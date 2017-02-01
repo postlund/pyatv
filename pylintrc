@@ -1,0 +1,9 @@
+[MASTER]
+reports=no
+
+disable=
+  locally-disabled,
+  fixme
+
+[EXCEPTIONS]
+overgeneral-exceptions=Exception
