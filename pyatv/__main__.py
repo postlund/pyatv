@@ -156,7 +156,7 @@ def _handle_command(args, loop):
         if cmd == 'commands':
             _print_commands('Remote control', ctrl)
             _print_commands('Metadata', metadata)
-            _print_commands('Playing commands', playing, newline=False)
+            _print_commands('Playing', playing, newline=False)
 
         elif cmd in ctrl:
             yield from _exec_command(atv.remote_control, cmd, *cmd_args)
