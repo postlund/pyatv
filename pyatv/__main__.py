@@ -181,7 +181,7 @@ def _handle_command(args, loop):
         if cmd == 'commands':
             _print_commands('Remote control', ctrl)
             _print_commands('Metadata', metadata)
-            _print_commands('Playing commands', playing, newline=False)
+            _print_commands('Playing', playing, newline=False)
 
         elif cmd == 'artwork':
             artwork = yield from atv.metadata.artwork()
