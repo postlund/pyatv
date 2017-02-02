@@ -1,5 +1,7 @@
-A python client library for the Apple TV |Build Status|
-=======================================================
+A python client library for the Apple TV
+========================================
+|Build Status| |Coverage Status|
+
 This is a python library for controlling and querying information from an Apple TV. It is async
 (python 3.4 syntax) and supports most of the commands that the regular Apple Remote app does as
 well as some additional iTunes commands, like changing the media position.
@@ -177,3 +179,5 @@ commands. You may also pass --debug to get better logging.
 
 .. |Build Status| image:: https://travis-ci.org/postlund/pyatv.svg?branch=master
    :target: https://travis-ci.org/postlund/pyatv
+.. |Coverage Status| image:: https://img.shields.io/coveralls/postlund/pyatv.svg
+   :target: https://coveralls.io/r/postlund/pyatv?branch=master
