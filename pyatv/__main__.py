@@ -158,6 +158,15 @@ def _handle_command(args, loop):
             _print_commands('Metadata', metadata)
             _print_commands('Playing commands', playing, newline=False)
 
+        elif cmd == 'artwork':
+            artwork = yield from _exec_command(atv.metadata, 'artwork', *cmd_args)
+            if artwork is not None:
+                file_ = open('artwork.png', 'w')
+                file_.write(artwork)
+                file_.close()
+            else:
+                print('No artwork is currently available.')
+
         elif cmd in ctrl:
             yield from _exec_command(atv.remote_control, cmd, *cmd_args)
 
