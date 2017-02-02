@@ -1,0 +1,20 @@
+sudo: false
+matrix:
+  fast_finish: true
+  include:
+    - python: "3.4.2"
+      env: TOXENV=py34
+    - python: "3.4.2"
+      env: TOXENV=lint
+    - python: "3.5"
+      env: TOXENV=py35
+    - python: "3.5"
+      env: TOXENV=lint
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+install: pip install -U tox coveralls
+language: python
+script: tox
+after_success: coveralls
