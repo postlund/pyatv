@@ -15,10 +15,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        'aiohttp==1.2.0',
-        'zeroconf==0.17.6',
-    ],
     test_suite='tests',
     keywords=['apple', 'tv'],
     tests_require=['tox'],
