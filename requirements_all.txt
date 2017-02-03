@@ -1,2 +1,2 @@
-zeroconf==0.17.6
+zeroconf==0.17.7
 aiohttp==1.2.0
