@@ -64,7 +64,7 @@ def cli_handler(loop):
         parser.error('both --hsgid and --address must be given')
 
     if args.command == 'scan':
-        yield from _handle_scan(args)
+        yield from _handle_scan(args, loop)
     elif args.command == 'pair':
         pyatv.pair_with_apple_tv()
     elif args.autodiscover:
@@ -79,8 +79,9 @@ def cli_handler(loop):
 
 
 @asyncio.coroutine
-def _handle_scan(args):
-    atvs = yield from pyatv.scan_for_apple_tvs(timeout=args.scan_timeout)
+def _handle_scan(args, loop):
+    atvs = yield from pyatv.scan_for_apple_tvs(
+        loop, timeout=args.scan_timeout)
     _print_found_apple_tvs(atvs)
 
 
@@ -94,7 +95,8 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
-    atvs = yield from pyatv.scan_for_apple_tvs(timeout=args.scan_timeout)
+    atvs = yield from pyatv.scan_for_apple_tvs(loop,
+                                               timeout=args.scan_timeout)
     if len(atvs) == 0:
         logging.error('Could not find any Apple TV on current network')
         return 1

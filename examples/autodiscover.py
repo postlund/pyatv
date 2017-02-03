@@ -9,7 +9,7 @@ import asyncio
 @asyncio.coroutine
 def print_what_is_playing(loop):
     print('Discovering devices on network...')
-    atvs = yield from pyatv.scan_for_apple_tvs(timeout=5)
+    atvs = yield from pyatv.scan_for_apple_tvs(loop, timeout=5)
 
     if len(atvs) == 0:
         sys.stderr.print('no device found\n')

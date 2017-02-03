@@ -43,7 +43,7 @@ an async call. A simple example might look like this:
 
     @asyncio.coroutine
     def discover(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs(timeout=5)
+        atvs = yield from pyatv.scan_for_apple_tvs(loop, timeout=5)
 
         # Devices are now in atvs
         print(atvs)

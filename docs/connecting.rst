@@ -23,7 +23,7 @@ session not being closed properly.
 
     @asyncio.coroutine
     def print_what_is_playing(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs()
+        atvs = yield from pyatv.scan_for_apple_tvs(loop)
         atv = pyatv.connect_to_apple_tv(atvs[0], loop)
 
         try:
