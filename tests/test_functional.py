@@ -1,11 +1,13 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import ipaddress
+
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import (AppleTVDevice, connect_to_apple_tv, const, exceptions)
 from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
-
+from tests import zeroconf_stub
 
 HSGID = '12345-6789-0'
 SESSION_ID = 55555
@@ -37,6 +39,19 @@ class FunctionalTest(AioHTTPTestCase):
     def get_connected_device(self):
         details = AppleTVDevice('Apple TV', '127.0.0.1', HSGID, self.app.port)
         return connect_to_apple_tv(details, self.loop)
+
+    @unittest_run_loop
+    def test_scan_for_apple_tvs(self):
+        import pyatv
+        zeroconf_stub.stub(pyatv, zeroconf_stub.homesharing_service(
+            'AAAA', b'Apple TV', '10.0.0.1', b'aaaa'))
+
+        atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
+        self.assertEqual(len(atvs), 1)
+        self.assertEqual(atvs[0].name, 'Apple TV')
+        self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.1'))
+        self.assertEqual(atvs[0].hsgid, 'aaaa')
+        self.assertEqual(atvs[0].port, 3689)
 
     @unittest_run_loop
     def test_login_failed(self):
