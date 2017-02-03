@@ -20,7 +20,7 @@ def auto_connect(handler, not_found=None, event_loop=None):
     # the event loop
     @asyncio.coroutine
     def _handle(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs(timeout=5)
+        atvs = yield from pyatv.scan_for_apple_tvs(loop, timeout=5)
 
         # Take the first device found
         if len(atvs) > 0:

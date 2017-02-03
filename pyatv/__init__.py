@@ -46,14 +46,14 @@ class _ServiceListener(object):
 
 
 @asyncio.coroutine
-def scan_for_apple_tvs(timeout=5):
+def scan_for_apple_tvs(loop, timeout=5):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     listener = _ServiceListener()
     zeroconf = Zeroconf()
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
         _LOGGER.debug('Discovering devices for %d seconds', timeout)
-        yield from asyncio.sleep(timeout)
+        yield from asyncio.sleep(timeout, loop=loop)
     finally:
         zeroconf.close()
 
