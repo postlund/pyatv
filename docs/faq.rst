@@ -15,6 +15,15 @@ this. If you, however, can see for example a title or artwork in the
 *Remote app* on your iPhone or iPad, then something is likely wrong. In this
 case, you should write a bug report.
 
+**When using Plex on Apple TV 4, pause and previtem does not work as expected. Is
+this a bug in pyatv?**
+
+This seems to be an issue with Plex, or rather bug in the media player (AVPlayer).
+You can read more about it in `issue #7 <https://github.com/postlund/pyatv/issues/7>`_
+on GitHub and `here <https://forums.plex.tv/discussion/191765/fast-forward-and-rewind-problem>`_.
+Unfortunately, this is not something pyatv can fix or work around. We'll just
+have to sit tight and wait for a fix in tvOS.
+
 Technical Questions
 -------------------
 **Is there a synchronous version of the library?**
