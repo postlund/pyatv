@@ -110,7 +110,7 @@ class DaapRequester:
         """Login to Apple TV using specified HSGID."""
         # Do not use session.get_data(...) in login as that would end up in
         # an infinte loop.
-        url = self._mkurl('login?[AUTH]&hasFP=1', session=False)
+        url = self._mkurl('login?[AUTH]&hasFP=1', session=False, hsgid=True)
         resp = yield from self._do(self.session.get_data, url)
         self._session_id = dmap.first(resp, 'mlog', 'mlid')
         _LOGGER.info('Logged in and got session id %s', self._session_id)
@@ -153,7 +153,7 @@ class DaapRequester:
             raise exceptions.AuthenticationError(
                 'failed to login: ' + str(status))
 
-    def _mkurl(self, cmd, *args, session=True, hsgid=True, revision=False):
+    def _mkurl(self, cmd, *args, session=True, hsgid=False, revision=False):
         url = '{}/{}'.format(self.url, cmd.format(*args))
         auth = ''
         if hsgid:

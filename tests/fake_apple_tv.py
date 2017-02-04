@@ -79,7 +79,8 @@ class FakeAppleTV(web.Application):
     def handle_login(self, request):
         """Handler for login requests."""
         self._verify_headers(request)
-        self._verify_auth_parameters(request, check_session=False)
+        self._verify_auth_parameters(
+            request, check_hsgid=True, check_session=False)
         data = self.responses['login']
         mlid = tags.uint32_tag('mlid', data.session)
         mlog = tags.container_tag('mlog', mlid)
@@ -167,8 +168,9 @@ class FakeAppleTV(web.Application):
     # This method makes sure that the correct hsgid and/or session id is
     # included in the GET-parameters. As this is extremely important for
     # anything to work, this should be verified in all requests.
-    def _verify_auth_parameters(self, request,
-                                check_hsgid=True,
+    def _verify_auth_parameters(self,
+                                request,
+                                check_hsgid=False,
                                 check_session=True):
         params = request.rel_url.query
         if check_hsgid:
