@@ -1,5 +1,6 @@
 """Methods used to GET/POST data from/to an Apple TV."""
 
+import re
 import binascii
 import logging
 import asyncio
@@ -157,7 +158,10 @@ class DaapRequester:
         url = '{}/{}'.format(self.url, cmd.format(*args))
         auth = ''
         if login_id:
-            auth = 'hsgid=' + self._login_id
+            if re.match(r'0x[0-9a-fA-F]{16}', self._login_id):
+                auth = 'pairing-guid=' + self._login_id
+            else:
+                auth = 'hsgid=' + self._login_id
         if session:
             auth = 'session-id={}&{}'.format(self._session_id, auth)
         if revision:

@@ -51,7 +51,7 @@ class PlayingResponse:
 class FakeAppleTV(web.Application):
     """Implementation of fake Apple TV."""
 
-    def __init__(self, loop, hsgid, session_id, testcase):
+    def __init__(self, loop, hsgid, pairing_guid, session_id, testcase):
         """Initialize a new FakeAppleTV."""
         super().__init__(loop=loop)
         self.responses = {}
@@ -59,6 +59,7 @@ class FakeAppleTV(web.Application):
         self.responses['artwork'] = None
         self.responses['playing'] = PlayingResponse()
         self.hsgid = hsgid
+        self.pairing_guid = pairing_guid
         self.last_button_pressed = None
         self.tc = testcase
 
@@ -80,7 +81,7 @@ class FakeAppleTV(web.Application):
         """Handler for login requests."""
         self._verify_headers(request)
         self._verify_auth_parameters(
-            request, check_hsgid=True, check_session=False)
+            request, check_login_id=True, check_session=False)
         data = self.responses['login']
         mlid = tags.uint32_tag('mlid', data.session)
         mlog = tags.container_tag('mlog', mlid)
@@ -165,17 +166,25 @@ class FakeAppleTV(web.Application):
             self.tc.assertEqual(request.headers[header],
                                 EXPECTED_HEADERS[header])
 
-    # This method makes sure that the correct hsgid and/or session id is
+    # This method makes sure that the correct login id and/or session id is
     # included in the GET-parameters. As this is extremely important for
     # anything to work, this should be verified in all requests.
     def _verify_auth_parameters(self,
                                 request,
-                                check_hsgid=False,
+                                check_login_id=False,
                                 check_session=True):
         params = request.rel_url.query
-        if check_hsgid:
-            self.tc.assertEqual(params['hsgid'], self.hsgid,
-                                msg='hsgid does not match')
+
+        # Either hsgid or pairing-guid should be present
+        if check_login_id:
+            if 'hsgid' in params:
+                self.tc.assertEqual(params['hsgid'], self.hsgid,
+                                    msg='hsgid does not match')
+            elif 'pairing-guid' in params:
+                self.tc.assertEqual(params['pairing-guid'], self.pairing_guid,
+                                    msg='pairing-guid does not match')
+            else:
+                self.tc.assertTrue(False, 'hsgid or pairing-guid not found')
 
         if check_session:
             session = self.responses['login'].session
