@@ -14,6 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PAIRING_GUID = '0000000000000001'
 
+
 class PairingHandler:
     """Handle the pairing process.
 
@@ -26,11 +27,12 @@ class PairingHandler:
         self.loop = loop
         self.name = name
         self.pairing_code = pairing_code
+        self.zeroconf = Zeroconf()
+        self.server = None
 
     @asyncio.coroutine
     def start(self):
         """Start the pairing server and publish service."""
-        self.zeroconf = Zeroconf()
         web_server = web.Server(self.handle_request, loop=self.loop)
         self.server = yield from self.loop.create_server(web_server, '0.0.0.0')
         allocated_port = self.server.sockets[0].getsockname()[1]

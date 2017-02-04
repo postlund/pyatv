@@ -83,9 +83,9 @@ def cli_handler(loop):
         handler = pyatv.pair_with_apple_tv(
             loop, args.pin_code, args.remote_name)
         print('Use pin {} to pair with "{}" (waiting for {}s)'.format(
-              args.pin_code, args.remote_name, args.pairing_timeout))
+            args.pin_code, args.remote_name, args.pairing_timeout))
         print('After successful pairing, use login id {}'.format(
-                pyatv.pairing.PAIRING_GUID))
+            pyatv.pairing.PAIRING_GUID))
         print('Note: If remote does not show up, reboot you Apple TV')
         yield from handler.start()
         yield from asyncio.sleep(args.pairing_timeout, loop=loop)
