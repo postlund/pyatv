@@ -58,6 +58,8 @@ class FunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     def test_login_failed(self):
+        # Twice since the client will retry one time
+        self.usecase.make_login_fail()
         self.usecase.make_login_fail()
 
         with self.assertRaises(exceptions.AuthenticationError):
@@ -212,7 +214,7 @@ class FunctionalTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_seek_in_playing_media(self):
         yield from self.atv.remote_control.set_position(60)
-        self.assertEqual(self.fake_atv.responses['playing'].position, 60000)
+        self.assertEqual(self.fake_atv.properties['dacp.playingtime'], 60000)
         yield from self.atv.logout()
 
     @unittest_run_loop
