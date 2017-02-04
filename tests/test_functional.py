@@ -10,6 +10,7 @@ from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
 from tests import zeroconf_stub
 
 HSGID = '12345-6789-0'
+PAIRING_GUID = '0x0000000000000001'
 SESSION_ID = 55555
 
 
@@ -17,7 +18,7 @@ class FunctionalTest(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
-        self.atv = self.get_connected_device()
+        self.atv = self.get_connected_device(HSGID)
         self.log_handler = LogOutputHandler(self)
 
     def tearDown(self):
@@ -25,7 +26,8 @@ class FunctionalTest(AioHTTPTestCase):
         self.log_handler.tearDown()
 
     def get_app(self, loop):
-        self.fake_atv = FakeAppleTV(loop, HSGID, SESSION_ID, self)
+        self.fake_atv = FakeAppleTV(
+            loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
 
         # Import TestServer here and not globally, otherwise py.test will
@@ -36,8 +38,9 @@ class FunctionalTest(AioHTTPTestCase):
         from aiohttp.test_utils import TestServer
         return TestServer(self.fake_atv)
 
-    def get_connected_device(self):
-        details = AppleTVDevice('Apple TV', '127.0.0.1', HSGID, self.app.port)
+    def get_connected_device(self, identifier):
+        details = AppleTVDevice(
+            'Apple TV', '127.0.0.1', identifier, self.app.port)
         return connect_to_apple_tv(details, self.loop)
 
     @unittest_run_loop
@@ -63,7 +66,14 @@ class FunctionalTest(AioHTTPTestCase):
         yield from self.atv.logout()
 
     @unittest_run_loop
-    def test_login_succeed(self):
+    def test_login_with_hsgid_succeed(self):
+        session_id = yield from self.atv.login()
+        self.assertEqual(SESSION_ID, session_id)
+        yield from self.atv.logout()
+
+    @unittest_run_loop
+    def test_login_with_pairing_guid_succeed(self):
+        self.atv = self.get_connected_device(PAIRING_GUID)
         session_id = yield from self.atv.login()
         self.assertEqual(SESSION_ID, session_id)
         yield from self.atv.logout()
