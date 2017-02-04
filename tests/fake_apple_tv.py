@@ -55,12 +55,13 @@ class FakeAppleTV(web.Application):
         """Initialize a new FakeAppleTV."""
         super().__init__(loop=loop)
         self.responses = {}
-        self.responses['login'] = LoginResponse(session_id, 200)
-        self.responses['artwork'] = None
-        self.responses['playing'] = PlayingResponse()
+        self.responses['login'] = [LoginResponse(session_id, 200)]
+        self.responses['artwork'] = []
+        self.responses['playing'] = []
         self.hsgid = hsgid
         self.pairing_guid = pairing_guid
         self.last_button_pressed = None
+        self.properties = {}  # setproperty
         self.tc = testcase
 
         self.router.add_get('/login', self.handle_login)
@@ -76,13 +77,28 @@ class FakeAppleTV(web.Application):
             self.router.add_post('/ctrl-int/1/' + button,
                                  self.handle_playback_button)
 
+    # This method will retrieve the next response for a certain type.
+    # If there are more than one response, it "pop" the last one and
+    # return it. When only one response remains, that response will be
+    # kept and returned for all further calls.
+    def _get_response(self, response_name, pop=True):
+        responses = self.responses[response_name]
+        if len(responses) == 0:
+            return None
+        elif len(responses) == 1:
+            return responses[0]
+        elif pop:
+            return responses.pop()
+        return responses[len(responses)-1]
+
     @asyncio.coroutine
     def handle_login(self, request):
         """Handler for login requests."""
         self._verify_headers(request)
         self._verify_auth_parameters(
             request, check_login_id=True, check_session=False)
-        data = self.responses['login']
+
+        data = self._get_response('login')
         mlid = tags.uint32_tag('mlid', data.session)
         mlog = tags.container_tag('mlog', mlid)
         return web.Response(body=mlog, status=data.status)
@@ -107,7 +123,7 @@ class FakeAppleTV(web.Application):
     def handle_artwork(self, request):
         """Handler for artwork requests."""
         self._verify_auth_parameters(request)
-        artwork = self.responses['artwork']
+        artwork = self._get_response('artwork')
         return web.Response(body=artwork, status=200)
 
     @asyncio.coroutine
@@ -116,7 +132,7 @@ class FakeAppleTV(web.Application):
         self._verify_auth_parameters(request)
 
         body = b''
-        playing = self.responses['playing']
+        playing = self._get_response('playing')
 
         if playing.paused is not None:
             body += tags.uint32_tag('caps', 3 if playing.paused else 4)
@@ -154,7 +170,7 @@ class FakeAppleTV(web.Application):
         self.tc.assertIn('dacp.playingtime', request.rel_url.query,
                          msg='property to set is missing')
         playingtime = request.rel_url.query['dacp.playingtime']
-        self.responses['playing'].position = int(playingtime)
+        self.properties['dacp.playingtime'] = int(playingtime)
         return web.Response(body=b'', status=200)
 
     # Verifies that all needed headers are included in the request. Should be
@@ -187,7 +203,7 @@ class FakeAppleTV(web.Application):
                 self.tc.assertTrue(False, 'hsgid or pairing-guid not found')
 
         if check_session:
-            session = self.responses['login'].session
+            session = self._get_response('login', pop=False).session
             self.tc.assertEqual(int(params['session-id']), session,
                                 msg='session id does not match')
 
@@ -202,36 +218,40 @@ class AppleTVUseCases:
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
 
-    def make_login_fail(self):
+    def make_login_fail(self, immediately=True):
         """Calling this method will make login fail with response 503."""
-        self.device.responses['login'] = LoginResponse(0, 503)
+        response = LoginResponse(0, 503)
+        if immediately:
+            self.device.responses['login'].append(response)
+        else:
+            self.device.responses['login'].insert(0, response)
 
     def change_artwork(self, artwork):
         """Calling this method will change artwork response."""
-        self.device.responses['artwork'] = artwork
+        self.device.responses['artwork'].insert(0, artwork)
 
     def nothing_playing(self):
         """Calling this method will put device in idle state."""
-        self.device.responses['playing'] = PlayingResponse()
+        self.device.responses['playing'].insert(0, PlayingResponse())
 
     def video_playing(self, paused, title, total_time, position):
         """Calling this method changes what is currently plaing to video."""
-        self.device.responses['playing'] = PlayingResponse(
+        self.device.responses['playing'].insert(0, PlayingResponse(
             paused=paused, title=title,
             total_time=total_time, position=position,
-            mediakind=3)
+            mediakind=3))
 
     def music_playing(self, paused, artist, album, title,
                       total_time, position):
         """Calling this method changes what is currently plaing to music."""
-        self.device.responses['playing'] = PlayingResponse(
+        self.device.responses['playing'].insert(0, PlayingResponse(
             paused=paused, title=title,
             artist=artist, album=album,
             total_time=total_time,
             position=position,
-            mediakind=2)
+            mediakind=2))
 
     def media_is_loading(self):
         """Calling this method puts device in a loading state."""
-        self.device.responses['playing'] = PlayingResponse(
-            playstatus=1)
+        self.device.responses['playing'].insert(0, PlayingResponse(
+            playstatus=1))
