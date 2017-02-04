@@ -15,13 +15,14 @@ _LOGGER = logging.getLogger(__name__)
 HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
 
 
-class AppleTVDevice(namedtuple('AppleTVDevice', 'name, address, hsgid, port')):
+class AppleTVDevice(
+        namedtuple('AppleTVDevice', 'name, address, login_id, port')):
     """Representation of an Apple TV device used when connecting."""
 
-    def __new__(cls, name, address, hsgid, port=3689):
+    def __new__(cls, name, address, login_id, port=3689):
         """"Initialize a new AppleTVDevice."""
         return super(AppleTVDevice, cls).__new__(
-            cls, name, address, hsgid, port)
+            cls, name, address, login_id, port)
 
 
 # pylint: disable=too-few-public-methods
@@ -66,7 +67,7 @@ def connect_to_apple_tv(details, loop):
     # TV and return the correct type for it.
     session = DaapSession(loop)
     requester = DaapRequester(
-        session, details.address, details.hsgid, details.port)
+        session, details.address, details.login_id, details.port)
     return AppleTVInternal(session, requester)
 
 

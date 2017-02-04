@@ -6,7 +6,8 @@ Finding an Apple TV device on the network is as easy as looking for a
 particular Zeroconf/Bonjour service on the network. It announces various kinds
 if services, but the one pyatv is looking for ``_appletv-v2._tcp.local.``. It
 is announced if home sharing is enabled and contains, amongst other things,
-the HSGID required when connecting to the device.
+the HSGID (corresponding to the "login id") required when connecting to the
+device.
 
 A typical entry as found by the python-zeroconf library might look like this
 (some of the data replaced):

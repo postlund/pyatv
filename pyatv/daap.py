@@ -97,20 +97,20 @@ class DaapRequester:
     It will automatically do login and other necesarry book-keeping.
     """
 
-    def __init__(self, session, address, hsgid, port):
+    def __init__(self, session, address, login_id, port):
         """Initialize a new DaapRequester."""
         self.session = session
         self.url = 'http://{}:{}'.format(address, port)
-        self._hsgid = hsgid
+        self._login_id = login_id
         self._session_id = 0
         self._revision_number = 0  # Not used yet
 
     @asyncio.coroutine
     def login(self):
-        """Login to Apple TV using specified HSGID."""
+        """Login to Apple TV using specified login id."""
         # Do not use session.get_data(...) in login as that would end up in
         # an infinte loop.
-        url = self._mkurl('login?[AUTH]&hasFP=1', session=False, hsgid=True)
+        url = self._mkurl('login?[AUTH]&hasFP=1', session=False, login_id=True)
         resp = yield from self._do(self.session.get_data, url)
         self._session_id = dmap.first(resp, 'mlog', 'mlid')
         _LOGGER.info('Logged in and got session id %s', self._session_id)
@@ -153,11 +153,11 @@ class DaapRequester:
             raise exceptions.AuthenticationError(
                 'failed to login: ' + str(status))
 
-    def _mkurl(self, cmd, *args, session=True, hsgid=False, revision=False):
+    def _mkurl(self, cmd, *args, session=True, login_id=False, revision=False):
         url = '{}/{}'.format(self.url, cmd.format(*args))
         auth = ''
-        if hsgid:
-            auth = 'hsgid=' + self._hsgid
+        if login_id:
+            auth = 'hsgid=' + self._login_id
         if session:
             auth = 'session-id={}&{}'.format(self._session_id, auth)
         if revision:

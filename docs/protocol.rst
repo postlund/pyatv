@@ -226,7 +226,9 @@ login
 
 **URL:** login?hsgid=<hsgid>&hasFP=1
 
-**Authentication:** HSGID
+**URL:** login?pairing-guid=<PAIRING GUID>&hasFP=1
+
+**Authentication:** HSGID or PAIRING GUID
 
 Used to login and get a ``session id``, that is needed for most commands.
 Example response from device: ::
@@ -235,11 +237,18 @@ Example response from device: ::
       mstt: 200 [uint, dmap.status]
       mlid: 1739004399 [uint, dmap.sessionid]
 
+Expected format for HSGID and PAIRING GUID respecively:
+
+* HSGID: ``XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX``
+* PAIRING GUID: ``0xXXXXXXXXXXXXXXXX``
+
+Where ``X`` corresponds to a hex digit (0-F).
+
 playstatusupdate
 ^^^^^^^^^^^^^^^^
 **Type:** GET
 
-**URL:** ctrl-int/1/playstatusupdate?hsgid=<hsgid>&session-id=<session id>&revision-number=0
+**URL:** ctrl-int/1/playstatusupdate?session-id=<session id>&revision-number=0
 
 **Authentication:** Session ID
 
@@ -274,7 +283,7 @@ controlpromptupdate
 ^^^^^^^^^^^^^^^^^^^
 **Type:** POST
 
-**URL:** controlpromptupdate?hsgid=<hsgid>&session-id=<session id>&prompt-id=0
+**URL:** controlpromptupdate?session-id=<session id>&prompt-id=0
 
 **Authentication:** Session ID
 
@@ -288,7 +297,7 @@ nowplayingartwork
 ^^^^^^^^^^^^^^^^^
 **Type:** GET
 
-**URL:** ctrl-int/1/nowplayingartwork?mw=1024&mh=576&hsgid=<hsgid>&session-id=<session id>
+**URL:** ctrl-int/1/nowplayingartwork?mw=1024&mh=576&session-id=<session id>
 
 **Authentication:** Session ID
 
@@ -306,7 +315,7 @@ ctrl-int
 ^^^^^^^^
 **Type:** POST
 
-**URL:** ctrl-int/1/<command>?hsgid=<hsgid&session-id=<session id>&prompt-id=0
+**URL:** ctrl-int/1/<command>?session-id=<session id>&prompt-id=0
 
 **Authentication:** Session ID
 
@@ -317,7 +326,7 @@ controlpromptentry
 ^^^^^^^^^^^^^^^^^^
 **Type:** POST
 
-**URL:** ctrl-int/1/controlpromptentry?hsgid=<hsgid>&session-id=<session id>&prompt-id=0
+**URL:** ctrl-int/1/controlpromptentry?session-id=<session id>&prompt-id=0
 
 **Authentication:** Session ID
 
@@ -336,7 +345,7 @@ setproperty
 ^^^^^^^^^^^
 **Type:** POST:
 
-**URL:** ctrl-int/1/setproperty?<key>=<value>&hsgid=<hsgid>&session-id=<session id>&prompt-id=0
+**URL:** ctrl-int/1/setproperty?<key>=<value>&session-id=<session id>&prompt-id=0
 
 **Authentication:** Session ID
 

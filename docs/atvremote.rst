@@ -17,7 +17,7 @@ command:
 
     $ atvremote scan
     Found Apple TVs:
-    - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9abc-def012345678)
+    - Apple TV at 10.0.10.22 (login id: 00000000-1234-5678-9abc-def012345678)
 
 In case you have multiple devices, they should all show up. The discovery
 process is performed for 3 seconds, which might be too short and sometimes
@@ -33,7 +33,7 @@ You have two choices:
 
 * Use ``-a`` that will perform the auto discover process and pick the first
   discovered device
-* Run ``scan`` yourself and manually specify IP-address and HSGID for device
+* Run ``scan`` yourself and manually specify IP-address and login id for device
 
 Using the first option is easiest but also the slowest (you have to wait
 three seconds every time) and also works poorly with multiple devices.
@@ -43,11 +43,11 @@ You can try it out like this:
 
     $ atvremote -a <command>
 
-To manually specify IP-address and HSGID, just do like this:
+To manually specify IP-address and login id, just do like this:
 
 .. code:: bash
 
-    $ atvremote --adress <IP> --hsgid <HSGID>
+    $ atvremote --adress <IP> --login_id <LOGIN ID>
 
 Using these methods are mutually exclusive, so you may only pick one.
 
