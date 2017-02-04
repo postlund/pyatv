@@ -15,6 +15,8 @@ from tests import zeroconf_stub
 HSGID = '12345-6789-0'
 PAIRING_GUID = '0x0000000000000001'
 SESSION_ID = 55555
+REMOTE_NAME = 'pyatv remote'
+PIN_CODE = 1234
 
 EXPECTED_ARTWORK = b'1234'
 
@@ -64,12 +66,15 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(atvs[0].login_id, 'aaaa')
         self.assertEqual(atvs[0].port, 3689)
 
+    # This is not a pretty test and it does crazy things. Should probably be
+    # re-written later but will do for now.
     @unittest_run_loop
     def test_pairing_with_device(self):
         zeroconf_stub.stub(pairing)
 
         # Start pairing process
-        yield from pyatv.pair_with_apple_tv(self.loop, 0, 1234, 'pyatv remote')
+        handler = pyatv.pair_with_apple_tv(self.loop, PIN_CODE, REMOTE_NAME)
+        yield from handler.start()
 
         # Verify that bonjour service was published
         zeroconf = zeroconf_stub.instance
@@ -82,21 +87,24 @@ class FunctionalTest(AioHTTPTestCase):
 
         # Extract port from service (as it is randomized) and request pairing
         # with the web server.
-        url = 'http://127.0.0.1:{}/pairing?pairingcode={}'.format(
-            service.port, PAIRINGCODE)
+        server = 'http://127.0.0.1:{}'.format(service.port)
+        url = '{}/pairing?pairingcode={}&servicename=test'.format(
+            server, PAIRINGCODE)
         session = aiohttp.ClientSession(loop=self.loop)
         response = yield from session.request('GET', url)
-        self.assertEqual(response.status, 200)
+        self.assertEqual(response.status, 200,
+                         msg='pairing failed')
 
         # Verify content returned in pairingresponse
         data = yield from response.content.read()
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), 'pyatv remote')
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
         response.close()
         yield from session.close()
+        yield from handler.stop()
         yield from self.atv.logout()
 
     @unittest_run_loop

@@ -13,6 +13,7 @@ from pyatv.internal.apple_tv import AppleTVInternal
 
 _LOGGER = logging.getLogger(__name__)
 
+
 HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
 
 
@@ -72,6 +73,6 @@ def connect_to_apple_tv(details, loop):
     return AppleTVInternal(session, requester)
 
 
-def pair_with_apple_tv(loop, timeout, pin_code, name):
+def pair_with_apple_tv(loop, pin_code, name):
     """Initiate pairing process with an Apple TV."""
-    return PairingHandler(loop, timeout, name, pin_code).run()
+    return PairingHandler(loop, name, pin_code)

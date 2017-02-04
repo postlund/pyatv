@@ -10,6 +10,7 @@ import argparse
 from argparse import ArgumentTypeError
 
 import pyatv
+import pyatv.pairing
 from pyatv import (dmap, exceptions, tag_definitions)
 from pyatv.interface import retrieve_commands
 
@@ -29,34 +30,41 @@ def cli_handler(loop):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('command')
-    parser.add_argument('-v', '--verbose', help='increase output verbosity',
-                        action='store_const', dest='loglevel',
-                        const=logging.INFO)
-    parser.add_argument('--developer', help='show developer commands',
-                        action='store_true', dest='developer',
-                        default=False)
-    parser.add_argument('--debug', help='print debug information',
-                        action='store_const', dest='loglevel',
-                        const=logging.DEBUG, default=logging.WARNING)
     parser.add_argument('--name', help='apple tv name',
                         dest='name', default='Apple TV')
-    parser.add_argument('--remote-name', help='remote pairing name',
-                        dest='remote_name', default='pyatv')
     parser.add_argument('--address', help='device ip address or hostname',
                         dest='address', default=None)
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
                         dest='scan_timeout', type=_in_range(1, 10),
                         metavar='TIMEOUT', default=3)
-    parser.add_argument('-p', '--pin', help='pairing pin code',
-                        dest='pin_code', type=_in_range(0, 9999),
-                        metavar='PIN', default=1234)
-    ident = parser.add_mutually_exclusive_group()
 
+    pairing = parser.add_argument_group('pairing')
+    pairing.add_argument('--remote-name', help='remote pairing name',
+                         dest='remote_name', default='pyatv')
+    pairing.add_argument('-p', '--pin', help='pairing pin code',
+                         dest='pin_code', type=_in_range(0, 9999),
+                         metavar='PIN', default=1234)
+    pairing.add_argument('--pairing-timeout', help='timeout when pairing',
+                         dest='pairing_timeout', type=int,
+                         metavar='TIMEOUT', default=60)
+
+    ident = parser.add_mutually_exclusive_group()
     ident.add_argument('-a', '--autodiscover',
                        help='automatically find a device',
                        action='store_true', dest='autodiscover', default=False)
     ident.add_argument('--login_id', help='home sharing id or pairing guid',
                        dest='login_id', default=None)
+
+    debug = parser.add_argument_group('debugging')
+    debug.add_argument('-v', '--verbose', help='increase output verbosity',
+                       action='store_const', dest='loglevel',
+                       const=logging.INFO)
+    debug.add_argument('--developer', help='show developer commands',
+                       action='store_true', dest='developer',
+                       default=False)
+    debug.add_argument('--debug', help='print debug information',
+                       action='store_const', dest='loglevel',
+                       const=logging.DEBUG, default=logging.WARNING)
 
     args = parser.parse_args()
 
@@ -72,9 +80,16 @@ def cli_handler(loop):
     if args.command == 'scan':
         yield from _handle_scan(args, loop)
     elif args.command == 'pair':
-        # TODO: hardcoded timeout
-        yield from pyatv.pair_with_apple_tv(
-            loop, 60, args.pin_code, args.remote_name)
+        handler = pyatv.pair_with_apple_tv(
+            loop, args.pin_code, args.remote_name)
+        print('Use pin {} to pair with "{}" (waiting for {}s)'.format(
+              args.pin_code, args.remote_name, args.pairing_timeout))
+        print('After successful pairing, use login id {}'.format(
+                pyatv.pairing.PAIRING_GUID))
+        print('Note: If remote does not show up, reboot you Apple TV')
+        yield from handler.start()
+        yield from asyncio.sleep(args.pairing_timeout, loop=loop)
+        yield from handler.stop()
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
     elif args.login_id:
@@ -228,6 +243,9 @@ def main():
     def _run_application(loop):
         try:
             asyncio.wait_for((yield from cli_handler(loop)), timeout=15)
+        except KeyboardInterrupt:
+            pass  # User pressed Ctrl+C, just ignore it
+
         except SystemExit:
             pass  # sys.exit() was used - do nothing
 
@@ -238,8 +256,11 @@ def main():
             sys.stderr.writelines(
                 '\n>>> An error occurred, full stack trace above\n')
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(_run_application(loop))
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(_run_application(loop))
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
