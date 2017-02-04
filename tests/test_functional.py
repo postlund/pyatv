@@ -50,7 +50,7 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV')
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.1'))
-        self.assertEqual(atvs[0].hsgid, 'aaaa')
+        self.assertEqual(atvs[0].login_id, 'aaaa')
         self.assertEqual(atvs[0].port, 3689)
 
     @unittest_run_loop

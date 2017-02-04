@@ -50,8 +50,8 @@ def cli_handler(loop):
     ident.add_argument('-a', '--autodiscover',
                        help='automatically find a device',
                        action='store_true', dest='autodiscover', default=False)
-    ident.add_argument('--hsgid', help='home sharing id',
-                       dest='hsgid', default=None)
+    ident.add_argument('--login_id', help='home sharing id or pairing guid',
+                       dest='login_id', default=None)
 
     args = parser.parse_args()
 
@@ -60,8 +60,9 @@ def cli_handler(loop):
     logging.getLogger('requests').setLevel(logging.WARNING)
 
     # Sanity checks that not can be done natively by argparse
-    if (args.hsgid and not args.address) or (not args.hsgid and args.address):
-        parser.error('both --hsgid and --address must be given')
+    if (args.login_id and not args.address) or \
+            (not args.login_id and args.address):
+        parser.error('both --login_id and --address must be given')
 
     if args.command == 'scan':
         yield from _handle_scan(args, loop)
@@ -69,7 +70,7 @@ def cli_handler(loop):
         pyatv.pair_with_apple_tv()
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
-    elif args.hsgid:
+    elif args.login_id:
         return (yield from _handle_command(args, loop))
     else:
         logging.error('To autodiscover an Apple TV, add -a')
@@ -88,8 +89,8 @@ def _handle_scan(args, loop):
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
     print('Found Apple TVs:')
     for apple_tv in atvs:
-        msg = ' - {} at {} (hsgid: {})\n'.format(
-            apple_tv.name, apple_tv.address, apple_tv.hsgid)
+        msg = ' - {} at {} (login id: {})\n'.format(
+            apple_tv.name, apple_tv.address, apple_tv.login_id)
         outstream.writelines(msg)
 
 
@@ -102,14 +103,14 @@ def _handle_autodiscover(args, loop):
         return 1
     elif len(atvs) > 1:
         logging.error('Found more than one Apple TV; '
-                      'specify one using --address and --hsgid')
+                      'specify one using --address and --login_id')
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
         return 1
 
     # Simple hack to re-use existing command handling and respect options
     apple_tv = atvs[0]
     args.address = apple_tv.address
-    args.hsgid = apple_tv.hsgid
+    args.login_id = apple_tv.login_id
     args.name = apple_tv.name
     logging.info('Auto-discovered %s at %s', args.name, args.address)
     yield from _handle_command(args, loop)
@@ -143,7 +144,7 @@ def _extract_command_with_args(cmd):
 
 @asyncio.coroutine
 def _handle_command(args, loop):
-    details = pyatv.AppleTVDevice(args.name, args.address, args.hsgid)
+    details = pyatv.AppleTVDevice(args.name, args.address, args.login_id)
     atv = pyatv.connect_to_apple_tv(details, loop)
 
     try:

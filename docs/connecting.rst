@@ -6,9 +6,9 @@ NOTE: This page currently only covers auto discovery of devices. Pairing will
 be added once that is implemented. You must have home sharing enabled for this
 to work.
 
-When connecting to a device, the IP-address (or hostname) and its HSGID is
-required. These details can be specified manually or be automatically
-discovered if home sharing is enabled.
+When connecting to a device, the IP-address (or hostname) and its login id,
+e.g. HSGID, is required. These details can be specified manually or be
+automatically discovered if home sharing is enabled.
 
 Code Example: Auto discovery
 ----------------------------
@@ -39,7 +39,8 @@ API Reference: :py:meth:`pyatv.connect_to_apple_tv`
 
 Code Example: Manual details
 ----------------------------
-Manually specifying the required details is not that hard either:
+Manually specifying the required details is not that hard either (also here
+you need to logout):
 
 .. code:: python
 

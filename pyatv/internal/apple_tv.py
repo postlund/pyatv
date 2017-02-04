@@ -26,7 +26,7 @@ class BaseAppleTV:
     def server_info(self):
         """Request and return server information."""
         return (yield from self.daap.get(
-            'server-info', session=False, hsgid=False))
+            'server-info', session=False, login_id=False))
 
     def playstatus(self):
         """Request raw data about what is currently playing.
