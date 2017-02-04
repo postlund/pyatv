@@ -164,11 +164,11 @@ library is described in its own chapter a bit further down.
 Authentication
 ^^^^^^^^^^^^^^
 Some commands can be queried freely by anyone on the same network as the Apple TV,
-like the server-info command. But most commands require an identifier called HSGID
-and a "session id". The session id is obtained by doing login and extracting the
-``mlid`` key. Both HSGID and session id are then included in all requests, e.g.
+like the server-info command. But most commands require a "session id". The
+session id is obtained by doing login and extracting the ``mlid`` key. Session id
+is then included in all requests, e.g.
 
-  ctrl-int/1/playstatusupdate?session-id=<session id>&hsgid=<hsgid>&revision-number=0
+  ctrl-int/1/playstatusupdate?session-id=<session id>&revision-number=0
 
 The device will respond with an error (503?) if the authentication fails.
 
@@ -241,7 +241,7 @@ playstatusupdate
 
 **URL:** ctrl-int/1/playstatusupdate?hsgid=<hsgid>&session-id=<session id>&revision-number=0
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 The respons contains information about what is currently playing. Example
 response: ::
@@ -276,7 +276,7 @@ controlpromptupdate
 
 **URL:** controlpromptupdate?hsgid=<hsgid>&session-id=<session id>&prompt-id=0
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 Currently an unused command. It can be used to fetch an ID (prompt-id?) that
 can optionally be passed with some of the commands. When it is present, that
@@ -290,7 +290,7 @@ nowplayingartwork
 
 **URL:** ctrl-int/1/nowplayingartwork?mw=1024&mh=576&hsgid=<hsgid>&session-id=<session id>
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 Returns a PNG image for what is currently playing, like a poster or album art.
 If not present, an empty response is returned. Width and height of image can be
@@ -308,7 +308,7 @@ ctrl-int
 
 **URL:** ctrl-int/1/<command>?hsgid=<hsgid&session-id=<session id>&prompt-id=0
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 <command> corresponds to the command to execute. Can be any of ``play``, ``pause``,
 ``nextitem`` or ``previtem``.
@@ -319,7 +319,7 @@ controlpromptentry
 
 **URL:** ctrl-int/1/controlpromptentry?hsgid=<hsgid>&session-id=<session id>&prompt-id=0
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 Used to trigger various buttons, like menu or select. Must contain the
 following binary DMAP data:
@@ -338,7 +338,7 @@ setproperty
 
 **URL:** ctrl-int/1/setproperty?<key>=<value>&hsgid=<hsgid>&session-id=<session id>&prompt-id=0
 
-**Authentication:** HSGID + Session ID
+**Authentication:** Session ID
 
 Changes a property for something. Currently only media position is implemented,
 but for example shuffle or repeat can be changed as well (and will likely be
