@@ -1,6 +1,7 @@
 include CHANGES.rst
 include README.rst
 include LICENSE.rst
+include CONTRIBUTORS.txt
 graft pyatv
 graft tests
 graft docs
@@ -8,4 +9,4 @@ graft examples
 exclude docs/Makefile
 global-exclude *~
 recursive-exclude * *.py[co]
-prunt docs/build
+prune docs/build

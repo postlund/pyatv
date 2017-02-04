@@ -27,7 +27,7 @@ Requirements
 ------------
 
 - python>=3.4.2
-- zeroconf==0.17.6
+- zeroconf==0.18.0
 - aiohttp==1.2.0
 
 Getting started
@@ -128,14 +128,14 @@ tracking.
 Tasks related to library features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Pairing with a device (issue #9)
-- Asynchronous auto discovery
-- Non-polling based API (callbacks)
-- Send URL to AirPlay media
-- Arrow keys (up, down, left and right)
-- Allow auto discovery stop after finding a device
-- Better output for "playing" in atvremote
-- Verify compatibility with python > 3.5 (tox)
+- Pairing with a device **DONE** (#9)
+- Asynchronous auto discovery **DONE**
+- Non-polling based API (callbacks) (#8)
+- Send URL to AirPlay media **DONE** (#16)
+- Arrow keys (up, down, left and right) (#17)
+- Allow auto discovery stop after finding a device (#19)
+- Better output for "playing" in atvremote (#20)
+- Verify compatibility with python > 3.5 (tox) *Pending* (#18)
 - Fix exit code in atvremote
 - Fix various TODOs in the code
 
@@ -143,8 +143,8 @@ Other tasks
 ^^^^^^^^^^^^
 
 - Help command to get full help text for a command
-- Verify support with Apple TV 4
-- Automatic builds with travis
+- Verify support with Apple TV 4 **DONE** (#3, #7)
+- Automatic builds with travis **DONE**
 - Write simple smoke test for atvremote
 - Improved documentation
 
