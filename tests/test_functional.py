@@ -1,11 +1,14 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import pyatv
+import aiohttp
 import ipaddress
 
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import (AppleTVDevice, connect_to_apple_tv, const, exceptions)
+from pyatv import (AppleTVDevice, connect_to_apple_tv, const,
+                   exceptions, dmap, tag_definitions, pairing)
 from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
 from tests import zeroconf_stub
 
@@ -14,6 +17,10 @@ PAIRING_GUID = '0x0000000000000001'
 SESSION_ID = 55555
 
 EXPECTED_ARTWORK = b'1234'
+
+# This is valid for the PAIR in the pairing module and pin 1234
+# (extracted form a real device)
+PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
 
 
 class FunctionalTest(AioHTTPTestCase):
@@ -47,7 +54,6 @@ class FunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     def test_scan_for_apple_tvs(self):
-        import pyatv
         zeroconf_stub.stub(pyatv, zeroconf_stub.homesharing_service(
             'AAAA', b'Apple TV', '10.0.0.1', b'aaaa'))
 
@@ -57,6 +63,41 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.1'))
         self.assertEqual(atvs[0].login_id, 'aaaa')
         self.assertEqual(atvs[0].port, 3689)
+
+    @unittest_run_loop
+    def test_pairing_with_device(self):
+        zeroconf_stub.stub(pairing)
+
+        # Start pairing process
+        yield from pyatv.pair_with_apple_tv(self.loop, 0, 1234, 'pyatv remote')
+
+        # Verify that bonjour service was published
+        zeroconf = zeroconf_stub.instance
+        self.assertEqual(len(zeroconf.registered_services), 1,
+                         msg='no zeroconf service registered')
+
+        service = zeroconf.registered_services[0]
+        self.assertEqual(service.properties['DvNm'], 'pyatv remote',
+                         msg='remote name does not match')
+
+        # Extract port from service (as it is randomized) and request pairing
+        # with the web server.
+        url = 'http://127.0.0.1:{}/pairing?pairingcode={}'.format(
+            service.port, PAIRINGCODE)
+        session = aiohttp.ClientSession(loop=self.loop)
+        response = yield from session.request('GET', url)
+        self.assertEqual(response.status, 200)
+
+        # Verify content returned in pairingresponse
+        data = yield from response.content.read()
+        parsed = dmap.parse(data, tag_definitions.lookup_tag)
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), 'pyatv remote')
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+
+        response.close()
+        yield from session.close()
+        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_login_failed(self):

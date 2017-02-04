@@ -7,6 +7,7 @@ import ipaddress
 from collections import namedtuple
 from zeroconf import ServiceBrowser, Zeroconf
 
+from pyatv.pairing import PairingHandler
 from pyatv.daap import (DaapSession, DaapRequester)
 from pyatv.internal.apple_tv import AppleTVInternal
 
@@ -71,7 +72,6 @@ def connect_to_apple_tv(details, loop):
     return AppleTVInternal(session, requester)
 
 
-# TODO: API not determined for this yet, might change when implemented
-def pair_with_apple_tv():
+def pair_with_apple_tv(loop, timeout, pin_code, name):
     """Initiate pairing process with an Apple TV."""
-    raise NotImplementedError
+    return PairingHandler(loop, timeout, name, pin_code).run()

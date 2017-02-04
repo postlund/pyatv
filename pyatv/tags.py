@@ -48,6 +48,13 @@ def uint32_tag(name, value):
         value.to_bytes(4, byteorder='big')
 
 
+def uint64_tag(name, value):
+    """Create a DMAP tag with uint64 data."""
+    return name.encode('utf-8') + \
+        b'\x00\x00\x00\x08' + \
+        value.to_bytes(8, byteorder='big')
+
+
 def bool_tag(name, value):
     """Create a DMAP tag with boolean data."""
     return name.encode('utf-8') + \

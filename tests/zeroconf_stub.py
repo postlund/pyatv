@@ -38,6 +38,7 @@ class ZeroconfStub:
     def __init__(self, services):
         """Create a new instance of Zeroconf."""
         self.services = services
+        self.registered_services = []
 
     def get_service_info(self, service_type, service_name):
         """Look up service information."""
@@ -45,15 +46,28 @@ class ZeroconfStub:
             if service.name == service_name:
                 return service
 
+    def register_service(self, service):
+        """Save services registered services."""
+        self.registered_services.append(service)
+
+    def unregister_service(self, service):
+        """Stub for unregistering services (does nothing)."""
+        pass
+
     def close(self):
         """Stub for closing zeroconf (does nothing)."""
         pass
 
 
+instance = None
+
+
 def stub(module, *services):
     """Stub a module using zeroconf."""
     def _zeroconf():
-        return ZeroconfStub(services)
+        global instance
+        instance = ZeroconfStub(list(services))
+        return instance
 
     module.Zeroconf = _zeroconf
     module.ServiceBrowser = ServiceBrowserStub

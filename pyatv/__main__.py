@@ -40,11 +40,16 @@ def cli_handler(loop):
                         const=logging.DEBUG, default=logging.WARNING)
     parser.add_argument('--name', help='apple tv name',
                         dest='name', default='Apple TV')
+    parser.add_argument('--remote-name', help='remote pairing name',
+                        dest='remote_name', default='pyatv')
     parser.add_argument('--address', help='device ip address or hostname',
                         dest='address', default=None)
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
                         dest='scan_timeout', type=_in_range(1, 10),
                         metavar='TIMEOUT', default=3)
+    parser.add_argument('-p', '--pin', help='pairing pin code',
+                        dest='pin_code', type=_in_range(0, 9999),
+                        metavar='PIN', default=1234)
     ident = parser.add_mutually_exclusive_group()
 
     ident.add_argument('-a', '--autodiscover',
@@ -67,7 +72,9 @@ def cli_handler(loop):
     if args.command == 'scan':
         yield from _handle_scan(args, loop)
     elif args.command == 'pair':
-        pyatv.pair_with_apple_tv()
+        # TODO: hardcoded timeout
+        yield from pyatv.pair_with_apple_tv(
+            loop, 60, args.pin_code, args.remote_name)
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
     elif args.login_id:
