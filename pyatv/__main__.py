@@ -161,9 +161,8 @@ def _handle_command(args, loop):
         elif cmd == 'artwork':
             artwork = yield from atv.metadata.artwork()
             if artwork is not None:
-                file = open('artwork.png', 'wb')
-                file.write(artwork)
-                file.close()
+                with open('artwork.png', 'wb') as file:
+                    file.write(artwork)
             else:
                 print('No artwork is currently available.')
 
