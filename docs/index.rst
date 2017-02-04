@@ -51,8 +51,8 @@ Connecting to a specific device:
 
     NAME = 'My Apple TV'
     ADDRESS = '10.0.10.22'
-    HSGID = '00000000-1111-2222-3333-444444444444'
-    DETAILS = pyatv.AppleTVDevice(NAME, ADDRESS, HSGID)
+    LOGIN_ID = '00000000-1111-2222-3333-444444444444'
+    DETAILS = pyatv.AppleTVDevice(NAME, ADDRESS, LOGIN_ID)
 
 
     @asyncio.coroutine
@@ -72,7 +72,8 @@ Connecting to a specific device:
     loop.run_until_complete(print_what_is_playing(loop, DETAILS))
 
 
-Where to find HSGID? See :ref:`this<pyatv-finding-devices>` page.
+What is LOGIN_ID and where to find it? See :ref:`this<pyatv-finding-devices>`
+page.
 
 
 Dependencies
@@ -107,6 +108,7 @@ Contents
 
    protocol
    finding_devices
+   pairing
    connecting
    controlling
    metadata

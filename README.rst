@@ -10,9 +10,6 @@ As this library is still at an early development stage, functionality is still m
 exist and API may change. Look at this as a "technical preview". API is not considered final
 until version 1.0 is released.
 
-NOTE: As pairing is not yet implemented, you `must` enable home sharing on your Apple TV for
-this library to work! Once pairing is implemented, this restriction will be lifted.
-
 The MIT license is used for this library.
 
 Features
@@ -130,7 +127,7 @@ tracking.
 Tasks related to library features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Pairing with a device
+- Pairing with a device (issue #9)
 - Asynchronous auto discovery
 - Non-polling based API (callbacks)
 - Send URL to AirPlay media

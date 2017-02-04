@@ -32,6 +32,12 @@ basically all you need. Any client that can list Bonjour services can be used, s
 But you can of course also use ``atvremote``, see
 :ref:`this page<pyatv-atvremote>`.
 
+No home sharing
+---------------
+If you do not want or can't enable home sharing, you can pair with your device
+instead and gain a pairing guid that you can use as login id. See
+:ref:`pairing<pyatv-pairing>` for more information about that.
+
 Code Example
 ------------
 Discovering devices is as easy as using ``pyatv.scan_for_apple_tvs``, which is
