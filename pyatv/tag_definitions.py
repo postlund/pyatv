@@ -41,9 +41,13 @@ _TAGS = {
     'ceQR': DmapTag('container', 'com.apple.itunes.playqueue-contents-response'),  # NOQA
     'cmcp': DmapTag('container', 'dmcp.controlprompt'),
     'cmmk': DmapTag(read_uint,   'dmcp.mediakind'),
+    'cmnm': DmapTag(read_str,    'dacp.devicename'),
+    'cmpa': DmapTag('container', 'dacp.pairinganswer'),
+    'cmpg': DmapTag(read_uint,   'dacp.pairingguid'),
     'cmpr': DmapTag(read_uint,   'dmcp.protocolversion'),
     'cmsr': DmapTag(read_uint,   'dmcp.serverrevision'),
     'cmst': DmapTag('container', 'dmcp.playstatus'),
+    'cmty': DmapTag(read_str,    'dacp.devicetype'),
     'mdcl': DmapTag('container', 'dmap.dictionary'),
     'miid': DmapTag(read_uint,   'dmap.itemid'),
     'minm': DmapTag(read_str,    'dmap.itemname'),

@@ -8,6 +8,7 @@ TEST_TAGS = {
     'uuu8': dmap.DmapTag(tags.read_uint, 'uint8'),
     'uu16': dmap.DmapTag(tags.read_uint, 'uint16'),
     'uu32': dmap.DmapTag(tags.read_uint, 'uint32'),
+    'uu64': dmap.DmapTag(tags.read_uint, 'uint64'),
     'bola': dmap.DmapTag(tags.read_bool, 'bool'),
     'bolb': dmap.DmapTag(tags.read_bool, 'bool'),
     'stra': dmap.DmapTag(tags.read_str, 'string'),
@@ -28,12 +29,14 @@ class DmapTest(unittest.TestCase):
     def test_parse_uint_of_various_lengths(self):
         in_data = tags.uint8_tag('uuu8', 12) + \
                   tags.uint16_tag('uu16', 37888) + \
-                  tags.uint32_tag('uu32', 305419896)
+                  tags.uint32_tag('uu32', 305419896) + \
+                  tags.uint64_tag('uu64', 8982983289232)
         parsed = dmap.parse(in_data, lookup_tag)
-        self.assertEqual(3, len(parsed))
+        self.assertEqual(4, len(parsed))
         self.assertEqual(12, dmap.first(parsed, 'uuu8'))
         self.assertEqual(37888, dmap.first(parsed, 'uu16'))
         self.assertEqual(305419896, dmap.first(parsed, 'uu32'))
+        self.assertEqual(8982983289232, dmap.first(parsed, 'uu64'))
 
     def test_parse_bool(self):
         in_data = tags.bool_tag('bola', True) + \
