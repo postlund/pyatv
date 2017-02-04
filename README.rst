@@ -16,6 +16,7 @@ Features
 --------
 
 - Automatic discovery of devices (zeroconf/Bonjour)
+- Pairing with devices
 - Most buttons (play, pause, next, previous, select, menu, topmenu)
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
