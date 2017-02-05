@@ -37,7 +37,7 @@ announced with name *pyatv* and PIN code to be used is 1234:
 
     $ atvremote pair
     Use pin 1234 to pair with "pyatv" (waiting for 60s)
-    After successful pairing, use login id 0000000000000001
+    After successful pairing, use login id 0x0000000000000001
     Note: If remote does not show up, reboot you Apple TV
 
 You can override all of the settings using ``--remote-name``, ``--pin`` and
@@ -45,9 +45,9 @@ You can override all of the settings using ``--remote-name``, ``--pin`` and
 
 .. note::
 
-    It is hardcoded into pyatv so that pairing guid ``0000000000000001``
+    It is hardcoded into pyatv so that pairing guid ``0x0000000000000001``
     must always be used. So, if you have paired your device, just use that
-    as login id.
+    as login id. It is important that you add ``0x`` in front of the guid!
 
 Specifying a device
 -------------------

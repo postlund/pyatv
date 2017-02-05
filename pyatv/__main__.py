@@ -84,7 +84,7 @@ def cli_handler(loop):
             loop, args.pin_code, args.remote_name)
         print('Use pin {} to pair with "{}" (waiting for {}s)'.format(
             args.pin_code, args.remote_name, args.pairing_timeout))
-        print('After successful pairing, use login id {}'.format(
+        print('After successful pairing, use login id 0x{}'.format(
             pyatv.pairing.PAIRING_GUID))
         print('Note: If remote does not show up, reboot you Apple TV')
         yield from handler.start()
