@@ -108,6 +108,11 @@ class RemoteControl(object):
         """Seek in the current playing media."""
         raise exceptions.NotSupportedError
 
+    @abstractmethod
+    def play_url(self, url, start_position=0, port=7000):
+        """Play media from an URL on the device."""
+        raise exceptions.NotSupportedError
+
 
 class Playing(object):
     """Base class for retrieving what is currently playing."""
