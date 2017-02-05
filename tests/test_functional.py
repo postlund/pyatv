@@ -13,6 +13,8 @@ HSGID = '12345-6789-0'
 PAIRING_GUID = '0x0000000000000001'
 SESSION_ID = 55555
 
+EXPECTED_ARTWORK = b'1234'
+
 
 class FunctionalTest(AioHTTPTestCase):
 
@@ -64,6 +66,24 @@ class FunctionalTest(AioHTTPTestCase):
 
         with self.assertRaises(exceptions.AuthenticationError):
             yield from self.atv.login()
+
+        yield from self.atv.logout()
+
+    # This test verifies issue #2 (automatic re-login). It uses the artwork
+    # API, but it could have been any API since the login code is the same.
+    @unittest_run_loop
+    def test_relogin_if_session_expired(self):
+        yield from self.atv.login()
+
+        # Here, we are logged in and currently have a asession id. These
+        # usescases will result in being logged out (HTTP 403) and forcing a
+        # re-login with a new session id (1234)
+        self.usecase.force_relogin(1234)
+        self.usecase.artwork_no_permission()
+        self.usecase.change_artwork(EXPECTED_ARTWORK)
+
+        artwork = yield from self.atv.metadata.artwork()
+        self.assertEqual(artwork, EXPECTED_ARTWORK)
 
         yield from self.atv.logout()
 
@@ -124,11 +144,10 @@ class FunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     def test_metadata_artwork(self):
-        expected_artwork = b'12345'
-        self.usecase.change_artwork(expected_artwork)
+        self.usecase.change_artwork(EXPECTED_ARTWORK)
 
         artwork = yield from self.atv.metadata.artwork()
-        self.assertEqual(artwork, expected_artwork)
+        self.assertEqual(artwork, EXPECTED_ARTWORK)
         yield from self.atv.logout()
 
     @unittest_run_loop

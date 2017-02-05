@@ -25,6 +25,7 @@ EXPECTED_HEADERS = {
 }
 
 LoginResponse = namedtuple('LoginResponse', 'session, status')
+ArtworkResponse = namedtuple('ArtworkResponse', 'content, status')
 
 
 class PlayingResponse:
@@ -60,6 +61,7 @@ class FakeAppleTV(web.Application):
         self.responses['playing'] = []
         self.hsgid = hsgid
         self.pairing_guid = pairing_guid
+        self.session = None
         self.last_button_pressed = None
         self.properties = {}  # setproperty
         self.tc = testcase
@@ -101,6 +103,7 @@ class FakeAppleTV(web.Application):
         data = self._get_response('login')
         mlid = tags.uint32_tag('mlid', data.session)
         mlog = tags.container_tag('mlog', mlid)
+        self.session = data.session
         return web.Response(body=mlog, status=data.status)
 
     @asyncio.coroutine
@@ -124,7 +127,7 @@ class FakeAppleTV(web.Application):
         """Handler for artwork requests."""
         self._verify_auth_parameters(request)
         artwork = self._get_response('artwork')
-        return web.Response(body=artwork, status=200)
+        return web.Response(body=artwork.content, status=artwork.status)
 
     @asyncio.coroutine
     def handle_playstatus(self, request):
@@ -203,8 +206,7 @@ class FakeAppleTV(web.Application):
                 self.tc.assertTrue(False, 'hsgid or pairing-guid not found')
 
         if check_session:
-            session = self._get_response('login', pop=False).session
-            self.tc.assertEqual(int(params['session-id']), session,
+            self.tc.assertEqual(int(params['session-id']), self.session,
                                 msg='session id does not match')
 
 
@@ -218,6 +220,10 @@ class AppleTVUseCases:
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
 
+    def force_relogin(self, session):
+        """Calling this method will change current session id."""
+        self.device.responses['login'].append(LoginResponse(session, 200))
+
     def make_login_fail(self, immediately=True):
         """Calling this method will make login fail with response 503."""
         response = LoginResponse(0, 503)
@@ -228,7 +234,16 @@ class AppleTVUseCases:
 
     def change_artwork(self, artwork):
         """Calling this method will change artwork response."""
-        self.device.responses['artwork'].insert(0, artwork)
+        self.device.responses['artwork'].insert(
+            0, ArtworkResponse(artwork, 200))
+
+    def artwork_no_permission(self):
+        """Make artwork fail with no permission.
+
+        This corresponds to have been logged out for some reason.
+        """
+        self.device.responses['artwork'].insert(
+            0, ArtworkResponse(None, 403))
 
     def nothing_playing(self):
         """Calling this method will put device in idle state."""
