@@ -111,8 +111,12 @@ class DaapRequester:
         """Login to Apple TV using specified login id."""
         # Do not use session.get_data(...) in login as that would end up in
         # an infinte loop.
-        url = self._mkurl('login?[AUTH]&hasFP=1', session=False, login_id=True)
-        resp = yield from self._do(self.session.get_data, url)
+        def _login_request():
+            return self.session.get_data(
+                self._mkurl('login?[AUTH]&hasFP=1',
+                            session=False, login_id=True))
+
+        resp = yield from self._do(_login_request)
         self._session_id = dmap.first(resp, 'mlog', 'mlid')
         _LOGGER.info('Logged in and got session id %s', self._session_id)
         return self._session_id
@@ -120,36 +124,39 @@ class DaapRequester:
     @asyncio.coroutine
     def get(self, cmd, daap_data=True, **args):
         """Perform a DAAP GET command."""
-        def _get_request(url):
-            return self.session.get_data(url, should_parse=daap_data)
+        def _get_request():
+            return self.session.get_data(
+                self._mkurl(cmd, *args), should_parse=daap_data)
 
         yield from self._assure_logged_in()
-        return (yield from self._do(_get_request,
-                                    self._mkurl(cmd, *args),
-                                    is_daap=daap_data))
+        return (yield from self._do(_get_request, is_daap=daap_data))
 
     @asyncio.coroutine
     def post(self, cmd, data=None, **args):
         """Perform DAAP POST command with optional data."""
-        def _post_request(url):
-            return self.session.post_data(url, data=data)
+        def _post_request():
+            return self.session.post_data(self._mkurl(cmd, *args), data=data)
 
         yield from self._assure_logged_in()
-        return (yield from self._do(_post_request, self._mkurl(cmd, *args)))
+        return (yield from self._do(_post_request))
 
-    # TODO: refactor to fix this
-    # pylint: disable=too-many-arguments
     @asyncio.coroutine
-    def _do(self, action, url, retry=True, is_login=False, is_daap=True):
-        resp, status = yield from action(url)
+    def _do(self, action, retry=True, is_login=False, is_daap=True):
+        resp, status = yield from action()
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
         if status >= 200 and status < 300:
             return resp
 
+        # When a 403 is received we are likely logged out, so a new
+        # login must be performed to get a new session id
+        if status == 403:
+            _LOGGER.info('implicitly logged out, logging in again')
+            yield from self.login()
+
         # Retry once if we got a bad response, otherwise bail out
         if retry:
             return (yield from self._do(
-                action, url, False, is_login=is_login, is_daap=is_daap))
+                action, False, is_login=is_login, is_daap=is_daap))
         else:
             raise exceptions.AuthenticationError(
                 'failed to login: ' + str(status))
