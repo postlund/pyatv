@@ -156,17 +156,18 @@ class DaapRequester:
 
     def _mkurl(self, cmd, *args, session=True, login_id=False, revision=False):
         url = '{}/{}'.format(self.url, cmd.format(*args))
-        auth = ''
+        parameters = []
         if login_id:
             if re.match(r'0x[0-9a-fA-F]{16}', self._login_id):
-                auth = 'pairing-guid=' + self._login_id
+                parameters.append('pairing-guid={}'.format(self._login_id))
             else:
-                auth = 'hsgid=' + self._login_id
+                parameters.append('hsgid={}'.format(self._login_id))
         if session:
-            auth = 'session-id={}&{}'.format(self._session_id, auth)
+            parameters.insert(0, 'session-id={}'.format(self._session_id))
         if revision:
-            auth = '{}&revision-number={}'.format(auth, self._revision_number)
-        return url.replace('[AUTH]', auth)
+            parameters.append('revision-number={}'.format(
+                self._revision_number))
+        return url.replace('[AUTH]', '&'.join(parameters))
 
     @asyncio.coroutine
     def _assure_logged_in(self):
