@@ -82,10 +82,11 @@ class BaseAppleTV:
 class RemoteControlInternal(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, apple_tv):
+    def __init__(self, apple_tv, airplay):
         """Initialize remote control instance."""
         super().__init__()
         self.apple_tv = apple_tv
+        self.airplay = airplay
 
     def up(self):
         """Press key up."""
@@ -135,6 +136,22 @@ class RemoteControlInternal(RemoteControl):
         """Seek in the current playing media."""
         time_in_ms = int(pos)*1000
         return self.apple_tv.set_property('dacp.playingtime', time_in_ms)
+
+    def play_url(self, url, start_position, **kwargs):
+        """Play media from an URL on the device.
+
+        Note: This method will not yield until the media has finished playing.
+        The Apple TV requires the request to stay open during the entire
+        play duration.
+        """
+        # AirPlay is separate from DAAP, so to make it easier to test the port
+        # can be overriden to something else. NOT part of the public API!
+        if 'port' in kwargs:
+            port = kwargs['port']
+        else:
+            import pyatv.airplay
+            port = pyatv.airplay.AIRPLAY_PORT
+        return self.airplay.play_url(url, int(start_position), port)
 
 
 class PlayingInternal(Playing):
@@ -241,13 +258,13 @@ class MetadataInternal(Metadata):
 class AppleTVInternal(AppleTV):
     """Implementation of API support for Apple TV."""
 
-    def __init__(self, session, requester):
+    def __init__(self, session, requester, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
         self.session = session
         self.requester = requester
         self.apple_tv = BaseAppleTV(self.requester)
-        self.atv_remote = RemoteControlInternal(self.apple_tv)
+        self.atv_remote = RemoteControlInternal(self.apple_tv, airplay)
         self.atv_metadata = MetadataInternal(self.apple_tv)
 
     def login(self):

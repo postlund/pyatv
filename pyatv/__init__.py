@@ -7,6 +7,7 @@ import ipaddress
 from collections import namedtuple
 from zeroconf import ServiceBrowser, Zeroconf
 
+from pyatv.airplay import AirPlay
 from pyatv.pairing import PairingHandler
 from pyatv.daap import (DaapSession, DaapRequester)
 from pyatv.internal.apple_tv import AppleTVInternal
@@ -67,10 +68,11 @@ def connect_to_apple_tv(details, loop):
     """Connect and logins to an Apple TV."""
     # If/when needed, the library should figure out the correct type of Apple
     # TV and return the correct type for it.
+    airplay = AirPlay(loop, details.address)
     session = DaapSession(loop)
     requester = DaapRequester(
         session, details.address, details.login_id, details.port)
-    return AppleTVInternal(session, requester)
+    return AppleTVInternal(session, requester, airplay)
 
 
 def pair_with_apple_tv(loop, pin_code, name):
