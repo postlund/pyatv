@@ -146,11 +146,9 @@ class RemoteControlInternal(RemoteControl):
         """
         # AirPlay is separate from DAAP, so to make it easier to test the port
         # can be overriden to something else. NOT part of the public API!
-        if 'port' in kwargs:
-            port = kwargs['port']
-        else:
-            import pyatv.airplay
-            port = pyatv.airplay.AIRPLAY_PORT
+        import pyatv.airplay
+        port_override = 'port' in kwargs
+        port = kwargs['port'] if port_override else pyatv.airplay.AIRPLAY_PORT
         return self.airplay.play_url(url, int(start_position), port)
 
 
