@@ -6,7 +6,9 @@ kinds of responses. Also, it performs various sanity checks, like that auth
 information is correct and headers are present.
 """
 
+import re
 import asyncio
+import plistlib
 from collections import namedtuple
 
 from aiohttp import web
@@ -26,6 +28,7 @@ EXPECTED_HEADERS = {
 
 LoginResponse = namedtuple('LoginResponse', 'session, status')
 ArtworkResponse = namedtuple('ArtworkResponse', 'content, status')
+AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'content')
 
 
 class PlayingResponse:
@@ -59,6 +62,7 @@ class FakeAppleTV(web.Application):
         self.responses['login'] = [LoginResponse(session_id, 200)]
         self.responses['artwork'] = []
         self.responses['playing'] = []
+        self.responses['airplay_playback'] = []
         self.hsgid = hsgid
         self.pairing_guid = pairing_guid
         self.session = None
@@ -66,6 +70,7 @@ class FakeAppleTV(web.Application):
         self.properties = {}  # setproperty
         self.tc = testcase
 
+        # Regular DAAP stuff
         self.router.add_get('/login', self.handle_login)
         self.router.add_get(
             '/ctrl-int/1/playstatusupdate', self.handle_playstatus)
@@ -78,6 +83,11 @@ class FakeAppleTV(web.Application):
         for button in ['play', 'pause', 'nextitem', 'previtem']:
             self.router.add_post('/ctrl-int/1/' + button,
                                  self.handle_playback_button)
+
+        # AirPlay stuff
+        self.router.add_post('/play', self.handle_airplay_play)
+        self.router.add_get('/playback-info',
+                            self.handle_airplay_playback_info)
 
     # This method will retrieve the next response for a certain type.
     # If there are more than one response, it "pop" the last one and
@@ -209,6 +219,30 @@ class FakeAppleTV(web.Application):
             self.tc.assertEqual(int(params['session-id']), self.session,
                                 msg='session id does not match')
 
+    @asyncio.coroutine
+    def handle_airplay_play(self, request):
+        """Handler for AirPlay play requests."""
+        headers = request.headers
+
+        # Verify headers first
+        self.tc.assertEqual(headers['User-Agent'], 'MediaControl/1.0')
+        self.tc.assertEqual(headers['Content-Type'], 'text/parameters')
+
+        body = yield from request.text()
+
+        self.last_airplay_url = re.search(
+            r'Content-Location: (.*)', body).group(1)
+        self.last_airplay_start = float(re.search(
+            r'Start-Position: (.*)', body).group(1))
+
+        return web.Response(status=200)
+
+    @asyncio.coroutine
+    def handle_airplay_playback_info(self, request):
+        """Handler for AirPlay playback-info requests."""
+        response = self._get_response('airplay_playback')
+        return web.Response(body=response.content, status=200)
+
 
 class AppleTVUseCases:
     """Wrapper for altering behavior of a FakeAppleTV instance.
@@ -270,3 +304,16 @@ class AppleTVUseCases:
         """Calling this method puts device in a loading state."""
         self.device.responses['playing'].insert(0, PlayingResponse(
             playstatus=1))
+
+    def airplay_playback_idle(self):
+        """Make playback-info return idle info."""
+        plist = dict(readyToPlay=False, uuid=123)
+        self.device.responses['airplay_playback'].insert(
+            0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+
+    def airplay_playback_playing(self):
+        """Make playback-info return that something is playing."""
+        # This is _not_ complete, currently not needed
+        plist = dict(duration=0.8)
+        self.device.responses['airplay_playback'].insert(
+            0, AirPlayPlaybackResponse(plistlib.dumps(plist)))

@@ -82,4 +82,4 @@ class AirPlay:
             finally:
                 yield from info.release()
 
-            yield from asyncio.sleep(1, self.loop)
+            yield from asyncio.sleep(1, loop=self.loop)

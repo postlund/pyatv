@@ -19,6 +19,7 @@ REMOTE_NAME = 'pyatv remote'
 PIN_CODE = 1234
 
 EXPECTED_ARTWORK = b'1234'
+AIRPLAY_STREAM = 'http://stream'
 
 # This is valid for the PAIR in the pairing module and pin 1234
 # (extracted form a real device)
@@ -106,6 +107,17 @@ class FunctionalTest(AioHTTPTestCase):
         yield from session.close()
         yield from handler.stop()
         yield from self.atv.logout()
+
+    @unittest_run_loop
+    def test_play_url(self):
+        self.usecase.airplay_playback_idle()
+        self.usecase.airplay_playback_playing()
+        self.usecase.airplay_playback_idle()
+
+        yield from self.atv.remote_control.play_url(
+            AIRPLAY_STREAM, 0, port=self.app.port)
+
+        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
 
     @unittest_run_loop
     def test_login_failed(self):
