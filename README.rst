@@ -1,6 +1,6 @@
 A python client library for the Apple TV
 ========================================
-|Build Status| |Coverage Status| |PyPi Package|
+|Build Status| |Coverage Status| |PyPi Package| |Quantifiedcode|
 
 This is a python library for controlling and querying information from an Apple TV. It is async
 (python 3.4 syntax) and supports most of the commands that the regular Apple Remote app does as
@@ -181,3 +181,5 @@ commands. You may also pass --debug to get better logging.
    :target: https://coveralls.io/r/postlund/pyatv?branch=master
 .. |PyPi Package| image:: https://badge.fury.io/py/pyatv.svg
    :target: https://badge.fury.io/py/pyatv
+.. |Quantifiedcode| image:: https://www.quantifiedcode.com/api/v1/project/bcacf534875647af8005bb089f329918/badge.svg
+   :target: https://www.quantifiedcode.com/app/project/bcacf534875647af8005bb089f329918
