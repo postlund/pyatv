@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.1.3 (2017-02-09)
+------------------
+
+Changes:
+
+- Made it possible to pass a custom ClientSession
+
+Notes:
+
+- Renamed topmenu to top_menu which is a breaking change
+
+0.1.2 (2017-02-09)
+------------------
+
 Changes:
 
 - aiohttp bumped to 1.3.0

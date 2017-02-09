@@ -6,7 +6,6 @@ import logging
 import asyncio
 
 from copy import copy
-from aiohttp import ClientSession
 
 from pyatv import (dmap, exceptions)
 from pyatv.tag_definitions import lookup_tag
@@ -33,14 +32,10 @@ class DaapSession(object):
     It automatically adds the required headers and also does DMAP parsing.
     """
 
-    def __init__(self, loop, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, session, timeout=DEFAULT_TIMEOUT):
         """Initialize a new DaapSession."""
-        self._session = ClientSession(loop=loop)
+        self._session = session
         self._timeout = timeout
-
-    def close(self):
-        """Close the underlying client session."""
-        return self._session.close()
 
     @asyncio.coroutine
     def get_data(self, url, should_parse=True):

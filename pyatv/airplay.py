@@ -4,8 +4,6 @@ import logging
 import asyncio
 import plistlib
 
-from aiohttp import ClientSession
-
 _LOGGER = logging.getLogger(__name__)
 
 # This is the default port. It is also included in the Bonjour service
@@ -20,11 +18,11 @@ TIMEOUT = 10
 class AirPlay:
     """This class helps with playing media from an URL."""
 
-    def __init__(self, loop, address):
+    def __init__(self, loop, session, address):
         """Initialize a new AirPlay instance."""
         self.loop = loop
         self.address = address
-        self.session = None
+        self.session = session
 
     @asyncio.coroutine
     def play_url(self, url, start_position, port=AIRPLAY_PORT):
@@ -34,23 +32,17 @@ class AirPlay:
         body = "Content-Location: {}\nStart-Position: {}\n\n".format(
             url, start_position)
 
-        # Use a new session for this so we can close it when playback has
-        # finished, otherwise the device will "hang" with a black screen for a
-        # while.
-        self.session = ClientSession(loop=self.loop)
-
         address = self._url(port, 'play')
         _LOGGER.debug('AirPlay %s to %s', url, address)
 
+        resp = None
         try:
             resp = yield from self.session.post(
                 address, headers=headers, data=body, timeout=TIMEOUT)
-
             yield from self._wait_for_media_to_end(port)
         finally:
             if resp is not None:
-                yield from resp.release()
-            yield from self.session.close()
+                resp.close()
 
     def _url(self, port, command):
         return 'http://{}:{}/{}'.format(self.address, port, command)
@@ -63,8 +55,9 @@ class AirPlay:
         attempts = 5
         video_started = False
         while True:
-            info = yield from self.session.get(address)
+            info = None
             try:
+                info = yield from self.session.get(address)
                 data = yield from info.content.read()
                 parsed = plistlib.loads(data)
 
@@ -82,6 +75,7 @@ class AirPlay:
                     break
 
             finally:
-                yield from info.release()
+                if info is not None:
+                    info.close()
 
             yield from asyncio.sleep(1, loop=self.loop)
