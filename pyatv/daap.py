@@ -46,17 +46,20 @@ class DaapSession(object):
     def get_data(self, url, should_parse=True):
         """Perform a GET request. Optionally parse reponse as DMAP data."""
         _LOGGER.debug('GET URL: %s', url)
-        resp = yield from self._session.get(
-            url, headers=_DMAP_HEADERS, timeout=self._timeout)
+        resp = None
         try:
+            resp = yield from self._session.get(
+                url, headers=_DMAP_HEADERS, timeout=self._timeout)
             resp_data = yield from resp.read()
             extracted = self._extract_data(resp_data, should_parse)
             return extracted, resp.status
         except Exception as ex:
-            resp.close()
+            if resp is not None:
+                resp.close()
             raise ex
         finally:
-            yield from resp.release()
+            if resp is not None:
+                yield from resp.release()
 
     @asyncio.coroutine
     def post_data(self, url, data=None, parse=True):
@@ -66,17 +69,20 @@ class DaapSession(object):
         headers = copy(_DMAP_HEADERS)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
-        resp = yield from self._session.post(
-            url, headers=headers, data=data, timeout=self._timeout)
+        resp = None
         try:
+            resp = yield from self._session.post(
+                url, headers=headers, data=data, timeout=self._timeout)
             resp_data = yield from resp.read()
             extracted = self._extract_data(resp_data, parse)
             return extracted, resp.status
         except Exception as ex:
-            resp.close()
+            if resp is not None:
+                resp.close()
             raise ex
         finally:
-            yield from resp.release()
+            if resp is not None:
+                yield from resp.release()
 
     @staticmethod
     def _extract_data(data, should_parse):

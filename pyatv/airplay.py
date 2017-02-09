@@ -42,12 +42,14 @@ class AirPlay:
         address = self._url(port, 'play')
         _LOGGER.debug('AirPlay %s to %s', url, address)
 
-        resp = yield from self.session.post(
-            address, headers=headers, data=body, timeout=TIMEOUT)
         try:
+            resp = yield from self.session.post(
+                address, headers=headers, data=body, timeout=TIMEOUT)
+
             yield from self._wait_for_media_to_end(port)
         finally:
-            yield from resp.release()
+            if resp is not None:
+                yield from resp.release()
             yield from self.session.close()
 
     def _url(self, port, command):
