@@ -10,7 +10,7 @@ Features
 --------
 
 - Automatic discovery of devices (zeroconf/Bonjour)
-- Most buttons (play, pause, next, previous, select, menu, topmenu)
+- Most buttons (play, pause, next, previous, select, menu, top_menu)
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
 - Change media position

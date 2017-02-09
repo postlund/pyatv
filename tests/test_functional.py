@@ -189,8 +189,8 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(self.fake_atv.last_button_pressed, 'menu')
 
     @unittest_run_loop
-    def test_button_topmenu(self):
-        yield from self.atv.remote_control.topmenu()
+    def test_button_top_menu(self):
+        yield from self.atv.remote_control.top_menu()
         self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
 
     @unittest_run_loop
