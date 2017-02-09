@@ -3,6 +3,7 @@
 import asyncio
 
 from tests.log_output_handler import LogOutputHandler
+from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import airplay
@@ -51,9 +52,12 @@ class AirPlayTest(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        aplay = airplay.AirPlay(self.loop, '127.0.0.1')
+        session = ClientSession(loop=self.loop)
+        aplay = airplay.AirPlay(self.loop, session, '127.0.0.1')
         yield from aplay.play_url(STREAM, START_POSITION, self.app.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, STREAM)
         self.assertEqual(self.fake_atv.last_airplay_start, START_POSITION)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
+
+        yield from session.close()

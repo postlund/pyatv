@@ -6,6 +6,25 @@ When connecting to a device, the IP-address (or hostname) and its login id,
 e.g. HSGID, is required. These details can be specified manually or be
 automatically discovered if home sharing is enabled.
 
+Custom aiohttp session
+----------------------
+If you are integrating pyatv in an application that already has a
+``ClientSession``, then you might want to re-use that session. You can just
+pass it as an optional parameter when connecting:
+
+.. code:: python
+
+    other_session = ... # Some session
+    atv = pyatv.connect_to_apple_tv(atv, loop, session=other_session)
+
+If no session is given, a default ``ClientSession`` will be created for you.
+
+.. note::
+
+    When you logout from a device by calling (yield from) ``atv.logout()``,
+    the session will be closed. So, if you share the session with other
+    instances, you might not want to do that.
+
 Code Example: Auto discovery
 ----------------------------
 Using auto discovery makes the connection procedure simple. But do not forget

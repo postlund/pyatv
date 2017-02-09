@@ -6,6 +6,7 @@ import logging
 import ipaddress
 from collections import namedtuple
 from zeroconf import ServiceBrowser, Zeroconf
+from aiohttp import ClientSession
 
 from pyatv.airplay import AirPlay
 from pyatv.pairing import PairingHandler
@@ -64,14 +65,18 @@ def scan_for_apple_tvs(loop, timeout=5):
     return listener.found_devices
 
 
-def connect_to_apple_tv(details, loop):
+def connect_to_apple_tv(details, loop, session=None):
     """Connect and logins to an Apple TV."""
+    # If no session is given, create a default one
+    if session is None:
+        session = ClientSession(loop=loop)
+
     # If/when needed, the library should figure out the correct type of Apple
     # TV and return the correct type for it.
-    airplay = AirPlay(loop, details.address)
-    session = DaapSession(loop)
+    airplay = AirPlay(loop, session, details.address)
+    daap_session = DaapSession(session)
     requester = DaapRequester(
-        session, details.address, details.login_id, details.port)
+        daap_session, details.address, details.login_id, details.port)
     return AppleTVInternal(session, requester, airplay)
 
 
