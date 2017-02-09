@@ -28,7 +28,7 @@ Requirements
 
 - python>=3.4.2
 - zeroconf==0.18.0
-- aiohttp==1.2.0
+- aiohttp==1.3.0
 
 Getting started
 ---------------
@@ -90,6 +90,7 @@ It is possible to use the reference CLI application as well:
     # List all commands supported by a device
     $ atvremote -a commands
     Remote control commands:
+     - play_url - Play media from an URL on the device
      - set_position - Seeks in the current playing media
      - pause - Press key play
      - menu - Press key menu

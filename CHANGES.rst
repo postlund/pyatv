@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+Changes:
+
+- aiohttp bumped to 1.3.0
+- Fix a potential request leak on error
+
+0.1.1 (2017-02-07)
+------------------
+
+This is the same as 0.1.0 but actually contains everything stated
+in the changes.
+
 0.1.0 (2017-02-07)
 ------------------
 
