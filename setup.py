@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyatv',
-    version='0.1.2',
+    version='0.1.3.dev1',
     license='MIT',
     url='https://github.com/postlund/pyatv',
     author='Pierre Ståhl',
