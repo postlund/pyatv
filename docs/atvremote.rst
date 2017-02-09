@@ -88,7 +88,7 @@ availble commands:
      - left - Press key left
      - right - Press key right
      - previous - Press key previous
-     - topmenu - Go to top menu (long press menu)
+     - top_menu - Go to top menu (long press menu)
      - set_position - Seeks in the current playing media
      - menu - Press key menu
      - up - Press key up

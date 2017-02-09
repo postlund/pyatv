@@ -17,7 +17,7 @@ Features
 
 - Automatic discovery of devices (zeroconf/Bonjour)
 - Pairing with devices
-- Most buttons (play, pause, next, previous, select, menu, topmenu)
+- Most buttons (play, pause, next, previous, select, menu, top_menu)
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
 - Change media position
@@ -94,7 +94,7 @@ It is possible to use the reference CLI application as well:
      - set_position - Seeks in the current playing media
      - pause - Press key play
      - menu - Press key menu
-     - topmenu - Go to top menu (long press menu)
+     - top_menu - Go to top menu (long press menu)
      - down - Press key down
      - previous - Press key previous
      - up - Press key up

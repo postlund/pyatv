@@ -99,7 +99,7 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def topmenu(self):
+    def top_menu(self):
         """Go to main menu (long press menu)."""
         raise exceptions.NotSupportedError
 

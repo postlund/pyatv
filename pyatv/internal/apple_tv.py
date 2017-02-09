@@ -127,7 +127,7 @@ class RemoteControlInternal(RemoteControl):
         """Press key menu."""
         return self.apple_tv.controlprompt_cmd('menu')
 
-    def topmenu(self):
+    def top_menu(self):
         """Press key topmenu."""
         return self.apple_tv.controlprompt_cmd('topmenu')
 
