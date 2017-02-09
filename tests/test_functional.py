@@ -1,6 +1,7 @@
 """Functional tests using the API with a fake Apple TV."""
 
 import pyatv
+import asyncio
 import aiohttp
 import ipaddress
 
@@ -34,10 +35,12 @@ class FunctionalTest(AioHTTPTestCase):
         self.log_handler = LogOutputHandler(self)
 
     def tearDown(self):
+        self.loop.run_until_complete(self.atv.logout())
         AioHTTPTestCase.tearDown(self)
         self.log_handler.tearDown()
 
-    def get_app(self, loop):
+    @asyncio.coroutine
+    def get_application(self, loop):
         self.fake_atv = FakeAppleTV(
             loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
@@ -106,7 +109,6 @@ class FunctionalTest(AioHTTPTestCase):
         response.close()
         yield from session.close()
         yield from handler.stop()
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_play_url(self):
@@ -128,8 +130,6 @@ class FunctionalTest(AioHTTPTestCase):
         with self.assertRaises(exceptions.AuthenticationError):
             yield from self.atv.login()
 
-        yield from self.atv.logout()
-
     # This test verifies issue #2 (automatic re-login). It uses the artwork
     # API, but it could have been any API since the login code is the same.
     @unittest_run_loop
@@ -146,62 +146,52 @@ class FunctionalTest(AioHTTPTestCase):
         artwork = yield from self.atv.metadata.artwork()
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
-        yield from self.atv.logout()
-
     @unittest_run_loop
     def test_login_with_hsgid_succeed(self):
         session_id = yield from self.atv.login()
         self.assertEqual(SESSION_ID, session_id)
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_login_with_pairing_guid_succeed(self):
+        yield from self.atv.logout()
         self.atv = self.get_connected_device(PAIRING_GUID)
         session_id = yield from self.atv.login()
         self.assertEqual(SESSION_ID, session_id)
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_play(self):
         yield from self.atv.remote_control.play()
         self.assertEqual(self.fake_atv.last_button_pressed, 'play')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_pause(self):
         yield from self.atv.remote_control.pause()
         self.assertEqual(self.fake_atv.last_button_pressed, 'pause')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_next(self):
         yield from self.atv.remote_control.next()
         self.assertEqual(self.fake_atv.last_button_pressed, 'nextitem')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_previous(self):
         yield from self.atv.remote_control.previous()
         self.assertEqual(self.fake_atv.last_button_pressed, 'previtem')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_select(self):
         yield from self.atv.remote_control.select()
         self.assertEqual(self.fake_atv.last_button_pressed, 'select')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_menu(self):
         yield from self.atv.remote_control.menu()
         self.assertEqual(self.fake_atv.last_button_pressed, 'menu')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_button_topmenu(self):
         yield from self.atv.remote_control.topmenu()
         self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_artwork(self):
@@ -209,7 +199,6 @@ class FunctionalTest(AioHTTPTestCase):
 
         artwork = yield from self.atv.metadata.artwork()
         self.assertEqual(artwork, EXPECTED_ARTWORK)
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_artwork_none_if_not_available(self):
@@ -217,7 +206,6 @@ class FunctionalTest(AioHTTPTestCase):
 
         artwork = yield from self.atv.metadata.artwork()
         self.assertIsNone(artwork)
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_none_type_when_not_playing(self):
@@ -226,8 +214,6 @@ class FunctionalTest(AioHTTPTestCase):
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_UNKNOWN)
         self.assertEqual(playing.play_state, const.PLAY_STATE_NO_MEDIA)
-
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_video_paused(self):
@@ -241,8 +227,6 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.total_time, 123)
         self.assertEqual(playing.position, 3)
 
-        yield from self.atv.logout()
-
     @unittest_run_loop
     def test_metadata_video_playing(self):
         self.usecase.video_playing(paused=False, title='video',
@@ -254,8 +238,6 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.title, 'video')
         self.assertEqual(playing.total_time, 40)
         self.assertEqual(playing.position, 10)
-
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_music_paused(self):
@@ -272,8 +254,6 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.total_time, 222)
         self.assertEqual(playing.position, 49)
 
-        yield from self.atv.logout()
-
     @unittest_run_loop
     def test_metadata_music_playing(self):
         self.usecase.music_playing(paused=False, title='music',
@@ -289,13 +269,10 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.total_time, 2)
         self.assertEqual(playing.position, 1)
 
-        yield from self.atv.logout()
-
     @unittest_run_loop
     def test_seek_in_playing_media(self):
         yield from self.atv.remote_control.set_position(60)
         self.assertEqual(self.fake_atv.properties['dacp.playingtime'], 60000)
-        yield from self.atv.logout()
 
     @unittest_run_loop
     def test_metadata_loading(self):
@@ -303,4 +280,3 @@ class FunctionalTest(AioHTTPTestCase):
 
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.play_state, const.PLAY_STATE_LOADING)
-        yield from self.atv.logout()

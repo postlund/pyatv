@@ -88,14 +88,7 @@ example (boiler plate code for creating a device is done during setup):
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_UNKNOWN)
         self.assertEqual(playing.play_state, const.PLAY_STATE_NO_MEDIA)
 
-        yield from self.atv.logout()
-
 It's easy to see that the usecase *nothing_playing* is used, which configures
 the fake device in such a way that nothing is playing. Metadata is then
 fetched with the regular public API and verified to be correct. Most test
 cases look like this, which make them easy to understand.
-
-.. note::
-
-    Currently, a logout must be done explicitly from the test case. This will
-    be fixed in the future.
