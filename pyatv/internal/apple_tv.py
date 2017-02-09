@@ -21,7 +21,6 @@ class BaseAppleTV:
     def __init__(self, requester):
         """Initialize a new Apple TV base implemenation."""
         self.daap = requester
-        self.controlpromptupdate()
 
     def server_info(self):
         """Request and return server information."""
