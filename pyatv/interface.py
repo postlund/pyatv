@@ -167,6 +167,11 @@ class Metadata(object):
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def artwork_url(self):
+        """Return artwork URL for what is currently playing."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def playing(self):
         """Return what is currently playing."""
         raise exceptions.NotSupportedError

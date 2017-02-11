@@ -132,6 +132,10 @@ class DaapRequester:
         yield from self._assure_logged_in()
         return (yield from self._do(_get_request, is_daap=daap_data))
 
+    def get_url(self, cmd, **args):
+        """Expand the request URL for a request."""
+        return self._mkurl(cmd, *args)
+
     @asyncio.coroutine
     def post(self, cmd, data=None, **args):
         """Perform DAAP POST command with optional data."""

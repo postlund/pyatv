@@ -29,3 +29,12 @@ To retrieve the artwork, use the asynchronous artwork method:
 Remember that the artwork (which is a PNG file) is relatively large, so you
 should try to minimize this call. More information is available at
 :py:meth:`pyatv.interface.Metadata.artwork`.
+
+It is also possible to get an artwork URL instead by using ``artwork_url()``.
+In this case, the same URL will always be returned as long as current
+session is valid and no check is performed if artwork is available (user of
+the library must handle this). An example:
+
+.. code:: python
+
+    artwork = yield form atv.metadata.artwork_url()

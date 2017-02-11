@@ -90,32 +90,33 @@ It is possible to use the reference CLI application as well:
     # List all commands supported by a device
     $ atvremote -a commands
     Remote control commands:
-     - play_url - Play media from an URL on the device
-     - set_position - Seeks in the current playing media
-     - pause - Press key play
-     - menu - Press key menu
-     - top_menu - Go to top menu (long press menu)
+     - next - Press key next
      - down - Press key down
      - previous - Press key previous
+     - set_position - Seek in the current playing media
+     - pause - Press key play
+     - menu - Press key menu
      - up - Press key up
-     - right - Press key right
-     - play - Press key play
+     - play_url - Play media from an URL on the device
      - select - Press key select
-     - next - Press key next
+     - right - Press key right
+     - top_menu - Go to main menu (long press menu)
+     - play - Press key play
      - left - Press key left
 
     Metadata commands:
-     - playing - Returns what is currently playing
-     - artwork - Returns artwork for what is currently playing (or None)
+     - playing - Return what is currently playing
+     - artwork_url - Return artwork URL for what is currently playing (or None)
+     - artwork - Return artwork for what is currently playing (or None)
 
-    Playing commands commands:
-     - title - Title of the current media, e.g. movie or song name
-     - play_state - Current play state, e.g. playing or paused
-     - artist - Artist of the currently playing song
+    Playing commands:
      - media_type - What type of media is currently playing, e.g. video, music
-     - total_time - Total play time in seconds
-     - album - Album of the currently playing song
+     - artist - Artist of the currently playing song
      - position - Current position in the playing media (seconds)
+     - title - Title of the current media, e.g. movie or song name
+     - album - Album of the currently playing song
+     - play_state - Current play state, e.g. playing or paused
+     - total_time - Total play time in seconds
 
 Type `atvremote --help` to list all supported commands.
 
