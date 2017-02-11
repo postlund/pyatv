@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.1.4 (2017-02-11)
+------------------
+
+Changes:
+
+- Added new function: artwork_url
+- aiohttp bumped to 1.3.1
+
 0.1.3 (2017-02-09)
 ------------------
 

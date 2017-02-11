@@ -2,4 +2,5 @@ Contributors
 ------------
 
 Pierre Ståhl
+Pierrick Rouxel
 Robbie Trencheny
