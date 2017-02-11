@@ -201,6 +201,26 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop
+    def test_metadata_artwork_url(self):
+        self.usecase.change_artwork(EXPECTED_ARTWORK)
+
+        yield from self.atv.login()
+
+        # URL to artwork
+        artwork_url = yield from self.atv.metadata.artwork_url()
+
+        # Fetch artwork with a GET request to ensure it works
+        session = aiohttp.ClientSession(loop=self.loop)
+        response = yield from session.request('GET', artwork_url)
+        self.assertEqual(response.status, 200,
+                         msg='failed to get artwork')
+        artwork = yield from response.content.read()
+        self.assertEqual(artwork, EXPECTED_ARTWORK)
+        response.close()
+
+        yield from session.close()
+
+    @unittest_run_loop
     def test_metadata_artwork_none_if_not_available(self):
         self.usecase.change_artwork(b'')
 

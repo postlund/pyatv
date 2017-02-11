@@ -83,31 +83,33 @@ availble commands:
 
     $ atvremote -a commands
     Remote control commands:
-     - play - Press key play
+     - next - Press key next
      - down - Press key down
-     - left - Press key left
-     - right - Press key right
      - previous - Press key previous
-     - top_menu - Go to top menu (long press menu)
-     - set_position - Seeks in the current playing media
+     - set_position - Seek in the current playing media
+     - pause - Press key play
      - menu - Press key menu
      - up - Press key up
-     - next - Press key next
-     - pause - Press key play
+     - play_url - Play media from an URL on the device
      - select - Press key select
+     - right - Press key right
+     - top_menu - Go to main menu (long press menu)
+     - play - Press key play
+     - left - Press key left
 
     Metadata commands:
-     - artwork - Returns artwork for what is currently playing (or None)
-     - playing - Returns what is currently playing
+     - playing - Return what is currently playing
+     - artwork_url - Return artwork URL for what is currently playing (or None)
+     - artwork - Return artwork for what is currently playing (or None)
 
-    Playing commands commands:
+    Playing commands:
+     - media_type - What type of media is currently playing, e.g. video, music
+     - artist - Artist of the currently playing song
      - position - Current position in the playing media (seconds)
+     - title - Title of the current media, e.g. movie or song name
      - album - Album of the currently playing song
      - play_state - Current play state, e.g. playing or paused
-     - artist - Artist of the currently playing song
-     - media_type - What type of media is currently playing, e.g. video, music
      - total_time - Total play time in seconds
-     - title - Title of the current media, e.g. movie or song name
 
 You can for instance get what is currently playing with ``playing``:
 

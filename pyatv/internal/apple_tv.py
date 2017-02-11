@@ -14,6 +14,8 @@ from pyatv.interface import (AppleTV, RemoteControl, Metadata, Playing)
 
 _LOGGER = logging.getLogger(__name__)
 
+_ARTWORK_CMD = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
+
 
 class BaseAppleTV:
     """Common protocol logic used to interact with an Apple TV."""
@@ -46,14 +48,21 @@ class BaseAppleTV:
                      self.daap.revision_number)
         return resp
 
+    def artwork_url(self):
+        """Return URL to current artwork.
+
+        As as valid session id is necessary, the URL will only be valid
+        if logged in.
+        """
+        return self.daap.get_url(_ARTWORK_CMD)
+
     @asyncio.coroutine
     def artwork(self):
         """Return an image file (png) for what is currently playing.
 
         None is returned if no artwork is available. Must be logged in.
         """
-        cmd_url = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
-        art = yield from self.daap.get(cmd_url, daap_data=False)
+        art = yield from self.daap.get(_ARTWORK_CMD, daap_data=False)
         return art if art != b'' else None
 
     def playqueue(self):
@@ -232,6 +241,11 @@ class MetadataInternal(Metadata):
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
         return self.apple_tv.artwork()
+
+    @asyncio.coroutine
+    def artwork_url(self):
+        """Return artwork URL for what is currently playing."""
+        return self.apple_tv.artwork_url()
 
     @asyncio.coroutine
     def playing(self):
