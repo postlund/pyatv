@@ -94,20 +94,14 @@ class FunctionalTest(AioHTTPTestCase):
         server = 'http://127.0.0.1:{}'.format(service.port)
         url = '{}/pairing?pairingcode={}&servicename=test'.format(
             server, PAIRINGCODE)
-        session = aiohttp.ClientSession(loop=self.loop)
-        response = yield from session.request('GET', url)
-        self.assertEqual(response.status, 200,
-                         msg='pairing failed')
+        data = yield from self.simple_get(url)
 
         # Verify content returned in pairingresponse
-        data = yield from response.content.read()
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
-        response.close()
-        yield from session.close()
         yield from handler.stop()
 
     @unittest_run_loop
@@ -204,21 +198,15 @@ class FunctionalTest(AioHTTPTestCase):
     def test_metadata_artwork_url(self):
         self.usecase.change_artwork(EXPECTED_ARTWORK)
 
+        # Must be logged in to have valid session id
         yield from self.atv.login()
 
         # URL to artwork
         artwork_url = yield from self.atv.metadata.artwork_url()
 
         # Fetch artwork with a GET request to ensure it works
-        session = aiohttp.ClientSession(loop=self.loop)
-        response = yield from session.request('GET', artwork_url)
-        self.assertEqual(response.status, 200,
-                         msg='failed to get artwork')
-        artwork = yield from response.content.read()
+        artwork = yield from self.simple_get(artwork_url)
         self.assertEqual(artwork, EXPECTED_ARTWORK)
-        response.close()
-
-        yield from session.close()
 
     @unittest_run_loop
     def test_metadata_artwork_none_if_not_available(self):
@@ -300,3 +288,14 @@ class FunctionalTest(AioHTTPTestCase):
 
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.play_state, const.PLAY_STATE_LOADING)
+
+    @asyncio.coroutine
+    def simple_get(self, url):
+        session = aiohttp.ClientSession(loop=self.loop)
+        response = yield from session.request('GET', url)
+        self.assertEqual(response.status, 200,
+                         msg='request to {0} failed'.format(url))
+        data = yield from response.content.read()
+        response.close()
+        yield from session.close()
+        return data
