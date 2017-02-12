@@ -1,5 +1,11 @@
 """Constants used in the public API."""
 
+MAJOR_VERSION = 0
+MINOR_VERSION = 1
+PATCH_VERSION = '5.dev1'
+__short_version__ = '{}.{}'.format(MAJOR_VERSION, MINOR_VERSION)
+__version__ = '{}.{}'.format(__short_version__, PATCH_VERSION)
+
 # Corresponds to "mediakind", cmst.cmmk, in iTunes (but more coerced here)
 
 #: Media type is unknown

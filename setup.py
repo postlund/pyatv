@@ -3,9 +3,13 @@
 
 from setuptools import setup, find_packages
 
+# Read in version without importing pyatv
+# http://stackoverflow.com/questions/6357361/alternative-to-execfile-in-python-3
+exec(compile(open('pyatv/const.py', "rb").read(), 'pyatv/const.py', 'exec'))
+
 setup(
     name='pyatv',
-    version='0.1.5.dev1',
+    version=__version__,
     license='MIT',
     url='https://github.com/postlund/pyatv',
     author='Pierre Ståhl',
