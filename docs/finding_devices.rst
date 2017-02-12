@@ -59,3 +59,39 @@ an async call. A simple example might look like this:
     loop.run_until_complete(discover(loop))
 
 API Reference: :py:meth:`pyatv.scan_for_apple_tvs`
+
+Finding a single device
+-----------------------
+Under some circumstance you might not care about which device you connect to,
+usually when you only have one device on the network. To simplify and speed up
+the discovery process, you can set the flag ``abort_on_found`` to ``True``.
+This will make ``pyatv.scan_for_apple_tvs`` abort when a device has been found,
+thus ignore the timeout and return quicker:
+
+.. code:: python
+
+    atvs = yield from pyatv.scan_for_apple_tvs(
+        loop, timeout=5, abort_on_found=True)
+
+This is for instance default behavior when using ``-a`` with atvremote. There's
+also a helper method that utilizes this by default:
+
+.. code:: python
+
+    import asyncio
+    from pyatv import helpers
+
+    @asyncio.coroutine
+    def print_what_is_playing(atv):
+        playing = yield from atv.metadata.playing()
+        print('Currently playing: ')
+        print(playing)
+
+    helpers.auto_connect(print_what_is_playing)
+
+When writing simpler application, ``auto_connect`` can be quite convenient as
+it can handle loop management for you. It is also possible to pass an error
+handler, that is called when a device is not found. See the API referece for
+more details.
+
+API Reference: :py:meth:`pyatv.helpers.auto_connect`
