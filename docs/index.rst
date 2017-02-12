@@ -79,10 +79,9 @@ page.
 Dependencies
 ------------
 
-- Python 3.4.2+
-- zeroconf
-- aiohtto
-
+- python>=3.4.2
+- zeroconf>=0.17.7
+- aiohttp>=1.3.0
 
 Contributing
 ------------

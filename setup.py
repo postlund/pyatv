@@ -16,8 +16,8 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'aiohttp==1.3.1',
-        'zeroconf==0.18.0',
+        'aiohttp>=1.3.0',
+        'zeroconf>=0.17.7',
     ],
     test_suite='tests',
     keywords=['apple', 'tv'],
