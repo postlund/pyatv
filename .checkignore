@@ -3,3 +3,4 @@
 # check for this in quantifiedcode as this disable checks for the entire file.
 pyatv/interface.py
 
+setup.py
