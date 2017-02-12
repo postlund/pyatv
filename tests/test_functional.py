@@ -26,6 +26,11 @@ AIRPLAY_STREAM = 'http://stream'
 # (extracted form a real device)
 PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
 
+HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
+    'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
+HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
+    'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
+
 
 class FunctionalTest(AioHTTPTestCase):
 
@@ -60,15 +65,23 @@ class FunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     def test_scan_for_apple_tvs(self):
-        zeroconf_stub.stub(pyatv, zeroconf_stub.homesharing_service(
-            'AAAA', b'Apple TV', '10.0.0.1', b'aaaa'))
+        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1)
 
         atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
         self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, 'Apple TV')
+        self.assertEqual(atvs[0].name, 'Apple TV 1')
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.1'))
         self.assertEqual(atvs[0].login_id, 'aaaa')
         self.assertEqual(atvs[0].port, 3689)
+
+    @unittest_run_loop
+    def test_scan_abort_on_first_found(self):
+        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
+
+        atvs = yield from pyatv.scan_for_apple_tvs(
+            self.loop, timeout=0, abort_on_found=True)
+        self.assertEqual(len(atvs), 1)
+        self.assertEqual(atvs[0].name, 'Apple TV 1')
 
     # This is not a pretty test and it does crazy things. Should probably be
     # re-written later but will do for now.

@@ -4,7 +4,7 @@ import asyncio
 import pyatv
 
 
-def auto_connect(handler, not_found=None, event_loop=None):
+def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
     """Convenient method for connecting to a device.
 
     This is a convenience method that create an event loop, auto discovers
@@ -20,7 +20,8 @@ def auto_connect(handler, not_found=None, event_loop=None):
     # the event loop
     @asyncio.coroutine
     def _handle(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs(loop, timeout=5)
+        atvs = yield from pyatv.scan_for_apple_tvs(
+            loop, timeout=timeout, abort_on_found=True)
 
         # Take the first device found
         if len(atvs) > 0:

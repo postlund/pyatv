@@ -121,8 +121,8 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
-    atvs = yield from pyatv.scan_for_apple_tvs(loop,
-                                               timeout=args.scan_timeout)
+    atvs = yield from pyatv.scan_for_apple_tvs(
+        loop, timeout=args.scan_timeout, abort_on_found=True)
     if len(atvs) == 0:
         logging.error('Could not find any Apple TV on current network')
         return 1

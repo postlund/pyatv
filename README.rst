@@ -135,7 +135,7 @@ Tasks related to library features
 - Non-polling based API (callbacks) (#8)
 - Send URL to AirPlay media **DONE** (#16)
 - Arrow keys (up, down, left and right) (#17)
-- Allow auto discovery stop after finding a device (#19)
+- Allow auto discovery stop after finding a device **DONE** (#19)
 - Better output for "playing" in atvremote (#20)
 - Verify compatibility with python > 3.5 (tox) *Pending* (#18)
 - Fix exit code in atvremote
