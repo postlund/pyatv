@@ -29,6 +29,7 @@ class DmapTag(namedtuple('DmapTag', ['type', 'name'])):
 
 
 def _parse(data, data_len, tag_lookup, pos, ctx=None):
+    """Internal parse method."""
     if ctx is None:
         ctx = []
     if pos >= data_len:
@@ -71,11 +72,11 @@ def pprint(data, tag_lookup, indent=0):
     if isinstance(data, dict):
         for key, value in data.items():
             tag = tag_lookup(key)
-            if isinstance(value, dict) or isinstance(value, list):
-                output += '{}{}: {}\n'.format(indent*' ', key, tag)
+            if isinstance(value, (dict, list)):
+                output += '{0}{1}: {2}\n'.format(indent*' ', key, tag)
                 output += pprint(value, tag_lookup, indent+2)
             else:
-                output += '{}{}: {} {}\n'.format(
+                output += '{0}{1}: {2} {3}\n'.format(
                     indent*' ', key, str(value), tag)
     elif isinstance(data, list):
         for elem in data:

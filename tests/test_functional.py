@@ -74,14 +74,13 @@ class FunctionalTest(AioHTTPTestCase):
     # re-written later but will do for now.
     @unittest_run_loop
     def test_pairing_with_device(self):
-        zeroconf_stub.stub(pairing)
+        zeroconf = zeroconf_stub.stub(pairing)
 
         # Start pairing process
         handler = pyatv.pair_with_apple_tv(self.loop, PIN_CODE, REMOTE_NAME)
         yield from handler.start()
 
         # Verify that bonjour service was published
-        zeroconf = zeroconf_stub.instance
         self.assertEqual(len(zeroconf.registered_services), 1,
                          msg='no zeroconf service registered')
 

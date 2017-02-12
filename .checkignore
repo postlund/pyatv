@@ -1,0 +1,5 @@
+# Goal is to quite "Prefer static methods over instance methods" as that will
+# be triggered by each "not supported"-method. Would be better to create a new
+# check for this in quantifiedcode as this disable checks for the entire file.
+pyatv/interface.py
+
