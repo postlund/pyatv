@@ -59,15 +59,9 @@ class ZeroconfStub:
         pass
 
 
-instance = None
-
-
 def stub(module, *services):
     """Stub a module using zeroconf."""
-    def _zeroconf():
-        global instance
-        instance = ZeroconfStub(list(services))
-        return instance
-
-    module.Zeroconf = _zeroconf
+    instance = ZeroconfStub(list(services))
+    module.Zeroconf = lambda: instance
     module.ServiceBrowser = ServiceBrowserStub
+    return instance

@@ -7,7 +7,7 @@ class AuthenticationError(Exception):
     pass
 
 
-class NotSupportedError(Exception):
+class NotSupportedError(NotImplementedError):
     """Thrown when trying to perform an action that is not supported."""
 
     pass
