@@ -11,7 +11,7 @@ from argparse import ArgumentTypeError
 
 import pyatv
 import pyatv.pairing
-from pyatv import (dmap, exceptions, tag_definitions)
+from pyatv import (const, dmap, exceptions, tag_definitions)
 from pyatv.interface import retrieve_commands
 
 
@@ -37,6 +37,9 @@ def cli_handler(loop):
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
                         dest='scan_timeout', type=_in_range(1, 10),
                         metavar='TIMEOUT', default=3)
+    parser.add_argument('--version', action='version',
+                        help='version of atvremote and pyatv',
+                        version='%(prog)s {0}'.format(const.__version__))
 
     pairing = parser.add_argument_group('pairing')
     pairing.add_argument('--remote-name', help='remote pairing name',
