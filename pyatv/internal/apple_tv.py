@@ -8,7 +8,7 @@ generations of devices. Everything is however left here for now.
 import logging
 import asyncio
 
-from pyatv import (const, exceptions, dmap, tags, interface, convert)
+from pyatv import (const, exceptions, dmap, tags, convert)
 from pyatv.interface import (AppleTV, RemoteControl, Metadata, Playing)
 
 
@@ -168,13 +168,6 @@ class PlayingInternal(Playing):
         super().__init__()
         self.apple_tv = apple_tv
         self.playstatus = playstatus
-
-    def __str__(self):
-        """Convert this playing object to a readable string."""
-        def _to_str(value_mapping):
-            return '{}: {}'.format(value_mapping, getattr(self, value_mapping))
-        values = interface.retrieve_commands(self).keys()
-        return '\n'.join(map(_to_str, sorted(values)))
 
     @property
     def media_type(self):
