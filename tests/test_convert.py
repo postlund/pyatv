@@ -83,6 +83,18 @@ class ConvertTest(unittest.TestCase):
         with self.assertRaises(exceptions.UnknownMediaKind):
             convert.media_kind(99999)
 
+    def test_media_type_to_string(self):
+        self.assertEqual('Unknown',
+                         convert.media_type_str(const.MEDIA_TYPE_UNKNOWN))
+        self.assertEqual('Video',
+                         convert.media_type_str(const.MEDIA_TYPE_VIDEO))
+        self.assertEqual('Music',
+                         convert.media_type_str(const.MEDIA_TYPE_MUSIC))
+        self.assertEqual('TV', convert.media_type_str(const.MEDIA_TYPE_TV))
+
+    def test_unknown_media_type_to_str_throws(self):
+        self.assertEqual('Unsupported', convert.media_type_str(999))
+
     # PLAYSTATE TESTS
 
     def test_play_state_no_media(self):
@@ -93,7 +105,7 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(const.PLAY_STATE_NO_MEDIA,
                          convert.playstate(None))
 
-    def test_regular_play_states(self):
+    def test_regular_playstates(self):
         self.assertEqual(const.PLAY_STATE_LOADING,
                          convert.playstate(PLAY_STATE_LOADING))
         self.assertEqual(const.PLAY_STATE_PAUSED,
@@ -108,6 +120,23 @@ class ConvertTest(unittest.TestCase):
     def test_unknown_playstate_throws(self):
         with self.assertRaises(exceptions.UnknownPlayState):
             convert.playstate(99999)
+
+    def test_playstate_str(self):
+        self.assertEqual('No media',
+                         convert.playstate_str(const.PLAY_STATE_NO_MEDIA))
+        self.assertEqual('Loading',
+                         convert.playstate_str(const.PLAY_STATE_LOADING))
+        self.assertEqual('Paused',
+                         convert.playstate_str(const.PLAY_STATE_PAUSED))
+        self.assertEqual('Playing',
+                         convert.playstate_str(const.PLAY_STATE_PLAYING))
+        self.assertEqual('Fast forward',
+                         convert.playstate_str(const.PLAY_STATE_FAST_FORWARD))
+        self.assertEqual('Fast backward',
+                         convert.playstate_str(const.PLAY_STATE_FAST_BACKWARD))
+
+    def test_unsupported_playstate_str(self):
+        self.assertEqual('Unsupported', convert.playstate_str(999))
 
     # TIME TESTS
 

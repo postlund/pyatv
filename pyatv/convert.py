@@ -17,6 +17,20 @@ def media_kind(kind):
     raise exceptions.UnknownMediaKind('Unknown media kind: ' + str(kind))
 
 
+def media_type_str(mediatype):
+    """Convert internal API media type to string."""
+    if mediatype == const.MEDIA_TYPE_UNKNOWN:
+        return 'Unknown'
+    elif mediatype == const.MEDIA_TYPE_VIDEO:
+        return 'Video'
+    elif mediatype == const.MEDIA_TYPE_MUSIC:
+        return 'Music'
+    elif mediatype == const.MEDIA_TYPE_TV:
+        return 'TV'
+    else:
+        return 'Unsupported'
+
+
 def playstate(state):
     """Convert iTunes playstate to API representation."""
     if state is None:
@@ -33,6 +47,25 @@ def playstate(state):
         return const.PLAY_STATE_FAST_BACKWARD
 
     raise exceptions.UnknownPlayState('Unknown playstate: ' + str(state))
+
+
+# pylint: disable=too-many-return-statements
+def playstate_str(state):
+    """Convert internal API playstate to string."""
+    if state == const.PLAY_STATE_NO_MEDIA:
+        return 'No media'
+    elif state == const.PLAY_STATE_LOADING:
+        return 'Loading'
+    elif state == const.PLAY_STATE_PAUSED:
+        return 'Paused'
+    elif state == const.PLAY_STATE_PLAYING:
+        return 'Playing'
+    elif state == const.PLAY_STATE_FAST_FORWARD:
+        return 'Fast forward'
+    elif state == const.PLAY_STATE_FAST_BACKWARD:
+        return 'Fast backward'
+    else:
+        return 'Unsupported'
 
 
 def ms_to_s(time):
