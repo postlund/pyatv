@@ -5,7 +5,7 @@ import inspect
 
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 
-from pyatv import exceptions
+from pyatv import (convert, exceptions)
 
 
 # TODO: make these methods more pretty and safe
@@ -118,6 +118,35 @@ class Playing(object):
     """Base class for retrieving what is currently playing."""
 
     __metaclass__ = ABCMeta
+
+    def __str__(self):
+        """Convert this playing object to a readable string."""
+        output = []
+        output.append('Media type: {0}'.format(
+            convert.media_type_str(self.media_type)))
+        output.append('Play state: {0}'.format(
+            convert.playstate_str(self.play_state)))
+
+        if self.title is not None:
+            output.append('     Title: {0}'.format(self.title))
+
+        if self.artist is not None:
+            output.append('    Artist: {0}'.format(self.artist))
+
+        if self.album is not None:
+            output.append('     Album: {0}'.format(self.album))
+
+        position = self.position
+        total_time = self.total_time
+        if position is not None and total_time is not None and total_time != 0:
+            output.append('  Position: {0}/{1}s ({2:.1%})'.format(
+                position, total_time, float(position)/float(total_time)))
+        elif position is not None and position != 0:
+            output.append('  Position: {0}s'.format(position))
+        elif total_time is not None and position != 0:
+            output.append('Total time: {0}s'.format(total_time))
+
+        return '\n'.join(output)
 
     @abstractproperty
     def media_type(self):
