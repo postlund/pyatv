@@ -97,7 +97,7 @@ def connect_to_apple_tv(details, loop, session=None):
     daap_session = DaapSession(session)
     requester = DaapRequester(
         daap_session, details.address, details.login_id, details.port)
-    return AppleTVInternal(session, requester, airplay)
+    return AppleTVInternal(loop, session, requester, airplay)
 
 
 def pair_with_apple_tv(loop, pin_code, name):

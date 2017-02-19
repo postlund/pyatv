@@ -15,6 +15,22 @@ from pyatv import (const, dmap, exceptions, tag_definitions)
 from pyatv.interface import retrieve_commands
 
 
+class PushListener:
+    """Internal listener for push updates."""
+
+    @staticmethod
+    def playstatus_update(_, playstatus):
+        """Print what is currently playing when it changes."""
+        print(str(playstatus))
+        print(20*'-')
+
+    @staticmethod
+    def playstatus_error(updater, exception):
+        """Inform about an error and restart push updates."""
+        print("An error occurred (restarting): {0}".format(exception))
+        updater.start(initial_delay=1)
+
+
 def _in_range(lower, upper):
     def _checker(value):
         if int(value) >= lower and int(value) < upper:
@@ -171,12 +187,14 @@ def _extract_command_with_args(cmd):
 def _handle_command(args, loop):
     details = pyatv.AppleTVDevice(args.name, args.address, args.login_id)
     atv = pyatv.connect_to_apple_tv(details, loop)
+    atv.push_updater.listener = PushListener()
 
     try:
         playing_resp = yield from atv.metadata.playing()
         ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
         metadata = retrieve_commands(atv.metadata, developer=args.developer)
         playing = retrieve_commands(playing_resp, developer=args.developer)
+        other = {'push_updates': 'Listen for push updates.'}
 
         # Parse input command and argument from user
         cmd, cmd_args = _extract_command_with_args(args.command)
@@ -184,7 +202,8 @@ def _handle_command(args, loop):
         if cmd == 'commands':
             _print_commands('Remote control', ctrl)
             _print_commands('Metadata', metadata)
-            _print_commands('Playing', playing, newline=False)
+            _print_commands('Playing', playing)
+            _print_commands('Other', other, newline=False)
 
         elif cmd == 'artwork':
             artwork = yield from atv.metadata.artwork()
@@ -193,6 +212,13 @@ def _handle_command(args, loop):
                     file.write(artwork)
             else:
                 print('No artwork is currently available.')
+
+        elif cmd == 'push_updates':
+            print('Press ENTER to stop')
+
+            atv.push_updater.start()
+            yield from loop.run_in_executor(None, sys.stdin.readline)
+            atv.push_updater.stop()
 
         elif cmd in ctrl:
             yield from _exec_command(atv.remote_control, cmd, *cmd_args)
@@ -205,6 +231,7 @@ def _handle_command(args, loop):
 
         else:
             logging.error('Unknown command: %s', args.command)
+
     finally:
         yield from atv.logout()
 
@@ -243,6 +270,7 @@ def main():
     """Start the asyncio event loop and runs the application."""
     # Helper method so that the coroutine exits cleanly if an exception
     # happens (which would leave resources dangling)
+    @asyncio.coroutine
     def _run_application(loop):
         try:
             asyncio.wait_for((yield from cli_handler(loop)), timeout=15)

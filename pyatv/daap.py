@@ -32,19 +32,19 @@ class DaapSession(object):
     It automatically adds the required headers and also does DMAP parsing.
     """
 
-    def __init__(self, session, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, session):
         """Initialize a new DaapSession."""
         self._session = session
-        self._timeout = timeout
 
     @asyncio.coroutine
-    def get_data(self, url, should_parse=True):
+    def get_data(self, url, should_parse=True, timeout=None):
         """Perform a GET request. Optionally parse reponse as DMAP data."""
         _LOGGER.debug('GET URL: %s', url)
         resp = None
         try:
             resp = yield from self._session.get(
-                url, headers=_DMAP_HEADERS, timeout=self._timeout)
+                url, headers=_DMAP_HEADERS,
+                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
             resp_data = yield from resp.read()
             extracted = self._extract_data(resp_data, should_parse)
             return extracted, resp.status
@@ -57,7 +57,7 @@ class DaapSession(object):
                 yield from resp.release()
 
     @asyncio.coroutine
-    def post_data(self, url, data=None, parse=True):
+    def post_data(self, url, data=None, parse=True, timeout=None):
         """Perform a POST request. Optionally parse reponse as DMAP data."""
         _LOGGER.debug('POST URL: %s', url)
 
@@ -67,7 +67,8 @@ class DaapSession(object):
         resp = None
         try:
             resp = yield from self._session.post(
-                url, headers=headers, data=data, timeout=self._timeout)
+                url, headers=headers, data=data,
+                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
             resp_data = yield from resp.read()
             extracted = self._extract_data(resp_data, parse)
             return extracted, resp.status
@@ -105,7 +106,6 @@ class DaapRequester:
         self.url = 'http://{}:{}'.format(address, port)
         self._login_id = login_id
         self._session_id = 0
-        self._revision_number = 0  # Not used yet
 
     @asyncio.coroutine
     def login(self):
@@ -123,11 +123,13 @@ class DaapRequester:
         return self._session_id
 
     @asyncio.coroutine
-    def get(self, cmd, daap_data=True, **args):
+    def get(self, cmd, daap_data=True, timeout=None, **args):
         """Perform a DAAP GET command."""
         def _get_request():
             return self.session.get_data(
-                self._mkurl(cmd, *args), should_parse=daap_data)
+                self._mkurl(cmd, *args),
+                should_parse=daap_data,
+                timeout=timeout)
 
         yield from self._assure_logged_in()
         return (yield from self._do(_get_request, is_daap=daap_data))
@@ -137,10 +139,12 @@ class DaapRequester:
         return self._mkurl(cmd, *args)
 
     @asyncio.coroutine
-    def post(self, cmd, data=None, **args):
+    def post(self, cmd, data=None, timeout=None, **args):
         """Perform DAAP POST command with optional data."""
         def _post_request():
-            return self.session.post_data(self._mkurl(cmd, *args), data=data)
+            return self.session.post_data(self._mkurl(cmd, *args),
+                                          data=data,
+                                          timeout=timeout)
 
         yield from self._assure_logged_in()
         return (yield from self._do(_post_request))
@@ -166,7 +170,7 @@ class DaapRequester:
             raise exceptions.AuthenticationError(
                 'failed to login: ' + str(status))
 
-    def _mkurl(self, cmd, *args, session=True, login_id=False, revision=False):
+    def _mkurl(self, cmd, *args, session=True, login_id=False):
         url = '{}/{}'.format(self.url, cmd.format(*args))
         parameters = []
         if login_id:
@@ -176,9 +180,6 @@ class DaapRequester:
                 parameters.append('hsgid={}'.format(self._login_id))
         if session:
             parameters.insert(0, 'session-id={}'.format(self._session_id))
-        if revision:
-            parameters.append('revision-number={}'.format(
-                self._revision_number))
         return url.replace('[AUTH]', '&'.join(parameters))
 
     @asyncio.coroutine
