@@ -206,6 +206,47 @@ class Metadata(object):
         raise exceptions.NotSupportedError
 
 
+class PushUpdater(object):
+    """Base class for push/async updates from an Apple TV."""
+
+    __metaclass__ = ABCMeta
+
+    @property
+    def listener(self):
+        """Listener (PushUpdaterListener) that receives updates."""
+        raise exceptions.NotSupportedError
+
+    @listener.setter  # type: ignore
+    @abstractmethod
+    def listener(self, listener):
+        """Listener that receives updates.
+
+        This should be an object implementing two methods:
+        - playstatus_update(updater, playstatus)
+        - playstatus_error(updater, exception)
+
+        The first method is called when a new update happens and the second one
+        is called if an error occurs. Please not that if an error happens, push
+        updates will be stopped. So they will need to be enabled again, e.g.
+        from the error method. A delay should preferably be passed to start()
+        to avoid an infinite error-loop.
+        """
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def start(self, initial_delay=0):
+        """Begin to listen to updates.
+
+        If an error occurs, start must be called again.
+        """
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def stop(self):
+        """No longer listen for updates."""
+        raise exceptions.NotSupportedError
+
+
 class AppleTV(object):
     """Base class representing an Apple TV."""
 
@@ -235,4 +276,9 @@ class AppleTV(object):
     @abstractproperty
     def metadata(self):
         """Return API for retrieving metadata from the Apple TV."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def push_updater(self):
+        """Return API for handling push update from the Apple TV."""
         raise exceptions.NotSupportedError

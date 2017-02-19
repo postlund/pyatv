@@ -9,11 +9,13 @@ import logging
 import asyncio
 
 from pyatv import (const, exceptions, dmap, tags, convert)
-from pyatv.interface import (AppleTV, RemoteControl, Metadata, Playing)
+from pyatv.interface import (AppleTV, RemoteControl, Metadata,
+                             Playing, PushUpdater)
 
 
 _LOGGER = logging.getLogger(__name__)
 
+_PSU_CMD = 'ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}'
 _ARTWORK_CMD = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
 
 
@@ -23,19 +25,27 @@ class BaseAppleTV:
     def __init__(self, requester):
         """Initialize a new Apple TV base implemenation."""
         self.daap = requester
+        self.playstatus_revision = 0
 
     def server_info(self):
         """Request and return server information."""
         return (yield from self.daap.get(
             'server-info', session=False, login_id=False))
 
-    def playstatus(self):
+    @asyncio.coroutine
+    def playstatus(self, use_revision=False, timeout=None):
         """Request raw data about what is currently playing.
+
+        If use_revision=True, this command will "block" until playstatus
+        changes on the device.
 
         Must be logged in.
         """
-        cmd_url = 'ctrl-int/1/playstatusupdate?[AUTH]&revision-number=0'
-        return self.daap.get(cmd_url)
+        cmd_url = _PSU_CMD.format(
+            self.playstatus_revision if use_revision else 0)
+        resp = yield from self.daap.get(cmd_url, timeout=timeout)
+        self.playstatus_revision = dmap.first(resp, 'cmst', 'cmsr')
+        return resp
 
     # TODO: currenly not used, needed when non-polling API is implemented
     @asyncio.coroutine
@@ -163,10 +173,9 @@ class RemoteControlInternal(RemoteControl):
 class PlayingInternal(Playing):
     """Implementation of API for retrieving what is playing."""
 
-    def __init__(self, apple_tv, playstatus):
+    def __init__(self, playstatus):
         """Initialize playing instance."""
         super().__init__()
-        self.apple_tv = apple_tv
         self.playstatus = playstatus
 
     @property
@@ -244,11 +253,15 @@ class MetadataInternal(Metadata):
     def playing(self):
         """Return current device state."""
         playstatus = yield from self.apple_tv.playstatus()
-        return PlayingInternal(self.apple_tv, playstatus)
+        return PlayingInternal(playstatus)
 
     def dev_playstatus(self):
         """Return raw playstatus response (developer command)."""
         return self.apple_tv.playstatus()
+
+    def dev_playstatus_wait(self):
+        """Wait for device to change state(developer command)."""
+        return self.apple_tv.playstatus(use_revision=True)
 
     def dev_playqueue(self):
         """Return raw playqueue response (developer command)."""
@@ -259,10 +272,87 @@ class MetadataInternal(Metadata):
         return self.apple_tv.server_info()
 
 
+class PushUpdaterInternal(PushUpdater):
+    """Implementation of API for handling push update from an Apple TV."""
+
+    def __init__(self, loop, apple_tv):
+        """Initialize a new PushUpdaterInternal instance."""
+        self.loop = loop
+        self.atv = apple_tv
+        self.future = None
+        self.__listener = None
+
+    @property
+    def listener(self):
+        """Current receiver of push updates."""
+        return self.__listener
+
+    @listener.setter
+    def listener(self, listener):
+        """Change active listener to push updates.
+
+        Will throw AsyncUpdaterRunningError if push updates is enabled.
+        """
+        if self.future is not None:
+            raise exceptions.AsyncUpdaterRunningError
+
+        self.__listener = listener
+
+    def start(self, initial_delay=0):
+        """Wait for push updates from device.
+
+        Will throw NoAsyncListenerError if no listner has been set.
+        """
+        if self.future is not None:
+            raise exceptions.NoAsyncListenerError
+
+        # If ensure_future, use that instead of async
+        if hasattr(asyncio, 'ensure_future'):
+            ensure_future = asyncio.ensure_future
+        else:
+            ensure_future = asyncio.async
+
+        self.future = ensure_future(self._poller(initial_delay))
+
+    def stop(self):
+        """No longer wait for push updates."""
+        if self.future is not None:
+            # TODO: pylint does not seem to figure out that cancel exists?
+            self.future.cancel()  # pylint: disable=no-member
+            self.future = None
+
+    @asyncio.coroutine
+    def _poller(self, initial_delay):
+        # Sleep some time before waiting for updates
+        if initial_delay > 0:
+            _LOGGER.debug('Initial delay set to %d', initial_delay)
+            yield from asyncio.sleep(initial_delay, loop=self.loop)
+
+        while True:
+            try:
+                _LOGGER.debug('Waiting for playstatus updates')
+                playstatus = yield from self.atv.playstatus(
+                    use_revision=True, timeout=0)
+
+                self.loop.call_soon(self.listener.playstatus_update,
+                                    self, PlayingInternal(playstatus))
+            except asyncio.CancelledError:
+                break
+
+            # It is not pretty to disable pylint here, but we must catch _all_
+            # exceptions to keep the API.
+            except Exception as ex:  # pylint: disable=broad-except
+                _LOGGER.debug('Playstatus error occurred: %s', ex)
+                self.loop.call_soon(self.listener.playstatus_error, self, ex)
+                break
+
+        self.future = None
+
+
 class AppleTVInternal(AppleTV):
     """Implementation of API support for Apple TV."""
 
-    def __init__(self, session, requester, airplay):
+    def __init__(self, loop, session, requester, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
         self.session = session
@@ -270,6 +360,7 @@ class AppleTVInternal(AppleTV):
         self.apple_tv = BaseAppleTV(self.requester)
         self.atv_remote = RemoteControlInternal(self.apple_tv, airplay)
         self.atv_metadata = MetadataInternal(self.apple_tv)
+        self.atv_push_updater = PushUpdaterInternal(loop, self.apple_tv)
 
     def login(self):
         """Perform an explicit login.
@@ -294,3 +385,8 @@ class AppleTVInternal(AppleTV):
     def metadata(self):
         """Return API for retrieving metadata from Apple TV."""
         return self.atv_metadata
+
+    @property
+    def push_updater(self):
+        """Return API for handling push update from the Apple TV."""
+        return self.atv_push_updater

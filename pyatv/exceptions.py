@@ -35,3 +35,15 @@ class UnknownPlayState(Exception):
     """Thrown when an unknown play state is found."""
 
     pass
+
+
+class NoAsyncListenerError(Exception):
+    """Thrown when starting AsyncUpdater with no listener."""
+
+    pass
+
+
+class AsyncUpdaterRunningError(Exception):
+    """Thrown when performing an invalid action in AsyncUpdater.."""
+
+    pass
