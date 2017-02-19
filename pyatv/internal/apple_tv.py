@@ -47,17 +47,6 @@ class BaseAppleTV:
         self.playstatus_revision = dmap.first(resp, 'cmst', 'cmsr')
         return resp
 
-    # TODO: currenly not used, needed when non-polling API is implemented
-    @asyncio.coroutine
-    def controlpromptupdate(self):
-        """Request session id used to control a device. Must be logged in."""
-        cmd_url = 'controlpromptupdate?[AUTH]&prompt-id=0'
-        resp = yield from self.daap.post(cmd_url)
-        self.daap.revision_number = dmap.first(resp, 'cmcp', 'miid')
-        _LOGGER.info('Got revision id %d for controlpromptupdate',
-                     self.daap.revision_number)
-        return resp
-
     def artwork_url(self):
         """Return URL to current artwork.
 
