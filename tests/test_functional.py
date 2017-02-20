@@ -39,6 +39,13 @@ class FunctionalTest(AioHTTPTestCase):
         self.atv = self.get_connected_device(HSGID)
         self.log_handler = LogOutputHandler(self)
 
+        # Make sleep calls do nothing to not slow down tests
+        @asyncio.coroutine
+        def fake_sleep(self, time=None, loop=None):
+            pass
+        from pyatv import airplay
+        asyncio.sleep = fake_sleep
+
     def tearDown(self):
         self.loop.run_until_complete(self.atv.logout())
         AioHTTPTestCase.tearDown(self)
