@@ -2,16 +2,15 @@
 
 import pyatv
 import asyncio
-import aiohttp
 import ipaddress
 
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import (AppleTVDevice, connect_to_apple_tv, const,
-                   exceptions, dmap, tag_definitions, pairing)
+                   exceptions, pairing)
 from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
-from tests import zeroconf_stub
+from tests import (utils, zeroconf_stub)
 
 HSGID = '12345-6789-0'
 PAIRING_GUID = '0x0000000000000001'
@@ -43,7 +42,6 @@ class FunctionalTest(AioHTTPTestCase):
         @asyncio.coroutine
         def fake_sleep(self, time=None, loop=None):
             pass
-        from pyatv import airplay
         asyncio.sleep = fake_sleep
 
     def tearDown(self):
@@ -95,33 +93,14 @@ class FunctionalTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_pairing_with_device(self):
         zeroconf = zeroconf_stub.stub(pairing)
+        self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
 
-        # Start pairing process
         handler = pyatv.pair_with_apple_tv(self.loop, PIN_CODE, REMOTE_NAME)
-        yield from handler.start()
-
-        # Verify that bonjour service was published
-        self.assertEqual(len(zeroconf.registered_services), 1,
-                         msg='no zeroconf service registered')
-
-        service = zeroconf.registered_services[0]
-        self.assertEqual(service.properties['DvNm'], 'pyatv remote',
-                         msg='remote name does not match')
-
-        # Extract port from service (as it is randomized) and request pairing
-        # with the web server.
-        server = 'http://127.0.0.1:{}'.format(service.port)
-        url = '{}/pairing?pairingcode={}&servicename=test'.format(
-            server, PAIRINGCODE)
-        data = yield from self.simple_get(url)
-
-        # Verify content returned in pairingresponse
-        parsed = dmap.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
-
+        yield from handler.start(zeroconf)
+        yield from self.usecase.act_on_bonjour_services(zeroconf)
         yield from handler.stop()
+
+        self.assertTrue(handler.has_paired, msg='did not pair with device')
 
     @unittest_run_loop
     def test_play_url(self):
@@ -224,7 +203,7 @@ class FunctionalTest(AioHTTPTestCase):
         artwork_url = yield from self.atv.metadata.artwork_url()
 
         # Fetch artwork with a GET request to ensure it works
-        artwork = yield from self.simple_get(artwork_url)
+        artwork = yield from utils.simple_get(self, artwork_url, self.loop)
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop
@@ -342,14 +321,3 @@ class FunctionalTest(AioHTTPTestCase):
 
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.play_state, const.PLAY_STATE_LOADING)
-
-    @asyncio.coroutine
-    def simple_get(self, url):
-        session = aiohttp.ClientSession(loop=self.loop)
-        response = yield from session.request('GET', url)
-        self.assertEqual(response.status, 200,
-                         msg='request to {0} failed'.format(url))
-        data = yield from response.content.read()
-        response.close()
-        yield from session.close()
-        return data

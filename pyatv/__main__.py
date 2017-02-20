@@ -8,6 +8,7 @@ import asyncio
 
 import argparse
 from argparse import ArgumentTypeError
+from zeroconf import Zeroconf
 
 import pyatv
 import pyatv.pairing
@@ -104,11 +105,13 @@ def cli_handler(loop):
         print('Use pin {} to pair with "{}" (waiting for {}s)'.format(
             args.pin_code, args.remote_name, args.pairing_timeout))
         print('After successful pairing, use login id 0x{}'.format(
-            pyatv.pairing.PAIRING_GUID))
+            pyatv.pairing.DEFAULT_PAIRING_GUID))
         print('Note: If remote does not show up, reboot you Apple TV')
-        yield from handler.start()
+        zc_instance = Zeroconf()
+        yield from handler.start(zc_instance)
         yield from asyncio.sleep(args.pairing_timeout, loop=loop)
         yield from handler.stop()
+        zc_instance.close()
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
     elif args.login_id:

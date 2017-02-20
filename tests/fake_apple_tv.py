@@ -14,6 +14,7 @@ from collections import namedtuple
 from aiohttp import web
 
 from pyatv import (tags, dmap, tag_definitions)
+from tests import utils
 
 
 EXPECTED_HEADERS = {
@@ -29,6 +30,7 @@ EXPECTED_HEADERS = {
 LoginResponse = namedtuple('LoginResponse', 'session, status')
 ArtworkResponse = namedtuple('ArtworkResponse', 'content, status')
 AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'content')
+PairingResponse = namedtuple('PairingResponse', 'remote_name, pairing_code')
 
 
 class PlayingResponse:
@@ -64,6 +66,7 @@ class FakeAppleTV(web.Application):
         self.responses['artwork'] = []
         self.responses['playing'] = []
         self.responses['airplay_playback'] = []
+        self.responses['pairing'] = []
         self.hsgid = hsgid
         self.pairing_guid = pairing_guid
         self.session = None
@@ -194,6 +197,40 @@ class FakeAppleTV(web.Application):
         playingtime = request.rel_url.query['dacp.playingtime']
         self.properties['dacp.playingtime'] = int(playingtime)
         return web.Response(body=b'', status=200)
+
+    @asyncio.coroutine
+    def trigger_bonjour(self, stubbed_zeroconf):
+        """Act upon available Bonjour services."""
+        # Add more services here when needed
+        for service in stubbed_zeroconf.registered_services:
+            if service.type != '_touch-remote._tcp.local.':
+                continue
+
+            # Look for the response matching this remote
+            remote_name = service.properties[b'DvNm']
+            for response in self.responses['pairing']:
+                if response.remote_name == remote_name:
+                    return self.perform_pairing(response, service.port)
+
+    @asyncio.coroutine
+    def perform_pairing(self, pairing_response, port):
+        """Pair with a remote client.
+
+        This will perform a GET-request to the specified port and hand over
+        information to the client (pyatv) so that the pairing process can be
+        completed.
+        """
+        server = 'http://127.0.0.1:{}'.format(port)
+        url = '{}/pairing?pairingcode={}&servicename=test'.format(
+            server, pairing_response.pairing_code)
+        data = yield from utils.simple_get(self.tc, url, self.loop)
+
+        # Verify content returned in pairingresponse
+        parsed = dmap.parse(data, tag_definitions.lookup_tag)
+        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'),
+                            pairing_response.remote_name)
+        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
     # Verifies that all needed headers are included in the request. Should be
     # checked in all requests, but that seems a bit too much and not that
@@ -330,3 +367,17 @@ class AppleTVUseCases:
         plist = dict(duration=0.8)
         self.device.responses['airplay_playback'].insert(
             0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+
+    def pairing_response(self, remote_name, expected_pairing_code):
+        """Reponse when a pairing request is made."""
+        self.device.responses['pairing'].insert(0, PairingResponse(
+            remote_name, expected_pairing_code))
+
+    @asyncio.coroutine
+    def act_on_bonjour_services(self, stubbed_zeroconf):
+        """Act on available Bonjour services.
+
+        This will make the device look at published services and perform
+        actions base on these. Most imporant for the pairing process.
+        """
+        yield from self.device.trigger_bonjour(stubbed_zeroconf)
