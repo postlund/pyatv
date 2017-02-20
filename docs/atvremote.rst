@@ -73,6 +73,50 @@ To manually specify IP-address and login id, just do like this:
 
 Using these methods are mutually exclusive, so you may only pick one.
 
+Push updates
+------------
+It is possible to listen for and print push updates as they happen using the
+``push_updates`` command:
+
+.. code:: bash
+
+    $ atvremote -a push_updates
+    Press ENTER to stop
+    Media type: Music
+    Play state: Loading
+         Title: Namnlös
+        Artist: Okänd artist
+         Album: Okänt album
+      Position: 0/4294966s (0.0%)
+    --------------------
+    Media type: Music
+    Play state: Loading
+    --------------------
+    Media type: Music
+    Play state: Paused
+      Position: 0/397s (0.0%)
+    --------------------
+    Media type: Music
+    Play state: Playing
+      Position: 0/397s (0.0%)
+    --------------------
+    Media type: Music
+    Play state: Paused
+      Position: 7/397s (1.8%)
+    --------------------
+    Media type: Music
+    Play state: Loading
+         Title: Namnlös
+        Artist: Okänd artist
+         Album: Okänt album
+      Position: 0/4294966s (0.0%)
+    --------------------
+    Media type: Unknown
+    Play state: No media
+    --------------------
+
+Just press ENTER to stop.
+
 Working with commands
 ---------------------
 Several commands are supported by the library (and thus the device). Easiest
@@ -83,52 +127,51 @@ availble commands:
 
     $ atvremote -a commands
     Remote control commands:
-     - next - Press key next
-     - down - Press key down
-     - previous - Press key previous
-     - set_position - Seek in the current playing media
-     - pause - Press key play
-     - menu - Press key menu
-     - up - Press key up
-     - play_url - Play media from an URL on the device
      - select - Press key select
-     - right - Press key right
+     - down - Press key down
      - top_menu - Go to main menu (long press menu)
-     - play - Press key play
+     - right - Press key right
+     - next - Press key next
+     - set_position - Seek in the current playing media
      - left - Press key left
+     - play_url - Play media from an URL on the device
+     - play - Press key play
+     - pause - Press key play
+     - up - Press key up
+     - menu - Press key menu
+     - previous - Press key previous
 
     Metadata commands:
+     - artwork_url - Return artwork URL for what is currently playing
      - playing - Return what is currently playing
-     - artwork_url - Return artwork URL for what is currently playing (or None)
      - artwork - Return artwork for what is currently playing (or None)
 
     Playing commands:
-     - media_type - What type of media is currently playing, e.g. video, music
-     - artist - Artist of the currently playing song
-     - position - Current position in the playing media (seconds)
-     - title - Title of the current media, e.g. movie or song name
-     - album - Album of the currently playing song
      - play_state - Current play state, e.g. playing or paused
      - total_time - Total play time in seconds
+     - title - Title of the current media, e.g. movie or song name
+     - media_type - What type of media is currently playing, e.g. video, music
+     - position - Current position in the playing media (seconds)
+     - artist - Artist of the currently playing song
+     - album - Album of the currently playing song
+
+    Other commands:
+     - push_updates - Listen for push updates.
 
 You can for instance get what is currently playing with ``playing``:
 
 .. code:: bash
 
-    atvremote -a playing
-    album: None
-    artist: None
-    media_type: 1
-    play_state: 1
-    position: 0
-    title: None
-    total_time: 0
+    $ atvremote -a playing
+    Media type: Music
+    Play state: Playing
+      Position: 0/397s (0.0%)
 
 Or seek in the currently playing media:
 
 .. code:: bash
 
-    atvremote -a set_position=123
+    $ atvremote -a set_position=123
 
 Logging and debugging
 ---------------------

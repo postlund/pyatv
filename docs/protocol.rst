@@ -248,11 +248,11 @@ playstatusupdate
 ^^^^^^^^^^^^^^^^
 **Type:** GET
 
-**URL:** ctrl-int/1/playstatusupdate?session-id=<session id>&revision-number=0
+**URL:** ctrl-int/1/playstatusupdate?session-id=<session id>&revision-number=<revision number>
 
 **Authentication:** Session ID
 
-The respons contains information about what is currently playing. Example
+The response contains information about what is currently playing. Example
 response: ::
 
     cmst: [container, dmcp.playstatus]
@@ -279,19 +279,11 @@ response: ::
       cast: 222000 [uint, dacp.tracklength]
       casu: 0 [uint, dacp.su]
 
-controlpromptupdate
-^^^^^^^^^^^^^^^^^^^
-**Type:** POST
-
-**URL:** controlpromptupdate?session-id=<session id>&prompt-id=0
-
-**Authentication:** Session ID
-
-Currently an unused command. It can be used to fetch an ID (prompt-id?) that
-can optionally be passed with some of the commands. When it is present, that
-GET or POST will block until something happens on the device. This can be
-used to implement a "push" interface, so polling would not be needed. Will
-be implemented in the future.
+The field ``cmsr`` (dmcp.serverrevision) is used to realize "push updates".
+By setting ``<revision number>`` to this number, the GET-request will block
+until something happens on the device. This number will increase for each
+update, so the next time it will be 160, 161, and so on. Using revision
+number 0 will never block and can be used to poll current playstatus.
 
 nowplayingartwork
 ^^^^^^^^^^^^^^^^^

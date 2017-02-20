@@ -1,10 +1,27 @@
 .. _pyatv-metadata:
 
-Fetching metadata
-=================
-Retrieving metadata from the device works very similar to the remote control
-API, but one asynchronous call will return an object containing the metadata
-to lower the amount of calls needed. Artwork is retrieved separately.
+Retrieving metadata
+===================
+It is possible to get metadata, i.e. what is playing, using two different
+methods:
+
+- Manually polling
+- Push updates
+
+Polling metadata from the device works very similar to the remote control
+API, but one asynchronous call will return an object containing all metadata.
+This is to lower the amount of device calls needed. Artwork is retrieved
+separately.
+
+When using push updates, new updates are *pushed* from the Apple TV when
+someting of interest happens. The exact same data that is available when
+polling, is passed to a callback provided by the API user. Please see the
+example further down for more details.
+
+.. note::
+
+    Only what is currently playing is supported by the push API. Artwork
+    must still be polled.
 
 What is currently playing
 -------------------------
@@ -19,7 +36,6 @@ You can easily extract fields like title, album or media type. See
 
 Artwork
 -------
-
 To retrieve the artwork, use the asynchronous artwork method:
 
 .. code:: python
@@ -38,3 +54,45 @@ the library must handle this). An example:
 .. code:: python
 
     artwork = yield form atv.metadata.artwork_url()
+
+Push updates
+------------
+The push update API is based on a regular callback interface. When playstatus
+information is available, a method called ``playstatus_update`` is called.
+Similarily, ``playstatus_error`` is called if an error occur. See the
+following example:
+
+.. code:: python
+
+    class PushListener:
+
+        def playstatus_update(self, updater, playstatus):
+            # Currently playing in playstatus
+
+        @staticmethod
+        def playstatus_error(updater, exception):
+            # Error in exception
+            updater.start(initial_delay=10)
+
+
+    @asyncio.coroutine
+    def listen_to_updates(self);
+        listener = PushListener()
+        self.atv.push_updater.listener = listener
+        self.atv.push_updater.start()
+
+A few things worth noting:
+
+- Both callback methods must be part of a "listener" (class)
+- There can be only one listener
+- If an error occurs, push updates are stopped
+
+Think a bit extra about the last point. You must manually restart push updates
+in case an error occur. The simplest way is to do like in the example above,
+but make sure to provide an "initial delay" (in seconds). Otherwhise you
+might end up in a loop where a push connection can never be established. This
+might for instance happen if the device loses its IP-address.
+
+When done, the async method ``stop`` must be called to not leak resources.
+Unless push updates were stopped because an error occurred and never
+restarted again.
