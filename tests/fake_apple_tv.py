@@ -223,7 +223,7 @@ class FakeAppleTV(web.Application):
         server = 'http://127.0.0.1:{}'.format(port)
         url = '{}/pairing?pairingcode={}&servicename=test'.format(
             server, pairing_response.pairing_code)
-        data = yield from utils.simple_get(self.tc, url, self.loop)
+        data, _ = yield from utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
