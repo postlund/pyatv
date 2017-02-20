@@ -203,7 +203,7 @@ class FunctionalTest(AioHTTPTestCase):
         artwork_url = yield from self.atv.metadata.artwork_url()
 
         # Fetch artwork with a GET request to ensure it works
-        artwork = yield from utils.simple_get(self, artwork_url, self.loop)
+        artwork, _ = yield from utils.simple_get(artwork_url, self.loop)
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop

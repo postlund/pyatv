@@ -145,6 +145,7 @@ def _handle_pairing(args, loop):
         print('If you are having problems, please see this page:')
         print('http://XXX')
 
+
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(

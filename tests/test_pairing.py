@@ -1,5 +1,6 @@
 """Test suit for pairing process with Apple TV."""
 
+import asyncio
 import asynctest
 
 from pyatv import pairing, dmap, tag_definitions
@@ -17,26 +18,27 @@ PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
 
 class PairingTest(asynctest.TestCase):
 
-    def test_succesful_pairing_with_device(self):
-        zeroconf = zeroconf_stub.stub(pairing)
+    @asyncio.coroutine
+    def setUp(self):
+        self.zeroconf = zeroconf_stub.stub(pairing)
+        self.pairing = pairing.PairingHandler(self.loop, REMOTE_NAME, PIN_CODE)
+        yield from self.pairing.start(self.zeroconf)
 
-        handler = pairing.PairingHandler(self.loop, REMOTE_NAME, PIN_CODE)
-        yield from handler.start(zeroconf)
+    @asyncio.coroutine
+    def tearDown(self):
+        yield from self.pairing.stop()
 
-        # Verify that bonjour service was published
-        self.assertEqual(len(zeroconf.registered_services), 1,
+    def test_zeroconf_service_published(self):
+        self.assertEqual(len(self.zeroconf.registered_services), 1,
                          msg='no zeroconf service registered')
 
-        service = zeroconf.registered_services[0]
+        service = self.zeroconf.registered_services[0]
         self.assertEqual(service.properties[b'DvNm'], REMOTE_NAME,
                          msg='remote name does not match')
 
-        # Extract port from service (as it is randomized) and request pairing
-        # with the web server.
-        server = 'http://127.0.0.1:{}'.format(service.port)
-        url = '{}/pairing?pairingcode={}&servicename=test'.format(
-            server, PAIRINGCODE)
-        data = yield from utils.simple_get(self, url, self.loop)
+    def test_succesful_pairing(self):
+        url = self._pairing_url(PAIRINGCODE)
+        data, _ = yield from utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
@@ -44,4 +46,14 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
-        yield from handler.stop()
+    def test_failed_pairing(self):
+        url = self._pairing_url('wrong')
+        _, status = yield from utils.simple_get(url, self.loop)
+
+        self.assertEqual(status, 500)
+
+    def _pairing_url(self, pairing_code):
+        service = self.zeroconf.registered_services[0]
+        server = 'http://127.0.0.1:{}'.format(service.port)
+        return '{}/pairing?pairingcode={}&servicename=test'.format(
+            server, pairing_code)

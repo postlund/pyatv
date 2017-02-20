@@ -6,13 +6,16 @@ from aiohttp import ClientSession
 
 
 @asyncio.coroutine
-def simple_get(testcase, url, loop):
+def simple_get(url, loop):
     """Perform a GET-request to a specified URL."""
     session = ClientSession(loop=loop)
     response = yield from session.request('GET', url)
-    testcase.assertEqual(response.status, 200,
-                         msg='request to {0} failed'.format(url))
+    if response.status < 200 or response.status >= 300:
+        response.close()
+        yield from session.close()
+        return None, response.status
+
     data = yield from response.content.read()
     response.close()
     yield from session.close()
-    return data
+    return data, response.status
