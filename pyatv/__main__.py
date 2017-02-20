@@ -64,9 +64,6 @@ def cli_handler(loop):
     pairing.add_argument('-p', '--pin', help='pairing pin code',
                          dest='pin_code', type=_in_range(0, 9999),
                          metavar='PIN', default=1234)
-    pairing.add_argument('--pairing-timeout', help='timeout when pairing',
-                         dest='pairing_timeout', type=int,
-                         metavar='TIMEOUT', default=60)
 
     ident = parser.add_mutually_exclusive_group()
     ident.add_argument('-a', '--autodiscover',
@@ -100,18 +97,7 @@ def cli_handler(loop):
     if args.command == 'scan':
         yield from _handle_scan(args, loop)
     elif args.command == 'pair':
-        handler = pyatv.pair_with_apple_tv(
-            loop, args.pin_code, args.remote_name)
-        print('Use pin {} to pair with "{}" (waiting for {}s)'.format(
-            args.pin_code, args.remote_name, args.pairing_timeout))
-        print('After successful pairing, use login id 0x{}'.format(
-            pyatv.pairing.DEFAULT_PAIRING_GUID))
-        print('Note: If remote does not show up, reboot you Apple TV')
-        zc_instance = Zeroconf()
-        yield from handler.start(zc_instance)
-        yield from asyncio.sleep(args.pairing_timeout, loop=loop)
-        yield from handler.stop()
-        zc_instance.close()
+        return (yield from _handle_pairing(args, loop))
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
     elif args.login_id:
@@ -137,6 +123,27 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
             apple_tv.name, apple_tv.address, apple_tv.login_id)
         outstream.writelines(msg)
 
+
+@asyncio.coroutine
+def _handle_pairing(args, loop):
+    handler = pyatv.pair_with_apple_tv(
+        loop, args.pin_code, args.remote_name)
+    print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
+        args.pin_code, args.remote_name))
+    print('Note: If remote does not show up, reboot you Apple TV')
+    yield from handler.start(Zeroconf())
+    yield from loop.run_in_executor(None, sys.stdin.readline)
+    yield from handler.stop()
+
+    # Give some feedback to the user
+    if handler.has_paired:
+        print('Pairing seems to have succeeded, yey!')
+        print('You may now use this login id 0x{}'.format(
+            pyatv.pairing.DEFAULT_PAIRING_GUID))
+    else:
+        print('!!! No response from Apple TV!')
+        print('If you are having problems, please see this page:')
+        print('http://XXX')
 
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):

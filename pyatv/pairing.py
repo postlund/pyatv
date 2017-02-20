@@ -41,11 +41,14 @@ class PairingHandler(object):
 
         # Get the allocated (random port) and include it in zeroconf service
         allocated_port = self._server.sockets[0].getsockname()[1]
+        _LOGGER.debug('Started pairing web server at port %d', allocated_port)
+
         self._setup_zeroconf(zeroconf, allocated_port)
 
     @asyncio.coroutine
     def stop(self):
         """Stop pairing server and unpublish service."""
+        _LOGGER.debug('Shutting down pairing server')
         yield from self._web_server.shutdown()
         self._server.close()
         yield from self._server.wait_closed()
@@ -65,6 +68,8 @@ class PairingHandler(object):
                               '0'*39 + '1._touch-remote._tcp.local.',
                               local_ip, port, 0, 0, props)
         zeroconf.register_service(service)
+
+        _LOGGER.debug('Published zeroconf service: %s', service)
 
     @asyncio.coroutine
     def handle_request(self, request):
