@@ -266,9 +266,9 @@ class PushUpdaterInternal(PushUpdater):
 
     def __init__(self, loop, apple_tv):
         """Initialize a new PushUpdaterInternal instance."""
-        self.loop = loop
-        self.atv = apple_tv
-        self.future = None
+        self._loop = loop
+        self._atv = apple_tv
+        self._future = None
         self.__listener = None
 
     @property
@@ -282,7 +282,7 @@ class PushUpdaterInternal(PushUpdater):
 
         Will throw AsyncUpdaterRunningError if push updates is enabled.
         """
-        if self.future is not None:
+        if self._future is not None:
             raise exceptions.AsyncUpdaterRunningError
 
         self.__listener = listener
@@ -292,7 +292,7 @@ class PushUpdaterInternal(PushUpdater):
 
         Will throw NoAsyncListenerError if no listner has been set.
         """
-        if self.future is not None:
+        if self._future is not None:
             raise exceptions.NoAsyncListenerError
 
         # If ensure_future, use that instead of async
@@ -301,30 +301,32 @@ class PushUpdaterInternal(PushUpdater):
         else:
             ensure_future = asyncio.async
 
-        self.future = ensure_future(self._poller(initial_delay))
+        self._future = ensure_future(self._poller(initial_delay),
+                                     loop=self._loop)
+        return self._future
 
     def stop(self):
         """No longer wait for push updates."""
-        if self.future is not None:
+        if self._future is not None:
             # TODO: pylint does not seem to figure out that cancel exists?
-            self.future.cancel()  # pylint: disable=no-member
-            self.future = None
+            self._future.cancel()  # pylint: disable=no-member
+            self._future = None
 
     @asyncio.coroutine
     def _poller(self, initial_delay):
         # Sleep some time before waiting for updates
         if initial_delay > 0:
             _LOGGER.debug('Initial delay set to %d', initial_delay)
-            yield from asyncio.sleep(initial_delay, loop=self.loop)
+            yield from asyncio.sleep(initial_delay, loop=self._loop)
 
         while True:
             try:
                 _LOGGER.debug('Waiting for playstatus updates')
-                playstatus = yield from self.atv.playstatus(
+                playstatus = yield from self._atv.playstatus(
                     use_revision=True, timeout=0)
 
-                self.loop.call_soon(self.listener.playstatus_update,
-                                    self, PlayingInternal(playstatus))
+                self._loop.call_soon(self.listener.playstatus_update,
+                                     self, PlayingInternal(playstatus))
             except asyncio.CancelledError:
                 break
 
@@ -332,10 +334,10 @@ class PushUpdaterInternal(PushUpdater):
             # exceptions to keep the API.
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug('Playstatus error occurred: %s', ex)
-                self.loop.call_soon(self.listener.playstatus_error, self, ex)
+                self._loop.call_soon(self.listener.playstatus_error, self, ex)
                 break
 
-        self.future = None
+        self._future = None
 
 
 class AppleTVInternal(AppleTV):

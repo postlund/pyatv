@@ -34,7 +34,7 @@ AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'content')
 class PlayingResponse:
     """Response returned by command playstatusupdate."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, revision=0, **kwargs):
         """Initialize a new PlayingResponse."""
         self.paused = self._get('paused', **kwargs)
         self.title = self._get('title', **kwargs)
@@ -44,6 +44,7 @@ class PlayingResponse:
         self.position = self._get('position', **kwargs)
         self.mediakind = self._get('mediakind', **kwargs)
         self.playstatus = self._get('playstatus', **kwargs)
+        self.revision = revision
 
     def _get(self, name, **kwargs):
         if name in kwargs:
@@ -147,6 +148,12 @@ class FakeAppleTV(web.Application):
         body = b''
         playing = self._get_response('playing')
 
+        # Make sure revision matches
+        revision = int(request.rel_url.query['revision-number'])
+        if playing.revision != revision:
+            # Not a valid response as a real device, just to make tests fail
+            return web.Response(status=500)
+
         if playing.paused is not None:
             body += tags.uint32_tag('caps', 3 if playing.paused else 4)
 
@@ -172,6 +179,8 @@ class FakeAppleTV(web.Application):
 
         if playing.playstatus is not None:
             body += tags.uint32_tag('caps', playing.playstatus)
+
+        body += tags.uint32_tag('cmsr', playing.revision + 1)
 
         return web.Response(
             body=tags.container_tag('cmst', body), status=200)
@@ -283,9 +292,13 @@ class AppleTVUseCases:
         """Calling this method will put device in idle state."""
         self.device.responses['playing'].insert(0, PlayingResponse())
 
-    def video_playing(self, paused, title, total_time, position):
+    def video_playing(self, paused, title, total_time, position, **kwargs):
         """Calling this method changes what is currently plaing to video."""
+        revision = 0
+        if 'revision' in kwargs:
+            revision = kwargs['revision']
         self.device.responses['playing'].insert(0, PlayingResponse(
+            revision=revision,
             paused=paused, title=title,
             total_time=total_time, position=position,
             mediakind=3))

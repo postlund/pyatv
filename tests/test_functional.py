@@ -290,6 +290,41 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.position, 1)
 
     @unittest_run_loop
+    def test_push_updates(self):
+
+        class PushListener:
+            def __init__(self):
+                self.playing = None
+
+            def playstatus_update(self, updater, playstatus):
+                self.playing = playstatus
+                updater.stop()
+
+            @staticmethod
+            def playstatus_error(updater, exception):
+                pass
+
+        # Prepare two playstatus updates in the fake device
+        self.usecase.video_playing(paused=False, title='video1',
+                                   total_time=40, position=10,
+                                   revision=0)
+        self.usecase.video_playing(paused=True, title='video2',
+                                   total_time=30, position=20,
+                                   revision=1)
+
+        # Poll the first one ("video1")
+        yield from self.atv.metadata.playing()
+
+        # Setup push updates which will instantly get the next one ("video2")
+        listener = PushListener()
+        self.atv.push_updater.listener = listener
+        yield from self.atv.push_updater.start()
+
+        # Check that we got the right one
+        self.assertIsNotNone(listener.playing)
+        self.assertEqual(listener.playing.title, 'video2')
+
+    @unittest_run_loop
     def test_seek_in_playing_media(self):
         yield from self.atv.remote_control.set_position(60)
         self.assertEqual(self.fake_atv.properties['dacp.playingtime'], 60000)
