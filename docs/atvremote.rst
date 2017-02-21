@@ -29,19 +29,17 @@ More details about the discovery process can be found
 
 Pairing with a device
 ---------------------
-To pair with a device, use the ``pair`` command. By default, it will wait
-one minute for the pairing process to complete. The remote control will be
+To pair with a device, use the ``pair`` command. The remote control will be
 announced with name *pyatv* and PIN code to be used is 1234:
 
 .. code:: bash
 
     $ atvremote pair
-    Use pin 1234 to pair with "pyatv" (waiting for 60s)
-    After successful pairing, use login id 0x0000000000000001
-    Note: If remote does not show up, reboot you Apple TV
+    Use pin 1234 to pair with "pyatv" (press ENTER to stop)
+    Note: If remote does not show up, try rebooting your Apple TV
 
-You can override all of the settings using ``--remote-name``, ``--pin`` and
-``--pairing-timeout``.
+You can override the settings using ``--remote-name`` and ``--pin``. When you
+are done or if you want to abort, just press ENTER.
 
 .. note::
 

@@ -130,7 +130,8 @@ def _handle_pairing(args, loop):
         loop, args.pin_code, args.remote_name)
     print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
         args.pin_code, args.remote_name))
-    print('Note: If remote does not show up, reboot you Apple TV')
+    print('Note: If remote does not show up, try rebooting your Apple TV')
+
     yield from handler.start(Zeroconf())
     yield from loop.run_in_executor(None, sys.stdin.readline)
     yield from handler.stop()
@@ -141,9 +142,7 @@ def _handle_pairing(args, loop):
         print('You may now use this login id 0x{}'.format(
             pyatv.pairing.DEFAULT_PAIRING_GUID))
     else:
-        print('!!! No response from Apple TV!')
-        print('If you are having problems, please see this page:')
-        print('http://XXX')
+        print('No response from Apple TV!')
 
 
 @asyncio.coroutine

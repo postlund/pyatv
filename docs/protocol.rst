@@ -19,12 +19,6 @@ the request it can also be something else (like a PNG file for artwork). The
 binary protocol will be explained first, as that makes it easier to understand
 the requests.
 
-.. note::
-
-   Pairing has not been implemented yet and current implementation requires
-   home sharing to be enabled on the device. Descriptions here only cover
-   current implementation.
-
 DMAP Binary Format
 ^^^^^^^^^^^^^^^^^^
 The binary format is basically TLV data where the tag is a 4 byte ASCII-string,
@@ -237,7 +231,7 @@ Example response from device: ::
       mstt: 200 [uint, dmap.status]
       mlid: 1739004399 [uint, dmap.sessionid]
 
-Expected format for HSGID and PAIRING GUID respecively:
+Expected format for HSGID and PAIRING GUID respectively:
 
 * HSGID: ``XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX``
 * PAIRING GUID: ``0xXXXXXXXXXXXXXXXX``
