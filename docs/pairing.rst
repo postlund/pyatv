@@ -95,17 +95,26 @@ web server and the opposite. This is done using a
 
     import pyatv
     import asyncio
+    from zeroconf import Zeroconf
 
     PIN_CODE = 1234
     REMOTE_NAME = 'my remote control'
 
     @asyncio.coroutine
     def pair_with_device(loop):
+        my_zeroconf = Zeroconf()
         handler = pyatv.pair_with_apple_tv(loop, PIN_CODE, REMOTE_NAME)
 
-        yield from handler.start()
+        yield from handler.start(my_zeroconf)
         yield from asyncio.sleep(60, loop=loop)
         yield from handler.stop()
+
+        if handler.has_paired:
+            print('Paired with device!')
+        else:
+            print('Did not pair with device!')
+
+        my_zeroconf.close()
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(pair_with_device(loop))
