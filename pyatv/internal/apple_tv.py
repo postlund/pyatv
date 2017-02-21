@@ -297,12 +297,15 @@ class PushUpdaterInternal(PushUpdater):
 
         # If ensure_future, use that instead of async
         if hasattr(asyncio, 'ensure_future'):
-            ensure_future = asyncio.ensure_future
+            run_async = getattr(asyncio, 'ensure_future')
         else:
-            ensure_future = asyncio.async
+            run_async = asyncio.async
 
-        self._future = ensure_future(self._poller(initial_delay),
-                                     loop=self._loop)
+        # This for some reason fails on travis but not in other places.
+        # Why is that (same python version)?
+        # pylint: disable=deprecated-method
+        self._future = run_async(self._poller(initial_delay),
+                                 loop=self._loop)
         return self._future
 
     def stop(self):
