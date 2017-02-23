@@ -1,6 +1,22 @@
 CHANGES
 =======
 
+0.2.0 (2017-02-23)
+------------------
+
+Changes:
+
+- Support for push updates
+- Fast auto discovery for single device
+- Nicer output in "atvremote playing"
+- Pairing improvements
+- Unpin external dependencies
+
+Other:
+
+- Easier version management (internal)
+- Code quality improvements (quantifiedcode)
+
 0.1.4 (2017-02-11)
 ------------------
 
