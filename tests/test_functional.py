@@ -290,13 +290,16 @@ class FunctionalTest(AioHTTPTestCase):
             def playstatus_error(updater, exception):
                 pass
 
-        # Prepare two playstatus updates in the fake device
+        # Prepare two playstatus updates in the fake device. Take note: every
+        # time start() is called, revision 0 should be used first. This will
+        # make sure that we always get a push update instantly. Otherwise we
+        # might hang and wait for an update.
         self.usecase.video_playing(paused=False, title='video1',
                                    total_time=40, position=10,
                                    revision=0)
         self.usecase.video_playing(paused=True, title='video2',
                                    total_time=30, position=20,
-                                   revision=1)
+                                   revision=0)
 
         # Poll the first one ("video1")
         yield from self.atv.metadata.playing()

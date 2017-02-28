@@ -301,6 +301,10 @@ class PushUpdaterInternal(PushUpdater):
         else:
             run_async = asyncio.async
 
+        # Always start with 0 to trigger an immediate response for the
+        # first request
+        self._atv.playstatus_revision = 0
+
         # This for some reason fails on travis but not in other places.
         # Why is that (same python version)?
         # pylint: disable=deprecated-method
