@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.2.1 (2017-02-28)
+------------------
+
+Changes:
+
+- Always trigger one push update when starting
+
 0.2.0 (2017-02-23)
 ------------------
 
