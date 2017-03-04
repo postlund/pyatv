@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.2.2 (2017-03-04)
+------------------
+
+Changes:
+
+- Allow custom pairing guid when pairing
+
+Notes:
+
+- By default, a random pairing guid is now generated when calling
+  pyatv.pair_with_apple_tv.
+
 0.2.1 (2017-02-28)
 ------------------
 
