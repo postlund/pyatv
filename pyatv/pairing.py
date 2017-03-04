@@ -4,6 +4,7 @@ import socket
 import asyncio
 import hashlib
 import logging
+import random
 from io import StringIO
 
 from aiohttp import web
@@ -22,15 +23,19 @@ class PairingHandler(object):
     that responds to pairing requests.
     """
 
-    def __init__(self, loop, name, pin_code):
+    def __init__(self, loop, name, pin_code, pairing_guid=None):
         """Initialize a new instance."""
         self._loop = loop
         self._name = name
-        self._pin_code = pin_code
-        self._pairing_guid = DEFAULT_PAIRING_GUID
         self._web_server = None
         self._server = None
+        self.pin_code = pin_code
+        self.pairing_guid = pairing_guid or self._generate_random_guid()
         self.has_paired = False
+
+    @staticmethod
+    def _generate_random_guid():
+        return hex(random.getrandbits(64))[2:].upper()  # Remove leading 0x
 
     @asyncio.coroutine
     def start(self, zeroconf):
@@ -49,9 +54,12 @@ class PairingHandler(object):
     def stop(self):
         """Stop pairing server and unpublish service."""
         _LOGGER.debug('Shutting down pairing server')
-        yield from self._web_server.shutdown()
-        self._server.close()
-        yield from self._server.wait_closed()
+        if self._web_server is not None:
+            yield from self._web_server.shutdown()
+            self._server.close()
+
+        if self._server is not None:
+            yield from self._server.wait_closed()
 
     def _setup_zeroconf(self, zeroconf, port):
         props = {
@@ -60,7 +68,7 @@ class PairingHandler(object):
             b'DvTy': b'iPod',
             b'RemN': b'Remote',
             b'txtvers': b'1',
-            b'Pair': self._pairing_guid
+            b'Pair': self.pairing_guid
             }
 
         local_ip = socket.inet_aton(socket.gethostbyname(socket.gethostname()))
@@ -80,7 +88,7 @@ class PairingHandler(object):
                      service_name, received_code)
 
         if self._verify_pin(received_code):
-            cmpg = tags.uint64_tag('cmpg', 1)
+            cmpg = tags.uint64_tag('cmpg', int(self.pairing_guid, 16))
             cmnm = tags.string_tag('cmnm', self._name)
             cmty = tags.string_tag('cmty', 'ipod')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
@@ -92,8 +100,8 @@ class PairingHandler(object):
 
     def _verify_pin(self, received_code):
         merged = StringIO()
-        merged.write(self._pairing_guid)
-        for char in str(self._pin_code):
+        merged.write(self.pairing_guid)
+        for char in str(self.pin_code):
             merged.write(char)
             merged.write("\x00")
 

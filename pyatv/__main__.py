@@ -64,6 +64,9 @@ def cli_handler(loop):
     pairing.add_argument('-p', '--pin', help='pairing pin code',
                          dest='pin_code', type=_in_range(0, 9999),
                          metavar='PIN', default=1234)
+    pairing.add_argument('--pairing-guid',
+                         help='pairing guid (16 chars hex)',
+                         dest='pairing_guid', default=None)
 
     ident = parser.add_mutually_exclusive_group()
     ident.add_argument('-a', '--autodiscover',
@@ -127,9 +130,10 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 @asyncio.coroutine
 def _handle_pairing(args, loop):
     handler = pyatv.pair_with_apple_tv(
-        loop, args.pin_code, args.remote_name)
+        loop, args.pin_code, args.remote_name, pairing_guid=args.pairing_guid)
     print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
         args.pin_code, args.remote_name))
+    print('Using pairing guid: 0x' + handler.pairing_guid)
     print('Note: If remote does not show up, try rebooting your Apple TV')
 
     yield from handler.start(Zeroconf())
@@ -139,8 +143,8 @@ def _handle_pairing(args, loop):
     # Give some feedback to the user
     if handler.has_paired:
         print('Pairing seems to have succeeded, yey!')
-        print('You may now use this login id 0x{}'.format(
-            pyatv.pairing.DEFAULT_PAIRING_GUID))
+        print('You may now use this login id: 0x{}'.format(
+            handler.pairing_guid))
     else:
         print('No response from Apple TV!')
 

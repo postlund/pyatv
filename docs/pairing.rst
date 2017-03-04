@@ -55,7 +55,7 @@ manuelly entered on scren. In case of pyatv, the "algorithm" is:
 
 .. code:: python
 
-    hash = md5('0000000000000001' + pin)
+    hash = md5(Pair + pin)
 
 It then connects to the port on the host (remote control) and performs a GET
 request, including this hash as well as a service name. An example might look
@@ -80,8 +80,15 @@ It is DAAP data and looks like this:
       cmty: ipod [str, dacp.devicetype]
 
 As can be seen, the name to be used for the remote is included in the response.
-After this response, the pairing process is complete and ``0000000000000001``
-can be used as login id when sending commands to the device.
+The pairing guid represented as an integer (``0000000000000001`` -> ``1``) is
+also included in ``cmpg``. After this response, the pairing process is complete
+and ``0000000000000001`` can be used as login id when sending commands to the
+device.
+
+.. note::
+
+   If a different pairing guid is used, that should be used as ``login_id``
+   instead of ``0000000000000001`` (which is just an example).
 
 Code Example: Pairing
 ---------------------
@@ -104,6 +111,7 @@ web server and the opposite. This is done using a
     def pair_with_device(loop):
         my_zeroconf = Zeroconf()
         handler = pyatv.pair_with_apple_tv(loop, PIN_CODE, REMOTE_NAME)
+	# handler.pairing_guid = '1234ABCDE56789FF'
 
         yield from handler.start(my_zeroconf)
         yield from asyncio.sleep(60, loop=loop)
@@ -111,6 +119,7 @@ web server and the opposite. This is done using a
 
         if handler.has_paired:
             print('Paired with device!')
+	    print('Pairing guid: ' + handler.pairing_guid)
         else:
             print('Did not pair with device!')
 
@@ -118,6 +127,11 @@ web server and the opposite. This is done using a
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(pair_with_device(loop))
+
+By default, a random pairing guid is generated. You can access it with
+``handler.pairing_guid`` in order to present it to the user. To change the
+pairing guid, you can change this variable to something else *before* calling
+``start`` (see above).
 
 This example is available in ``examples``.
 

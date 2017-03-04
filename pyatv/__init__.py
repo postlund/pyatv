@@ -100,6 +100,6 @@ def connect_to_apple_tv(details, loop, session=None):
     return AppleTVInternal(loop, session, requester, airplay)
 
 
-def pair_with_apple_tv(loop, pin_code, name):
+def pair_with_apple_tv(loop, pin_code, name, pairing_guid=None):
     """Initiate pairing process with an Apple TV."""
-    return PairingHandler(loop, name, pin_code)
+    return PairingHandler(loop, name, pin_code, pairing_guid=pairing_guid)

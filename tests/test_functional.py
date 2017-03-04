@@ -95,7 +95,9 @@ class FunctionalTest(AioHTTPTestCase):
         zeroconf = zeroconf_stub.stub(pairing)
         self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
 
-        handler = pyatv.pair_with_apple_tv(self.loop, PIN_CODE, REMOTE_NAME)
+        handler = pyatv.pair_with_apple_tv(
+            self.loop, PIN_CODE, REMOTE_NAME,
+            pairing_guid=pairing.DEFAULT_PAIRING_GUID)
         yield from handler.start(zeroconf)
         yield from self.usecase.act_on_bonjour_services(zeroconf)
         yield from handler.stop()

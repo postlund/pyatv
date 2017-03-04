@@ -26,6 +26,7 @@ def pair_with_device(loop):
     # Give some feedback about the process
     if handler.has_paired:
         print('Paired with device!')
+        print('Pairing guid: ' + handler.pairing_guid)
     else:
         print('Did not pair with device!')
 
