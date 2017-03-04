@@ -81,7 +81,7 @@ you need to logout):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(print_what_is_playing(loop, DETAILS))
 
-Specify ``LOGIN_ID`` to be either HSGID or ``0000000000000001`` if you
-have paired with your device.
+Specify ``LOGIN_ID`` to be either HSGID or the pairing guid used when pairing
+with your device.
 
 API Reference: :py:meth:`pyatv.connect_to_apple_tv`, :py:class:`pyatv.AppleTVDevice`
