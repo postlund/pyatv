@@ -98,7 +98,7 @@ def cli_handler(loop):
         parser.error('both --login_id and --address must be given')
 
     if args.command == 'scan':
-        yield from _handle_scan(args, loop)
+        return (yield from _handle_scan(args, loop))
     elif args.command == 'pair':
         return (yield from _handle_pairing(args, loop))
     elif args.autodiscover:
@@ -107,9 +107,8 @@ def cli_handler(loop):
         return (yield from _handle_command(args, loop))
     else:
         logging.error('To autodiscover an Apple TV, add -a')
-        return 1
 
-    return 0
+    return 1
 
 
 @asyncio.coroutine
@@ -118,13 +117,15 @@ def _handle_scan(args, loop):
         loop, timeout=args.scan_timeout)
     _print_found_apple_tvs(atvs)
 
+    return 0
+
 
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
     print('Found Apple TVs:')
     for apple_tv in atvs:
-        msg = ' - {} at {} (login id: {})\n'.format(
+        msg = ' - {} at {} (login id: {})'.format(
             apple_tv.name, apple_tv.address, apple_tv.login_id)
-        outstream.writelines(msg)
+        print(msg, file=outstream)
 
 
 @asyncio.coroutine
@@ -148,6 +149,8 @@ def _handle_pairing(args, loop):
     else:
         print('No response from Apple TV!')
 
+    return 0
+
 
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
@@ -169,6 +172,7 @@ def _handle_autodiscover(args, loop):
     args.name = apple_tv.name
     logging.info('Auto-discovered %s at %s', args.name, args.address)
     yield from _handle_command(args, loop)
+
     return 0
 
 
@@ -208,7 +212,7 @@ def _handle_command(args, loop):
         ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
         metadata = retrieve_commands(atv.metadata, developer=args.developer)
         playing = retrieve_commands(playing_resp, developer=args.developer)
-        other = {'push_updates': 'Listen for push updates.'}
+        other = {'push_updates': 'Listen for push updates'}
 
         # Parse input command and argument from user
         cmd, cmd_args = _extract_command_with_args(args.command)
@@ -249,6 +253,8 @@ def _handle_command(args, loop):
     finally:
         yield from atv.logout()
 
+    return 0
+
 
 @asyncio.coroutine
 def _exec_command(obj, command, *args):
@@ -287,7 +293,8 @@ def main():
     @asyncio.coroutine
     def _run_application(loop):
         try:
-            asyncio.wait_for((yield from cli_handler(loop)), timeout=15)
+            return (yield from asyncio.wait_for(cli_handler(loop), timeout=15))
+
         except KeyboardInterrupt:
             pass  # User pressed Ctrl+C, just ignore it
 
@@ -301,13 +308,16 @@ def main():
             sys.stderr.writelines(
                 '\n>>> An error occurred, full stack trace above\n')
 
+        return 1
+
     try:
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(_run_application(loop))
+        return loop.run_until_complete(_run_application(loop))
     except KeyboardInterrupt:
         pass
 
+    return 1
+
 
 if __name__ == '__main__':
-    main()
-    sys.exit(0)  # TODO: fix correct return value
+    sys.exit(main())
