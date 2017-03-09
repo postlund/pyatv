@@ -67,6 +67,7 @@ class AirPlay:
                     parsed = {}
                     attempts = ATTEMPT_COUNT
                     _LOGGER.warning('Got invalid playback-info: %s', data)
+                    _LOGGER.warning(info)
 
                 # duration is only available if something is playing
                 if 'duration' in parsed:
