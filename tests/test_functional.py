@@ -131,6 +131,37 @@ class FunctionalTest(AioHTTPTestCase):
         session_id = yield from self.atv.login()
         self.assertEqual(SESSION_ID, session_id)
 
+    # When moving around using the arrow keys, a sequence of seven
+    # different requests are sent to the device. To simplify the
+    # test, verify that seven commands were sent and that the last
+    # command matches the expected arrow key. This does not guarantee
+    # that the earlier six commands were correct, but it's good
+    # enough to keep the tests clean.
+
+    @unittest_run_loop
+    def test_button_up(self):
+        yield from self.atv.remote_control.up()
+        self.assertEqual(self.fake_atv.buttons_press_count, 7)
+        self.assertEqual(self.fake_atv.last_button_pressed, 'up')
+
+    @unittest_run_loop
+    def test_button_down(self):
+        yield from self.atv.remote_control.down()
+        self.assertEqual(self.fake_atv.buttons_press_count, 7)
+        self.assertEqual(self.fake_atv.last_button_pressed, 'down')
+
+    @unittest_run_loop
+    def test_button_left(self):
+        yield from self.atv.remote_control.left()
+        self.assertEqual(self.fake_atv.buttons_press_count, 7)
+        self.assertEqual(self.fake_atv.last_button_pressed, 'left')
+
+    @unittest_run_loop
+    def test_button_right(self):
+        yield from self.atv.remote_control.right()
+        self.assertEqual(self.fake_atv.buttons_press_count, 7)
+        self.assertEqual(self.fake_atv.last_button_pressed, 'right')
+
     @unittest_run_loop
     def test_button_play(self):
         yield from self.atv.remote_control.play()

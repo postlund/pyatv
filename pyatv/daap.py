@@ -60,6 +60,7 @@ class DaapSession(object):
     def post_data(self, url, data=None, parse=True, timeout=None):
         """Perform a POST request. Optionally parse reponse as DMAP data."""
         _LOGGER.debug('POST URL: %s', url)
+        self._log_data(data, False)
 
         headers = copy(_DMAP_HEADERS)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -70,6 +71,7 @@ class DaapSession(object):
                 url, headers=headers, data=data,
                 timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
             resp_data = yield from resp.read()
+            self._log_data(resp_data, True)
             extracted = self._extract_data(resp_data, parse)
             return extracted, resp.status
         except Exception as ex:
@@ -82,15 +84,19 @@ class DaapSession(object):
 
     @staticmethod
     def _extract_data(data, should_parse):
-        if _LOGGER.isEnabledFor(logging.DEBUG):
-            output = data[0:128]
-            _LOGGER.debug('Data[%d]: %s%s',
-                          len(data),
-                          binascii.hexlify(output),
-                          '...' if len(output) != len(data) else '')
         if should_parse:
             return dmap.parse(data, lookup_tag)
         return data
+
+    @staticmethod
+    def _log_data(data, is_recv):
+        if data and _LOGGER.isEnabledFor(logging.DEBUG):
+            output = data[0:128]
+            _LOGGER.debug('%s Data[%d]: %s%s',
+                          '<-' if is_recv else '->',
+                          len(data),
+                          binascii.hexlify(output),
+                          '...' if len(output) != len(data) else '')
 
 
 class DaapRequester:

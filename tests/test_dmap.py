@@ -78,6 +78,16 @@ class DmapTest(unittest.TestCase):
         parsed = dmap.parse(in_data, lookup_tag)
         self.assertEqual(12, dmap.first(parsed, 'cona', 'conb', 'uuu8'))
 
+    def test_extract_multiple_with_same_name(self):
+        in_data = tags.uint8_tag('uuu8', 1) + \
+                  tags.uint8_tag('uuu8', 2) + \
+                  tags.uint8_tag('uuu8', 3)
+        parsed = dmap.parse(in_data, lookup_tag)
+        iter = dmap.matches(parsed, 'uuu8')
+        self.assertEqual(1, next(iter))
+        self.assertEqual(2, next(iter))
+        self.assertEqual(3, next(iter))
+
     def test_ignore_value(self):
         elem = tags.uint8_tag('igno', 44)
         parsed = dmap.parse(elem, lookup_tag)
