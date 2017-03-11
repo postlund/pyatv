@@ -18,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
+DEVICE_SERVICE = '_touch-able._tcp.local.'
 
 
 class AppleTVDevice(
@@ -37,7 +38,7 @@ class _ServiceListener(object):
         """Initialize a new _ServiceListener."""
         self.abort_on_found = abort_on_found
         self.semaphore = semaphore
-        self.found_devices = []
+        self.found_devices = {}
 
     def add_service(self, zeroconf, service_type, name):
         """Callback from zeroconf when a service has been discovered."""
@@ -48,33 +49,49 @@ class _ServiceListener(object):
 
         info = zeroconf.get_service_info(service_type, name)
         if info.type == HOMESHARING_SERVICE:
-            self.add_device(info)
+            self.add_hs_device(info)
 
             # Check if we should continue to run or not
             if self.abort_on_found:
                 _LOGGER.debug('Aborting since a device was found')
                 self.semaphore.release()
+        elif info.type == DEVICE_SERVICE:
+            self.add_device(info)
         else:
             _LOGGER.warning('Discovered unknown device: %s', info)
 
-    def add_device(self, info):
+    def add_hs_device(self, info):
         """Add a new device to discovered list."""
         address = ipaddress.ip_address(info.address)
         tv_name = info.properties[b'Name'].decode('utf-8')
         hsgid = info.properties[b'hG'].decode('utf-8')
-        self.found_devices.append(AppleTVDevice(tv_name, address, hsgid))
+        self.found_devices[address] = AppleTVDevice(tv_name, address, hsgid)
         _LOGGER.debug('Auto-discovered service %s at %s (hsgid: %s)',
                       tv_name, address, hsgid)
 
+    def add_device(self, info):
+        """Add a new device without Home Sharing to discovered list."""
+        address = ipaddress.ip_address(info.address)
+        tv_name = info.properties[b'CtlN'].decode('utf-8')
+        if address not in self.found_devices:
+            self.found_devices[address] = AppleTVDevice(tv_name, address, None)
+            _LOGGER.debug('Auto-discovered service %s at %s (no home sharing)',
+                          tv_name, address)
+        else:
+            _LOGGER.debug('Ignoring %s since its already known with HSGID',
+                          address)
+
 
 @asyncio.coroutine
-def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False):
+def scan_for_apple_tvs(loop, timeout=5,
+                       abort_on_found=False, only_home_sharing=True):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     semaphore = asyncio.Semaphore(value=0, loop=loop)
     listener = _ServiceListener(abort_on_found, semaphore)
     zeroconf = Zeroconf()
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
+        ServiceBrowser(zeroconf, DEVICE_SERVICE, listener)
         _LOGGER.debug('Discovering devices for %d seconds', timeout)
         yield from asyncio.wait_for(semaphore.acquire(), timeout, loop=loop)
     except concurrent.futures.TimeoutError:
@@ -82,7 +99,13 @@ def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False):
     finally:
         zeroconf.close()
 
-    return listener.found_devices
+    def _should_include(atv):
+        if not only_home_sharing:
+            return True
+
+        return atv.login_id is not None
+
+    return list(filter(_should_include, listener.found_devices.values()))
 
 
 def connect_to_apple_tv(details, loop, session=None):

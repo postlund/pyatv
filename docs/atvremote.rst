@@ -19,6 +19,8 @@ command:
     Found Apple TVs:
     - Apple TV at 10.0.10.22 (login id: 00000000-1234-5678-9abc-def012345678)
 
+    Note: You must use 'pair' with devices that have home sharing disabled
+
 In case you have multiple devices, they should all show up. The discovery
 process is performed for 3 seconds, which might be too short and sometimes
 a device might not show up. Either just try again or raise the discover

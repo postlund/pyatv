@@ -114,18 +114,25 @@ def cli_handler(loop):
 @asyncio.coroutine
 def _handle_scan(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
-        loop, timeout=args.scan_timeout)
+        loop, timeout=args.scan_timeout, only_home_sharing=False)
     _print_found_apple_tvs(atvs)
 
     return 0
 
 
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
-    print('Found Apple TVs:')
+    print('Found Apple TVs:', file=outstream)
     for apple_tv in atvs:
-        msg = ' - {} at {} (login id: {})'.format(
-            apple_tv.name, apple_tv.address, apple_tv.login_id)
+        if apple_tv.login_id is None:
+            msg = ' - {0} at {1} (home sharing disabled)'.format(
+                apple_tv.name, apple_tv.address)
+        else:
+            msg = ' - {0} at {1} (login id: {2})'.format(
+                apple_tv.name, apple_tv.address, apple_tv.login_id)
         print(msg, file=outstream)
+
+    print("\nNote: You must use 'pair' with devices "
+          "that have home sharing disabled", file=outstream)
 
 
 @asyncio.coroutine

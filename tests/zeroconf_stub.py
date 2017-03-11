@@ -23,13 +23,29 @@ def homesharing_service(service_name, atv_name, address, hsgid):
                        properties=props)
 
 
+def device_service(service_name, atv_name, address):
+    """Create a service representing an Apple TV with no home-sharing."""
+    props = {
+        b'DvTy': b'AppleTV', b'Ver': b'131077', b'DvSv': b'1792',
+        b'atCV': b'65539', b'atSV': b'65541', b'txtvers': b'1',
+        b'DbId': b'AAAAAAAAAAAAAAAA', b'CtlN': atv_name
+    }
+
+    return ServiceInfo('_touch-able._tcp.local.',
+                       service_name + '._touch-able._tcp.local.',
+                       address=address, port='3689',
+                       server='AppleTV-2.local.',
+                       properties=props)
+
+
 class ServiceBrowserStub:
     """Stub for ServiceBrowser."""
 
     def __init__(self, zeroconf, service_type, listener):
         """Create a new instance of ServiceBrowser."""
         for service in zeroconf.services:
-            listener.add_service(zeroconf, service_type, service.name)
+            if service.type == service_type:
+                listener.add_service(zeroconf, service_type, service.name)
 
 
 class ZeroconfStub:
