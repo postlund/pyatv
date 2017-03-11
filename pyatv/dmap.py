@@ -55,14 +55,19 @@ def parse(data, tag_lookup):
 
 
 # TODO: Rewrite this (you should be proud if you understand it...)
-def first(dmap_data, *path):
-    """Look up a value given a path in some parsed DMAP data."""
+def matches(dmap_data, *path):
+    """Look up all values matching a path in some parsed DMAP data."""
     if not (path and isinstance(dmap_data, list)):
-        return dmap_data
+        yield dmap_data
 
     for key in dmap_data:
         if path[0] in key:
-            return first(key[path[0]], *path[1:])
+            yield first(key[path[0]], *path[1:])
+
+
+def first(dmap_data, *path):
+    """Look up a value given a path in some parsed DMAP data."""
+    return next(matches(dmap_data, *path))
 
 
 # #TODO: Also a bad method that should be re-written

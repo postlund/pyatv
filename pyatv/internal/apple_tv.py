@@ -17,6 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _PSU_CMD = 'ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}'
 _ARTWORK_CMD = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
+_CTRL_PROMPT_CMD = 'ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0'
 
 
 class BaseAppleTV:
@@ -75,9 +76,12 @@ class BaseAppleTV:
 
     def controlprompt_cmd(self, cmd):
         """Perform a "controlpromptentry" command."""
-        data = tags.string_tag('cmbe', cmd) + tags.string_tag('cmcc', '0')
-        cmd_url = 'ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0'
-        return self.daap.post(cmd_url, data=data)
+        data = tags.string_tag('cmbe', cmd) + tags.uint8_tag('cmcc', 0)
+        return self.daap.post(_CTRL_PROMPT_CMD, data=data)
+
+    def controlprompt_data(self, data):
+        """Perform a "controlpromptentry" command."""
+        return self.daap.post(_CTRL_PROMPT_CMD, data=data)
 
     def set_property(self, prop, value):
         """Change value of a DAAP property, e.g. volume or media position."""
@@ -95,21 +99,64 @@ class RemoteControlInternal(RemoteControl):
         self.apple_tv = apple_tv
         self.airplay = airplay
 
+    @asyncio.coroutine
     def up(self):
         """Press key up."""
-        raise exceptions.NotSupportedError
+        yield from self._send_commands(
+            self._move('Down', 0, 20, 275),
+            self._move('Move', 1, 20, 270),
+            self._move('Move', 2, 20, 265),
+            self._move('Move', 3, 20, 260),
+            self._move('Move', 4, 20, 255),
+            self._move('Move', 5, 20, 250),
+            self._move('Up', 6, 20, 250))
 
+    @asyncio.coroutine
     def down(self):
         """Press key down."""
-        raise exceptions.NotSupportedError
+        yield from self._send_commands(
+            self._move('Down', 0, 20, 250),
+            self._move('Move', 1, 20, 255),
+            self._move('Move', 2, 20, 260),
+            self._move('Move', 3, 20, 265),
+            self._move('Move', 4, 20, 270),
+            self._move('Move', 5, 20, 275),
+            self._move('Up', 6, 20, 275))
 
+    @asyncio.coroutine
     def left(self):
         """Press key left."""
-        raise exceptions.NotSupportedError
+        yield from self._send_commands(
+            self._move('Down', 0, 75, 100),
+            self._move('Move', 1, 70, 100),
+            self._move('Move', 3, 65, 100),
+            self._move('Move', 4, 60, 100),
+            self._move('Move', 5, 55, 100),
+            self._move('Move', 6, 50, 100),
+            self._move('Up', 7, 50, 100))
 
+    @asyncio.coroutine
     def right(self):
         """Press key right."""
-        raise exceptions.NotSupportedError
+        yield from self._send_commands(
+            self._move('Down', 0, 50, 100),
+            self._move('Move', 1, 55, 100),
+            self._move('Move', 3, 60, 100),
+            self._move('Move', 4, 65, 100),
+            self._move('Move', 5, 70, 100),
+            self._move('Move', 6, 75, 100),
+            self._move('Up', 7, 75, 100))
+
+    @staticmethod
+    def _move(direction, time, point1, point2):
+        data = 'touch{0}&time={1}&point={2},{3}'.format(
+            direction, time, point1, point2)
+        return tags.uint8_tag('cmcc', 0x30) + tags.string_tag('cmbe', data)
+
+    @asyncio.coroutine
+    def _send_commands(self, *cmds):
+        for cmd in cmds:
+            yield from self.apple_tv.controlprompt_data(cmd)
 
     def play(self):
         """Press key play."""

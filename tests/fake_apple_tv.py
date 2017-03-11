@@ -73,6 +73,7 @@ class FakeAppleTV(web.Application):
         self.pairing_guid = pairing_guid
         self.session = None
         self.last_button_pressed = None
+        self.buttons_press_count = 0
         self.properties = {}  # setproperty
         self.tc = testcase
 
@@ -127,6 +128,7 @@ class FakeAppleTV(web.Application):
         """Handler for playback buttons."""
         self._verify_auth_parameters(request)
         self.last_button_pressed = request.rel_url.path.split('/')[-1]
+        self.buttons_press_count += 1
         return web.Response(status=200)
 
     @asyncio.coroutine
@@ -135,8 +137,23 @@ class FakeAppleTV(web.Application):
         self._verify_auth_parameters(request)
         content = yield from request.content.read()
         parsed = dmap.parse(content, tag_definitions.lookup_tag)
-        self.last_button_pressed = dmap.first(parsed, 'cmbe')
+        self.last_button_pressed = self._convert_button(parsed)
+        self.buttons_press_count += 1
         return web.Response(status=200)
+
+    @staticmethod
+    def _convert_button(data):
+        value = dmap.first(data, 'cmbe')
+        if value == 'touchUp&time=6&point=20,250':
+            return 'up'
+        elif value == 'touchUp&time=6&point=20,275':
+            return 'down'
+        elif value == 'touchUp&time=7&point=50,100':
+            return 'left'
+        elif value == 'touchUp&time=7&point=75,100':
+            return 'right'
+        else:
+            return value
 
     @asyncio.coroutine
     def handle_artwork(self, request):
