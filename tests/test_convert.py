@@ -6,6 +6,8 @@ from pyatv import (const, convert, exceptions)
 
 # These are extracted from iTunes, see for instance:
 # http://www.blooming.no/wp-content/uploads/2013/03/ITLibMediaItem.h
+# and also this:
+# https://github.com/melloware/dacp-net/blob/master/Melloware.DACP/DACPResponse.cs
 # Key: cmst.cmmk
 MEDIA_KIND_UNKNOWN = 1
 MEDIA_KIND_SONG = 2
@@ -28,7 +30,9 @@ MEDIA_KIND_ITUNESU = 18
 MEDIA_KIND_BOOK = 19
 MEDIA_KIND_PDFBOOK = 20
 MEDIA_KIND_ALERTTONE = 21
-
+MEDIA_KIND_MUSICVIDEO2 = 32
+MEDIA_KIND_PODCAST2 = 36
+MEDIA_KIND_TVSHOW2 = 64
 
 # Found on various places on the Internet as well as by testing
 # Key: cmst.caps
@@ -53,6 +57,8 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(const.MEDIA_TYPE_VIDEO,
                          convert.media_kind(MEDIA_KIND_MUSICVIDEO))
         self.assertEqual(const.MEDIA_TYPE_VIDEO,
+                         convert.media_kind(MEDIA_KIND_MUSICVIDEO2))
+        self.assertEqual(const.MEDIA_TYPE_VIDEO,
                          convert.media_kind(MEDIA_KIND_VIDEOPASS))
         self.assertEqual(const.MEDIA_TYPE_VIDEO,
                          convert.media_kind(MEDIA_KIND_HOMEVIDEO))
@@ -67,6 +73,8 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(const.MEDIA_TYPE_MUSIC,
                          convert.media_kind(MEDIA_KIND_PODCAST))
         self.assertEqual(const.MEDIA_TYPE_MUSIC,
+                         convert.media_kind(MEDIA_KIND_PODCAST2))
+        self.assertEqual(const.MEDIA_TYPE_MUSIC,
                          convert.media_kind(MEDIA_KIND_COACHEDAUDIO))
         self.assertEqual(const.MEDIA_TYPE_MUSIC,
                          convert.media_kind(MEDIA_KIND_RINGTONE))
@@ -78,6 +86,8 @@ class ConvertTest(unittest.TestCase):
     def test_tv_kinds(self):
         self.assertEqual(const.MEDIA_TYPE_TV,
                          convert.media_kind(MEDIA_KIND_TVSHOW))
+        self.assertEqual(const.MEDIA_TYPE_TV,
+                         convert.media_kind(MEDIA_KIND_TVSHOW2))
 
     def test_unknown_media_kind_throws(self):
         with self.assertRaises(exceptions.UnknownMediaKind):
