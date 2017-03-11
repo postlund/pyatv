@@ -7,11 +7,11 @@ def media_kind(kind):
     """Convert iTunes media kind to API representation."""
     if kind in [1]:
         return const.MEDIA_TYPE_UNKNOWN
-    elif kind in [3, 7, 11, 12, 13, 18]:
+    elif kind in [3, 7, 11, 12, 13, 18, 32]:
         return const.MEDIA_TYPE_VIDEO
-    elif kind in [2, 4, 10, 14, 17, 21]:
+    elif kind in [2, 4, 10, 14, 17, 21, 36]:
         return const.MEDIA_TYPE_MUSIC
-    elif kind in [8]:
+    elif kind in [8, 64]:
         return const.MEDIA_TYPE_TV
 
     raise exceptions.UnknownMediaKind('Unknown media kind: ' + str(kind))
