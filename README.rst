@@ -77,6 +77,8 @@ It is possible to use the reference CLI application as well:
     Found Apple TVs:
      - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9012- 345678901234)
 
+    Note: You must use 'pair' with devices that have home sharing disabled
+
     # Manually specify device
     $ atvremote --address 10.0.10.22 --hsgid 00000000-1234-5678-9012- 345678901234 playing
     Media type: Music

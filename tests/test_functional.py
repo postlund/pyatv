@@ -2,7 +2,6 @@
 
 import pyatv
 import asyncio
-import ipaddress
 
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
@@ -67,26 +66,6 @@ class FunctionalTest(AioHTTPTestCase):
         details = AppleTVDevice(
             'Apple TV', '127.0.0.1', identifier, self.app.port)
         return connect_to_apple_tv(details, self.loop)
-
-    @unittest_run_loop
-    def test_scan_for_apple_tvs(self):
-        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1)
-
-        atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, 'Apple TV 1')
-        self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.1'))
-        self.assertEqual(atvs[0].login_id, 'aaaa')
-        self.assertEqual(atvs[0].port, 3689)
-
-    @unittest_run_loop
-    def test_scan_abort_on_first_found(self):
-        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
-
-        atvs = yield from pyatv.scan_for_apple_tvs(
-            self.loop, timeout=0, abort_on_found=True)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, 'Apple TV 1')
 
     # This is not a pretty test and it does crazy things. Should probably be
     # re-written later but will do for now.
