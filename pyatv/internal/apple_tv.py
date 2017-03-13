@@ -144,6 +144,11 @@ class RemoteControlInternal(RemoteControl):
         time_in_ms = int(pos)*1000
         return self.apple_tv.set_property('dacp.playingtime', time_in_ms)
 
+    def set_shuffle(self, is_on):
+        """Change shuffle mode to on or off."""
+        state = 1 if is_on else 0
+        return self.apple_tv.set_property('dacp.shufflestate', state)
+
     def play_url(self, url, start_position, **kwargs):
         """Play media from an URL on the device.
 
@@ -203,7 +208,7 @@ class PlayingInternal(Playing):
 
     @property
     def album(self):
-        """Album of the currently playing song.."""
+        """Album of the currently playing song."""
         return dmap.first(self.playstatus, 'cmst', 'canl')
 
     @property
@@ -215,6 +220,11 @@ class PlayingInternal(Playing):
     def position(self):
         """Current position in the playing media (seconds)."""
         return self.total_time - self._get_time_in_seconds('cant')
+
+    @property
+    def shuffle(self):
+        """If shuffle is enabled or not."""
+        return bool(dmap.first(self.playstatus, 'cmst', 'cash'))
 
     def _get_time_in_seconds(self, tag):
         time = dmap.first(self.playstatus, 'cmst', tag)
