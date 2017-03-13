@@ -224,6 +224,24 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.play_state, const.PLAY_STATE_NO_MEDIA)
 
     @unittest_run_loop
+    def test_shuffle_state_off(self):
+        self.usecase.video_playing(paused=True, title='dummy',
+                                   total_time=123, position=3,
+                                   shuffle=False)
+
+        playing = yield from self.atv.metadata.playing()
+        self.assertFalse(playing.shuffle)
+
+    @unittest_run_loop
+    def test_shuffle_state_on(self):
+        self.usecase.video_playing(paused=True, title='dummy',
+                                   total_time=123, position=3,
+                                   shuffle=True)
+
+        playing = yield from self.atv.metadata.playing()
+        self.assertTrue(playing.shuffle)
+
+    @unittest_run_loop
     def test_metadata_video_paused(self):
         self.usecase.video_playing(paused=True, title='dummy',
                                    total_time=123, position=3)

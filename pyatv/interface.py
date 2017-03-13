@@ -109,6 +109,11 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def set_shuffle(self, is_on):
+        """Change shuffle mode to on or off."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def play_url(self, url, start_position=0, port=7000):
         """Play media from an URL on the device."""
         raise exceptions.NotSupportedError
@@ -181,6 +186,11 @@ class Playing(object):
     @abstractproperty
     def position(self):
         """Current position in the playing media (seconds)."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def shuffle(self):
+        """If shuffle is enabled or not."""
         raise exceptions.NotSupportedError
 
 

@@ -36,7 +36,7 @@ PairingResponse = namedtuple('PairingResponse', 'remote_name, pairing_code')
 class PlayingResponse:
     """Response returned by command playstatusupdate."""
 
-    def __init__(self, revision=0, **kwargs):
+    def __init__(self, revision=0, shuffle=False, **kwargs):
         """Initialize a new PlayingResponse."""
         self.paused = self._get('paused', **kwargs)
         self.title = self._get('title', **kwargs)
@@ -47,6 +47,7 @@ class PlayingResponse:
         self.mediakind = self._get('mediakind', **kwargs)
         self.playstatus = self._get('playstatus', **kwargs)
         self.revision = revision
+        self.shuffle = shuffle
 
     def _get(self, name, **kwargs):
         if name in kwargs:
@@ -183,6 +184,7 @@ class FakeAppleTV(web.Application):
         if playing.playstatus is not None:
             body += tags.uint32_tag('caps', playing.playstatus)
 
+        body += tags.uint8_tag('cash', playing.shuffle)
         body += tags.uint32_tag('cmsr', playing.revision + 1)
 
         return web.Response(
@@ -332,13 +334,16 @@ class AppleTVUseCases:
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Calling this method changes what is currently plaing to video."""
         revision = 0
+        shuffle = False
         if 'revision' in kwargs:
             revision = kwargs['revision']
+        if 'shuffle' in kwargs:
+            shuffle = kwargs['shuffle']
         self.device.responses['playing'].insert(0, PlayingResponse(
             revision=revision,
             paused=paused, title=title,
             total_time=total_time, position=position,
-            mediakind=3))
+            mediakind=3, shuffle=shuffle))
 
     def music_playing(self, paused, artist, album, title,
                       total_time, position):
