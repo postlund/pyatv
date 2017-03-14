@@ -16,6 +16,7 @@ Features
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
 - Change media position
+- Shuffle and repeat
 
 
 Library Installation

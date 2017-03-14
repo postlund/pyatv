@@ -22,6 +22,7 @@ Features
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
 - Change media position
+- Shuffle and repeat
 
 Requirements
 ------------
@@ -89,36 +90,40 @@ It is possible to use the reference CLI application as well:
     # List all commands supported by a device
     $ atvremote -a commands
     Remote control commands:
-     - select - Press key select
      - down - Press key down
-     - top_menu - Go to main menu (long press menu)
-     - right - Press key right
-     - next - Press key next
-     - set_position - Seek in the current playing media
      - left - Press key left
-     - play_url - Play media from an URL on the device
-     - play - Press key play
-     - pause - Press key play
-     - up - Press key up
      - menu - Press key menu
+     - next - Press key next
+     - pause - Press key play
+     - play - Press key play
+     - play_url - Play media from an URL on the device
      - previous - Press key previous
+     - right - Press key right
+     - select - Press key select
+     - set_position - Seek in the current playing media
+     - set_repeat - Change repeat mode
+     - set_shuffle - Change shuffle mode to on or off
+     - top_menu - Go to main menu (long press menu)
+     - up - Press key up
 
     Metadata commands:
+     - artwork - Return artwork for what is currently playing (or None)
      - artwork_url - Return artwork URL for what is currently playing
      - playing - Return what is currently playing
-     - artwork - Return artwork for what is currently playing (or None)
 
     Playing commands:
-     - play_state - Current play state, e.g. playing or paused
-     - total_time - Total play time in seconds
-     - title - Title of the current media, e.g. movie or song name
-     - media_type - What type of media is currently playing, e.g. video, music
-     - position - Current position in the playing media (seconds)
-     - artist - Artist of the currently playing song
      - album - Album of the currently playing song
+     - artist - Artist of the currently playing song
+     - media_type - What type of media is currently playing, e.g. video, music
+     - play_state - Current play state, e.g. playing or paused
+     - position - Current position in the playing media (seconds)
+     - repeat - Current repeat mode
+     - shuffle - If shuffle is enabled or not
+     - title - Title of the current media, e.g. movie or song name
+     - total_time - Total play time in seconds
 
     Other commands:
-     - push_updates - Listen for push updates.
+     - push_updates - Listen for push updates
 
 Type `atvremote --help` to list all supported commands.
 
