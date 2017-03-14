@@ -87,6 +87,16 @@ class PlayingDummy(interface.Playing):
         """Current position in the playing media (seconds)."""
         return self._position
 
+    @property
+    def shuffle(self):
+        """If shuffle is enabled or not."""
+        return True
+
+    @property
+    def repeat(self):
+        """Current repeat mode."""
+        return const.REPEAT_STATE_TRACK
+
 
 class InterfaceTest(unittest.TestCase):
 
@@ -143,3 +153,8 @@ class InterfaceTest(unittest.TestCase):
     def test_playing_both_position_and_total_time(self):
         out = str(PlayingDummy(position=1234, total_time=5678))
         self.assertIn('1234/5678', out)
+
+    def test_playing_shuffle_and_repeat(self):
+        out = str(PlayingDummy())
+        self.assertIn('Shuffle: True', out)
+        self.assertIn('Repeat: Track', out)
