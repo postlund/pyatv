@@ -335,17 +335,19 @@ setproperty
 
 **Authentication:** Session ID
 
-Changes a property for something. Currently only media position is implemented,
-but for example shuffle or repeat can be changed as well (and will likely be
-implemented in the future).
+Changes a property for something.
 
 Summary of supported properties:
 
-+-----------------------+------+----------------------+
-| Key                   | Type | Value                |
-+=======================+======+======================+
-| dacp.playingtime      | uint | Time in seconds      |
-+-----------------------+------+----------------------+
++-----------------------+------+-------------------------------------+
+| Key                   | Type | Value                               |
++=======================+======+=====================================+
+| dacp.playingtime      | uint | Time in seconds                     |
++-----------------------+------+-------------------------------------+
+| dacp.shufflestate     | bool | Shuffle state on/off                |
++-----------------------+------+-------------------------------------+
+| dacp.repeatstate      | uint | Repeat mode (0=Off, 1=Track, 2=All) |
++-----------------------+------+-------------------------------------+
 
 References
 ----------
