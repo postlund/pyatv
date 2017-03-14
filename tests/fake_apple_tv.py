@@ -46,6 +46,7 @@ class PlayingResponse:
         self.position = self._get('position', **kwargs)
         self.mediakind = self._get('mediakind', **kwargs)
         self.playstatus = self._get('playstatus', **kwargs)
+        self.repeat = self._get('repeat', **kwargs)
         self.revision = revision
         self.shuffle = shuffle
 
@@ -184,6 +185,9 @@ class FakeAppleTV(web.Application):
         if playing.playstatus is not None:
             body += tags.uint32_tag('caps', playing.playstatus)
 
+        if playing.repeat is not None:
+            body += tags.uint8_tag('carp', playing.repeat)
+
         body += tags.uint8_tag('cash', playing.shuffle)
         body += tags.uint32_tag('cmsr', playing.revision + 1)
 
@@ -194,10 +198,18 @@ class FakeAppleTV(web.Application):
     def handle_set_property(self, request):
         """Handler for property changes."""
         self._verify_auth_parameters(request)
-        self.tc.assertIn('dacp.playingtime', request.rel_url.query,
-                         msg='property to set is missing')
-        playingtime = request.rel_url.query['dacp.playingtime']
-        self.properties['dacp.playingtime'] = int(playingtime)
+        if 'dacp.playingtime' in request.rel_url.query:
+            self.properties['dacp.playingtime'] = int(
+                request.rel_url.query['dacp.playingtime'])
+        elif 'dacp.shufflestate' in request.rel_url.query:
+            self.properties['dacp.shufflestate'] = int(
+                request.rel_url.query['dacp.shufflestate'])
+        elif 'dacp.repeatstate' in request.rel_url.query:
+            self.properties['dacp.repeatstate'] = int(
+                request.rel_url.query['dacp.repeatstate'])
+        else:
+            web.Response(body=b'', status=500)
+
         return web.Response(body=b'', status=200)
 
     @asyncio.coroutine
@@ -331,19 +343,27 @@ class AppleTVUseCases:
         """Calling this method will put device in idle state."""
         self.device.responses['playing'].insert(0, PlayingResponse())
 
+    def example_video(self, **kwargs):
+        """Play some example video."""
+        self.video_playing(paused=True, title='dummy',
+                           total_time=123, position=3, **kwargs)
+
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Calling this method changes what is currently plaing to video."""
         revision = 0
         shuffle = False
+        repeat = None
         if 'revision' in kwargs:
             revision = kwargs['revision']
         if 'shuffle' in kwargs:
             shuffle = kwargs['shuffle']
+        if 'repeat' in kwargs:
+            repeat = kwargs['repeat']
         self.device.responses['playing'].insert(0, PlayingResponse(
             revision=revision,
             paused=paused, title=title,
             total_time=total_time, position=position,
-            mediakind=3, shuffle=shuffle))
+            mediakind=3, shuffle=shuffle, repeat=repeat))
 
     def music_playing(self, paused, artist, album, title,
                       total_time, position):
@@ -365,6 +385,15 @@ class AppleTVUseCases:
         plist = dict(readyToPlay=False, uuid=123)
         self.device.responses['airplay_playback'].insert(
             0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+
+    def set_property(self, prop, value):
+        """Change value of a property."""
+        # Use "fictional" properties to not tie them to DAP (if some other
+        # protocol is to be supported in the future)
+        if prop == 'shuffle':
+            self.device.properties['dacp.shufflestate'] = value
+        elif prop == 'repeat':
+            self.device.properties['dacp.repeatstate'] = value
 
     def airplay_playback_playing(self):
         """Make playback-info return that something is playing."""

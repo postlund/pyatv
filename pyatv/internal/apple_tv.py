@@ -81,7 +81,7 @@ class BaseAppleTV:
 
     def set_property(self, prop, value):
         """Change value of a DAAP property, e.g. volume or media position."""
-        cmd_url = 'ctrl-int/1/setproperty?{}={}&[AUTH]&prompt-id=0'.format(
+        cmd_url = 'ctrl-int/1/setproperty?{}={}&[AUTH]'.format(
             prop, value)
         return self.daap.post(cmd_url)
 
@@ -148,6 +148,10 @@ class RemoteControlInternal(RemoteControl):
         """Change shuffle mode to on or off."""
         state = 1 if is_on else 0
         return self.apple_tv.set_property('dacp.shufflestate', state)
+
+    def set_repeat(self, repeat_mode):
+        """Change repeat mode."""
+        return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
 
     def play_url(self, url, start_position, **kwargs):
         """Play media from an URL on the device.
@@ -225,6 +229,11 @@ class PlayingInternal(Playing):
     def shuffle(self):
         """If shuffle is enabled or not."""
         return bool(dmap.first(self.playstatus, 'cmst', 'cash'))
+
+    @property
+    def repeat(self):
+        """Current repeat mode."""
+        return dmap.first(self.playstatus, 'cmst', 'carp')
 
     def _get_time_in_seconds(self, tag):
         time = dmap.first(self.playstatus, 'cmst', tag)

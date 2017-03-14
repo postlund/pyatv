@@ -178,7 +178,7 @@ def _handle_autodiscover(args, loop):
 
 def _print_commands(title, obj, newline=True):
     commands = ' - ' + '\n - '.join(
-        map(lambda x: x[0] + ' - ' + x[1], obj.items()))
+        map(lambda x: x[0] + ' - ' + x[1], sorted(obj.items())))
     print('{} commands:\n{}{}'.format(
         title, commands, '\n' if newline else ''))
 

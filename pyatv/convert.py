@@ -68,6 +68,18 @@ def playstate_str(state):
         return 'Unsupported'
 
 
+def repeat_str(state):
+    """Convert internal API repeat state to string."""
+    if state == const.REPEAT_STATE_OFF:
+        return 'Off'
+    elif state == const.REPEAT_STATE_TRACK:
+        return 'Track'
+    elif state == const.REPEAT_STATE_ALL:
+        return 'All'
+    else:
+        return 'Unsupported'
+
+
 def ms_to_s(time):
     """Convert time in ms to seconds."""
     if time is None:

@@ -114,6 +114,11 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def set_repeat(self, repeat_mode):
+        """Change repeat mode."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def play_url(self, url, start_position=0, port=7000):
         """Play media from an URL on the device."""
         raise exceptions.NotSupportedError
@@ -150,6 +155,13 @@ class Playing(object):
             output.append('  Position: {0}s'.format(position))
         elif total_time is not None and position != 0:
             output.append('Total time: {0}s'.format(total_time))
+
+        if self.repeat is not None:
+            output.append('    Repeat: {0}'.format(
+                convert.repeat_str(self.repeat)))
+
+        if self.shuffle is not None:
+            output.append('   Shuffle: {0}'.format(self.shuffle))
 
         return '\n'.join(output)
 
@@ -191,6 +203,11 @@ class Playing(object):
     @abstractproperty
     def shuffle(self):
         """If shuffle is enabled or not."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def repeat(self):
+        """Current repeat mode."""
         raise exceptions.NotSupportedError
 
 

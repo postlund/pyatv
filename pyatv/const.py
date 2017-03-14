@@ -40,3 +40,15 @@ PLAY_STATE_FAST_FORWARD = 5
 
 #: Media is being rewinded
 PLAY_STATE_FAST_BACKWARD = 6
+
+
+# Corresponds to "repeatstate", dacp.repeatstate, in iTunes
+
+#: No repeat
+REPEAT_STATE_OFF = 0
+
+#: Repeat current track
+REPEAT_STATE_TRACK = 1
+
+#: Repeat all tracks
+REPEAT_STATE_ALL = 2

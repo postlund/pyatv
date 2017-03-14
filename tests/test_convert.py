@@ -92,7 +92,7 @@ class ConvertTest(unittest.TestCase):
                          convert.media_type_str(const.MEDIA_TYPE_MUSIC))
         self.assertEqual('TV', convert.media_type_str(const.MEDIA_TYPE_TV))
 
-    def test_unknown_media_type_to_str_throws(self):
+    def test_unknown_media_type_to_str(self):
         self.assertEqual('Unsupported', convert.media_type_str(999))
 
     # PLAYSTATE TESTS
@@ -152,3 +152,16 @@ class ConvertTest(unittest.TestCase):
         # Sometimes really large times are reported during buffering, this test
         # handles those special cases.
         self.assertEqual(0, convert.ms_to_s(2**32 - 1))
+
+    # REPEAT TESTS
+
+    def test_repeat_str(self):
+        self.assertEqual('Off',
+                         convert.repeat_str(const.REPEAT_STATE_OFF))
+        self.assertEqual('Track',
+                         convert.repeat_str(const.REPEAT_STATE_TRACK))
+        self.assertEqual('All',
+                         convert.repeat_str(const.REPEAT_STATE_ALL))
+
+    def test_unknown_repeat_to_str(self):
+        self.assertEqual('Unsupported', convert.repeat_str(1234))
