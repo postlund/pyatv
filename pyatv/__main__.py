@@ -77,18 +77,21 @@ def cli_handler(loop):
 
     debug = parser.add_argument_group('debugging')
     debug.add_argument('-v', '--verbose', help='increase output verbosity',
-                       action='store_const', dest='loglevel',
-                       const=logging.INFO)
+                       action='store_true', dest='verbose')
     debug.add_argument('--developer', help='show developer commands',
                        action='store_true', dest='developer',
                        default=False)
     debug.add_argument('--debug', help='print debug information',
-                       action='store_const', dest='loglevel',
-                       const=logging.DEBUG, default=logging.WARNING)
+                       action='store_true', dest='debug')
 
     args = parser.parse_args()
+    loglevel = logging.WARNING
+    if args.verbose:
+        loglevel = logging.INFO
+    if args.debug:
+        loglevel = logging.DEBUG
 
-    logging.basicConfig(level=args.loglevel,
+    logging.basicConfig(level=loglevel,
                         format='%(levelname)s: %(message)s')
     logging.getLogger('requests').setLevel(logging.WARNING)
 
