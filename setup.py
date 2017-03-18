@@ -20,7 +20,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'aiohttp>=1.3.0',
+        'aiohttp>=1.3.5',
         'zeroconf>=0.17.7',
     ],
     test_suite='tests',
