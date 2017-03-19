@@ -43,7 +43,8 @@ class PlayingDummy(interface.Playing):
 
     def __init__(self, media_type=const.MEDIA_TYPE_VIDEO,
                  play_state=const.PLAY_STATE_PLAYING, title=None, artist=None,
-                 album=None, total_time=None, position=None):
+                 album=None, total_time=None, position=None, shuffle=True,
+                 repeat=const.REPEAT_STATE_TRACK):
         self._media_type = media_type
         self._play_state = play_state
         self._title = title
@@ -51,6 +52,8 @@ class PlayingDummy(interface.Playing):
         self._album = album
         self._total_time = total_time
         self._position = position
+        self._shuffle = shuffle
+        self._repeat = repeat
 
     @property
     def media_type(self):
@@ -90,12 +93,12 @@ class PlayingDummy(interface.Playing):
     @property
     def shuffle(self):
         """If shuffle is enabled or not."""
-        return True
+        return self._shuffle
 
     @property
     def repeat(self):
         """Current repeat mode."""
-        return const.REPEAT_STATE_TRACK
+        return self._repeat
 
 
 class InterfaceTest(unittest.TestCase):
