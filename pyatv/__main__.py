@@ -300,10 +300,9 @@ def main():
     """Start the asyncio event loop and runs the application."""
     # Helper method so that the coroutine exits cleanly if an exception
     # happens (which would leave resources dangling)
-    @asyncio.coroutine
     def _run_application(loop):
         try:
-            return (yield from asyncio.wait_for(cli_handler(loop), timeout=15))
+            return cli_handler(loop)
 
         except KeyboardInterrupt:
             pass  # User pressed Ctrl+C, just ignore it
