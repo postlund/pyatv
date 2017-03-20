@@ -46,7 +46,7 @@ def cli_handler(loop):
     """Application starts here."""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('command')
+    parser.add_argument('command', nargs='+')
     parser.add_argument('--name', help='apple tv name',
                         dest='name', default='Apple TV')
     parser.add_argument('--address', help='device ip address or hostname',
@@ -100,14 +100,14 @@ def cli_handler(loop):
             (not args.login_id and args.address):
         parser.error('both --login_id and --address must be given')
 
-    if args.command == 'scan':
+    if args.command[0] == 'scan':
         return (yield from _handle_scan(args, loop))
-    elif args.command == 'pair':
+    elif args.command[0] == 'pair':
         return (yield from _handle_pairing(args, loop))
     elif args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
     elif args.login_id:
-        return (yield from _handle_command(args, loop))
+        return (yield from _handle_commands(args, loop))
     else:
         logging.error('To autodiscover an Apple TV, add -a')
 
@@ -181,9 +181,8 @@ def _handle_autodiscover(args, loop):
     args.login_id = apple_tv.login_id
     args.name = apple_tv.name
     logging.info('Auto-discovered %s at %s', args.name, args.address)
-    yield from _handle_command(args, loop)
 
-    return 0
+    return (yield from _handle_commands(args, loop))
 
 
 def _print_commands(title, obj, newline=True):
@@ -212,56 +211,66 @@ def _extract_command_with_args(cmd):
 
 
 @asyncio.coroutine
-def _handle_command(args, loop):
+def _handle_commands(args, loop):
     details = pyatv.AppleTVDevice(args.name, args.address, args.login_id)
     atv = pyatv.connect_to_apple_tv(details, loop)
     atv.push_updater.listener = PushListener()
 
     try:
-        playing_resp = yield from atv.metadata.playing()
-        ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
-        metadata = retrieve_commands(atv.metadata, developer=args.developer)
-        playing = retrieve_commands(playing_resp, developer=args.developer)
-        other = {'push_updates': 'Listen for push updates'}
-
-        # Parse input command and argument from user
-        cmd, cmd_args = _extract_command_with_args(args.command)
-
-        if cmd == 'commands':
-            _print_commands('Remote control', ctrl)
-            _print_commands('Metadata', metadata)
-            _print_commands('Playing', playing)
-            _print_commands('Other', other, newline=False)
-
-        elif cmd == 'artwork':
-            artwork = yield from atv.metadata.artwork()
-            if artwork is not None:
-                with open('artwork.png', 'wb') as file:
-                    file.write(artwork)
-            else:
-                print('No artwork is currently available.')
-
-        elif cmd == 'push_updates':
-            print('Press ENTER to stop')
-
-            atv.push_updater.start()
-            yield from loop.run_in_executor(None, sys.stdin.readline)
-            atv.push_updater.stop()
-
-        elif cmd in ctrl:
-            yield from _exec_command(atv.remote_control, cmd, *cmd_args)
-
-        elif cmd in metadata:
-            yield from _exec_command(atv.metadata, cmd, *cmd_args)
-
-        elif cmd in playing:
-            yield from _exec_command(playing_resp, cmd, *cmd_args)
-
-        else:
-            logging.error('Unknown command: %s', args.command)
-
+        for cmd in args.command:
+            ret = yield from _handle_command(args, cmd, atv, loop)
+            if ret != 0:
+                return ret
     finally:
         yield from atv.logout()
+
+    return 0
+
+
+@asyncio.coroutine
+def _handle_command(args, cmd, atv, loop):
+    playing_resp = yield from atv.metadata.playing()
+    ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
+    metadata = retrieve_commands(atv.metadata, developer=args.developer)
+    playing = retrieve_commands(playing_resp, developer=args.developer)
+    other = {'push_updates': 'Listen for push updates'}
+
+    # Parse input command and argument from user
+    cmd, cmd_args = _extract_command_with_args(cmd)
+    if cmd == 'commands':
+        _print_commands('Remote control', ctrl)
+        _print_commands('Metadata', metadata)
+        _print_commands('Playing', playing)
+        _print_commands('Other', other, newline=False)
+
+    elif cmd == 'artwork':
+        artwork = yield from atv.metadata.artwork()
+        if artwork is not None:
+            with open('artwork.png', 'wb') as file:
+                file.write(artwork)
+        else:
+            print('No artwork is currently available.')
+            return 1
+
+    elif cmd == 'push_updates':
+        print('Press ENTER to stop')
+
+        atv.push_updater.start()
+        yield from loop.run_in_executor(None, sys.stdin.readline)
+        atv.push_updater.stop()
+
+    elif cmd in ctrl:
+        return (yield from _exec_command(atv.remote_control, cmd, *cmd_args))
+
+    elif cmd in metadata:
+        return (yield from _exec_command(atv.metadata, cmd, *cmd_args))
+
+    elif cmd in playing:
+        return (yield from _exec_command(playing_resp, cmd, *cmd_args))
+
+    else:
+        logging.error('Unknown command: %s', args.command[0])
+        return 1
 
     return 0
 
@@ -278,16 +287,17 @@ def _exec_command(obj, command, *args):
         else:
             value = tmp
         _pretty_print(value)
+        return 0
     except NotImplementedError:
         logging.fatal("Command '%s' is not supported by device", command)
     except exceptions.AuthenticationError as ex:
         logging.fatal('Authentication error: %s', str(ex))
+    return 1
 
 
 def _pretty_print(data):
     if data is None:
         return
-
     if isinstance(data, bytes):
         print(binascii.hexlify(data))
     elif isinstance(data, list):
@@ -300,9 +310,10 @@ def main():
     """Start the asyncio event loop and runs the application."""
     # Helper method so that the coroutine exits cleanly if an exception
     # happens (which would leave resources dangling)
+    @asyncio.coroutine
     def _run_application(loop):
         try:
-            return cli_handler(loop)
+            return (yield from cli_handler(loop))
 
         except KeyboardInterrupt:
             pass  # User pressed Ctrl+C, just ignore it
