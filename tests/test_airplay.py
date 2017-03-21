@@ -30,8 +30,9 @@ class AirPlayTest(AioHTTPTestCase):
         AioHTTPTestCase.tearDown(self)
         self.log_handler.tearDown()
 
-    def get_app(self, loop):
-        self.fake_atv = FakeAppleTV(loop, 0, 0, 0, self)
+    @asyncio.coroutine
+    def get_application(self, loop=None):
+        self.fake_atv = FakeAppleTV(self.loop, 0, 0, 0, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
 
         # Import TestServer here and not globally, otherwise py.test will
