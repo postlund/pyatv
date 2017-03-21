@@ -49,9 +49,9 @@ class FunctionalTest(AioHTTPTestCase):
         self.log_handler.tearDown()
 
     @asyncio.coroutine
-    def get_application(self, loop):
+    def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(
-            loop, HSGID, PAIRING_GUID, SESSION_ID, self)
+            self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
 
         # Import TestServer here and not globally, otherwise py.test will
