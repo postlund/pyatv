@@ -84,7 +84,7 @@ Dependencies
 
 - python>=3.4.2
 - zeroconf>=0.17.7
-- aiohttp>=1.3.0
+- aiohttp>=1.3.5
 
 Contributing
 ------------
