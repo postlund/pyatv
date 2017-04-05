@@ -12,12 +12,12 @@ Features
 - Automatic discovery of devices (zeroconf/Bonjour)
 - Push updates
 - Remote control pairing
-- Most buttons (play, pause, next, previous, select, menu, top_menu)
+- Playback controls (play, pause, next, stop, etc.)
+- Navigation controls (select, menu, top_menu, arrow keys)
 - Fetch artwork in PNG format
 - Currently playing (e.g. title, artist, album, total time, etc.)
 - Change media position
 - Shuffle and repeat
-
 
 Library Installation
 --------------------
@@ -118,6 +118,7 @@ Contents
    atvremote
    developing
    testing
+   troubleshooting
    faq
 
 

@@ -24,6 +24,17 @@ on GitHub and `here <https://forums.plex.tv/discussion/191765/fast-forward-and-r
 Unfortunately, this is not something pyatv can fix or work around. We'll just
 have to sit tight and wait for a fix in tvOS.
 
+**Streaming with AirPlay does not work. It says "This AirPlay connection requires
+iOS 7.1 or later, OS X 10.10 or later, or iTunes 11.2 or later." on the screen.
+What's wrong?**
+
+From tvOS 10.2 and later, Apple enforces "device verification". This was optional
+and disabled by default in earlier versions. After this update, a lot of 3rd party
+tools broke, including pyatv. This means that it is currently not possible to stream
+content to an Apple TV running tvOS 10.2 (or later). As soon as the device
+verification scheme has been reversed engineered, support will be added. But there
+is no timeframe for this.
+
 Technical Questions
 -------------------
 **Is there a synchronous version of the library?**

@@ -18,7 +18,7 @@ class LogOutputHandler:
         logging.getLogger().addHandler(self.handler)
 
     def tearDown(self):
-        """Should be called by tearDown in test.
+        """Call by tearDown in test.
 
         This method will print all error produced by the test to stdout.
         """

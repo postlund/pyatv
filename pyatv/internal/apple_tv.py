@@ -224,7 +224,7 @@ class PlayingInternal(Playing):
 
     @property
     def media_type(self):
-        """What type of media is currently playing, e.g. video, music."""
+        """Type of media is currently playing, e.g. video, music."""
         state = dmap.first(self.playstatus, 'cmst', 'caps')
         if not state:
             return const.MEDIA_TYPE_UNKNOWN
@@ -242,7 +242,7 @@ class PlayingInternal(Playing):
 
     @property
     def play_state(self):
-        """Current play state, e.g. playing or paused."""
+        """Play state, e.g. playing or paused."""
         state = dmap.first(self.playstatus, 'cmst', 'caps')
         return convert.playstate(state)
 
@@ -268,7 +268,7 @@ class PlayingInternal(Playing):
 
     @property
     def position(self):
-        """Current position in the playing media (seconds)."""
+        """Position in the playing media (seconds)."""
         return self.total_time - self._get_time_in_seconds('cant')
 
     @property
@@ -278,7 +278,7 @@ class PlayingInternal(Playing):
 
     @property
     def repeat(self):
-        """Current repeat mode."""
+        """Repeat mode."""
         return dmap.first(self.playstatus, 'cmst', 'carp')
 
     def _get_time_in_seconds(self, tag):
@@ -338,7 +338,7 @@ class PushUpdaterInternal(PushUpdater):
 
     @property
     def listener(self):
-        """Current receiver of push updates."""
+        """Receiver of push updates."""
         return self.__listener
 
     @listener.setter

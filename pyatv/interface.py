@@ -171,12 +171,12 @@ class Playing(object):
 
     @abstractproperty
     def media_type(self):
-        """What type of media is currently playing, e.g. video, music."""
+        """Type of media is currently playing, e.g. video, music."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
     def play_state(self):
-        """Current play state, e.g. playing or paused."""
+        """Play state, e.g. playing or paused."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
@@ -201,7 +201,7 @@ class Playing(object):
 
     @abstractproperty
     def position(self):
-        """Current position in the playing media (seconds)."""
+        """Position in the playing media (seconds)."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
@@ -211,7 +211,7 @@ class Playing(object):
 
     @abstractproperty
     def repeat(self):
-        """Current repeat mode."""
+        """Repeat mode."""
         raise exceptions.NotSupportedError
 
 
@@ -244,13 +244,13 @@ class PushUpdater(object):
 
     @property
     def listener(self):
-        """Listener (PushUpdaterListener) that receives updates."""
+        """Object (PushUpdaterListener) that receives updates."""
         raise exceptions.NotSupportedError
 
     @listener.setter  # type: ignore
     @abstractmethod
     def listener(self, listener):
-        """Listener that receives updates.
+        """Object that receives updates.
 
         This should be an object implementing two methods:
         - playstatus_update(updater, playstatus)
