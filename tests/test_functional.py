@@ -142,6 +142,11 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(self.fake_atv.last_button_pressed, 'pause')
 
     @unittest_run_loop
+    def test_button_stop(self):
+        yield from self.atv.remote_control.stop()
+        self.assertEqual(self.fake_atv.last_button_pressed, 'stop')
+
+    @unittest_run_loop
     def test_button_next(self):
         yield from self.atv.remote_control.next()
         self.assertEqual(self.fake_atv.last_button_pressed, 'nextitem')

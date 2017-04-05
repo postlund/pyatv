@@ -86,7 +86,7 @@ class FakeAppleTV(web.Application):
             '/ctrl-int/1/nowplayingartwork', self.handle_artwork)
         self.router.add_post(
             '/ctrl-int/1/setproperty', self.handle_set_property)
-        for button in ['play', 'pause', 'nextitem', 'previtem']:
+        for button in ['play', 'pause', 'stop', 'nextitem', 'previtem']:
             self.router.add_post('/ctrl-int/1/' + button,
                                  self.handle_playback_button)
 
