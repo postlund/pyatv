@@ -26,7 +26,7 @@ class AppleTVDevice(
     """Representation of an Apple TV device used when connecting."""
 
     def __new__(cls, name, address, login_id, port=3689):
-        """"Initialize a new AppleTVDevice."""
+        """Initialize a new AppleTVDevice."""
         return super(AppleTVDevice, cls).__new__(
             cls, name, address, login_id, port)
 
@@ -41,7 +41,7 @@ class _ServiceListener(object):
         self.found_devices = {}
 
     def add_service(self, zeroconf, service_type, name):
-        """Callback from zeroconf when a service has been discovered."""
+        """Handle callback from zeroconf when a service has been discovered."""
         # If it's not instantly lockable, then abort_on_found is True and we
         # have found a device already
         if not self.semaphore.locked():
@@ -124,5 +124,5 @@ def connect_to_apple_tv(details, loop, session=None):
 
 
 def pair_with_apple_tv(loop, pin_code, name, pairing_guid=None):
-    """Initiate pairing process with an Apple TV."""
+    """Initialize pairing process with an Apple TV."""
     return PairingHandler(loop, name, pin_code, pairing_guid=pairing_guid)

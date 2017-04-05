@@ -112,7 +112,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_login(self, request):
-        """Handler for login requests."""
+        """Handle login requests."""
         self._verify_headers(request)
         self._verify_auth_parameters(
             request, check_login_id=True, check_session=False)
@@ -125,7 +125,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_playback_button(self, request):
-        """Handler for playback buttons."""
+        """Handle playback buttons."""
         self._verify_auth_parameters(request)
         self.last_button_pressed = request.rel_url.path.split('/')[-1]
         self.buttons_press_count += 1
@@ -133,7 +133,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_remote_button(self, request):
-        """Handler for remote control buttons."""
+        """Handle remote control buttons."""
         self._verify_auth_parameters(request)
         content = yield from request.content.read()
         parsed = dmap.parse(content, tag_definitions.lookup_tag)
@@ -157,14 +157,14 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_artwork(self, request):
-        """Handler for artwork requests."""
+        """Handle artwork requests."""
         self._verify_auth_parameters(request)
         artwork = self._get_response('artwork')
         return web.Response(body=artwork.content, status=artwork.status)
 
     @asyncio.coroutine
     def handle_playstatus(self, request):
-        """Handler for playstatus (currently playing) requests."""
+        """Handle  playstatus (currently playing) requests."""
         self._verify_auth_parameters(request)
 
         body = b''
@@ -213,7 +213,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_set_property(self, request):
-        """Handler for property changes."""
+        """Handle property changes."""
         self._verify_auth_parameters(request)
         if 'dacp.playingtime' in request.rel_url.query:
             self.properties['dacp.playingtime'] = int(
@@ -298,7 +298,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_airplay_play(self, request):
-        """Handler for AirPlay play requests."""
+        """Handle AirPlay play requests."""
         headers = request.headers
 
         # Verify headers first
@@ -316,7 +316,7 @@ class FakeAppleTV(web.Application):
 
     @asyncio.coroutine
     def handle_airplay_playback_info(self, request):
-        """Handler for AirPlay playback-info requests."""
+        """Handle AirPlay playback-info requests."""
         response = self._get_response('airplay_playback')
         return web.Response(body=response.content, status=200)
 
@@ -332,11 +332,11 @@ class AppleTVUseCases:
         self.device = fake_apple_tv
 
     def force_relogin(self, session):
-        """Calling this method will change current session id."""
+        """Call this method to change current session id."""
         self.device.responses['login'].append(LoginResponse(session, 200))
 
     def make_login_fail(self, immediately=True):
-        """Calling this method will make login fail with response 503."""
+        """Call this method to make login fail with response 503."""
         response = LoginResponse(0, 503)
         if immediately:
             self.device.responses['login'].append(response)
@@ -344,7 +344,7 @@ class AppleTVUseCases:
             self.device.responses['login'].insert(0, response)
 
     def change_artwork(self, artwork):
-        """Calling this method will change artwork response."""
+        """Call this method to change artwork response."""
         self.device.responses['artwork'].insert(
             0, ArtworkResponse(artwork, 200))
 
@@ -357,7 +357,7 @@ class AppleTVUseCases:
             0, ArtworkResponse(None, 403))
 
     def nothing_playing(self):
-        """Calling this method will put device in idle state."""
+        """Call this method to put device in idle state."""
         self.device.responses['playing'].insert(0, PlayingResponse())
 
     def example_video(self, **kwargs):
@@ -366,7 +366,7 @@ class AppleTVUseCases:
                            total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
-        """Calling this method changes what is currently plaing to video."""
+        """Call this method to change what is currently plaing to video."""
         revision = 0
         shuffle = False
         repeat = None
@@ -384,7 +384,7 @@ class AppleTVUseCases:
 
     def music_playing(self, paused, artist, album, title,
                       total_time, position):
-        """Calling this method changes what is currently plaing to music."""
+        """Call this method to change what is currently plaing to music."""
         self.device.responses['playing'].insert(0, PlayingResponse(
             paused=paused, title=title,
             artist=artist, album=album,
@@ -393,7 +393,7 @@ class AppleTVUseCases:
             mediakind=2))
 
     def media_is_loading(self):
-        """Calling this method puts device in a loading state."""
+        """Call this method to put device in a loading state."""
         self.device.responses['playing'].insert(0, PlayingResponse(
             playstatus=1))
 

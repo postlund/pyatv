@@ -5,7 +5,7 @@ import pyatv
 
 
 def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
-    """Convenient method for connecting to a device.
+    """Short method for connecting to a device.
 
     This is a convenience method that create an event loop, auto discovers
     devices, picks the first device found, connects to it and passes it to a

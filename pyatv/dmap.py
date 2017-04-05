@@ -29,7 +29,6 @@ class DmapTag(namedtuple('DmapTag', ['type', 'name'])):
 
 
 def _parse(data, data_len, tag_lookup, pos, ctx=None):
-    """Internal parse method."""
     if ctx is None:
         ctx = []
     if pos >= data_len:
