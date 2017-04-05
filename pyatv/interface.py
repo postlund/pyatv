@@ -79,6 +79,11 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def stop(self):
+        """Press key stop."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def next(self):
         """Press key next."""
         raise exceptions.NotSupportedError

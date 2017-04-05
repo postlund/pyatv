@@ -103,6 +103,7 @@ It is possible to use the reference CLI application as well:
      - set_position - Seek in the current playing media
      - set_repeat - Change repeat mode
      - set_shuffle - Change shuffle mode to on or off
+     - stop - Press key stop
      - top_menu - Go to main menu (long press menu)
      - up - Press key up
 

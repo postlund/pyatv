@@ -119,6 +119,10 @@ class RemoteControlInternal(RemoteControl):
         """Press key pause."""
         return self.apple_tv.ctrl_int_cmd('pause')
 
+    def stop(self):
+        """Press key stop."""
+        return self.apple_tv.ctrl_int_cmd('stop')
+
     def next(self):
         """Press key next."""
         return self.apple_tv.ctrl_int_cmd('nextitem')
