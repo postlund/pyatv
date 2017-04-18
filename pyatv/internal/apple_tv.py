@@ -317,7 +317,7 @@ class PushUpdaterInternal(PushUpdater):
         if hasattr(asyncio, 'ensure_future'):
             run_async = getattr(asyncio, 'ensure_future')
         else:
-            run_async = asyncio.async
+            run_async = asyncio.async  # pylint: disable=no-member
 
         # Always start with 0 to trigger an immediate response for the
         # first request
