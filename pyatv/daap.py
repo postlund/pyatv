@@ -90,8 +90,7 @@ class DaapSession(object):
                           '...' if len(output) != len(data) else '')
         if should_parse:
             return dmap.parse(data, lookup_tag)
-        else:
-            return data
+        return data
 
 
 class DaapRequester:

@@ -157,18 +157,13 @@ class RemoteControlInternal(RemoteControl):
         """Change repeat mode."""
         return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
 
-    def play_url(self, url, start_position, **kwargs):
+    def play_url(self, url, start_position=0, port=7000):
         """Play media from an URL on the device.
 
         Note: This method will not yield until the media has finished playing.
         The Apple TV requires the request to stay open during the entire
         play duration.
         """
-        # AirPlay is separate from DAAP, so to make it easier to test the port
-        # can be overriden to something else. NOT part of the public API!
-        import pyatv.airplay
-        port_override = 'port' in kwargs
-        port = kwargs['port'] if port_override else pyatv.airplay.AIRPLAY_PORT
         return self.airplay.play_url(url, int(start_position), port)
 
 
@@ -390,12 +385,13 @@ class AppleTVInternal(AppleTV):
         """
         return self.requester.login()
 
+    @asyncio.coroutine
     def logout(self):
         """Perform an explicit logout.
 
         Must be done when session is no longer needed to not leak resources.
         """
-        return self.session.close()
+        self.session.close()
 
     @property
     def remote_control(self):

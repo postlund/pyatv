@@ -61,4 +61,4 @@ class AirPlayTest(AioHTTPTestCase):
         self.assertEqual(self.fake_atv.last_airplay_start, START_POSITION)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
 
-        yield from session.close()
+        session.close()

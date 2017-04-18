@@ -62,7 +62,7 @@ class FakeAppleTV(web.Application):
 
     def __init__(self, loop, hsgid, pairing_guid, session_id, testcase):
         """Initialize a new FakeAppleTV."""
-        super().__init__(loop=loop)
+        super().__init__()
         self.responses = {}
         self.responses['login'] = [LoginResponse(session_id, 200)]
         self.responses['artwork'] = []

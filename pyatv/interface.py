@@ -15,14 +15,13 @@ def _get_first_sentence_in_pydoc(obj):
     if index == -1:
         # Here we have no leading . so return everything
         return doc
-    else:
-        # Try to find the first complete sentence and respect
-        # abbreviations correctly
-        match = re.findall(r'(.*\.[^A-Z]*)\.(?: [A-Z].*|)', doc)
-        if len(match) == 1:
-            return match[0]
-        else:
-            return doc[0:index]
+
+    # Try to find the first complete sentence and respect
+    # abbreviations correctly
+    match = re.findall(r'(.*\.[^A-Z]*)\.(?: [A-Z].*|)', doc)
+    if len(match) == 1:
+        return match[0]
+    return doc[0:index]
 
 
 def retrieve_commands(obj, developer=False):

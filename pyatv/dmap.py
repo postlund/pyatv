@@ -57,7 +57,7 @@ def parse(data, tag_lookup):
 # TODO: Rewrite this (you should be proud if you understand it...)
 def first(dmap_data, *path):
     """Look up a value given a path in some parsed DMAP data."""
-    if len(path) == 0 or not isinstance(dmap_data, list):
+    if not (path and isinstance(dmap_data, list)):
         return dmap_data
 
     for key in dmap_data:
