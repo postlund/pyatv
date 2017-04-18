@@ -70,7 +70,7 @@ To manually specify IP-address and login id, just do like this:
 
 .. code:: bash
 
-    $ atvremote --adress <IP> --login_id <LOGIN ID>
+    $ atvremote --address <IP> --login_id <LOGIN ID>
 
 Using these methods are mutually exclusive, so you may only pick one.
 
