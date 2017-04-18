@@ -24,7 +24,7 @@ def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
             loop, timeout=timeout, abort_on_found=True)
 
         # Take the first device found
-        if len(atvs) > 0:
+        if atvs:
             atv = pyatv.connect_to_apple_tv(atvs[0], loop)
             try:
                 yield from handler(atv)

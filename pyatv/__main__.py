@@ -166,7 +166,7 @@ def _handle_pairing(args, loop):
 def _handle_autodiscover(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
         loop, timeout=args.scan_timeout, abort_on_found=True)
-    if len(atvs) == 0:
+    if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return 1
     elif len(atvs) > 1:
@@ -204,10 +204,10 @@ def _extract_command_with_args(cmd):
     equal_sign = cmd.find('=')
     if equal_sign == -1:
         return cmd, []
-    else:
-        command = cmd[0:equal_sign]
-        args = cmd[equal_sign+1:].split(',')
-        return command, args
+
+    command = cmd[0:equal_sign]
+    args = cmd[equal_sign+1:].split(',')
+    return command, args
 
 
 @asyncio.coroutine

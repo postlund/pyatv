@@ -27,8 +27,7 @@ def media_type_str(mediatype):
         return 'Music'
     elif mediatype == const.MEDIA_TYPE_TV:
         return 'TV'
-    else:
-        return 'Unsupported'
+    return 'Unsupported'
 
 
 def playstate(state):
@@ -64,8 +63,7 @@ def playstate_str(state):
         return 'Fast forward'
     elif state == const.PLAY_STATE_FAST_BACKWARD:
         return 'Fast backward'
-    else:
-        return 'Unsupported'
+    return 'Unsupported'
 
 
 def repeat_str(state):
@@ -76,8 +74,7 @@ def repeat_str(state):
         return 'Track'
     elif state == const.REPEAT_STATE_ALL:
         return 'All'
-    else:
-        return 'Unsupported'
+    return 'Unsupported'
 
 
 def ms_to_s(time):
