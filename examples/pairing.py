@@ -1,17 +1,20 @@
 """Simple example showing of pairing."""
 
-import pyatv
 import asyncio
+import pyatv
 from zeroconf import Zeroconf
 
 
 PIN_CODE = 1234
 REMOTE_NAME = 'my remote control'
 
+LOOP = asyncio.get_event_loop()
+
 
 # Method that is dispatched by the asyncio event loop
 @asyncio.coroutine
 def pair_with_device(loop):
+    """Make it possible to pair with device."""
     my_zeroconf = Zeroconf()
     handler = pyatv.pair_with_apple_tv(loop, PIN_CODE, REMOTE_NAME)
 
@@ -33,6 +36,6 @@ def pair_with_device(loop):
     my_zeroconf.close()
 
 
-# Setup event loop and connect
-loop = asyncio.get_event_loop()
-loop.run_until_complete(pair_with_device(loop))
+if __name__ == '__main__':
+    # Setup event loop and connect
+    LOOP.run_until_complete(pair_with_device(LOOP))
