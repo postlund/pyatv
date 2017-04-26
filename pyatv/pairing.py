@@ -7,6 +7,8 @@ import logging
 import random
 from io import StringIO
 
+import ipaddress
+import netifaces
 from aiohttp import web
 from zeroconf import ServiceInfo
 from pyatv import tags
@@ -14,6 +16,21 @@ from pyatv import tags
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PAIRING_GUID = '0000000000000001'
+
+
+# TODO: netifaces is written in C and pylint does not find members
+# of that library correctly. Maybe there is a solution to this?
+# pylint: disable=no-member
+def _get_private_ip_addresses():
+    for iface in netifaces.interfaces():
+        addresses = netifaces.ifaddresses(iface)
+        if netifaces.AF_INET not in addresses:
+            continue
+
+        for addr in addresses[netifaces.AF_INET]:
+            ipaddr = ipaddress.ip_address(addr['addr'])
+            if ipaddr.is_private and not ipaddr.is_loopback:
+                yield ipaddr
 
 
 class PairingHandler(object):
@@ -61,7 +78,7 @@ class PairingHandler(object):
         if self._server is not None:
             yield from self._server.wait_closed()
 
-    def _setup_zeroconf(self, zeroconf, port):
+    def _publish_service(self, zeroconf, address, port):
         props = {
             b'DvNm': self._name,
             b'RemV': b'10000',
@@ -71,13 +88,17 @@ class PairingHandler(object):
             b'Pair': self.pairing_guid
             }
 
-        local_ip = socket.inet_aton(socket.gethostbyname(socket.gethostname()))
-        service = ServiceInfo('_touch-remote._tcp.local.',
-                              '0'*39 + '1._touch-remote._tcp.local.',
-                              local_ip, port, 0, 0, props)
+        service = ServiceInfo(
+            '_touch-remote._tcp.local.',
+            '{0:040d}._touch-remote._tcp.local.'.format(int(address)),
+            socket.inet_aton(str(address)), port, 0, 0, props)
         zeroconf.register_service(service)
 
         _LOGGER.debug('Published zeroconf service: %s', service)
+
+    def _setup_zeroconf(self, zeroconf, port):
+        for ipaddr in _get_private_ip_addresses():
+            self._publish_service(zeroconf, ipaddr, port)
 
     @asyncio.coroutine
     def handle_request(self, request):
