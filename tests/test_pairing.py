@@ -2,6 +2,7 @@
 
 import asyncio
 import asynctest
+import ipaddress
 
 from unittest.mock import patch
 from pyatv import pairing, dmap, tag_definitions
@@ -32,6 +33,11 @@ class PairingTest(asynctest.TestCase):
         self.pairing = pairing.PairingHandler(
             self.loop, REMOTE_NAME, PIN_CODE,
             pairing_guid=pairing.DEFAULT_PAIRING_GUID)
+
+        # TODO: currently stubs internal method, should provide stub
+        # for netifaces later
+        pairing._get_private_ip_addresses = \
+            lambda: [ipaddress.ip_address('10.0.0.1')]
 
     @asyncio.coroutine
     def tearDown(self):

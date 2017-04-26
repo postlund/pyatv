@@ -2,6 +2,7 @@
 
 import pyatv
 import asyncio
+import ipaddress
 
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
@@ -42,6 +43,11 @@ class FunctionalTest(AioHTTPTestCase):
         def fake_sleep(self, time=None, loop=None):
             pass
         asyncio.sleep = fake_sleep
+
+        # TODO: currently stubs internal method, should provide stub
+        # for netifaces later
+        pairing._get_private_ip_addresses = \
+            lambda: [ipaddress.ip_address('10.0.0.1')]
 
     def tearDown(self):
         self.loop.run_until_complete(self.atv.logout())
