@@ -12,6 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 AIRPLAY_PORT = 7000
 
 TIMEOUT = 10
+ATTEMPT_COUNT = 5
 
 
 # pylint: disable=too-few-public-methods
@@ -51,26 +52,35 @@ class AirPlay:
     # some time until the media starts playing, give it 5 seconds (attempts)
     @asyncio.coroutine
     def _wait_for_media_to_end(self, port):
-        address = self._url(port, 'playback-info')
-        attempts = 5
-        video_started = False
+        address = self._url(port, 'scrub')
+        attempts = ATTEMPT_COUNT
+        is_video_playing = False
         while True:
             info = None
             try:
                 info = yield from self.session.get(address)
                 data = yield from info.content.read()
-                parsed = plistlib.loads(data)
+                try:
+                    s = data.decode('utf-8').rstrip().split('\n')
+                    parsed = dict(x.split(':') for x in s)
+                    _LOGGER.debug('Playback-info: %s', parsed)
+                except plistlib.InvalidFileException:
+                    parsed = {}
+                    attempts = ATTEMPT_COUNT
+                    _LOGGER.warning('Got invalid playback-info: %s', data)
+                    _LOGGER.warning(info)
+                    _LOGGER.info(data)
 
                 # duration is only available if something is playing
-                if 'duration' in parsed:
-                    video_started = True
+                if float(parsed['position']) > 0.0:
+                    is_video_playing = True
                     attempts = -1
                 else:
-                    video_started = False
+                    is_video_playing = False
                     if attempts >= 0:
                         attempts -= 1
 
-                if not video_started and attempts < 0:
+                if not is_video_playing and attempts < 0:
                     _LOGGER.debug('media playback ended')
                     break
 
