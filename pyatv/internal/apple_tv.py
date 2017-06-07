@@ -9,8 +9,10 @@ import logging
 import asyncio
 
 from pyatv import (const, exceptions, dmap, tags, convert)
+from pyatv.airplay import player
+from pyatv.daap import (DaapSession, DaapRequester)
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater)
+                             Playing, PushUpdater, AirPlay)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,11 +95,10 @@ class BaseAppleTV:
 class RemoteControlInternal(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, apple_tv, airplay):
+    def __init__(self, apple_tv):
         """Initialize remote control instance."""
         super().__init__()
         self.apple_tv = apple_tv
-        self.airplay = airplay
 
     @asyncio.coroutine
     def up(self):
@@ -203,15 +204,6 @@ class RemoteControlInternal(RemoteControl):
     def set_repeat(self, repeat_mode):
         """Change repeat mode."""
         return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
-
-    def play_url(self, url, start_position=0, port=7000):
-        """Play media from an URL on the device.
-
-        Note: This method will not yield until the media has finished playing.
-        The Apple TV requires the request to stay open during the entire
-        play duration.
-        """
-        return self.airplay.play_url(url, int(start_position), port)
 
 
 class PlayingInternal(Playing):
@@ -412,25 +404,53 @@ class PushUpdaterInternal(PushUpdater):
         self._future = None
 
 
+# pylint: disable=too-few-public-methods
+class AirPlayInternal(AirPlay):
+    """Implementation of API for AirPlay support."""
+
+    def __init__(self, airplay_player):
+        """Initialize a new AirPlayInternal instance."""
+        self.player = airplay_player
+
+    def play_url(self, url, **kwargs):
+        """Play media from an URL on the device.
+
+        Note: This method will not yield until the media has finished playing.
+        The Apple TV requires the request to stay open during the entire
+        play duration.
+        """
+        start_position = 0 if 'position' not in kwargs else kwargs['position']
+        port = 7000 if 'port' not in kwargs else kwargs['port']
+        return self.player.play_url(url, int(start_position), port)
+
+
 class AppleTVInternal(AppleTV):
     """Implementation of API support for Apple TV."""
 
-    def __init__(self, loop, session, requester, airplay):
+    # This is a container class so it's OK with many attributes
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, loop, session, details):
         """Initialize a new Apple TV."""
         super().__init__()
-        self.session = session
-        self.requester = requester
-        self.apple_tv = BaseAppleTV(self.requester)
-        self.atv_remote = RemoteControlInternal(self.apple_tv, airplay)
-        self.atv_metadata = MetadataInternal(self.apple_tv)
-        self.atv_push_updater = PushUpdaterInternal(loop, self.apple_tv)
+        self._session = session
+        self._daap = DaapSession(session)
+        self._requester = DaapRequester(
+            self._daap, details.address, details.login_id, details.port)
+
+        self._apple_tv = BaseAppleTV(self._requester)
+        self._atv_remote = RemoteControlInternal(self._apple_tv)
+        self._atv_metadata = MetadataInternal(self._apple_tv)
+        self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
+
+        airplay_player = player.AirPlayPlayer(loop, session, details.address)
+        self._airplay = AirPlayInternal(airplay_player)
 
     def login(self):
         """Perform an explicit login.
 
         Not needed as login is performed automatically.
         """
-        return self.requester.login()
+        return self._requester.login()
 
     @asyncio.coroutine
     def logout(self):
@@ -438,19 +458,24 @@ class AppleTVInternal(AppleTV):
 
         Must be done when session is no longer needed to not leak resources.
         """
-        self.session.close()
+        self._session.close()
 
     @property
     def remote_control(self):
         """Return API for controlling the Apple TV."""
-        return self.atv_remote
+        return self._atv_remote
 
     @property
     def metadata(self):
         """Return API for retrieving metadata from Apple TV."""
-        return self.atv_metadata
+        return self._atv_metadata
 
     @property
     def push_updater(self):
         """Return API for handling push update from the Apple TV."""
-        return self.atv_push_updater
+        return self._atv_push_updater
+
+    @property
+    def airplay(self):
+        """Return API for working with AirPlay."""
+        return self._airplay

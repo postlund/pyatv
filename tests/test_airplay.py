@@ -6,7 +6,7 @@ from tests.log_output_handler import LogOutputHandler
 from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import airplay
+from pyatv.airplay import player
 from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
 
 
@@ -14,7 +14,7 @@ STREAM = 'http://airplaystream'
 START_POSITION = 0.8
 
 
-class AirPlayTest(AioHTTPTestCase):
+class AirPlayPlayerTest(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
@@ -23,7 +23,7 @@ class AirPlayTest(AioHTTPTestCase):
         # This is a hack that overrides asyncio.sleep to avoid making the test
         # slow. It also counts number of calls, since this is quite important
         # to the general function.
-        airplay.asyncio.sleep = self.fake_asyncio_sleep
+        player.asyncio.sleep = self.fake_asyncio_sleep
         self.no_of_sleeps = 0
 
     def tearDown(self):
@@ -54,8 +54,9 @@ class AirPlayTest(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
         session = ClientSession(loop=self.loop)
-        aplay = airplay.AirPlay(self.loop, session, '127.0.0.1')
-        yield from aplay.play_url(STREAM, START_POSITION, self.app.port)
+        aplay = player.AirPlayPlayer(self.loop, session, '127.0.0.1')
+        yield from aplay.play_url(
+            STREAM, position=START_POSITION, port=self.app.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, STREAM)
         self.assertEqual(self.fake_atv.last_airplay_start, START_POSITION)

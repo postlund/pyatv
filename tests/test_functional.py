@@ -95,8 +95,8 @@ class FunctionalTest(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        yield from self.atv.remote_control.play_url(
-            AIRPLAY_STREAM, 0, port=self.app.port)
+        yield from self.atv.airplay.play_url(
+            AIRPLAY_STREAM, port=self.app.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
 

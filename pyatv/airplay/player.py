@@ -15,7 +15,7 @@ TIMEOUT = 10
 
 
 # pylint: disable=too-few-public-methods
-class AirPlay:
+class AirPlayPlayer:
     """This class helps with playing media from an URL."""
 
     def __init__(self, loop, session, address):
@@ -25,12 +25,12 @@ class AirPlay:
         self.session = session
 
     @asyncio.coroutine
-    def play_url(self, url, start_position, port=AIRPLAY_PORT):
+    def play_url(self, url, position=0, port=AIRPLAY_PORT):
         """Play media from an URL on the device."""
         headers = {'User-Agent': 'MediaControl/1.0',
                    'Content-Type': 'text/parameters'}
         body = "Content-Location: {}\nStart-Position: {}\n\n".format(
-            url, start_position)
+            url, position)
 
         address = self._url(port, 'play')
         _LOGGER.debug('AirPlay %s to %s', url, address)
