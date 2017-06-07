@@ -1,7 +1,6 @@
 """Methods used to GET/POST data from/to an Apple TV."""
 
 import re
-import binascii
 import logging
 import asyncio
 
@@ -26,88 +25,15 @@ _DMAP_HEADERS = {
 DEFAULT_TIMEOUT = 10.0  # Seconds
 
 
-class DaapSession(object):
-    """This class makes it easy to perform DAAP requests.
-
-    It automatically adds the required headers and also does DMAP parsing.
-    """
-
-    def __init__(self, session):
-        """Initialize a new DaapSession."""
-        self._session = session
-
-    @asyncio.coroutine
-    def get_data(self, url, should_parse=True, timeout=None):
-        """Perform a GET request. Optionally parse reponse as DMAP data."""
-        _LOGGER.debug('GET URL: %s', url)
-        resp = None
-        try:
-            resp = yield from self._session.get(
-                url, headers=_DMAP_HEADERS,
-                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
-            resp_data = yield from resp.read()
-            extracted = self._extract_data(resp_data, should_parse)
-            return extracted, resp.status
-        except Exception as ex:
-            if resp is not None:
-                resp.close()
-            raise ex
-        finally:
-            if resp is not None:
-                yield from resp.release()
-
-    @asyncio.coroutine
-    def post_data(self, url, data=None, parse=True, timeout=None):
-        """Perform a POST request. Optionally parse reponse as DMAP data."""
-        _LOGGER.debug('POST URL: %s', url)
-        self._log_data(data, False)
-
-        headers = copy(_DMAP_HEADERS)
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
-        resp = None
-        try:
-            resp = yield from self._session.post(
-                url, headers=headers, data=data,
-                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
-            resp_data = yield from resp.read()
-            self._log_data(resp_data, True)
-            extracted = self._extract_data(resp_data, parse)
-            return extracted, resp.status
-        except Exception as ex:
-            if resp is not None:
-                resp.close()
-            raise ex
-        finally:
-            if resp is not None:
-                yield from resp.release()
-
-    @staticmethod
-    def _extract_data(data, should_parse):
-        if should_parse:
-            return dmap.parse(data, lookup_tag)
-        return data
-
-    @staticmethod
-    def _log_data(data, is_recv):
-        if data and _LOGGER.isEnabledFor(logging.DEBUG):
-            output = data[0:128]
-            _LOGGER.debug('%s Data[%d]: %s%s',
-                          '<-' if is_recv else '->',
-                          len(data),
-                          binascii.hexlify(output),
-                          '...' if len(output) != len(data) else '')
-
-
 class DaapRequester:
     """Helper class that makes it easy to perform DAAP requests.
 
     It will automatically do login and other necesarry book-keeping.
     """
 
-    def __init__(self, session, address, login_id, port):
+    def __init__(self, http, address, login_id, port):
         """Initialize a new DaapRequester."""
-        self.session = session
+        self.http = http
         self.url = 'http://{}:{}'.format(address, port)
         self._login_id = login_id
         self._session_id = 0
@@ -118,9 +44,10 @@ class DaapRequester:
         # Do not use session.get_data(...) in login as that would end up in
         # an infinte loop.
         def _login_request():
-            return self.session.get_data(
+            return self.http.get_data(
                 self._mkurl('login?[AUTH]&hasFP=1',
-                            session=False, login_id=True))
+                            session=False, login_id=True),
+                headers=_DMAP_HEADERS)
 
         resp = yield from self._do(_login_request)
         self._session_id = dmap.first(resp, 'mlog', 'mlid')
@@ -131,9 +58,9 @@ class DaapRequester:
     def get(self, cmd, daap_data=True, timeout=None, **args):
         """Perform a DAAP GET command."""
         def _get_request():
-            return self.session.get_data(
+            return self.http.get_data(
                 self._mkurl(cmd, *args),
-                should_parse=daap_data,
+                headers=_DMAP_HEADERS,
                 timeout=timeout)
 
         yield from self._assure_logged_in()
@@ -147,9 +74,13 @@ class DaapRequester:
     def post(self, cmd, data=None, timeout=None, **args):
         """Perform DAAP POST command with optional data."""
         def _post_request():
-            return self.session.post_data(self._mkurl(cmd, *args),
-                                          data=data,
-                                          timeout=timeout)
+            headers = copy(_DMAP_HEADERS)
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            return self.http.post_data(
+                self._mkurl(cmd, *args),
+                data=data,
+                headers=headers,
+                timeout=timeout)
 
         yield from self._assure_logged_in()
         return (yield from self._do(_post_request))
@@ -157,6 +88,9 @@ class DaapRequester:
     @asyncio.coroutine
     def _do(self, action, retry=True, is_login=False, is_daap=True):
         resp, status = yield from action()
+        if is_daap:
+            resp = dmap.parse(resp, lookup_tag)
+
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
         if status >= 200 and status < 300:
             return resp
