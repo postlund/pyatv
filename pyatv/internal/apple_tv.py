@@ -10,7 +10,8 @@ import asyncio
 
 from pyatv import (const, exceptions, dmap, tags, convert)
 from pyatv.airplay import player
-from pyatv.daap import (DaapSession, DaapRequester)
+from pyatv.daap import DaapRequester
+from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, AirPlay)
 
@@ -433,9 +434,9 @@ class AppleTVInternal(AppleTV):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
-        self._daap = DaapSession(session)
+        self._http = HttpSession(session)
         self._requester = DaapRequester(
-            self._daap, details.address, details.login_id, details.port)
+            self._http, details.address, details.login_id, details.port)
 
         self._apple_tv = BaseAppleTV(self._requester)
         self._atv_remote = RemoteControlInternal(self._apple_tv)
