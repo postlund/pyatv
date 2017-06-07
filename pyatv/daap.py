@@ -31,10 +31,9 @@ class DaapRequester:
     It will automatically do login and other necesarry book-keeping.
     """
 
-    def __init__(self, http, address, login_id, port):
+    def __init__(self, http, login_id):
         """Initialize a new DaapRequester."""
         self.http = http
-        self.url = 'http://{}:{}'.format(address, port)
         self._login_id = login_id
         self._session_id = 0
 
@@ -68,7 +67,7 @@ class DaapRequester:
 
     def get_url(self, cmd, **args):
         """Expand the request URL for a request."""
-        return self._mkurl(cmd, *args)
+        return self.http.base_url + self._mkurl(cmd, *args)
 
     @asyncio.coroutine
     def post(self, cmd, data=None, timeout=None, **args):
@@ -110,7 +109,7 @@ class DaapRequester:
                 'failed to login: ' + str(status))
 
     def _mkurl(self, cmd, *args, session=True, login_id=False):
-        url = '{}/{}'.format(self.url, cmd.format(*args))
+        url = '{}'.format(cmd.format(*args))
         parameters = []
         if login_id:
             if re.match(r'0x[0-9a-fA-F]{16}', self._login_id):

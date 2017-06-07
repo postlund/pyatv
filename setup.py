@@ -20,8 +20,12 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'aiohttp>=1.3.5, <3.0',
-        'zeroconf>=0.17.7',
+        'aiohttp>=1.3.5, <3',
+        'cryptography>=1.8.1',
+        'curve25519-donna>=1.3, <2',
+        'ed25519>=1.4, <2',
+        'srptools>=0.1.1',
+        'zeroconf>=0.17.7'
     ],
     test_suite='tests',
     keywords=['apple', 'tv'],

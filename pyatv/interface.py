@@ -210,7 +210,6 @@ class Playing(object):
         raise exceptions.NotSupportedError
 
 
-# pylint: disable=too-few-public-methods
 class Metadata(object):
     """Base class for retrieving metadata from an Apple TV."""
 
@@ -277,6 +276,36 @@ class AirPlay(object):
     """Base class for AirPlay functionality."""
 
     __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def generate_credentials(self):
+        """Create new credentials for authentication.
+
+        Credentials that have been authenticated shall be saved and loaded with
+        load_credentials before playing anything. If credentials are lost,
+        authentication must be performed again.
+        """
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def load_credentials(self, credentials):
+        """Load existing credentials."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def verify_authenticated(self):
+        """Check if loaded credentials are verified."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def start_authentication(self):
+        """Begin authentication proces (show PIN on screen)."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def finish_authentication(self, pin):
+        """End authentication process with PIN code."""
+        raise exceptions.NotSupportedError
 
     @abstractmethod
     def play_url(self, url, **kwargs):

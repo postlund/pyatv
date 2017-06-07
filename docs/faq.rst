@@ -1,5 +1,8 @@
 .. _pyatv-faq:
 
+.. role:: strike
+    :class: strike
+
 FAQ
 ===
 This page tries to answer some common questions.
@@ -28,12 +31,18 @@ have to sit tight and wait for a fix in tvOS.
 iOS 7.1 or later, OS X 10.10 or later, or iTunes 11.2 or later." on the screen.
 What's wrong?**
 
-From tvOS 10.2 and later, Apple enforces "device verification". This was optional
+The device authentication process has now been reversed engineered and implemented
+in pyatv. In order to get rid of this message, you must perform *device authentication*.
+If you are interested in development details (like the API), check out
+:ref:`the AirPlay page<pyatv-airplay>`. To try it out with ``atvremote``, instead
+check out the section about it at :ref:`atvremote<pyatv-atvremote>`.
+
+:strike:`From tvOS 10.2 and later, Apple enforces "device verification". This was optional
 and disabled by default in earlier versions. After this update, a lot of 3rd party
 tools broke, including pyatv. This means that it is currently not possible to stream
 content to an Apple TV running tvOS 10.2 (or later). As soon as the device
 verification scheme has been reversed engineered, support will be added. But there
-is no timeframe for this.
+is no timeframe for this.`
 
 Technical Questions
 -------------------

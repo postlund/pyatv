@@ -47,3 +47,15 @@ class AsyncUpdaterRunningError(Exception):
     """Thrown when performing an invalid action in AsyncUpdater.."""
 
     pass
+
+
+class NoCredentialsError(Exception):
+    """Thrown if performing an action before initialize is called."""
+
+    pass
+
+
+class DeviceAuthenticationError(Exception):
+    """Thrown when device authentication fails."""
+
+    pass

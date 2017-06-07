@@ -7,6 +7,7 @@ generations of devices. Everything is however left here for now.
 
 import logging
 import asyncio
+import binascii
 
 from pyatv import (const, exceptions, dmap, tags, convert)
 from pyatv.airplay import player
@@ -14,7 +15,8 @@ from pyatv.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, AirPlay)
-
+from pyatv.airplay.srp import (SRPAuthHandler, new_credentials)
+from pyatv.airplay.auth import (AuthenticationVerifier, DeviceAuthenticator)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -409,10 +411,46 @@ class PushUpdaterInternal(PushUpdater):
 class AirPlayInternal(AirPlay):
     """Implementation of API for AirPlay support."""
 
-    def __init__(self, airplay_player):
+    def __init__(self, http, airplay_player):
         """Initialize a new AirPlayInternal instance."""
         self.player = airplay_player
+        self.identifier = None
+        self.srp = SRPAuthHandler()
+        self.verifier = AuthenticationVerifier(http, self.srp)
+        self.auther = DeviceAuthenticator(http, self.srp)
 
+    @asyncio.coroutine
+    def generate_credentials(self):
+        """Create new credentials for authentication.
+
+        Credentials that have been authenticated shall be saved and loaded with
+        load_credentials before playing anything. If credentials are lost,
+        authentication must be performed again.
+        """
+        identifier, seed = new_credentials()
+        return '{0}:{1}'.format(identifier, seed.decode().upper())
+
+    @asyncio.coroutine
+    def load_credentials(self, credentials):
+        """Load existing credentials."""
+        split = credentials.split(':')
+        self.identifier = split[0]
+        self.srp.initialize(binascii.unhexlify(split[1]))
+        _LOGGER.debug('Loaded AirPlay credentials: %s', credentials)
+
+    def verify_authenticated(self):
+        """Check if loaded credentials are verified."""
+        return self.verifier.verify_authed()
+
+    def start_authentication(self):
+        """Begin authentication proces (show PIN on screen)."""
+        return self.auther.start_authentication()
+
+    def finish_authentication(self, pin):
+        """End authentication process with PIN code."""
+        return self.auther.finish_authentication(self.identifier, pin)
+
+    @asyncio.coroutine
     def play_url(self, url, **kwargs):
         """Play media from an URL on the device.
 
@@ -420,9 +458,13 @@ class AirPlayInternal(AirPlay):
         The Apple TV requires the request to stay open during the entire
         play duration.
         """
-        start_position = 0 if 'position' not in kwargs else kwargs['position']
+        # If credentials have been loaded, do device verification first
+        if self.identifier:
+            yield from self.verify_authenticated()
+
+        position = 0 if 'position' not in kwargs else int(kwargs['position'])
         port = 7000 if 'port' not in kwargs else kwargs['port']
-        return self.player.play_url(url, int(start_position), port)
+        return (yield from self.player.play_url(url, position, port))
 
 
 class AppleTVInternal(AppleTV):
@@ -434,9 +476,10 @@ class AppleTVInternal(AppleTV):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
-        self._http = HttpSession(session)
-        self._requester = DaapRequester(
-            self._http, details.address, details.login_id, details.port)
+
+        daap_http = HttpSession(
+            session, 'http://{0}:{1}/'.format(details.address, details.port))
+        self._requester = DaapRequester(daap_http, details.login_id)
 
         self._apple_tv = BaseAppleTV(self._requester)
         self._atv_remote = RemoteControlInternal(self._apple_tv)
@@ -444,7 +487,9 @@ class AppleTVInternal(AppleTV):
         self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
 
         airplay_player = player.AirPlayPlayer(loop, session, details.address)
-        self._airplay = AirPlayInternal(airplay_player)
+        airplay_http = HttpSession(
+            session, 'http://{0}:7000/'.format(details.address))
+        self._airplay = AirPlayInternal(airplay_http, airplay_player)
 
     def login(self):
         """Perform an explicit login.
