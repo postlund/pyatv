@@ -227,12 +227,15 @@ def _handle_commands(args, loop):
     return 0
 
 
+# pylint: disable=too-many-return-statements
 @asyncio.coroutine
 def _handle_command(args, cmd, atv, loop):
+    # TODO: Add these to array and use a loop
     playing_resp = yield from atv.metadata.playing()
     ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
     metadata = retrieve_commands(atv.metadata, developer=args.developer)
     playing = retrieve_commands(playing_resp, developer=args.developer)
+    airplay = retrieve_commands(atv.airplay, developer=args.developer)
     other = {'push_updates': 'Listen for push updates'}
 
     # Parse input command and argument from user
@@ -241,6 +244,7 @@ def _handle_command(args, cmd, atv, loop):
         _print_commands('Remote control', ctrl)
         _print_commands('Metadata', metadata)
         _print_commands('Playing', playing)
+        _print_commands('AirPlay', airplay)
         _print_commands('Other', other, newline=False)
 
     elif cmd == 'artwork':
@@ -267,6 +271,9 @@ def _handle_command(args, cmd, atv, loop):
 
     elif cmd in playing:
         return (yield from _exec_command(playing_resp, cmd, *cmd_args))
+
+    elif cmd in airplay:
+        return (yield from _exec_command(atv.airplay, cmd, *cmd_args))
 
     else:
         logging.error('Unknown command: %s', args.command[0])

@@ -122,11 +122,6 @@ class RemoteControl(object):
         """Change repeat mode."""
         raise exceptions.NotSupportedError
 
-    @abstractmethod
-    def play_url(self, url, start_position=0, port=7000):
-        """Play media from an URL on the device."""
-        raise exceptions.NotSupportedError
-
 
 class Playing(object):
     """Base class for retrieving what is currently playing."""
@@ -278,6 +273,17 @@ class PushUpdater(object):
         raise exceptions.NotSupportedError
 
 
+class AirPlay(object):
+    """Base class for AirPlay functionality."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def play_url(self, url, **kwargs):
+        """Play media from an URL on the device."""
+        raise exceptions.NotSupportedError
+
+
 class AppleTV(object):
     """Base class representing an Apple TV."""
 
@@ -312,4 +318,9 @@ class AppleTV(object):
     @abstractproperty
     def push_updater(self):
         """Return API for handling push update from the Apple TV."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def airplay(self):
+        """Return API for working with AirPlay."""
         raise exceptions.NotSupportedError
