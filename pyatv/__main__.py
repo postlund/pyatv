@@ -75,6 +75,11 @@ def cli_handler(loop):
     ident.add_argument('--login_id', help='home sharing id or pairing guid',
                        dest='login_id', default=None)
 
+    airplay = parser.add_argument_group('airplay')
+    airplay.add_argument('--airplay_credentials',
+                         help='credentials for airplay',
+                         dest='airplay_credentials', default=None)
+
     debug = parser.add_argument_group('debugging')
     debug.add_argument('-v', '--verbose', help='increase output verbosity',
                        action='store_true', dest='verbose')
@@ -217,6 +222,9 @@ def _handle_commands(args, loop):
     atv.push_updater.listener = PushListener()
 
     try:
+        if args.airplay_credentials is not None:
+            yield from atv.airplay.load_credentials(args.airplay_credentials)
+
         for cmd in args.command:
             ret = yield from _handle_command(args, cmd, atv, loop)
             if ret != 0:
@@ -236,7 +244,10 @@ def _handle_command(args, cmd, atv, loop):
     metadata = retrieve_commands(atv.metadata, developer=args.developer)
     playing = retrieve_commands(playing_resp, developer=args.developer)
     airplay = retrieve_commands(atv.airplay, developer=args.developer)
-    other = {'push_updates': 'Listen for push updates'}
+    other = {
+        'push_updates': 'Listen for push updates',
+        'auth': 'Perform AirPlay device authentication'
+    }
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -262,6 +273,21 @@ def _handle_command(args, cmd, atv, loop):
         atv.push_updater.start()
         yield from loop.run_in_executor(None, sys.stdin.readline)
         atv.push_updater.stop()
+
+    elif cmd == 'auth':
+        credentials = yield from atv.airplay.generate_credentials()
+        yield from atv.airplay.load_credentials(credentials)
+
+        try:
+            yield from atv.airplay.start_authentication()
+            pin = input('Enter PIN on screen: ')
+            yield from atv.airplay.finish_authentication(pin)
+            print('You may now use these credentials:')
+            print(credentials)
+
+        except exceptions.DeviceAuthenticationError:
+            logging.exception('Failed to authenticate - invalid PIN?')
+            return 1
 
     elif cmd in ctrl:
         return (yield from _exec_command(atv.remote_control, cmd, *cmd_args))
@@ -296,9 +322,9 @@ def _exec_command(obj, command, *args):
         _pretty_print(value)
         return 0
     except NotImplementedError:
-        logging.fatal("Command '%s' is not supported by device", command)
+        logging.exception("Command '%s' is not supported by device", command)
     except exceptions.AuthenticationError as ex:
-        logging.fatal('Authentication error: %s', str(ex))
+        logging.exception('Authentication error: %s', str(ex))
     return 1
 
 

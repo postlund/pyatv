@@ -1,0 +1,5 @@
+@import url('default.css');
+
+.strike {
+    text-decoration: line-through;
+}

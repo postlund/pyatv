@@ -8,8 +8,6 @@ well as some additional iTunes commands, like changing the media position. It im
 legacy DAAP-protocol and does not support features from the new MediaRemote.framework. Support
 for this might be added in the future if that protocol is ever fully reverse engineered.
 
-**Note: AirPlay support is currently broken for tvOS 10.2, see issue #79.**
-
 The MIT license is used for this library.
 
 Features
@@ -18,6 +16,7 @@ Features
 - Automatic discovery of devices (zeroconf/Bonjour)
 - Push updates
 - Remote control pairing
+- AirPlay stream URL (including tvOS 10.2+)
 - Playback controls (play, pause, next, stop, etc.)
 - Navigation controls (select, menu, top_menu, arrow keys)
 - Fetch artwork in PNG format
@@ -29,8 +28,7 @@ Requirements
 ------------
 
 - python>=3.4.2
-- zeroconf>=0.17.7
-- aiohttp>=1.3.5
+- See documentation for additional libraries
 
 Getting started
 ---------------
@@ -97,7 +95,6 @@ It is possible to use the reference CLI application as well:
      - next - Press key next
      - pause - Press key play
      - play - Press key play
-     - play_url - Play media from an URL on the device
      - previous - Press key previous
      - right - Press key right
      - select - Press key select
@@ -116,15 +113,24 @@ It is possible to use the reference CLI application as well:
     Playing commands:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
-     - media_type - What type of media is currently playing, e.g. video, music
-     - play_state - Current play state, e.g. playing or paused
-     - position - Current position in the playing media (seconds)
-     - repeat - Current repeat mode
+     - media_type - Type of media is currently playing, e.g. video, music
+     - play_state - Play state, e.g. playing or paused
+     - position - Position in the playing media (seconds)
+     - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
      - title - Title of the current media, e.g. movie or song name
      - total_time - Total play time in seconds
 
+    AirPlay commands:
+     - finish_authentication - End authentication process with PIN code
+     - generate_credentials - Create new credentials for authentication
+     - load_credentials - Load existing credentials
+     - play_url - Play media from an URL on the device
+     - start_authentication - Begin authentication proces (show PIN on screen)
+     - verify_authenticated - Check if loaded credentials are verified
+
     Other commands:
+     - auth - Perform AirPlay device authentication
      - push_updates - Listen for push updates
 
 Type ``atvremote --help`` to list all supported commands.
@@ -133,13 +139,19 @@ Missing features and improvements
 ---------------------------------
 
 Most of the core functionality is now in place and API is starting to mature
-enough to soon be called "stable". The next major things to support are device
-verification (#79) to make AirPlay work with tvOS (10.2+) again. After that,
-implementation of the MediaRemoteTV protocol used by newer devices (tvOS) will
-be given a shot.
+enough to soon be called "stable". Things on the roadmap are listed below.
+
+Planned tasks
+^^^^^^^^^^^^^
+
+- Implement MediaRemoteTV protocol
+- Investigate robustness of device scanning
+- Extend AirPlay support
+
+  - Easy streaming of local files
 
 Minor tasks
-^^^^^^^^^^^^
+^^^^^^^^^^^
 
 - Help command to get full help text for a command (atvremote)
 - Write simple smoke test for atvremote

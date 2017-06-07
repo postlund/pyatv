@@ -122,6 +122,28 @@ It is possible to listen for and print push updates as they happen using the
 
 Just press ENTER to stop.
 
+AirPlay Device Authentication
+-----------------------------
+To play a URL with AirPlay on a device running tvOS 10.2 or later, *device
+authentication* must be performed (or if it has been explicitly enabled).
+Simply use the ``auth`` command for this:
+
+.. code:: bash
+
+    $ atvremote -a auth
+    Enter PIN on screen: 1234  # Pin code displayed on screen
+    You may now use these credentials:
+    D9B75D737BE2F0F1:6A26D8EB6F4AE2408757D5CA5FF9C37E96BEBB22C632426C4A02AD4FA895A85B
+
+The generated credentials must be used every time something is to be played
+(otherwise a PIN will be required again). So make sure to save it somewhere.
+
+To play a URL, then just use ``play_url`` and provide the credentials:
+
+.. code:: bash
+
+    $ atvremote -a --airplay_credentials D9B75D737BE2F0F1:6A26D8EB6F4AE2408757D5CA5FF9C37E96BEBB22C632426C4A02AD4FA895A85B play_url=<some URL here>
+
 Working with commands
 ---------------------
 Several commands are supported by the library (and thus the device). Easiest
@@ -138,7 +160,6 @@ availble commands:
      - next - Press key next
      - pause - Press key play
      - play - Press key play
-     - play_url - Play media from an URL on the device
      - previous - Press key previous
      - right - Press key right
      - select - Press key select
@@ -157,15 +178,24 @@ availble commands:
     Playing commands:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
-     - media_type - What type of media is currently playing, e.g. video, music
-     - play_state - Current play state, e.g. playing or paused
-     - position - Current position in the playing media (seconds)
-     - repeat - Current repeat mode
+     - media_type - Type of media is currently playing, e.g. video, music
+     - play_state - Play state, e.g. playing or paused
+     - position - Position in the playing media (seconds)
+     - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
      - title - Title of the current media, e.g. movie or song name
      - total_time - Total play time in seconds
 
+    AirPlay commands:
+     - finish_authentication - End authentication process with PIN code
+     - generate_credentials - Create new credentials for authentication
+     - load_credentials - Load existing credentials
+     - play_url - Play media from an URL on the device
+     - start_authentication - Begin authentication proces (show PIN on screen)
+     - verify_authenticated - Check if loaded credentials are verified
+
     Other commands:
+     - auth - Perform AirPlay device authentication
      - push_updates - Listen for push updates
 
 You can for instance get what is currently playing with ``playing``:
