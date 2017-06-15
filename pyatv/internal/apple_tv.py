@@ -488,7 +488,8 @@ class AppleTVInternal(AppleTV):
 
         airplay_player = player.AirPlayPlayer(loop, session, details.address)
         airplay_http = HttpSession(
-            session, 'http://{0}:7000/'.format(details.address))
+            session, 'http://{0}:{1}/'.format(
+                details.address, details.airplay_port))
         self._airplay = AirPlayInternal(airplay_http, airplay_player)
 
     def login(self):

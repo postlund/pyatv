@@ -58,7 +58,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         http = HttpSession(
             self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
         handler = srp.SRPAuthHandler()
-        handler.initialize(DEVICE_AUTH_KEY)
+        handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
         verifier = AuthenticationVerifier(http, handler)
         self.assertTrue((yield from verifier.verify_authed()))
@@ -81,7 +81,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         http = HttpSession(
             self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
         handler = srp.SRPAuthHandler()
-        handler.initialize(DEVICE_AUTH_KEY)
+        handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
         auther = DeviceAuthenticator(http, handler)
         yield from auther.start_authentication()

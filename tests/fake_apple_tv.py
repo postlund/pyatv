@@ -31,9 +31,10 @@ EXPECTED_HEADERS = {
 # --- START AUTHENTICATION DATA VALID SESSION (FROM DEVICE) ---
 
 DEVICE_IDENTIFIER = '75FBEEC773CFC563'
-DEVICE_AUTH_KEY = binascii.unhexlify(
-    '8F06696F2542D70DF59286C761695C485F815BE3D152849E1361282D46AB1493')
+DEVICE_AUTH_KEY = \
+    '8F06696F2542D70DF59286C761695C485F815BE3D152849E1361282D46AB1493'
 DEVICE_PIN = 2271
+DEVICE_CREDENTIALS = DEVICE_IDENTIFIER + ':' + DEVICE_AUTH_KEY
 
 # pylint: disable=E501
 # For authentication
@@ -100,6 +101,8 @@ class FakeAppleTV(web.Application):
         self.session = None
         self.last_button_pressed = None
         self.buttons_press_count = 0
+        self.has_authenticated = True
+        self.last_airplay_url = None
         self.properties = {}  # setproperty
         self.tc = testcase
 
@@ -331,6 +334,9 @@ class FakeAppleTV(web.Application):
     @asyncio.coroutine
     def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
+        if not self.has_authenticated:
+            return web.Response(status=503)
+
         headers = request.headers
 
         # Verify headers first
@@ -385,6 +391,7 @@ class FakeAppleTV(web.Application):
             return web.Response(
                 body=binascii.unhexlify(_DEVICE_VERIFY_STEP1_RESP), status=200)
         elif hexlified == _DEVICE_VERIFY_STEP2:
+            self.has_authenticated = True
             return web.Response(body=_DEVICE_VERIFY_STEP2_RESP, status=200)
 
         return web.Response(body=b'', status=503)
@@ -487,6 +494,10 @@ class AppleTVUseCases:
         plist = dict(duration=0.8)
         self.device.responses['airplay_playback'].insert(
             0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+
+    def airplay_require_authentication(self):
+        """Require device authentication for AirPlay."""
+        self.device.has_authenticated = False
 
     def pairing_response(self, remote_name, expected_pairing_code):
         """Reponse when a pairing request is made."""

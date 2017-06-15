@@ -6,15 +6,22 @@ CHANGES
 
 Changes:
 
-- Fix atvremote exit codes
+- Support AirPlay device authentication
 - Support arrow keys (left, right, up, down)
 - Support scanning for Apple TVs with home sharing disabled
 - Support for shuffle and repeat modes
 - Support for "stop" button
 - Multiple commands can be given to atvremote
 - Handle additional media kinds
+- Fix atvremote exit codes
 - Support python 3.6
 - Bump aiohttp to 1.3.5 and support 2.0.0+
+
+Notes:
+
+- play_url has moved to the new airplay module and no longer
+  accepts start position as required argument. This is a
+  breaking change!
 
 Other:
 

@@ -20,13 +20,15 @@ DEVICE_SERVICE = '_touch-able._tcp.local.'
 
 
 class AppleTVDevice(
-        namedtuple('AppleTVDevice', 'name, address, login_id, port')):
+        namedtuple('AppleTVDevice',
+                   'name, address, login_id, port, airplay_port')):
     """Representation of an Apple TV device used when connecting."""
 
-    def __new__(cls, name, address, login_id, port=3689):
+    # pylint: disable=too-many-arguments
+    def __new__(cls, name, address, login_id, port=3689, airplay_port=7000):
         """Initialize a new AppleTVDevice."""
         return super(AppleTVDevice, cls).__new__(
-            cls, name, address, login_id, port)
+            cls, name, address, login_id, port, airplay_port)
 
 
 # pylint: disable=too-few-public-methods
