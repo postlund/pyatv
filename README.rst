@@ -75,7 +75,7 @@ It is possible to use the reference CLI application as well:
     # Scanning for devices on network
     $ atvremote
     Found Apple TVs:
-     - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9012- 345678901234)
+     - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9012-345678901234)
 
     Note: You must use 'pair' with devices that have home sharing disabled
 
@@ -85,6 +85,8 @@ It is possible to use the reference CLI application as well:
     Play state: Playing
       Position: 0/397s (0.0%)
 
+    # Passing multiple commands
+    $ atvremote -a next next play playing stop
 
     # List all commands supported by a device
     $ atvremote -a commands

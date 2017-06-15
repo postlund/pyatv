@@ -9,7 +9,8 @@ from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import (AppleTVDevice, connect_to_apple_tv, const,
                    exceptions, pairing)
-from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
+from tests.fake_apple_tv import (
+    FakeAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
 from tests import (utils, zeroconf_stub)
 
 HSGID = '12345-6789-0'
@@ -70,7 +71,7 @@ class FunctionalTest(AioHTTPTestCase):
 
     def get_connected_device(self, identifier):
         details = AppleTVDevice(
-            'Apple TV', '127.0.0.1', identifier, self.app.port)
+            'Apple TV', '127.0.0.1', identifier, self.app.port, self.app.port)
         return connect_to_apple_tv(details, self.loop)
 
     # This is not a pretty test and it does crazy things. Should probably be
@@ -90,10 +91,36 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertTrue(handler.has_paired, msg='did not pair with device')
 
     @unittest_run_loop
+    def test_device_authentication(self):
+        # Credentials used for device authentication
+        yield from self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
+
+        # Perform authentication
+        yield from self.atv.airplay.start_authentication()
+        yield from self.atv.airplay.finish_authentication(DEVICE_PIN)
+
+        # Verify credentials are authenticated
+        self.assertTrue((yield from self.atv.airplay.verify_authenticated()))
+
+    @unittest_run_loop
     def test_play_url(self):
         self.usecase.airplay_playback_idle()
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
+
+        yield from self.atv.airplay.play_url(
+            AIRPLAY_STREAM, port=self.app.port)
+
+        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+
+    @unittest_run_loop
+    def test_play_url_authenticated(self):
+        self.usecase.airplay_require_authentication()
+        self.usecase.airplay_playback_idle()
+        self.usecase.airplay_playback_playing()
+        self.usecase.airplay_playback_idle()
+
+        yield from self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
 
         yield from self.atv.airplay.play_url(
             AIRPLAY_STREAM, port=self.app.port)
