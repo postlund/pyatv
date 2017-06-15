@@ -54,9 +54,9 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
         session = ClientSession(loop=self.loop)
-        aplay = player.AirPlayPlayer(self.loop, session, '127.0.0.1')
-        yield from aplay.play_url(
-            STREAM, position=START_POSITION, port=self.app.port)
+        aplay = player.AirPlayPlayer(
+            self.loop, session, '127.0.0.1', port=self.app.port)
+        yield from aplay.play_url(STREAM, position=START_POSITION)
 
         self.assertEqual(self.fake_atv.last_airplay_url, STREAM)
         self.assertEqual(self.fake_atv.last_airplay_start, START_POSITION)

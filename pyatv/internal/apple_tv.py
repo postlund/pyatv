@@ -463,8 +463,7 @@ class AirPlayInternal(AirPlay):
             yield from self.verify_authenticated()
 
         position = 0 if 'position' not in kwargs else int(kwargs['position'])
-        port = 7000 if 'port' not in kwargs else kwargs['port']
-        return (yield from self.player.play_url(url, position, port))
+        return (yield from self.player.play_url(url, position))
 
 
 class AppleTVInternal(AppleTV):
@@ -486,7 +485,8 @@ class AppleTVInternal(AppleTV):
         self._atv_metadata = MetadataInternal(self._apple_tv)
         self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
 
-        airplay_player = player.AirPlayPlayer(loop, session, details.address)
+        airplay_player = player.AirPlayPlayer(
+            loop, session, details.address, details.airplay_port)
         airplay_http = HttpSession(
             session, 'http://{0}:{1}/'.format(
                 details.address, details.airplay_port))
