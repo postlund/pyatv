@@ -28,6 +28,7 @@ Notes:
 Other:
 
 - Upgrade test tools (pylint, flake, etc.)
+- Added documentation to readthedocs
 
 0.2.2 (2017-03-04)
 ------------------

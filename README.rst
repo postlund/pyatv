@@ -1,6 +1,6 @@
 A python client library for the Apple TV
 ========================================
-|Build Status| |Coverage Status| |PyPi Package| |Quantifiedcode|
+|Build Status| |Coverage Status| |PyPi Package| |Quantifiedcode| |docs|
 
 This is a python library for controlling and querying information from an Apple TV. It is async
 (python 3.4 syntax) and supports most of the commands that the regular Apple Remote app does as
@@ -160,10 +160,10 @@ Minor tasks
 - Write simple smoke test for atvremote
 - Improved documentation
 
-  - More examples
+  - More examples **Considered DONE**
   - Better pydoc documentation for classes and methods
-  - Manual in docs/
-  - Add to readthedocs.io
+  - Manual in docs/ **DONE**
+  - Add to readthedocs.io **DONE**
 
 Development
 -----------
@@ -193,3 +193,7 @@ commands. You may also pass ``--debug`` to get better logging.
    :target: https://badge.fury.io/py/pyatv
 .. |Quantifiedcode| image:: https://www.quantifiedcode.com/api/v1/project/bcacf534875647af8005bb089f329918/badge.svg
    :target: https://www.quantifiedcode.com/app/project/bcacf534875647af8005bb089f329918
+.. |docs| image:: https://readthedocs.org/projects/pyatv/badge/?version=latest
+   :alt: Documentation Status
+   :scale: 100%
+   :target: https://pyatv.readthedocs.io/en/latest/?badge=latest
