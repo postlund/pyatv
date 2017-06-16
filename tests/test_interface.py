@@ -104,8 +104,7 @@ class PlayingDummy(interface.Playing):
 class InterfaceTest(unittest.TestCase):
 
     def setUp(self):
-        self.obj = TestClass()
-        self.methods = interface.retrieve_commands(self.obj)
+        self.methods = interface.retrieve_commands(TestClass)
 
     # COMMANDS AND HELP TEXT
 
@@ -117,7 +116,7 @@ class InterfaceTest(unittest.TestCase):
         self.assertTrue('abbrev_help' in self.methods)
 
     def test_get_developer_command(self):
-        methods = interface.retrieve_commands(self.obj, developer=True)
+        methods = interface.retrieve_commands(TestClass, developer=True)
         self.assertEqual(6, len(methods))
         self.assertEqual('Developer help', methods['dev_method'])
 

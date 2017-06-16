@@ -11,7 +11,9 @@ Changes:
 - Support scanning for Apple TVs with home sharing disabled
 - Support for shuffle and repeat modes
 - Support for "stop" button
+- New "hash" function in Playing API
 - Multiple commands can be given to atvremote
+- Doing "atvremote commands" requires no device and is a lot faster
 - Handle additional media kinds
 - Fix atvremote exit codes
 - Support python 3.6

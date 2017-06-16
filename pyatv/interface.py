@@ -28,7 +28,7 @@ def _get_first_sentence_in_pydoc(obj):
 def retrieve_commands(obj, developer=False):
     """Retrieve all commands and help texts from an API object."""
     commands = {}  # Name and help
-    for member in [obj]+obj.__class__.mro():
+    for member in [obj]:
         for func in member.__dict__:
             if not inspect.isfunction(member.__dict__[func]) and \
                not isinstance(member.__dict__[func], property):
