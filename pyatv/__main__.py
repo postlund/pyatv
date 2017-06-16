@@ -12,7 +12,7 @@ from zeroconf import Zeroconf
 
 import pyatv
 import pyatv.pairing
-from pyatv import (const, dmap, exceptions, tag_definitions)
+from pyatv import (const, dmap, exceptions, interface, tag_definitions)
 from pyatv.interface import retrieve_commands
 
 
@@ -105,7 +105,9 @@ def cli_handler(loop):
             (not args.login_id and args.address):
         parser.error('both --login_id and --address must be given')
 
-    if args.command[0] == 'scan':
+    if args.command[0] == 'commands':
+        return _handle_command_list(args)
+    elif args.command[0] == 'scan':
         return (yield from _handle_scan(args, loop))
     elif args.command[0] == 'pair':
         return (yield from _handle_pairing(args, loop))
@@ -167,6 +169,19 @@ def _handle_pairing(args, loop):
     return 0
 
 
+def _handle_command_list(args):
+    _print_commands('Remote control', interface.RemoteControl, args)
+    _print_commands('Metadata', interface.Metadata, args)
+    _print_commands('Playing', interface.Playing, args)
+    _print_commands('AirPlay', interface.AirPlay, args)
+
+    print('Other commands:')
+    print(' - push_updates - Listen for push updates')
+    print(' - auth - Perform AirPlay device authentication')
+
+    return 0
+
+
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
@@ -190,11 +205,11 @@ def _handle_autodiscover(args, loop):
     return (yield from _handle_commands(args, loop))
 
 
-def _print_commands(title, obj, newline=True):
+def _print_commands(title, api, args):
+    cmd_list = retrieve_commands(api, args.developer)
     commands = ' - ' + '\n - '.join(
-        map(lambda x: x[0] + ' - ' + x[1], sorted(obj.items())))
-    print('{} commands:\n{}{}'.format(
-        title, commands, '\n' if newline else ''))
+        map(lambda x: x[0] + ' - ' + x[1], sorted(cmd_list.items())))
+    print('{} commands:\n{}\n'.format(title, commands))
 
 
 def _extract_command_with_args(cmd):
@@ -239,26 +254,14 @@ def _handle_commands(args, loop):
 @asyncio.coroutine
 def _handle_command(args, cmd, atv, loop):
     # TODO: Add these to array and use a loop
-    playing_resp = yield from atv.metadata.playing()
-    ctrl = retrieve_commands(atv.remote_control, developer=args.developer)
-    metadata = retrieve_commands(atv.metadata, developer=args.developer)
-    playing = retrieve_commands(playing_resp, developer=args.developer)
-    airplay = retrieve_commands(atv.airplay, developer=args.developer)
-    other = {
-        'push_updates': 'Listen for push updates',
-        'auth': 'Perform AirPlay device authentication'
-    }
+    ctrl = retrieve_commands(interface.RemoteControl, developer=args.developer)
+    metadata = retrieve_commands(interface.Metadata, developer=args.developer)
+    playing = retrieve_commands(interface.Playing, developer=args.developer)
+    airplay = retrieve_commands(interface.AirPlay, developer=args.developer)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
-    if cmd == 'commands':
-        _print_commands('Remote control', ctrl)
-        _print_commands('Metadata', metadata)
-        _print_commands('Playing', playing)
-        _print_commands('AirPlay', airplay)
-        _print_commands('Other', other, newline=False)
-
-    elif cmd == 'artwork':
+    if cmd == 'artwork':
         artwork = yield from atv.metadata.artwork()
         if artwork is not None:
             with open('artwork.png', 'wb') as file:
@@ -296,6 +299,7 @@ def _handle_command(args, cmd, atv, loop):
         return (yield from _exec_command(atv.metadata, cmd, *cmd_args))
 
     elif cmd in playing:
+        playing_resp = yield from atv.metadata.playing()
         return (yield from _exec_command(playing_resp, cmd, *cmd_args))
 
     elif cmd in airplay:
