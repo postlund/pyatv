@@ -2,6 +2,7 @@
 
 import re
 import inspect
+import hashlib
 
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 
@@ -163,6 +164,17 @@ class Playing(object):
             output.append('   Shuffle: {0}'.format(self.shuffle))
 
         return '\n'.join(output)
+
+    @property
+    def hash(self):
+        """Create a unique hash for what is currently playing.
+
+        The hash is based on title, artist, album and total time. It should
+        always be the same for the same content, but it is not guaranteed.
+        """
+        base = '{0}{1}{2}{3}'.format(
+            self.title, self.artist, self.album, self.total_time)
+        return hashlib.sha256(base.encode('utf-8')).hexdigest()
 
     @abstractproperty
     def media_type(self):

@@ -115,10 +115,11 @@ It is possible to use the reference CLI application as well:
     Playing commands:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
-     - media_type - Type of media is currently playing, e.g. video, music
-     - play_state - Play state, e.g. playing or paused
-     - position - Position in the playing media (seconds)
-     - repeat - Repeat mode
+     - hash - Create a unique hash for what is currently playing
+     - media_type - What type of media is currently playing, e.g. video, music
+     - play_state - Current play state, e.g. playing or paused
+     - position - Current position in the playing media (seconds)
+     - repeat - Current repeat mode
      - shuffle - If shuffle is enabled or not
      - title - Title of the current media, e.g. movie or song name
      - total_time - Total play time in seconds

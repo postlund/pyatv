@@ -53,7 +53,30 @@ the library must handle this). An example:
 
 .. code:: python
 
-    artwork = yield form atv.metadata.artwork_url()
+    artwork = yield from atv.metadata.artwork_url()
+
+Hash
+----
+To simplify detection if content has changed between retrieval of what is
+currently playing, a unique hash can be generated. It is a SHA256 hash based
+on the following data:
+
+- Title
+- Artist
+- Album
+- Total time
+
+These properties has been selected as they are in general unique for the same
+content. No guarantee is however given that the same hash is not given for
+different content nor the same content. It can be used as a fair guess.
+
+.. code:: python
+
+    playing = yield from atv.metadata.playing()
+    ...  # Some time later
+    playing2 = yield from atv.metadata.playing()
+    if playing2.hash != playing.hash:
+        print('Content has changed')
 
 Push updates
 ------------

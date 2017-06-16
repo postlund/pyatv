@@ -161,3 +161,18 @@ class InterfaceTest(unittest.TestCase):
         out = str(PlayingDummy())
         self.assertIn('Shuffle: True', out)
         self.assertIn('Repeat: Track', out)
+
+    # OTHER
+
+    def test_playing_generate_same_hash(self):
+        playing = PlayingDummy(
+            title='title', artist='artist', album='album', total_time=123)
+        self.assertEqual(
+            '538df531d1715629fdd87affd0c5957bcbf54cd89180778071e6535b7df4e22c',
+            playing.hash)
+
+        playing2 = PlayingDummy(
+            title='dummy', artist='test', album='none', total_time=321)
+        self.assertEqual(
+            '80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade',
+            playing2.hash)
