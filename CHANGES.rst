@@ -14,6 +14,8 @@ Changes:
 - New "hash" function in Playing API
 - Multiple commands can be given to atvremote
 - Doing "atvremote commands" requires no device and is a lot faster
+- All commands now listed with "atvremote commands"
+- New "help" command in atvremote
 - Handle additional media kinds
 - Fix atvremote exit codes
 - Support python 3.6
