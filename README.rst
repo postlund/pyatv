@@ -116,10 +116,10 @@ It is possible to use the reference CLI application as well:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
      - hash - Create a unique hash for what is currently playing
-     - media_type - What type of media is currently playing, e.g. video, music
-     - play_state - Current play state, e.g. playing or paused
-     - position - Current position in the playing media (seconds)
-     - repeat - Current repeat mode
+     - media_type - Type of media is currently playing, e.g. video, music
+     - play_state - Play state, e.g. playing or paused
+     - position - Position in the playing media (seconds)
+     - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
      - title - Title of the current media, e.g. movie or song name
      - total_time - Total play time in seconds
@@ -132,9 +132,16 @@ It is possible to use the reference CLI application as well:
      - start_authentication - Begin authentication proces (show PIN on screen)
      - verify_authenticated - Check if loaded credentials are verified
 
-    Other commands:
+    Device commands:
+     - artwork_save - Download artwork and save it to artwork.png
      - auth - Perform AirPlay device authentication
      - push_updates - Listen for push updates
+
+    Global commands:
+     - commands - Print a list with available commands
+     - help - Print help text for a command
+     - pair - Pair pyatv as a remote control with an Apple TV
+     - scan - Scan for Apple TVs on the network
 
 Type ``atvremote --help`` to list all supported commands.
 
@@ -156,7 +163,7 @@ Planned tasks
 Minor tasks
 ^^^^^^^^^^^
 
-- Help command to get full help text for a command (atvremote)
+- Help command to get full help text for a command (atvremote) **DONE**
 - Write simple smoke test for atvremote
 - Improved documentation
 

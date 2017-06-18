@@ -179,10 +179,10 @@ availble commands:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
      - hash - Create a unique hash for what is currently playing
-     - media_type - What type of media is currently playing, e.g. video, music
-     - play_state - Current play state, e.g. playing or paused
-     - position - Current position in the playing media (seconds)
-     - repeat - Current repeat mode
+     - media_type - Type of media is currently playing, e.g. video, music
+     - play_state - Play state, e.g. playing or paused
+     - position - Position in the playing media (seconds)
+     - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
      - title - Title of the current media, e.g. movie or song name
      - total_time - Total play time in seconds
@@ -195,9 +195,16 @@ availble commands:
      - start_authentication - Begin authentication proces (show PIN on screen)
      - verify_authenticated - Check if loaded credentials are verified
 
-    Other commands:
+    Device commands:
+     - artwork_save - Download artwork and save it to artwork.png
      - auth - Perform AirPlay device authentication
      - push_updates - Listen for push updates
+
+    Global commands:
+     - commands - Print a list with available commands
+     - help - Print help text for a command
+     - pair - Pair pyatv as a remote control with an Apple TV
+     - scan - Scan for Apple TVs on the network
 
 You can for instance get what is currently playing with ``playing``:
 
@@ -215,6 +222,18 @@ Or seek in the currently playing media:
 .. code:: bash
 
     $ atvremote -a set_position=123
+
+If you want additional help for a specific command, use ``help``:
+
+    $ atvremote help pair
+    COMMAND:
+    >> pair(self)
+
+    HELP:
+    Pair pyatv as a remote control with an Apple TV.
+
+.. code:: bash
+
 
 Logging and debugging
 ---------------------
