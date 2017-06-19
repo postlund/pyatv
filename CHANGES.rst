@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-0.3.0 (2017-XX-XX)
+0.3.0 (2017-06-19)
 ------------------
 
 Changes:
@@ -11,15 +11,17 @@ Changes:
 - Support scanning for Apple TVs with home sharing disabled
 - Support for shuffle and repeat modes
 - Support for "stop" button
+- Handle additional media kinds
 - New "hash" function in Playing API
+- Support python 3.6
+- Bump aiohttp to 1.3.5 and support 2.0.0+
+
+atvremote:
 - Multiple commands can be given to atvremote
 - Doing "atvremote commands" requires no device and is a lot faster
 - All commands now listed with "atvremote commands"
 - New "help" command in atvremote
-- Handle additional media kinds
 - Fix atvremote exit codes
-- Support python 3.6
-- Bump aiohttp to 1.3.5 and support 2.0.0+
 
 Notes:
 
