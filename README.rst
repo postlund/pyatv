@@ -200,7 +200,7 @@ commands. You may also pass ``--debug`` to get better logging.
    :target: https://badge.fury.io/py/pyatv
 .. |Quantifiedcode| image:: https://www.quantifiedcode.com/api/v1/project/bcacf534875647af8005bb089f329918/badge.svg
    :target: https://www.quantifiedcode.com/app/project/bcacf534875647af8005bb089f329918
-.. |docs| image:: https://readthedocs.org/projects/pyatv/badge/?version=latest
+.. |docs| image:: https://readthedocs.org/projects/pyatv/badge/?version=master
    :alt: Documentation Status
    :scale: 100%
-   :target: https://pyatv.readthedocs.io/en/latest/?badge=latest
+   :target: https://pyatv.readthedocs.io/en/master/?badge=latest
