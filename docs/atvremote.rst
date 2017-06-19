@@ -225,15 +225,14 @@ Or seek in the currently playing media:
 
 If you want additional help for a specific command, use ``help``:
 
+.. code:: bash
+
     $ atvremote help pair
     COMMAND:
     >> pair(self)
 
     HELP:
     Pair pyatv as a remote control with an Apple TV.
-
-.. code:: bash
-
 
 Logging and debugging
 ---------------------
