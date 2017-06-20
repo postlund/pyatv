@@ -224,6 +224,11 @@ class Metadata(object):
 
     __metaclass__ = ABCMeta
 
+    @abstractproperty
+    def device_id(self):
+        """Return a unique identifier for current device."""
+        raise exceptions.NotSupportedError
+
     @abstractmethod
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""

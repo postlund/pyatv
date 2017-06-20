@@ -110,6 +110,7 @@ It is possible to use the reference CLI application as well:
     Metadata commands:
      - artwork - Return artwork for what is currently playing (or None)
      - artwork_url - Return artwork URL for what is currently playing
+     - device_id - Return a unique identifier for current device
      - playing - Return what is currently playing
 
     Playing commands:
