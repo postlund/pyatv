@@ -55,6 +55,21 @@ the library must handle this). An example:
 
     artwork = yield from atv.metadata.artwork_url()
 
+Device ID
+---------
+A unique SHA256 identifier can be generated to separate devices from one another:
+
+.. code:: python
+
+    device_id = atv.metadata.device_id
+
+.. note::
+
+    This id is based on the device address solely. No domain name resolution is
+    performed, so different identifiers will be returned for the same device
+    depending on if an IP-address is specified or a domain name. This might change
+    in the future.
+
 Hash
 ----
 To simplify detection if content has changed between retrieval of what is

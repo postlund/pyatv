@@ -8,6 +8,7 @@ generations of devices. Everything is however left here for now.
 import logging
 import asyncio
 import binascii
+import hashlib
 
 from pyatv import (const, exceptions, dmap, tags, convert)
 from pyatv.airplay import player
@@ -284,10 +285,19 @@ class PlayingInternal(Playing):
 class MetadataInternal(Metadata):
     """Implementation of API for retrieving metadata from an Apple TV."""
 
-    def __init__(self, apple_tv):
+    def __init__(self, apple_tv, daap):
         """Initialize metadata instance."""
         super().__init__()
         self.apple_tv = apple_tv
+
+        # Strip port number and base hash only on address
+        self._device_id = hashlib.sha256(
+            daap.base_url.split(':')[0].encode('utf-8')).hexdigest()
+
+    @property
+    def device_id(self):
+        """Return a unique identifier for current device."""
+        return self._device_id
 
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
@@ -466,7 +476,7 @@ class AppleTVInternal(AppleTV):
 
         self._apple_tv = BaseAppleTV(self._requester)
         self._atv_remote = RemoteControlInternal(self._apple_tv)
-        self._atv_metadata = MetadataInternal(self._apple_tv)
+        self._atv_metadata = MetadataInternal(self._apple_tv, daap_http)
         self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
 
         airplay_player = player.AirPlayPlayer(
