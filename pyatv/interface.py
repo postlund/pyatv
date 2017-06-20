@@ -25,20 +25,17 @@ def _get_first_sentence_in_pydoc(obj):
     return doc[0:index]
 
 
-def retrieve_commands(obj, developer=False):
+def retrieve_commands(obj):
     """Retrieve all commands and help texts from an API object."""
     commands = {}  # Name and help
-    for member in [obj]:
-        for func in member.__dict__:
-            if not inspect.isfunction(member.__dict__[func]) and \
-               not isinstance(member.__dict__[func], property):
-                continue
-            if func.startswith('_'):
-                continue
-            if func.startswith('dev_') and not developer:
-                continue
-            commands[func] = _get_first_sentence_in_pydoc(
-                member.__dict__[func])
+    for func in obj.__dict__:
+        if not inspect.isfunction(obj.__dict__[func]) and \
+           not isinstance(obj.__dict__[func], property):
+            continue
+        if func.startswith('_'):
+            continue
+        commands[func] = _get_first_sentence_in_pydoc(
+            obj.__dict__[func])
     return commands
 
 

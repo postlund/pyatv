@@ -16,6 +16,13 @@ from pyatv import (const, dmap, exceptions, interface, tag_definitions)
 from pyatv.interface import retrieve_commands
 
 
+def _print_commands(title, api):
+    cmd_list = retrieve_commands(api)
+    commands = ' - ' + '\n - '.join(
+        map(lambda x: x[0] + ' - ' + x[1], sorted(cmd_list.items())))
+    print('{} commands:\n{}\n'.format(title, commands))
+
+
 class GlobalCommands:
     """Commands not bound to a specific device."""
 
@@ -27,20 +34,14 @@ class GlobalCommands:
     @asyncio.coroutine
     def commands(self):
         """Print a list with available commands."""
-        self._print_commands('Remote control', interface.RemoteControl)
-        self._print_commands('Metadata', interface.Metadata)
-        self._print_commands('Playing', interface.Playing)
-        self._print_commands('AirPlay', interface.AirPlay)
-        self._print_commands('Device', DeviceCommands)
-        self._print_commands('Global', self.__class__)
+        _print_commands('Remote control', interface.RemoteControl)
+        _print_commands('Metadata', interface.Metadata)
+        _print_commands('Playing', interface.Playing)
+        _print_commands('AirPlay', interface.AirPlay)
+        _print_commands('Device', DeviceCommands)
+        _print_commands('Global', self.__class__)
 
         return 0
-
-    def _print_commands(self, title, api):
-        cmd_list = retrieve_commands(api, self.args.developer)
-        commands = ' - ' + '\n - '.join(
-            map(lambda x: x[0] + ' - ' + x[1], sorted(cmd_list.items())))
-        print('{} commands:\n{}\n'.format(title, commands))
 
     @asyncio.coroutine
     def help(self):
@@ -225,9 +226,6 @@ def cli_handler(loop):
     debug = parser.add_argument_group('debugging')
     debug.add_argument('-v', '--verbose', help='increase output verbosity',
                        action='store_true', dest='verbose')
-    debug.add_argument('--developer', help='show developer commands',
-                       action='store_true', dest='developer',
-                       default=False)
     debug.add_argument('--debug', help='print debug information',
                        action='store_true', dest='debug')
 
@@ -247,7 +245,7 @@ def cli_handler(loop):
             (not args.login_id and args.address):
         parser.error('both --login_id and --address must be given')
 
-    cmds = retrieve_commands(GlobalCommands, developer=args.developer)
+    cmds = retrieve_commands(GlobalCommands)
 
     if args.command[0] in cmds:
         glob_cmds = GlobalCommands(args, loop)
@@ -343,11 +341,11 @@ def _handle_commands(args, loop):
 @asyncio.coroutine
 def _handle_device_command(args, cmd, atv, loop):
     # TODO: Add these to array and use a loop
-    device = retrieve_commands(DeviceCommands, developer=args.developer)
-    ctrl = retrieve_commands(interface.RemoteControl, developer=args.developer)
-    metadata = retrieve_commands(interface.Metadata, developer=args.developer)
-    playing = retrieve_commands(interface.Playing, developer=args.developer)
-    airplay = retrieve_commands(interface.AirPlay, developer=args.developer)
+    device = retrieve_commands(DeviceCommands)
+    ctrl = retrieve_commands(interface.RemoteControl)
+    metadata = retrieve_commands(interface.Metadata)
+    playing = retrieve_commands(interface.Playing)
+    airplay = retrieve_commands(interface.AirPlay)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)

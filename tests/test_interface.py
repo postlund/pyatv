@@ -22,10 +22,6 @@ class TestClass:
         """Property help"""
         pass
 
-    def dev_method(self):
-        """Developer help."""
-        pass
-
     def abbrev_help(self):
         """Type, e.g. a, b or c."""
         pass
@@ -114,11 +110,6 @@ class InterfaceTest(unittest.TestCase):
         self.assertTrue('another_method' in self.methods)
         self.assertTrue('some_property' in self.methods)
         self.assertTrue('abbrev_help' in self.methods)
-
-    def test_get_developer_command(self):
-        methods = interface.retrieve_commands(TestClass, developer=True)
-        self.assertEqual(6, len(methods))
-        self.assertEqual('Developer help', methods['dev_method'])
 
     def test_get_first_sentence_without_leading_period_in_pydoc(self):
         self.assertEqual('Help text', self.methods['test_method'])
