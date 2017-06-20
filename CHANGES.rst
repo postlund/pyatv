@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.3.1 (2017-06-20)
+------------------
+
+Changes:
+
+- Add device_id
+- Remove developer commands
+
 0.3.0 (2017-06-19)
 ------------------
 
