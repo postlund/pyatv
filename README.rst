@@ -189,8 +189,7 @@ You can run the tests with ``python setup.py test``. Also, make sure that
 pylint, flake8 and pydoc passes before committing. This is done automatically
 if you run just run ``tox``.
 
-When using ``atvremote``, pass ``--developer`` to enable some developer friendly
-commands. You may also pass ``--debug`` to get better logging.
+When using ``atvremote``, pass ``--debug`` to get better logging.
 
 .. |Build Status| image:: https://travis-ci.org/postlund/pyatv.svg?branch=master
    :target: https://travis-ci.org/postlund/pyatv

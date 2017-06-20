@@ -237,6 +237,4 @@ If you want additional help for a specific command, use ``help``:
 Logging and debugging
 ---------------------
 You can enable additional debugging information by specifying either
-``--verbose`` or ``--debug``. There are also some additional developer commands
-that might be useful, if you also specify ``--developer``. They will
-show up if you query all available commands.
+``--verbose`` or ``--debug``.

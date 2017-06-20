@@ -304,22 +304,6 @@ class MetadataInternal(Metadata):
         playstatus = yield from self.apple_tv.playstatus()
         return PlayingInternal(playstatus)
 
-    def dev_playstatus(self):
-        """Return raw playstatus response (developer command)."""
-        return self.apple_tv.playstatus()
-
-    def dev_playstatus_wait(self):
-        """Wait for device to change state(developer command)."""
-        return self.apple_tv.playstatus(use_revision=True)
-
-    def dev_playqueue(self):
-        """Return raw playqueue response (developer command)."""
-        return self.apple_tv.playqueue()
-
-    def dev_server_info(self):
-        """Return raw server-info sersponse (developer command)."""
-        return self.apple_tv.server_info()
-
 
 class PushUpdaterInternal(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
