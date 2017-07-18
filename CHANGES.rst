@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.3.4 (2017-07-18)
+------------------
+
+Changes:
+
+- Add long_description to get description on pypi
+
 0.3.3 (2017-07-18)
 ------------------
 

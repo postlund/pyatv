@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
+import os
 from setuptools import setup, find_packages
 
 # Read in version without importing pyatv
 # http://stackoverflow.com/questions/6357361/alternative-to-execfile-in-python-3
 exec(compile(open('pyatv/const.py', "rb").read(), 'pyatv/const.py', 'exec'))
+
+
+# Read content of a file and return as a string
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
     name='pyatv',
@@ -15,6 +22,7 @@ setup(
     author='Pierre Ståhl',
     author_email='pierre.staahl@gmail.com',
     description='Library for controlling an Apple TV',
+    long_description=read('README.rst'),
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
