@@ -10,6 +10,8 @@ import asyncio
 import binascii
 import hashlib
 
+from urllib.parse import urlparse
+
 from pyatv import (const, exceptions, dmap, tags, convert)
 from pyatv.airplay import player
 from pyatv.daap import DaapRequester
@@ -290,9 +292,9 @@ class MetadataInternal(Metadata):
         super().__init__()
         self.apple_tv = apple_tv
 
-        # Strip port number and base hash only on address
-        self._device_id = hashlib.sha256(
-            daap.base_url.split(':')[0].encode('utf-8')).hexdigest()
+        # Extract hostname and use that as base for hash
+        address = urlparse(daap.base_url).hostname
+        self._device_id = hashlib.sha256(address.encode('utf-8')).hexdigest()
 
     @property
     def device_id(self):
