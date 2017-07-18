@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+0.3.3 (2017-07-18)
+------------------
+
+Changes:
+
+- Fixed broken device_id function (always generated same id)
+
+atvremote:
+- Fixed argument handling, e.g. when using play_url
+
 0.3.2 (2017-06-20)
 ------------------
 

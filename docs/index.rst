@@ -27,6 +27,9 @@ Use pip::
 
     $ pip install pyatv
 
+NOTE: You need some system packages, run this on debian or similar:
+
+    $ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 
 Getting Started
 ---------------
