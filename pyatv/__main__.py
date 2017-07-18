@@ -351,27 +351,31 @@ def _handle_device_command(args, cmd, atv, loop):
     cmd, cmd_args = _extract_command_with_args(cmd)
     if cmd in device:
         return (yield from _exec_command(
-            DeviceCommands(atv, loop), cmd, print_result=False, *cmd_args))
+            DeviceCommands(atv, loop), cmd, False, *cmd_args))
 
     elif cmd in ctrl:
-        return (yield from _exec_command(atv.remote_control, cmd, *cmd_args))
+        return (yield from _exec_command(
+            atv.remote_control, cmd, True, *cmd_args))
 
     elif cmd in metadata:
-        return (yield from _exec_command(atv.metadata, cmd, *cmd_args))
+        return (yield from _exec_command(
+            atv.metadata, cmd, True, *cmd_args))
 
     elif cmd in playing:
         playing_resp = yield from atv.metadata.playing()
-        return (yield from _exec_command(playing_resp, cmd, *cmd_args))
+        return (yield from _exec_command(
+            playing_resp, cmd, True, *cmd_args))
 
     elif cmd in airplay:
-        return (yield from _exec_command(atv.airplay, cmd, *cmd_args))
+        return (yield from _exec_command(
+            atv.airplay, cmd, True, *cmd_args))
 
     logging.error('Unknown command: %s', args.command[0])
     return 1
 
 
 @asyncio.coroutine
-def _exec_command(obj, command, print_result=True, *args):
+def _exec_command(obj, command, print_result, *args):
     try:
         # If the command to execute is a @property, the value returned by that
         # property will be stored in tmp. Otherwise it's a coroutine and we
