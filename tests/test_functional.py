@@ -236,10 +236,10 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
 
     def test_metadata_device_id(self):
-        # This is a reference case for a server running at 127.0.0.1
+        # This is a reference case for a server running at 127.0.0.1:3689
         self.assertEqual(
             self.atv.metadata.device_id,
-            'e0603c499aae47eb89343ad0ef3178e044c62e70ae2309b35591d1d49a3211ec')
+            '12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0')
 
     @unittest_run_loop
     def test_metadata_artwork(self):
