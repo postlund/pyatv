@@ -6,6 +6,8 @@ import plistlib
 
 from aiohttp import ClientSession
 
+from pyatv import const
+
 _LOGGER = logging.getLogger(__name__)
 
 # This is the default port. It is also included in the Bonjour service
@@ -55,13 +57,11 @@ class AirPlayPlayer:
     def _url(self, port, command):
         return 'http://{}:{}/{}'.format(self.address, port, command)
 
-    # Poll playback-info to find out if something is playing. It might take
-    # some time until the media starts playing, give it 5 seconds (attempts)
+    # Poll playback-info to find out if something is playing.
     @asyncio.coroutine
     def _wait_for_media_to_end(self, session):
         address = self._url(self.port, 'playback-info')
-        attempts = 5
-        video_started = False
+        play_state = const.PLAY_STATE_LOADING
         while True:
             info = None
             try:
@@ -69,18 +69,16 @@ class AirPlayPlayer:
                 data = yield from info.content.read()
                 parsed = plistlib.loads(data)
 
-                # duration is only available if something is playing
-                if 'duration' in parsed:
-                    video_started = True
-                    attempts = -1
-                else:
-                    video_started = False
-                    if attempts >= 0:
-                        attempts -= 1
-
-                if not video_started and attempts < 0:
-                    _LOGGER.debug('media playback ended')
-                    break
+                if play_state == const.PLAY_STATE_LOADING:
+                    if 'duration' in parsed:
+                        play_state = const.PLAY_STATE_PLAYING
+                    elif 'readyToPlay' not in parsed:
+                        play_state = const.PLAY_STATE_NO_MEDIA
+                        break
+                elif play_state == const.PLAY_STATE_PLAYING:
+                    if 'duration' not in parsed:
+                        play_state = const.PLAY_STATE_NO_MEDIA
+                        break
 
             finally:
                 if info is not None:
