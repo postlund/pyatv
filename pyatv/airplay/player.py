@@ -4,6 +4,8 @@ import logging
 import asyncio
 import plistlib
 
+from aiohttp import ClientSession
+
 _LOGGER = logging.getLogger(__name__)
 
 # This is the default port. It is also included in the Bonjour service
@@ -23,7 +25,6 @@ class AirPlayPlayer:
         """Initialize a new AirPlay instance."""
         self.loop = loop
         self.address = address
-        self.session = session
         self.port = port
 
     @asyncio.coroutine
@@ -39,12 +40,17 @@ class AirPlayPlayer:
 
         resp = None
         try:
-            resp = yield from self.session.post(
+            session = ClientSession(loop=self.loop)
+            resp = yield from session.post(
                 address, headers=headers, data=body, timeout=TIMEOUT)
-            yield from self._wait_for_media_to_end()
+            yield from self._wait_for_media_to_end(session)
         finally:
             if resp is not None:
                 resp.close()
+            # Apple TV 3 Gen have a bug. It stays in playing state forever
+            # after stream finished. We need close session every time when
+            # video stops to fix it.
+            session.close()
 
     def _url(self, port, command):
         return 'http://{}:{}/{}'.format(self.address, port, command)
@@ -52,14 +58,14 @@ class AirPlayPlayer:
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)
     @asyncio.coroutine
-    def _wait_for_media_to_end(self):
+    def _wait_for_media_to_end(self, session):
         address = self._url(self.port, 'playback-info')
         attempts = 5
         video_started = False
         while True:
             info = None
             try:
-                info = yield from self.session.get(address)
+                info = yield from session.get(address)
                 data = yield from info.content.read()
                 parsed = plistlib.loads(data)
 
