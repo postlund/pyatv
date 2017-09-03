@@ -12,7 +12,9 @@ from zeroconf import Zeroconf
 
 import pyatv
 import pyatv.pairing
-from pyatv import (const, dmap, exceptions, interface, tag_definitions)
+from pyatv import (const, exceptions, interface)
+from pyatv.dmap import tag_definitions
+from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
 
 
@@ -405,7 +407,7 @@ def _pretty_print(data):
     if isinstance(data, bytes):
         print(binascii.hexlify(data))
     elif isinstance(data, list):
-        print(dmap.pprint(data, tag_definitions.lookup_tag))
+        print(pprint(data, tag_definitions.lookup_tag))
     else:
         print(data)
 

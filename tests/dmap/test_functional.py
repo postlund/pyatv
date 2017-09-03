@@ -9,8 +9,8 @@ from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import (AppleTVDevice, connect_to_apple_tv, const,
                    exceptions, pairing)
-from tests.fake_apple_tv import (
-    FakeAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
+from tests.fake_daap_atv import (
+    FakeDaapAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
 from tests import (utils, zeroconf_stub)
 
 HSGID = '12345-6789-0'
@@ -57,7 +57,7 @@ class FunctionalTest(AioHTTPTestCase):
 
     @asyncio.coroutine
     def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(
+        self.fake_atv = FakeDaapAppleTV(
             self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
 

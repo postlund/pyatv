@@ -1,4 +1,4 @@
-"""Fake Apple TV device for tests.
+"""Fake DAAP Apple TV device for tests.
 
 This is an implementation of an Apple TV device that can be used to verify
 functionality in tests. It is possible to specify return values for different
@@ -14,7 +14,7 @@ from collections import namedtuple
 
 from aiohttp import web
 
-from pyatv import (tags, dmap, tag_definitions)
+from pyatv.dmap import (parser, tags, tag_definitions)
 from tests import utils
 
 
@@ -84,7 +84,7 @@ class PlayingResponse:
             return None
 
 
-class FakeAppleTV(web.Application):
+class FakeDaapAppleTV(web.Application):
     """Implementation of fake Apple TV."""
 
     def __init__(self, loop, hsgid, pairing_guid, session_id, testcase):
@@ -171,14 +171,14 @@ class FakeAppleTV(web.Application):
         """Handle remote control buttons."""
         self._verify_auth_parameters(request)
         content = yield from request.content.read()
-        parsed = dmap.parse(content, tag_definitions.lookup_tag)
+        parsed = parser.parse(content, tag_definitions.lookup_tag)
         self.last_button_pressed = self._convert_button(parsed)
         self.buttons_press_count += 1
         return web.Response(status=200)
 
     @staticmethod
     def _convert_button(data):
-        value = dmap.first(data, 'cmbe')
+        value = parser.first(data, 'cmbe')
         if value == 'touchUp&time=6&point=20,250':
             return 'up'
         elif value == 'touchUp&time=6&point=20,275':
@@ -292,11 +292,11 @@ class FakeAppleTV(web.Application):
         data, _ = yield from utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
-        parsed = dmap.parse(data, tag_definitions.lookup_tag)
-        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'),
+        parsed = parser.parse(data, tag_definitions.lookup_tag)
+        self.tc.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.tc.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'),
                             pairing_response.remote_name)
-        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.tc.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
     # Verifies that all needed headers are included in the request. Should be
     # checked in all requests, but that seems a bit too much and not that

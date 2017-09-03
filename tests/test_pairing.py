@@ -5,7 +5,8 @@ import asynctest
 import ipaddress
 
 from unittest.mock import patch
-from pyatv import pairing, dmap, tag_definitions
+from pyatv import pairing
+from pyatv.dmap import (parser, tag_definitions)
 from tests import zeroconf_stub, utils
 
 
@@ -68,10 +69,10 @@ class PairingTest(asynctest.TestCase):
         data, _ = yield from utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
-        parsed = dmap.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        parsed = parser.parse(data, tag_definitions.lookup_tag)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
     def test_pair_custom_pairing_guid(self):
         self.pairing.pin_code = PIN_CODE2
@@ -82,8 +83,8 @@ class PairingTest(asynctest.TestCase):
         data, _ = yield from utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
-        parsed = dmap.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'),
+        parsed = parser.parse(data, tag_definitions.lookup_tag)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'),
                          int(PAIRING_GUID2, 16))
 
     def test_failed_pairing(self):

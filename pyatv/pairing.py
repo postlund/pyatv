@@ -11,7 +11,7 @@ import ipaddress
 import netifaces
 from aiohttp import web
 from zeroconf import ServiceInfo
-from pyatv import tags
+from pyatv.dmap import tags
 
 _LOGGER = logging.getLogger(__name__)
 

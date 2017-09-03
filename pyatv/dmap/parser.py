@@ -11,7 +11,7 @@ a four byte big endian unsigned int as length and the data as data. So:
 from collections import namedtuple
 
 from pyatv import exceptions
-from pyatv.tags import (read_str, read_uint)
+from .tags import (read_str, read_uint)
 
 
 class DmapTag(namedtuple('DmapTag', ['type', 'name'])):
