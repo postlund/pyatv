@@ -18,7 +18,7 @@ def print_what_is_playing(loop):
         print('no device found', file=sys.stderr)
         return
 
-    print('Connecting to {}'.format(atvs[0].address))
+    print('Connecting to {0}'.format(atvs[0].address))
     atv = pyatv.connect_to_apple_tv(atvs[0], loop)
 
     try:

@@ -175,3 +175,16 @@ class ConvertTest(unittest.TestCase):
 
     def test_unknown_repeat_to_str(self):
         self.assertEqual('Unsupported', convert.repeat_str(1234))
+
+    # PROTOCOL TESTS
+
+    def test_protocol_str(self):
+        self.assertEqual('MRP',
+                         convert.protocol_str(const.PROTOCOL_MRP))
+        self.assertEqual('DMAP',
+                         convert.protocol_str(const.PROTOCOL_DMAP))
+        self.assertEqual('AirPlay',
+                         convert.protocol_str(const.PROTOCOL_AIRPLAY))
+
+    def test_unknown_protocol_str(self):
+        self.assertEqual('Unknown', convert.protocol_str('invalid'))

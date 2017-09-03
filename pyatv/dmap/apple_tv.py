@@ -402,20 +402,23 @@ class DmapAppleTV(AppleTV):
         super().__init__()
         self._session = session
 
+        dmap_service = details.usable_service()
         daap_http = HttpSession(
-            session, 'http://{0}:{1}/'.format(details.address, details.port))
-        self._requester = DaapRequester(daap_http, details.login_id)
+            session,
+            'http://{0}:{1}/'.format(details.address, dmap_service.port))
+        self._requester = DaapRequester(daap_http, dmap_service.login_id)
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._atv_remote = DmapRemoteControl(self._apple_tv)
         self._atv_metadata = DmapMetadata(self._apple_tv, daap_http)
         self._atv_push_updater = DmapPushUpdater(loop, self._apple_tv)
 
+        airplay_service = details.airplay_service()
         airplay_player = player.AirPlayPlayer(
-            loop, session, details.address, details.airplay_port)
+            loop, session, details.address, airplay_service.port)
         airplay_http = HttpSession(
             session, 'http://{0}:{1}/'.format(
-                details.address, details.airplay_port))
+                details.address, airplay_service.port))
         self._airplay = AirPlayAPI(airplay_http, airplay_player)
 
     def login(self):

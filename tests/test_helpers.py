@@ -5,7 +5,7 @@ import asynctest
 
 from asynctest.mock import patch
 
-from pyatv import (AppleTVDevice, helpers)
+from pyatv import (AppleTV, helpers)
 
 
 class MockAppleTV:
@@ -20,7 +20,7 @@ class MockAppleTV:
 class HelpersTest(asynctest.TestCase):
 
     def setUp(self):
-        self.device_details = AppleTVDevice('name', 'address', 'hsgid')
+        self.device_details = AppleTV('address', 'name')
         self.mock_device = asynctest.mock.Mock(MockAppleTV())
 
     @patch('pyatv.scan_for_apple_tvs', return_value=[])

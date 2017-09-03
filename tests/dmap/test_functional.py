@@ -7,8 +7,8 @@ import ipaddress
 from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import (AppleTVDevice, connect_to_apple_tv, const,
-                   exceptions, pairing)
+from pyatv import (AppleTV, AirPlayService, DmapService, connect_to_apple_tv,
+                   const, exceptions, pairing)
 from tests.fake_daap_atv import (
     FakeDaapAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
 from tests import (utils, zeroconf_stub)
@@ -70,8 +70,9 @@ class FunctionalTest(AioHTTPTestCase):
         return TestServer(self.fake_atv)
 
     def get_connected_device(self, identifier):
-        details = AppleTVDevice(
-            'Apple TV', '127.0.0.1', identifier, self.app.port, self.app.port)
+        details = AppleTV('127.0.0.1', 'Apple TV')
+        details.add_service(DmapService(identifier, port=self.app.port))
+        details.add_service(AirPlayService(self.app.port))
         return connect_to_apple_tv(details, self.loop)
 
     # This is not a pretty test and it does crazy things. Should probably be
