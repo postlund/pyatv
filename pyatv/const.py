@@ -6,7 +6,20 @@ PATCH_VERSION = '5.dev1'
 __short_version__ = '{}.{}'.format(MAJOR_VERSION, MINOR_VERSION)
 __version__ = '{}.{}'.format(__short_version__, PATCH_VERSION)
 
-# Corresponds to "mediakind", cmst.cmmk, in iTunes (but more coerced here)
+
+# Protocol types
+
+#: Protocol is DMAP (Apple TV 1, 2 and 3)
+PROTOCOL_DMAP = 1
+
+#: Protocol is MediaRemote (Apple TV 4 and later)
+PROTOCOL_MRP = 2
+
+#: Protocol is AirPlay
+PROTOCOL_AIRPLAY = 3
+
+
+# Media types
 
 #: Media type is unknown
 MEDIA_TYPE_UNKNOWN = 1
@@ -21,7 +34,7 @@ MEDIA_TYPE_MUSIC = 3
 MEDIA_TYPE_TV = 4
 
 
-# Corresponds to "playstate", cmst.playkind, in iTunes (still not fully known)
+# Play states
 
 #: No media is currently select/playing
 PLAY_STATE_NO_MEDIA = 1
@@ -42,7 +55,7 @@ PLAY_STATE_FAST_FORWARD = 5
 PLAY_STATE_FAST_BACKWARD = 6
 
 
-# Corresponds to "repeatstate", dacp.repeatstate, in iTunes
+# Repeat states
 
 #: No repeat
 REPEAT_STATE_OFF = 0

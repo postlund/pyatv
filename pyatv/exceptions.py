@@ -1,6 +1,12 @@
 """Local exceptions used by library."""
 
 
+class NoUsableServiceError(Exception):
+    """Thrown when connecting to a device with no usable service."""
+
+    pass
+
+
 class AuthenticationError(Exception):
     """Thrown when login fails."""
 

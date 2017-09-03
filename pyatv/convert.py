@@ -86,3 +86,14 @@ def ms_to_s(time):
     if time >= (2**32 - 1):
         return 0
     return round(time / 1000.0)
+
+
+def protocol_str(protocol):
+    """Convert internal API protocol to string."""
+    if protocol == const.PROTOCOL_MRP:
+        return 'MRP'
+    elif protocol == const.PROTOCOL_DMAP:
+        return 'DMAP'
+    elif protocol == const.PROTOCOL_AIRPLAY:
+        return 'AirPlay'
+    return 'Unknown'

@@ -19,7 +19,37 @@ def homesharing_service(service_name, atv_name, address, hsgid):
 
     return ServiceInfo('_appletv-v2._tcp.local.',
                        service_name + '._appletv-v2._tcp.local.',
-                       address=address, port='3689',
+                       address=address, port=3689,
+                       properties=props)
+
+
+def mrp_service(service_name, atv_name, address):
+    """Create a MediaRemote service simulating an Apple TV."""
+    props = {
+        b'ModelName': b'Mac', b'SystemBuildVersion': b'16G29',
+        b'Name': atv_name, b'AllowPairing': b'YES',
+        b'UniqueIdentifier': b'4EE5AF58-7E5D-465A-935E-82E4DB74385D'
+    }
+
+    return ServiceInfo('_mediaremotetv._tcp.local.',
+                       service_name + '._mediaremotetv._tcp.local.',
+                       address=address, port=49152,
+                       properties=props)
+
+
+def airplay_service(atv_name, address):
+    """Create a MediaRemote service simulating an Apple TV."""
+    props = {
+        b'deviceid': b'AA:BB:CC:DD:EE:FF', b'model': b'AppleTV3,1',
+        b'pi': b'4EE5AF58-7E5D-465A-935E-82E4DB74385D', b'flags': b'0x44',
+        b'vv': b'2', b'features': b'0x5A7FFFF7,0xE',
+        b'pk': b'3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98',  # noqa
+        b'srcvers': b'220.68'
+    }
+
+    return ServiceInfo('_airplay._tcp.local.',
+                       atv_name + '._airplay._tcp.local.',
+                       address=address, port=7000,
                        properties=props)
 
 
@@ -33,7 +63,7 @@ def device_service(service_name, atv_name, address):
 
     return ServiceInfo('_touch-able._tcp.local.',
                        service_name + '._touch-able._tcp.local.',
-                       address=address, port='3689',
+                       address=address, port=3689,
                        server='AppleTV-2.local.',
                        properties=props)
 

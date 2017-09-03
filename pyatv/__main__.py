@@ -12,7 +12,8 @@ from zeroconf import Zeroconf
 
 import pyatv
 import pyatv.pairing
-from pyatv import (const, exceptions, interface)
+from pyatv import (
+    AppleTV, DmapService, MrpService, const, exceptions, interface)
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
@@ -76,7 +77,7 @@ class GlobalCommands:
     def scan(self):
         """Scan for Apple TVs on the network."""
         atvs = yield from pyatv.scan_for_apple_tvs(
-            self.loop, timeout=self.args.scan_timeout, only_home_sharing=False)
+            self.loop, timeout=self.args.scan_timeout, only_usable=False)
         _print_found_apple_tvs(atvs)
 
         return 0
@@ -185,6 +186,20 @@ def _in_range(lower, upper):
     return _checker
 
 
+# pylint: disable=too-few-public-methods
+class TransformProtocol(argparse.Action):
+    """Transform protocol in string format to internal representation."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Match protocol string and save correct version."""
+        if values == "mrp":
+            setattr(namespace, self.dest, const.PROTOCOL_MRP)
+        elif values == "dmap":
+            setattr(namespace, self.dest, const.PROTOCOL_DMAP)
+        else:
+            raise ArgumentTypeError('Valid protocols are: mrp, dmap')
+
+
 @asyncio.coroutine
 def cli_handler(loop):
     """Application starts here."""
@@ -196,6 +211,12 @@ def cli_handler(loop):
                         dest='name', default='Apple TV')
     parser.add_argument('--address', help='device ip address or hostname',
                         dest='address', default=None)
+    parser.add_argument('--protocol', action=TransformProtocol,
+                        help='protocol to use (values: dmap, mrp)',
+                        dest='protocol', default='dmap')
+    parser.add_argument('--port', help='port when connecting',
+                        dest='port', type=_in_range(0, 65535),
+                        default=0)
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
                         dest='scan_timeout', type=_in_range(1, 10),
                         metavar='TIMEOUT', default=3)
@@ -243,8 +264,9 @@ def cli_handler(loop):
     logging.getLogger('requests').setLevel(logging.WARNING)
 
     # Sanity checks that not can be done natively by argparse
-    if (args.login_id and not args.address) or \
-            (not args.login_id and args.address):
+    if args.protocol == const.PROTOCOL_DMAP and \
+            ((args.login_id and not args.address) or
+             (not args.login_id and args.address)):
         parser.error('both --login_id and --address must be given')
 
     cmds = retrieve_commands(GlobalCommands)
@@ -264,17 +286,10 @@ def cli_handler(loop):
 
 
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
-    print('Found Apple TVs:', file=outstream)
     for apple_tv in atvs:
-        if apple_tv.login_id is None:
-            msg = ' - {0} at {1} (home sharing disabled)'.format(
-                apple_tv.name, apple_tv.address)
-        else:
-            msg = ' - {0} at {1} (login id: {2})'.format(
-                apple_tv.name, apple_tv.address, apple_tv.login_id)
-        print(msg, file=outstream)
+        print('{0}\n'.format(apple_tv), file=outstream)
 
-    print("\nNote: You must use 'pair' with devices "
+    print("Note: You must use 'pair' with devices "
           "that have home sharing disabled", file=outstream)
 
 
@@ -291,11 +306,19 @@ def _handle_autodiscover(args, loop):
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
         return 1
 
-    # Simple hack to re-use existing command handling and respect options
     apple_tv = atvs[0]
+    service = apple_tv.usable_service()
+
+    # Common parameters for all protocols
     args.address = apple_tv.address
-    args.login_id = apple_tv.login_id
     args.name = apple_tv.name
+    args.protocol = service.protocol
+    args.port = service.port
+
+    # Protocol specific parameters
+    if service.protocol == const.PROTOCOL_DMAP:
+        args.login_id = service.login_id
+
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
     return (yield from _handle_commands(args, loop))
@@ -321,7 +344,12 @@ def _extract_command_with_args(cmd):
 
 @asyncio.coroutine
 def _handle_commands(args, loop):
-    details = pyatv.AppleTVDevice(args.name, args.address, args.login_id)
+    details = AppleTV(args.address, args.name)
+    if args.protocol == const.PROTOCOL_DMAP:
+        details.add_service(DmapService(args.login_id, port=args.port))
+    elif args.protocol == const.PROTOCOL_MRP:
+        details.add_service(MrpService(args.port))
+
     atv = pyatv.connect_to_apple_tv(details, loop)
     atv.push_updater.listener = PushListener()
 
