@@ -6,8 +6,10 @@ import asyncio
 
 from copy import copy
 
-from pyatv import (dmap, exceptions)
-from pyatv.tag_definitions import lookup_tag
+
+from pyatv import exceptions
+from pyatv.dmap import parser
+from .tag_definitions import lookup_tag
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ class DaapRequester:
                 headers=_DMAP_HEADERS)
 
         resp = yield from self._do(_login_request)
-        self._session_id = dmap.first(resp, 'mlog', 'mlid')
+        self._session_id = parser.first(resp, 'mlog', 'mlid')
         _LOGGER.info('Logged in and got session id %s', self._session_id)
         return self._session_id
 
@@ -88,7 +90,7 @@ class DaapRequester:
     def _do(self, action, retry=True, is_login=False, is_daap=True):
         resp, status = yield from action()
         if is_daap:
-            resp = dmap.parse(resp, lookup_tag)
+            resp = parser.parse(resp, lookup_tag)
 
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
         if status >= 200 and status < 300:
@@ -133,5 +135,5 @@ class DaapRequester:
         if _LOGGER.isEnabledFor(logging.INFO):
             formatted = data
             if is_daap:
-                formatted = dmap.pprint(data, lookup_tag)
+                formatted = parser.pprint(data, lookup_tag)
             _LOGGER.debug(text, formatted)

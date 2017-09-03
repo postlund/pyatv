@@ -7,7 +7,7 @@ from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv.airplay import player
-from tests.fake_apple_tv import (FakeAppleTV, AppleTVUseCases)
+from tests.fake_daap_atv import (FakeDaapAppleTV, AppleTVUseCases)
 
 
 STREAM = 'http://airplaystream'
@@ -32,7 +32,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
     @asyncio.coroutine
     def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self.loop, 0, 0, 0, self)
+        self.fake_atv = FakeDaapAppleTV(self.loop, 0, 0, 0, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
 
         # Import TestServer here and not globally, otherwise py.test will

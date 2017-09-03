@@ -1,8 +1,8 @@
 """Definitions of DMAP tags used by various applications."""
 
 import logging
-from pyatv.dmap import DmapTag
-from pyatv.tags import (read_bool, read_uint, read_str, read_raw, read_ignore)
+from .parser import DmapTag
+from .tags import (read_bool, read_uint, read_str, read_raw, read_ignore)
 
 _LOGGER = logging.getLogger(__name__)
 

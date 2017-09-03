@@ -10,7 +10,7 @@ from zeroconf import ServiceBrowser, Zeroconf
 from aiohttp import ClientSession
 
 from pyatv.pairing import PairingHandler
-from pyatv.internal.apple_tv import AppleTVInternal
+from pyatv.dmap.apple_tv import DmapAppleTV
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ def connect_to_apple_tv(details, loop, session=None):
 
     # If/when needed, the library should figure out the correct type of Apple
     # TV and return the correct type for it.
-    return AppleTVInternal(loop, session, details)
+    return DmapAppleTV(loop, session, details)
 
 
 def pair_with_apple_tv(loop, pin_code, name, pairing_guid=None):

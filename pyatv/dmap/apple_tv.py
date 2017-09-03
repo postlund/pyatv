@@ -1,25 +1,19 @@
-"""Implementation of the protocol used to interact with an Apple TV.
-
-Only verified to work with a 3rd generation device. Classes should be
-extracted and adjusted for differences if needed, to support newer/older
-generations of devices. Everything is however left here for now.
-"""
+"""Implementation of the DMAP protocol used by ATV 1, 2 and 3."""
 
 import logging
 import asyncio
-import binascii
 import hashlib
 
 from urllib.parse import urlparse
 
-from pyatv import (const, exceptions, dmap, tags, convert)
+from pyatv import (const, exceptions, convert)
 from pyatv.airplay import player
-from pyatv.daap import DaapRequester
+from pyatv.dmap import (parser, tags)
+from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater, AirPlay)
-from pyatv.airplay.srp import (SRPAuthHandler, new_credentials)
-from pyatv.airplay.auth import (AuthenticationVerifier, DeviceAuthenticator)
+                             Playing, PushUpdater)
+from pyatv.airplay.api import AirPlayAPI
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,18 +22,13 @@ _ARTWORK_CMD = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
 _CTRL_PROMPT_CMD = 'ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0'
 
 
-class BaseAppleTV:
+class BaseDmapAppleTV:
     """Common protocol logic used to interact with an Apple TV."""
 
     def __init__(self, requester):
         """Initialize a new Apple TV base implemenation."""
         self.daap = requester
         self.playstatus_revision = 0
-
-    def server_info(self):
-        """Request and return server information."""
-        return (yield from self.daap.get(
-            'server-info', session=False, login_id=False))
 
     @asyncio.coroutine
     def playstatus(self, use_revision=False, timeout=None):
@@ -53,7 +42,7 @@ class BaseAppleTV:
         cmd_url = _PSU_CMD.format(
             self.playstatus_revision if use_revision else 0)
         resp = yield from self.daap.get(cmd_url, timeout=timeout)
-        self.playstatus_revision = dmap.first(resp, 'cmst', 'cmsr')
+        self.playstatus_revision = parser.first(resp, 'cmst', 'cmsr')
         return resp
 
     def artwork_url(self):
@@ -98,7 +87,7 @@ class BaseAppleTV:
         return self.daap.post(cmd_url)
 
 
-class RemoteControlInternal(RemoteControl):
+class DmapRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
     def __init__(self, apple_tv):
@@ -212,7 +201,7 @@ class RemoteControlInternal(RemoteControl):
         return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
 
 
-class PlayingInternal(Playing):
+class DmapPlaying(Playing):
     """Implementation of API for retrieving what is playing."""
 
     def __init__(self, playstatus):
@@ -223,11 +212,11 @@ class PlayingInternal(Playing):
     @property
     def media_type(self):
         """Type of media is currently playing, e.g. video, music."""
-        state = dmap.first(self.playstatus, 'cmst', 'caps')
+        state = parser.first(self.playstatus, 'cmst', 'caps')
         if not state:
             return const.MEDIA_TYPE_UNKNOWN
 
-        mediakind = dmap.first(self.playstatus, 'cmst', 'cmmk')
+        mediakind = parser.first(self.playstatus, 'cmst', 'cmmk')
         if mediakind is not None:
             return convert.media_kind(mediakind)
 
@@ -241,23 +230,23 @@ class PlayingInternal(Playing):
     @property
     def play_state(self):
         """Play state, e.g. playing or paused."""
-        state = dmap.first(self.playstatus, 'cmst', 'caps')
+        state = parser.first(self.playstatus, 'cmst', 'caps')
         return convert.playstate(state)
 
     @property
     def title(self):
         """Title of the current media, e.g. movie or song name."""
-        return dmap.first(self.playstatus, 'cmst', 'cann')
+        return parser.first(self.playstatus, 'cmst', 'cann')
 
     @property
     def artist(self):
         """Arist of the currently playing song."""
-        return dmap.first(self.playstatus, 'cmst', 'cana')
+        return parser.first(self.playstatus, 'cmst', 'cana')
 
     @property
     def album(self):
         """Album of the currently playing song."""
-        return dmap.first(self.playstatus, 'cmst', 'canl')
+        return parser.first(self.playstatus, 'cmst', 'canl')
 
     @property
     def total_time(self):
@@ -272,19 +261,19 @@ class PlayingInternal(Playing):
     @property
     def shuffle(self):
         """If shuffle is enabled or not."""
-        return bool(dmap.first(self.playstatus, 'cmst', 'cash'))
+        return bool(parser.first(self.playstatus, 'cmst', 'cash'))
 
     @property
     def repeat(self):
         """Repeat mode."""
-        return dmap.first(self.playstatus, 'cmst', 'carp')
+        return parser.first(self.playstatus, 'cmst', 'carp')
 
     def _get_time_in_seconds(self, tag):
-        time = dmap.first(self.playstatus, 'cmst', tag)
+        time = parser.first(self.playstatus, 'cmst', tag)
         return convert.ms_to_s(time)
 
 
-class MetadataInternal(Metadata):
+class DmapMetadata(Metadata):
     """Implementation of API for retrieving metadata from an Apple TV."""
 
     def __init__(self, apple_tv, daap):
@@ -314,14 +303,14 @@ class MetadataInternal(Metadata):
     def playing(self):
         """Return current device state."""
         playstatus = yield from self.apple_tv.playstatus()
-        return PlayingInternal(playstatus)
+        return DmapPlaying(playstatus)
 
 
-class PushUpdaterInternal(PushUpdater):
+class DmapPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
     def __init__(self, loop, apple_tv):
-        """Initialize a new PushUpdaterInternal instance."""
+        """Initialize a new DmapPushUpdater instance."""
         self._loop = loop
         self._atv = apple_tv
         self._future = None
@@ -389,7 +378,7 @@ class PushUpdaterInternal(PushUpdater):
                     use_revision=True, timeout=0)
 
                 self._loop.call_soon(self.listener.playstatus_update,
-                                     self, PlayingInternal(playstatus))
+                                     self, DmapPlaying(playstatus))
             except asyncio.CancelledError:
                 break
 
@@ -403,66 +392,7 @@ class PushUpdaterInternal(PushUpdater):
         self._future = None
 
 
-# pylint: disable=too-few-public-methods
-class AirPlayInternal(AirPlay):
-    """Implementation of API for AirPlay support."""
-
-    def __init__(self, http, airplay_player):
-        """Initialize a new AirPlayInternal instance."""
-        self.player = airplay_player
-        self.identifier = None
-        self.srp = SRPAuthHandler()
-        self.verifier = AuthenticationVerifier(http, self.srp)
-        self.auther = DeviceAuthenticator(http, self.srp)
-
-    @asyncio.coroutine
-    def generate_credentials(self):
-        """Create new credentials for authentication.
-
-        Credentials that have been authenticated shall be saved and loaded with
-        load_credentials before playing anything. If credentials are lost,
-        authentication must be performed again.
-        """
-        identifier, seed = new_credentials()
-        return '{0}:{1}'.format(identifier, seed.decode().upper())
-
-    @asyncio.coroutine
-    def load_credentials(self, credentials):
-        """Load existing credentials."""
-        split = credentials.split(':')
-        self.identifier = split[0]
-        self.srp.initialize(binascii.unhexlify(split[1]))
-        _LOGGER.debug('Loaded AirPlay credentials: %s', credentials)
-
-    def verify_authenticated(self):
-        """Check if loaded credentials are verified."""
-        return self.verifier.verify_authed()
-
-    def start_authentication(self):
-        """Begin authentication proces (show PIN on screen)."""
-        return self.auther.start_authentication()
-
-    def finish_authentication(self, pin):
-        """End authentication process with PIN code."""
-        return self.auther.finish_authentication(self.identifier, pin)
-
-    @asyncio.coroutine
-    def play_url(self, url, **kwargs):
-        """Play media from an URL on the device.
-
-        Note: This method will not yield until the media has finished playing.
-        The Apple TV requires the request to stay open during the entire
-        play duration.
-        """
-        # If credentials have been loaded, do device verification first
-        if self.identifier:
-            yield from self.verify_authenticated()
-
-        position = 0 if 'position' not in kwargs else int(kwargs['position'])
-        return (yield from self.player.play_url(url, position))
-
-
-class AppleTVInternal(AppleTV):
+class DmapAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""
 
     # This is a container class so it's OK with many attributes
@@ -476,17 +406,17 @@ class AppleTVInternal(AppleTV):
             session, 'http://{0}:{1}/'.format(details.address, details.port))
         self._requester = DaapRequester(daap_http, details.login_id)
 
-        self._apple_tv = BaseAppleTV(self._requester)
-        self._atv_remote = RemoteControlInternal(self._apple_tv)
-        self._atv_metadata = MetadataInternal(self._apple_tv, daap_http)
-        self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
+        self._apple_tv = BaseDmapAppleTV(self._requester)
+        self._atv_remote = DmapRemoteControl(self._apple_tv)
+        self._atv_metadata = DmapMetadata(self._apple_tv, daap_http)
+        self._atv_push_updater = DmapPushUpdater(loop, self._apple_tv)
 
         airplay_player = player.AirPlayPlayer(
             loop, session, details.address, details.airplay_port)
         airplay_http = HttpSession(
             session, 'http://{0}:{1}/'.format(
                 details.address, details.airplay_port))
-        self._airplay = AirPlayInternal(airplay_http, airplay_player)
+        self._airplay = AirPlayAPI(airplay_http, airplay_player)
 
     def login(self):
         """Perform an explicit login.
