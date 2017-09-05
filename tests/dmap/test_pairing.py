@@ -5,8 +5,7 @@ import asynctest
 import ipaddress
 
 from unittest.mock import patch
-from pyatv import pairing
-from pyatv.dmap import (parser, tag_definitions)
+from pyatv.dmap import (pairing, parser, tag_definitions)
 from tests import zeroconf_stub, utils
 
 
