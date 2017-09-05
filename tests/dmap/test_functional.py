@@ -8,7 +8,8 @@ from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv import (AppleTV, AirPlayService, DmapService, connect_to_apple_tv,
-                   const, exceptions, pairing)
+                   const, exceptions)
+from pyatv.dmap import pairing
 from tests.fake_daap_atv import (
     FakeDaapAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
 from tests import (utils, zeroconf_stub)
