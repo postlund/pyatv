@@ -296,7 +296,8 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 @asyncio.coroutine
 def _handle_autodiscover(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
-        loop, timeout=args.scan_timeout, abort_on_found=True)
+        loop, timeout=args.scan_timeout, abort_on_found=True,
+        device_ip=args.address, only_usable=False)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return 1
@@ -307,7 +308,12 @@ def _handle_autodiscover(args, loop):
         return 1
 
     apple_tv = atvs[0]
-    service = apple_tv.usable_service()
+
+    # Extract the preferred service here instead of a usable service. The
+    # reason for this is that some services are never usable after a scan,
+    # like MRP, but might become usable after the user has filled in
+    # additional information (which will be done here).
+    service = apple_tv.preferred_service()
 
     # Common parameters for all protocols
     args.address = apple_tv.address
