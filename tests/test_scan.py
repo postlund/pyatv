@@ -123,3 +123,12 @@ class FunctionalTest(asynctest.TestCase):
 
         service = services[0]
         self.assertEqual(service.port, 7000)
+
+    def test_scan_for_particular_device(self):
+        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
+
+        atvs = yield from pyatv.scan_for_apple_tvs(
+            self.loop, timeout=0, only_usable=False, device_ip='10.0.0.2')
+        self.assertEqual(len(atvs), 1)
+        self.assertEqual(atvs[0].name, 'Apple TV 2')
+        self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.2'))

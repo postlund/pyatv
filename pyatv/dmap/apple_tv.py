@@ -7,13 +7,11 @@ import hashlib
 from urllib.parse import urlparse
 
 from pyatv import (const, exceptions, convert)
-from pyatv.airplay import player
 from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater)
-from pyatv.airplay.api import AirPlayAPI
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -397,7 +395,7 @@ class DmapAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, details):
+    def __init__(self, loop, session, details, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
@@ -412,14 +410,7 @@ class DmapAppleTV(AppleTV):
         self._atv_remote = DmapRemoteControl(self._apple_tv)
         self._atv_metadata = DmapMetadata(self._apple_tv, daap_http)
         self._atv_push_updater = DmapPushUpdater(loop, self._apple_tv)
-
-        airplay_service = details.airplay_service()
-        airplay_player = player.AirPlayPlayer(
-            loop, session, details.address, airplay_service.port)
-        airplay_http = HttpSession(
-            session, 'http://{0}:{1}/'.format(
-                details.address, airplay_service.port))
-        self._airplay = AirPlayAPI(airplay_http, airplay_player)
+        self._airplay = airplay
 
     def login(self):
         """Perform an explicit login.
