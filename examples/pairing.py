@@ -16,20 +16,24 @@ LOOP = asyncio.get_event_loop()
 def pair_with_device(loop):
     """Make it possible to pair with device."""
     my_zeroconf = Zeroconf()
-    handler = pyatv.pair_with_apple_tv(loop, PIN_CODE, REMOTE_NAME)
+    details = pyatv.AppleTV('127.0.0.1', 'Apple TV')
+    details.add_service(pyatv.DmapService('login_id'))
+    atv = pyatv.connect_to_apple_tv(details, loop)
 
-    yield from handler.start(my_zeroconf)
+    yield from atv.pairing.start(
+        zeroconf=my_zeroconf, name=REMOTE_NAME, pin=PIN_CODE)
     print('You can now pair with pyatv')
 
     # Wait for a minute to allow pairing
     yield from asyncio.sleep(60, loop=loop)
 
-    yield from handler.stop()
+    yield from atv.pairing.stop()
 
     # Give some feedback about the process
-    if handler.has_paired:
+    if atv.pairing.has_paired:
+        pairing_guid = yield from atv.pairing.get('pairing_gui')
         print('Paired with device!')
-        print('Pairing guid: ' + handler.pairing_guid)
+        print('Pairing guid: ' + pairing_guid)
     else:
         print('Did not pair with device!')
 

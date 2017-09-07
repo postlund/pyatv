@@ -81,32 +81,6 @@ class GlobalCommands:
 
         return 0
 
-    @asyncio.coroutine
-    def pair(self):
-        """Pair pyatv as a remote control with an Apple TV."""
-        handler = pyatv.pair_with_apple_tv(
-            self.loop, self.args.pin_code, self.args.remote_name,
-            pairing_guid=self.args.pairing_guid)
-        print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
-            self.args.pin_code, self.args.remote_name))
-        print('Using pairing guid: 0x' + handler.pairing_guid)
-        print('Note: If remote does not show up, try rebooting your Apple TV')
-
-        yield from handler.start(Zeroconf())
-        yield from self.loop.run_in_executor(None, sys.stdin.readline)
-        yield from handler.stop()
-
-        # Give some feedback to the user
-        if handler.has_paired:
-            print('Pairing seems to have succeeded, yey!')
-            print('You may now use this login id: 0x{}'.format(
-                handler.pairing_guid))
-        else:
-            print('No response from Apple TV!')
-            return 1
-
-        return 0
-
 
 class DeviceCommands:
     """Additional commands available for a device.
@@ -114,10 +88,11 @@ class DeviceCommands:
     These commands are not part of the API but are provided by atvremote.
     """
 
-    def __init__(self, atv, loop):
+    def __init__(self, atv, loop, args):
         """Initialize a new instance of DeviceCommands."""
         self.atv = atv
         self.loop = loop
+        self.args = args
 
     @asyncio.coroutine
     def artwork_save(self):
@@ -158,6 +133,43 @@ class DeviceCommands:
         except exceptions.DeviceAuthenticationError:
             logging.exception('Failed to authenticate - invalid PIN?')
             return 1
+
+    @asyncio.coroutine
+    def pair(self):
+        """Pair pyatv as a remote control with an Apple TV."""
+        protocol = self.atv.service.protocol
+        if protocol == const.PROTOCOL_DMAP:
+            yield from self._pair_with_dmap_device()
+        elif protocol == const.PROTOCOL_MRP:
+            raise exceptions.NotSupportedError()
+
+    @asyncio.coroutine
+    def _pair_with_dmap_device(self):
+        yield from self.atv.pairing.set(
+            'pairing_guid', self.args.pairing_guid)
+
+        yield from self.atv.pairing.start(
+            zeroconf=Zeroconf(), name=self.args.name, pin=self.args.pin_code)
+        pairing_guid = yield from self.atv.pairing.get('pairing_guid')
+
+        print('Use pin {0} to pair with "{1}" (press ENTER to stop)'.format(
+            self.args.pin_code, self.args.remote_name))
+        print('Using pairing guid: 0x{0}'.format(pairing_guid))
+        print('Note: If remote does not show up, try rebooting your Apple TV')
+
+        yield from self.loop.run_in_executor(None, sys.stdin.readline)
+        yield from self.atv.pairing.stop()
+
+        # Give some feedback to the user
+        if self.atv.pairing.has_paired:
+            print('Pairing seems to have succeeded, yey!')
+            print('You may now use this login id: 0x{}'.format(
+                pairing_guid))
+        else:
+            print('No response from Apple TV!')
+            return 1
+
+        return 0
 
 
 class PushListener:
@@ -212,12 +224,12 @@ def cli_handler(loop):
                         dest='address', default=None)
     parser.add_argument('--protocol', action=TransformProtocol,
                         help='protocol to use (values: dmap, mrp)',
-                        dest='protocol', default='dmap')
+                        dest='protocol', default=None)
     parser.add_argument('--port', help='port when connecting',
                         dest='port', type=_in_range(0, 65535),
                         default=0)
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
-                        dest='scan_timeout', type=_in_range(1, 10),
+                        dest='scan_timeout', type=_in_range(1, 100),
                         metavar='TIMEOUT', default=3)
     parser.add_argument('--version', action='version',
                         help='version of atvremote and pyatv',
@@ -262,12 +274,6 @@ def cli_handler(loop):
                         format='%(levelname)s: %(message)s')
     logging.getLogger('requests').setLevel(logging.WARNING)
 
-    # Sanity checks that not can be done natively by argparse
-    if args.protocol == const.PROTOCOL_DMAP and \
-            ((args.login_id and not args.address) or
-             (not args.login_id and args.address)):
-        parser.error('both --login_id and --address must be given')
-
     cmds = retrieve_commands(GlobalCommands)
 
     if args.command[0] in cmds:
@@ -275,7 +281,10 @@ def cli_handler(loop):
         return (yield from _exec_command(
             glob_cmds, args.command[0], print_result=False))
     elif args.autodiscover:
-        return (yield from _handle_autodiscover(args, loop))
+        if not (yield from _autodiscover_device(args, loop)):
+            return 1
+
+        return (yield from _handle_commands(args, loop))
     elif args.login_id:
         return (yield from _handle_commands(args, loop))
     else:
@@ -293,18 +302,18 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 
 @asyncio.coroutine
-def _handle_autodiscover(args, loop):
+def _autodiscover_device(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
         loop, timeout=args.scan_timeout, abort_on_found=True,
-        device_ip=args.address, only_usable=False)
+        device_ip=args.address, protocol=args.protocol, only_usable=True)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
-        return 1
+        return None
     elif len(atvs) > 1:
         logging.error('Found more than one Apple TV; '
                       'specify one using --address and --login_id')
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
-        return 1
+        return None
 
     apple_tv = atvs[0]
 
@@ -313,6 +322,9 @@ def _handle_autodiscover(args, loop):
     # like MRP, but might become usable after the user has filled in
     # additional information (which will be done here).
     service = apple_tv.preferred_service()
+    if not service:
+        print("fel fel fel")
+        return None
 
     # Common parameters for all protocols
     args.address = apple_tv.address
@@ -326,7 +338,7 @@ def _handle_autodiscover(args, loop):
 
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
-    return (yield from _handle_commands(args, loop))
+    return apple_tv
 
 
 def _extract_command_with_args(cmd):
@@ -355,7 +367,7 @@ def _handle_commands(args, loop):
     elif args.protocol == const.PROTOCOL_MRP:
         details.add_service(MrpService(args.port))
 
-    atv = pyatv.connect_to_apple_tv(details, loop)
+    atv = pyatv.connect_to_apple_tv(details, loop, protocol=args.protocol)
     atv.push_updater.listener = PushListener()
 
     try:
@@ -386,7 +398,7 @@ def _handle_device_command(args, cmd, atv, loop):
     cmd, cmd_args = _extract_command_with_args(cmd)
     if cmd in device:
         return (yield from _exec_command(
-            DeviceCommands(atv, loop), cmd, False, *cmd_args))
+            DeviceCommands(atv, loop, args), cmd, False, *cmd_args))
 
     elif cmd in ctrl:
         return (yield from _exec_command(

@@ -39,6 +39,44 @@ def retrieve_commands(obj):
     return commands
 
 
+class PairingHandler(object):
+    """Base class for API used to pair with an Apple TV."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def has_paired(self):
+        """If a successful pairing has been performed.
+
+        The value will be reset when stop() is called.
+        """
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def start(self, **kwargs):
+        """Start pairing process."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def stop(self, **kwargs):
+        """Stop pairing process."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def set(self, key, value, **kwargs):
+        """Set a process specific value.
+
+        The value is specific to the device being paired with and can for
+        instance be a PIN code.
+        """
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def get(self, key):
+        """Retrieve a process specific value."""
+        raise exceptions.NotSupportedError
+
+
 class RemoteControl(object):
     """Base class for API used to control an Apple TV."""
 
@@ -346,6 +384,16 @@ class AppleTV(object):
 
         Must be done when session is no longer needed to not leak resources.
         """
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def service(self):
+        """Return service used to connect to the Apple TV.."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def pairing(self):
+        """Return API for pairing with the Apple TV."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
