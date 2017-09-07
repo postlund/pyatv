@@ -2,7 +2,8 @@
 
 import logging
 from .parser import DmapTag
-from .tags import (read_bool, read_uint, read_str, read_raw, read_ignore)
+from .tags import (
+    read_bool, read_uint, read_str, read_ignore, read_bplist)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ _TAGS = {
     'cave': DmapTag(read_bool,   'dacp.dacpvisualizerenabled'),
     'cavs': DmapTag(read_uint,   'dacp.visualizer'),
     'ceQR': DmapTag('container', 'com.apple.itunes.playqueue-contents-response'),  # NOQA
+    'ceSD': DmapTag(read_bplist, 'playing metadata'),
     'cmcp': DmapTag('container', 'dmcp.controlprompt'),
     'cmmk': DmapTag(read_uint,   'dmcp.mediakind'),
     'cmnm': DmapTag(read_str,    'dacp.devicename'),
@@ -85,7 +87,6 @@ _TAGS = {
     'casc': DmapTag(read_uint,   'unknown tag'),
     'cass': DmapTag(read_uint,   'unknown tag'),
     'ceQA': DmapTag(read_uint,   'unknown tag'),
-    'ceSD': DmapTag(read_raw,    'unknown tag'),
     'cmbe': DmapTag(read_str,    'unknown tag'),
     'cmcc': DmapTag(read_str,    'unknown tag'),
     'cmce': DmapTag(read_str,    'unknown tag'),

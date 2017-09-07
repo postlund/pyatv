@@ -1,6 +1,7 @@
 """Unit tests for pyatv.dmap.parser."""
 
 import unittest
+import plistlib
 
 from pyatv import exceptions
 from pyatv.dmap import (tags, parser)
@@ -14,10 +15,10 @@ TEST_TAGS = {
     'bolb': parser.DmapTag(tags.read_bool, 'bool'),
     'stra': parser.DmapTag(tags.read_str, 'string'),
     'strb': parser.DmapTag(tags.read_str, 'string'),
-    'rawa': parser.DmapTag(tags.read_raw, 'raw'),
     'cona': parser.DmapTag('container', 'container'),
     'conb': parser.DmapTag('container', 'container 2'),
     'igno': parser.DmapTag(tags.read_ignore, 'ignore'),
+    'plst': parser.DmapTag(tags.read_bplist, 'bplist'),
 }
 
 
@@ -55,11 +56,13 @@ class ParserTest(unittest.TestCase):
         self.assertEqual('', parser.first(parsed, 'stra'))
         self.assertEqual('test string', parser.first(parsed, 'strb'))
 
-    def test_parse_raw_data(self):
-        in_data = tags.raw_tag('rawa', b'\x01\x02\x03')
+    def test_parse_binary_plist(self):
+        data = {"key": "value"}
+        in_data = tags.raw_tag(
+            'plst', plistlib.dumps(data, fmt=plistlib.FMT_BINARY))
         parsed = parser.parse(in_data, lookup_tag)
         self.assertEqual(1, len(parsed))
-        self.assertEqual(b'\x01\x02\x03', parser.first(parsed, 'rawa'))
+        self.assertEqual(data, parser.first(parsed, 'plst'))
 
     def test_parse_value_in_container(self):
         in_data = tags.container_tag('cona',
