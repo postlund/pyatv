@@ -11,7 +11,7 @@ a four byte big endian unsigned int as length and the data as data. So:
 from collections import namedtuple
 
 from pyatv import exceptions
-from .tags import (read_str, read_uint)
+from .tags import (read_str, read_uint, read_bplist)
 
 
 class DmapTag(namedtuple('DmapTag', ['type', 'name'])):
@@ -70,7 +70,7 @@ def pprint(data, tag_lookup, indent=0):
     if isinstance(data, dict):
         for key, value in data.items():
             tag = tag_lookup(key)
-            if isinstance(value, (dict, list)):
+            if isinstance(value, (dict, list)) and tag.type != read_bplist:
                 output += '{0}{1}: {2}\n'.format(indent*' ', key, tag)
                 output += pprint(value, tag_lookup, indent+2)
             else:

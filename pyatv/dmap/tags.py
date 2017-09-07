@@ -1,5 +1,7 @@
 """Util functions for extracting and constructing DMAP data."""
 
+import plistlib
+
 
 def read_str(data, start, length):
     """Extract a string from a position in a sequence."""
@@ -16,9 +18,12 @@ def read_bool(data, start, length):
     return read_uint(data, start, length) == 1
 
 
-def read_raw(data, start, length):
-    """Extract raw data from a position in a sequence."""
-    return data[start:start+length]
+def read_bplist(data, start, length):
+    """Extract a binary plist from a position in a sequence."""
+    # TODO: pylint doesn't find FMT_BINARY, why?
+    # pylint: disable=no-member
+    return plistlib.loads(data[start:start+length],
+                          fmt=plistlib.FMT_BINARY)
 
 
 # pylint: disable=unused-argument
