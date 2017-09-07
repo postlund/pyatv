@@ -7,7 +7,7 @@ import hashlib
 from urllib.parse import urlparse
 
 from pyatv import (const, exceptions, convert)
-from pyatv.dmap import (parser, tags)
+from pyatv.dmap import (pairing, parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
@@ -400,17 +400,18 @@ class DmapAppleTV(AppleTV):
         super().__init__()
         self._session = session
 
-        dmap_service = details.usable_service()
+        self._service = details.usable_service()
         daap_http = HttpSession(
             session,
-            'http://{0}:{1}/'.format(details.address, dmap_service.port))
-        self._requester = DaapRequester(daap_http, dmap_service.login_id)
+            'http://{0}:{1}/'.format(details.address, self._service.port))
+        self._requester = DaapRequester(daap_http, self._service.login_id)
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._atv_remote = DmapRemoteControl(self._apple_tv)
         self._atv_metadata = DmapMetadata(self._apple_tv, daap_http)
         self._atv_push_updater = DmapPushUpdater(loop, self._apple_tv)
         self._airplay = airplay
+        self._atv_pairing = pairing.DmapPairingHandler(loop)
 
     def login(self):
         """Perform an explicit login.
@@ -426,6 +427,16 @@ class DmapAppleTV(AppleTV):
         Must be done when session is no longer needed to not leak resources.
         """
         self._session.close()
+
+    @property
+    def service(self):
+        """Return service used to connect to the Apple TV.."""
+        return self._service
+
+    @property
+    def pairing(self):
+        """Return API for pairing with the Apple TV."""
+        return self._atv_pairing
 
     @property
     def remote_control(self):

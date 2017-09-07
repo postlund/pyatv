@@ -1,6 +1,5 @@
 """Functional tests using the API with a fake Apple TV."""
 
-import pyatv
 import asyncio
 import ipaddress
 
@@ -83,14 +82,16 @@ class FunctionalTest(AioHTTPTestCase):
         zeroconf = zeroconf_stub.stub(pairing)
         self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
 
-        handler = pyatv.pair_with_apple_tv(
-            self.loop, PIN_CODE, REMOTE_NAME,
-            pairing_guid=pairing.DEFAULT_PAIRING_GUID)
-        yield from handler.start(zeroconf)
+        yield from self.atv.pairing.start(
+            zeroconf=zeroconf, pin=PIN_CODE, name=REMOTE_NAME)
+        yield from self.atv.pairing.set(
+            'pairing_guid', pairing.DEFAULT_PAIRING_GUID)
         yield from self.usecase.act_on_bonjour_services(zeroconf)
-        yield from handler.stop()
 
-        self.assertTrue(handler.has_paired, msg='did not pair with device')
+        self.assertTrue(self.atv.pairing.has_paired,
+                        msg='did not pair with device')
+
+        yield from self.atv.pairing.stop()
 
     @unittest_run_loop
     def test_device_authentication(self):

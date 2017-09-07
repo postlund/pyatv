@@ -13,7 +13,7 @@ from pyatv.airplay import player
 from pyatv.airplay.api import AirPlayAPI
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 from pyatv.net import HttpSession
-from pyatv.pairing import PairingHandler
+
 from pyatv.dmap.apple_tv import DmapAppleTV
 from pyatv.mrp.apple_tv import MrpAppleTV
 
@@ -47,6 +47,14 @@ class AppleTV:
         """
         if self._should_add(service):
             self._services[service.protocol] = service
+
+    def get_service(self, protocol):
+        """Look up a service based on protocol.
+
+        If a service with the specified protocol is not available, None is
+        returned.
+        """
+        return self._services.get(protocol, None)
 
     def _should_add(self, service):
         # This is a special case. Do not add a DMAP service in case it already
@@ -144,9 +152,9 @@ class BaseService:
 class DmapService(BaseService):
     """Representation of a DMAP service."""
 
-    def __init__(self, login_id, port=3689):
+    def __init__(self, login_id, port=None):
         """Initialize a new DmapService."""
-        super().__init__(PROTOCOL_DMAP, port)
+        super().__init__(PROTOCOL_DMAP, port or 3689)
         self.login_id = login_id
 
     def is_usable(self):
@@ -166,6 +174,10 @@ class MrpService(BaseService):
         """Initialize a new MrpService."""
         super().__init__(PROTOCOL_MRP, port)
 
+    def is_usable(self):
+        """Return True if service is usable, else False."""
+        return True
+
 
 # pylint: disable=too-few-public-methods
 class AirPlayService(BaseService):
@@ -178,10 +190,13 @@ class AirPlayService(BaseService):
 
 class _ServiceListener(object):
 
-    def __init__(self, abort_on_found, device_ip, semaphore):
+    # pylint: disable=too-many-arguments
+    def __init__(self, loop, abort_on_found, device_ip, protocol, semaphore):
         """Initialize a new _ServiceListener."""
+        self.loop = loop
         self.abort_on_found = abort_on_found
         self.device_ip = None if not device_ip else ip_address(device_ip)
+        self.protocol = protocol
         self.semaphore = semaphore
         self.found_devices = {}
 
@@ -189,7 +204,7 @@ class _ServiceListener(object):
         """Handle callback from zeroconf when a service has been discovered."""
         # If it's not instantly lockable, then abort_on_found is True and we
         # have found a device already
-        if not self.semaphore.locked():
+        if self.abort_on_found and len(self.found_devices) == 1:
             return
 
         info = zeroconf.get_service_info(service_type, name)
@@ -197,6 +212,8 @@ class _ServiceListener(object):
 
         # We might be looking for a particular device
         if self.device_ip and self.device_ip != address:
+            _LOGGER.debug('Ignoring %s (not matching %s)',
+                          address, self.device_ip)
             return
 
         if info.type == HOMESHARING_SERVICE:
@@ -212,17 +229,26 @@ class _ServiceListener(object):
 
     def add_hs_service(self, info, address):
         """Add a new device to discovered list."""
+        if self.protocol and self.protocol != PROTOCOL_DMAP:
+            return
+
         name = info.properties[b'Name'].decode('utf-8')
         hsgid = info.properties[b'hG'].decode('utf-8')
         self._handle_service(address, name, DmapService(hsgid, port=info.port))
 
     def add_non_hs_service(self, info, address):
         """Add a new device without Home Sharing to discovered list."""
+        if self.protocol and self.protocol != PROTOCOL_DMAP:
+            return
+
         name = info.properties[b'CtlN'].decode('utf-8')
         self._handle_service(address, name, DmapService(None, port=info.port))
 
     def add_mrp_service(self, info, address):
         """Add a new MediaRemoteProtocol device to discovered list."""
+        if self.protocol and self.protocol != PROTOCOL_MRP:
+            return
+
         name = info.properties[b'Name'].decode('utf-8')
         self._handle_service(address, name, MrpService(info.port))
 
@@ -242,20 +268,31 @@ class _ServiceListener(object):
         atv.add_service(service)
 
         # Check if we should continue to run or not
-        if self.abort_on_found:
+        if self._should_abort(address):
             _LOGGER.debug('Aborting since a device was found')
 
             # Only return the found device as a convenience to the user
             self.found_devices = {address: atv}
-            self.semaphore.release()
+
+            # zeroconf is run in a different thread so this must be a
+            # thread-safe call
+            self.loop.call_soon_threadsafe(self.semaphore.release)
+
+    def _should_abort(self, address):
+        if not self.abort_on_found:
+            return False
+
+        return self.found_devices[address].usable_service()
 
 
+# pylint: disable=too-many-arguments
 @asyncio.coroutine
 def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
-                       device_ip=None, only_usable=True):
+                       device_ip=None, only_usable=True, protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     semaphore = asyncio.Semaphore(value=0, loop=loop)
-    listener = _ServiceListener(abort_on_found, device_ip, semaphore)
+    listener = _ServiceListener(
+        loop, abort_on_found, device_ip, protocol, semaphore)
     zeroconf = Zeroconf()
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
@@ -278,25 +315,16 @@ def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
     return list(filter(_should_include, listener.found_devices.values()))
 
 
-def connect_to_apple_tv(details, loop, session=None):
+def connect_to_apple_tv(details, loop, protocol=None, session=None):
     """Connect and logins to an Apple TV."""
-    service = details.usable_service()
-    if not service:
-        raise exceptions.NoUsableServiceError(
-            'no usable service to connect to')
+    service = _get_service_used_to_connect(details, protocol)
 
     # If no session is given, create a default one
     if session is None:
         session = ClientSession(loop=loop)
 
     # AirPlay serive is the same for both DMAP and MRP
-    airplay_service = details.airplay_service()
-    airplay_player = player.AirPlayPlayer(
-        loop, session, details.address, airplay_service.port)
-    airplay_http = HttpSession(
-        session, 'http://{0}:{1}/'.format(
-            details.address, airplay_service.port))
-    airplay = AirPlayAPI(airplay_http, airplay_player)
+    airplay = _setup_airplay(loop, session, details)
 
     # Create correct implementation depending on protocol
     if service.protocol == PROTOCOL_DMAP:
@@ -305,6 +333,24 @@ def connect_to_apple_tv(details, loop, session=None):
         return MrpAppleTV(loop, session, details, airplay)
 
 
-def pair_with_apple_tv(loop, pin_code, name, pairing_guid=None):
-    """Initialize pairing process with an Apple TV."""
-    return PairingHandler(loop, name, pin_code, pairing_guid=pairing_guid)
+def _get_service_used_to_connect(details, protocol):
+    if not protocol:
+        service = details.usable_service()
+    else:
+        service = details.get_service(protocol)
+
+    if not service:
+        raise exceptions.NoUsableServiceError(
+            'no usable service to connect to')
+
+    return service
+
+
+def _setup_airplay(loop, session, details):
+    airplay_service = details.airplay_service()
+    airplay_player = player.AirPlayPlayer(
+        loop, session, details.address, airplay_service.port)
+    airplay_http = HttpSession(
+        session, 'http://{0}:{1}/'.format(
+            details.address, airplay_service.port))
+    return AirPlayAPI(airplay_http, airplay_player)

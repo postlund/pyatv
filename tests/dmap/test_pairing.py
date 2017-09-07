@@ -4,7 +4,6 @@ import asyncio
 import asynctest
 import ipaddress
 
-from unittest.mock import patch
 from pyatv.dmap import (pairing, parser, tag_definitions)
 from tests import zeroconf_stub, utils
 
@@ -30,9 +29,7 @@ class PairingTest(asynctest.TestCase):
     @asyncio.coroutine
     def setUp(self):
         self.zeroconf = zeroconf_stub.stub(pairing)
-        self.pairing = pairing.PairingHandler(
-            self.loop, REMOTE_NAME, PIN_CODE,
-            pairing_guid=pairing.DEFAULT_PAIRING_GUID)
+        self.pairing = pairing.DmapPairingHandler(self.loop)
 
         # TODO: currently stubs internal method, should provide stub
         # for netifaces later
@@ -43,8 +40,15 @@ class PairingTest(asynctest.TestCase):
     def tearDown(self):
         yield from self.pairing.stop()
 
+    @asyncio.coroutine
+    def _start(self, pin_code=PIN_CODE,
+               pairing_guid=pairing.DEFAULT_PAIRING_GUID):
+        yield from self.pairing.start(
+            zeroconf=self.zeroconf, name=REMOTE_NAME, pin=pin_code)
+        yield from self.pairing.set('pairing_guid', pairing_guid)
+
     def test_zeroconf_service_published(self):
-        yield from self.pairing.start(self.zeroconf)
+        yield from self._start()
 
         self.assertEqual(len(self.zeroconf.registered_services), 1,
                          msg='no zeroconf service registered')
@@ -53,16 +57,17 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(service.properties[b'DvNm'], REMOTE_NAME,
                          msg='remote name does not match')
 
-    @patch('random.getrandbits')
-    def test_random_pairing_guid_generated(self, getrandbits):
-        getrandbits.return_value = RANDOM_128_BITS
+    def test_random_pairing_guid_generated(self):
+        pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
-        handler = pairing.PairingHandler(self.loop, REMOTE_NAME, PIN_CODE)
+        handler = pairing.DmapPairingHandler(self.loop)
+        yield from handler.set('pairing_guid', None)
 
-        self.assertEqual(handler.pairing_guid, RANDOM_PAIRING_GUID)
+        pairing_guid = yield from handler.get('pairing_guid')
+        self.assertEqual(pairing_guid, RANDOM_PAIRING_GUID)
 
     def test_succesful_pairing(self):
-        yield from self.pairing.start(self.zeroconf)
+        yield from self._start()
 
         url = self._pairing_url(PAIRING_CODE)
         data, _ = yield from utils.simple_get(url, self.loop)
@@ -74,9 +79,7 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
     def test_pair_custom_pairing_guid(self):
-        self.pairing.pin_code = PIN_CODE2
-        self.pairing.pairing_guid = PAIRING_GUID2
-        yield from self.pairing.start(self.zeroconf)
+        yield from self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
 
         url = self._pairing_url(PAIRING_CODE2)
         data, _ = yield from utils.simple_get(url, self.loop)
@@ -87,7 +90,7 @@ class PairingTest(asynctest.TestCase):
                          int(PAIRING_GUID2, 16))
 
     def test_failed_pairing(self):
-        yield from self.pairing.start(self.zeroconf)
+        yield from self._start()
 
         url = self._pairing_url('wrong')
         _, status = yield from utils.simple_get(url, self.loop)

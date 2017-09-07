@@ -12,6 +12,7 @@ import netifaces
 from aiohttp import web
 from zeroconf import ServiceInfo
 from pyatv.dmap import tags
+from pyatv.interface import PairingHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,30 +34,41 @@ def _get_private_ip_addresses():
                 yield ipaddr
 
 
-class PairingHandler(object):
+class DmapPairingHandler(PairingHandler):
     """Handle the pairing process.
 
     This class will publish a bonjour service and configure a webserver
     that responds to pairing requests.
     """
 
-    def __init__(self, loop, name, pin_code, pairing_guid=None):
+    def __init__(self, loop):
         """Initialize a new instance."""
         self._loop = loop
-        self._name = name
+        self._name = None
         self._web_server = None
         self._server = None
-        self.pin_code = pin_code
-        self.pairing_guid = pairing_guid or self._generate_random_guid()
-        self.has_paired = False
+        self.pin_code = None
+        self.pairing_guid = None
+        self._has_paired = False
 
     @staticmethod
     def _generate_random_guid():
         return hex(random.getrandbits(64))[2:].upper()  # Remove leading 0x
 
+    @property
+    def has_paired(self):
+        """If a successful pairing has been performed.
+
+        The value will be reset when stop() is called.
+        """
+        return self._has_paired
+
     @asyncio.coroutine
-    def start(self, zeroconf):
+    def start(self, **kwargs):
         """Start the pairing server and publish service."""
+        zeroconf = kwargs['zeroconf']
+        self._name = kwargs['name']
+        self.pin_code = kwargs['pin']
         self._web_server = web.Server(self.handle_request, loop=self._loop)
         self._server = yield from self._loop.create_server(
             self._web_server, '0.0.0.0')
@@ -68,15 +80,32 @@ class PairingHandler(object):
         self._setup_zeroconf(zeroconf, allocated_port)
 
     @asyncio.coroutine
-    def stop(self):
+    def stop(self, **kwargs):
         """Stop pairing server and unpublish service."""
         _LOGGER.debug('Shutting down pairing server')
+        self._has_paired = False
         if self._web_server is not None:
             yield from self._web_server.shutdown()
             self._server.close()
 
         if self._server is not None:
             yield from self._server.wait_closed()
+
+    @asyncio.coroutine
+    def set(self, key, value, **kwargs):
+        """Set a process specific value.
+
+        The value is specific to the device being paired with and can for
+        instance be a PIN code.
+        """
+        if key == 'pairing_guid':
+            self.pairing_guid = value or self._generate_random_guid()
+
+    @asyncio.coroutine
+    def get(self, key):
+        """Retrieve a process specific value."""
+        if key == 'pairing_guid':
+            return self.pairing_guid
 
     def _publish_service(self, zeroconf, address, port):
         props = {
@@ -113,7 +142,7 @@ class PairingHandler(object):
             cmnm = tags.string_tag('cmnm', self._name)
             cmty = tags.string_tag('cmty', 'ipod')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
-            self.has_paired = True
+            self._has_paired = True
             return web.Response(body=response)
 
         # Code did not match, generate an error
@@ -128,5 +157,4 @@ class PairingHandler(object):
 
         expected_code = hashlib.md5(merged.getvalue().encode()).hexdigest()
         _LOGGER.debug('Got code %s, expects %s', received_code, expected_code)
-
         return received_code == expected_code
