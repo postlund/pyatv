@@ -1,0 +1,89 @@
+syntax = "proto2";
+
+import "pyatv/mrp/protobuf/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional SetStateMessage setStateMessage = 9;
+}
+
+message SetStateMessage {
+
+  message NowPlayingInfoMessage {
+    optional string album = 1;
+    optional string artist = 2;
+    optional double duration = 3;
+    optional double elapsedTime = 4;
+    optional float playbackRate = 5;
+    optional int32 repeatMode = 6;
+    optional int32 shuffleMode = 7;
+    optional double timestamp = 8;
+    optional string title = 9;
+    optional uint64 uniqueIdentifier = 10;
+    optional bool isExplicitTrack = 11;
+    optional bool isMusicApp = 12;
+    optional int64 radioStationIdentifier = 13;
+    optional string radioStationHash = 14;
+    optional string radioStationName = 15;
+    optional bytes artworkDataDigest = 16;
+    optional bool isAlwaysLive = 17;
+    optional bool isAdvertisement = 18;
+  }
+
+  enum SupportedCommand {
+    Play = 1;
+    Pause = 2;
+    TogglePlayPause = 3;
+    EnableLanguageOption = 53;
+    DisableLanguageOption = 54;
+    Stop = 4;
+    SkipForward = 18;
+    SkipBackward = 19;
+    BeginFastForward = 9;
+    BeginRewind = 11;
+    ChangePlaybackRate = 20;
+    SeekToPlaybackPosition = 45;
+    NextInContext = 34;
+    PreviousInContext = 35;
+    RemoveFromPlaybackQueue = 56;
+    ReorderPlaybackQueue = 55;
+    PlayItemInPlaybackQueue = 57;
+  }
+
+  enum PlaybackState {
+    Playing = 1;
+    Paused = 2;
+  }
+
+  message SupportedCommandMessage {
+    optional SupportedCommand command = 1;
+    optional bool enabled = 2;
+    optional bool active = 3;
+    repeated double preferredIntervals = 4;
+    optional string localizedTitle = 5;
+    optional float minimumRating = 6;
+    optional float maximumRating = 7;
+    repeated float supportedRates = 8;
+    optional string localizedShortTitle = 9;
+    optional int32 repeatMode = 10;
+    optional int32 shuffleMode = 11;
+    optional int32 presentationStyle = 12;
+    optional int32 skipInterval = 13;
+    optional int32 numAvailableSkips = 14;
+    optional int32 skipFrequency = 15;
+    optional int32 canScrub = 16;
+    repeated int32 supportedPlaybackQueueTypes = 17;
+    repeated string supportedCustomQueueIdentifiers = 18;
+    optional int32 supportedInsertionPositions = 19;
+    optional bool supportsSharedQueue = 20;
+  }
+
+  message SupportedCommands {
+    repeated SupportedCommandMessage supportedCommand = 1;
+  }
+
+  optional NowPlayingInfoMessage nowPlayingInfo= 1;
+  optional SupportedCommands supportedCommands = 2;
+  optional string displayID = 4;
+  optional string displayName = 5;
+  optional PlaybackState playbackState = 6;
+}

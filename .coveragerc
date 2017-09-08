@@ -3,6 +3,8 @@ source = pyatv
 
 omit =
     pyatv/__main__.py
+    pyatv/mrp/*.py # TODO: remove when MRP has tests
+    pyatv/mrp/protobuf/*.py
 
 [report]
 # Regexes for lines to exclude from consideration

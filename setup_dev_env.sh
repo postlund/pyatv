@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 PYTHON="python3.5 python3.4"
 
 found_version=
@@ -33,6 +35,9 @@ pip install --upgrade pip
 echo "-> Installing library as develop..."
 python setup.py develop
 
+echo "-> Installing protobuf-setuptools..."
+pip install protobuf-setuptools
+
 echo "-> Installing test dependencies..."
 pip install -r requirements_test.txt
 pip install tox
@@ -51,9 +56,14 @@ When starting a new shell, run:
 
   source bin/activate
 
-To run tests, run:
+To run tests, run any of:
 
   python setup.py test
+  py.test tests/test_conf.py  # Single test
+
+To re-generate protobuf messages:
+
+  ./scripts/build_proto.sh
 
 The CLI application can be used, e.g. run:
 

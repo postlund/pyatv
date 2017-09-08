@@ -63,7 +63,7 @@ class PairingTest(asynctest.TestCase):
         handler = pairing.DmapPairingHandler(self.loop)
         yield from handler.set('pairing_guid', None)
 
-        pairing_guid = yield from handler.get('pairing_guid')
+        pairing_guid = yield from handler.get('credentials')
         self.assertEqual(pairing_guid, RANDOM_PAIRING_GUID)
 
     def test_succesful_pairing(self):

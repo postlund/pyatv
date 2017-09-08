@@ -84,7 +84,7 @@ class FunctionalTest(asynctest.TestCase):
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.3'))
 
         service = atvs[0].usable_service()
-        self.assertEqual(service.login_id, 'cccc')
+        self.assertEqual(service.device_credentials, 'cccc')
         self.assertEqual(service.port, 3689)
 
     def test_scan_mrp(self):
