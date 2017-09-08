@@ -39,7 +39,7 @@ PLAY_STATE_FORWARD = 5
 PLAY_STATE_BACKWARD = 6
 
 
-class TagsTest(unittest.TestCase):
+class TypesTest(unittest.TestCase):
 
     # MEDIA KIND TESTS
 

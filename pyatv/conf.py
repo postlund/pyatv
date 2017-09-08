@@ -3,6 +3,8 @@
 from pyatv import convert
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 
+_SUPPORTED_PROTOCOLS = [PROTOCOL_MRP, PROTOCOL_DMAP]
+
 
 class AppleTV:
     """Representation of an Apple TV configuration.
@@ -12,19 +14,25 @@ class AppleTV:
     AirPlay.
     """
 
-    def __init__(self, address, name):
+    def __init__(self, address, name, **kwargs):
         """Initialize a new AppleTV."""
         self.address = address
         self.name = name
         self._services = {}
+        self._supported_protocols = \
+            kwargs.get('supported_services', _SUPPORTED_PROTOCOLS)
 
     def add_service(self, service):
         """Add a new service.
 
         If the service already exists, it will be replaced.
         """
-        if self._should_add(service):
-            self._services[service.protocol] = service
+        if service.protocol in self._services:
+            existing = self._services[service.protocol]
+            if not existing.superseeded_by(service):
+                return
+
+        self._services[service.protocol] = service
 
     def get_service(self, protocol):
         """Look up a service based on protocol.
@@ -33,13 +41,6 @@ class AppleTV:
         returned.
         """
         return self._services.get(protocol, None)
-
-    def _should_add(self, service):
-        # This is a special case. Do not add a DMAP service in case it already
-        # exists and have a login_id specified.
-        return not (service.protocol == PROTOCOL_DMAP and
-                    service.protocol in self._services and
-                    not service.login_id)
 
     def services(self):
         """Return all supported services."""
@@ -53,15 +54,12 @@ class AppleTV:
         preferred over DMAP.
         """
         services = self._services
-        if PROTOCOL_MRP in services and services[PROTOCOL_MRP].is_usable():
-            return self._services[PROTOCOL_MRP]
-
-        if PROTOCOL_DMAP in services and services[PROTOCOL_DMAP].is_usable():
-            return self._services[PROTOCOL_DMAP]
+        for protocol in self._supported_protocols:
+            if protocol in services and services[protocol].is_usable():
+                return services[protocol]
 
         return None
 
-    # TODO: refactor this and usable_service
     def preferred_service(self):
         """Return the best supported service of the device.
 
@@ -70,12 +68,9 @@ class AppleTV:
         an Apple TV supporting both DMAP and MRP (like gen 4) will return MRP
         here.
         """
-        services = self._services
-        if PROTOCOL_MRP in services and services[PROTOCOL_MRP]:
-            return self._services[PROTOCOL_MRP]
-
-        if PROTOCOL_DMAP in services and services[PROTOCOL_DMAP]:
-            return self._services[PROTOCOL_DMAP]
+        for protocol in self._supported_protocols:
+            if protocol in self._services:
+                return self._services[protocol]
 
         return None
 
@@ -96,6 +91,7 @@ class AppleTV:
     def __eq__(self, other):
         """Compare instance with another instance."""
         if isinstance(other, self.__class__):
+            print(self.address == other.address)
             return self.address == other.address
         return False
 
@@ -120,6 +116,12 @@ class BaseService:
         """Return True if service is usable, else False."""
         return False
 
+    # pylint: disable=unused-argument
+    @staticmethod
+    def superseeded_by(other_service):
+        """Return True if input service should be used instead of this one."""
+        return False
+
     def __str__(self):
         """Return a string representation of this object."""
         return 'Protocol: {0}, Port: {1}'.format(
@@ -138,6 +140,18 @@ class DmapService(BaseService):
     def is_usable(self):
         """Return True if service is usable, else False."""
         return self.login_id is not None
+
+    def superseeded_by(self, other_service):
+        """Return True if input service has login id and this has not."""
+        if not other_service or \
+                other_service.__class__ != self.__class__ or \
+                other_service.protocol != self.protocol or \
+                other_service.port != self.port:
+            return False
+
+        # If this service does not have a login id but the other one does, then
+        # we should return True here
+        return not self.login_id and other_service.login_id
 
     def __str__(self):
         """Return a string representation of this object."""
