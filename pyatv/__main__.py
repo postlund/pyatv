@@ -11,8 +11,8 @@ from argparse import ArgumentTypeError
 from zeroconf import Zeroconf
 
 import pyatv
-from pyatv import (
-    AppleTV, DmapService, MrpService, const, exceptions, interface)
+from pyatv import (const, exceptions, interface)
+from pyatv.conf import (AppleTV, DmapService, MrpService)
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands

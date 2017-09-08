@@ -2,6 +2,7 @@
 
 import asyncio
 import pyatv
+from pyatv import conf
 
 # Enter details used to connect
 NAME = 'My Apple TV'
@@ -15,8 +16,8 @@ LOOP = asyncio.get_event_loop()
 @asyncio.coroutine
 def print_what_is_playing(loop):
     """Connect to device and print what is playing."""
-    details = pyatv.AppleTV(ADDRESS, NAME)
-    details.add_service(pyatv.DmapService(HSGID))
+    details = conf.AppleTV(ADDRESS, NAME)
+    details.add_service(conf.DmapService(HSGID))
 
     print('Connecting to {}'.format(details.address))
     atv = pyatv.connect_to_apple_tv(details, loop)

@@ -4,7 +4,7 @@ import pyatv
 import ipaddress
 import asynctest
 
-from pyatv import AppleTV
+from pyatv.conf import AppleTV
 from tests import zeroconf_stub
 
 
