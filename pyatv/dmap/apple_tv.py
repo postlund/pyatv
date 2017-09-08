@@ -340,8 +340,10 @@ class DmapPushUpdater(PushUpdater):
 
         Will throw NoAsyncListenerError if no listner has been set.
         """
-        if self._future is not None:
+        if self.__listener is None:
             raise exceptions.NoAsyncListenerError
+        elif self._future is not None:
+            return None
 
         # If ensure_future, use that instead of async
         if hasattr(asyncio, 'ensure_future'):
@@ -409,7 +411,8 @@ class DmapAppleTV(AppleTV):
         daap_http = HttpSession(
             session,
             'http://{0}:{1}/'.format(details.address, self._service.port))
-        self._requester = DaapRequester(daap_http, self._service.login_id)
+        self._requester = DaapRequester(
+            daap_http, self._service.device_credentials)
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._atv_remote = DmapRemoteControl(self._apple_tv)

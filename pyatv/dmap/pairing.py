@@ -105,7 +105,7 @@ class DmapPairingHandler(PairingHandler):
     @asyncio.coroutine
     def get(self, key):
         """Retrieve a process specific value."""
-        if key == 'pairing_guid':
+        if key == 'credentials':
             return self.pairing_guid
 
         return None

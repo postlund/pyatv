@@ -132,14 +132,14 @@ class BaseService:
 class DmapService(BaseService):
     """Representation of a DMAP service."""
 
-    def __init__(self, login_id, port=None):
+    def __init__(self, device_credentials, port=None):
         """Initialize a new DmapService."""
         super().__init__(PROTOCOL_DMAP, port or 3689)
-        self.login_id = login_id
+        self.device_credentials = device_credentials
 
     def is_usable(self):
         """Return True if service is usable, else False."""
-        return self.login_id is not None
+        return self.device_credentials is not None
 
     def superseeded_by(self, other_service):
         """Return True if input service has login id and this has not."""
@@ -151,24 +151,31 @@ class DmapService(BaseService):
 
         # If this service does not have a login id but the other one does, then
         # we should return True here
-        return not self.login_id and other_service.login_id
+        return not self.device_credentials and other_service.device_credentials
 
     def __str__(self):
         """Return a string representation of this object."""
-        return super().__str__() + ', Login ID: {0}'.format(self.login_id)
+        return super().__str__() + ', Device Credentials: {0}'.format(
+            self.device_credentials)
 
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
     """Representation of a MediaRemote Protocol service."""
 
-    def __init__(self, port):
+    def __init__(self, port, device_credentials=None):
         """Initialize a new MrpService."""
         super().__init__(PROTOCOL_MRP, port)
+        self.device_credentials = device_credentials
 
     def is_usable(self):
         """Return True if service is usable, else False."""
         return True
+
+    def __str__(self):
+        """Return a string representation of this object."""
+        return super().__str__() + ', Device Credentials: {0}'.format(
+            self.device_credentials)
 
 
 # pylint: disable=too-few-public-methods
