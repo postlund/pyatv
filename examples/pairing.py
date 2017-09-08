@@ -2,6 +2,7 @@
 
 import asyncio
 import pyatv
+from pyatv import conf
 from zeroconf import Zeroconf
 
 
@@ -16,8 +17,8 @@ LOOP = asyncio.get_event_loop()
 def pair_with_device(loop):
     """Make it possible to pair with device."""
     my_zeroconf = Zeroconf()
-    details = pyatv.AppleTV('127.0.0.1', 'Apple TV')
-    details.add_service(pyatv.DmapService('login_id'))
+    details = conf.AppleTV('127.0.0.1', 'Apple TV')
+    details.add_service(conf.DmapService('login_id'))
     atv = pyatv.connect_to_apple_tv(details, loop)
 
     yield from atv.pairing.start(
