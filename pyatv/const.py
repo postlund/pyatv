@@ -36,6 +36,9 @@ MEDIA_TYPE_TV = 4
 
 # Play states
 
+#: Device is in idle state
+PLAY_STATE_IDLE = 0
+
 #: No media is currently select/playing
 PLAY_STATE_NO_MEDIA = 1
 

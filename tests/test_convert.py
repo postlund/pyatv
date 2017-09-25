@@ -36,6 +36,7 @@ MEDIA_KIND_TVSHOW2 = 64
 
 # Found on various places on the Internet as well as by testing
 # Key: cmst.caps
+PLAY_STATE_IDLE = 0
 PLAY_STATE_LOADING = 1  # E.g. buffering
 PLAY_STATE_PAUSED = 3
 PLAY_STATE_PLAYING = 4
@@ -116,6 +117,8 @@ class ConvertTest(unittest.TestCase):
                          convert.playstate(None))
 
     def test_regular_playstates(self):
+        self.assertEqual(const.PLAY_STATE_IDLE,
+                         convert.playstate(PLAY_STATE_IDLE))
         self.assertEqual(const.PLAY_STATE_LOADING,
                          convert.playstate(PLAY_STATE_LOADING))
         self.assertEqual(const.PLAY_STATE_PAUSED,
