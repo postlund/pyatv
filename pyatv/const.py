@@ -23,6 +23,9 @@ MEDIA_TYPE_TV = 4
 
 # Corresponds to "playstate", cmst.playkind, in iTunes (still not fully known)
 
+#: Device is in idle state
+PLAY_STATE_IDLE = 0
+
 #: No media is currently select/playing
 PLAY_STATE_NO_MEDIA = 1
 
