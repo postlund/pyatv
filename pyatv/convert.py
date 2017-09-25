@@ -32,8 +32,11 @@ def media_type_str(mediatype):
 
 def playstate(state):
     """Convert iTunes playstate to API representation."""
+    # pylint: disable=too-many-return-statements
     if state is None:
         return const.PLAY_STATE_NO_MEDIA
+    elif state == 0:
+        return const.PLAY_STATE_IDLE
     elif state == 1:
         return const.PLAY_STATE_LOADING
     elif state == 3:
