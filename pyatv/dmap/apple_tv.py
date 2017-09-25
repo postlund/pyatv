@@ -247,6 +247,11 @@ class DmapPlaying(Playing):
         return parser.first(self.playstatus, 'cmst', 'canl')
 
     @property
+    def genre(self):
+        """Genre of the currently playing song."""
+        return parser.first(self.playstatus, 'cmst', 'cang')
+
+    @property
     def total_time(self):
         """Total play time in seconds."""
         return self._get_time_in_seconds('cast')

@@ -27,6 +27,7 @@ _TAGS = {
     'cafe': DmapTag(read_bool,   'dacp.fullscreenenabled'),
     'cafs': DmapTag(read_uint,   'dacp.fullscreen'),
     'cana': DmapTag(read_str,    'daap.nowplayingartist'),
+    'cang': DmapTag(read_str,    'dacp.nowplayinggenre'),
     'canl': DmapTag(read_str,    'daap.nowplayingalbum'),
     'cann': DmapTag(read_str,    'daap.nowplayingtrack'),
     'cant': DmapTag(read_uint,   'dacp.remainingtime'),

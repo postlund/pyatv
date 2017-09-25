@@ -181,6 +181,9 @@ class Playing(object):
         if self.album is not None:
             output.append('     Album: {0}'.format(self.album))
 
+        if self.genre is not None:
+            output.append('     Genre: {0}'.format(self.genre))
+
         position = self.position
         total_time = self.total_time
         if position is not None and total_time is not None and total_time != 0:
@@ -234,6 +237,11 @@ class Playing(object):
     @abstractproperty
     def album(self):
         """Album of the currently playing song."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def genre(self):
+        """Genre of the currently playing song."""
         raise exceptions.NotSupportedError
 
     @abstractproperty

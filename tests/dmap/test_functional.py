@@ -308,7 +308,8 @@ class FunctionalTest(AioHTTPTestCase):
     def test_metadata_music_paused(self):
         self.usecase.music_playing(paused=True, title='music',
                                    artist='artist', album='album',
-                                   total_time=222, position=49)
+                                   total_time=222, position=49,
+                                   genre='genre')
 
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
@@ -316,6 +317,7 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'artist')
         self.assertEqual(playing.album, 'album')
+        self.assertEqual(playing.genre, 'genre')
         self.assertEqual(playing.total_time, 222)
         self.assertEqual(playing.position, 49)
 
@@ -323,7 +325,8 @@ class FunctionalTest(AioHTTPTestCase):
     def test_metadata_music_playing(self):
         self.usecase.music_playing(paused=False, title='music',
                                    artist='test1', album='test2',
-                                   total_time=2, position=1)
+                                   total_time=2, position=1,
+                                   genre='genre')
 
         playing = yield from self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
@@ -331,6 +334,7 @@ class FunctionalTest(AioHTTPTestCase):
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'test1')
         self.assertEqual(playing.album, 'test2')
+        self.assertEqual(playing.genre, 'genre')
         self.assertEqual(playing.total_time, 2)
         self.assertEqual(playing.position, 1)
 

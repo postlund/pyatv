@@ -65,23 +65,18 @@ class PlayingResponse:
 
     def __init__(self, revision=0, shuffle=False, **kwargs):
         """Initialize a new PlayingResponse."""
-        self.paused = self._get('paused', **kwargs)
-        self.title = self._get('title', **kwargs)
-        self.artist = self._get('artist', **kwargs)
-        self.album = self._get('album', **kwargs)
-        self.total_time = self._get('total_time', **kwargs)
-        self.position = self._get('position', **kwargs)
-        self.mediakind = self._get('mediakind', **kwargs)
-        self.playstatus = self._get('playstatus', **kwargs)
-        self.repeat = self._get('repeat', **kwargs)
+        self.paused = kwargs.get('paused', None)
+        self.title = kwargs.get('title', None)
+        self.artist = kwargs.get('artist', None)
+        self.album = kwargs.get('album', None)
+        self.genre = kwargs.get('genre', None)
+        self.total_time = kwargs.get('total_time', None)
+        self.position = kwargs.get('position', None)
+        self.mediakind = kwargs.get('mediakind', None)
+        self.playstatus = kwargs.get('playstatus', None)
+        self.repeat = kwargs.get('repeat', None)
         self.revision = revision
         self.shuffle = shuffle
-
-    def _get(self, name, **kwargs):
-        if name in kwargs:
-            return kwargs[name]
-        else:
-            return None
 
 
 class FakeDaapAppleTV(web.Application):
@@ -222,6 +217,9 @@ class FakeDaapAppleTV(web.Application):
 
         if playing.album is not None:
             body += tags.string_tag('canl', playing.album)
+
+        if playing.genre is not None:
+            body += tags.string_tag('cang', playing.genre)
 
         if playing.total_time is not None:
             total_time = playing.total_time * 1000  # sec -> ms
@@ -458,14 +456,14 @@ class AppleTVUseCases:
             total_time=total_time, position=position,
             mediakind=3, shuffle=shuffle, repeat=repeat))
 
-    def music_playing(self, paused, artist, album, title,
+    def music_playing(self, paused, artist, album, title, genre,
                       total_time, position):
         """Call this method to change what is currently plaing to music."""
         self.device.responses['playing'].insert(0, PlayingResponse(
             paused=paused, title=title,
             artist=artist, album=album,
             total_time=total_time,
-            position=position,
+            position=position, genre=genre,
             mediakind=2))
 
     def media_is_loading(self):
