@@ -39,13 +39,14 @@ class PlayingDummy(interface.Playing):
 
     def __init__(self, media_type=const.MEDIA_TYPE_VIDEO,
                  play_state=const.PLAY_STATE_PLAYING, title=None, artist=None,
-                 album=None, total_time=None, position=None, shuffle=True,
-                 repeat=const.REPEAT_STATE_TRACK):
+                 album=None, genre=None, total_time=None, position=None,
+                 shuffle=True, repeat=const.REPEAT_STATE_TRACK):
         self._media_type = media_type
         self._play_state = play_state
         self._title = title
         self._artist = artist
         self._album = album
+        self._genre = genre
         self._total_time = total_time
         self._position = position
         self._shuffle = shuffle
@@ -75,6 +76,11 @@ class PlayingDummy(interface.Playing):
     def album(self):
         """Album of the currently playing song."""
         return self._album
+
+    @property
+    def genre(self):
+        """Genre of the currently playing song."""
+        return self._genre
 
     @property
     def total_time(self):
@@ -130,12 +136,14 @@ class InterfaceTest(unittest.TestCase):
         self.assertIn(convert.media_type_str(const.MEDIA_TYPE_VIDEO), out)
         self.assertIn(convert.playstate_str(const.PLAY_STATE_PLAYING), out)
 
-    def test_playing_title_artist_album(self):
+    def test_playing_title_artist_album_genre(self):
         out = str(PlayingDummy(
-            title='mytitle', artist='myartist', album='myalbum'))
+            title='mytitle', artist='myartist',
+            album='myalbum', genre='mygenre'))
         self.assertIn('mytitle', out)
         self.assertIn('myartist', out)
         self.assertIn('myalbum', out)
+        self.assertIn('mygenre', out)
 
     def test_playing_only_position(self):
         self.assertIn('1234', str(PlayingDummy(position=1234)))
