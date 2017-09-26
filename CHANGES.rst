@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.3.5 (2017-09-26)
+------------------
+
+Changes:
+
+- Fix support for genre (#106)
+- Handle playstate idle/0 (#115)
+- Improve session handling in AirPlay (#118)
+
 0.3.4 (2017-07-18)
 ------------------
 
@@ -16,6 +25,7 @@ Changes:
 - Fixed broken device_id function (always generated same id)
 
 atvremote:
+
 - Fixed argument handling, e.g. when using play_url
 
 0.3.2 (2017-06-20)
@@ -49,6 +59,7 @@ Changes:
 - Bump aiohttp to 1.3.5 and support 2.0.0+
 
 atvremote:
+
 - Multiple commands can be given to atvremote
 - Doing "atvremote commands" requires no device and is a lot faster
 - All commands now listed with "atvremote commands"
