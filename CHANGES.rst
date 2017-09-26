@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.3.5 (2017-09-26)
+------------------
+
+Changes:
+
+- Fix support for genre (#106)
+- Handle playstate idle/0 (#115)
+- Improve session handling in AirPlay (#118)
+
 0.3.4 (2017-07-18)
 ------------------
 
