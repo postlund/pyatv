@@ -477,6 +477,11 @@ class AppleTVUseCases:
         self.device.responses['airplay_playback'].insert(
             0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
 
+    def airplay_playback_not_ready(self):
+        """Make playback-info return device not being ready."""
+        self.device.responses['airplay_playback'].insert(
+            0, AirPlayPlaybackResponse(plistlib.dumps(dict())))
+
     def set_property(self, prop, value):
         """Change value of a property."""
         # Use "fictional" properties to not tie them to DAP (if some other

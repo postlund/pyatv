@@ -487,7 +487,7 @@ class AppleTVInternal(AppleTV):
         self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
 
         airplay_player = player.AirPlayPlayer(
-            loop, session, details.address, details.airplay_port)
+            loop, details.address, details.airplay_port)
         airplay_http = HttpSession(
             session, 'http://{0}:{1}/'.format(
                 details.address, details.airplay_port))
