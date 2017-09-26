@@ -23,7 +23,7 @@ TIMEOUT = 10
 class AirPlayPlayer:
     """This class helps with playing media from an URL."""
 
-    def __init__(self, loop, session, address, port=7000):
+    def __init__(self, loop, address, port=7000):
         """Initialize a new AirPlay instance."""
         self.loop = loop
         self.address = address
