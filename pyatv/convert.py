@@ -56,6 +56,8 @@ def playstate_str(state):
     """Convert internal API playstate to string."""
     if state == const.PLAY_STATE_NO_MEDIA:
         return 'No media'
+    if state == const.PLAY_STATE_IDLE:
+        return 'Idle'
     elif state == const.PLAY_STATE_LOADING:
         return 'Loading'
     elif state == const.PLAY_STATE_PAUSED:
