@@ -137,6 +137,8 @@ class ConvertTest(unittest.TestCase):
     def test_playstate_str(self):
         self.assertEqual('No media',
                          convert.playstate_str(const.PLAY_STATE_NO_MEDIA))
+        self.assertEqual('Idle',
+                         convert.playstate_str(const.PLAY_STATE_IDLE))
         self.assertEqual('Loading',
                          convert.playstate_str(const.PLAY_STATE_LOADING))
         self.assertEqual('Paused',
