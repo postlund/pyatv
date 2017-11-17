@@ -6,7 +6,6 @@ kinds of responses. Also, it performs various sanity checks, like that auth
 information is correct and headers are present.
 """
 
-import re
 import asyncio
 import plistlib
 import binascii
@@ -339,14 +338,14 @@ class FakeAppleTV(web.Application):
 
         # Verify headers first
         self.tc.assertEqual(headers['User-Agent'], 'MediaControl/1.0')
-        self.tc.assertEqual(headers['Content-Type'], 'text/parameters')
+        self.tc.assertEqual(
+            headers['Content-Type'], 'application/x-apple-binary-plist')
 
-        body = yield from request.text()
+        body = yield from request.read()
+        parsed = plistlib.loads(body)
 
-        self.last_airplay_url = re.search(
-            r'Content-Location: (.*)', body).group(1)
-        self.last_airplay_start = float(re.search(
-            r'Start-Position: (.*)', body).group(1))
+        self.last_airplay_url = parsed['Content-Location']
+        self.last_airplay_start = parsed['Start-Position']
 
         return web.Response(status=200)
 

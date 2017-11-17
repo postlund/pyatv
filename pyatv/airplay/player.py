@@ -30,24 +30,26 @@ class AirPlayPlayer:
     def play_url(self, url, position=0):
         """Play media from an URL on the device."""
         headers = {'User-Agent': 'MediaControl/1.0',
-                   'Content-Type': 'text/parameters'}
-        body = "Content-Location: {}\nStart-Position: {}\n\n".format(
-            url, position)
+                   'Content-Type': 'application/x-apple-binary-plist'}
+        body = {'Content-Location': url, 'Start-Position': position}
 
         address = self._url(self.port, 'play')
         _LOGGER.debug('AirPlay %s to %s', url, address)
 
         resp = None
         try:
+            # pylint: disable=no-member
             resp = yield from self.session.post(
-                address, headers=headers, data=body, timeout=TIMEOUT)
+                address, headers=headers,
+                data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
+                timeout=TIMEOUT)
             yield from self._wait_for_media_to_end()
         finally:
             if resp is not None:
                 resp.close()
 
     def _url(self, port, command):
-        return 'http://{}:{}/{}'.format(self.address, port, command)
+        return 'http://{0}:{1}/{2}'.format(self.address, port, command)
 
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)
@@ -61,6 +63,8 @@ class AirPlayPlayer:
             try:
                 info = yield from self.session.get(address)
                 data = yield from info.content.read()
+                _LOGGER.debug('Playback-info (%d): %s', info.status, data)
+
                 parsed = plistlib.loads(data)
 
                 # duration is only available if something is playing
