@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+0.3.8 (2017-11-17)
+------------------
+
+Changes:
+
+- Revert some of the earlier AirPlay clean ups from 0.3.5 as that made playback
+  less reliable
+- Use binary plist instead of text format in play_url to make AirPlay work with
+  later versions of tvOS
+
 0.3.6 (2017-10-01)
 ------------------
 
