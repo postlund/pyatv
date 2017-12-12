@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.3.9 (2017-12-12)
+------------------
+
+Changes:
+
+- Handle re-login properly in case of connection problems or if a device is
+  restarted
+
 0.3.8 (2017-11-17)
 ------------------
 
