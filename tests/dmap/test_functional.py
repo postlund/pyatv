@@ -60,14 +60,7 @@ class FunctionalTest(AioHTTPTestCase):
         self.fake_atv = FakeDaapAppleTV(
             self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
-
-        # Import TestServer here and not globally, otherwise py.test will
-        # complain when running:
-        #
-        #   test_functional.py cannot collect test class 'TestServer'
-        #   because it has a __init__ constructor
-        from aiohttp.test_utils import TestServer
-        return TestServer(self.fake_atv)
+        return self.fake_atv
 
     def get_connected_device(self, identifier):
         details = AppleTV('127.0.0.1', 'Apple TV')
@@ -112,7 +105,7 @@ class FunctionalTest(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
         yield from self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.app.port)
+            AIRPLAY_STREAM, port=self.server.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
 
@@ -126,7 +119,7 @@ class FunctionalTest(AioHTTPTestCase):
         yield from self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
 
         yield from self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.app.port)
+            AIRPLAY_STREAM, port=self.server.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
 

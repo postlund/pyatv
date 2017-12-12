@@ -45,7 +45,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_verify_invalid(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(INVALID_AUTH_KEY)
 
@@ -56,7 +56,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_verify_authenticated(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
@@ -66,7 +66,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_auth_successful(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(INVALID_AUTH_KEY)
 
@@ -79,7 +79,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_auth_failed(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
