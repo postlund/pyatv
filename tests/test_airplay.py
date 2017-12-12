@@ -34,14 +34,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop, 0, 0, 0, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
-
-        # Import TestServer here and not globally, otherwise py.test will
-        # complain when running:
-        #
-        #   test_functional.py cannot collect test class 'TestServer'
-        #   because it has a __init__ constructor
-        from aiohttp.test_utils import TestServer
-        return TestServer(self.fake_atv)
+        return self.fake_atv
 
     @asyncio.coroutine
     def fake_asyncio_sleep(self, time, loop):
@@ -55,7 +48,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         session = ClientSession(loop=self.loop)
         aplay = player.AirPlayPlayer(
-            self.loop, session, '127.0.0.1', port=self.app.port)
+            self.loop, session, '127.0.0.1', port=self.server.port)
         yield from aplay.play_url(STREAM, position=START_POSITION)
 
         self.assertEqual(self.fake_atv.last_airplay_url, STREAM)

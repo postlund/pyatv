@@ -33,19 +33,12 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @asyncio.coroutine
     def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop, 0, 0, 0, self)
-
-        # Import TestServer here and not globally, otherwise py.test will
-        # complain when running:
-        #
-        #   test_functional.py cannot collect test class 'TestServer'
-        #   because it has a __init__ constructor
-        from aiohttp.test_utils import TestServer
-        return TestServer(self.fake_atv)
+        return self.fake_atv
 
     @unittest_run_loop
     def test_verify_invalid(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(INVALID_AUTH_KEY)
 
@@ -56,7 +49,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_verify_authenticated(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
@@ -66,7 +59,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_auth_successful(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(INVALID_AUTH_KEY)
 
@@ -79,7 +72,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @unittest_run_loop
     def test_auth_failed(self):
         http = HttpSession(
-            self.session, 'http://127.0.0.1:{0}/'.format(self.app.port))
+            self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
         handler = srp.SRPAuthHandler()
         handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
