@@ -52,6 +52,7 @@ class DaapRequester:
 
         resp = yield from self._do(_login_request)
         self._session_id = parser.first(resp, 'mlog', 'mlid')
+
         _LOGGER.info('Logged in and got session id %s', self._session_id)
         return self._session_id
 
@@ -95,10 +96,8 @@ class DaapRequester:
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
         if status >= 200 and status < 300:
             return resp
-
-        # When a 403 is received we are likely logged out, so a new
-        # login must be performed to get a new session id
-        if status == 403:
+        elif not is_login:
+            # If a request fails, try to login again before retrying
             _LOGGER.info('implicitly logged out, logging in again')
             yield from self.login()
 
