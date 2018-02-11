@@ -80,7 +80,7 @@ It is possible to use the reference CLI application as well:
     $ atvremote -a next
 
     # Scanning for devices on network
-    $ atvremote
+    $ atvremote scan
     Found Apple TVs:
      - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9012-345678901234)
 
