@@ -97,3 +97,4 @@ htmlcov
 
 artwork.png
 .Python
+.pytest_cache
