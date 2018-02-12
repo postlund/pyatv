@@ -64,8 +64,8 @@ class FunctionalTest(AioHTTPTestCase):
 
     def get_connected_device(self, identifier):
         details = AppleTV('127.0.0.1', 'Apple TV')
-        details.add_service(DmapService(identifier, port=self.app.port))
-        details.add_service(AirPlayService(self.app.port))
+        details.add_service(DmapService(identifier, port=self.server.port))
+        details.add_service(AirPlayService(self.server.port))
         return connect_to_apple_tv(details, self.loop)
 
     # This is not a pretty test and it does crazy things. Should probably be

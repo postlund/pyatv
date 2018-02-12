@@ -50,7 +50,7 @@ class DaapRequester:
                             session=False, login_id=True),
                 headers=_DMAP_HEADERS)
 
-        resp = yield from self._do(_login_request)
+        resp = yield from self._do(_login_request, is_login=True)
         self._session_id = parser.first(resp, 'mlog', 'mlid')
 
         _LOGGER.info('Logged in and got session id %s', self._session_id)
