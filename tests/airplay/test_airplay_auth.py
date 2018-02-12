@@ -33,14 +33,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     @asyncio.coroutine
     def get_application(self, loop=None):
         self.fake_atv = FakeDaapAppleTV(self.loop, 0, 0, 0, self)
-
-        # Import TestServer here and not globally, otherwise py.test will
-        # complain when running:
-        #
-        #   test_functional.py cannot collect test class 'TestServer'
-        #   because it has a __init__ constructor
-        from aiohttp.test_utils import TestServer
-        return TestServer(self.fake_atv)
+        return self.fake_atv
 
     @unittest_run_loop
     def test_verify_invalid(self):

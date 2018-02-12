@@ -189,7 +189,7 @@ def _get_service_used_to_connect(details, protocol):
 def _setup_airplay(loop, session, details):
     airplay_service = details.airplay_service()
     airplay_player = player.AirPlayPlayer(
-        loop, details.address, airplay_service.port)
+        loop, session, details.address, airplay_service.port)
     airplay_http = HttpSession(
         session, 'http://{0}:{1}/'.format(
             details.address, airplay_service.port))
