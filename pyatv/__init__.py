@@ -169,8 +169,8 @@ def connect_to_apple_tv(details, loop, protocol=None, session=None):
     # Create correct implementation depending on protocol
     if service.protocol == PROTOCOL_DMAP:
         return DmapAppleTV(loop, session, details, airplay)
-    elif service.protocol == PROTOCOL_MRP:
-        return MrpAppleTV(loop, session, details, airplay)
+
+    return MrpAppleTV(loop, session, details, airplay)
 
 
 def _get_service_used_to_connect(details, protocol):

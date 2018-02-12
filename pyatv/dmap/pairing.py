@@ -5,12 +5,13 @@ import asyncio
 import hashlib
 import logging
 import random
+import ipaddress
 from io import StringIO
 
-import ipaddress
-import netifaces
 from aiohttp import web
 from zeroconf import ServiceInfo
+import netifaces
+
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
 
@@ -106,6 +107,8 @@ class DmapPairingHandler(PairingHandler):
         """Retrieve a process specific value."""
         if key == 'pairing_guid':
             return self.pairing_guid
+
+        return None
 
     def _publish_service(self, zeroconf, address, port):
         props = {
