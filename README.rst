@@ -10,6 +10,9 @@ for this might be added in the future if that protocol is ever fully reverse eng
 
 The MIT license is used for this library.
 
+``This is the development branch containing experimental changes. If you want a stable version,
+have a look at the v0.3.x tags.``
+
 Features
 --------
 
