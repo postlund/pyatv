@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 import "pyatv/mrp/protobuf/ProtocolMessage.proto";
-import "pyatv/mrp/protobuf/VoiceInputDeviceDescriptor.proto";
+import "pyatv/mrp/protobuf/VoiceInputDeviceDescriptorMessage.proto";
 
 extend ProtocolMessage {
   optional RegisterVoiceInputDeviceMessage registerVoiceInputDeviceMessage = 33;

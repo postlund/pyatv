@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 import "pyatv/mrp/protobuf/ProtocolMessage.proto";
-import "pyatv/mrp/protobuf/TextEditingAttributes.proto";
+import "pyatv/mrp/protobuf/TextEditingAttributesMessage.proto";
 
 extend ProtocolMessage {
   optional KeyboardMessage keyboardMessage = 28;

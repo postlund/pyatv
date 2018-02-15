@@ -58,7 +58,7 @@ def _log_debug(message, **kwargs):
 
 
 def hkdf_expand(salt, info, shared_secret):
-    """Dervice encryption keys from shared secret."""
+    """Derive encryption keys from shared secret."""
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.hkdf import HKDF
     from cryptography.hazmat.backends import default_backend

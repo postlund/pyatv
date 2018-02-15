@@ -32,7 +32,7 @@ setConnectionStateMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=None,
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 _SETCONNECTIONSTATEMESSAGE_CONNECTIONSTATE = _descriptor.EnumDescriptor(
   name='ConnectionState',
@@ -66,7 +66,7 @@ _SETCONNECTIONSTATEMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=2,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],

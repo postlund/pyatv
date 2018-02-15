@@ -311,10 +311,10 @@ class PushUpdater(object):
         - playstatus_error(updater, exception)
 
         The first method is called when a new update happens and the second one
-        is called if an error occurs. Please not that if an error happens, push
-        updates will be stopped. So they will need to be enabled again, e.g.
-        from the error method. A delay should preferably be passed to start()
-        to avoid an infinite error-loop.
+        is called if an error occurs. Please note that if an error happens,
+        push updates will be stopped. So they will need to be enabled again,
+        e.g. from the error method. A delay should preferably be passed to
+        start() to avoid an infinite error-loop.
         """
         raise exceptions.NotSupportedError
 

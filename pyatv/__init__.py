@@ -4,6 +4,7 @@ import asyncio
 import logging
 import concurrent
 from ipaddress import ip_address
+from threading import Lock
 
 from zeroconf import ServiceBrowser, Zeroconf
 from aiohttp import ClientSession
@@ -37,11 +38,17 @@ class _ServiceListener(object):
         self.protocol = protocol
         self.semaphore = semaphore
         self.found_devices = {}
+        self.lock = Lock()
 
     def add_service(self, zeroconf, service_type, name):
         """Handle callback from zeroconf when a service has been discovered."""
-        # If it's not instantly lockable, then abort_on_found is True and we
-        # have found a device already
+        self.lock.acquire()
+        try:
+            self._internal_add(zeroconf, service_type, name)
+        finally:
+            self.lock.release()
+
+    def _internal_add(self, zeroconf, service_type, name):
         if self.abort_on_found and len(self.found_devices) == 1:
             return
 
@@ -163,7 +170,7 @@ def connect_to_apple_tv(details, loop, protocol=None, session=None):
     if session is None:
         session = ClientSession(loop=loop)
 
-    # AirPlay serive is the same for both DMAP and MRP
+    # AirPlay service is the same for both DMAP and MRP
     airplay = _setup_airplay(loop, session, details)
 
     # Create correct implementation depending on protocol

@@ -14,16 +14,16 @@ _sym_db = _symbol_database.Default()
 
 
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
-from pyatv.mrp.protobuf import VirtualTouchDeviceDescriptor_pb2 as pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptor__pb2
+from pyatv.mrp.protobuf import VirtualTouchDeviceDescriptorMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='pyatv/mrp/protobuf/RegisterHIDDeviceMessage.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n1pyatv/mrp/protobuf/RegisterHIDDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\x35pyatv/mrp/protobuf/VirtualTouchDeviceDescriptor.proto\"S\n\x18RegisterHIDDeviceMessage\x12\x37\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1d.VirtualTouchDeviceDescriptor:M\n\x18registerHIDDeviceMessage\x12\x10.ProtocolMessage\x18\x0b \x01(\x0b\x32\x19.RegisterHIDDeviceMessage')
+  serialized_pb=_b('\n1pyatv/mrp/protobuf/RegisterHIDDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a<pyatv/mrp/protobuf/VirtualTouchDeviceDescriptorMessage.proto\"S\n\x18RegisterHIDDeviceMessage\x12\x37\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1d.VirtualTouchDeviceDescriptor:M\n\x18registerHIDDeviceMessage\x12\x10.ProtocolMessage\x18\x0b \x01(\x0b\x32\x19.RegisterHIDDeviceMessage')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptor__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2.DESCRIPTOR,])
 
 
 REGISTERHIDDEVICEMESSAGE_FIELD_NUMBER = 11
@@ -33,7 +33,7 @@ registerHIDDeviceMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=None,
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 
 _REGISTERHIDDEVICEMESSAGE = _descriptor.Descriptor(
@@ -49,7 +49,7 @@ _REGISTERHIDDEVICEMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -62,11 +62,11 @@ _REGISTERHIDDEVICEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=150,
-  serialized_end=233,
+  serialized_start=157,
+  serialized_end=240,
 )
 
-_REGISTERHIDDEVICEMESSAGE.fields_by_name['deviceDescriptor'].message_type = pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptor__pb2._VIRTUALTOUCHDEVICEDESCRIPTOR
+_REGISTERHIDDEVICEMESSAGE.fields_by_name['deviceDescriptor'].message_type = pyatv_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2._VIRTUALTOUCHDEVICEDESCRIPTOR
 DESCRIPTOR.message_types_by_name['RegisterHIDDeviceMessage'] = _REGISTERHIDDEVICEMESSAGE
 DESCRIPTOR.extensions_by_name['registerHIDDeviceMessage'] = registerHIDDeviceMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
