@@ -14,16 +14,16 @@ _sym_db = _symbol_database.Default()
 
 
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
-from pyatv.mrp.protobuf import TextEditingAttributes_pb2 as pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributes__pb2
+from pyatv.mrp.protobuf import TextEditingAttributesMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributesMessage__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='pyatv/mrp/protobuf/KeyboardMessage.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n(pyatv/mrp/protobuf/KeyboardMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a.pyatv/mrp/protobuf/TextEditingAttributes.proto\"m\n\x0fKeyboardMessage\x12\r\n\x05state\x18\x01 \x01(\x05\x12*\n\nattributes\x18\x03 \x01(\x0b\x32\x16.TextEditingAttributes\x12\x1f\n\x17\x65ncryptedTextCyphertext\x18\x04 \x01(\x0c:;\n\x0fkeyboardMessage\x12\x10.ProtocolMessage\x18\x1c \x01(\x0b\x32\x10.KeyboardMessage')
+  serialized_pb=_b('\n(pyatv/mrp/protobuf/KeyboardMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\x35pyatv/mrp/protobuf/TextEditingAttributesMessage.proto\"m\n\x0fKeyboardMessage\x12\r\n\x05state\x18\x01 \x01(\x05\x12*\n\nattributes\x18\x03 \x01(\x0b\x32\x16.TextEditingAttributes\x12\x1f\n\x17\x65ncryptedTextCyphertext\x18\x04 \x01(\x0c:;\n\x0fkeyboardMessage\x12\x10.ProtocolMessage\x18\x1c \x01(\x0b\x32\x10.KeyboardMessage')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributes__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributesMessage__pb2.DESCRIPTOR,])
 
 
 KEYBOARDMESSAGE_FIELD_NUMBER = 28
@@ -33,7 +33,7 @@ keyboardMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=None,
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 
 _KEYBOARDMESSAGE = _descriptor.Descriptor(
@@ -49,21 +49,21 @@ _KEYBOARDMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='attributes', full_name='KeyboardMessage.attributes', index=1,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='encryptedTextCyphertext', full_name='KeyboardMessage.encryptedTextCyphertext', index=2,
       number=4, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -76,11 +76,11 @@ _KEYBOARDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=134,
-  serialized_end=243,
+  serialized_start=141,
+  serialized_end=250,
 )
 
-_KEYBOARDMESSAGE.fields_by_name['attributes'].message_type = pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributes__pb2._TEXTEDITINGATTRIBUTES
+_KEYBOARDMESSAGE.fields_by_name['attributes'].message_type = pyatv_dot_mrp_dot_protobuf_dot_TextEditingAttributesMessage__pb2._TEXTEDITINGATTRIBUTES
 DESCRIPTOR.message_types_by_name['KeyboardMessage'] = _KEYBOARDMESSAGE
 DESCRIPTOR.extensions_by_name['keyboardMessage'] = keyboardMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

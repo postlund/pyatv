@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "pyatv/mrp/protobuf/AudioFormatSettings.proto";
+import "pyatv/mrp/protobuf/AudioFormatSettingsMessage.proto";
 
 message VoiceInputDeviceDescriptor {
   optional AudioFormatSettings defaultFormat = 1;

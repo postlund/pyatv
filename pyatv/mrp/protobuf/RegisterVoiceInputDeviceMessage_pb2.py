@@ -14,16 +14,16 @@ _sym_db = _symbol_database.Default()
 
 
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
-from pyatv.mrp.protobuf import VoiceInputDeviceDescriptor_pb2 as pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptor__pb2
+from pyatv.mrp.protobuf import VoiceInputDeviceDescriptorMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptorMessage__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='pyatv/mrp/protobuf/RegisterVoiceInputDeviceMessage.proto',
   package='',
   syntax='proto2',
-  serialized_pb=_b('\n8pyatv/mrp/protobuf/RegisterVoiceInputDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\x33pyatv/mrp/protobuf/VoiceInputDeviceDescriptor.proto\"X\n\x1fRegisterVoiceInputDeviceMessage\x12\x35\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1b.VoiceInputDeviceDescriptor:[\n\x1fregisterVoiceInputDeviceMessage\x12\x10.ProtocolMessage\x18! \x01(\x0b\x32 .RegisterVoiceInputDeviceMessage')
+  serialized_pb=_b('\n8pyatv/mrp/protobuf/RegisterVoiceInputDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a:pyatv/mrp/protobuf/VoiceInputDeviceDescriptorMessage.proto\"X\n\x1fRegisterVoiceInputDeviceMessage\x12\x35\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1b.VoiceInputDeviceDescriptor:[\n\x1fregisterVoiceInputDeviceMessage\x12\x10.ProtocolMessage\x18! \x01(\x0b\x32 .RegisterVoiceInputDeviceMessage')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptor__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptorMessage__pb2.DESCRIPTOR,])
 
 
 REGISTERVOICEINPUTDEVICEMESSAGE_FIELD_NUMBER = 33
@@ -33,7 +33,7 @@ registerVoiceInputDeviceMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=None,
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 
 _REGISTERVOICEINPUTDEVICEMESSAGE = _descriptor.Descriptor(
@@ -49,7 +49,7 @@ _REGISTERVOICEINPUTDEVICEMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -62,11 +62,11 @@ _REGISTERVOICEINPUTDEVICEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=155,
-  serialized_end=243,
+  serialized_start=162,
+  serialized_end=250,
 )
 
-_REGISTERVOICEINPUTDEVICEMESSAGE.fields_by_name['deviceDescriptor'].message_type = pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptor__pb2._VOICEINPUTDEVICEDESCRIPTOR
+_REGISTERVOICEINPUTDEVICEMESSAGE.fields_by_name['deviceDescriptor'].message_type = pyatv_dot_mrp_dot_protobuf_dot_VoiceInputDeviceDescriptorMessage__pb2._VOICEINPUTDEVICEDESCRIPTOR
 DESCRIPTOR.message_types_by_name['RegisterVoiceInputDeviceMessage'] = _REGISTERVOICEINPUTDEVICEMESSAGE
 DESCRIPTOR.extensions_by_name['registerVoiceInputDeviceMessage'] = registerVoiceInputDeviceMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

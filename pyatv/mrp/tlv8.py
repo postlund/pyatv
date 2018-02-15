@@ -16,10 +16,12 @@ TLV_BACK_OFF = '8'
 TLV_SIGNATURE = '10'
 
 
-# Simple method to parse TLV data. If value is larger than 255 bytes, it is
-# split up in multiple chunks. So the same tag might occurr several times.
 def read_tlv(data):
-    """Parse TLV8 bytes into a dict."""
+    """Parse TLV8 bytes into a dict.
+
+    If value is larger than 255 bytes, it is split up in multiple chunks. So
+    the same tag might occurr several times.
+    """
     def _parse(data, pos, size, result=None):
         if result is None:
             result = {}

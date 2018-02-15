@@ -32,7 +32,7 @@ getKeyboardSessionMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=_b("").decode('utf-8'),
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 
 _GETKEYBOARDSESSIONMESSAGE = _descriptor.Descriptor(

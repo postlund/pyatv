@@ -32,7 +32,7 @@ registerVoiceInputDeviceResponseMessage = _descriptor.FieldDescriptor(
   has_default_value=False, default_value=None,
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
-  options=None)
+  options=None, file=DESCRIPTOR)
 
 
 _REGISTERVOICEINPUTDEVICERESPONSEMESSAGE = _descriptor.Descriptor(
@@ -48,14 +48,14 @@ _REGISTERVOICEINPUTDEVICERESPONSEMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='errorCode', full_name='RegisterVoiceInputDeviceResponseMessage.errorCode', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
