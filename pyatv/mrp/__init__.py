@@ -178,9 +178,9 @@ class MrpPlaying(Playing):
             return 0
 
         now_utc = datetime.datetime.utcnow()
-        ts = datetime.datetime(2001, 1, 1, 0, 0) + \
+        timeshift = datetime.datetime(2001, 1, 1, 0, 0) + \
             datetime.timedelta(seconds=timestamp)
-        diff = (now_utc - ts).total_seconds()
+        diff = (now_utc - timeshift).total_seconds()
         base = self._setstate.nowPlayingInfo.elapsedTime
         extra = 0
         if int(self._setstate.nowPlayingInfo.playbackRate) == 0:
@@ -210,9 +210,24 @@ class MrpMetadata(Metadata):
         self._metadata = None  # TODO: data from TRANSACTION_MESSAGE
 
     @asyncio.coroutine
-    def _handle_set_state(self, message, data):
+    def _handle_set_state(self, message, _):
         if message.type == protobuf.SET_STATE_MESSAGE:
             self._setstate = message.inner()
+
+    @property
+    def device_id(self):
+        """Return a unique identifier for current device."""
+        raise exceptions.NotSupportedError
+
+    @asyncio.coroutine
+    def artwork(self):
+        """Return artwork for what is currently playing (or None)."""
+        raise exceptions.NotSupportedError
+
+    @asyncio.coroutine
+    def artwork_url(self):
+        """Return artwork URL for what is currently playing."""
+        raise exceptions.NotSupportedError
 
     @asyncio.coroutine
     def playing(self):
@@ -233,6 +248,7 @@ class MrpPushUpdater(PushUpdater):
 
     def __init__(self, loop, metadata, protocol):
         """Initialize a new MrpPushUpdater instance."""
+        super().__init__()
         self.loop = loop
         self.metadata = metadata
         self.protocol = protocol
@@ -241,23 +257,6 @@ class MrpPushUpdater(PushUpdater):
         self.protocol.add_listener(
             self._handle_update, protobuf.TRANSACTION_MESSAGE)
         self._enabled = False
-        self.__listener = None
-
-    @property
-    def listener(self):
-        """Receiver of push updates."""
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener):
-        """Change active listener to push updates.
-
-        Will throw AsyncUpdaterRunningError if push updates is enabled.
-        """
-        if self._enabled:
-            raise exceptions.AsyncUpdaterRunningError
-
-        self.__listener = listener
 
     def start(self, initial_delay=0):
         """Wait for push updates from device.
@@ -276,7 +275,7 @@ class MrpPushUpdater(PushUpdater):
         self._enabled = False
 
     @asyncio.coroutine
-    def _handle_update(self, message, data):
+    def _handle_update(self, *_):
         if self._enabled:
             playstatus = yield from self.metadata.playing()
             self.loop.call_soon(
@@ -286,7 +285,7 @@ class MrpPushUpdater(PushUpdater):
 class MrpPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, loop, protocol, srp, service):
+    def __init__(self, protocol, srp, service):
         """Initialize a new MrpPairingHandler."""
         self.pairing_procedure = MrpPairingProcedure(protocol, srp)
         self.service = service
@@ -324,6 +323,8 @@ class MrpPairingHandler(PairingHandler):
         if key == 'credentials' and self.service.device_credentials:
             return str(self.service.device_credentials)
 
+        return None
+
 
 class MrpAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""
@@ -335,20 +336,20 @@ class MrpAppleTV(AppleTV):
         super().__init__()
 
         self._session = session
-        self._service = details.usable_service()
+        self._mrp_service = details.usable_service()
 
         self._connection = MrpConnection(
-            details.address, self._service.port, loop)
+            details.address, self._mrp_service.port, loop)
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(
-            loop, self._connection, self._srp, self._service)
+            loop, self._connection, self._srp, self._mrp_service)
 
-        self._atv_remote = MrpRemoteControl(loop, self._protocol)
-        self._atv_metadata = MrpMetadata(self._protocol)
-        self._atv_push_updater = MrpPushUpdater(
-            loop, self._atv_metadata, self._protocol)
-        self._atv_pairing = MrpPairingHandler(
-            loop, self._protocol, self._srp, self._service)
+        self._mrp_remote = MrpRemoteControl(loop, self._protocol)
+        self._mrp_metadata = MrpMetadata(self._protocol)
+        self._mrp_push_updater = MrpPushUpdater(
+            loop, self._mrp_metadata, self._protocol)
+        self._mrp_pairing = MrpPairingHandler(
+            self._protocol, self._srp, self._mrp_service)
         self._airplay = airplay
 
     @asyncio.coroutine
@@ -368,27 +369,27 @@ class MrpAppleTV(AppleTV):
     @property
     def service(self):
         """Return service used to connect to the Apple TV.."""
-        return self._service
+        return self._mrp_service
 
     @property
     def pairing(self):
         """Return API for pairing with the Apple TV."""
-        return self._atv_pairing
+        return self._mrp_pairing
 
     @property
     def remote_control(self):
         """Return API for controlling the Apple TV."""
-        return self._atv_remote
+        return self._mrp_remote
 
     @property
     def metadata(self):
         """Return API for retrieving metadata from Apple TV."""
-        return self._atv_metadata
+        return self._mrp_metadata
 
     @property
     def push_updater(self):
         """Return API for handling push update from the Apple TV."""
-        return self._atv_push_updater
+        return self._mrp_push_updater
 
     @property
     def airplay(self):

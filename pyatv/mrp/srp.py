@@ -7,16 +7,17 @@ import hashlib
 import logging
 
 import curve25519
-
-from pyatv import exceptions
-from pyatv.mrp import (tlv8, chacha20)
-
 from srptools import (SRPContext, SRPClientSession, constants)
 from ed25519.keys import SigningKey, VerifyingKey
+
+from pyatv import exceptions
+from pyatv.log import log_binary
+from pyatv.mrp import (tlv8, chacha20)
 
 _LOGGER = logging.getLogger(__name__)
 
 
+# pylint: disable=too-few-public-methods
 class Credentials:
     """Identifiers and encryption keys used by MRP."""
 
@@ -28,7 +29,7 @@ class Credentials:
         self.client_id = client_id
 
     @classmethod
-    def parse(self, detail_string):
+    def parse(cls, detail_string):
         """Parse a string represention of Credentials."""
         split = detail_string.split(':')
         if len(split) != 4:
@@ -49,14 +50,6 @@ class Credentials:
             binascii.hexlify(self.client_id).decode('utf-8'))
 
 
-# Special log method to avoid hexlify conversion if debug is off
-def _log_debug(message, **kwargs):
-    if _LOGGER.isEnabledFor(logging.DEBUG):
-        output = ('{0}={1}'.format(k, binascii.hexlify(
-            bytearray(v)).decode()) for k, v in kwargs.items())
-        _LOGGER.debug('%s (%s)', message, ', '.join(output))
-
-
 def hkdf_expand(salt, info, shared_secret):
     """Derive encryption keys from shared secret."""
     from cryptography.hazmat.primitives import hashes
@@ -72,6 +65,7 @@ def hkdf_expand(salt, info, shared_secret):
     return hkdf.derive(shared_secret)
 
 
+# pylint: disable=too-many-instance-attributes
 class SRPAuthHandler:
     """Handle SRP crypto routines for auth and key derivation."""
 
@@ -99,18 +93,17 @@ class SRPAuthHandler:
 
     def verify1(self, credentials, session_pub_key, encrypted):
         """First verification step."""
-        public = curve25519.Public(session_pub_key)
+        # No additional hashing used
         self._shared = self._verify_private.get_shared_key(
-            public, hashfunc=lambda x: x)  # No additional hashing used
+            curve25519.Public(session_pub_key), hashfunc=lambda x: x)
 
         session_key = hkdf_expand('Pair-Verify-Encrypt-Salt',
                                   'Pair-Verify-Encrypt-Info',
                                   self._shared)
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        decrypted = chacha.decrypt(encrypted, nounce='PV-Msg02'.encode())
-
-        decrypted_tlv = tlv8.read_tlv(decrypted)
+        decrypted_tlv = tlv8.read_tlv(
+            chacha.decrypt(encrypted, nounce='PV-Msg02'.encode()))
 
         identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
         signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
@@ -126,8 +119,7 @@ class SRPAuthHandler:
         device_info = self._verify_public.serialize() + \
             credentials.client_id + session_pub_key
 
-        signer = SigningKey(credentials.ltsk)
-        device_signature = signer.sign(device_info)
+        device_signature = SigningKey(credentials.ltsk).sign(device_info)
 
         tlv = tlv8.write_tlv({tlv8.TLV_IDENTIFIER: credentials.client_id,
                               tlv8.TLV_SIGNATURE: device_signature})
@@ -147,7 +139,7 @@ class SRPAuthHandler:
                                 'MediaRemote-Read-Encryption-Key',
                                 self._shared)
 
-        _log_debug('Keys', Output=output_key, Input=input_key)
+        log_binary(_LOGGER, 'Keys', Output=output_key, Input=input_key)
         return output_key, input_key
 
     def step1(self, pin):
@@ -171,7 +163,7 @@ class SRPAuthHandler:
 
         pub_key = binascii.unhexlify(self._session.public)
         proof = binascii.unhexlify(self._session.key_proof)
-        _log_debug('Client', Public=pub_key, Proof=proof)
+        log_binary(_LOGGER, 'Client', Public=pub_key, Proof=proof)
         return pub_key, proof
 
     def step3(self):
@@ -195,7 +187,7 @@ class SRPAuthHandler:
 
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
         encrypted_data = chacha.encrypt(tlv, nounce='PS-Msg05'.encode())
-        _log_debug('Data', Encrypted=encrypted_data)
+        log_binary(_LOGGER, 'Data', Encrypted=encrypted_data)
         return encrypted_data
 
     def step4(self, encrypted_data):
@@ -211,7 +203,8 @@ class SRPAuthHandler:
         atv_identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
         atv_signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
         atv_pub_key = decrypted_tlv[tlv8.TLV_PUBLIC_KEY]
-        _log_debug('Device',
+        log_binary(_LOGGER,
+                   'Device',
                    Identifier=atv_identifier,
                    Signature=atv_signature,
                    Public=atv_pub_key)

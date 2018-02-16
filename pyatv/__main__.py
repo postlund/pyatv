@@ -431,7 +431,6 @@ def _handle_commands(args, loop):
 # pylint: disable=too-many-return-statements
 @asyncio.coroutine
 def _handle_device_command(args, cmd, atv, loop):
-    # TODO: Add these to array and use a loop
     device = retrieve_commands(DeviceCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
     metadata = retrieve_commands(interface.Metadata)

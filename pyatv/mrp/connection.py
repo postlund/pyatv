@@ -1,22 +1,14 @@
 """Network layer for MRP."""
 
-import binascii
 import asyncio
 import logging
 
+from pyatv.log import log_binary
 from pyatv.mrp import chacha20
 from pyatv.mrp import protobuf
 from pyatv.mrp.variant import (read_variant, write_variant)
 
 _LOGGER = logging.getLogger(__name__)
-
-
-# Special log method to avoid hexlify conversion if debug is off
-def _log_debug(message, **kwargs):
-    if _LOGGER.isEnabledFor(logging.DEBUG):
-        output = ('{0}={1}'.format(k, binascii.hexlify(
-            bytearray(v)).decode()) for k, v in kwargs.items())
-        _LOGGER.debug('%s (%s)', message, ', '.join(output))
 
 
 class MrpConnection:
@@ -57,10 +49,10 @@ class MrpConnection:
         """Send message to device."""
         serialized = message.SerializeToString()
 
-        _log_debug('>> Send', Data=serialized)
+        log_binary(_LOGGER, '>> Send', Data=serialized)
         if self._chacha:
             serialized = self._chacha.encrypt(serialized)
-            _log_debug('>> Send', Encrypted=serialized)
+            log_binary(_LOGGER, '>> Send', Encrypted=serialized)
 
         data = write_variant(len(serialized)) + serialized
         self._writer.write(data)
@@ -78,7 +70,7 @@ class MrpConnection:
         # A message might be split over several reads, so we store a buffer and
         # try to decode messages from that buffer
         self._buffer += data
-        _log_debug('<< Receive', Data=data)
+        log_binary(_LOGGER, '<< Receive', Data=data)
 
         # The variant tells us how much data must follow
         length, raw = read_variant(self._buffer)
@@ -92,7 +84,7 @@ class MrpConnection:
 
         if self._chacha:
             data = self._chacha.decrypt(data)
-            _log_debug('<< Receive', Decrypted=data)
+            log_binary(_LOGGER, '<< Receive', Decrypted=data)
 
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(data)

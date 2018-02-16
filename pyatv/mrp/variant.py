@@ -5,10 +5,10 @@ def read_variant(variant):
     """Read and parse a binary protobuf variant value."""
     result = 0
     cnt = 0
-    for b in variant:
-        result |= (b & 0x7f) << (7 * cnt)
+    for data in variant:
+        result |= (data & 0x7f) << (7 * cnt)
         cnt += 1
-        if not (b & 0x80):
+        if not data & 0x80:
             return result, variant[cnt:]
     raise Exception('invalid variant')
 
