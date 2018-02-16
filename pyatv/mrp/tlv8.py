@@ -29,14 +29,14 @@ def read_tlv(data):
             return result
 
         tag = str(data[pos])
-        len = data[pos+1]
-        value = data[pos+2:pos+2+len]
+        length = data[pos+1]
+        value = data[pos+2:pos+2+length]
 
         if tag in result:
             result[tag] += value  # value > 255 is split up
         else:
             result[tag] = value
-        return _parse(data, pos+2+len, size, result)
+        return _parse(data, pos+2+length, size, result)
 
     return _parse(data, 0, len(data))
 

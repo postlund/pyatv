@@ -1,23 +1,15 @@
 """Device pairing and derivation of encryption keys."""
 
-import binascii
 import asyncio
 import logging
 
+from pyatv.log import log_binary
 from pyatv.mrp import (tlv8, messages)
 from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
 
 _LOGGER = logging.getLogger(__name__)
 
 PHONE_IDENTIFIER = '6fdad309-5331-47ff-b525-1158bb105af1'
-
-
-# Special log method to avoid hexlify conversion if debug is off
-def _log_debug(message, **kwargs):
-    if _LOGGER.isEnabledFor(logging.DEBUG):
-        output = ('{0}={1}'.format(k, binascii.hexlify(
-            bytearray(v)).decode()) for k, v in kwargs.items())
-        _LOGGER.debug('%s (%s)', message, ', '.join(output))
 
 
 def _get_pairing_data(resp):
@@ -72,7 +64,7 @@ class MrpPairingProcedure:
 
         pairing_data = _get_pairing_data(resp)
         atv_proof = pairing_data[tlv8.TLV_PROOF]
-        _log_debug('Device', Proof=atv_proof)
+        log_binary(_LOGGER, 'Device', Proof=atv_proof)
 
         encrypted_data = self.srp.step3()
         msg = messages.crypto_pairing({
@@ -112,7 +104,10 @@ class MrpPairingVerifier:
         resp = _get_pairing_data(resp)
         session_pub_key = resp[tlv8.TLV_PUBLIC_KEY]
         encrypted = resp[tlv8.TLV_ENCRYPTED_DATA]
-        _log_debug('Device', Public=self.credentials.ltpk, Encrypted=encrypted)
+        log_binary(_LOGGER,
+                   'Device',
+                   Public=self.credentials.ltpk,
+                   Encrypted=encrypted)
 
         encrypted_data = self.srp.verify1(
             self.credentials, session_pub_key, encrypted)

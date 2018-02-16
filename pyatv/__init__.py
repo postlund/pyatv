@@ -15,8 +15,8 @@ from pyatv.airplay.api import AirPlayAPI
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP)
 from pyatv.net import HttpSession
 
-from pyatv.dmap.apple_tv import DmapAppleTV
-from pyatv.mrp.apple_tv import MrpAppleTV
+from pyatv.dmap import DmapAppleTV
+from pyatv.mrp import MrpAppleTV
 
 _LOGGER = logging.getLogger(__name__)
 

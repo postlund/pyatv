@@ -9,19 +9,12 @@ import curve25519
 from ed25519.keys import SigningKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import (Cipher, algorithms, modes)
-
 from srptools import (SRPContext, SRPClientSession, constants)
+
+from pyatv.log import log_binary
 from pyatv.exceptions import (NoCredentialsError, AuthenticationError)
 
 _LOGGER = logging.getLogger(__name__)
-
-
-# Special log method to avoid hexlify conversion if debug is off
-def _log_debug(message, **kwargs):
-    if _LOGGER.isEnabledFor(logging.DEBUG):
-        output = ('{0}={1}'.format(k, binascii.hexlify(
-            bytearray(v)).decode()) for k, v in kwargs.items())
-        _LOGGER.debug('%s (%s)', message, ', '.join(output))
 
 
 def hash_sha512(*indata):
@@ -101,15 +94,18 @@ class SRPAuthHandler:
         verifying_key = signing_key.get_verifying_key()
         self._auth_private = signing_key.to_seed()
         self._auth_public = verifying_key.to_bytes()
-        _log_debug('Authentication keys',
-                   Private=self._auth_private, Public=self._auth_public)
+        log_binary(_LOGGER,
+                   'Authentication keys',
+                   Private=self._auth_private,
+                   Public=self._auth_public)
 
     def verify1(self):
         """First device verification step."""
         self._check_initialized()
         self._verify_private = curve25519.Private(secret=self.seed)
         self._verify_public = self._verify_private.get_public()
-        _log_debug('Verification keys',
+        log_binary(_LOGGER,
+                   'Verification keys',
                    Private=self._verify_private.serialize(),
                    Public=self._verify_public.serialize())
         verify_public = self._verify_public.serialize()
@@ -118,24 +114,24 @@ class SRPAuthHandler:
     def verify2(self, atv_public_key, data):
         """Last device verification step."""
         self._check_initialized()
-        _log_debug('Verify', PublicSecret=atv_public_key, Data=data)
+        log_binary(_LOGGER, 'Verify', PublicSecret=atv_public_key, Data=data)
 
         # Generate a shared secret key
         public = curve25519.Public(atv_public_key)
         shared = self._verify_private.get_shared_key(
             public, hashfunc=lambda x: x)  # No additional hashing used
-        _log_debug('Shared secret', Secret=shared)
+        log_binary(_LOGGER, 'Shared secret', Secret=shared)
 
         # Derive new AES key and IV from shared key
         aes_key = hash_sha512('Pair-Verify-AES-Key', shared)[0:16]
         aes_iv = hash_sha512('Pair-Verify-AES-IV', shared)[0:16]
-        _log_debug('Pair-Verify-AES', Key=aes_key, IV=aes_iv)
+        log_binary(_LOGGER, 'Pair-Verify-AES', Key=aes_key, IV=aes_iv)
 
         # Sign public keys and encrypt with AES
         signer = SigningKey(self._auth_private)
         signed = signer.sign(self._verify_public.serialize() + atv_public_key)
         signature, _ = aes_encrypt(modes.CTR, aes_key, aes_iv, data, signed)
-        _log_debug('Signature', Signature=signature)
+        log_binary(_LOGGER, 'Signature', Signature=signature)
 
         # Signature is prepended with 0x00000000 (alignment?)
         return b'\x00\x00\x00\x00' + signature
@@ -178,10 +174,10 @@ class SRPAuthHandler:
         tmp = bytearray(hash_sha512('Pair-Setup-AES-IV', session_key)[0:16])
         tmp[-1] = tmp[-1] + 1  # Last byte must be increased by 1
         aes_iv = bytes(tmp)
-        _log_debug('Pair-Setup-AES', Key=aes_key, IV=aes_iv)
+        log_binary(_LOGGER, 'Pair-Setup-AES', Key=aes_key, IV=aes_iv)
 
         epk, tag = aes_encrypt(modes.GCM, aes_key, aes_iv, self._auth_public)
-        _log_debug('Pair-Setup EPK+Tag', EPK=epk, Tag=tag)
+        log_binary(_LOGGER, 'Pair-Setup EPK+Tag', EPK=epk, Tag=tag)
 
         return epk, tag
 

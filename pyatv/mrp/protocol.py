@@ -12,7 +12,11 @@ from pyatv.mrp.srp import Credentials
 
 _LOGGER = logging.getLogger(__name__)
 
+Listener = namedtuple('Listener', 'func data')
+OutstandingMessage = namedtuple('OutstandingMessage', 'semaphore response')
 
+
+# pylint: disable=too-many-instance-attributes
 class MrpProtocol(object):
     """Protocol logic related to MRP.
 
@@ -23,8 +27,6 @@ class MrpProtocol(object):
 
     It provides an API for sending and receiving messages.
     """
-
-    Listener = namedtuple('Listener', ['func', 'data'])
 
     def __init__(self, loop, connection, srp, service):
         """Initialize a new MrpProtocol."""
@@ -45,7 +47,7 @@ class MrpProtocol(object):
         if message_type not in lst:
             lst[message_type] = []
 
-        lst[message_type].append(self.Listener(listener, data))
+        lst[message_type].append(Listener(listener, data))
 
     # TODO: This method is too big for its own good. Must split and clean up.
     @asyncio.coroutine
@@ -81,16 +83,16 @@ class MrpProtocol(object):
         # been enabled
         yield from self.send(messages.set_connection_state())
 
-        # Wait for some stuff to arrive before returning
-        semaphore = asyncio.Semaphore(value=0, loop=self.loop)
-
         @asyncio.coroutine
-        def _wait_for_updates(message, data):
+        def _wait_for_updates(_, semaphore):
             # Use a counter here whenever more than one message is expected
             semaphore.release()
 
+        # Wait for some stuff to arrive before returning
+        semaphore = asyncio.Semaphore(value=0, loop=self.loop)
         self.add_listener(_wait_for_updates,
                           protobuf.SET_STATE_MESSAGE,
+                          data=semaphore,
                           one_shot=False)
 
         # Subscribe to updates at this stage
@@ -108,14 +110,13 @@ class MrpProtocol(object):
 
     def stop(self):
         """Disconnect from device."""
-        if len(self._outstanding) > 0:
+        if self._outstanding:
             _LOGGER.warning('There were %d outstanding requests',
                             len(self._outstanding))
 
         if self._future is not None:
             self._future.cancel()
             self._future = None
-            self._enable_encryption = False
             self._initial_message_sent = False
             self._outstanding = {}
 
@@ -169,7 +170,7 @@ class MrpProtocol(object):
     @asyncio.coroutine
     def _receive(self, identifier, timeout):
         semaphore = asyncio.Semaphore(value=0, loop=self.loop)
-        self._outstanding[identifier] = [semaphore, None]
+        self._outstanding[identifier] = OutstandingMessage(semaphore, None)
 
         try:
             # The background "future" will save the response and release the
@@ -181,7 +182,7 @@ class MrpProtocol(object):
             del self._outstanding[identifier]
             raise
 
-        response = self._outstanding[identifier][1]
+        response = self._outstanding[identifier].response
         del self._outstanding[identifier]
         return response
 
@@ -204,13 +205,13 @@ class MrpProtocol(object):
                 # If the message identifer is outstanding, then someone is
                 # waiting for the respone so we save it here
                 if identifier in self._outstanding:
-                    self._outstanding[identifier][1] = resp
-                    self._outstanding[identifier][0].release()
+                    self._outstanding[identifier].respone = resp
+                    self._outstanding[identifier].semaphore.release()
                 else:
                     try:
                         yield from self._dispatch(resp)
-                    except Exception as ex:
-                        _LOGGER.exception('fail to dispatch')
+                    except Exception:  # pylint: disable=broad-except
+                        _LOGGER.exception('failed to dispatch')
 
             except asyncio.CancelledError:
                 break

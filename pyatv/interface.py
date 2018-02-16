@@ -296,13 +296,16 @@ class PushUpdater(object):
 
     __metaclass__ = ABCMeta
 
+    def __init__(self):
+        """Initialize a new PushUpdater."""
+        self.__listener = None
+
     @property
     def listener(self):
         """Object (PushUpdaterListener) that receives updates."""
-        raise exceptions.NotSupportedError
+        return self.__listener
 
     @listener.setter  # type: ignore
-    @abstractmethod
     def listener(self, listener):
         """Object that receives updates.
 
@@ -316,7 +319,7 @@ class PushUpdater(object):
         e.g. from the error method. A delay should preferably be passed to
         start() to avoid an infinite error-loop.
         """
-        raise exceptions.NotSupportedError
+        self.__listener = listener
 
     @abstractmethod
     def start(self, initial_delay=0):

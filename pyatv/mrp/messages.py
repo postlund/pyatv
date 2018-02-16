@@ -76,7 +76,7 @@ def register_hid_device(screen_width, screen_height,
     return message
 
 
-def send_packed_virtual_touch_event(x, y, phase, deviceID, finger):
+def send_packed_virtual_touch_event(xpos, ypos, phase, device_id, finger):
     """Create a new WAKE_DEVICE_MESSAGE."""
     message = create(protobuf.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE)
     event = message.inner()
@@ -84,10 +84,10 @@ def send_packed_virtual_touch_event(x, y, phase, deviceID, finger):
     # The packed version of VirtualTouchEvent contains X, Y, phase, deviceID
     # and finger stored as a byte array. Each value is written as 16bit little
     # endian integers.
-    event.data = x.to_bytes(2, byteorder='little')
-    event.data += y.to_bytes(2, byteorder='little')
+    event.data = xpos.to_bytes(2, byteorder='little')
+    event.data += ypos.to_bytes(2, byteorder='little')
     event.data += phase.to_bytes(2, byteorder='little')
-    event.data += deviceID.to_bytes(2, byteorder='little')
+    event.data += device_id.to_bytes(2, byteorder='little')
     event.data += finger.to_bytes(2, byteorder='little')
 
     return message
