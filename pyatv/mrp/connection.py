@@ -11,7 +11,7 @@ from pyatv.mrp.variant import (read_variant, write_variant)
 _LOGGER = logging.getLogger(__name__)
 
 
-class MrpConnection:
+class MrpConnection(asyncio.Protocol):
     """Network layer that encryptes/decryptes and (de)serializes messages."""
 
     def __init__(self, host, port, loop):
@@ -19,10 +19,20 @@ class MrpConnection:
         self.host = str(host)  # TODO: which datatype do I want here?
         self.port = port
         self.loop = loop
+        self.listener = None
         self._buffer = b''
-        self._reader = None
-        self._writer = None
         self._chacha = None
+        self._transport = None
+
+    def connection_made(self, transport):
+        """Device connection was made."""
+        _LOGGER.debug('Connected to device')
+        self._transport = transport
+
+    def connection_lost(self, exc):
+        """Device connection was dropped."""
+        _LOGGER.debug('Disconnected from device: %s', exc)
+        self._transport = None
 
     def enable_encryption(self, output_key, input_key):
         """Enable encryption with the specified keys."""
@@ -31,18 +41,18 @@ class MrpConnection:
     @property
     def connected(self):
         """If a connection is open or not."""
-        return self._reader and self._writer
+        return self._transport is not None
 
     @asyncio.coroutine
     def connect(self):
         """Connect to device."""
-        self._reader, self._writer = yield from asyncio.open_connection(
-            self.host, self.port, loop=self.loop)  # TODO: timeout
+        return self.loop.create_connection(lambda: self, self.host, self.port)
 
     def close(self):
         """Close connection to device."""
-        if self._writer:
-            self._writer.close()
+        if self._transport:
+            self._transport.close()
+        self._transport = None
         self._chacha = None
 
     def send(self, message):
@@ -55,18 +65,12 @@ class MrpConnection:
             log_binary(_LOGGER, '>> Send', Encrypted=serialized)
 
         data = write_variant(len(serialized)) + serialized
-        self._writer.write(data)
+        self._transport.write(data)
         _LOGGER.debug('>> Send: Protobuf=%s', message)
 
-    @asyncio.coroutine
-    def receive(self):
-        """Receive message from device."""
-        data = yield from self._reader.read(1024)
-        if data == b'':
-            _LOGGER.debug('Device closed the connection')
-            # TODO: other exception
-            raise Exception('device closed the connection')
-
+    # TODO: read messages from buffer with loop
+    def data_received(self, data):
+        """Message was received from device."""
         # A message might be split over several reads, so we store a buffer and
         # try to decode messages from that buffer
         self._buffer += data
@@ -77,7 +81,7 @@ class MrpConnection:
         if len(raw) < length:
             _LOGGER.debug(
                 'Require %d bytes but only %d in buffer', length, len(raw))
-            return None
+            return
 
         data = raw[:length]  # Incoming message (might be encrypted)
         self._buffer = raw[length:]  # Buffer, might contain more messages
@@ -89,4 +93,4 @@ class MrpConnection:
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(data)
         _LOGGER.debug('<< Receive: Protobuf=%s', parsed)
-        return parsed
+        self.listener.message_received(parsed)

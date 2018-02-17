@@ -32,12 +32,12 @@ class MrpProtocol(object):
         """Initialize a new MrpProtocol."""
         self.loop = loop
         self.connection = connection
+        self.connection.listener = self
         self.srp = srp
         self.service = service
         self._outstanding = {}
         self._listeners = {}
         self._one_shots = {}
-        self._future = None
         self._initial_message_sent = False
 
     def add_listener(self, listener, message_type, data=None, one_shot=False):
@@ -57,14 +57,6 @@ class MrpProtocol(object):
             return
 
         yield from self.connection.connect()
-
-        # TODO: refactor and share code with dmap.apple_tv.DmapPushUpdater
-        if hasattr(asyncio, 'ensure_future'):
-            run_async = getattr(asyncio, 'ensure_future')
-        else:
-            run_async = asyncio.async  # pylint: disable=no-member
-
-        self._future = run_async(self._receiver(), loop=self.loop)
 
         # In case credentials have been given externally (i.e. not by pairing
         # with a device), then use that client id
@@ -114,12 +106,8 @@ class MrpProtocol(object):
             _LOGGER.warning('There were %d outstanding requests',
                             len(self._outstanding))
 
-        if self._future is not None:
-            self._future.cancel()
-            self._future = None
-            self._initial_message_sent = False
-            self._outstanding = {}
-
+        self._initial_message_sent = False
+        self._outstanding = {}
         self.connection.close()
 
     @asyncio.coroutine
@@ -173,8 +161,7 @@ class MrpProtocol(object):
         self._outstanding[identifier] = OutstandingMessage(semaphore, None)
 
         try:
-            # The background "future" will save the response and release the
-            # semaphore when it has been received
+            # The connection instance will dispatch the message
             yield from asyncio.wait_for(
                 semaphore.acquire(), timeout, loop=self.loop)
 
@@ -186,35 +173,27 @@ class MrpProtocol(object):
         del self._outstanding[identifier]
         return response
 
-    @asyncio.coroutine
-    def _receiver(self):
-        _LOGGER.debug('MRP message receiver started')
+    def message_received(self, message):
+        """Message was received from device."""
+        _LOGGER.debug('Received message: %s', message)
 
-        while True:
+        if message.identifier:
+            identifier = message.identifier
+        else:
+            identifier = 'type_' + str(message.type)
+
+        # If the message identifer is outstanding, then someone is
+        # waiting for the respone so we save it here
+        if identifier in self._outstanding:
+            outstanding = OutstandingMessage(
+                self._outstanding[identifier].semaphore, message)
+            self._outstanding[identifier] = outstanding
+            self._outstanding[identifier].semaphore.release()
+        else:
             try:
-                _LOGGER.debug('Waiting for new message...')
-                resp = yield from self.connection.receive()
-
-                if not resp:
-                    continue  # Only partial message received
-                elif resp.identifier:
-                    identifier = resp.identifier
-                else:
-                    identifier = 'type_' + str(resp.type)
-
-                # If the message identifer is outstanding, then someone is
-                # waiting for the respone so we save it here
-                if identifier in self._outstanding:
-                    self._outstanding[identifier].respone = resp
-                    self._outstanding[identifier].semaphore.release()
-                else:
-                    try:
-                        yield from self._dispatch(resp)
-                    except Exception:  # pylint: disable=broad-except
-                        _LOGGER.exception('failed to dispatch')
-
-            except asyncio.CancelledError:
-                break
+                self.loop.call_soon(self._dispatch, message)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception('failed to dispatch')
 
     # TODO: dispatching should maybe not be a coroutine?
     @asyncio.coroutine
