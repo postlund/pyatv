@@ -1,30 +1,16 @@
-"""Functional tests using the API with a fake Apple TV."""
+"""Common functional tests for all protocols."""
 
 import asyncio
-import ipaddress
 
-from tests.log_output_handler import LogOutputHandler
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import (connect_to_apple_tv, const, exceptions)
-from pyatv.conf import (AirPlayService, DmapService, AppleTV)
-from pyatv.dmap import pairing
-from tests.fake_daap_atv import (
-    FakeDaapAppleTV, AppleTVUseCases, DEVICE_PIN, DEVICE_CREDENTIALS)
+from pyatv import const
+from tests.airplay.fake_airplay_device import (DEVICE_PIN, DEVICE_CREDENTIALS)
 from tests import (utils, zeroconf_stub)
 
-HSGID = '12345-6789-0'
-PAIRING_GUID = '0x0000000000000001'
-SESSION_ID = 55555
-REMOTE_NAME = 'pyatv remote'
-PIN_CODE = 1234
 
 EXPECTED_ARTWORK = b'1234'
 AIRPLAY_STREAM = 'http://stream'
-
-# This is valid for the PAIR in the pairing module and pin 1234
-# (extracted form a real device)
-PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
     'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
@@ -32,12 +18,10 @@ HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
     'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
 
 
-class FunctionalTest(AioHTTPTestCase):
+class CommonFunctionalTests(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
-        self.atv = self.get_connected_device(HSGID)
-        self.log_handler = LogOutputHandler(self)
 
         # Make sleep calls do nothing to not slow down tests
         @asyncio.coroutine
@@ -45,49 +29,12 @@ class FunctionalTest(AioHTTPTestCase):
             pass
         asyncio.sleep = fake_sleep
 
-        # TODO: currently stubs internal method, should provide stub
-        # for netifaces later
-        pairing._get_private_ip_addresses = \
-            lambda: [ipaddress.ip_address('10.0.0.1')]
-
-    def tearDown(self):
-        self.loop.run_until_complete(self.atv.logout())
-        AioHTTPTestCase.tearDown(self)
-        self.log_handler.tearDown()
-
     @asyncio.coroutine
     def get_application(self, loop=None):
-        self.fake_atv = FakeDaapAppleTV(
-            self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
-        self.usecase = AppleTVUseCases(self.fake_atv)
-        return self.fake_atv
-
-    def get_connected_device(self, identifier):
-        details = AppleTV('127.0.0.1', 'Apple TV')
-        details.add_service(DmapService(identifier, port=self.server.port))
-        details.add_service(AirPlayService(self.server.port))
-        return connect_to_apple_tv(details, self.loop)
-
-    # This is not a pretty test and it does crazy things. Should probably be
-    # re-written later but will do for now.
-    @unittest_run_loop
-    def test_pairing_with_device(self):
-        zeroconf = zeroconf_stub.stub(pairing)
-        self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
-
-        yield from self.atv.pairing.start(
-            zeroconf=zeroconf, pin=PIN_CODE, name=REMOTE_NAME)
-        yield from self.atv.pairing.set(
-            'pairing_guid', pairing.DEFAULT_PAIRING_GUID)
-        yield from self.usecase.act_on_bonjour_services(zeroconf)
-
-        self.assertTrue(self.atv.pairing.has_paired,
-                        msg='did not pair with device')
-
-        yield from self.atv.pairing.stop()
+        raise NotImplementedError()
 
     @unittest_run_loop
-    def test_device_authentication(self):
+    def test_airplay_device_authentication(self):
         # Credentials used for device authentication
         yield from self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
 
@@ -122,50 +69,6 @@ class FunctionalTest(AioHTTPTestCase):
             AIRPLAY_STREAM, port=self.server.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
-
-    @unittest_run_loop
-    def test_login_failed(self):
-        # Twice since the client will retry one time
-        self.usecase.make_login_fail()
-        self.usecase.make_login_fail()
-
-        with self.assertRaises(exceptions.AuthenticationError):
-            yield from self.atv.login()
-
-    # This test verifies issue #2 (automatic re-login). It uses the artwork
-    # API, but it could have been any API since the login code is the same.
-    @unittest_run_loop
-    def test_relogin_if_session_expired(self):
-        yield from self.atv.login()
-
-        # Here, we are logged in and currently have a asession id. These
-        # usescases will result in being logged out (HTTP 403) and forcing a
-        # re-login with a new session id (1234)
-        self.usecase.force_relogin(1234)
-        self.usecase.artwork_no_permission()
-        self.usecase.change_artwork(EXPECTED_ARTWORK)
-
-        artwork = yield from self.atv.metadata.artwork()
-        self.assertEqual(artwork, EXPECTED_ARTWORK)
-
-    @unittest_run_loop
-    def test_login_with_hsgid_succeed(self):
-        session_id = yield from self.atv.login()
-        self.assertEqual(SESSION_ID, session_id)
-
-    @unittest_run_loop
-    def test_login_with_pairing_guid_succeed(self):
-        yield from self.atv.logout()
-        self.atv = self.get_connected_device(PAIRING_GUID)
-        session_id = yield from self.atv.login()
-        self.assertEqual(SESSION_ID, session_id)
-
-    # When moving around using the arrow keys, a sequence of seven
-    # different requests are sent to the device. To simplify the
-    # test, verify that seven commands were sent and that the last
-    # command matches the expected arrow key. This does not guarantee
-    # that the earlier six commands were correct, but it's good
-    # enough to keep the tests clean.
 
     @unittest_run_loop
     def test_button_up(self):
