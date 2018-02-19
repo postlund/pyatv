@@ -85,7 +85,7 @@ class MrpProtocol(object):
         self.add_listener(_wait_for_updates,
                           protobuf.SET_STATE_MESSAGE,
                           data=semaphore,
-                          one_shot=False)
+                          one_shot=True)
 
         # Subscribe to updates at this stage
         yield from self.send(messages.client_updates_config())
@@ -108,6 +108,7 @@ class MrpProtocol(object):
 
         self._initial_message_sent = False
         self._outstanding = {}
+        self._one_shots = {}
         self.connection.close()
 
     @asyncio.coroutine
@@ -177,13 +178,9 @@ class MrpProtocol(object):
         """Message was received from device."""
         _LOGGER.debug('Received message: %s', message)
 
-        if message.identifier:
-            identifier = message.identifier
-        else:
-            identifier = 'type_' + str(message.type)
-
         # If the message identifer is outstanding, then someone is
         # waiting for the respone so we save it here
+        identifier = message.identifier or 'type_' + str(message.type)
         if identifier in self._outstanding:
             outstanding = OutstandingMessage(
                 self._outstanding[identifier].semaphore, message)
@@ -191,7 +188,7 @@ class MrpProtocol(object):
             self._outstanding[identifier].semaphore.release()
         else:
             try:
-                self.loop.call_soon(self._dispatch, message)
+                asyncio.ensure_future(self._dispatch(message), loop=self.loop)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception('failed to dispatch')
 
@@ -199,13 +196,16 @@ class MrpProtocol(object):
     @asyncio.coroutine
     def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
-            _LOGGER.debug('Dispatching message with type %d (%s)',
-                          message.type, type(message.inner()).__name__)
+            _LOGGER.debug('Dispatching message with type %d (%s) to %s',
+                          message.type,
+                          type(message.inner()).__name__,
+                          listener)
             yield from listener.func(message, listener.data)
 
         if message.type in self._one_shots:
             for one_shot in self._one_shots.get(message.type,):
-                _LOGGER.debug('One-shot with message type %d', message.type)
+                _LOGGER.debug('One-shot with message type %d to %s',
+                              message.type, listener)
                 yield from one_shot.func(message, one_shot.data)
 
             del self._one_shots[message.type]
