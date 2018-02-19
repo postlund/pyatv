@@ -1,9 +1,8 @@
-"""AirPlay device authentication tests with fake Apple TV."""
+"""AirPlay device authentication tests with fake device."""
 
 import asyncio
 import binascii
 
-from tests.log_output_handler import LogOutputHandler
 from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
@@ -11,28 +10,26 @@ from pyatv.airplay import srp
 from pyatv.airplay.auth import (DeviceAuthenticator, AuthenticationVerifier)
 from pyatv.exceptions import DeviceAuthenticationError
 from pyatv.net import HttpSession
-from tests.fake_daap_atv import (
-    FakeDaapAppleTV, DEVICE_IDENTIFIER, DEVICE_AUTH_KEY, DEVICE_PIN)
+from tests.airplay.fake_airplay_device import (
+    FakeAirPlayDevice, DEVICE_IDENTIFIER, DEVICE_AUTH_KEY, DEVICE_PIN)
 
 
 INVALID_AUTH_KEY = binascii.unhexlify('0'*64)
 
 
-class AirPlayPlayerTest(AioHTTPTestCase):
+class AirPlayAuthTest(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
-        self.log_handler = LogOutputHandler(self)
         self.session = ClientSession(loop=self.loop)
 
     def tearDown(self):
         self.session.close()
-        self.log_handler.tearDown()
         AioHTTPTestCase.tearDown(self)
 
     @asyncio.coroutine
     def get_application(self, loop=None):
-        self.fake_atv = FakeDaapAppleTV(self.loop, 0, 0, 0, self)
+        self.fake_atv = FakeAirPlayDevice(self.loop, self)
         return self.fake_atv
 
     @unittest_run_loop
