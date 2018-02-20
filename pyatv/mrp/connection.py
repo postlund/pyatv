@@ -76,16 +76,23 @@ class MrpConnection(asyncio.Protocol):
         self._buffer += data
         log_binary(_LOGGER, '<< Receive', Data=data)
 
-        # The variant tells us how much data must follow
-        length, raw = read_variant(self._buffer)
-        if len(raw) < length:
-            _LOGGER.debug(
-                'Require %d bytes but only %d in buffer', length, len(raw))
-            return
+        while self._buffer:
+            # The variant tells us how much data must follow
+            length, raw = read_variant(self._buffer)
+            if len(raw) < length:
+                _LOGGER.debug(
+                    'Require %d bytes but only %d in buffer', length, len(raw))
+                break
 
-        data = raw[:length]  # Incoming message (might be encrypted)
-        self._buffer = raw[length:]  # Buffer, might contain more messages
+            data = raw[:length]  # Incoming message (might be encrypted)
+            self._buffer = raw[length:]  # Buffer, might contain more messages
 
+            try:
+                self._handle_message(data)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.error('Failed to handle message')
+
+    def _handle_message(self, data):
         if self._chacha:
             data = self._chacha.decrypt(data)
             log_binary(_LOGGER, '<< Receive', Decrypted=data)
@@ -93,4 +100,5 @@ class MrpConnection(asyncio.Protocol):
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(data)
         _LOGGER.debug('<< Receive: Protobuf=%s', parsed)
-        self.listener.message_received(parsed)
+        if self.listener:
+            self.listener.message_received(parsed)
