@@ -28,7 +28,7 @@ class LogTest(unittest.TestCase):
 
     def test_log_multiple_args_if_enabled(self):
         log.log_binary(self.mock_logger, 'k', test=b'\x01\x02', dummy=b'\xfe')
-        self.assertEqual(self._debug_string(), 'k (test=0102, dummy=fe)')
+        self.assertEqual(self._debug_string(), 'k (dummy=fe, test=0102)')
 
     # This method generates the formatted debug string
     def _debug_string(self):
