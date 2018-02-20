@@ -205,7 +205,7 @@ class MrpProtocol(object):
         if message.type in self._one_shots:
             for one_shot in self._one_shots.get(message.type,):
                 _LOGGER.debug('One-shot with message type %d to %s',
-                              message.type, listener)
+                              message.type, one_shot)
                 yield from one_shot.func(message, one_shot.data)
 
             del self._one_shots[message.type]
