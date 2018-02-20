@@ -53,11 +53,11 @@ class PlayingResponse:
 
 
 class FakeAppleTV(FakeAirPlayDevice):
-    """Implementation of fake Apple TV."""
+    """Implementation of a fake DMAP Apple TV."""
 
-    def __init__(self, loop, hsgid, pairing_guid, session_id, testcase):
+    def __init__(self, hsgid, pairing_guid, session_id, testcase):
         """Initialize a new FakeAppleTV."""
-        super().__init__(loop, testcase)
+        super().__init__(testcase)
 
         self.responses['login'] = [LoginResponse(session_id, 200)]
         self.responses['artwork'] = []
@@ -111,19 +111,21 @@ class FakeAppleTV(FakeAirPlayDevice):
         self.buttons_press_count += 1
         return web.Response(status=200)
 
-    @staticmethod
-    def _convert_button(data):
+    def _convert_button(self, data):
         value = parser.first(data, 'cmbe')
-        if value == 'touchUp&time=6&point=20,250':
-            return 'up'
-        elif value == 'touchUp&time=6&point=20,275':
-            return 'down'
-        elif value == 'touchUp&time=7&point=50,100':
-            return 'left'
-        elif value == 'touchUp&time=7&point=75,100':
-            return 'right'
-        else:
-            return value
+
+        # Consider navigation buttons if six commands have been received
+        if self.buttons_press_count == 6:
+            if value == 'touchUp&time=6&point=20,250':
+                return 'up'
+            elif value == 'touchUp&time=6&point=20,275':
+                return 'down'
+            elif value == 'touchUp&time=7&point=50,100':
+                return 'left'
+            elif value == 'touchUp&time=7&point=75,100':
+                return 'right'
+
+        return value
 
     async def handle_artwork(self, request):
         """Handle artwork requests."""
@@ -340,15 +342,6 @@ class AppleTVUseCases(AirPlayUseCases):
         """Call this method to put device in a loading state."""
         self.device.responses['playing'].insert(0, PlayingResponse(
             playstatus=1))
-
-    def set_property(self, prop, value):
-        """Change value of a property."""
-        # Use "fictional" properties to not tie them to DAP (if some other
-        # protocol is to be supported in the future)
-        if prop == 'shuffle':
-            self.device.properties['dacp.shufflestate'] = value
-        elif prop == 'repeat':
-            self.device.properties['dacp.repeatstate'] = value
 
     def pairing_response(self, remote_name, expected_pairing_code):
         """Reponse when a pairing request is made."""
