@@ -30,12 +30,9 @@ def device_information(name, identifier):
     return message
 
 
-def set_connection_state():
-    """Create a new SET_CONNECTION_STATE_MESSAGE."""
-    message = create(protobuf.SET_CONNECTION_STATE_MESSAGE)
-    connection = message.inner()
-    connection.state = protobuf.SetConnectionStateMessage.Connected
-    return message
+def set_ready_state():
+    """Create a new SET_READY_STATE_MESSAGE."""
+    return create(protobuf.ProtocolMessage.SET_READY_STATE_MESSAGE)
 
 
 def crypto_pairing(pairing_data):
