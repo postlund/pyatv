@@ -2,7 +2,6 @@
 
 import logging
 import asyncio
-import datetime
 
 from pyatv import (const, exceptions)
 from pyatv.mrp import (messages, protobuf)
@@ -167,25 +166,20 @@ class MrpPlaying(Playing):
     @property
     def total_time(self):
         """Total play time in seconds."""
-        return int(self._setstate.nowPlayingInfo.duration) or None
+        now_playing = self._setstate.nowPlayingInfo
+        if now_playing.HasField('duration'):
+            return int(now_playing.duration)
+
+        return None
 
     @property
     def position(self):
         """Position in the playing media (seconds)."""
-        # TODO: ugly PoC for now and probably not 100% correct
-        timestamp = int(self._setstate.nowPlayingInfo.timestamp)
-        if timestamp == 0:
-            return 0
+        now_playing = self._setstate.nowPlayingInfo
+        if now_playing.HasField('elapsedTime'):
+            return int(now_playing.elapsedTime)
 
-        now_utc = datetime.datetime.utcnow()
-        timeshift = datetime.datetime(2001, 1, 1, 0, 0) + \
-            datetime.timedelta(seconds=timestamp)
-        diff = (now_utc - timeshift).total_seconds()
-        base = self._setstate.nowPlayingInfo.elapsedTime
-        extra = 0
-        if int(self._setstate.nowPlayingInfo.playbackRate) == 0:
-            extra = diff
-        return int(base + extra)
+        return None
 
     @property
     def shuffle(self):
@@ -206,13 +200,19 @@ class MrpMetadata(Metadata):
         self.protocol = protocol
         self.protocol.add_listener(
             self._handle_set_state, protobuf.SET_STATE_MESSAGE)
+        self.protocol.add_listener(
+            self._handle_transaction, protobuf.TRANSACTION_MESSAGE)
         self._setstate = None
-        self._metadata = None  # TODO: data from TRANSACTION_MESSAGE
+        self._nowplaying = None
 
     @asyncio.coroutine
     def _handle_set_state(self, message, _):
-        if message.type == protobuf.SET_STATE_MESSAGE:
-            self._setstate = message.inner()
+        self._setstate = message.inner()
+
+    @asyncio.coroutine
+    def _handle_transaction(self, message, _):
+        packet = message.inner().packets[0].packet
+        self._nowplaying = packet.contentItem.metadata.nowPlayingInfo
 
     @property
     def device_id(self):
@@ -240,7 +240,7 @@ class MrpMetadata(Metadata):
         if self._setstate is None:
             return MrpPlaying(protobuf.SetStateMessage(), None)
 
-        return MrpPlaying(self._setstate, self._metadata)
+        return MrpPlaying(self._setstate, self._nowplaying)
 
 
 class MrpPushUpdater(PushUpdater):

@@ -73,7 +73,7 @@ class MrpProtocol(object):
 
         # This should be the first message sent after encryption has
         # been enabled
-        yield from self.send(messages.set_connection_state())
+        yield from self.send(messages.set_ready_state())
 
         @asyncio.coroutine
         def _wait_for_updates(_, semaphore):
@@ -176,8 +176,6 @@ class MrpProtocol(object):
 
     def message_received(self, message):
         """Message was received from device."""
-        _LOGGER.debug('Received message: %s', message)
-
         # If the message identifer is outstanding, then someone is
         # waiting for the respone so we save it here
         identifier = message.identifier or 'type_' + str(message.type)
@@ -188,7 +186,13 @@ class MrpProtocol(object):
             self._outstanding[identifier].semaphore.release()
         else:
             try:
-                asyncio.ensure_future(self._dispatch(message), loop=self.loop)
+                # TODO: workaround until python 3.4 is droppes
+                if not hasattr(asyncio, 'ensure_future'):
+                    run_async = asyncio.async  # pylint: disable=no-member
+                else:
+                    run_async = getattr(asyncio, 'ensure_future')
+
+                run_async(self._dispatch(message), loop=self.loop)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception('failed to dispatch')
 
