@@ -46,15 +46,15 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(
-            self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
+            HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
         return self.fake_atv
 
     def get_connected_device(self, identifier):
-        details = AppleTV('127.0.0.1', 'Apple TV')
-        details.add_service(DmapService(identifier, port=self.server.port))
-        details.add_service(AirPlayService(self.server.port))
-        return connect_to_apple_tv(details, self.loop)
+        conf = AppleTV('127.0.0.1', 'Apple TV')
+        conf.add_service(DmapService(identifier, port=self.server.port))
+        conf.add_service(AirPlayService(self.server.port))
+        return connect_to_apple_tv(conf, self.loop)
 
     # This is not a pretty test and it does crazy things. Should probably be
     # re-written later but will do for now.
