@@ -26,18 +26,18 @@ AIRPLAY_SERVICE_1 = zeroconf_stub.airplay_service(
 
 class FunctionalTest(asynctest.TestCase):
 
-    def test_scan_no_device_found(self):
+    async def test_scan_no_device_found(self):
         zeroconf_stub.stub(pyatv)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
+        atvs = await pyatv.scan_for_apple_tvs(self.loop, timeout=0)
         self.assertEqual(len(atvs), 0)
 
-    def test_scan_for_apple_tvs(self):
+    async def test_scan_for_apple_tvs(self):
         zeroconf_stub.stub(
             pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2,
             MRP_SERVICE_1, AIRPLAY_SERVICE_1)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
+        atvs = await pyatv.scan_for_apple_tvs(self.loop, timeout=0)
         self.assertEqual(len(atvs), 3)
 
         # First device
@@ -52,18 +52,18 @@ class FunctionalTest(asynctest.TestCase):
         dev3 = AppleTV(ipaddress.ip_address('10.0.0.4'), 'Apple TV 4')
         self.assertIn(dev3, atvs)
 
-    def test_scan_abort_on_first_found(self):
+    async def test_scan_abort_on_first_found(self):
         zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, abort_on_found=True)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 1')
 
-    def test_scan_all_devices(self):
+    async def test_scan_all_devices(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, only_usable=False)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 3')
@@ -75,10 +75,10 @@ class FunctionalTest(asynctest.TestCase):
         service = services[0]
         self.assertEqual(service.port, 3689)
 
-    def test_scan_home_sharing_overrules(self):
+    async def test_scan_home_sharing_overrules(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(self.loop, timeout=0)
+        atvs = await pyatv.scan_for_apple_tvs(self.loop, timeout=0)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 3')
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.3'))
@@ -87,10 +87,10 @@ class FunctionalTest(asynctest.TestCase):
         self.assertEqual(service.device_credentials, 'cccc')
         self.assertEqual(service.port, 3689)
 
-    def test_scan_mrp(self):
+    async def test_scan_mrp(self):
         zeroconf_stub.stub(pyatv, MRP_SERVICE_1, MRP_SERVICE_2)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, only_usable=False, timeout=0)
         self.assertEqual(len(atvs), 2)
 
@@ -100,10 +100,10 @@ class FunctionalTest(asynctest.TestCase):
         dev2 = AppleTV(ipaddress.ip_address('10.0.0.5'), 'Apple TV 5')
         self.assertIn(dev2, atvs)
 
-    def test_scan_airplay_device(self):
+    async def test_scan_airplay_device(self):
         zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, only_usable=False)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 6')
@@ -115,10 +115,10 @@ class FunctionalTest(asynctest.TestCase):
         service = services[0]
         self.assertEqual(service.port, 7000)
 
-    def test_scan_for_particular_device(self):
+    async def test_scan_for_particular_device(self):
         zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
 
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, only_usable=False, device_ip='10.0.0.2')
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 2')

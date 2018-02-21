@@ -43,8 +43,7 @@ class MrpConnection(asyncio.Protocol):
         """If a connection is open or not."""
         return self._transport is not None
 
-    @asyncio.coroutine
-    def connect(self):
+    async def connect(self):
         """Connect to device."""
         return self.loop.create_connection(lambda: self, self.host, self.port)
 

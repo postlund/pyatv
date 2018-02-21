@@ -28,8 +28,7 @@ class BaseDmapAppleTV:
         self.daap = requester
         self.playstatus_revision = 0
 
-    @asyncio.coroutine
-    def playstatus(self, use_revision=False, timeout=None):
+    async def playstatus(self, use_revision=False, timeout=None):
         """Request raw data about what is currently playing.
 
         If use_revision=True, this command will "block" until playstatus
@@ -39,7 +38,7 @@ class BaseDmapAppleTV:
         """
         cmd_url = _PSU_CMD.format(
             self.playstatus_revision if use_revision else 0)
-        resp = yield from self.daap.get(cmd_url, timeout=timeout)
+        resp = await self.daap.get(cmd_url, timeout=timeout)
         self.playstatus_revision = parser.first(resp, 'cmst', 'cmsr')
         return resp
 
@@ -51,13 +50,12 @@ class BaseDmapAppleTV:
         """
         return self.daap.get_url(_ARTWORK_CMD)
 
-    @asyncio.coroutine
-    def artwork(self):
+    async def artwork(self):
         """Return an image file (png) for what is currently playing.
 
         None is returned if no artwork is available. Must be logged in.
         """
-        art = yield from self.daap.get(_ARTWORK_CMD, daap_data=False)
+        art = await self.daap.get(_ARTWORK_CMD, daap_data=False)
         return art if art != b'' else None
 
     def playqueue(self):
@@ -93,10 +91,9 @@ class DmapRemoteControl(RemoteControl):
         super().__init__()
         self.apple_tv = apple_tv
 
-    @asyncio.coroutine
-    def up(self):
+    async def up(self):
         """Press key up."""
-        yield from self._send_commands(
+        await self._send_commands(
             self._move('Down', 0, 20, 275),
             self._move('Move', 1, 20, 270),
             self._move('Move', 2, 20, 265),
@@ -105,10 +102,9 @@ class DmapRemoteControl(RemoteControl):
             self._move('Move', 5, 20, 250),
             self._move('Up', 6, 20, 250))
 
-    @asyncio.coroutine
-    def down(self):
+    async def down(self):
         """Press key down."""
-        yield from self._send_commands(
+        await self._send_commands(
             self._move('Down', 0, 20, 250),
             self._move('Move', 1, 20, 255),
             self._move('Move', 2, 20, 260),
@@ -117,10 +113,9 @@ class DmapRemoteControl(RemoteControl):
             self._move('Move', 5, 20, 275),
             self._move('Up', 6, 20, 275))
 
-    @asyncio.coroutine
-    def left(self):
+    async def left(self):
         """Press key left."""
-        yield from self._send_commands(
+        await self._send_commands(
             self._move('Down', 0, 75, 100),
             self._move('Move', 1, 70, 100),
             self._move('Move', 3, 65, 100),
@@ -129,10 +124,9 @@ class DmapRemoteControl(RemoteControl):
             self._move('Move', 6, 50, 100),
             self._move('Up', 7, 50, 100))
 
-    @asyncio.coroutine
-    def right(self):
+    async def right(self):
         """Press key right."""
-        yield from self._send_commands(
+        await self._send_commands(
             self._move('Down', 0, 50, 100),
             self._move('Move', 1, 55, 100),
             self._move('Move', 3, 60, 100),
@@ -147,10 +141,9 @@ class DmapRemoteControl(RemoteControl):
             direction, time, point1, point2)
         return tags.uint8_tag('cmcc', 0x30) + tags.string_tag('cmbe', data)
 
-    @asyncio.coroutine
-    def _send_commands(self, *cmds):
+    async def _send_commands(self, *cmds):
         for cmd in cmds:
-            yield from self.apple_tv.controlprompt_data(cmd)
+            await self.apple_tv.controlprompt_data(cmd)
 
     def play(self):
         """Press key play."""
@@ -297,15 +290,13 @@ class DmapMetadata(Metadata):
         """Return artwork for what is currently playing (or None)."""
         return self.apple_tv.artwork()
 
-    @asyncio.coroutine
-    def artwork_url(self):
+    async def artwork_url(self):
         """Return artwork URL for what is currently playing."""
         return self.apple_tv.artwork_url()
 
-    @asyncio.coroutine
-    def playing(self):
+    async def playing(self):
         """Return current device state."""
-        playstatus = yield from self.apple_tv.playstatus()
+        playstatus = await self.apple_tv.playstatus()
         return DmapPlaying(playstatus)
 
 
@@ -329,12 +320,6 @@ class DmapPushUpdater(PushUpdater):
         elif self._future is not None:
             return None
 
-        # If ensure_future, use that instead of async
-        if hasattr(asyncio, 'ensure_future'):
-            run_async = getattr(asyncio, 'ensure_future')
-        else:
-            run_async = asyncio.async  # pylint: disable=no-member
-
         # Always start with 0 to trigger an immediate response for the
         # first request
         self._atv.playstatus_revision = 0
@@ -342,8 +327,8 @@ class DmapPushUpdater(PushUpdater):
         # This for some reason fails on travis but not in other places.
         # Why is that (same python version)?
         # pylint: disable=deprecated-method
-        self._future = run_async(self._poller(initial_delay),
-                                 loop=self._loop)
+        self._future = asyncio.ensure_future(
+            self._poller(initial_delay), loop=self._loop)
         return self._future
 
     def stop(self):
@@ -353,17 +338,16 @@ class DmapPushUpdater(PushUpdater):
             self._future.cancel()  # pylint: disable=no-member
             self._future = None
 
-    @asyncio.coroutine
-    def _poller(self, initial_delay):
+    async def _poller(self, initial_delay):
         # Sleep some time before waiting for updates
         if initial_delay > 0:
             _LOGGER.debug('Initial delay set to %d', initial_delay)
-            yield from asyncio.sleep(initial_delay, loop=self._loop)
+            await asyncio.sleep(initial_delay, loop=self._loop)
 
         while True:
             try:
                 _LOGGER.debug('Waiting for playstatus updates')
-                playstatus = yield from self._atv.playstatus(
+                playstatus = await self._atv.playstatus(
                     use_revision=True, timeout=0)
 
                 self._loop.call_soon(self.listener.playstatus_update,
@@ -412,13 +396,12 @@ class DmapAppleTV(AppleTV):
         """
         return self._requester.login()
 
-    @asyncio.coroutine
-    def logout(self):
+    async def logout(self):
         """Perform an explicit logout.
 
         Must be done when session is no longer needed to not leak resources.
         """
-        self._session.close()
+        await self._session.close()
 
     @property
     def service(self):

@@ -1,6 +1,5 @@
 """Device pairing and derivation of encryption keys."""
 
-import asyncio
 import logging
 
 from pyatv.log import log_binary
@@ -27,15 +26,14 @@ class MrpPairingProcedure:
         self._atv_salt = None
         self._atv_pub_key = None
 
-    @asyncio.coroutine
-    def start_pairing(self):
+    async def start_pairing(self):
         """Start pairing procedure."""
         self.srp.initialize()
 
         msg = messages.crypto_pairing({
             tlv8.TLV_METHOD: b'\x00',
             tlv8.TLV_SEQ_NO: b'\x01'})
-        resp = yield from self.protocol.send_and_receive(
+        resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
@@ -48,8 +46,7 @@ class MrpPairingProcedure:
         self._atv_salt = pairing_data[tlv8.TLV_SALT]
         self._atv_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
 
-    @asyncio.coroutine
-    def finish_pairing(self, pin):
+    async def finish_pairing(self, pin):
         """Finish pairing process."""
         self.srp.step1(pin)
 
@@ -59,7 +56,7 @@ class MrpPairingProcedure:
             tlv8.TLV_SEQ_NO: b'\x03',
             tlv8.TLV_PUBLIC_KEY: pub_key,
             tlv8.TLV_PROOF: proof})
-        resp = yield from self.protocol.send_and_receive(
+        resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
@@ -70,7 +67,7 @@ class MrpPairingProcedure:
         msg = messages.crypto_pairing({
             tlv8.TLV_SEQ_NO: b'\x05',
             tlv8.TLV_ENCRYPTED_DATA: encrypted_data})
-        resp = yield from self.protocol.send_and_receive(
+        resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
@@ -90,15 +87,14 @@ class MrpPairingVerifier:
         self._output_key = None
         self._input_key = None
 
-    @asyncio.coroutine
-    def verify_credentials(self):
+    async def verify_credentials(self):
         """Verify credentials with device."""
         _, public_key = self.srp.initialize()
 
         msg = messages.crypto_pairing({
             tlv8.TLV_SEQ_NO: b'\x01',
             tlv8.TLV_PUBLIC_KEY: public_key})
-        resp = yield from self.protocol.send_and_receive(
+        resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         resp = _get_pairing_data(resp)
@@ -114,7 +110,7 @@ class MrpPairingVerifier:
         msg = messages.crypto_pairing({
             tlv8.TLV_SEQ_NO: b'\x03',
             tlv8.TLV_ENCRYPTED_DATA: encrypted_data})
-        resp = yield from self.protocol.send_and_receive(
+        resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         # TODO: check status code

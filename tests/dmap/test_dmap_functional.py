@@ -1,6 +1,5 @@
 """Functional tests using the API with a fake DMAP Apple TV."""
 
-import asyncio
 import ipaddress
 
 from aiohttp.test_utils import unittest_run_loop
@@ -45,8 +44,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.loop.run_until_complete(self.atv.logout())
         super().tearDown()
 
-    @asyncio.coroutine
-    def get_application(self, loop=None):
+    async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(
             self.loop, HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
@@ -61,35 +59,35 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     # This is not a pretty test and it does crazy things. Should probably be
     # re-written later but will do for now.
     @unittest_run_loop
-    def test_pairing_with_device(self):
+    async def test_pairing_with_device(self):
         zeroconf = zeroconf_stub.stub(pairing)
         self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
 
-        yield from self.atv.pairing.start(
+        await self.atv.pairing.start(
             zeroconf=zeroconf, pin=PIN_CODE, name=REMOTE_NAME)
-        yield from self.atv.pairing.set(
+        await self.atv.pairing.set(
             'pairing_guid', pairing.DEFAULT_PAIRING_GUID)
-        yield from self.usecase.act_on_bonjour_services(zeroconf)
+        await self.usecase.act_on_bonjour_services(zeroconf)
 
         self.assertTrue(self.atv.pairing.has_paired,
                         msg='did not pair with device')
 
-        yield from self.atv.pairing.stop()
+        await self.atv.pairing.stop()
 
     @unittest_run_loop
-    def test_login_failed(self):
+    async def test_login_failed(self):
         # Twice since the client will retry one time
         self.usecase.make_login_fail()
         self.usecase.make_login_fail()
 
         with self.assertRaises(exceptions.AuthenticationError):
-            yield from self.atv.login()
+            await self.atv.login()
 
     # This test verifies issue #2 (automatic re-login). It uses the artwork
     # API, but it could have been any API since the login code is the same.
     @unittest_run_loop
-    def test_relogin_if_session_expired(self):
-        yield from self.atv.login()
+    async def test_relogin_if_session_expired(self):
+        await self.atv.login()
 
         # Here, we are logged in and currently have a asession id. These
         # usescases will result in being logged out (HTTP 403) and forcing a
@@ -98,17 +96,17 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.artwork_no_permission()
         self.usecase.change_artwork(EXPECTED_ARTWORK)
 
-        artwork = yield from self.atv.metadata.artwork()
+        artwork = await self.atv.metadata.artwork()
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop
-    def test_login_with_hsgid_succeed(self):
-        session_id = yield from self.atv.login()
+    async def test_login_with_hsgid_succeed(self):
+        session_id = await self.atv.login()
         self.assertEqual(SESSION_ID, session_id)
 
     @unittest_run_loop
-    def test_login_with_pairing_guid_succeed(self):
-        yield from self.atv.logout()
+    async def test_login_with_pairing_guid_succeed(self):
+        await self.atv.logout()
         self.atv = self.get_connected_device(PAIRING_GUID)
-        session_id = yield from self.atv.login()
+        session_id = await self.atv.login()
         self.assertEqual(SESSION_ID, session_id)

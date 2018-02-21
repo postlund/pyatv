@@ -1,7 +1,6 @@
 """Module used for pairing pyatv with a device."""
 
 import socket
-import asyncio
 import hashlib
 import logging
 import random
@@ -64,14 +63,13 @@ class DmapPairingHandler(PairingHandler):
         """
         return self._has_paired
 
-    @asyncio.coroutine
-    def start(self, **kwargs):
+    async def start(self, **kwargs):
         """Start the pairing server and publish service."""
         zeroconf = kwargs['zeroconf']
         self._name = kwargs['name']
         self.pin_code = kwargs['pin']
         self._web_server = web.Server(self.handle_request, loop=self._loop)
-        self._server = yield from self._loop.create_server(
+        self._server = await self._loop.create_server(
             self._web_server, '0.0.0.0')
 
         # Get the allocated (random port) and include it in zeroconf service
@@ -80,20 +78,18 @@ class DmapPairingHandler(PairingHandler):
 
         self._setup_zeroconf(zeroconf, allocated_port)
 
-    @asyncio.coroutine
-    def stop(self, **kwargs):
+    async def stop(self, **kwargs):
         """Stop pairing server and unpublish service."""
         _LOGGER.debug('Shutting down pairing server')
         self._has_paired = False
         if self._web_server is not None:
-            yield from self._web_server.shutdown()
+            await self._web_server.shutdown()
             self._server.close()
 
         if self._server is not None:
-            yield from self._server.wait_closed()
+            await self._server.wait_closed()
 
-    @asyncio.coroutine
-    def set(self, key, value, **kwargs):
+    async def set(self, key, value, **kwargs):
         """Set a process specific value.
 
         The value is specific to the device being paired with and can for
@@ -102,8 +98,7 @@ class DmapPairingHandler(PairingHandler):
         if key == 'pairing_guid':
             self.pairing_guid = value or self._generate_random_guid()
 
-    @asyncio.coroutine
-    def get(self, key):
+    async def get(self, key):
         """Retrieve a process specific value."""
         if key == 'credentials':
             return self.pairing_guid
@@ -132,8 +127,7 @@ class DmapPairingHandler(PairingHandler):
         for ipaddr in _get_private_ip_addresses():
             self._publish_service(zeroconf, ipaddr, port)
 
-    @asyncio.coroutine
-    def handle_request(self, request):
+    async def handle_request(self, request):
         """Respond to request if PIN is correct."""
         service_name = request.rel_url.query['servicename']
         received_code = request.rel_url.query['pairingcode'].lower()

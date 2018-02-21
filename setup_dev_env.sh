@@ -2,7 +2,7 @@
 
 set -e
 
-PYTHON="python3.5 python3.4"
+PYTHON="python3.6 python3.5"
 
 found_version=
 for p in $PYTHON

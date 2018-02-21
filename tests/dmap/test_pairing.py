@@ -1,6 +1,5 @@
 """Test suit for pairing process with Apple TV."""
 
-import asyncio
 import asynctest
 import ipaddress
 
@@ -26,8 +25,7 @@ RANDOM_PAIRING_GUID = '5B03A9CF4A983143'
 
 class PairingTest(asynctest.TestCase):
 
-    @asyncio.coroutine
-    def setUp(self):
+    async def setUp(self):
         self.zeroconf = zeroconf_stub.stub(pairing)
         self.pairing = pairing.DmapPairingHandler(self.loop)
 
@@ -36,19 +34,17 @@ class PairingTest(asynctest.TestCase):
         pairing._get_private_ip_addresses = \
             lambda: [ipaddress.ip_address('10.0.0.1')]
 
-    @asyncio.coroutine
-    def tearDown(self):
-        yield from self.pairing.stop()
+    async def tearDown(self):
+        await self.pairing.stop()
 
-    @asyncio.coroutine
-    def _start(self, pin_code=PIN_CODE,
-               pairing_guid=pairing.DEFAULT_PAIRING_GUID):
-        yield from self.pairing.start(
+    async def _start(self, pin_code=PIN_CODE,
+                     pairing_guid=pairing.DEFAULT_PAIRING_GUID):
+        await self.pairing.start(
             zeroconf=self.zeroconf, name=REMOTE_NAME, pin=pin_code)
-        yield from self.pairing.set('pairing_guid', pairing_guid)
+        await self.pairing.set('pairing_guid', pairing_guid)
 
-    def test_zeroconf_service_published(self):
-        yield from self._start()
+    async def test_zeroconf_service_published(self):
+        await self._start()
 
         self.assertEqual(len(self.zeroconf.registered_services), 1,
                          msg='no zeroconf service registered')
@@ -57,20 +53,20 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(service.properties[b'DvNm'], REMOTE_NAME,
                          msg='remote name does not match')
 
-    def test_random_pairing_guid_generated(self):
+    async def test_random_pairing_guid_generated(self):
         pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
         handler = pairing.DmapPairingHandler(self.loop)
-        yield from handler.set('pairing_guid', None)
+        await handler.set('pairing_guid', None)
 
-        pairing_guid = yield from handler.get('credentials')
+        pairing_guid = await handler.get('credentials')
         self.assertEqual(pairing_guid, RANDOM_PAIRING_GUID)
 
-    def test_succesful_pairing(self):
-        yield from self._start()
+    async def test_succesful_pairing(self):
+        await self._start()
 
         url = self._pairing_url(PAIRING_CODE)
-        data, _ = yield from utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
@@ -78,22 +74,22 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
-    def test_pair_custom_pairing_guid(self):
-        yield from self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
+    async def test_pair_custom_pairing_guid(self):
+        await self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
 
         url = self._pairing_url(PAIRING_CODE2)
-        data, _ = yield from utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'),
                          int(PAIRING_GUID2, 16))
 
-    def test_failed_pairing(self):
-        yield from self._start()
+    async def test_failed_pairing(self):
+        await self._start()
 
         url = self._pairing_url('wrong')
-        _, status = yield from utils.simple_get(url, self.loop)
+        _, status = await utils.simple_get(url, self.loop)
 
         self.assertEqual(status, 500)
 

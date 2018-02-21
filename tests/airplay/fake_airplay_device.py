@@ -1,6 +1,5 @@
 """A fake AirPlay device."""
 
-import asyncio
 import plistlib
 import binascii
 from collections import namedtuple
@@ -70,8 +69,7 @@ class FakeAirPlayDevice(web.Application):
             return responses.pop()
         return responses[len(responses)-1]
 
-    @asyncio.coroutine
-    def handle_airplay_play(self, request):
+    async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
         if not self.has_authenticated:
             return web.Response(status=503)
@@ -83,7 +81,7 @@ class FakeAirPlayDevice(web.Application):
         self.tc.assertEqual(
             headers['Content-Type'], 'application/x-apple-binary-plist')
 
-        body = yield from request.read()
+        body = await request.read()
         parsed = plistlib.loads(body)
 
         self.last_airplay_url = parsed['Content-Location']
@@ -100,13 +98,13 @@ class FakeAirPlayDevice(web.Application):
     # general. This is a dumb implementation that verifies hard coded values,
     # which is fine for regression but an implementation with better validation
     # would be better.
-    def handle_pair_pin_start(self, request):
+    async def handle_pair_pin_start(self, request):
         """Handle start of AirPlay device authentication."""
         return web.Response(status=200)  # Normally never fails
 
-    def handle_pair_setup_pin(self, request):
+    async def handle_pair_setup_pin(self, request):
         """Handle AirPlay device authentication requests."""
-        content = yield from request.content.read()
+        content = await request.content.read()
         hexlified = binascii.hexlify(content)
 
         if hexlified == _DEVICE_AUTH_STEP1:
@@ -121,9 +119,9 @@ class FakeAirPlayDevice(web.Application):
 
         return web.Response(status=503)
 
-    def handle_airplay_pair_verify(self, request):
+    async def handle_airplay_pair_verify(self, request):
         """Handle verification of AirPlay device authentication."""
-        content = yield from request.content.read()
+        content = await request.content.read()
         hexlified = binascii.hexlify(content)
 
         if hexlified == _DEVICE_VERIFY_STEP1:
