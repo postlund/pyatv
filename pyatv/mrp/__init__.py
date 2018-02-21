@@ -1,7 +1,6 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import logging
-import asyncio
 
 from pyatv import (const, exceptions)
 from pyatv.mrp import (messages, protobuf)
@@ -43,13 +42,12 @@ class MrpRemoteControl(RemoteControl):
         self.loop = loop
         self.protocol = protocol
 
-    @asyncio.coroutine
-    def _press_key(self, key):
+    async def _press_key(self, key):
         lookup = _KEY_LOOKUP.get(key, None)
         if lookup:
-            yield from self.protocol.send(
+            await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], True))
-            yield from self.protocol.send(
+            await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], False))
         else:
             raise Exception('unknown key: ' + key)
@@ -106,13 +104,11 @@ class MrpRemoteControl(RemoteControl):
         """Seek in the current playing media."""
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def set_shuffle(self, is_on):
+    async def set_shuffle(self, is_on):
         """Change shuffle mode to on or off."""
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def set_repeat(self, repeat_mode):
+    async def set_repeat(self, repeat_mode):
         """Change repeat mode."""
         raise exceptions.NotSupportedError
 
@@ -205,12 +201,10 @@ class MrpMetadata(Metadata):
         self._setstate = None
         self._nowplaying = None
 
-    @asyncio.coroutine
-    def _handle_set_state(self, message, _):
+    async def _handle_set_state(self, message, _):
         self._setstate = message.inner()
 
-    @asyncio.coroutine
-    def _handle_transaction(self, message, _):
+    async def _handle_transaction(self, message, _):
         packet = message.inner().packets[0].packet
         self._nowplaying = packet.contentItem.metadata.nowPlayingInfo
 
@@ -219,22 +213,19 @@ class MrpMetadata(Metadata):
         """Return a unique identifier for current device."""
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def artwork(self):
+    async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def artwork_url(self):
+    async def artwork_url(self):
         """Return artwork URL for what is currently playing."""
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def playing(self):
+    async def playing(self):
         """Return what is currently playing."""
         # TODO: This is hack-ish
         if self._setstate is None:
-            yield from self.protocol.start()
+            await self.protocol.start()
 
         # No SET_STATE_MESSAGE received yet, use default
         if self._setstate is None:
@@ -274,10 +265,9 @@ class MrpPushUpdater(PushUpdater):
         """No longer wait for push updates."""
         self._enabled = False
 
-    @asyncio.coroutine
-    def _handle_update(self, *_):
+    async def _handle_update(self, *_):
         if self._enabled:
-            playstatus = yield from self.metadata.playing()
+            playstatus = await self.metadata.playing()
             self.loop.call_soon(
                 self.listener.playstatus_update, self, playstatus)
 
@@ -295,21 +285,18 @@ class MrpPairingHandler(PairingHandler):
         """If a successful pairing has been performed."""
         return self.service.device_credentials is not None
 
-    @asyncio.coroutine
-    def start(self, **kwargs):
+    async def start(self, **kwargs):
         """Start pairing process."""
-        yield from self.pairing_procedure.start_pairing()
+        await self.pairing_procedure.start_pairing()
 
-    @asyncio.coroutine
-    def stop(self, **kwargs):
+    async def stop(self, **kwargs):
         """Stop pairing process."""
         pin = kwargs['pin']
 
         self.service.device_credentials = \
-            yield from self.pairing_procedure.finish_pairing(pin)
+            await self.pairing_procedure.finish_pairing(pin)
 
-    @asyncio.coroutine
-    def set(self, key, value, **kwargs):
+    async def set(self, key, value, **kwargs):
         """Set a process specific value.
 
         The value is specific to the device being paired with and can for
@@ -317,8 +304,7 @@ class MrpPairingHandler(PairingHandler):
         """
         raise exceptions.NotSupportedError
 
-    @asyncio.coroutine
-    def get(self, key):
+    async def get(self, key):
         """Retrieve a process specific value."""
         if key == 'credentials' and self.service.device_credentials:
             return str(self.service.device_credentials)
@@ -352,12 +338,10 @@ class MrpAppleTV(AppleTV):
             self._protocol, self._srp, self._mrp_service)
         self._airplay = airplay
 
-    @asyncio.coroutine
-    def login(self):
+    async def login(self):
         """Perform an explicit login."""
-        yield from self._protocol.start()
+        await self._protocol.start()
 
-    @asyncio.coroutine
     def logout(self):
         """Perform an explicit logout.
 

@@ -2,7 +2,6 @@
 
 import re
 import logging
-import asyncio
 
 from copy import copy
 
@@ -39,8 +38,7 @@ class DaapRequester:
         self._login_id = login_id
         self._session_id = 0
 
-    @asyncio.coroutine
-    def login(self):
+    async def login(self):
         """Login to Apple TV using specified login id."""
         # Do not use session.get_data(...) in login as that would end up in
         # an infinte loop.
@@ -50,14 +48,13 @@ class DaapRequester:
                             session=False, login_id=True),
                 headers=_DMAP_HEADERS)
 
-        resp = yield from self._do(_login_request, is_login=True)
+        resp = await self._do(_login_request, is_login=True)
         self._session_id = parser.first(resp, 'mlog', 'mlid')
 
         _LOGGER.info('Logged in and got session id %s', self._session_id)
         return self._session_id
 
-    @asyncio.coroutine
-    def get(self, cmd, daap_data=True, timeout=None, **args):
+    async def get(self, cmd, daap_data=True, timeout=None, **args):
         """Perform a DAAP GET command."""
         def _get_request():
             return self.http.get_data(
@@ -65,15 +62,14 @@ class DaapRequester:
                 headers=_DMAP_HEADERS,
                 timeout=timeout)
 
-        yield from self._assure_logged_in()
-        return (yield from self._do(_get_request, is_daap=daap_data))
+        await self._assure_logged_in()
+        return await self._do(_get_request, is_daap=daap_data)
 
     def get_url(self, cmd, **args):
         """Expand the request URL for a request."""
         return self.http.base_url + self._mkurl(cmd, *args)
 
-    @asyncio.coroutine
-    def post(self, cmd, data=None, timeout=None, **args):
+    async def post(self, cmd, data=None, timeout=None, **args):
         """Perform DAAP POST command with optional data."""
         def _post_request():
             headers = copy(_DMAP_HEADERS)
@@ -84,12 +80,11 @@ class DaapRequester:
                 headers=headers,
                 timeout=timeout)
 
-        yield from self._assure_logged_in()
-        return (yield from self._do(_post_request))
+        await self._assure_logged_in()
+        return await self._do(_post_request)
 
-    @asyncio.coroutine
-    def _do(self, action, retry=True, is_login=False, is_daap=True):
-        resp, status = yield from action()
+    async def _do(self, action, retry=True, is_login=False, is_daap=True):
+        resp, status = await action()
         if is_daap:
             resp = parser.parse(resp, lookup_tag)
 
@@ -99,11 +94,11 @@ class DaapRequester:
         elif not is_login:
             # If a request fails, try to login again before retrying
             _LOGGER.info('implicitly logged out, logging in again')
-            yield from self.login()
+            await self.login()
 
         # Retry once if we got a bad response, otherwise bail out
         if retry:
-            return (yield from self._do(
+            return (await self._do(
                 action, False, is_login=is_login, is_daap=is_daap))
         else:
             raise exceptions.AuthenticationError(
@@ -121,13 +116,12 @@ class DaapRequester:
             parameters.insert(0, 'session-id={}'.format(self._session_id))
         return url.replace('[AUTH]', '&'.join(parameters))
 
-    @asyncio.coroutine
-    def _assure_logged_in(self):
+    async def _assure_logged_in(self):
         if self._session_id != 0:
             _LOGGER.debug('Already logged in, re-using seasion id %d',
                           self._session_id)
         else:
-            yield from self.login()
+            await self.login()
 
     @staticmethod
     def _log_response(text, data, is_daap):

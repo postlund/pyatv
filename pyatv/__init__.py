@@ -133,9 +133,9 @@ class _ServiceListener(object):
 
 
 # pylint: disable=too-many-arguments
-@asyncio.coroutine
-def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
-                       device_ip=None, only_usable=True, protocol=None):
+async def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
+                             device_ip=None, only_usable=True,
+                             protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     semaphore = asyncio.Semaphore(value=0, loop=loop)
     listener = _ServiceListener(
@@ -147,7 +147,7 @@ def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
         ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, listener)
         ServiceBrowser(zeroconf, AIRPLAY_SERVICE, listener)
         _LOGGER.debug('Discovering devices for %d seconds', timeout)
-        yield from asyncio.wait_for(semaphore.acquire(), timeout, loop=loop)
+        await asyncio.wait_for(semaphore.acquire(), timeout, loop=loop)
     except concurrent.futures.TimeoutError:
         pass  # Will happen when timeout occurs (totally normal)
     finally:

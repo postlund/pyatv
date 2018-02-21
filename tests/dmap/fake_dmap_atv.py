@@ -1,6 +1,5 @@
 """Fake DMAP Apple TV device for tests."""
 
-import asyncio
 from collections import namedtuple
 
 from aiohttp import web
@@ -84,8 +83,7 @@ class FakeAppleTV(FakeAirPlayDevice):
             self.router.add_post('/ctrl-int/1/' + button,
                                  self.handle_playback_button)
 
-    @asyncio.coroutine
-    def handle_login(self, request):
+    async def handle_login(self, request):
         """Handle login requests."""
         self._verify_headers(request)
         self._verify_auth_parameters(
@@ -97,19 +95,17 @@ class FakeAppleTV(FakeAirPlayDevice):
         self.session = data.session
         return web.Response(body=mlog, status=data.status)
 
-    @asyncio.coroutine
-    def handle_playback_button(self, request):
+    async def handle_playback_button(self, request):
         """Handle playback buttons."""
         self._verify_auth_parameters(request)
         self.last_button_pressed = request.rel_url.path.split('/')[-1]
         self.buttons_press_count += 1
         return web.Response(status=200)
 
-    @asyncio.coroutine
-    def handle_remote_button(self, request):
+    async def handle_remote_button(self, request):
         """Handle remote control buttons."""
         self._verify_auth_parameters(request)
-        content = yield from request.content.read()
+        content = await request.content.read()
         parsed = parser.parse(content, tag_definitions.lookup_tag)
         self.last_button_pressed = self._convert_button(parsed)
         self.buttons_press_count += 1
@@ -129,15 +125,13 @@ class FakeAppleTV(FakeAirPlayDevice):
         else:
             return value
 
-    @asyncio.coroutine
-    def handle_artwork(self, request):
+    async def handle_artwork(self, request):
         """Handle artwork requests."""
         self._verify_auth_parameters(request)
         artwork = self._get_response('artwork')
         return web.Response(body=artwork.content, status=artwork.status)
 
-    @asyncio.coroutine
-    def handle_playstatus(self, request):
+    async def handle_playstatus(self, request):
         """Handle  playstatus (currently playing) requests."""
         self._verify_auth_parameters(request)
 
@@ -188,8 +182,7 @@ class FakeAppleTV(FakeAirPlayDevice):
         return web.Response(
             body=tags.container_tag('cmst', body), status=200)
 
-    @asyncio.coroutine
-    def handle_set_property(self, request):
+    async def handle_set_property(self, request):
         """Handle property changes."""
         self._verify_auth_parameters(request)
         if 'dacp.playingtime' in request.rel_url.query:
@@ -206,8 +199,7 @@ class FakeAppleTV(FakeAirPlayDevice):
 
         return web.Response(body=b'', status=200)
 
-    @asyncio.coroutine
-    def trigger_bonjour(self, stubbed_zeroconf):
+    async def trigger_bonjour(self, stubbed_zeroconf):
         """Act upon available Bonjour services."""
         # Add more services here when needed
         for service in stubbed_zeroconf.registered_services:
@@ -218,10 +210,9 @@ class FakeAppleTV(FakeAirPlayDevice):
             remote_name = service.properties[b'DvNm']
             for response in self.responses['pairing']:
                 if response.remote_name == remote_name:
-                    return self.perform_pairing(response, service.port)
+                    return await self.perform_pairing(response, service.port)
 
-    @asyncio.coroutine
-    def perform_pairing(self, pairing_response, port):
+    async def perform_pairing(self, pairing_response, port):
         """Pair with a remote client.
 
         This will perform a GET-request to the specified port and hand over
@@ -231,7 +222,7 @@ class FakeAppleTV(FakeAirPlayDevice):
         server = 'http://127.0.0.1:{}'.format(port)
         url = '{}/pairing?pairingcode={}&servicename=test'.format(
             server, pairing_response.pairing_code)
-        data, _ = yield from utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url, self.loop)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
@@ -364,11 +355,10 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device.responses['pairing'].insert(0, PairingResponse(
             remote_name, expected_pairing_code))
 
-    @asyncio.coroutine
-    def act_on_bonjour_services(self, stubbed_zeroconf):
+    async def act_on_bonjour_services(self, stubbed_zeroconf):
         """Act on available Bonjour services.
 
         This will make the device look at published services and perform
         actions base on these. Most imporant for the pairing process.
         """
-        yield from self.device.trigger_bonjour(stubbed_zeroconf)
+        await self.device.trigger_bonjour(stubbed_zeroconf)

@@ -1,7 +1,6 @@
 """Methods used to make GET/POST requests."""
 
 import logging
-import asyncio
 import binascii
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,18 +17,17 @@ class HttpSession(object):
         self._session = client_session  # aiohttp session
         self.base_url = base_url
 
-    @asyncio.coroutine
-    def get_data(self, path, headers=None, timeout=None):
+    async def get_data(self, path, headers=None, timeout=None):
         """Perform a GET request."""
         url = self.base_url + path
         _LOGGER.debug('GET URL: %s', url)
         resp = None
         try:
-            resp = yield from self._session.get(
+            resp = await self._session.get(
                 url, headers=headers,
                 timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
             if resp.content_length is not None:
-                resp_data = yield from resp.read()
+                resp_data = await resp.read()
             else:
                 resp_data = None
             return resp_data, resp.status
@@ -39,10 +37,9 @@ class HttpSession(object):
             raise ex
         finally:
             if resp is not None:
-                yield from resp.release()
+                await resp.release()
 
-    @asyncio.coroutine
-    def post_data(self, path, data=None, headers=None, timeout=None):
+    async def post_data(self, path, data=None, headers=None, timeout=None):
         """Perform a POST request."""
         url = self.base_url + path
         _LOGGER.debug('POST URL: %s', url)
@@ -50,11 +47,11 @@ class HttpSession(object):
 
         resp = None
         try:
-            resp = yield from self._session.post(
+            resp = await self._session.post(
                 url, headers=headers, data=data,
                 timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
             if resp.content_length is not None:
-                resp_data = yield from resp.read()
+                resp_data = await resp.read()
             else:
                 resp_data = None
             self._log_data(resp_data, True)
@@ -65,7 +62,7 @@ class HttpSession(object):
             raise ex
         finally:
             if resp is not None:
-                yield from resp.release()
+                await resp.release()
 
     @staticmethod
     def _log_data(data, is_recv):

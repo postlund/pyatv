@@ -30,7 +30,7 @@ Features
 Requirements
 ------------
 
-- python>=3.4.2
+- python>=3.5.3
 - See documentation for additional libraries
 
 Getting started

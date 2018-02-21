@@ -25,11 +25,10 @@ def _print_commands(title, api):
     print('{} commands:\n{}\n'.format(title, commands))
 
 
-@asyncio.coroutine
-def _read_input(loop, prompt):
+async def _read_input(loop, prompt):
     sys.stdout.write(prompt)
     sys.stdout.flush()
-    user_input = yield from loop.run_in_executor(None, sys.stdin.readline)
+    user_input = await loop.run_in_executor(None, sys.stdin.readline)
     return user_input.strip()
 
 
@@ -41,8 +40,7 @@ class GlobalCommands:
         self.args = args
         self.loop = loop
 
-    @asyncio.coroutine
-    def commands(self):
+    async def commands(self):
         """Print a list with available commands."""
         _print_commands('Remote control', interface.RemoteControl)
         _print_commands('Metadata', interface.Metadata)
@@ -53,8 +51,7 @@ class GlobalCommands:
 
         return 0
 
-    @asyncio.coroutine
-    def help(self):
+    async def help(self):
         """Print help text for a command."""
         if len(self.args.command) != 2:
             print('Which command do you want help with?', file=sys.stderr)
@@ -80,10 +77,9 @@ class GlobalCommands:
                     key, signature, inspect.getdoc(value)))
         return 0
 
-    @asyncio.coroutine
-    def scan(self):
+    async def scan(self):
         """Scan for Apple TVs on the network."""
-        atvs = yield from pyatv.scan_for_apple_tvs(
+        atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=self.args.scan_timeout, only_usable=False)
         _print_found_apple_tvs(atvs)
 
@@ -102,27 +98,25 @@ class DeviceCommands:
         self.loop = loop
         self.args = args
 
-    @asyncio.coroutine
-    def cli(self):
+    async def cli(self):
         """Enter commands in a simple CLI."""
         print('Enter commands and press enter')
         print('Type help for help and exit to quit')
 
         while True:
-            command = yield from _read_input(self.loop, 'pyatv> ')
+            command = await _read_input(self.loop, 'pyatv> ')
             if command.lower() == 'exit':
                 break
             elif command == 'cli':
                 print('Command not availble here')
                 continue
 
-            yield from _handle_device_command(
+            await _handle_device_command(
                 self.args, command, self.atv, self.loop)
 
-    @asyncio.coroutine
-    def artwork_save(self):
+    async def artwork_save(self):
         """Download artwork and save it to artwork.png."""
-        artwork = yield from self.atv.metadata.artwork()
+        artwork = await self.atv.metadata.artwork()
         if artwork is not None:
             with open('artwork.png', 'wb') as file:
                 file.write(artwork)
@@ -131,28 +125,26 @@ class DeviceCommands:
             return 1
         return 0
 
-    @asyncio.coroutine
-    def push_updates(self):
+    async def push_updates(self):
         """Listen for push updates."""
         print('Press ENTER to stop')
 
         self.atv.push_updater.start()
-        yield from self.atv.login()
-        yield from self.loop.run_in_executor(None, sys.stdin.readline)
+        await self.atv.login()
+        await self.loop.run_in_executor(None, sys.stdin.readline)
         self.atv.push_updater.stop()
         return 0
 
-    @asyncio.coroutine
-    def auth(self):
+    async def auth(self):
         """Perform AirPlay device authentication."""
-        credentials = yield from self.atv.airplay.generate_credentials()
-        yield from self.atv.airplay.load_credentials(credentials)
+        credentials = await self.atv.airplay.generate_credentials()
+        await self.atv.airplay.load_credentials(credentials)
 
         try:
-            yield from self.atv.airplay.start_authentication()
-            pin = yield from _read_input(self.loop, 'Enter PIN on screen: ')
+            await self.atv.airplay.start_authentication()
+            pin = await _read_input(self.loop, 'Enter PIN on screen: ')
 
-            yield from self.atv.airplay.finish_authentication(pin)
+            await self.atv.airplay.finish_authentication(pin)
             print('You may now use these credentials:')
             print(credentials)
             return 0
@@ -161,33 +153,31 @@ class DeviceCommands:
             logging.exception('Failed to authenticate - invalid PIN?')
             return 1
 
-    @asyncio.coroutine
-    def pair(self):
+    async def pair(self):
         """Pair pyatv as a remote control with an Apple TV."""
         protocol = self.atv.service.protocol
         if protocol == const.PROTOCOL_DMAP:
-            yield from self._pair_with_dmap_device()
+            await self._pair_with_dmap_device()
         elif protocol == const.PROTOCOL_MRP:
-            yield from self._pair_with_mrp_device()
+            await self._pair_with_mrp_device()
 
-    @asyncio.coroutine
-    def _pair_with_dmap_device(self):
-        yield from self.atv.pairing.set(
+    async def _pair_with_dmap_device(self):
+        await self.atv.pairing.set(
             'pairing_guid', self.args.pairing_guid)
 
-        yield from self.atv.pairing.start(
+        await self.atv.pairing.start(
             zeroconf=Zeroconf(), name=self.args.name, pin=self.args.pin_code)
 
         print('Use pin {0} to pair with "{1}" (press ENTER to stop)'.format(
             self.args.pin_code, self.args.remote_name))
         print('Note: If remote does not show up, try rebooting your Apple TV')
 
-        yield from self.loop.run_in_executor(None, sys.stdin.readline)
-        yield from self.atv.pairing.stop()
+        await self.loop.run_in_executor(None, sys.stdin.readline)
+        await self.atv.pairing.stop()
 
         # Give some feedback to the user
         if self.atv.pairing.has_paired:
-            credentials = yield from self.atv.pairing.get('credentials')
+            credentials = await self.atv.pairing.get('credentials')
             print('Pairing seems to have succeeded, yey!')
             print('You may now use these credentials: 0x{}'.format(
                 credentials))
@@ -197,15 +187,14 @@ class DeviceCommands:
 
         return 0
 
-    @asyncio.coroutine
-    def _pair_with_mrp_device(self):
-        yield from self.atv.pairing.start()
-        pin = yield from _read_input(self.loop, 'Enter PIN on screen: ')
-        yield from self.atv.pairing.stop(pin=pin)
+    async def _pair_with_mrp_device(self):
+        await self.atv.pairing.start()
+        pin = await _read_input(self.loop, 'Enter PIN on screen: ')
+        await self.atv.pairing.stop(pin=pin)
 
         # Give some feedback to the user
         if self.atv.pairing.has_paired:
-            credentials = yield from self.atv.pairing.get('credentials')
+            credentials = await self.atv.pairing.get('credentials')
             print('Pairing seems to have succeeded, yey!')
             print('You may now use these credentials: {0}'.format(credentials))
         else:
@@ -254,8 +243,7 @@ class TransformProtocol(argparse.Action):
             raise ArgumentTypeError('Valid protocols are: mrp, dmap')
 
 
-@asyncio.coroutine
-def cli_handler(loop):
+async def cli_handler(loop):
     """Application starts here."""
     parser = argparse.ArgumentParser()
 
@@ -320,15 +308,15 @@ def cli_handler(loop):
 
     if args.command[0] in cmds:
         glob_cmds = GlobalCommands(args, loop)
-        return (yield from _exec_command(
+        return (await _exec_command(
             glob_cmds, args.command[0], print_result=False))
     elif args.autodiscover:
-        if not (yield from _autodiscover_device(args, loop)):
+        if not await _autodiscover_device(args, loop):
             return 1
 
-        return (yield from _handle_commands(args, loop))
+        return await _handle_commands(args, loop)
     elif args.device_credentials:
-        return (yield from _handle_commands(args, loop))
+        return await _handle_commands(args, loop)
     else:
         logging.error('To autodiscover an Apple TV, add -a')
 
@@ -343,9 +331,8 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
           "that have home sharing disabled", file=outstream)
 
 
-@asyncio.coroutine
-def _autodiscover_device(args, loop):
-    atvs = yield from pyatv.scan_for_apple_tvs(
+async def _autodiscover_device(args, loop):
+    atvs = await pyatv.scan_for_apple_tvs(
         loop, timeout=args.scan_timeout, abort_on_found=True,
         device_ip=args.address, protocol=args.protocol, only_usable=True)
     if not atvs:
@@ -401,8 +388,7 @@ def _extract_command_with_args(cmd):
     return command, args
 
 
-@asyncio.coroutine
-def _handle_commands(args, loop):
+async def _handle_commands(args, loop):
     details = AppleTV(args.address, args.name)
     if args.protocol == const.PROTOCOL_DMAP:
         details.add_service(DmapService(
@@ -416,21 +402,20 @@ def _handle_commands(args, loop):
 
     try:
         if args.airplay_credentials is not None:
-            yield from atv.airplay.load_credentials(args.airplay_credentials)
+            await atv.airplay.load_credentials(args.airplay_credentials)
 
         for cmd in args.command:
-            ret = yield from _handle_device_command(args, cmd, atv, loop)
+            ret = await _handle_device_command(args, cmd, atv, loop)
             if ret != 0:
                 return ret
     finally:
-        yield from atv.logout()
+        await atv.logout()
 
     return 0
 
 
 # pylint: disable=too-many-return-statements
-@asyncio.coroutine
-def _handle_device_command(args, cmd, atv, loop):
+async def _handle_device_command(args, cmd, atv, loop):
     device = retrieve_commands(DeviceCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
     metadata = retrieve_commands(interface.Metadata)
@@ -440,39 +425,38 @@ def _handle_device_command(args, cmd, atv, loop):
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
     if cmd in device:
-        return (yield from _exec_command(
+        return (await _exec_command(
             DeviceCommands(atv, loop, args), cmd, False, *cmd_args))
 
     elif cmd in ctrl:
-        return (yield from _exec_command(
+        return (await _exec_command(
             atv.remote_control, cmd, True, *cmd_args))
 
     elif cmd in metadata:
-        return (yield from _exec_command(
+        return (await _exec_command(
             atv.metadata, cmd, True, *cmd_args))
 
     elif cmd in playing:
-        playing_resp = yield from atv.metadata.playing()
-        return (yield from _exec_command(
+        playing_resp = await atv.metadata.playing()
+        return (await _exec_command(
             playing_resp, cmd, True, *cmd_args))
 
     elif cmd in airplay:
-        return (yield from _exec_command(
+        return (await _exec_command(
             atv.airplay, cmd, True, *cmd_args))
 
     logging.error('Unknown command: %s', cmd)
     return 1
 
 
-@asyncio.coroutine
-def _exec_command(obj, command, print_result, *args):
+async def _exec_command(obj, command, print_result, *args):
     try:
         # If the command to execute is a @property, the value returned by that
         # property will be stored in tmp. Otherwise it's a coroutine and we
         # have to yield for the result and wait until it is available.
         tmp = getattr(obj, command)
         if inspect.ismethod(tmp):
-            value = yield from tmp(*args)
+            value = await tmp(*args)
         else:
             value = tmp
 
@@ -504,10 +488,9 @@ def main():
     """Start the asyncio event loop and runs the application."""
     # Helper method so that the coroutine exits cleanly if an exception
     # happens (which would leave resources dangling)
-    @asyncio.coroutine
-    def _run_application(loop):
+    async def _run_application(loop):
         try:
-            return (yield from cli_handler(loop))
+            return await cli_handler(loop)
 
         except KeyboardInterrupt:
             pass  # User pressed Ctrl+C, just ignore it

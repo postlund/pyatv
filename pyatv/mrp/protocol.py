@@ -1,7 +1,7 @@
 """Implementation of the MRP protocol."""
 
-import uuid
 import asyncio
+import uuid
 import logging
 
 from collections import namedtuple
@@ -50,13 +50,12 @@ class MrpProtocol(object):
         lst[message_type].append(Listener(listener, data))
 
     # TODO: This method is too big for its own good. Must split and clean up.
-    @asyncio.coroutine
-    def start(self):
+    async def start(self):
         """Connect to device and listen to incoming messages."""
         if self.connection.connected:
             return
 
-        yield from self.connection.connect()
+        await self.connection.connect()
 
         # In case credentials have been given externally (i.e. not by pairing
         # with a device), then use that client id
@@ -68,15 +67,14 @@ class MrpProtocol(object):
         # device will not respond with anything
         msg = messages.device_information(
             'pyatv', self.srp.pairing_id.decode())
-        yield from self.send_and_receive(msg)
+        await self.send_and_receive(msg)
         self._initial_message_sent = True
 
         # This should be the first message sent after encryption has
         # been enabled
-        yield from self.send(messages.set_ready_state())
+        await self.send(messages.set_ready_state())
 
-        @asyncio.coroutine
-        def _wait_for_updates(_, semaphore):
+        async def _wait_for_updates(_, semaphore):
             # Use a counter here whenever more than one message is expected
             semaphore.release()
 
@@ -88,11 +86,11 @@ class MrpProtocol(object):
                           one_shot=True)
 
         # Subscribe to updates at this stage
-        yield from self.send(messages.client_updates_config())
-        yield from self.send(messages.wake_device())
+        await self.send(messages.client_updates_config())
+        await self.send(messages.wake_device())
 
         try:
-            yield from asyncio.wait_for(
+            await asyncio.wait_for(
                 semaphore.acquire(), 1, loop=self.loop)
         except asyncio.TimeoutError:
             # This is not an issue itself, but I should do something better.
@@ -111,10 +109,9 @@ class MrpProtocol(object):
         self._one_shots = {}
         self.connection.close()
 
-    @asyncio.coroutine
-    def _connect_and_encrypt(self):
+    async def _connect_and_encrypt(self):
         if not self.connection.connected:
-            yield from self.start()
+            await self.start()
 
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
@@ -125,20 +122,19 @@ class MrpProtocol(object):
             credentials = Credentials.parse(self.service.device_credentials)
             pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
 
-            yield from pair_verifier.verify_credentials()
+            await pair_verifier.verify_credentials()
             output_key, input_key = pair_verifier.encryption_keys()
             self.connection.enable_encryption(output_key, input_key)
 
-    @asyncio.coroutine
-    def send(self, message):
+    async def send(self, message):
         """Send a message and expect no response."""
-        yield from self._connect_and_encrypt()
+        await self._connect_and_encrypt()
         self.connection.send(message)
 
-    @asyncio.coroutine
-    def send_and_receive(self, message, generate_identifier=True, timeout=5):
+    async def send_and_receive(self, message,
+                               generate_identifier=True, timeout=5):
         """Send a message and wait for a response."""
-        yield from self._connect_and_encrypt()
+        await self._connect_and_encrypt()
 
         # Some messages will respond with the same identifier as used in the
         # corresponding request. Others will not and one example is the crypto
@@ -154,16 +150,15 @@ class MrpProtocol(object):
             identifier = 'type_' + str(message.type)
 
         self.connection.send(message)
-        return (yield from self._receive(identifier, timeout))
+        return await self._receive(identifier, timeout)
 
-    @asyncio.coroutine
-    def _receive(self, identifier, timeout):
+    async def _receive(self, identifier, timeout):
         semaphore = asyncio.Semaphore(value=0, loop=self.loop)
         self._outstanding[identifier] = OutstandingMessage(semaphore, None)
 
         try:
             # The connection instance will dispatch the message
-            yield from asyncio.wait_for(
+            await asyncio.wait_for(
                 semaphore.acquire(), timeout, loop=self.loop)
 
         except:
@@ -185,31 +180,21 @@ class MrpProtocol(object):
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
         else:
-            try:
-                # TODO: workaround until python 3.4 is droppes
-                if not hasattr(asyncio, 'ensure_future'):
-                    run_async = asyncio.async  # pylint: disable=no-member
-                else:
-                    run_async = getattr(asyncio, 'ensure_future')
-
-                run_async(self._dispatch(message), loop=self.loop)
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception('failed to dispatch')
+            asyncio.ensure_future(self._dispatch(message), loop=self.loop)
 
     # TODO: dispatching should maybe not be a coroutine?
-    @asyncio.coroutine
-    def _dispatch(self, message):
+    async def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
             _LOGGER.debug('Dispatching message with type %d (%s) to %s',
                           message.type,
                           type(message.inner()).__name__,
                           listener)
-            yield from listener.func(message, listener.data)
+            await listener.func(message, listener.data)
 
         if message.type in self._one_shots:
             for one_shot in self._one_shots.get(message.type,):
                 _LOGGER.debug('One-shot with message type %d to %s',
                               message.type, one_shot)
-                yield from one_shot.func(message, one_shot.data)
+                await one_shot.func(message, one_shot.data)
 
             del self._one_shots[message.type]

@@ -26,8 +26,7 @@ class AirPlayPlayer:
         self.session = session
         self.port = port
 
-    @asyncio.coroutine
-    def play_url(self, url, position=0):
+    async def play_url(self, url, position=0):
         """Play media from an URL on the device."""
         headers = {'User-Agent': 'MediaControl/1.0',
                    'Content-Type': 'application/x-apple-binary-plist'}
@@ -39,11 +38,11 @@ class AirPlayPlayer:
         resp = None
         try:
             # pylint: disable=no-member
-            resp = yield from self.session.post(
+            resp = await self.session.post(
                 address, headers=headers,
                 data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
                 timeout=TIMEOUT)
-            yield from self._wait_for_media_to_end()
+            await self._wait_for_media_to_end()
         finally:
             if resp is not None:
                 resp.close()
@@ -53,16 +52,15 @@ class AirPlayPlayer:
 
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)
-    @asyncio.coroutine
-    def _wait_for_media_to_end(self):
+    async def _wait_for_media_to_end(self):
         address = self._url(self.port, 'playback-info')
         attempts = 5
         video_started = False
         while True:
             info = None
             try:
-                info = yield from self.session.get(address)
-                data = yield from info.content.read()
+                info = await self.session.get(address)
+                data = await info.content.read()
                 _LOGGER.debug('Playback-info (%d): %s', info.status, data)
 
                 parsed = plistlib.loads(data)
@@ -84,4 +82,4 @@ class AirPlayPlayer:
                 if info is not None:
                     info.close()
 
-            yield from asyncio.sleep(1, loop=self.loop)
+            await asyncio.sleep(1, loop=self.loop)

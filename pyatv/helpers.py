@@ -18,21 +18,20 @@ def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
     """
     # A coroutine is used so we can connect to the device while being inside
     # the event loop
-    @asyncio.coroutine
-    def _handle(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs(
+    async def _handle(loop):
+        atvs = await pyatv.scan_for_apple_tvs(
             loop, timeout=timeout, abort_on_found=True)
 
         # Take the first device found
         if atvs:
             atv = pyatv.connect_to_apple_tv(atvs[0], loop)
             try:
-                yield from handler(atv)
+                await handler(atv)
             finally:
-                yield from atv.logout()
+                await atv.logout()
         else:
             if not_found is not None:
-                yield from not_found()
+                await not_found()
 
     loop = event_loop if event_loop else asyncio.get_event_loop()
     loop.run_until_complete(_handle(loop))
