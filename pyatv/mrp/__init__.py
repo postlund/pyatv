@@ -342,12 +342,12 @@ class MrpAppleTV(AppleTV):
         """Perform an explicit login."""
         await self._protocol.start()
 
-    def logout(self):
+    async def logout(self):
         """Perform an explicit logout.
 
         Must be done when session is no longer needed to not leak resources.
         """
-        self._session.close()
+        await self._session.close()
         self._protocol.stop()
 
     @property
