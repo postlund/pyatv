@@ -177,6 +177,11 @@ class DmapRemoteControl(RemoteControl):
         """Press key topmenu."""
         return self.apple_tv.controlprompt_cmd('topmenu')
 
+    async def suspend(self):
+        """Suspend the device."""
+        # Not supported by DMAP
+        raise exceptions.NotSupportedError
+
     def set_position(self, pos):
         """Seek in the current playing media."""
         time_in_ms = int(pos)*1000

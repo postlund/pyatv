@@ -56,6 +56,11 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         details.add_service(AirPlayService(self.server.port))
         return connect_to_apple_tv(details, self.loop)
 
+    @unittest_run_loop
+    async def test_not_supportedt(self):
+        with self.assertRaises(exceptions.NotSupportedError):
+            await self.atv.remote_control.suspend()
+
     # This is not a pretty test and it does crazy things. Should probably be
     # re-written later but will do for now.
     @unittest_run_loop

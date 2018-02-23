@@ -29,6 +29,7 @@ _KEY_LOOKUP = {
     'select': [1, 0x89],
     'menu': [1, 0x86],
     'top_menu': [12, 0x60],
+    'suspend': [1, 0x82],
 
     # 'mic': [12, 0x04]  # Siri
 }
@@ -99,6 +100,10 @@ class MrpRemoteControl(RemoteControl):
     def top_menu(self):
         """Go to main menu (long press menu)."""
         return self._press_key('top_menu')
+
+    def suspend(self):
+        """Suspend the device."""
+        return self._press_key('suspend')
 
     def set_position(self, pos):
         """Seek in the current playing media."""
