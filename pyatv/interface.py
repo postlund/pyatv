@@ -144,6 +144,11 @@ class RemoteControl:
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def suspend(self):
+        """Suspend the device."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def set_position(self, pos):
         """Seek in the current playing media."""
         raise exceptions.NotSupportedError
