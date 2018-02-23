@@ -345,15 +345,7 @@ async def _autodiscover_device(args, loop):
         return None
 
     apple_tv = atvs[0]
-
-    # Extract the preferred service here instead of a usable service. The
-    # reason for this is that some services are never usable after a scan,
-    # like MRP, but might become usable after the user has filled in
-    # additional information (which will be done here).
-    service = apple_tv.preferred_service()
-    if not service:
-        print("fel fel fel")
-        return None
+    service = apple_tv.usable_service()  # scan only returns usable service
 
     # Common parameters for all protocols
     args.address = apple_tv.address
@@ -361,7 +353,7 @@ async def _autodiscover_device(args, loop):
     args.protocol = service.protocol
     args.port = service.port
 
-    # Protocol specific parameters
+    # Protocol specific parameters (overrides cli arguments)
     if service.protocol == const.PROTOCOL_DMAP:
         args.device_credentials = service.device_credentials
 

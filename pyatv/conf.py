@@ -60,20 +60,6 @@ class AppleTV:
 
         return None
 
-    def preferred_service(self):
-        """Return the best supported service of the device.
-
-        This methods works similarily to usable_service(), but it will return
-        the most appropriate service regardless of it being usable or not. So
-        an Apple TV supporting both DMAP and MRP (like gen 4) will return MRP
-        here.
-        """
-        for protocol in self._supported_protocols:
-            if protocol in self._services:
-                return self._services[protocol]
-
-        return None
-
     def is_usable(self):
         """Return True if there are any usable services."""
         return any([x.is_usable() for x in self._services.values()])
