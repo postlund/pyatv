@@ -69,15 +69,6 @@ class ConfTest(unittest.TestCase):
         self.service_mock2.is_usable.return_value = True
         self.assertEqual(self.atv.usable_service(), self.service_mock2)
 
-    def test_preferred_service(self):
-        self.assertIsNone(self.atv.preferred_service())
-
-        self.atv.add_service(self.service_mock)
-        self.assertEqual(self.atv.preferred_service(), self.service_mock)
-
-        self.atv.add_service(self.service_mock2)
-        self.assertEqual(self.atv.preferred_service(), self.service_mock)
-
     def test_any_service_usable(self):
         self.assertFalse(self.atv.is_usable())
 
