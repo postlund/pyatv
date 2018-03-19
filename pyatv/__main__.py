@@ -155,18 +155,25 @@ class DeviceCommands:
 
     async def pair(self):
         """Pair pyatv as a remote control with an Apple TV."""
+        # Connect using the specified protocol
+        # TODO: config should be stored elsewhere so that API is same for both
         protocol = self.atv.service.protocol
         if protocol == const.PROTOCOL_DMAP:
-            await self._pair_with_dmap_device()
+            await self.atv.pairing.start(zeroconf=Zeroconf(),
+                                         name=self.args.remote_name,
+                                         pairing_guid=self.args.pairing_guid)
         elif protocol == const.PROTOCOL_MRP:
-            await self._pair_with_mrp_device()
+            await self.atv.pairing.start()
 
-    async def _pair_with_dmap_device(self):
-        await self.atv.pairing.set(
-            'pairing_guid', self.args.pairing_guid)
+        # Ask for PIN if present or just wait for pairing to end
+        if self.atv.pairing.device_provides_pin:
+            pin = await _read_input(self.loop, 'Enter PIN on screen: ')
+            self.atv.pairing.pin(pin)
+        else:
+            self.atv.pairing.pin(self.args.pin_code)
 
-        await self.atv.pairing.start(
-            zeroconf=Zeroconf(), name=self.args.name, pin=self.args.pin_code)
+            print('Use {0} to pair with "{1}" (press ENTER to stop)'.format(
+                self.args.pin_code, self.args.remote_name))
 
         if self.args.pin_code is None:
             print('Use any pin to pair with "{}" (press ENTER to stop)'.format(
@@ -175,33 +182,15 @@ class DeviceCommands:
             print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
                 self.args.pin_code, self.args.remote_name))
 
-        print('Note: If remote does not show up, try rebooting your Apple TV')
-
         await self.loop.run_in_executor(None, sys.stdin.readline)
+
         await self.atv.pairing.stop()
 
         # Give some feedback to the user
         if self.atv.pairing.has_paired:
-            credentials = await self.atv.pairing.get('credentials')
             print('Pairing seems to have succeeded, yey!')
-            print('You may now use these credentials: 0x{}'.format(
-                credentials))
-        else:
-            print('Pairing failed!')
-            return 1
-
-        return 0
-
-    async def _pair_with_mrp_device(self):
-        await self.atv.pairing.start()
-        pin = await _read_input(self.loop, 'Enter PIN on screen: ')
-        await self.atv.pairing.stop(pin=pin)
-
-        # Give some feedback to the user
-        if self.atv.pairing.has_paired:
-            credentials = await self.atv.pairing.get('credentials')
-            print('Pairing seems to have succeeded, yey!')
-            print('You may now use these credentials: {0}'.format(credentials))
+            print('You may now use these credentials: {0}'.format(
+                self.atv.pairing.credentials))
         else:
             print('Pairing failed!')
             return 1
@@ -322,7 +311,7 @@ async def cli_handler(loop):
             return 1
 
         return await _handle_commands(args, loop)
-    if args.device_credentials:
+    if args.address:
         return await _handle_commands(args, loop)
 
     logging.error('To autodiscover an Apple TV, add -a')

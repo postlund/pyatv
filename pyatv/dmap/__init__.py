@@ -380,7 +380,7 @@ class DmapAppleTV(AppleTV):
         super().__init__()
         self._session = session
 
-        self._dmap_service = details.usable_service()
+        self._dmap_service = details.get_service(const.PROTOCOL_DMAP)
         daap_http = HttpSession(
             session,
             'http://{0}:{1}/'.format(details.address, self._dmap_service.port))

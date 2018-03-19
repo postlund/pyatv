@@ -8,8 +8,6 @@ from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
 
 _LOGGER = logging.getLogger(__name__)
 
-PHONE_IDENTIFIER = '6fdad309-5331-47ff-b525-1158bb105af1'
-
 
 def _get_pairing_data(resp):
     pairing_message = CryptoPairingMessage.cryptoPairingMessage

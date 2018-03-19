@@ -284,11 +284,17 @@ class MrpPairingHandler(PairingHandler):
         """Initialize a new MrpPairingHandler."""
         self.pairing_procedure = MrpPairingProcedure(protocol, srp)
         self.service = service
+        self._pin_code = None
 
     @property
     def has_paired(self):
         """If a successful pairing has been performed."""
         return self.service.device_credentials is not None
+
+    @property
+    def credentials(self):
+        """Credentials that were generated during pairing."""
+        return str(self.service.device_credentials)
 
     async def start(self, **kwargs):
         """Start pairing process."""
@@ -296,25 +302,20 @@ class MrpPairingHandler(PairingHandler):
 
     async def stop(self, **kwargs):
         """Stop pairing process."""
-        pin = kwargs['pin']
+        if not self._pin_code:
+            raise Exception('no pin given')  # TODO: new exception
 
         self.service.device_credentials = \
-            await self.pairing_procedure.finish_pairing(pin)
+            await self.pairing_procedure.finish_pairing(self._pin_code)
 
-    async def set(self, key, value, **kwargs):
-        """Set a process specific value.
+    def pin(self, pin):
+        """Pin code used for pairing."""
+        self._pin_code = pin
 
-        The value is specific to the device being paired with and can for
-        instance be a PIN code.
-        """
-        raise exceptions.NotSupportedError
-
-    async def get(self, key):
-        """Retrieve a process specific value."""
-        if key == 'credentials' and self.service.device_credentials:
-            return str(self.service.device_credentials)
-
-        return None
+    @property
+    def device_provides_pin(self):
+        """Return True if remote device presents PIN code, else False."""
+        return True
 
 
 class MrpAppleTV(AppleTV):
@@ -327,7 +328,7 @@ class MrpAppleTV(AppleTV):
         super().__init__()
 
         self._session = session
-        self._mrp_service = details.usable_service()
+        self._mrp_service = details.get_service(const.PROTOCOL_MRP)
 
         self._connection = MrpConnection(
             details.address, self._mrp_service.port, loop)
