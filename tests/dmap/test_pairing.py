@@ -25,7 +25,7 @@ PAIRING_CODE3 = 'A34C3361C7D57D61CA41F62A8042F069'
 
 # Pairing guid is 8 bytes, which is 64 bits
 RANDOM_128_BITS = 6558272190156386627
-RANDOM_PAIRING_GUID = '5B03A9CF4A983143'
+RANDOM_PAIRING_GUID = '0x5B03A9CF4A983143'
 
 
 class PairingTest(asynctest.TestCase):
@@ -42,11 +42,13 @@ class PairingTest(asynctest.TestCase):
     async def tearDown(self):
         await self.pairing.stop()
 
-    async def _start(self, pin_code=PIN_CODE,
+    async def _start(self,
+                     pin_code=PIN_CODE,
                      pairing_guid=pairing.DEFAULT_PAIRING_GUID):
-        await self.pairing.start(
-            zeroconf=self.zeroconf, name=REMOTE_NAME, pin=pin_code)
-        await self.pairing.set('pairing_guid', pairing_guid)
+        await self.pairing.start(zeroconf=self.zeroconf,
+                                 name=REMOTE_NAME,
+                                 pairing_guid=pairing_guid)
+        self.pairing.pin(pin_code)
 
     async def test_zeroconf_service_published(self):
         await self._start()
@@ -62,10 +64,10 @@ class PairingTest(asynctest.TestCase):
         pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
         handler = pairing.DmapPairingHandler(self.loop)
-        await handler.set('pairing_guid', None)
+        await handler.start(zeroconf=self.zeroconf, name='test')
 
-        pairing_guid = await handler.get('credentials')
-        self.assertEqual(pairing_guid, RANDOM_PAIRING_GUID)
+        self.assertEqual(handler.credentials, RANDOM_PAIRING_GUID)
+        await handler.stop()
 
     async def test_succesful_pairing(self):
         await self._start()

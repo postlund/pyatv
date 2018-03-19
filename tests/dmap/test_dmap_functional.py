@@ -68,10 +68,12 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         zeroconf = zeroconf_stub.stub(pairing)
         self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
 
-        await self.atv.pairing.start(
-            zeroconf=zeroconf, pin=PIN_CODE, name=REMOTE_NAME)
-        await self.atv.pairing.set(
-            'pairing_guid', pairing.DEFAULT_PAIRING_GUID)
+        self.assertFalse(self.atv.pairing.device_provides_pin)
+
+        await self.atv.pairing.start(zeroconf=zeroconf,
+                                     pairing_guid=pairing.DEFAULT_PAIRING_GUID,
+                                     name=REMOTE_NAME)
+        self.atv.pairing.pin(PIN_CODE)
         await self.usecase.act_on_bonjour_services(zeroconf)
 
         self.assertTrue(self.atv.pairing.has_paired,

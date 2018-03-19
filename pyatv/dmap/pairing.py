@@ -47,8 +47,8 @@ class DmapPairingHandler(PairingHandler):
         self._name = None
         self._web_server = None
         self._server = None
-        self.pin_code = None
-        self.pairing_guid = None
+        self._pin_code = None
+        self._pairing_guid = None
         self._has_paired = False
 
     @staticmethod
@@ -63,11 +63,18 @@ class DmapPairingHandler(PairingHandler):
         """
         return self._has_paired
 
+    @property
+    def credentials(self):
+        """Credentials that were generated during pairing."""
+        return '0x{0}'.format(self._pairing_guid)
+
     async def start(self, **kwargs):
         """Start the pairing server and publish service."""
         zeroconf = kwargs['zeroconf']
         self._name = kwargs['name']
-        self.pin_code = kwargs['pin']
+        self._pairing_guid = kwargs.get('pairing_guid', None) or \
+            self._generate_random_guid()
+
         self._web_server = web.Server(self.handle_request, loop=self._loop)
         self._server = await self._loop.create_server(
             self._web_server, '0.0.0.0')
@@ -81,7 +88,6 @@ class DmapPairingHandler(PairingHandler):
     async def stop(self, **kwargs):
         """Stop pairing server and unpublish service."""
         _LOGGER.debug('Shutting down pairing server')
-        self._has_paired = False
         if self._web_server is not None:
             await self._web_server.shutdown()
             self._server.close()
@@ -89,21 +95,14 @@ class DmapPairingHandler(PairingHandler):
         if self._server is not None:
             await self._server.wait_closed()
 
-    async def set(self, key, value, **kwargs):
-        """Set a process specific value.
+    def pin(self, pin):
+        """Pin code used for pairing."""
+        self._pin_code = pin
 
-        The value is specific to the device being paired with and can for
-        instance be a PIN code.
-        """
-        if key == 'pairing_guid':
-            self.pairing_guid = value or self._generate_random_guid()
-
-    async def get(self, key):
-        """Retrieve a process specific value."""
-        if key == 'credentials':
-            return self.pairing_guid
-
-        return None
+    @property
+    def device_provides_pin(self):
+        """Return True if remote device presents PIN code, else False."""
+        return False
 
     def _publish_service(self, zeroconf, address, port):
         props = {
@@ -112,7 +111,7 @@ class DmapPairingHandler(PairingHandler):
             b'DvTy': b'iPod',
             b'RemN': b'Remote',
             b'txtvers': b'1',
-            b'Pair': self.pairing_guid
+            b'Pair': self._pairing_guid
             }
 
         service = ServiceInfo(
@@ -135,7 +134,7 @@ class DmapPairingHandler(PairingHandler):
                      service_name, received_code)
 
         if self._verify_pin(received_code):
-            cmpg = tags.uint64_tag('cmpg', int(self.pairing_guid, 16))
+            cmpg = tags.uint64_tag('cmpg', int(self._pairing_guid, 16))
             cmnm = tags.string_tag('cmnm', self._name)
             cmty = tags.string_tag('cmty', 'iPhone')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
@@ -147,12 +146,12 @@ class DmapPairingHandler(PairingHandler):
 
     def _verify_pin(self, received_code):
         # If no particular pin code is specified, allow any pin
-        if self.pin_code is None:
+        if self._pin_code is None:
             return True
 
         merged = StringIO()
-        merged.write(self.pairing_guid)
-        for char in str(self.pin_code).zfill(4):
+        merged.write(self._pairing_guid)
+        for char in str(self._pin_code).zfill(4):
             merged.write(char)
             merged.write("\x00")
 

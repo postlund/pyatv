@@ -21,8 +21,8 @@ async def pair_with_device(loop):
     details.add_service(conf.DmapService('login_id'))
     atv = pyatv.connect_to_apple_tv(details, loop)
 
-    await atv.pairing.start(
-        zeroconf=my_zeroconf, name=REMOTE_NAME, pin=PIN_CODE)
+    atv.pairing.pin(PIN_CODE)
+    await atv.pairing.start(zeroconf=my_zeroconf, name=REMOTE_NAME)
     print('You can now pair with pyatv')
 
     # Wait for a minute to allow pairing
@@ -32,9 +32,8 @@ async def pair_with_device(loop):
 
     # Give some feedback about the process
     if atv.pairing.has_paired:
-        pairing_guid = await atv.pairing.get('pairing_gui')
         print('Paired with device!')
-        print('Pairing guid: ' + pairing_guid)
+        print('Credentials:', atv.pairing.credentials)
     else:
         print('Did not pair with device!')
 

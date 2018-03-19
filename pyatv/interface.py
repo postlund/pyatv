@@ -44,12 +44,27 @@ class PairingHandler:
 
     __metaclass__ = ABCMeta
 
+    @abstractmethod
+    def pin(self, pin):
+        """Pin code used for pairing."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def device_provides_pin(self):
+        """Return True if remote device presents PIN code, else False."""
+        raise exceptions.NotSupportedError
+
     @abstractproperty
     def has_paired(self):
         """If a successful pairing has been performed.
 
         The value will be reset when stop() is called.
         """
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def credentials(self):
+        """Credentials that were generated during pairing."""
         raise exceptions.NotSupportedError
 
     @abstractmethod
@@ -60,20 +75,6 @@ class PairingHandler:
     @abstractmethod
     def stop(self, **kwargs):
         """Stop pairing process."""
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def set(self, key, value, **kwargs):
-        """Set a process specific value.
-
-        The value is specific to the device being paired with and can for
-        instance be a PIN code.
-        """
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def get(self, key):
-        """Retrieve a process specific value."""
         raise exceptions.NotSupportedError
 
 

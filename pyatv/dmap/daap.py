@@ -15,10 +15,10 @@ _LOGGER = logging.getLogger(__name__)
 _DMAP_HEADERS = {
     'Accept': '*/*',
     'Accept-Encoding': 'gzip',
-    'Client-DAAP-Version': '3.12',
+    'Client-DAAP-Version': '3.13',
     'Client-ATV-Sharing-Version': '1.2',
-    'Client-iTunes-Sharing-Version': '3.10',
-    'User-Agent': 'TVRemote/186 CFNetwork/808.1.4 Darwin/16.1.0',
+    'Client-iTunes-Sharing-Version': '3.15',
+    'User-Agent': 'Remote/1021',
     'Viewer-Only-Client': '1',
 }
 
