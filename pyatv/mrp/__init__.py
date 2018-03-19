@@ -7,6 +7,7 @@ from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
+from pyatv.mrp.protobuf import CommandInfo_pb2
 from pyatv.mrp.pairing import MrpPairingProcedure
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, PairingHandler)
@@ -21,8 +22,6 @@ _KEY_LOOKUP = {
     'down': [1, 0x8D],
     'left': [1, 0x8B],
     'right': [1, 0x8A],
-    'play': [12, 0xB0],
-    'pause': [12, 0xB1],
     'stop': [12, 0xB7],
     'next': [12, 0xB5],
     'previous': [12, 0xB6],
@@ -71,23 +70,24 @@ class MrpRemoteControl(RemoteControl):
 
     def play(self):
         """Press key play."""
-        return self._press_key('play')
+        return self.protocol.send(messages.command(CommandInfo_pb2.Play))
 
     def pause(self):
         """Press key play."""
-        return self._press_key('pause')
+        return self.protocol.send(messages.command(CommandInfo_pb2.Pause))
 
     def stop(self):
         """Press key stop."""
-        return self._press_key('stop')
+        return self.protocol.send(messages.command(CommandInfo_pb2.Stop))
 
     def next(self):
         """Press key next."""
-        return self._press_key('next')
+        return self.protocol.send(messages.command(CommandInfo_pb2.NextTrack))
 
     def previous(self):
         """Press key previous."""
-        return self._press_key('previous')
+        return self.protocol.send(
+            messages.command(CommandInfo_pb2.PreviousTrack))
 
     def select(self):
         """Press key select."""
@@ -107,15 +107,25 @@ class MrpRemoteControl(RemoteControl):
 
     def set_position(self, pos):
         """Seek in the current playing media."""
-        raise exceptions.NotSupportedError
+        return self.protocol.send(messages.seek_to_position(pos))
 
-    async def set_shuffle(self, is_on):
+    def set_shuffle(self, is_on):
         """Change shuffle mode to on or off."""
-        raise exceptions.NotSupportedError
+        return self.protocol.send(messages.shuffle(is_on))
 
-    async def set_repeat(self, repeat_mode):
+    def set_repeat(self, repeat_mode):
         """Change repeat mode."""
-        raise exceptions.NotSupportedError
+        # TODO: extract to convert module
+        if int(repeat_mode) == const.REPEAT_STATE_OFF:
+            state = 1
+        elif int(repeat_mode) == const.REPEAT_STATE_ALL:
+            state = 2
+        elif int(repeat_mode) == const.REPEAT_STATE_TRACK:
+            state = 3
+        else:
+            raise ValueError('Invalid repeat mode: ' + str(repeat_mode))
+
+        return self.protocol.send(messages.repeat(state))
 
 
 class MrpPlaying(Playing):
@@ -141,8 +151,7 @@ class MrpPlaying(Playing):
         if state == 2:
             return const.PLAY_STATE_PAUSED
 
-        raise exceptions.UnknownPlayState(
-            'Unknown playstate: ' + str(state))
+        return const.PLAY_STATE_PAUSED
 
     @property
     def title(self):
@@ -162,7 +171,11 @@ class MrpPlaying(Playing):
     @property
     def genre(self):
         """Genre of the currently playing song."""
-        return None
+        if self._metadata:
+            from pyatv.mrp.protobuf import ContentItem_pb2
+            transaction = ContentItem_pb2.ContentItem()
+            transaction.ParseFromString(self._metadata)
+            # TODO: implement this
 
     @property
     def total_time(self):
@@ -182,15 +195,23 @@ class MrpPlaying(Playing):
 
         return None
 
+    def _get_command_info(self, command):
+        for cmd in self._setstate.supportedCommands.supportedCommands:
+            if cmd.command == command:
+                return cmd
+        return None
+
     @property
     def shuffle(self):
         """If shuffle is enabled or not."""
-        return None
+        info = self._get_command_info(CommandInfo_pb2.ChangeShuffleMode)
+        return None if info is None else info.shuffleMode
 
     @property
     def repeat(self):
         """Repeat mode."""
-        return None
+        info = self._get_command_info(CommandInfo_pb2.ChangeRepeatMode)
+        return None if info is None else info.repeatMode
 
 
 class MrpMetadata(Metadata):
@@ -210,8 +231,8 @@ class MrpMetadata(Metadata):
         self._setstate = message.inner()
 
     async def _handle_transaction(self, message, _):
-        packet = message.inner().packets[0].packet
-        self._nowplaying = packet.contentItem.metadata.nowPlayingInfo
+        packet = message.inner().packets.packets[0].packetData
+        self._nowplaying = packet  # .contentItem.metadata.nowPlayingInfo
 
     @property
     def device_id(self):

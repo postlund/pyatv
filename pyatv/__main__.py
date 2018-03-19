@@ -368,13 +368,21 @@ def _extract_command_with_args(cmd):
     all the additional arguments are passed as arguments to the target
     method.
     """
+    def _isint(value):
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
+
     equal_sign = cmd.find('=')
     if equal_sign == -1:
         return cmd, []
 
     command = cmd[0:equal_sign]
     args = cmd[equal_sign+1:].split(',')
-    return command, args
+    converted = [x if not _isint(x) else int(x) for x in args]
+    return command, converted
 
 
 async def _handle_commands(args, loop):

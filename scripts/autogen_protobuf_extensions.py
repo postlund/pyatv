@@ -83,8 +83,24 @@ def extract_message_info():
                 title + '_pb2', title, accessor, constant)
 
 
+def extract_unreferenced_messages():
+
+    base_path = BASE_PACKAGE.replace('.', '/')
+
+    for filename in os.listdir(base_path):
+        tmp = os.path.splitext(filename)
+        if tmp[1] != '.proto' or tmp[0] == 'ProtocolMessage':
+            continue
+
+        with open(os.path.join(base_path, filename)) as file:
+            for line in file:
+                if line.startswith('message'):
+                    yield tmp[0] + '_pb2', line.split(' ')[1]
+
+
 def main():
     """Script starts somewhere around here."""
+    message_names = set()
     packages = []
     messages = []
     extensions = []
@@ -92,6 +108,7 @@ def main():
 
     # Extract everything needed to generate output file
     for info in extract_message_info():
+        message_names.add(info.title)
         packages.append(
             'from {0} import {1}'.format(
                 BASE_PACKAGE, info.module))
@@ -105,12 +122,20 @@ def main():
             '{0} = ProtocolMessage.{0}'.format(
                 info.const))
 
+
+    # Look for remaining messages
+    for module_name, message_name in extract_unreferenced_messages():
+        if message_name not in message_names:
+            message_names.add(message_name)
+            messages.append('from {0}.{1} import {2}'.format(
+                    BASE_PACKAGE, module_name, message_name))
+
     # Print file output with values inserted
     print(OUTPUT_TEMPLATE.format(
-        packages='\n'.join(packages),
-        messages='\n'.join(messages),
-        extensions='\n    '.join(extensions),
-        constants='\n'.join(constants)))
+        packages='\n'.join(sorted(packages)),
+        messages='\n'.join(sorted(messages)),
+        extensions='\n    '.join(sorted(extensions)),
+        constants='\n'.join(sorted(constants))))
 
     return 0
 

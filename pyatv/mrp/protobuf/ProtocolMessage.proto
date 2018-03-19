@@ -6,6 +6,7 @@ message ProtocolMessage {
   enum Type { 
     SEND_COMMAND_MESSAGE = 1;
     SEND_COMMAND_RESULT_MESSAGE = 2;
+    GET_STATE_MESSAGE = 3;
     SET_STATE_MESSAGE = 4;
     SET_ARTWORK_MESSAGE = 5;
     REGISTER_HID_DEVICE_MESSAGE = 6;
@@ -42,7 +43,7 @@ message ProtocolMessage {
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = 43;
   }
 
-  required Type type = 1; // Identifies which underlying message is filled in.
+  optional Type type = 1; // Identifies which underlying message is filled in.
   optional string identifier = 2;
   optional int32 priority = 4;
   optional uint64 timestamp = 5;
