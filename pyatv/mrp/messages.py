@@ -27,12 +27,21 @@ def device_information(name, identifier):
     info.applicationBundleIdentifier = 'com.apple.TVRemote'
     info.applicationBundleVersion = '273.12'
     info.protocolVersion = 1
+    info.lastSupportedMessageType = 58
+    info.supportsExtendedMotion = True
     return message
 
 
 def set_ready_state():
     """Create a new SET_READY_STATE_MESSAGE."""
     return create(protobuf.ProtocolMessage.SET_READY_STATE_MESSAGE)
+
+
+def set_connection_state():
+    """Create a new SET_CONNECTION_STATE."""
+    message = create(protobuf.ProtocolMessage.SET_CONNECTION_STATE_MESSAGE)
+    message.inner().state = protobuf.SetConnectionStateMessage.Connected
+    return message
 
 
 def crypto_pairing(pairing_data):
@@ -112,4 +121,37 @@ def send_hid_event(use_page, usage, down):
         data + \
         binascii.unhexlify(b'0000000000000001000000')
 
+    return message
+
+
+def command(cmd):
+    """Playback command request."""
+    message = create(protobuf.SEND_COMMAND_MESSAGE)
+    send_command = message.inner()
+    send_command.command = cmd
+    return message
+
+
+def repeat(mode):
+    """Change repeat mode of current player."""
+    message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
+    send_command = message.inner()
+    send_command.options.externalPlayerCommand = True
+    send_command.options.repeatMode = mode
+    return message
+
+
+def shuffle(enable):
+    """Change shuffle mode of current player."""
+    message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
+    send_command = message.inner()
+    send_command.options.shuffleMode = 3 if enable else 1
+    return message
+
+
+def seek_to_position(position):
+    """Seek to an absolute position in stream."""
+    message = command(protobuf.CommandInfo_pb2.SeekToPlaybackPosition)
+    send_command = message.inner()
+    send_command.options.playbackPosition = position
     return message
