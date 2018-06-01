@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.3.10 (2018-06-01)
+-------------------
+
+Changes:
+
+- Loosen up required versions for some dependencies
+
 0.3.9 (2017-12-12)
 ------------------
 
