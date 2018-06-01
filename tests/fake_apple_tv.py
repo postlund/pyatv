@@ -362,6 +362,7 @@ class FakeAppleTV(web.Application):
         """Handle start of AirPlay device authentication."""
         return web.Response(status=200)  # Normally never fails
 
+    @asyncio.coroutine
     def handle_pair_setup_pin(self, request):
         """Handle AirPlay device authentication requests."""
         content = yield from request.content.read()
@@ -379,6 +380,7 @@ class FakeAppleTV(web.Application):
 
         return web.Response(status=503)
 
+    @asyncio.coroutine
     def handle_airplay_pair_verify(self, request):
         """Handle verification of AirPlay device authentication."""
         content = yield from request.content.read()
