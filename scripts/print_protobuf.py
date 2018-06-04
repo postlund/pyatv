@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Decode and print a protobuf message from hex."""
 
 import sys
 import binascii

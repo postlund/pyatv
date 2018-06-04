@@ -84,7 +84,7 @@ def extract_message_info():
 
 
 def extract_unreferenced_messages():
-
+    """Get messages not referenced anywhere."""
     base_path = BASE_PACKAGE.replace('.', '/')
 
     for filename in os.listdir(base_path):
@@ -121,7 +121,6 @@ def main():
         constants.append(
             '{0} = ProtocolMessage.{0}'.format(
                 info.const))
-
 
     # Look for remaining messages
     for module_name, message_name in extract_unreferenced_messages():
