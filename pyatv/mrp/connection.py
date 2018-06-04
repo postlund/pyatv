@@ -67,7 +67,16 @@ class MrpConnection(asyncio.Protocol):
         self._transport.write(data)
         _LOGGER.debug('>> Send: Protobuf=%s', message)
 
-    # TODO: read messages from buffer with loop
+    def send_raw(self, data):
+        """Send message to device."""
+        log_binary(_LOGGER, '>> Send raw', Data=data)
+        if self._chacha:
+            data = self._chacha.encrypt(data)
+            log_binary(_LOGGER, '>> Send raw', Encrypted=data)
+
+        data = write_variant(len(data)) + data
+        self._transport.write(data)
+
     def data_received(self, data):
         """Message was received from device."""
         # A message might be split over several reads, so we store a buffer and
@@ -89,7 +98,7 @@ class MrpConnection(asyncio.Protocol):
             try:
                 self._handle_message(data)
             except Exception:  # pylint: disable=broad-except
-                _LOGGER.error('Failed to handle message')
+                _LOGGER.exception('Failed to handle message')
 
     def _handle_message(self, data):
         if self._chacha:
@@ -100,4 +109,4 @@ class MrpConnection(asyncio.Protocol):
         parsed.ParseFromString(data)
         _LOGGER.debug('<< Receive: Protobuf=%s', parsed)
         if self.listener:
-            self.listener.message_received(parsed)
+            self.listener.message_received(parsed, data)

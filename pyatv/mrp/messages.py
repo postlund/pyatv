@@ -20,15 +20,21 @@ def device_information(name, identifier):
     # pylint: disable=no-member
     message = create(protobuf.DEVICE_INFO_MESSAGE)
     info = message.inner()
-    info.uniqueIdentifier = identifier
-    info.name = name
-    info.localizedModelName = 'iPhone'
-    info.systemBuildVersion = '14G60'
+    info.allowsPairing = True
     info.applicationBundleIdentifier = 'com.apple.TVRemote'
     info.applicationBundleVersion = '273.12'
-    info.protocolVersion = 1
     info.lastSupportedMessageType = 58
+    info.localizedModelName = 'iPhone'
+    info.name = name
+    info.protocolVersion = 1
+    info.sharedQueueVersion = 2
+    info.supportsACL = True
     info.supportsExtendedMotion = True
+    info.supportsSharedQueue = True
+    info.supportsSystemPairing = True
+    info.systemBuildVersion = '14G60'
+    info.systemMediaApplication = "com.apple.TVMusic"
+    info.uniqueIdentifier = identifier
     return message
 
 

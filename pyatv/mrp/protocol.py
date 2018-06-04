@@ -50,7 +50,7 @@ class MrpProtocol:
         lst[message_type].append(Listener(listener, data))
 
     # TODO: This method is too big for its own good. Must split and clean up.
-    async def start(self):
+    async def start(self, skip_initial_messages=False):
         """Connect to device and listen to incoming messages."""
         if self.connection.connected:
             return
@@ -67,8 +67,16 @@ class MrpProtocol:
         # device will not respond with anything
         msg = messages.device_information(
             'pyatv', self.srp.pairing_id.decode())
+
         await self.send_and_receive(msg)
         self._initial_message_sent = True
+
+        # This is a hack to support re-use of a protocol object in
+        # proxy (will be removed/refactored later)
+        if skip_initial_messages:
+            return
+
+        await self._connect_and_encrypt()
 
         # This should be the first message sent after encryption has
         # been enabled
@@ -169,7 +177,7 @@ class MrpProtocol:
         del self._outstanding[identifier]
         return response
 
-    def message_received(self, message):
+    def message_received(self, message, _):
         """Message was received from device."""
         # If the message identifer is outstanding, then someone is
         # waiting for the respone so we save it here
