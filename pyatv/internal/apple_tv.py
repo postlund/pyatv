@@ -25,7 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 
 _PSU_CMD = 'ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}'
 _ARTWORK_CMD = 'ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]'
-_CTRL_PROMPT_CMD = 'ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0'
+_CTRL_PROMPT_CMD = 'ctrl-int/1/controlpromptentry?[AUTH]&prompt-id={0}'
 
 
 class BaseAppleTV:
@@ -82,14 +82,16 @@ class BaseAppleTV:
         cmd_url = 'ctrl-int/1/{}?[AUTH]&prompt-id=0'.format(cmd)
         return self.daap.post(cmd_url)
 
-    def controlprompt_cmd(self, cmd):
+    def controlprompt_cmd(self, cmd, prompt_id=0, cmcc=0, text_entry=None):
         """Perform a "controlpromptentry" command."""
-        data = tags.string_tag('cmbe', cmd) + tags.uint8_tag('cmcc', 0)
-        return self.daap.post(_CTRL_PROMPT_CMD, data=data)
+        data = tags.string_tag('cmbe', cmd) + tags.uint8_tag('cmcc', cmcc)
+        if text_entry:
+            data += tags.string_tag('cmte', text_entry)
+        return self.daap.post(_CTRL_PROMPT_CMD.format(prompt_id), data=data)
 
     def controlprompt_data(self, data):
         """Perform a "controlpromptentry" command."""
-        return self.daap.post(_CTRL_PROMPT_CMD, data=data)
+        return self.daap.post(_CTRL_PROMPT_CMD.format(0), data=data)
 
     def set_property(self, prop, value):
         """Change value of a DAAP property, e.g. volume or media position."""
@@ -210,6 +212,20 @@ class RemoteControlInternal(RemoteControl):
     def set_repeat(self, repeat_mode):
         """Change repeat mode."""
         return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
+
+
+class KeyboardInternal(RemoteControl):
+    """Implementation of keyboard API."""
+
+    def __init__(self, apple_tv):
+        """Initialize keybard instance."""
+        super().__init__()
+        self.apple_tv = apple_tv
+
+    def send_input(self, text):
+        """Send keyboard input."""
+        return self.apple_tv.controlprompt_cmd(
+            'PromptUpdate', prompt_id=1, cmcc=8, text_entry=text)
 
 
 class PlayingInternal(Playing):
@@ -483,6 +499,7 @@ class AppleTVInternal(AppleTV):
 
         self._apple_tv = BaseAppleTV(self._requester)
         self._atv_remote = RemoteControlInternal(self._apple_tv)
+        self._atv_keybord = KeyboardInternal(self._apple_tv)
         self._atv_metadata = MetadataInternal(self._apple_tv, daap_http)
         self._atv_push_updater = PushUpdaterInternal(loop, self._apple_tv)
 
@@ -512,6 +529,11 @@ class AppleTVInternal(AppleTV):
     def remote_control(self):
         """Return API for controlling the Apple TV."""
         return self._atv_remote
+
+    @property
+    def keyboard(self):
+        """Return API for keyboard."""
+        return self._atv_keybord
 
     @property
     def metadata(self):

@@ -83,3 +83,11 @@ def pprint(data, tag_lookup, indent=0):
         raise exceptions.InvalidDmapDataError(
             'invalid dmap data: ' + str(data))
     return output
+
+
+if __name__ == '__main__':
+    import sys
+    from pyatv import tag_definitions, dmap
+    with open(sys.argv[1], 'rb') as _fh:
+        parsed = dmap.parse(_fh.read(), tag_definitions.lookup_tag)
+        print(dmap.pprint(parsed, tag_definitions.lookup_tag))

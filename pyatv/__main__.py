@@ -35,6 +35,7 @@ class GlobalCommands:
     def commands(self):
         """Print a list with available commands."""
         _print_commands('Remote control', interface.RemoteControl)
+        _print_commands('Keyboard', interface.Keyboard)
         _print_commands('Metadata', interface.Metadata)
         _print_commands('Playing', interface.Playing)
         _print_commands('AirPlay', interface.AirPlay)
@@ -51,6 +52,7 @@ class GlobalCommands:
             return 1
 
         iface = [interface.RemoteControl,
+                 interface.Keyboard,
                  interface.Metadata,
                  interface.Playing,
                  interface.AirPlay,
@@ -342,6 +344,7 @@ def _handle_commands(args, loop):
 def _handle_device_command(args, cmd, atv, loop):
     # TODO: Add these to array and use a loop
     device = retrieve_commands(DeviceCommands)
+    keyboard = retrieve_commands(interface.Keyboard)
     ctrl = retrieve_commands(interface.RemoteControl)
     metadata = retrieve_commands(interface.Metadata)
     playing = retrieve_commands(interface.Playing)
@@ -356,6 +359,10 @@ def _handle_device_command(args, cmd, atv, loop):
     elif cmd in ctrl:
         return (yield from _exec_command(
             atv.remote_control, cmd, True, *cmd_args))
+
+    elif cmd in keyboard:
+        return (yield from _exec_command(
+            atv.keyboard, cmd, True, *cmd_args))
 
     elif cmd in metadata:
         return (yield from _exec_command(

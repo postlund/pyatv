@@ -48,6 +48,7 @@ _TAGS = {
     'cmpr': DmapTag(read_uint,   'dmcp.protocolversion'),
     'cmsr': DmapTag(read_uint,   'dmcp.serverrevision'),
     'cmst': DmapTag('container', 'dmcp.playstatus'),
+    'cmte': DmapTag(read_str,    'dmcp.textentry'),
     'cmty': DmapTag(read_str,    'dacp.devicetype'),
     'mdcl': DmapTag('container', 'dmap.dictionary'),
     'miid': DmapTag(read_uint,   'dmap.itemid'),
@@ -90,13 +91,12 @@ _TAGS = {
     'cmbe': DmapTag(read_str,    'unknown tag'),
     'cmcc': DmapTag(read_str,    'unknown tag'),
     'cmce': DmapTag(read_str,    'unknown tag'),
-    'cmcv': DmapTag(read_ignore, 'unknown tag'),
+    'cmcv': DmapTag(read_str,    'unknown tag'),
     'cmik': DmapTag(read_uint,   'unknown tag'),
     'cmsb': DmapTag(read_uint,   'unknown tag'),
     'cmsc': DmapTag(read_uint,   'unknown tag'),
     'cmsp': DmapTag(read_uint,   'unknown tag'),
     'cmsv': DmapTag(read_uint,   'unknown tag'),
-    'cmte': DmapTag(read_str,    'unknown tag'),
     'mscu': DmapTag(read_uint,   'unknown tag'),
 }
 

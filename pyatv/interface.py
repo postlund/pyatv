@@ -121,6 +121,17 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
 
+class Keyboard(object):
+    """Base class for API used for keyboard input."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def send_input(self):
+        """Send keyboard input."""
+        raise exceptions.NotSupportedError
+
+
 class Playing(object):
     """Base class for retrieving what is currently playing."""
 
@@ -359,6 +370,11 @@ class AppleTV(object):
     @abstractproperty
     def remote_control(self):
         """Return API for controlling the Apple TV."""
+        raise exceptions.NotSupportedError
+
+    @abstractproperty
+    def keyboard(self):
+        """Return API for keyboard."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
