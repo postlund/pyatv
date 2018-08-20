@@ -62,6 +62,8 @@ def first(dmap_data, *path):
         if path[0] in key:
             return first(key[path[0]], *path[1:])
 
+    return None
+
 
 # #TODO: Also a bad method that should be re-written
 def pprint(data, tag_lookup, indent=0):

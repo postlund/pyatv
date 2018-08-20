@@ -356,12 +356,6 @@ class PushUpdaterInternal(PushUpdater):
         if self._future is not None:
             raise exceptions.NoAsyncListenerError
 
-        # If ensure_future, use that instead of async
-        if hasattr(asyncio, 'ensure_future'):
-            run_async = getattr(asyncio, 'ensure_future')
-        else:
-            run_async = asyncio.async  # pylint: disable=no-member
-
         # Always start with 0 to trigger an immediate response for the
         # first request
         self._atv.playstatus_revision = 0
@@ -369,8 +363,8 @@ class PushUpdaterInternal(PushUpdater):
         # This for some reason fails on travis but not in other places.
         # Why is that (same python version)?
         # pylint: disable=deprecated-method
-        self._future = run_async(self._poller(initial_delay),
-                                 loop=self._loop)
+        self._future = asyncio.ensure_future(self._poller(initial_delay),
+                                             loop=self._loop)
         return self._future
 
     def stop(self):
@@ -506,7 +500,7 @@ class AppleTVInternal(AppleTV):
 
         Must be done when session is no longer needed to not leak resources.
         """
-        self._session.close()
+        yield from self._session.close()
 
     @property
     def remote_control(self):

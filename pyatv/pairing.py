@@ -5,12 +5,13 @@ import asyncio
 import hashlib
 import logging
 import random
+import ipaddress
 from io import StringIO
 
-import ipaddress
-import netifaces
 from aiohttp import web
 from zeroconf import ServiceInfo
+
+import netifaces
 from pyatv import tags
 
 _LOGGER = logging.getLogger(__name__)

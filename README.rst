@@ -27,7 +27,7 @@ Features
 Requirements
 ------------
 
-- python>=3.4.2
+- python>=3.5.3
 - See documentation for additional libraries
 
 Getting started
@@ -40,7 +40,7 @@ Use pip::
 
     $ pip install pyatv
 
-NOTE: You need some system packages, run this on debian or similar:
+NOTE: You need some system packages, run this on debian or similar::
 
     $ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 

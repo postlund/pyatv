@@ -25,10 +25,10 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.log_handler = LogOutputHandler(self)
         self.session = ClientSession(loop=self.loop)
 
-    def tearDown(self):
-        self.session.close()
+    @asyncio.coroutine
+    def tearDownAsync(self):
+        yield from self.session.close()
         self.log_handler.tearDown()
-        AioHTTPTestCase.tearDown(self)
 
     @asyncio.coroutine
     def get_application(self, loop=None):
