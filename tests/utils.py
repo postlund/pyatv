@@ -12,10 +12,10 @@ def simple_get(url, loop):
     response = yield from session.request('GET', url)
     if response.status < 200 or response.status >= 300:
         response.close()
-        session.close()
+        yield from session.close()
         return None, response.status
 
     data = yield from response.content.read()
     response.close()
-    session.close()
+    yield from session.close()
     return data, response.status

@@ -53,7 +53,5 @@ synchronous library is currently out of scope and not a priority.
 
 **Why not use the async/await syntax introduced in python 3.5?**
 
-Mainly for greater compatibility. It is now also supported in python 3.4. Since
-the main driver for this library was support for the Apple TV in
-`Home-Assistant <https://home-assistant.io/>`_, it was natural to pick the
-older version (since Home Assistant is implemented in that).
+This syntax-change has been introduced on the master branch and will be default
+in version 0.4.0 and later.

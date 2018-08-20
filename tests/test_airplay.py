@@ -19,6 +19,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
     def setUp(self):
         AioHTTPTestCase.setUp(self)
         self.log_handler = LogOutputHandler(self)
+        self.session = ClientSession(loop=self.loop)
 
         # This is a hack that overrides asyncio.sleep to avoid making the test
         # slow. It also counts number of calls, since this is quite important
@@ -26,9 +27,10 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         player.asyncio.sleep = self.fake_asyncio_sleep
         self.no_of_sleeps = 0
 
-    def tearDown(self):
-        AioHTTPTestCase.tearDown(self)
+    @asyncio.coroutine
+    def tearDownAsync(self):
         self.log_handler.tearDown()
+        yield from self.session.close()
 
     @asyncio.coroutine
     def get_application(self, loop=None):
@@ -46,13 +48,10 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        session = ClientSession(loop=self.loop)
         aplay = player.AirPlayPlayer(
-            self.loop, session, '127.0.0.1', port=self.server.port)
+            self.loop, self.session, '127.0.0.1', port=self.server.port)
         yield from aplay.play_url(STREAM, position=START_POSITION)
 
         self.assertEqual(self.fake_atv.last_airplay_url, STREAM)
         self.assertEqual(self.fake_atv.last_airplay_start, START_POSITION)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
-
-        session.close()

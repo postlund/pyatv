@@ -1,8 +1,9 @@
 """Simple example showing of pairing."""
 
 import asyncio
-import pyatv
 from zeroconf import Zeroconf
+
+import pyatv
 
 
 PIN_CODE = 1234

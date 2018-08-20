@@ -1,6 +1,6 @@
 [MASTER]
 reports=no
-
+extension-pkg-whitelist=netifaces
 disable=
   locally-disabled,
   fixme
