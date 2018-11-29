@@ -133,11 +133,11 @@ class MrpPlaying(Playing):
         state = self._setstate.playbackState
         if state == 1:
             return const.PLAY_STATE_PLAYING
-        elif state == 2:
+        if state == 2:
             return const.PLAY_STATE_PAUSED
-        else:
-            raise exceptions.UnknownPlayState(
-                'Unknown playstate: ' + str(state))
+
+        raise exceptions.UnknownPlayState(
+            'Unknown playstate: ' + str(state))
 
     @property
     def title(self):

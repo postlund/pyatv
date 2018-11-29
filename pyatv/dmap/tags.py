@@ -29,7 +29,6 @@ def read_bplist(data, start, length):
 # pylint: disable=unused-argument
 def read_ignore(data, start, length):
     """Use this to ignore data for all input."""
-    pass
 
 
 def uint8_tag(name, value):

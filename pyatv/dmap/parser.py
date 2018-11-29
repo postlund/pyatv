@@ -72,7 +72,7 @@ def pprint(data, tag_lookup, indent=0):
     if isinstance(data, dict):
         for key, value in data.items():
             tag = tag_lookup(key)
-            if isinstance(value, (dict, list)) and tag.type != read_bplist:
+            if isinstance(value, (dict, list)) and tag.type is not read_bplist:
                 output += '{0}{1}: {2}\n'.format(indent*' ', key, tag)
                 output += pprint(value, tag_lookup, indent+2)
             else:
