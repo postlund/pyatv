@@ -121,6 +121,10 @@ class PairingHandler:
         return web.Response(status=500)
 
     def _verify_pin(self, received_code):
+        # If no particular pin code is specified, allow any pin
+        if self.pin_code is None:
+            return True
+
         merged = StringIO()
         merged.write(self.pairing_guid)
         for char in str(self.pin_code):

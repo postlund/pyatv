@@ -73,6 +73,18 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
 
+    def test_succesful_pairing_with_any_pin(self):
+        self.pairing.pin_code = None
+        yield from self.pairing.start(self.zeroconf)
+
+        url = self._pairing_url('invalid_pairing_code')
+        data, _ = yield from utils.simple_get(url, self.loop)
+
+        parsed = dmap.parse(data, tag_definitions.lookup_tag)
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+
     def test_pair_custom_pairing_guid(self):
         self.pairing.pin_code = PIN_CODE2
         self.pairing.pairing_guid = PAIRING_GUID2
