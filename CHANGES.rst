@@ -1,6 +1,21 @@
 CHANGES
 =======
 
+0.3.11 (2018-11-29)
+-------------------
+
+Changes:
+
+- Deprecate support for python 3.4
+- Add support for python 3.7
+- Bug fixes for #150 and #151
+- Add netifaces as dependency (#160)
+- Allow using any pin code when pairing
+
+Other:
+
+- Bump various test tools and fix code to conform with guidelines
+
 0.3.10 (2018-06-01)
 -------------------
 

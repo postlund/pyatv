@@ -7,5 +7,6 @@ pytest-cov==2.4.0
 pytest-timeout==1.2.0
 pytest-aiohttp==0.3.0
 pydocstyle==2.0.0
-mypy-lang==0.4.6
+mypy==0.641
 Sphinx==1.5.5
+typed-ast==1.1.0
