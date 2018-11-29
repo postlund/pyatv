@@ -310,15 +310,15 @@ async def cli_handler(loop):
         glob_cmds = GlobalCommands(args, loop)
         return (await _exec_command(
             glob_cmds, args.command[0], print_result=False))
-    elif args.autodiscover:
+    if args.autodiscover:
         if not await _autodiscover_device(args, loop):
             return 1
 
         return await _handle_commands(args, loop)
-    elif args.device_credentials:
+    if args.device_credentials:
         return await _handle_commands(args, loop)
-    else:
-        logging.error('To autodiscover an Apple TV, add -a')
+
+    logging.error('To autodiscover an Apple TV, add -a')
 
     return 1
 
@@ -338,7 +338,8 @@ async def _autodiscover_device(args, loop):
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
-    elif len(atvs) > 1:
+
+    if len(atvs) > 1:
         logging.error('Found more than one Apple TV; '
                       'specify one using --address and --device-credentials')
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
@@ -420,20 +421,20 @@ async def _handle_device_command(args, cmd, atv, loop):
         return (await _exec_command(
             DeviceCommands(atv, loop, args), cmd, False, *cmd_args))
 
-    elif cmd in ctrl:
+    if cmd in ctrl:
         return (await _exec_command(
             atv.remote_control, cmd, True, *cmd_args))
 
-    elif cmd in metadata:
+    if cmd in metadata:
         return (await _exec_command(
             atv.metadata, cmd, True, *cmd_args))
 
-    elif cmd in playing:
+    if cmd in playing:
         playing_resp = await atv.metadata.playing()
         return (await _exec_command(
             playing_resp, cmd, True, *cmd_args))
 
-    elif cmd in airplay:
+    if cmd in airplay:
         return (await _exec_command(
             atv.airplay, cmd, True, *cmd_args))
 
@@ -490,7 +491,7 @@ def main():
         except SystemExit:
             pass  # sys.exit() was used - do nothing
 
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except  # noqa
             import traceback
 
             traceback.print_exc(file=sys.stderr)

@@ -89,9 +89,10 @@ class DaapRequester:
             resp = parser.parse(resp, lookup_tag)
 
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
-        if status >= 200 and status < 300:
+        if 200 <= status < 300:
             return resp
-        elif not is_login:
+
+        if not is_login:
             # If a request fails, try to login again before retrying
             _LOGGER.info('implicitly logged out, logging in again')
             await self.login()
@@ -100,9 +101,9 @@ class DaapRequester:
         if retry:
             return (await self._do(
                 action, False, is_login=is_login, is_daap=is_daap))
-        else:
-            raise exceptions.AuthenticationError(
-                'failed to login: ' + str(status))
+
+        raise exceptions.AuthenticationError(
+            'failed to login: ' + str(status))
 
     def _mkurl(self, cmd, *args, session=True, login_id=False):
         url = '{}'.format(cmd.format(*args))

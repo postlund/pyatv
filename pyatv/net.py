@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 10.0  # Seconds
 
 
-class HttpSession(object):
+class HttpSession:
     """This class simplifies GET/POST requests."""
 
     def __init__(self, client_session, base_url):

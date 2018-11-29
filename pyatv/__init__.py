@@ -27,7 +27,7 @@ MEDIAREMOTE_SERVICE = '_mediaremotetv._tcp.local.'
 AIRPLAY_SERVICE = '_airplay._tcp.local.'
 
 
-class _ServiceListener(object):
+class _ServiceListener:
 
     # pylint: disable=too-many-arguments
     def __init__(self, loop, abort_on_found, device_ip, protocol, semaphore):

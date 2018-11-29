@@ -17,7 +17,7 @@ OutstandingMessage = namedtuple('OutstandingMessage', 'semaphore response')
 
 
 # pylint: disable=too-many-instance-attributes
-class MrpProtocol(object):
+class MrpProtocol:
     """Protocol logic related to MRP.
 
     This class wraps an MrpConnection instance and will automatically:
@@ -161,7 +161,7 @@ class MrpProtocol(object):
             await asyncio.wait_for(
                 semaphore.acquire(), timeout, loop=self.loop)
 
-        except:
+        except:  # noqa
             del self._outstanding[identifier]
             raise
 
