@@ -85,6 +85,17 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'),
                          int(PAIRING_GUID2, 16))
 
+    async def test_succesful_pairing_with_any_pin(self):
+        await self._start(pin_code=None)
+
+        url = self._pairing_url('invalid_pairing_code')
+        data, _ = await utils.simple_get(url, self.loop)
+
+        parsed = parser.parse(data, tag_definitions.lookup_tag)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
+
     async def test_failed_pairing(self):
         await self._start()
 
