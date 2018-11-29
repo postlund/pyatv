@@ -251,12 +251,12 @@ def cli_handler(loop):
         glob_cmds = GlobalCommands(args, loop)
         return (yield from _exec_command(
             glob_cmds, args.command[0], print_result=False))
-    elif args.autodiscover:
+    if args.autodiscover:
         return (yield from _handle_autodiscover(args, loop))
-    elif args.login_id:
+    if args.login_id:
         return (yield from _handle_commands(args, loop))
-    else:
-        logging.error('To autodiscover an Apple TV, add -a')
+
+    logging.error('To autodiscover an Apple TV, add -a')
 
     return 1
 
@@ -280,10 +280,12 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 def _handle_autodiscover(args, loop):
     atvs = yield from pyatv.scan_for_apple_tvs(
         loop, timeout=args.scan_timeout, abort_on_found=True)
+
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return 1
-    elif len(atvs) > 1:
+
+    if len(atvs) > 1:
         logging.error('Found more than one Apple TV; '
                       'specify one using --address and --login_id')
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
@@ -353,20 +355,20 @@ def _handle_device_command(args, cmd, atv, loop):
         return (yield from _exec_command(
             DeviceCommands(atv, loop), cmd, False, *cmd_args))
 
-    elif cmd in ctrl:
+    if cmd in ctrl:
         return (yield from _exec_command(
             atv.remote_control, cmd, True, *cmd_args))
 
-    elif cmd in metadata:
+    if cmd in metadata:
         return (yield from _exec_command(
             atv.metadata, cmd, True, *cmd_args))
 
-    elif cmd in playing:
+    if cmd in playing:
         playing_resp = yield from atv.metadata.playing()
         return (yield from _exec_command(
             playing_resp, cmd, True, *cmd_args))
 
-    elif cmd in airplay:
+    if cmd in airplay:
         return (yield from _exec_command(
             atv.airplay, cmd, True, *cmd_args))
 
@@ -425,7 +427,7 @@ def main():
         except SystemExit:
             pass  # sys.exit() was used - do nothing
 
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except # noqa: E722
             import traceback
 
             traceback.print_exc(file=sys.stderr)

@@ -32,7 +32,7 @@ class AppleTVDevice(
 
 
 # pylint: disable=too-few-public-methods
-class _ServiceListener(object):
+class _ServiceListener:
 
     def __init__(self, abort_on_found, semaphore):
         """Initialize a new _ServiceListener."""

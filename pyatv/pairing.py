@@ -34,7 +34,7 @@ def _get_private_ip_addresses():
                 yield ipaddr
 
 
-class PairingHandler(object):
+class PairingHandler:
     """Handle the pairing process.
 
     This class will publish a bonjour service and configure a webserver

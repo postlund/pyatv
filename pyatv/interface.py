@@ -39,7 +39,7 @@ def retrieve_commands(obj):
     return commands
 
 
-class RemoteControl(object):
+class RemoteControl:
     """Base class for API used to control an Apple TV."""
 
     __metaclass__ = ABCMeta
@@ -121,7 +121,7 @@ class RemoteControl(object):
         raise exceptions.NotSupportedError
 
 
-class Playing(object):
+class Playing:
     """Base class for retrieving what is currently playing."""
 
     __metaclass__ = ABCMeta
@@ -227,7 +227,7 @@ class Playing(object):
         raise exceptions.NotSupportedError
 
 
-class Metadata(object):
+class Metadata:
     """Base class for retrieving metadata from an Apple TV."""
 
     __metaclass__ = ABCMeta
@@ -253,7 +253,7 @@ class Metadata(object):
         raise exceptions.NotSupportedError
 
 
-class PushUpdater(object):
+class PushUpdater:
     """Base class for push/async updates from an Apple TV."""
 
     __metaclass__ = ABCMeta
@@ -294,7 +294,7 @@ class PushUpdater(object):
         raise exceptions.NotSupportedError
 
 
-class AirPlay(object):
+class AirPlay:
     """Base class for AirPlay functionality."""
 
     __metaclass__ = ABCMeta
@@ -335,7 +335,7 @@ class AirPlay(object):
         raise exceptions.NotSupportedError
 
 
-class AppleTV(object):
+class AppleTV:
     """Base class representing an Apple TV."""
 
     __metaclass__ = ABCMeta
