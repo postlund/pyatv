@@ -30,8 +30,9 @@ setup(
     install_requires=[
         'aiohttp>=3.0.1, <4',
         'cryptography>=1.8.1',
-        'curve25519-donna>=1.3, <2',
-        'ed25519>=1.4, <2',
+        'curve25519-donna>=1.3',
+        'ed25519>=1.4',
+        'netifaces>=0.10.0',
         'protobuf>=3.4.0',
         'srptools>=0.2.0',
         'tlslite-ng>=0.7.0',
