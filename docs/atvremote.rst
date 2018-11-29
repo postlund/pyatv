@@ -50,6 +50,15 @@ You can override the settings using ``--remote-name``, ``--pin`` and
 ENTER. If the pairing succeeded (after pressing ENTER), this will be
 acknowledged with a message.
 
+It is also possible to specify ``none`` as PIN code to allow any pin code:
+
+.. code:: bash
+
+    $ atvremote -p none pair
+    Use any pin to pair with "pyatv" (press ENTER to stop)
+    Using pairing guid: 0x895D9666154733BD
+    Note: If remote does not show up, try rebooting your Apple TV
+
 Specifying a device
 -------------------
 You have two choices:

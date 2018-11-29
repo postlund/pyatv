@@ -168,8 +168,13 @@ class DeviceCommands:
         await self.atv.pairing.start(
             zeroconf=Zeroconf(), name=self.args.name, pin=self.args.pin_code)
 
-        print('Use pin {0} to pair with "{1}" (press ENTER to stop)'.format(
-            self.args.pin_code, self.args.remote_name))
+        if self.args.pin_code is None:
+            print('Use any pin to pair with "{}" (press ENTER to stop)'.format(
+                self.args.remote_name))
+        else:
+            print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
+                self.args.pin_code, self.args.remote_name))
+
         print('Note: If remote does not show up, try rebooting your Apple TV')
 
         await self.loop.run_in_executor(None, sys.stdin.readline)
@@ -220,8 +225,10 @@ class PushListener:
         updater.start(initial_delay=1)
 
 
-def _in_range(lower, upper):
+def _in_range(lower, upper, allow_none=False):
     def _checker(value):
+        if allow_none and str(value).lower() == 'none':
+            return None
         if int(value) >= lower and int(value) < upper:
             return int(value)
         raise ArgumentTypeError('Must be greater >= {} and < {}'.format(
@@ -270,8 +277,8 @@ async def cli_handler(loop):
     pairing.add_argument('--remote-name', help='remote pairing name',
                          dest='remote_name', default='pyatv')
     pairing.add_argument('-p', '--pin', help='pairing pin code',
-                         dest='pin_code', type=_in_range(0, 9999),
-                         metavar='PIN', default=1234)
+                         dest='pin_code', metavar='PIN', default=1234,
+                         type=_in_range(0, 9999, allow_none=True))
     pairing.add_argument('--pairing-guid',
                          help='pairing guid (16 chars hex)',
                          dest='pairing_guid', default=None)
