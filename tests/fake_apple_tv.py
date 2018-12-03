@@ -293,7 +293,7 @@ class FakeAppleTV(web.Application):
         self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
         self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'),
                             pairing_response.remote_name)
-        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.tc.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     # Verifies that all needed headers are included in the request. Should be
     # checked in all requests, but that seems a bit too much and not that

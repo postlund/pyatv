@@ -112,7 +112,7 @@ class PairingHandler:
         if self._verify_pin(received_code):
             cmpg = tags.uint64_tag('cmpg', int(self.pairing_guid, 16))
             cmnm = tags.string_tag('cmnm', self._name)
-            cmty = tags.string_tag('cmty', 'ipod')
+            cmty = tags.string_tag('cmty', 'iPhone')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
             self.has_paired = True
             return web.Response(body=response)
