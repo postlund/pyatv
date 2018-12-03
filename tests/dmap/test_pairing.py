@@ -72,7 +72,7 @@ class PairingTest(asynctest.TestCase):
         parsed = parser.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     async def test_pair_custom_pairing_guid(self):
         await self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
@@ -94,7 +94,7 @@ class PairingTest(asynctest.TestCase):
         parsed = parser.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     async def test_failed_pairing(self):
         await self._start()
