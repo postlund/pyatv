@@ -4,6 +4,8 @@ import logging
 import asyncio
 import plistlib
 
+from pyatv import exceptions
+
 _LOGGER = logging.getLogger(__name__)
 
 # This is the default port. It is also included in the Bonjour service
@@ -63,6 +65,11 @@ class AirPlayPlayer:
             try:
                 info = yield from self.session.get(address)
                 data = yield from info.content.read()
+
+                if info.status == 403:
+                    raise exceptions.NoCredentialsError(
+                        'device authentication required')
+
                 _LOGGER.debug('Playback-info (%d): %s', info.status, data)
 
                 parsed = plistlib.loads(data)
