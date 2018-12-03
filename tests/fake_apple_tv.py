@@ -55,7 +55,7 @@ _DEVICE_VERIFY_STEP2_RESP = b''  # Value not used by pyatv
 
 LoginResponse = namedtuple('LoginResponse', 'session, status')
 ArtworkResponse = namedtuple('ArtworkResponse', 'content, status')
-AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'content')
+AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'code content')
 PairingResponse = namedtuple('PairingResponse', 'remote_name, pairing_code')
 
 
@@ -352,7 +352,7 @@ class FakeAppleTV(web.Application):
     def handle_airplay_playback_info(self, request):
         """Handle AirPlay playback-info requests."""
         response = self._get_response('airplay_playback')
-        return web.Response(body=response.content, status=200)
+        return web.Response(body=response.content, status=response.code)
 
     # TODO: Extract device auth code to separate module and make it more
     # general. This is a dumb implementation that verifies hard coded values,
@@ -476,7 +476,7 @@ class AppleTVUseCases:
         """Make playback-info return idle info."""
         plist = dict(readyToPlay=False, uuid=123)
         self.device.responses['airplay_playback'].insert(
-            0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+            0, AirPlayPlaybackResponse(200, plistlib.dumps(plist)))
 
     def set_property(self, prop, value):
         """Change value of a property."""
@@ -492,11 +492,16 @@ class AppleTVUseCases:
         # This is _not_ complete, currently not needed
         plist = dict(duration=0.8)
         self.device.responses['airplay_playback'].insert(
-            0, AirPlayPlaybackResponse(plistlib.dumps(plist)))
+            0, AirPlayPlaybackResponse(200, plistlib.dumps(plist)))
 
     def airplay_require_authentication(self):
         """Require device authentication for AirPlay."""
         self.device.has_authenticated = False
+
+    def airplay_playback_playing_no_permission(self):
+        """Make playback-info return forbidden."""
+        self.device.responses['airplay_playback'].insert(
+            0, AirPlayPlaybackResponse(403, None))
 
     def pairing_response(self, remote_name, expected_pairing_code):
         """Reponse when a pairing request is made."""
