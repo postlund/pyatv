@@ -3,6 +3,7 @@
 from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
+from pyatv import exceptions
 from pyatv.airplay import player
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
@@ -47,3 +48,14 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
 
         await session.close()
+
+    @unittest_run_loop
+    async def test_play_video_no_permission(self):
+        self.usecase.airplay_playback_playing_no_permission()
+
+        session = ClientSession(loop=self.loop)
+        aplay = player.AirPlayPlayer(
+            self.loop, session, '127.0.0.1', port=self.server.port)
+
+        with self.assertRaises(exceptions.NoCredentialsError):
+            await aplay.play_url(STREAM, position=START_POSITION)
