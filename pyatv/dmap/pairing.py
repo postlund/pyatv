@@ -152,7 +152,7 @@ class DmapPairingHandler(PairingHandler):
 
         merged = StringIO()
         merged.write(self.pairing_guid)
-        for char in str(self.pin_code):
+        for char in str(self.pin_code).zfill(4):
             merged.write(char)
             merged.write("\x00")
 

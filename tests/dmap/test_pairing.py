@@ -18,6 +18,11 @@ PIN_CODE2 = 5555
 PAIRING_GUID2 = '1234ABCDE56789FF'
 PAIRING_CODE2 = '58AD1D195B6DAA58AA2EA29DC25B81C3'
 
+# Code is padded with zeros
+PIN_CODE3 = 1
+PAIRING_GUID3 = '7D1324235F535AE7'
+PAIRING_CODE3 = 'A34C3361C7D57D61CA41F62A8042F069'
+
 # Pairing guid is 8 bytes, which is 64 bits
 RANDOM_128_BITS = 6558272190156386627
 RANDOM_PAIRING_GUID = '5B03A9CF4A983143'
@@ -74,6 +79,22 @@ class PairingTest(asynctest.TestCase):
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
+    async def test_succesful_pairing_with_any_pin(self):
+        await self._start(pin_code=None)
+
+        url = self._pairing_url('invalid_pairing_code')
+        _, status = await utils.simple_get(url, self.loop)
+
+        self.assertEqual(status, 200)
+
+    async def test_succesful_pairing_with_pin_leadering_zeros(self):
+        await self._start(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
+
+        url = self._pairing_url(PAIRING_CODE3)
+        _, status = await utils.simple_get(url, self.loop)
+
+        self.assertEqual(status, 200)
+
     async def test_pair_custom_pairing_guid(self):
         await self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
 
@@ -84,17 +105,6 @@ class PairingTest(asynctest.TestCase):
         parsed = parser.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'),
                          int(PAIRING_GUID2, 16))
-
-    async def test_succesful_pairing_with_any_pin(self):
-        await self._start(pin_code=None)
-
-        url = self._pairing_url('invalid_pairing_code')
-        data, _ = await utils.simple_get(url, self.loop)
-
-        parsed = parser.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.assertEqual(parser.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(parser.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     async def test_failed_pairing(self):
         await self._start()
