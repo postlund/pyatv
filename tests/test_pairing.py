@@ -71,7 +71,7 @@ class PairingTest(asynctest.TestCase):
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     def test_succesful_pairing_with_any_pin(self):
         self.pairing.pin_code = None
@@ -83,7 +83,7 @@ class PairingTest(asynctest.TestCase):
         parsed = dmap.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
         self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'ipod')
+        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'iPhone')
 
     def test_pair_custom_pairing_guid(self):
         self.pairing.pin_code = PIN_CODE2
