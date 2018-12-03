@@ -20,6 +20,10 @@ PIN_CODE2 = 5555
 PAIRING_GUID2 = '1234ABCDE56789FF'
 PAIRING_CODE2 = '58AD1D195B6DAA58AA2EA29DC25B81C3'
 
+PIN_CODE3 = 1
+PAIRING_GUID3 = '7D1324235F535AE7'
+PAIRING_CODE3 = 'A34C3361C7D57D61CA41F62A8042F069'
+
 # Pairing guid is 8 bytes, which is 64 bits
 RANDOM_128_BITS = 6558272190156386627
 RANDOM_PAIRING_GUID = '5B03A9CF4A983143'
@@ -78,12 +82,19 @@ class PairingTest(asynctest.TestCase):
         yield from self.pairing.start(self.zeroconf)
 
         url = self._pairing_url('invalid_pairing_code')
-        data, _ = yield from utils.simple_get(url, self.loop)
+        _, status = yield from utils.simple_get(url, self.loop)
 
-        parsed = dmap.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmpg'), 1)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmnm'), REMOTE_NAME)
-        self.assertEqual(dmap.first(parsed, 'cmpa', 'cmty'), 'iPhone')
+        self.assertEqual(status, 200)
+
+    def test_succesful_pairing_with_pin_leadering_zeros(self):
+        self.pairing.pin_code = PIN_CODE3
+        self.pairing.pairing_guid = PAIRING_GUID3
+        yield from self.pairing.start(self.zeroconf)
+
+        url = self._pairing_url(PAIRING_CODE3)
+        _, status = yield from utils.simple_get(url, self.loop)
+
+        self.assertEqual(status, 200)
 
     def test_pair_custom_pairing_guid(self):
         self.pairing.pin_code = PIN_CODE2
