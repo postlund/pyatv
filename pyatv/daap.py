@@ -91,7 +91,7 @@ class DaapRequester:
             resp = dmap.parse(resp, lookup_tag)
 
         self._log_response(str(action.__name__) + ': %s', resp, is_daap)
-        if 200 >= status < 300:
+        if 200 <= status < 300:
             return resp
 
         if not is_login:
