@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.3.12 (2018-12-07)
+-------------------
+
+Changes:
+
+- Fix breaking change in tvOS 12.1.1 (details in #158)
+- Manually paired remotes are no longer removed when rebooting Apple TV (#127)
+- Handle leading zeros when pairing (#163)
+- Improved error whan using AirPlay without credentials
+- Fixed bug introduced in 0.3.11 where a status code was not handled properly
+  when no artwork was available (seen as an exception)
+
 0.3.11 (2018-11-29)
 -------------------
 
