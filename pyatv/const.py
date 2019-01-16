@@ -57,6 +57,9 @@ PLAY_STATE_FAST_FORWARD = 5
 #: Media is being rewinded
 PLAY_STATE_FAST_BACKWARD = 6
 
+#: Media is stopped
+PLAY_STATE_STOPPED = 7
+
 
 # Repeat states
 
