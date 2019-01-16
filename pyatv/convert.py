@@ -39,6 +39,8 @@ def playstate(state):
         return const.PLAY_STATE_IDLE
     if state == 1:
         return const.PLAY_STATE_LOADING
+    if state == 2:
+        return const.PLAY_STATE_STOPPED
     if state == 3:
         return const.PLAY_STATE_PAUSED
     if state == 4:
@@ -68,6 +70,8 @@ def playstate_str(state):
         return 'Fast forward'
     if state == const.PLAY_STATE_FAST_BACKWARD:
         return 'Fast backward'
+    if state == const.PLAY_STATE_STOPPED:
+        return 'Stopped'
     return 'Unsupported'
 
 

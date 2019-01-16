@@ -38,6 +38,7 @@ MEDIA_KIND_TVSHOW2 = 64
 # Key: cmst.caps
 PLAY_STATE_IDLE = 0
 PLAY_STATE_LOADING = 1  # E.g. buffering
+PLAY_STATE_STOPPED = 2
 PLAY_STATE_PAUSED = 3
 PLAY_STATE_PLAYING = 4
 PLAY_STATE_FORWARD = 5
@@ -121,6 +122,8 @@ class ConvertTest(unittest.TestCase):
                          convert.playstate(PLAY_STATE_IDLE))
         self.assertEqual(const.PLAY_STATE_LOADING,
                          convert.playstate(PLAY_STATE_LOADING))
+        self.assertEqual(const.PLAY_STATE_STOPPED,
+                         convert.playstate(PLAY_STATE_STOPPED))
         self.assertEqual(const.PLAY_STATE_PAUSED,
                          convert.playstate(PLAY_STATE_PAUSED))
         self.assertEqual(const.PLAY_STATE_PLAYING,
