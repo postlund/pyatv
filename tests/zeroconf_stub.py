@@ -19,7 +19,7 @@ def homesharing_service(service_name, atv_name, address, hsgid):
 
     return ServiceInfo('_appletv-v2._tcp.local.',
                        service_name + '._appletv-v2._tcp.local.',
-                       address=address, port=3689,
+                       addresses=[address], port=3689,
                        properties=props)
 
 
@@ -33,7 +33,7 @@ def mrp_service(service_name, atv_name, address):
 
     return ServiceInfo('_mediaremotetv._tcp.local.',
                        service_name + '._mediaremotetv._tcp.local.',
-                       address=address, port=49152,
+                       addresses=[address], port=49152,
                        properties=props)
 
 
@@ -49,7 +49,7 @@ def airplay_service(atv_name, address):
 
     return ServiceInfo('_airplay._tcp.local.',
                        atv_name + '._airplay._tcp.local.',
-                       address=address, port=7000,
+                       addresses=[address], port=7000,
                        properties=props)
 
 
@@ -63,7 +63,7 @@ def device_service(service_name, atv_name, address):
 
     return ServiceInfo('_touch-able._tcp.local.',
                        service_name + '._touch-able._tcp.local.',
-                       address=address, port=3689,
+                       addresses=[address], port=3689,
                        server='AppleTV-2.local.',
                        properties=props)
 

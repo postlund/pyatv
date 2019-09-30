@@ -73,7 +73,7 @@ class PairingTest(asynctest.TestCase):
         await self._start()
 
         url = self._pairing_url(PAIRING_CODE)
-        data, _ = await utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
@@ -85,7 +85,7 @@ class PairingTest(asynctest.TestCase):
         await self._start(pin_code=None)
 
         url = self._pairing_url('invalid_pairing_code')
-        _, status = await utils.simple_get(url, self.loop)
+        _, status = await utils.simple_get(url)
 
         self.assertEqual(status, 200)
 
@@ -93,7 +93,7 @@ class PairingTest(asynctest.TestCase):
         await self._start(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
 
         url = self._pairing_url(PAIRING_CODE3)
-        _, status = await utils.simple_get(url, self.loop)
+        _, status = await utils.simple_get(url)
 
         self.assertEqual(status, 200)
 
@@ -101,7 +101,7 @@ class PairingTest(asynctest.TestCase):
         await self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
 
         url = self._pairing_url(PAIRING_CODE2)
-        data, _ = await utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
@@ -112,7 +112,7 @@ class PairingTest(asynctest.TestCase):
         await self._start()
 
         url = self._pairing_url('wrong')
-        _, status = await utils.simple_get(url, self.loop)
+        _, status = await utils.simple_get(url)
 
         self.assertEqual(status, 500)
 

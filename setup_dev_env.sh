@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 PYTHON="python3.7 python3.6 python3.5"
 
 found_version=
@@ -9,8 +7,8 @@ for p in $PYTHON
 do
     which $p 2>&1 > /dev/null
     if [ $? -eq 0 ]; then
-	found_version=$p
-	break
+        found_version=$p
+        break
     fi
 done
 

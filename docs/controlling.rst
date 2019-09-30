@@ -8,7 +8,7 @@ via the `remote_control` attribute after connecting to a device, like so:
 .. code:: python
 
     details = ...
-    atv = pyatv.connect_to_apple_tv(details, loop)
+    atv = await pyatv.connect_to_apple_tv(details, loop)
     rc = atv.remote_control
 
 All commands are asynchronous, so they must be used in a coroutine. For a
@@ -21,8 +21,8 @@ the expected action:
 
 .. code:: python
 
-    yield from atv.remote_control.play()
-    yield from atv.remote_control.next()
+    await atv.remote_control.play()
+    await atv.remote_control.next()
 
 Commands with arguments
 -----------------------
@@ -32,4 +32,4 @@ the desired media position:
 
 .. code:: python
 
-    yield from atv.remote_control.set_position(60)  # 1 minute in
+    await atv.remote_control.set_position(60)  # 1 minute in

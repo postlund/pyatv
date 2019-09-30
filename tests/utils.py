@@ -3,10 +3,9 @@
 from aiohttp import ClientSession
 
 
-async def simple_get(url, loop):
+async def simple_get(url):
     """Perform a GET-request to a specified URL."""
-    print("url:", url, url.__class__)
-    session = ClientSession(loop=loop)
+    session = ClientSession()
     response = await session.request('GET', url)
     if response.status < 200 or response.status >= 300:
         response.close()

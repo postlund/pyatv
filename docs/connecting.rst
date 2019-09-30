@@ -15,7 +15,7 @@ pass it as an optional parameter when connecting:
 .. code:: python
 
     other_session = ... # Some session
-    atv = pyatv.connect_to_apple_tv(atv, loop, session=other_session)
+    atv = await pyatv.connect_to_apple_tv(atv, loop, session=other_session)
 
 If no session is given, a default ``ClientSession`` will be created for you.
 
@@ -36,10 +36,9 @@ session not being closed properly.
     import pyatv
     import asyncio
 
-    @asyncio.coroutine
-    def print_what_is_playing(loop):
-        atvs = yield from pyatv.scan_for_apple_tvs(loop)
-        atv = pyatv.connect_to_apple_tv(atvs[0], loop)
+    async def print_what_is_playing(loop):
+        atvs = await from pyatv.scan_for_apple_tvs(loop)
+        atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
 
         try:
             # Do something with atv
@@ -68,9 +67,8 @@ you need to logout):
     # LOGIN_ID = '0000000000000001'                   # Pairing guid
     DETAILS = pyatv.AppleTVDevice(NAME, ADDRESS, LOGIN_ID)
 
-    @asyncio.coroutine
-    def print_what_is_playing(loop, details):
-        atv = pyatv.connect_to_apple_tv(details, loop)
+    async def print_what_is_playing(loop, details):
+        atv = await pyatv.connect_to_apple_tv(details, loop)
 
         try:
             # Do something with atv

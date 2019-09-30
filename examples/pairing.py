@@ -19,7 +19,7 @@ async def pair_with_device(loop):
     my_zeroconf = Zeroconf()
     details = conf.AppleTV('127.0.0.1', 'Apple TV')
     details.add_service(conf.DmapService('login_id'))
-    atv = pyatv.connect_to_apple_tv(details, loop)
+    atv = await pyatv.connect_to_apple_tv(details, loop)
 
     atv.pairing.pin(PIN_CODE)
     await atv.pairing.start(zeroconf=my_zeroconf, name=REMOTE_NAME)

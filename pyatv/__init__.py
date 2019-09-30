@@ -53,7 +53,7 @@ class _ServiceListener:
             return
 
         info = zeroconf.get_service_info(service_type, name)
-        address = ip_address(info.address)
+        address = ip_address(info.addresses[0])  # TODO: Consider all?
 
         # We might be looking for a particular device
         if self.device_ip and self.device_ip != address:
@@ -162,7 +162,7 @@ async def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
     return list(filter(_should_include, listener.found_devices.values()))
 
 
-def connect_to_apple_tv(details, loop, protocol=None, session=None):
+async def connect_to_apple_tv(details, loop, protocol=None, session=None):
     """Connect and logins to an Apple TV."""
     service = _get_service_used_to_connect(details, protocol)
 

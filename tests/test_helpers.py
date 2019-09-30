@@ -32,8 +32,7 @@ class HelpersTest(asynctest.TestCase):
             self.device_found = False
 
         helpers.auto_connect(found_handler,
-                             not_found=not_found_handler,
-                             event_loop=self.loop)
+                             not_found=not_found_handler)
 
         self.assertFalse(self.device_found)
 
@@ -48,8 +47,7 @@ class HelpersTest(asynctest.TestCase):
         async def found_handler(atv):
             self.found_device = atv
 
-        helpers.auto_connect(found_handler,
-                             event_loop=self.loop)
+        helpers.auto_connect(found_handler)
 
         self.assertEqual(self.found_device, self.mock_device)
         self.assertTrue(self.mock_device.logout.called)

@@ -156,7 +156,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
         artwork_url = await self.atv.metadata.artwork_url()
 
         # Fetch artwork with a GET request to ensure it works
-        artwork, _ = await utils.simple_get(artwork_url, self.loop)
+        artwork, _ = await utils.simple_get(artwork_url)
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop

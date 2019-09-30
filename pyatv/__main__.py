@@ -394,7 +394,8 @@ async def _handle_commands(args, loop):
         details.add_service(MrpService(
             args.port, device_credentials=args.device_credentials))
 
-    atv = pyatv.connect_to_apple_tv(details, loop, protocol=args.protocol)
+    atv = await pyatv.connect_to_apple_tv(
+        details, loop, protocol=args.protocol)
     atv.push_updater.listener = PushListener()
 
     try:

@@ -31,9 +31,9 @@ HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
 
 class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
-    def setUp(self):
-        super().setUp()
-        self.atv = self.get_connected_device(HSGID)
+    async def setUpAsync(self):
+        await super().setUpAsync()
+        self.atv = await self.get_connected_device(HSGID)
 
         # TODO: currently stubs internal method, should provide stub
         # for netifaces later
@@ -48,13 +48,13 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.fake_atv = FakeAppleTV(
             HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
-        return self.fake_atv
+        return self.fake_atv.app
 
-    def get_connected_device(self, identifier):
+    async def get_connected_device(self, identifier):
         conf = AppleTV('127.0.0.1', 'Apple TV')
         conf.add_service(DmapService(identifier, port=self.server.port))
         conf.add_service(AirPlayService(self.server.port))
-        return connect_to_apple_tv(conf, self.loop)
+        return await connect_to_apple_tv(conf, self.loop)
 
     @unittest_run_loop
     async def test_not_supportedt(self):
@@ -114,6 +114,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
         await self.atv.logout()
-        self.atv = self.get_connected_device(PAIRING_GUID)
+        self.atv = await self.get_connected_device(PAIRING_GUID)
         session_id = await self.atv.login()
         self.assertEqual(SESSION_ID, session_id)

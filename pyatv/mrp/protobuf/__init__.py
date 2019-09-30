@@ -131,5 +131,5 @@ def _inner_message(self):
     raise Exception('unknown type: ' + str(self.type))
 
 
-ProtocolMessage.inner = _inner_message
+ProtocolMessage.inner = _inner_message  # type: ignore
 

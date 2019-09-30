@@ -4,7 +4,7 @@ import asyncio
 import pyatv
 
 
-def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
+def auto_connect(handler, timeout=5, not_found=None):
     """Short method for connecting to a device.
 
     This is a convenience method that create an event loop, auto discovers
@@ -13,8 +13,7 @@ def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
     called when no device was found. Very inflexible in many cases, but can be
     handys sometimes when trying things.
 
-    Note 1: both handler and not_found must be coroutines
-    Note 2: An optional loop can be passed if needed (mainly for testing)
+    Note: both handler and not_found must be coroutines
     """
     # A coroutine is used so we can connect to the device while being inside
     # the event loop
@@ -24,7 +23,7 @@ def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
 
         # Take the first device found
         if atvs:
-            atv = pyatv.connect_to_apple_tv(atvs[0], loop)
+            atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
             try:
                 await handler(atv)
             finally:
@@ -33,5 +32,5 @@ def auto_connect(handler, timeout=5, not_found=None, event_loop=None):
             if not_found is not None:
                 await not_found()
 
-    loop = event_loop if event_loop else asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(_handle(loop))

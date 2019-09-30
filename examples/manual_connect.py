@@ -19,7 +19,7 @@ async def print_what_is_playing(loop):
     details.add_service(conf.DmapService(HSGID))
 
     print('Connecting to {}'.format(details.address))
-    atv = pyatv.connect_to_apple_tv(details, loop)
+    atv = await pyatv.connect_to_apple_tv(details, loop)
 
     try:
         print((await atv.metadata.playing()))

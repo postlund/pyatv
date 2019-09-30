@@ -70,18 +70,18 @@ class FakeAppleTV(FakeAirPlayDevice):
         self.buttons_press_count = 0
         self.properties = {}  # setproperty
 
-        self.router.add_get('/login', self.handle_login)
-        self.router.add_get(
+        self.app.router.add_get('/login', self.handle_login)
+        self.app.router.add_get(
             '/ctrl-int/1/playstatusupdate', self.handle_playstatus)
-        self.router.add_post(
+        self.app.router.add_post(
             '/ctrl-int/1/controlpromptentry', self.handle_remote_button)
-        self.router.add_get(
+        self.app.router.add_get(
             '/ctrl-int/1/nowplayingartwork', self.handle_artwork)
-        self.router.add_post(
+        self.app.router.add_post(
             '/ctrl-int/1/setproperty', self.handle_set_property)
         for button in ['play', 'pause', 'stop', 'nextitem', 'previtem']:
-            self.router.add_post('/ctrl-int/1/' + button,
-                                 self.handle_playback_button)
+            self.app.router.add_post('/ctrl-int/1/' + button,
+                                     self.handle_playback_button)
 
     async def handle_login(self, request):
         """Handle login requests."""
@@ -224,7 +224,7 @@ class FakeAppleTV(FakeAirPlayDevice):
         server = 'http://127.0.0.1:{}'.format(port)
         url = '{}/pairing?pairingcode={}&servicename=test'.format(
             server, pairing_response.pairing_code)
-        data, _ = await utils.simple_get(url, self.loop)
+        data, _ = await utils.simple_get(url)
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
