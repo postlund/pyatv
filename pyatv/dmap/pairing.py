@@ -117,7 +117,11 @@ class DmapPairingHandler(PairingHandler):
         service = ServiceInfo(
             '_touch-remote._tcp.local.',
             '{0:040d}._touch-remote._tcp.local.'.format(int(address)),
-            socket.inet_aton(str(address)), port, 0, 0, props)
+            addresses=[socket.inet_aton(str(address))],
+            port=port,
+            weight=0,
+            priority=0,
+            properties=props)
         zeroconf.register_service(service)
 
         _LOGGER.debug('Published zeroconf service: %s', service)

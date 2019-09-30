@@ -18,7 +18,7 @@ async def print_what_is_playing(loop):
         return
 
     print('Connecting to {0}'.format(atvs[0].address))
-    atv = pyatv.connect_to_apple_tv(atvs[0], loop)
+    atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
 
     try:
         playing = await atv.metadata.playing()

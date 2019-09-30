@@ -35,7 +35,7 @@ _DEVICE_VERIFY_STEP2_RESP = b''  # Value not used by pyatv
 AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'code content')
 
 
-class FakeAirPlayDevice(web.Application):
+class FakeAirPlayDevice:
 
     def __init__(self, testcase):
         super().__init__()
@@ -44,16 +44,17 @@ class FakeAirPlayDevice(web.Application):
         self.has_authenticated = True
         self.last_airplay_url = None
         self.tc = testcase
+        self.app = web.Application()
 
-        self.router.add_post('/play', self.handle_airplay_play)
-        self.router.add_get('/playback-info',
-                            self.handle_airplay_playback_info)
-        self.router.add_post('/pair-pin-start',
-                             self.handle_pair_pin_start)
-        self.router.add_post('/pair-setup-pin',
-                             self.handle_pair_setup_pin)
-        self.router.add_post('/pair-verify',
-                             self.handle_airplay_pair_verify)
+        self.app.router.add_post('/play', self.handle_airplay_play)
+        self.app.router.add_get('/playback-info',
+                                self.handle_airplay_playback_info)
+        self.app.router.add_post('/pair-pin-start',
+                                 self.handle_pair_pin_start)
+        self.app.router.add_post('/pair-setup-pin',
+                                 self.handle_pair_setup_pin)
+        self.app.router.add_post('/pair-verify',
+                                 self.handle_airplay_pair_verify)
 
     # This method will retrieve the next response for a certain type.
     # If there are more than one response, it "pop" the last one and
@@ -89,7 +90,7 @@ class FakeAirPlayDevice(web.Application):
 
         return web.Response(status=200)
 
-    def handle_airplay_playback_info(self, request):
+    async def handle_airplay_playback_info(self, request):
         """Handle AirPlay playback-info requests."""
         response = self._get_response('airplay_playback')
         return web.Response(body=response.content, status=response.code)

@@ -15,9 +15,9 @@ from tests.mrp.fake_mrp_atv import (
 @unittest.skip('not ready yet')
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
-    def setUp(self):
-        super().setUp()
-        self.atv = self.get_connected_device(self.fake_atv.port)
+    async def setUp(self):
+        await super().setUpAsync()
+        self.atv = await self.get_connected_device(self.fake_atv.port)
 
     def tearDown(self):
         pass
@@ -28,11 +28,11 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.fake_atv.start(self.loop)
         return self.fake_atv
 
-    def get_connected_device(self, port):
+    async def get_connected_device(self, port):
         conf = AppleTV('127.0.0.1', 'Test device')
         conf.add_service(MrpService(port))
         conf.add_service(AirPlayService(self.server.port))
-        return connect_to_apple_tv(conf, loop=self.loop)
+        return await connect_to_apple_tv(conf, loop=self.loop)
 
     @unittest_run_loop
     def test_dummy_test(self):

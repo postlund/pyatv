@@ -5,4 +5,4 @@ if [ ! -e "setup.py" ]; then
     exit 1
 fi
 
-protoc --proto_path=. --python_out=. pyatv/mrp/protobuf/*.proto
+protoc --proto_path=. --python_out=. --mypy_out=. pyatv/mrp/protobuf/*.proto
