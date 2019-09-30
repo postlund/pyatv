@@ -28,9 +28,10 @@ class MrpPairingProcedure:
         """Start pairing procedure."""
         self.srp.initialize()
 
-        msg = messages.crypto_pairing({
-            tlv8.TLV_METHOD: b'\x00',
-            tlv8.TLV_SEQ_NO: b'\x01'})
+        msg = messages.crypto_pairing(
+            {tlv8.TLV_METHOD: b'\x00',
+             tlv8.TLV_SEQ_NO: b'\x01'},
+            is_pairing=True)
         resp = await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 

@@ -44,12 +44,17 @@ def set_connection_state():
     return message
 
 
-def crypto_pairing(pairing_data):
+def crypto_pairing(pairing_data, is_pairing=False):
     """Create a new CRYPTO_PAIRING_MESSAGE."""
     message = create(protobuf.CRYPTO_PAIRING_MESSAGE)
     crypto = message.inner()
     crypto.status = 0
     crypto.pairingData = tlv8.write_tlv(pairing_data)
+
+    # Hardcoded values for now, might have to be changed
+    crypto.isRetrying = False
+    crypto.isUsingSystemPairing = False
+    crypto.state = 2 if is_pairing else 0
     return message
 
 

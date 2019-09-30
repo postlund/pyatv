@@ -172,17 +172,16 @@ class DeviceCommands:
         else:
             self.atv.pairing.pin(self.args.pin_code)
 
-            print('Use {0} to pair with "{1}" (press ENTER to stop)'.format(
-                self.args.pin_code, self.args.remote_name))
+            if self.args.pin_code is None:
+                print('Use any pin to pair with "{}"'
+                      ' (press ENTER to stop)'.format(
+                          self.args.remote_name))
+            else:
+                print('Use pin {} to pair with "{}"'
+                      ' (press ENTER to stop)'.format(
+                          self.args.pin_code, self.args.remote_name))
 
-        if self.args.pin_code is None:
-            print('Use any pin to pair with "{}" (press ENTER to stop)'.format(
-                self.args.remote_name))
-        else:
-            print('Use pin {} to pair with "{}" (press ENTER to stop)'.format(
-                self.args.pin_code, self.args.remote_name))
-
-        await self.loop.run_in_executor(None, sys.stdin.readline)
+            await self.loop.run_in_executor(None, sys.stdin.readline)
 
         await self.atv.pairing.stop()
 
