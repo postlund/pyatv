@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n-pyatv/mrp/protobuf/CryptoPairingMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\";\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x02(\x0c\x12\x0e\n\x06status\x18\x02 \x02(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage')
+  serialized_pb=_b('\n-pyatv/mrp/protobuf/CryptoPairingMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"|\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x02(\x0c\x12\x0e\n\x06status\x18\x02 \x02(\x05\x12\x12\n\nisRetrying\x18\x03 \x02(\x08\x12\x1c\n\x14isUsingSystemPairing\x18\x04 \x02(\x08\x12\r\n\x05state\x18\x05 \x02(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -57,6 +57,27 @@ _CRYPTOPAIRINGMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isRetrying', full_name='CryptoPairingMessage.isRetrying', index=2,
+      number=3, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isUsingSystemPairing', full_name='CryptoPairingMessage.isUsingSystemPairing', index=3,
+      number=4, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='state', full_name='CryptoPairingMessage.state', index=4,
+      number=5, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -70,7 +91,7 @@ _CRYPTOPAIRINGMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=91,
-  serialized_end=150,
+  serialized_end=215,
 )
 
 DESCRIPTOR.message_types_by_name['CryptoPairingMessage'] = _CRYPTOPAIRINGMESSAGE
