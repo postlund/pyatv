@@ -12,7 +12,8 @@ from aiohttp import ClientSession
 from pyatv import (conf, exceptions)
 from pyatv.airplay import player
 from pyatv.airplay.api import AirPlayAPI
-from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP)
+from pyatv.const import (
+    PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 from pyatv.net import HttpSession
 
 from pyatv.dmap import DmapAppleTV
@@ -101,6 +102,9 @@ class _ServiceListener:
 
     def add_airplay_service(self, info, address):
         """Add a new AirPlay device to discovered list."""
+        if self.protocol and self.protocol != PROTOCOL_AIRPLAY:
+            return
+
         name = info.name.replace('._airplay._tcp.local.', '')
         self._handle_service(address, name, conf.AirPlayService(info.port))
 
