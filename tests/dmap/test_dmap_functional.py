@@ -8,7 +8,7 @@ from pyatv import (connect_to_apple_tv, exceptions)
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
-from tests import (zeroconf_stub, common_functional_tests)
+from tests import (getmac_stub, zeroconf_stub, common_functional_tests)
 
 HSGID = '12345-6789-0'
 PAIRING_GUID = '0x0000000000000001'
@@ -51,7 +51,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv.app
 
     async def get_connected_device(self, identifier):
-        conf = AppleTV('127.0.0.1', 'Apple TV')
+        conf = AppleTV(getmac_stub.IP, 'Apple TV')
         conf.add_service(DmapService(identifier, port=self.server.port))
         conf.add_service(AirPlayService(self.server.port))
         return await connect_to_apple_tv(conf, self.loop)

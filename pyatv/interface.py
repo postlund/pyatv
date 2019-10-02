@@ -276,10 +276,14 @@ class Metadata:
 
     __metaclass__ = ABCMeta
 
-    @abstractproperty
+    def __init__(self, device_id):
+        """Initialize a new instance of Metadata."""
+        self._device_id = device_id
+
+    @property
     def device_id(self):
         """Return a unique identifier for current device."""
-        raise exceptions.NotSupportedError
+        return self._device_id
 
     @abstractmethod
     def artwork(self):

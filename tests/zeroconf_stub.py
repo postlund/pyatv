@@ -1,10 +1,8 @@
 """Stub for the zeroconf library.
 
 As zeroconf does not provide a stub or mock, this implementation will serve as
-stub here. It can fake immediate answers for any service. Currently only the
-home sharing service has been added.
+stub here. It can fake immediate answers for any service.
 """
-
 from zeroconf import ServiceInfo
 
 

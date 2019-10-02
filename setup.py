@@ -32,6 +32,7 @@ setup(
         'cryptography>=1.8.1',
         'curve25519-donna>=1.3',
         'ed25519>=1.4',
+        'getmac>=0.8',
         'netifaces>=0.10.0',
         'protobuf>=3.4.0',
         'srptools>=0.2.0',
