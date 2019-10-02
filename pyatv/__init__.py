@@ -109,6 +109,10 @@ class _ServiceListener:
         self._handle_service(address, name, conf.AirPlayService(info.port))
 
     def _handle_service(self, address, name, service):
+        if self.abort_on_found and not service.is_usable():
+            _LOGGER.debug('Ignoring unusable device %s', name)
+            return
+
         if address not in self.found_devices:
             self.found_devices[address] = conf.AppleTV(address, name)
 

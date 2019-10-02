@@ -52,13 +52,22 @@ class FunctionalTest(asynctest.TestCase):
         dev3 = AppleTV(ipaddress.ip_address('10.0.0.4'), 'Apple TV 4')
         self.assertIn(dev3, atvs)
 
-    async def test_scan_abort_on_first_found(self):
-        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
+    async def test_scan_abort_on_first_usable_found(self):
+        zeroconf_stub.stub(
+            pyatv,
+            HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
 
         atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, abort_on_found=True)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 1')
+
+    async def test_scan_abort_airplay_unusable(self):
+        zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
+
+        atvs = await pyatv.scan_for_apple_tvs(
+            self.loop, timeout=0, abort_on_found=True)
+        self.assertEqual(len(atvs), 0)
 
     async def test_scan_all_devices(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
