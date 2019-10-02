@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyatv import (const, convert, interface)
+from pyatv import (const, convert, exceptions, interface)
 
 
 class TestClass:
@@ -103,6 +103,21 @@ class PlayingDummy(interface.Playing):
         return self._repeat
 
 
+class MetadataDummy(interface.Metadata):
+
+    def artwork(self):
+        """Return artwork for what is currently playing (or None)."""
+        raise exceptions.NotSupportedError
+
+    def artwork_url(self):
+        """Return artwork URL for what is currently playing."""
+        raise exceptions.NotSupportedError
+
+    def playing(self):
+        """Return what is currently playing."""
+        raise exceptions.NotSupportedError
+
+
 class InterfaceTest(unittest.TestCase):
 
     def setUp(self):
@@ -174,3 +189,19 @@ class InterfaceTest(unittest.TestCase):
         self.assertEqual(
             '80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade',
             playing2.hash)
+
+    # METADATA
+
+    def test_metadata_device_id(self):
+        self.assertEqual(MetadataDummy('dummy').device_id, 'dummy')
+
+    # Dummy test for the sake of code coverage
+    def test_metadata_rest_not_supported(self):
+        metadata = MetadataDummy('dummy')
+
+        with self.assertRaises(exceptions.NotSupportedError):
+            metadata.artwork()
+        with self.assertRaises(exceptions.NotSupportedError):
+            metadata.artwork_url()
+        with self.assertRaises(exceptions.NotSupportedError):
+            metadata.playing()

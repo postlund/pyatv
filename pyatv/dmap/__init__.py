@@ -2,9 +2,6 @@
 
 import logging
 import asyncio
-import hashlib
-
-from urllib.parse import urlparse
 
 from pyatv import (const, exceptions, convert)
 from pyatv.dmap import (pairing, parser, tags)
@@ -277,19 +274,10 @@ class DmapPlaying(Playing):
 class DmapMetadata(Metadata):
     """Implementation of API for retrieving metadata from an Apple TV."""
 
-    def __init__(self, apple_tv, daap):
+    def __init__(self, device_id, apple_tv):
         """Initialize metadata instance."""
-        super().__init__()
+        super().__init__(device_id)
         self.apple_tv = apple_tv
-
-        # Extract hostname and use that as base for hash
-        address = urlparse(daap.base_url).hostname
-        self._device_id = hashlib.sha256(address.encode('utf-8')).hexdigest()
-
-    @property
-    def device_id(self):
-        """Return a unique identifier for current device."""
-        return self._device_id
 
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
@@ -375,7 +363,8 @@ class DmapAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, details, airplay):
+    def __init__(self, loop,  # pylint: disable=too-many-arguments
+                 device_id, session, details, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
@@ -389,7 +378,7 @@ class DmapAppleTV(AppleTV):
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
-        self._dmap_metadata = DmapMetadata(self._apple_tv, daap_http)
+        self._dmap_metadata = DmapMetadata(device_id, self._apple_tv)
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
         self._dmap_pairing = pairing.DmapPairingHandler(loop)
         self._airplay = airplay

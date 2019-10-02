@@ -4,9 +4,11 @@ import asyncio
 
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import const
+import pyatv
+from pyatv import const, exceptions
+from pyatv.conf import AppleTV
 from tests.airplay.fake_airplay_device import (DEVICE_PIN, DEVICE_CREDENTIALS)
-from tests import (utils, zeroconf_stub)
+from tests import (utils, getmac_stub, zeroconf_stub)
 
 
 EXPECTED_ARTWORK = b'1234'
@@ -22,6 +24,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
+        getmac_stub.stub(pyatv)
 
         # Make sleep calls do nothing to not slow down tests
         async def fake_sleep(self, time=None, loop=None):
@@ -30,6 +33,20 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     async def get_application(self, loop=None):
         raise NotImplementedError()
+
+    @unittest_run_loop
+    async def test_failed_to_determine_device_id(self):
+        conf = AppleTV(getmac_stub.IP_UNKNOWN, 'Apple TV')
+
+        with self.assertRaises(exceptions.DeviceIdUnknownError):
+            await pyatv.connect_to_apple_tv(conf, self.loop)
+
+    @unittest_run_loop
+    async def test_device_id_failure(self):
+        conf = AppleTV(getmac_stub.IP_EXCEPTION, 'Apple TV')
+
+        with self.assertRaises(exceptions.DeviceIdUnknownError):
+            await pyatv.connect_to_apple_tv(conf, self.loop)
 
     @unittest_run_loop
     async def test_airplay_device_authentication(self):
@@ -133,10 +150,9 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
 
     def test_metadata_device_id(self):
-        # This is a reference case for a server running at 127.0.0.1:3689
-        self.assertEqual(
-            self.atv.metadata.device_id,
-            '12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0')
+        expected_device_id = getmac_stub.MAC.lower().replace(':', '')
+        self.assertEqual(self.atv.metadata.device_id,
+                         expected_device_id)
 
     @unittest_run_loop
     async def test_metadata_artwork(self):

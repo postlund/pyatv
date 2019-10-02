@@ -43,3 +43,7 @@ class NoCredentialsError(Exception):
 
 class DeviceAuthenticationError(Exception):
     """Thrown when device authentication fails."""
+
+
+class DeviceIdUnknownError(Exception):
+    """Thrown when device ID could not be determined."""

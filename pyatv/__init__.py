@@ -6,6 +6,7 @@ import concurrent
 from ipaddress import ip_address
 from threading import Lock
 
+from getmac import get_mac_address
 from zeroconf import ServiceBrowser, Zeroconf
 from aiohttp import ClientSession
 
@@ -172,6 +173,10 @@ async def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
 
 async def connect_to_apple_tv(details, loop, protocol=None, session=None):
     """Connect and logins to an Apple TV."""
+    # Figure out unique device ID based on MAC
+    device_id = await _get_device_id(details.address, loop)
+    _LOGGER.debug('Device id for %s is %s', details.address, device_id)
+
     service = _get_service_used_to_connect(details, protocol)
 
     # If no session is given, create a default one
@@ -183,9 +188,9 @@ async def connect_to_apple_tv(details, loop, protocol=None, session=None):
 
     # Create correct implementation depending on protocol
     if service.protocol == PROTOCOL_DMAP:
-        return DmapAppleTV(loop, session, details, airplay)
+        return DmapAppleTV(loop, device_id, session, details, airplay)
 
-    return MrpAppleTV(loop, session, details, airplay)
+    return MrpAppleTV(loop, device_id, session, details, airplay)
 
 
 def _get_service_used_to_connect(details, protocol):
@@ -209,3 +214,18 @@ def _setup_airplay(loop, session, details):
         session, 'http://{0}:{1}/'.format(
             details.address, airplay_service.port))
     return AirPlayAPI(airplay_http, airplay_player)
+
+
+async def _get_device_id(address, loop):
+    def _getmac(ip_addr):
+        try:
+            return get_mac_address(ip=ip_addr, network_request=False)
+        except Exception as ex:
+            raise ex from exceptions.DeviceIdUnknownError(
+                'error when determining device id')
+
+    mac = await loop.run_in_executor(None, _getmac, str(address))
+    if mac is None:
+        raise exceptions.DeviceIdUnknownError(
+            'could not determine device id')
+    return mac.lower().replace(':', '')

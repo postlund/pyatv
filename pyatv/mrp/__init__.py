@@ -217,8 +217,9 @@ class MrpPlaying(Playing):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol):
+    def __init__(self, protocol, device_id):
         """Initialize a new MrpPlaying."""
+        super().__init__(device_id)
         self.protocol = protocol
         self.protocol.add_listener(
             self._handle_set_state, protobuf.SET_STATE_MESSAGE)
@@ -233,11 +234,6 @@ class MrpMetadata(Metadata):
     async def _handle_transaction(self, message, _):
         packet = message.inner().packets.packets[0].packetData
         self._nowplaying = packet  # .contentItem.metadata.nowPlayingInfo
-
-    @property
-    def device_id(self):
-        """Return a unique identifier for current device."""
-        raise exceptions.NotSupportedError
 
     async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
@@ -344,7 +340,8 @@ class MrpAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, details, airplay):
+    def __init__(self, loop,  # pylint: disable=too-many-arguments
+                 device_id, session, details, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
 
@@ -358,7 +355,7 @@ class MrpAppleTV(AppleTV):
             loop, self._connection, self._srp, self._mrp_service)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._protocol)
+        self._mrp_metadata = MrpMetadata(self._protocol, device_id)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._protocol)
         self._mrp_pairing = MrpPairingHandler(
