@@ -1,1 +1,0 @@
-sed -r ':a;N;$!ba;s/ *asyncio.coroutine\n( *)def/\1async def/g;s/yield from/await/g'
