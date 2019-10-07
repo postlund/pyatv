@@ -1,37 +1,71 @@
 A python client library for the Apple TV
 ========================================
-|Build Status| |Coverage Status| |PyPi Package| |docs|
+|Build Status| |Coverage Status| |PyPi Package| |Downloads| |docs|
 
-This is a python library for controlling and querying information from an Apple TV. It is async
-(python 3.4 syntax) and supports most of the commands that the regular Apple Remote app does as
-well as some additional iTunes commands, like changing the media position. It implements the
-legacy DAAP-protocol and does not support features from the new MediaRemote.framework. Support
-for this might be added in the future if that protocol is ever fully reverse engineered.
+This is a python library for controlling and querying information from an Apple TV. It is built
+upon asyncio and supports most of the commands that the regular Apple Remote app does as
+well as some additional iTunes commands, like changing the media position. It implements the legacy
+DAAP/DMAP-protocol used by older Apple TVs (not running tvOS and devices running tvOS < 13).
 
-The MIT license is used for this library.
+Support for the Media Remote Protocol (MRP) used by tvOS is under heavy development. Basic support
+is available on the GitHub `master` branch and version 0.4.0 of `pyatv` is planned to have
+"usable" support (functionality similar to what is supported by DAAP/DMAP). No date is set for when
+0.4.0 is to be released yet.
 
-``This is the development branch containing experimental changes. If you want a stable version,
-have a look at the v0.3.x tags.``
+**This is the development branch containing experimental changes. If you want a stable version,
+have a look at the v0.3.x tags.**
+
+This library is licensed under the MIT license.
 
 Features
 --------
 
-- Automatic discovery of devices (zeroconf/Bonjour)
-- Push updates
-- Remote control pairing
-- AirPlay stream URL (including tvOS 10.2+)
-- Playback controls (play, pause, next, stop, etc.)
-- Navigation controls (select, menu, top_menu, arrow keys)
-- Fetch artwork in PNG format
-- Currently playing (e.g. title, artist, album, total time, etc.)
-- Change media position
-- Shuffle and repeat
+Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = Apple TV 4 and later):
+
++-----------------------------------------------------------------+----------+-----------+
+| **Feature**                                                     | **DMAP** | **MRP**   |
++-----------------------------------------------------------------+----------+-----------+
+| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       |
++-----------------------------------------------------------------+----------+-----------+
+| Push updates                                                    | Yes      | Yes       |
++-----------------------------------------------------------------+----------+-----------+
+| Remote control pairing                                          | Yes      | Yes       |
++-----------------------------------------------------------------+----------+-----------+
+| AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       |
++-----------------------------------------------------------------+----------+-----------+
+| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes*      |
++-----------------------------------------------------------------+----------+-----------+
+| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes*      |
++-----------------------------------------------------------------+----------+-----------+
+| Fetch artwork in PNG format                                     | Yes      | No        |
++-----------------------------------------------------------------+----------+-----------+
+| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Partial** |
++-----------------------------------------------------------------+----------+-----------+
+| Media type and play state                                       | Yes      | Partial** |
++-----------------------------------------------------------------+----------+-----------+
+| Change media position                                           | Yes      | Yes*      |
++-----------------------------------------------------------------+----------+-----------+
+| Shuffle and repeat                                              | Yes      | Yes*      |
++-----------------------------------------------------------------+----------+-----------+
+
+*\* Some support exists but has not been thoroughly tested to verify that it works satisfactory*
+
+*\*\* Only stub support exists and is mostly not usable*
 
 Requirements
 ------------
 
-- python>=3.5.3
-- See documentation for additional libraries
+- python >= 3.5.3
+- aiohttp >= 3.0.1, <4
+- cryptography >= 1.8.1
+- curve25519-donna >= 1.3
+- ed25519 >= 1.4
+- getmac >= 0.8
+- netifaces >= 0.10.0
+- protobuf >= 3.4.0
+- srptools >= 0.2.0
+- tlslite-ng >= 0.7.0
+- zeroconf >= 0.17.7
 
 Getting started
 ---------------
@@ -47,6 +81,10 @@ NOTE: You need some system packages, run this on debian or similar::
 
     $ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 
+To install development version from git::
+
+    $ pip install git+https://github.com/postlund/pyatv.git
+
 Using the API
 ^^^^^^^^^^^^^
 
@@ -57,9 +95,8 @@ Here is a simple example using auto discovery and printing what is playing:
     import asyncio
     from pyatv import helpers
 
-    @asyncio.coroutine
-    def print_what_is_playing(atv):
-        playing = yield from atv.metadata.playing()
+    async def print_what_is_playing(atv):
+        playing = await atv.metadata.playing()
         print('Currently playing:')
         print(playing)
 
@@ -75,22 +112,35 @@ It is possible to use the reference CLI application as well:
 
 .. code:: bash
 
-    # Automatically discover device (zeroconf)
+    # Scanning for devices on network
+    $ atvremote scan
+    Scan Results
+    ========================================
+    Name: Living Room
+    Address: 10.0.0.10
+    Id: aabbccddeeff 
+    Services:
+      - Protocol: AirPlay, Port: 7000
+      - Protocol: MRP, Port: 49152, Credentials: None
+
+    Name: Bed Room
+    Address: 10.0.0.11
+    Id: ffeeddccbbaa 
+    Services:
+      - Protocol: DMAP, Port: 3689, Credentials: 00000000-1234-5678-9012-345678901234
+
+    # Automatically discover device
     $ atvremote -a play
     $ atvremote -a next
 
-    # Scanning for devices on network
-    $ atvremote scan
-    Found Apple TVs:
-     - Apple TV at 10.0.10.22 (hsgid: 00000000-1234-5678-9012-345678901234)
-
-    Note: You must use 'pair' with devices that have home sharing disabled
-
     # Manually specify device
-    $ atvremote --address 10.0.10.22 --hsgid 00000000-1234-5678-9012- 345678901234 playing
+    $ atvremote --id ffeeddccbbaa --address 10.0.10.11 --device_credentials 00000000-1234-5678-9012-345678901234 playing
     Media type: Music
     Play state: Playing
       Position: 0/397s (0.0%)
+
+    # Automatically find a specific device based on device id
+    $ atvremote --id aabbccddeeff -a playing
 
     # Passing multiple commands
     $ atvremote -a next next play playing stop
@@ -156,29 +206,33 @@ Type ``atvremote --help`` to list all supported commands.
 Missing features and improvements
 ---------------------------------
 
-Most of the core functionality is now in place and API is starting to mature
-enough to soon be called "stable". Things on the roadmap are listed below.
+Most features related to DMAP is already in place and focus is currently on
+getting MRP in usable shape. This implies certain API breaking changes need
+to happen, thus **0.4.0 will not be API compliant with earlier versions**.
 
-Planned tasks
-^^^^^^^^^^^^^
+Roadmap is below, but be sure to check out open issues as well. New features
+and changes are added there.
 
-- Implement MediaRemoteTV protocol
-- Investigate robustness of device scanning
-- Extend AirPlay support
+Near time
+^^^^^^^^^
 
-  - Easy streaming of local files
+- Implement MediaRemoteTV protocol (#94)
+- Investigate robustness of device scanning (#65, #143, #177, #178)
 
-Minor tasks
-^^^^^^^^^^^
+Later
+^^^^^
 
-- Help command to get full help text for a command (atvremote) **DONE**
+- Stream local files using AirPlay (#95)
+
+Quality and documentation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
 - Write simple smoke test for atvremote
+- Write formal test procedure (#203)
 - Improved documentation
 
-  - More examples **Considered DONE**
   - Better pydoc documentation for classes and methods
-  - Manual in docs/ **DONE**
-  - Add to readthedocs.io **DONE**
+  - Migrate documentation to GitHub pages (#205)
 
 Development
 -----------
@@ -209,3 +263,5 @@ When using ``atvremote``, pass ``--debug`` to get better logging.
    :alt: Documentation Status
    :scale: 100%
    :target: https://pyatv.readthedocs.io/en/master/?badge=latest
+.. |Downloads| image:: https://pepy.tech/badge/pyatv
+   :target: https://pepy.tech/project/pyatv
