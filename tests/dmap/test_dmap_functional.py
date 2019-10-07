@@ -51,7 +51,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv.app
 
     async def get_connected_device(self, identifier):
-        conf = AppleTV(getmac_stub.IP, 'Apple TV')
+        conf = AppleTV(getmac_stub.IP, 'aabbccddeeff', 'Apple TV')
         conf.add_service(DmapService(identifier, port=self.server.port))
         conf.add_service(AirPlayService(self.server.port))
         return await connect_to_apple_tv(conf, self.loop)

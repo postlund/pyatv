@@ -35,17 +35,18 @@ class CommonFunctionalTests(AioHTTPTestCase):
         raise NotImplementedError()
 
     @unittest_run_loop
-    async def test_failed_to_determine_device_id(self):
-        conf = AppleTV(getmac_stub.IP_UNKNOWN, 'Apple TV')
-
-        with self.assertRaises(exceptions.DeviceIdUnknownError):
-            await pyatv.connect_to_apple_tv(conf, self.loop)
+    async def test_get_device_id(self):
+        self.assertIsNone(
+            await pyatv.get_device_id(getmac_stub.IP_UNKNOWN, self.loop))
+        self.assertEqual(
+            await pyatv.get_device_id(getmac_stub.IP, self.loop),
+            'aabbccddeeff')
 
     @unittest_run_loop
-    async def test_device_id_failure(self):
-        conf = AppleTV(getmac_stub.IP_EXCEPTION, 'Apple TV')
+    async def test_connect_missing_device_id(self):
+        conf = AppleTV('1.2.3.4', None, 'Apple TV')
 
-        with self.assertRaises(exceptions.DeviceIdUnknownError):
+        with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect_to_apple_tv(conf, self.loop)
 
     @unittest_run_loop

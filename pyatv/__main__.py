@@ -244,6 +244,8 @@ async def cli_handler(loop):
 
     parser.add_argument('command', nargs='+',
                         help='commands, help, ...')
+    parser.add_argument('--id', help='device identifier',
+                        dest='id', default=None)
     parser.add_argument('--name', help='apple tv name',
                         dest='name', default='Apple TV')
     parser.add_argument('--address', help='device ip address or hostname',
@@ -319,17 +321,16 @@ async def cli_handler(loop):
 
 
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
+    print('Scan Results', file=outstream)
+    print('=' * 40, file=outstream)
     for apple_tv in atvs:
         print('{0}\n'.format(apple_tv), file=outstream)
-
-    print("Note: You must use 'pair' with devices "
-          "that have home sharing disabled", file=outstream)
 
 
 async def _autodiscover_device(args, loop):
     atvs = await pyatv.scan_for_apple_tvs(
         loop, timeout=args.scan_timeout, abort_on_found=True,
-        device_ip=args.address, protocol=args.protocol, only_usable=True)
+        device_id=args.id, protocol=args.protocol, only_usable=True)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
@@ -344,6 +345,7 @@ async def _autodiscover_device(args, loop):
     service = apple_tv.usable_service()  # scan only returns usable service
 
     # Common parameters for all protocols
+    args.id = apple_tv.device_id
     args.address = apple_tv.address
     args.name = apple_tv.name
     args.protocol = service.protocol
@@ -385,7 +387,7 @@ def _extract_command_with_args(cmd):
 
 
 async def _handle_commands(args, loop):
-    details = AppleTV(args.address, args.name)
+    details = AppleTV(args.address, args.id, args.name)
     if args.protocol == const.PROTOCOL_DMAP:
         details.add_service(DmapService(
             args.device_credentials, port=args.port))

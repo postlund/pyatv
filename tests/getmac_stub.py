@@ -17,14 +17,15 @@ IP_UNKNOWN = '127.0.0.2'
 IP_EXCEPTION = '127.0.0.3'
 
 
-def get_mac_address_stub(ip=None, network_request=True):
-    if ip == IP:
-        return MAC
-    if ip == IP_EXCEPTION:
-        raise exceptions.DeviceIdUnknownError('error')
-    return None
-
-
-def stub(module):
+def stub(module, mapping=None):
     """Stub a module using getmac."""
+    def get_mac_address_stub(ip=None, network_request=True):
+        if ip == IP:
+            return MAC
+        if mapping is not None and ip in mapping:
+            return mapping[ip]
+        if ip == IP_EXCEPTION:
+            raise exceptions.DeviceIdUnknownError('error')
+        return None
+
     module.get_mac_address = get_mac_address_stub

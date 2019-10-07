@@ -18,7 +18,7 @@ class MockAppleTV:
 class HelpersTest(asynctest.TestCase):
 
     def setUp(self):
-        self.device_details = conf.AppleTV('address', 'name')
+        self.device_details = conf.AppleTV('address', 'id', 'name')
         self.mock_device = asynctest.mock.Mock(MockAppleTV())
 
     @patch('pyatv.scan_for_apple_tvs', return_value=[])
