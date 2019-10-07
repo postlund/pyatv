@@ -32,11 +32,11 @@ AIRPLAY_SERVICE = '_airplay._tcp.local.'
 class _ServiceListener:
 
     # pylint: disable=too-many-arguments
-    def __init__(self, loop, abort_on_found, device_ip, protocol, semaphore):
+    def __init__(self, loop, abort_on_found, device_id, protocol, semaphore):
         """Initialize a new _ServiceListener."""
         self.loop = loop
         self.abort_on_found = abort_on_found
-        self.device_ip = None if not device_ip else ip_address(device_ip)
+        self.device_id = device_id
         self.protocol = protocol
         self.semaphore = semaphore
         self.found_devices = {}
@@ -56,12 +56,6 @@ class _ServiceListener:
 
         info = zeroconf.get_service_info(service_type, name)
         address = ip_address(info.addresses[0])  # TODO: Consider all?
-
-        # We might be looking for a particular device
-        if self.device_ip and self.device_ip != address:
-            _LOGGER.debug('Ignoring %s (not matching %s)',
-                          address, self.device_ip)
-            return
 
         if info.type == HOMESHARING_SERVICE:
             self.add_hs_service(info, address)
@@ -115,7 +109,16 @@ class _ServiceListener:
             return
 
         if address not in self.found_devices:
-            self.found_devices[address] = conf.AppleTV(address, name)
+            device_id = _get_device_id(str(address))
+
+            # We might be looking for a particular device
+            if self.device_id and self.device_id != device_id:
+                _LOGGER.debug('Ignoring %s (not matching %s)',
+                              device_id, self.device_id)
+                return
+
+            self.found_devices[address] = conf.AppleTV(
+                address, device_id, name)
 
         _LOGGER.debug('Auto-discovered %s at %s:%d (protocol: %s)',
                       name, address, service.port, service.protocol)
@@ -143,12 +146,12 @@ class _ServiceListener:
 
 # pylint: disable=too-many-arguments
 async def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
-                             device_ip=None, only_usable=True,
+                             device_id=None, only_usable=True,
                              protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     semaphore = asyncio.Semaphore(value=0, loop=loop)
     listener = _ServiceListener(
-        loop, abort_on_found, device_ip, protocol, semaphore)
+        loop, abort_on_found, device_id, protocol, semaphore)
     zeroconf = Zeroconf()
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
@@ -168,14 +171,15 @@ async def scan_for_apple_tvs(loop, timeout=5, abort_on_found=False,
 
         return atv.is_usable()
 
-    return list(filter(_should_include, listener.found_devices.values()))
+    found_devices = listener.found_devices.values()
+    return [x for x in found_devices if _should_include(x)]
 
 
 async def connect_to_apple_tv(details, loop, protocol=None, session=None):
     """Connect and logins to an Apple TV."""
-    # Figure out unique device ID based on MAC
-    device_id = await _get_device_id(details.address, loop)
-    _LOGGER.debug('Device id for %s is %s', details.address, device_id)
+    if details.device_id is None:
+        raise exceptions.DeviceIdMissingError(
+            'missing device id for ' + str(details.address))
 
     service = _get_service_used_to_connect(details, protocol)
 
@@ -188,9 +192,9 @@ async def connect_to_apple_tv(details, loop, protocol=None, session=None):
 
     # Create correct implementation depending on protocol
     if service.protocol == PROTOCOL_DMAP:
-        return DmapAppleTV(loop, device_id, session, details, airplay)
+        return DmapAppleTV(loop, session, details, airplay)
 
-    return MrpAppleTV(loop, device_id, session, details, airplay)
+    return MrpAppleTV(loop, session, details, airplay)
 
 
 def _get_service_used_to_connect(details, protocol):
@@ -216,16 +220,23 @@ def _setup_airplay(loop, session, details):
     return AirPlayAPI(airplay_http, airplay_player)
 
 
-async def _get_device_id(address, loop):
-    def _getmac(ip_addr):
-        try:
-            return get_mac_address(ip=ip_addr, network_request=False)
-        except Exception as ex:
-            raise ex from exceptions.DeviceIdUnknownError(
-                'error when determining device id')
+def _get_device_id(address):
+    try:
+        mac = get_mac_address(ip=address, network_request=False)
+        if mac is not None:
+            return mac.lower().replace(':', '')
+    except Exception:  # pylint: disable=broad-except
+        _LOGGER.warning('failed to determine device id for %s', address)
+    return None
 
-    mac = await loop.run_in_executor(None, _getmac, str(address))
-    if mac is None:
-        raise exceptions.DeviceIdUnknownError(
-            'could not determine device id')
-    return mac.lower().replace(':', '')
+
+async def get_device_id(address, loop):
+    """Get device id for an address.
+
+    This is a convenience method that can be used to look up a
+    device id for an address. It is supposed to be used when not relying
+    on the builtin scan function (i.e. scan_for_apple_tvs). It is only
+    supported when used in conjuction with finding a device with
+    python-zeroconf.
+    """
+    return await loop.run_in_executor(None, _get_device_id, address)

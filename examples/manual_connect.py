@@ -1,5 +1,6 @@
 """Simple example that shows how to manually connect to an Apple TV."""
 
+import sys
 import asyncio
 import pyatv
 from pyatv import conf
@@ -15,7 +16,12 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def print_what_is_playing(loop):
     """Connect to device and print what is playing."""
-    details = conf.AppleTV(ADDRESS, NAME)
+    device_id = pyatv.get_device_id(ADDRESS, loop)
+    if device_id is None:
+        print('Unable to determine device id', file=sys.stderr)
+        sys.exit(1)
+
+    details = conf.AppleTV(ADDRESS, device_id, NAME)
     details.add_service(conf.DmapService(HSGID))
 
     print('Connecting to {}'.format(details.address))

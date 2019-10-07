@@ -1,10 +1,10 @@
 """Simple example showing of pairing."""
 
+import sys
 import asyncio
 from zeroconf import Zeroconf
 
 import pyatv
-from pyatv import conf
 
 
 PIN_CODE = 1234
@@ -17,9 +17,14 @@ LOOP = asyncio.get_event_loop()
 async def pair_with_device(loop):
     """Make it possible to pair with device."""
     my_zeroconf = Zeroconf()
-    details = conf.AppleTV('127.0.0.1', 'Apple TV')
-    details.add_service(conf.DmapService('login_id'))
-    atv = await pyatv.connect_to_apple_tv(details, loop)
+
+    atvs = await pyatv.scan_for_apple_tvs(loop, timeout=5)
+
+    if not atvs:
+        print('no device found', file=sys.stderr)
+        return
+
+    atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
 
     atv.pairing.pin(PIN_CODE)
     await atv.pairing.start(zeroconf=my_zeroconf, name=REMOTE_NAME)

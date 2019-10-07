@@ -29,7 +29,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv
 
     async def get_connected_device(self, port):
-        conf = AppleTV(getmac_stub.IP, 'Test device')
+        conf = AppleTV(getmac_stub.IP, 'aabbccddeeff', 'Test device')
         conf.add_service(MrpService(port))
         conf.add_service(AirPlayService(self.server.port))
         return await connect_to_apple_tv(conf, loop=self.loop)

@@ -14,13 +14,16 @@ ADDRESS_2 = '192.168.0.1'
 NAME = 'Alice'
 PORT_1 = 1234
 PORT_2 = 5678
+DEVICE_ID_1 = 'id1'
+DEVICE_ID_2 = 'id2'
 
 
 class ConfTest(unittest.TestCase):
 
     def setUp(self):
         self.atv = conf.AppleTV(
-            ADDRESS_1, NAME, supported_services=SUPPORTED_PROTOCOLS)
+            ADDRESS_1, DEVICE_ID_1,
+            NAME, supported_services=SUPPORTED_PROTOCOLS)
         self.service_mock = MagicMock()
         self.service_mock.protocol = PROTOCOL_1
         self.service_mock.port = PORT_1
@@ -40,11 +43,8 @@ class ConfTest(unittest.TestCase):
     def test_equality(self):
         self.assertEqual(self.atv, self.atv)
 
-        atv2 = conf.AppleTV(ADDRESS_2, NAME)
+        atv2 = conf.AppleTV(ADDRESS_1, DEVICE_ID_2, NAME)
         self.assertNotEqual(self.atv, atv2)
-
-        atv2.address = ADDRESS_1
-        self.assertEqual(self.atv, atv2)
 
     def test_add_services_and_get(self):
         self.atv.add_service(self.service_mock)

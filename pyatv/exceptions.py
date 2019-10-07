@@ -45,5 +45,5 @@ class DeviceAuthenticationError(Exception):
     """Thrown when device authentication fails."""
 
 
-class DeviceIdUnknownError(Exception):
-    """Thrown when device ID could not be determined."""
+class DeviceIdMissingError(Exception):
+    """Thrown when device id is missing."""

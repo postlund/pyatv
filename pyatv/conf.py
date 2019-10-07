@@ -1,5 +1,4 @@
 """Configuration when connecting to an Apple TV."""
-
 from pyatv import convert
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 
@@ -14,10 +13,11 @@ class AppleTV:
     AirPlay.
     """
 
-    def __init__(self, address, name, **kwargs):
+    def __init__(self, address, device_id, name, **kwargs):
         """Initialize a new AppleTV."""
         self.address = address
         self.name = name
+        self.device_id = device_id
         self._services = {}
         self._supported_protocols = \
             kwargs.get('supported_services', _SUPPORTED_PROTOCOLS)
@@ -77,15 +77,18 @@ class AppleTV:
     def __eq__(self, other):
         """Compare instance with another instance."""
         if isinstance(other, self.__class__):
-            print(self.address == other.address)
-            return self.address == other.address
+            return self.device_id == other.device_id
         return False
 
     def __str__(self):
         """Return a string representation of this object."""
         services = [' - {0}'.format(s) for s in self._services.values()]
-        return 'Device "{0}" at {1} supports these services:\n{2}'.format(
-            self.name, self.address, '\n'.join(services))
+        return '    Name: {0}\n' \
+               ' Address: {1}\n' \
+               '      Id: {2}\n' \
+               'Services:\n' \
+               '{3}'.format(self.name, self.address,
+                            self.device_id, '\n'.join(services))
 
 
 # pylint: disable=too-few-public-methods
@@ -141,7 +144,7 @@ class DmapService(BaseService):
 
     def __str__(self):
         """Return a string representation of this object."""
-        return super().__str__() + ', Device Credentials: {0}'.format(
+        return super().__str__() + ', Credentials: {0}'.format(
             self.device_credentials)
 
 
@@ -160,7 +163,7 @@ class MrpService(BaseService):
 
     def __str__(self):
         """Return a string representation of this object."""
-        return super().__str__() + ', Device Credentials: {0}'.format(
+        return super().__str__() + ', Credentials: {0}'.format(
             self.device_credentials)
 
 
