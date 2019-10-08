@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.4.0a1 (2019-10-08)
+--------------------
+
+Second pre-release which is basically the same as first, but I messed up and missed
+a few commits...
+
 0.4.0a0 (2019-10-08)
 --------------------
 
