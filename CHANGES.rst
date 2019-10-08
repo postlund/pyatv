@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.4.0a0 (2019-10-08)
+--------------------
+
+First pre-release of 0.4, too many changes to list. But initial MRP support
+is the biggest addition.
+
 0.3.9 (2017-12-12)
 ------------------
 
