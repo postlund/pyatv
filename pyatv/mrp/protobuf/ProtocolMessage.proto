@@ -47,42 +47,4 @@ message ProtocolMessage {
   optional string identifier = 2;
   optional int32 priority = 4;
   optional uint64 timestamp = 5;
-
-  // One of the following will be filled in.
-//  optional SendCommandMessage sendCommandMessage = 6;
-//  optional SendCommandResultMessage sendCommandResultMessage = 7;
-//  optional SetStateMessage setStateMessage = 9;
-//  optional SetArtworkMessage setArtworkMessage = 10;
-//  optional RegisterHIDDeviceMessage registerHIDDeviceMessage = 11;
-//  optional RegisterHIDDeviceResultMessage registerHIDDeviceResultMessage = 12;
-//  optional SendHIDEventMessage sendHIDEventMessage = 13;
-//  optional SendVirtualTouchEventMessage sendVirtualTouchEventMessage = 15;
-//  optional NotificationMessage notificationMessage = 16;
-//  optional ContentItemsChangedNotificationMessage contentItemsChangedNotificationMessage = 17;
-//  optional DeviceInfoMessage deviceInfoMessage = 20;
-//  optional ClientUpdatesConfigMessage clientUpdatesConfigMessage = 21;
-//  optional VolumeControlAvailabilityMessage volumeControlAvailabilityMessage = 22;
-//  optional GameControllerMessage gameControllerMessage = 23;
-//  optional RegisterGameControllerMessage registerGameControllerMessage = 24;
-//  optional RegisterGameControllerResponseMessage registerGameControllerResponseMessage = 25;
-//  optional UnregisterGameControllerMessage unregisterGameControllerMessage = 26;
-//  optional RegisterForGameControllerEventsMessage registerForGameControllerEventsMessage = 27;
-//  optional KeyboardMessage keyboardMessage = 28;
-//  optional GetKeyboardSessionMessage getKeyboardSessionMessage = 29;
-//  optional TextInputMessage textInputMessage = 30;
-//  optional GetVoiceInputDevicesMessage getVoiceInputDevicesMessage = 31;
-//  optional GetVoiceInputDevicesResponseMessage getVoiceInputDevicesResponseMessage = 32;
-//  optional RegisterVoiceInputDeviceMessage registerVoiceInputDeviceMessage = 33;
-//  optional RegisterVoiceInputDeviceResponseMessage registerVoiceInputDeviceResponseMessage = 34;
-//  optional SetRecordingStateMessage setRecordingStateMessage = 35;
-//  optional SendVoiceInputMessage sendVoiceInputMessage = 36;
-//  optional GetPlaybackQueueMessage getPlaybackQueueMessage = 37;
-//  optional TransactionMessage transactionMessage = 38;
-//  optional CryptoPairingMessage cryptoPairingMessage = 39;
-//  optional GameControllerPropertiesMessage gameControllerPropertiesMessage = 40;
-//  optional SetReadyStateMessage setReadyStateMessage = 41;
-//  optional SetConnectionStateMessage setConnectionStateMessage = 42;
-//  optional SetHiliteModeMessage setHiliteModeMessage = 44;
-//  optional WakeDeviceMessage wakeDeviceMessage = 45;
-//  optional SendPackedVirtualTouchEventMessage sendPackedVirtualTouchEventMessage = 47;
 }

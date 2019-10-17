@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "pyatv/mrp/protobuf/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional TextInputMessage textInputMessage = 30;
+}
+
+message TextInputMessage {
+  enum ActionType {
+    Unknown = 0;
+    Insert = 1;
+    Set = 2;
+    Delete = 3;
+    Clear = 4;
+  }
+  optional double timestamp = 1;
+  optional string text = 2;
+  optional ActionType actionType = 3;
+}

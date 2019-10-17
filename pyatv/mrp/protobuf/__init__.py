@@ -25,6 +25,7 @@ from pyatv.mrp.protobuf import SetArtworkMessage_pb2
 from pyatv.mrp.protobuf import SetConnectionStateMessage_pb2
 from pyatv.mrp.protobuf import SetHiliteModeMessage_pb2
 from pyatv.mrp.protobuf import SetStateMessage_pb2
+from pyatv.mrp.protobuf import TextInputMessage_pb2
 from pyatv.mrp.protobuf import TransactionMessage_pb2
 from pyatv.mrp.protobuf import VolumeControlAvailabilityMessage_pb2
 from pyatv.mrp.protobuf import WakeDeviceMessage_pb2
@@ -62,6 +63,7 @@ from pyatv.mrp.protobuf.SetHiliteModeMessage_pb2 import SetHiliteModeMessage
 from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage
 from pyatv.mrp.protobuf.SupportedCommands_pb2 import SupportedCommands
 from pyatv.mrp.protobuf.TextEditingAttributesMessage_pb2 import TextEditingAttributes
+from pyatv.mrp.protobuf.TextInputMessage_pb2 import TextInputMessage
 from pyatv.mrp.protobuf.TextInputTraitsMessage_pb2 import TextInputTraits
 from pyatv.mrp.protobuf.TransactionKey_pb2 import TransactionKey
 from pyatv.mrp.protobuf.TransactionMessage_pb2 import TransactionMessage
@@ -93,6 +95,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.SET_CONNECTION_STATE_MESSAGE: SetConnectionStateMessage_pb2.setConnectionStateMessage,
     ProtocolMessage.SET_HILITE_MODE_MESSAGE: SetHiliteModeMessage_pb2.setHiliteModeMessage,
     ProtocolMessage.SET_STATE_MESSAGE: SetStateMessage_pb2.setStateMessage,
+    ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
@@ -118,6 +121,7 @@ SET_ARTWORK_MESSAGE = ProtocolMessage.SET_ARTWORK_MESSAGE
 SET_CONNECTION_STATE_MESSAGE = ProtocolMessage.SET_CONNECTION_STATE_MESSAGE
 SET_HILITE_MODE_MESSAGE = ProtocolMessage.SET_HILITE_MODE_MESSAGE
 SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
+TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
