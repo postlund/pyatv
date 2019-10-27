@@ -274,9 +274,9 @@ class DmapPlaying(Playing):
 class DmapMetadata(Metadata):
     """Implementation of API for retrieving metadata from an Apple TV."""
 
-    def __init__(self, device_id, apple_tv):
+    def __init__(self, identifier, apple_tv):
         """Initialize metadata instance."""
-        super().__init__(device_id)
+        super().__init__(identifier)
         self.apple_tv = apple_tv
 
     def artwork(self):
@@ -377,7 +377,7 @@ class DmapAppleTV(AppleTV):
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
-        self._dmap_metadata = DmapMetadata(details.device_id, self._apple_tv)
+        self._dmap_metadata = DmapMetadata(details.identifier, self._apple_tv)
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
         self._dmap_pairing = pairing.DmapPairingHandler(loop)
         self._airplay = airplay

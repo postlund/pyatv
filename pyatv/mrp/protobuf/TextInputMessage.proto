@@ -7,12 +7,12 @@ extend ProtocolMessage {
 }
 
 message TextInputMessage {
-  enum ActionType {
+  enum ActionType2 {
     Unknown = 0;
     Insert = 1;
     Set = 2;
     Delete = 3;
-    Clear = 4;
+    ClearText = 4; // "Clear" collides with base measage and makes mypy sad
   }
   optional double timestamp = 1;
   optional string text = 2;

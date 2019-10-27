@@ -14,25 +14,26 @@ ADDRESS_2 = '192.168.0.1'
 NAME = 'Alice'
 PORT_1 = 1234
 PORT_2 = 5678
-DEVICE_ID_1 = 'id1'
-DEVICE_ID_2 = 'id2'
+IDENTIFIER_1 = 'id1'
+IDENTIFIER_2 = 'id2'
 
 
 class ConfTest(unittest.TestCase):
 
     def setUp(self):
         self.atv = conf.AppleTV(
-            ADDRESS_1, DEVICE_ID_1,
-            NAME, supported_services=SUPPORTED_PROTOCOLS)
+            ADDRESS_1, NAME, supported_services=SUPPORTED_PROTOCOLS)
         self.service_mock = MagicMock()
         self.service_mock.protocol = PROTOCOL_1
         self.service_mock.port = PORT_1
+        self.service_mock.identifier = IDENTIFIER_1
         self.service_mock.is_usable.return_value = False
         self.service_mock.superseeded_by.return_value = False
 
         self.service_mock2 = MagicMock()
         self.service_mock2.protocol = PROTOCOL_2
         self.service_mock2.port = PORT_2
+        self.service_mock2.identifier = IDENTIFIER_2
         self.service_mock2.is_usable.return_value = False
         self.service_mock2.superseeded_by.return_value = False
 
@@ -43,14 +44,15 @@ class ConfTest(unittest.TestCase):
     def test_equality(self):
         self.assertEqual(self.atv, self.atv)
 
-        atv2 = conf.AppleTV(ADDRESS_1, DEVICE_ID_2, NAME)
+        atv2 = conf.AppleTV(ADDRESS_1, NAME)
+        atv2.add_service(conf.AirPlayService(IDENTIFIER_1, PORT_1))
         self.assertNotEqual(self.atv, atv2)
 
     def test_add_services_and_get(self):
         self.atv.add_service(self.service_mock)
         self.atv.add_service(self.service_mock2)
 
-        services = self.atv.services()
+        services = self.atv.services
         self.assertEqual(len(services), 2)
 
         self.assertIn(self.service_mock, services)
@@ -58,6 +60,20 @@ class ConfTest(unittest.TestCase):
 
         self.assertEqual(self.atv.get_service(PROTOCOL_1), self.service_mock)
         self.assertEqual(self.atv.get_service(PROTOCOL_2), self.service_mock2)
+
+    def test_identifier(self):
+        self.assertIsNone(self.atv.identifier)
+
+        self.atv.add_service(self.service_mock)
+        self.assertEqual(self.atv.identifier, IDENTIFIER_1)
+
+        self.atv.add_service(self.service_mock2)
+        self.assertEqual(self.atv.identifier, IDENTIFIER_1)
+
+        services = self.atv.services
+        self.assertEqual(len(services), 2)
+        self.assertIn(self.service_mock, services)
+        self.assertIn(self.service_mock2, services)
 
     def test_usable_service(self):
         self.assertIsNone(self.atv.usable_service())
@@ -110,8 +126,8 @@ class ConfTest(unittest.TestCase):
     # but it's mainly to exercise string as that is important. Might refactor
     # this in the future.
     def test_to_str(self):
-        self.atv.add_service(conf.DmapService('LOGIN_ID'))
-        self.atv.add_service(conf.MrpService(PORT_2))
+        self.atv.add_service(conf.DmapService(IDENTIFIER_1, 'LOGIN_ID'))
+        self.atv.add_service(conf.MrpService(IDENTIFIER_2, PORT_2))
 
         # Check for some keywords to not lock up format too much
         output = str(self.atv)

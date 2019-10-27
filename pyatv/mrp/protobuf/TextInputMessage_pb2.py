@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n)pyatv/mrp/protobuf/TextInputMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\xac\x01\n\x10TextInputMessage\x12\x11\n\ttimestamp\x18\x01 \x01(\x01\x12\x0c\n\x04text\x18\x02 \x01(\t\x12\x30\n\nactionType\x18\x03 \x01(\x0e\x32\x1c.TextInputMessage.ActionType\"E\n\nActionType\x12\x0b\n\x07Unknown\x10\x00\x12\n\n\x06Insert\x10\x01\x12\x07\n\x03Set\x10\x02\x12\n\n\x06\x44\x65lete\x10\x03\x12\t\n\x05\x43lear\x10\x04:=\n\x10textInputMessage\x12\x10.ProtocolMessage\x18\x1e \x01(\x0b\x32\x11.TextInputMessage')
+  serialized_pb=_b('\n)pyatv/mrp/protobuf/TextInputMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"|\n\x10TextInputMessage\x12\x11\n\ttimestamp\x18\x01 \x01(\x01\x12\x0c\n\x04text\x18\x02 \x01(\t\"G\n\x0b\x41\x63tionType2\x12\x0b\n\x07Unknown\x10\x00\x12\n\n\x06Insert\x10\x01\x12\x07\n\x03Set\x10\x02\x12\n\n\x06\x44\x65lete\x10\x03\x12\n\n\x06\x43leaRr\x10\x04:=\n\x10textInputMessage\x12\x10.ProtocolMessage\x18\x1e \x01(\x0b\x32\x11.TextInputMessage')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -35,9 +35,9 @@ textInputMessage = _descriptor.FieldDescriptor(
   is_extension=True, extension_scope=None,
   serialized_options=None, file=DESCRIPTOR)
 
-_TEXTINPUTMESSAGE_ACTIONTYPE = _descriptor.EnumDescriptor(
-  name='ActionType',
-  full_name='TextInputMessage.ActionType',
+_TEXTINPUTMESSAGE_ACTIONTYPE2 = _descriptor.EnumDescriptor(
+  name='ActionType2',
+  full_name='TextInputMessage.ActionType2',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -58,16 +58,16 @@ _TEXTINPUTMESSAGE_ACTIONTYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='Clear', index=4, number=4,
+      name='CleaRr', index=4, number=4,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=191,
-  serialized_end=260,
+  serialized_start=140,
+  serialized_end=211,
 )
-_sym_db.RegisterEnumDescriptor(_TEXTINPUTMESSAGE_ACTIONTYPE)
+_sym_db.RegisterEnumDescriptor(_TEXTINPUTMESSAGE_ACTIONTYPE2)
 
 
 _TEXTINPUTMESSAGE = _descriptor.Descriptor(
@@ -91,19 +91,12 @@ _TEXTINPUTMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='actionType', full_name='TextInputMessage.actionType', index=2,
-      number=3, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
-    _TEXTINPUTMESSAGE_ACTIONTYPE,
+    _TEXTINPUTMESSAGE_ACTIONTYPE2,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -111,12 +104,11 @@ _TEXTINPUTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=88,
-  serialized_end=260,
+  serialized_start=87,
+  serialized_end=211,
 )
 
-_TEXTINPUTMESSAGE.fields_by_name['actionType'].enum_type = _TEXTINPUTMESSAGE_ACTIONTYPE
-_TEXTINPUTMESSAGE_ACTIONTYPE.containing_type = _TEXTINPUTMESSAGE
+_TEXTINPUTMESSAGE_ACTIONTYPE2.containing_type = _TEXTINPUTMESSAGE
 DESCRIPTOR.message_types_by_name['TextInputMessage'] = _TEXTINPUTMESSAGE
 DESCRIPTOR.extensions_by_name['textInputMessage'] = textInputMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

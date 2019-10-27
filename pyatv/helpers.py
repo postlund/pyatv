@@ -19,7 +19,7 @@ def auto_connect(handler, timeout=5, not_found=None):
     # the event loop
     async def _handle(loop):
         atvs = await pyatv.scan_for_apple_tvs(
-            loop, timeout=timeout, abort_on_found=True)
+            loop, timeout=timeout)
 
         # Take the first device found
         if atvs:
