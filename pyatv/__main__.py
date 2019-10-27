@@ -244,7 +244,7 @@ async def cli_handler(loop):
 
     parser.add_argument('command', nargs='+',
                         help='commands, help, ...')
-    parser.add_argument('--id', help='device identifier',
+    parser.add_argument('-i', '--id', help='device identifier',
                         dest='id', default=None)
     parser.add_argument('--name', help='apple tv name',
                         dest='name', default='Apple TV')
@@ -273,9 +273,9 @@ async def cli_handler(loop):
                          help='pairing guid (16 chars hex)',
                          dest='pairing_guid', default=None)
 
-    parser.add_argument('-a', '--autodiscover', action='store_true',
-                        help='automatically find a device',
-                        dest='autodiscover', default=False)
+    parser.add_argument('-m', '--manual', action='store_true',
+                        help='use manual device details',
+                        dest='manual', default=False)
     parser.add_argument('--device_credentials', help='credentials to device',
                         dest='device_credentials', default=None)
 
@@ -307,7 +307,7 @@ async def cli_handler(loop):
         glob_cmds = GlobalCommands(args, loop)
         return (await _exec_command(
             glob_cmds, args.command[0], print_result=False))
-    if args.autodiscover:
+    if not args.manual:
         if not await _autodiscover_device(args, loop):
             return 1
 
@@ -329,8 +329,8 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 async def _autodiscover_device(args, loop):
     atvs = await pyatv.scan_for_apple_tvs(
-        loop, timeout=args.scan_timeout, abort_on_found=True,
-        device_id=args.id, protocol=args.protocol, only_usable=True)
+        loop, timeout=args.scan_timeout,
+        identifier=args.id, protocol=args.protocol, only_usable=True)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
@@ -345,7 +345,7 @@ async def _autodiscover_device(args, loop):
     service = apple_tv.usable_service()  # scan only returns usable service
 
     # Common parameters for all protocols
-    args.id = apple_tv.device_id
+    args.id = apple_tv.identifier
     args.address = apple_tv.address
     args.name = apple_tv.name
     args.protocol = service.protocol
@@ -387,13 +387,13 @@ def _extract_command_with_args(cmd):
 
 
 async def _handle_commands(args, loop):
-    details = AppleTV(args.address, args.id, args.name)
+    details = AppleTV(args.address, args.name)
     if args.protocol == const.PROTOCOL_DMAP:
         details.add_service(DmapService(
-            args.device_credentials, port=args.port))
+            args.id, args.device_credentials, port=args.port))
     elif args.protocol == const.PROTOCOL_MRP:
         details.add_service(MrpService(
-            args.port, device_credentials=args.device_credentials))
+            args.id, args.port, device_credentials=args.device_credentials))
 
     atv = await pyatv.connect_to_apple_tv(
         details, loop, protocol=args.protocol)

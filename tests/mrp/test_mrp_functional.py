@@ -7,7 +7,7 @@ from aiohttp.test_utils import unittest_run_loop
 from pyatv import connect_to_apple_tv
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
-from tests import (common_functional_tests, getmac_stub)
+from tests import common_functional_tests
 from tests.mrp.fake_mrp_atv import (
     FakeAppleTV, AppleTVUseCases)
 
@@ -29,9 +29,9 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv
 
     async def get_connected_device(self, port):
-        conf = AppleTV(getmac_stub.IP, 'aabbccddeeff', 'Test device')
-        conf.add_service(MrpService(port))
-        conf.add_service(AirPlayService(self.server.port))
+        conf = AppleTV('127.0.0.1', 'Test device')
+        conf.add_service(MrpService('mrp_id', port))
+        conf.add_service(AirPlayService('airplay_id', self.server.port))
         return await connect_to_apple_tv(conf, loop=self.loop)
 
     @unittest_run_loop

@@ -21,12 +21,12 @@ def homesharing_service(service_name, atv_name, address, hsgid):
                        properties=props)
 
 
-def mrp_service(service_name, atv_name, address):
+def mrp_service(service_name, atv_name, address, identifier):
     """Create a MediaRemote service simulating an Apple TV."""
     props = {
         b'ModelName': b'Mac', b'SystemBuildVersion': b'16G29',
         b'Name': atv_name, b'AllowPairing': b'YES',
-        b'UniqueIdentifier': b'4EE5AF58-7E5D-465A-935E-82E4DB74385D'
+        b'UniqueIdentifier': identifier.encode('utf-8')
     }
 
     return ServiceInfo('_mediaremotetv._tcp.local.',

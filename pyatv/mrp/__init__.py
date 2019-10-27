@@ -217,9 +217,9 @@ class MrpPlaying(Playing):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, device_id):
+    def __init__(self, protocol, identifier):
         """Initialize a new MrpPlaying."""
-        super().__init__(device_id)
+        super().__init__(identifier)
         self.protocol = protocol
         self.protocol.add_listener(
             self._handle_set_state, protobuf.SET_STATE_MESSAGE)
@@ -354,7 +354,7 @@ class MrpAppleTV(AppleTV):
             loop, self._connection, self._srp, self._mrp_service)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._protocol, details.device_id)
+        self._mrp_metadata = MrpMetadata(self._protocol, details.identifier)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._protocol)
         self._mrp_pairing = MrpPairingHandler(

@@ -4,8 +4,8 @@ import pyatv
 import ipaddress
 import asynctest
 
-from pyatv.conf import AppleTV
-from tests import getmac_stub, zeroconf_stub
+from pyatv import const
+from tests import zeroconf_stub
 
 
 IP_1 = '10.0.0.1'
@@ -15,12 +15,8 @@ IP_4 = '10.0.0.4'
 IP_5 = '10.0.0.5'
 IP_6 = '10.0.0.6'
 
-DEVICE_ID_1 = 'id1'
-DEVICE_ID_2 = 'id2'
-DEVICE_ID_3 = 'id3'
-DEVICE_ID_4 = 'id4'
-DEVICE_ID_5 = 'id5'
-DEVICE_ID_6 = 'id6'
+MRP_ID_1 = 'mrp_id_1'
+MRP_ID_2 = 'mrp_id_2'
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
     'AAAA', b'Apple TV 1', IP_1, b'aaaa')
@@ -31,52 +27,27 @@ HOMESHARING_SERVICE_3 = zeroconf_stub.homesharing_service(
 DEVICE_SERVICE_1 = zeroconf_stub.device_service(
     'CCCC', b'Apple TV 3', IP_3)
 MRP_SERVICE_1 = zeroconf_stub.mrp_service(
-    'DDDD', b'Apple TV 4', IP_4)
+    'DDDD', b'Apple TV 4', IP_4, MRP_ID_1)
 MRP_SERVICE_2 = zeroconf_stub.mrp_service(
-    'EEEE', b'Apple TV 5', IP_5)
+    'EEEE', b'Apple TV 5', IP_5, MRP_ID_2)
 AIRPLAY_SERVICE_1 = zeroconf_stub.airplay_service(
     'Apple TV 6', IP_6)
-NO_DEVICE_ID_SERVICE = zeroconf_stub.airplay_service(
-    'Apple TV', getmac_stub.IP_UNKNOWN)
-EXCEPTION_DEVICE_ID_SERVICE = zeroconf_stub.airplay_service(
-    'Apple TV', getmac_stub.IP_EXCEPTION)
+
+
+def _get_atv(atvs, ip):
+    for atv in atvs:
+        if atv.address == ipaddress.ip_address(ip):
+            return atv
+    return None
 
 
 class FunctionalTest(asynctest.TestCase):
-
-    def setUp(self):
-        mapping = {
-          IP_1: DEVICE_ID_1,
-          IP_2: DEVICE_ID_2,
-          IP_3: DEVICE_ID_3,
-          IP_4: DEVICE_ID_4,
-          IP_5: DEVICE_ID_5,
-          IP_6: DEVICE_ID_6,
-        }
-        getmac_stub.stub(pyatv, mapping=mapping)
 
     async def test_scan_no_device_found(self):
         zeroconf_stub.stub(pyatv)
 
         atvs = await pyatv.scan_for_apple_tvs(self.loop, timeout=0)
         self.assertEqual(len(atvs), 0)
-
-    async def test_scan_device_id_missing(self):
-        zeroconf_stub.stub(pyatv, NO_DEVICE_ID_SERVICE)
-
-        atvs = await pyatv.scan_for_apple_tvs(
-          self.loop, timeout=0, only_usable=False)
-        self.assertEqual(len(atvs), 1)
-        self.assertIsNone(atvs[0].device_id)
-
-    # Defensive test for general failures (maybe not necessary)
-    async def test_scan_device_id_failure(self):
-        zeroconf_stub.stub(pyatv, EXCEPTION_DEVICE_ID_SERVICE)
-
-        atvs = await pyatv.scan_for_apple_tvs(
-          self.loop, timeout=0, only_usable=False)
-        self.assertEqual(len(atvs), 1)
-        self.assertIsNone(atvs[0].device_id)
 
     async def test_scan_for_apple_tvs(self):
         zeroconf_stub.stub(
@@ -87,44 +58,37 @@ class FunctionalTest(asynctest.TestCase):
         self.assertEqual(len(atvs), 3)
 
         # First device
-        dev1 = AppleTV(ipaddress.ip_address(IP_1), DEVICE_ID_1, 'Apple TV 1')
-        self.assertIn(dev1, atvs)
+        dev1 = _get_atv(atvs, IP_1)
+        self.assertIsNotNone(dev1)
+        self.assertEqual(dev1.identifier, 'AAAA')
 
         # Second device
-        dev2 = AppleTV(ipaddress.ip_address(IP_2), DEVICE_ID_2, 'Apple TV 2')
-        self.assertIn(dev2, atvs)
+        dev2 = _get_atv(atvs, IP_2)
+        self.assertIsNotNone(dev2)
+        self.assertEqual(dev2.identifier, 'BBBB')
 
         # Third device
-        dev3 = AppleTV(ipaddress.ip_address(IP_4), DEVICE_ID_4, 'Apple TV 4')
-        self.assertIn(dev3, atvs)
-
-    async def test_scan_abort_on_first_usable_found(self):
-        zeroconf_stub.stub(
-            pyatv,
-            HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
-
-        atvs = await pyatv.scan_for_apple_tvs(
-            self.loop, timeout=0, abort_on_found=True)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, 'Apple TV 1')
+        dev3 = _get_atv(atvs, IP_4)
+        self.assertIsNotNone(dev3)
+        self.assertEqual(dev3.identifier, MRP_ID_1)
 
     async def test_scan_abort_airplay_unusable(self):
         zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
 
         atvs = await pyatv.scan_for_apple_tvs(
-            self.loop, timeout=0, abort_on_found=True)
+            self.loop, timeout=0)
         self.assertEqual(len(atvs), 0)
 
-    async def test_scan_all_devices(self):
+    async def test_scan_no_home_sharing(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
 
         atvs = await pyatv.scan_for_apple_tvs(
             self.loop, timeout=0, only_usable=False)
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 3')
-        self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.3'))
+        self.assertEqual(atvs[0].address, ipaddress.ip_address(IP_3))
 
-        services = atvs[0].services()
+        services = atvs[0].services
         self.assertEqual(len(services), 1)
 
         service = services[0]
@@ -149,11 +113,15 @@ class FunctionalTest(asynctest.TestCase):
             self.loop, only_usable=False, timeout=0)
         self.assertEqual(len(atvs), 2)
 
-        dev1 = AppleTV(ipaddress.ip_address(IP_4), DEVICE_ID_4, 'Apple TV 4')
-        self.assertIn(dev1, atvs)
+        dev1 = _get_atv(atvs, IP_4)
+        self.assertIsNotNone(dev1)
+        self.assertEqual(dev1.name, 'Apple TV 4')
+        self.assertIsNotNone(dev1.get_service(const.PROTOCOL_MRP))
 
-        dev2 = AppleTV(ipaddress.ip_address(IP_5), DEVICE_ID_5, 'Apple TV 5')
-        self.assertIn(dev2, atvs)
+        dev2 = _get_atv(atvs, IP_5)
+        self.assertIsNotNone(dev2)
+        self.assertEqual(dev2.name, 'Apple TV 5')
+        self.assertIsNotNone(dev2.get_service(const.PROTOCOL_MRP))
 
     async def test_scan_airplay_device(self):
         zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
@@ -164,7 +132,7 @@ class FunctionalTest(asynctest.TestCase):
         self.assertEqual(atvs[0].name, 'Apple TV 6')
         self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.6'))
 
-        services = atvs[0].services()
+        services = atvs[0].services
         self.assertEqual(len(services), 1)
 
         service = services[0]
@@ -174,7 +142,7 @@ class FunctionalTest(asynctest.TestCase):
         zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
 
         atvs = await pyatv.scan_for_apple_tvs(
-            self.loop, timeout=0, only_usable=False, device_id=DEVICE_ID_2)
+            self.loop, timeout=0, only_usable=False, identifier='BBBB')
         self.assertEqual(len(atvs), 1)
         self.assertEqual(atvs[0].name, 'Apple TV 2')
         self.assertEqual(atvs[0].address, ipaddress.ip_address(IP_2))

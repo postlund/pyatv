@@ -8,7 +8,7 @@ import pyatv
 from pyatv import const, exceptions
 from pyatv.conf import AppleTV
 from tests.airplay.fake_airplay_device import (DEVICE_PIN, DEVICE_CREDENTIALS)
-from tests import (utils, getmac_stub, zeroconf_stub)
+from tests import (utils, zeroconf_stub)
 
 
 EXPECTED_ARTWORK = b'1234'
@@ -24,7 +24,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
-        getmac_stub.stub(pyatv)
 
         # Make sleep calls do nothing to not slow down tests
         async def fake_sleep(self, time=None, loop=None):
@@ -35,16 +34,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
         raise NotImplementedError()
 
     @unittest_run_loop
-    async def test_get_device_id(self):
-        self.assertIsNone(
-            await pyatv.get_device_id(getmac_stub.IP_UNKNOWN, self.loop))
-        self.assertEqual(
-            await pyatv.get_device_id(getmac_stub.IP, self.loop),
-            'aabbccddeeff')
-
-    @unittest_run_loop
     async def test_connect_missing_device_id(self):
-        conf = AppleTV('1.2.3.4', None, 'Apple TV')
+        conf = AppleTV('1.2.3.4', 'Apple TV')
 
         with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect_to_apple_tv(conf, self.loop)
@@ -150,10 +141,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.atv.remote_control.top_menu()
         self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
 
+    # TODO: This should check that device_id is one of the IDs
+    #       passed to the services into the device.
     def test_metadata_device_id(self):
-        expected_device_id = getmac_stub.MAC.lower().replace(':', '')
-        self.assertEqual(self.atv.metadata.device_id,
-                         expected_device_id)
+        self.assertEqual(self.atv.metadata.device_id, 'dmap_id')
 
     @unittest_run_loop
     async def test_metadata_artwork(self):
