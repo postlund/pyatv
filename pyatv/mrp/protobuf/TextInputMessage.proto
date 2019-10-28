@@ -7,7 +7,7 @@ extend ProtocolMessage {
 }
 
 message TextInputMessage {
-  enum ActionType2 {
+  enum ActionType {
     Unknown = 0;
     Insert = 1;
     Set = 2;
