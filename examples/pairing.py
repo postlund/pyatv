@@ -2,7 +2,7 @@
 
 import sys
 import asyncio
-from zeroconf import Zeroconf
+from aiozeroconf import Zeroconf
 
 import pyatv
 
@@ -16,7 +16,7 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def pair_with_device(loop):
     """Make it possible to pair with device."""
-    my_zeroconf = Zeroconf()
+    my_zeroconf = Zeroconf(loop)
 
     atvs = await pyatv.scan_for_apple_tvs(loop, timeout=5)
 

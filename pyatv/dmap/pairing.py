@@ -8,7 +8,7 @@ import ipaddress
 from io import StringIO
 
 from aiohttp import web
-from zeroconf import ServiceInfo
+from aiozeroconf import ServiceInfo
 import netifaces
 
 from pyatv.dmap import tags
@@ -83,7 +83,8 @@ class DmapPairingHandler(PairingHandler):
         allocated_port = self._server.sockets[0].getsockname()[1]
         _LOGGER.debug('Started pairing web server at port %d', allocated_port)
 
-        self._setup_zeroconf(zeroconf, allocated_port)
+        for ipaddr in _get_private_ip_addresses():
+            await self._publish_service(zeroconf, ipaddr, allocated_port)
 
     async def stop(self, **kwargs):
         """Stop pairing server and unpublish service."""
@@ -104,7 +105,7 @@ class DmapPairingHandler(PairingHandler):
         """Return True if remote device presents PIN code, else False."""
         return False
 
-    def _publish_service(self, zeroconf, address, port):
+    async def _publish_service(self, zeroconf, address, port):
         props = {
             b'DvNm': self._name,
             b'RemV': b'10000',
@@ -117,18 +118,14 @@ class DmapPairingHandler(PairingHandler):
         service = ServiceInfo(
             '_touch-remote._tcp.local.',
             '{0:040d}._touch-remote._tcp.local.'.format(int(address)),
-            addresses=[socket.inet_aton(str(address))],
+            address=socket.inet_aton(str(address)),
             port=port,
             weight=0,
             priority=0,
             properties=props)
-        zeroconf.register_service(service)
+        await zeroconf.register_service(service)
 
         _LOGGER.debug('Published zeroconf service: %s', service)
-
-    def _setup_zeroconf(self, zeroconf, port):
-        for ipaddr in _get_private_ip_addresses():
-            self._publish_service(zeroconf, ipaddr, port)
 
     async def handle_request(self, request):
         """Respond to request if PIN is correct."""

@@ -3,7 +3,7 @@
 As zeroconf does not provide a stub or mock, this implementation will serve as
 stub here. It can fake immediate answers for any service.
 """
-from zeroconf import ServiceInfo
+from aiozeroconf import ServiceInfo
 
 
 def homesharing_service(service_name, atv_name, address, hsgid):
@@ -17,7 +17,7 @@ def homesharing_service(service_name, atv_name, address, hsgid):
 
     return ServiceInfo('_appletv-v2._tcp.local.',
                        service_name + '._appletv-v2._tcp.local.',
-                       addresses=[address], port=3689,
+                       address=address, port=3689,
                        properties=props)
 
 
@@ -31,7 +31,7 @@ def mrp_service(service_name, atv_name, address, identifier):
 
     return ServiceInfo('_mediaremotetv._tcp.local.',
                        service_name + '._mediaremotetv._tcp.local.',
-                       addresses=[address], port=49152,
+                       address=address, port=49152,
                        properties=props)
 
 
@@ -47,7 +47,7 @@ def airplay_service(atv_name, address):
 
     return ServiceInfo('_airplay._tcp.local.',
                        atv_name + '._airplay._tcp.local.',
-                       addresses=[address], port=7000,
+                       address=address, port=7000,
                        properties=props)
 
 
@@ -61,7 +61,7 @@ def device_service(service_name, atv_name, address):
 
     return ServiceInfo('_touch-able._tcp.local.',
                        service_name + '._touch-able._tcp.local.',
-                       addresses=[address], port=3689,
+                       address=address, port=3689,
                        server='AppleTV-2.local.',
                        properties=props)
 
@@ -84,21 +84,21 @@ class ZeroconfStub:
         self.services = services
         self.registered_services = []
 
-    def get_service_info(self, service_type, service_name):
+    async def get_service_info(self, service_type, service_name, timeout=2000):
         """Look up service information."""
         for service in self.services:
             if service.name == service_name:
                 return service
 
-    def register_service(self, service):
+    async def register_service(self, service):
         """Save services registered services."""
         self.registered_services.append(service)
 
-    def unregister_service(self, service):
+    async def unregister_service(self, service):
         """Stub for unregistering services (does nothing)."""
         pass
 
-    def close(self):
+    async def close(self):
         """Stub for closing zeroconf (does nothing)."""
         pass
 
@@ -106,6 +106,6 @@ class ZeroconfStub:
 def stub(module, *services):
     """Stub a module using zeroconf."""
     instance = ZeroconfStub(list(services))
-    module.Zeroconf = lambda: instance
+    module.Zeroconf = lambda loop: instance
     module.ServiceBrowser = ServiceBrowserStub
     return instance

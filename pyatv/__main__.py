@@ -8,7 +8,7 @@ import asyncio
 
 import argparse
 from argparse import ArgumentTypeError
-from zeroconf import Zeroconf
+from aiozeroconf import Zeroconf
 
 import pyatv
 from pyatv import (const, exceptions, interface)
@@ -159,7 +159,7 @@ class DeviceCommands:
         # TODO: config should be stored elsewhere so that API is same for both
         protocol = self.atv.service.protocol
         if protocol == const.PROTOCOL_DMAP:
-            await self.atv.pairing.start(zeroconf=Zeroconf(),
+            await self.atv.pairing.start(zeroconf=Zeroconf(self.loop),
                                          name=self.args.remote_name,
                                          pairing_guid=self.args.pairing_guid)
         elif protocol == const.PROTOCOL_MRP:
