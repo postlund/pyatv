@@ -3,9 +3,8 @@
 import asyncio
 import logging
 from ipaddress import ip_address
-from threading import Lock
 
-from zeroconf import ServiceBrowser, Zeroconf
+from aiozeroconf import ServiceBrowser, Zeroconf
 from aiohttp import ClientSession
 
 from pyatv import (conf, exceptions)
@@ -39,19 +38,19 @@ class _ServiceListener:
         """Initialize a new _ServiceListener."""
         self.loop = loop
         self.found_devices = {}
-        self.lock = Lock()
 
     def add_service(self, zeroconf, service_type, name):
         """Handle callback from zeroconf when a service has been discovered."""
-        self.lock.acquire()
-        try:
-            self._internal_add(zeroconf, service_type, name)
-        finally:
-            self.lock.release()
+        asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
 
-    def _internal_add(self, zeroconf, service_type, name):
-        info = zeroconf.get_service_info(service_type, name)
-        address = ip_address(info.addresses[0])  # TODO: Consider all?
+    async def _internal_add(self, zeroconf, service_type, name):
+        info = await zeroconf.get_service_info(
+            service_type, name, timeout=2000)
+        if info.address is None:
+            _LOGGER.warning("Failed to resolve %s (%s)", service_type, name)
+            return
+
+        address = ip_address(info.address)
 
         if info.type == HOMESHARING_SERVICE:
             self.add_hs_service(info, address)
@@ -104,13 +103,12 @@ class _ServiceListener:
         atv.add_service(service)
 
 
-# pylint: disable=too-many-arguments
 async def scan_for_apple_tvs(loop, timeout=5,
                              identifier=None, only_usable=True,
                              protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     listener = _ServiceListener(loop)
-    zeroconf = Zeroconf()
+    zeroconf = Zeroconf(loop)
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
         ServiceBrowser(zeroconf, DEVICE_SERVICE, listener)
@@ -119,7 +117,7 @@ async def scan_for_apple_tvs(loop, timeout=5,
         _LOGGER.debug('Discovering devices for %d seconds', timeout)
         await asyncio.sleep(timeout)
     finally:
-        zeroconf.close()
+        await zeroconf.close()
 
     def _should_include(atv):
         if only_usable and not atv.is_usable():
