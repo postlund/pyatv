@@ -8,7 +8,7 @@ import pyatv
 from pyatv import const, exceptions
 from pyatv.conf import AppleTV
 from tests.airplay.fake_airplay_device import (DEVICE_PIN, DEVICE_CREDENTIALS)
-from tests import (utils, zeroconf_stub)
+from tests import zeroconf_stub
 
 
 EXPECTED_ARTWORK = b'1234'
@@ -151,20 +151,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.change_artwork(EXPECTED_ARTWORK)
 
         artwork = await self.atv.metadata.artwork()
-        self.assertEqual(artwork, EXPECTED_ARTWORK)
-
-    @unittest_run_loop
-    async def test_metadata_artwork_url(self):
-        self.usecase.change_artwork(EXPECTED_ARTWORK)
-
-        # Must be logged in to have valid session id
-        await self.atv.login()
-
-        # URL to artwork
-        artwork_url = await self.atv.metadata.artwork_url()
-
-        # Fetch artwork with a GET request to ensure it works
-        artwork, _ = await utils.simple_get(artwork_url)
         self.assertEqual(artwork, EXPECTED_ARTWORK)
 
     @unittest_run_loop

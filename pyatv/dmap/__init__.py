@@ -39,14 +39,6 @@ class BaseDmapAppleTV:
         self.playstatus_revision = parser.first(resp, 'cmst', 'cmsr')
         return resp
 
-    def artwork_url(self):
-        """Return URL to current artwork.
-
-        As as valid session id is necessary, the URL will only be valid
-        if logged in.
-        """
-        return self.daap.get_url(_ARTWORK_CMD)
-
     async def artwork(self):
         """Return an image file (png) for what is currently playing.
 
@@ -282,10 +274,6 @@ class DmapMetadata(Metadata):
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
         return self.apple_tv.artwork()
-
-    async def artwork_url(self):
-        """Return artwork URL for what is currently playing."""
-        return self.apple_tv.artwork_url()
 
     async def playing(self):
         """Return current device state."""

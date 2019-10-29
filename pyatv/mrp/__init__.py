@@ -239,10 +239,6 @@ class MrpMetadata(Metadata):
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError
 
-    async def artwork_url(self):
-        """Return artwork URL for what is currently playing."""
-        raise exceptions.NotSupportedError
-
     async def playing(self):
         """Return what is currently playing."""
         # TODO: This is hack-ish
