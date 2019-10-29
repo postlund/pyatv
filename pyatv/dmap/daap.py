@@ -65,10 +65,6 @@ class DaapRequester:
         await self._assure_logged_in()
         return await self._do(_get_request, is_daap=daap_data)
 
-    def get_url(self, cmd, **args):
-        """Expand the request URL for a request."""
-        return self.http.base_url + self._mkurl(cmd, *args)
-
     async def post(self, cmd, data=None, timeout=None, **args):
         """Perform DAAP POST command with optional data."""
         def _post_request():

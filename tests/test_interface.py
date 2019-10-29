@@ -109,10 +109,6 @@ class MetadataDummy(interface.Metadata):
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError
 
-    def artwork_url(self):
-        """Return artwork URL for what is currently playing."""
-        raise exceptions.NotSupportedError
-
     def playing(self):
         """Return what is currently playing."""
         raise exceptions.NotSupportedError
@@ -201,7 +197,5 @@ class InterfaceTest(unittest.TestCase):
 
         with self.assertRaises(exceptions.NotSupportedError):
             metadata.artwork()
-        with self.assertRaises(exceptions.NotSupportedError):
-            metadata.artwork_url()
         with self.assertRaises(exceptions.NotSupportedError):
             metadata.playing()
