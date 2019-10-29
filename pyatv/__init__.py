@@ -43,6 +43,9 @@ class _ServiceListener:
         """Handle callback from zeroconf when a service has been discovered."""
         asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
 
+    def remove_service(self, zeroconf, service_type, name):
+        """Handle callback when a service is removed."""
+
     async def _internal_add(self, zeroconf, service_type, name):
         info = await zeroconf.get_service_info(
             service_type, name, timeout=2000)
