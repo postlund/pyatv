@@ -302,12 +302,12 @@ class MrpPairingHandler(PairingHandler):
     @property
     def has_paired(self):
         """If a successful pairing has been performed."""
-        return self.service.device_credentials is not None
+        return self.service.credentials is not None
 
     @property
     def credentials(self):
         """Credentials that were generated during pairing."""
-        return str(self.service.device_credentials)
+        return str(self.service.credentials)
 
     async def start(self, **kwargs):
         """Start pairing process."""
@@ -318,7 +318,7 @@ class MrpPairingHandler(PairingHandler):
         if not self._pin_code:
             raise Exception('no pin given')  # TODO: new exception
 
-        self.service.device_credentials = \
+        self.service.credentials = \
             await self.pairing_procedure.finish_pairing(self._pin_code)
 
     def pin(self, pin):
