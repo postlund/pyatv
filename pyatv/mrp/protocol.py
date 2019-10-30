@@ -59,9 +59,9 @@ class MrpProtocol:
 
         # In case credentials have been given externally (i.e. not by pairing
         # with a device), then use that client id
-        if self.service.device_credentials:
+        if self.service.credentials:
             self.srp.pairing_id = Credentials.parse(
-                self.service.device_credentials).client_id
+                self.service.credentials).client_id
 
         # The first message must always be DEVICE_INFORMATION, otherwise the
         # device will not respond with anything
@@ -123,11 +123,11 @@ class MrpProtocol:
 
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
-        if self.service.device_credentials and self._initial_message_sent:
+        if self.service.credentials and self._initial_message_sent:
             self._initial_message_sent = False
 
             # Verify credentials and generate keys
-            credentials = Credentials.parse(self.service.device_credentials)
+            credentials = Credentials.parse(self.service.credentials)
             pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
 
             await pair_verifier.verify_credentials()

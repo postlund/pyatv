@@ -129,7 +129,7 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
             self.loop, self.connection, SRPAuthHandler(),
-            MrpService(port, device_credentials=self.credentials))
+            MrpService(port, credentials=self.credentials))
         self.loop.run_until_complete(
             protocol.start(skip_initial_messages=True))
         self.connection.listener = self

@@ -143,14 +143,14 @@ class BaseService:
 class DmapService(BaseService):
     """Representation of a DMAP service."""
 
-    def __init__(self, identifier, device_credentials, port=None):
+    def __init__(self, identifier, credentials, port=None):
         """Initialize a new DmapService."""
         super().__init__(identifier, PROTOCOL_DMAP, port or 3689)
-        self.device_credentials = device_credentials
+        self.credentials = credentials
 
     def is_usable(self):
         """Return True if service is usable, else False."""
-        return self.device_credentials is not None
+        return self.credentials is not None
 
     def superseeded_by(self, other_service):
         """Return True if input service has login id and this has not."""
@@ -162,22 +162,22 @@ class DmapService(BaseService):
 
         # If this service does not have a login id but the other one does, then
         # we should return True here
-        return not self.device_credentials and other_service.device_credentials
+        return not self.credentials and other_service.credentials
 
     def __str__(self):
         """Return a string representation of this object."""
         return super().__str__() + ', Credentials: {0}'.format(
-            self.device_credentials)
+            self.credentials)
 
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
     """Representation of a MediaRemote Protocol service."""
 
-    def __init__(self, identifier, port, device_credentials=None):
+    def __init__(self, identifier, port, credentials=None):
         """Initialize a new MrpService."""
         super().__init__(identifier, PROTOCOL_MRP, port)
-        self.device_credentials = device_credentials
+        self.credentials = credentials
 
     def is_usable(self):
         """Return True if service is usable, else False."""
@@ -186,7 +186,7 @@ class MrpService(BaseService):
     def __str__(self):
         """Return a string representation of this object."""
         return super().__str__() + ', Credentials: {0}'.format(
-            self.device_credentials)
+            self.credentials)
 
 
 # pylint: disable=too-few-public-methods

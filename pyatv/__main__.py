@@ -312,12 +312,13 @@ async def cli_handler(loop):
             return 1
 
         return await _handle_commands(args, loop)
-    if args.address:
-        return await _handle_commands(args, loop)
 
-    logging.error('To autodiscover an Apple TV, add -a')
+    if args.port == 0 or args.address is None or args.protocol is None:
+        logging.error(
+            'You must specify address, port and protocol in manual mode')
+        return 1
 
-    return 1
+    return await _handle_commands(args, loop)
 
 
 def _print_found_apple_tvs(atvs, outstream=sys.stdout):
@@ -336,8 +337,8 @@ async def _autodiscover_device(args, loop):
         return None
 
     if len(atvs) > 1:
-        logging.error('Found more than one Apple TV; '
-                      'specify one using --address and --device-credentials')
+        logging.error(
+            'Found more than one Apple TV; specify one using --id')
         _print_found_apple_tvs(atvs, outstream=sys.stderr)
         return None
 
@@ -393,7 +394,7 @@ async def _handle_commands(args, loop):
             args.id, args.device_credentials, port=args.port))
     elif args.protocol == const.PROTOCOL_MRP:
         details.add_service(MrpService(
-            args.id, args.port, device_credentials=args.device_credentials))
+            args.id, args.port, credentials=args.device_credentials))
 
     atv = await pyatv.connect_to_apple_tv(
         details, loop, protocol=args.protocol)
