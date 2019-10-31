@@ -244,7 +244,7 @@ environment and install everything needed for development:
 
     git clone https://github.com/postlund/pyatv.git
     cd pyatv
-    ./setup_dev_env.sh
+    ./scripts/setup_dev_env.sh
     source bin/activate
 
 You can run the tests with ``python setup.py test``. Also, make sure that
