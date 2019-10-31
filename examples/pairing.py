@@ -18,13 +18,13 @@ async def pair_with_device(loop):
     """Make it possible to pair with device."""
     my_zeroconf = Zeroconf(loop)
 
-    atvs = await pyatv.scan_for_apple_tvs(loop, timeout=5)
+    atvs = await pyatv.scan(loop, timeout=5)
 
     if not atvs:
         print('no device found', file=sys.stderr)
         return
 
-    atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
+    atv = await pyatv.connect(atvs[0], loop)
 
     atv.pairing.pin(PIN_CODE)
     await atv.pairing.start(zeroconf=my_zeroconf, name=REMOTE_NAME)

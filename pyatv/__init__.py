@@ -7,10 +7,9 @@ from ipaddress import ip_address
 from aiozeroconf import ServiceBrowser, Zeroconf
 from aiohttp import ClientSession
 
-from pyatv import (conf, exceptions)
+from pyatv import (conf, const, exceptions)
 from pyatv.airplay import player
 from pyatv.airplay.api import AirPlayAPI
-from pyatv.const import PROTOCOL_DMAP
 from pyatv.net import HttpSession
 
 from pyatv.dmap import DmapAppleTV
@@ -106,9 +105,7 @@ class _ServiceListener:
         atv.add_service(service)
 
 
-async def scan_for_apple_tvs(loop, timeout=5,
-                             identifier=None, only_usable=True,
-                             protocol=None):
+async def scan(loop, timeout=5, identifier=None, protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     listener = _ServiceListener(loop)
     zeroconf = Zeroconf(loop)
@@ -123,9 +120,6 @@ async def scan_for_apple_tvs(loop, timeout=5,
         await zeroconf.close()
 
     def _should_include(atv):
-        if only_usable and not atv.is_usable():
-            return False
-
         if identifier and identifier not in atv.all_identifiers:
             return False
 
@@ -138,45 +132,32 @@ async def scan_for_apple_tvs(loop, timeout=5,
     return [x for x in found_devices if _should_include(x)]
 
 
-async def connect_to_apple_tv(details, loop, protocol=None, session=None):
+async def connect(config, loop, protocol=None, session=None):
     """Connect and logins to an Apple TV."""
-    if details.identifier is None:
+    if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
-    service = _get_service_used_to_connect(details, protocol)
+    service = config.main_service(protocol=protocol)
 
     # If no session is given, create a default one
     if session is None:
         session = ClientSession(loop=loop)
 
     # AirPlay service is the same for both DMAP and MRP
-    airplay = _setup_airplay(loop, session, details)
+    airplay = _setup_airplay(loop, session, config)
 
     # Create correct implementation depending on protocol
-    if service.protocol == PROTOCOL_DMAP:
-        return DmapAppleTV(loop, session, details, airplay)
+    if service.protocol == const.PROTOCOL_DMAP:
+        return DmapAppleTV(loop, session, config, airplay)
 
-    return MrpAppleTV(loop, session, details, airplay)
-
-
-def _get_service_used_to_connect(details, protocol):
-    if not protocol:
-        service = details.usable_service()
-    else:
-        service = details.get_service(protocol)
-
-    if not service:
-        raise exceptions.NoUsableServiceError(
-            'no usable service to connect to')
-
-    return service
+    return MrpAppleTV(loop, session, config, airplay)
 
 
-def _setup_airplay(loop, session, details):
-    airplay_service = details.airplay_service()
+def _setup_airplay(loop, session, config):
+    airplay_service = config.get_service(const.PROTOCOL_AIRPLAY)
     airplay_player = player.AirPlayPlayer(
-        loop, session, details.address, airplay_service.port)
+        loop, session, config.address, airplay_service.port)
     airplay_http = HttpSession(
         session, 'http://{0}:{1}/'.format(
-            details.address, airplay_service.port))
+            config.address, airplay_service.port))
     return AirPlayAPI(airplay_http, airplay_player)

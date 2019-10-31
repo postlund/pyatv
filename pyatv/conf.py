@@ -1,5 +1,5 @@
 """Configuration when connecting to an Apple TV."""
-from pyatv import convert
+from pyatv import (convert, exceptions)
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 
 _SUPPORTED_PROTOCOLS = [PROTOCOL_MRP, PROTOCOL_DMAP]
@@ -30,20 +30,20 @@ class AppleTV:
     @property
     def all_identifiers(self):
         """Return all unique identifiers for this device."""
-        services = self._services.values()
+        services = self.services
         return [x.identifier for x in services if x.identifier is not None]
 
     def add_service(self, service):
         """Add a new service.
 
-        If the service already exists, it will be replaced.
+        If the service already exists, it will be merged.
         """
-        if service.protocol in self._services:
-            existing = self._services[service.protocol]
-            if not existing.superseeded_by(service):
-                return
+        existing = self._services.get(service.protocol, None)
+        if existing is not None:
+            existing.merge(service)
+        else:
+            self._services[service.protocol] = service
 
-        self._services[service.protocol] = service
         if self._identifier is None:
             self._identifier = service.identifier
 
@@ -53,40 +53,31 @@ class AppleTV:
         If a service with the specified protocol is not available, None is
         returned.
         """
+        # Special case for AirPlay for now
+        if protocol == PROTOCOL_AIRPLAY:
+            if self._services.get(protocol, None) is None:
+                self._services[protocol] = AirPlayService(None, 7000)
+
         return self._services.get(protocol, None)
 
     @property
     def services(self):
         """Return all supported services."""
-        return list(self._services.values())
+        services = set(list(self._services.keys()) + [PROTOCOL_AIRPLAY])
+        return [self.get_service(x) for x in services]
 
-    def usable_service(self):
-        """Return a usable service or None if there is none.
+    def main_service(self, protocol=None):
+        """Return suggested service used to establish connection."""
+        protocols = [protocol] if protocol is not None else \
+            [PROTOCOL_MRP, PROTOCOL_DMAP]
 
-        A service is usable if enough configuration to be able to make a
-        connection is available. If several protocols are usable, MRP will be
-        preferred over DMAP.
-        """
-        services = self._services
-        for protocol in self._supported_protocols:
-            if protocol in services and services[protocol].is_usable():
-                return services[protocol]
+        for prot in protocols:
+            service = self.get_service(prot)
+            if service is not None:
+                return service
 
-        return None
-
-    def is_usable(self):
-        """Return True if there are any usable services."""
-        return any([x.is_usable() for x in self._services.values()])
-
-    def airplay_service(self):
-        """Return service used for AirPlay.
-
-        If no AirPlay service has been found, a default at port 7000 will be
-        created.
-        """
-        if PROTOCOL_AIRPLAY in self._services:
-            return self._services[PROTOCOL_AIRPLAY]
-        return AirPlayService(None, 7000)
+        raise exceptions.NoServiceError(
+            'no service to connect to')
 
     def __eq__(self, other):
         """Compare instance with another instance."""
@@ -122,16 +113,8 @@ class BaseService:
         """Return unique identifier associated with this service."""
         return self.__identifier
 
-    @staticmethod
-    def is_usable():
-        """Return True if service is usable, else False."""
-        return False
-
-    # pylint: disable=unused-argument
-    @staticmethod
-    def superseeded_by(other_service):
-        """Return True if input service should be used instead of this one."""
-        return False
+    def merge(self, other):
+        """Merge with other service of same type."""
 
     def __str__(self):
         """Return a string representation of this object."""
@@ -148,21 +131,9 @@ class DmapService(BaseService):
         super().__init__(identifier, PROTOCOL_DMAP, port or 3689)
         self.credentials = credentials
 
-    def is_usable(self):
-        """Return True if service is usable, else False."""
-        return self.credentials is not None
-
-    def superseeded_by(self, other_service):
-        """Return True if input service has login id and this has not."""
-        if not other_service or \
-                other_service.__class__ != self.__class__ or \
-                other_service.protocol != self.protocol or \
-                other_service.port != self.port:
-            return False
-
-        # If this service does not have a login id but the other one does, then
-        # we should return True here
-        return not self.credentials and other_service.credentials
+    def merge(self, other):
+        """Merge with other service of same type."""
+        self.credentials = other.credentials or self.credentials
 
     def __str__(self):
         """Return a string representation of this object."""
@@ -178,10 +149,6 @@ class MrpService(BaseService):
         """Initialize a new MrpService."""
         super().__init__(identifier, PROTOCOL_MRP, port)
         self.credentials = credentials
-
-    def is_usable(self):
-        """Return True if service is usable, else False."""
-        return True
 
     def __str__(self):
         """Return a string representation of this object."""

@@ -3,7 +3,7 @@ import asyncio
 import pyatv
 from pyatv import conf
 
-# Enter details used to connect
+# Enter config used to connect
 NAME = 'My Apple TV'
 ADDRESS = '10.0.10.22'
 HSGID = '00000000-1111-2222-3333-444444444444'
@@ -14,11 +14,11 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def print_what_is_playing(loop):
     """Connect to device and print what is playing."""
-    details = conf.AppleTV(ADDRESS, NAME)
-    details.add_service(conf.DmapService(None, HSGID))
+    config = conf.AppleTV(ADDRESS, NAME)
+    config.add_service(conf.DmapService(None, HSGID))
 
-    print('Connecting to {}'.format(details.address))
-    atv = await pyatv.connect_to_apple_tv(details, loop)
+    print('Connecting to {}'.format(config.address))
+    atv = await pyatv.connect(config, loop)
 
     try:
         print((await atv.metadata.playing()))

@@ -18,12 +18,11 @@ def auto_connect(handler, timeout=5, not_found=None):
     # A coroutine is used so we can connect to the device while being inside
     # the event loop
     async def _handle(loop):
-        atvs = await pyatv.scan_for_apple_tvs(
-            loop, timeout=timeout)
+        atvs = await pyatv.scan(loop, timeout=timeout)
 
         # Take the first device found
         if atvs:
-            atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
+            atv = await pyatv.connect(atvs[0], loop)
             try:
                 await handler(atv)
             finally:

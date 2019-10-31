@@ -79,8 +79,7 @@ class GlobalCommands:
 
     async def scan(self):
         """Scan for Apple TVs on the network."""
-        atvs = await pyatv.scan_for_apple_tvs(
-            self.loop, timeout=self.args.scan_timeout, only_usable=False)
+        atvs = await pyatv.scan(self.loop, timeout=self.args.scan_timeout)
         _print_found_apple_tvs(atvs)
 
         return 0
@@ -329,9 +328,9 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 
 async def _autodiscover_device(args, loop):
-    atvs = await pyatv.scan_for_apple_tvs(
+    atvs = await pyatv.scan(
         loop, timeout=args.scan_timeout,
-        identifier=args.id, protocol=args.protocol, only_usable=True)
+        identifier=args.id, protocol=args.protocol)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
@@ -343,7 +342,7 @@ async def _autodiscover_device(args, loop):
         return None
 
     apple_tv = atvs[0]
-    service = apple_tv.usable_service()  # scan only returns usable service
+    service = apple_tv.main_service()
 
     # Common parameters for all protocols
     args.id = apple_tv.identifier
@@ -351,10 +350,7 @@ async def _autodiscover_device(args, loop):
     args.name = apple_tv.name
     args.protocol = service.protocol
     args.port = service.port
-
-    # Protocol specific parameters (overrides cli arguments)
-    if service.protocol == const.PROTOCOL_DMAP:
-        args.device_credentials = service.device_credentials
+    args.device_credentials = service.credentials
 
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
@@ -388,16 +384,15 @@ def _extract_command_with_args(cmd):
 
 
 async def _handle_commands(args, loop):
-    details = AppleTV(args.address, args.name)
+    config = AppleTV(args.address, args.name)
     if args.protocol == const.PROTOCOL_DMAP:
-        details.add_service(DmapService(
+        config.add_service(DmapService(
             args.id, args.device_credentials, port=args.port))
     elif args.protocol == const.PROTOCOL_MRP:
-        details.add_service(MrpService(
+        config.add_service(MrpService(
             args.id, args.port, credentials=args.device_credentials))
 
-    atv = await pyatv.connect_to_apple_tv(
-        details, loop, protocol=args.protocol)
+    atv = await pyatv.connect(config, loop, protocol=args.protocol)
     atv.push_updater.listener = PushListener()
 
     try:

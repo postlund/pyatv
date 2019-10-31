@@ -18,10 +18,10 @@ class MockAppleTV:
 class HelpersTest(asynctest.TestCase):
 
     def setUp(self):
-        self.device_details = conf.AppleTV('address', 'name')
+        self.config = conf.AppleTV('address', 'name')
         self.mock_device = asynctest.mock.Mock(MockAppleTV())
 
-    @patch('pyatv.scan_for_apple_tvs', return_value=[])
+    @patch('pyatv.scan', return_value=[])
     def test_auto_connect_with_no_device(self, scan_func):
         self.device_found = True
 
@@ -36,10 +36,10 @@ class HelpersTest(asynctest.TestCase):
 
         self.assertFalse(self.device_found)
 
-    @patch('pyatv.scan_for_apple_tvs')
-    @patch('pyatv.connect_to_apple_tv')
+    @patch('pyatv.scan')
+    @patch('pyatv.connect')
     def test_auto_connect_with_device(self, connect_func, scan_func):
-        scan_func.return_value = [self.device_details]
+        scan_func.return_value = [self.config]
         connect_func.return_value = self.mock_device
 
         self.found_device = None

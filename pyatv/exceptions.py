@@ -1,7 +1,7 @@
 """Local exceptions used by library."""
 
 
-class NoUsableServiceError(Exception):
+class NoServiceError(Exception):
     """Thrown when connecting to a device with no usable service."""
 
 
