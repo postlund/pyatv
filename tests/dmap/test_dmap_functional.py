@@ -4,7 +4,8 @@ import ipaddress
 
 from aiohttp.test_utils import unittest_run_loop
 
-from pyatv import (connect_to_apple_tv, exceptions)
+import pyatv
+from pyatv import exceptions
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
@@ -54,7 +55,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         conf = AppleTV('127.0.0.1', 'Apple TV')
         conf.add_service(DmapService('dmap_id', hsgid, port=self.server.port))
         conf.add_service(AirPlayService('mrp_id', self.server.port))
-        return await connect_to_apple_tv(conf, self.loop)
+        return await pyatv.connect(conf, self.loop)
 
     @unittest_run_loop
     async def test_not_supportedt(self):

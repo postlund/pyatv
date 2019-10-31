@@ -336,21 +336,21 @@ class MrpAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, details, airplay):
+    def __init__(self, loop, session, config, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
 
         self._session = session
-        self._mrp_service = details.get_service(const.PROTOCOL_MRP)
+        self._mrp_service = config.get_service(const.PROTOCOL_MRP)
 
         self._connection = MrpConnection(
-            details.address, self._mrp_service.port, loop)
+            config.address, self._mrp_service.port, loop)
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(
             loop, self._connection, self._srp, self._mrp_service)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._protocol, details.identifier)
+        self._mrp_metadata = MrpMetadata(self._protocol, config.identifier)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._protocol)
         self._mrp_pairing = MrpPairingHandler(

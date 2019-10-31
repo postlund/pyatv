@@ -57,6 +57,7 @@ Requirements
 
 - python >= 3.5.3
 - aiohttp >= 3.0.1, <4
+- aiozeroconf >= 0.1.8
 - cryptography >= 1.8.1
 - curve25519-donna >= 1.3
 - ed25519 >= 1.4
@@ -64,7 +65,6 @@ Requirements
 - protobuf >= 3.4.0
 - srptools >= 0.2.0
 - tlslite-ng >= 0.7.0
-- zeroconf >= 0.17.7
 
 Getting started
 ---------------
@@ -119,7 +119,6 @@ It is possible to use the reference CLI application as well:
         Address: 10.0.0.10
     Identifiers:
      - 00:11:22:33:44:55
-     - 2DF2E7507639C269
      - AABBCCDDEEFFAABB
     Services:
      - Protocol: AirPlay, Port: 7000
@@ -139,7 +138,7 @@ It is possible to use the reference CLI application as well:
     $ atvremote -i 55:44:33:22:11:00 next
 
     # Manually specify device
-    $ atvremote --id ffeeddccbbaa --address 10.0.10.11 --port 3689 --protocol dmap --device_credentials 00000000-1234-5678-9012-345678901234 playing
+    $ atvremote -m --id ffeeddccbbaa --address 10.0.10.11 --port 3689 --protocol dmap --device_credentials 00000000-1234-5678-9012-345678901234 playing
     Media type: Music
     Play state: Playing
       Position: 0/397s (0.0%)

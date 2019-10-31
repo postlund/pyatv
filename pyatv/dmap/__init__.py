@@ -351,21 +351,21 @@ class DmapAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, details, airplay):
+    def __init__(self, loop, session, config, airplay):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
 
-        self._dmap_service = details.get_service(const.PROTOCOL_DMAP)
+        self._dmap_service = config.get_service(const.PROTOCOL_DMAP)
         daap_http = HttpSession(
             session,
-            'http://{0}:{1}/'.format(details.address, self._dmap_service.port))
+            'http://{0}:{1}/'.format(config.address, self._dmap_service.port))
         self._requester = DaapRequester(
             daap_http, self._dmap_service.credentials)
 
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
-        self._dmap_metadata = DmapMetadata(details.identifier, self._apple_tv)
+        self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
         self._dmap_pairing = pairing.DmapPairingHandler(loop)
         self._airplay = airplay

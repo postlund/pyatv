@@ -38,7 +38,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
         conf = AppleTV('1.2.3.4', 'Apple TV')
 
         with self.assertRaises(exceptions.DeviceIdMissingError):
-            await pyatv.connect_to_apple_tv(conf, self.loop)
+            await pyatv.connect(conf, self.loop)
 
     @unittest_run_loop
     async def test_airplay_device_authentication(self):

@@ -4,7 +4,7 @@ import unittest
 
 from aiohttp.test_utils import unittest_run_loop
 
-from pyatv import connect_to_apple_tv
+import pyatv
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
@@ -32,7 +32,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         conf = AppleTV('127.0.0.1', 'Test device')
         conf.add_service(MrpService('mrp_id', port))
         conf.add_service(AirPlayService('airplay_id', self.server.port))
-        return await connect_to_apple_tv(conf, loop=self.loop)
+        return await pyatv.connect(conf, loop=self.loop)
 
     @unittest_run_loop
     def test_dummy_test(self):

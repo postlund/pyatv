@@ -11,14 +11,14 @@ LOOP = asyncio.get_event_loop()
 async def print_what_is_playing(loop):
     """Find a device and print what is playing."""
     print('Discovering devices on network...')
-    atvs = await pyatv.scan_for_apple_tvs(loop, timeout=5)
+    atvs = await pyatv.scan(loop, timeout=5)
 
     if not atvs:
         print('no device found', file=sys.stderr)
         return
 
     print('Connecting to {0}'.format(atvs[0].address))
-    atv = await pyatv.connect_to_apple_tv(atvs[0], loop)
+    atv = await pyatv.connect(atvs[0], loop)
 
     try:
         playing = await atv.metadata.playing()

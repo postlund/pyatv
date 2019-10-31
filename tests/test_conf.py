@@ -3,11 +3,9 @@
 import unittest
 from unittest.mock import MagicMock
 
-from pyatv import (conf, const)
-
-PROTOCOL_1 = 1
-PROTOCOL_2 = 2
-SUPPORTED_PROTOCOLS = [PROTOCOL_1, PROTOCOL_2]
+from pyatv import (conf, const, exceptions)
+from pyatv.const import (
+  PROTOCOL_AIRPLAY, PROTOCOL_DMAP, PROTOCOL_MRP)
 
 ADDRESS_1 = '127.0.0.1'
 ADDRESS_2 = '192.168.0.1'
@@ -21,116 +19,106 @@ IDENTIFIER_2 = 'id2'
 class ConfTest(unittest.TestCase):
 
     def setUp(self):
-        self.atv = conf.AppleTV(
-            ADDRESS_1, NAME, supported_services=SUPPORTED_PROTOCOLS)
+        self.config = conf.AppleTV(ADDRESS_1, NAME)
         self.service_mock = MagicMock()
-        self.service_mock.protocol = PROTOCOL_1
+        self.service_mock.protocol = const.PROTOCOL_DMAP
         self.service_mock.port = PORT_1
         self.service_mock.identifier = IDENTIFIER_1
-        self.service_mock.is_usable.return_value = False
-        self.service_mock.superseeded_by.return_value = False
 
         self.service_mock2 = MagicMock()
-        self.service_mock2.protocol = PROTOCOL_2
+        self.service_mock2.protocol = const.PROTOCOL_MRP
         self.service_mock2.port = PORT_2
         self.service_mock2.identifier = IDENTIFIER_2
-        self.service_mock2.is_usable.return_value = False
-        self.service_mock2.superseeded_by.return_value = False
+
+        self.airplay_mock = MagicMock()
+        self.airplay_mock.port = PORT_1
+        self.airplay_mock.protocol = const.PROTOCOL_AIRPLAY
 
     def test_address_and_name(self):
-        self.assertEqual(self.atv.address, ADDRESS_1)
-        self.assertEqual(self.atv.name, NAME)
+        self.assertEqual(self.config.address, ADDRESS_1)
+        self.assertEqual(self.config.name, NAME)
 
     def test_equality(self):
-        self.assertEqual(self.atv, self.atv)
+        self.assertEqual(self.config, self.config)
 
         atv2 = conf.AppleTV(ADDRESS_1, NAME)
         atv2.add_service(conf.AirPlayService(IDENTIFIER_1, PORT_1))
-        self.assertNotEqual(self.atv, atv2)
+        self.assertNotEqual(self.config, atv2)
 
     def test_add_services_and_get(self):
-        self.atv.add_service(self.service_mock)
-        self.atv.add_service(self.service_mock2)
+        self.config.add_service(self.service_mock)
+        self.config.add_service(self.service_mock2)
 
-        services = self.atv.services
-        self.assertEqual(len(services), 2)
+        services = self.config.services
+        self.assertEqual(len(services), 3)
 
         self.assertIn(self.service_mock, services)
         self.assertIn(self.service_mock2, services)
 
-        self.assertEqual(self.atv.get_service(PROTOCOL_1), self.service_mock)
-        self.assertEqual(self.atv.get_service(PROTOCOL_2), self.service_mock2)
+        self.assertEqual(
+            self.config.get_service(PROTOCOL_DMAP), self.service_mock)
+        self.assertEqual(
+            self.config.get_service(PROTOCOL_MRP), self.service_mock2)
+        self.assertIsNotNone(self.config.get_service(PROTOCOL_AIRPLAY))
 
     def test_identifier(self):
-        self.assertIsNone(self.atv.identifier)
+        self.assertIsNone(self.config.identifier)
 
-        self.atv.add_service(self.service_mock)
-        self.assertEqual(self.atv.identifier, IDENTIFIER_1)
+        self.config.add_service(self.service_mock)
+        self.assertEqual(self.config.identifier, IDENTIFIER_1)
 
-        self.atv.add_service(self.service_mock2)
-        self.assertEqual(self.atv.identifier, IDENTIFIER_1)
+        self.config.add_service(self.service_mock2)
+        self.assertEqual(self.config.identifier, IDENTIFIER_1)
 
-        services = self.atv.services
-        self.assertEqual(len(services), 2)
+        services = self.config.services
+        self.assertEqual(len(services), 3)
         self.assertIn(self.service_mock, services)
         self.assertIn(self.service_mock2, services)
 
-    def test_usable_service(self):
-        self.assertIsNone(self.atv.usable_service())
-
-        self.atv.add_service(self.service_mock)
-        self.atv.add_service(self.service_mock2)
-        self.assertIsNone(self.atv.usable_service())
-
-        self.service_mock2.is_usable.return_value = True
-        self.assertEqual(self.atv.usable_service(), self.service_mock2)
-
-    def test_any_service_usable(self):
-        self.assertFalse(self.atv.is_usable())
-
-        self.atv.add_service(self.service_mock)
-        self.assertFalse(self.atv.is_usable())
-
-        self.service_mock.is_usable.return_value = True
-        self.assertTrue(self.atv.is_usable())
-
     def test_default_airplay_service(self):
-        airplay = self.atv.airplay_service()
+        airplay = self.config.get_service(const.PROTOCOL_AIRPLAY)
         self.assertEqual(airplay.protocol, const.PROTOCOL_AIRPLAY)
         self.assertEqual(airplay.port, 7000)
 
     def test_add_airplay_service(self):
-        airplay_mock = MagicMock()
-        airplay_mock.port = PORT_1
-        airplay_mock.protocol = const.PROTOCOL_AIRPLAY
-        self.atv.add_service(airplay_mock)
+        self.config.add_service(self.airplay_mock)
 
-        airplay = self.atv.airplay_service()
+        airplay = self.config.get_service(PROTOCOL_AIRPLAY)
         self.assertEqual(airplay.protocol, const.PROTOCOL_AIRPLAY)
         self.assertEqual(airplay.port, PORT_1)
 
-    def test_superseeded_by(self):
-        self.atv.add_service(self.service_mock)
+    def test_main_service_no_service(self):
+        with self.assertRaises(exceptions.NoServiceError):
+            self.config.main_service()
 
-        mock = MagicMock()
-        mock.protocol = PROTOCOL_1
-        mock.port = PORT_1
-        self.atv.add_service(mock)
-        self.assertEqual(self.atv.get_service(PROTOCOL_1), self.service_mock)
+    def test_main_service_airplay_no_service(self):
+        self.config.add_service(self.airplay_mock)
+        with self.assertRaises(exceptions.NoServiceError):
+            self.config.main_service()
 
-        self.service_mock.superseeded_by.return_value = True
-        self.atv.add_service(mock)
-        self.assertEqual(self.atv.get_service(PROTOCOL_1), mock)
+    def test_main_service_get_service(self):
+        self.config.add_service(self.service_mock)
+        self.assertEqual(self.config.main_service(), self.service_mock)
+
+        self.config.add_service(self.service_mock2)
+        self.assertEqual(self.config.main_service(), self.service_mock2)
+
+    def test_main_service_override_protocol(self):
+        self.config.add_service(self.service_mock)
+        self.config.add_service(self.service_mock2)
+        self.assertEqual(
+            self.config.main_service(protocol=self.service_mock.protocol),
+            self.service_mock)
 
     # This test is a bit strange and couples to protocol specific services,
     # but it's mainly to exercise string as that is important. Might refactor
     # this in the future.
     def test_to_str(self):
-        self.atv.add_service(conf.DmapService(IDENTIFIER_1, 'LOGIN_ID'))
-        self.atv.add_service(conf.MrpService(IDENTIFIER_2, PORT_2))
+        self.config.add_service(conf.DmapService(IDENTIFIER_1, 'LOGIN_ID'))
+        self.config.add_service(conf.MrpService(IDENTIFIER_2, PORT_2))
 
         # Check for some keywords to not lock up format too much
-        output = str(self.atv)
+        output = str(self.config)
         self.assertIn(ADDRESS_1, output)
         self.assertIn(NAME, output)
         self.assertIn('LOGIN_ID', output)

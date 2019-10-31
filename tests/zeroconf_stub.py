@@ -35,10 +35,10 @@ def mrp_service(service_name, atv_name, address, identifier):
                        properties=props)
 
 
-def airplay_service(atv_name, address):
+def airplay_service(atv_name, address, deviceid):
     """Create a MediaRemote service simulating an Apple TV."""
     props = {
-        b'deviceid': b'AA:BB:CC:DD:EE:FF', b'model': b'AppleTV3,1',
+        b'deviceid': deviceid.encode('utf-8'), b'model': b'AppleTV3,1',
         b'pi': b'4EE5AF58-7E5D-465A-935E-82E4DB74385D', b'flags': b'0x44',
         b'vv': b'2', b'features': b'0x5A7FFFF7,0xE',
         b'pk': b'3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98',  # noqa
