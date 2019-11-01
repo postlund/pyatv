@@ -129,13 +129,13 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
             self.loop, self.connection, SRPAuthHandler(),
-            MrpService(port, credentials=self.credentials))
+            MrpService(None, port, credentials=self.credentials))
         self.loop.run_until_complete(
             protocol.start(skip_initial_messages=True))
         self.connection.listener = self
 
         # Setup server used to publish a fake MRP server
-        coro = self.loop.create_server(lambda: self, '0.0.0.0', 8888)
+        coro = self.loop.create_server(lambda: self, '0.0.0.0')
         self.server = self.loop.run_until_complete(coro)
         _LOGGER.info('Started MRP server at port %d', self.port)
 
