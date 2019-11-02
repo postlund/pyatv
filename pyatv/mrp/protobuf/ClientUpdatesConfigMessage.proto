@@ -11,5 +11,6 @@ message ClientUpdatesConfigMessage {
   optional bool nowPlayingUpdates = 2;
   optional bool volumeUpdates = 3;
   optional bool keyboardUpdates = 4;
+  optional bool outputDeviceUpdates = 5;
 }
 

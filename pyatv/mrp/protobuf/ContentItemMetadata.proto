@@ -1,6 +1,18 @@
 syntax = "proto2";
 
 message ContentItemMetadata {
+    enum MediaType {
+      UnknownMediaType = 0;
+      Audio = 1;
+      Video = 2;
+    }
+    enum MediaSubType {
+      UnknownMediaSubType = 0;
+      Music = 1;
+      Podcast = 4;
+      AudioBook = 5;
+      ITunesU = 6;
+    }
     optional string title = 1;
     optional string subtitle = 2;
     optional bool isContainer = 3;
@@ -64,8 +76,8 @@ message ContentItemMetadata {
     optional float downloadProgress = 61;
     optional bytes appMetricsData = 62;
     optional string seriesName = 63;
-    optional int32 mediaType = 64;
-    optional int32 mediaSubType = 65;
+    optional MediaType mediaType = 64;
+    optional MediaSubType mediaSubType = 65;
 
     optional bytes nowPlayingInfoData = 67;
     optional bytes userInfoData = 68;
@@ -81,4 +93,11 @@ message ContentItemMetadata {
     optional int32 artworkDataHeight = 78;
     optional bytes currentPlaybackDateData = 79;
     optional string artworkIdentifier = 80;
+    optional bool isLoading = 81;
+    optional bytes artworkURLTemplatesData = 82;
+    optional int64 legacyUniqueIdentifier = 83;
+    optional int32 episodeType = 84;
+    optional string artworkFileURL = 85;
+    optional string brandIdentifier = 86;
+    optional string localizedDurationString = 87;
 }

@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n*pyatv/mrp/protobuf/DeviceInfoMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\x8c\x04\n\x11\x44\x65viceInfoMessage\x12\x18\n\x10uniqueIdentifier\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x1a\n\x12localizedModelName\x18\x03 \x01(\t\x12\x1a\n\x12systemBuildVersion\x18\x04 \x02(\t\x12#\n\x1b\x61pplicationBundleIdentifier\x18\x05 \x02(\t\x12 \n\x18\x61pplicationBundleVersion\x18\x06 \x01(\t\x12\x17\n\x0fprotocolVersion\x18\x07 \x02(\x05\x12 \n\x18lastSupportedMessageType\x18\x08 \x01(\r\x12\x1d\n\x15supportsSystemPairing\x18\t \x01(\x08\x12\x15\n\rallowsPairing\x18\n \x01(\x08\x12\x11\n\tconnected\x18\x0b \x01(\x08\x12\x1e\n\x16systemMediaApplication\x18\x0c \x01(\t\x12\x13\n\x0bsupportsACL\x18\r \x01(\x08\x12\x1b\n\x13supportsSharedQueue\x18\x0e \x01(\x08\x12\x1e\n\x16supportsExtendedMotion\x18\x0f \x01(\x08\x12\x18\n\x10\x62luetoothAddress\x18\x10 \x01(\x0c\x12\x1a\n\x12sharedQueueVersion\x18\x11 \x01(\r\x12$\n\x1clocalReceiverPairingIdentity\x18\x13 \x01(\t:?\n\x11\x64\x65viceInfoMessage\x12\x10.ProtocolMessage\x18\x14 \x01(\x0b\x32\x12.DeviceInfoMessage')
+  serialized_pb=_b('\n*pyatv/mrp/protobuf/DeviceInfoMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\xd9\x06\n\x11\x44\x65viceInfoMessage\x12\x18\n\x10uniqueIdentifier\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x1a\n\x12localizedModelName\x18\x03 \x01(\t\x12\x1a\n\x12systemBuildVersion\x18\x04 \x02(\t\x12#\n\x1b\x61pplicationBundleIdentifier\x18\x05 \x02(\t\x12 \n\x18\x61pplicationBundleVersion\x18\x06 \x01(\t\x12\x17\n\x0fprotocolVersion\x18\x07 \x02(\x05\x12 \n\x18lastSupportedMessageType\x18\x08 \x01(\r\x12\x1d\n\x15supportsSystemPairing\x18\t \x01(\x08\x12\x15\n\rallowsPairing\x18\n \x01(\x08\x12\x11\n\tconnected\x18\x0b \x01(\x08\x12\x1e\n\x16systemMediaApplication\x18\x0c \x01(\t\x12\x13\n\x0bsupportsACL\x18\r \x01(\x08\x12\x1b\n\x13supportsSharedQueue\x18\x0e \x01(\x08\x12\x1e\n\x16supportsExtendedMotion\x18\x0f \x01(\x08\x12\x18\n\x10\x62luetoothAddress\x18\x10 \x01(\x0c\x12\x1a\n\x12sharedQueueVersion\x18\x11 \x01(\r\x12\x11\n\tdeviceUID\x18\x13 \x01(\t\x12\x1d\n\x15managedConfigDeviceID\x18\x14 \x01(\t\x12\x13\n\x0b\x64\x65viceClass\x18\x15 \x01(\x05\x12\x1a\n\x12logicalDeviceCount\x18\x16 \x01(\r\x12\x1a\n\x12tightlySyncedGroup\x18\x17 \x01(\x08\x12\x1a\n\x12isProxyGroupPlayer\x18\x18 \x01(\x08\x12\x14\n\x0ctightSyncUID\x18\x19 \x01(\t\x12\x10\n\x08groupUID\x18\x1a \x01(\t\x12\x11\n\tgroupName\x18\x1b \x01(\t\x12\x15\n\risGroupLeader\x18\x1d \x01(\x08\x12\x17\n\x0fisAirplayActive\x18\x1e \x01(\x08\x12 \n\x18systemPodcastApplication\x18\x1f \x01(\t\x12\x1c\n\x14\x65nderDefaultGroupUID\x18  \x01(\t\x12\x18\n\x10\x61irplayReceivers\x18! \x03(\t\x12\x11\n\tlinkAgent\x18\" \x01(\t:?\n\x11\x64\x65viceInfoMessage\x12\x10.ProtocolMessage\x18\x14 \x01(\x0b\x32\x12.DeviceInfoMessage')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -163,8 +163,106 @@ _DEVICEINFOMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='localReceiverPairingIdentity', full_name='DeviceInfoMessage.localReceiverPairingIdentity', index=17,
+      name='deviceUID', full_name='DeviceInfoMessage.deviceUID', index=17,
       number=19, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='managedConfigDeviceID', full_name='DeviceInfoMessage.managedConfigDeviceID', index=18,
+      number=20, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='deviceClass', full_name='DeviceInfoMessage.deviceClass', index=19,
+      number=21, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='logicalDeviceCount', full_name='DeviceInfoMessage.logicalDeviceCount', index=20,
+      number=22, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tightlySyncedGroup', full_name='DeviceInfoMessage.tightlySyncedGroup', index=21,
+      number=23, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isProxyGroupPlayer', full_name='DeviceInfoMessage.isProxyGroupPlayer', index=22,
+      number=24, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tightSyncUID', full_name='DeviceInfoMessage.tightSyncUID', index=23,
+      number=25, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='groupUID', full_name='DeviceInfoMessage.groupUID', index=24,
+      number=26, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='groupName', full_name='DeviceInfoMessage.groupName', index=25,
+      number=27, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isGroupLeader', full_name='DeviceInfoMessage.isGroupLeader', index=26,
+      number=29, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isAirplayActive', full_name='DeviceInfoMessage.isAirplayActive', index=27,
+      number=30, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='systemPodcastApplication', full_name='DeviceInfoMessage.systemPodcastApplication', index=28,
+      number=31, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='enderDefaultGroupUID', full_name='DeviceInfoMessage.enderDefaultGroupUID', index=29,
+      number=32, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='airplayReceivers', full_name='DeviceInfoMessage.airplayReceivers', index=30,
+      number=33, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='linkAgent', full_name='DeviceInfoMessage.linkAgent', index=31,
+      number=34, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -182,7 +280,7 @@ _DEVICEINFOMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=89,
-  serialized_end=613,
+  serialized_end=946,
 )
 
 DESCRIPTOR.message_types_by_name['DeviceInfoMessage'] = _DEVICEINFOMESSAGE

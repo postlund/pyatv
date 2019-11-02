@@ -24,5 +24,20 @@ message DeviceInfoMessage {
   optional bool supportsExtendedMotion = 15;
   optional bytes bluetoothAddress = 16;
   optional uint32 sharedQueueVersion = 17;
-  optional string localReceiverPairingIdentity = 19;
+  optional string deviceUID = 19;
+  optional string managedConfigDeviceID = 20;
+  optional int32 deviceClass = 21;
+  optional uint32 logicalDeviceCount = 22;
+  optional bool tightlySyncedGroup = 23;
+  optional bool isProxyGroupPlayer = 24;
+  optional string tightSyncUID = 25;
+  optional string groupUID = 26;
+  optional string groupName = 27;
+  // optional <> groupedDevices = 28;
+  optional bool isGroupLeader = 29;
+  optional bool isAirplayActive = 30;
+  optional string systemPodcastApplication = 31;
+  optional string enderDefaultGroupUID = 32;
+  repeated string airplayReceivers = 33;
+  optional string linkAgent = 34;
 }

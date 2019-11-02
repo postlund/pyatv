@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n2pyatv/mrp/protobuf/SetConnectionStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"x\n\x19SetConnectionStateMessage\x12\x39\n\x05state\x18\x01 \x01(\x0e\x32*.SetConnectionStateMessage.ConnectionState\" \n\x0f\x43onnectionState\x12\r\n\tConnected\x10\x02:O\n\x19setConnectionStateMessage\x12\x10.ProtocolMessage\x18* \x01(\x0b\x32\x1a.SetConnectionStateMessage')
+  serialized_pb=_b('\n2pyatv/mrp/protobuf/SetConnectionStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\xa4\x01\n\x19SetConnectionStateMessage\x12\x39\n\x05state\x18\x01 \x01(\x0e\x32*.SetConnectionStateMessage.ConnectionState\"L\n\x0f\x43onnectionState\x12\x08\n\x04None\x10\x00\x12\x0e\n\nConnecting\x10\x01\x12\r\n\tConnected\x10\x02\x12\x10\n\x0c\x44isconnected\x10\x03:O\n\x19setConnectionStateMessage\x12\x10.ProtocolMessage\x18* \x01(\x0b\x32\x1a.SetConnectionStateMessage')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -42,14 +42,26 @@ _SETCONNECTIONSTATEMESSAGE_CONNECTIONSTATE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='Connected', index=0, number=2,
+      name='None', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Connecting', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Connected', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Disconnected', index=3, number=3,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=184,
-  serialized_end=216,
+  serialized_start=185,
+  serialized_end=261,
 )
 _sym_db.RegisterEnumDescriptor(_SETCONNECTIONSTATEMESSAGE_CONNECTIONSTATE)
 
@@ -64,7 +76,7 @@ _SETCONNECTIONSTATEMESSAGE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='state', full_name='SetConnectionStateMessage.state', index=0,
       number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=2,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -81,8 +93,8 @@ _SETCONNECTIONSTATEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=96,
-  serialized_end=216,
+  serialized_start=97,
+  serialized_end=261,
 )
 
 _SETCONNECTIONSTATEMESSAGE.fields_by_name['state'].enum_type = _SETCONNECTIONSTATEMESSAGE_CONNECTIONSTATE

@@ -8,4 +8,5 @@ message NowPlayingClient {
   optional int32 nowPlayingVisibility = 5;
 //    optional TintColor tintColor = 6;
   optional string displayName = 7;
+  repeated string bundleIdentifierHierarchys = 8;
 }

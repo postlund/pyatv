@@ -8,4 +8,5 @@ extend ProtocolMessage {
 
 message VolumeControlAvailabilityMessage {
   optional bool volumeControlAvailable = 1;
+  optional int32 volumeCapabilities = 2;
 }

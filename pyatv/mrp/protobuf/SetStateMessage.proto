@@ -2,21 +2,34 @@ syntax = "proto2";
 
 import "pyatv/mrp/protobuf/ProtocolMessage.proto";
 import "pyatv/mrp/protobuf/NowPlayingInfo.proto";
+import "pyatv/mrp/protobuf/PlaybackQueue.proto";
 import "pyatv/mrp/protobuf/SupportedCommands.proto";
+import "pyatv/mrp/protobuf/PlaybackQueueCapabilities.proto";
 import "pyatv/mrp/protobuf/PlayerPath.proto";
+import "pyatv/mrp/protobuf/PlaybackQueueRequest.proto";
 
 extend ProtocolMessage {
   optional SetStateMessage setStateMessage = 9;
 }
 
 message SetStateMessage {
+  enum PlaybackState {
+    Unknown = 0;
+    Playing = 1;
+    Paused = 2;
+    Stopped = 3;
+    Interrupted = 4;
+    Seeking = 5;
+  }
+
   optional NowPlayingInfo nowPlayingInfo = 1;
   optional SupportedCommands supportedCommands = 2;
-//  optional PlaybackQueue playbackQueue = 3;
+  optional PlaybackQueue playbackQueue = 3;
   optional string displayID = 4;
   optional string displayName = 5;
-  optional uint32 playbackState = 6;
-//  optional PlaybackQueueCapabilities playbackQueueCapabilities = 8;
+  optional PlaybackState playbackState = 6;
+  optional PlaybackQueueCapabilities playbackQueueCapabilities = 8;
   optional PlayerPath playerPath = 9;
-//  optional Request request = 10;
+  optional PlaybackQueueRequest request = 10;
+  optional double playbackStateTimestamp = 11;
 }

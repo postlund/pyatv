@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n)pyatv/mrp/protobuf/NowPlayingClient.proto\"\xc4\x01\n\x10NowPlayingClient\x12\x19\n\x11processIdentifier\x18\x01 \x01(\x05\x12\x18\n\x10\x62undleIdentifier\x18\x02 \x01(\t\x12)\n!parentApplicationBundleIdentifier\x18\x03 \x01(\t\x12\x1d\n\x15processUserIdentifier\x18\x04 \x01(\x05\x12\x1c\n\x14nowPlayingVisibility\x18\x05 \x01(\x05\x12\x13\n\x0b\x64isplayName\x18\x07 \x01(\t')
+  serialized_pb=_b('\n)pyatv/mrp/protobuf/NowPlayingClient.proto\"\xe8\x01\n\x10NowPlayingClient\x12\x19\n\x11processIdentifier\x18\x01 \x01(\x05\x12\x18\n\x10\x62undleIdentifier\x18\x02 \x01(\t\x12)\n!parentApplicationBundleIdentifier\x18\x03 \x01(\t\x12\x1d\n\x15processUserIdentifier\x18\x04 \x01(\x05\x12\x1c\n\x14nowPlayingVisibility\x18\x05 \x01(\x05\x12\x13\n\x0b\x64isplayName\x18\x07 \x01(\t\x12\"\n\x1a\x62undleIdentifierHierarchys\x18\x08 \x03(\t')
 )
 
 
@@ -75,6 +75,13 @@ _NOWPLAYINGCLIENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='bundleIdentifierHierarchys', full_name='NowPlayingClient.bundleIdentifierHierarchys', index=6,
+      number=8, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -88,7 +95,7 @@ _NOWPLAYINGCLIENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=46,
-  serialized_end=242,
+  serialized_end=278,
 )
 
 DESCRIPTOR.message_types_by_name['NowPlayingClient'] = _NOWPLAYINGCLIENT
