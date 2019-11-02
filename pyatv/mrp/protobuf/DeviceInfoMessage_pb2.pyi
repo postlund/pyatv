@@ -5,11 +5,16 @@ from google.protobuf.descriptor import (
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
 )
 
+from google.protobuf.internal.containers import (
+    RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
+)
+
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
 from typing import (
+    Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
 )
@@ -38,7 +43,21 @@ class DeviceInfoMessage(google___protobuf___message___Message):
     supportsExtendedMotion = ... # type: bool
     bluetoothAddress = ... # type: bytes
     sharedQueueVersion = ... # type: int
-    localReceiverPairingIdentity = ... # type: typing___Text
+    deviceUID = ... # type: typing___Text
+    managedConfigDeviceID = ... # type: typing___Text
+    deviceClass = ... # type: int
+    logicalDeviceCount = ... # type: int
+    tightlySyncedGroup = ... # type: bool
+    isProxyGroupPlayer = ... # type: bool
+    tightSyncUID = ... # type: typing___Text
+    groupUID = ... # type: typing___Text
+    groupName = ... # type: typing___Text
+    isGroupLeader = ... # type: bool
+    isAirplayActive = ... # type: bool
+    systemPodcastApplication = ... # type: typing___Text
+    enderDefaultGroupUID = ... # type: typing___Text
+    airplayReceivers = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    linkAgent = ... # type: typing___Text
 
     def __init__(self,
         *,
@@ -59,17 +78,31 @@ class DeviceInfoMessage(google___protobuf___message___Message):
         supportsExtendedMotion : typing___Optional[bool] = None,
         bluetoothAddress : typing___Optional[bytes] = None,
         sharedQueueVersion : typing___Optional[int] = None,
-        localReceiverPairingIdentity : typing___Optional[typing___Text] = None,
+        deviceUID : typing___Optional[typing___Text] = None,
+        managedConfigDeviceID : typing___Optional[typing___Text] = None,
+        deviceClass : typing___Optional[int] = None,
+        logicalDeviceCount : typing___Optional[int] = None,
+        tightlySyncedGroup : typing___Optional[bool] = None,
+        isProxyGroupPlayer : typing___Optional[bool] = None,
+        tightSyncUID : typing___Optional[typing___Text] = None,
+        groupUID : typing___Optional[typing___Text] = None,
+        groupName : typing___Optional[typing___Text] = None,
+        isGroupLeader : typing___Optional[bool] = None,
+        isAirplayActive : typing___Optional[bool] = None,
+        systemPodcastApplication : typing___Optional[typing___Text] = None,
+        enderDefaultGroupUID : typing___Optional[typing___Text] = None,
+        airplayReceivers : typing___Optional[typing___Iterable[typing___Text]] = None,
+        linkAgent : typing___Optional[typing___Text] = None,
         ) -> None: ...
     @classmethod
     def FromString(cls, s: bytes) -> DeviceInfoMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"allowsPairing",u"applicationBundleIdentifier",u"applicationBundleVersion",u"bluetoothAddress",u"connected",u"lastSupportedMessageType",u"localReceiverPairingIdentity",u"localizedModelName",u"name",u"protocolVersion",u"sharedQueueVersion",u"supportsACL",u"supportsExtendedMotion",u"supportsSharedQueue",u"supportsSystemPairing",u"systemBuildVersion",u"systemMediaApplication",u"uniqueIdentifier"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"allowsPairing",u"applicationBundleIdentifier",u"applicationBundleVersion",u"bluetoothAddress",u"connected",u"lastSupportedMessageType",u"localReceiverPairingIdentity",u"localizedModelName",u"name",u"protocolVersion",u"sharedQueueVersion",u"supportsACL",u"supportsExtendedMotion",u"supportsSharedQueue",u"supportsSystemPairing",u"systemBuildVersion",u"systemMediaApplication",u"uniqueIdentifier"]) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"allowsPairing",u"applicationBundleIdentifier",u"applicationBundleVersion",u"bluetoothAddress",u"connected",u"deviceClass",u"deviceUID",u"enderDefaultGroupUID",u"groupName",u"groupUID",u"isAirplayActive",u"isGroupLeader",u"isProxyGroupPlayer",u"lastSupportedMessageType",u"linkAgent",u"localizedModelName",u"logicalDeviceCount",u"managedConfigDeviceID",u"name",u"protocolVersion",u"sharedQueueVersion",u"supportsACL",u"supportsExtendedMotion",u"supportsSharedQueue",u"supportsSystemPairing",u"systemBuildVersion",u"systemMediaApplication",u"systemPodcastApplication",u"tightSyncUID",u"tightlySyncedGroup",u"uniqueIdentifier"]) -> bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"airplayReceivers",u"allowsPairing",u"applicationBundleIdentifier",u"applicationBundleVersion",u"bluetoothAddress",u"connected",u"deviceClass",u"deviceUID",u"enderDefaultGroupUID",u"groupName",u"groupUID",u"isAirplayActive",u"isGroupLeader",u"isProxyGroupPlayer",u"lastSupportedMessageType",u"linkAgent",u"localizedModelName",u"logicalDeviceCount",u"managedConfigDeviceID",u"name",u"protocolVersion",u"sharedQueueVersion",u"supportsACL",u"supportsExtendedMotion",u"supportsSharedQueue",u"supportsSystemPairing",u"systemBuildVersion",u"systemMediaApplication",u"systemPodcastApplication",u"tightSyncUID",u"tightlySyncedGroup",u"uniqueIdentifier"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"lastSupportedMessageType",b"lastSupportedMessageType",u"localReceiverPairingIdentity",b"localReceiverPairingIdentity",u"localizedModelName",b"localizedModelName",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"uniqueIdentifier",b"uniqueIdentifier"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"lastSupportedMessageType",b"lastSupportedMessageType",u"localReceiverPairingIdentity",b"localReceiverPairingIdentity",u"localizedModelName",b"localizedModelName",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"deviceClass",b"deviceClass",u"deviceUID",b"deviceUID",u"enderDefaultGroupUID",b"enderDefaultGroupUID",u"groupName",b"groupName",u"groupUID",b"groupUID",u"isAirplayActive",b"isAirplayActive",u"isGroupLeader",b"isGroupLeader",u"isProxyGroupPlayer",b"isProxyGroupPlayer",u"lastSupportedMessageType",b"lastSupportedMessageType",u"linkAgent",b"linkAgent",u"localizedModelName",b"localizedModelName",u"logicalDeviceCount",b"logicalDeviceCount",u"managedConfigDeviceID",b"managedConfigDeviceID",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"systemPodcastApplication",b"systemPodcastApplication",u"tightSyncUID",b"tightSyncUID",u"tightlySyncedGroup",b"tightlySyncedGroup",u"uniqueIdentifier",b"uniqueIdentifier"]) -> bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"airplayReceivers",b"airplayReceivers",u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"deviceClass",b"deviceClass",u"deviceUID",b"deviceUID",u"enderDefaultGroupUID",b"enderDefaultGroupUID",u"groupName",b"groupName",u"groupUID",b"groupUID",u"isAirplayActive",b"isAirplayActive",u"isGroupLeader",b"isGroupLeader",u"isProxyGroupPlayer",b"isProxyGroupPlayer",u"lastSupportedMessageType",b"lastSupportedMessageType",u"linkAgent",b"linkAgent",u"localizedModelName",b"localizedModelName",u"logicalDeviceCount",b"logicalDeviceCount",u"managedConfigDeviceID",b"managedConfigDeviceID",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"systemPodcastApplication",b"systemPodcastApplication",u"tightSyncUID",b"tightSyncUID",u"tightlySyncedGroup",b"tightlySyncedGroup",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
 
 deviceInfoMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

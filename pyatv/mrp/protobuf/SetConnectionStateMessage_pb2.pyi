@@ -36,8 +36,12 @@ class SetConnectionStateMessage(google___protobuf___message___Message):
         def values(cls) -> typing___List[SetConnectionStateMessage.ConnectionState]: ...
         @classmethod
         def items(cls) -> typing___List[typing___Tuple[str, SetConnectionStateMessage.ConnectionState]]: ...
+        Connecting = typing___cast(SetConnectionStateMessage.ConnectionState, 1)
         Connected = typing___cast(SetConnectionStateMessage.ConnectionState, 2)
+        Disconnected = typing___cast(SetConnectionStateMessage.ConnectionState, 3)
+    Connecting = typing___cast(SetConnectionStateMessage.ConnectionState, 1)
     Connected = typing___cast(SetConnectionStateMessage.ConnectionState, 2)
+    Disconnected = typing___cast(SetConnectionStateMessage.ConnectionState, 3)
 
     state = ... # type: SetConnectionStateMessage.ConnectionState
 

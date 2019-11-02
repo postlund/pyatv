@@ -73,6 +73,8 @@ class ProtocolMessage(google___protobuf___message___Message):
         SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.Type, 40)
         WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 41)
         SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 43)
+        SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 50)
+        UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 55)
     SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.Type, 1)
     SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.Type, 2)
     GET_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 3)
@@ -110,6 +112,8 @@ class ProtocolMessage(google___protobuf___message___Message):
     SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.Type, 40)
     WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 41)
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 43)
+    SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 50)
+    UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 55)
 
     type = ... # type: ProtocolMessage.Type
     identifier = ... # type: typing___Text

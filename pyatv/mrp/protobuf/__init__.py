@@ -24,9 +24,11 @@ from pyatv.mrp.protobuf import SendPackedVirtualTouchEventMessage_pb2
 from pyatv.mrp.protobuf import SetArtworkMessage_pb2
 from pyatv.mrp.protobuf import SetConnectionStateMessage_pb2
 from pyatv.mrp.protobuf import SetHiliteModeMessage_pb2
+from pyatv.mrp.protobuf import SetNowPlayingClientMessage_pb2
 from pyatv.mrp.protobuf import SetStateMessage_pb2
 from pyatv.mrp.protobuf import TextInputMessage_pb2
 from pyatv.mrp.protobuf import TransactionMessage_pb2
+from pyatv.mrp.protobuf import UpdateClientMessage_pb2
 from pyatv.mrp.protobuf import VolumeControlAvailabilityMessage_pb2
 from pyatv.mrp.protobuf import WakeDeviceMessage_pb2
 
@@ -47,6 +49,10 @@ from pyatv.mrp.protobuf.NowPlayingClient_pb2 import NowPlayingClient
 from pyatv.mrp.protobuf.NowPlayingInfo_pb2 import NowPlayingInfo
 from pyatv.mrp.protobuf.NowPlayingPlayer_pb2 import NowPlayingPlayer
 from pyatv.mrp.protobuf.Origin_pb2 import Origin
+from pyatv.mrp.protobuf.PlaybackQueueCapabilities_pb2 import PlaybackQueueCapabilities
+from pyatv.mrp.protobuf.PlaybackQueueContext_pb2 import PlaybackQueueContext
+from pyatv.mrp.protobuf.PlaybackQueueRequest_pb2 import PlaybackQueueRequest
+from pyatv.mrp.protobuf.PlaybackQueue_pb2 import PlaybackQueue
 from pyatv.mrp.protobuf.PlayerPath_pb2 import PlayerPath
 from pyatv.mrp.protobuf.RegisterForGameControllerEventsMessage_pb2 import RegisterForGameControllerEventsMessage
 from pyatv.mrp.protobuf.RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
@@ -60,6 +66,7 @@ from pyatv.mrp.protobuf.SendPackedVirtualTouchEventMessage_pb2 import SendPacked
 from pyatv.mrp.protobuf.SetArtworkMessage_pb2 import SetArtworkMessage
 from pyatv.mrp.protobuf.SetConnectionStateMessage_pb2 import SetConnectionStateMessage
 from pyatv.mrp.protobuf.SetHiliteModeMessage_pb2 import SetHiliteModeMessage
+from pyatv.mrp.protobuf.SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
 from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage
 from pyatv.mrp.protobuf.SupportedCommands_pb2 import SupportedCommands
 from pyatv.mrp.protobuf.TextEditingAttributesMessage_pb2 import TextEditingAttributes
@@ -69,6 +76,7 @@ from pyatv.mrp.protobuf.TransactionKey_pb2 import TransactionKey
 from pyatv.mrp.protobuf.TransactionMessage_pb2 import TransactionMessage
 from pyatv.mrp.protobuf.TransactionPacket_pb2 import TransactionPacket
 from pyatv.mrp.protobuf.TransactionPackets_pb2 import TransactionPackets
+from pyatv.mrp.protobuf.UpdateClientMessage_pb2 import UpdateClientMessage
 from pyatv.mrp.protobuf.VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from pyatv.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from pyatv.mrp.protobuf.VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
@@ -94,9 +102,11 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.SET_ARTWORK_MESSAGE: SetArtworkMessage_pb2.setArtworkMessage,
     ProtocolMessage.SET_CONNECTION_STATE_MESSAGE: SetConnectionStateMessage_pb2.setConnectionStateMessage,
     ProtocolMessage.SET_HILITE_MODE_MESSAGE: SetHiliteModeMessage_pb2.setHiliteModeMessage,
+    ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE: SetNowPlayingClientMessage_pb2.setNowPlayingClientMessage,
     ProtocolMessage.SET_STATE_MESSAGE: SetStateMessage_pb2.setStateMessage,
     ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
+    ProtocolMessage.UPDATE_CLIENT_MESSAGE: UpdateClientMessage_pb2.updateClientMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
 }
@@ -120,9 +130,11 @@ SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = ProtocolMessage.SEND_PACKED_VIRTUAL_TO
 SET_ARTWORK_MESSAGE = ProtocolMessage.SET_ARTWORK_MESSAGE
 SET_CONNECTION_STATE_MESSAGE = ProtocolMessage.SET_CONNECTION_STATE_MESSAGE
 SET_HILITE_MODE_MESSAGE = ProtocolMessage.SET_HILITE_MODE_MESSAGE
+SET_NOW_PLAYING_CLIENT_MESSAGE = ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE
 SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
 TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
+UPDATE_CLIENT_MESSAGE = ProtocolMessage.UPDATE_CLIENT_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 

@@ -20,10 +20,70 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n,pyatv/mrp/protobuf/ContentItemMetadata.proto\"\xba\x0e\n\x13\x43ontentItemMetadata\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08subtitle\x18\x02 \x01(\t\x12\x13\n\x0bisContainer\x18\x03 \x01(\x08\x12\x12\n\nisPlayable\x18\x04 \x01(\x08\x12\x18\n\x10playbackProgress\x18\x05 \x01(\x02\x12\x11\n\talbumName\x18\x06 \x01(\t\x12\x17\n\x0ftrackArtistName\x18\x07 \x01(\t\x12\x17\n\x0f\x61lbumArtistName\x18\x08 \x01(\t\x12\x14\n\x0c\x64irectorName\x18\t \x01(\t\x12\x14\n\x0cseasonNumber\x18\n \x01(\x05\x12\x15\n\repisodeNumber\x18\x0b \x01(\x05\x12\x13\n\x0breleaseDate\x18\x0c \x01(\x01\x12\x11\n\tplayCount\x18\r \x01(\x05\x12\x10\n\x08\x64uration\x18\x0e \x01(\x01\x12\x1e\n\x16localizedContentRating\x18\x0f \x01(\t\x12\x16\n\x0eisExplicitItem\x18\x10 \x01(\x08\x12\x14\n\x0cplaylistType\x18\x11 \x01(\x05\x12\x18\n\x10radioStationType\x18\x12 \x01(\x05\x12\x18\n\x10\x61rtworkAvailable\x18\x13 \x01(\x08\x12\x15\n\rinfoAvailable\x18\x15 \x01(\x08\x12 \n\x18languageOptionsAvailable\x18\x16 \x01(\x08\x12\x18\n\x10numberOfSections\x18\x17 \x01(\x05\x12\x17\n\x0flyricsAvailable\x18\x18 \x01(\x08\x12\x19\n\x11\x65\x64itingStyleFlags\x18\x19 \x01(\x05\x12\x1a\n\x12isStreamingContent\x18\x1a \x01(\x08\x12\x1a\n\x12isCurrentlyPlaying\x18\x1b \x01(\x08\x12\x1c\n\x14\x63ollectionIdentifier\x18\x1c \x01(\t\x12\x19\n\x11profileIdentifier\x18\x1d \x01(\t\x12\x11\n\tstartTime\x18\x1e \x01(\x01\x12\x17\n\x0f\x61rtworkMIMEType\x18\x1f \x01(\t\x12\x16\n\x0e\x61ssetURLString\x18  \x01(\t\x12\x10\n\x08\x63omposer\x18! \x01(\t\x12\x12\n\ndiscNumber\x18\" \x01(\x05\x12\x13\n\x0b\x65lapsedTime\x18# \x01(\x01\x12\r\n\x05genre\x18$ \x01(\t\x12\x14\n\x0cisAlwaysLive\x18% \x01(\x08\x12\x14\n\x0cplaybackRate\x18\' \x01(\x02\x12\x14\n\x0c\x63hapterCount\x18( \x01(\x05\x12\x16\n\x0etotalDiscCount\x18) \x01(\x05\x12\x17\n\x0ftotalTrackCount\x18* \x01(\x05\x12\x13\n\x0btrackNumber\x18+ \x01(\x05\x12\x19\n\x11\x63ontentIdentifier\x18, \x01(\t\x12\x12\n\nisSharable\x18. \x01(\x08\x12\x0f\n\x07isLiked\x18\x30 \x01(\x08\x12\x14\n\x0cisInWishList\x18\x31 \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\x32 \x01(\x03\x12\x18\n\x10radioStationName\x18\x34 \x01(\t\x12\x1a\n\x12radioStationString\x18\x35 \x01(\t\x12\x1d\n\x15iTunesStoreIdentifier\x18\x36 \x01(\x03\x12)\n!iTunesStoreSubscriptionIdentifier\x18\x37 \x01(\x03\x12#\n\x1biTunesStoreArtistIdentifier\x18\x38 \x01(\x03\x12\"\n\x1aiTunesStoreAlbumIdentifier\x18\x39 \x01(\x03\x12\x18\n\x10purchaseInfoData\x18: \x01(\x0c\x12\x1b\n\x13\x64\x65\x66\x61ultPlaybackRate\x18; \x01(\x02\x12\x15\n\rdownloadState\x18< \x01(\x05\x12\x18\n\x10\x64ownloadProgress\x18= \x01(\x02\x12\x16\n\x0e\x61ppMetricsData\x18> \x01(\x0c\x12\x12\n\nseriesName\x18? \x01(\t\x12\x11\n\tmediaType\x18@ \x01(\x05\x12\x14\n\x0cmediaSubType\x18\x41 \x01(\x05\x12\x1a\n\x12nowPlayingInfoData\x18\x43 \x01(\x0c\x12\x14\n\x0cuserInfoData\x18\x44 \x01(\x0c\x12\x13\n\x0bisSteerable\x18\x45 \x01(\x08\x12\x12\n\nartworkURL\x18\x46 \x01(\t\x12\x11\n\tlyricsURL\x18G \x01(\t\x12\"\n\x1a\x64\x65viceSpecificUserInfoData\x18H \x01(\x0c\x12\x1a\n\x12\x63ollectionInfoData\x18I \x01(\x0c\x12\x1c\n\x14\x65lapsedTimeTimestamp\x18J \x01(\x01\x12\x19\n\x11inferredTimestamp\x18K \x01(\x01\x12\x19\n\x11serviceIdentifier\x18L \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18M \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18N \x01(\x05\x12\x1f\n\x17\x63urrentPlaybackDateData\x18O \x01(\x0c\x12\x19\n\x11\x61rtworkIdentifier\x18P \x01(\t')
+  serialized_pb=_b('\n,pyatv/mrp/protobuf/ContentItemMetadata.proto\"\xce\x11\n\x13\x43ontentItemMetadata\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08subtitle\x18\x02 \x01(\t\x12\x13\n\x0bisContainer\x18\x03 \x01(\x08\x12\x12\n\nisPlayable\x18\x04 \x01(\x08\x12\x18\n\x10playbackProgress\x18\x05 \x01(\x02\x12\x11\n\talbumName\x18\x06 \x01(\t\x12\x17\n\x0ftrackArtistName\x18\x07 \x01(\t\x12\x17\n\x0f\x61lbumArtistName\x18\x08 \x01(\t\x12\x14\n\x0c\x64irectorName\x18\t \x01(\t\x12\x14\n\x0cseasonNumber\x18\n \x01(\x05\x12\x15\n\repisodeNumber\x18\x0b \x01(\x05\x12\x13\n\x0breleaseDate\x18\x0c \x01(\x01\x12\x11\n\tplayCount\x18\r \x01(\x05\x12\x10\n\x08\x64uration\x18\x0e \x01(\x01\x12\x1e\n\x16localizedContentRating\x18\x0f \x01(\t\x12\x16\n\x0eisExplicitItem\x18\x10 \x01(\x08\x12\x14\n\x0cplaylistType\x18\x11 \x01(\x05\x12\x18\n\x10radioStationType\x18\x12 \x01(\x05\x12\x18\n\x10\x61rtworkAvailable\x18\x13 \x01(\x08\x12\x15\n\rinfoAvailable\x18\x15 \x01(\x08\x12 \n\x18languageOptionsAvailable\x18\x16 \x01(\x08\x12\x18\n\x10numberOfSections\x18\x17 \x01(\x05\x12\x17\n\x0flyricsAvailable\x18\x18 \x01(\x08\x12\x19\n\x11\x65\x64itingStyleFlags\x18\x19 \x01(\x05\x12\x1a\n\x12isStreamingContent\x18\x1a \x01(\x08\x12\x1a\n\x12isCurrentlyPlaying\x18\x1b \x01(\x08\x12\x1c\n\x14\x63ollectionIdentifier\x18\x1c \x01(\t\x12\x19\n\x11profileIdentifier\x18\x1d \x01(\t\x12\x11\n\tstartTime\x18\x1e \x01(\x01\x12\x17\n\x0f\x61rtworkMIMEType\x18\x1f \x01(\t\x12\x16\n\x0e\x61ssetURLString\x18  \x01(\t\x12\x10\n\x08\x63omposer\x18! \x01(\t\x12\x12\n\ndiscNumber\x18\" \x01(\x05\x12\x13\n\x0b\x65lapsedTime\x18# \x01(\x01\x12\r\n\x05genre\x18$ \x01(\t\x12\x14\n\x0cisAlwaysLive\x18% \x01(\x08\x12\x14\n\x0cplaybackRate\x18\' \x01(\x02\x12\x14\n\x0c\x63hapterCount\x18( \x01(\x05\x12\x16\n\x0etotalDiscCount\x18) \x01(\x05\x12\x17\n\x0ftotalTrackCount\x18* \x01(\x05\x12\x13\n\x0btrackNumber\x18+ \x01(\x05\x12\x19\n\x11\x63ontentIdentifier\x18, \x01(\t\x12\x12\n\nisSharable\x18. \x01(\x08\x12\x0f\n\x07isLiked\x18\x30 \x01(\x08\x12\x14\n\x0cisInWishList\x18\x31 \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\x32 \x01(\x03\x12\x18\n\x10radioStationName\x18\x34 \x01(\t\x12\x1a\n\x12radioStationString\x18\x35 \x01(\t\x12\x1d\n\x15iTunesStoreIdentifier\x18\x36 \x01(\x03\x12)\n!iTunesStoreSubscriptionIdentifier\x18\x37 \x01(\x03\x12#\n\x1biTunesStoreArtistIdentifier\x18\x38 \x01(\x03\x12\"\n\x1aiTunesStoreAlbumIdentifier\x18\x39 \x01(\x03\x12\x18\n\x10purchaseInfoData\x18: \x01(\x0c\x12\x1b\n\x13\x64\x65\x66\x61ultPlaybackRate\x18; \x01(\x02\x12\x15\n\rdownloadState\x18< \x01(\x05\x12\x18\n\x10\x64ownloadProgress\x18= \x01(\x02\x12\x16\n\x0e\x61ppMetricsData\x18> \x01(\x0c\x12\x12\n\nseriesName\x18? \x01(\t\x12\x31\n\tmediaType\x18@ \x01(\x0e\x32\x1e.ContentItemMetadata.MediaType\x12\x37\n\x0cmediaSubType\x18\x41 \x01(\x0e\x32!.ContentItemMetadata.MediaSubType\x12\x1a\n\x12nowPlayingInfoData\x18\x43 \x01(\x0c\x12\x14\n\x0cuserInfoData\x18\x44 \x01(\x0c\x12\x13\n\x0bisSteerable\x18\x45 \x01(\x08\x12\x12\n\nartworkURL\x18\x46 \x01(\t\x12\x11\n\tlyricsURL\x18G \x01(\t\x12\"\n\x1a\x64\x65viceSpecificUserInfoData\x18H \x01(\x0c\x12\x1a\n\x12\x63ollectionInfoData\x18I \x01(\x0c\x12\x1c\n\x14\x65lapsedTimeTimestamp\x18J \x01(\x01\x12\x19\n\x11inferredTimestamp\x18K \x01(\x01\x12\x19\n\x11serviceIdentifier\x18L \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18M \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18N \x01(\x05\x12\x1f\n\x17\x63urrentPlaybackDateData\x18O \x01(\x0c\x12\x19\n\x11\x61rtworkIdentifier\x18P \x01(\t\x12\x11\n\tisLoading\x18Q \x01(\x08\x12\x1f\n\x17\x61rtworkURLTemplatesData\x18R \x01(\x0c\x12\x1e\n\x16legacyUniqueIdentifier\x18S \x01(\x03\x12\x13\n\x0b\x65pisodeType\x18T \x01(\x05\x12\x16\n\x0e\x61rtworkFileURL\x18U \x01(\t\x12\x17\n\x0f\x62randIdentifier\x18V \x01(\t\x12\x1f\n\x17localizedDurationString\x18W \x01(\t\"7\n\tMediaType\x12\x14\n\x10UnknownMediaType\x10\x00\x12\t\n\x05\x41udio\x10\x01\x12\t\n\x05Video\x10\x02\"[\n\x0cMediaSubType\x12\x17\n\x13UnknownMediaSubType\x10\x00\x12\t\n\x05Music\x10\x01\x12\x0b\n\x07Podcast\x10\x04\x12\r\n\tAudioBook\x10\x05\x12\x0b\n\x07ITunesU\x10\x06')
 )
 
 
+
+_CONTENTITEMMETADATA_MEDIATYPE = _descriptor.EnumDescriptor(
+  name='MediaType',
+  full_name='ContentItemMetadata.MediaType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UnknownMediaType', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Audio', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Video', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=2155,
+  serialized_end=2210,
+)
+_sym_db.RegisterEnumDescriptor(_CONTENTITEMMETADATA_MEDIATYPE)
+
+_CONTENTITEMMETADATA_MEDIASUBTYPE = _descriptor.EnumDescriptor(
+  name='MediaSubType',
+  full_name='ContentItemMetadata.MediaSubType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UnknownMediaSubType', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Music', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Podcast', index=2, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='AudioBook', index=3, number=5,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ITunesU', index=4, number=6,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=2212,
+  serialized_end=2303,
+)
+_sym_db.RegisterEnumDescriptor(_CONTENTITEMMETADATA_MEDIASUBTYPE)
 
 
 _CONTENTITEMMETADATA = _descriptor.Descriptor(
@@ -441,14 +501,14 @@ _CONTENTITEMMETADATA = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='mediaType', full_name='ContentItemMetadata.mediaType', index=58,
-      number=64, type=5, cpp_type=1, label=1,
+      number=64, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='mediaSubType', full_name='ContentItemMetadata.mediaSubType', index=59,
-      number=65, type=5, cpp_type=1, label=1,
+      number=65, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -551,11 +611,62 @@ _CONTENTITEMMETADATA = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isLoading', full_name='ContentItemMetadata.isLoading', index=74,
+      number=81, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='artworkURLTemplatesData', full_name='ContentItemMetadata.artworkURLTemplatesData', index=75,
+      number=82, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='legacyUniqueIdentifier', full_name='ContentItemMetadata.legacyUniqueIdentifier', index=76,
+      number=83, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='episodeType', full_name='ContentItemMetadata.episodeType', index=77,
+      number=84, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='artworkFileURL', full_name='ContentItemMetadata.artworkFileURL', index=78,
+      number=85, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='brandIdentifier', full_name='ContentItemMetadata.brandIdentifier', index=79,
+      number=86, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='localizedDurationString', full_name='ContentItemMetadata.localizedDurationString', index=80,
+      number=87, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
+    _CONTENTITEMMETADATA_MEDIATYPE,
+    _CONTENTITEMMETADATA_MEDIASUBTYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -564,9 +675,13 @@ _CONTENTITEMMETADATA = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=49,
-  serialized_end=1899,
+  serialized_end=2303,
 )
 
+_CONTENTITEMMETADATA.fields_by_name['mediaType'].enum_type = _CONTENTITEMMETADATA_MEDIATYPE
+_CONTENTITEMMETADATA.fields_by_name['mediaSubType'].enum_type = _CONTENTITEMMETADATA_MEDIASUBTYPE
+_CONTENTITEMMETADATA_MEDIATYPE.containing_type = _CONTENTITEMMETADATA
+_CONTENTITEMMETADATA_MEDIASUBTYPE.containing_type = _CONTENTITEMMETADATA
 DESCRIPTOR.message_types_by_name['ContentItemMetadata'] = _CONTENTITEMMETADATA
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

@@ -15,8 +15,11 @@ _sym_db = _symbol_database.Default()
 
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 from pyatv.mrp.protobuf import NowPlayingInfo_pb2 as pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2
+from pyatv.mrp.protobuf import PlaybackQueue_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueue__pb2
 from pyatv.mrp.protobuf import SupportedCommands_pb2 as pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2
+from pyatv.mrp.protobuf import PlaybackQueueCapabilities_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2
 from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
+from pyatv.mrp.protobuf import PlaybackQueueRequest_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -24,9 +27,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n(pyatv/mrp/protobuf/SetStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\'pyatv/mrp/protobuf/NowPlayingInfo.proto\x1a*pyatv/mrp/protobuf/SupportedCommands.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"\xc9\x01\n\x0fSetStateMessage\x12\'\n\x0enowPlayingInfo\x18\x01 \x01(\x0b\x32\x0f.NowPlayingInfo\x12-\n\x11supportedCommands\x18\x02 \x01(\x0b\x32\x12.SupportedCommands\x12\x11\n\tdisplayID\x18\x04 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x05 \x01(\t\x12\x15\n\rplaybackState\x18\x06 \x01(\r\x12\x1f\n\nplayerPath\x18\t \x01(\x0b\x32\x0b.PlayerPath:;\n\x0fsetStateMessage\x12\x10.ProtocolMessage\x18\t \x01(\x0b\x32\x10.SetStateMessage')
+  serialized_pb=_b('\n(pyatv/mrp/protobuf/SetStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\'pyatv/mrp/protobuf/NowPlayingInfo.proto\x1a&pyatv/mrp/protobuf/PlaybackQueue.proto\x1a*pyatv/mrp/protobuf/SupportedCommands.proto\x1a\x32pyatv/mrp/protobuf/PlaybackQueueCapabilities.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\x1a-pyatv/mrp/protobuf/PlaybackQueueRequest.proto\"\xf9\x03\n\x0fSetStateMessage\x12\'\n\x0enowPlayingInfo\x18\x01 \x01(\x0b\x32\x0f.NowPlayingInfo\x12-\n\x11supportedCommands\x18\x02 \x01(\x0b\x32\x12.SupportedCommands\x12%\n\rplaybackQueue\x18\x03 \x01(\x0b\x32\x0e.PlaybackQueue\x12\x11\n\tdisplayID\x18\x04 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x05 \x01(\t\x12\x35\n\rplaybackState\x18\x06 \x01(\x0e\x32\x1e.SetStateMessage.PlaybackState\x12=\n\x19playbackQueueCapabilities\x18\x08 \x01(\x0b\x32\x1a.PlaybackQueueCapabilities\x12\x1f\n\nplayerPath\x18\t \x01(\x0b\x32\x0b.PlayerPath\x12&\n\x07request\x18\n \x01(\x0b\x32\x15.PlaybackQueueRequest\x12\x1e\n\x16playbackStateTimestamp\x18\x0b \x01(\x01\"`\n\rPlaybackState\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05:;\n\x0fsetStateMessage\x12\x10.ProtocolMessage\x18\t \x01(\x0b\x32\x10.SetStateMessage')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueue__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2.DESCRIPTOR,])
 
 
 SETSTATEMESSAGE_FIELD_NUMBER = 9
@@ -37,6 +40,44 @@ setStateMessage = _descriptor.FieldDescriptor(
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
   serialized_options=None, file=DESCRIPTOR)
+
+_SETSTATEMESSAGE_PLAYBACKSTATE = _descriptor.EnumDescriptor(
+  name='PlaybackState',
+  full_name='SetStateMessage.PlaybackState',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Playing', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Paused', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Stopped', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Interrupted', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Seeking', index=5, number=5,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=757,
+  serialized_end=853,
+)
+_sym_db.RegisterEnumDescriptor(_SETSTATEMESSAGE_PLAYBACKSTATE)
 
 
 _SETSTATEMESSAGE = _descriptor.Descriptor(
@@ -61,30 +102,58 @@ _SETSTATEMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='displayID', full_name='SetStateMessage.displayID', index=2,
+      name='playbackQueue', full_name='SetStateMessage.playbackQueue', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='displayID', full_name='SetStateMessage.displayID', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='displayName', full_name='SetStateMessage.displayName', index=3,
+      name='displayName', full_name='SetStateMessage.displayName', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='playbackState', full_name='SetStateMessage.playbackState', index=4,
-      number=6, type=13, cpp_type=3, label=1,
+      name='playbackState', full_name='SetStateMessage.playbackState', index=5,
+      number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='playerPath', full_name='SetStateMessage.playerPath', index=5,
+      name='playbackQueueCapabilities', full_name='SetStateMessage.playbackQueueCapabilities', index=6,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='playerPath', full_name='SetStateMessage.playerPath', index=7,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='request', full_name='SetStateMessage.request', index=8,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='playbackStateTimestamp', full_name='SetStateMessage.playbackStateTimestamp', index=9,
+      number=11, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -93,6 +162,7 @@ _SETSTATEMESSAGE = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _SETSTATEMESSAGE_PLAYBACKSTATE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -100,13 +170,18 @@ _SETSTATEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=209,
-  serialized_end=410,
+  serialized_start=348,
+  serialized_end=853,
 )
 
 _SETSTATEMESSAGE.fields_by_name['nowPlayingInfo'].message_type = pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2._NOWPLAYINGINFO
 _SETSTATEMESSAGE.fields_by_name['supportedCommands'].message_type = pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2._SUPPORTEDCOMMANDS
+_SETSTATEMESSAGE.fields_by_name['playbackQueue'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueue__pb2._PLAYBACKQUEUE
+_SETSTATEMESSAGE.fields_by_name['playbackState'].enum_type = _SETSTATEMESSAGE_PLAYBACKSTATE
+_SETSTATEMESSAGE.fields_by_name['playbackQueueCapabilities'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2._PLAYBACKQUEUECAPABILITIES
 _SETSTATEMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
+_SETSTATEMESSAGE.fields_by_name['request'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2._PLAYBACKQUEUEREQUEST
+_SETSTATEMESSAGE_PLAYBACKSTATE.containing_type = _SETSTATEMESSAGE
 DESCRIPTOR.message_types_by_name['SetStateMessage'] = _SETSTATEMESSAGE
 DESCRIPTOR.extensions_by_name['setStateMessage'] = setStateMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

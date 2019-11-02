@@ -4,11 +4,16 @@ from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
 )
 
+from google.protobuf.internal.containers import (
+    RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
+)
+
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
 from typing import (
+    Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
 )
@@ -26,6 +31,7 @@ class NowPlayingClient(google___protobuf___message___Message):
     processUserIdentifier = ... # type: int
     nowPlayingVisibility = ... # type: int
     displayName = ... # type: typing___Text
+    bundleIdentifierHierarchys = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
 
     def __init__(self,
         *,
@@ -35,6 +41,7 @@ class NowPlayingClient(google___protobuf___message___Message):
         processUserIdentifier : typing___Optional[int] = None,
         nowPlayingVisibility : typing___Optional[int] = None,
         displayName : typing___Optional[typing___Text] = None,
+        bundleIdentifierHierarchys : typing___Optional[typing___Iterable[typing___Text]] = None,
         ) -> None: ...
     @classmethod
     def FromString(cls, s: bytes) -> NowPlayingClient: ...
@@ -42,7 +49,7 @@ class NowPlayingClient(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
         def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",u"displayName",u"nowPlayingVisibility",u"parentApplicationBundleIdentifier",u"processIdentifier",u"processUserIdentifier"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",u"displayName",u"nowPlayingVisibility",u"parentApplicationBundleIdentifier",u"processIdentifier",u"processUserIdentifier"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",u"bundleIdentifierHierarchys",u"displayName",u"nowPlayingVisibility",u"parentApplicationBundleIdentifier",u"processIdentifier",u"processUserIdentifier"]) -> None: ...
     else:
         def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> None: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"bundleIdentifierHierarchys",b"bundleIdentifierHierarchys",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> None: ...
