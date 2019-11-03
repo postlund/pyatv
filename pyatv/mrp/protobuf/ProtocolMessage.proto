@@ -41,8 +41,9 @@ message ProtocolMessage {
     SET_HILITE_MODE_MESSAGE = 40;
     WAKE_DEVICE_MESSAGE = 41;
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = 43;
-    SET_NOW_PLAYING_CLIENT_MESSAGE = 50;
+    SET_NOW_PLAYING_CLIENT_MESSAGE = 46;
     UPDATE_CLIENT_MESSAGE = 55;
+    UPDATE_CONTENT_ITEM_MESSAGE = 56;
   }
 
   optional Type type = 1; // Identifies which underlying message is filled in.

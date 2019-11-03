@@ -29,6 +29,7 @@ from pyatv.mrp.protobuf import SetStateMessage_pb2
 from pyatv.mrp.protobuf import TextInputMessage_pb2
 from pyatv.mrp.protobuf import TransactionMessage_pb2
 from pyatv.mrp.protobuf import UpdateClientMessage_pb2
+from pyatv.mrp.protobuf import UpdateContentItemMessage_pb2
 from pyatv.mrp.protobuf import VolumeControlAvailabilityMessage_pb2
 from pyatv.mrp.protobuf import WakeDeviceMessage_pb2
 
@@ -77,6 +78,7 @@ from pyatv.mrp.protobuf.TransactionMessage_pb2 import TransactionMessage
 from pyatv.mrp.protobuf.TransactionPacket_pb2 import TransactionPacket
 from pyatv.mrp.protobuf.TransactionPackets_pb2 import TransactionPackets
 from pyatv.mrp.protobuf.UpdateClientMessage_pb2 import UpdateClientMessage
+from pyatv.mrp.protobuf.UpdateContentItemMessage_pb2 import UpdateContentItemMessage
 from pyatv.mrp.protobuf.VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from pyatv.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from pyatv.mrp.protobuf.VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
@@ -107,6 +109,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
     ProtocolMessage.UPDATE_CLIENT_MESSAGE: UpdateClientMessage_pb2.updateClientMessage,
+    ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE: UpdateContentItemMessage_pb2.updateContentItemMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
 }
@@ -135,6 +138,7 @@ SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
 TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
 UPDATE_CLIENT_MESSAGE = ProtocolMessage.UPDATE_CLIENT_MESSAGE
+UPDATE_CONTENT_ITEM_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 

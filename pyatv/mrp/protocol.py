@@ -188,21 +188,22 @@ class MrpProtocol:
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
         else:
-            asyncio.ensure_future(self._dispatch(message), loop=self.loop)
+            self._dispatch(message)
 
-    # TODO: dispatching should maybe not be a coroutine?
-    async def _dispatch(self, message):
+    def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
             _LOGGER.debug('Dispatching message with type %d (%s) to %s',
                           message.type,
                           type(message.inner()).__name__,
                           listener)
-            await listener.func(message, listener.data)
+            asyncio.ensure_future(
+                listener.func(message, listener.data), loop=self.loop)
 
         if message.type in self._one_shots:
-            for one_shot in self._one_shots.get(message.type,):
+            for one_shot in self._one_shots.get(message.type, []):
                 _LOGGER.debug('One-shot with message type %d to %s',
                               message.type, one_shot)
-                await one_shot.func(message, one_shot.data)
+                asyncio.ensure_future(
+                    one_shot.func(message, one_shot.data), loop=self.loop)
 
             del self._one_shots[message.type]

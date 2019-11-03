@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n?pyatv/mrp/protobuf/RegisterForGameControllerEventsMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\x94\x01\n&RegisterForGameControllerEventsMessage\x12N\n\x0einputModeFlags\x18\x01 \x01(\x0e\x32\x36.RegisterForGameControllerEventsMessage.InputModeFlags\"\x1a\n\x0eInputModeFlags\x12\x08\n\x04None\x10\x00:i\n&registerForGameControllerEventsMessage\x12\x10.ProtocolMessage\x18\x1b \x01(\x0b\x32\'.RegisterForGameControllerEventsMessage')
+  serialized_pb=_b('\n?pyatv/mrp/protobuf/RegisterForGameControllerEventsMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"\xbc\x01\n&RegisterForGameControllerEventsMessage\x12N\n\x0einputModeFlags\x18\x01 \x01(\x0e\x32\x36.RegisterForGameControllerEventsMessage.InputModeFlags\"B\n\x0eInputModeFlags\x12\x08\n\x04None\x10\x00\x12\n\n\x06Motion\x10\x01\x12\x0b\n\x07\x42uttons\x10\x02\x12\r\n\tDigitizer\x10\x03:i\n&registerForGameControllerEventsMessage\x12\x10.ProtocolMessage\x18\x1b \x01(\x0b\x32\'.RegisterForGameControllerEventsMessage')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -45,11 +45,23 @@ _REGISTERFORGAMECONTROLLEREVENTSMESSAGE_INPUTMODEFLAGS = _descriptor.EnumDescrip
       name='None', index=0, number=0,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Motion', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Buttons', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Digitizer', index=3, number=3,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=232,
-  serialized_end=258,
+  serialized_end=298,
 )
 _sym_db.RegisterEnumDescriptor(_REGISTERFORGAMECONTROLLEREVENTSMESSAGE_INPUTMODEFLAGS)
 
@@ -82,7 +94,7 @@ _REGISTERFORGAMECONTROLLEREVENTSMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=110,
-  serialized_end=258,
+  serialized_end=298,
 )
 
 _REGISTERFORGAMECONTROLLEREVENTSMESSAGE.fields_by_name['inputModeFlags'].enum_type = _REGISTERFORGAMECONTROLLEREVENTSMESSAGE_INPUTMODEFLAGS

@@ -1,14 +1,16 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import logging
+from datetime import datetime
 
 from pyatv import (const, exceptions)
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp.protobuf import CommandInfo_pb2
+from pyatv.mrp.protobuf import CommandInfo_pb2, SetStateMessage_pb2
 from pyatv.mrp.pairing import MrpPairingProcedure
+from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, PairingHandler)
 
@@ -131,72 +133,83 @@ class MrpRemoteControl(RemoteControl):
 class MrpPlaying(Playing):
     """Implementation of API for retrieving what is playing."""
 
-    def __init__(self, setstate, metadata):
+    def __init__(self, state):
         """Initialize a new MrpPlaying."""
-        self._setstate = setstate
-        self._metadata = metadata
+        self._state = state
 
     @property
     def media_type(self):
         """Type of media is currently playing, e.g. video, music."""
+        if self._state.metadata:
+            media_type = self._state.metadata.mediaType
+            cim = protobuf.ContentItemMetadata_pb2.ContentItemMetadata
+            if media_type == cim.Audio:
+                return const.MEDIA_TYPE_MUSIC
+            if media_type == cim.Video:
+                return const.MEDIA_TYPE_VIDEO
+
         return const.MEDIA_TYPE_UNKNOWN
 
     @property
     def play_state(self):
         """Play state, e.g. playing or paused."""
-        # TODO: extract to a convert module
-        state = self._setstate.playbackState
-        if state == 1:
+        if self._state is None:
+            return const.PLAY_STATE_IDLE
+
+        state = self._state.playback_state
+        ssm = SetStateMessage_pb2.SetStateMessage
+        if state == ssm.Playing:
             return const.PLAY_STATE_PLAYING
-        if state == 2:
+        if state == ssm.Paused:
             return const.PLAY_STATE_PAUSED
+        if state == ssm.Stopped:
+            return const.PLAY_STATE_STOPPED
+        if state == ssm.Interrupted:
+            return const.PLAY_STATE_LOADING
+        # if state == SetStateMessage_pb2.Seeking
+        #    return XXX
 
         return const.PLAY_STATE_PAUSED
 
     @property
     def title(self):
         """Title of the current media, e.g. movie or song name."""
-        return self._setstate.nowPlayingInfo.title or None
+        return self._state.metadata_field('title')
 
     @property
     def artist(self):
         """Artist of the currently playing song."""
-        return self._setstate.nowPlayingInfo.artist or None
+        return self._state.metadata_field('trackArtistName')
 
     @property
     def album(self):
         """Album of the currently playing song."""
-        return self._setstate.nowPlayingInfo.album or None
+        return self._state.metadata_field('albumName')
 
     @property
     def genre(self):
         """Genre of the currently playing song."""
-        if self._metadata:
-            from pyatv.mrp.protobuf import ContentItem_pb2
-            transaction = ContentItem_pb2.ContentItem()
-            transaction.ParseFromString(self._metadata)
-            # TODO: implement this
+        return self._state.metadata_field('genre')
 
     @property
     def total_time(self):
         """Total play time in seconds."""
-        now_playing = self._setstate.nowPlayingInfo
-        if now_playing.HasField('duration'):
-            return int(now_playing.duration)
-
-        return None
+        duration = self._state.metadata_field('duration')
+        return None if duration is None else int(duration)
 
     @property
     def position(self):
         """Position in the playing media (seconds)."""
-        now_playing = self._setstate.nowPlayingInfo
-        if now_playing.HasField('elapsedTime'):
-            return int(now_playing.elapsedTime)
-
+        elapsed_time = self._state.metadata_field('elapsedTime')
+        if elapsed_time:
+            diff = (datetime.now() - self._state.timestamp).total_seconds()
+            if self.play_state == const.PLAY_STATE_PLAYING:
+                return int(elapsed_time + diff)
+            return int(elapsed_time)
         return None
 
     def _get_command_info(self, command):
-        for cmd in self._setstate.supportedCommands.supportedCommands:
+        for cmd in self._state.supported_commands:
             if cmd.command == command:
                 return cmd
         return None
@@ -217,23 +230,10 @@ class MrpPlaying(Playing):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, identifier):
+    def __init__(self, psm, identifier):
         """Initialize a new MrpPlaying."""
         super().__init__(identifier)
-        self.protocol = protocol
-        self.protocol.add_listener(
-            self._handle_set_state, protobuf.SET_STATE_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_transaction, protobuf.TRANSACTION_MESSAGE)
-        self._setstate = None
-        self._nowplaying = None
-
-    async def _handle_set_state(self, message, _):
-        self._setstate = message.inner()
-
-    async def _handle_transaction(self, message, _):
-        packet = message.inner().packets.packets[0].packetData
-        self._nowplaying = packet  # .contentItem.metadata.nowPlayingInfo
+        self.psm = psm
 
     async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
@@ -241,31 +241,23 @@ class MrpMetadata(Metadata):
 
     async def playing(self):
         """Return what is currently playing."""
-        # TODO: This is hack-ish
-        if self._setstate is None:
-            await self.protocol.start()
+        # TODO: This is a hack for now (removed when #240 is done)
+        if not self.psm.states:
+            await self.psm.protocol.start()
 
-        # No SET_STATE_MESSAGE received yet, use default
-        if self._setstate is None:
-            return MrpPlaying(protobuf.SetStateMessage(), None)
-
-        return MrpPlaying(self._setstate, self._nowplaying)
+        return MrpPlaying(self.psm.playing)
 
 
 class MrpPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, metadata, protocol):
+    def __init__(self, loop, metadata, psm):
         """Initialize a new MrpPushUpdater instance."""
         super().__init__()
         self.loop = loop
         self.metadata = metadata
-        self.protocol = protocol
-        self.protocol.add_listener(
-            self._handle_update, protobuf.SET_STATE_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_update, protobuf.TRANSACTION_MESSAGE)
-        self._enabled = False
+        self.psm = psm
+        self.listener = None
 
     def start(self, initial_delay=0):
         """Wait for push updates from device.
@@ -274,20 +266,18 @@ class MrpPushUpdater(PushUpdater):
         """
         if self.listener is None:
             raise exceptions.NoAsyncListenerError
-        elif self._enabled:
-            return
 
-        self._enabled = True
+        self.psm.listener = self
 
     def stop(self):
         """No longer wait for push updates."""
-        self._enabled = False
+        self.psm.listener = None
 
-    async def _handle_update(self, *_):
-        if self._enabled:
-            playstatus = await self.metadata.playing()
-            self.loop.call_soon(
-                self.listener.playstatus_update, self, playstatus)
+    async def state_updated(self):
+        """State was updated for active player."""
+        playstatus = await self.metadata.playing()
+        self.loop.call_soon(
+            self.listener.playstatus_update, self, playstatus)
 
 
 class MrpPairingHandler(PairingHandler):
@@ -348,11 +338,12 @@ class MrpAppleTV(AppleTV):
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(
             loop, self._connection, self._srp, self._mrp_service)
+        self._psm = PlayerStateManager(self._protocol)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._protocol, config.identifier)
+        self._mrp_metadata = MrpMetadata(self._psm, config.identifier)
         self._mrp_push_updater = MrpPushUpdater(
-            loop, self._mrp_metadata, self._protocol)
+            loop, self._mrp_metadata, self._psm)
         self._mrp_pairing = MrpPairingHandler(
             self._protocol, self._srp, self._mrp_service)
         self._airplay = airplay

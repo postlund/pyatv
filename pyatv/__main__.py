@@ -203,8 +203,8 @@ class PushListener:
     @staticmethod
     def playstatus_update(_, playstatus):
         """Print what is currently playing when it changes."""
-        print(str(playstatus))
-        print(20*'-')
+        print(str(playstatus), flush=True)
+        print(20*'-', flush=True)
 
     @staticmethod
     def playstatus_error(updater, exception):

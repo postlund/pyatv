@@ -9,6 +9,9 @@ extend ProtocolMessage {
 message RegisterForGameControllerEventsMessage {
   enum InputModeFlags {
     None = 0;
+    Motion = 1;
+    Buttons = 2;
+    Digitizer = 3;
   }
 
   optional InputModeFlags inputModeFlags = 1;
