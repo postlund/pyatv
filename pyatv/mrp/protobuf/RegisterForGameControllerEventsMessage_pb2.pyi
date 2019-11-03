@@ -14,6 +14,7 @@ from typing import (
     List as typing___List,
     Optional as typing___Optional,
     Tuple as typing___Tuple,
+    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -35,6 +36,12 @@ class RegisterForGameControllerEventsMessage(google___protobuf___message___Messa
         def values(cls) -> typing___List[RegisterForGameControllerEventsMessage.InputModeFlags]: ...
         @classmethod
         def items(cls) -> typing___List[typing___Tuple[str, RegisterForGameControllerEventsMessage.InputModeFlags]]: ...
+        Motion = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 1)
+        Buttons = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 2)
+        Digitizer = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 3)
+    Motion = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 1)
+    Buttons = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 2)
+    Digitizer = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlags, 3)
 
     inputModeFlags = ... # type: RegisterForGameControllerEventsMessage.InputModeFlags
 
