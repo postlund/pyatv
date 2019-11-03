@@ -55,8 +55,7 @@ import asyncio
 import logging
 import binascii
 
-import zeroconf
-from zeroconf import ServiceInfo
+from aiozeroconf import Zeroconf, ServiceInfo
 
 import curve25519
 from srptools import (SRPContext, SRPServerSession, constants)
@@ -337,7 +336,7 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         self._send(msg)
 
 
-def publish_zeroconf(zconf, ip_address, port):
+async def publish_zeroconf(zconf, ip_address, port):
     """Publish zeroconf service for ATV proxy instance."""
     props = {
         b'ModelName': False,
@@ -351,8 +350,12 @@ def publish_zeroconf(zconf, ip_address, port):
     service = ServiceInfo(
         '_mediaremotetv._tcp.local.',
         'ATVProxy._mediaremotetv._tcp.local.',
-        socket.inet_aton(ip_address), port, 0, 0, props)
-    zconf.register_service(service)
+        address=socket.inet_aton(ip_address),
+        port=port,
+        weight=0,
+        priority=0,
+        properties=props)
+    await zconf.register_service(service)
     _LOGGER.debug('Published zeroconf service: %s', service)
 
 
@@ -372,11 +375,12 @@ def main(loop):
     atv_ip_addr = sys.argv[3]
     atv_port = int(sys.argv[4])
     unique_identifier = sys.argv[5].encode()
-    zconf = zeroconf.Zeroconf()
+    zconf = Zeroconf(loop)
     proxy = ProxyMrpAppleTV(loop, credentials, unique_identifier)
 
     proxy.start(atv_ip_addr, atv_port)
-    publish_zeroconf(zconf, local_ip_addr, proxy.port)
+    loop.run_until_complete(
+        publish_zeroconf(zconf, local_ip_addr, proxy.port))
     loop.run_forever()
 
 
