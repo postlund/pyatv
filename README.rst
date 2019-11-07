@@ -138,7 +138,7 @@ It is possible to use the reference CLI application as well:
     $ atvremote -i 55:44:33:22:11:00 next
 
     # Manually specify device
-    $ atvremote -m --id ffeeddccbbaa --address 10.0.10.11 --port 3689 --protocol dmap --device_credentials 00000000-1234-5678-9012-345678901234 playing
+    $ atvremote -m --id ffeeddccbbaa --address 10.0.10.11 --port 3689 --protocol dmap --dmap_credentials 00000000-1234-5678-9012-345678901234 playing
     Media type: Music
     Play state: Playing
       Position: 0/397s (0.0%)
