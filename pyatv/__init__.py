@@ -9,7 +9,7 @@ from aiohttp import ClientSession
 
 from pyatv import (conf, const, exceptions)
 from pyatv.airplay import player
-from pyatv.airplay.api import AirPlayAPI
+from pyatv.airplay import AirPlayAPI
 from pyatv.net import HttpSession
 
 from pyatv.dmap import DmapAppleTV
@@ -160,4 +160,4 @@ def _setup_airplay(loop, session, config):
     airplay_http = HttpSession(
         session, 'http://{0}:{1}/'.format(
             config.address, airplay_service.port))
-    return AirPlayAPI(airplay_http, airplay_player)
+    return AirPlayAPI(config, airplay_http, airplay_player)

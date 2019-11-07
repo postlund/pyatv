@@ -42,9 +42,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_airplay_device_authentication(self):
-        # Credentials used for device authentication
-        await self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
-
         # Perform authentication
         await self.atv.airplay.start_authentication()
         await self.atv.airplay.finish_authentication(DEVICE_PIN)

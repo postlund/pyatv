@@ -12,7 +12,8 @@ from aiozeroconf import Zeroconf
 
 import pyatv
 from pyatv import (const, exceptions, interface)
-from pyatv.conf import (AppleTV, DmapService, MrpService)
+from pyatv.conf import (
+    AppleTV, DmapService, MrpService, AirPlayService)
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
@@ -275,13 +276,15 @@ async def cli_handler(loop):
     parser.add_argument('-m', '--manual', action='store_true',
                         help='use manual device details',
                         dest='manual', default=False)
-    parser.add_argument('--device_credentials', help='credentials to device',
-                        dest='device_credentials', default=None)
 
-    airplay = parser.add_argument_group('airplay')
-    airplay.add_argument('--airplay_credentials',
-                         help='credentials for airplay',
-                         dest='airplay_credentials', default=None)
+    creds = parser.add_argument_group('credentials')
+    creds.add_argument('--dmap-credentials', help='DMAP credentials to device',
+                       dest='dmap_credentials', default=None)
+    creds.add_argument('--mrp-credentials', help='MRP credentials to device',
+                       dest='mrp_credentials', default=None)
+    creds.add_argument('--airplay-credentials',
+                       help='credentials for airplay',
+                       dest='airplay_credentials', default=None)
 
     debug = parser.add_argument_group('debugging')
     debug.add_argument('-v', '--verbose', help='increase output verbosity',
@@ -350,7 +353,16 @@ async def _autodiscover_device(args, loop):
     args.name = apple_tv.name
     args.protocol = service.protocol
     args.port = service.port
-    args.device_credentials = service.credentials
+
+    def _set_credentials(protocol, field):
+        service = apple_tv.get_service(protocol)
+        if service:
+            value = service.credentials or getattr(args, field)
+            setattr(args, field, value)
+
+    _set_credentials(const.PROTOCOL_DMAP, 'dmap_credentials')
+    _set_credentials(const.PROTOCOL_MRP, 'mrp_credentials')
+    _set_credentials(const.PROTOCOL_AIRPLAY, 'airplay_credentials')
 
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
@@ -385,20 +397,20 @@ def _extract_command_with_args(cmd):
 
 async def _handle_commands(args, loop):
     config = AppleTV(args.address, args.name)
-    if args.protocol == const.PROTOCOL_DMAP:
+    if args.dmap_credentials:
         config.add_service(DmapService(
-            args.id, args.device_credentials, port=args.port))
-    elif args.protocol == const.PROTOCOL_MRP:
+            args.id, args.dmap_credentials, port=args.port))
+    if args.mrp_credentials:
         config.add_service(MrpService(
-            args.id, args.port, credentials=args.device_credentials))
+            args.id, args.port, credentials=args.mrp_credentials))
+    if args.airplay_credentials:
+        config.add_service(AirPlayService(
+            args.id, credentials=args.airplay_credentials))
 
     atv = await pyatv.connect(config, loop, protocol=args.protocol)
     atv.push_updater.listener = PushListener()
 
     try:
-        if args.airplay_credentials is not None:
-            await atv.airplay.load_credentials(args.airplay_credentials)
-
         for cmd in args.command:
             ret = await _handle_device_command(args, cmd, atv, loop)
             if ret != 0:

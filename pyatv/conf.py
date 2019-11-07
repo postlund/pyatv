@@ -107,6 +107,7 @@ class BaseService:
         self.__identifier = identifier
         self.protocol = protocol
         self.port = port
+        self.credentials = None
 
     @property
     def identifier(self):
@@ -115,11 +116,13 @@ class BaseService:
 
     def merge(self, other):
         """Merge with other service of same type."""
+        self.credentials = other.credentials or self.credentials
 
     def __str__(self):
         """Return a string representation of this object."""
-        return 'Protocol: {0}, Port: {1}'.format(
-            convert.protocol_str(self.protocol), self.port)
+        return 'Protocol: {0}, Port: {1}, Credentials: {2}'.format(
+            convert.protocol_str(self.protocol), self.port,
+            self.credentials)
 
 
 # pylint: disable=too-few-public-methods
@@ -131,15 +134,6 @@ class DmapService(BaseService):
         super().__init__(identifier, PROTOCOL_DMAP, port or 3689)
         self.credentials = credentials
 
-    def merge(self, other):
-        """Merge with other service of same type."""
-        self.credentials = other.credentials or self.credentials
-
-    def __str__(self):
-        """Return a string representation of this object."""
-        return super().__str__() + ', Credentials: {0}'.format(
-            self.credentials)
-
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
@@ -150,16 +144,12 @@ class MrpService(BaseService):
         super().__init__(identifier, PROTOCOL_MRP, port)
         self.credentials = credentials
 
-    def __str__(self):
-        """Return a string representation of this object."""
-        return super().__str__() + ', Credentials: {0}'.format(
-            self.credentials)
-
 
 # pylint: disable=too-few-public-methods
 class AirPlayService(BaseService):
     """Representation of an AirPlay service."""
 
-    def __init__(self, identifier, port):
+    def __init__(self, identifier, port=7000, credentials=None):
         """Initialize a new AirPlayService."""
         super().__init__(identifier, PROTOCOL_AIRPLAY, port)
+        self.credentials = credentials
