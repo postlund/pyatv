@@ -397,10 +397,10 @@ def _extract_command_with_args(cmd):
 
 async def _handle_commands(args, loop):
     config = AppleTV(args.address, args.name)
-    if args.dmap_credentials:
+    if args.dmap_credentials or args.protocol == const.PROTOCOL_DMAP:
         config.add_service(DmapService(
             args.id, args.dmap_credentials, port=args.port))
-    if args.mrp_credentials:
+    if args.mrp_credentials or args.protocol == const.PROTOCOL_MRP:
         config.add_service(MrpService(
             args.id, args.port, credentials=args.mrp_credentials))
     if args.airplay_credentials:
