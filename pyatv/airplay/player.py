@@ -3,6 +3,7 @@
 import logging
 import asyncio
 import plistlib
+from uuid import uuid4
 
 from pyatv import exceptions
 
@@ -33,7 +34,11 @@ class AirPlayPlayer:
         """Play media from an URL on the device."""
         headers = {'User-Agent': 'MediaControl/1.0',
                    'Content-Type': 'application/x-apple-binary-plist'}
-        body = {'Content-Location': url, 'Start-Position': position}
+        body = {
+            'Content-Location': url,
+            'Start-Position': position,
+            'X-Apple-Session-ID': str(uuid4()),
+            }
 
         address = self._url(self.port, 'play')
         _LOGGER.debug('AirPlay %s to %s', url, address)
