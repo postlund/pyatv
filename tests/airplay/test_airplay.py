@@ -45,6 +45,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         self.assertEqual(self.fake_device.last_airplay_url, STREAM)
         self.assertEqual(self.fake_device.last_airplay_start, START_POSITION)
+        self.assertIsNotNone(self.fake_device.last_airplay_uuid)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
 
         await session.close()

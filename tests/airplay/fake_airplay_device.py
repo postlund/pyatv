@@ -43,6 +43,8 @@ class FakeAirPlayDevice:
         self.responses['airplay_playback'] = []
         self.has_authenticated = True
         self.last_airplay_url = None
+        self.last_airplay_start = None
+        self.last_airplay_uuid = None
         self.tc = testcase
         self.app = web.Application()
 
@@ -87,6 +89,7 @@ class FakeAirPlayDevice:
 
         self.last_airplay_url = parsed['Content-Location']
         self.last_airplay_start = parsed['Start-Position']
+        self.last_airplay_uuid = parsed['X-Apple-Session-ID']
 
         return web.Response(status=200)
 
