@@ -8,15 +8,14 @@ import ipaddress
 from io import StringIO
 
 from aiohttp import web
-from aiozeroconf import ServiceInfo
+from aiozeroconf import ServiceInfo, Zeroconf
 import netifaces
 
+from pyatv import const
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
 
 _LOGGER = logging.getLogger(__name__)
-
-DEFAULT_PAIRING_GUID = '0000000000000001'
 
 
 # TODO: netifaces is written in C and pylint does not find members
@@ -34,26 +33,35 @@ def _get_private_ip_addresses():
                 yield ipaddr
 
 
-class DmapPairingHandler(PairingHandler):
+def _generate_random_guid():
+    return hex(random.getrandbits(64)).upper()
+
+
+class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-attributes  # noqa
     """Handle the pairing process.
 
     This class will publish a bonjour service and configure a webserver
     that responds to pairing requests.
     """
 
-    def __init__(self, loop):
+    def __init__(self, config, session, loop, **kwargs):
         """Initialize a new instance."""
+        super().__init__(session)
+        self._service = config.get_service(const.PROTOCOL_DMAP)
         self._loop = loop
-        self._name = None
+        self._zeroconf = kwargs.get('zeroconf', Zeroconf(loop))
+        self._name = kwargs.get('name', 'pyatv')
         self._web_server = None
         self._server = None
         self._pin_code = None
-        self._pairing_guid = None
         self._has_paired = False
+        self._pairing_guid = (kwargs.get(
+            'pairing_guid', None) or _generate_random_guid())[2:].upper()
 
-    @staticmethod
-    def _generate_random_guid():
-        return hex(random.getrandbits(64))[2:].upper()  # Remove leading 0x
+    async def close(self):
+        """Call to free allocated resources after pairing."""
+        await self._zeroconf.close()
+        await super().close()
 
     @property
     def has_paired(self):
@@ -63,18 +71,8 @@ class DmapPairingHandler(PairingHandler):
         """
         return self._has_paired
 
-    @property
-    def credentials(self):
-        """Credentials that were generated during pairing."""
-        return '0x{0}'.format(self._pairing_guid)
-
-    async def start(self, **kwargs):
+    async def begin(self):
         """Start the pairing server and publish service."""
-        zeroconf = kwargs['zeroconf']
-        self._name = kwargs['name']
-        self._pairing_guid = kwargs.get('pairing_guid', None) or \
-            self._generate_random_guid()
-
         self._web_server = web.Server(self.handle_request, loop=self._loop)
         self._server = await self._loop.create_server(
             self._web_server, '0.0.0.0')
@@ -84,9 +82,9 @@ class DmapPairingHandler(PairingHandler):
         _LOGGER.debug('Started pairing web server at port %d', allocated_port)
 
         for ipaddr in _get_private_ip_addresses():
-            await self._publish_service(zeroconf, ipaddr, allocated_port)
+            await self._publish_service(ipaddr, allocated_port)
 
-    async def stop(self, **kwargs):
+    async def finish(self):
         """Stop pairing server and unpublish service."""
         _LOGGER.debug('Shutting down pairing server')
         if self._web_server is not None:
@@ -105,7 +103,7 @@ class DmapPairingHandler(PairingHandler):
         """Return True if remote device presents PIN code, else False."""
         return False
 
-    async def _publish_service(self, zeroconf, address, port):
+    async def _publish_service(self, address, port):
         props = {
             b'DvNm': self._name,
             b'RemV': b'10000',
@@ -123,7 +121,7 @@ class DmapPairingHandler(PairingHandler):
             weight=0,
             priority=0,
             properties=props)
-        await zeroconf.register_service(service)
+        await self._zeroconf.register_service(service)
 
         _LOGGER.debug('Published zeroconf service: %s', service)
 
@@ -140,6 +138,7 @@ class DmapPairingHandler(PairingHandler):
             cmty = tags.string_tag('cmty', 'iPhone')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
             self._has_paired = True
+            self._service.credentials = '0x' + self._pairing_guid
             return web.Response(body=response)
 
         # Code did not match, generate an error

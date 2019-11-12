@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
 )
 
 from google.protobuf.message import (
@@ -9,8 +10,11 @@ from google.protobuf.message import (
 )
 
 from typing import (
+    List as typing___List,
     Optional as typing___Optional,
     Text as typing___Text,
+    Tuple as typing___Tuple,
+    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -20,13 +24,53 @@ from typing_extensions import (
 
 class NowPlayingInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class RepeatMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> NowPlayingInfo.RepeatMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[NowPlayingInfo.RepeatMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, NowPlayingInfo.RepeatMode]]: ...
+        Unknown = typing___cast(NowPlayingInfo.RepeatMode, 0)
+        One = typing___cast(NowPlayingInfo.RepeatMode, 1)
+        All = typing___cast(NowPlayingInfo.RepeatMode, 2)
+    Unknown = typing___cast(NowPlayingInfo.RepeatMode, 0)
+    One = typing___cast(NowPlayingInfo.RepeatMode, 1)
+    All = typing___cast(NowPlayingInfo.RepeatMode, 2)
+
+    class ShuffleMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> NowPlayingInfo.ShuffleMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[NowPlayingInfo.ShuffleMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, NowPlayingInfo.ShuffleMode]]: ...
+        Unkown = typing___cast(NowPlayingInfo.ShuffleMode, 0)
+        Off = typing___cast(NowPlayingInfo.ShuffleMode, 1)
+        Albums = typing___cast(NowPlayingInfo.ShuffleMode, 2)
+        Songs = typing___cast(NowPlayingInfo.ShuffleMode, 3)
+    Unkown = typing___cast(NowPlayingInfo.ShuffleMode, 0)
+    Off = typing___cast(NowPlayingInfo.ShuffleMode, 1)
+    Albums = typing___cast(NowPlayingInfo.ShuffleMode, 2)
+    Songs = typing___cast(NowPlayingInfo.ShuffleMode, 3)
+
     album = ... # type: typing___Text
     artist = ... # type: typing___Text
     duration = ... # type: float
     elapsedTime = ... # type: float
     playbackRate = ... # type: float
-    repeatMode = ... # type: int
-    shuffleMode = ... # type: int
+    repeatMode = ... # type: NowPlayingInfo.RepeatMode
+    shuffleMode = ... # type: NowPlayingInfo.ShuffleMode
     timestamp = ... # type: float
     title = ... # type: typing___Text
     uniqueIdentifier = ... # type: int
@@ -46,8 +90,8 @@ class NowPlayingInfo(google___protobuf___message___Message):
         duration : typing___Optional[float] = None,
         elapsedTime : typing___Optional[float] = None,
         playbackRate : typing___Optional[float] = None,
-        repeatMode : typing___Optional[int] = None,
-        shuffleMode : typing___Optional[int] = None,
+        repeatMode : typing___Optional[NowPlayingInfo.RepeatMode] = None,
+        shuffleMode : typing___Optional[NowPlayingInfo.ShuffleMode] = None,
         timestamp : typing___Optional[float] = None,
         title : typing___Optional[typing___Text] = None,
         uniqueIdentifier : typing___Optional[int] = None,

@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
 )
 
 from google.protobuf.message import (
@@ -9,8 +10,11 @@ from google.protobuf.message import (
 )
 
 from typing import (
+    List as typing___List,
     Optional as typing___Optional,
     Text as typing___Text,
+    Tuple as typing___Tuple,
+    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -20,6 +24,46 @@ from typing_extensions import (
 
 class CommandOptions(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class RepeatMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> CommandOptions.RepeatMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[CommandOptions.RepeatMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, CommandOptions.RepeatMode]]: ...
+        Unknown = typing___cast(CommandOptions.RepeatMode, 0)
+        One = typing___cast(CommandOptions.RepeatMode, 1)
+        All = typing___cast(CommandOptions.RepeatMode, 2)
+    Unknown = typing___cast(CommandOptions.RepeatMode, 0)
+    One = typing___cast(CommandOptions.RepeatMode, 1)
+    All = typing___cast(CommandOptions.RepeatMode, 2)
+
+    class ShuffleMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> CommandOptions.ShuffleMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[CommandOptions.ShuffleMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, CommandOptions.ShuffleMode]]: ...
+        Unkown = typing___cast(CommandOptions.ShuffleMode, 0)
+        Off = typing___cast(CommandOptions.ShuffleMode, 1)
+        Albums = typing___cast(CommandOptions.ShuffleMode, 2)
+        Songs = typing___cast(CommandOptions.ShuffleMode, 3)
+    Unkown = typing___cast(CommandOptions.ShuffleMode, 0)
+    Off = typing___cast(CommandOptions.ShuffleMode, 1)
+    Albums = typing___cast(CommandOptions.ShuffleMode, 2)
+    Songs = typing___cast(CommandOptions.ShuffleMode, 3)
+
     sourceId = ... # type: typing___Text
     mediaType = ... # type: typing___Text
     externalPlayerCommand = ... # type: bool
@@ -28,8 +72,8 @@ class CommandOptions(google___protobuf___message___Message):
     rating = ... # type: float
     negative = ... # type: bool
     playbackPosition = ... # type: float
-    repeatMode = ... # type: int
-    shuffleMode = ... # type: int
+    repeatMode = ... # type: CommandOptions.RepeatMode
+    shuffleMode = ... # type: CommandOptions.ShuffleMode
     trackID = ... # type: int
     radioStationID = ... # type: int
     radioStationHash = ... # type: typing___Text
@@ -61,8 +105,8 @@ class CommandOptions(google___protobuf___message___Message):
         rating : typing___Optional[float] = None,
         negative : typing___Optional[bool] = None,
         playbackPosition : typing___Optional[float] = None,
-        repeatMode : typing___Optional[int] = None,
-        shuffleMode : typing___Optional[int] = None,
+        repeatMode : typing___Optional[CommandOptions.RepeatMode] = None,
+        shuffleMode : typing___Optional[CommandOptions.ShuffleMode] = None,
         trackID : typing___Optional[int] = None,
         radioStationID : typing___Optional[int] = None,
         radioStationHash : typing___Optional[typing___Text] = None,

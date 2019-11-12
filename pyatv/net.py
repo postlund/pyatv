@@ -3,10 +3,24 @@
 import logging
 import binascii
 
+from aiohttp import ClientSession
+
 _LOGGER = logging.getLogger(__name__)
 
 
 DEFAULT_TIMEOUT = 10.0  # Seconds
+
+
+def is_custom_session(session):
+    """Return if a ClientSession was created by pyatv."""
+    return hasattr(session, '_pyatv')
+
+
+async def create_session(loop):
+    """Create aiohttp ClientSession manged by pyatv."""
+    session = ClientSession(loop=loop)
+    setattr(session, '_pyatv', True)
+    return session
 
 
 class HttpSession:

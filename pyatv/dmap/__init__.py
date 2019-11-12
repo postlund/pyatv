@@ -3,8 +3,8 @@
 import logging
 import asyncio
 
-from pyatv import (const, exceptions, convert)
-from pyatv.dmap import (pairing, parser, tags)
+from pyatv import (const, exceptions, convert, net)
+from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
@@ -367,7 +367,6 @@ class DmapAppleTV(AppleTV):
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
         self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
-        self._dmap_pairing = pairing.DmapPairingHandler(loop)
         self._airplay = airplay
 
     def login(self):
@@ -382,17 +381,13 @@ class DmapAppleTV(AppleTV):
 
         Must be done when session is no longer needed to not leak resources.
         """
-        await self._session.close()
+        if net.is_custom_session(self._session):
+            await self._session.close()
 
     @property
     def service(self):
         """Return service used to connect to the Apple TV.."""
         return self._dmap_service
-
-    @property
-    def pairing(self):
-        """Return API for pairing with the Apple TV."""
-        return self._dmap_pairing
 
     @property
     def remote_control(self):

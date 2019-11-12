@@ -1,6 +1,19 @@
 syntax = "proto2";
 
 message CommandOptions {
+  enum RepeatMode {
+    Unknown = 0;
+    One = 1;
+    All = 2;
+  }
+
+  enum ShuffleMode {
+    Unkown = 0;
+    Off = 1;
+    Albums = 2;
+    Songs = 3;
+  }
+
   optional string sourceId = 2;
   optional string mediaType = 3;
   optional bool externalPlayerCommand = 4;
@@ -9,8 +22,8 @@ message CommandOptions {
   optional float rating = 7;
   optional bool negative = 8;
   optional double playbackPosition = 9;
-  optional int32 repeatMode = 10;
-  optional int32 shuffleMode = 11;
+  optional RepeatMode repeatMode = 10;
+  optional ShuffleMode shuffleMode = 11;
   optional uint64 trackID = 12;
   optional int64 radioStationID = 13;
   optional string radioStationHash = 14;

@@ -140,6 +140,46 @@ PlayItemInPlaybackQueue = typing___cast(Command, 57)
 
 class CommandInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class RepeatMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> CommandInfo.RepeatMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[CommandInfo.RepeatMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, CommandInfo.RepeatMode]]: ...
+        Unknown = typing___cast(CommandInfo.RepeatMode, 0)
+        One = typing___cast(CommandInfo.RepeatMode, 1)
+        All = typing___cast(CommandInfo.RepeatMode, 2)
+    Unknown = typing___cast(CommandInfo.RepeatMode, 0)
+    One = typing___cast(CommandInfo.RepeatMode, 1)
+    All = typing___cast(CommandInfo.RepeatMode, 2)
+
+    class ShuffleMode(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> CommandInfo.ShuffleMode: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[CommandInfo.ShuffleMode]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, CommandInfo.ShuffleMode]]: ...
+        Unkown = typing___cast(CommandInfo.ShuffleMode, 0)
+        Off = typing___cast(CommandInfo.ShuffleMode, 1)
+        Albums = typing___cast(CommandInfo.ShuffleMode, 2)
+        Songs = typing___cast(CommandInfo.ShuffleMode, 3)
+    Unkown = typing___cast(CommandInfo.ShuffleMode, 0)
+    Off = typing___cast(CommandInfo.ShuffleMode, 1)
+    Albums = typing___cast(CommandInfo.ShuffleMode, 2)
+    Songs = typing___cast(CommandInfo.ShuffleMode, 3)
+
     command = ... # type: Command
     enabled = ... # type: bool
     active = ... # type: bool
@@ -149,8 +189,8 @@ class CommandInfo(google___protobuf___message___Message):
     maximumRating = ... # type: float
     supportedRates = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[float]
     localizedShortTitle = ... # type: typing___Text
-    repeatMode = ... # type: int
-    shuffleMode = ... # type: int
+    repeatMode = ... # type: CommandInfo.RepeatMode
+    shuffleMode = ... # type: CommandInfo.ShuffleMode
     presentationStyle = ... # type: int
     skipInterval = ... # type: int
     numAvailableSkips = ... # type: int
@@ -172,8 +212,8 @@ class CommandInfo(google___protobuf___message___Message):
         maximumRating : typing___Optional[float] = None,
         supportedRates : typing___Optional[typing___Iterable[float]] = None,
         localizedShortTitle : typing___Optional[typing___Text] = None,
-        repeatMode : typing___Optional[int] = None,
-        shuffleMode : typing___Optional[int] = None,
+        repeatMode : typing___Optional[CommandInfo.RepeatMode] = None,
+        shuffleMode : typing___Optional[CommandInfo.ShuffleMode] = None,
         presentationStyle : typing___Optional[int] = None,
         skipInterval : typing___Optional[int] = None,
         numAvailableSkips : typing___Optional[int] = None,

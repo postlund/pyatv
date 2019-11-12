@@ -6,8 +6,7 @@ from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
 from pyatv import const, exceptions
-from pyatv.conf import AppleTV
-from tests.airplay.fake_airplay_device import (DEVICE_PIN, DEVICE_CREDENTIALS)
+from pyatv.conf import AppleTV, AirPlayService
 from tests import zeroconf_stub
 
 
@@ -41,13 +40,20 @@ class CommonFunctionalTests(AioHTTPTestCase):
             await pyatv.connect(conf, self.loop)
 
     @unittest_run_loop
-    async def test_airplay_device_authentication(self):
-        # Perform authentication
-        await self.atv.airplay.start_authentication()
-        await self.atv.airplay.finish_authentication(DEVICE_PIN)
+    async def test_connect_invalid_protocol(self):
+        conf = AppleTV('1.2.3.4', 'Apple TV')
+        conf.add_service(AirPlayService('airplay_id'))
 
-        # Verify credentials are authenticated
-        self.assertTrue((await self.atv.airplay.verify_authenticated()))
+        with self.assertRaises(exceptions.UnsupportedProtocolError):
+            await pyatv.connect(
+                conf, self.loop, protocol=const.PROTOCOL_AIRPLAY)
+
+    @unittest_run_loop
+    async def test_pair_missing_service(self):
+        conf = AppleTV('1.2.3.4', 'Apple TV')
+
+        with self.assertRaises(exceptions.NoServiceError):
+            await pyatv.pair(conf, const.PROTOCOL_DMAP, self.loop)
 
     @unittest_run_loop
     async def test_play_url(self):
@@ -66,8 +72,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
-
-        await self.atv.airplay.load_credentials(DEVICE_CREDENTIALS)
 
         await self.atv.airplay.play_url(
             AIRPLAY_STREAM, port=self.server.port)

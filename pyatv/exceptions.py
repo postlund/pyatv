@@ -5,6 +5,10 @@ class NoServiceError(Exception):
     """Thrown when connecting to a device with no usable service."""
 
 
+class UnsupportedProtocolError(Exception):
+    """Thrown when an unsupported protocol was requested."""
+
+
 class AuthenticationError(Exception):
     """Thrown when login fails."""
 

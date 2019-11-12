@@ -53,6 +53,19 @@ enum Command {
 }
 
 message CommandInfo {
+  enum RepeatMode {
+    Unknown = 0;
+    One = 1;
+    All = 2;
+  }
+
+  enum ShuffleMode {
+    Unkown = 0;
+    Off = 1;
+    Albums = 2;
+    Songs = 3;
+  }
+
   optional Command command = 1;
   optional bool enabled = 2;
   optional bool active = 3;
@@ -62,8 +75,8 @@ message CommandInfo {
   optional float maximumRating = 7;
   repeated float supportedRates = 8;
   optional string localizedShortTitle = 9;
-  optional int32 repeatMode = 10;
-  optional int32 shuffleMode = 11;
+  optional RepeatMode repeatMode = 10;
+  optional ShuffleMode shuffleMode = 11;
   optional int32 presentationStyle = 12;
   optional int32 skipInterval = 13;
   optional int32 numAvailableSkips = 14;

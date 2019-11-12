@@ -20,10 +20,66 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\'pyatv/mrp/protobuf/NowPlayingInfo.proto\"\x9c\x03\n\x0eNowPlayingInfo\x12\r\n\x05\x61lbum\x18\x01 \x01(\t\x12\x0e\n\x06\x61rtist\x18\x02 \x01(\t\x12\x10\n\x08\x64uration\x18\x03 \x01(\x01\x12\x13\n\x0b\x65lapsedTime\x18\x04 \x01(\x01\x12\x14\n\x0cplaybackRate\x18\x05 \x01(\x02\x12\x12\n\nrepeatMode\x18\x06 \x01(\x05\x12\x13\n\x0bshuffleMode\x18\x07 \x01(\x05\x12\x11\n\ttimestamp\x18\x08 \x01(\x01\x12\r\n\x05title\x18\t \x01(\t\x12\x18\n\x10uniqueIdentifier\x18\n \x01(\x04\x12\x17\n\x0fisExplicitTrack\x18\x0b \x01(\x08\x12\x12\n\nisMusicApp\x18\x0c \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\r \x01(\x03\x12\x18\n\x10radioStationHash\x18\x0e \x01(\t\x12\x18\n\x10radioStationName\x18\x0f \x01(\t\x12\x19\n\x11\x61rtworkDataDigest\x18\x10 \x01(\x0c\x12\x14\n\x0cisAlwaysLive\x18\x11 \x01(\x08\x12\x17\n\x0fisAdvertisement\x18\x12 \x01(\x08')
+  serialized_pb=_b('\n\'pyatv/mrp/protobuf/NowPlayingInfo.proto\"\xbd\x04\n\x0eNowPlayingInfo\x12\r\n\x05\x61lbum\x18\x01 \x01(\t\x12\x0e\n\x06\x61rtist\x18\x02 \x01(\t\x12\x10\n\x08\x64uration\x18\x03 \x01(\x01\x12\x13\n\x0b\x65lapsedTime\x18\x04 \x01(\x01\x12\x14\n\x0cplaybackRate\x18\x05 \x01(\x02\x12.\n\nrepeatMode\x18\x06 \x01(\x0e\x32\x1a.NowPlayingInfo.RepeatMode\x12\x30\n\x0bshuffleMode\x18\x07 \x01(\x0e\x32\x1b.NowPlayingInfo.ShuffleMode\x12\x11\n\ttimestamp\x18\x08 \x01(\x01\x12\r\n\x05title\x18\t \x01(\t\x12\x18\n\x10uniqueIdentifier\x18\n \x01(\x04\x12\x17\n\x0fisExplicitTrack\x18\x0b \x01(\x08\x12\x12\n\nisMusicApp\x18\x0c \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\r \x01(\x03\x12\x18\n\x10radioStationHash\x18\x0e \x01(\t\x12\x18\n\x10radioStationName\x18\x0f \x01(\t\x12\x19\n\x11\x61rtworkDataDigest\x18\x10 \x01(\x0c\x12\x14\n\x0cisAlwaysLive\x18\x11 \x01(\x08\x12\x17\n\x0fisAdvertisement\x18\x12 \x01(\x08\"+\n\nRepeatMode\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03One\x10\x01\x12\x07\n\x03\x41ll\x10\x02\"9\n\x0bShuffleMode\x12\n\n\x06Unkown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03')
 )
 
 
+
+_NOWPLAYINGINFO_REPEATMODE = _descriptor.EnumDescriptor(
+  name='RepeatMode',
+  full_name='NowPlayingInfo.RepeatMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='One', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='All', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=515,
+  serialized_end=558,
+)
+_sym_db.RegisterEnumDescriptor(_NOWPLAYINGINFO_REPEATMODE)
+
+_NOWPLAYINGINFO_SHUFFLEMODE = _descriptor.EnumDescriptor(
+  name='ShuffleMode',
+  full_name='NowPlayingInfo.ShuffleMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unkown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Off', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Albums', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Songs', index=3, number=3,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=560,
+  serialized_end=617,
+)
+_sym_db.RegisterEnumDescriptor(_NOWPLAYINGINFO_SHUFFLEMODE)
 
 
 _NOWPLAYINGINFO = _descriptor.Descriptor(
@@ -70,14 +126,14 @@ _NOWPLAYINGINFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='repeatMode', full_name='NowPlayingInfo.repeatMode', index=5,
-      number=6, type=5, cpp_type=1, label=1,
+      number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='shuffleMode', full_name='NowPlayingInfo.shuffleMode', index=6,
-      number=7, type=5, cpp_type=1, label=1,
+      number=7, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -164,6 +220,8 @@ _NOWPLAYINGINFO = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _NOWPLAYINGINFO_REPEATMODE,
+    _NOWPLAYINGINFO_SHUFFLEMODE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -172,9 +230,13 @@ _NOWPLAYINGINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=44,
-  serialized_end=456,
+  serialized_end=617,
 )
 
+_NOWPLAYINGINFO.fields_by_name['repeatMode'].enum_type = _NOWPLAYINGINFO_REPEATMODE
+_NOWPLAYINGINFO.fields_by_name['shuffleMode'].enum_type = _NOWPLAYINGINFO_SHUFFLEMODE
+_NOWPLAYINGINFO_REPEATMODE.containing_type = _NOWPLAYINGINFO
+_NOWPLAYINGINFO_SHUFFLEMODE.containing_type = _NOWPLAYINGINFO
 DESCRIPTOR.message_types_by_name['NowPlayingInfo'] = _NOWPLAYINGINFO
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
