@@ -9,10 +9,9 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.protobuf import CommandInfo_pb2, SetStateMessage_pb2
-from pyatv.mrp.pairing import MrpPairingProcedure
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater, PairingHandler)
+                             Playing, PushUpdater)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -280,47 +279,6 @@ class MrpPushUpdater(PushUpdater):
             self.listener.playstatus_update, self, playstatus)
 
 
-class MrpPairingHandler(PairingHandler):
-    """Base class for API used to pair with an Apple TV."""
-
-    def __init__(self, protocol, srp, service):
-        """Initialize a new MrpPairingHandler."""
-        self.pairing_procedure = MrpPairingProcedure(protocol, srp)
-        self.service = service
-        self._pin_code = None
-
-    @property
-    def has_paired(self):
-        """If a successful pairing has been performed."""
-        return self.service.credentials is not None
-
-    @property
-    def credentials(self):
-        """Credentials that were generated during pairing."""
-        return str(self.service.credentials)
-
-    async def start(self, **kwargs):
-        """Start pairing process."""
-        await self.pairing_procedure.start_pairing()
-
-    async def stop(self, **kwargs):
-        """Stop pairing process."""
-        if not self._pin_code:
-            raise Exception('no pin given')  # TODO: new exception
-
-        self.service.credentials = \
-            await self.pairing_procedure.finish_pairing(self._pin_code)
-
-    def pin(self, pin):
-        """Pin code used for pairing."""
-        self._pin_code = pin
-
-    @property
-    def device_provides_pin(self):
-        """Return True if remote device presents PIN code, else False."""
-        return True
-
-
 class MrpAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""
 
@@ -344,8 +302,6 @@ class MrpAppleTV(AppleTV):
         self._mrp_metadata = MrpMetadata(self._psm, config.identifier)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._psm)
-        self._mrp_pairing = MrpPairingHandler(
-            self._protocol, self._srp, self._mrp_service)
         self._airplay = airplay
 
     async def login(self):
@@ -364,11 +320,6 @@ class MrpAppleTV(AppleTV):
     def service(self):
         """Return service used to connect to the Apple TV.."""
         return self._mrp_service
-
-    @property
-    def pairing(self):
-        """Return API for pairing with the Apple TV."""
-        return self._mrp_pairing
 
     @property
     def remote_control(self):

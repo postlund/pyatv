@@ -8,7 +8,6 @@ import asyncio
 
 import argparse
 from argparse import ArgumentTypeError
-from aiozeroconf import Zeroconf
 
 import pyatv
 from pyatv import (const, exceptions, interface)
@@ -31,6 +30,22 @@ async def _read_input(loop, prompt):
     sys.stdout.flush()
     user_input = await loop.run_in_executor(None, sys.stdin.readline)
     return user_input.strip()
+
+
+async def _scan_for_device(identifier, timeout, loop, protocol=None):
+    atvs = await pyatv.scan(
+        loop, timeout=timeout, identifier=identifier, protocol=protocol)
+    if not atvs:
+        logging.error('Could not find any Apple TV on current network')
+        return None
+
+    if len(atvs) > 1:
+        logging.error(
+            'Found more than one Apple TV; specify one using --id')
+        _print_found_apple_tvs(atvs, outstream=sys.stderr)
+        return None
+
+    return atvs[0]
 
 
 class GlobalCommands:
@@ -85,6 +100,70 @@ class GlobalCommands:
 
         return 0
 
+    async def pair(self):
+        """Pair pyatv as a remote control with an Apple TV."""
+        if self.args.protocol is None:
+            logging.error('No protocol specified')
+            return 1
+
+        apple_tv = await _scan_for_device(
+            self.args.id, self.args.scan_timeout, self.loop)
+        if not apple_tv:
+            return 2
+
+        options = {}
+
+        # Protocol specific options
+        if self.args.protocol == const.PROTOCOL_DMAP:
+            options.update({
+                'pairing_guid': self.args.pairing_guid,
+                'remote_name': self.args.remote_name,
+            })
+
+        pairing = await pyatv.pair(
+            apple_tv, self.args.protocol, self.loop, **options)
+
+        try:
+            await self._perform_pairing(pairing)
+        except:  # pylint: disable=bare-except  # noqa
+            logging.exception('Pairing failed')
+            return 3
+        finally:
+            await pairing.close()
+
+        return 0
+
+    async def _perform_pairing(self, pairing):
+        await pairing.begin()
+
+        # Ask for PIN if present or just wait for pairing to end
+        if pairing.device_provides_pin:
+            pin = await _read_input(self.loop, 'Enter PIN on screen: ')
+            pairing.pin(pin)
+        else:
+            pairing.pin(self.args.pin_code)
+
+            if self.args.pin_code is None:
+                print('Use any pin to pair with "{}"'
+                      ' (press ENTER to stop)'.format(
+                          self.args.remote_name))
+            else:
+                print('Use pin {} to pair with "{}"'
+                      ' (press ENTER to stop)'.format(
+                          self.args.pin_code, self.args.remote_name))
+
+            await self.loop.run_in_executor(None, sys.stdin.readline)
+
+        await pairing.finish()
+
+        # Give some feedback to the user
+        if pairing.has_paired:
+            print('Pairing seems to have succeeded, yey!')
+            print('You may now use these credentials: {0}'.format(
+                pairing.credentials))
+        else:
+            print('Pairing failed!')
+
 
 class DeviceCommands:
     """Additional commands available for a device.
@@ -135,67 +214,6 @@ class DeviceCommands:
         self.atv.push_updater.stop()
         return 0
 
-    async def auth(self):
-        """Perform AirPlay device authentication."""
-        credentials = await self.atv.airplay.generate_credentials()
-        await self.atv.airplay.load_credentials(credentials)
-
-        try:
-            await self.atv.airplay.start_authentication()
-            pin = await _read_input(self.loop, 'Enter PIN on screen: ')
-
-            await self.atv.airplay.finish_authentication(pin)
-            print('You may now use these credentials:')
-            print(credentials)
-            return 0
-
-        except exceptions.DeviceAuthenticationError:
-            logging.exception('Failed to authenticate - invalid PIN?')
-            return 1
-
-    async def pair(self):
-        """Pair pyatv as a remote control with an Apple TV."""
-        # Connect using the specified protocol
-        # TODO: config should be stored elsewhere so that API is same for both
-        protocol = self.atv.service.protocol
-        if protocol == const.PROTOCOL_DMAP:
-            await self.atv.pairing.start(zeroconf=Zeroconf(self.loop),
-                                         name=self.args.remote_name,
-                                         pairing_guid=self.args.pairing_guid)
-        elif protocol == const.PROTOCOL_MRP:
-            await self.atv.pairing.start()
-
-        # Ask for PIN if present or just wait for pairing to end
-        if self.atv.pairing.device_provides_pin:
-            pin = await _read_input(self.loop, 'Enter PIN on screen: ')
-            self.atv.pairing.pin(pin)
-        else:
-            self.atv.pairing.pin(self.args.pin_code)
-
-            if self.args.pin_code is None:
-                print('Use any pin to pair with "{}"'
-                      ' (press ENTER to stop)'.format(
-                          self.args.remote_name))
-            else:
-                print('Use pin {} to pair with "{}"'
-                      ' (press ENTER to stop)'.format(
-                          self.args.pin_code, self.args.remote_name))
-
-            await self.loop.run_in_executor(None, sys.stdin.readline)
-
-        await self.atv.pairing.stop()
-
-        # Give some feedback to the user
-        if self.atv.pairing.has_paired:
-            print('Pairing seems to have succeeded, yey!')
-            print('You may now use these credentials: {0}'.format(
-                self.atv.pairing.credentials))
-        else:
-            print('Pairing failed!')
-            return 1
-
-        return 0
-
 
 class PushListener:
     """Internal listener for push updates."""
@@ -234,8 +252,10 @@ class TransformProtocol(argparse.Action):
             setattr(namespace, self.dest, const.PROTOCOL_MRP)
         elif values == "dmap":
             setattr(namespace, self.dest, const.PROTOCOL_DMAP)
+        elif values == 'airplay':
+            setattr(namespace, self.dest, const.PROTOCOL_AIRPLAY)
         else:
-            raise ArgumentTypeError('Valid protocols are: mrp, dmap')
+            raise ArgumentTypeError('Valid protocols are: mrp, dmap, airplay')
 
 
 async def cli_handler(loop):
@@ -331,20 +351,11 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 
 async def _autodiscover_device(args, loop):
-    atvs = await pyatv.scan(
-        loop, timeout=args.scan_timeout,
-        identifier=args.id, protocol=args.protocol)
-    if not atvs:
-        logging.error('Could not find any Apple TV on current network')
+    apple_tv = await _scan_for_device(
+        args.id, args.scan_timeout, loop, protocol=args.protocol)
+    if not apple_tv:
         return None
 
-    if len(atvs) > 1:
-        logging.error(
-            'Found more than one Apple TV; specify one using --id')
-        _print_found_apple_tvs(atvs, outstream=sys.stderr)
-        return None
-
-    apple_tv = atvs[0]
     service = apple_tv.main_service()
 
     # Common parameters for all protocols

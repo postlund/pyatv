@@ -6,7 +6,7 @@ import hashlib
 
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 
-from pyatv import (convert, exceptions)
+from pyatv import (convert, exceptions, net)
 
 
 # TODO: make these methods more pretty and safe
@@ -44,6 +44,15 @@ class PairingHandler:
 
     __metaclass__ = ABCMeta
 
+    def __init__(self, session):
+        """Initialize a new instance of PairingHandler."""
+        self.session = session
+
+    async def close(self):
+        """Call to free allocated resources after pairing."""
+        if net.is_custom_session(self.session):
+            await self.session.close()
+
     @abstractmethod
     def pin(self, pin):
         """Pin code used for pairing."""
@@ -62,18 +71,13 @@ class PairingHandler:
         """
         raise exceptions.NotSupportedError
 
-    @abstractproperty
-    def credentials(self):
-        """Credentials that were generated during pairing."""
-        raise exceptions.NotSupportedError
-
     @abstractmethod
-    def start(self, **kwargs):
+    async def begin(self):
         """Start pairing process."""
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def stop(self, **kwargs):
+    async def finish(self):
         """Stop pairing process."""
         raise exceptions.NotSupportedError
 
@@ -340,40 +344,10 @@ class PushUpdater:
         raise exceptions.NotSupportedError
 
 
-class AirPlay:
+class AirPlay:  # pylint: disable=too-few-public-methods
     """Base class for AirPlay functionality."""
 
     __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def generate_credentials(self):
-        """Create new credentials for authentication.
-
-        Credentials that have been authenticated shall be saved and loaded with
-        load_credentials before playing anything. If credentials are lost,
-        authentication must be performed again.
-        """
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def load_credentials(self, credentials):
-        """Load existing credentials."""
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def verify_authenticated(self):
-        """Check if loaded credentials are verified."""
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def start_authentication(self):
-        """Begin authentication proces (show PIN on screen)."""
-        raise exceptions.NotSupportedError
-
-    @abstractmethod
-    def finish_authentication(self, pin):
-        """End authentication process with PIN code."""
-        raise exceptions.NotSupportedError
 
     @abstractmethod
     def play_url(self, url, **kwargs):
@@ -404,12 +378,7 @@ class AppleTV:
 
     @abstractproperty
     def service(self):
-        """Return service used to connect to the Apple TV.."""
-        raise exceptions.NotSupportedError
-
-    @abstractproperty
-    def pairing(self):
-        """Return API for pairing with the Apple TV."""
+        """Return service used to connect to the Apple TV."""
         raise exceptions.NotSupportedError
 
     @abstractproperty

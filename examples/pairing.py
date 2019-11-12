@@ -2,13 +2,10 @@
 
 import sys
 import asyncio
-from aiozeroconf import Zeroconf
 
 import pyatv
+from pyatv import const
 
-
-PIN_CODE = 1234
-REMOTE_NAME = 'my remote control'
 
 LOOP = asyncio.get_event_loop()
 
@@ -16,33 +13,25 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def pair_with_device(loop):
     """Make it possible to pair with device."""
-    my_zeroconf = Zeroconf(loop)
-
-    atvs = await pyatv.scan(loop, timeout=5)
+    atvs = await pyatv.scan(loop, timeout=5, protocol=const.PROTOCOL_MRP)
 
     if not atvs:
-        print('no device found', file=sys.stderr)
+        print('No device found', file=sys.stderr)
         return
 
-    atv = await pyatv.connect(atvs[0], loop)
+    pairing = await pyatv.pair(atvs[0], const.PROTOCOL_MRP, loop)
+    await pairing.begin()
 
-    atv.pairing.pin(PIN_CODE)
-    await atv.pairing.start(zeroconf=my_zeroconf, name=REMOTE_NAME)
-    print('You can now pair with pyatv')
-
-    # Wait for a minute to allow pairing
-    await asyncio.sleep(60, loop=loop)
-
-    await atv.pairing.stop()
+    pin = int(input("Enter PIN: "))
+    pairing.pin(pin)
+    await pairing.finish()
 
     # Give some feedback about the process
-    if atv.pairing.has_paired:
+    if pairing.has_paired:
         print('Paired with device!')
-        print('Credentials:', atv.pairing.credentials)
+        print('Credentials:', pairing.credentials)
     else:
         print('Did not pair with device!')
-
-    my_zeroconf.close()
 
 
 if __name__ == '__main__':

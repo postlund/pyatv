@@ -1,4 +1,4 @@
-"""Simple example that connects to a device with autodiscover."""
+"""Simple example that scans for devices and connects to first one found."""
 
 import sys
 import asyncio
@@ -14,7 +14,7 @@ async def print_what_is_playing(loop):
     atvs = await pyatv.scan(loop, timeout=5)
 
     if not atvs:
-        print('no device found', file=sys.stderr)
+        print('No device found', file=sys.stderr)
         return
 
     print('Connecting to {0}'.format(atvs[0].address))

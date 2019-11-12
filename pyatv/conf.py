@@ -2,8 +2,6 @@
 from pyatv import (convert, exceptions)
 from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
 
-_SUPPORTED_PROTOCOLS = [PROTOCOL_MRP, PROTOCOL_DMAP]
-
 
 class AppleTV:
     """Representation of an Apple TV configuration.
@@ -13,14 +11,12 @@ class AppleTV:
     AirPlay.
     """
 
-    def __init__(self, address, name, **kwargs):
+    def __init__(self, address, name):
         """Initialize a new AppleTV."""
         self.address = address
         self.name = name
         self._services = {}
         self._identifier = None
-        self._supported_protocols = \
-            kwargs.get('supported_services', _SUPPORTED_PROTOCOLS)
 
     @property
     def identifier(self):

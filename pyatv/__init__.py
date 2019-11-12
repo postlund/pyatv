@@ -5,18 +5,20 @@ import logging
 from ipaddress import ip_address
 
 from aiozeroconf import ServiceBrowser, Zeroconf
-from aiohttp import ClientSession
 
-from pyatv import (conf, const, exceptions)
+from pyatv import (conf, const, exceptions, net)
 from pyatv.airplay import player
 from pyatv.airplay import AirPlayAPI
 from pyatv.net import HttpSession
 
 from pyatv.dmap import DmapAppleTV
+from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
+from pyatv.mrp.pairing import MrpPairingHandler
+from pyatv.airplay.pairing import AirPlayPairingHandler
+
 
 _LOGGER = logging.getLogger(__name__)
-
 
 HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
 DEVICE_SERVICE = '_touch-able._tcp.local.'
@@ -139,18 +141,23 @@ async def connect(config, loop, protocol=None, session=None):
 
     service = config.main_service(protocol=protocol)
 
+    supported_implementations = {
+        const.PROTOCOL_DMAP: DmapAppleTV,
+        const.PROTOCOL_MRP: MrpAppleTV,
+    }
+
+    implementation = supported_implementations.get(service.protocol, None)
+    if not implementation:
+        raise exceptions.UnsupportedProtocolError()
+
     # If no session is given, create a default one
     if session is None:
-        session = ClientSession(loop=loop)
+        session = await net.create_session(loop=loop)
 
     # AirPlay service is the same for both DMAP and MRP
     airplay = _setup_airplay(loop, session, config)
 
-    # Create correct implementation depending on protocol
-    if service.protocol == const.PROTOCOL_DMAP:
-        return DmapAppleTV(loop, session, config, airplay)
-
-    return MrpAppleTV(loop, session, config, airplay)
+    return implementation(loop, session, config, airplay)
 
 
 def _setup_airplay(loop, session, config):
@@ -161,3 +168,26 @@ def _setup_airplay(loop, session, config):
         session, 'http://{0}:{1}/'.format(
             config.address, airplay_service.port))
     return AirPlayAPI(config, airplay_http, airplay_player)
+
+
+async def pair(config, protocol, loop, session=None, **kwargs):
+    """Pair with an Apple TV."""
+    service = config.get_service(protocol)
+    if not service:
+        raise exceptions.NoServiceError(
+            'no service available for protocol ' + str(protocol))
+
+    protocol_handlers = {
+        const.PROTOCOL_DMAP: DmapPairingHandler,
+        const.PROTOCOL_MRP: MrpPairingHandler,
+        const.PROTOCOL_AIRPLAY: AirPlayPairingHandler,
+    }
+
+    handler = protocol_handlers.get(protocol, None)
+    if handler is None:
+        raise exceptions.UnsupportedProtocolError()
+
+    if session is None:
+        session = await net.create_session(loop)
+
+    return handler(config, session, loop, **kwargs)

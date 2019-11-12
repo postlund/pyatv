@@ -20,10 +20,66 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\'pyatv/mrp/protobuf/CommandOptions.proto\"\xbc\x06\n\x0e\x43ommandOptions\x12\x10\n\x08sourceId\x18\x02 \x01(\t\x12\x11\n\tmediaType\x18\x03 \x01(\t\x12\x1d\n\x15\x65xternalPlayerCommand\x18\x04 \x01(\x08\x12\x14\n\x0cskipInterval\x18\x05 \x01(\x02\x12\x14\n\x0cplaybackRate\x18\x06 \x01(\x02\x12\x0e\n\x06rating\x18\x07 \x01(\x02\x12\x10\n\x08negative\x18\x08 \x01(\x08\x12\x18\n\x10playbackPosition\x18\t \x01(\x01\x12\x12\n\nrepeatMode\x18\n \x01(\x05\x12\x13\n\x0bshuffleMode\x18\x0b \x01(\x05\x12\x0f\n\x07trackID\x18\x0c \x01(\x04\x12\x16\n\x0eradioStationID\x18\r \x01(\x03\x12\x18\n\x10radioStationHash\x18\x0e \x01(\t\x12\"\n\x1asystemAppPlaybackQueueData\x18\x0f \x01(\x0c\x12\x1f\n\x17\x64\x65stinationAppDisplayID\x18\x10 \x01(\t\x12\x13\n\x0bsendOptions\x18\x11 \x01(\r\x12/\n\'requestDefermentToPlaybackQueuePosition\x18\x12 \x01(\x08\x12\x11\n\tcontextID\x18\x13 \x01(\t\x12*\n\"shouldOverrideManuallyCuratedQueue\x18\x14 \x01(\x08\x12\x12\n\nstationURL\x18\x15 \x01(\t\x12 \n\x18shouldBeginRadioPlayback\x18\x16 \x01(\x08\x12&\n\x1eplaybackQueueInsertionPosition\x18\x17 \x01(\x05\x12\x15\n\rcontentItemID\x18\x18 \x01(\t\x12\x1b\n\x13playbackQueueOffset\x18\x19 \x01(\x05\x12&\n\x1eplaybackQueueDestinationOffset\x18\x1a \x01(\x05\x12\x16\n\x0elanguageOption\x18\x1b \x01(\x0c\x12\x1c\n\x14playbackQueueContext\x18\x1c \x01(\x0c\x12 \n\x18insertAfterContentItemID\x18\x1d \x01(\t\x12\x1f\n\x17nowPlayingContentItemID\x18\x1e \x01(\t\x12\x15\n\rreplaceIntent\x18\x1f \x01(\x05')
+  serialized_pb=_b('\n\'pyatv/mrp/protobuf/CommandOptions.proto\"\xdd\x07\n\x0e\x43ommandOptions\x12\x10\n\x08sourceId\x18\x02 \x01(\t\x12\x11\n\tmediaType\x18\x03 \x01(\t\x12\x1d\n\x15\x65xternalPlayerCommand\x18\x04 \x01(\x08\x12\x14\n\x0cskipInterval\x18\x05 \x01(\x02\x12\x14\n\x0cplaybackRate\x18\x06 \x01(\x02\x12\x0e\n\x06rating\x18\x07 \x01(\x02\x12\x10\n\x08negative\x18\x08 \x01(\x08\x12\x18\n\x10playbackPosition\x18\t \x01(\x01\x12.\n\nrepeatMode\x18\n \x01(\x0e\x32\x1a.CommandOptions.RepeatMode\x12\x30\n\x0bshuffleMode\x18\x0b \x01(\x0e\x32\x1b.CommandOptions.ShuffleMode\x12\x0f\n\x07trackID\x18\x0c \x01(\x04\x12\x16\n\x0eradioStationID\x18\r \x01(\x03\x12\x18\n\x10radioStationHash\x18\x0e \x01(\t\x12\"\n\x1asystemAppPlaybackQueueData\x18\x0f \x01(\x0c\x12\x1f\n\x17\x64\x65stinationAppDisplayID\x18\x10 \x01(\t\x12\x13\n\x0bsendOptions\x18\x11 \x01(\r\x12/\n\'requestDefermentToPlaybackQueuePosition\x18\x12 \x01(\x08\x12\x11\n\tcontextID\x18\x13 \x01(\t\x12*\n\"shouldOverrideManuallyCuratedQueue\x18\x14 \x01(\x08\x12\x12\n\nstationURL\x18\x15 \x01(\t\x12 \n\x18shouldBeginRadioPlayback\x18\x16 \x01(\x08\x12&\n\x1eplaybackQueueInsertionPosition\x18\x17 \x01(\x05\x12\x15\n\rcontentItemID\x18\x18 \x01(\t\x12\x1b\n\x13playbackQueueOffset\x18\x19 \x01(\x05\x12&\n\x1eplaybackQueueDestinationOffset\x18\x1a \x01(\x05\x12\x16\n\x0elanguageOption\x18\x1b \x01(\x0c\x12\x1c\n\x14playbackQueueContext\x18\x1c \x01(\x0c\x12 \n\x18insertAfterContentItemID\x18\x1d \x01(\t\x12\x1f\n\x17nowPlayingContentItemID\x18\x1e \x01(\t\x12\x15\n\rreplaceIntent\x18\x1f \x01(\x05\"+\n\nRepeatMode\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03One\x10\x01\x12\x07\n\x03\x41ll\x10\x02\"9\n\x0bShuffleMode\x12\n\n\x06Unkown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03')
 )
 
 
+
+_COMMANDOPTIONS_REPEATMODE = _descriptor.EnumDescriptor(
+  name='RepeatMode',
+  full_name='CommandOptions.RepeatMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='One', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='All', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=931,
+  serialized_end=974,
+)
+_sym_db.RegisterEnumDescriptor(_COMMANDOPTIONS_REPEATMODE)
+
+_COMMANDOPTIONS_SHUFFLEMODE = _descriptor.EnumDescriptor(
+  name='ShuffleMode',
+  full_name='CommandOptions.ShuffleMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unkown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Off', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Albums', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Songs', index=3, number=3,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=976,
+  serialized_end=1033,
+)
+_sym_db.RegisterEnumDescriptor(_COMMANDOPTIONS_SHUFFLEMODE)
 
 
 _COMMANDOPTIONS = _descriptor.Descriptor(
@@ -91,14 +147,14 @@ _COMMANDOPTIONS = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='repeatMode', full_name='CommandOptions.repeatMode', index=8,
-      number=10, type=5, cpp_type=1, label=1,
+      number=10, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='shuffleMode', full_name='CommandOptions.shuffleMode', index=9,
-      number=11, type=5, cpp_type=1, label=1,
+      number=11, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -248,6 +304,8 @@ _COMMANDOPTIONS = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _COMMANDOPTIONS_REPEATMODE,
+    _COMMANDOPTIONS_SHUFFLEMODE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -256,9 +314,13 @@ _COMMANDOPTIONS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=44,
-  serialized_end=872,
+  serialized_end=1033,
 )
 
+_COMMANDOPTIONS.fields_by_name['repeatMode'].enum_type = _COMMANDOPTIONS_REPEATMODE
+_COMMANDOPTIONS.fields_by_name['shuffleMode'].enum_type = _COMMANDOPTIONS_SHUFFLEMODE
+_COMMANDOPTIONS_REPEATMODE.containing_type = _COMMANDOPTIONS
+_COMMANDOPTIONS_SHUFFLEMODE.containing_type = _COMMANDOPTIONS
 DESCRIPTOR.message_types_by_name['CommandOptions'] = _COMMANDOPTIONS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

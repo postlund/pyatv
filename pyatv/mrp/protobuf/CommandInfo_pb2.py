@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n$pyatv/mrp/protobuf/CommandInfo.proto\"\x8e\x04\n\x0b\x43ommandInfo\x12\x19\n\x07\x63ommand\x18\x01 \x01(\x0e\x32\x08.Command\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x1a\n\x12preferredIntervals\x18\x04 \x03(\x01\x12\x16\n\x0elocalizedTitle\x18\x05 \x01(\t\x12\x15\n\rminimumRating\x18\x06 \x01(\x02\x12\x15\n\rmaximumRating\x18\x07 \x01(\x02\x12\x16\n\x0esupportedRates\x18\x08 \x03(\x02\x12\x1b\n\x13localizedShortTitle\x18\t \x01(\t\x12\x12\n\nrepeatMode\x18\n \x01(\x05\x12\x13\n\x0bshuffleMode\x18\x0b \x01(\x05\x12\x19\n\x11presentationStyle\x18\x0c \x01(\x05\x12\x14\n\x0cskipInterval\x18\r \x01(\x05\x12\x19\n\x11numAvailableSkips\x18\x0e \x01(\x05\x12\x15\n\rskipFrequency\x18\x0f \x01(\x05\x12\x10\n\x08\x63\x61nScrub\x18\x10 \x01(\x05\x12#\n\x1bsupportedPlaybackQueueTypes\x18\x11 \x03(\x05\x12\'\n\x1fsupportedCustomQueueIdentifiers\x18\x12 \x03(\t\x12#\n\x1bsupportedInsertionPositions\x18\x13 \x03(\x05\x12\x1b\n\x13supportsSharedQueue\x18\x14 \x01(\x08*\x8b\x08\n\x07\x43ommand\x12\x0b\n\x07Unknown\x10\x00\x12\x08\n\x04Play\x10\x01\x12\t\n\x05Pause\x10\x02\x12\x13\n\x0fTogglePlayPause\x10\x03\x12\x08\n\x04Stop\x10\x04\x12\r\n\tNextTrack\x10\x05\x12\x11\n\rPreviousTrack\x10\x06\x12\x16\n\x12\x41\x64vanceShuffleMode\x10\x07\x12\x15\n\x11\x41\x64vanceRepeatMode\x10\x08\x12\x14\n\x10\x42\x65ginFastForward\x10\t\x12\x12\n\x0e\x45ndFastForward\x10\n\x12\x0f\n\x0b\x42\x65ginRewind\x10\x0b\x12\r\n\tEndRewind\x10\x0c\x12\x13\n\x0fRewind15Seconds\x10\r\x12\x18\n\x14\x46\x61stForward15Seconds\x10\x0e\x12\x13\n\x0fRewind30Seconds\x10\x0f\x12\x18\n\x14\x46\x61stForward30Seconds\x10\x10\x12\x0f\n\x0bSkipForward\x10\x12\x12\x10\n\x0cSkipBackward\x10\x13\x12\x16\n\x12\x43hangePlaybackRate\x10\x14\x12\r\n\tRateTrack\x10\x15\x12\r\n\tLikeTrack\x10\x16\x12\x10\n\x0c\x44islikeTrack\x10\x17\x12\x11\n\rBookmarkTrack\x10\x18\x12\x1a\n\x16SeekToPlaybackPosition\x10-\x12\x14\n\x10\x43hangeRepeatMode\x10.\x12\x15\n\x11\x43hangeShuffleMode\x10/\x12\x18\n\x14\x45nableLanguageOption\x10\x35\x12\x19\n\x15\x44isableLanguageOption\x10\x36\x12\x0f\n\x0bNextChapter\x10\x19\x12\x13\n\x0fPreviousChapter\x10\x1a\x12\r\n\tNextAlbum\x10\x1b\x12\x11\n\rPreviousAlbum\x10\x1c\x12\x10\n\x0cNextPlaylist\x10\x1d\x12\x14\n\x10PreviousPlaylist\x10\x1e\x12\x0c\n\x08\x42\x61nTrack\x10\x1f\x12\x16\n\x12\x41\x64\x64TrackToWishList\x10 \x12\x1b\n\x17RemoveTrackFromWishList\x10!\x12\x11\n\rNextInContext\x10\"\x12\x15\n\x11PreviousInContext\x10#\x12\x18\n\x14ResetPlaybackTimeout\x10)\x12\x14\n\x10SetPlaybackQueue\x10\x30\x12\x1e\n\x1a\x41\x64\x64NowPlayingItemToLibrary\x10\x31\x12\x16\n\x12\x43reateRadioStation\x10\x32\x12\x14\n\x10\x41\x64\x64ItemToLibrary\x10\x33\x12\x1b\n\x17InsertIntoPlaybackQueue\x10\x34\x12\x18\n\x14ReorderPlaybackQueue\x10\x37\x12\x1b\n\x17RemoveFromPlaybackQueue\x10\x38\x12\x1b\n\x17PlayItemInPlaybackQueue\x10\x39')
+  serialized_pb=_b('\n$pyatv/mrp/protobuf/CommandInfo.proto\"\xa9\x05\n\x0b\x43ommandInfo\x12\x19\n\x07\x63ommand\x18\x01 \x01(\x0e\x32\x08.Command\x12\x0f\n\x07\x65nabled\x18\x02 \x01(\x08\x12\x0e\n\x06\x61\x63tive\x18\x03 \x01(\x08\x12\x1a\n\x12preferredIntervals\x18\x04 \x03(\x01\x12\x16\n\x0elocalizedTitle\x18\x05 \x01(\t\x12\x15\n\rminimumRating\x18\x06 \x01(\x02\x12\x15\n\rmaximumRating\x18\x07 \x01(\x02\x12\x16\n\x0esupportedRates\x18\x08 \x03(\x02\x12\x1b\n\x13localizedShortTitle\x18\t \x01(\t\x12+\n\nrepeatMode\x18\n \x01(\x0e\x32\x17.CommandInfo.RepeatMode\x12-\n\x0bshuffleMode\x18\x0b \x01(\x0e\x32\x18.CommandInfo.ShuffleMode\x12\x19\n\x11presentationStyle\x18\x0c \x01(\x05\x12\x14\n\x0cskipInterval\x18\r \x01(\x05\x12\x19\n\x11numAvailableSkips\x18\x0e \x01(\x05\x12\x15\n\rskipFrequency\x18\x0f \x01(\x05\x12\x10\n\x08\x63\x61nScrub\x18\x10 \x01(\x05\x12#\n\x1bsupportedPlaybackQueueTypes\x18\x11 \x03(\x05\x12\'\n\x1fsupportedCustomQueueIdentifiers\x18\x12 \x03(\t\x12#\n\x1bsupportedInsertionPositions\x18\x13 \x03(\x05\x12\x1b\n\x13supportsSharedQueue\x18\x14 \x01(\x08\"+\n\nRepeatMode\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03One\x10\x01\x12\x07\n\x03\x41ll\x10\x02\"9\n\x0bShuffleMode\x12\n\n\x06Unkown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03*\x8b\x08\n\x07\x43ommand\x12\x0b\n\x07Unknown\x10\x00\x12\x08\n\x04Play\x10\x01\x12\t\n\x05Pause\x10\x02\x12\x13\n\x0fTogglePlayPause\x10\x03\x12\x08\n\x04Stop\x10\x04\x12\r\n\tNextTrack\x10\x05\x12\x11\n\rPreviousTrack\x10\x06\x12\x16\n\x12\x41\x64vanceShuffleMode\x10\x07\x12\x15\n\x11\x41\x64vanceRepeatMode\x10\x08\x12\x14\n\x10\x42\x65ginFastForward\x10\t\x12\x12\n\x0e\x45ndFastForward\x10\n\x12\x0f\n\x0b\x42\x65ginRewind\x10\x0b\x12\r\n\tEndRewind\x10\x0c\x12\x13\n\x0fRewind15Seconds\x10\r\x12\x18\n\x14\x46\x61stForward15Seconds\x10\x0e\x12\x13\n\x0fRewind30Seconds\x10\x0f\x12\x18\n\x14\x46\x61stForward30Seconds\x10\x10\x12\x0f\n\x0bSkipForward\x10\x12\x12\x10\n\x0cSkipBackward\x10\x13\x12\x16\n\x12\x43hangePlaybackRate\x10\x14\x12\r\n\tRateTrack\x10\x15\x12\r\n\tLikeTrack\x10\x16\x12\x10\n\x0c\x44islikeTrack\x10\x17\x12\x11\n\rBookmarkTrack\x10\x18\x12\x1a\n\x16SeekToPlaybackPosition\x10-\x12\x14\n\x10\x43hangeRepeatMode\x10.\x12\x15\n\x11\x43hangeShuffleMode\x10/\x12\x18\n\x14\x45nableLanguageOption\x10\x35\x12\x19\n\x15\x44isableLanguageOption\x10\x36\x12\x0f\n\x0bNextChapter\x10\x19\x12\x13\n\x0fPreviousChapter\x10\x1a\x12\r\n\tNextAlbum\x10\x1b\x12\x11\n\rPreviousAlbum\x10\x1c\x12\x10\n\x0cNextPlaylist\x10\x1d\x12\x14\n\x10PreviousPlaylist\x10\x1e\x12\x0c\n\x08\x42\x61nTrack\x10\x1f\x12\x16\n\x12\x41\x64\x64TrackToWishList\x10 \x12\x1b\n\x17RemoveTrackFromWishList\x10!\x12\x11\n\rNextInContext\x10\"\x12\x15\n\x11PreviousInContext\x10#\x12\x18\n\x14ResetPlaybackTimeout\x10)\x12\x14\n\x10SetPlaybackQueue\x10\x30\x12\x1e\n\x1a\x41\x64\x64NowPlayingItemToLibrary\x10\x31\x12\x16\n\x12\x43reateRadioStation\x10\x32\x12\x14\n\x10\x41\x64\x64ItemToLibrary\x10\x33\x12\x1b\n\x17InsertIntoPlaybackQueue\x10\x34\x12\x18\n\x14ReorderPlaybackQueue\x10\x37\x12\x1b\n\x17RemoveFromPlaybackQueue\x10\x38\x12\x1b\n\x17PlayItemInPlaybackQueue\x10\x39')
 )
 
 _COMMAND = _descriptor.EnumDescriptor(
@@ -229,8 +229,8 @@ _COMMAND = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=570,
-  serialized_end=1605,
+  serialized_start=725,
+  serialized_end=1760,
 )
 _sym_db.RegisterEnumDescriptor(_COMMAND)
 
@@ -285,6 +285,62 @@ ReorderPlaybackQueue = 55
 RemoveFromPlaybackQueue = 56
 PlayItemInPlaybackQueue = 57
 
+
+_COMMANDINFO_REPEATMODE = _descriptor.EnumDescriptor(
+  name='RepeatMode',
+  full_name='CommandInfo.RepeatMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='One', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='All', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=620,
+  serialized_end=663,
+)
+_sym_db.RegisterEnumDescriptor(_COMMANDINFO_REPEATMODE)
+
+_COMMANDINFO_SHUFFLEMODE = _descriptor.EnumDescriptor(
+  name='ShuffleMode',
+  full_name='CommandInfo.ShuffleMode',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unkown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Off', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Albums', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Songs', index=3, number=3,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=665,
+  serialized_end=722,
+)
+_sym_db.RegisterEnumDescriptor(_COMMANDINFO_SHUFFLEMODE)
 
 
 _COMMANDINFO = _descriptor.Descriptor(
@@ -359,14 +415,14 @@ _COMMANDINFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='repeatMode', full_name='CommandInfo.repeatMode', index=9,
-      number=10, type=5, cpp_type=1, label=1,
+      number=10, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='shuffleMode', full_name='CommandInfo.shuffleMode', index=10,
-      number=11, type=5, cpp_type=1, label=1,
+      number=11, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -439,6 +495,8 @@ _COMMANDINFO = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _COMMANDINFO_REPEATMODE,
+    _COMMANDINFO_SHUFFLEMODE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -447,10 +505,14 @@ _COMMANDINFO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=41,
-  serialized_end=567,
+  serialized_end=722,
 )
 
 _COMMANDINFO.fields_by_name['command'].enum_type = _COMMAND
+_COMMANDINFO.fields_by_name['repeatMode'].enum_type = _COMMANDINFO_REPEATMODE
+_COMMANDINFO.fields_by_name['shuffleMode'].enum_type = _COMMANDINFO_SHUFFLEMODE
+_COMMANDINFO_REPEATMODE.containing_type = _COMMANDINFO
+_COMMANDINFO_SHUFFLEMODE.containing_type = _COMMANDINFO
 DESCRIPTOR.message_types_by_name['CommandInfo'] = _COMMANDINFO
 DESCRIPTOR.enum_types_by_name['Command'] = _COMMAND
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

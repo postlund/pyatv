@@ -53,36 +53,19 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv.app
 
     async def get_connected_device(self, hsgid):
-        conf = AppleTV('127.0.0.1', 'Apple TV')
-        conf.add_service(DmapService('dmap_id', hsgid, port=self.server.port))
-        conf.add_service(AirPlayService(
-            'mrp_id', self.server.port, DEVICE_CREDENTIALS))
-        return await pyatv.connect(conf, self.loop)
+        self.dmap_service = DmapService(
+            'dmap_id', hsgid, port=self.server.port)
+        self.airplay_service = AirPlayService(
+            'airplay_id', self.server.port, DEVICE_CREDENTIALS)
+        self.conf = AppleTV('127.0.0.1', 'Apple TV')
+        self.conf.add_service(self.dmap_service)
+        self.conf.add_service(self.airplay_service)
+        return await pyatv.connect(self.conf, self.loop)
 
     @unittest_run_loop
     async def test_not_supportedt(self):
         with self.assertRaises(exceptions.NotSupportedError):
             await self.atv.remote_control.suspend()
-
-    # This is not a pretty test and it does crazy things. Should probably be
-    # re-written later but will do for now.
-    @unittest_run_loop
-    async def test_pairing_with_device(self):
-        zeroconf = zeroconf_stub.stub(pairing)
-        self.usecase.pairing_response(REMOTE_NAME, PAIRINGCODE)
-
-        self.assertFalse(self.atv.pairing.device_provides_pin)
-
-        await self.atv.pairing.start(zeroconf=zeroconf,
-                                     pairing_guid=pairing.DEFAULT_PAIRING_GUID,
-                                     name=REMOTE_NAME)
-        self.atv.pairing.pin(PIN_CODE)
-        await self.usecase.act_on_bonjour_services(zeroconf)
-
-        self.assertTrue(self.atv.pairing.has_paired,
-                        msg='did not pair with device')
-
-        await self.atv.pairing.stop()
 
     @unittest_run_loop
     async def test_login_failed(self):
