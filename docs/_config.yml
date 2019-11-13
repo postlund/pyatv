@@ -17,7 +17,6 @@ title: pyatv
 email: pierre.staahl@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   A python client library for the Apple TV
-baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://postlund.github.io/pyatv" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: postlund
 github_username:  postlund
