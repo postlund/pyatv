@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Reference application: atvremote &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developing pyatv" href="developing.html" />
+    <link rel="prev" title="API" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="reference-application-atvremote">
+<span id="pyatv-atvremote"></span><h1>Reference application: atvremote<a class="headerlink" href="#reference-application-atvremote" title="Permalink to this headline">¶</a></h1>
+<p>To more easily test pyatv, the <code class="docutils literal notranslate"><span class="pre">atvremote</span></code> application can be used. It is
+bundled with pyatv and supports all the functionality implemented by the library.
+So it is also a good place to go to for inspiration when implementing your own
+application.</p>
+<div class="section" id="discovering-devices">
+<h2>Discovering devices<a class="headerlink" href="#discovering-devices" title="Permalink to this headline">¶</a></h2>
+<p>If you want to automatically discover devices on your network, use the scan
+command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote scan
+Found Apple TVs:
+- Apple TV at <span class="m">10</span>.0.10.22 <span class="o">(</span>login id: <span class="m">00000000</span>-1234-5678-9abc-def012345678<span class="o">)</span>
+
+Note: You must use <span class="s1">&#39;pair&#39;</span> with devices that have home sharing disabled
+</pre></div>
+</div>
+<p>In case you have multiple devices, they should all show up. The discovery
+process is performed for 3 seconds, which might be too short and sometimes
+a device might not show up. Either just try again or raise the discover
+time with the -t flag, e.g. <code class="docutils literal notranslate"><span class="pre">atvremote</span> <span class="pre">-t</span> <span class="pre">10</span> <span class="pre">scan</span></code>.</p>
+<p>More details about the discovery process can be found
+<a class="reference internal" href="finding_devices.html#pyatv-finding-devices"><span class="std std-ref">here</span></a>.</p>
+</div>
+<div class="section" id="pairing-with-a-device">
+<h2>Pairing with a device<a class="headerlink" href="#pairing-with-a-device" title="Permalink to this headline">¶</a></h2>
+<p>To pair with a device, use the <code class="docutils literal notranslate"><span class="pre">pair</span></code> command. The remote control will be
+announced with name <em>pyatv</em>, PIN code to be used is 1234 and a random pairing
+guid is generated:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote pair
+Use pin <span class="m">1234</span> to pair with <span class="s2">&quot;pyatv&quot;</span> <span class="o">(</span>press ENTER to stop<span class="o">)</span>
+Using pairing guid: 0x2F2C71E9D2A087DB
+Note: If remote does not show up, try rebooting your Apple TV
+&lt;Pair with device and press ENTER when <span class="k">done</span>&gt;
+Pairing seems to have succeeded, yey!
+You may now use this login id: 0x2F2C71E9D2A087DB
+</pre></div>
+</div>
+<p>You can override the settings using <code class="docutils literal notranslate"><span class="pre">--remote-name</span></code>, <code class="docutils literal notranslate"><span class="pre">--pin</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--pairing-guid</span></code>. When you are done or if you want to abort, just press
+ENTER. If the pairing succeeded (after pressing ENTER), this will be
+acknowledged with a message.</p>
+<p>It is also possible to specify <code class="docutils literal notranslate"><span class="pre">none</span></code> as PIN code to allow any pin code:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -p none pair
+Use any pin to pair with <span class="s2">&quot;pyatv&quot;</span> <span class="o">(</span>press ENTER to stop<span class="o">)</span>
+Using pairing guid: 0x895D9666154733BD
+Note: If remote does not show up, try rebooting your Apple TV
+</pre></div>
+</div>
+</div>
+<div class="section" id="specifying-a-device">
+<h2>Specifying a device<a class="headerlink" href="#specifying-a-device" title="Permalink to this headline">¶</a></h2>
+<p>You have two choices:</p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">-a</span></code> that will perform the auto discover process and pick the first
+discovered device</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">scan</span></code> yourself and manually specify IP-address and login id for device</p></li>
+</ul>
+<p>Using the first option is easiest but also the slowest (you have to wait
+three seconds every time) and also works poorly with multiple devices.
+You can try it out like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a &lt;command&gt;
+</pre></div>
+</div>
+<p>To manually specify IP-address and login id, just do like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote --address &lt;IP&gt; --login_id &lt;LOGIN ID&gt;
+</pre></div>
+</div>
+<p>Using these methods are mutually exclusive, so you may only pick one.</p>
+</div>
+<div class="section" id="push-updates">
+<h2>Push updates<a class="headerlink" href="#push-updates" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to listen for and print push updates as they happen using the
+<code class="docutils literal notranslate"><span class="pre">push_updates</span></code> command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a push_updates
+Press ENTER to stop
+Media type: Music
+Play state: Loading
+     Title: Namnlös
+    Artist: Okänd artist
+     Album: Okänt album
+  Position: <span class="m">0</span>/4294966s <span class="o">(</span><span class="m">0</span>.0%<span class="o">)</span>
+    Repeat: Off
+   Shuffle: False
+--------------------
+Media type: Music
+Play state: Loading
+--------------------
+Media type: Music
+Play state: Paused
+  Position: <span class="m">0</span>/397s <span class="o">(</span><span class="m">0</span>.0%<span class="o">)</span>
+--------------------
+Media type: Music
+Play state: Playing
+  Position: <span class="m">0</span>/397s <span class="o">(</span><span class="m">0</span>.0%<span class="o">)</span>
+--------------------
+Media type: Music
+Play state: Paused
+  Position: <span class="m">7</span>/397s <span class="o">(</span><span class="m">1</span>.8%<span class="o">)</span>
+--------------------
+Media type: Music
+Play state: Loading
+     Title: Namnlös
+    Artist: Okänd artist
+     Album: Okänt album
+  Position: <span class="m">0</span>/4294966s <span class="o">(</span><span class="m">0</span>.0%<span class="o">)</span>
+    Repeat: Off
+   Shuffle: False
+--------------------
+Media type: Unknown
+Play state: No media
+--------------------
+</pre></div>
+</div>
+<p>Just press ENTER to stop.</p>
+</div>
+<div class="section" id="airplay-device-authentication">
+<h2>AirPlay Device Authentication<a class="headerlink" href="#airplay-device-authentication" title="Permalink to this headline">¶</a></h2>
+<p>To play a URL with AirPlay on a device running tvOS 10.2 or later, <em>device
+authentication</em> must be performed (or if it has been explicitly enabled).
+Simply use the <code class="docutils literal notranslate"><span class="pre">auth</span></code> command for this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a auth
+Enter PIN on screen: <span class="m">1234</span>  <span class="c1"># Pin code displayed on screen</span>
+You may now use these credentials:
+D9B75D737BE2F0F1:6A26D8EB6F4AE2408757D5CA5FF9C37E96BEBB22C632426C4A02AD4FA895A85B
+</pre></div>
+</div>
+<p>The generated credentials must be used every time something is to be played
+(otherwise a PIN will be required again). So make sure to save it somewhere.</p>
+<p>To play a URL, then just use <code class="docutils literal notranslate"><span class="pre">play_url</span></code> and provide the credentials:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a --airplay_credentials D9B75D737BE2F0F1:6A26D8EB6F4AE2408757D5CA5FF9C37E96BEBB22C632426C4A02AD4FA895A85B <span class="nv">play_url</span><span class="o">=</span>&lt;some URL here&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="working-with-commands">
+<h2>Working with commands<a class="headerlink" href="#working-with-commands" title="Permalink to this headline">¶</a></h2>
+<p>Several commands are supported by the library (and thus the device). Easiest
+is just to use the command called <code class="docutils literal notranslate"><span class="pre">commands</span></code>, as it will present a list of
+availble commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a commands
+Remote control commands:
+ - down - Press key down
+ - left - Press key left
+ - menu - Press key menu
+ - next - Press key next
+ - pause - Press key play
+ - play - Press key play
+ - previous - Press key previous
+ - right - Press key right
+ - <span class="k">select</span> - Press key <span class="k">select</span>
+ - set_position - Seek in the current playing media
+ - set_repeat - Change repeat mode
+ - set_shuffle - Change shuffle mode to on or off
+ - stop - Press key stop
+ - top_menu - Go to main menu <span class="o">(</span>long press menu<span class="o">)</span>
+ - up - Press key up
+
+Metadata commands:
+ - artwork - Return artwork <span class="k">for</span> what is currently playing <span class="o">(</span>or None<span class="o">)</span>
+ - artwork_url - Return artwork URL <span class="k">for</span> what is currently playing
+ - device_id - Return a unique identifier <span class="k">for</span> current device
+ - playing - Return what is currently playing
+
+Playing commands:
+ - album - Album of the currently playing song
+ - artist - Artist of the currently playing song
+ - <span class="nb">hash</span> - Create a unique <span class="nb">hash</span> <span class="k">for</span> what is currently playing
+ - media_type - Type of media is currently playing, e.g. video, music
+ - play_state - Play state, e.g. playing or paused
+ - position - Position in the playing media <span class="o">(</span>seconds<span class="o">)</span>
+ - repeat - Repeat mode
+ - shuffle - If shuffle is enabled or not
+ - title - Title of the current media, e.g. movie or song name
+ - total_time - Total play <span class="nb">time</span> in seconds
+
+AirPlay commands:
+ - finish_authentication - End authentication process with PIN code
+ - generate_credentials - Create new credentials <span class="k">for</span> authentication
+ - load_credentials - Load existing credentials
+ - play_url - Play media from an URL on the device
+ - start_authentication - Begin authentication proces <span class="o">(</span>show PIN on screen<span class="o">)</span>
+ - verify_authenticated - Check <span class="k">if</span> loaded credentials are verified
+
+Device commands:
+ - artwork_save - Download artwork and save it to artwork.png
+ - auth - Perform AirPlay device authentication
+ - push_updates - Listen <span class="k">for</span> push updates
+
+Global commands:
+ - commands - Print a list with available commands
+ - <span class="nb">help</span> - Print <span class="nb">help</span> text <span class="k">for</span> a <span class="nb">command</span>
+ - pair - Pair pyatv as a remote control with an Apple TV
+ - scan - Scan <span class="k">for</span> Apple TVs on the network
+</pre></div>
+</div>
+<p>You can for instance get what is currently playing with <code class="docutils literal notranslate"><span class="pre">playing</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a playing
+Media type: Music
+Play state: Playing
+  Position: <span class="m">0</span>/397s <span class="o">(</span><span class="m">0</span>.0%<span class="o">)</span>
+    Repeat: Off
+   Shuffle: False
+</pre></div>
+</div>
+<p>Or seek in the currently playing media:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote -a <span class="nv">set_position</span><span class="o">=</span><span class="m">123</span>
+</pre></div>
+</div>
+<p>If you want additional help for a specific command, use <code class="docutils literal notranslate"><span class="pre">help</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ atvremote <span class="nb">help</span> pair
+COMMAND:
+&gt;&gt; pair<span class="o">(</span>self<span class="o">)</span>
+
+HELP:
+Pair pyatv as a remote control with an Apple TV.
+</pre></div>
+</div>
+</div>
+<div class="section" id="logging-and-debugging">
+<h2>Logging and debugging<a class="headerlink" href="#logging-and-debugging" title="Permalink to this headline">¶</a></h2>
+<p>You can enable additional debugging information by specifying either
+<code class="docutils literal notranslate"><span class="pre">--verbose</span></code> or <code class="docutils literal notranslate"><span class="pre">--debug</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairing.html">Pairing with a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Retrieving metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reference application: atvremote</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#discovering-devices">Discovering devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pairing-with-a-device">Pairing with a device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-a-device">Specifying a device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#push-updates">Push updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#airplay-device-authentication">AirPlay Device Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-commands">Working with commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging-and-debugging">Logging and debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">API</a></li>
+      <li>Next: <a href="developing.html" title="next chapter">Developing pyatv</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/atvremote.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
