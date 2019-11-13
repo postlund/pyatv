@@ -369,18 +369,15 @@ class DmapAppleTV(AppleTV):
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
         self._airplay = airplay
 
-    def login(self):
-        """Perform an explicit login.
+    def connect(self):
+        """Initiate connection to device.
 
-        Not needed as login is performed automatically.
+        Not needed as it is performed automatically.
         """
         return self._requester.login()
 
-    async def logout(self):
-        """Perform an explicit logout.
-
-        Must be done when session is no longer needed to not leak resources.
-        """
+    async def close(self):
+        """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             await self._session.close()
 

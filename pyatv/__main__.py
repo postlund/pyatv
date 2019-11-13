@@ -209,7 +209,6 @@ class DeviceCommands:
         print('Press ENTER to stop')
 
         self.atv.push_updater.start()
-        await self.atv.login()
         await self.loop.run_in_executor(None, sys.stdin.readline)
         self.atv.push_updater.stop()
         return 0
@@ -427,7 +426,7 @@ async def _handle_commands(args, loop):
             if ret != 0:
                 return ret
     finally:
-        await atv.logout()
+        await atv.close()
 
     return 0
 

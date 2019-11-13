@@ -240,10 +240,6 @@ class MrpMetadata(Metadata):
 
     async def playing(self):
         """Return what is currently playing."""
-        # TODO: This is a hack for now (removed when #240 is done)
-        if not self.psm.states:
-            await self.psm.protocol.start()
-
         return MrpPlaying(self.psm.playing)
 
 
@@ -304,21 +300,21 @@ class MrpAppleTV(AppleTV):
             loop, self._mrp_metadata, self._psm)
         self._airplay = airplay
 
-    async def login(self):
-        """Perform an explicit login."""
+    async def connect(self):
+        """Initiate connection to device.
+
+        Not needed as it is performed automatically.
+        """
         await self._protocol.start()
 
-    async def logout(self):
-        """Perform an explicit logout.
-
-        Must be done when session is no longer needed to not leak resources.
-        """
+    async def close(self):
+        """Close connection and release allocated resources."""
         await self._session.close()
         self._protocol.stop()
 
     @property
     def service(self):
-        """Return service used to connect to the Apple TV.."""
+        """Return service used to connect to the Apple TV."""
         return self._mrp_service
 
     @property

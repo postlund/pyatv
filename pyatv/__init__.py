@@ -157,7 +157,9 @@ async def connect(config, loop, protocol=None, session=None):
     # AirPlay service is the same for both DMAP and MRP
     airplay = _setup_airplay(loop, session, config)
 
-    return implementation(loop, session, config, airplay)
+    atv = implementation(loop, session, config, airplay)
+    await atv.connect()
+    return atv
 
 
 def _setup_airplay(loop, session, config):
