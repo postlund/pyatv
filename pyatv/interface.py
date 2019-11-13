@@ -361,19 +361,16 @@ class AppleTV:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def login(self):
-        """Perform an explicit login.
+    def connect(self):
+        """Initiate connection to device.
 
-        Not needed as login is performed automatically.
+        Not needed as it is performed automatically.
         """
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def logout(self):
-        """Perform an explicit logout.
-
-        Must be done when session is no longer needed to not leak resources.
-        """
+    def close(self):
+        """Close connection and release allocated resources."""
         raise exceptions.NotSupportedError
 
     @abstractproperty

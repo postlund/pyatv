@@ -42,9 +42,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         pairing._get_private_ip_addresses = \
             lambda: [ipaddress.ip_address('10.0.0.1')]
 
-    def tearDown(self):
-        self.loop.run_until_complete(self.atv.logout())
-        super().tearDown()
+    async def tearDownAsync(self):
+        await self.atv.close()
+        await super().tearDownAsync()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(
@@ -68,19 +68,19 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             await self.atv.remote_control.suspend()
 
     @unittest_run_loop
-    async def test_login_failed(self):
+    async def test_connect_failed(self):
         # Twice since the client will retry one time
         self.usecase.make_login_fail()
         self.usecase.make_login_fail()
 
         with self.assertRaises(exceptions.AuthenticationError):
-            await self.atv.login()
+            await self.atv.connect()
 
     # This test verifies issue #2 (automatic re-login). It uses the artwork
     # API, but it could have been any API since the login code is the same.
     @unittest_run_loop
     async def test_relogin_if_session_expired(self):
-        await self.atv.login()
+        await self.atv.connect()
 
         # Here, we are logged in and currently have a asession id. These
         # usescases will result in being logged out (HTTP 403) and forcing a
@@ -94,12 +94,12 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_login_with_hsgid_succeed(self):
-        session_id = await self.atv.login()
+        session_id = await self.atv.connect()
         self.assertEqual(SESSION_ID, session_id)
 
     @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
-        await self.atv.logout()
+        await self.atv.close()
         self.atv = await self.get_connected_device(PAIRING_GUID)
-        session_id = await self.atv.login()
+        session_id = await self.atv.connect()
         self.assertEqual(SESSION_ID, session_id)
