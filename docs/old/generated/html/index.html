@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pyatv: Apple TV Remote Control Library &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Protocol" href="protocol.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pyatv-apple-tv-remote-control-library">
+<h1>pyatv: Apple TV Remote Control Library<a class="headerlink" href="#pyatv-apple-tv-remote-control-library" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Automatic discovery of devices (zeroconf/Bonjour)</p></li>
+<li><p>Push updates</p></li>
+<li><p>Remote control pairing</p></li>
+<li><p>AirPlay stream URL (including tvOS 10.2+)</p></li>
+<li><p>Playback controls (play, pause, next, stop, etc.)</p></li>
+<li><p>Navigation controls (select, menu, top_menu, arrow keys)</p></li>
+<li><p>Fetch artwork in PNG format</p></li>
+<li><p>Currently playing (e.g. title, artist, album, total time, etc.)</p></li>
+<li><p>Change media position</p></li>
+<li><p>Shuffle and repeat</p></li>
+</ul>
+</div>
+<div class="section" id="library-installation">
+<h2>Library Installation<a class="headerlink" href="#library-installation" title="Permalink to this headline">¶</a></h2>
+<p>Use pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install pyatv
+</pre></div>
+</div>
+<p>NOTE: You need some system packages, run this on debian or similar:</p>
+<blockquote>
+<div><p>$ sudo apt-get install build-essential libssl-dev libffi-dev python-dev</p>
+</div></blockquote>
+</div>
+<div class="section" id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>Connecting to the first automatically discovered device:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">pyatv</span> <span class="kn">import</span> <span class="n">helpers</span>
+
+<span class="nd">@asyncio.coroutine</span>
+<span class="k">def</span> <span class="nf">print_what_is_playing</span><span class="p">(</span><span class="n">atv</span><span class="p">):</span>
+    <span class="n">playing</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">playing</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Currently playing:&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">playing</span><span class="p">)</span>
+
+<span class="n">helpers</span><span class="o">.</span><span class="n">auto_connect</span><span class="p">(</span><span class="n">print_what_is_playing</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connecting to a specific device:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyatv</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="n">NAME</span> <span class="o">=</span> <span class="s1">&#39;My Apple TV&#39;</span>
+<span class="n">ADDRESS</span> <span class="o">=</span> <span class="s1">&#39;10.0.10.22&#39;</span>
+<span class="n">LOGIN_ID</span> <span class="o">=</span> <span class="s1">&#39;00000000-1111-2222-3333-444444444444&#39;</span>
+<span class="n">DETAILS</span> <span class="o">=</span> <span class="n">pyatv</span><span class="o">.</span><span class="n">AppleTVDevice</span><span class="p">(</span><span class="n">NAME</span><span class="p">,</span> <span class="n">ADDRESS</span><span class="p">,</span> <span class="n">LOGIN_ID</span><span class="p">)</span>
+
+
+<span class="nd">@asyncio.coroutine</span>
+<span class="k">def</span> <span class="nf">print_what_is_playing</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">details</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Connecting to {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">details</span><span class="o">.</span><span class="n">address</span><span class="p">))</span>
+    <span class="n">atv</span> <span class="o">=</span> <span class="n">pyatv</span><span class="o">.</span><span class="n">connect_to_apple_tv</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">playing</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">playing</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Currently playing:&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">playing</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">print_what_is_playing</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">DETAILS</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>What is LOGIN_ID and where to find it? See <a class="reference internal" href="finding_devices.html#pyatv-finding-devices"><span class="std std-ref">this</span></a>
+page.</p>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>python&gt;=3.4.2</p></li>
+<li><p>zeroconf&gt;=0.17.7</p></li>
+<li><p>aiohttp&gt;=1.3.5</p></li>
+<li><p>cryptography&gt;=1.8.1</p></li>
+<li><p>curve25519-donna&gt;=1.3, &lt;2</p></li>
+<li><p>ed25519&gt;=1.4, &lt;2</p></li>
+<li><p>srptools&gt;=0.1.1</p></li>
+</ul>
+</div>
+<div class="section" id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
+<p>If you want to contribute, see <a class="reference internal" href="developing.html#pyatv-developing"><span class="std std-ref">developing</span></a> for
+more information.</p>
+</div>
+<div class="section" id="authors-and-license">
+<h2>Authors and License<a class="headerlink" href="#authors-and-license" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pyatv</span></code> is mainly written by Pierre Ståhl and is availble under the <em>MIT</em>
+license. You may freely modify and redistribute this package under that
+license.</p>
+<p>If you do make changes, feel free to send a pull request on GitHub.</p>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="protocol.html#daap-and-dmap">DAAP and DMAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocol.html#supported-requests">Supported Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocol.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="finding_devices.html#no-home-sharing">No home sharing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="finding_devices.html#code-example">Code Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="finding_devices.html#finding-a-single-device">Finding a single device</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pairing.html">Pairing with a device</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pairing.html#how-does-it-work">How does it work</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pairing.html#code-example-pairing">Code Example: Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pairing.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="connecting.html#custom-aiohttp-session">Custom aiohttp session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="connecting.html#code-example-auto-discovery">Code Example: Auto discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="connecting.html#code-example-manual-details">Code Example: Manual details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controlling.html#performing-a-command">Performing a command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controlling.html#commands-with-arguments">Commands with arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Retrieving metadata</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#what-is-currently-playing">What is currently playing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#artwork">Artwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#device-id">Device ID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#hash">Hash</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#push-updates">Push updates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="airplay.html#device-authentication">Device Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airplay.html#playing-media">Playing media</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airplay.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-pyatv">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-pyatv.const">pyatv.const module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-pyatv.exceptions">pyatv.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-pyatv.helpers">pyatv.helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-pyatv.interface">pyatv.interface module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="atvremote.html">Reference application: atvremote</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#discovering-devices">Discovering devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#pairing-with-a-device">Pairing with a device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#specifying-a-device">Specifying a device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#push-updates">Push updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#airplay-device-authentication">AirPlay Device Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#working-with-commands">Working with commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atvremote.html#logging-and-debugging">Logging and debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developing.html#development-environment">Development environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developing.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developing.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developing.html#requirements-for-pull-requests">Requirements for pull requests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#unit-testing">Unit Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#functional-testing">Functional Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#scanning-does-not-find-any-devices">Scanning does not find any devices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#general-questions">General Questions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="faq.html#technical-questions">Technical Questions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairing.html">Pairing with a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Retrieving metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atvremote.html">Reference application: atvremote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="protocol.html" title="next chapter">Protocol</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

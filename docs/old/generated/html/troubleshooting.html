@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Troubleshooting &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ" href="faq.html" />
+    <link rel="prev" title="Testing" href="testing.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="troubleshooting">
+<span id="pyatv-troubleshooting"></span><h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
+<p>If you are having problems, have a look at this page. There are currently not
+much content here, please submit a PR or write an issue if you want to add or
+change something.</p>
+<div class="section" id="scanning-does-not-find-any-devices">
+<h2>Scanning does not find any devices<a class="headerlink" href="#scanning-does-not-find-any-devices" title="Permalink to this headline">¶</a></h2>
+<p>Scanning relies on the Bonjour protocol (e.g. mDNS and Avahi are implementations
+of this protocol on Linux). Since <code class="docutils literal notranslate"><span class="pre">pyatv</span></code> uses <code class="docutils literal notranslate"><span class="pre">python-zeroconf</span></code>, which is a
+standalone implementation that does not require any other service running, you
+do not need any of those installed. It however helps when troubleshooting (and
+most distributions come with avahi installed by default). So a simple start when
+troubleshooting might be:</p>
+<p>For Linux:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ avahi-browse --all
+</pre></div>
+</div>
+<p>For macOS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ dns-sd -B _appletv-v2._tcp.
+OR
+$ dns-sd -G -B _touch-able._tcp.
+</pre></div>
+</div>
+<p>If you get an error such as “command not found”, you do do not have avahi
+installed. You will have to consult your distributions support channels
+(e.g. forum) for help on this.</p>
+<p>Here are some other possible sources of problems:</p>
+<ul class="simple">
+<li><p>Versions earlier than 0.3.0 of pyatv did not discover Apple TVs that did
+not have Home Sharing enabled. Just enable Home Sharing and upgrade to the
+latest and greatest version of pyatv and it should show up.</p></li>
+<li><p>Bonjour/Zeroconf requires you to be on the same network as the devices
+you are looking for. This means that you cannot scan for devices from
+inside of a container or virtual machine, unless they are usig a bridged
+network interface.</p></li>
+<li><p>If you are running a Mac or using an iPhone, try enabling AirPlay mirroring
+or use the Remote app. Unless you can get that to work, it is highly
+unlikely that pyatv will work either.</p></li>
+<li><p>If you can see your Apple TV on your iPhone, you can try to install an app
+suitable for Bonjour discovery. Just search for <em>bonjour</em> in the App store
+(there might be alternatives for Android as well) and look for the property
+called <code class="docutils literal notranslate"><span class="pre">hG</span></code> when scanning. This is the login id.</p></li>
+<li><p>Firewalls might block the necessary traffic for Bonjour. Make sure the
+traffic is allowed or disable it when scanning.</p></li>
+<li><p>We have seen that switching the Apple TV from WiFi to cable solves the problem
+in some cases. It is recommended that you try it out.</p></li>
+</ul>
+<p>Please note that you only need to scan for a device to find its login id. Once
+you have it, you can specify it and the device IP-address manually using the
+<code class="docutils literal notranslate"><span class="pre">--address</span></code> and <code class="docutils literal notranslate"><span class="pre">--login_id</span></code> flags. So you can discover the device from
+any computer on your network and still use pyatv from inside a container or
+virtual machine if you like.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairing.html">Pairing with a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Retrieving metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atvremote.html">Reference application: atvremote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scanning-does-not-find-any-devices">Scanning does not find any devices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="testing.html" title="previous chapter">Testing</a></li>
+      <li>Next: <a href="faq.html" title="next chapter">FAQ</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/troubleshooting.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

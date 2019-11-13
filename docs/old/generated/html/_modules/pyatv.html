@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pyatv &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pyatv</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Library for controlling an Apple TV.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">concurrent</span>
+<span class="kn">from</span> <span class="nn">ipaddress</span> <span class="k">import</span> <span class="n">ip_address</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Lock</span>
+
+<span class="kn">from</span> <span class="nn">zeroconf</span> <span class="k">import</span> <span class="n">ServiceBrowser</span><span class="p">,</span> <span class="n">Zeroconf</span>
+<span class="kn">from</span> <span class="nn">aiohttp</span> <span class="k">import</span> <span class="n">ClientSession</span>
+
+<span class="kn">from</span> <span class="nn">pyatv</span> <span class="k">import</span> <span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyatv.airplay</span> <span class="k">import</span> <span class="n">player</span>
+<span class="kn">from</span> <span class="nn">pyatv.airplay.api</span> <span class="k">import</span> <span class="n">AirPlayAPI</span>
+<span class="kn">from</span> <span class="nn">pyatv.const</span> <span class="k">import</span> <span class="p">(</span><span class="n">PROTOCOL_MRP</span><span class="p">,</span> <span class="n">PROTOCOL_DMAP</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyatv.net</span> <span class="k">import</span> <span class="n">HttpSession</span>
+
+<span class="kn">from</span> <span class="nn">pyatv.dmap</span> <span class="k">import</span> <span class="n">DmapAppleTV</span>
+<span class="kn">from</span> <span class="nn">pyatv.mrp</span> <span class="k">import</span> <span class="n">MrpAppleTV</span>
+
+<span class="n">_LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">HOMESHARING_SERVICE</span> <span class="o">=</span> <span class="s1">&#39;_appletv-v2._tcp.local.&#39;</span>
+<span class="n">DEVICE_SERVICE</span> <span class="o">=</span> <span class="s1">&#39;_touch-able._tcp.local.&#39;</span>
+<span class="n">MEDIAREMOTE_SERVICE</span> <span class="o">=</span> <span class="s1">&#39;_mediaremotetv._tcp.local.&#39;</span>
+<span class="n">AIRPLAY_SERVICE</span> <span class="o">=</span> <span class="s1">&#39;_airplay._tcp.local.&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">_ServiceListener</span><span class="p">:</span>
+
+    <span class="c1"># pylint: disable=too-many-arguments</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">abort_on_found</span><span class="p">,</span> <span class="n">device_ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">semaphore</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a new _ServiceListener.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abort_on_found</span> <span class="o">=</span> <span class="n">abort_on_found</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device_ip</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">device_ip</span> <span class="k">else</span> <span class="n">ip_address</span><span class="p">(</span><span class="n">device_ip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">semaphore</span> <span class="o">=</span> <span class="n">semaphore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zeroconf</span><span class="p">,</span> <span class="n">service_type</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handle callback from zeroconf when a service has been discovered.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal_add</span><span class="p">(</span><span class="n">zeroconf</span><span class="p">,</span> <span class="n">service_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_internal_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zeroconf</span><span class="p">,</span> <span class="n">service_type</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abort_on_found</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="n">zeroconf</span><span class="o">.</span><span class="n">get_service_info</span><span class="p">(</span><span class="n">service_type</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="n">ip_address</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">addresses</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># TODO: Consider all?</span>
+
+        <span class="c1"># We might be looking for a particular device</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_ip</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_ip</span> <span class="o">!=</span> <span class="n">address</span><span class="p">:</span>
+            <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Ignoring </span><span class="si">%s</span><span class="s1"> (not matching </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span>
+                          <span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device_ip</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">HOMESHARING_SERVICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_hs_service</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">DEVICE_SERVICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_non_hs_service</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">MEDIAREMOTE_SERVICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_mrp_service</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">AIRPLAY_SERVICE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_airplay_service</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Discovered unknown device: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_hs_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new device to discovered list.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">PROTOCOL_DMAP</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">hsgid</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;hG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_service</span><span class="p">(</span>
+            <span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">DmapService</span><span class="p">(</span><span class="n">hsgid</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">add_non_hs_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new device without Home Sharing to discovered list.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">PROTOCOL_DMAP</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;CtlN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_service</span><span class="p">(</span>
+            <span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">DmapService</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">add_mrp_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new MediaRemoteProtocol device to discovered list.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">PROTOCOL_MRP</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="sa">b</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_service</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">MrpService</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">add_airplay_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new AirPlay device to discovered list.&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;._airplay._tcp.local.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_service</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">AirPlayService</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_handle_service</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">service</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">address</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span><span class="p">[</span><span class="n">address</span><span class="p">]</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">AppleTV</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Auto-discovered </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> (protocol: </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span>
+                      <span class="n">name</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">service</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">service</span><span class="o">.</span><span class="n">protocol</span><span class="p">)</span>
+
+        <span class="n">atv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span><span class="p">[</span><span class="n">address</span><span class="p">]</span>
+        <span class="n">atv</span><span class="o">.</span><span class="n">add_service</span><span class="p">(</span><span class="n">service</span><span class="p">)</span>
+
+        <span class="c1"># Check if we should continue to run or not</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_abort</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+            <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Aborting since a device was found&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Only return the found device as a convenience to the user</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span> <span class="o">=</span> <span class="p">{</span><span class="n">address</span><span class="p">:</span> <span class="n">atv</span><span class="p">}</span>
+
+            <span class="c1"># zeroconf is run in a different thread so this must be a</span>
+            <span class="c1"># thread-safe call</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">semaphore</span><span class="o">.</span><span class="n">release</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_should_abort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">abort_on_found</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">found_devices</span><span class="p">[</span><span class="n">address</span><span class="p">]</span><span class="o">.</span><span class="n">usable_service</span><span class="p">()</span>
+
+
+<span class="c1"># pylint: disable=too-many-arguments</span>
+<div class="viewcode-block" id="scan_for_apple_tvs"><a class="viewcode-back" href="../api.html#pyatv.scan_for_apple_tvs">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">scan_for_apple_tvs</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">abort_on_found</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">device_ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_usable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scan for Apple TVs using zeroconf (bonjour) and returns them.&quot;&quot;&quot;</span>
+    <span class="n">semaphore</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="n">listener</span> <span class="o">=</span> <span class="n">_ServiceListener</span><span class="p">(</span>
+        <span class="n">loop</span><span class="p">,</span> <span class="n">abort_on_found</span><span class="p">,</span> <span class="n">device_ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">semaphore</span><span class="p">)</span>
+    <span class="n">zeroconf</span> <span class="o">=</span> <span class="n">Zeroconf</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ServiceBrowser</span><span class="p">(</span><span class="n">zeroconf</span><span class="p">,</span> <span class="n">HOMESHARING_SERVICE</span><span class="p">,</span> <span class="n">listener</span><span class="p">)</span>
+        <span class="n">ServiceBrowser</span><span class="p">(</span><span class="n">zeroconf</span><span class="p">,</span> <span class="n">DEVICE_SERVICE</span><span class="p">,</span> <span class="n">listener</span><span class="p">)</span>
+        <span class="n">ServiceBrowser</span><span class="p">(</span><span class="n">zeroconf</span><span class="p">,</span> <span class="n">MEDIAREMOTE_SERVICE</span><span class="p">,</span> <span class="n">listener</span><span class="p">)</span>
+        <span class="n">ServiceBrowser</span><span class="p">(</span><span class="n">zeroconf</span><span class="p">,</span> <span class="n">AIRPLAY_SERVICE</span><span class="p">,</span> <span class="n">listener</span><span class="p">)</span>
+        <span class="n">_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Discovering devices for </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">semaphore</span><span class="o">.</span><span class="n">acquire</span><span class="p">(),</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># Will happen when timeout occurs (totally normal)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">zeroconf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_should_include</span><span class="p">(</span><span class="n">atv</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">only_usable</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="n">atv</span><span class="o">.</span><span class="n">is_usable</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">_should_include</span><span class="p">,</span> <span class="n">listener</span><span class="o">.</span><span class="n">found_devices</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="connect_to_apple_tv"><a class="viewcode-back" href="../api.html#pyatv.connect_to_apple_tv">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">connect_to_apple_tv</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">loop</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connect and logins to an Apple TV.&quot;&quot;&quot;</span>
+    <span class="n">service</span> <span class="o">=</span> <span class="n">_get_service_used_to_connect</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+
+    <span class="c1"># If no session is given, create a default one</span>
+    <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">ClientSession</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+
+    <span class="c1"># AirPlay service is the same for both DMAP and MRP</span>
+    <span class="n">airplay</span> <span class="o">=</span> <span class="n">_setup_airplay</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">details</span><span class="p">)</span>
+
+    <span class="c1"># Create correct implementation depending on protocol</span>
+    <span class="k">if</span> <span class="n">service</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">PROTOCOL_DMAP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DmapAppleTV</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">details</span><span class="p">,</span> <span class="n">airplay</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">MrpAppleTV</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">details</span><span class="p">,</span> <span class="n">airplay</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_service_used_to_connect</span><span class="p">(</span><span class="n">details</span><span class="p">,</span> <span class="n">protocol</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">protocol</span><span class="p">:</span>
+        <span class="n">service</span> <span class="o">=</span> <span class="n">details</span><span class="o">.</span><span class="n">usable_service</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">service</span> <span class="o">=</span> <span class="n">details</span><span class="o">.</span><span class="n">get_service</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">service</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NoUsableServiceError</span><span class="p">(</span>
+            <span class="s1">&#39;no usable service to connect to&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">service</span>
+
+
+<span class="k">def</span> <span class="nf">_setup_airplay</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">details</span><span class="p">):</span>
+    <span class="n">airplay_service</span> <span class="o">=</span> <span class="n">details</span><span class="o">.</span><span class="n">airplay_service</span><span class="p">()</span>
+    <span class="n">airplay_player</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">AirPlayPlayer</span><span class="p">(</span>
+        <span class="n">loop</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">details</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">airplay_service</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="n">airplay_http</span> <span class="o">=</span> <span class="n">HttpSession</span><span class="p">(</span>
+        <span class="n">session</span><span class="p">,</span> <span class="s1">&#39;http://</span><span class="si">{0}</span><span class="s1">:</span><span class="si">{1}</span><span class="s1">/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">airplay_service</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">AirPlayAPI</span><span class="p">(</span><span class="n">airplay_http</span><span class="p">,</span> <span class="n">airplay_player</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pairing.html">Pairing with a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../controlling.html">Controlling a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../metadata.html">Retrieving metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../atvremote.html">Reference application: atvremote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

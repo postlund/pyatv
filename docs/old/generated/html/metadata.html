@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Retrieving metadata &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="AirPlay Support" href="airplay.html" />
+    <link rel="prev" title="Controlling a device" href="controlling.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="retrieving-metadata">
+<span id="pyatv-metadata"></span><h1>Retrieving metadata<a class="headerlink" href="#retrieving-metadata" title="Permalink to this headline">¶</a></h1>
+<p>It is possible to get metadata, i.e. what is playing, using two different
+methods:</p>
+<ul class="simple">
+<li><p>Manually polling</p></li>
+<li><p>Push updates</p></li>
+</ul>
+<p>Polling metadata from the device works very similar to the remote control
+API, but one asynchronous call will return an object containing all metadata.
+This is to lower the amount of device calls needed. Artwork is retrieved
+separately.</p>
+<p>When using push updates, new updates are <em>pushed</em> from the Apple TV when
+someting of interest happens. The exact same data that is available when
+polling, is passed to a callback provided by the API user. Please see the
+example further down for more details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only what is currently playing is supported by the push API. Artwork
+must still be polled.</p>
+</div>
+<div class="section" id="what-is-currently-playing">
+<h2>What is currently playing<a class="headerlink" href="#what-is-currently-playing" title="Permalink to this headline">¶</a></h2>
+<p>To retrieve what is currently playing, use the asynchronous playing method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">playing</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">playing</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can easily extract fields like title, album or media type. See
+<a class="reference internal" href="api.html#pyatv.interface.Playing" title="pyatv.interface.Playing"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyatv.interface.Playing</span></code></a> and <a class="reference internal" href="api.html#module-pyatv.const" title="pyatv.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyatv.const</span></code></a>.</p>
+</div>
+<div class="section" id="artwork">
+<h2>Artwork<a class="headerlink" href="#artwork" title="Permalink to this headline">¶</a></h2>
+<p>To retrieve the artwork, use the asynchronous artwork method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">artwork</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">artwork</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Remember that the artwork (which is a PNG file) is relatively large, so you
+should try to minimize this call. More information is available at
+<a class="reference internal" href="api.html#pyatv.interface.Metadata.artwork" title="pyatv.interface.Metadata.artwork"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pyatv.interface.Metadata.artwork()</span></code></a>.</p>
+<p>It is also possible to get an artwork URL instead by using <code class="docutils literal notranslate"><span class="pre">artwork_url()</span></code>.
+In this case, the same URL will always be returned as long as current
+session is valid and no check is performed if artwork is available (user of
+the library must handle this). An example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">artwork</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">artwork_url</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="device-id">
+<h2>Device ID<a class="headerlink" href="#device-id" title="Permalink to this headline">¶</a></h2>
+<p>A unique SHA256 identifier can be generated to separate devices from one another:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">device_id</span> <span class="o">=</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">device_id</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This id is based on the device address solely. No domain name resolution is
+performed, so different identifiers will be returned for the same device
+depending on if an IP-address is specified or a domain name. This might change
+in the future.</p>
+</div>
+</div>
+<div class="section" id="hash">
+<h2>Hash<a class="headerlink" href="#hash" title="Permalink to this headline">¶</a></h2>
+<p>To simplify detection if content has changed between retrieval of what is
+currently playing, a unique hash can be generated. It is a SHA256 hash based
+on the following data:</p>
+<ul class="simple">
+<li><p>Title</p></li>
+<li><p>Artist</p></li>
+<li><p>Album</p></li>
+<li><p>Total time</p></li>
+</ul>
+<p>These properties has been selected as they are in general unique for the same
+content. No guarantee is however given that the same hash is not given for
+different content nor the same content. It can be used as a fair guess.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">playing</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">playing</span><span class="p">()</span>
+<span class="o">...</span>  <span class="c1"># Some time later</span>
+<span class="n">playing2</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">atv</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">playing</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">playing2</span><span class="o">.</span><span class="n">hash</span> <span class="o">!=</span> <span class="n">playing</span><span class="o">.</span><span class="n">hash</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Content has changed&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="push-updates">
+<h2>Push updates<a class="headerlink" href="#push-updates" title="Permalink to this headline">¶</a></h2>
+<p>The push update API is based on a regular callback interface. When playstatus
+information is available, a method called <code class="docutils literal notranslate"><span class="pre">playstatus_update</span></code> is called.
+Similarily, <code class="docutils literal notranslate"><span class="pre">playstatus_error</span></code> is called if an error occur. See the
+following example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PushListener</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">playstatus_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updater</span><span class="p">,</span> <span class="n">playstatus</span><span class="p">):</span>
+        <span class="c1"># Currently playing in playstatus</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">playstatus_error</span><span class="p">(</span><span class="n">updater</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
+        <span class="c1"># Error in exception</span>
+        <span class="n">updater</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">initial_delay</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+
+<span class="nd">@asyncio.coroutine</span>
+<span class="k">def</span> <span class="nf">listen_to_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">);</span>
+    <span class="n">listener</span> <span class="o">=</span> <span class="n">PushListener</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atv</span><span class="o">.</span><span class="n">push_updater</span><span class="o">.</span><span class="n">listener</span> <span class="o">=</span> <span class="n">listener</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atv</span><span class="o">.</span><span class="n">push_updater</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>A few things worth noting:</p>
+<ul class="simple">
+<li><p>Both callback methods must be part of a “listener” (class)</p></li>
+<li><p>There can be only one listener</p></li>
+<li><p>If an error occurs, push updates are stopped</p></li>
+</ul>
+<p>Think a bit extra about the last point. You must manually restart push updates
+in case an error occur. The simplest way is to do like in the example above,
+but make sure to provide an “initial delay” (in seconds). Otherwhise you
+might end up in a loop where a push connection can never be established. This
+might for instance happen if the device loses its IP-address.</p>
+<p>When done, the async method <code class="docutils literal notranslate"><span class="pre">stop</span></code> must be called to not leak resources.
+Unless push updates were stopped because an error occurred and never
+restarted again.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairing.html">Pairing with a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Retrieving metadata</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-currently-playing">What is currently playing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#artwork">Artwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#device-id">Device ID</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hash">Hash</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#push-updates">Push updates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atvremote.html">Reference application: atvremote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="controlling.html" title="previous chapter">Controlling a device</a></li>
+      <li>Next: <a href="airplay.html" title="next chapter">AirPlay Support</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/metadata.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

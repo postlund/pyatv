@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pairing with a device &#8212; pyatv 0.4.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Connecting" href="connecting.html" />
+    <link rel="prev" title="Finding Devices" href="finding_devices.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pairing-with-a-device">
+<span id="pyatv-pairing"></span><h1>Pairing with a device<a class="headerlink" href="#pairing-with-a-device" title="Permalink to this headline">¶</a></h1>
+<p>An alternative to using home sharing and the <code class="docutils literal notranslate"><span class="pre">HSGID</span></code> identifier is to pair
+with the device and use a <code class="docutils literal notranslate"><span class="pre">pairing</span> <span class="pre">guid</span></code> instead. This is useful if you
+for some reason do not want to set up home sharing or if you do not have an
+Apple account.</p>
+<p>The library automatically handles both types of identifiers. Once you have one
+of them, it should just work. So, from now on the term <code class="docutils literal notranslate"><span class="pre">login</span> <span class="pre">id</span></code> will be
+used, which can be either a HSGID or pairing guid.</p>
+<div class="section" id="how-does-it-work">
+<h2>How does it work<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<p>Pairing with a device is sort of a reversed process compared to when sending
+commands to it. The Apple TV listens to a specific Bonjour service with type
+<code class="docutils literal notranslate"><span class="pre">_touch-remote._tcp.local.</span></code> and all remote controls publishes this service.
+Included in this service is a bunch of data that is needed for the pairing
+process:</p>
+<ul class="simple">
+<li><p>IP-address of the host (remote control)</p></li>
+<li><p>A TCP-port open on the host</p></li>
+<li><p>Various properties, like the remote name and the pairing guid to be used</p></li>
+</ul>
+<p>When pyatv publishes this service, it might look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ServiceInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;_touch-remote._tcp.local.&#39;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;0000000000000000000000000000000000000001._touch-remote._tcp.local.&#39;</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n\x00\n\x19</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="mi">57469</span><span class="p">,</span>
+            <span class="n">weight</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">server</span><span class="o">=</span><span class="s1">&#39;0000000000000000000000000000000000000001._touch-remote._tcp.local.&#39;</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+                <span class="sa">b</span><span class="s1">&#39;DvNm&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;pyatv&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;txtvers&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;1&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;RemV&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;10000&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;Pair&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;0000000000000001&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;DvTy&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;iPod&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;RemN&#39;</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;Remote&#39;</span>
+            <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Note the <code class="docutils literal notranslate"><span class="pre">port</span></code>, <code class="docutils literal notranslate"><span class="pre">DvNM</span></code> (name of the remote) and <code class="docutils literal notranslate"><span class="pre">Pair</span></code>. These are the
+most interesting parameters.</p>
+<p>When this service is published, a new remote will “popup” on the Apple TV.
+Next is the actual pairing, which is the tricky part. To avoid sending
+the pin code over the network (which would eliminate integrity all together),
+it instead generates a MD5 hash based on the Pair property and the PIN you
+manuelly entered on scren. In case of pyatv, the “algorithm” is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">hash</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">Pair</span> <span class="o">+</span> <span class="n">pin</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It then connects to the port on the host (remote control) and performs a GET
+request, including this hash as well as a service name. An example might look
+like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INFO</span><span class="p">:</span> <span class="mf">10.0</span><span class="o">.</span><span class="mf">10.22</span> <span class="o">-</span> <span class="o">-</span> <span class="p">[</span><span class="mi">04</span><span class="o">/</span><span class="n">Feb</span><span class="o">/</span><span class="mi">2017</span><span class="p">:</span><span class="mi">15</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">29</span> <span class="o">+</span><span class="mi">0000</span><span class="p">]</span> <span class="s2">&quot;GET /pair?pairingcode=AAB15DF9F73AA252A7934E0AF9C86B13&amp;servicename=AAAAAAAAAAAAAAAA HTTP/1.1&quot;</span> <span class="mi">200</span> <span class="mi">49</span> <span class="s2">&quot;-&quot;</span> <span class="s2">&quot;AppleTV/7.2.2 iOS/8.4.2 AppleTV/7.2.2 model/AppleTV3,1 build/12H606 (3; dt:12)&quot;</span>
+</pre></div>
+</div>
+<p>The remote control then calculates the hash in the same way and verifies if
+it is correct. Of course, the remote decides if the pairing should succeed so
+this verification can be skipped altogether to allow any PIN code.</p>
+<p>After verifying the hash, a response must be sent sent back to the device.
+It is DAAP data and looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmpa</span><span class="p">:</span> <span class="p">[</span><span class="n">container</span><span class="p">,</span> <span class="n">dacp</span><span class="o">.</span><span class="n">pairinganswer</span><span class="p">]</span>
+  <span class="n">cmpg</span><span class="p">:</span> <span class="mi">1</span> <span class="p">[</span><span class="n">uint</span><span class="p">,</span> <span class="n">dacp</span><span class="o">.</span><span class="n">pairingguid</span><span class="p">]</span>
+  <span class="n">cmnm</span><span class="p">:</span> <span class="n">pyatv</span> <span class="n">remote</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">dacp</span><span class="o">.</span><span class="n">devicename</span><span class="p">]</span>
+  <span class="n">cmty</span><span class="p">:</span> <span class="n">ipod</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">dacp</span><span class="o">.</span><span class="n">devicetype</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>As can be seen, the name to be used for the remote is included in the response.
+The pairing guid represented as an integer (<code class="docutils literal notranslate"><span class="pre">0000000000000001</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">1</span></code>) is
+also included in <code class="docutils literal notranslate"><span class="pre">cmpg</span></code>. After this response, the pairing process is complete
+and <code class="docutils literal notranslate"><span class="pre">0000000000000001</span></code> can be used as login id when sending commands to the
+device.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If a different pairing guid is used, that should be used as <code class="docutils literal notranslate"><span class="pre">login_id</span></code>
+instead of <code class="docutils literal notranslate"><span class="pre">0000000000000001</span></code> (which is just an example).</p>
+</div>
+</div>
+<div class="section" id="code-example-pairing">
+<h2>Code Example: Pairing<a class="headerlink" href="#code-example-pairing" title="Permalink to this headline">¶</a></h2>
+<p>When performing pairing, the application is responsible for starting and stopping
+the process. In practice this means publishing the Bonjour service, starting the
+web server and the opposite. This is done using a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pyatv.pairing.PairingHandler</span></code>, which is returned when you call
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pyatv.pair_with_apple_tv()</span></code>. The process itself is quite simple:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyatv</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">zeroconf</span> <span class="kn">import</span> <span class="n">Zeroconf</span>
+
+<span class="n">PIN_CODE</span> <span class="o">=</span> <span class="mi">1234</span>
+<span class="n">REMOTE_NAME</span> <span class="o">=</span> <span class="s1">&#39;my remote control&#39;</span>
+
+<span class="nd">@asyncio.coroutine</span>
+<span class="k">def</span> <span class="nf">pair_with_device</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+    <span class="n">my_zeroconf</span> <span class="o">=</span> <span class="n">Zeroconf</span><span class="p">()</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">pyatv</span><span class="o">.</span><span class="n">pair_with_apple_tv</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">PIN_CODE</span><span class="p">,</span> <span class="n">REMOTE_NAME</span><span class="p">)</span>
+    <span class="c1"># handler.pairing_guid = &#39;1234ABCDE56789FF&#39;</span>
+
+    <span class="k">yield from</span> <span class="n">handler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">my_zeroconf</span><span class="p">)</span>
+    <span class="k">yield from</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="k">yield from</span> <span class="n">handler</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">handler</span><span class="o">.</span><span class="n">has_paired</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Paired with device!&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Pairing guid: &#39;</span> <span class="o">+</span> <span class="n">handler</span><span class="o">.</span><span class="n">pairing_guid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Did not pair with device!&#39;</span><span class="p">)</span>
+
+    <span class="n">my_zeroconf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">pair_with_device</span><span class="p">(</span><span class="n">loop</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>By default, a random pairing guid is generated. You can access it with
+<code class="docutils literal notranslate"><span class="pre">handler.pairing_guid</span></code> in order to present it to the user. To change the
+pairing guid, you can change this variable to something else <em>before</em> calling
+<code class="docutils literal notranslate"><span class="pre">start</span></code> (see above).</p>
+<p>This example is available in <code class="docutils literal notranslate"><span class="pre">examples</span></code>.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://dacp.jsharkey.org/">http://dacp.jsharkey.org/</a></p>
+<p><a class="reference external" href="http://jsharkey.org/blog/2009/06/21/itunes-dacp-pairing-hash-is-broken/">http://jsharkey.org/blog/2009/06/21/itunes-dacp-pairing-hash-is-broken/</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pyatv</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="finding_devices.html">Finding Devices</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pairing with a device</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-does-it-work">How does it work</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-example-pairing">Code Example: Pairing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="connecting.html">Connecting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling.html">Controlling a device</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Retrieving metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="airplay.html">AirPlay Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atvremote.html">Reference application: atvremote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developing.html">Developing pyatv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="finding_devices.html" title="previous chapter">Finding Devices</a></li>
+      <li>Next: <a href="connecting.html" title="next chapter">Connecting</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Pierre Ståhl.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/pairing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
