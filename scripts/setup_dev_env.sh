@@ -44,7 +44,7 @@ echo "-> Running tests as verification..."
 python setup.py test
 
 echo "-> Generating documentation..."
-cd docs && make html
+./scripts/build_docs.sh build
 
 
 cat <<EOF
@@ -57,24 +57,23 @@ When starting a new shell, run:
 To run tests, run any of:
 
   python setup.py test
-  py.test tests/test_conf.py  # Single test
+  pytest tests/test_conf.py  # Single test
 
 To re-generate protobuf messages:
 
   ./scripts/build_proto.sh
+  ./scripts/autogen_protobuf_extensions.py > pyatv/mrp/protobuf/__init__.py
 
 The CLI application can be used, e.g. run:
 
-  atvremote --debug -a commands
-  atvremote --developer --debug -a dev_playstatus
+  atvremote --debug commands
+  atvremote --developer --debug playing
 
-HTML documentation has been generated in:
+To preview documentation in docs, run:
 
-  docs/generated/html
+  ./scripts/build_docs.sh serve
 
-To re-generate documentation, e.g. run:
-
-  make -C docs html
+and navigate to http://127.0.0.1:4000
 
 ==================================================
 
