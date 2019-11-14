@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.4.0a2 (2019-11-14)
+--------------------
+
+Third pre-release. Most stuff is in place now except for tests and documentation.
+
 0.4.0a1 (2019-10-08)
 --------------------
 
