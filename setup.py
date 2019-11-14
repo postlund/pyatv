@@ -22,7 +22,7 @@ setup(
     author='Pierre Ståhl',
     author_email='pierre.staahl@gmail.com',
     description='Library for controlling an Apple TV',
-    long_description=read('README.rst'),
+    long_description=read('README.md'),
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
