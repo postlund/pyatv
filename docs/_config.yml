@@ -16,7 +16,7 @@
 title: pyatv
 email: pierre.staahl@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A python client library for the Apple TV
+  a python client library for the Apple TV
 url: "https://postlund.github.io/pyatv" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: postlund
 github_username:  postlund
@@ -26,6 +26,49 @@ markdown: kramdown
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-feed
+  - jemoji
+
+pyatv_version: "pyatv==0.4.0a3"
+
+top_pages:
+  - link: /
+    title: Main Page
+  - link: /getting-started/
+    title: Getting Started
+  - link: /documentation/
+    title: Documentation
+  - link: /development/
+    title: Development
+  - link: /support/
+    title: Support
+
+page_links:
+  documentation:
+    - link: /documentation/
+      title: Start
+    - link: /documentation/concepts/
+      title: Concepts
+    - link: /documentation/roadmap/
+      title: Roadmap
+    - link: /documentation/atvremote/
+      title: atvremote
+  development:
+    - link: /development/
+      title: Start
+    - link: /development/services/
+      title: Services
+    - link: /development/examples/
+      title: Examples
+    - link: /development/testing/
+      title: Testing
+  support:
+    - link: /support/
+      title: Start
+    - link: /support/troubleshooting/
+      title: Troubleshooting
+    - link: /support/faq/
+      title: FAQ
+
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
