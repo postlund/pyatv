@@ -8,7 +8,7 @@ upon asyncio and supports most of the commands that the regular Apple Remote app
 
 Support for tvOS is still in early stages, but feel free to give it a spin:
 
-    pip install pyatv==0.4.0aX
+    pip install {{ site.pyatv_version }}
 
 This library is licensed under the MIT license.
 
