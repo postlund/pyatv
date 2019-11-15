@@ -1,5 +1,6 @@
 ---
 layout: template
+title: pyatv
 ---
 # Main Page
 
