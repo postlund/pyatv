@@ -9,7 +9,7 @@ link_group: documentation
 This section covers general parts of `pyatv`, like how to install it, concepts and terminology to
 understand how it works. More or less everything that is not *how* you develop with it.
 
-Before diving into code, make sure you read and understand the [Concepts](/documentation/concepts/)
+Before diving into code, make sure you read and understand the [Concepts](documentation/concepts/)
 first.
 
 ## Installing pyatv
@@ -25,7 +25,7 @@ You might need some additional packages to compile the dependencies. On a debian
 
 ### Development version
 
-To try out the latest development verison (a.k.a. `master` on GitHub), you can install with:
+To try out the latest development version (a.k.a. `master` on GitHub), you can install with:
 
     pip install git+https://github.com/postlund/pyatv.git
 

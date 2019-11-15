@@ -18,9 +18,9 @@ As pyatv is a library, it is mainly aimed for developers creating applications t
 with Apple TVs. However, pyatv ships with a powerful command line application that is useful for
 normal users as well.
 
-So, head over to [Getting started](/getting-started) to get going!
+So, head over to [Getting started](getting-started) to get going!
 
-If you need help or have questions, check out the [Support](/support) page instead.
+If you need help or have questions, check out the [Support](support) page instead.
 
 # Features
 
