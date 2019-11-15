@@ -77,7 +77,7 @@ Once you have credentials, you can start controlling the device and asking for s
     $ atvremote --id ... --mrp-credentials ... play
 
 To see all supported commands, pass `commands` as last argument. More detailed instructions
-can be found att the [atvremote](/documentation/atvremote/) page.
+can be found att the [atvremote](documentation/atvremote/) page.
 
 
 ## Writing code
