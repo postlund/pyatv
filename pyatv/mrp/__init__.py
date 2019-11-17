@@ -1,7 +1,7 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import logging
-import time
+import asyncio
 from datetime import datetime
 
 from pyatv import (const, exceptions)
@@ -53,7 +53,7 @@ class MrpRemoteControl(RemoteControl):
         if lookup:
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], True))
-            time.sleep(lookup[2])
+            await asyncio.sleep(lookup[2])
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], False))
         else:
