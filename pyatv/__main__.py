@@ -160,7 +160,7 @@ class GlobalCommands:
         if pairing.has_paired:
             print('Pairing seems to have succeeded, yey!')
             print('You may now use these credentials: {0}'.format(
-                pairing.credentials))
+                pairing.service.credentials))
         else:
             print('Pairing failed!')
 
