@@ -150,6 +150,26 @@ class RemoteControl:
         raise exceptions.NotSupportedError
 
     @abstractmethod
+    def volume_up(self):
+        """Press key volume up."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def volume_down(self):
+        """Press key volume down."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def home(self):
+        """Press key home."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def home_hold(self):
+        """Hold key home."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
     def top_menu(self):
         """Go to main menu (long press menu)."""
         raise exceptions.NotSupportedError

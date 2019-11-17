@@ -103,6 +103,8 @@ called `commands`, as it will present a list of availble commands:
     $ atvremote --id 40:CB:C0:A8:DE:9A commands
     Remote control commands:
      - down - Press key down
+     - home - Press key home
+     - home_hold - Hold key home
      - left - Press key left
      - menu - Press key menu
      - next - Press key next
@@ -117,6 +119,8 @@ called `commands`, as it will present a list of availble commands:
      - suspend - Suspend the device
      - top_menu - Go to main menu (long press menu)
      - up - Press key up
+     - volume_down - Press key volume down
+     - volume_up - Press key volume up
 
     Metadata commands:
      - artwork - Return artwork for what is currently playing (or None)
