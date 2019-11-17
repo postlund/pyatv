@@ -1,6 +1,7 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import logging
+import time
 from datetime import datetime
 
 from pyatv import (const, exceptions)
@@ -18,20 +19,24 @@ _LOGGER = logging.getLogger(__name__)
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
-    # name: [usage_page, usage]
-    'up': [1, 0x8C],
-    'down': [1, 0x8D],
-    'left': [1, 0x8B],
-    'right': [1, 0x8A],
-    'stop': [12, 0xB7],
-    'next': [12, 0xB5],
-    'previous': [12, 0xB6],
-    'select': [1, 0x89],
-    'menu': [1, 0x86],
-    'top_menu': [12, 0x60],
-    'suspend': [1, 0x82],
+    # name: [usage_page, usage, button hold time (seconds)]
+    'up': [1, 0x8C, 0],
+    'down': [1, 0x8D, 0],
+    'left': [1, 0x8B, 0],
+    'right': [1, 0x8A, 0],
+    'stop': [12, 0xB7, 0],
+    'next': [12, 0xB5, 0],
+    'previous': [12, 0xB6, 0],
+    'select': [1, 0x89, 0],
+    'menu': [1, 0x86, 0],
+    'top_menu': [12, 0x60, 0],
+    'home': [12, 0x40, 0],
+    'home_hold': [12, 0x40, 1],
+    'suspend': [1, 0x82, 0],
+    'volume_up': [12, 0xE9, 0],
+    'volume_down': [12, 0xEA, 0],
 
-    # 'mic': [12, 0x04]  # Siri
+    # 'mic': [12, 0x04, 0],  # Siri
 }
 
 
@@ -48,6 +53,7 @@ class MrpRemoteControl(RemoteControl):
         if lookup:
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], True))
+            time.sleep(lookup[2])
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], False))
         else:
@@ -97,6 +103,22 @@ class MrpRemoteControl(RemoteControl):
     def menu(self):
         """Press key menu."""
         return self._press_key('menu')
+
+    def volume_up(self):
+        """Press key volume up."""
+        return self._press_key('volume_up')
+
+    def volume_down(self):
+        """Press key volume down."""
+        return self._press_key('volume_down')
+
+    def home(self):
+        """Press key home."""
+        return self._press_key('home')
+
+    def home_hold(self):
+        """Hold key home."""
+        return self._press_key('home_hold')
 
     def top_menu(self):
         """Go to main menu (long press menu)."""
