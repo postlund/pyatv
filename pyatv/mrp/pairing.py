@@ -17,13 +17,12 @@ class MrpPairingHandler(PairingHandler):
 
     def __init__(self, config, session, loop):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session)
-        self.service = service = config.get_service(const.PROTOCOL_MRP)
+        super().__init__(session, config.get_service(const.PROTOCOL_MRP))
         self.connection = MrpConnection(
             config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(
-            loop, self.connection, self.srp, service)
+            loop, self.connection, self.srp, self.service)
         self.pairing_procedure = MrpPairingProcedure(
             self.protocol, self.srp)
         self.pin_code = None
