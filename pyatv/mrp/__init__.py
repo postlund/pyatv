@@ -292,7 +292,7 @@ class MrpAppleTV(AppleTV):
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(
             loop, self._connection, self._srp, self._mrp_service)
-        self._psm = PlayerStateManager(self._protocol)
+        self._psm = PlayerStateManager(self._protocol, loop)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
         self._mrp_metadata = MrpMetadata(self._psm, config.identifier)

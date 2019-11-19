@@ -1,5 +1,6 @@
 """Module responsible for keeping track of media player states."""
 
+import asyncio
 import logging
 from datetime import datetime
 
@@ -69,12 +70,13 @@ class PlayerState:
 class PlayerStateManager:  # pylint: disable=too-few-public-methods
     """Manage state of all media players."""
 
-    def __init__(self, protocol):
+    def __init__(self, protocol, loop):
         """Initialize a new PlayerStateManager instance."""
         self.protocol = protocol
+        self.loop = loop
         self.states = {}
         self.active = None
-        self.listener = None
+        self._listener = None
         self._add_listeners()
 
     def _add_listeners(self):
@@ -86,6 +88,19 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self.protocol.add_listener(
             self._handle_set_now_playing_client,
             protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
+
+    @property
+    def listener(self):
+        """Return current listener."""
+        return self._listener
+
+    @listener.setter
+    def listener(self, new_listener):
+        """Change current listener."""
+        self._listener = new_listener
+        if self.listener:
+            asyncio.ensure_future(
+                self.listener.state_updated(), loop=self.loop)
 
     @property
     def playing(self):
