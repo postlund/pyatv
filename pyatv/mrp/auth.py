@@ -2,6 +2,7 @@
 
 import logging
 
+from pyatv import exceptions
 from pyatv.log import log_binary
 from pyatv.mrp import (tlv8, messages)
 from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
@@ -39,8 +40,9 @@ class MrpPairingProcedure:
 
         if tlv8.TLV_BACK_OFF in pairing_data:
             time = int.from_bytes(
-                pairing_data[tlv8.TLV_BACK_OFF], byteorder='big')
-            raise Exception('back off {0}s'.format(time))
+                pairing_data[tlv8.TLV_BACK_OFF], byteorder='little')
+            raise exceptions.BackOffError(
+                'please wait {0}s before trying again'.format(time))
 
         self._atv_salt = pairing_data[tlv8.TLV_SALT]
         self._atv_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
