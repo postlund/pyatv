@@ -14,6 +14,7 @@ PORT_1 = 1234
 PORT_2 = 5678
 IDENTIFIER_1 = 'id1'
 IDENTIFIER_2 = 'id2'
+CREDENTIALS_1 = 'cred1'
 
 
 class ConfTest(unittest.TestCase):
@@ -24,6 +25,7 @@ class ConfTest(unittest.TestCase):
         self.service_mock.protocol = const.PROTOCOL_DMAP
         self.service_mock.port = PORT_1
         self.service_mock.identifier = IDENTIFIER_1
+        self.service_mock.credentials = None
 
         self.service_mock2 = MagicMock()
         self.service_mock2.protocol = const.PROTOCOL_MRP
@@ -109,6 +111,17 @@ class ConfTest(unittest.TestCase):
         self.assertEqual(
             self.config.main_service(protocol=self.service_mock.protocol),
             self.service_mock)
+
+    def test_set_credentials_for_missing_service(self):
+        self.assertFalse(self.config.set_credentials(PROTOCOL_DMAP, 'dummy'))
+
+    def test_set_credentials(self):
+        self.config.add_service(self.service_mock)
+        self.assertIsNone(self.config.get_service(PROTOCOL_DMAP).credentials)
+
+        self.config.set_credentials(PROTOCOL_DMAP, 'dummy')
+        self.assertEqual(
+            self.config.get_service(PROTOCOL_DMAP).credentials, 'dummy')
 
     # This test is a bit strange and couples to protocol specific services,
     # but it's mainly to exercise string as that is important. Might refactor
