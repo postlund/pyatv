@@ -47,7 +47,7 @@ class MrpPairingHandler(PairingHandler):
             raise exceptions.DeviceAuthenticationError('no pin given')
 
         self.service.credentials = \
-            await self.pairing_procedure.finish_pairing(self.pin_code)
+            str(await self.pairing_procedure.finish_pairing(self.pin_code))
 
     @property
     def device_provides_pin(self):
