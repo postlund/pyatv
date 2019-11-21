@@ -32,20 +32,32 @@ async def _read_input(loop, prompt):
     return user_input.strip()
 
 
-async def _scan_for_device(identifier, timeout, loop, protocol=None):
-    atvs = await pyatv.scan(
-        loop, timeout=timeout, identifier=identifier, protocol=protocol)
+async def _scan_for_device(args, timeout, loop, protocol=None):
+    options = {
+        'timeout': timeout,
+        'protocol': protocol
+    }
+
+    if not args.name:
+        options['identifier'] = args.id
+
+    atvs = await pyatv.scan(loop, **options)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
 
-    if len(atvs) > 1:
+    if args.name:
+        devices = [atv for atv in atvs if atv.name == args.name]
+    else:
+        devices = atvs
+
+    if len(devices) > 1:
         logging.error(
             'Found more than one Apple TV; specify one using --id')
-        _print_found_apple_tvs(atvs, outstream=sys.stderr)
+        _print_found_apple_tvs(devices, outstream=sys.stderr)
         return None
 
-    return atvs[0]
+    return devices[0]
 
 
 class GlobalCommands:
@@ -107,7 +119,7 @@ class GlobalCommands:
             return 1
 
         apple_tv = await _scan_for_device(
-            self.args.id, self.args.scan_timeout, self.loop)
+            self.args, self.args.scan_timeout, self.loop)
         if not apple_tv:
             return 2
 
@@ -265,8 +277,8 @@ async def cli_handler(loop):
                         help='commands, help, ...')
     parser.add_argument('-i', '--id', help='device identifier',
                         dest='id', default=None)
-    parser.add_argument('--name', help='apple tv name',
-                        dest='name', default='Apple TV')
+    parser.add_argument('-n', '--name', help='apple tv name',
+                        dest='name', default=None)
     parser.add_argument('--address', help='device ip address or hostname',
                         dest='address', default=None)
     parser.add_argument('--protocol', action=TransformProtocol,
@@ -351,7 +363,7 @@ def _print_found_apple_tvs(atvs, outstream=sys.stdout):
 
 async def _autodiscover_device(args, loop):
     apple_tv = await _scan_for_device(
-        args.id, args.scan_timeout, loop, protocol=args.protocol)
+        args, args.scan_timeout, loop, protocol=args.protocol)
     if not apple_tv:
         return None
 

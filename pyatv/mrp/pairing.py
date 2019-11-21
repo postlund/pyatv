@@ -27,6 +27,11 @@ class MrpPairingHandler(PairingHandler):
             self.protocol, self.srp)
         self.pin_code = None
 
+    async def close(self):
+        """Call to free allocated resources after pairing."""
+        await self.connection.close()
+        await super().close()
+
     @property
     def has_paired(self):
         """If a successful pairing has been performed."""
