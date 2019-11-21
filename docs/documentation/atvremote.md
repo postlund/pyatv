@@ -12,13 +12,88 @@ good place to go to for inspiration when implementing your own application.
 
 ## Discovering devices
 
+To find devices, use the `scan` command:
+
+    $ atvremote scan
+    ========================================
+           Name: Living Room
+        Address: 10.0.0.10
+    Identifiers:
+     - 01234567-89AB-CDEF-0123-4567890ABCDE
+     - 00:11:22:33:44:55
+    Services:
+     - Protocol: MRP, Port: 49152, Credentials: None
+     - Protocol: AirPlay, Port: 7000, Credentials: None
+
+           Name: Kitchen
+        Address: 10.0.0.11
+    Identifiers:
+     - ABCDEFABCDEFABCD
+     - AA:BB:CC:DD:EE:FF
+    Services:
+     - Protocol: AirPlay, Port: 7000, Credentials: None
+     - Protocol: DMAP, Port: 3689, Credentials: 00000000-1111-2222-3333-444455556666
+
+In this case two devices were found, one named `Living Room` and another named
+`Kitchen`. You can read more about what everything means under [Concepts](concepts.md).
+
 ### Specifying a device
+
+In order for `atvremote` to know which device you want to control, you must specify the
+`--id` flag (or `-i` for short) together with an identifier. You may choose any of the available
+identifiers.
+
+Based on the output in the previous chapter, you may write:
+
+    $ atvremote -i 00:11:22:33:44:54 <some command>
+
+But this would also work equally good:
+
+    $ atvremote -i 01234567-89AB-CDEF-0123-4567890ABCDE <some command>
+
+It is also possible to use the device name by specifying `-n` instead:
+
+    $ atvremote -n "Living Room" <some command>
 
 ## Pairing with a device
 
+In most cases you have to pair with a device and obtain *credentials* in order to communicate
+with it. To pair you must specify a device, which protocol to pair and use the `pair` command:
+
+    $ atvremote --id 00:11:22:33:44:55 --protocol mrp pair
+    Enter PIN on screen: 1234
+    Pairing seems to have succeeded, yey!
+    You may now use these credentials: xxxx
+
+Which protocols a device supports can be seen with `scan`. But in general you need to pair
+either `mrp` (devices running tvOS) or `dmap` (Apple TV 3 and earlier). If you also want to
+stream video, you can pair `airplay` as well. The procedure is the same for all of them, just
+change the argument provided to `--protocol`.
+
 ### Credentials
 
+Once you have paired and received credentials, you must provide said credentials to `atvremote`
+via the `--xxx-credentials` flags. Replace `xxx` with either `mrp`, `dmap` or `airplay`.  You
+may specify multiple credentials:
+
+    $ atvremote -n Kitchen --mrp-credentials abcd --airplay-credentials 1234 playing
+
+In the future, `atvremote` will likely store these automatically for you. But as of right now, you
+have to manage the credentials yourself. Follow progress at
+[#242](https://github.com/postlund/pyatv/issues/243).
+
 ## Push updates
+
+With `atvremote` you can use `push_updates` to display current play status automatically
+without having to ask the device for it:
+
+    $ atvremote -n Kitchen push_updates
+    Press ENTER to stop
+    Media type: Unknown
+    Play state: Paused
+    --------------------
+
+Updates will be displayed when they happen. Just press ENTER to stop.
 
 ## Working with commands
 
@@ -88,7 +163,7 @@ Or seek in the currently playing media:
 
     $ atvremote --id 40:CB:C0:A8:DE:9A set_position=123
 
-Playing a video via AirPlay:
+Play a video via AirPlay:
 
     $ atvremote --id 40:CB:C0:A8:DE:9A play_url=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 

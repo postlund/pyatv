@@ -12,7 +12,7 @@ This page tries to answer some common questions.
 
 ### My device is not found when scanning?
 
-See [Troubleshooting](support/troubleshooting/) for some hints on locating the issue.
+See [Troubleshooting](../troubleshooting/) for some hints on locating the issue.
 
 ### Why is all or some metadata missing when I am playing some media on my device?
 
@@ -27,7 +27,7 @@ case, you should write a bug report.
 The device authentication process has now been reversed engineered and implemented
 in pyatv. In order to get rid of this message, you must perform AirPlay pairing with
 the device and use the obtained credentials with playing media. See
-[pairing with atvremote](documentation/atvremote).
+[pairing with atvremote](../..//documentation/atvremote).
 
 ## Technical Questions
 
