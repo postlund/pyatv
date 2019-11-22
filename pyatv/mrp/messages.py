@@ -50,6 +50,11 @@ def set_connection_state():
     return message
 
 
+def get_keyboard_session():
+    """Create a new GET_KEYBOARD_SESSION_MESSAGE."""
+    return create(protobuf.ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE)
+
+
 def crypto_pairing(pairing_data, is_pairing=False):
     """Create a new CRYPTO_PAIRING_MESSAGE."""
     message = create(protobuf.CRYPTO_PAIRING_MESSAGE)
@@ -64,8 +69,8 @@ def crypto_pairing(pairing_data, is_pairing=False):
     return message
 
 
-def client_updates_config(artwork=True, now_playing=True,
-                          volume=True, keyboard=True):
+def client_updates_config(artwork=True, now_playing=False,
+                          volume=False, keyboard=True):
     """Create a new CLIENT_UPDATES_CONFIG_MESSAGE."""
     message = create(protobuf.CLIENT_UPDATES_CONFIG_MESSAGE)
     config = message.inner()
