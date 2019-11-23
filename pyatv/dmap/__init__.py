@@ -162,25 +162,29 @@ class DmapRemoteControl(RemoteControl):
         """Press key menu."""
         return self.apple_tv.controlprompt_cmd('menu')
 
-    def volume_up(self):
-        """Press key volume up."""
-        return self.apple_tv.controlprompt_cmd('volume_up')
-
-    def volume_down(self):
-        """Press key volume down."""
-        return self.apple_tv.controlprompt_cmd('volume_down')
-
-    def home(self):
-        """Press key home."""
-        return self.apple_tv.controlprompt_cmd('home')
-
-    def home_hold(self):
-        """Hold key home."""
-        return self.apple_tv.controlprompt_cmd('home_hold')
-
     def top_menu(self):
         """Press key topmenu."""
         return self.apple_tv.controlprompt_cmd('topmenu')
+
+    def volume_up(self):
+        """Press key volume up."""
+        # DMAP support unknown
+        raise exceptions.NotSupportedError
+
+    def volume_down(self):
+        """Press key volume down."""
+        # DMAP support unknown
+        raise exceptions.NotSupportedError
+
+    def home(self):
+        """Press key home."""
+        # DMAP support unknown
+        raise exceptions.NotSupportedError
+
+    def home_hold(self):
+        """Hold key home."""
+        # DMAP support unknown
+        raise exceptions.NotSupportedError
 
     async def suspend(self):
         """Suspend the device."""
