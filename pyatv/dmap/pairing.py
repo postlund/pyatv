@@ -46,8 +46,7 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
 
     def __init__(self, config, session, loop, **kwargs):
         """Initialize a new instance."""
-        super().__init__(session)
-        self._service = config.get_service(const.PROTOCOL_DMAP)
+        super().__init__(session, config.get_service(const.PROTOCOL_DMAP))
         self._loop = loop
         self._zeroconf = kwargs.get('zeroconf', Zeroconf(loop))
         self._name = kwargs.get('name', 'pyatv')
@@ -138,7 +137,7 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
             cmty = tags.string_tag('cmty', 'iPhone')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
             self._has_paired = True
-            self._service.credentials = '0x' + self._pairing_guid
+            self.service.credentials = '0x' + self._pairing_guid
             return web.Response(body=response)
 
         # Code did not match, generate an error

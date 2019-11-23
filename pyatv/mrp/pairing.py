@@ -17,16 +17,20 @@ class MrpPairingHandler(PairingHandler):
 
     def __init__(self, config, session, loop):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session)
-        self.service = service = config.get_service(const.PROTOCOL_MRP)
+        super().__init__(session, config.get_service(const.PROTOCOL_MRP))
         self.connection = MrpConnection(
             config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(
-            loop, self.connection, self.srp, service)
+            loop, self.connection, self.srp, self.service)
         self.pairing_procedure = MrpPairingProcedure(
             self.protocol, self.srp)
         self.pin_code = None
+
+    async def close(self):
+        """Call to free allocated resources after pairing."""
+        await self.connection.close()
+        await super().close()
 
     @property
     def has_paired(self):
@@ -43,7 +47,7 @@ class MrpPairingHandler(PairingHandler):
             raise exceptions.DeviceAuthenticationError('no pin given')
 
         self.service.credentials = \
-            await self.pairing_procedure.finish_pairing(self.pin_code)
+            str(await self.pairing_procedure.finish_pairing(self.pin_code))
 
     @property
     def device_provides_pin(self):

@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.4.0a4 (2019-11-20)
+--------------------
+
+Changes:
+
+cfa0514 Fix push updater in MRP
+945a2d6 Add set_credentials to conf.AppleTV
+0373c5d Add "back off" exception to MRP
+32d4e58 Add service property to PairingHandler
+81d74cd fixed credentials reference to .service.credentials
+1c2029c Use pyatv as title on main page in documentation
+
 0.4.0a3 (2019-11-15)
 --------------------
 

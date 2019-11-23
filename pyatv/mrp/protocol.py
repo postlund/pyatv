@@ -80,7 +80,7 @@ class MrpProtocol:
 
         # This should be the first message sent after encryption has
         # been enabled
-        await self.send(messages.set_ready_state())
+        await self.send(messages.set_connection_state())
 
         async def _wait_for_updates(_, semaphore):
             # Use a counter here whenever more than one message is expected
@@ -95,7 +95,7 @@ class MrpProtocol:
 
         # Subscribe to updates at this stage
         await self.send(messages.client_updates_config())
-        await self.send(messages.wake_device())
+        await self.send_and_receive(messages.get_keyboard_session())
 
         try:
             await asyncio.wait_for(

@@ -44,9 +44,15 @@ class PairingHandler:
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, session):
+    def __init__(self, session, service):
         """Initialize a new instance of PairingHandler."""
         self.session = session
+        self._service = service
+
+    @property
+    def service(self):
+        """Return service used for pairing."""
+        return self._service
 
     async def close(self):
         """Call to free allocated resources after pairing."""

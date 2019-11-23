@@ -20,7 +20,7 @@ control a device, this is the way to go.
 
 ### Finding a device
 
-Use the `scan` to find devices:
+Use `scan` to find devices:
 
     $ atvremote scan
     ========================================
@@ -34,11 +34,16 @@ Use the `scan` to find devices:
      - Protocol: AirPlay, Port: 7000, Credentials: None
 
 Each device is identified by one or more unique identifiers. You can pick any
-of them and pass to `--id` (see following examples).
+of them and pass to `--id` or use its name with `-n`:
+
+    $  tvremote --id 40:CB:C0:A8:DE:9A ...
+    OR
+    $ atvremote -n "Living Room" ...
 
 This device supports two services: MRP and AirPlay. MRP is used to control the
-device and you need to pair with it in order to obtain credentials. The same
-is valid for AirPlay, in case you want to stream a video to it for instance.
+device. You need to pair with it in order to obtain credentials which are then
+used to communicate with it. The same is valid for AirPlay, in case you want to
+stream a video to it for instance.
 
 ### Pairing process
 
@@ -77,7 +82,7 @@ Once you have credentials, you can start controlling the device and asking for s
     $ atvremote --id ... --mrp-credentials ... play
 
 To see all supported commands, pass `commands` as last argument. More detailed instructions
-can be found att the [atvremote](documentation/atvremote/) page.
+can be found att the [atvremote](../documentation/atvremote/) page.
 
 
 ## Writing code

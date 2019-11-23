@@ -75,6 +75,14 @@ class AppleTV:
         raise exceptions.NoServiceError(
             'no service to connect to')
 
+    def set_credentials(self, protocol, credentials):
+        """Set credentials for a protocol if it exists."""
+        service = self.get_service(protocol)
+        if service:
+            service.credentials = credentials
+            return True
+        return False
+
     def __eq__(self, other):
         """Compare instance with another instance."""
         if isinstance(other, self.__class__):

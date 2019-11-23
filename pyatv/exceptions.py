@@ -51,3 +51,7 @@ class DeviceAuthenticationError(Exception):
 
 class DeviceIdMissingError(Exception):
     """Thrown when device id is missing."""
+
+
+class BackOffError(Exception):
+    """Thrown when device mandates a backoff period."""

@@ -19,11 +19,11 @@ class AirPlayPairingHandler(PairingHandler):
 
     def __init__(self, config, session, _):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session)
-        self.service = service = config.get_service(const.PROTOCOL_AIRPLAY)
+        super().__init__(session, config.get_service(const.PROTOCOL_AIRPLAY))
         self.srp = SRPAuthHandler()
         self.http = net.HttpSession(
-            session, 'http://{0}:{1}/'.format(config.address, service.port))
+            session,
+            'http://{0}:{1}/'.format(config.address, self.service.port))
         self.auther = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
         self.srp.initialize(binascii.unhexlify(self.auth_data.seed))
