@@ -29,7 +29,7 @@ plugins:
   - jekyll-feed
   - jemoji
 
-pyatv_version: "pyatv==0.4.0a5"
+pyatv_version: "pyatv==0.4.0a6"
 
 top_pages:
   - link: /
