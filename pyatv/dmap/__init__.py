@@ -3,6 +3,8 @@
 import logging
 import asyncio
 
+from aiohttp.client_exceptions import ClientError
+
 from pyatv import (const, exceptions, convert, net)
 from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
@@ -46,10 +48,6 @@ class BaseDmapAppleTV:
         """
         art = await self.daap.get(_ARTWORK_CMD, daap_data=False)
         return art if art != b'' else None
-
-    def playqueue(self):
-        """Return current playqueue. Must be logged in."""
-        return self.daap.post('playqueue-contents?[AUTH]')
 
     def ctrl_int_cmd(self, cmd):
         """Perform a "ctrl-int" command."""
@@ -304,17 +302,19 @@ class DmapMetadata(Metadata):
 class DmapPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, apple_tv):
+    def __init__(self, loop, apple_tv, listener):
         """Initialize a new DmapPushUpdater instance."""
         super().__init__()
         self._loop = loop
         self._atv = apple_tv
+        self._listener = listener
         self._future = None
+        self._initial_delay = 0
 
     def start(self, initial_delay=0):
         """Wait for push updates from device.
 
-        Will throw NoAsyncListenerError if no listner has been set.
+        Will throw NoAsyncListenerError if no listener has been set.
         """
         if self.listener is None:
             raise exceptions.NoAsyncListenerError
@@ -325,26 +325,35 @@ class DmapPushUpdater(PushUpdater):
         # first request
         self._atv.playstatus_revision = 0
 
+        # Delay before restarting after an error
+        self._initial_delay = initial_delay
+
         # This for some reason fails on travis but not in other places.
         # Why is that (same python version)?
         # pylint: disable=deprecated-method
-        self._future = asyncio.ensure_future(
-            self._poller(initial_delay), loop=self._loop)
+        self._future = asyncio.ensure_future(self._poller(), loop=self._loop)
         return self._future
 
     def stop(self):
-        """No longer wait for push updates."""
+        """No longer forward updates to listener."""
         if self._future is not None:
             self._future.cancel()
             self._future = None
 
-    async def _poller(self, initial_delay):
-        # Sleep some time before waiting for updates
-        if initial_delay > 0:
-            _LOGGER.debug('Initial delay set to %d', initial_delay)
-            await asyncio.sleep(initial_delay, loop=self._loop)
+            # Let listener know that we disconnected
+            if self._listener and self._listener.listener:
+                self._listener.listener.connection_closed()
+
+    async def _poller(self):
+        first_call = True
 
         while True:
+            # Sleep some time before waiting for updates
+            if not first_call and self._initial_delay > 0:
+                _LOGGER.debug('Initial delay set to %d', self._initial_delay)
+                await asyncio.sleep(self._initial_delay, loop=self._loop)
+                first_call = False
+
             try:
                 _LOGGER.debug('Waiting for playstatus updates')
                 playstatus = await self._atv.playstatus(
@@ -355,12 +364,19 @@ class DmapPushUpdater(PushUpdater):
             except asyncio.CancelledError:
                 break
 
+            except ClientError as ex:
+                _LOGGER.exception('A communication error happened')
+                if self._listener and self._listener.listener:
+                    self._loop.call_soon(
+                        self._listener.listener.connection_lost, ex)
+
+                break
+
             # It is not pretty to disable pylint here, but we must catch _all_
             # exceptions to keep the API.
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug('Playstatus error occurred: %s', ex)
                 self._loop.call_soon(self.listener.playstatus_error, self, ex)
-                break
 
         self._future = None
 
@@ -385,13 +401,13 @@ class DmapAppleTV(AppleTV):
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
         self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
-        self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv)
+        self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
         self._airplay = airplay
 
     def connect(self):
         """Initiate connection to device.
 
-        Not needed as it is performed automatically.
+        No need to call it yourself, it's done automatically.
         """
         return self._requester.login()
 
