@@ -3,6 +3,7 @@ A python client library for the Apple TV
 [![Build Status](https://travis-ci.org/postlund/pyatv.svg?branch=master)](https://travis-ci.org/postlund/pyatv)
 [![Coverage Status](https://img.shields.io/coveralls/postlund/pyatv.svg)](https://coveralls.io/r/postlund/pyatv?branch=master)
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
 [![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
 
 This is a python3 library for controlling and querying information from an Apple TV. It is built
