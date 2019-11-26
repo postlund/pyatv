@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.4.0a6 (2019-11-26)
+--------------------
+
+All changes:
+
+ffc4b40 Fix connection handling in MRP pairing
+
 0.4.0a5 (2019-11-26)
 --------------------
 
