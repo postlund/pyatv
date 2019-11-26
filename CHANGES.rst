@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.4.0a5 (2019-11-26)
+--------------------
+
+All changes:
+
+96f3b81 Update dmap implementation
+f81aeab Update __init__.py
+f133fb8 Implement asyncio.sleep
+9e9dfdc Add MRP functionality
+4765565 Make corrections to MRP flow
+2906e34 Return MRP credentials as string after pairing
+88bf241 Specify device with -n in atvremote
+
 0.4.0a4 (2019-11-20)
 --------------------
 
