@@ -348,10 +348,7 @@ class PushUpdater:
         - playstatus_error(updater, exception)
 
         The first method is called when a new update happens and the second one
-        is called if an error occurs. Please note that if an error happens,
-        push updates will be stopped. So they will need to be enabled again,
-        e.g. from the error method. A delay should preferably be passed to
-        start() to avoid an infinite error-loop.
+        is called if an error occurs.
         """
         self.__listener = listener
 
@@ -365,7 +362,7 @@ class PushUpdater:
 
     @abstractmethod
     def stop(self):
-        """No longer listen for updates."""
+        """No longer forward updates to listener."""
         raise exceptions.NotSupportedError
 
 
@@ -380,21 +377,52 @@ class AirPlay:  # pylint: disable=too-few-public-methods
         raise exceptions.NotSupportedError
 
 
+class DeviceListener:
+    """Listener interface for generic device updates."""
+
+    @abstractmethod
+    def connection_lost(self, exception):
+        """Device was unexpectedly disconnected."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def connection_closed(self):
+        """Device connection was (intentionally) closed."""
+        raise NotImplementedError()
+
+
 class AppleTV:
     """Base class representing an Apple TV."""
 
     __metaclass__ = ABCMeta
 
+    def __init__(self):
+        """Initialize a new AppleTV."""
+        self.__listener = None
+
+    @property
+    def listener(self):
+        """Object receiving generic device updates.
+
+        Must be an object conforming to DeviceListener.
+        """
+        return self.__listener
+
+    @listener.setter
+    def listener(self, target):
+        """Change object receiving generic device updates."""
+        self.__listener = target
+
     @abstractmethod
-    def connect(self):
+    async def connect(self):
         """Initiate connection to device.
 
-        Not needed as it is performed automatically.
+        No need to call it yourself, it's done automatically.
         """
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def close(self):
+    async def close(self):
         """Close connection and release allocated resources."""
         raise exceptions.NotSupportedError
 

@@ -50,6 +50,7 @@ class PlayingResponse:
         self.repeat = kwargs.get('repeat', None)
         self.revision = revision
         self.shuffle = shuffle
+        self.force_close = kwargs.get('force_close', False)
 
 
 class FakeAppleTV(FakeAirPlayDevice):
@@ -139,6 +140,10 @@ class FakeAppleTV(FakeAirPlayDevice):
 
         body = b''
         playing = self._get_response('playing')
+
+        # Check if connection should be closed to trigger error on client side
+        if playing.force_close:
+            await request.transport.close()
 
         # Make sure revision matches
         revision = int(request.rel_url.query['revision-number'])
@@ -305,6 +310,11 @@ class AppleTVUseCases(AirPlayUseCases):
     def nothing_playing(self):
         """Call this method to put device in idle state."""
         self.device.responses['playing'].insert(0, PlayingResponse())
+
+    def server_closes_connection(self):
+        """Call this method to force server to close connection on request."""
+        self.device.responses['playing'].insert(
+            0, PlayingResponse(force_close=True))
 
     def example_video(self, **kwargs):
         """Play some example video."""

@@ -11,13 +11,14 @@ from pyatv.mrp.variant import (read_variant, write_variant)
 _LOGGER = logging.getLogger(__name__)
 
 
-class MrpConnection(asyncio.Protocol):
+class MrpConnection(asyncio.Protocol):  # pylint: disable=too-many-instance-attributes  # noqa
     """Network layer that encryptes/decryptes and (de)serializes messages."""
 
-    def __init__(self, host, port, loop):
+    def __init__(self, host, port, loop, atv=None):
         """Initialize a new MrpConnection."""
-        self.host = host
+        self.host = str(host)
         self.port = port
+        self.atv = atv
         self.loop = loop
         self.listener = None
         self._buffer = b''
@@ -33,6 +34,12 @@ class MrpConnection(asyncio.Protocol):
         """Device connection was dropped."""
         _LOGGER.debug('Disconnected from device: %s', exc)
         self._transport = None
+
+        if self.atv and self.atv.listener:
+            if exc is None:
+                self.atv.listener.connection_closed()
+            else:
+                self.atv.listener.connection_lost(exc)
 
     def enable_encryption(self, output_key, input_key):
         """Enable encryption with the specified keys."""
