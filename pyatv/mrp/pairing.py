@@ -29,7 +29,7 @@ class MrpPairingHandler(PairingHandler):
 
     async def close(self):
         """Call to free allocated resources after pairing."""
-        await self.connection.close()
+        self.connection.close()
         await super().close()
 
     @property
@@ -39,6 +39,7 @@ class MrpPairingHandler(PairingHandler):
 
     async def begin(self):
         """Start pairing process."""
+        await self.protocol.start(skip_initial_messages=True)
         await self.pairing_procedure.start_pairing()
 
     async def finish(self):
