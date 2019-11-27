@@ -3,9 +3,10 @@
 import logging
 import binascii
 
-from pyatv import const
+from pyatv import const, net
 from pyatv.interface import AirPlay
 
+from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.airplay.auth import AuthenticationVerifier
 
@@ -15,31 +16,41 @@ _LOGGER = logging.getLogger(__name__)
 class AirPlayAPI(AirPlay):  # pylint: disable=too-few-public-methods
     """Implementation of API for AirPlay support."""
 
-    def __init__(self, config, http, airplay_player):
+    def __init__(self, config, loop):
         """Initialize a new AirPlayInternal instance."""
         self.config = config
-        self.player = airplay_player
+        self.loop = loop
+        self.service = self.config.get_service(const.PROTOCOL_AIRPLAY)
         self.identifier = None
-        self.srp = SRPAuthHandler()
-        self.verifier = AuthenticationVerifier(http, self.srp)
-        self._load_credentials()
 
-    def _load_credentials(self):
-        service = self.config.get_service(const.PROTOCOL_AIRPLAY)
-        if service.credentials is None:
+    def _get_credentials(self):
+        if self.service.credentials is None:
             _LOGGER.debug('No AirPlay credentials loaded')
-            return
+            return None
 
-        split = service.credentials.split(':')
-        self.identifier = split[0]
-        self.srp.initialize(binascii.unhexlify(split[1]))
+        split = self.service.credentials.split(':')
         _LOGGER.debug(
             'Loaded AirPlay credentials: %s',
-            service.credentials)
+            self.service.credentials)
 
-    def _verify_authenticated(self):
-        """Check if loaded credentials are verified."""
-        return self.verifier.verify_authed()
+        return split[1]
+
+    async def _player(self, session):
+        player = AirPlayPlayer(
+            self.loop, session, self.config.address, self.service.port)
+        http = net.HttpSession(
+            session, 'http://{0}:{1}/'.format(
+                self.config.address, self.service.port))
+
+        # If credentials have been loaded, do device verification first
+        credentials = self._get_credentials()
+        if credentials:
+            srp = SRPAuthHandler()
+            srp.initialize(binascii.unhexlify(credentials))
+            verifier = AuthenticationVerifier(http, srp)
+            await verifier.verify_authed()
+
+        return player
 
     async def play_url(self, url, **kwargs):
         """Play media from an URL on the device.
@@ -48,9 +59,13 @@ class AirPlayAPI(AirPlay):  # pylint: disable=too-few-public-methods
         The Apple TV requires the request to stay open during the entire
         play duration.
         """
-        # If credentials have been loaded, do device verification first
-        if self.identifier:
-            await self._verify_authenticated()
-
-        position = int(kwargs.get('position', 0))
-        return await self.player.play_url(url, position)
+        # This creates a new ClientSession every time something is played.
+        # It is not recommended by aiohttp, but it is the only way not having
+        # a dangling connection laying around. So it will have to do for now.
+        session = await net.create_session(self.loop)
+        try:
+            player = await self._player(session)
+            position = int(kwargs.get('position', 0))
+            return await player.play_url(url, position)
+        finally:
+            await session.close()
