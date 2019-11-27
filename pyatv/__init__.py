@@ -7,9 +7,7 @@ from ipaddress import ip_address
 from aiozeroconf import ServiceBrowser, Zeroconf
 
 from pyatv import (conf, const, exceptions, net)
-from pyatv.airplay import player
 from pyatv.airplay import AirPlayAPI
-from pyatv.net import HttpSession
 
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
@@ -155,21 +153,11 @@ async def connect(config, loop, protocol=None, session=None):
         session = await net.create_session(loop=loop)
 
     # AirPlay service is the same for both DMAP and MRP
-    airplay = _setup_airplay(loop, session, config)
+    airplay = AirPlayAPI(config, loop)
 
     atv = implementation(loop, session, config, airplay)
     await atv.connect()
     return atv
-
-
-def _setup_airplay(loop, session, config):
-    airplay_service = config.get_service(const.PROTOCOL_AIRPLAY)
-    airplay_player = player.AirPlayPlayer(
-        loop, session, config.address, airplay_service.port)
-    airplay_http = HttpSession(
-        session, 'http://{0}:{1}/'.format(
-            config.address, airplay_service.port))
-    return AirPlayAPI(config, airplay_http, airplay_player)
 
 
 async def pair(config, protocol, loop, session=None, **kwargs):
