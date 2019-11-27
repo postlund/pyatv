@@ -12,7 +12,11 @@ _LOGGER = logging.getLogger(__name__)
 
 def _get_pairing_data(resp):
     pairing_message = CryptoPairingMessage.cryptoPairingMessage
-    return tlv8.read_tlv(resp.Extensions[pairing_message].pairingData)
+    tlv = tlv8.read_tlv(resp.Extensions[pairing_message].pairingData)
+    if tlv8.TLV_ERROR in tlv:
+        error = int.from_bytes(tlv[tlv8.TLV_ERROR], byteorder='little')
+        raise exceptions.AuthenticationError("got error: " + str(error))
+    return tlv
 
 
 class MrpPairingProcedure:
