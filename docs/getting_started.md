@@ -87,20 +87,48 @@ can be found att the [atvremote](../documentation/atvremote/) page.
 
 ## Writing code
 
-TBD
+A simple example that connects to a device and prints what is currently playing looks
+like this:
 
-### Finding a device
+```python
+import sys
+import asyncio
+import pyatv
 
-TBD
+LOOP = asyncio.get_event_loop()
 
-### Pairing process
 
-TBD
+# Method that is dispatched by the asyncio event loop
+async def print_what_is_playing(loop):
+    """Find a device and print what is playing."""
+    print('Discovering devices on network...')
+    atvs = await pyatv.scan(loop, timeout=5)
 
-### Controlling
+    if not atvs:
+        print('No device found', file=sys.stderr)
+        return
 
-TBD
+    print('Connecting to {0}'.format(atvs[0].address))
+    atv = await pyatv.connect(atvs[0], loop)
 
-## Going further
+    try:
+        playing = await atv.metadata.playing()
+        print('Currently playing:')
+        print(playing)
+    finally:
+        # Do not forget to close
+        await atv.close()
 
-TBD
+
+if __name__ == '__main__':
+    # Setup event loop and connect
+    LOOP.run_until_complete(print_what_is_playing(LOOP))
+```
+
+You can find this example under `examples/scan_and_connect.py`
+
+## What's next?
+
+It is recommended that you read the [Documentation](../documentation/) section to get
+a better grasp of how `pyatv` works. Then continue with [Development](../development)
+once you are ready to write some code.

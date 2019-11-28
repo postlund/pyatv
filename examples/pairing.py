@@ -29,10 +29,11 @@ async def pair_with_device(loop):
     # Give some feedback about the process
     if pairing.has_paired:
         print('Paired with device!')
-        print('Credentials:', pairing.credentials)
+        print('Credentials:', pairing.service.credentials)
     else:
         print('Did not pair with device!')
 
+    await pairing.close()
 
 if __name__ == '__main__':
     # Setup event loop and connect
