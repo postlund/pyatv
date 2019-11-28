@@ -49,19 +49,27 @@ page_links:
       title: Start
     - link: /documentation/concepts/
       title: Concepts
-    - link: /documentation/roadmap/
-      title: Roadmap
+    - link: /documentation/protocols/
+      title: Protocols
     - link: /documentation/atvremote/
       title: atvremote
   development:
     - link: /development/
       title: Start
-    - link: /development/services/
-      title: Services
+    - link: /development/scan_pair_and_connect/
+      title: Scan, Pair and Connect
+    - link: /development/control/
+      title: Control
+    - link: /development/metadata/
+      title: Metadata
+    - link: /development/listeners/
+      title: Listeners
+    - link: /development/airplay/
+      title: AirPlay
+    - link: /development/api_reference/
+      title: API Reference
     - link: /development/examples/
       title: Examples
-    - link: /development/testing/
-      title: Testing
   support:
     - link: /support/
       title: Start

@@ -25,8 +25,8 @@ async def print_what_is_playing(loop):
         print('Currently playing:')
         print(playing)
     finally:
-        # Do not forget to logout
-        await atv.logout()
+        # Do not forget to close
+        await atv.close()
 
 
 if __name__ == '__main__':

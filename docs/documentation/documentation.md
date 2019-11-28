@@ -43,3 +43,9 @@ To get the work done, `pyatv` requires some other pieces of software, more speci
 - protobuf >= 3.4.0
 - srptools >= 0.2.0
 - tlslite-ng >= 0.7.0
+
+### Roadmap
+
+Current roadmap is available on GitHub:
+
+**[Roadmap](https://github.com/postlund/pyatv/milestones)**
