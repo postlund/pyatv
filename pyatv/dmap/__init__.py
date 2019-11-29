@@ -335,8 +335,7 @@ class DmapPushUpdater(PushUpdater):
     def stop(self):
         """No longer wait for push updates."""
         if self._future is not None:
-            # TODO: pylint does not seem to figure out that cancel exists?
-            self._future.cancel()  # pylint: disable=no-member
+            self._future.cancel()
             self._future = None
 
     async def _poller(self, initial_delay):

@@ -1,7 +1,7 @@
 """Simple example that shows how to manually connect to an Apple TV."""
 import asyncio
-import pyatv
-from pyatv import conf
+
+from pyatv import conf, connect
 
 # Enter config used to connect
 NAME = 'My Apple TV'
@@ -18,7 +18,7 @@ async def print_what_is_playing(loop):
     config.add_service(conf.DmapService('some_id', HSGID))
 
     print('Connecting to {0}'.format(config.address))
-    atv = await pyatv.connect(config, loop)
+    atv = await connect(config, loop)
 
     try:
         print(await atv.metadata.playing())

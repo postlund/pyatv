@@ -65,7 +65,6 @@ def first(dmap_data, *path):
     return None
 
 
-# #TODO: Also a bad method that should be re-written
 def pprint(data, tag_lookup, indent=0):
     """Return a pretty formatted string of parsed DMAP data."""
     output = ''

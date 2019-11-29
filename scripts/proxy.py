@@ -310,8 +310,6 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
             'Pair-Setup-Encrypt-Info',
             binascii.unhexlify(self._session.key))
 
-        chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-
         acc_device_x = hkdf_expand(
             'Pair-Setup-Accessory-Sign-Salt',
             'Pair-Setup-Accessory-Sign-Info',

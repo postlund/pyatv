@@ -3,7 +3,7 @@
 from aiohttp import ClientSession
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
-from pyatv import exceptions
+from pyatv import exceptions, net
 from pyatv.airplay import player
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
@@ -15,14 +15,23 @@ START_POSITION = 0.8
 
 class AirPlayPlayerTest(AioHTTPTestCase):
 
-    def setUp(self):
-        AioHTTPTestCase.setUp(self)
+    async def setUpAsync(self):
+        await AioHTTPTestCase.setUpAsync(self)
 
         # This is a hack that overrides asyncio.sleep to avoid making the test
         # slow. It also counts number of calls, since this is quite important
         # to the general function.
         player.asyncio.sleep = self.fake_asyncio_sleep
         self.no_of_sleeps = 0
+
+        self.session = ClientSession(loop=self.loop)
+        http = net.HttpSession(
+          self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
+        self.player = player.AirPlayPlayer(self.loop, http)
+
+    async def tearDownAsync(self):
+        await AioHTTPTestCase.tearDownAsync(self)
+        await self.session.close()
 
     async def get_application(self, loop=None):
         self.fake_device = FakeAirPlayDevice(self)
@@ -38,25 +47,16 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        session = ClientSession(loop=self.loop)
-        aplay = player.AirPlayPlayer(
-            self.loop, session, '127.0.0.1', port=self.server.port)
-        await aplay.play_url(STREAM, position=START_POSITION)
+        await self.player.play_url(STREAM, position=START_POSITION)
 
         self.assertEqual(self.fake_device.last_airplay_url, STREAM)
         self.assertEqual(self.fake_device.last_airplay_start, START_POSITION)
         self.assertIsNotNone(self.fake_device.last_airplay_uuid)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
 
-        await session.close()
-
     @unittest_run_loop
     async def test_play_video_no_permission(self):
         self.usecase.airplay_playback_playing_no_permission()
 
-        session = ClientSession(loop=self.loop)
-        aplay = player.AirPlayPlayer(
-            self.loop, session, '127.0.0.1', port=self.server.port)
-
         with self.assertRaises(exceptions.NoCredentialsError):
-            await aplay.play_url(STREAM, position=START_POSITION)
+            await self.player.play_url(STREAM, position=START_POSITION)

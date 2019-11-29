@@ -6,7 +6,7 @@ import logging
 
 from collections import namedtuple
 
-from pyatv.mrp import (messages, protobuf)
+from pyatv.mrp import messages
 from pyatv.mrp.auth import MrpPairingVerifier
 from pyatv.mrp.srp import Credentials
 
@@ -82,29 +82,9 @@ class MrpProtocol:
         # been enabled
         await self.send(messages.set_connection_state())
 
-        async def _wait_for_updates(_, semaphore):
-            # Use a counter here whenever more than one message is expected
-            semaphore.release()
-
-        # Wait for some stuff to arrive before returning
-        semaphore = asyncio.Semaphore(value=0, loop=self.loop)
-        self.add_listener(_wait_for_updates,
-                          protobuf.SET_STATE_MESSAGE,
-                          data=semaphore,
-                          one_shot=True)
-
         # Subscribe to updates at this stage
         await self.send(messages.client_updates_config())
         await self.send_and_receive(messages.get_keyboard_session())
-
-        try:
-            await asyncio.wait_for(
-                semaphore.acquire(), 1, loop=self.loop)
-        except asyncio.TimeoutError:
-            # This is not an issue itself, but I should do something better.
-            # Basically this gives the device about one second to respond with
-            # some metadata before continuing.
-            pass
 
     def stop(self):
         """Disconnect from device."""

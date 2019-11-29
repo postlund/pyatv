@@ -115,7 +115,7 @@ class MrpPairingVerifier:
         msg = messages.crypto_pairing({
             tlv8.TLV_SEQ_NO: b'\x03',
             tlv8.TLV_ENCRYPTED_DATA: encrypted_data})
-        resp = await self.protocol.send_and_receive(
+        await self.protocol.send_and_receive(
             msg, generate_identifier=False)
 
         # TODO: check status code

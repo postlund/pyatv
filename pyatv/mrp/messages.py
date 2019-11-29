@@ -14,7 +14,6 @@ def create(message_type, priority=0):
     return message
 
 
-# TODO: default information here for the moment
 def device_information(name, identifier):
     """Create a new DEVICE_INFO_MESSAGE."""
     # pylint: disable=no-member

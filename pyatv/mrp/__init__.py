@@ -138,7 +138,6 @@ class MrpRemoteControl(RemoteControl):
 
     def set_repeat(self, repeat_mode):
         """Change repeat mode."""
-        # TODO: extract to convert module
         if int(repeat_mode) == const.REPEAT_STATE_OFF:
             state = 1
         elif int(repeat_mode) == const.REPEAT_STATE_ALL:
