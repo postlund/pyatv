@@ -66,7 +66,7 @@ instead.
 You can of course specify `--mrp-credentials` and `--airplay-credentials`
 at the same time:
 
-    atvremote --id 40:CB:C0:A8:DE:9A --mrp-credentials `cat creds` --airplay-credentials `airplay_creds` ...
+    atvremote --id 40:CB:C0:A8:DE:9A --mrp-credentials `cat mrp_creds` --airplay-credentials `cat airplay_creds` ...
 
 *NB: Currently, pyatv does not have any methods of storing credentials persistently,
 that is why this process is cumbersome. Work to improve this is planned for a later
