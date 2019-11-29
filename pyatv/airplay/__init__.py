@@ -36,11 +36,10 @@ class AirPlayAPI(AirPlay):  # pylint: disable=too-few-public-methods
         return split[1]
 
     async def _player(self, session):
-        player = AirPlayPlayer(
-            self.loop, session, self.config.address, self.service.port)
         http = net.HttpSession(
             session, 'http://{0}:{1}/'.format(
                 self.config.address, self.service.port))
+        player = AirPlayPlayer(self.loop, http)
 
         # If credentials have been loaded, do device verification first
         credentials = self._get_credentials()

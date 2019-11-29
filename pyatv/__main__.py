@@ -9,8 +9,7 @@ import asyncio
 import argparse
 from argparse import ArgumentTypeError
 
-import pyatv
-from pyatv import (const, exceptions, interface)
+from pyatv import (const, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
     AppleTV, DmapService, MrpService, AirPlayService)
 from pyatv.dmap import tag_definitions
@@ -41,7 +40,7 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
     if not args.name:
         options['identifier'] = args.id
 
-    atvs = await pyatv.scan(loop, **options)
+    atvs = await scan(loop, **options)
     if not atvs:
         logging.error('Could not find any Apple TV on current network')
         return None
@@ -107,7 +106,7 @@ class GlobalCommands:
 
     async def scan(self):
         """Scan for Apple TVs on the network."""
-        atvs = await pyatv.scan(self.loop, timeout=self.args.scan_timeout)
+        atvs = await scan(self.loop, timeout=self.args.scan_timeout)
         _print_found_apple_tvs(atvs)
 
         return 0
@@ -132,7 +131,7 @@ class GlobalCommands:
                 'remote_name': self.args.remote_name,
             })
 
-        pairing = await pyatv.pair(
+        pairing = await pair(
             apple_tv, self.args.protocol, self.loop, **options)
 
         try:
@@ -248,8 +247,8 @@ def _in_range(lower, upper, allow_none=False):
             return None
         if int(value) >= lower and int(value) < upper:
             return int(value)
-        raise ArgumentTypeError('Must be greater >= {} and < {}'.format(
-            lower, upper))
+        raise argparse.ArgumentTypeError(
+            'Must be greater >= {} and < {}'.format(lower, upper))
     return _checker
 
 
@@ -429,7 +428,7 @@ async def _handle_commands(args, loop):
         config.add_service(AirPlayService(
             args.id, credentials=args.airplay_credentials))
 
-    atv = await pyatv.connect(config, loop, protocol=args.protocol)
+    atv = await connect(config, loop, protocol=args.protocol)
     atv.push_updater.listener = PushListener()
 
     try:

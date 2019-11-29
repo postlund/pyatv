@@ -16,7 +16,7 @@ class MrpConnection(asyncio.Protocol):
 
     def __init__(self, host, port, loop):
         """Initialize a new MrpConnection."""
-        self.host = str(host)  # TODO: which datatype do I want here?
+        self.host = host
         self.port = port
         self.loop = loop
         self.listener = None

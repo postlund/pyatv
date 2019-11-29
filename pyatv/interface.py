@@ -9,7 +9,6 @@ from abc import (ABCMeta, abstractmethod, abstractproperty)
 from pyatv import (convert, exceptions, net)
 
 
-# TODO: make these methods more pretty and safe
 def _get_first_sentence_in_pydoc(obj):
     doc = obj.__doc__
     index = doc.find('.')
