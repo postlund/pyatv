@@ -57,4 +57,4 @@ class MrpPairingHandler(PairingHandler):
 
     def pin(self, pin):
         """Pin code used for pairing."""
-        self.pin_code = pin
+        self.pin_code = str(pin).zfill(4)
