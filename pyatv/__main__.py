@@ -121,12 +121,9 @@ class GlobalCommands:
 
         if self.args.protocol is None:
             logging.warning('No protocol specified')
-            try:
-                print('Assuming protocol {0}'.format(
-                    convert.protocol_str(apple_tv.get_services()[0])))
-                self.args.protocol = apple_tv.get_services()[0]
-            except Exception:
-                return 1
+            print('Assuming protocol {0}'.format(
+                convert.protocol_str(apple_tv.get_services()[0])))
+            self.args.protocol = apple_tv.get_services()[0]
 
         options = {}
 
