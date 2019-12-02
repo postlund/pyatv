@@ -57,6 +57,7 @@ class AppleTV:
         return self._services.get(protocol, None)
 
     def get_services(self):
+        """returns numbered list of services"""
         return list(self._services)
 
     @property
