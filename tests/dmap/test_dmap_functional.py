@@ -1,11 +1,12 @@
 """Functional tests using the API with a fake DMAP Apple TV."""
 
+import asyncio
 import ipaddress
 
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv import exceptions
+from pyatv import exceptions, interface
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
@@ -29,6 +30,30 @@ HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
     'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
 HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
     'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
+
+
+class DummyDeviceListener(interface.DeviceListener):
+
+    def __init__(self):
+        self.closed_sem = asyncio.Semaphore(0)
+        self.lost_sem = asyncio.Semaphore(0)
+
+    def connection_lost(self, exception):
+        self.lost_sem.release()
+
+    def connection_closed(self):
+        self.closed_sem.release()
+
+
+class DummyPushListener:
+
+    @staticmethod
+    def playstatus_update(updater, playstatus):
+        updater.stop()
+
+    @staticmethod
+    def playstatus_error(updater, exception):
+        pass
 
 
 class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
@@ -103,3 +128,31 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.atv = await self.get_connected_device(PAIRING_GUID)
         session_id = await self.atv.connect()
         self.assertEqual(SESSION_ID, session_id)
+
+    @unittest_run_loop
+    async def test_connection_closed(self):
+        self.usecase.video_playing(paused=False, title='video1',
+                                   total_time=40, position=10,
+                                   revision=0)
+
+        self.atv.listener = DummyDeviceListener()
+        self.atv.push_updater.listener = DummyPushListener()
+        await self.atv.push_updater.start()
+
+        # Callback is scheduled on the event loop, so a semaphore is used
+        # to synchronize with the loop
+        await asyncio.wait_for(
+            self.atv.listener.closed_sem.acquire(), timeout=3.0)
+
+    @unittest_run_loop
+    async def test_connection_lost(self):
+        self.usecase.server_closes_connection()
+
+        self.atv.listener = DummyDeviceListener()
+        self.atv.push_updater.listener = DummyPushListener()
+        await self.atv.push_updater.start()
+
+        # Callback is scheduled on the event loop, so a semaphore is used
+        # to synchronize with the loop
+        await asyncio.wait_for(
+            self.atv.listener.lost_sem.acquire(), timeout=3.0)

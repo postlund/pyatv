@@ -278,7 +278,7 @@ class MrpPushUpdater(PushUpdater):
     def start(self, initial_delay=0):
         """Wait for push updates from device.
 
-        Will throw NoAsyncListenerError if no listner has been set.
+        Will throw NoAsyncListenerError if no listener has been set.
         """
         if self.listener is None:
             raise exceptions.NoAsyncListenerError
@@ -286,14 +286,18 @@ class MrpPushUpdater(PushUpdater):
         self.psm.listener = self
 
     def stop(self):
-        """No longer wait for push updates."""
+        """No longer forward updates to listener."""
         self.psm.listener = None
 
     async def state_updated(self):
         """State was updated for active player."""
-        playstatus = await self.metadata.playing()
-        self.loop.call_soon(
-            self.listener.playstatus_update, self, playstatus)
+        try:
+            playstatus = await self.metadata.playing()
+            self.loop.call_soon(
+                self.listener.playstatus_update, self, playstatus)
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.debug('Playstatus error occurred: %s', ex)
+            self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
 
 class MrpAppleTV(AppleTV):
@@ -309,7 +313,7 @@ class MrpAppleTV(AppleTV):
         self._mrp_service = config.get_service(const.PROTOCOL_MRP)
 
         self._connection = MrpConnection(
-            config.address, self._mrp_service.port, loop)
+            config.address, self._mrp_service.port, loop, atv=self)
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(
             loop, self._connection, self._srp, self._mrp_service)
@@ -324,7 +328,7 @@ class MrpAppleTV(AppleTV):
     async def connect(self):
         """Initiate connection to device.
 
-        Not needed as it is performed automatically.
+        No need to call it yourself, it's done automatically.
         """
         await self._protocol.start()
 

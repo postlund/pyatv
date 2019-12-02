@@ -7,7 +7,6 @@ import binascii
 import asyncio
 
 import argparse
-from argparse import ArgumentTypeError
 
 from pyatv import (const, convert, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
@@ -139,7 +138,7 @@ class GlobalCommands:
 
         try:
             await self._perform_pairing(pairing)
-        except:  # pylint: disable=bare-except  # noqa
+        except Exception:  # pylint: disable=broad-except  # noqa
             logging.exception('Pairing failed')
             return 3
         finally:
@@ -238,10 +237,21 @@ class PushListener:
         print(20*'-', flush=True)
 
     @staticmethod
-    def playstatus_error(updater, exception):
+    def playstatus_error(_, exception):
         """Inform about an error and restart push updates."""
         print("An error occurred (restarting): {0}".format(exception))
-        updater.start(initial_delay=1)
+
+
+class DeviceListener(interface.DeviceListener):
+    """Internal listener for generic device updates."""
+
+    def connection_lost(self, exception):
+        """Call when unexpectedly being disconnected from device."""
+        print("Connection lost with error:", str(exception), file=sys.stderr)
+
+    def connection_closed(self):
+        """Call when connection was (intentionally) closed."""
+        logging.debug("Connection was closed properly")
 
 
 def _in_range(lower, upper, allow_none=False):
@@ -268,7 +278,8 @@ class TransformProtocol(argparse.Action):
         elif values == 'airplay':
             setattr(namespace, self.dest, const.PROTOCOL_AIRPLAY)
         else:
-            raise ArgumentTypeError('Valid protocols are: mrp, dmap, airplay')
+            raise argparse.ArgumentTypeError(
+                'Valid protocols are: mrp, dmap, airplay')
 
 
 async def cli_handler(loop):
@@ -432,6 +443,7 @@ async def _handle_commands(args, loop):
             args.id, credentials=args.airplay_credentials))
 
     atv = await connect(config, loop, protocol=args.protocol)
+    atv.listener = DeviceListener()
     atv.push_updater.listener = PushListener()
 
     try:
@@ -529,7 +541,7 @@ def main():
         except SystemExit:
             pass  # sys.exit() was used - do nothing
 
-        except:  # pylint: disable=bare-except  # noqa
+        except Exception:  # pylint: disable=broad-except  # noqa
             import traceback
 
             traceback.print_exc(file=sys.stderr)
