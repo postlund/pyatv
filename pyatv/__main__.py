@@ -9,7 +9,7 @@ import asyncio
 import argparse
 from argparse import ArgumentTypeError
 
-from pyatv import (const, exceptions, interface, scan, connect, pair)
+from pyatv import (const, convert, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
     AppleTV, DmapService, MrpService, AirPlayService)
 from pyatv.dmap import tag_definitions
@@ -113,14 +113,19 @@ class GlobalCommands:
 
     async def pair(self):
         """Pair pyatv as a remote control with an Apple TV."""
-        if self.args.protocol is None:
-            logging.error('No protocol specified')
-            return 1
-
         apple_tv = await _scan_for_device(
             self.args, self.args.scan_timeout, self.loop)
+
         if not apple_tv:
             return 2
+        if self.args.protocol is None:
+            logging.warning('No protocol specified')
+            try:
+                print('Assuming protocol {0}'.format(
+                    convert.protocol_str(next(iter(apple_tv._services)))))
+                self.args.protocol = next(iter(apple_tv._services))
+            except:
+                return 1
 
         options = {}
 
