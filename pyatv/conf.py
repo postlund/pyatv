@@ -56,6 +56,9 @@ class AppleTV:
 
         return self._services.get(protocol, None)
 
+    def get_services(self):
+        return list(self._services)
+
     @property
     def services(self):
         """Return all supported services."""
