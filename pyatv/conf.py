@@ -58,7 +58,7 @@ class AppleTV:
 
     def get_services(self):
         """Return numbered list of services."""
-        return list(self._services)
+        return sorted(list(self._services))
 
     @property
     def services(self):

@@ -69,6 +69,7 @@ Which protocols a device supports can be seen with `scan`. But in general you ne
 either `mrp` (devices running tvOS) or `dmap` (Apple TV 3 and earlier). If you also want to
 stream video, you can pair `airplay` as well. The procedure is the same for all of them, just
 change the argument provided to `--protocol`.
+If no protocol is specified, it will assume `mrp` (devices running tvOS) or `dmap` (Apple TV 3 and earlier) first, or AirPlay if that's the only one available.
 
 ### Credentials
 
