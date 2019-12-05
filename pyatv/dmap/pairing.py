@@ -48,7 +48,8 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
         """Initialize a new instance."""
         super().__init__(session, config.get_service(const.PROTOCOL_DMAP))
         self._loop = loop
-        self._zeroconf = kwargs.get('zeroconf', Zeroconf(loop))
+        self._zeroconf = kwargs.get(
+            'zeroconf', Zeroconf(loop, address_family=[netifaces.AF_INET]))
         self._name = kwargs.get('name', 'pyatv')
         self._web_server = None
         self._server = None
