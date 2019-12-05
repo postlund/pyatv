@@ -113,7 +113,7 @@ def insert_changes(version):
         with open("CHANGES.rst", "w") as fw:
             fw.write(CHANGES_TEMPLATE.format(
                 version=version_str,
-                separators="=" * len(version_str)))
+                separators="-" * len(version_str)))
             fw.write("\n".join(changes[3:]))
 
 
