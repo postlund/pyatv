@@ -1,6 +1,30 @@
 CHANGES
 =======
 
+0.4.0a7 (2019-12-05)
+--------------------
+
+Noteworthy:
+
+- Better handling of PINs with leading zeros in MRP
+- No re-use of ClientSession in AirPlay hopefully fixes dangling
+  connections (i.e. spinng wheel after playback)
+- Documentation finalized
+
+All changes:
+
+ed026dc Add initial script to make releases
+514272f Add interface to report device disconnects
+6607187 [fix] typo in getting_started.md
+703ccc7 Support PINs with leading zeros in MRP
+98a4d53 General clean-up of various parts
+69a22e0 [fix] Other typo in getting_started.md
+b538644 Do not re-use ClientSession for AirPlay
+aa8f629 Throw exception if MRP pairing fails
+652b039 Finalize documentation for 0.4.0
+1cd5508 Add initial text about concepts to documentation
+5b51db5 Add badge to LGTM
+
 0.4.0a6 (2019-11-26)
 --------------------
 
