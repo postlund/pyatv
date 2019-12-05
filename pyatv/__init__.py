@@ -4,6 +4,7 @@ import asyncio
 import logging
 from ipaddress import ip_address
 
+import netifaces
 from aiozeroconf import ServiceBrowser, Zeroconf
 
 from pyatv import (conf, const, exceptions, net)
@@ -108,7 +109,7 @@ class _ServiceListener:
 async def scan(loop, timeout=5, identifier=None, protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     listener = _ServiceListener(loop)
-    zeroconf = Zeroconf(loop)
+    zeroconf = Zeroconf(loop, address_family=[netifaces.AF_INET])
     try:
         ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
         ServiceBrowser(zeroconf, DEVICE_SERVICE, listener)

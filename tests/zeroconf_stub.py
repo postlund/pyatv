@@ -106,6 +106,6 @@ class ZeroconfStub:
 def stub(module, *services):
     """Stub a module using zeroconf."""
     instance = ZeroconfStub(list(services))
-    module.Zeroconf = lambda loop: instance
+    module.Zeroconf = lambda loop, address_family=None: instance
     module.ServiceBrowser = ServiceBrowserStub
     return instance
