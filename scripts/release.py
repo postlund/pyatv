@@ -68,6 +68,17 @@ def verify_dist():
         bail("The dist directory must be empty!")
 
 
+def create_branch(version):
+    """Create release branch."""
+    _LOGGER.info("Verifying that workspace is clean")
+    if call("git status --untracked-file=no --porcelain") != "":
+        bail("Workspace is not clean!")
+
+    branch_name = "release_" + version.replace(".", "_")
+    _LOGGER.info("Checking out new branch %s", branch_name)
+    call("git checkout -b {0} origin/master", branch_name)
+
+
 def install_dependencies():
     """Install python dependencies."""
     for package in ["wheel", "twine"]:
@@ -162,6 +173,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="release maker")
     parser.add_argument("version", help="version to release")
+    parser.add_argument("--skip-branch", default=False,
+                        action="store_true",
+                        help="skip creating branch")
     parser.add_argument("--skip-dependencies", default=False,
                         action="store_true",
                         help="skip installing dependencies")
@@ -204,6 +218,8 @@ def main():
 
     if args.prepare_release:
         _LOGGER.info("Preparing to release %s", version)
+        if not args.skip_branch:
+            create_branch(version)
         if not args.skip_dependencies:
             install_dependencies()
         if not args.skip_update_version:
