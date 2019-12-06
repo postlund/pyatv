@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.4.0a8 (2019-12-06)
+--------------------
+
+Changes:
+
+* Leading zeros when pairing AirPlay works now
+
+All changes:
+
+bf71b8f Include all changes from git in CHANGES.rst
+3086be5 Create release branch automatically
+4e8854a Support leading zeros for PINs in AirPlay
+
+
 0.4.0a7 (2019-12-05)
 --------------------
 
