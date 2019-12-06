@@ -28,6 +28,10 @@ Notes:
 
 REMOVE ME
 
+All changes:
+
+{all_changes}
+
 """
 
 
@@ -88,8 +92,6 @@ def install_dependencies():
 
 def update_version(version):
     """Update version constants in const.py."""
-    from pyatv import const
-    _LOGGER.info("Current version is: %s", const.__version__)
     _LOGGER.info("Updating with new version: %s", version)
 
     output = Path("pyatv/const.py").read_text()
@@ -121,10 +123,18 @@ def insert_changes(version):
         version_str = "{0} ({1})".format(
             version, datetime.now().strftime("%Y-%m-%d"))
 
+        _LOGGER.info("Finding previous release commit")
+        message = call('git log -1 --grep="^Release "')
+        commit_sha = message.split("\n")[0].split(" ")[1]
+
+        _LOGGER.info("Getting all changes since %s", commit_sha)
+        all_changes = call("git log --oneline {0}..HEAD", commit_sha)
+
         with open("CHANGES.rst", "w") as fw:
             fw.write(CHANGES_TEMPLATE.format(
                 version=version_str,
-                separators="-" * len(version_str)))
+                separators="-" * len(version_str),
+                all_changes=all_changes))
             fw.write("\n".join(changes[3:]))
 
 
