@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.4.0a9 (2019-12-07)
+--------------------
+
+All changes:
+
+c25da51 Fix MRP idle state
+
 0.4.0a8 (2019-12-06)
 --------------------
 
@@ -13,7 +20,6 @@ All changes:
 bf71b8f Include all changes from git in CHANGES.rst
 3086be5 Create release branch automatically
 4e8854a Support leading zeros for PINs in AirPlay
-
 
 0.4.0a7 (2019-12-05)
 --------------------
