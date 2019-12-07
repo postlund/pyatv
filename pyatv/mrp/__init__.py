@@ -173,11 +173,10 @@ class MrpPlaying(Playing):
     @property
     def play_state(self):
         """Play state, e.g. playing or paused."""
-        if self._state is None:
-            return const.PLAY_STATE_IDLE
-
         state = self._state.playback_state
         ssm = SetStateMessage_pb2.SetStateMessage
+        if state is None:
+            return const.PLAY_STATE_IDLE
         if state == ssm.Playing:
             return const.PLAY_STATE_PLAYING
         if state == ssm.Paused:
