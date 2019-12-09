@@ -2,9 +2,13 @@
 
 import plistlib
 import binascii
+import logging
 from collections import namedtuple
 
 from aiohttp import web
+
+_LOGGER = logging.getLogger(__name__)
+
 
 # --- START AUTHENTICATION DATA VALID SESSION (FROM DEVICE) ---
 

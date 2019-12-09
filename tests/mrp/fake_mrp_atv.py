@@ -17,6 +17,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         super().__init__(testcase)
         self.buttons_press_count = 0
         self.last_button_pressed = None
+        self.connection_state = None
 
         self.server = None
         self.buffer = b''
@@ -24,6 +25,12 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         self.mapping = {
             protobuf.DEVICE_INFO_MESSAGE: self.handle_device_info,
             protobuf.CRYPTO_PAIRING_MESSAGE: self.handle_crypto_pairing,
+            protobuf.SET_CONNECTION_STATE_MESSAGE:
+                self.handle_set_connection_state,
+            protobuf.CLIENT_UPDATES_CONFIG_MESSAGE:
+                self.handle_client_updates_config_message,
+            protobuf.GET_KEYBOARD_SESSION_MESSAGE:
+                self.handle_get_keyboard_session_message,
             }
 
     @asyncio.coroutine
@@ -47,23 +54,24 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
     def data_received(self, data):
         self.buffer += data
 
-        length, raw = variant.read_variant(self.buffer)
-        if len(raw) < length:
-            return
+        while self.buffer:
+            length, raw = variant.read_variant(self.buffer)
+            if len(raw) < length:
+                return
 
-        data = raw[:length]
-        self.buffer = raw[length:]
-        parsed = protobuf.ProtocolMessage()
-        parsed.ParseFromString(data)
-        _LOGGER.info('Incoming message: %s', parsed)
+            data = raw[:length]
+            self.buffer = raw[length:]
+            parsed = protobuf.ProtocolMessage()
+            parsed.ParseFromString(data)
+            _LOGGER.info('Incoming message: %s', parsed)
 
-        try:
-            def unhandled_message(message):
-                _LOGGER.warning('No message handler for %s', message)
+            try:
+                def unhandled_message(message):
+                    _LOGGER.warning('No message handler for %s', message)
 
-            self.mapping.get(parsed.type, unhandled_message)(parsed)
-        except Exception:
-            _LOGGER.exception('Error while dispatching message')
+                self.mapping.get(parsed.type, unhandled_message)(parsed)
+            except Exception:
+                _LOGGER.exception('Error while dispatching message')
 
     def handle_device_info(self, message):
         _LOGGER.debug('Received device info message')
@@ -74,6 +82,23 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
 
     def handle_crypto_pairing(self, message):
         _LOGGER.debug('Received crypto pairing message')
+
+    def handle_set_connection_state(self, message):
+        inner = message.inner()
+        _LOGGER.debug('Changed connection state to %d', inner.state)
+        self.connection_state = inner.state
+
+    def handle_client_updates_config_message(self, message):
+        _LOGGER.debug('Update client config')
+
+    def handle_get_keyboard_session_message(self, message):
+        _LOGGER.debug('Get keyboard session')
+
+        # This message has a lot more fields, but pyatv currently
+        # not use them so ignore for now
+        resp = messages.create(protobuf.KEYBOARD_MESSAGE)
+        resp.identifier = message.identifier
+        self._send(resp)
 
 
 class AppleTVUseCases(AirPlayUseCases):
