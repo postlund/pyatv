@@ -24,14 +24,14 @@ class PlayerState:
         self.playback_state = None
         self.supported_commands = []
         self.timestamp = 0
-        self._items = []
-        self._location = 0
+        self.items = []
+        self.location = 0
 
     @property
     def metadata(self):
         """Metadata of currently playing item."""
-        if len(self._items) >= (self._location + 1):
-            return self._items[self._location].metadata
+        if len(self.items) >= (self.location + 1):
+            return self.items[self.location].metadata
         return None
 
     def metadata_field(self, field):
@@ -56,13 +56,13 @@ class PlayerState:
 
         if setstate.HasField('playbackQueue'):
             queue = setstate.playbackQueue
-            self._items = queue.contentItems
-            self._location = queue.location
+            self.items = queue.contentItems
+            self.location = queue.location
 
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
         for updated_item in item_update.contentItems:
-            for existing in self._items:
+            for existing in self.items:
                 if updated_item.identifier == existing.identifier:
                     existing.CopyFrom(updated_item)
 

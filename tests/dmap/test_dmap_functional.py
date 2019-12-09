@@ -19,7 +19,8 @@ SESSION_ID = 55555
 REMOTE_NAME = 'pyatv remote'
 PIN_CODE = 1234
 
-EXPECTED_ARTWORK = b'1234'
+ARTWORK_BYTES = b'1234'
+ARTWORK_MIMETYPE = 'image/png'
 AIRPLAY_STREAM = 'http://stream'
 
 # This is valid for the PAIR in the pairing module and pin 1234
@@ -112,10 +113,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # re-login with a new session id (1234)
         self.usecase.force_relogin(1234)
         self.usecase.artwork_no_permission()
-        self.usecase.change_artwork(EXPECTED_ARTWORK)
+        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
 
         artwork = await self.atv.metadata.artwork()
-        self.assertEqual(artwork, EXPECTED_ARTWORK)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
 
     @unittest_run_loop
     async def test_login_with_hsgid_succeed(self):
@@ -230,14 +231,16 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_metadata_artwork(self):
-        self.usecase.change_artwork(EXPECTED_ARTWORK)
+        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
 
         artwork = await self.atv.metadata.artwork()
-        self.assertEqual(artwork, EXPECTED_ARTWORK)
+        self.assertIsNotNone(artwork)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
 
     @unittest_run_loop
     async def test_metadata_artwork_none_if_not_available(self):
-        self.usecase.change_artwork(b'')
+        self.usecase.change_artwork(b'', None)
 
         artwork = await self.atv.metadata.artwork()
         self.assertIsNone(artwork)

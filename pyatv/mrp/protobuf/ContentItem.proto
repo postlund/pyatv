@@ -6,13 +6,16 @@ import "pyatv/mrp/protobuf/LanguageOption.proto";
 message ContentItem {
   optional string identifier = 1;
   optional ContentItemMetadata metadata = 2;
-  optional string info = 3;
-  repeated LanguageOption availableLanguageOptions = 4;
-  repeated LanguageOption currentLanguageOptions = 5;
-//  optional Lyrics lyrics = 6;
-//  repeated Sections sections = 7;
-  optional string parentIdentifier = 8;
-  optional string ancestorIdentifier = 9;
-  optional string queueIdentifier = 10;
-  optional string requestIdentifier = 11;
+  optional bytes artworkData = 3;
+  optional string info = 4;
+  repeated LanguageOption availableLanguageOptions = 5;
+  repeated LanguageOption currentLanguageOptions = 6;
+//  optional Lyrics lyrics = 7;
+//  repeated Sections sections = 8;
+  optional string parentIdentifier = 9;
+  optional string ancestorIdentifier = 10;
+  optional string queueIdentifier = 11;
+  optional string requestIdentifier = 12;
+  optional int32 artworkDataWidth = 13;
+  optional int32 artworkDataHeight = 14;
 }

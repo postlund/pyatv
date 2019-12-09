@@ -12,7 +12,7 @@ from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.protobuf import CommandInfo_pb2, SetStateMessage_pb2
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater)
+                             Playing, PushUpdater, ArtworkInfo)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -249,14 +249,26 @@ class MrpPlaying(Playing):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, psm, identifier):
+    def __init__(self, protocol, psm, identifier):
         """Initialize a new MrpPlaying."""
         super().__init__(identifier)
+        self.protocol = protocol
         self.psm = psm
 
     async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
-        raise exceptions.NotSupportedError
+        playing = self.psm.playing
+        metadata = playing.metadata
+        if not metadata or not metadata.artworkAvailable:
+            _LOGGER.debug('No artwork available')
+            return None
+
+        msg = messages.playback_queue_request(playing.location)
+        resp = await self.psm.protocol.send_and_receive(msg)
+        if resp.HasField('type'):
+            item = resp.inner().playbackQueue.contentItems[playing.location]
+            return ArtworkInfo(item.artworkData, metadata.artworkMIMEType)
+        return None
 
     async def playing(self):
         """Return what is currently playing."""
@@ -319,7 +331,8 @@ class MrpAppleTV(AppleTV):
         self._psm = PlayerStateManager(self._protocol, loop)
 
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._psm, config.identifier)
+        self._mrp_metadata = MrpMetadata(
+            self._protocol, self._psm, config.identifier)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._psm)
         self._airplay = airplay

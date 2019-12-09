@@ -18,8 +18,8 @@ from pyatv.mrp.protobuf.PlaybackQueueCapabilities_pb2 import (
     PlaybackQueueCapabilities as pyatv___mrp___protobuf___PlaybackQueueCapabilities_pb2___PlaybackQueueCapabilities,
 )
 
-from pyatv.mrp.protobuf.PlaybackQueueRequest_pb2 import (
-    PlaybackQueueRequest as pyatv___mrp___protobuf___PlaybackQueueRequest_pb2___PlaybackQueueRequest,
+from pyatv.mrp.protobuf.PlaybackQueueRequestMessage_pb2 import (
+    PlaybackQueueRequestMessage as pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage,
 )
 
 from pyatv.mrp.protobuf.PlaybackQueue_pb2 import (
@@ -95,7 +95,7 @@ class SetStateMessage(google___protobuf___message___Message):
     def playerPath(self) -> pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath: ...
 
     @property
-    def request(self) -> pyatv___mrp___protobuf___PlaybackQueueRequest_pb2___PlaybackQueueRequest: ...
+    def request(self) -> pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage: ...
 
     def __init__(self,
         *,
@@ -107,7 +107,7 @@ class SetStateMessage(google___protobuf___message___Message):
         playbackState : typing___Optional[SetStateMessage.PlaybackState] = None,
         playbackQueueCapabilities : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueCapabilities_pb2___PlaybackQueueCapabilities] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
-        request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequest_pb2___PlaybackQueueRequest] = None,
+        request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage] = None,
         playbackStateTimestamp : typing___Optional[float] = None,
         ) -> None: ...
     @classmethod

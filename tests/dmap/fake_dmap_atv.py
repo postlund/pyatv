@@ -294,7 +294,7 @@ class AppleTVUseCases(AirPlayUseCases):
         else:
             self.device.responses['login'].insert(0, response)
 
-    def change_artwork(self, artwork):
+    def change_artwork(self, artwork, mimetype):
         """Call this method to change artwork response."""
         self.device.responses['artwork'].insert(
             0, ArtworkResponse(artwork, 200))
