@@ -1,9 +1,14 @@
 syntax = "proto2";
 
+import "pyatv/mrp/protobuf/ProtocolMessage.proto";
 import "pyatv/mrp/protobuf/PlaybackQueueContext.proto";
 import "pyatv/mrp/protobuf/PlayerPath.proto";
 
-message PlaybackQueueRequest {
+extend ProtocolMessage {
+  optional PlaybackQueueRequestMessage playbackQueueRequestMessage = 37;
+}
+
+message PlaybackQueueRequestMessage {
   optional int32 location = 1;
   optional int32 length = 2;
   optional bool includeMetadata = 3;

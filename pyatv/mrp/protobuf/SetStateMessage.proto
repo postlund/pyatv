@@ -6,7 +6,7 @@ import "pyatv/mrp/protobuf/PlaybackQueue.proto";
 import "pyatv/mrp/protobuf/SupportedCommands.proto";
 import "pyatv/mrp/protobuf/PlaybackQueueCapabilities.proto";
 import "pyatv/mrp/protobuf/PlayerPath.proto";
-import "pyatv/mrp/protobuf/PlaybackQueueRequest.proto";
+import "pyatv/mrp/protobuf/PlaybackQueueRequestMessage.proto";
 
 extend ProtocolMessage {
   optional SetStateMessage setStateMessage = 9;
@@ -30,6 +30,6 @@ message SetStateMessage {
   optional PlaybackState playbackState = 6;
   optional PlaybackQueueCapabilities playbackQueueCapabilities = 8;
   optional PlayerPath playerPath = 9;
-  optional PlaybackQueueRequest request = 10;
+  optional PlaybackQueueRequestMessage request = 10;
   optional double playbackStateTimestamp = 11;
 }

@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
 )
 
 from google.protobuf.internal.containers import (
@@ -31,7 +32,7 @@ from typing_extensions import (
 )
 
 
-class PlaybackQueueRequest(google___protobuf___message___Message):
+class PlaybackQueueRequestMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     location = ... # type: int
     length = ... # type: int
@@ -76,7 +77,7 @@ class PlaybackQueueRequest(google___protobuf___message___Message):
         isLegacyNowPlayingInfoRequest : typing___Optional[bool] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> PlaybackQueueRequest: ...
+    def FromString(cls, s: bytes) -> PlaybackQueueRequestMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
@@ -85,3 +86,5 @@ class PlaybackQueueRequest(google___protobuf___message___Message):
     else:
         def HasField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"contentItemIdentifiers",b"contentItemIdentifiers",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> None: ...
+
+playbackQueueRequestMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

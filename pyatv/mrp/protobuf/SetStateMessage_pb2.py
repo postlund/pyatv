@@ -19,7 +19,7 @@ from pyatv.mrp.protobuf import PlaybackQueue_pb2 as pyatv_dot_mrp_dot_protobuf_d
 from pyatv.mrp.protobuf import SupportedCommands_pb2 as pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2
 from pyatv.mrp.protobuf import PlaybackQueueCapabilities_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2
 from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
-from pyatv.mrp.protobuf import PlaybackQueueRequest_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2
+from pyatv.mrp.protobuf import PlaybackQueueRequestMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequestMessage__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -27,9 +27,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n(pyatv/mrp/protobuf/SetStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\'pyatv/mrp/protobuf/NowPlayingInfo.proto\x1a&pyatv/mrp/protobuf/PlaybackQueue.proto\x1a*pyatv/mrp/protobuf/SupportedCommands.proto\x1a\x32pyatv/mrp/protobuf/PlaybackQueueCapabilities.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\x1a-pyatv/mrp/protobuf/PlaybackQueueRequest.proto\"\xf9\x03\n\x0fSetStateMessage\x12\'\n\x0enowPlayingInfo\x18\x01 \x01(\x0b\x32\x0f.NowPlayingInfo\x12-\n\x11supportedCommands\x18\x02 \x01(\x0b\x32\x12.SupportedCommands\x12%\n\rplaybackQueue\x18\x03 \x01(\x0b\x32\x0e.PlaybackQueue\x12\x11\n\tdisplayID\x18\x04 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x05 \x01(\t\x12\x35\n\rplaybackState\x18\x06 \x01(\x0e\x32\x1e.SetStateMessage.PlaybackState\x12=\n\x19playbackQueueCapabilities\x18\x08 \x01(\x0b\x32\x1a.PlaybackQueueCapabilities\x12\x1f\n\nplayerPath\x18\t \x01(\x0b\x32\x0b.PlayerPath\x12&\n\x07request\x18\n \x01(\x0b\x32\x15.PlaybackQueueRequest\x12\x1e\n\x16playbackStateTimestamp\x18\x0b \x01(\x01\"`\n\rPlaybackState\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05:;\n\x0fsetStateMessage\x12\x10.ProtocolMessage\x18\t \x01(\x0b\x32\x10.SetStateMessage')
+  serialized_pb=_b('\n(pyatv/mrp/protobuf/SetStateMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\'pyatv/mrp/protobuf/NowPlayingInfo.proto\x1a&pyatv/mrp/protobuf/PlaybackQueue.proto\x1a*pyatv/mrp/protobuf/SupportedCommands.proto\x1a\x32pyatv/mrp/protobuf/PlaybackQueueCapabilities.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\x1a\x34pyatv/mrp/protobuf/PlaybackQueueRequestMessage.proto\"\x80\x04\n\x0fSetStateMessage\x12\'\n\x0enowPlayingInfo\x18\x01 \x01(\x0b\x32\x0f.NowPlayingInfo\x12-\n\x11supportedCommands\x18\x02 \x01(\x0b\x32\x12.SupportedCommands\x12%\n\rplaybackQueue\x18\x03 \x01(\x0b\x32\x0e.PlaybackQueue\x12\x11\n\tdisplayID\x18\x04 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x05 \x01(\t\x12\x35\n\rplaybackState\x18\x06 \x01(\x0e\x32\x1e.SetStateMessage.PlaybackState\x12=\n\x19playbackQueueCapabilities\x18\x08 \x01(\x0b\x32\x1a.PlaybackQueueCapabilities\x12\x1f\n\nplayerPath\x18\t \x01(\x0b\x32\x0b.PlayerPath\x12-\n\x07request\x18\n \x01(\x0b\x32\x1c.PlaybackQueueRequestMessage\x12\x1e\n\x16playbackStateTimestamp\x18\x0b \x01(\x01\"`\n\rPlaybackState\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05:;\n\x0fsetStateMessage\x12\x10.ProtocolMessage\x18\t \x01(\x0b\x32\x10.SetStateMessage')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueue__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueue__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_SupportedCommands__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequestMessage__pb2.DESCRIPTOR,])
 
 
 SETSTATEMESSAGE_FIELD_NUMBER = 9
@@ -74,8 +74,8 @@ _SETSTATEMESSAGE_PLAYBACKSTATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=757,
-  serialized_end=853,
+  serialized_start=771,
+  serialized_end=867,
 )
 _sym_db.RegisterEnumDescriptor(_SETSTATEMESSAGE_PLAYBACKSTATE)
 
@@ -170,8 +170,8 @@ _SETSTATEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=348,
-  serialized_end=853,
+  serialized_start=355,
+  serialized_end=867,
 )
 
 _SETSTATEMESSAGE.fields_by_name['nowPlayingInfo'].message_type = pyatv_dot_mrp_dot_protobuf_dot_NowPlayingInfo__pb2._NOWPLAYINGINFO
@@ -180,7 +180,7 @@ _SETSTATEMESSAGE.fields_by_name['playbackQueue'].message_type = pyatv_dot_mrp_do
 _SETSTATEMESSAGE.fields_by_name['playbackState'].enum_type = _SETSTATEMESSAGE_PLAYBACKSTATE
 _SETSTATEMESSAGE.fields_by_name['playbackQueueCapabilities'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueCapabilities__pb2._PLAYBACKQUEUECAPABILITIES
 _SETSTATEMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
-_SETSTATEMESSAGE.fields_by_name['request'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequest__pb2._PLAYBACKQUEUEREQUEST
+_SETSTATEMESSAGE.fields_by_name['request'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueRequestMessage__pb2._PLAYBACKQUEUEREQUESTMESSAGE
 _SETSTATEMESSAGE_PLAYBACKSTATE.containing_type = _SETSTATEMESSAGE
 DESCRIPTOR.message_types_by_name['SetStateMessage'] = _SETSTATEMESSAGE
 DESCRIPTOR.extensions_by_name['setStateMessage'] = setStateMessage

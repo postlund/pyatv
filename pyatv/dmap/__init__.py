@@ -10,7 +10,7 @@ from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater)
+                             Playing, PushUpdater, ArtworkInfo)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -289,9 +289,12 @@ class DmapMetadata(Metadata):
         super().__init__(identifier)
         self.apple_tv = apple_tv
 
-    def artwork(self):
+    async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
-        return self.apple_tv.artwork()
+        data = await self.apple_tv.artwork()
+        if data:
+            return ArtworkInfo(data, 'image/png')
+        return None
 
     async def playing(self):
         """Return current device state."""

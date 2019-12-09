@@ -80,6 +80,17 @@ def client_updates_config(artwork=True, now_playing=False,
     return message
 
 
+def playback_queue_request(location, width=-1, height=400):
+    """Create a new PLAYBACK_QUEUE_REQUEST."""
+    message = create(protobuf.PLAYBACK_QUEUE_REQUEST_MESSAGE)
+    request = message.inner()
+    request.location = location
+    request.length = 1
+    request.artworkWidth = width
+    request.artworkHeight = height
+    return message
+
+
 def wake_device():
     """Create a new WAKE_DEVICE_MESSAGE."""
     return create(protobuf.WAKE_DEVICE_MESSAGE)

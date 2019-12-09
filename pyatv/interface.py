@@ -4,9 +4,13 @@ import re
 import inspect
 import hashlib
 
+from collections import namedtuple
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 
 from pyatv import (convert, exceptions, net)
+
+
+ArtworkInfo = namedtuple('ArtworkInfo', 'bytes mimetype')
 
 
 def _get_first_sentence_in_pydoc(obj):

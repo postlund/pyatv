@@ -12,6 +12,7 @@ from pyatv.mrp.protobuf import DeviceInfoMessage_pb2
 from pyatv.mrp.protobuf import GetKeyboardSessionMessage_pb2
 from pyatv.mrp.protobuf import KeyboardMessage_pb2
 from pyatv.mrp.protobuf import NotificationMessage_pb2
+from pyatv.mrp.protobuf import PlaybackQueueRequestMessage_pb2
 from pyatv.mrp.protobuf import RegisterForGameControllerEventsMessage_pb2
 from pyatv.mrp.protobuf import RegisterHIDDeviceMessage_pb2
 from pyatv.mrp.protobuf import RegisterHIDDeviceResultMessage_pb2
@@ -52,7 +53,7 @@ from pyatv.mrp.protobuf.NowPlayingPlayer_pb2 import NowPlayingPlayer
 from pyatv.mrp.protobuf.Origin_pb2 import Origin
 from pyatv.mrp.protobuf.PlaybackQueueCapabilities_pb2 import PlaybackQueueCapabilities
 from pyatv.mrp.protobuf.PlaybackQueueContext_pb2 import PlaybackQueueContext
-from pyatv.mrp.protobuf.PlaybackQueueRequest_pb2 import PlaybackQueueRequest
+from pyatv.mrp.protobuf.PlaybackQueueRequestMessage_pb2 import PlaybackQueueRequestMessage
 from pyatv.mrp.protobuf.PlaybackQueue_pb2 import PlaybackQueue
 from pyatv.mrp.protobuf.PlayerPath_pb2 import PlayerPath
 from pyatv.mrp.protobuf.RegisterForGameControllerEventsMessage_pb2 import RegisterForGameControllerEventsMessage
@@ -92,6 +93,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE: GetKeyboardSessionMessage_pb2.getKeyboardSessionMessage,
     ProtocolMessage.KEYBOARD_MESSAGE: KeyboardMessage_pb2.keyboardMessage,
     ProtocolMessage.NOTIFICATION_MESSAGE: NotificationMessage_pb2.notificationMessage,
+    ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE: PlaybackQueueRequestMessage_pb2.playbackQueueRequestMessage,
     ProtocolMessage.REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE: RegisterForGameControllerEventsMessage_pb2.registerForGameControllerEventsMessage,
     ProtocolMessage.REGISTER_HID_DEVICE_MESSAGE: RegisterHIDDeviceMessage_pb2.registerHIDDeviceMessage,
     ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE: RegisterHIDDeviceResultMessage_pb2.registerHIDDeviceResultMessage,
@@ -121,6 +123,7 @@ DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 GET_KEYBOARD_SESSION_MESSAGE = ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE
 KEYBOARD_MESSAGE = ProtocolMessage.KEYBOARD_MESSAGE
 NOTIFICATION_MESSAGE = ProtocolMessage.NOTIFICATION_MESSAGE
+PLAYBACK_QUEUE_REQUEST_MESSAGE = ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE
 REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = ProtocolMessage.REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE
 REGISTER_HID_DEVICE_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_MESSAGE
 REGISTER_HID_DEVICE_RESULT_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE
