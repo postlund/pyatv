@@ -35,11 +35,14 @@ class AirPlayPlayer:
             }
 
         # pylint: disable=no-member
-        await self.http.post_data(
+        _, status = await self.http.post_data(
             'play',
             headers=HEADERS,
             data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
             timeout=TIMEOUT)
+        # TODO: Should be more fine-grained
+        if 400 <= status < 600:
+            raise exceptions.AuthenticationError()
         await self._wait_for_media_to_end()
 
     # Poll playback-info to find out if something is playing. It might take
