@@ -21,7 +21,7 @@ def homesharing_service(service_name, atv_name, address, hsgid):
                        properties=props)
 
 
-def mrp_service(service_name, atv_name, address, identifier):
+def mrp_service(service_name, atv_name, address, identifier, port=49152):
     """Create a MediaRemote service simulating an Apple TV."""
     props = {
         b'ModelName': b'Mac', b'SystemBuildVersion': b'16G29',
@@ -31,11 +31,11 @@ def mrp_service(service_name, atv_name, address, identifier):
 
     return ServiceInfo('_mediaremotetv._tcp.local.',
                        service_name + '._mediaremotetv._tcp.local.',
-                       address=address, port=49152,
+                       address=address, port=port,
                        properties=props)
 
 
-def airplay_service(atv_name, address, deviceid):
+def airplay_service(atv_name, address, deviceid, port=7000):
     """Create a MediaRemote service simulating an Apple TV."""
     props = {
         b'deviceid': deviceid.encode('utf-8'), b'model': b'AppleTV3,1',
@@ -47,7 +47,7 @@ def airplay_service(atv_name, address, deviceid):
 
     return ServiceInfo('_airplay._tcp.local.',
                        atv_name + '._airplay._tcp.local.',
-                       address=address, port=7000,
+                       address=address, port=port,
                        properties=props)
 
 
