@@ -52,7 +52,7 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
     if len(devices) > 1:
         logging.error(
             'Found more than one Apple TV; specify one using --id')
-        _print_found_apple_tvs(devices, outstream=sys.stderr)
+        _print_found_apple_tvs(devices, sys.stderr)
         return None
 
     return devices[0]
@@ -106,7 +106,7 @@ class GlobalCommands:
     async def scan(self):
         """Scan for Apple TVs on the network."""
         atvs = await scan(self.loop, timeout=self.args.scan_timeout)
-        _print_found_apple_tvs(atvs)
+        _print_found_apple_tvs(atvs, sys.stdout)
 
         return 0
 
@@ -122,6 +122,14 @@ class GlobalCommands:
             return 2
 
         options = {}
+
+        # Inject user provided credentials
+        apple_tv.set_credentials(
+            const.PROTOCOL_AIRPLAY, self.args.airplay_credentials)
+        apple_tv.set_credentials(
+            const.PROTOCOL_DMAP, self.args.dmap_credentials)
+        apple_tv.set_credentials(
+            const.PROTOCOL_MRP, self.args.mrp_credentials)
 
         # Protocol specific options
         if self.args.protocol == const.PROTOCOL_DMAP:
@@ -364,7 +372,7 @@ async def cli_handler(loop):
     return await _handle_commands(args, loop)
 
 
-def _print_found_apple_tvs(atvs, outstream=sys.stdout):
+def _print_found_apple_tvs(atvs, outstream):
     print('Scan Results', file=outstream)
     print('=' * 40, file=outstream)
     for apple_tv in atvs:
@@ -524,7 +532,7 @@ def _pretty_print(data):
         print(data)
 
 
-def main():
+async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
     # Helper method so that the coroutine exits cleanly if an exception
     # happens (which would leave resources dangling)
@@ -548,12 +556,17 @@ def main():
         return 1
 
     try:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(_run_application(loop))
+        return await _run_application(loop)
     except KeyboardInterrupt:
         pass
 
     return 1
+
+
+def main():
+    """Application start here."""
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(appstart(loop))
 
 
 if __name__ == '__main__':
