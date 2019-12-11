@@ -55,3 +55,7 @@ class DeviceIdMissingError(Exception):
 
 class BackOffError(Exception):
     """Thrown when device mandates a backoff period."""
+
+
+class PlaybackError(Exception):
+    """Thrown when media playback failed."""

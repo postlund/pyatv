@@ -49,6 +49,8 @@ class FakeAirPlayDevice:
         self.last_airplay_url = None
         self.last_airplay_start = None
         self.last_airplay_uuid = None
+        self.play_count = 0
+        self.injected_play_fails = 0
         self.tc = testcase
         self.app = web.Application()
 
@@ -78,6 +80,11 @@ class FakeAirPlayDevice:
 
     async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
+        self.play_count += 1
+
+        if self.injected_play_fails > 0:
+            self.injected_play_fails -= 1
+            return web.Response(status=500)
         if not self.has_authenticated:
             return web.Response(status=503)
 
@@ -148,6 +155,10 @@ class AirPlayUseCases:
     def __init__(self, fake_airplay_device):
         """Initialize a new AirPlayUseCases."""
         self.device = fake_airplay_device
+
+    def airplay_play_failure(self, count):
+        """Make play command fail a number of times."""
+        self.device.injected_play_fails = count
 
     def airplay_playback_idle(self):
         """Make playback-info return idle info."""

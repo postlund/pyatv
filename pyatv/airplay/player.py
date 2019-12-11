@@ -10,6 +10,8 @@ from pyatv import exceptions
 
 _LOGGER = logging.getLogger(__name__)
 
+PLAY_RETRIES = 3
+WAIT_RETRIES = 5
 TIMEOUT = 10
 HEADERS = {
     'User-Agent': 'MediaControl/1.0',
@@ -34,21 +36,38 @@ class AirPlayPlayer:
             'X-Apple-Session-ID': str(uuid4()),
             }
 
-        # pylint: disable=no-member
-        _, status = await self.http.post_data(
-            'play',
-            headers=HEADERS,
-            data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
-            timeout=TIMEOUT)
-        # TODO: Should be more fine-grained
-        if 400 <= status < 600:
-            raise exceptions.AuthenticationError()
-        await self._wait_for_media_to_end()
+        retry = 0
+        while retry < PLAY_RETRIES:
+            # pylint: disable=no-member
+            _, status = await self.http.post_data(
+                'play',
+                headers=HEADERS,
+                data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
+                timeout=TIMEOUT)
+
+            # Sometimes AirPlay fails with "Internal Server Error", we
+            # apply a "lets try again"-approach to that
+            if status == 500:
+                retry += 1
+                _LOGGER.debug('Failed to stream %s, retry %d of %d',
+                              url, retry, PLAY_RETRIES)
+                await asyncio.sleep(1.0, loop=self.loop)
+                continue
+
+            # TODO: Should be more fine-grained
+            if 400 <= status < 600:
+                raise exceptions.AuthenticationError(
+                    'Status code: ' + str(status))
+
+            await self._wait_for_media_to_end()
+            return
+
+        raise exceptions.PlaybackError('Max retries exceeded')
 
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)
     async def _wait_for_media_to_end(self):
-        attempts = 5
+        attempts = WAIT_RETRIES
         video_started = False
 
         while True:
