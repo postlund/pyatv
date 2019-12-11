@@ -42,11 +42,11 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes*      |
 | --------------------------------------------------------------- |--------- | --------- |
-| Fetch artwork in PNG format                                     | Yes      | No        |
+| Fetch artwork                                                   | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Partial** |
+| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Media type and play state                                       | Yes      | Partial** |
+| Media type and play state                                       | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Change media position                                           | Yes      | Yes*      |
 | --------------------------------------------------------------- | -------- | --------- |
@@ -54,8 +54,6 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 
 
 *\* Some support exists but has not been thoroughly tested to verify that it works satisfactory*
-
-*\*\* Only stub support exists and is mostly not usable*
 
 # Who is making this?
 
