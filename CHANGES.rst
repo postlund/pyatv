@@ -1,6 +1,26 @@
 CHANGES
 =======
 
+0.4.0a10 (2019-12-11)
+---------------------
+
+Changes:
+
+* Support for artwork in MRP
+* Retry attempts in AirPlay
+* Better test coverage
+
+All changes:
+
+f5f775b Add retry attempts when AirPlay streaming fails
+680bdcf Initial support for artwork in MRP
+a9f0ca9 Add documentation for manual mode in atvremote
+5d89ec9 Add Investigation to issue templates
+107c691 Add initial smoke tests for atvremote
+e45deba Prepare for adding MRP tests
+4644158 Add AirPlay test for new credentials
+
+
 0.4.0a9 (2019-12-07)
 --------------------
 
