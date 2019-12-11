@@ -60,3 +60,23 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         with self.assertRaises(exceptions.NoCredentialsError):
             await self.player.play_url(STREAM, position=START_POSITION)
+
+    @unittest_run_loop
+    async def test_play_with_retries(self):
+        self.usecase.airplay_play_failure(2)
+        self.usecase.airplay_playback_playing()
+        self.usecase.airplay_playback_idle()
+
+        await self.player.play_url(STREAM, position=START_POSITION)
+
+        self.assertEqual(
+            self.fake_device.play_count, 3)  # Two retries + success
+
+    @unittest_run_loop
+    async def test_play_with_too_many_retries(self):
+        self.usecase.airplay_play_failure(10)
+        self.usecase.airplay_playback_playing()
+        self.usecase.airplay_playback_idle()
+
+        with self.assertRaises(exceptions.PlaybackError):
+            await self.player.play_url(STREAM, position=START_POSITION)
