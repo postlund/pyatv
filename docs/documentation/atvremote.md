@@ -55,6 +55,20 @@ It is also possible to use the device name by specifying `-n` instead:
 
     $ atvremote -n "Living Room" <some command>
 
+### Manually specifying a device
+
+It is possible to bypass the automatic scanning that `atvremote` performs
+by passing the `--manual` flag. This is convenvient if you rely on an external
+scanning process or to shorten the turn-around time during development testing.
+However, doing so means that you mainly lose all benefits of unique identifiers.
+They lose meaning completely. Only use this mode if you know what you are doing!
+
+When specifying `--manual` you *must* also specify `--address`, `--port`, `--protocol`
+and `--id`. Even though the identifier is not used (or applicable), you must
+still specify something. A simple call example looks like this:
+
+    $ atvremote --manual --address 10.0.0.10 --port 49152 --protocol mrp --id test playing
+
 ## Pairing with a device
 
 In most cases you have to pair with a device and obtain *credentials* in order to communicate
