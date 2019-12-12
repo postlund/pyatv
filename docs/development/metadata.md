@@ -42,6 +42,9 @@ To retrieve the artwork, use the asynchronous artwork method:
 artwork = await atv.metadata.artwork()
 ```
 
+This will return an `pyatv.interface.Metadata.ArtworkInfo`, containing the image bytes and mimetype. If no artwork is available,
+`None` is returned instead.
+
 Remember that the artwork is relatively large, so you should try to minimize
 this call. More information is available at `pyatv.interface.Metadata.artwork`.
 
