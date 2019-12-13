@@ -135,6 +135,7 @@ called `commands`, as it will present a list of availble commands:
      - up - Press key up
      - volume_down - Press key volume down
      - volume_up - Press key volume up
+     - wakeup - Wake up the device
 
     Metadata commands:
      - artwork - Return artwork for what is currently playing (or None)

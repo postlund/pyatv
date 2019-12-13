@@ -70,6 +70,7 @@ class BaseDmapAppleTV:
         return self.daap.post(cmd_url)
 
 
+# pylint: disable=too-many-public-methods
 class DmapRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
@@ -184,9 +185,13 @@ class DmapRemoteControl(RemoteControl):
         # DMAP support unknown
         raise exceptions.NotSupportedError
 
-    async def suspend(self):
+    def suspend(self):
         """Suspend the device."""
         # Not supported by DMAP
+        raise exceptions.NotSupportedError
+
+    def wakeup(self):
+        """Wake up the device."""
         raise exceptions.NotSupportedError
 
     def set_position(self, pos):
