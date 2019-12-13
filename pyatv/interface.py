@@ -91,7 +91,7 @@ class PairingHandler:
         raise exceptions.NotSupportedError
 
 
-class RemoteControl:
+class RemoteControl:  # pylint: disable=too-many-public-methods
     """Base class for API used to control an Apple TV."""
 
     __metaclass__ = ABCMeta
@@ -180,6 +180,11 @@ class RemoteControl:
     @abstractmethod
     def suspend(self):
         """Suspend the device."""
+        raise exceptions.NotSupportedError
+
+    @abstractmethod
+    def wakeup(self):
+        """Wake up the device."""
         raise exceptions.NotSupportedError
 
     @abstractmethod

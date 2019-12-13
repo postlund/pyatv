@@ -33,6 +33,7 @@ _KEY_LOOKUP = {
     'home': [12, 0x40, 0],
     'home_hold': [12, 0x40, 1],
     'suspend': [1, 0x82, 0],
+    'wakeup': [1, 0x83, 0],
     'volume_up': [12, 0xE9, 0],
     'volume_down': [12, 0xEA, 0],
 
@@ -40,6 +41,7 @@ _KEY_LOOKUP = {
 }
 
 
+# pylint: disable=too-many-public-methods
 class MrpRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
@@ -127,6 +129,10 @@ class MrpRemoteControl(RemoteControl):
     def suspend(self):
         """Suspend the device."""
         return self._press_key('suspend')
+
+    def wakeup(self):
+        """Wake up the device."""
+        return self._press_key('wakeup')
 
     def set_position(self, pos):
         """Seek in the current playing media."""
