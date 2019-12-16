@@ -2,20 +2,61 @@
 
 import asyncio
 import logging
+import struct
 
 from pyatv.mrp import (messages, protobuf, variant)
+from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
 
 _LOGGER = logging.getLogger(__name__)
 
+_KEY_LOOKUP = {
+    # name: [usage_page, usage, button hold time (seconds)]
+    'up': [1, 0x8C, 0],
+    'down': [1, 0x8D, 0],
+    'left': [1, 0x8B, 0],
+    'right': [1, 0x8A, 0],
+    'stop': [12, 0xB7, 0],
+    'next': [12, 0xB5, 0],
+    'previous': [12, 0xB6, 0],
+    'select': [1, 0x89, 0],
+    'menu': [1, 0x86, 0],
+    'topmenu': [12, 0x60, 0],
+    'home': [12, 0x40, 0],
+    'home_hold': [12, 0x40, 1],
+    'suspend': [1, 0x82, 0],
+    'wakeup': [1, 0x83, 0],
+    'volume_up': [12, 0xE9, 0],
+    'volume_down': [12, 0xEA, 0],
+}
+
+_COMMAND_LOOKUP = {
+    cmd.Play: 'play',
+    cmd.Pause: 'pause',
+    cmd.Stop: 'stop',
+    cmd.NextTrack: 'nextitem',
+    cmd.PreviousTrack: 'previtem',
+}
+
+
+def _convert_key_press(use_page, usage):
+    for name, codes in _KEY_LOOKUP.items():
+        if codes[0] == use_page and codes[1] == usage:
+            return name
+    raise Exception(
+        'unsupported key: use_page={0}, usage={1}'.format(
+            use_page, usage))
+
 
 class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, testcase):
+    def __init__(self, testcase, loop):
         super().__init__(testcase)
-        self.buttons_press_count = 0
+        self.loop = loop
+        self.app.on_startup.append(self.start)
+        self.outstanding_keypresses = set()  # Pressed but not released
         self.last_button_pressed = None
         self.connection_state = None
 
@@ -31,12 +72,15 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
                 self.handle_client_updates_config_message,
             protobuf.GET_KEYBOARD_SESSION_MESSAGE:
                 self.handle_get_keyboard_session_message,
+            protobuf.SEND_HID_EVENT_MESSAGE:
+                self.handle_send_hid_event_message,
+            protobuf.SEND_COMMAND_MESSAGE:
+                self.handle_send_command_message,
             }
 
-    @asyncio.coroutine
-    def start(self, loop):
-        coro = loop.create_server(lambda: self, '127.0.0.1')
-        self.server = yield from loop.create_task(coro)
+    async def start(self, app):
+        coro = self.loop.create_server(lambda: self, '127.0.0.1')
+        self.server = await self.loop.create_task(coro)
         _LOGGER.info('Started MRP server at port %d', self.port)
 
     @property
@@ -99,6 +143,39 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         resp = messages.create(protobuf.KEYBOARD_MESSAGE)
         resp.identifier = message.identifier
         self._send(resp)
+
+    def handle_send_hid_event_message(self, message):
+        _LOGGER.debug('Got HID event message')
+
+        hid_data = message.inner().hidEventData
+
+        # These corresponds to the bytes mapping to pressed key (see
+        # send_hid_event in pyatv/mrp/messages.py)
+        start = hid_data[43:49]
+        use_page, usage, down_press = struct.unpack('>HHH', start)
+
+        if down_press == 1:
+            self.outstanding_keypresses.add((use_page, usage))
+        elif down_press == 0:
+            if (use_page, usage) in self.outstanding_keypresses:
+                self.last_button_pressed = _convert_key_press(use_page, usage)
+                self.outstanding_keypresses.remove((use_page, usage))
+                _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+            else:
+                _LOGGER.error('Missing key down for %d,%d', use_page, usage)
+        else:
+            _LOGGER.error('Invalid key press state: %d', down_press)
+
+    def handle_send_command_message(self, message):
+        _LOGGER.debug('Got command message')
+
+        button = _COMMAND_LOOKUP.get(message.inner().command)
+        if button:
+            self.last_button_pressed = button
+            _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+        else:
+            _LOGGER.warning(
+                'Unhandled button press: %s', message.inner().command)
 
 
 class AppleTVUseCases(AirPlayUseCases):

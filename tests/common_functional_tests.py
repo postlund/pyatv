@@ -1,13 +1,12 @@
 """Common functional tests for all protocols."""
 
-import asyncio
-
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
 from pyatv import const, exceptions
 from pyatv.conf import AppleTV, AirPlayService
 from tests import zeroconf_stub
+from tests.utils import stub_sleep, until
 
 
 EXPECTED_ARTWORK = b'1234'
@@ -23,11 +22,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
-
-        # Make sleep calls do nothing to not slow down tests
-        async def fake_sleep(self, time=None, loop=None):
-            pass
-        asyncio.sleep = fake_sleep
+        stub_sleep()
 
     async def get_application(self, loop=None):
         raise NotImplementedError()
@@ -86,3 +81,63 @@ class CommonFunctionalTests(AioHTTPTestCase):
             AIRPLAY_STREAM, port=self.server.port)
 
         self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+
+    @unittest_run_loop
+    async def test_button_up(self):
+        await self.atv.remote_control.up()
+        await until(lambda: self.fake_atv.last_button_pressed == 'up')
+
+    @unittest_run_loop
+    async def test_button_down(self):
+        await self.atv.remote_control.down()
+        await until(lambda: self.fake_atv.last_button_pressed == 'down')
+
+    @unittest_run_loop
+    async def test_button_left(self):
+        await self.atv.remote_control.left()
+        await until(lambda: self.fake_atv.last_button_pressed == 'left')
+
+    @unittest_run_loop
+    async def test_button_right(self):
+        await self.atv.remote_control.right()
+        await until(lambda: self.fake_atv.last_button_pressed == 'right')
+
+    @unittest_run_loop
+    async def test_button_select(self):
+        await self.atv.remote_control.select()
+        await until(lambda: self.fake_atv.last_button_pressed == 'select')
+
+    @unittest_run_loop
+    async def test_button_menu(self):
+        await self.atv.remote_control.menu()
+        await until(lambda: self.fake_atv.last_button_pressed == 'menu')
+
+    @unittest_run_loop
+    async def test_button_top_menu(self):
+        await self.atv.remote_control.top_menu()
+        await until(lambda: self.fake_atv.last_button_pressed == 'topmenu')
+
+    @unittest_run_loop
+    async def test_button_play(self):
+        await self.atv.remote_control.play()
+        await until(lambda: self.fake_atv.last_button_pressed == 'play')
+
+    @unittest_run_loop
+    async def test_button_pause(self):
+        await self.atv.remote_control.pause()
+        await until(lambda: self.fake_atv.last_button_pressed == 'pause')
+
+    @unittest_run_loop
+    async def test_button_stop(self):
+        await self.atv.remote_control.stop()
+        await until(lambda: self.fake_atv.last_button_pressed == 'stop')
+
+    @unittest_run_loop
+    async def test_button_next(self):
+        await self.atv.remote_control.next()
+        await until(lambda: self.fake_atv.last_button_pressed == 'nextitem')
+
+    @unittest_run_loop
+    async def test_button_previous(self):
+        await self.atv.remote_control.previous()
+        await until(lambda: self.fake_atv.last_button_pressed == 'previtem')

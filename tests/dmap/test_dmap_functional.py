@@ -160,69 +160,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     # Common tests are below. Move tests that have been implemented to
     # common_functional_tests.py once implemented
-    @unittest_run_loop
-    async def test_button_up(self):
-        await self.atv.remote_control.up()
-        self.assertEqual(self.fake_atv.buttons_press_count, 7)
-        self.assertEqual(self.fake_atv.last_button_pressed, 'up')
-
-    @unittest_run_loop
-    async def test_button_down(self):
-        await self.atv.remote_control.down()
-        self.assertEqual(self.fake_atv.buttons_press_count, 7)
-        self.assertEqual(self.fake_atv.last_button_pressed, 'down')
-
-    @unittest_run_loop
-    async def test_button_left(self):
-        await self.atv.remote_control.left()
-        self.assertEqual(self.fake_atv.buttons_press_count, 7)
-        self.assertEqual(self.fake_atv.last_button_pressed, 'left')
-
-    @unittest_run_loop
-    async def test_button_right(self):
-        await self.atv.remote_control.right()
-        self.assertEqual(self.fake_atv.buttons_press_count, 7)
-        self.assertEqual(self.fake_atv.last_button_pressed, 'right')
-
-    @unittest_run_loop
-    async def test_button_play(self):
-        await self.atv.remote_control.play()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'play')
-
-    @unittest_run_loop
-    async def test_button_pause(self):
-        await self.atv.remote_control.pause()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'pause')
-
-    @unittest_run_loop
-    async def test_button_stop(self):
-        await self.atv.remote_control.stop()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'stop')
-
-    @unittest_run_loop
-    async def test_button_next(self):
-        await self.atv.remote_control.next()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'nextitem')
-
-    @unittest_run_loop
-    async def test_button_previous(self):
-        await self.atv.remote_control.previous()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'previtem')
-
-    @unittest_run_loop
-    async def test_button_select(self):
-        await self.atv.remote_control.select()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'select')
-
-    @unittest_run_loop
-    async def test_button_menu(self):
-        await self.atv.remote_control.menu()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'menu')
-
-    @unittest_run_loop
-    async def test_button_top_menu(self):
-        await self.atv.remote_control.top_menu()
-        self.assertEqual(self.fake_atv.last_button_pressed, 'topmenu')
 
     # TODO: This should check that device_id is one of the IDs
     #       passed to the services into the device.
@@ -402,3 +339,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.play_state, const.PLAY_STATE_LOADING)
+
+    @unittest_run_loop
+    async def test_button_unsupported_raises(self):
+        buttons = ['home', 'volume_up', 'volume_down', 'suspend', 'wakeup']
+        for button in buttons:
+            with self.assertRaises(exceptions.NotSupportedError):
+                await getattr(self.atv.remote_control, button)()

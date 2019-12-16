@@ -38,7 +38,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.usecase = AirPlayUseCases(self.fake_device)
         return self.fake_device.app
 
-    async def fake_asyncio_sleep(self, time, loop):
+    async def fake_asyncio_sleep(self, time, loop=None):
         self.no_of_sleeps += 1
 
     @unittest_run_loop
