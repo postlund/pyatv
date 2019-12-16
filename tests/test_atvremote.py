@@ -1,7 +1,6 @@
 """Smoke test for atvremote."""
 
 import sys
-import asyncio
 
 from contextlib import contextmanager
 from io import StringIO
@@ -11,6 +10,7 @@ from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 import pyatv
 from pyatv import __main__ as atvremote
 from tests import zeroconf_stub
+from tests.utils import stub_sleep
 from tests.airplay.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS
 from tests.mrp.fake_mrp_atv import (
     FakeAppleTV, AppleTVUseCases)
@@ -40,20 +40,12 @@ class AtvremoteTest(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)
+        stub_sleep()
         self.stub_services()
         self.stdout = None
         self.stderr = None
         self.retcode = None
         self.inputs = []
-
-        # This is a special "hack" to schedule the sleep at the end of the
-        # event queue in order to give the zeroconf handlers a possibility to
-        # run
-        async def fake_sleep(time=None, loop=None):
-            async def dummy():
-                pass
-            await asyncio.ensure_future(dummy())
-        asyncio.sleep = fake_sleep
 
     def stub_services(self):
         port = self.server.port
@@ -67,9 +59,8 @@ class AtvremoteTest(AioHTTPTestCase):
         zeroconf_stub.stub(pyatv, *services)
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self)
+        self.fake_atv = FakeAppleTV(self, self.loop)
         self.usecase = AppleTVUseCases(self.fake_atv)
-        await self.fake_atv.start(self.loop)
         return self.fake_atv.app
 
     def user_input(self, text):
