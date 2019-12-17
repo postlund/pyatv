@@ -30,8 +30,7 @@ _KEY_LOOKUP = {
     'select': [1, 0x89, 0],
     'menu': [1, 0x86, 0],
     'topmenu': [12, 0x60, 0],
-    'home': [12, 0x40, 0],
-    'home_hold': [12, 0x40, 1],
+    'home': [12, 0x40, 1],
     'suspend': [1, 0x82, 0],
     'wakeup': [1, 0x83, 0],
     'volume_up': [12, 0xE9, 0],
@@ -50,12 +49,13 @@ class MrpRemoteControl(RemoteControl):
         self.loop = loop
         self.protocol = protocol
 
-    async def _press_key(self, key):
+    async def _press_key(self, key, hold=False):
         lookup = _KEY_LOOKUP.get(key, None)
         if lookup:
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], True))
-            await asyncio.sleep(lookup[2])
+            if hold:
+                await asyncio.sleep(lookup[2])
             await self.protocol.send(
                 messages.send_hid_event(lookup[0], lookup[1], False))
         else:
@@ -120,7 +120,7 @@ class MrpRemoteControl(RemoteControl):
 
     def home_hold(self):
         """Hold key home."""
-        return self._press_key('home_hold')
+        return self._press_key('home', hold=True)
 
     def top_menu(self):
         """Go to main menu (long press menu)."""
