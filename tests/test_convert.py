@@ -109,28 +109,28 @@ class ConvertTest(unittest.TestCase):
 
     # PLAYSTATE TESTS
 
-    def test_play_state_no_media(self):
+    def test_device_state_no_media(self):
         # This test should not really be here as "None" is in reality not a
         # valid value. But it is supported nonetheless because that makes
         # usage nicer. None means that the field is not included in a
         # server response, which matches the behavior of dmap.first.
-        self.assertEqual(const.PLAY_STATE_NO_MEDIA,
+        self.assertEqual(const.DEVICE_STATE_IDLE,
                          convert.playstate(None))
 
     def test_regular_playstates(self):
-        self.assertEqual(const.PLAY_STATE_IDLE,
+        self.assertEqual(const.DEVICE_STATE_IDLE,
                          convert.playstate(PLAY_STATE_IDLE))
-        self.assertEqual(const.PLAY_STATE_LOADING,
+        self.assertEqual(const.DEVICE_STATE_LOADING,
                          convert.playstate(PLAY_STATE_LOADING))
-        self.assertEqual(const.PLAY_STATE_STOPPED,
+        self.assertEqual(const.DEVICE_STATE_STOPPED,
                          convert.playstate(PLAY_STATE_STOPPED))
-        self.assertEqual(const.PLAY_STATE_PAUSED,
+        self.assertEqual(const.DEVICE_STATE_PAUSED,
                          convert.playstate(PLAY_STATE_PAUSED))
-        self.assertEqual(const.PLAY_STATE_PLAYING,
+        self.assertEqual(const.DEVICE_STATE_PLAYING,
                          convert.playstate(PLAY_STATE_PLAYING))
-        self.assertEqual(const.PLAY_STATE_FAST_FORWARD,
+        self.assertEqual(const.DEVICE_STATE_SEEKING,
                          convert.playstate(PLAY_STATE_FORWARD))
-        self.assertEqual(const.PLAY_STATE_FAST_BACKWARD,
+        self.assertEqual(const.DEVICE_STATE_SEEKING,
                          convert.playstate(PLAY_STATE_BACKWARD))
 
     def test_unknown_playstate_throws(self):
@@ -138,20 +138,18 @@ class ConvertTest(unittest.TestCase):
             convert.playstate(99999)
 
     def test_playstate_str(self):
-        self.assertEqual('No media',
-                         convert.playstate_str(const.PLAY_STATE_NO_MEDIA))
         self.assertEqual('Idle',
-                         convert.playstate_str(const.PLAY_STATE_IDLE))
+                         convert.playstate_str(const.DEVICE_STATE_IDLE))
         self.assertEqual('Loading',
-                         convert.playstate_str(const.PLAY_STATE_LOADING))
+                         convert.playstate_str(const.DEVICE_STATE_LOADING))
+        self.assertEqual('Stopped',
+                         convert.playstate_str(const.DEVICE_STATE_STOPPED))
         self.assertEqual('Paused',
-                         convert.playstate_str(const.PLAY_STATE_PAUSED))
+                         convert.playstate_str(const.DEVICE_STATE_PAUSED))
         self.assertEqual('Playing',
-                         convert.playstate_str(const.PLAY_STATE_PLAYING))
-        self.assertEqual('Fast forward',
-                         convert.playstate_str(const.PLAY_STATE_FAST_FORWARD))
-        self.assertEqual('Fast backward',
-                         convert.playstate_str(const.PLAY_STATE_FAST_BACKWARD))
+                         convert.playstate_str(const.DEVICE_STATE_PLAYING))
+        self.assertEqual('Seeking',
+                         convert.playstate_str(const.DEVICE_STATE_SEEKING))
 
     def test_unsupported_playstate_str(self):
         self.assertEqual('Unsupported', convert.playstate_str(999))

@@ -34,32 +34,25 @@ MEDIA_TYPE_MUSIC = 3
 MEDIA_TYPE_TV = 4
 
 
-# Play states
+# Device states
 
 #: Device is in idle state
-PLAY_STATE_IDLE = 0
-
-#: No media is currently select/playing
-PLAY_STATE_NO_MEDIA = 1
+DEVICE_STATE_IDLE = 0
 
 #: Media is loading/buffering
-PLAY_STATE_LOADING = 2
+DEVICE_STATE_LOADING = 1
 
 #: Media is paused
-PLAY_STATE_PAUSED = 3
+DEVICE_STATE_PAUSED = 2
 
 #: Media is playing
-PLAY_STATE_PLAYING = 4
-
-#: Media is being fast forwarded
-PLAY_STATE_FAST_FORWARD = 5
-
-#: Media is being rewinded
-PLAY_STATE_FAST_BACKWARD = 6
+DEVICE_STATE_PLAYING = 3
 
 #: Media is stopped
-PLAY_STATE_STOPPED = 7
+DEVICE_STATE_STOPPED = 4
 
+#: Media is seeking
+DEVICE_STATE_SEEKING = 5
 
 # Repeat states
 

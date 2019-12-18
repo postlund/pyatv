@@ -188,7 +188,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_UNKNOWN)
-        self.assertEqual(playing.play_state, const.PLAY_STATE_NO_MEDIA)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_IDLE)
 
     @unittest_run_loop
     async def test_metadata_video_paused(self):
@@ -197,7 +197,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
-        self.assertEqual(playing.play_state, const.PLAY_STATE_PAUSED)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
         self.assertEqual(playing.title, 'dummy')
         self.assertEqual(playing.total_time, 123)
         self.assertEqual(playing.position, 3)
@@ -209,7 +209,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
-        self.assertEqual(playing.play_state, const.PLAY_STATE_PLAYING)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_PLAYING)
         self.assertEqual(playing.title, 'video')
         self.assertEqual(playing.total_time, 40)
         self.assertEqual(playing.position, 10)
@@ -223,7 +223,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
-        self.assertEqual(playing.play_state, const.PLAY_STATE_PAUSED)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'artist')
         self.assertEqual(playing.album, 'album')
@@ -240,7 +240,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.atv.metadata.playing()
         self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
-        self.assertEqual(playing.play_state, const.PLAY_STATE_PLAYING)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_PLAYING)
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'test1')
         self.assertEqual(playing.album, 'test2')
@@ -338,7 +338,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.media_is_loading()
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.play_state, const.PLAY_STATE_LOADING)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_LOADING)
 
     @unittest_run_loop
     async def test_button_unsupported_raises(self):

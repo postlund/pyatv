@@ -103,8 +103,8 @@ without having to ask the device for it:
 
     $ atvremote -n Kitchen push_updates
     Press ENTER to stop
-    Media type: Unknown
-    Play state: Paused
+      Media type: Unknown
+    Device state: Paused
     --------------------
 
 Updates will be displayed when they happen. Just press ENTER to stop.
@@ -148,7 +148,7 @@ called `commands`, as it will present a list of availble commands:
      - genre - Genre of the currently playing song
      - hash - Create a unique hash for what is currently playing
      - media_type - Type of media is currently playing, e.g. video, music
-     - play_state - Play state, e.g. playing or paused
+     - device_state - Device state, e.g. playing or paused
      - position - Position in the playing media (seconds)
      - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
@@ -172,11 +172,11 @@ called `commands`, as it will present a list of availble commands:
 You can for instance get what is currently playing with `playing`:
 
     $ atvremote --id 40:CB:C0:A8:DE:9A playing
-    Media type: Music
-    Play state: Playing
-      Position: 0/397s (0.0%)
-        Repeat: Off
-       Shuffle: False
+      Media type: Music
+    Device state: Playing
+        Position: 0/397s (0.0%)
+          Repeat: Off
+         Shuffle: False
 
 Or seek in the currently playing media:
 

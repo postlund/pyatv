@@ -13,6 +13,9 @@ import os
 from collections import namedtuple
 
 
+# New messages re-using inner message of another type
+REUSED_MESSAGES = {'DEVICE_INFO_MESSAGE': 'DEVICE_INFO_UPDATE_MESSAGE'}
+
 BASE_PACKAGE = 'pyatv.mrp.protobuf'
 OUTPUT_TEMPLATE = """\"\"\"Simplified extension handling for protobuf messages.
 
@@ -121,6 +124,12 @@ def main():
         constants.append(
             '{0} = ProtocolMessage.{0}'.format(
                 info.const))
+
+        reused = REUSED_MESSAGES.get(info.const)
+        if reused:
+            extensions.append(
+                'ProtocolMessage.{0}: {1}.{2},'.format(
+                     reused, info.module, info.accessor))
 
     # Look for remaining messages
     for module_name, message_name in extract_unreferenced_messages():

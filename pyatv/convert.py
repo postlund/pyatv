@@ -33,22 +33,18 @@ def media_type_str(mediatype):
 def playstate(state):
     """Convert iTunes playstate to API representation."""
     # pylint: disable=too-many-return-statements
-    if state is None:
-        return const.PLAY_STATE_NO_MEDIA
-    if state == 0:
-        return const.PLAY_STATE_IDLE
+    if state == 0 or state is None:
+        return const.DEVICE_STATE_IDLE
     if state == 1:
-        return const.PLAY_STATE_LOADING
+        return const.DEVICE_STATE_LOADING
     if state == 2:
-        return const.PLAY_STATE_STOPPED
+        return const.DEVICE_STATE_STOPPED
     if state == 3:
-        return const.PLAY_STATE_PAUSED
+        return const.DEVICE_STATE_PAUSED
     if state == 4:
-        return const.PLAY_STATE_PLAYING
-    if state == 5:
-        return const.PLAY_STATE_FAST_FORWARD
-    if state == 6:
-        return const.PLAY_STATE_FAST_BACKWARD
+        return const.DEVICE_STATE_PLAYING
+    if state in (5, 6):
+        return const.DEVICE_STATE_SEEKING
 
     raise exceptions.UnknownPlayState('Unknown playstate: ' + str(state))
 
@@ -56,22 +52,19 @@ def playstate(state):
 # pylint: disable=too-many-return-statements
 def playstate_str(state):
     """Convert internal API playstate to string."""
-    if state == const.PLAY_STATE_NO_MEDIA:
-        return 'No media'
-    if state == const.PLAY_STATE_IDLE:
+    if state == const.DEVICE_STATE_IDLE:
         return 'Idle'
-    if state == const.PLAY_STATE_LOADING:
+    if state == const.DEVICE_STATE_LOADING:
         return 'Loading'
-    if state == const.PLAY_STATE_PAUSED:
-        return 'Paused'
-    if state == const.PLAY_STATE_PLAYING:
-        return 'Playing'
-    if state == const.PLAY_STATE_FAST_FORWARD:
-        return 'Fast forward'
-    if state == const.PLAY_STATE_FAST_BACKWARD:
-        return 'Fast backward'
-    if state == const.PLAY_STATE_STOPPED:
+    if state == const.DEVICE_STATE_STOPPED:
         return 'Stopped'
+    if state == const.DEVICE_STATE_PAUSED:
+        return 'Paused'
+    if state == const.DEVICE_STATE_PLAYING:
+        return 'Playing'
+    if state == const.DEVICE_STATE_SEEKING:
+        return 'Seeking'
+
     return 'Unsupported'
 
 

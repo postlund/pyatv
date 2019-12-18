@@ -1,3 +1,4 @@
+
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import logging
@@ -177,24 +178,24 @@ class MrpPlaying(Playing):
         return const.MEDIA_TYPE_UNKNOWN
 
     @property
-    def play_state(self):
-        """Play state, e.g. playing or paused."""
+    def device_state(self):  # pylint: disable=too-many-return-statements
+        """Device state, e.g. playing or paused."""
         state = self._state.playback_state
         ssm = SetStateMessage_pb2.SetStateMessage
         if state is None:
-            return const.PLAY_STATE_IDLE
+            return const.DEVICE_STATE_IDLE
         if state == ssm.Playing:
-            return const.PLAY_STATE_PLAYING
+            return const.DEVICE_STATE_PLAYING
         if state == ssm.Paused:
-            return const.PLAY_STATE_PAUSED
+            return const.DEVICE_STATE_PAUSED
         if state == ssm.Stopped:
-            return const.PLAY_STATE_STOPPED
+            return const.DEVICE_STATE_STOPPED
         if state == ssm.Interrupted:
-            return const.PLAY_STATE_LOADING
-        # if state == SetStateMessage_pb2.Seeking
-        #    return XXX
+            return const.DEVICE_STATE_LOADING
+        if state == ssm.Seeking:
+            return const.DEVICE_STATE_SEEKING
 
-        return const.PLAY_STATE_PAUSED
+        return const.DEVICE_STATE_PAUSED
 
     @property
     def title(self):
@@ -228,7 +229,7 @@ class MrpPlaying(Playing):
         elapsed_time = self._state.metadata_field('elapsedTime')
         if elapsed_time:
             diff = (datetime.now() - self._state.timestamp).total_seconds()
-            if self.play_state == const.PLAY_STATE_PLAYING:
+            if self.device_state == const.DEVICE_STATE_PLAYING:
                 return int(elapsed_time + diff)
             return int(elapsed_time)
         return None

@@ -211,39 +211,39 @@ class Playing:
     def __str__(self):
         """Convert this playing object to a readable string."""
         output = []
-        output.append('Media type: {0}'.format(
+        output.append('  Media type: {0}'.format(
             convert.media_type_str(self.media_type)))
-        output.append('Play state: {0}'.format(
-            convert.playstate_str(self.play_state)))
+        output.append('Device state: {0}'.format(
+            convert.playstate_str(self.device_state)))
 
         if self.title is not None:
-            output.append('     Title: {0}'.format(self.title))
+            output.append('       Title: {0}'.format(self.title))
 
         if self.artist is not None:
-            output.append('    Artist: {0}'.format(self.artist))
+            output.append('      Artist: {0}'.format(self.artist))
 
         if self.album is not None:
-            output.append('     Album: {0}'.format(self.album))
+            output.append('       Album: {0}'.format(self.album))
 
         if self.genre is not None:
-            output.append('     Genre: {0}'.format(self.genre))
+            output.append('       Genre: {0}'.format(self.genre))
 
         position = self.position
         total_time = self.total_time
         if position is not None and total_time is not None and total_time != 0:
-            output.append('  Position: {0}/{1}s ({2:.1%})'.format(
+            output.append('    Position: {0}/{1}s ({2:.1%})'.format(
                 position, total_time, float(position)/float(total_time)))
         elif position is not None and position != 0:
-            output.append('  Position: {0}s'.format(position))
+            output.append('    Position: {0}s'.format(position))
         elif total_time is not None and position != 0:
-            output.append('Total time: {0}s'.format(total_time))
+            output.append('  Total time: {0}s'.format(total_time))
 
         if self.repeat is not None:
-            output.append('    Repeat: {0}'.format(
+            output.append('      Repeat: {0}'.format(
                 convert.repeat_str(self.repeat)))
 
         if self.shuffle is not None:
-            output.append('   Shuffle: {0}'.format(self.shuffle))
+            output.append('     Shuffle: {0}'.format(self.shuffle))
 
         return '\n'.join(output)
 
@@ -264,8 +264,8 @@ class Playing:
         raise exceptions.NotSupportedError
 
     @abstractproperty
-    def play_state(self):
-        """Play state, e.g. playing or paused."""
+    def device_state(self):
+        """Device state, e.g. playing or paused."""
         raise exceptions.NotSupportedError
 
     @abstractproperty
