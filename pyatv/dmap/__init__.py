@@ -236,8 +236,8 @@ class DmapPlaying(Playing):
         return const.MEDIA_TYPE_VIDEO
 
     @property
-    def play_state(self):
-        """Play state, e.g. playing or paused."""
+    def device_state(self):
+        """Device state, e.g. playing or paused."""
         state = parser.first(self.playstatus, 'cmst', 'caps')
         return convert.playstate(state)
 

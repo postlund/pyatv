@@ -38,11 +38,11 @@ class TestClass:
 class PlayingDummy(interface.Playing):
 
     def __init__(self, media_type=const.MEDIA_TYPE_VIDEO,
-                 play_state=const.PLAY_STATE_PLAYING, title=None, artist=None,
-                 album=None, genre=None, total_time=None, position=None,
-                 shuffle=True, repeat=const.REPEAT_STATE_TRACK):
+                 device_state=const.DEVICE_STATE_PLAYING, title=None,
+                 artist=None, album=None, genre=None, total_time=None,
+                 position=None, shuffle=True, repeat=const.REPEAT_STATE_TRACK):
         self._media_type = media_type
-        self._play_state = play_state
+        self._device_state = device_state
         self._title = title
         self._artist = artist
         self._album = album
@@ -58,9 +58,9 @@ class PlayingDummy(interface.Playing):
         return self._media_type
 
     @property
-    def play_state(self):
-        """Current play state, e.g. playing or paused."""
-        return self._play_state
+    def device_state(self):
+        """Current device state, e.g. playing or paused."""
+        return self._device_state
 
     @property
     def title(self):
@@ -145,7 +145,7 @@ class InterfaceTest(unittest.TestCase):
     def test_playing_media_type_and_playstate(self):
         out = str(PlayingDummy())
         self.assertIn(convert.media_type_str(const.MEDIA_TYPE_VIDEO), out)
-        self.assertIn(convert.playstate_str(const.PLAY_STATE_PLAYING), out)
+        self.assertIn(convert.playstate_str(const.DEVICE_STATE_PLAYING), out)
 
     def test_playing_title_artist_album_genre(self):
         out = str(PlayingDummy(
