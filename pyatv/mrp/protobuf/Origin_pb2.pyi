@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
 )
 
 from google.protobuf.message import (
@@ -13,8 +14,11 @@ from pyatv.mrp.protobuf.DeviceInfoMessage_pb2 import (
 )
 
 from typing import (
+    List as typing___List,
     Optional as typing___Optional,
     Text as typing___Text,
+    Tuple as typing___Tuple,
+    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -24,7 +28,26 @@ from typing_extensions import (
 
 class Origin(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    type = ... # type: int
+    class Type(int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: int) -> str: ...
+        @classmethod
+        def Value(cls, name: str) -> Origin.Type: ...
+        @classmethod
+        def keys(cls) -> typing___List[str]: ...
+        @classmethod
+        def values(cls) -> typing___List[Origin.Type]: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[str, Origin.Type]]: ...
+        Unknown = typing___cast(Origin.Type, 0)
+        Local = typing___cast(Origin.Type, 1)
+        Custom = typing___cast(Origin.Type, 2)
+    Unknown = typing___cast(Origin.Type, 0)
+    Local = typing___cast(Origin.Type, 1)
+    Custom = typing___cast(Origin.Type, 2)
+
+    type = ... # type: Origin.Type
     displayName = ... # type: typing___Text
     identifier = ... # type: int
 
@@ -33,7 +56,7 @@ class Origin(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        type : typing___Optional[int] = None,
+        type : typing___Optional[Origin.Type] = None,
         displayName : typing___Optional[typing___Text] = None,
         identifier : typing___Optional[int] = None,
         deviceInfo : typing___Optional[pyatv___mrp___protobuf___DeviceInfoMessage_pb2___DeviceInfoMessage] = None,

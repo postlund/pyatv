@@ -18,6 +18,12 @@ HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
     'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
 
 
+async def poll(fn, **kwargs):
+    result = await fn()
+    conds = [getattr(result, f) == val for f, val in kwargs.items()]
+    return all(conds), result
+
+
 class CommonFunctionalTests(AioHTTPTestCase):
 
     def setUp(self):
@@ -141,3 +147,16 @@ class CommonFunctionalTests(AioHTTPTestCase):
     async def test_button_previous(self):
         await self.atv.remote_control.previous()
         await until(lambda: self.fake_atv.last_button_pressed == 'previtem')
+
+    @unittest_run_loop
+    async def test_metadata_video_paused(self):
+        self.usecase.video_playing(paused=True, title='dummy',
+                                   total_time=123, position=3)
+
+        playing = await until(
+            poll, fn=self.atv.metadata.playing, title='dummy')
+        self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
+        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
+        self.assertEqual(playing.title, 'dummy')
+        self.assertEqual(playing.total_time, 123)
+        self.assertEqual(playing.position, 3)

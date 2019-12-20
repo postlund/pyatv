@@ -6,6 +6,7 @@ import struct
 
 from pyatv.mrp import (messages, protobuf, variant)
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
+from pyatv.mrp.protobuf import SetStateMessage as ssm
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
 
@@ -38,6 +39,8 @@ _COMMAND_LOOKUP = {
     cmd.PreviousTrack: 'previtem',
 }
 
+PLAYER_IDENTIFIER = 'com.github.postlund.pyatv'
+
 
 def _convert_key_press(use_page, usage):
     for name, codes in _KEY_LOOKUP.items():
@@ -46,6 +49,40 @@ def _convert_key_press(use_page, usage):
     raise Exception(
         'unsupported key: use_page={0}, usage={1}'.format(
             use_page, usage))
+
+
+def _set_state_message(metadata, identifier):
+    # Most things are hardcoded here for simplicity. Will change that
+    # as time goes by and more dynamic content is needed.
+    set_state = messages.create(protobuf.SET_STATE_MESSAGE)
+    inner = set_state.inner()
+    inner.playbackState = metadata.playback_state
+    inner.displayName = 'Fake Player'
+    inner.playbackStateTimestamp = 0
+
+    queue = inner.playbackQueue
+    queue.location = 0
+    item = queue.contentItems.add()
+    md = item.metadata
+    md.title = metadata.title
+    md.duration = metadata.total_time
+    md.elapsedTime = metadata.position
+    md.mediaType = protobuf.ContentItemMetadata.Video
+
+    client = inner.playerPath.client
+    client.processIdentifier = 123
+    client.bundleIdentifier = identifier
+    return set_state
+
+
+class PlayingMetadata:
+
+    def __init__(self, **kwargs):
+        """Initialize a new PlayingMetadata."""
+        self.playback_state = kwargs.get('playback_state', None)
+        self.title = kwargs.get('title', None)
+        self.total_time = kwargs.get('total_time', None)
+        self.position = kwargs.get('position', None)
 
 
 class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
@@ -58,6 +95,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         self.outstanding_keypresses = set()  # Pressed but not released
         self.last_button_pressed = None
         self.connection_state = None
+        self.states = {}
 
         self.server = None
         self.buffer = b''
@@ -93,6 +131,21 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         data = message.SerializeToString()
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
+
+    def set_player_state(self, identifier, state):
+        # TODO: Add logic to produce "diff updates" here?
+        self.states[identifier] = state
+        self._send(state)
+
+    def set_active_player(self, identifier):
+        if identifier not in self.states:
+            raise Exception('invalid player: %s', identifier)
+
+        now_playing = messages.create(
+            protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
+        client = now_playing.inner().client
+        client.bundleIdentifier = identifier
+        self._send(now_playing)
 
     def data_received(self, data):
         self.buffer += data
@@ -198,7 +251,13 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
-        pass
+        metadata = PlayingMetadata(
+            playback_state=ssm.Paused if paused else ssm.Playing,
+            title=title, total_time=total_time,
+            position=position, **kwargs)
+        self.device.set_player_state(
+            PLAYER_IDENTIFIER, _set_state_message(metadata, PLAYER_IDENTIFIER))
+        self.device.set_active_player(PLAYER_IDENTIFIER)
 
     def music_playing(self, paused, artist, album, title, genre,
                       total_time, position):

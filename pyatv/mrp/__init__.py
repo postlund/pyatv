@@ -3,7 +3,7 @@
 
 import logging
 import asyncio
-from datetime import datetime
+import datetime
 
 from pyatv import (const, exceptions)
 from pyatv.mrp import (messages, protobuf)
@@ -169,7 +169,7 @@ class MrpPlaying(Playing):
         """Type of media is currently playing, e.g. video, music."""
         if self._state.metadata:
             media_type = self._state.metadata.mediaType
-            cim = protobuf.ContentItemMetadata_pb2.ContentItemMetadata
+            cim = protobuf.ContentItemMetadata
             if media_type == cim.Audio:
                 return const.MEDIA_TYPE_MUSIC
             if media_type == cim.Video:
@@ -228,7 +228,8 @@ class MrpPlaying(Playing):
         """Position in the playing media (seconds)."""
         elapsed_time = self._state.metadata_field('elapsedTime')
         if elapsed_time:
-            diff = (datetime.now() - self._state.timestamp).total_seconds()
+            now = datetime.datetime.now()
+            diff = (now - self._state.timestamp).total_seconds()
             if self.device_state == const.DEVICE_STATE_PLAYING:
                 return int(elapsed_time + diff)
             return int(elapsed_time)

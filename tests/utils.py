@@ -2,6 +2,11 @@
 
 import time
 import asyncio
+import inspect
+
+from datetime import datetime
+from importlib import import_module
+
 from aiohttp import ClientSession
 
 
@@ -41,15 +46,24 @@ async def simple_get(url):
     return data, response.status
 
 
-# This is a modified version of run_until from uvloop:
-# https://github.com/MagicStack/uvloop/blob/176569118e4dfd520ee9c1b87edb08ba16d13a83/uvloop/_testbase.py#L535  # noqa
-async def until(pred, timeout=20):
+async def until(pred, timeout=5, **kwargs):
     """Wait until a predicate is fulfilled.
 
     Simple method of "waiting" for asynchronous code to finish.
     """
     deadline = time.time() + timeout
-    while not pred():
+    while True:
+        value = pred(**kwargs)
+        if inspect.iscoroutinefunction(pred):
+            value = await value
+
+        if isinstance(value, tuple):
+            cond, retvalue = value
+            if cond:
+                return retvalue
+        elif value:
+            return None
+
         if timeout is not None:
             if deadline - time.time() <= 0:
                 raise asyncio.futures.TimeoutError()
@@ -59,3 +73,33 @@ async def until(pred, timeout=20):
             await asyncio._real_sleep(0.5)
         else:
             await asyncio.sleep(0.5)
+
+
+def faketime(module_name, *times):
+    """Monkey patch datetime.now to return fake time."""
+    class FakeDatetime:
+        def __init__(self, times):
+            self.times = times
+
+        def __enter__(self):
+            module = import_module(module_name)
+            setattr(module.datetime, 'datetime', self)
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            module = import_module(module_name)
+            setattr(module.datetime, 'datetime', datetime)
+
+        def now(self, *args, **kwargs):
+            """Replace times from now to fake values."""
+            if not self.time:
+                return datetime.now(*args, **kwargs)
+
+            next_time = self.times[0]
+            self.times = self.times[1:]
+            return datetime.fromtimestamp(next_time)
+
+        def __getattr__(self, attr):
+            """Redirect non-stubbed functions to original module."""
+            return getattr(datetime, attr)
+
+    return FakeDatetime(list(times))
