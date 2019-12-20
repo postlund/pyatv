@@ -191,18 +191,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(playing.device_state, const.DEVICE_STATE_IDLE)
 
     @unittest_run_loop
-    async def test_metadata_video_paused(self):
-        self.usecase.video_playing(paused=True, title='dummy',
-                                   total_time=123, position=3)
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
-        self.assertEqual(playing.title, 'dummy')
-        self.assertEqual(playing.total_time, 123)
-        self.assertEqual(playing.position, 3)
-
-    @unittest_run_loop
     async def test_metadata_video_playing(self):
         self.usecase.video_playing(paused=False, title='video',
                                    total_time=40, position=10)

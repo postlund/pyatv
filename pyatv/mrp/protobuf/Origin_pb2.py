@@ -21,11 +21,37 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x1fpyatv/mrp/protobuf/Origin.proto\x1a*pyatv/mrp/protobuf/DeviceInfoMessage.proto\"g\n\x06Origin\x12\x0c\n\x04type\x18\x01 \x01(\x05\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x12\n\nidentifier\x18\x03 \x01(\x05\x12&\n\ndeviceInfo\x18\x04 \x01(\x0b\x32\x12.DeviceInfoMessage')
+  serialized_pb=_b('\n\x1fpyatv/mrp/protobuf/Origin.proto\x1a*pyatv/mrp/protobuf/DeviceInfoMessage.proto\"\xa1\x01\n\x06Origin\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.Origin.Type\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x12\n\nidentifier\x18\x03 \x01(\x05\x12&\n\ndeviceInfo\x18\x04 \x01(\x0b\x32\x12.DeviceInfoMessage\"*\n\x04Type\x12\x0b\n\x07Unknown\x10\x00\x12\t\n\x05Local\x10\x01\x12\n\n\x06\x43ustom\x10\x02')
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_DeviceInfoMessage__pb2.DESCRIPTOR,])
 
 
+
+_ORIGIN_TYPE = _descriptor.EnumDescriptor(
+  name='Type',
+  full_name='Origin.Type',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Local', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Custom', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=199,
+  serialized_end=241,
+)
+_sym_db.RegisterEnumDescriptor(_ORIGIN_TYPE)
 
 
 _ORIGIN = _descriptor.Descriptor(
@@ -37,7 +63,7 @@ _ORIGIN = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='type', full_name='Origin.type', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -68,6 +94,7 @@ _ORIGIN = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _ORIGIN_TYPE,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -75,11 +102,13 @@ _ORIGIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=79,
-  serialized_end=182,
+  serialized_start=80,
+  serialized_end=241,
 )
 
+_ORIGIN.fields_by_name['type'].enum_type = _ORIGIN_TYPE
 _ORIGIN.fields_by_name['deviceInfo'].message_type = pyatv_dot_mrp_dot_protobuf_dot_DeviceInfoMessage__pb2._DEVICEINFOMESSAGE
+_ORIGIN_TYPE.containing_type = _ORIGIN
 DESCRIPTOR.message_types_by_name['Origin'] = _ORIGIN
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
