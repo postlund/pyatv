@@ -359,17 +359,19 @@ async def cli_handler(loop):
         return (await _exec_command(
             glob_cmds, args.command[0], print_result=False))
     if not args.manual:
-        if not await _autodiscover_device(args, loop):
+        config = await _autodiscover_device(args, loop)
+        if not config:
             return 1
 
-        return await _handle_commands(args, loop)
+        return await _handle_commands(args, config, loop)
 
     if args.port == 0 or args.address is None or args.protocol is None:
         logging.error(
             'You must specify address, port and protocol in manual mode')
         return 1
 
-    return await _handle_commands(args, loop)
+    config = _manual_device(args)
+    return await _handle_commands(args, config, loop)
 
 
 def _print_found_apple_tvs(atvs, outstream):
@@ -385,15 +387,6 @@ async def _autodiscover_device(args, loop):
     if not apple_tv:
         return None
 
-    service = apple_tv.main_service()
-
-    # Common parameters for all protocols
-    args.id = apple_tv.identifier
-    args.address = apple_tv.address
-    args.name = apple_tv.name
-    args.protocol = service.protocol
-    args.port = service.port
-
     def _set_credentials(protocol, field):
         service = apple_tv.get_service(protocol)
         if service:
@@ -407,6 +400,20 @@ async def _autodiscover_device(args, loop):
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
     return apple_tv
+
+
+def _manual_device(args):
+    config = AppleTV(args.address, args.name)
+    if args.dmap_credentials or args.protocol == const.PROTOCOL_DMAP:
+        config.add_service(DmapService(
+            args.id, args.dmap_credentials, port=args.port))
+    if args.mrp_credentials or args.protocol == const.PROTOCOL_MRP:
+        config.add_service(MrpService(
+            args.id, args.port, credentials=args.mrp_credentials))
+    if args.airplay_credentials:
+        config.add_service(AirPlayService(
+            args.id, credentials=args.airplay_credentials))
+    return config
 
 
 def _extract_command_with_args(cmd):
@@ -435,18 +442,7 @@ def _extract_command_with_args(cmd):
     return command, converted
 
 
-async def _handle_commands(args, loop):
-    config = AppleTV(args.address, args.name)
-    if args.dmap_credentials or args.protocol == const.PROTOCOL_DMAP:
-        config.add_service(DmapService(
-            args.id, args.dmap_credentials, port=args.port))
-    if args.mrp_credentials or args.protocol == const.PROTOCOL_MRP:
-        config.add_service(MrpService(
-            args.id, args.port, credentials=args.mrp_credentials))
-    if args.airplay_credentials:
-        config.add_service(AirPlayService(
-            args.id, credentials=args.airplay_credentials))
-
+async def _handle_commands(args, config, loop):
     atv = await connect(config, loop, protocol=args.protocol)
     atv.listener = DeviceListener()
     atv.push_updater.listener = PushListener()

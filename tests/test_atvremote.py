@@ -18,6 +18,7 @@ from tests.mrp.fake_mrp_atv import (
 
 IP_1 = '10.0.0.1'
 IP_2 = '127.0.0.1'
+DMAP_ID = 'dmap_id'
 MRP_ID = 'mrp_id'
 AIRPLAY_ID = 'AA:BB:CC:DD:EE:FF'
 
@@ -41,22 +42,26 @@ class AtvremoteTest(AioHTTPTestCase):
     def setUp(self):
         AioHTTPTestCase.setUp(self)
         stub_sleep()
-        self.stub_services()
+        self.setup_environment()
         self.stdout = None
         self.stderr = None
         self.retcode = None
         self.inputs = []
 
-    def stub_services(self):
-        port = self.server.port
+    def setup_environment(self):
+        airplay_port = self.server.port
+
         services = []
         services.append(zeroconf_stub.homesharing_service(
-                'AAAA', b'Apple TV 1', IP_1, b'aaaa'))
+                DMAP_ID, b'Apple TV 1', IP_1, b'aaaa'))
         services.append(zeroconf_stub.mrp_service(
-                'DDDD', b'Apple TV 2', IP_2, MRP_ID, port=port))
+                'DDDD', b'Apple TV 2', IP_2, MRP_ID, port=self.fake_atv.port))
         services.append(zeroconf_stub.airplay_service(
-                'Apple TV 2', IP_2, AIRPLAY_ID, port=port))
+                'Apple TV 2', IP_2, AIRPLAY_ID, port=airplay_port))
         zeroconf_stub.stub(pyatv, *services)
+
+        self.usecase.airplay_playback_playing()
+        self.usecase.airplay_playback_idle()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self, self.loop)
@@ -84,8 +89,13 @@ class AtvremoteTest(AioHTTPTestCase):
     @unittest_run_loop
     async def test_scan_devices(self):
         await self.atvremote("scan")
-        self.has_output(
-            "Apple TV 1", "Apple TV 2", MRP_ID, IP_1, IP_2, AIRPLAY_ID, "AAAA")
+        self.has_output("Apple TV 1",
+                        "Apple TV 2",
+                        IP_1,
+                        IP_2,
+                        MRP_ID,
+                        AIRPLAY_ID,
+                        DMAP_ID)
         self.exit_ok()
 
     @unittest_run_loop
@@ -97,5 +107,34 @@ class AtvremoteTest(AioHTTPTestCase):
             "--id", MRP_ID,
             "--airplay-credentials", DEVICE_CREDENTIALS,
             "pair")
-        self.has_output("Enter PIN", "seems to have succeeded")
+        self.has_output("Enter PIN",
+                        "seems to have succeeded",
+                        DEVICE_CREDENTIALS)
+
+    @unittest_run_loop
+    async def test_airplay_play_url(self):
+        self.user_input(str(DEVICE_PIN))
+        await self.atvremote(
+            "--id", MRP_ID,
+            "--airplay-credentials", DEVICE_CREDENTIALS,
+            "play_url=http://fake")
+        self.exit_ok()
+
+    @unittest_run_loop
+    async def test_mrp_idle(self):
+        await self.atvremote("--id", MRP_ID, "playing")
+        self.has_output("Media type: Unknown", "Device state: Idle")
+        self.exit_ok()
+
+    @unittest_run_loop
+    async def test_manual_connect(self):
+        self.user_input(str(DEVICE_PIN))
+        await self.atvremote(
+            "--address", IP_2,
+            "--protocol", "mrp",
+            "--port", str(self.fake_atv.port),
+            "--id", MRP_ID,
+            "--manual",
+            "playing")
+        self.has_output("Media type: Unknown", "Device state: Idle")
         self.exit_ok()
