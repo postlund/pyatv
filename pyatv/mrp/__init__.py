@@ -226,14 +226,20 @@ class MrpPlaying(Playing):
     @property
     def position(self):
         """Position in the playing media (seconds)."""
+        # If we don't have reference time, we can't do anything
+        if not self._state.timestamp:
+            return None
+
         elapsed_time = self._state.metadata_field('elapsedTime')
-        if elapsed_time:
-            now = datetime.datetime.now()
-            diff = (now - self._state.timestamp).total_seconds()
-            if self.device_state == const.DEVICE_STATE_PLAYING:
-                return int(elapsed_time + diff)
-            return int(elapsed_time)
-        return None
+        now = datetime.datetime.now()
+        diff = (now - self._state.timestamp).total_seconds()
+
+        # If elapsed time is available, we make the assumption that
+        # it is zero (playback started at reference time)
+        elapsed_time = elapsed_time or 0
+        if self.device_state == const.DEVICE_STATE_PLAYING:
+            return int(elapsed_time + diff)
+        return int(elapsed_time)
 
     def _get_command_info(self, command):
         for cmd in self._state.supported_commands:
