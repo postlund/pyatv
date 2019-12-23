@@ -23,7 +23,7 @@ class PlayerState:
         """Initialize a new PlayerState instance."""
         self.playback_state = None
         self.supported_commands = []
-        self.timestamp = 0
+        self.timestamp = None
         self.items = []
         self.location = 0
 
