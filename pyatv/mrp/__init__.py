@@ -5,7 +5,8 @@ import logging
 import asyncio
 import datetime
 
-from pyatv import (const, exceptions)
+from pyatv import exceptions
+from pyatv.const import Protocol, MediaType, DeviceState, RepeatState
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
@@ -145,11 +146,11 @@ class MrpRemoteControl(RemoteControl):
 
     def set_repeat(self, repeat_mode):
         """Change repeat mode."""
-        if int(repeat_mode) == const.REPEAT_STATE_OFF:
+        if int(repeat_mode) == RepeatState.Off:
             state = 1
-        elif int(repeat_mode) == const.REPEAT_STATE_ALL:
+        elif int(repeat_mode) == RepeatState.All:
             state = 2
-        elif int(repeat_mode) == const.REPEAT_STATE_TRACK:
+        elif int(repeat_mode) == RepeatState.Track:
             state = 3
         else:
             raise ValueError('Invalid repeat mode: ' + str(repeat_mode))
@@ -171,11 +172,11 @@ class MrpPlaying(Playing):
             media_type = self._state.metadata.mediaType
             cim = protobuf.ContentItemMetadata
             if media_type == cim.Audio:
-                return const.MEDIA_TYPE_MUSIC
+                return MediaType.Music
             if media_type == cim.Video:
-                return const.MEDIA_TYPE_VIDEO
+                return MediaType.Video
 
-        return const.MEDIA_TYPE_UNKNOWN
+        return MediaType.Unknown
 
     @property
     def device_state(self):  # pylint: disable=too-many-return-statements
@@ -183,19 +184,19 @@ class MrpPlaying(Playing):
         state = self._state.playback_state
         ssm = SetStateMessage_pb2.SetStateMessage
         if state is None:
-            return const.DEVICE_STATE_IDLE
+            return DeviceState.Idle
         if state == ssm.Playing:
-            return const.DEVICE_STATE_PLAYING
+            return DeviceState.Playing
         if state == ssm.Paused:
-            return const.DEVICE_STATE_PAUSED
+            return DeviceState.Paused
         if state == ssm.Stopped:
-            return const.DEVICE_STATE_STOPPED
+            return DeviceState.Stopped
         if state == ssm.Interrupted:
-            return const.DEVICE_STATE_LOADING
+            return DeviceState.Loading
         if state == ssm.Seeking:
-            return const.DEVICE_STATE_SEEKING
+            return DeviceState.Seeking
 
-        return const.DEVICE_STATE_PAUSED
+        return DeviceState.Paused
 
     @property
     def title(self):
@@ -237,7 +238,7 @@ class MrpPlaying(Playing):
         # If elapsed time is available, we make the assumption that
         # it is zero (playback started at reference time)
         elapsed_time = elapsed_time or 0
-        if self.device_state == const.DEVICE_STATE_PLAYING:
+        if self.device_state == DeviceState.Playing:
             return int(elapsed_time + diff)
         return int(elapsed_time)
 
@@ -335,7 +336,7 @@ class MrpAppleTV(AppleTV):
         super().__init__()
 
         self._session = session
-        self._mrp_service = config.get_service(const.PROTOCOL_MRP)
+        self._mrp_service = config.get_service(Protocol.MRP)
 
         self._connection = MrpConnection(
             config.address, self._mrp_service.port, loop, atv=self)

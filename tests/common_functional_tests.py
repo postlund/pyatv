@@ -3,14 +3,15 @@
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
-from pyatv import const, exceptions
+from pyatv import exceptions
+from pyatv.const import Protocol, MediaType, DeviceState
 from pyatv.conf import AppleTV, AirPlayService
 from tests import zeroconf_stub
 from tests.utils import stub_sleep, until
 
 
 EXPECTED_ARTWORK = b'1234'
-AIRPLAY_STREAM = 'http://stream'
+AirPlay_STREAM = 'http://stream'
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
     'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
@@ -47,14 +48,14 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         with self.assertRaises(exceptions.UnsupportedProtocolError):
             await pyatv.connect(
-                conf, self.loop, protocol=const.PROTOCOL_AIRPLAY)
+                conf, self.loop, protocol=Protocol.AirPlay)
 
     @unittest_run_loop
     async def test_pair_missing_service(self):
         conf = AppleTV('1.2.3.4', 'Apple TV')
 
         with self.assertRaises(exceptions.NoServiceError):
-            await pyatv.pair(conf, const.PROTOCOL_DMAP, self.loop)
+            await pyatv.pair(conf, Protocol.DMAP, self.loop)
 
     @unittest_run_loop
     async def test_play_url(self):
@@ -63,18 +64,18 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
         await self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.server.port)
+            AirPlay_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+        self.assertEqual(self.fake_atv.last_airplay_url, AirPlay_STREAM)
 
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
-        self.conf.get_service(const.PROTOCOL_AIRPLAY).credentials = None
+        self.conf.get_service(Protocol.AirPlay).credentials = None
         self.usecase.airplay_require_authentication()
 
         with self.assertRaises(exceptions.AuthenticationError):
             await self.atv.airplay.play_url(
-                AIRPLAY_STREAM, port=self.server.port)
+                AirPlay_STREAM, port=self.server.port)
 
     @unittest_run_loop
     async def test_play_url_authenticated(self):
@@ -84,9 +85,9 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
         await self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.server.port)
+            AirPlay_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+        self.assertEqual(self.fake_atv.last_airplay_url, AirPlay_STREAM)
 
     @unittest_run_loop
     async def test_button_up(self):
@@ -155,8 +156,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         playing = await until(
             poll, fn=self.atv.metadata.playing, title='dummy')
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
+        self.assertEqual(playing.media_type, MediaType.Video)
+        self.assertEqual(playing.device_state, DeviceState.Paused)
         self.assertEqual(playing.title, 'dummy')
         self.assertEqual(playing.total_time, 123)
         self.assertEqual(playing.position, 3)

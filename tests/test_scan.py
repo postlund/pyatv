@@ -5,6 +5,7 @@ import ipaddress
 import asynctest
 
 from pyatv import const
+from pyatv.const import Protocol
 from tests import zeroconf_stub
 
 
@@ -89,9 +90,9 @@ class ScanTest(asynctest.TestCase):
 
         atv = atvs[0]
         self.assertEqual(
-            atv.get_service(const.PROTOCOL_DMAP).port, 3689)
+            atv.get_service(Protocol.DMAP).port, 3689)
         self.assertEqual(
-            atv.get_service(const.PROTOCOL_AIRPLAY).port, 7000)
+            atv.get_service(Protocol.AirPlay).port, 7000)
 
     async def test_scan_home_sharing_merge(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)
@@ -110,18 +111,18 @@ class ScanTest(asynctest.TestCase):
           pyatv, MRP_SERVICE_1, MRP_SERVICE_2, DEVICE_SERVICE_1)
 
         atvs = await pyatv.scan(
-          self.loop, timeout=0, protocol=const.PROTOCOL_MRP)
+          self.loop, timeout=0, protocol=const.Protocol.MRP)
         self.assertEqual(len(atvs), 2)
 
         dev1 = _get_atv(atvs, IP_4)
         self.assertIsNotNone(dev1)
         self.assertEqual(dev1.name, 'Apple TV 4')
-        self.assertIsNotNone(dev1.get_service(const.PROTOCOL_MRP))
+        self.assertIsNotNone(dev1.get_service(const.Protocol.MRP))
 
         dev2 = _get_atv(atvs, IP_5)
         self.assertIsNotNone(dev2)
         self.assertEqual(dev2.name, 'Apple TV 5')
-        self.assertIsNotNone(dev2.get_service(const.PROTOCOL_MRP))
+        self.assertIsNotNone(dev2.get_service(const.Protocol.MRP))
 
     async def test_scan_airplay_device(self):
         zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)

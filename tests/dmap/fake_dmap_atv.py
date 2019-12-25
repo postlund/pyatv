@@ -181,7 +181,7 @@ class FakeAppleTV(FakeAirPlayDevice):
             body += tags.uint32_tag('caps', playing.playstatus)
 
         if playing.repeat is not None:
-            body += tags.uint8_tag('carp', playing.repeat)
+            body += tags.uint8_tag('carp', playing.repeat.value)
 
         body += tags.uint8_tag('cash', playing.shuffle)
         body += tags.uint32_tag('cmsr', playing.revision + 1)

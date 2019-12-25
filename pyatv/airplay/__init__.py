@@ -3,7 +3,8 @@
 import logging
 import binascii
 
-from pyatv import const, net
+from pyatv import net
+from pyatv.const import Protocol
 from pyatv.interface import AirPlay
 
 from pyatv.airplay.player import AirPlayPlayer
@@ -20,7 +21,7 @@ class AirPlayAPI(AirPlay):  # pylint: disable=too-few-public-methods
         """Initialize a new AirPlayInternal instance."""
         self.config = config
         self.loop = loop
-        self.service = self.config.get_service(const.PROTOCOL_AIRPLAY)
+        self.service = self.config.get_service(Protocol.AirPlay)
         self.identifier = None
 
     def _get_credentials(self):

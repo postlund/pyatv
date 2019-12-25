@@ -5,7 +5,8 @@ import asyncio
 
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import (const, exceptions, convert, net)
+from pyatv import (exceptions, convert, net)
+from pyatv.const import Protocol, MediaType, RepeatState
 from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
@@ -222,7 +223,7 @@ class DmapPlaying(Playing):
         """Type of media is currently playing, e.g. video, music."""
         state = parser.first(self.playstatus, 'cmst', 'caps')
         if not state:
-            return const.MEDIA_TYPE_UNKNOWN
+            return MediaType.Unknown
 
         mediakind = parser.first(self.playstatus, 'cmst', 'cmmk')
         if mediakind is not None:
@@ -231,9 +232,9 @@ class DmapPlaying(Playing):
         # Fallback: if artist or album exists we assume music (not present
         # for video)
         if self.artist or self.album:
-            return const.MEDIA_TYPE_MUSIC
+            return MediaType.Music
 
-        return const.MEDIA_TYPE_VIDEO
+        return MediaType.Video
 
     @property
     def device_state(self):
@@ -279,7 +280,8 @@ class DmapPlaying(Playing):
     @property
     def repeat(self):
         """Repeat mode."""
-        return parser.first(self.playstatus, 'cmst', 'carp')
+        state = parser.first(self.playstatus, 'cmst', 'carp')
+        return None if state is None else RepeatState(state)
 
     def _get_time_in_seconds(self, tag):
         time = parser.first(self.playstatus, 'cmst', tag)
@@ -399,7 +401,7 @@ class DmapAppleTV(AppleTV):
         super().__init__()
         self._session = session
 
-        self._dmap_service = config.get_service(const.PROTOCOL_DMAP)
+        self._dmap_service = config.get_service(Protocol.DMAP)
         daap_http = HttpSession(
             session,
             'http://{0}:{1}/'.format(config.address, self._dmap_service.port))

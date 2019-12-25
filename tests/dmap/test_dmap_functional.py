@@ -6,8 +6,9 @@ import ipaddress
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv import const, exceptions, interface
+from pyatv import exceptions, interface
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
+from pyatv.const import MediaType, DeviceState, RepeatState
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -187,8 +188,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.nothing_playing()
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_UNKNOWN)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_IDLE)
+        self.assertEqual(playing.media_type, MediaType.Unknown)
+        self.assertEqual(playing.device_state, DeviceState.Idle)
 
     @unittest_run_loop
     async def test_metadata_video_playing(self):
@@ -196,8 +197,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
                                    total_time=40, position=10)
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_VIDEO)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_PLAYING)
+        self.assertEqual(playing.media_type, MediaType.Video)
+        self.assertEqual(playing.device_state, DeviceState.Playing)
         self.assertEqual(playing.title, 'video')
         self.assertEqual(playing.total_time, 40)
         self.assertEqual(playing.position, 10)
@@ -210,8 +211,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
                                    genre='genre')
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_PAUSED)
+        self.assertEqual(playing.media_type, MediaType.Music)
+        self.assertEqual(playing.device_state, DeviceState.Paused)
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'artist')
         self.assertEqual(playing.album, 'album')
@@ -227,8 +228,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
                                    genre='genre')
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, const.MEDIA_TYPE_MUSIC)
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_PLAYING)
+        self.assertEqual(playing.media_type, MediaType.Music)
+        self.assertEqual(playing.device_state, DeviceState.Playing)
         self.assertEqual(playing.title, 'music')
         self.assertEqual(playing.artist, 'test1')
         self.assertEqual(playing.album, 'test2')
@@ -287,18 +288,18 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_repeat_state(self):
-        self.usecase.example_video(repeat=const.REPEAT_STATE_OFF)
-        self.usecase.example_video(repeat=const.REPEAT_STATE_TRACK)
-        self.usecase.example_video(repeat=const.REPEAT_STATE_ALL)
+        self.usecase.example_video(repeat=RepeatState.Off)
+        self.usecase.example_video(repeat=RepeatState.Track)
+        self.usecase.example_video(repeat=RepeatState.All)
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, const.REPEAT_STATE_OFF)
+        self.assertEqual(playing.repeat, RepeatState.Off)
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, const.REPEAT_STATE_TRACK)
+        self.assertEqual(playing.repeat, RepeatState.Track)
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, const.REPEAT_STATE_ALL)
+        self.assertEqual(playing.repeat, RepeatState.All)
 
     @unittest_run_loop
     async def test_set_shuffle(self):
@@ -326,7 +327,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.media_is_loading()
 
         playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.device_state, const.DEVICE_STATE_LOADING)
+        self.assertEqual(playing.device_state, DeviceState.Loading)
 
     @unittest_run_loop
     async def test_button_unsupported_raises(self):

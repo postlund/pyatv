@@ -1,6 +1,6 @@
 """Configuration when connecting to an Apple TV."""
 from pyatv import (convert, exceptions)
-from pyatv.const import (PROTOCOL_MRP, PROTOCOL_DMAP, PROTOCOL_AIRPLAY)
+from pyatv.const import Protocol
 
 
 class AppleTV:
@@ -50,7 +50,7 @@ class AppleTV:
         returned.
         """
         # Special case for AirPlay for now
-        if protocol == PROTOCOL_AIRPLAY:
+        if protocol == Protocol.AirPlay:
             if self._services.get(protocol, None) is None:
                 self._services[protocol] = AirPlayService(None, 7000)
 
@@ -59,13 +59,13 @@ class AppleTV:
     @property
     def services(self):
         """Return all supported services."""
-        services = set(list(self._services.keys()) + [PROTOCOL_AIRPLAY])
+        services = set(list(self._services.keys()) + [Protocol.AirPlay])
         return [self.get_service(x) for x in services]
 
     def main_service(self, protocol=None):
         """Return suggested service used to establish connection."""
         protocols = [protocol] if protocol is not None else \
-            [PROTOCOL_MRP, PROTOCOL_DMAP]
+            [Protocol.MRP, Protocol.DMAP]
 
         for prot in protocols:
             service = self.get_service(prot)
@@ -135,7 +135,7 @@ class DmapService(BaseService):
 
     def __init__(self, identifier, credentials, port=None):
         """Initialize a new DmapService."""
-        super().__init__(identifier, PROTOCOL_DMAP, port or 3689)
+        super().__init__(identifier, Protocol.DMAP, port or 3689)
         self.credentials = credentials
 
 
@@ -145,7 +145,7 @@ class MrpService(BaseService):
 
     def __init__(self, identifier, port, credentials=None):
         """Initialize a new MrpService."""
-        super().__init__(identifier, PROTOCOL_MRP, port)
+        super().__init__(identifier, Protocol.MRP, port)
         self.credentials = credentials
 
 
@@ -155,5 +155,5 @@ class AirPlayService(BaseService):
 
     def __init__(self, identifier, port=7000, credentials=None):
         """Initialize a new AirPlayService."""
-        super().__init__(identifier, PROTOCOL_AIRPLAY, port)
+        super().__init__(identifier, Protocol.AirPlay, port)
         self.credentials = credentials

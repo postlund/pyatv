@@ -2,7 +2,8 @@
 
 import unittest
 
-from pyatv import (const, convert, exceptions, interface)
+from pyatv import (convert, exceptions, interface)
+from pyatv.const import MediaType, DeviceState, RepeatState
 
 
 class TestClass:
@@ -37,10 +38,10 @@ class TestClass:
 
 class PlayingDummy(interface.Playing):
 
-    def __init__(self, media_type=const.MEDIA_TYPE_VIDEO,
-                 device_state=const.DEVICE_STATE_PLAYING, title=None,
+    def __init__(self, media_type=MediaType.Video,
+                 device_state=DeviceState.Playing, title=None,
                  artist=None, album=None, genre=None, total_time=None,
-                 position=None, shuffle=True, repeat=const.REPEAT_STATE_TRACK):
+                 position=None, shuffle=True, repeat=RepeatState.Track):
         self._media_type = media_type
         self._device_state = device_state
         self._title = title
@@ -144,8 +145,8 @@ class InterfaceTest(unittest.TestCase):
 
     def test_playing_media_type_and_playstate(self):
         out = str(PlayingDummy())
-        self.assertIn(convert.media_type_str(const.MEDIA_TYPE_VIDEO), out)
-        self.assertIn(convert.playstate_str(const.DEVICE_STATE_PLAYING), out)
+        self.assertIn(convert.media_type_str(MediaType.Video), out)
+        self.assertIn(convert.playstate_str(DeviceState.Playing), out)
 
     def test_playing_title_artist_album_genre(self):
         out = str(PlayingDummy(

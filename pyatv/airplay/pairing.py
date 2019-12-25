@@ -4,7 +4,8 @@ import logging
 import binascii
 from collections import namedtuple
 
-from pyatv import const, exceptions, net
+from pyatv import exceptions, net
+from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.airplay.srp import (SRPAuthHandler, new_credentials)
 from pyatv.airplay.auth import DeviceAuthenticator
@@ -19,7 +20,7 @@ class AirPlayPairingHandler(PairingHandler):
 
     def __init__(self, config, session, _):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session, config.get_service(const.PROTOCOL_AIRPLAY))
+        super().__init__(session, config.get_service(Protocol.AirPlay))
         self.srp = SRPAuthHandler()
         self.http = net.HttpSession(
             session,

@@ -5,7 +5,7 @@ import ipaddress
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
-from pyatv import const
+from pyatv.const import Protocol
 from pyatv.conf import (DmapService, AppleTV)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
@@ -62,7 +62,7 @@ class PairFunctionalTest(AioHTTPTestCase):
         }
 
         self.pairing = await pyatv.pair(
-            self.conf, const.PROTOCOL_DMAP, self.loop, **options)
+            self.conf, Protocol.DMAP, self.loop, **options)
 
     @unittest_run_loop
     async def test_pairing_with_device(self):

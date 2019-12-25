@@ -2,7 +2,8 @@
 
 import logging
 
-from pyatv import const, exceptions
+from pyatv import exceptions
+from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.mrp.auth import MrpPairingProcedure
 from pyatv.mrp.srp import SRPAuthHandler
@@ -17,7 +18,7 @@ class MrpPairingHandler(PairingHandler):
 
     def __init__(self, config, session, loop):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session, config.get_service(const.PROTOCOL_MRP))
+        super().__init__(session, config.get_service(Protocol.MRP))
         self.connection = MrpConnection(
             config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()

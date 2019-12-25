@@ -11,7 +11,7 @@ from aiohttp import web
 from aiozeroconf import ServiceInfo, Zeroconf
 import netifaces
 
-from pyatv import const
+from pyatv.const import Protocol
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
 
@@ -46,7 +46,7 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
 
     def __init__(self, config, session, loop, **kwargs):
         """Initialize a new instance."""
-        super().__init__(session, config.get_service(const.PROTOCOL_DMAP))
+        super().__init__(session, config.get_service(Protocol.DMAP))
         self._loop = loop
         self._zeroconf = kwargs.get(
             'zeroconf', Zeroconf(loop, address_family=[netifaces.AF_INET]))
