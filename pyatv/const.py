@@ -1,5 +1,8 @@
 """Constants used in the public API."""
 
+from enum import Enum
+
+
 MAJOR_VERSION = '0'
 MINOR_VERSION = '4'
 PATCH_VERSION = '0a10'
@@ -7,60 +10,37 @@ __short_version__ = '{}.{}'.format(MAJOR_VERSION, MINOR_VERSION)
 __version__ = '{}.{}'.format(__short_version__, PATCH_VERSION)
 
 
-# Protocol types
+class Protocol(Enum):
+    """All supported protocol."""
 
-#: Protocol is DMAP (Apple TV 1, 2 and 3)
-PROTOCOL_DMAP = 1
-
-#: Protocol is MediaRemote (Apple TV 4 and later)
-PROTOCOL_MRP = 2
-
-#: Protocol is AirPlay
-PROTOCOL_AIRPLAY = 3
+    DMAP = 1
+    MRP = 2
+    AirPlay = 3
 
 
-# Media types
+class MediaType(Enum):
+    """All suuported media types."""
 
-#: Media type is unknown
-MEDIA_TYPE_UNKNOWN = 1
-
-#: Media type is video
-MEDIA_TYPE_VIDEO = 2
-
-#: Media type is music
-MEDIA_TYPE_MUSIC = 3
-
-#: Media type is TV
-MEDIA_TYPE_TV = 4
+    Unknown = 0
+    Video = 1
+    Music = 2
+    TV = 3
 
 
-# Device states
+class DeviceState(Enum):
+    """All supported device states."""
 
-#: Device is in idle state
-DEVICE_STATE_IDLE = 0
+    Idle = 0
+    Loading = 1
+    Paused = 2
+    Playing = 3
+    Stopped = 4
+    Seeking = 5
 
-#: Media is loading/buffering
-DEVICE_STATE_LOADING = 1
 
-#: Media is paused
-DEVICE_STATE_PAUSED = 2
+class RepeatState(Enum):
+    """All supported repeat states."""
 
-#: Media is playing
-DEVICE_STATE_PLAYING = 3
-
-#: Media is stopped
-DEVICE_STATE_STOPPED = 4
-
-#: Media is seeking
-DEVICE_STATE_SEEKING = 5
-
-# Repeat states
-
-#: No repeat
-REPEAT_STATE_OFF = 0
-
-#: Repeat current track
-REPEAT_STATE_TRACK = 1
-
-#: Repeat all tracks
-REPEAT_STATE_ALL = 2
+    Off = 0
+    Track = 1
+    All = 2

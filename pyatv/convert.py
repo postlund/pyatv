@@ -1,31 +1,33 @@
 """Various types of extraction and conversion functions."""
 
-from pyatv import (const, exceptions)
+from pyatv import exceptions
+from pyatv.const import (
+    Protocol, MediaType, DeviceState, RepeatState)
 
 
 def media_kind(kind):
     """Convert iTunes media kind to API representation."""
     if kind in [1]:
-        return const.MEDIA_TYPE_UNKNOWN
+        return MediaType.Unknown
     if kind in [3, 7, 11, 12, 13, 18, 32]:
-        return const.MEDIA_TYPE_VIDEO
+        return MediaType.Video
     if kind in [2, 4, 10, 14, 17, 21, 36]:
-        return const.MEDIA_TYPE_MUSIC
+        return MediaType.Music
     if kind in [8, 64]:
-        return const.MEDIA_TYPE_TV
+        return MediaType.TV
 
     raise exceptions.UnknownMediaKind('Unknown media kind: ' + str(kind))
 
 
 def media_type_str(mediatype):
     """Convert internal API media type to string."""
-    if mediatype == const.MEDIA_TYPE_UNKNOWN:
+    if mediatype == MediaType.Unknown:
         return 'Unknown'
-    if mediatype == const.MEDIA_TYPE_VIDEO:
+    if mediatype == MediaType.Video:
         return 'Video'
-    if mediatype == const.MEDIA_TYPE_MUSIC:
+    if mediatype == MediaType.Music:
         return 'Music'
-    if mediatype == const.MEDIA_TYPE_TV:
+    if mediatype == MediaType.TV:
         return 'TV'
     return 'Unsupported'
 
@@ -34,17 +36,17 @@ def playstate(state):
     """Convert iTunes playstate to API representation."""
     # pylint: disable=too-many-return-statements
     if state == 0 or state is None:
-        return const.DEVICE_STATE_IDLE
+        return DeviceState.Idle
     if state == 1:
-        return const.DEVICE_STATE_LOADING
+        return DeviceState.Loading
     if state == 2:
-        return const.DEVICE_STATE_STOPPED
+        return DeviceState.Stopped
     if state == 3:
-        return const.DEVICE_STATE_PAUSED
+        return DeviceState.Paused
     if state == 4:
-        return const.DEVICE_STATE_PLAYING
+        return DeviceState.Playing
     if state in (5, 6):
-        return const.DEVICE_STATE_SEEKING
+        return DeviceState.Seeking
 
     raise exceptions.UnknownPlayState('Unknown playstate: ' + str(state))
 
@@ -52,17 +54,17 @@ def playstate(state):
 # pylint: disable=too-many-return-statements
 def playstate_str(state):
     """Convert internal API playstate to string."""
-    if state == const.DEVICE_STATE_IDLE:
+    if state == DeviceState.Idle:
         return 'Idle'
-    if state == const.DEVICE_STATE_LOADING:
+    if state == DeviceState.Loading:
         return 'Loading'
-    if state == const.DEVICE_STATE_STOPPED:
+    if state == DeviceState.Stopped:
         return 'Stopped'
-    if state == const.DEVICE_STATE_PAUSED:
+    if state == DeviceState.Paused:
         return 'Paused'
-    if state == const.DEVICE_STATE_PLAYING:
+    if state == DeviceState.Playing:
         return 'Playing'
-    if state == const.DEVICE_STATE_SEEKING:
+    if state == DeviceState.Seeking:
         return 'Seeking'
 
     return 'Unsupported'
@@ -70,11 +72,11 @@ def playstate_str(state):
 
 def repeat_str(state):
     """Convert internal API repeat state to string."""
-    if state == const.REPEAT_STATE_OFF:
+    if state == RepeatState.Off:
         return 'Off'
-    if state == const.REPEAT_STATE_TRACK:
+    if state == RepeatState.Track:
         return 'Track'
-    if state == const.REPEAT_STATE_ALL:
+    if state == RepeatState.All:
         return 'All'
     return 'Unsupported'
 
@@ -92,10 +94,10 @@ def ms_to_s(time):
 
 def protocol_str(protocol):
     """Convert internal API protocol to string."""
-    if protocol == const.PROTOCOL_MRP:
+    if protocol == Protocol.MRP:
         return 'MRP'
-    if protocol == const.PROTOCOL_DMAP:
+    if protocol == Protocol.DMAP:
         return 'DMAP'
-    if protocol == const.PROTOCOL_AIRPLAY:
+    if protocol == Protocol.AirPlay:
         return 'AirPlay'
     return 'Unknown'

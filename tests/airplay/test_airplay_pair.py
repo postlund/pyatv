@@ -6,7 +6,7 @@ from asynctest.mock import patch
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
-from pyatv import const
+from pyatv.const import Protocol
 from pyatv.conf import (AirPlayService, AppleTV)
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases, DEVICE_CREDENTIALS, DEVICE_PIN,
@@ -44,7 +44,7 @@ class PairFunctionalTest(AioHTTPTestCase):
         self.usecase.airplay_require_authentication()
 
         self.pairing = await pyatv.pair(
-            self.conf, const.PROTOCOL_AIRPLAY, self.loop)
+            self.conf, Protocol.AirPlay, self.loop)
 
         self.assertTrue(self.pairing.device_provides_pin)
 
@@ -66,5 +66,5 @@ class PairFunctionalTest(AioHTTPTestCase):
     @unittest_run_loop
     async def test_pairing_with_device_existing_credentials(self):
         self.conf.get_service(
-            const.PROTOCOL_AIRPLAY).credentials = DEVICE_CREDENTIALS
+            Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
         await self.do_pairing()

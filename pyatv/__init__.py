@@ -7,9 +7,9 @@ from ipaddress import ip_address
 import netifaces
 from aiozeroconf import ServiceBrowser, Zeroconf
 
-from pyatv import (conf, const, exceptions, net)
+from pyatv import (conf, exceptions, net)
 from pyatv.airplay import AirPlayAPI
-
+from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
@@ -141,8 +141,8 @@ async def connect(config, loop, protocol=None, session=None):
     service = config.main_service(protocol=protocol)
 
     supported_implementations = {
-        const.PROTOCOL_DMAP: DmapAppleTV,
-        const.PROTOCOL_MRP: MrpAppleTV,
+        Protocol.DMAP: DmapAppleTV,
+        Protocol.MRP: MrpAppleTV,
     }
 
     implementation = supported_implementations.get(service.protocol, None)
@@ -169,9 +169,9 @@ async def pair(config, protocol, loop, session=None, **kwargs):
             'no service available for protocol ' + str(protocol))
 
     protocol_handlers = {
-        const.PROTOCOL_DMAP: DmapPairingHandler,
-        const.PROTOCOL_MRP: MrpPairingHandler,
-        const.PROTOCOL_AIRPLAY: AirPlayPairingHandler,
+        Protocol.DMAP: DmapPairingHandler,
+        Protocol.MRP: MrpPairingHandler,
+        Protocol.AirPlay: AirPlayPairingHandler,
     }
 
     handler = protocol_handlers.get(protocol, None)

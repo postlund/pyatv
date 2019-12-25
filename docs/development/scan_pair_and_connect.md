@@ -24,7 +24,7 @@ async def scan(loop, timeout=5, identifier=None, protocol=None):
 **identifier:** filter to scan for *one* particular device
 
 **protocol:** filter fo scan for devices with a particular protocol
-(`const.PROTOCOL_DMAP`, `const.PROTOCOL_MRP` or `const.PROTOCOL_AIRPLAY`)
+(`Protocol.DMAP`, `Protocol.MRP` or `Protocol.AirPlay`)
 
 ### Usage
 
@@ -40,11 +40,14 @@ You can put some limitations on what device(s) to scan for, e.g. an identifier
 and/or a protocol:
 
 ```python
+from pyatv import scan
+from pyatv.const import Protocol
+
 # Scan for a specific device
-atvs = pyatv.scan(loop, identifier='AA:BB:CC:DD:EE:FF')
+atvs = scan(loop, identifier='AA:BB:CC:DD:EE:FF')
 
 # Only scan for MRP capable devices
-atvs = pyatv.scan(loop, protocol=const.PROTOCOL_MRP)
+atvs = scan(loop, protocol=Protocol.MRP)
 ```
 
 A list is always returned, even if a filter is applied.
@@ -94,9 +97,12 @@ If an error occurs, e.g. incorrect PIN, `exceptions.DeviceAuthenticationError` i
 Translating the flow above into code looks like this:
 
 ```python
-atvs = await pyatv.scan(loop)
+from pyatv import scan, pair
+from pyatv.const import Protocol
 
-pairing = await pyatv.pair(atvs[0], const.PROTOCOL_MRP, loop)
+atvs = await scan(loop)
+
+pairing = await pair(atvs[0], Protocol.MRP, loop)
 await pairing.begin()
 
 pin = int(input("Enter PIN: "))
@@ -177,7 +183,7 @@ The following extra settings are supported by `DMAP`:
 You pass these via `kwargs` to `pyatv.pair`:
 
 ```python
-pairing = await pyatv.pair(config, const.PROTOCOL_DMAP, name='my remote')
+pairing = await pyatv.pair(config, Protocol.DMAP, name='my remote')
 ```
 
 ### AirPlay specifics

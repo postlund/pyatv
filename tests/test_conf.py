@@ -4,8 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from pyatv import (conf, const, exceptions)
-from pyatv.const import (
-  PROTOCOL_AIRPLAY, PROTOCOL_DMAP, PROTOCOL_MRP)
+from pyatv.const import Protocol
 
 ADDRESS_1 = '127.0.0.1'
 ADDRESS_2 = '192.168.0.1'
@@ -22,19 +21,19 @@ class ConfTest(unittest.TestCase):
     def setUp(self):
         self.config = conf.AppleTV(ADDRESS_1, NAME)
         self.service_mock = MagicMock()
-        self.service_mock.protocol = const.PROTOCOL_DMAP
+        self.service_mock.protocol = const.Protocol.DMAP
         self.service_mock.port = PORT_1
         self.service_mock.identifier = IDENTIFIER_1
         self.service_mock.credentials = None
 
         self.service_mock2 = MagicMock()
-        self.service_mock2.protocol = const.PROTOCOL_MRP
+        self.service_mock2.protocol = const.Protocol.MRP
         self.service_mock2.port = PORT_2
         self.service_mock2.identifier = IDENTIFIER_2
 
         self.airplay_mock = MagicMock()
         self.airplay_mock.port = PORT_1
-        self.airplay_mock.protocol = const.PROTOCOL_AIRPLAY
+        self.airplay_mock.protocol = Protocol.AirPlay
 
     def test_address_and_name(self):
         self.assertEqual(self.config.address, ADDRESS_1)
@@ -58,10 +57,10 @@ class ConfTest(unittest.TestCase):
         self.assertIn(self.service_mock2, services)
 
         self.assertEqual(
-            self.config.get_service(PROTOCOL_DMAP), self.service_mock)
+            self.config.get_service(Protocol.DMAP), self.service_mock)
         self.assertEqual(
-            self.config.get_service(PROTOCOL_MRP), self.service_mock2)
-        self.assertIsNotNone(self.config.get_service(PROTOCOL_AIRPLAY))
+            self.config.get_service(Protocol.MRP), self.service_mock2)
+        self.assertIsNotNone(self.config.get_service(Protocol.AirPlay))
 
     def test_identifier(self):
         self.assertIsNone(self.config.identifier)
@@ -78,15 +77,15 @@ class ConfTest(unittest.TestCase):
         self.assertIn(self.service_mock2, services)
 
     def test_default_airplay_service(self):
-        airplay = self.config.get_service(const.PROTOCOL_AIRPLAY)
-        self.assertEqual(airplay.protocol, const.PROTOCOL_AIRPLAY)
+        airplay = self.config.get_service(Protocol.AirPlay)
+        self.assertEqual(airplay.protocol, Protocol.AirPlay)
         self.assertEqual(airplay.port, 7000)
 
     def test_add_airplay_service(self):
         self.config.add_service(self.airplay_mock)
 
-        airplay = self.config.get_service(PROTOCOL_AIRPLAY)
-        self.assertEqual(airplay.protocol, const.PROTOCOL_AIRPLAY)
+        airplay = self.config.get_service(Protocol.AirPlay)
+        self.assertEqual(airplay.protocol, Protocol.AirPlay)
         self.assertEqual(airplay.port, PORT_1)
 
     def test_main_service_no_service(self):
@@ -113,15 +112,15 @@ class ConfTest(unittest.TestCase):
             self.service_mock)
 
     def test_set_credentials_for_missing_service(self):
-        self.assertFalse(self.config.set_credentials(PROTOCOL_DMAP, 'dummy'))
+        self.assertFalse(self.config.set_credentials(Protocol.DMAP, 'dummy'))
 
     def test_set_credentials(self):
         self.config.add_service(self.service_mock)
-        self.assertIsNone(self.config.get_service(PROTOCOL_DMAP).credentials)
+        self.assertIsNone(self.config.get_service(Protocol.DMAP).credentials)
 
-        self.config.set_credentials(PROTOCOL_DMAP, 'dummy')
+        self.config.set_credentials(Protocol.DMAP, 'dummy')
         self.assertEqual(
-            self.config.get_service(PROTOCOL_DMAP).credentials, 'dummy')
+            self.config.get_service(Protocol.DMAP).credentials, 'dummy')
 
     # This test is a bit strange and couples to protocol specific services,
     # but it's mainly to exercise string as that is important. Might refactor

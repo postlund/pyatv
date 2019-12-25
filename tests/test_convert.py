@@ -2,7 +2,9 @@
 
 import unittest
 
-from pyatv import (const, convert, exceptions)
+from pyatv import (convert, exceptions)
+from pyatv.const import (
+    Protocol, MediaType, DeviceState, RepeatState)
 
 # These are extracted from iTunes, see for instance:
 # http://www.blooming.no/wp-content/uploads/2013/03/ITLibMediaItem.h
@@ -50,45 +52,45 @@ class ConvertTest(unittest.TestCase):
     # MEDIA KIND TESTS
 
     def test_unknown_media_kind(self):
-        self.assertEqual(const.MEDIA_TYPE_UNKNOWN,
+        self.assertEqual(MediaType.Unknown,
                          convert.media_kind(MEDIA_KIND_UNKNOWN))
 
     def test_video_media_kinds(self):
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_MOVIE))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_MUSICVIDEO))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_MUSICVIDEO2))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_VIDEOPASS))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_HOMEVIDEO))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_FUTUREVIDEO))
-        self.assertEqual(const.MEDIA_TYPE_VIDEO,
+        self.assertEqual(MediaType.Video,
                          convert.media_kind(MEDIA_KIND_ITUNESU))
 
     def test_music_media_kinds(self):
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_SONG))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_PODCAST))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_PODCAST2))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_COACHEDAUDIO))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_RINGTONE))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_VOICEMEMO))
-        self.assertEqual(const.MEDIA_TYPE_MUSIC,
+        self.assertEqual(MediaType.Music,
                          convert.media_kind(MEDIA_KIND_ALERTTONE))
 
     def test_tv_kinds(self):
-        self.assertEqual(const.MEDIA_TYPE_TV,
+        self.assertEqual(MediaType.TV,
                          convert.media_kind(MEDIA_KIND_TVSHOW))
-        self.assertEqual(const.MEDIA_TYPE_TV,
+        self.assertEqual(MediaType.TV,
                          convert.media_kind(MEDIA_KIND_TVSHOW2))
 
     def test_unknown_media_kind_throws(self):
@@ -97,12 +99,12 @@ class ConvertTest(unittest.TestCase):
 
     def test_media_type_to_string(self):
         self.assertEqual('Unknown',
-                         convert.media_type_str(const.MEDIA_TYPE_UNKNOWN))
+                         convert.media_type_str(MediaType.Unknown))
         self.assertEqual('Video',
-                         convert.media_type_str(const.MEDIA_TYPE_VIDEO))
+                         convert.media_type_str(MediaType.Video))
         self.assertEqual('Music',
-                         convert.media_type_str(const.MEDIA_TYPE_MUSIC))
-        self.assertEqual('TV', convert.media_type_str(const.MEDIA_TYPE_TV))
+                         convert.media_type_str(MediaType.Music))
+        self.assertEqual('TV', convert.media_type_str(MediaType.TV))
 
     def test_unknown_media_type_to_str(self):
         self.assertEqual('Unsupported', convert.media_type_str(999))
@@ -114,23 +116,23 @@ class ConvertTest(unittest.TestCase):
         # valid value. But it is supported nonetheless because that makes
         # usage nicer. None means that the field is not included in a
         # server response, which matches the behavior of dmap.first.
-        self.assertEqual(const.DEVICE_STATE_IDLE,
+        self.assertEqual(DeviceState.Idle,
                          convert.playstate(None))
 
     def test_regular_playstates(self):
-        self.assertEqual(const.DEVICE_STATE_IDLE,
+        self.assertEqual(DeviceState.Idle,
                          convert.playstate(PLAY_STATE_IDLE))
-        self.assertEqual(const.DEVICE_STATE_LOADING,
+        self.assertEqual(DeviceState.Loading,
                          convert.playstate(PLAY_STATE_LOADING))
-        self.assertEqual(const.DEVICE_STATE_STOPPED,
+        self.assertEqual(DeviceState.Stopped,
                          convert.playstate(PLAY_STATE_STOPPED))
-        self.assertEqual(const.DEVICE_STATE_PAUSED,
+        self.assertEqual(DeviceState.Paused,
                          convert.playstate(PLAY_STATE_PAUSED))
-        self.assertEqual(const.DEVICE_STATE_PLAYING,
+        self.assertEqual(DeviceState.Playing,
                          convert.playstate(PLAY_STATE_PLAYING))
-        self.assertEqual(const.DEVICE_STATE_SEEKING,
+        self.assertEqual(DeviceState.Seeking,
                          convert.playstate(PLAY_STATE_FORWARD))
-        self.assertEqual(const.DEVICE_STATE_SEEKING,
+        self.assertEqual(DeviceState.Seeking,
                          convert.playstate(PLAY_STATE_BACKWARD))
 
     def test_unknown_playstate_throws(self):
@@ -139,17 +141,17 @@ class ConvertTest(unittest.TestCase):
 
     def test_playstate_str(self):
         self.assertEqual('Idle',
-                         convert.playstate_str(const.DEVICE_STATE_IDLE))
+                         convert.playstate_str(DeviceState.Idle))
         self.assertEqual('Loading',
-                         convert.playstate_str(const.DEVICE_STATE_LOADING))
+                         convert.playstate_str(DeviceState.Loading))
         self.assertEqual('Stopped',
-                         convert.playstate_str(const.DEVICE_STATE_STOPPED))
+                         convert.playstate_str(DeviceState.Stopped))
         self.assertEqual('Paused',
-                         convert.playstate_str(const.DEVICE_STATE_PAUSED))
+                         convert.playstate_str(DeviceState.Paused))
         self.assertEqual('Playing',
-                         convert.playstate_str(const.DEVICE_STATE_PLAYING))
+                         convert.playstate_str(DeviceState.Playing))
         self.assertEqual('Seeking',
-                         convert.playstate_str(const.DEVICE_STATE_SEEKING))
+                         convert.playstate_str(DeviceState.Seeking))
 
     def test_unsupported_playstate_str(self):
         self.assertEqual('Unsupported', convert.playstate_str(999))
@@ -173,11 +175,11 @@ class ConvertTest(unittest.TestCase):
 
     def test_repeat_str(self):
         self.assertEqual('Off',
-                         convert.repeat_str(const.REPEAT_STATE_OFF))
+                         convert.repeat_str(RepeatState.Off))
         self.assertEqual('Track',
-                         convert.repeat_str(const.REPEAT_STATE_TRACK))
+                         convert.repeat_str(RepeatState.Track))
         self.assertEqual('All',
-                         convert.repeat_str(const.REPEAT_STATE_ALL))
+                         convert.repeat_str(RepeatState.All))
 
     def test_unknown_repeat_to_str(self):
         self.assertEqual('Unsupported', convert.repeat_str(1234))
@@ -186,11 +188,11 @@ class ConvertTest(unittest.TestCase):
 
     def test_protocol_str(self):
         self.assertEqual('MRP',
-                         convert.protocol_str(const.PROTOCOL_MRP))
+                         convert.protocol_str(Protocol.MRP))
         self.assertEqual('DMAP',
-                         convert.protocol_str(const.PROTOCOL_DMAP))
+                         convert.protocol_str(Protocol.DMAP))
         self.assertEqual('AirPlay',
-                         convert.protocol_str(const.PROTOCOL_AIRPLAY))
+                         convert.protocol_str(Protocol.AirPlay))
 
     def test_unknown_protocol_str(self):
         self.assertEqual('Unknown', convert.protocol_str('invalid'))

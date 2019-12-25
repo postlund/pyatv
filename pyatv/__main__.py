@@ -11,6 +11,7 @@ import argparse
 from pyatv import (const, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
     AppleTV, DmapService, MrpService, AirPlayService)
+from pyatv.const import Protocol
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
@@ -125,14 +126,14 @@ class GlobalCommands:
 
         # Inject user provided credentials
         apple_tv.set_credentials(
-            const.PROTOCOL_AIRPLAY, self.args.airplay_credentials)
+            const.Protocol.AirPlay, self.args.airplay_credentials)
         apple_tv.set_credentials(
-            const.PROTOCOL_DMAP, self.args.dmap_credentials)
+            const.Protocol.DMAP, self.args.dmap_credentials)
         apple_tv.set_credentials(
-            const.PROTOCOL_MRP, self.args.mrp_credentials)
+            const.Protocol.MRP, self.args.mrp_credentials)
 
         # Protocol specific options
-        if self.args.protocol == const.PROTOCOL_DMAP:
+        if self.args.protocol == const.Protocol.DMAP:
             options.update({
                 'pairing_guid': self.args.pairing_guid,
                 'remote_name': self.args.remote_name,
@@ -277,11 +278,11 @@ class TransformProtocol(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         """Match protocol string and save correct version."""
         if values == "mrp":
-            setattr(namespace, self.dest, const.PROTOCOL_MRP)
+            setattr(namespace, self.dest, const.Protocol.MRP)
         elif values == "dmap":
-            setattr(namespace, self.dest, const.PROTOCOL_DMAP)
+            setattr(namespace, self.dest, const.Protocol.DMAP)
         elif values == 'airplay':
-            setattr(namespace, self.dest, const.PROTOCOL_AIRPLAY)
+            setattr(namespace, self.dest, const.Protocol.AirPlay)
         else:
             raise argparse.ArgumentTypeError(
                 'Valid protocols are: mrp, dmap, airplay')
@@ -393,9 +394,9 @@ async def _autodiscover_device(args, loop):
             value = service.credentials or getattr(args, field)
             setattr(args, field, value)
 
-    _set_credentials(const.PROTOCOL_DMAP, 'dmap_credentials')
-    _set_credentials(const.PROTOCOL_MRP, 'mrp_credentials')
-    _set_credentials(const.PROTOCOL_AIRPLAY, 'airplay_credentials')
+    _set_credentials(Protocol.DMAP, 'dmap_credentials')
+    _set_credentials(Protocol.MRP, 'mrp_credentials')
+    _set_credentials(Protocol.AirPlay, 'airplay_credentials')
 
     logging.info('Auto-discovered %s at %s', args.name, args.address)
 
@@ -404,10 +405,10 @@ async def _autodiscover_device(args, loop):
 
 def _manual_device(args):
     config = AppleTV(args.address, args.name)
-    if args.dmap_credentials or args.protocol == const.PROTOCOL_DMAP:
+    if args.dmap_credentials or args.protocol == const.Protocol.DMAP:
         config.add_service(DmapService(
             args.id, args.dmap_credentials, port=args.port))
-    if args.mrp_credentials or args.protocol == const.PROTOCOL_MRP:
+    if args.mrp_credentials or args.protocol == const.Protocol.MRP:
         config.add_service(MrpService(
             args.id, args.port, credentials=args.mrp_credentials))
     if args.airplay_credentials:
