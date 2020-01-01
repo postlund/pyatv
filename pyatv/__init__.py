@@ -25,19 +25,97 @@ MEDIAREMOTE_SERVICE = '_mediaremotetv._tcp.local.'
 AIRPLAY_SERVICE = '_airplay._tcp.local.'
 
 
-def _zcprop(info, prop):
-    value = info.properties.get(prop.encode('utf-8'), None)
+def _property_decode(properties, prop):
+    value = properties.get(prop.encode('utf-8'))
     if value:
         return value.decode('utf-8')
     return None
 
 
-class _ServiceListener:
+class BaseScanner:  # pylint: disable=too-few-public-methods
+    """Base scanner for service discovery."""
+
+    def __init__(self):
+        """Initialize a new BaseScanner."""
+        self._found_devices = {}
+
+    def service_discovered(  # pylint: disable=too-many-arguments
+            self, service_type, service_name, address, port, properties):
+        """Call when a service was discovered."""
+        supported_types = {
+            HOMESHARING_SERVICE: self._hs_service,
+            DEVICE_SERVICE: self._non_hs_service,
+            MEDIAREMOTE_SERVICE: self._mrp_service,
+            AIRPLAY_SERVICE: self._airplay_service
+        }
+
+        handler = supported_types.get(service_type)
+        if handler:
+            handler(service_name, address, port, properties)
+        else:
+            _LOGGER.warning('Discovered unknown device: %s', service_type)
+
+    def _hs_service(self, service_name, address, port, properties):
+        """Add a new device to discovered list."""
+        identifier = service_name.split('.')[0]
+        name = _property_decode(properties, 'Name')
+        hsgid = _property_decode(properties, 'hG')
+        service = conf.DmapService(identifier, hsgid, port=port)
+        self._handle_service(address, name, service)
+
+    def _non_hs_service(self, service_name, address, port, properties):
+        """Add a new device without Home Sharing to discovered list."""
+        identifier = service_name.split('.')[0]
+        name = _property_decode(properties, 'CtlN')
+        service = conf.DmapService(identifier, None, port=port)
+        self._handle_service(address, name, service)
+
+    def _mrp_service(self, _, address, port, properties):
+        """Add a new MediaRemoteProtocol device to discovered list."""
+        identifier = _property_decode(properties, 'UniqueIdentifier')
+        name = _property_decode(properties, 'Name')
+        service = conf.MrpService(identifier, port)
+        self._handle_service(address, name, service)
+
+    def _airplay_service(self, service_name, address, port, properties):
+        """Add a new AirPlay device to discovered list."""
+        identifier = _property_decode(properties, 'deviceid')
+        name = service_name.replace('.' + AIRPLAY_SERVICE, '')
+        service = conf.AirPlayService(identifier, port)
+        self._handle_service(address, name, service)
+
+    def _handle_service(self, address, name, service):
+        if address not in self._found_devices:
+            self._found_devices[address] = conf.AppleTV(address, name)
+
+        _LOGGER.debug('Auto-discovered %s at %s:%d (protocol: %s)',
+                      name, address, service.port, service.protocol)
+
+        atv = self._found_devices[address]
+        atv.add_service(service)
+
+
+class ZeroconfScanner(BaseScanner):
+    """Service discovery based on Zeroconf."""
 
     def __init__(self, loop):
-        """Initialize a new _ServiceListener."""
+        """Initialize a new ZeroconfScanner."""
+        super().__init__()
         self.loop = loop
-        self.found_devices = {}
+
+    async def discover(self, timeout):
+        """Start discovery of devices and services."""
+        zeroconf = Zeroconf(self.loop, address_family=[netifaces.AF_INET])
+        try:
+            ServiceBrowser(zeroconf, HOMESHARING_SERVICE, self)
+            ServiceBrowser(zeroconf, DEVICE_SERVICE, self)
+            ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self)
+            ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self)
+            _LOGGER.debug('Discovering devices for %d seconds', timeout)
+            await asyncio.sleep(timeout)
+        finally:
+            await zeroconf.close()
+        return self._found_devices
 
     def add_service(self, zeroconf, service_type, name):
         """Handle callback from zeroconf when a service has been discovered."""
@@ -54,72 +132,12 @@ class _ServiceListener:
             return
 
         address = ip_address(info.address)
-
-        if info.type == HOMESHARING_SERVICE:
-            self.add_hs_service(info, address)
-        elif info.type == DEVICE_SERVICE:
-            self.add_non_hs_service(info, address)
-        elif info.type == MEDIAREMOTE_SERVICE:
-            self.add_mrp_service(info, address)
-        elif info.type == AIRPLAY_SERVICE:
-            self.add_airplay_service(info, address)
-        else:
-            _LOGGER.warning('Discovered unknown device: %s', info)
-
-    def add_hs_service(self, info, address):
-        """Add a new device to discovered list."""
-        identifier = info.name.split('.')[0]
-        name = _zcprop(info, 'Name')
-        hsgid = _zcprop(info, 'hG')
-        service = conf.DmapService(identifier, hsgid, port=info.port)
-        self._handle_service(address, name, service)
-
-    def add_non_hs_service(self, info, address):
-        """Add a new device without Home Sharing to discovered list."""
-        identifier = info.name.split('.')[0]
-        name = _zcprop(info, 'CtlN')
-        service = conf.DmapService(identifier, None, port=info.port)
-        self._handle_service(address, name, service)
-
-    def add_mrp_service(self, info, address):
-        """Add a new MediaRemoteProtocol device to discovered list."""
-        identifier = _zcprop(info, 'UniqueIdentifier')
-        name = _zcprop(info, 'Name')
-        service = conf.MrpService(identifier, info.port)
-        self._handle_service(address, name, service)
-
-    def add_airplay_service(self, info, address):
-        """Add a new AirPlay device to discovered list."""
-        identifier = _zcprop(info, 'deviceid')
-        name = info.name.replace('.' + AIRPLAY_SERVICE, '')
-        service = conf.AirPlayService(identifier, info.port)
-        self._handle_service(address, name, service)
-
-    def _handle_service(self, address, name, service):
-        if address not in self.found_devices:
-            self.found_devices[address] = conf.AppleTV(address, name)
-
-        _LOGGER.debug('Auto-discovered %s at %s:%d (protocol: %s)',
-                      name, address, service.port, service.protocol)
-
-        atv = self.found_devices[address]
-        atv.add_service(service)
+        self.service_discovered(
+            info.type, info.name, address, info.port, info.properties)
 
 
 async def scan(loop, timeout=5, identifier=None, protocol=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
-    listener = _ServiceListener(loop)
-    zeroconf = Zeroconf(loop, address_family=[netifaces.AF_INET])
-    try:
-        ServiceBrowser(zeroconf, HOMESHARING_SERVICE, listener)
-        ServiceBrowser(zeroconf, DEVICE_SERVICE, listener)
-        ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, listener)
-        ServiceBrowser(zeroconf, AIRPLAY_SERVICE, listener)
-        _LOGGER.debug('Discovering devices for %d seconds', timeout)
-        await asyncio.sleep(timeout)
-    finally:
-        await zeroconf.close()
-
     def _should_include(atv):
         if identifier and identifier not in atv.all_identifiers:
             return False
@@ -129,8 +147,9 @@ async def scan(loop, timeout=5, identifier=None, protocol=None):
 
         return True
 
-    found_devices = listener.found_devices.values()
-    return [x for x in found_devices if _should_include(x)]
+    scanner = ZeroconfScanner(loop)
+    devices = (await scanner.discover(timeout)).values()
+    return [device for device in devices if _should_include(device)]
 
 
 async def connect(config, loop, protocol=None, session=None):
