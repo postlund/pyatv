@@ -7,6 +7,7 @@ import binascii
 import asyncio
 import argparse
 import traceback
+from ipaddress import ip_address
 
 from pyatv import (const, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
@@ -39,6 +40,8 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
 
     if not args.name:
         options['identifier'] = args.id
+    if args.scan_hosts:
+        options['hosts'] = args.scan_hosts
 
     atvs = await scan(loop, **options)
     if not atvs:
@@ -106,7 +109,9 @@ class GlobalCommands:
 
     async def scan(self):
         """Scan for Apple TVs on the network."""
-        atvs = await scan(self.loop, timeout=self.args.scan_timeout)
+        atvs = await scan(self.loop,
+                          hosts=self.args.scan_hosts,
+                          timeout=self.args.scan_timeout)
         _print_found_apple_tvs(atvs, sys.stdout)
 
         return 0
@@ -289,6 +294,16 @@ class TransformProtocol(argparse.Action):
                 'Valid protocols are: mrp, dmap, airplay')
 
 
+# pylint: disable=too-few-public-methods
+class TransformScanHosts(argparse.Action):
+    """Transform scan hosts into array."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Split hosts and save as array."""
+        ips = [ip_address(ip) for ip in values.split(',')]
+        setattr(namespace, self.dest, ips)
+
+
 async def cli_handler(loop):
     """Application starts here."""
     parser = argparse.ArgumentParser()
@@ -310,6 +325,9 @@ async def cli_handler(loop):
     parser.add_argument('-t', '--scan-timeout', help='timeout when scanning',
                         dest='scan_timeout', type=_in_range(1, 100),
                         metavar='TIMEOUT', default=3)
+    parser.add_argument('-s', '--scan-hosts', help='scan specific hosts',
+                        dest='scan_hosts', default=None,
+                        action=TransformScanHosts)
     parser.add_argument('--version', action='version',
                         help='version of atvremote and pyatv',
                         version='%(prog)s {0}'.format(const.__version__))

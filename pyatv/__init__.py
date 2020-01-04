@@ -1,5 +1,6 @@
 """Library for controlling an Apple TV."""
 
+import os
 import asyncio
 import logging
 from ipaddress import ip_address
@@ -7,7 +8,7 @@ from ipaddress import ip_address
 import netifaces
 from aiozeroconf import ServiceBrowser, Zeroconf
 
-from pyatv import (conf, exceptions, net)
+from pyatv import (conf, exceptions, net, udns)
 from pyatv.airplay import AirPlayAPI
 from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
@@ -23,6 +24,13 @@ HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
 DEVICE_SERVICE = '_touch-able._tcp.local.'
 MEDIAREMOTE_SERVICE = '_mediaremotetv._tcp.local.'
 AIRPLAY_SERVICE = '_airplay._tcp.local.'
+
+ALL_SERVICES = [
+    HOMESHARING_SERVICE,
+    DEVICE_SERVICE,
+    MEDIAREMOTE_SERVICE,
+    AIRPLAY_SERVICE
+]
 
 
 def _property_decode(properties, prop):
@@ -88,7 +96,7 @@ class BaseScanner:  # pylint: disable=too-few-public-methods
         if address not in self._found_devices:
             self._found_devices[address] = conf.AppleTV(address, name)
 
-        _LOGGER.debug('Auto-discovered %s at %s:%d (protocol: %s)',
+        _LOGGER.debug('Auto-discovered %s at %s:%d (%s)',
                       name, address, service.port, service.protocol)
 
         atv = self._found_devices[address]
@@ -136,7 +144,61 @@ class ZeroconfScanner(BaseScanner):
             info.type, info.name, address, info.port, info.properties)
 
 
-async def scan(loop, timeout=5, identifier=None, protocol=None):
+class UnicastMdnsScanner(BaseScanner):
+    """Service discovery based on unicast MDNS."""
+
+    def __init__(self, hosts, loop):
+        """Initialize a new UnicastMdnsScanner."""
+        super().__init__()
+        self.hosts = hosts
+        self.loop = loop
+
+    async def discover(self, timeout):
+        """Start discovery of devices and services."""
+        results = await asyncio.gather(
+            *[self._get_services(host, timeout) for host in self.hosts])
+        for host, response in results:
+            if response is not None:
+                self._handle_response(host, response)
+        return self._found_devices
+
+    async def _get_services(self, host, timeout):
+        port = os.environ.get('PYATV_UDNS_PORT', 5353)  # For testing purposes
+        services = [s[0:-1] for s in ALL_SERVICES]
+        response = await udns.request(
+            self.loop, host, services, port=port, timeout=timeout)
+        return host, response
+
+    def _handle_response(self, host, response):
+        for resource in response.resources:
+            if resource.qtype != udns.QTYPE_TXT:
+                continue
+
+            service_name = '.'.join(resource.qname.split('.')[1:]) + '.'
+            if service_name not in ALL_SERVICES:
+                continue
+
+            port = UnicastMdnsScanner._get_port(response, resource.qname)
+            if not port:
+                _LOGGER.warning('Missing port for %s', resource.qname)
+                continue
+
+            self.service_discovered(
+                service_name, resource.qname + '.', host, port, resource.rd)
+
+    @staticmethod
+    def _get_port(response, qname):
+        for resource in response.resources:
+            if resource.qtype != udns.QTYPE_SRV:
+                continue
+
+            if resource.qname == qname:
+                return resource.rd.get('port')
+
+        return None
+
+
+async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     def _should_include(atv):
         if identifier and identifier not in atv.all_identifiers:
@@ -147,7 +209,11 @@ async def scan(loop, timeout=5, identifier=None, protocol=None):
 
         return True
 
-    scanner = ZeroconfScanner(loop)
+    if hosts:
+        scanner = UnicastMdnsScanner(hosts, loop)
+    else:
+        scanner = ZeroconfScanner(loop)
+
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]
 

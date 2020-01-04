@@ -37,6 +37,37 @@ To find devices, use the `scan` command:
 In this case two devices were found, one named `Living Room` and another named
 `Kitchen`. You can read more about what everything means under [Concepts](concepts.md).
 
+### Discovering specific devices
+
+A normal `scan` uses multicast to discover all devices on the network. It is possible to
+scan for specific devices ("unicast") by specifying `--scan-hosts`:
+
+    $ atvremote --scan-hosts 10.0.0.10 scan
+    ========================================
+           Name: Living Room
+        Address: 10.0.0.10
+    Identifiers:
+     - 01234567-89AB-CDEF-0123-4567890ABCDE
+     - 00:11:22:33:44:55
+    Services:
+     - Protocol: MRP, Port: 49152, Credentials: None
+     - Protocol: AirPlay, Port: 7000, Credentials: None
+
+
+This yields the same result, but is much faster as it only has to wait for response from
+one device. Downside is of course that it cannot automatically find devices, you must know the
+IP-address. Multiple devices can be specified as a comma-separated list:
+
+    $ atvremote --scan-hosts 10.0.0.10,10.0.0.11 scan
+
+If you have problems using regular scanning or have configured a static address on your Apple TV,
+this is the recommended way of finding your devices. Please do note that you should not manually
+specify address, port, etc. when using this method. It is not necessary.
+
+The `--scan-hosts` flag can be used with any other command as well:
+
+    $ atvremote --scan-hosts 10.0.0.10 -n Kitchen <some command>
+
 ### Specifying a device
 
 In order for `atvremote` to know which device you want to control, you must specify the
@@ -61,7 +92,8 @@ It is possible to bypass the automatic scanning that `atvremote` performs
 by passing the `--manual` flag. This is convenvient if you rely on an external
 scanning process or to shorten the turn-around time during development testing.
 However, doing so means that you mainly lose all benefits of unique identifiers.
-They lose meaning completely. Only use this mode if you know what you are doing!
+They lose meaning completely. Only use this mode if you know what you are doing
+and refrain from using this in conjunction with `--scan-hosts`!
 
 When specifying `--manual` you *must* also specify `--address`, `--port`, `--protocol`
 and `--id`. Even though the identifier is not used (or applicable), you must

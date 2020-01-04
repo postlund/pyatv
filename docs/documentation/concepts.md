@@ -74,6 +74,12 @@ To find devices, you perform a *scan* with the `pyatv.scan` function. It uses [Z
 
 Scanning is not 100% reliable, that comes with the territory. Sometimes a device is not found, or even a service might not be found. It will happen and that is just life. Scan again and hope for the best. Usually it works just fine, so it shouldn't be that much of an issue (but bear it in mind when writing your software).
 
+As a workaround for scanning issues, `pyatv` comes with support for *unicast scanning*. It allows
+you to specify a list of devices to scan for. When doing so, `pyatv` will not rely on multicast
+but rather send a request to the devices directly. This is much more reliable and even works across
+different networks, but of course comes with the downside of not having devices auto discovered.
+You can simply try this out with `atvremote`, please see [atvremote](../atvremote/).
+
 ## Pairing
 
 Pairing is the process of obtaining credentials. You provide a configuration to the `pyatv.pair` method together with the protocol you want to pair. Usually you have to input a PIN code and then the credentials are returned via the `credentials` property in the service. This means that you can scan for a device, pass the configuration you got from `pyatv.scan` to `pyatv.pair` and finish off by passing the same configuration to `pyatv.connect`. As simple as that.
