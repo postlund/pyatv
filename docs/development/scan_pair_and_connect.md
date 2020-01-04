@@ -14,7 +14,7 @@ to control a device. This page describes how you do this.
 ### API
 
 ```python
-async def scan(loop, timeout=5, identifier=None, protocol=None):
+async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
 ```
 
 **loop:** asyncio event loop (e.g. `asyncio.get_event_loop()`)
@@ -25,6 +25,8 @@ async def scan(loop, timeout=5, identifier=None, protocol=None):
 
 **protocol:** filter fo scan for devices with a particular protocol
 (`Protocol.DMAP`, `Protocol.MRP` or `Protocol.AirPlay`)
+
+**hosts:** list of hosts to specifically scan for, e.g. `['10.0.0.1', '10.0.0.2']`
 
 ### Usage
 
@@ -45,6 +47,9 @@ from pyatv.const import Protocol
 
 # Scan for a specific device
 atvs = scan(loop, identifier='AA:BB:CC:DD:EE:FF')
+
+# Scan for a specific device by IP (unicast)
+atvs = scan(loop, hosts=['10.0.0.1'])
 
 # Only scan for MRP capable devices
 atvs = scan(loop, protocol=Protocol.MRP)

@@ -73,6 +73,8 @@ page_links:
   support:
     - link: /support/
       title: Start
+    - link: /support/scanning_issues/
+      title: Scanning Issues
     - link: /support/troubleshooting/
       title: Troubleshooting
     - link: /support/faq/

@@ -5,11 +5,13 @@ import sys
 from contextlib import contextmanager
 from io import StringIO
 
+from unittest.mock import patch
+
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
 from pyatv import __main__ as atvremote
-from tests import zeroconf_stub
+from tests import fake_udns, zeroconf_stub
 from tests.utils import stub_sleep
 from tests.airplay.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS
 from tests.mrp.fake_mrp_atv import (
@@ -39,10 +41,11 @@ def capture_output(argv, inputs):
 
 class AtvremoteTest(AioHTTPTestCase):
 
-    def setUp(self):
-        AioHTTPTestCase.setUp(self)
+    async def setUpAsync(self):
+        await AioHTTPTestCase.setUpAsync(self)
         stub_sleep()
         self.setup_environment()
+        await self.fake_udns.start()
         self.stdout = None
         self.stderr = None
         self.retcode = None
@@ -60,12 +63,18 @@ class AtvremoteTest(AioHTTPTestCase):
                 'Apple TV 2', IP_2, AIRPLAY_ID, port=airplay_port))
         zeroconf_stub.stub(pyatv, *services)
 
+        self.fake_udns.add_service(fake_udns.mrp_service(
+                'DDDD', 'Apple TV 2', MRP_ID, port=self.fake_atv.port))
+        self.fake_udns.add_service(fake_udns.airplay_service(
+                'Apple TV 2', AIRPLAY_ID, port=airplay_port))
+
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self, self.loop)
         self.usecase = AppleTVUseCases(self.fake_atv)
+        self.fake_udns = fake_udns.FakeUdns(self.loop)
         return self.fake_atv.app
 
     def user_input(self, text):
@@ -82,9 +91,11 @@ class AtvremoteTest(AioHTTPTestCase):
         argv = ['atvremote'] + list(args)
         inputs = '\n'.join(self.inputs) + '\n'
         with capture_output(argv, inputs) as (out, err):
-            self.retcode = await atvremote.appstart(self.loop)
-            self.stdout = out.getvalue()
-            self.stderr = err.getvalue()
+            udns_port = str(self.fake_udns.port)
+            with patch.dict('os.environ', {'PYATV_UDNS_PORT': udns_port}):
+                self.retcode = await atvremote.appstart(self.loop)
+                self.stdout = out.getvalue()
+                self.stderr = err.getvalue()
 
     @unittest_run_loop
     async def test_scan_devices(self):
@@ -96,6 +107,18 @@ class AtvremoteTest(AioHTTPTestCase):
                         MRP_ID,
                         AIRPLAY_ID,
                         DMAP_ID)
+        self.exit_ok()
+
+    @unittest_run_loop
+    async def test_scan_hosts(self):
+        await self.atvremote(
+            "--scan-hosts",
+            "127.0.0.1",
+            "scan")
+        self.has_output("Apple TV 2",
+                        IP_2,
+                        MRP_ID,
+                        AIRPLAY_ID)
         self.exit_ok()
 
     @unittest_run_loop
