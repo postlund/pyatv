@@ -5,8 +5,8 @@ import inspect
 import logging
 import binascii
 import asyncio
-
 import argparse
+import traceback
 
 from pyatv import (const, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
@@ -205,7 +205,8 @@ class DeviceCommands:
             command = await _read_input(self.loop, 'pyatv> ')
             if command.lower() == 'exit':
                 break
-            elif command == 'cli':
+
+            if command == 'cli':
                 print('Command not availble here')
                 continue
 
@@ -544,8 +545,6 @@ async def appstart(loop):
             pass  # sys.exit() was used - do nothing
 
         except Exception:  # pylint: disable=broad-except  # noqa
-            import traceback
-
             traceback.print_exc(file=sys.stderr)
             sys.stderr.writelines(
                 '\n>>> An error occurred, full stack trace above\n')
