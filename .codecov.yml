@@ -1,0 +1,35 @@
+codecov:
+  branch: master
+
+coverage:
+  range: "80..100"
+
+  status:
+    project: no
+
+flags:
+  library:
+    paths:
+    - pyatv/
+  examples:
+    paths:
+    - examples/
+  configs:
+    paths:
+    - ".git*"
+    - "*.yml"
+  changelog:
+    - CHANGES/
+    - CHANGES.rst
+  docs:
+    paths:
+    - docs/
+    - "*.md"
+    - "*.rst"
+    - "*.txt"
+  scripts:
+    paths:
+    - scripts/
+  tests:
+    paths:
+    - tests/

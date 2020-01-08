@@ -10,6 +10,10 @@ import curve25519
 from srptools import (SRPContext, SRPClientSession, constants)
 from ed25519.keys import SigningKey, VerifyingKey
 
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.backends import default_backend
+
 from pyatv import exceptions
 from pyatv.log import log_binary
 from pyatv.mrp import (tlv8, chacha20)
@@ -52,9 +56,6 @@ class Credentials:
 
 def hkdf_expand(salt, info, shared_secret):
     """Derive encryption keys from shared secret."""
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-    from cryptography.hazmat.backends import default_backend
     hkdf = HKDF(
         algorithm=hashes.SHA512(),
         length=32,

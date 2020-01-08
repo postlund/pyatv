@@ -22,7 +22,7 @@ fi
 echo "-> Using python: $found_version"
 
 echo "-> Creating python virtual environment..."
-virtualenv -p $found_version .
+$found_version -m venv .
 
 echo "-> Activating virtual environment..."
 source bin/activate

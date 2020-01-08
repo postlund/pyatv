@@ -328,7 +328,7 @@ class DmapPushUpdater(PushUpdater):
         """
         if self.listener is None:
             raise exceptions.NoAsyncListenerError
-        elif self._future is not None:
+        if self._future is not None:
             return None
 
         # Always start with 0 to trigger an immediate response for the
