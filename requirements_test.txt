@@ -9,5 +9,5 @@ pytest-aiohttp==0.3.0
 pydocstyle==4.0.1
 mypy==0.730
 mypy-protobuf==1.15
-Sphinx==2.2.0
+Sphinx==2.3.1
 typed-ast==1.4.0
