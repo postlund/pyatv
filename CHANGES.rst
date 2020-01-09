@@ -1,6 +1,42 @@
 CHANGES
 =======
 
+0.4.0a11 (2020-01-09)
+---------------------
+
+Changes:
+
+* Support for unicast scanning
+* Added wakeup command in remote control interface
+* Mostly quality release with minor bug fixes and more tests
+
+Notes:
+
+* Breaking changes in this release due to change to enums (6018ba2)
+
+All changes:
+
+998e77c Minor bug fixes
+d0eacb0 Bump flake8 from 3.7.8 to 3.7.9
+a5c8d68 Bump mypy from 0.730 to 0.761
+a9aa1c4 Bump pydocstyle from 4.0.1 to 5.0.1
+98a72bb Support for scanning specific hosts
+a3560e5 Bump pytest-timeout from 1.3.3 to 1.3.4
+64fcd2e Bump mypy-protobuf from 1.15 to 1.16
+87f07ee Clean up tox and move from coveralls to codecov
+6496548 Refactor scanning code
+6018ba2 Change from constants to enums in const.py
+ca8ae64 Fix position in MRP when elapsed time is missing
+deb7374 Additional atvremote tests
+4a2b27e Add first "playing" functional test to MRP
+5001d18 Rename play_state to device_state
+1c5f3b3 Fix flaky home button test in MRP
+918e2be Add some additional tests for MRP
+2f1b32a Add wakeup command to RemoteControl
+72e31a9 Update artwork documentation
+8d0b4a6 Update feature table in documentation
+
+
 0.4.0a10 (2019-12-11)
 ---------------------
 
