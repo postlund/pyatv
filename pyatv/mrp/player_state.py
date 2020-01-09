@@ -21,11 +21,19 @@ class PlayerState:
 
     def __init__(self):
         """Initialize a new PlayerState instance."""
-        self.playback_state = None
+        self._playback_state = None
         self.supported_commands = []
         self.timestamp = None
         self.items = []
         self.location = 0
+
+    @property
+    def playback_state(self):
+        """Playback state of device."""
+        # If nothing is in the queue then we are idle
+        if self.metadata is None:
+            return None
+        return self._playback_state
 
     @property
     def metadata(self):
@@ -44,7 +52,7 @@ class PlayerState:
     def handle_set_state(self, setstate):
         """Update current state with new data from SetStateMessage."""
         if setstate.HasField('playbackState'):
-            self.playback_state = setstate.playbackState
+            self._playback_state = setstate.playbackState
 
         if setstate.HasField('supportedCommands'):
             self.supported_commands = \

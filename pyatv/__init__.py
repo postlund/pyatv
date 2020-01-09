@@ -165,8 +165,11 @@ class UnicastMdnsScanner(BaseScanner):
     async def _get_services(self, host, timeout):
         port = os.environ.get('PYATV_UDNS_PORT', 5353)  # For testing purposes
         services = [s[0:-1] for s in ALL_SERVICES]
-        response = await udns.request(
-            self.loop, host, services, port=port, timeout=timeout)
+        try:
+            response = await udns.request(
+                self.loop, host, services, port=port, timeout=timeout)
+        except asyncio.TimeoutError:
+            response = None
         return host, response
 
     def _handle_response(self, host, response):

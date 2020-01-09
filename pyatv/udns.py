@@ -231,8 +231,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     def error_received(self, exc):
         """Error received during communication."""
-        _LOGGER.error('Error during DNS lookup for %s: %s',
-                      self.host, exc)
+        _LOGGER.debug('Error during DNS lookup for %s: %s', self.host, exc)
         self.semaphore.release()
 
     def connection_lost(self, exc):
