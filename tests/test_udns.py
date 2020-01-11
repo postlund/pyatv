@@ -69,7 +69,7 @@ class UdnsFunctionalTest(asynctest.TestCase):
         question = resp.questions[0]
         self.assertEqual(question.qname, MEDIAREMOTE_SERVICE)
         self.assertEqual(question.qtype, udns.QTYPE_ANY)
-        self.assertEqual(question.qclass, 1)
+        self.assertEqual(question.qclass, 0x8001)
 
     async def test_service_has_valid_answer(self):
         resp, data = await self.request(MEDIAREMOTE_SERVICE)
