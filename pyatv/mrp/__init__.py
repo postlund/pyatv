@@ -1,6 +1,7 @@
 
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
+import math
 import logging
 import asyncio
 import datetime
@@ -222,7 +223,9 @@ class MrpPlaying(Playing):
     def total_time(self):
         """Total play time in seconds."""
         duration = self._state.metadata_field('duration')
-        return None if duration is None else int(duration)
+        if duration is None or math.isnan(duration):
+            return None
+        return int(duration)
 
     @property
     def position(self):
