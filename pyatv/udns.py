@@ -106,7 +106,7 @@ def create_request(services):
     """Creste a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35Ff)
     msg.questions += [
-        DnsQuestion(s, QTYPE_ANY, 0x0001) for s in services
+        DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services
     ]
     return msg.pack()
 
