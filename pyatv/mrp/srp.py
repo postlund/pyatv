@@ -37,7 +37,7 @@ class Credentials:
         """Parse a string represention of Credentials."""
         split = detail_string.split(':')
         if len(split) != 4:
-            raise Exception('invalid credentials')  # TODO: other exception
+            raise exceptions.InvalidCredentialsError('invalid credentials')
 
         ltpk = binascii.unhexlify(split[0])
         ltsk = binascii.unhexlify(split[1])
@@ -110,7 +110,7 @@ class SRPAuthHandler:
         signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
 
         if identifier != credentials.atv_id:
-            raise Exception('incorrect device response')  # TODO: new exception
+            raise exceptions.AuthenticationError('incorrect device response')
 
         info = session_pub_key + \
             bytes(identifier) + self._verify_public.serialize()
@@ -160,7 +160,7 @@ class SRPAuthHandler:
         self._client_session_key, _, _ = self._session.process(pk_str, salt)
 
         if not self._session.verify_proof(self._session.key_proof_hash):
-            raise exceptions.AuthenticationError('proofs do not match (mitm?)')
+            raise exceptions.AuthenticationError('proofs do not match')
 
         pub_key = binascii.unhexlify(self._session.public)
         proof = binascii.unhexlify(self._session.key_proof)
@@ -196,8 +196,10 @@ class SRPAuthHandler:
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
         decrypted_tlv_bytes = chacha.decrypt(
             encrypted_data, nounce='PS-Msg06'.encode())
+
         if not decrypted_tlv_bytes:
-            raise Exception('data decrypt failed')  # TODO: new exception
+            raise exceptions.AuthenticationError('data decrypt failed')
+
         decrypted_tlv = tlv8.read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug('PS-Msg06: %s', decrypted_tlv)
 

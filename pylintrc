@@ -6,6 +6,7 @@ ignored-classes=ProtocolMessage,SetConnectionStateMessage,SetStateMessage,Conten
 
 disable=
   locally-disabled,
+  duplicate-code,
   fixme
 
 [EXCEPTIONS]

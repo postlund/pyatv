@@ -9,8 +9,12 @@ class UnsupportedProtocolError(Exception):
     """Thrown when an unsupported protocol was requested."""
 
 
+class PairingError(Exception):
+    """Thrown when pairing fails."""
+
+
 class AuthenticationError(Exception):
-    """Thrown when login fails."""
+    """Thrown when authentication fails."""
 
 
 class NotSupportedError(NotImplementedError):
@@ -21,15 +25,11 @@ class InvalidDmapDataError(Exception):
     """Thrown when invalid DMAP data is parsed."""
 
 
-class UnknownServerResponseError(Exception):
-    """Thrown when somethins unknown is send back from the Apple TV."""
-
-
-class UnknownMediaKind(Exception):
+class UnknownMediaKindError(Exception):
     """Thrown when an unknown media kind is found."""
 
 
-class UnknownPlayState(Exception):
+class UnknownPlayStateError(Exception):
     """Thrown when an unknown play state is found."""
 
 
@@ -37,16 +37,12 @@ class NoAsyncListenerError(Exception):
     """Thrown when starting AsyncUpdater with no listener."""
 
 
-class AsyncUpdaterRunningError(Exception):
-    """Thrown when performing an invalid action in AsyncUpdater.."""
-
-
 class NoCredentialsError(Exception):
-    """Thrown if performing an action before initialize is called."""
+    """Thrown if credentials are missing."""
 
 
-class DeviceAuthenticationError(Exception):
-    """Thrown when device authentication fails."""
+class InvalidCredentialsError(Exception):
+    """Thrown if credentials are invalid."""
 
 
 class DeviceIdMissingError(Exception):

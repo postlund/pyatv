@@ -7,7 +7,7 @@ from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 from pyatv.airplay import srp
 from pyatv.airplay.auth import (DeviceAuthenticator, AuthenticationVerifier)
-from pyatv.exceptions import DeviceAuthenticationError
+from pyatv.exceptions import AuthenticationError
 from pyatv.net import HttpSession
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, DEVICE_IDENTIFIER, DEVICE_AUTH_KEY, DEVICE_PIN)
@@ -36,7 +36,7 @@ class AirPlayAuthTest(AioHTTPTestCase):
         handler.initialize(INVALID_AUTH_KEY)
 
         verifier = AuthenticationVerifier(http, handler)
-        with self.assertRaises(DeviceAuthenticationError):
+        with self.assertRaises(AuthenticationError):
             await verifier.verify_authed()
 
     @unittest_run_loop
@@ -58,7 +58,7 @@ class AirPlayAuthTest(AioHTTPTestCase):
 
         auther = DeviceAuthenticator(http, handler)
         await auther.start_authentication()
-        with self.assertRaises(DeviceAuthenticationError):
+        with self.assertRaises(AuthenticationError):
             await auther.finish_authentication(
                 DEVICE_IDENTIFIER, DEVICE_PIN)
 

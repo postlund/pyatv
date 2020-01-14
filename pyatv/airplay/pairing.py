@@ -54,17 +54,25 @@ class AirPlayPairingHandler(PairingHandler):
         _LOGGER.debug('Starting AirPlay pairing with credentials %s',
                       self.auth_data.credentials)
         self.pairing_complete = False
-        return await self.auther.start_authentication()
+
+        try:
+            return await self.auther.start_authentication()
+        except Exception as ex:
+            raise exceptions.PairingError(str(ex)) from ex
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
-            raise exceptions.DeviceAuthenticationError('no pin given')
+            raise exceptions.PairingError('no pin given')
 
-        if await self.auther.finish_authentication(self.auth_data.identifier,
-                                                   self.pin_code):
-            self.service.credentials = self.auth_data.credentials
-            self.pairing_complete = True
+        try:
+            await self.auther.finish_authentication(
+                self.auth_data.identifier, self.pin_code)
+        except Exception as ex:
+            raise exceptions.PairingError(str(ex)) from ex
+
+        self.service.credentials = self.auth_data.credentials
+        self.pairing_complete = True
 
     def pin(self, pin):
         """Pin code used for pairing."""

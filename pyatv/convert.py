@@ -16,7 +16,7 @@ def media_kind(kind):
     if kind in [8, 64]:
         return MediaType.TV
 
-    raise exceptions.UnknownMediaKind('Unknown media kind: ' + str(kind))
+    raise exceptions.UnknownMediaKindError('Unknown media kind: ' + str(kind))
 
 
 def media_type_str(mediatype):
@@ -48,7 +48,7 @@ def playstate(state):
     if state in (5, 6):
         return DeviceState.Seeking
 
-    raise exceptions.UnknownPlayState('Unknown playstate: ' + str(state))
+    raise exceptions.UnknownPlayStateError('Unknown playstate: ' + str(state))
 
 
 # pylint: disable=too-many-return-statements

@@ -44,14 +44,15 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
         options['hosts'] = args.scan_hosts
 
     atvs = await scan(loop, **options)
-    if not atvs:
-        logging.error('Could not find any Apple TV on current network')
-        return None
 
     if args.name:
         devices = [atv for atv in atvs if atv.name == args.name]
     else:
         devices = atvs
+
+    if not atvs:
+        logging.error('Could not find any Apple TV on current network')
+        return None
 
     if len(devices) > 1:
         logging.error(

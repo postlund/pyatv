@@ -183,4 +183,4 @@ class SRPAuthHandler:
 
     def _check_initialized(self):
         if not self.seed:
-            raise NoCredentialsError()
+            raise NoCredentialsError("no credentials available")

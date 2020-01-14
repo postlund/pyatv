@@ -235,7 +235,7 @@ async def connect(config, loop, protocol=None, session=None):
 
     implementation = supported_implementations.get(service.protocol, None)
     if not implementation:
-        raise exceptions.UnsupportedProtocolError()
+        raise exceptions.UnsupportedProtocolError(str(service.protocol))
 
     # If no session is given, create a default one
     if session is None:
@@ -264,7 +264,7 @@ async def pair(config, protocol, loop, session=None, **kwargs):
 
     handler = protocol_handlers.get(protocol, None)
     if handler is None:
-        raise exceptions.UnsupportedProtocolError()
+        raise exceptions.UnsupportedProtocolError(str(protocol))
 
     if session is None:
         session = await net.create_session(loop)
