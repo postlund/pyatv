@@ -5,7 +5,7 @@ import plistlib
 import logging
 
 from copy import copy
-from pyatv.exceptions import DeviceAuthenticationError
+from pyatv.exceptions import AuthenticationError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class DeviceAuthenticator:
         _, code = await self.http.post_data(
             'pair-pin-start', headers=_AIRPLAY_HEADERS)
         if code != 200:
-            raise DeviceAuthenticationError('pair start failed')
+            raise AuthenticationError('pair start failed')
 
     async def finish_authentication(self, username, password):
         """Finish authentication process.
@@ -69,7 +69,7 @@ class DeviceAuthenticator:
             'pair-setup-pin',
             data=plistlib.dumps(plist, fmt=plistlib.FMT_BINARY))
         if code != 200:
-            raise DeviceAuthenticationError(
+            raise AuthenticationError(
                 '{0} failed with code {1}'.format(step, code))
         return resp
 
@@ -100,6 +100,6 @@ class AuthenticationVerifier:
         resp, code = await self.http.post_data(
             'pair-verify', data=data, headers=headers)
         if code != 200:
-            raise DeviceAuthenticationError(
+            raise AuthenticationError(
                 '{0} failed with code {1}'.format(step, code))
         return resp

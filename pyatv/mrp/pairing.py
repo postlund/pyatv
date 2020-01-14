@@ -40,16 +40,22 @@ class MrpPairingHandler(PairingHandler):
 
     async def begin(self):
         """Start pairing process."""
-        await self.protocol.start(skip_initial_messages=True)
-        await self.pairing_procedure.start_pairing()
+        try:
+            await self.protocol.start(skip_initial_messages=True)
+            await self.pairing_procedure.start_pairing()
+        except Exception as ex:
+            raise exceptions.PairingError(str(ex)) from ex
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
-            raise exceptions.DeviceAuthenticationError('no pin given')
+            raise exceptions.PairingError('no pin given')
 
-        self.service.credentials = \
-            str(await self.pairing_procedure.finish_pairing(self.pin_code))
+        try:
+            self.service.credentials = str(
+                await self.pairing_procedure.finish_pairing(self.pin_code))
+        except Exception as ex:
+            raise exceptions.PairingError(str(ex)) from ex
 
     @property
     def device_provides_pin(self):

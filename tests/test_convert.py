@@ -94,7 +94,7 @@ class ConvertTest(unittest.TestCase):
                          convert.media_kind(MEDIA_KIND_TVSHOW2))
 
     def test_unknown_media_kind_throws(self):
-        with self.assertRaises(exceptions.UnknownMediaKind):
+        with self.assertRaises(exceptions.UnknownMediaKindError):
             convert.media_kind(99999)
 
     def test_media_type_to_string(self):
@@ -136,7 +136,7 @@ class ConvertTest(unittest.TestCase):
                          convert.playstate(PLAY_STATE_BACKWARD))
 
     def test_unknown_playstate_throws(self):
-        with self.assertRaises(exceptions.UnknownPlayState):
+        with self.assertRaises(exceptions.UnknownPlayStateError):
             convert.playstate(99999)
 
     def test_playstate_str(self):

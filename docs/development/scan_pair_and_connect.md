@@ -97,7 +97,7 @@ to succeed (or timeout), in order to know when to call `finish`. This is only ap
 to the case when `device_provides_pin` is False. Now you have to poll `has_paired` or
 just require that pairing succeeds within a time frame.
 
-If an error occurs, e.g. incorrect PIN, `exceptions.DeviceAuthenticationError` is raised.
+If an error occurs, e.g. incorrect PIN, `exceptions.PairingError` is raised.
 
 Translating the flow above into code looks like this:
 

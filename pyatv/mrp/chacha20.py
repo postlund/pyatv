@@ -1,6 +1,8 @@
 """Transparent encryption layer using Chacha20_Pooly1305."""
 from tlslite.utils.chacha20_poly1305 import CHACHA20_POLY1305
 
+from pyatv import exceptions
+
 
 class Chacha20Cipher:
     """CHACHA20 encryption/decryption layer."""
@@ -30,6 +32,6 @@ class Chacha20Cipher:
             b'\x00\x00\x00\x00' + nounce, data, bytes())
 
         if not decrypted:
-            raise Exception('data decrypt failed')  # TODO: new exception
+            raise exceptions.AuthenticationError('data decrypt failed')
 
         return bytes(decrypted)
