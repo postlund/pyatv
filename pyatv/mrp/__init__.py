@@ -6,7 +6,7 @@ import logging
 import asyncio
 import datetime
 
-from pyatv import exceptions
+from pyatv import exceptions, net
 from pyatv.const import Protocol, MediaType, DeviceState, RepeatState
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
@@ -364,7 +364,8 @@ class MrpAppleTV(AppleTV):
 
     async def close(self):
         """Close connection and release allocated resources."""
-        await self._session.close()
+        if net.is_custom_session(self._session):
+            await self._session.close()
         self._protocol.stop()
 
     @property
