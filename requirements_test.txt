@@ -9,4 +9,4 @@ pytest-aiohttp==0.3.0
 pydocstyle==5.0.2
 mypy==0.761
 mypy-protobuf==1.16
-typed-ast==1.4.0
+typed-ast==1.4.1
