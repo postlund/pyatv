@@ -61,6 +61,13 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
     async def close(self):
         """Call to free allocated resources after pairing."""
         await self._zeroconf.close()
+        if self._web_server is not None:
+            await self._web_server.shutdown()
+            self._server.close()
+
+        if self._server is not None:
+            await self._server.wait_closed()
+
         await super().close()
 
     @property
@@ -86,13 +93,9 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
 
     async def finish(self):
         """Stop pairing server and unpublish service."""
-        _LOGGER.debug('Shutting down pairing server')
-        if self._web_server is not None:
-            await self._web_server.shutdown()
-            self._server.close()
-
-        if self._server is not None:
-            await self._server.wait_closed()
+        if self._has_paired:
+            _LOGGER.debug('Saving updated credentials')
+            self.service.credentials = '0x' + self._pairing_guid
 
     def pin(self, pin):
         """Pin code used for pairing."""
@@ -138,7 +141,6 @@ class DmapPairingHandler(PairingHandler):  # pylint: disable=too-many-instance-a
             cmty = tags.string_tag('cmty', 'iPhone')
             response = tags.container_tag('cmpa', cmpg + cmnm + cmty)
             self._has_paired = True
-            self.service.credentials = '0x' + self._pairing_guid
             return web.Response(body=response)
 
         # Code did not match, generate an error

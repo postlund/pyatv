@@ -79,6 +79,8 @@ class PairingTest(asynctest.TestCase):
         url = self._pairing_url(PAIRING_CODE)
         data, _ = await utils.simple_get(url)
 
+        await self.pairing.finish()
+
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
         self.assertEqual(parser.first(parsed, 'cmpa', 'cmpg'), 1)
@@ -94,6 +96,8 @@ class PairingTest(asynctest.TestCase):
 
         url = self._pairing_url(RANDOM_PAIRING_CODE)
         await utils.simple_get(url)
+
+        await self.pairing.finish()
 
         self.assertEqual(self.service.credentials, RANDOM_PAIRING_GUID)
 
@@ -118,6 +122,8 @@ class PairingTest(asynctest.TestCase):
 
         url = self._pairing_url(PAIRING_CODE2)
         data, _ = await utils.simple_get(url)
+
+        await self.pairing.finish()
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
