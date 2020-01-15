@@ -6,6 +6,7 @@ import logging
 
 from collections import namedtuple
 
+from pyatv import exceptions
 from pyatv.mrp import messages
 from pyatv.mrp.auth import MrpPairingVerifier
 from pyatv.mrp.srp import Credentials
@@ -110,9 +111,12 @@ class MrpProtocol:
             credentials = Credentials.parse(self.service.credentials)
             pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
 
-            await pair_verifier.verify_credentials()
-            output_key, input_key = pair_verifier.encryption_keys()
-            self.connection.enable_encryption(output_key, input_key)
+            try:
+                await pair_verifier.verify_credentials()
+                output_key, input_key = pair_verifier.encryption_keys()
+                self.connection.enable_encryption(output_key, input_key)
+            except Exception as ex:
+                raise exceptions.AuthenticationError(str(ex)) from ex
 
     async def send(self, message):
         """Send a message and expect no response."""
