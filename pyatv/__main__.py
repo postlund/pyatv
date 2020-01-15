@@ -412,7 +412,7 @@ async def _autodiscover_device(args, loop):
         service = apple_tv.get_service(protocol)
         if service:
             value = service.credentials or getattr(args, field)
-            setattr(args, field, value)
+            service.credentials = value
 
     _set_credentials(Protocol.DMAP, 'dmap_credentials')
     _set_credentials(Protocol.MRP, 'mrp_credentials')

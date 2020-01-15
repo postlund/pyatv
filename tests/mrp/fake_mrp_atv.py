@@ -179,6 +179,10 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
     def handle_crypto_pairing(self, message):
         _LOGGER.debug('Received crypto pairing message')
 
+        # TODO: Remove when authentication is supported (see
+        # test_atvremote.py why this is here).
+        self._send(messages.crypto_pairing({}))
+
     def handle_set_connection_state(self, message):
         inner = message.inner()
         _LOGGER.debug('Changed connection state to %d', inner.state)

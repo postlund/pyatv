@@ -84,8 +84,12 @@ class AtvremoteTest(AioHTTPTestCase):
         for string in strings:
             self.assertIn(string, self.stdout)
 
-    def exit_ok(self):
-        self.assertEqual(self.retcode, 0)
+    def has_error(self, *strings):
+        for string in strings:
+            self.assertIn(string, self.stderr)
+
+    def exit(self, code):
+        self.assertEqual(self.retcode, code)
 
     async def atvremote(self, *args):
         argv = ['atvremote'] + list(args)
@@ -107,7 +111,7 @@ class AtvremoteTest(AioHTTPTestCase):
                         MRP_ID,
                         AIRPLAY_ID,
                         DMAP_ID)
-        self.exit_ok()
+        self.exit(0)
 
     @unittest_run_loop
     async def test_scan_hosts(self):
@@ -119,7 +123,7 @@ class AtvremoteTest(AioHTTPTestCase):
                         IP_2,
                         MRP_ID,
                         AIRPLAY_ID)
-        self.exit_ok()
+        self.exit(0)
 
     @unittest_run_loop
     async def test_pair_airplay(self):
@@ -133,6 +137,7 @@ class AtvremoteTest(AioHTTPTestCase):
         self.has_output("Enter PIN",
                         "seems to have succeeded",
                         DEVICE_CREDENTIALS)
+        self.exit(0)
 
     @unittest_run_loop
     async def test_airplay_play_url(self):
@@ -141,13 +146,31 @@ class AtvremoteTest(AioHTTPTestCase):
             "--id", MRP_ID,
             "--airplay-credentials", DEVICE_CREDENTIALS,
             "play_url=http://fake")
-        self.exit_ok()
+        self.exit(0)
 
     @unittest_run_loop
     async def test_mrp_idle(self):
         await self.atvremote("--id", MRP_ID, "playing")
         self.has_output("Media type: Unknown", "Device state: Idle")
-        self.exit_ok()
+        self.exit(0)
+
+    @unittest_run_loop
+    async def test_mrp_credentials(self):
+        # TODO: This test is a bit special. Encryption is not supported
+        # by the fake MRP device at the moment, so if credentials are
+        # given the test will fail. So, a dummy response is provided by
+        # the fake device for now which will result in AuthenticationError
+        # that we can look for here. This test only verifies that
+        # authentication is initiated, but not that it succeeds. There are
+        # other testa covering the latter. Anyways, this test verifies
+        # that credentials given to atvremote is at least used.
+        self.fake_atv.require_auth = True
+        await self.atvremote(
+            "--id", MRP_ID,
+            "--mrp-credentials", "30:31:32:33",
+            "playing")
+        self.has_error("AuthenticationError:")
+        self.exit(1)
 
     @unittest_run_loop
     async def test_manual_connect(self):
@@ -160,4 +183,4 @@ class AtvremoteTest(AioHTTPTestCase):
             "--manual",
             "playing")
         self.has_output("Media type: Unknown", "Device state: Idle")
-        self.exit_ok()
+        self.exit(0)

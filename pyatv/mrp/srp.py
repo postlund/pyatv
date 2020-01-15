@@ -8,6 +8,7 @@ import logging
 
 import curve25519
 from srptools import (SRPContext, SRPClientSession, constants)
+from ed25519 import BadPrefixError, BadSignatureError
 from ed25519.keys import SigningKey, VerifyingKey
 
 from cryptography.hazmat.primitives import hashes
@@ -115,7 +116,11 @@ class SRPAuthHandler:
         info = session_pub_key + \
             bytes(identifier) + self._verify_public.serialize()
         ltpk = VerifyingKey(bytes(credentials.ltpk))
-        ltpk.verify(bytes(signature), bytes(info))  # throws if no match
+
+        try:
+            ltpk.verify(bytes(signature), bytes(info))
+        except (BadPrefixError, BadSignatureError) as ex:
+            raise exceptions.AuthenticationError('signature error') from ex
 
         device_info = self._verify_public.serialize() + \
             credentials.client_id + session_pub_key
