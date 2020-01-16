@@ -10,33 +10,29 @@
 # What you need is:
 #
 # * Credentials to device of interest (atvremote -a --id <device> pair)
-# * Unique identifer of device, look for UniqueIdentifier in a zeroconf browser
 # * IP-address and port to the Apple TV of interest
 # * IP-address of an interface that is on the same network as the Apple TV
 #
 # Then you just call this script like:
 #
-#   python ./scripts/proxy.py `cat credentials` 10.0.0.20 10.0.10.30 49152 \
-#      aaaaaaaa-bbbb-ccccccccc-dddddddddddd
+#   python ./scripts/proxy.py `cat credentials` 10.0.0.20 10.0.10.30 49152
 #
-# Argument order: <credentials> <local ip> <atv ip> <atv port> <identifier>
+# Argument order: <credentials> <local ip> <atv ip> <atv port>
 #
-# The script should connect to the Apple TV immediately and you should be able
-# to connect to ATVProxy from your phone (the file "credentials" contains the
-# credentials you got during pairing). Use pin 1111 when pairing. You will have
-# to re-pair everytime you connect and you have to restart this script if you
-# disconnect, e.g. close the app.
+# It shoulf be possible to pair with your phone using pin "1111". When the
+# proxy receives a connection, it will start by connecting to the Apple TV and
+# then continue with setting up encryption and relaying messages. The same
+# static key pair is hardcoded, so it is possible to reconnect again layer
+# without having to re-pair.
 #
 # Please note that this script is perhaps not a 100% accurate MITM of all
-# traffic. It takes shortcuts, doesn't imitate everything correctly and also
-# has a connection established before the app (this should maybe be reversed
-# here?), so some traffic might be missed. Also note that printed protobuf
-# messages are based on the definitions in pyatv. If new fields have been added
-# by Apple, they will not be seen in the logs.
+# traffic. It takes shortcuts and doesn't imitate everything correctly, so some
+# traffic might be missed. Also note that printed protobuf messages are based
+# on the definitions in pyatv. If new fields have been added by Apple, they
+# will not be seen in the logs.
 #
 # Some suggestions for improvements:
 #
-# * Support re-connection better without having to restart script
 # * Use pyatv to discover device (based on device id) to not have to enter all
 #   details on command line
 # * Use argparse for arguments
@@ -70,17 +66,30 @@ from pyatv.log import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
+DEVICE_NAME = 'Proxy'
+IDENTIFIER = '5D797FD3-3538-427E-A47B-A32FC6CF3A69'
+AIRPLAY_IDENTIFIER = '4D797FD3-3538-427E-A47B-A32FC6CF3A6A'
+
+
+# This is a hack. When using a constant, e.g. 32 * '\xAA', will be corrupted
+# for the second client that connects. Not sure why, but this works...
+def seed():
+    """Generate a static signing seed."""
+    a = b''
+    for _ in range(32):
+        a += b'\xAA'
+    return a
+
 
 # TODO: Refactor and clean up: this is very messy
 class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-attributes  # noqa
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, loop, credentials, atv_device_id):
+    def __init__(self, loop, credentials):
         """Initialize a new instance of ProxyMrpAppleTV."""
         self.loop = loop
         self.credentials = credentials
-        self.atv_device_id = atv_device_id
-        self.server = None
+        self.atv_device_id = IDENTIFIER.encode()
         self.buffer = b''
         self.has_paired = False
         self.transport = None
@@ -95,10 +104,11 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
 
         self._shared = None
         self._session_key = None
-        self._signing_key = SigningKey(32 * b'\x01')
-        self._auth_private = self._signing_key.to_seed()
+
+        self._signing_key = SigningKey(seed())
+        self._auth_private = self._signing_key.to_bytes()
         self._auth_public = self._signing_key.get_verifying_key().to_bytes()
-        self._verify_private = curve25519.Private(secret=32 * b'\x01')
+        self._verify_private = curve25519.Private(secret=seed())
         self._verify_public = self._verify_private.get_public()
 
         self.context = SRPContext(
@@ -122,26 +132,16 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
             self.verifier,
             binascii.hexlify(self._auth_private).decode())
 
-    def start(self, address, port):
+    async def start(self, address, port):
         """Start the proxy instance."""
         # Establish connection to ATV
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
             self.loop, self.connection, SRPAuthHandler(),
             MrpService(None, port, credentials=self.credentials))
-        self.loop.run_until_complete(
-            protocol.start(skip_initial_messages=True))
+        await protocol.start(skip_initial_messages=True)
         self.connection.listener = self
-
-        # Setup server used to publish a fake MRP server
-        coro = self.loop.create_server(lambda: self, '0.0.0.0')
-        self.server = self.loop.run_until_complete(coro)
-        _LOGGER.info('Started MRP server at port %d', self.port)
-
-    @property
-    def port(self):
-        """Port used by MRP proxy server."""
-        return self.server.sockets[0].getsockname()[1]
+        self._process_buffer()
 
     def connection_made(self, transport):
         """Client did connect to proxy."""
@@ -180,7 +180,10 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
     def data_received(self, data):
         """Message received from iOS app/client."""
         self.buffer += data
+        if self.connection.connected:
+            self._process_buffer()
 
+    def _process_buffer(self):
         while self.buffer:
             length, raw = variant.read_variant(self.buffer)
             if len(raw) < length:
@@ -211,12 +214,13 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         # TODO: Consolidate this better with message.device_information(...)
         resp = messages.create(protobuf.DEVICE_INFO_MESSAGE)
         resp.identifier = message.identifier
-        resp.inner().uniqueIdentifier = self.atv_device_id.decode()
-        resp.inner().name = 'ATVProxy'
-        resp.inner().systemBuildVersion = '15K600'
+        resp.inner().uniqueIdentifier = self.atv_device_id
+        resp.inner().name = DEVICE_NAME
+        resp.inner().localizedModelName = DEVICE_NAME
+        resp.inner().systemBuildVersion = '17K449'
         resp.inner().applicationBundleIdentifier = 'com.apple.mediaremoted'
         resp.inner().protocolVersion = 1
-        resp.inner().lastSupportedMessageType = 58
+        resp.inner().lastSupportedMessageType = 77
         resp.inner().supportsSystemPairing = True
         resp.inner().allowsPairing = True
         resp.inner().systemMediaApplication = "com.apple.TVMusic"
@@ -224,6 +228,7 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         resp.inner().supportsSharedQueue = True
         resp.inner().supportsExtendedMotion = True
         resp.inner().sharedQueueVersion = 2
+        resp.inner().deviceClass = 4
         self._send(resp)
 
     def handle_crypto_pairing(self, message, _):
@@ -231,6 +236,13 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
         _LOGGER.debug('Received crypto pairing message')
         pairing_data = tlv8.read_tlv(message.inner().pairingData)
         seqno = pairing_data[tlv8.TLV_SEQ_NO][0]
+
+        if seqno == 1:
+            if tlv8.TLV_PUBLIC_KEY in pairing_data:
+                self.has_paired = True
+            elif tlv8.TLV_METHOD in pairing_data:
+                self.has_paired = False
+
         getattr(self, "_seqno_" + str(seqno))(pairing_data)
 
     def _seqno_1(self, pairing_data):
@@ -246,7 +258,7 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
                                       self._shared)
 
             info = server_pub_key + self.atv_device_id + client_pub_key
-            signature = SigningKey(self._signing_key.to_seed()).sign(info)
+            signature = self._signing_key.sign(info)
 
             tlv = tlv8.write_tlv({
                 tlv8.TLV_IDENTIFIER: self.atv_device_id,
@@ -337,17 +349,19 @@ class ProxyMrpAppleTV(asyncio.Protocol):  # pylint: disable=too-many-instance-at
 async def publish_zeroconf(zconf, ip_address, port):
     """Publish zeroconf service for ATV proxy instance."""
     props = {
-        b'ModelName': False,
+        b'ModelName': 'Apple TV',
         b'AllowPairing': b'YES',
+        b'macAddress': b'40:cb:c0:12:34:56',
         b'BluetoothAddress': False,
-        b'Name': b'ATVProxy',
-        b'UniqueIdentifier': '4d797fd3-3538-427e-a47b-a32fc6cf3a69'.encode(),
-        b'SystemBuildVersion': b'15K600',
+        b'Name': DEVICE_NAME.encode(),
+        b'UniqueIdentifier': IDENTIFIER.encode(),
+        b'SystemBuildVersion': b'17K499',
+        b'LocalAirPlayReceiverPairingIdentity': AIRPLAY_IDENTIFIER.encode(),
         }
 
     service = ServiceInfo(
         '_mediaremotetv._tcp.local.',
-        'ATVProxy._mediaremotetv._tcp.local.',
+        DEVICE_NAME + '._mediaremotetv._tcp.local.',
         address=socket.inet_aton(ip_address),
         port=port,
         weight=0,
@@ -356,15 +370,17 @@ async def publish_zeroconf(zconf, ip_address, port):
     await zconf.register_service(service)
     _LOGGER.debug('Published zeroconf service: %s', service)
 
+    return service
 
-def main(loop):
+
+async def main(loop):
     """Script starts here."""
     # To get logging from pyatv
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 5:
         print("Usage: {0} <credentials> <local ip> "
-              "<atv ip> <atv port> <unique identifier>".format(
+              "<atv ip> <atv port>".format(
                   sys.argv[0]))
         sys.exit(1)
 
@@ -372,15 +388,29 @@ def main(loop):
     local_ip_addr = sys.argv[2]
     atv_ip_addr = sys.argv[3]
     atv_port = int(sys.argv[4])
-    unique_identifier = sys.argv[5].encode()
     zconf = Zeroconf(loop)
-    proxy = ProxyMrpAppleTV(loop, credentials, unique_identifier)
 
-    proxy.start(atv_ip_addr, atv_port)
-    loop.run_until_complete(
-        publish_zeroconf(zconf, local_ip_addr, proxy.port))
-    loop.run_forever()
+    def proxy_factory():
+        try:
+            proxy = ProxyMrpAppleTV(loop, credentials)
+            asyncio.ensure_future(
+                proxy.start(atv_ip_addr, atv_port), loop=loop)
+        except Exception:
+            _LOGGER.exception("failed to start proxy")
+        return proxy
+
+    # Setup server used to publish a fake MRP server
+    server = await loop.create_server(proxy_factory, '0.0.0.0')
+    port = server.sockets[0].getsockname()[1]
+    _LOGGER.error('Started MRP server at port %d', port)
+
+    service = await publish_zeroconf(zconf, local_ip_addr, port)
+
+    print("Press ENTER to quit")
+    await loop.run_in_executor(None, sys.stdin.readline)
+
+    await zconf.unregister_service(service)
 
 
 if __name__ == '__main__':
-    main(asyncio.get_event_loop())
+    asyncio.get_event_loop().run_until_complete(main(asyncio.get_event_loop()))

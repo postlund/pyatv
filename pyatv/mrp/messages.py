@@ -21,8 +21,8 @@ def device_information(name, identifier):
     info = message.inner()
     info.allowsPairing = True
     info.applicationBundleIdentifier = 'com.apple.TVRemote'
-    info.applicationBundleVersion = '273.12'
-    info.lastSupportedMessageType = 58
+    info.applicationBundleVersion = '344.28'
+    info.lastSupportedMessageType = 77
     info.localizedModelName = 'iPhone'
     info.name = name
     info.protocolVersion = 1
@@ -31,9 +31,11 @@ def device_information(name, identifier):
     info.supportsExtendedMotion = True
     info.supportsSharedQueue = True
     info.supportsSystemPairing = True
-    info.systemBuildVersion = '14G60'
+    info.systemBuildVersion = '17B111'
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
+    info.deviceClass = 1
+    info.logicalDeviceCount = 1
     return message
 
 
