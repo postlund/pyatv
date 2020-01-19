@@ -1,6 +1,26 @@
 CHANGES
 =======
 
+0.4.0a12 (2020-01-19)
+---------------------
+
+Changes:
+
+* Minor bug fixes and improvements, see log below
+
+All changes:
+
+0c68936 Some updates to the MRP proxy
+c25fe5d Add temporary test for credentials in atvremote
+1b9f395 Initial clean-up of pairing and auth exceptions
+72fc6f0 Release resources when closing in DMAP pairing
+f2d91b0 Avoid closing external aiohttp session in MRP
+05abc25 Bump typed-ast from 1.4.0 to 1.4.1
+e00c6a4 Set unicast bit in qtype field
+6a55c73 Bump pydocstyle from 5.0.1 to 5.0.2
+34cb7ff Handle NaN durations in MRP
+
+
 0.4.0a11 (2020-01-09)
 ---------------------
 

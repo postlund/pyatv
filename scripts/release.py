@@ -124,7 +124,7 @@ def insert_changes(version):
             version, datetime.now().strftime("%Y-%m-%d"))
 
         _LOGGER.info("Finding previous release commit")
-        message = call('git log -1 --grep="^Release "')
+        message = call('git log -1 --grep="^Release [0-9]"')
         commit_sha = message.split("\n")[0].split(" ")[1]
 
         _LOGGER.info("Getting all changes since %s", commit_sha)
