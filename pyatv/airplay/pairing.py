@@ -57,6 +57,8 @@ class AirPlayPairingHandler(PairingHandler):
 
         try:
             return await self.auther.start_authentication()
+        except OSError:
+            raise  # Connection problems, e.g. timeout
         except Exception as ex:
             raise exceptions.PairingError(str(ex)) from ex
 
