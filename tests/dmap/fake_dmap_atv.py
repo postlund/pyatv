@@ -1,5 +1,7 @@
 """Fake DMAP Apple TV device for tests."""
 
+import logging
+
 from collections import namedtuple
 
 from aiohttp import web
@@ -9,6 +11,7 @@ from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
 from tests import utils
 
+_LOGGER = logging.getLogger(__name__)
 
 EXPECTED_HEADERS = {
     'Accept': '*/*',
@@ -69,7 +72,6 @@ class FakeAppleTV(FakeAirPlayDevice):
         self.session = None
         self.last_button_pressed = None
         self.buttons_press_count = 0
-        self.properties = {}  # setproperty
 
         self.app.router.add_get('/login', self.handle_login)
         self.app.router.add_get(
@@ -172,7 +174,8 @@ class FakeAppleTV(FakeAirPlayDevice):
 
             if playing.position is not None:
                 pos = (playing.total_time - playing.position)
-                body += tags.uint32_tag('cant', pos*1000)  # sec -> ms
+                print(playing.total_time, playing.position)
+                body += tags.uint32_tag('cant', pos * 1000)  # sec -> ms
 
         if playing.mediakind is not None:
             body += tags.uint32_tag('cmmk', playing.mediakind)
@@ -181,7 +184,7 @@ class FakeAppleTV(FakeAirPlayDevice):
             body += tags.uint32_tag('caps', playing.playstatus)
 
         if playing.repeat is not None:
-            body += tags.uint8_tag('carp', playing.repeat.value)
+            body += tags.uint8_tag('carp', playing.repeat)
 
         body += tags.uint8_tag('cash', playing.shuffle)
         body += tags.uint32_tag('cmsr', playing.revision + 1)
@@ -193,14 +196,14 @@ class FakeAppleTV(FakeAirPlayDevice):
         """Handle property changes."""
         self._verify_auth_parameters(request)
         if 'dacp.playingtime' in request.rel_url.query:
-            self.properties['dacp.playingtime'] = int(
-                request.rel_url.query['dacp.playingtime'])
+            playtime = int(request.rel_url.query['dacp.playingtime'])
+            self._get_response('playing').position = int(playtime / 1000)
         elif 'dacp.shufflestate' in request.rel_url.query:
-            self.properties['dacp.shufflestate'] = int(
-                request.rel_url.query['dacp.shufflestate'])
+            shuffle = int(request.rel_url.query['dacp.shufflestate'])
+            self._get_response('playing').shuffle = (shuffle == 1)
         elif 'dacp.repeatstate' in request.rel_url.query:
-            self.properties['dacp.repeatstate'] = int(
-                request.rel_url.query['dacp.repeatstate'])
+            repeat = int(request.rel_url.query['dacp.repeatstate'])
+            self._get_response('playing').repeat = repeat
         else:
             web.Response(body=b'', status=500)
 
@@ -329,9 +332,9 @@ class AppleTVUseCases(AirPlayUseCases):
         if 'revision' in kwargs:
             revision = kwargs['revision']
         if 'shuffle' in kwargs:
-            shuffle = kwargs['shuffle']
+            shuffle = kwargs['shuffle'].value
         if 'repeat' in kwargs:
-            repeat = kwargs['repeat']
+            repeat = kwargs['repeat'].value
         self.device.responses['playing'].insert(0, PlayingResponse(
             revision=revision,
             paused=paused, title=title,

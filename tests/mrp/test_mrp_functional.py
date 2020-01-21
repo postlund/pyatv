@@ -3,6 +3,7 @@
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
+from pyatv.const import ShuffleState
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
@@ -58,3 +59,17 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def test_button_wakeup(self):
         await self.atv.remote_control.wakeup()
         await until(lambda: self.fake_atv.last_button_pressed == 'wakeup')
+
+    @unittest_run_loop
+    async def test_shuffle_state_albums(self):
+        self.usecase.example_video(shuffle=ShuffleState.Albums)
+        playing = await self.playing(shuffle=ShuffleState.Albums)
+        self.assertEqual(playing.shuffle, ShuffleState.Albums)
+
+    @unittest_run_loop
+    async def test_set_shuffle_albums(self):
+        self.usecase.example_video()
+
+        await self.atv.remote_control.set_shuffle(ShuffleState.Albums)
+        playing = await self.playing(shuffle=ShuffleState.Albums)
+        self.assertEqual(playing.shuffle, ShuffleState.Albums)

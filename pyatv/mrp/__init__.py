@@ -7,7 +7,8 @@ import asyncio
 import datetime
 
 from pyatv import exceptions, net
-from pyatv.const import Protocol, MediaType, DeviceState, RepeatState
+from pyatv.const import (
+    Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
@@ -141,22 +142,13 @@ class MrpRemoteControl(RemoteControl):
         """Seek in the current playing media."""
         return self.protocol.send(messages.seek_to_position(pos))
 
-    def set_shuffle(self, is_on):
+    def set_shuffle(self, shuffle_state):
         """Change shuffle mode to on or off."""
-        return self.protocol.send(messages.shuffle(is_on))
+        return self.protocol.send(messages.shuffle(shuffle_state))
 
-    def set_repeat(self, repeat_mode):
-        """Change repeat mode."""
-        if int(repeat_mode) == RepeatState.Off:
-            state = 1
-        elif int(repeat_mode) == RepeatState.All:
-            state = 2
-        elif int(repeat_mode) == RepeatState.Track:
-            state = 3
-        else:
-            raise ValueError('Invalid repeat mode: ' + str(repeat_mode))
-
-        return self.protocol.send(messages.repeat(state))
+    def set_repeat(self, repeat_state):
+        """Change repeat state."""
+        return self.protocol.send(messages.repeat(repeat_state))
 
 
 class MrpPlaying(Playing):
@@ -255,13 +247,25 @@ class MrpPlaying(Playing):
     def shuffle(self):
         """If shuffle is enabled or not."""
         info = self._get_command_info(CommandInfo_pb2.ChangeShuffleMode)
-        return None if info is None else info.shuffleMode
+        if info is None:
+            return ShuffleState.Off
+        if info.shuffleMode == protobuf.CommandInfo.Off:
+            return ShuffleState.Off
+        if info.shuffleMode == protobuf.CommandInfo.Albums:
+            return ShuffleState.Albums
+
+        return ShuffleState.Songs
 
     @property
     def repeat(self):
         """Repeat mode."""
         info = self._get_command_info(CommandInfo_pb2.ChangeRepeatMode)
-        return None if info is None else info.repeatMode
+        if info is None:
+            return RepeatState.Off
+        if info.repeatMode == protobuf.CommandInfo.One:
+            return RepeatState.Track
+
+        return RepeatState.All
 
 
 class MrpMetadata(Metadata):

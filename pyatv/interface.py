@@ -193,13 +193,13 @@ class RemoteControl:  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def set_shuffle(self, is_on):
+    def set_shuffle(self, shuffle_state):
         """Change shuffle mode to on or off."""
         raise exceptions.NotSupportedError
 
     @abstractmethod
-    def set_repeat(self, repeat_mode):
-        """Change repeat mode."""
+    def set_repeat(self, repeat_state):
+        """Change repeat state."""
         raise exceptions.NotSupportedError
 
 

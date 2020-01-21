@@ -2,6 +2,7 @@
 
 import binascii
 
+from pyatv import const
 from pyatv.mrp import protobuf
 from pyatv.mrp import tlv8
 
@@ -162,18 +163,26 @@ def command(cmd):
 
 def repeat(mode):
     """Change repeat mode of current player."""
-    message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
+    message = command(protobuf.CommandInfo_pb2.ChangeRepeatMode)
     send_command = message.inner()
     send_command.options.externalPlayerCommand = True
-    send_command.options.repeatMode = mode
+    if mode == const.RepeatState.Track:
+        send_command.options.repeatMode = protobuf.CommandInfo.One
+    elif mode == const.RepeatState.All:
+        send_command.options.repeatMode = protobuf.CommandInfo.All
     return message
 
 
-def shuffle(enable):
+def shuffle(state):
     """Change shuffle mode of current player."""
     message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
-    send_command = message.inner()
-    send_command.options.shuffleMode = 3 if enable else 1
+    options = message.inner().options
+    if state == const.ShuffleState.Off:
+        options.shuffleMode = protobuf.CommandInfo.Off
+    elif state == const.ShuffleState.Albums:
+        options.shuffleMode = protobuf.CommandInfo.Albums
+    else:
+        options.shuffleMode = protobuf.CommandInfo.Songs
     return message
 
 

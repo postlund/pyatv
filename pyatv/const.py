@@ -44,3 +44,11 @@ class RepeatState(Enum):
     Off = 0
     Track = 1
     All = 2
+
+
+class ShuffleState(Enum):
+    """All supported shuffle states."""
+
+    Off = 0
+    Albums = 1
+    Songs = 2
