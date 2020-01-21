@@ -8,7 +8,7 @@ from aiohttp.test_utils import unittest_run_loop
 import pyatv
 from pyatv import exceptions, interface
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
-from pyatv.const import MediaType, DeviceState, RepeatState
+from pyatv.const import MediaType, DeviceState, ShuffleState
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -159,37 +159,33 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await asyncio.wait_for(
             self.atv.listener.lost_sem.acquire(), timeout=3.0)
 
+    @unittest_run_loop
+    async def test_button_unsupported_raises(self):
+        buttons = ['home', 'volume_up', 'volume_down', 'suspend', 'wakeup']
+        for button in buttons:
+            with self.assertRaises(exceptions.NotSupportedError):
+                await getattr(self.atv.remote_control, button)()
+
+    @unittest_run_loop
+    async def test_shuffle_state_albums(self):
+        # DMAP does not support "albums" as shuffle state, so it is
+        # mapped to "songs"
+        self.usecase.example_video(shuffle=ShuffleState.Albums)
+        playing = await self.playing(shuffle=ShuffleState.Songs)
+        self.assertEqual(playing.shuffle, ShuffleState.Songs)
+
+    @unittest_run_loop
+    async def test_set_shuffle_albums(self):
+        self.usecase.example_video()
+
+        # DMAP does not support "albums" as shuffle state, so it is
+        # mapped to "songs"
+        await self.atv.remote_control.set_shuffle(ShuffleState.Albums)
+        playing = await self.playing(shuffle=ShuffleState.Songs)
+        self.assertEqual(playing.shuffle, ShuffleState.Songs)
+
     # Common tests are below. Move tests that have been implemented to
     # common_functional_tests.py once implemented
-
-    # TODO: This should check that device_id is one of the IDs
-    #       passed to the services into the device.
-    def test_metadata_device_id(self):
-        self.assertEqual(self.atv.metadata.device_id, 'dmap_id')
-
-    @unittest_run_loop
-    async def test_metadata_artwork(self):
-        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
-
-        artwork = await self.atv.metadata.artwork()
-        self.assertIsNotNone(artwork)
-        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
-        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
-
-    @unittest_run_loop
-    async def test_metadata_artwork_none_if_not_available(self):
-        self.usecase.change_artwork(b'', None)
-
-        artwork = await self.atv.metadata.artwork()
-        self.assertIsNone(artwork)
-
-    @unittest_run_loop
-    async def test_metadata_none_type_when_not_playing(self):
-        self.usecase.nothing_playing()
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, MediaType.Unknown)
-        self.assertEqual(playing.device_state, DeviceState.Idle)
 
     @unittest_run_loop
     async def test_metadata_video_playing(self):
@@ -276,62 +272,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(listener.playing.title, 'video2')
 
     @unittest_run_loop
-    async def test_shuffle_state(self):
-        self.usecase.example_video(shuffle=False)
-        self.usecase.example_video(shuffle=True)
-
-        playing = await self.atv.metadata.playing()
-        self.assertFalse(playing.shuffle)
-
-        playing = await self.atv.metadata.playing()
-        self.assertTrue(playing.shuffle)
-
-    @unittest_run_loop
-    async def test_repeat_state(self):
-        self.usecase.example_video(repeat=RepeatState.Off)
-        self.usecase.example_video(repeat=RepeatState.Track)
-        self.usecase.example_video(repeat=RepeatState.All)
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, RepeatState.Off)
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, RepeatState.Track)
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.repeat, RepeatState.All)
-
-    @unittest_run_loop
-    async def test_set_shuffle(self):
-        await self.atv.remote_control.set_shuffle(1)
-        self.assertEqual(self.fake_atv.properties['dacp.shufflestate'], 1)
-
-        await self.atv.remote_control.set_shuffle(0)
-        self.assertEqual(self.fake_atv.properties['dacp.shufflestate'], 0)
-
-    @unittest_run_loop
-    async def test_set_repeat(self):
-        await self.atv.remote_control.set_repeat(1)
-        self.assertEqual(self.fake_atv.properties['dacp.repeatstate'], 1)
-
-        await self.atv.remote_control.set_repeat(2)
-        self.assertEqual(self.fake_atv.properties['dacp.repeatstate'], 2)
-
-    @unittest_run_loop
     async def test_seek_in_playing_media(self):
-        await self.atv.remote_control.set_position(60)
-        self.assertEqual(self.fake_atv.properties['dacp.playingtime'], 60000)
+        self.usecase.video_playing(paused=False, title='dummy',
+                                   total_time=40, position=10)
 
-    @unittest_run_loop
-    async def test_metadata_loading(self):
-        self.usecase.media_is_loading()
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.device_state, DeviceState.Loading)
-
-    @unittest_run_loop
-    async def test_button_unsupported_raises(self):
-        buttons = ['home', 'volume_up', 'volume_down', 'suspend', 'wakeup']
-        for button in buttons:
-            with self.assertRaises(exceptions.NotSupportedError):
-                await getattr(self.atv.remote_control, button)()
+        await self.atv.remote_control.set_position(30)
+        playing = await self.playing(title='dummy')
+        self.assertEqual(playing.position, 30)

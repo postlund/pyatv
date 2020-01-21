@@ -12,7 +12,7 @@ from ipaddress import ip_address
 from pyatv import (const, exceptions, interface, scan, connect, pair)
 from pyatv.conf import (
     AppleTV, DmapService, MrpService, AirPlayService)
-from pyatv.const import Protocol
+from pyatv.const import Protocol, ShuffleState, RepeatState
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
@@ -446,12 +446,19 @@ def _extract_command_with_args(cmd):
     all the additional arguments are passed as arguments to the target
     method.
     """
-    def _isint(value):
+    def _typeparse(value):
         try:
-            int(value)
-            return True
+            return int(value)
         except ValueError:
-            return False
+            return value
+
+    def _parse_args(cmd, args):
+        args = [_typeparse(x) for x in args]
+        if cmd == 'set_shuffle':
+            return [ShuffleState(args[0])]
+        if cmd == 'set_repeat':
+            return [RepeatState(args[0])]
+        return args
 
     equal_sign = cmd.find('=')
     if equal_sign == -1:
@@ -459,8 +466,7 @@ def _extract_command_with_args(cmd):
 
     command = cmd[0:equal_sign]
     args = cmd[equal_sign+1:].split(',')
-    converted = [x if not _isint(x) else int(x) for x in args]
-    return command, converted
+    return command, _parse_args(command, args)
 
 
 async def _handle_commands(args, config, loop):

@@ -6,7 +6,7 @@ import asyncio
 from aiohttp.client_exceptions import ClientError
 
 from pyatv import (exceptions, convert, net)
-from pyatv.const import Protocol, MediaType, RepeatState
+from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState
 from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
@@ -200,14 +200,15 @@ class DmapRemoteControl(RemoteControl):
         time_in_ms = int(pos)*1000
         return self.apple_tv.set_property('dacp.playingtime', time_in_ms)
 
-    def set_shuffle(self, is_on):
+    def set_shuffle(self, shuffle_state):
         """Change shuffle mode to on or off."""
-        state = 1 if is_on else 0
+        state = 0 if shuffle_state == ShuffleState.Off else 1
         return self.apple_tv.set_property('dacp.shufflestate', state)
 
-    def set_repeat(self, repeat_mode):
+    def set_repeat(self, repeat_state):
         """Change repeat mode."""
-        return self.apple_tv.set_property('dacp.repeatstate', repeat_mode)
+        return self.apple_tv.set_property(
+            'dacp.repeatstate', repeat_state.value)
 
 
 class DmapPlaying(Playing):
@@ -275,13 +276,21 @@ class DmapPlaying(Playing):
     @property
     def shuffle(self):
         """If shuffle is enabled or not."""
-        return bool(parser.first(self.playstatus, 'cmst', 'cash'))
+        state = parser.first(self.playstatus, 'cmst', 'cash')
+        if state is None or state == 0:
+            return ShuffleState.Off
+
+        # DMAP does not support the "albums" state and will always report
+        # "songs" if shuffle is active
+        return ShuffleState.Songs
 
     @property
     def repeat(self):
         """Repeat mode."""
         state = parser.first(self.playstatus, 'cmst', 'carp')
-        return None if state is None else RepeatState(state)
+        if state is None:
+            return RepeatState.Off
+        return RepeatState(state)
 
     def _get_time_in_seconds(self, tag):
         time = parser.first(self.playstatus, 'cmst', tag)

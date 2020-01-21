@@ -2,7 +2,7 @@
 reports=no
 extension-pkg-whitelist=netifaces
 ignore=pyatv/mrp/protobuf
-ignored-classes=ProtocolMessage,SetConnectionStateMessage,SetStateMessage,ContentItemMetadata
+ignored-classes=ProtocolMessage,SetConnectionStateMessage,SetStateMessage,ContentItemMetadata,CommandInfo
 
 disable=
   locally-disabled,

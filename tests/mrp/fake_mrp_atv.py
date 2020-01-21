@@ -4,6 +4,7 @@ import asyncio
 import logging
 import struct
 
+from pyatv import const
 from pyatv.mrp import (messages, protobuf, variant)
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
@@ -39,6 +40,17 @@ _COMMAND_LOOKUP = {
     cmd.PreviousTrack: 'previtem',
 }
 
+_REPEAT_LOOKUP = {
+    const.RepeatState.Track: protobuf.CommandInfo.One,
+    const.RepeatState.All: protobuf.CommandInfo.All,
+}
+
+_SHUFFLE_LOOKUP = {
+    const.ShuffleState.Off: protobuf.CommandInfo.Off,
+    const.ShuffleState.Albums: protobuf.CommandInfo.Albums,
+    const.ShuffleState.Songs: protobuf.CommandInfo.Songs,
+}
+
 PLAYER_IDENTIFIER = 'com.github.postlund.pyatv'
 
 
@@ -60,14 +72,32 @@ def _set_state_message(metadata, identifier):
     inner.displayName = 'Fake Player'
     inner.playbackStateTimestamp = 0
 
+    if metadata.repeat and metadata.repeat != const.RepeatState.Off:
+        cmd = inner.supportedCommands.supportedCommands.add()
+        cmd.command = protobuf.CommandInfo_pb2.ChangeRepeatMode
+        cmd.repeatMode = _REPEAT_LOOKUP[metadata.repeat]
+
+    if metadata.shuffle:
+        cmd = inner.supportedCommands.supportedCommands.add()
+        cmd.command = protobuf.CommandInfo_pb2.ChangeShuffleMode
+        cmd.shuffleMode = metadata.shuffle
+
     queue = inner.playbackQueue
     queue.location = 0
     item = queue.contentItems.add()
     md = item.metadata
-    md.title = metadata.title
-    md.duration = metadata.total_time
-    md.elapsedTime = metadata.position
+
+    if metadata.title:
+        md.title = metadata.title
+    if metadata.total_time:
+        md.duration = metadata.total_time
+    if metadata.position:
+        md.elapsedTime = metadata.position
     md.mediaType = protobuf.ContentItemMetadata.Video
+
+    if metadata.artwork_mimetype:
+        md.artworkAvailable = True
+        md.artworkMIMEType = metadata.artwork_mimetype
 
     client = inner.playerPath.client
     client.processIdentifier = 123
@@ -79,10 +109,14 @@ class PlayingMetadata:
 
     def __init__(self, **kwargs):
         """Initialize a new PlayingMetadata."""
-        self.playback_state = kwargs.get('playback_state', None)
-        self.title = kwargs.get('title', None)
-        self.total_time = kwargs.get('total_time', None)
-        self.position = kwargs.get('position', None)
+        self.playback_state = kwargs.get('playback_state')
+        self.title = kwargs.get('title')
+        self.total_time = kwargs.get('total_time')
+        self.position = kwargs.get('position')
+        self.repeat = kwargs.get('repeat')
+        self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get('shuffle'))
+        self.artwork = None
+        self.artwork_mimetype = None
 
 
 class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
@@ -96,6 +130,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         self.last_button_pressed = None
         self.connection_state = None
         self.states = {}
+        self.active_player = None
 
         self.server = None
         self.buffer = b''
@@ -113,6 +148,8 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
                 self.handle_send_hid_event_message,
             protobuf.SEND_COMMAND_MESSAGE:
                 self.handle_send_command_message,
+            protobuf.PLAYBACK_QUEUE_REQUEST_MESSAGE:
+                self.handle_playback_queue_request_message,
             }
 
     async def start(self, app):
@@ -132,15 +169,22 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
 
+    def update_state(self, identifier):
+        state = self.states[identifier]
+        self._send(_set_state_message(state, identifier))
+
     def set_player_state(self, identifier, state):
-        # TODO: Add logic to produce "diff updates" here?
         self.states[identifier] = state
-        self._send(state)
+        self.update_state(identifier)
+
+    def get_player_state(self, identifier):
+        return self.states[identifier]
 
     def set_active_player(self, identifier):
         if identifier not in self.states:
             raise Exception('invalid player: %s', identifier)
 
+        self.active_player = identifier
         now_playing = messages.create(
             protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
         client = now_playing.inner().client
@@ -224,14 +268,46 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
 
     def handle_send_command_message(self, message):
         _LOGGER.debug('Got command message')
+        inner = message.inner()
 
-        button = _COMMAND_LOOKUP.get(message.inner().command)
+        button = _COMMAND_LOOKUP.get(inner.command)
         if button:
             self.last_button_pressed = button
             _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+        elif inner.command == cmd.ChangeRepeatMode:
+            state = self.get_player_state(self.active_player)
+            repeatMode = inner.options.repeatMode
+            if repeatMode == protobuf.CommandInfo.One:
+                state.repeat = const.RepeatState.Track
+            elif repeatMode == protobuf.CommandInfo.All:
+                state.repeat = const.RepeatState.All
+            else:
+                state.repeat = const.RepeatState.Off
+            self.update_state(self.active_player)
+            _LOGGER.debug('Change repeat state to %s', state.repeat)
+        elif inner.command == cmd.ChangeShuffleMode:
+            state = self.get_player_state(self.active_player)
+            state.shuffle = inner.options.shuffleMode
+            self.update_state(self.active_player)
+            _LOGGER.debug('Change shuffle state to %s', state.shuffle)
         else:
             _LOGGER.warning(
                 'Unhandled button press: %s', message.inner().command)
+
+    def handle_playback_queue_request_message(self, message):
+        _LOGGER.debug('Got playback queue request')
+
+        setstate = messages.create(protobuf.SET_STATE_MESSAGE)
+        setstate.identifier = message.identifier
+        inner = setstate.inner()
+        queue = inner.playbackQueue
+        queue.location = 0
+        item = queue.contentItems.add()
+        item.artworkData = self.states[self.active_player].artwork
+        item.artworkDataWidth = 456
+        item.artworkDataHeight = 789
+
+        self._send(setstate)
 
 
 class AppleTVUseCases(AirPlayUseCases):
@@ -241,9 +317,12 @@ class AppleTVUseCases(AirPlayUseCases):
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
 
-    def change_artwork(self, artwork):
+    def change_artwork(self, artwork, mimetype):
         """Call this method to change artwork response."""
-        pass
+        metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
+        metadata.artwork = artwork
+        metadata.artwork_mimetype = mimetype
+        self.device.update_state(PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
         """Call this method to put device in idle state."""
@@ -251,7 +330,8 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def example_video(self, **kwargs):
         """Play some example video."""
-        pass
+        self.video_playing(paused=True, title='dummy',
+                           total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
@@ -259,8 +339,7 @@ class AppleTVUseCases(AirPlayUseCases):
             playback_state=ssm.Paused if paused else ssm.Playing,
             title=title, total_time=total_time,
             position=position, **kwargs)
-        self.device.set_player_state(
-            PLAYER_IDENTIFIER, _set_state_message(metadata, PLAYER_IDENTIFIER))
+        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)
 
     def music_playing(self, paused, artist, album, title, genre,
@@ -270,4 +349,6 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def media_is_loading(self):
         """Call this method to put device in a loading state."""
-        pass
+        metadata = PlayingMetadata(playback_state=ssm.Interrupted)
+        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
+        self.device.set_active_player(PLAYER_IDENTIFIER)
