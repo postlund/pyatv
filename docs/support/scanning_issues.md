@@ -56,7 +56,6 @@ You basically say: "scan *these* IP-addresses". This seems to work more relibly 
 comes with some other advantages:
 
 * It is fast because we know exactly which answers to wait for
-* It works across different networks (Zeroconf is not designed for that)
 * All services can be obtained with *one* request, so no timing issues
 * All data `pyatv` requires, like unique identifiers, are present so it is more reliable than manual configuration
 
