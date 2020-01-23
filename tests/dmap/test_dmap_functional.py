@@ -5,10 +5,9 @@ import ipaddress
 
 from aiohttp.test_utils import unittest_run_loop
 
-import pyatv
-from pyatv import exceptions, interface
+from pyatv import connect, exceptions, interface
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
-from pyatv.const import MediaType, DeviceState, ShuffleState
+from pyatv.const import ShuffleState
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -87,7 +86,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.conf = AppleTV('127.0.0.1', 'Apple TV')
         self.conf.add_service(self.dmap_service)
         self.conf.add_service(self.airplay_service)
-        return await pyatv.connect(self.conf, self.loop)
+        return await connect(self.conf, self.loop)
 
     @unittest_run_loop
     async def test_not_supportedt(self):
@@ -183,99 +182,3 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.set_shuffle(ShuffleState.Albums)
         playing = await self.playing(shuffle=ShuffleState.Songs)
         self.assertEqual(playing.shuffle, ShuffleState.Songs)
-
-    # Common tests are below. Move tests that have been implemented to
-    # common_functional_tests.py once implemented
-
-    @unittest_run_loop
-    async def test_metadata_video_playing(self):
-        self.usecase.video_playing(paused=False, title='video',
-                                   total_time=40, position=10)
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, MediaType.Video)
-        self.assertEqual(playing.device_state, DeviceState.Playing)
-        self.assertEqual(playing.title, 'video')
-        self.assertEqual(playing.total_time, 40)
-        self.assertEqual(playing.position, 10)
-
-    @unittest_run_loop
-    async def test_metadata_music_paused(self):
-        self.usecase.music_playing(paused=True, title='music',
-                                   artist='artist', album='album',
-                                   total_time=222, position=49,
-                                   genre='genre')
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, MediaType.Music)
-        self.assertEqual(playing.device_state, DeviceState.Paused)
-        self.assertEqual(playing.title, 'music')
-        self.assertEqual(playing.artist, 'artist')
-        self.assertEqual(playing.album, 'album')
-        self.assertEqual(playing.genre, 'genre')
-        self.assertEqual(playing.total_time, 222)
-        self.assertEqual(playing.position, 49)
-
-    @unittest_run_loop
-    async def test_metadata_music_playing(self):
-        self.usecase.music_playing(paused=False, title='music',
-                                   artist='test1', album='test2',
-                                   total_time=2, position=1,
-                                   genre='genre')
-
-        playing = await self.atv.metadata.playing()
-        self.assertEqual(playing.media_type, MediaType.Music)
-        self.assertEqual(playing.device_state, DeviceState.Playing)
-        self.assertEqual(playing.title, 'music')
-        self.assertEqual(playing.artist, 'test1')
-        self.assertEqual(playing.album, 'test2')
-        self.assertEqual(playing.genre, 'genre')
-        self.assertEqual(playing.total_time, 2)
-        self.assertEqual(playing.position, 1)
-
-    @unittest_run_loop
-    async def test_push_updates(self):
-
-        class PushListener:
-            def __init__(self):
-                self.playing = None
-
-            def playstatus_update(self, updater, playstatus):
-                self.playing = playstatus
-                updater.stop()
-
-            @staticmethod
-            def playstatus_error(updater, exception):
-                pass
-
-        # Prepare two playstatus updates in the fake device. Take note: every
-        # time start() is called, revision 0 should be used first. This will
-        # make sure that we always get a push update instantly. Otherwise we
-        # might hang and wait for an update.
-        self.usecase.video_playing(paused=False, title='video1',
-                                   total_time=40, position=10,
-                                   revision=0)
-        self.usecase.video_playing(paused=True, title='video2',
-                                   total_time=30, position=20,
-                                   revision=0)
-
-        # Poll the first one ("video1")
-        await self.atv.metadata.playing()
-
-        # Setup push updates which will instantly get the next one ("video2")
-        listener = PushListener()
-        self.atv.push_updater.listener = listener
-        await self.atv.push_updater.start()
-
-        # Check that we got the right one
-        self.assertIsNotNone(listener.playing)
-        self.assertEqual(listener.playing.title, 'video2')
-
-    @unittest_run_loop
-    async def test_seek_in_playing_media(self):
-        self.usecase.video_playing(paused=False, title='dummy',
-                                   total_time=40, position=10)
-
-        await self.atv.remote_control.set_position(30)
-        playing = await self.playing(title='dummy')
-        self.assertEqual(playing.position, 30)

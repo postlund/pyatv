@@ -89,14 +89,19 @@ def faketime(module_name, *times):
             module = import_module(module_name)
             setattr(module.datetime, 'datetime', datetime)
 
-        def now(self, *args, **kwargs):
+        def now(self, tz=None):
             """Replace times from now to fake values."""
             if not self.time:
-                return datetime.now(*args, **kwargs)
+                return datetime.now(tz=tz)
 
             next_time = self.times[0]
-            self.times = self.times[1:]
-            return datetime.fromtimestamp(next_time)
+            if len(self.times) > 1:
+                self.times = self.times[1:]
+
+            time = datetime.fromtimestamp(next_time)
+            if tz:
+                time = time.replace(tzinfo=tz)
+            return time
 
         def __getattr__(self, attr):
             """Redirect non-stubbed functions to original module."""

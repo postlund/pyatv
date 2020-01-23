@@ -7,11 +7,13 @@ from pyatv.mrp import protobuf
 from pyatv.mrp import tlv8
 
 
-def create(message_type, priority=0):
+def create(message_type, priority=0, identifier=None):
     """Create a ProtocolMessage."""
     message = protobuf.ProtocolMessage()
     message.type = message_type
     message.priority = priority
+    if identifier:
+        message.identifier = identifier
     return message
 
 
@@ -164,12 +166,12 @@ def command(cmd):
 def repeat(mode):
     """Change repeat mode of current player."""
     message = command(protobuf.CommandInfo_pb2.ChangeRepeatMode)
-    send_command = message.inner()
-    send_command.options.externalPlayerCommand = True
+    options = message.inner().options
+    options.sendOptions = 0
     if mode == const.RepeatState.Track:
-        send_command.options.repeatMode = protobuf.CommandInfo.One
+        options.repeatMode = protobuf.CommandInfo.One
     elif mode == const.RepeatState.All:
-        send_command.options.repeatMode = protobuf.CommandInfo.All
+        options.repeatMode = protobuf.CommandInfo.All
     return message
 
 
@@ -177,6 +179,7 @@ def shuffle(state):
     """Change shuffle mode of current player."""
     message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
     options = message.inner().options
+    options.sendOptions = 0
     if state == const.ShuffleState.Off:
         options.shuffleMode = protobuf.CommandInfo.Off
     elif state == const.ShuffleState.Albums:
