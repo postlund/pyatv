@@ -230,6 +230,15 @@ class MrpPlaying(Playing):
         now = datetime.datetime.now()
         diff = (now - self._state.timestamp).total_seconds()
 
+        # For debugging purposes, log some timing info. I know there are bugs
+        # here but I have not been able to reproduce myself, so I'm preparing
+        # for bug reports.
+        _LOGGER.debug('Elapsed: %d, Now: %d, playbackState: %d, Delta: %d',
+                      int(elapsed_time or 0),
+                      now.timestamp(),
+                      self._state.timestamp.timestamp(),
+                      int(diff))
+
         # If elapsed time is available, we make the assumption that
         # it is zero (playback started at reference time)
         elapsed_time = elapsed_time or 0

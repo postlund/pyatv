@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import struct
+from datetime import datetime
 
 from pyatv import const
 from pyatv.mrp import (messages, protobuf, variant)
@@ -51,6 +52,8 @@ _SHUFFLE_LOOKUP = {
     const.ShuffleState.Songs: protobuf.CommandInfo.Songs,
 }
 
+_COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
+
 PLAYER_IDENTIFIER = 'com.github.postlund.pyatv'
 
 
@@ -70,7 +73,7 @@ def _set_state_message(metadata, identifier):
     inner = set_state.inner()
     inner.playbackState = metadata.playback_state
     inner.displayName = 'Fake Player'
-    inner.playbackStateTimestamp = 0
+    inner.playbackStateTimestamp = _COCOA_BASE
 
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()
@@ -87,14 +90,20 @@ def _set_state_message(metadata, identifier):
     item = queue.contentItems.add()
     md = item.metadata
 
+    if metadata.artist:
+        md.trackArtistName = metadata.artist
+    if metadata.album:
+        md.albumName = metadata.album
     if metadata.title:
         md.title = metadata.title
+    if metadata.genre:
+        md.genre = metadata.genre
     if metadata.total_time:
         md.duration = metadata.total_time
     if metadata.position:
         md.elapsedTime = metadata.position
-    md.mediaType = protobuf.ContentItemMetadata.Video
-
+    if metadata.media_type:
+        md.mediaType = metadata.media_type
     if metadata.artwork_mimetype:
         md.artworkAvailable = True
         md.artworkMIMEType = metadata.artwork_mimetype
@@ -111,10 +120,14 @@ class PlayingMetadata:
         """Initialize a new PlayingMetadata."""
         self.playback_state = kwargs.get('playback_state')
         self.title = kwargs.get('title')
+        self.artist = kwargs.get('artist')
+        self.album = kwargs.get('album')
+        self.genre = kwargs.get('genre')
         self.total_time = kwargs.get('total_time')
         self.position = kwargs.get('position')
         self.repeat = kwargs.get('repeat')
         self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get('shuffle'))
+        self.media_type = kwargs.get('media_type')
         self.artwork = None
         self.artwork_mimetype = None
 
@@ -135,22 +148,6 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         self.server = None
         self.buffer = b''
         self.transport = None
-        self.mapping = {
-            protobuf.DEVICE_INFO_MESSAGE: self.handle_device_info,
-            protobuf.CRYPTO_PAIRING_MESSAGE: self.handle_crypto_pairing,
-            protobuf.SET_CONNECTION_STATE_MESSAGE:
-                self.handle_set_connection_state,
-            protobuf.CLIENT_UPDATES_CONFIG_MESSAGE:
-                self.handle_client_updates_config_message,
-            protobuf.GET_KEYBOARD_SESSION_MESSAGE:
-                self.handle_get_keyboard_session_message,
-            protobuf.SEND_HID_EVENT_MESSAGE:
-                self.handle_send_hid_event_message,
-            protobuf.SEND_COMMAND_MESSAGE:
-                self.handle_send_command_message,
-            protobuf.PLAYBACK_QUEUE_REQUEST_MESSAGE:
-                self.handle_playback_queue_request_message,
-            }
 
     async def start(self, app):
         coro = self.loop.create_server(lambda: self, '127.0.0.1')
@@ -206,52 +203,44 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
             _LOGGER.info('Incoming message: %s', parsed)
 
             try:
-                def unhandled_message(message):
-                    _LOGGER.warning('No message handler for %s', message)
+                name = parsed.Type.Name(
+                    parsed.type).lower().replace('_message', '')
 
-                self.mapping.get(parsed.type, unhandled_message)(parsed)
+                _LOGGER.debug('Received %s message', name)
+                getattr(self, 'handle_' + name)(parsed, parsed.inner())
+            except AttributeError:
+                _LOGGER.exception('No message handler for ' + str(parsed))
             except Exception:
                 _LOGGER.exception('Error while dispatching message')
 
-    def handle_device_info(self, message):
-        _LOGGER.debug('Received device info message')
-
+    def handle_device_info(self, message, inner):
         resp = messages.device_information('Fake MRP ATV', '1234')
         resp.identifier = message.identifier
         self._send(resp)
 
-    def handle_crypto_pairing(self, message):
-        _LOGGER.debug('Received crypto pairing message')
-
+    def handle_crypto_pairing(self, message, inner):
         # TODO: Remove when authentication is supported (see
         # test_atvremote.py why this is here).
         self._send(messages.crypto_pairing({}))
 
-    def handle_set_connection_state(self, message):
-        inner = message.inner()
+    def handle_set_connection_state(self, message, inner):
         _LOGGER.debug('Changed connection state to %d', inner.state)
         self.connection_state = inner.state
 
-    def handle_client_updates_config_message(self, message):
-        _LOGGER.debug('Update client config')
+    def handle_client_updates_config(self, message, inner):
+        pass
 
-    def handle_get_keyboard_session_message(self, message):
-        _LOGGER.debug('Get keyboard session')
-
+    def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
         # not use them so ignore for now
         resp = messages.create(protobuf.KEYBOARD_MESSAGE)
         resp.identifier = message.identifier
         self._send(resp)
 
-    def handle_send_hid_event_message(self, message):
-        _LOGGER.debug('Got HID event message')
-
-        hid_data = message.inner().hidEventData
-
+    def handle_send_hid_event(self, message, inner):
         # These corresponds to the bytes mapping to pressed key (see
         # send_hid_event in pyatv/mrp/messages.py)
-        start = hid_data[43:49]
+        start = inner.hidEventData[43:49]
         use_page, usage, down_press = struct.unpack('>HHH', start)
 
         if down_press == 1:
@@ -266,10 +255,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         else:
             _LOGGER.error('Invalid key press state: %d', down_press)
 
-    def handle_send_command_message(self, message):
-        _LOGGER.debug('Got command message')
-        inner = message.inner()
-
+    def handle_send_command(self, message, inner):
         button = _COMMAND_LOOKUP.get(inner.command)
         if button:
             self.last_button_pressed = button
@@ -290,23 +276,24 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
             state.shuffle = inner.options.shuffleMode
             self.update_state(self.active_player)
             _LOGGER.debug('Change shuffle state to %s', state.shuffle)
+        elif inner.command == cmd.SeekToPlaybackPosition:
+            state = self.get_player_state(self.active_player)
+            state.position = inner.options.playbackPosition
+            self.update_state(self.active_player)
+            _LOGGER.debug('Seek to position: %d', state.position)
         else:
             _LOGGER.warning(
                 'Unhandled button press: %s', message.inner().command)
 
-    def handle_playback_queue_request_message(self, message):
-        _LOGGER.debug('Got playback queue request')
-
+    def handle_playback_queue_request(self, message, inner):
         setstate = messages.create(protobuf.SET_STATE_MESSAGE)
         setstate.identifier = message.identifier
-        inner = setstate.inner()
-        queue = inner.playbackQueue
+        queue = setstate.inner().playbackQueue
         queue.location = 0
         item = queue.contentItems.add()
         item.artworkData = self.states[self.active_player].artwork
         item.artworkDataWidth = 456
         item.artworkDataHeight = 789
-
         self._send(setstate)
 
 
@@ -338,14 +325,22 @@ class AppleTVUseCases(AirPlayUseCases):
         metadata = PlayingMetadata(
             playback_state=ssm.Paused if paused else ssm.Playing,
             title=title, total_time=total_time,
-            position=position, **kwargs)
+            position=position, media_type=protobuf.ContentItemMetadata.Video,
+            **kwargs)
         self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)
 
     def music_playing(self, paused, artist, album, title, genre,
-                      total_time, position):
+                      total_time, position, **kwargs):
         """Call this method to change what is currently plaing to music."""
-        pass
+        metadata = PlayingMetadata(
+            playback_state=ssm.Paused if paused else ssm.Playing,
+            artist=artist, album=album, title=title, genre=genre,
+            total_time=total_time, position=position,
+            media_type=protobuf.ContentItemMetadata.Music,
+            **kwargs)
+        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
+        self.device.set_active_player(PLAYER_IDENTIFIER)
 
     def media_is_loading(self):
         """Call this method to put device in a loading state."""

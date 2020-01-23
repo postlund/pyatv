@@ -1,5 +1,7 @@
 """Common functional tests for all protocols."""
 
+import logging
+
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
@@ -8,8 +10,10 @@ from pyatv.const import (
     Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 from pyatv.conf import AppleTV, AirPlayService
 from tests import zeroconf_stub
-from tests.utils import stub_sleep, until
+from tests.utils import stub_sleep, until, faketime
 
+
+_LOGGER = logging.getLogger(__name__)
 
 EXPECTED_ARTWORK = b'1234'
 ARTWORK_BYTES = b'1234'
@@ -162,14 +166,74 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_metadata_video_paused(self):
         self.usecase.video_playing(paused=True, title='dummy',
-                                   total_time=123, position=3)
+                                   total_time=100, position=3)
 
-        playing = await self.playing(title='dummy')
-        self.assertEqual(playing.media_type, MediaType.Video)
-        self.assertEqual(playing.device_state, DeviceState.Paused)
-        self.assertEqual(playing.title, 'dummy')
-        self.assertEqual(playing.total_time, 123)
-        self.assertEqual(playing.position, 3)
+        with faketime('pyatv', 0):
+            playing = await self.playing(title='dummy')
+            self.assertEqual(playing.media_type, MediaType.Video)
+            self.assertEqual(playing.device_state, DeviceState.Paused)
+            self.assertEqual(playing.title, 'dummy')
+            self.assertEqual(playing.total_time, 100)
+            self.assertEqual(playing.position, 3)
+
+    @unittest_run_loop
+    async def test_metadata_video_playing(self):
+        self.usecase.video_playing(paused=False, title='video',
+                                   total_time=40, position=10)
+
+        with faketime('pyatv', 0):
+            playing = await self.playing(title='video')
+            self.assertEqual(playing.media_type, MediaType.Video)
+            self.assertEqual(playing.device_state, DeviceState.Playing)
+            self.assertEqual(playing.title, 'video')
+            self.assertEqual(playing.total_time, 40)
+            self.assertEqual(playing.position, 10)
+
+    @unittest_run_loop
+    async def test_metadata_music_paused(self):
+        self.usecase.music_playing(paused=True, title='music',
+                                   artist='artist', album='album',
+                                   total_time=222, position=49,
+                                   genre='genre')
+
+        with faketime('pyatv', 0):
+            playing = await self.playing(title='music')
+            self.assertEqual(playing.media_type, MediaType.Music)
+            self.assertEqual(playing.device_state, DeviceState.Paused)
+            self.assertEqual(playing.title, 'music')
+            self.assertEqual(playing.artist, 'artist')
+            self.assertEqual(playing.album, 'album')
+            self.assertEqual(playing.genre, 'genre')
+            self.assertEqual(playing.total_time, 222)
+            self.assertEqual(playing.position, 49)
+
+    @unittest_run_loop
+    async def test_metadata_music_playing(self):
+        self.usecase.music_playing(paused=False, title='music',
+                                   artist='test1', album='test2',
+                                   total_time=2, position=1,
+                                   genre='genre')
+
+        with faketime('pyatv', 0):
+            playing = await self.playing(title='music')
+            self.assertEqual(playing.media_type, MediaType.Music)
+            self.assertEqual(playing.device_state, DeviceState.Playing)
+            self.assertEqual(playing.title, 'music')
+            self.assertEqual(playing.artist, 'test1')
+            self.assertEqual(playing.album, 'test2')
+            self.assertEqual(playing.genre, 'genre')
+            self.assertEqual(playing.total_time, 2)
+            self.assertEqual(playing.position, 1)
+
+    @unittest_run_loop
+    async def test_seek_in_playing_media(self):
+        self.usecase.video_playing(paused=False, title='dummy',
+                                   total_time=40, position=10)
+
+        with faketime('pyatv', 0):
+            await self.atv.remote_control.set_position(30)
+            playing = await self.playing(position=30)
+            self.assertEqual(playing.position, 30)
 
     @unittest_run_loop
     async def test_metadata_artwork(self):
@@ -181,6 +245,42 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertIsNotNone(artwork)
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
         self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
+    @unittest_run_loop
+    async def test_push_updates(self):
+
+        class PushListener:
+            def __init__(self):
+                self.playing = None
+
+            def playstatus_update(self, updater, playstatus):
+                _LOGGER.debug('Got playstatus: %s', playstatus)
+                self.playing = playstatus
+
+            @staticmethod
+            def playstatus_error(updater, exception):
+                pass
+
+        # TODO: This test is a little weird as it leaks DMAP details
+        # (revision). Should revise and make it better or use different tests
+        # for each protocol.
+        self.usecase.video_playing(paused=False, title='video1',
+                                   total_time=40, position=10,
+                                   revision=0)
+        self.usecase.video_playing(paused=True, title='video2',
+                                   total_time=30, position=20,
+                                   revision=0)
+
+        await self.playing()
+
+        # Setup push updates which will instantly get the next one ("video2")
+        listener = PushListener()
+        self.atv.push_updater.listener = listener
+        self.atv.push_updater.start()
+
+        # Check that we got the right one
+        await until(lambda: listener.playing is not None)
+        self.assertEqual(listener.playing.title, 'video2')
 
     @unittest_run_loop
     async def test_metadata_artwork_none_if_not_available(self):
