@@ -76,9 +76,14 @@ Scanning is not 100% reliable, that comes with the territory. Sometimes a device
 
 As a workaround for scanning issues, `pyatv` comes with support for *unicast scanning*. It allows
 you to specify a list of devices to scan for. When doing so, `pyatv` will not rely on multicast
-but rather send a request to the devices directly. This is much more reliable and even works across
-different networks, but of course comes with the downside of not having devices auto discovered.
-You can simply try this out with `atvremote`, please see [atvremote](../atvremote/).
+but rather send a request to the devices directly. This is much more reliable but of course comes
+with the downside of not having devices auto discovered. You can simply try this out with `atvremote`,
+please see [atvremote](../atvremote/).
+
+Please note that unicast scanning does not work across different network as the Apple TV will ignore
+packets from a different subnet. This is according to the multicast DNS specification (see chapter 5.5
+in RFC 6762 [here](https://tools.ietf.org/html/rfc6762#section-5.5) in case you are interested) and is
+not something that can be fixed in `pyatv`.
 
 ## Pairing
 
