@@ -22,7 +22,7 @@ PIN_CODE = 1234
 PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
 
 
-class PairFunctionalTest(AioHTTPTestCase):
+class DmapPairFunctionalTest(AioHTTPTestCase):
 
     def setUp(self):
         AioHTTPTestCase.setUp(self)

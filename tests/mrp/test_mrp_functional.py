@@ -18,7 +18,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def setUpAsync(self):
         await super().setUpAsync()
         self.conf = AppleTV('127.0.0.1', 'Test device')
-        self.conf.add_service(MrpService('mrp_id', self.fake_atv.port))
+        self.conf.add_service(MrpService(
+            'mrp_id', self.fake_atv.port))
         self.conf.add_service(AirPlayService(
             'airplay_id', self.server.port, DEVICE_CREDENTIALS))
         self.atv = await self.get_connected_device()

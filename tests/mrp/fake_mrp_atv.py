@@ -6,11 +6,12 @@ import struct
 from datetime import datetime
 
 from pyatv import const
-from pyatv.mrp import (messages, protobuf, variant)
+from pyatv.mrp import (chacha20, messages, protobuf, variant)
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
 from tests.airplay.fake_airplay_device import (
     FakeAirPlayDevice, AirPlayUseCases)
+from tests.mrp.mrp_server_auth import MrpServerAuth
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,6 +55,8 @@ _SHUFFLE_LOOKUP = {
 
 _COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
 
+
+DEVICE_NAME = 'Fake MRP ATV'
 PLAYER_IDENTIFIER = 'com.github.postlund.pyatv'
 
 
@@ -132,11 +135,12 @@ class PlayingMetadata:
         self.artwork_mimetype = None
 
 
-class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
+class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
     def __init__(self, testcase, loop):
-        super().__init__(testcase)
+        FakeAirPlayDevice.__init__(self, testcase)
+        MrpServerAuth.__init__(self, self, DEVICE_NAME)
         self.loop = loop
         self.app.on_startup.append(self.start)
         self.outstanding_keypresses = set()  # Pressed but not released
@@ -144,9 +148,11 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         self.connection_state = None
         self.states = {}
         self.active_player = None
+        self.has_authenticated = False
 
         self.server = None
         self.buffer = b''
+        self.chacha = None
         self.transport = None
 
     async def start(self, app):
@@ -161,14 +167,23 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
     def connection_made(self, transport):
         self.transport = transport
 
-    def _send(self, message):
+    def enable_encryption(self, input_key, output_key):
+        """Enable encryption with specified keys."""
+        self.chacha = chacha20.Chacha20Cipher(
+            input_key, output_key)
+        self.has_authenticated = True
+
+    def send(self, message):
         data = message.SerializeToString()
+        if self.chacha:
+            data = self.chacha.encrypt(data)
+
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
 
     def update_state(self, identifier):
         state = self.states[identifier]
-        self._send(_set_state_message(state, identifier))
+        self.send(_set_state_message(state, identifier))
 
     def set_player_state(self, identifier, state):
         self.states[identifier] = state
@@ -186,7 +201,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
             protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
         client = now_playing.inner().client
         client.bundleIdentifier = identifier
-        self._send(now_playing)
+        self.send(now_playing)
 
     def data_received(self, data):
         self.buffer += data
@@ -198,6 +213,9 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
 
             data = raw[:length]
             self.buffer = raw[length:]
+            if self.chacha:
+                data = self.chacha.decrypt(data)
+
             parsed = protobuf.ProtocolMessage()
             parsed.ParseFromString(data)
             _LOGGER.info('Incoming message: %s', parsed)
@@ -214,14 +232,9 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
                 _LOGGER.exception('Error while dispatching message')
 
     def handle_device_info(self, message, inner):
-        resp = messages.device_information('Fake MRP ATV', '1234')
+        resp = messages.device_information(DEVICE_NAME, '1234')
         resp.identifier = message.identifier
-        self._send(resp)
-
-    def handle_crypto_pairing(self, message, inner):
-        # TODO: Remove when authentication is supported (see
-        # test_atvremote.py why this is here).
-        self._send(messages.crypto_pairing({}))
+        self.send(resp)
 
     def handle_set_connection_state(self, message, inner):
         _LOGGER.debug('Changed connection state to %d', inner.state)
@@ -235,7 +248,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         # not use them so ignore for now
         resp = messages.create(protobuf.KEYBOARD_MESSAGE)
         resp.identifier = message.identifier
-        self._send(resp)
+        self.send(resp)
 
     def handle_send_hid_event(self, message, inner):
         # These corresponds to the bytes mapping to pressed key (see
@@ -294,7 +307,7 @@ class FakeAppleTV(FakeAirPlayDevice, asyncio.Protocol):
         item.artworkData = self.states[self.active_player].artwork
         item.artworkDataWidth = 456
         item.artworkDataHeight = 789
-        self._send(setstate)
+        self.send(setstate)
 
 
 class AppleTVUseCases(AirPlayUseCases):

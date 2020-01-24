@@ -44,244 +44,42 @@
 # improvements in case I personally see any benefits of doing so.
 """Simple MRP proxy server to intercept traffic."""
 
+import os
 import sys
 import socket
-import hashlib
 import asyncio
 import logging
-import binascii
-from collections import namedtuple
 
 from aiozeroconf import Zeroconf, ServiceInfo
 
-import curve25519
-from srptools import (SRPContext, SRPServerSession, constants)
-from ed25519.keys import SigningKey
-
 from pyatv.conf import MrpService
-from pyatv.mrp.srp import SRPAuthHandler, hkdf_expand
+from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp import (chacha20, messages, protobuf, variant, tlv8)
+from pyatv.mrp import (chacha20, protobuf, variant)
 from pyatv.log import log_binary
+
+# SRP server auth lives with the test code for now and we need to add that path
+# so python finds it. This should be removed once fake devices are part of the
+# real library code.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
+
+from tests.mrp.mrp_server_auth import MrpServerAuth, SERVER_IDENTIFIER
 
 _LOGGER = logging.getLogger(__name__)
 
-ServerKeys = namedtuple('ServerKeys', 'sign auth auth_pub verify verify_pub')
-
 DEVICE_NAME = 'Proxy'
-IDENTIFIER = '5D797FD3-3538-427E-A47B-A32FC6CF3A69'
 AIRPLAY_IDENTIFIER = '4D797FD3-3538-427E-A47B-A32FC6CF3A6A'
 
 
-# This is a hack. When using a constant, e.g. 32 * '\xAA', will be corrupted
-# for the second client that connects. Not sure why, but this works...
-def seed():
-    """Generate a static signing seed."""
-    a = b''
-    for _ in range(32):
-        a += b'\xAA'
-    return a
-
-
-def generate_keys(seed):
-    """Generate server encryption keys from seed."""
-    signing_key = SigningKey(seed)
-    verify_private = curve25519.Private(secret=seed)
-    return ServerKeys(
-        sign=signing_key,
-        auth=signing_key.to_bytes(),
-        auth_pub=signing_key.get_verifying_key().to_bytes(),
-        verify=verify_private,
-        verify_pub=verify_private.get_public())
-
-
-def new_server_session(keys, pin):
-    """Create SRP server session."""
-    context = SRPContext(
-        'Pair-Setup', str(pin),
-        prime=constants.PRIME_3072,
-        generator=constants.PRIME_3072_GEN,
-        hash_func=hashlib.sha512,
-        bits_salt=128)
-    username, verifier, salt = context.get_user_data_triplet()
-
-    context_server = SRPContext(
-        username,
-        prime=constants.PRIME_3072,
-        generator=constants.PRIME_3072_GEN,
-        hash_func=hashlib.sha512,
-        bits_salt=128)
-
-    session = SRPServerSession(
-        context_server,
-        verifier,
-        binascii.hexlify(keys.auth).decode())
-
-    return session, salt
-
-
-class ServerAuth:
-    """Server-side implementation of MRP authentication."""
-
-    def __init__(self, delegate, unique_id):
-        """Initialize a new instance if ServerAuth."""
-        self.delegate = delegate
-        self.unique_id = unique_id
-        self.input_key = None
-        self.output_key = None
-        self.has_paired = False
-        self.keys = generate_keys(seed())
-        self.session, self.salt = new_server_session(self.keys, 1111)
-
-    def handle_device_info(self, message, _):
-        """Handle received device information message."""
-        _LOGGER.debug('Received device info message')
-
-        # TODO: Consolidate this better with messages.device_information(...)
-        resp = messages.create(
-            protobuf.DEVICE_INFO_MESSAGE, identifier=message.identifier)
-        resp.inner().uniqueIdentifier = self.unique_id
-        resp.inner().name = DEVICE_NAME
-        resp.inner().localizedModelName = DEVICE_NAME
-        resp.inner().systemBuildVersion = '17K449'
-        resp.inner().applicationBundleIdentifier = 'com.apple.mediaremoted'
-        resp.inner().protocolVersion = 1
-        resp.inner().lastSupportedMessageType = 77
-        resp.inner().supportsSystemPairing = True
-        resp.inner().allowsPairing = True
-        resp.inner().systemMediaApplication = "com.apple.TVMusic"
-        resp.inner().supportsACL = True
-        resp.inner().supportsSharedQueue = True
-        resp.inner().supportsExtendedMotion = True
-        resp.inner().sharedQueueVersion = 2
-        resp.inner().deviceClass = 4
-        self.delegate.send(resp)
-
-    def handle_crypto_pairing(self, message, inner):
-        """Handle incoming crypto pairing message."""
-        _LOGGER.debug('Received crypto pairing message')
-        pairing_data = tlv8.read_tlv(inner.pairingData)
-        seqno = pairing_data[tlv8.TLV_SEQ_NO][0]
-
-        # Work-around for now to support "tries" to auth before pairing
-        if seqno == 1:
-            if tlv8.TLV_PUBLIC_KEY in pairing_data:
-                self.has_paired = True
-            elif tlv8.TLV_METHOD in pairing_data:
-                self.has_paired = False
-
-        suffix = 'paired' if self.has_paired else 'pairing'
-        method = '_seqno{0}_{1}'.format(seqno, suffix)
-        getattr(self, method)(pairing_data)
-
-    def _seqno1_paired(self, pairing_data):
-        server_pub_key = self.keys.verify_pub.serialize()
-        client_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
-
-        shared_key = self.keys.verify.get_shared_key(
-            curve25519.Public(client_pub_key), hashfunc=lambda x: x)
-
-        session_key = hkdf_expand('Pair-Verify-Encrypt-Salt',
-                                  'Pair-Verify-Encrypt-Info',
-                                  shared_key)
-
-        info = server_pub_key + self.unique_id + client_pub_key
-        signature = self.keys.sign.sign(info)
-
-        tlv = tlv8.write_tlv({
-            tlv8.TLV_IDENTIFIER: self.unique_id,
-            tlv8.TLV_SIGNATURE: signature
-        })
-
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce='PV-Msg02'.encode())
-
-        msg = messages.crypto_pairing({
-            tlv8.TLV_SEQ_NO: b'\x02',
-            tlv8.TLV_PUBLIC_KEY: server_pub_key,
-            tlv8.TLV_ENCRYPTED_DATA: encrypted
-        })
-
-        self.output_key = hkdf_expand('MediaRemote-Salt',
-                                      'MediaRemote-Write-Encryption-Key',
-                                      shared_key)
-
-        self.input_key = hkdf_expand('MediaRemote-Salt',
-                                     'MediaRemote-Read-Encryption-Key',
-                                     shared_key)
-
-        log_binary(_LOGGER,
-                   'Keys',
-                   Output=self.output_key,
-                   Input=self.input_key)
-        self.delegate.send(msg)
-
-    def _seqno1_pairing(self, pairing_data):
-        msg = messages.crypto_pairing({
-            tlv8.TLV_SALT: binascii.unhexlify(self.salt),
-            tlv8.TLV_PUBLIC_KEY: binascii.unhexlify(self.session.public),
-            tlv8.TLV_SEQ_NO: b'\x02'
-        })
-
-        self.delegate.send(msg)
-
-    def _seqno3_paired(self, pairing_data):
-        self.delegate.send(messages.crypto_pairing({tlv8.TLV_SEQ_NO: b'\x04'}))
-        self.delegate.enable_encryption(self.input_key, self.output_key)
-
-    def _seqno3_pairing(self, pairing_data):
-        pubkey = binascii.hexlify(
-            pairing_data[tlv8.TLV_PUBLIC_KEY]).decode()
-        self.session.process(pubkey, self.salt)
-
-        proof = binascii.unhexlify(self.session.key_proof_hash)
-        assert self.session.verify_proof(
-            binascii.hexlify(pairing_data[tlv8.TLV_PROOF]))
-
-        msg = messages.crypto_pairing({
-            tlv8.TLV_PROOF: proof,
-            tlv8.TLV_SEQ_NO: b'\x04'
-        })
-        self.delegate.send(msg)
-
-    def _seqno5_pairing(self, _):
-        session_key = hkdf_expand(
-            'Pair-Setup-Encrypt-Salt',
-            'Pair-Setup-Encrypt-Info',
-            binascii.unhexlify(self.session.key))
-
-        acc_device_x = hkdf_expand(
-            'Pair-Setup-Accessory-Sign-Salt',
-            'Pair-Setup-Accessory-Sign-Info',
-            binascii.unhexlify(self.session.key))
-
-        device_info = acc_device_x + self.unique_id + self.keys.auth_pub
-        signature = self.keys.sign.sign(device_info)
-
-        tlv = tlv8.write_tlv({tlv8.TLV_IDENTIFIER: self.unique_id,
-                              tlv8.TLV_PUBLIC_KEY: self.keys.auth_pub,
-                              tlv8.TLV_SIGNATURE: signature})
-
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce='PS-Msg06'.encode())
-
-        msg = messages.crypto_pairing({
-            tlv8.TLV_SEQ_NO: b'\x06',
-            tlv8.TLV_ENCRYPTED_DATA: encrypted,
-        })
-        self.has_paired = True
-
-        self.delegate.send(msg)
-
-
-class ProxyMrpAppleTV(ServerAuth, asyncio.Protocol):
+class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, loop, identifier=IDENTIFIER):
+    def __init__(self, loop):
         """Initialize a new instance of ProxyMrpAppleTV."""
+        super().__init__(self, DEVICE_NAME)
         self.loop = loop
-        self.auther = ServerAuth(self, identifier.encode())
+        self.auther = MrpServerAuth(self, DEVICE_NAME)
         self.buffer = b''
         self.transport = None
         self.chacha = None
@@ -362,9 +160,9 @@ class ProxyMrpAppleTV(ServerAuth, asyncio.Protocol):
 
             try:
                 if message.type == protobuf.DEVICE_INFO_MESSAGE:
-                    self.auther.handle_device_info(message, message.inner())
+                    self.handle_device_info(message, message.inner())
                 elif message.type == protobuf.CRYPTO_PAIRING_MESSAGE:
-                    self.auther.handle_crypto_pairing(message, message.inner())
+                    self.handle_crypto_pairing(message, message.inner())
                 else:
                     self.connection.send_raw(data)
             except Exception:  # pylint: disable=broad-except
@@ -379,7 +177,7 @@ async def publish_zeroconf(zconf, ip_address, port):
         b'macAddress': b'40:cb:c0:12:34:56',
         b'BluetoothAddress': False,
         b'Name': DEVICE_NAME.encode(),
-        b'UniqueIdentifier': IDENTIFIER.encode(),
+        b'UniqueIdentifier': SERVER_IDENTIFIER.encode(),
         b'SystemBuildVersion': b'17K499',
         b'LocalAirPlayReceiverPairingIdentity': AIRPLAY_IDENTIFIER.encode(),
         }
