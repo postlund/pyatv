@@ -16,6 +16,7 @@ from tests.utils import stub_sleep
 from tests.airplay.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS
 from tests.mrp.fake_mrp_atv import (
     FakeAppleTV, AppleTVUseCases)
+from tests.mrp.mrp_server_auth import CLIENT_CREDENTIALS
 
 
 IP_1 = '10.0.0.1'
@@ -155,20 +156,22 @@ class AtvremoteTest(AioHTTPTestCase):
         self.exit(0)
 
     @unittest_run_loop
-    async def test_mrp_credentials(self):
-        # TODO: This test is a bit special. Encryption is not supported
-        # by the fake MRP device at the moment, so if credentials are
-        # given the test will fail. So, a dummy response is provided by
-        # the fake device for now which will result in AuthenticationError
-        # that we can look for here. This test only verifies that
-        # authentication is initiated, but not that it succeeds. There are
-        # other testa covering the latter. Anyways, this test verifies
-        # that credentials given to atvremote is at least used.
-        self.fake_atv.require_auth = True
+    async def test_mrp_auth(self):
+        await self.atvremote(
+            "--id", MRP_ID,
+            "--mrp-credentials", CLIENT_CREDENTIALS,
+            "playing")
+        self.assertTrue(self.fake_atv.has_authenticated)
+        self.has_output("Device state: Idle")
+        self.exit(0)
+
+    @unittest_run_loop
+    async def test_mrp_auth_error(self):
         await self.atvremote(
             "--id", MRP_ID,
             "--mrp-credentials", "30:31:32:33",
             "playing")
+        self.assertFalse(self.fake_atv.has_authenticated)
         self.has_error("AuthenticationError:")
         self.exit(1)
 

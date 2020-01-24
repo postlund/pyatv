@@ -42,7 +42,6 @@ AirPlayPlaybackResponse = namedtuple('AirPlayPlaybackResponse', 'code content')
 class FakeAirPlayDevice:
 
     def __init__(self, testcase):
-        super().__init__()
         self.responses = {}
         self.responses['airplay_playback'] = []
         self.has_authenticated = True
