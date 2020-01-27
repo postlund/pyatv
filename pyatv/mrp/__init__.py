@@ -1,4 +1,3 @@
-
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import math
@@ -9,6 +8,7 @@ import datetime
 from pyatv import exceptions, net
 from pyatv.const import (
     Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
+from pyatv.cache import Cache
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
@@ -285,20 +285,42 @@ class MrpMetadata(Metadata):
         super().__init__(identifier)
         self.protocol = protocol
         self.psm = psm
+        self.artwork_cache = Cache(limit=4)
 
     async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
-        playing = self.psm.playing
-        metadata = playing.metadata
-        if not metadata or not metadata.artworkAvailable:
+        identifier = self.artwork_id
+        if not identifier:
             _LOGGER.debug('No artwork available')
             return None
 
-        msg = messages.playback_queue_request(playing.location)
-        resp = await self.psm.protocol.send_and_receive(msg)
-        if resp.HasField('type'):
-            item = resp.inner().playbackQueue.contentItems[playing.location]
-            return ArtworkInfo(item.artworkData, metadata.artworkMIMEType)
+        if identifier in self.artwork_cache:
+            _LOGGER.debug('Retrieved artwork %s from cache', identifier)
+            return self.artwork_cache.get(identifier)
+
+        artwork = await self._fetch_artwork()
+        if artwork:
+            self.artwork_cache.put(identifier, artwork)
+            return artwork
+
+        return None
+
+    async def _fetch_artwork(self):
+        playing = self.psm.playing
+        resp = await self.psm.protocol.send_and_receive(
+            messages.playback_queue_request(playing.location))
+        if not resp.HasField('type'):
+            return None
+
+        item = resp.inner().playbackQueue.contentItems[playing.location]
+        return ArtworkInfo(item.artworkData, playing.metadata.artworkMIMEType)
+
+    @property
+    def artwork_id(self):
+        """Return a unique identifier for current artwork."""
+        metadata = self.psm.playing.metadata
+        if metadata and metadata.artworkAvailable:
+            return metadata.artworkIdentifier
         return None
 
     async def playing(self):

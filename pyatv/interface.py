@@ -328,6 +328,11 @@ class Metadata:
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError
 
+    @abstractproperty
+    def artwork_id(self):
+        """Return a unique identifier for current artwork."""
+        raise exceptions.NotSupportedError
+
     @abstractmethod
     def playing(self):
         """Return what is currently playing."""

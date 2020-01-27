@@ -6,6 +6,7 @@ import asyncio
 from aiohttp.client_exceptions import ClientError
 
 from pyatv import (exceptions, convert, net)
+from pyatv.cache import Cache
 from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState
 from pyatv.dmap import (parser, tags)
 from pyatv.dmap.daap import DaapRequester
@@ -27,6 +28,7 @@ class BaseDmapAppleTV:
         """Initialize a new Apple TV base implemenation."""
         self.daap = requester
         self.playstatus_revision = 0
+        self.latest_hash = None
 
     async def playstatus(self, use_revision=False, timeout=None):
         """Request raw data about what is currently playing.
@@ -40,7 +42,9 @@ class BaseDmapAppleTV:
             self.playstatus_revision if use_revision else 0)
         resp = await self.daap.get(cmd_url, timeout=timeout)
         self.playstatus_revision = parser.first(resp, 'cmst', 'cmsr')
-        return resp
+        playing = DmapPlaying(resp)
+        self.latest_hash = playing.hash
+        return playing
 
     async def artwork(self):
         """Return an image file (png) for what is currently playing.
@@ -304,18 +308,41 @@ class DmapMetadata(Metadata):
         """Initialize metadata instance."""
         super().__init__(identifier)
         self.apple_tv = apple_tv
+        self.artwork_cache = Cache(limit=4)
 
     async def artwork(self):
         """Return artwork for what is currently playing (or None)."""
+        # Having to fetch "playing" here is not ideal, but an identifier is
+        # needed and we cannot trust any previous identifiers. So we have to do
+        # this until a better solution comes along.
+        playing = await self.playing()
+        identifier = playing.hash
+        if identifier in self.artwork_cache:
+            _LOGGER.debug('Retrieved artwork %s from cache', identifier)
+            return self.artwork_cache.get(identifier)
+
+        artwork = await self._fetch_artwork()
+        if artwork:
+            self.artwork_cache.put(identifier, artwork)
+            return artwork
+
+        return None
+
+    async def _fetch_artwork(self):
+        _LOGGER.debug('Fetching artwork')
         data = await self.apple_tv.artwork()
         if data:
             return ArtworkInfo(data, 'image/png')
         return None
 
+    @property
+    def artwork_id(self):
+        """Return a unique identifier for current artwork."""
+        return self.apple_tv.latest_hash
+
     async def playing(self):
         """Return current device state."""
-        playstatus = await self.apple_tv.playstatus()
-        return DmapPlaying(playstatus)
+        return await self.apple_tv.playstatus()
 
 
 class DmapPushUpdater(PushUpdater):
@@ -378,8 +405,8 @@ class DmapPushUpdater(PushUpdater):
                 playstatus = await self._atv.playstatus(
                     use_revision=True, timeout=0)
 
-                self._loop.call_soon(self.listener.playstatus_update,
-                                     self, DmapPlaying(playstatus))
+                self._loop.call_soon(
+                    self.listener.playstatus_update, self, playstatus)
             except asyncio.CancelledError:
                 break
 

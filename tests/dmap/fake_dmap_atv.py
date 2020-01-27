@@ -297,10 +297,10 @@ class AppleTVUseCases(AirPlayUseCases):
         else:
             self.device.responses['login'].insert(0, response)
 
-    def change_artwork(self, artwork, mimetype):
+    def change_artwork(self, artwork, mimetype, identifier=None):
         """Call this method to change artwork response."""
-        self.device.responses['artwork'].insert(
-            0, ArtworkResponse(artwork, 200))
+        self.device.responses['artwork'].append(
+            ArtworkResponse(artwork, 200))
 
     def artwork_no_permission(self):
         """Make artwork fail with no permission.
