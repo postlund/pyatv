@@ -110,6 +110,7 @@ def _set_state_message(metadata, identifier):
     if metadata.artwork_mimetype:
         md.artworkAvailable = True
         md.artworkMIMEType = metadata.artwork_mimetype
+        md.artworkIdentifier = metadata.artwork_identifier
 
     client = inner.playerPath.client
     client.processIdentifier = 123
@@ -317,11 +318,12 @@ class AppleTVUseCases(AirPlayUseCases):
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
 
-    def change_artwork(self, artwork, mimetype):
+    def change_artwork(self, artwork, mimetype, identifier='artwork'):
         """Call this method to change artwork response."""
         metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
         metadata.artwork = artwork
         metadata.artwork_mimetype = mimetype
+        metadata.artwork_identifier = identifier
         self.device.update_state(PLAYER_IDENTIFIER)
 
     def nothing_playing(self):

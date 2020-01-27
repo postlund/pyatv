@@ -13,6 +13,11 @@ from tests.mrp.fake_mrp_atv import (
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 
 
+ARTWORK_BYTES = b'1234'
+ARTWORK_MIMETYPE = 'image/png'
+ARTWORK_ID = 'artwork_id1'
+
+
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def setUpAsync(self):
@@ -74,3 +79,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.set_shuffle(ShuffleState.Albums)
         playing = await self.playing(shuffle=ShuffleState.Albums)
         self.assertEqual(playing.shuffle, ShuffleState.Albums)
+
+    @unittest_run_loop
+    async def test_metadata_artwork_id(self):
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            ARTWORK_BYTES, ARTWORK_MIMETYPE, ARTWORK_ID)
+
+        await self.playing(title='dummy')
+        self.assertEqual(self.atv.metadata.artwork_id, ARTWORK_ID)

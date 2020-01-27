@@ -111,6 +111,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # Here, we are logged in and currently have a asession id. These
         # usescases will result in being logged out (HTTP 403) and forcing a
         # re-login with a new session id (1234)
+        self.usecase.example_video()
         self.usecase.force_relogin(1234)
         self.usecase.artwork_no_permission()
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)

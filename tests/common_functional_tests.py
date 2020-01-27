@@ -15,9 +15,10 @@ from tests.utils import stub_sleep, until, faketime
 
 _LOGGER = logging.getLogger(__name__)
 
-EXPECTED_ARTWORK = b'1234'
 ARTWORK_BYTES = b'1234'
+ARTWORK_BYTES2 = b'4321'
 ARTWORK_MIMETYPE = 'image/png'
+ARTWORK_ID = 'artwork_id1'
 AIRPLAY_STREAM = 'http://stream'
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
@@ -245,6 +246,32 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertIsNotNone(artwork)
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
         self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
+    @unittest_run_loop
+    async def test_metadata_artwork_cache(self):
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            ARTWORK_BYTES, ARTWORK_MIMETYPE, ARTWORK_ID)
+
+        await self.playing(title='dummy')
+
+        artwork = await self.atv.metadata.artwork()
+        self.assertIsNotNone(artwork)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+
+        artwork_id = self.atv.metadata.artwork_id
+
+        # Change artwork data for same identifier (not really legal)
+        self.usecase.change_artwork(
+            ARTWORK_BYTES2, ARTWORK_MIMETYPE, ARTWORK_ID)
+
+        # Expect previous data from cache
+        artwork = await self.atv.metadata.artwork()
+        self.assertIsNotNone(artwork)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+
+        # Artwork identifier should be the same before as after
+        self.assertEqual(self.atv.metadata.artwork_id, artwork_id)
 
     @unittest_run_loop
     async def test_push_updates(self):
