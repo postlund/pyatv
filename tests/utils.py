@@ -66,7 +66,7 @@ async def until(pred, timeout=5, **kwargs):
 
         if timeout is not None:
             if deadline - time.time() <= 0:
-                raise asyncio.futures.TimeoutError()
+                raise asyncio.TimeoutError()
 
         # Use original method if stubbed
         if hasattr(asyncio, '_real_sleep'):

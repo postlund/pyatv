@@ -69,6 +69,31 @@ def _convert_key_press(use_page, usage):
             use_page, usage))
 
 
+def _fill_item(item, metadata):
+    if metadata.identifier:
+        item.identifier = metadata.identifier
+
+    md = item.metadata
+    if metadata.artist:
+        md.trackArtistName = metadata.artist
+    if metadata.album:
+        md.albumName = metadata.album
+    if metadata.title:
+        md.title = metadata.title
+    if metadata.genre:
+        md.genre = metadata.genre
+    if metadata.total_time:
+        md.duration = metadata.total_time
+    if metadata.position:
+        md.elapsedTime = metadata.position
+    if metadata.media_type:
+        md.mediaType = metadata.media_type
+    if metadata.artwork_mimetype:
+        md.artworkAvailable = True
+        md.artworkMIMEType = metadata.artwork_mimetype
+        md.artworkIdentifier = metadata.artwork_identifier
+
+
 def _set_state_message(metadata, identifier):
     # Most things are hardcoded here for simplicity. Will change that
     # as time goes by and more dynamic content is needed.
@@ -90,27 +115,7 @@ def _set_state_message(metadata, identifier):
 
     queue = inner.playbackQueue
     queue.location = 0
-    item = queue.contentItems.add()
-    md = item.metadata
-
-    if metadata.artist:
-        md.trackArtistName = metadata.artist
-    if metadata.album:
-        md.albumName = metadata.album
-    if metadata.title:
-        md.title = metadata.title
-    if metadata.genre:
-        md.genre = metadata.genre
-    if metadata.total_time:
-        md.duration = metadata.total_time
-    if metadata.position:
-        md.elapsedTime = metadata.position
-    if metadata.media_type:
-        md.mediaType = metadata.media_type
-    if metadata.artwork_mimetype:
-        md.artworkAvailable = True
-        md.artworkMIMEType = metadata.artwork_mimetype
-        md.artworkIdentifier = metadata.artwork_identifier
+    _fill_item(queue.contentItems.add(), metadata)
 
     client = inner.playerPath.client
     client.processIdentifier = 123
@@ -122,6 +127,7 @@ class PlayingMetadata:
 
     def __init__(self, **kwargs):
         """Initialize a new PlayingMetadata."""
+        self.identifier = kwargs.get('identifier')
         self.playback_state = kwargs.get('playback_state')
         self.title = kwargs.get('title')
         self.artist = kwargs.get('artist')
@@ -204,6 +210,18 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         client.bundleIdentifier = identifier
         self.send(now_playing)
 
+    def item_update(self, metadata, identifier):
+        msg = messages.create(protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
+        inner = msg.inner()
+
+        _fill_item(inner.contentItems.add(), metadata)
+
+        client = inner.playerPath.client
+        client.processIdentifier = 123
+        client.bundleIdentifier = identifier
+
+        self.send(msg)
+
     def data_received(self, data):
         self.buffer += data
 
@@ -247,9 +265,8 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
         # not use them so ignore for now
-        resp = messages.create(protobuf.KEYBOARD_MESSAGE)
-        resp.identifier = message.identifier
-        self.send(resp)
+        self.send(messages.create(
+            protobuf.KEYBOARD_MESSAGE, identifier=message.identifier))
 
     def handle_send_hid_event(self, message, inner):
         # These corresponds to the bytes mapping to pressed key (see
@@ -300,8 +317,8 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
                 'Unhandled button press: %s', message.inner().command)
 
     def handle_playback_queue_request(self, message, inner):
-        setstate = messages.create(protobuf.SET_STATE_MESSAGE)
-        setstate.identifier = message.identifier
+        setstate = messages.create(
+            protobuf.SET_STATE_MESSAGE, identifier=message.identifier)
         queue = setstate.inner().playbackQueue
         queue.location = 0
         item = queue.contentItems.add()
@@ -325,6 +342,13 @@ class AppleTVUseCases(AirPlayUseCases):
         metadata.artwork_mimetype = mimetype
         metadata.artwork_identifier = identifier
         self.device.update_state(PLAYER_IDENTIFIER)
+
+    def change_metadata(self, **kwargs):
+        """Change metadata for item via ContentItemUpdate."""
+        metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
+        for key, value in kwargs.items():
+            setattr(metadata, key, value)
+        self.device.item_update(metadata, PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
         """Call this method to put device in idle state."""
