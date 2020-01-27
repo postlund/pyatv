@@ -88,3 +88,13 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         await self.playing(title='dummy')
         self.assertEqual(self.atv.metadata.artwork_id, ARTWORK_ID)
+
+    @unittest_run_loop
+    async def test_item_updates(self):
+        self.usecase.example_video(identifier='id')
+        await self.playing(title='dummy')
+
+        # Trigger update of single item by chaging title
+        self.usecase.change_metadata(title='foobar')
+        playing = await self.playing(title='foobar')
+        self.assertEqual(playing.title, 'foobar')

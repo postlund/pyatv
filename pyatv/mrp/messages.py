@@ -42,11 +42,6 @@ def device_information(name, identifier):
     return message
 
 
-def set_ready_state():
-    """Create a new SET_READY_STATE_MESSAGE."""
-    return create(protobuf.ProtocolMessage.SET_READY_STATE_MESSAGE)
-
-
 def set_connection_state():
     """Create a new SET_CONNECTION_STATE."""
     message = create(protobuf.ProtocolMessage.SET_CONNECTION_STATE_MESSAGE)
@@ -93,40 +88,6 @@ def playback_queue_request(location, width=-1, height=400):
     request.length = 1
     request.artworkWidth = width
     request.artworkHeight = height
-    return message
-
-
-def wake_device():
-    """Create a new WAKE_DEVICE_MESSAGE."""
-    return create(protobuf.WAKE_DEVICE_MESSAGE)
-
-
-def register_hid_device(screen_width, screen_height,
-                        absolute=False, integrated_display=False):
-    """Create a new REGISTER_HID_DEVICE_MESSAGE."""
-    message = create(protobuf.REGISTER_HID_DEVICE_MESSAGE)
-    descriptor = message.inner().deviceDescriptor
-    descriptor.absolute = 1 if absolute else 0
-    descriptor.integratedDisplay = 1 if integrated_display else 0
-    descriptor.screenSizeWidth = screen_width
-    descriptor.screenSizeHeight = screen_height
-    return message
-
-
-def send_packed_virtual_touch_event(xpos, ypos, phase, device_id, finger):
-    """Create a new WAKE_DEVICE_MESSAGE."""
-    message = create(protobuf.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE)
-    event = message.inner()
-
-    # The packed version of VirtualTouchEvent contains X, Y, phase, deviceID
-    # and finger stored as a byte array. Each value is written as 16bit little
-    # endian integers.
-    event.data = xpos.to_bytes(2, byteorder='little')
-    event.data += ypos.to_bytes(2, byteorder='little')
-    event.data += phase.to_bytes(2, byteorder='little')
-    event.data += device_id.to_bytes(2, byteorder='little')
-    event.data += finger.to_bytes(2, byteorder='little')
-
     return message
 
 

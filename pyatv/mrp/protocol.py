@@ -38,19 +38,15 @@ class MrpProtocol:
         self.service = service
         self._outstanding = {}
         self._listeners = {}
-        self._one_shots = {}
         self._initial_message_sent = False
 
-    def add_listener(self, listener, message_type, data=None, one_shot=False):
+    def add_listener(self, listener, message_type, data=None):
         """Add a listener that will receice incoming messages."""
-        lst = self._one_shots if one_shot else self._listeners
+        if message_type not in self._listeners:
+            self._listeners[message_type] = []
 
-        if message_type not in lst:
-            lst[message_type] = []
+        self._listeners[message_type].append(Listener(listener, data))
 
-        lst[message_type].append(Listener(listener, data))
-
-    # TODO: This method is too big for its own good. Must split and clean up.
     async def start(self, skip_initial_messages=False):
         """Connect to device and listen to incoming messages."""
         if self.connection.connected:
@@ -95,7 +91,6 @@ class MrpProtocol:
 
         self._initial_message_sent = False
         self._outstanding = {}
-        self._one_shots = {}
         self.connection.close()
 
     async def _connect_and_encrypt(self):
@@ -182,12 +177,3 @@ class MrpProtocol:
                           listener)
             asyncio.ensure_future(
                 listener.func(message, listener.data), loop=self.loop)
-
-        if message.type in self._one_shots:
-            for one_shot in self._one_shots.get(message.type, []):
-                _LOGGER.debug('One-shot with message type %d to %s',
-                              message.type, one_shot)
-                asyncio.ensure_future(
-                    one_shot.func(message, one_shot.data), loop=self.loop)
-
-            del self._one_shots[message.type]
