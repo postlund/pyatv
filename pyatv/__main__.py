@@ -370,7 +370,8 @@ async def cli_handler(loop):
         loglevel = logging.DEBUG
 
     logging.basicConfig(level=loglevel,
-                        format='%(levelname)s: %(message)s')
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        format='%(asctime)s %(levelname)s: %(message)s')
     logging.getLogger('requests').setLevel(logging.WARNING)
 
     cmds = retrieve_commands(GlobalCommands)
