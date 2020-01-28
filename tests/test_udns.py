@@ -15,7 +15,7 @@ TEST_SERVICES = {
     port=1234,
     properties={
       'Name': 'Kitchen',
-      'foo': 'bar',
+      'foo': '=bar',
     }),
 }
 
