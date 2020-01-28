@@ -6,8 +6,8 @@ import logging
 import datetime  # noqa
 from ipaddress import ip_address
 
-import netifaces
 from aiozeroconf import ServiceBrowser, Zeroconf
+import netifaces
 
 from pyatv import (conf, exceptions, net, udns)
 from pyatv.airplay import AirPlayAPI
