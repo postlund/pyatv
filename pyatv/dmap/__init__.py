@@ -374,9 +374,6 @@ class DmapPushUpdater(PushUpdater):
         # Delay before restarting after an error
         self._initial_delay = initial_delay
 
-        # This for some reason fails on travis but not in other places.
-        # Why is that (same python version)?
-        # pylint: disable=deprecated-method
         self._future = asyncio.ensure_future(self._poller(), loop=self._loop)
         return self._future
 
