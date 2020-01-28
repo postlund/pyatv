@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pyatv.mrp import protobuf
 
@@ -12,8 +12,8 @@ _LOGGER = logging.getLogger(__name__)
 
 def _cocoa_to_timestamp(time):
     delta = datetime(2001, 1, 1) - datetime(1970, 1, 1)
-    timestamp = datetime.fromtimestamp(time) + delta
-    return timestamp
+    time_seconds = (timedelta(seconds=time) + delta).total_seconds()
+    return datetime.fromtimestamp(time_seconds)
 
 
 class PlayerState:
