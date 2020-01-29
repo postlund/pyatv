@@ -30,9 +30,9 @@ class PlayerState:
     @property
     def playback_state(self):
         """Playback state of device."""
-        # If nothing is in the queue then we are idle
-        if self.metadata is None:
-            return None
+        if self.metadata and self.metadata.HasField('playbackRate'):
+            return 0 < self.metadata.playbackRate > 0
+
         return self._playback_state
 
     @property
@@ -79,7 +79,13 @@ class PlayerState:
         for updated_item in item_update.contentItems:
             for existing in self.items:
                 if updated_item.identifier == existing.identifier:
-                    existing.CopyFrom(updated_item)
+                    # TODO: Other parts of the ContentItem should be merged as
+                    # well, but those are not used right now so will do that
+                    # when needed.
+                    #
+                    # NB: MergeFrom will append repeated fields (which is
+                    # likely not what is expected)!
+                    existing.metadata.MergeFrom(updated_item.metadata)
 
 
 class PlayerStateManager:  # pylint: disable=too-few-public-methods

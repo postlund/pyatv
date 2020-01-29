@@ -3,7 +3,7 @@
 import unittest
 
 from pyatv import (convert, exceptions, interface)
-from pyatv.const import MediaType, DeviceState, RepeatState
+from pyatv.const import MediaType, DeviceState, RepeatState, ShuffleState
 
 
 class TestClass:
@@ -41,7 +41,8 @@ class PlayingDummy(interface.Playing):
     def __init__(self, media_type=MediaType.Video,
                  device_state=DeviceState.Playing, title=None,
                  artist=None, album=None, genre=None, total_time=None,
-                 position=None, shuffle=True, repeat=RepeatState.Track):
+                 position=None, shuffle=ShuffleState.Songs,
+                 repeat=RepeatState.Track):
         self._media_type = media_type
         self._device_state = device_state
         self._title = title
@@ -173,7 +174,7 @@ class InterfaceTest(unittest.TestCase):
 
     def test_playing_shuffle_and_repeat(self):
         out = str(PlayingDummy())
-        self.assertIn('Shuffle: True', out)
+        self.assertIn('Shuffle: Songs', out)
         self.assertIn('Repeat: Track', out)
 
     # OTHER

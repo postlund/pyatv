@@ -243,7 +243,8 @@ class Playing:
                 convert.repeat_str(self.repeat)))
 
         if self.shuffle is not None:
-            output.append('     Shuffle: {0}'.format(self.shuffle))
+            output.append('     Shuffle: {0}'.format(
+                convert.shuffle_str(self.shuffle)))
 
         return '\n'.join(output)
 
