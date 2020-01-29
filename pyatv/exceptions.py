@@ -9,6 +9,10 @@ class UnsupportedProtocolError(Exception):
     """Thrown when an unsupported protocol was requested."""
 
 
+class ConnectionFailedError(Exception):
+    """Thrown when connection fails, e.g. refused or timed out."""
+
+
 class PairingError(Exception):
     """Thrown when pairing fails."""
 

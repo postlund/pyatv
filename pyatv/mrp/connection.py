@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 from pyatv.mrp import chacha20
 from pyatv.mrp import protobuf
 from pyatv.mrp.variant import (read_variant, write_variant)

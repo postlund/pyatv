@@ -330,13 +330,20 @@ class MrpPushUpdater(PushUpdater):
         self.psm = psm
         self.listener = None
 
+    @property
+    def active(self):
+        """Return if push updater has been started."""
+        return self.psm.listener == self
+
     def start(self, initial_delay=0):
         """Wait for push updates from device.
 
         Will throw NoAsyncListenerError if no listener has been set.
         """
         if self.listener is None:
-            raise exceptions.NoAsyncListenerError
+            raise exceptions.NoAsyncListenerError()
+        if self.active:
+            return
 
         self.psm.listener = self
 

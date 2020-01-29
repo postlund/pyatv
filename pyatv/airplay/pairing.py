@@ -9,6 +9,7 @@ from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.airplay.srp import (SRPAuthHandler, new_credentials)
 from pyatv.airplay.auth import DeviceAuthenticator
+from pyatv.support import error_handler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,29 +50,23 @@ class AirPlayPairingHandler(PairingHandler):
         """If a successful pairing has been performed."""
         return self.pairing_complete
 
-    async def begin(self):
+    def begin(self):
         """Start pairing process."""
         _LOGGER.debug('Starting AirPlay pairing with credentials %s',
                       self.auth_data.credentials)
         self.pairing_complete = False
-
-        try:
-            return await self.auther.start_authentication()
-        except OSError:
-            raise  # Connection problems, e.g. timeout
-        except Exception as ex:
-            raise exceptions.PairingError(str(ex)) from ex
+        return error_handler(self.auther.start_authentication,
+                             exceptions.PairingError)
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
             raise exceptions.PairingError('no pin given')
 
-        try:
-            await self.auther.finish_authentication(
-                self.auth_data.identifier, self.pin_code)
-        except Exception as ex:
-            raise exceptions.PairingError(str(ex)) from ex
+        await error_handler(self.auther.finish_authentication,
+                            exceptions.PairingError,
+                            self.auth_data.identifier,
+                            self.pin_code)
 
         self.service.credentials = self.auth_data.credentials
         self.pairing_complete = True

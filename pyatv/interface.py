@@ -65,12 +65,12 @@ class PairingHandler:
     @abstractmethod
     def pin(self, pin):
         """Pin code used for pairing."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def device_provides_pin(self):
         """Return True if remote device presents PIN code, else False."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def has_paired(self):
@@ -78,17 +78,17 @@ class PairingHandler:
 
         The value will be reset when stop() is called.
         """
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     async def begin(self):
         """Start pairing process."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     async def finish(self):
         """Stop pairing process."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class RemoteControl:  # pylint: disable=too-many-public-methods
@@ -100,107 +100,107 @@ class RemoteControl:  # pylint: disable=too-many-public-methods
     @abstractmethod
     def up(self):
         """Press key up."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def down(self):
         """Press key down."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def left(self):
         """Press key left."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def right(self):
         """Press key right."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def play(self):
         """Press key play."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def pause(self):
         """Press key play."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def stop(self):
         """Press key stop."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def next(self):
         """Press key next."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def previous(self):
         """Press key previous."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def select(self):
         """Press key select."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def menu(self):
         """Press key menu."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def volume_up(self):
         """Press key volume up."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def volume_down(self):
         """Press key volume down."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def home(self):
         """Press key home."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def home_hold(self):
         """Hold key home."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def top_menu(self):
         """Go to main menu (long press menu)."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def suspend(self):
         """Suspend the device."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def wakeup(self):
         """Wake up the device."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def set_position(self, pos):
         """Seek in the current playing media."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def set_shuffle(self, shuffle_state):
         """Change shuffle mode to on or off."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def set_repeat(self, repeat_state):
         """Change repeat state."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class Playing:
@@ -261,52 +261,52 @@ class Playing:
     @abstractproperty
     def media_type(self):
         """Type of media is currently playing, e.g. video, music."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def device_state(self):
         """Device state, e.g. playing or paused."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def title(self):
         """Title of the current media, e.g. movie or song name."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def artist(self):
         """Artist of the currently playing song."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def album(self):
         """Album of the currently playing song."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def genre(self):
         """Genre of the currently playing song."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def total_time(self):
         """Total play time in seconds."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def position(self):
         """Position in the playing media (seconds)."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def shuffle(self):
         """If shuffle is enabled or not."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def repeat(self):
         """Repeat mode."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class Metadata:
@@ -326,17 +326,17 @@ class Metadata:
     @abstractmethod
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def playing(self):
         """Return what is currently playing."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class PushUpdater:
@@ -347,6 +347,11 @@ class PushUpdater:
     def __init__(self):
         """Initialize a new PushUpdater."""
         self.__listener = None
+
+    @abstractproperty
+    def active(self):
+        """Return if push updater has been started."""
+        raise exceptions.NotSupportedError()
 
     @property
     def listener(self):
@@ -372,12 +377,12 @@ class PushUpdater:
 
         If an error occurs, start must be called again.
         """
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def stop(self):
         """No longer forward updates to listener."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class AirPlay:  # pylint: disable=too-few-public-methods
@@ -388,7 +393,7 @@ class AirPlay:  # pylint: disable=too-few-public-methods
     @abstractmethod
     def play_url(self, url, **kwargs):
         """Play media from an URL on the device."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class DeviceListener:
@@ -433,34 +438,34 @@ class AppleTV:
 
         No need to call it yourself, it's done automatically.
         """
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractmethod
     async def close(self):
         """Close connection and release allocated resources."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def service(self):
         """Return service used to connect to the Apple TV."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def remote_control(self):
         """Return API for controlling the Apple TV."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def metadata(self):
         """Return API for retrieving metadata from the Apple TV."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def push_updater(self):
         """Return API for handling push update from the Apple TV."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     @abstractproperty
     def airplay(self):
         """Return API for working with AirPlay."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()

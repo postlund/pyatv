@@ -3,7 +3,7 @@
 import logging
 
 from pyatv import exceptions
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 from pyatv.mrp import (tlv8, messages)
 from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
 
@@ -32,6 +32,8 @@ class MrpPairingProcedure:
     async def start_pairing(self):
         """Start pairing procedure."""
         self.srp.initialize()
+
+        await self.protocol.start(skip_initial_messages=True)
 
         msg = messages.crypto_pairing(
             {tlv8.TLV_METHOD: b'\x00',

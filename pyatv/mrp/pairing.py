@@ -9,6 +9,7 @@ from pyatv.mrp.auth import MrpPairingProcedure
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.connection import MrpConnection
+from pyatv.support import error_handler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,24 +39,20 @@ class MrpPairingHandler(PairingHandler):
         """If a successful pairing has been performed."""
         return self.service.credentials is not None
 
-    async def begin(self):
+    def begin(self):
         """Start pairing process."""
-        try:
-            await self.protocol.start(skip_initial_messages=True)
-            await self.pairing_procedure.start_pairing()
-        except Exception as ex:
-            raise exceptions.PairingError(str(ex)) from ex
+        return error_handler(self.pairing_procedure.start_pairing,
+                             exceptions.PairingError)
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
             raise exceptions.PairingError('no pin given')
 
-        try:
-            self.service.credentials = str(
-                await self.pairing_procedure.finish_pairing(self.pin_code))
-        except Exception as ex:
-            raise exceptions.PairingError(str(ex)) from ex
+        self.service.credentials = str(await error_handler(
+            self.pairing_procedure.finish_pairing,
+            exceptions.PairingError,
+            self.pin_code))
 
     @property
     def device_provides_pin(self):

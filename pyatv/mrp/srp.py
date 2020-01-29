@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
 
 from pyatv import exceptions
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 from pyatv.mrp import (tlv8, chacha20)
 
 _LOGGER = logging.getLogger(__name__)

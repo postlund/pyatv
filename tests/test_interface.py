@@ -108,15 +108,15 @@ class MetadataDummy(interface.Metadata):
 
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def playing(self):
         """Return what is currently playing."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
 
 class InterfaceTest(unittest.TestCase):

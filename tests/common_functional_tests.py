@@ -1,11 +1,12 @@
 """Common functional tests for all protocols."""
 
 import logging
+import asyncio
 
 from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
 
 import pyatv
-from pyatv import exceptions
+from pyatv import exceptions, interface
 from pyatv.const import (
     Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 from pyatv.conf import AppleTV, AirPlayService
@@ -31,6 +32,19 @@ async def poll(fn, **kwargs):
     result = await fn()
     conds = [getattr(result, f) == val for f, val in kwargs.items()]
     return all(conds), result
+
+
+class DummyDeviceListener(interface.DeviceListener):
+
+    def __init__(self):
+        self.closed_sem = asyncio.Semaphore(0)
+        self.lost_sem = asyncio.Semaphore(0)
+
+    def connection_lost(self, exception):
+        self.lost_sem.release()
+
+    def connection_closed(self):
+        self.closed_sem.release()
 
 
 class CommonFunctionalTests(AioHTTPTestCase):
@@ -163,6 +177,14 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     def test_metadata_device_id(self):
         self.assertIn(self.atv.metadata.device_id, self.conf.all_identifiers)
+
+    @unittest_run_loop
+    async def test_close_connection(self):
+        self.atv.listener = DummyDeviceListener()
+        await self.atv.close()
+
+        await asyncio.wait_for(
+            self.atv.listener.closed_sem.acquire(), timeout=3.0)
 
     @unittest_run_loop
     async def test_metadata_video_paused(self):
@@ -308,6 +330,32 @@ class CommonFunctionalTests(AioHTTPTestCase):
         # Check that we got the right one
         await until(lambda: listener.playing is not None)
         self.assertEqual(listener.playing.title, 'video2')
+
+    @unittest_run_loop
+    async def test_push_updater_active(self):
+
+        class DummyPushListener:
+
+            @staticmethod
+            def playstatus_update(updater, playstatus):
+                pass
+
+            @staticmethod
+            def playstatus_error(updater, exception):
+                pass
+
+        self.usecase.video_playing(paused=False, title='video1',
+                                   total_time=40, position=10,
+                                   revision=0)
+
+        self.assertFalse(self.atv.push_updater.active)
+
+        self.atv.push_updater.listener = DummyPushListener()
+        self.atv.push_updater.start()
+        self.assertTrue(self.atv.push_updater.active)
+
+        self.atv.push_updater.stop()
+        self.assertFalse(self.atv.push_updater.active)
 
     @unittest_run_loop
     async def test_metadata_artwork_none_if_not_available(self):
