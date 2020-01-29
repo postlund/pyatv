@@ -11,7 +11,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import (Cipher, algorithms, modes)
 from srptools import (SRPContext, SRPClientSession, constants)
 
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 from pyatv.exceptions import (NoCredentialsError, AuthenticationError)
 
 _LOGGER = logging.getLogger(__name__)

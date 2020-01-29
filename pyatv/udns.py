@@ -4,7 +4,7 @@ import struct
 import logging
 from collections import namedtuple
 
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 

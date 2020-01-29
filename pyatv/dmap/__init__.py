@@ -173,31 +173,31 @@ class DmapRemoteControl(RemoteControl):
     def volume_up(self):
         """Press key volume up."""
         # DMAP support unknown
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def volume_down(self):
         """Press key volume down."""
         # DMAP support unknown
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def home(self):
         """Press key home."""
         # DMAP support unknown
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def home_hold(self):
         """Hold key home."""
         # DMAP support unknown
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def suspend(self):
         """Suspend the device."""
         # Not supported by DMAP
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def wakeup(self):
         """Wake up the device."""
-        raise exceptions.NotSupportedError
+        raise exceptions.NotSupportedError()
 
     def set_position(self, pos):
         """Seek in the current playing media."""
@@ -357,15 +357,20 @@ class DmapPushUpdater(PushUpdater):
         self._future = None
         self._initial_delay = 0
 
+    @property
+    def active(self):
+        """Return if push updater has been started."""
+        return self._future is not None
+
     def start(self, initial_delay=0):
         """Wait for push updates from device.
 
         Will throw NoAsyncListenerError if no listener has been set.
         """
         if self.listener is None:
-            raise exceptions.NoAsyncListenerError
-        if self._future is not None:
-            return None
+            raise exceptions.NoAsyncListenerError()
+        if self.active:
+            return
 
         # Always start with 0 to trigger an immediate response for the
         # first request
@@ -375,17 +380,12 @@ class DmapPushUpdater(PushUpdater):
         self._initial_delay = initial_delay
 
         self._future = asyncio.ensure_future(self._poller(), loop=self._loop)
-        return self._future
 
     def stop(self):
         """No longer forward updates to listener."""
         if self._future is not None:
             self._future.cancel()
             self._future = None
-
-            # Let listener know that we disconnected
-            if self._listener and self._listener.listener:
-                self._listener.listener.connection_closed()
 
     async def _poller(self):
         first_call = True
@@ -458,6 +458,8 @@ class DmapAppleTV(AppleTV):
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             await self._session.close()
+        if self.listener:
+            self.listener.connection_closed()
 
     @property
     def service(self):

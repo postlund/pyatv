@@ -16,6 +16,8 @@ TLV_ERROR = '7'
 TLV_BACK_OFF = '8'
 TLV_SIGNATURE = '10'
 
+ERROR_AUTHENTICATION = '2'
+
 
 def read_tlv(data):
     """Parse TLV8 bytes into a dict.

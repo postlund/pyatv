@@ -55,7 +55,6 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         await self.handle.begin()
         self.handle.pin(PIN_CODE + 1)
 
-        # TODO: Timeout should be immediate here
         with self.assertRaises(exceptions.PairingError):
             await self.handle.finish()
 

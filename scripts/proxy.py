@@ -57,7 +57,7 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import (chacha20, protobuf, variant)
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 
 # SRP server auth lives with the test code for now and we need to add that path
 # so python finds it. This should be removed once fake devices are part of the

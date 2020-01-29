@@ -11,7 +11,7 @@ from ed25519.keys import SigningKey
 
 from pyatv.mrp import (chacha20, messages, protobuf, tlv8)
 from pyatv.mrp.srp import hkdf_expand
-from pyatv.log import log_binary
+from pyatv.support import log_binary
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -192,13 +192,19 @@ class MrpServerAuth:
         self.session.process(pubkey, self.salt)
 
         proof = binascii.unhexlify(self.session.key_proof_hash)
-        assert self.session.verify_proof(
-            binascii.hexlify(pairing_data[tlv8.TLV_PROOF]))
+        if self.session.verify_proof(
+                binascii.hexlify(pairing_data[tlv8.TLV_PROOF])):
 
-        msg = messages.crypto_pairing({
-            tlv8.TLV_PROOF: proof,
-            tlv8.TLV_SEQ_NO: b'\x04'
-        })
+            msg = messages.crypto_pairing({
+                tlv8.TLV_PROOF: proof,
+                tlv8.TLV_SEQ_NO: b'\x04'
+            })
+        else:
+            msg = messages.crypto_pairing({
+                tlv8.TLV_ERROR: tlv8.ERROR_AUTHENTICATION.encode(),
+                tlv8.TLV_SEQ_NO: b'\x04'
+            })
+
         self.delegate.send(msg)
 
     def _seqno5_pairing(self, _):

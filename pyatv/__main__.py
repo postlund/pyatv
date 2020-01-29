@@ -224,7 +224,7 @@ class DeviceCommands:
         artwork = await self.atv.metadata.artwork()
         if artwork is not None:
             with open('artwork.png', 'wb') as file:
-                file.write(artwork)
+                file.write(artwork.bytes)
         else:
             print('No artwork is currently available.')
             return 1
