@@ -2,7 +2,7 @@
 
 from pyatv import exceptions
 from pyatv.const import (
-    Protocol, MediaType, DeviceState, RepeatState)
+    Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 
 
 def media_kind(kind):
@@ -78,6 +78,17 @@ def repeat_str(state):
         return 'Track'
     if state == RepeatState.All:
         return 'All'
+    return 'Unsupported'
+
+
+def shuffle_str(state):
+    """Convert internal API shuffle state to string."""
+    if state == ShuffleState.Off:
+        return 'Off'
+    if state == ShuffleState.Albums:
+        return 'Albums'
+    if state == ShuffleState.Songs:
+        return 'Songs'
     return 'Unsupported'
 
 

@@ -7,7 +7,7 @@ from pyatv.const import DeviceState, ShuffleState
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
-from tests.utils import until
+from tests.utils import until, faketime
 from tests.mrp.fake_mrp_atv import (
     FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -91,13 +91,21 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_item_updates(self):
-        self.usecase.example_video(identifier='id')
-        await self.playing(title='dummy')
+        self.usecase.video_playing(
+            False, 'dummy', 100, 1, identifier='id', artist='some artist')
 
-        # Trigger update of single item by chaging title
-        self.usecase.change_metadata(title='foobar')
-        playing = await self.playing(title='foobar')
-        self.assertEqual(playing.title, 'foobar')
+        with faketime('pyatv', 0):
+            await self.playing(title='dummy')
+
+            # Trigger update of single item by chaging title
+            self.usecase.change_metadata(title='foobar', identifier='id')
+            playing = await self.playing(title='foobar')
+
+            # Make sure other metadata is untouched
+            self.assertEqual(playing.title, 'foobar')
+            self.assertEqual(playing.artist, 'some artist')
+            self.assertEqual(playing.total_time, 100)
+            self.assertEqual(playing.position, 1)
 
     @unittest_run_loop
     async def test_item_id_hash(self):
@@ -113,3 +121,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         nothing_playing = await self.playing(
             device_state=DeviceState.Idle)
         self.assertEqual(nothing_playing.hash, initial_hash)
+
+    @unittest_run_loop
+    async def test_metadata_playback_rate_device_state(self):
+        self.usecase.example_video()
+
+        playing = await self.playing(title='dummy')
+        self.assertEqual(playing.device_state, DeviceState.Paused)
+
+        self.usecase.change_metadata(title='dummy2', playback_rate=1.0)
+        playing = await self.playing(title='dummy2')
+        self.assertEqual(playing.device_state, DeviceState.Playing)

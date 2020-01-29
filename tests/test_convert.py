@@ -4,7 +4,7 @@ import unittest
 
 from pyatv import (convert, exceptions)
 from pyatv.const import (
-    Protocol, MediaType, DeviceState, RepeatState)
+    Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 
 # These are extracted from iTunes, see for instance:
 # http://www.blooming.no/wp-content/uploads/2013/03/ITLibMediaItem.h
@@ -183,6 +183,19 @@ class ConvertTest(unittest.TestCase):
 
     def test_unknown_repeat_to_str(self):
         self.assertEqual('Unsupported', convert.repeat_str(1234))
+
+    # SHUFFLE TESTS
+
+    def test_shuffle_str(self):
+        self.assertEqual('Off',
+                         convert.shuffle_str(ShuffleState.Off))
+        self.assertEqual('Albums',
+                         convert.shuffle_str(ShuffleState.Albums))
+        self.assertEqual('Songs',
+                         convert.shuffle_str(ShuffleState.Songs))
+
+    def test_unknown_shuffle_to_str(self):
+        self.assertEqual('Unsupported', convert.shuffle_str(1234))
 
     # PROTOCOL TESTS
 

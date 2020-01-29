@@ -86,6 +86,8 @@ def _fill_item(item, metadata):
         md.duration = metadata.total_time
     if metadata.position:
         md.elapsedTime = metadata.position
+    if metadata.playback_rate:
+        md.playbackRate = metadata.playback_rate
     if metadata.media_type:
         md.mediaType = metadata.media_type
     if metadata.artwork_mimetype:
@@ -138,6 +140,7 @@ class PlayingMetadata:
         self.repeat = kwargs.get('repeat')
         self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get('shuffle'))
         self.media_type = kwargs.get('media_type')
+        self.playback_rate = kwargs.get('playback_rate')
         self.artwork = None
         self.artwork_mimetype = None
 
@@ -347,9 +350,14 @@ class AppleTVUseCases(AirPlayUseCases):
     def change_metadata(self, **kwargs):
         """Change metadata for item via ContentItemUpdate."""
         metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
+
+        # Update saved metadata
         for key, value in kwargs.items():
             setattr(metadata, key, value)
-        self.device.item_update(metadata, PLAYER_IDENTIFIER)
+
+        # Create a temporary metadata instance with requested parameters
+        change = PlayingMetadata(**kwargs)
+        self.device.item_update(change, PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
         """Call this method to put device in idle state."""

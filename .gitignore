@@ -96,3 +96,4 @@ artwork.png
 .Python
 .pytest_cache
 .mypy_cache
+coverage.xml

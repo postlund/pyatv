@@ -314,7 +314,13 @@ class MrpMetadata(Metadata):
     @property
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
-        return self.psm.playing.metadata_field('artworkIdentifier')
+        metadata = self.psm.playing.metadata
+        if metadata and metadata.artworkAvailable:
+            if metadata.HasField('artworkIdentifier'):
+                return metadata.artworkIdentifier
+            if metadata.HasField('contentIdentifier'):
+                return metadata.contentIdentifier
+        return None
 
     async def playing(self):
         """Return what is currently playing."""
