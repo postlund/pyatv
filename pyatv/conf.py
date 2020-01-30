@@ -49,17 +49,12 @@ class AppleTV:
         If a service with the specified protocol is not available, None is
         returned.
         """
-        # Special case for AirPlay for now
-        if protocol == Protocol.AirPlay:
-            if self._services.get(protocol, None) is None:
-                self._services[protocol] = AirPlayService(None, 7000)
-
         return self._services.get(protocol, None)
 
     @property
     def services(self):
         """Return all supported services."""
-        services = set(list(self._services.keys()) + [Protocol.AirPlay])
+        services = set(list(self._services.keys()))
         return [self.get_service(x) for x in services]
 
     def main_service(self, protocol=None):
