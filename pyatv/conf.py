@@ -16,12 +16,15 @@ class AppleTV:
         self.address = address
         self.name = name
         self._services = {}
-        self._identifier = None
 
     @property
     def identifier(self):
         """Return one of the identifiers associated with this device."""
-        return self._identifier
+        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
+            service = self.get_service(prot)
+            if service:
+                return service.identifier
+        return None
 
     @property
     def all_identifiers(self):
@@ -39,9 +42,6 @@ class AppleTV:
             existing.merge(service)
         else:
             self._services[service.protocol] = service
-
-        if self._identifier is None:
-            self._identifier = service.identifier
 
     def get_service(self, protocol):
         """Look up a service based on protocol.
