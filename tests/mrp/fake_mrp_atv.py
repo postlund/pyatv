@@ -200,14 +200,15 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         return self.states[identifier]
 
     def set_active_player(self, identifier):
-        if identifier not in self.states:
+        if identifier is not None and identifier not in self.states:
             raise Exception('invalid player: %s', identifier)
 
         self.active_player = identifier
         now_playing = messages.create(
             protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
         client = now_playing.inner().client
-        client.bundleIdentifier = identifier
+        if identifier:
+            client.bundleIdentifier = identifier
         self.send(now_playing)
 
     def item_update(self, metadata, identifier):
@@ -352,7 +353,7 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def nothing_playing(self):
         """Call this method to put device in idle state."""
-        pass
+        self.device.set_active_player(None)
 
     def example_video(self, **kwargs):
         """Play some example video."""

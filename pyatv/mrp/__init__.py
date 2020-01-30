@@ -267,6 +267,11 @@ class MrpPlaying(Playing):
 
         return RepeatState.All
 
+    @property
+    def hash(self):
+        """Create a unique hash for what is currently playing."""
+        return self._state.item_identifier or super().hash
+
 
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
@@ -309,10 +314,7 @@ class MrpMetadata(Metadata):
     @property
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
-        metadata = self.psm.playing.metadata
-        if metadata and metadata.artworkAvailable:
-            return metadata.artworkIdentifier
-        return None
+        return self.psm.playing.metadata_field('artworkIdentifier')
 
     async def playing(self):
         """Return what is currently playing."""

@@ -3,7 +3,7 @@
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv.const import ShuffleState
+from pyatv.const import DeviceState, ShuffleState
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
@@ -98,3 +98,18 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title='foobar')
         playing = await self.playing(title='foobar')
         self.assertEqual(playing.title, 'foobar')
+
+    @unittest_run_loop
+    async def test_item_id_hash(self):
+        initial_hash = (await self.atv.metadata.playing()).hash
+
+        # Verify thar content identifier is used as hash
+        self.usecase.example_video(identifier='some_id')
+        playing = await self.playing(title='dummy')
+        self.assertEqual(playing.hash, 'some_id')
+
+        # Ensure that we fall back to initial hash if nothing is playing
+        self.usecase.nothing_playing()
+        nothing_playing = await self.playing(
+            device_state=DeviceState.Idle)
+        self.assertEqual(nothing_playing.hash, initial_hash)
