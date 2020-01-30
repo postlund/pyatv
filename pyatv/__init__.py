@@ -10,7 +10,7 @@ from aiozeroconf import ServiceBrowser, Zeroconf
 import netifaces
 
 from pyatv import (conf, exceptions, net, udns)
-from pyatv.airplay import AirPlayAPI
+from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
@@ -242,8 +242,8 @@ async def connect(config, loop, protocol=None, session=None):
     if session is None:
         session = await net.create_session(loop=loop)
 
-    # AirPlay service is the same for both DMAP and MRP
-    airplay = AirPlayAPI(config, loop)
+    # AirPlay stream API is the same for both DMAP and MRP
+    airplay = AirPlayStreamAPI(config, loop)
 
     atv = implementation(loop, session, config, airplay)
     await atv.connect()

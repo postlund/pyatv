@@ -482,6 +482,6 @@ class DmapAppleTV(AppleTV):
         return self._dmap_push_updater
 
     @property
-    def airplay(self):
-        """Return API for working with AirPlay."""
+    def stream(self):
+        """Return API for streaming media."""
         return self._airplay

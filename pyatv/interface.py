@@ -386,8 +386,8 @@ class PushUpdater:
         raise exceptions.NotSupportedError()
 
 
-class AirPlay:  # pylint: disable=too-few-public-methods
-    """Base class for AirPlay functionality."""
+class Stream:  # pylint: disable=too-few-public-methods
+    """Base class for stream functionality."""
 
     __metaclass__ = ABCMeta
 
@@ -467,6 +467,6 @@ class AppleTV:
         raise exceptions.NotSupportedError()
 
     @abstractproperty
-    def airplay(self):
-        """Return API for working with AirPlay."""
+    def stream(self):
+        """Return API for streaming media."""
         raise exceptions.NotSupportedError()
