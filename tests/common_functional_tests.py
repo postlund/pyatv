@@ -20,7 +20,7 @@ ARTWORK_BYTES = b'1234'
 ARTWORK_BYTES2 = b'4321'
 ARTWORK_MIMETYPE = 'image/png'
 ARTWORK_ID = 'artwork_id1'
-AIRPLAY_STREAM = 'http://stream'
+EXAMPLE_STREAM = 'http://stream'
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
     'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
@@ -89,10 +89,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        await self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.server.port)
+        await self.atv.stream.play_url(
+            EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+        self.assertEqual(self.fake_atv.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
@@ -100,8 +100,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_require_authentication()
 
         with self.assertRaises(exceptions.AuthenticationError):
-            await self.atv.airplay.play_url(
-                AIRPLAY_STREAM, port=self.server.port)
+            await self.atv.stream.play_url(
+                EXAMPLE_STREAM, port=self.server.port)
 
     @unittest_run_loop
     async def test_play_url_authenticated(self):
@@ -110,10 +110,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.airplay_playback_playing()
         self.usecase.airplay_playback_idle()
 
-        await self.atv.airplay.play_url(
-            AIRPLAY_STREAM, port=self.server.port)
+        await self.atv.stream.play_url(
+            EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, AIRPLAY_STREAM)
+        self.assertEqual(self.fake_atv.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_button_up(self):

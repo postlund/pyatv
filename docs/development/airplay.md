@@ -12,6 +12,9 @@ very limited. Only two features are supported:
 - Device authentication ("pairing")
 - Playing media via URL
 
+In the external interface, AirPlay support is implemented via the `interface.Stream`
+API.
+
 Additional features will be added as needed.
 
 ## Device Authentication
@@ -55,7 +58,7 @@ Playing a URL is as simple as passing the URL to `play_url`:
 
 ```python
 url = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-await atv.airplay.play_url(url)
+await atv.stream.play_url(url)
 ```
 
 If the device requires device authentication, credentials must be present for

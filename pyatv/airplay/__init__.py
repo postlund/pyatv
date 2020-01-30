@@ -5,7 +5,7 @@ import binascii
 
 from pyatv import net
 from pyatv.const import Protocol
-from pyatv.interface import AirPlay
+from pyatv.interface import Stream
 
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import SRPAuthHandler
@@ -14,11 +14,11 @@ from pyatv.airplay.auth import AuthenticationVerifier
 _LOGGER = logging.getLogger(__name__)
 
 
-class AirPlayAPI(AirPlay):  # pylint: disable=too-few-public-methods
-    """Implementation of API for AirPlay support."""
+class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
+    """Implementation of stream API with AirPlay."""
 
     def __init__(self, config, loop):
-        """Initialize a new AirPlayInternal instance."""
+        """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
         self.loop = loop
         self.service = self.config.get_service(Protocol.AirPlay)

@@ -430,6 +430,6 @@ class MrpAppleTV(AppleTV):
         return self._mrp_push_updater
 
     @property
-    def airplay(self):
-        """Return API for working with AirPlay."""
+    def stream(self):
+        """Return API for streaming media."""
         return self._airplay
