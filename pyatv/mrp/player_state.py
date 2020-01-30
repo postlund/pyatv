@@ -42,6 +42,13 @@ class PlayerState:
             return self.items[self.location].metadata
         return None
 
+    @property
+    def item_identifier(self):
+        """Return identifier of current item in queue."""
+        if len(self.items) >= (self.location + 1):
+            return self.items[self.location].identifier
+        return None
+
     def metadata_field(self, field):
         """Return a specific metadata field or None if missing."""
         metadata = self.metadata
