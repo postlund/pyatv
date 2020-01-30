@@ -40,27 +40,21 @@ class ConfTest(unittest.TestCase):
     def test_add_services_and_get(self):
         self.config.add_service(self.dmap_service)
         self.config.add_service(self.mrp_service)
+        self.config.add_service(self.airplay_service)
 
         services = self.config.services
         self.assertEqual(len(services), 3)
 
         self.assertIn(self.dmap_service, services)
         self.assertIn(self.mrp_service, services)
+        self.assertIn(self.airplay_service, services)
 
         self.assertEqual(
             self.config.get_service(Protocol.DMAP), self.dmap_service)
         self.assertEqual(
             self.config.get_service(Protocol.MRP), self.mrp_service)
-        self.assertIsNotNone(self.config.get_service(Protocol.AirPlay))
-
-    def test_services(self):
-        self.config.add_service(self.dmap_service)
-        self.config.add_service(self.mrp_service)
-
-        services = self.config.services
-        self.assertEqual(len(services), 3)
-        self.assertIn(self.dmap_service, services)
-        self.assertIn(self.mrp_service, services)
+        self.assertEqual(
+            self.config.get_service(Protocol.AirPlay), self.airplay_service)
 
     def test_identifier_order(self):
         self.assertIsNone(self.config.identifier)
@@ -73,11 +67,6 @@ class ConfTest(unittest.TestCase):
 
         self.config.add_service(self.airplay_service)
         self.assertEqual(self.config.identifier, IDENTIFIER_2)
-
-    def test_default_airplay_service(self):
-        airplay = self.config.get_service(Protocol.AirPlay)
-        self.assertEqual(airplay.protocol, Protocol.AirPlay)
-        self.assertEqual(airplay.port, 7000)
 
     def test_add_airplay_service(self):
         self.config.add_service(self.airplay_service)

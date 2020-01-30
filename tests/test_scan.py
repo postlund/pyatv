@@ -95,8 +95,6 @@ class ScanZeroconfTest(asynctest.TestCase):
         atv = atvs[0]
         self.assertEqual(
             atv.get_service(Protocol.DMAP).port, 3689)
-        self.assertEqual(
-            atv.get_service(Protocol.AirPlay).port, 7000)
 
     async def test_scan_home_sharing_merge(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)

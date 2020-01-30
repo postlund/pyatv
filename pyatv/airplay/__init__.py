@@ -3,7 +3,7 @@
 import logging
 import binascii
 
-from pyatv import net
+from pyatv import net, exceptions
 from pyatv.const import Protocol
 from pyatv.interface import Stream
 
@@ -59,6 +59,10 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         The Apple TV requires the request to stay open during the entire
         play duration.
         """
+        if not self.service:
+            raise exceptions.NotSupportedError(
+                "AirPlay service is not available")
+
         # This creates a new ClientSession every time something is played.
         # It is not recommended by aiohttp, but it is the only way not having
         # a dangling connection laying around. So it will have to do for now.

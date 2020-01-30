@@ -156,3 +156,15 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.set_shuffle(ShuffleState.Albums)
         playing = await self.playing(shuffle=ShuffleState.Songs)
         self.assertEqual(playing.shuffle, ShuffleState.Songs)
+
+    @unittest_run_loop
+    async def test_play_url_no_service(self):
+        conf = AppleTV('127.0.0.1', 'Apple TV')
+        conf.add_service(self.dmap_service)
+
+        atv = await connect(conf, self.loop)
+
+        with self.assertRaises(exceptions.NotSupportedError):
+            await atv.stream.play_url('http://123')
+
+        await atv.close()
