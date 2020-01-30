@@ -14,23 +14,23 @@ from packaging.version import Version, InvalidVersion
 
 _LOGGER = logging.getLogger(__name__)
 
-CHANGES_TEMPLATE = """CHANGES
-=======
+CHANGES_TEMPLATE = """# CHANGES
 
-{version}
-{separators}
+## {version}
 
-Changes:
+*Changes:*
 
 REMOVE ME
 
-Notes:
+*Notes:*
 
 REMOVE ME
 
-All changes:
+*All changes:*
 
+```
 {all_changes}
+```
 
 """
 
@@ -113,11 +113,11 @@ def generate_outputs():
 
 
 def insert_changes(version):
-    """Insert changelog entry into CHANGES.rst."""
-    _LOGGER.info("Adding entry to CHANGES.rst")
-    changes = Path("CHANGES.rst").read_text().split("\n")
+    """Insert changelog entry into CHANGES.md."""
+    _LOGGER.info("Adding entry to CHANGES.md")
+    changes = Path("CHANGES.md").read_text().split("\n")
 
-    if changes[3].startswith(version):
+    if changes[2].startswith('## ' + version):
         _LOGGER.info("Changelog entry already present")
     else:
         version_str = "{0} ({1})".format(
@@ -130,24 +130,23 @@ def insert_changes(version):
         _LOGGER.info("Getting all changes since %s", commit_sha)
         all_changes = call("git log --oneline {0}..HEAD", commit_sha)
 
-        with open("CHANGES.rst", "w") as fw:
+        with open("CHANGES.md", "w") as fw:
             fw.write(CHANGES_TEMPLATE.format(
                 version=version_str,
-                separators="-" * len(version_str),
-                all_changes=all_changes))
-            fw.write("\n".join(changes[3:]))
+                all_changes=all_changes.rstrip()))
+            fw.write("\n".join(changes[2:]))
 
 
 def verify_changes(version):
-    """Verify that CHANGES.rst is valid."""
-    _LOGGER.info("Verifying CHANGES.rst")
+    """Verify that CHANGES.md is valid."""
+    _LOGGER.info("Verifying CHANGES.md")
 
-    changes = Path("CHANGES.rst").read_text()
+    changes = Path("CHANGES.md").read_text()
     if version not in changes:
-        bail("Version {0} not in CHANGES.rst", version)
+        bail("Version {0} not in CHANGES.md", version)
 
     if "REMOVE ME" in changes:
-        bail("CHANGES.rst contains bad content!")
+        bail("CHANGES.md contains bad content!")
 
 
 def verify_and_create_commit(version):
@@ -161,7 +160,7 @@ def verify_and_create_commit(version):
     _LOGGER.info("Trying to create release commit")
     call('git commit -m "Release {0}"', version)
 
-    expected_files = ["CHANGES.rst", "pyatv/const.py"]
+    expected_files = ["CHANGES.md", "pyatv/const.py"]
     content = call("git --no-pager show", show_output=False)
     for filename in expected_files:
         if "+++ b/{0}".format(filename) not in content:
@@ -194,10 +193,10 @@ def main():
                         help="skip updating version")
     parser.add_argument("--skip-changes", default=False,
                         action="store_true",
-                        help="skip updating CHANGES.rst")
+                        help="skip updating CHANGES.md")
     parser.add_argument("--skip-verify-changes", default=False,
                         action="store_true",
-                        help="skip verify content in CHANGES.rst")
+                        help="skip verify content in CHANGES.md")
     parser.add_argument("--skip-commit", default=False,
                         action="store_true",
                         help="skip git commit")
@@ -237,7 +236,7 @@ def main():
         if not args.skip_changes:
             insert_changes(version)
         _LOGGER.info(
-            "Update CHANGES.rst and add files to include with git add")
+            "Update CHANGES.md and add files to include with git add")
     elif args.make_release:
         _LOGGER.info("Making release %s", version)
         if not args.skip_verify_changes:

@@ -1,7 +1,9 @@
-Contributors
-------------
+# Contributors
 
 Pierre Ståhl
+
 Pierrick Rouxel
+
 Rob Nee
+
 Robbie Trencheny

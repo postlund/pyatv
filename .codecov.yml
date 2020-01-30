@@ -20,7 +20,7 @@ flags:
     - "*.yml"
   changelog:
     - CHANGES/
-    - CHANGES.rst
+    - CHANGES.md
   docs:
     paths:
     - docs/

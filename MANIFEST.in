@@ -1,7 +1,7 @@
-include CHANGES.rst
+include CHANGES.md
 include README.md
-include LICENSE.rst
-include CONTRIBUTORS.txt
+include LICENSE.md
+include CONTRIBUTORS.md
 graft pyatv
 graft tests
 graft docs

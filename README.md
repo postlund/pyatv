@@ -6,6 +6,7 @@ A python client library for the Apple TV
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
 [![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is a python3 library for controlling and querying information from an Apple TV. It is built
 upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
