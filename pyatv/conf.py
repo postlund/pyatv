@@ -37,7 +37,7 @@ class AppleTV:
 
         If the service already exists, it will be merged.
         """
-        existing = self._services.get(service.protocol, None)
+        existing = self._services.get(service.protocol)
         if existing is not None:
             existing.merge(service)
         else:
@@ -49,12 +49,12 @@ class AppleTV:
         If a service with the specified protocol is not available, None is
         returned.
         """
-        return self._services.get(protocol, None)
+        return self._services.get(protocol)
 
     @property
     def services(self):
         """Return all supported services."""
-        services = set(list(self._services.keys()))
+        services = set(self._services.keys())
         return [self.get_service(x) for x in services]
 
     def main_service(self, protocol=None):
