@@ -1,5 +1,68 @@
 # CHANGES
 
+## 0.4.0a13 (2020-01-31)
+
+*Changes:*
+
+* Fixed bug where device state would be reported as "paused"
+  when playing (yielding incorrect position as side-effect). This
+  also fixes delta updates, where metadata would sometimes be
+  lost.
+* Fixed bug where a crash would occur if a device had a = (0x3D)
+  in its MAC-address
+* Added artwork_id to metadata that gives a unique id for artwork
+* Use cache for artwork that saves the latest four artworks
+* Identifiers in config is now prioritized in order
+  MRP, DMAP and AirPlay
+* AirPlay is not handled specially in config now. If no AirPlay
+  service is added, no service will be implicitly created.
+* Error handling (raised exceptions) are now more consistent
+  when pairing
+
+*Breaking changes*
+
+* AirPlay interface has been renamed to "stream", e.g. use
+  atv.stream.play_url instead of atv.airplay.play_url.
+
+*Notes:*
+
+* Running tests on Windows works again
+* This release contains a lot new test coverage and all "common"
+  functional tests have been ported to MRP
+* Last documentation have been migrated to markdown
+* Moved from travis to GitHub actions
+
+*All changes:*
+
+```
+635ec68 Change last files from rst to markdown
+cff609d Remove AirPlay as special case
+63f230a Change AirPlay interface to Stream interface
+d11fba1 Add priority to identifiers in config
+17c685d Improve device state and delta updates in MRP
+bcb69de Use content id as hash in MRP
+7443118 Bump mypy-protobuf from 1.16 to 1.17
+c1c9dac Bump pytest from 5.3.4 to 5.3.5
+9aff539 Fixes to push updates, error handling and more
+dec3cb3 Minor clean ups and additional coverage
+a383b66 Add timestamp to debug log in atvremote
+be01d8a Add codecov upload to test workflow
+713694a Remove travis configuration
+0d06c5a Fix tests on Windows
+a95a3dc Run tests with GitHub actions
+11b8155 Add simple LRU cache for artwork
+bdf76e0 Fix bug i TXT handling in UDNS
+61cd843 Add tests for MRP authentication
+830448f Extract SRP server code in proxy
+cb0018a Unicast scanning does not work between networks
+bdfcac0 Use pytest-xdist in tox
+6b50f2a Migrate last common functional tests
+1e67b95 Move more functional tests to common
+b3b9225 Bump pytest from 5.3.3 to 5.3.4
+d49837d Re-raise OSError during AirPlay pairing on errors
+6ed3dee Bump pytest from 5.3.2 to 5.3.3
+```
+
 ## 0.4.0a12 (2020-01-19)
 
 *Changes:*
