@@ -35,7 +35,7 @@ setup(
         'curve25519-donna>=1.3',
         'ed25519>=1.4',
         'netifaces>=0.10.0',
-        'protobuf>=3.4.0',
+        'protobuf>=3.8.0',
         'srptools>=0.2.0',
         'tlslite-ng>=0.7.0',
     ],

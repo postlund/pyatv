@@ -3,10 +3,10 @@
 import asyncio
 import logging
 
-from pyatv.support import log_binary
 from pyatv.mrp import chacha20
 from pyatv.mrp import protobuf
 from pyatv.mrp.variant import (read_variant, write_variant)
+from pyatv.support import log_binary, log_protobuf
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class MrpConnection(asyncio.Protocol):  # pylint: disable=too-many-instance-attr
 
         data = write_variant(len(serialized)) + serialized
         self._transport.write(data)
-        _LOGGER.debug('>> Send: Protobuf=%s', message)
+        log_protobuf(_LOGGER, '>> Send: Protobuf', message)
 
     def send_raw(self, data):
         """Send message to device."""
@@ -114,6 +114,7 @@ class MrpConnection(asyncio.Protocol):  # pylint: disable=too-many-instance-attr
 
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(data)
-        _LOGGER.debug('<< Receive: Protobuf=%s', parsed)
+        log_protobuf(_LOGGER, '<< Receive: Protobuf', parsed)
+
         if self.listener:
             self.listener.message_received(parsed, data)
