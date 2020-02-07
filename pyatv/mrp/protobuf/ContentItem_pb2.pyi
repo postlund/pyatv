@@ -31,17 +31,23 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class ContentItem(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     identifier = ... # type: typing___Text
-    artworkData = ... # type: bytes
+    artworkData = ... # type: builtin___bytes
     info = ... # type: typing___Text
     parentIdentifier = ... # type: typing___Text
     ancestorIdentifier = ... # type: typing___Text
     queueIdentifier = ... # type: typing___Text
     requestIdentifier = ... # type: typing___Text
-    artworkDataWidth = ... # type: int
-    artworkDataHeight = ... # type: int
+    artworkDataWidth = ... # type: builtin___int
+    artworkDataHeight = ... # type: builtin___int
 
     @property
     def metadata(self) -> pyatv___mrp___protobuf___ContentItemMetadata_pb2___ContentItemMetadata: ...
@@ -56,7 +62,7 @@ class ContentItem(google___protobuf___message___Message):
         *,
         identifier : typing___Optional[typing___Text] = None,
         metadata : typing___Optional[pyatv___mrp___protobuf___ContentItemMetadata_pb2___ContentItemMetadata] = None,
-        artworkData : typing___Optional[bytes] = None,
+        artworkData : typing___Optional[builtin___bytes] = None,
         info : typing___Optional[typing___Text] = None,
         availableLanguageOptions : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]] = None,
         currentLanguageOptions : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]] = None,
@@ -64,16 +70,16 @@ class ContentItem(google___protobuf___message___Message):
         ancestorIdentifier : typing___Optional[typing___Text] = None,
         queueIdentifier : typing___Optional[typing___Text] = None,
         requestIdentifier : typing___Optional[typing___Text] = None,
-        artworkDataWidth : typing___Optional[int] = None,
-        artworkDataHeight : typing___Optional[int] = None,
+        artworkDataWidth : typing___Optional[builtin___int] = None,
+        artworkDataHeight : typing___Optional[builtin___int] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> ContentItem: ...
+    def FromString(cls, s: builtin___bytes) -> ContentItem: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",u"artworkData",u"artworkDataHeight",u"artworkDataWidth",u"identifier",u"info",u"metadata",u"parentIdentifier",u"queueIdentifier",u"requestIdentifier"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",u"artworkData",u"artworkDataHeight",u"artworkDataWidth",u"identifier",u"info",u"metadata",u"parentIdentifier",u"queueIdentifier",u"requestIdentifier"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",u"artworkData",u"artworkDataHeight",u"artworkDataWidth",u"availableLanguageOptions",u"currentLanguageOptions",u"identifier",u"info",u"metadata",u"parentIdentifier",u"queueIdentifier",u"requestIdentifier"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",b"ancestorIdentifier",u"artworkData",b"artworkData",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"identifier",b"identifier",u"info",b"info",u"metadata",b"metadata",u"parentIdentifier",b"parentIdentifier",u"queueIdentifier",b"queueIdentifier",u"requestIdentifier",b"requestIdentifier"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",b"ancestorIdentifier",u"artworkData",b"artworkData",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"identifier",b"identifier",u"info",b"info",u"metadata",b"metadata",u"parentIdentifier",b"parentIdentifier",u"queueIdentifier",b"queueIdentifier",u"requestIdentifier",b"requestIdentifier"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"ancestorIdentifier",b"ancestorIdentifier",u"artworkData",b"artworkData",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"availableLanguageOptions",b"availableLanguageOptions",u"currentLanguageOptions",b"currentLanguageOptions",u"identifier",b"identifier",u"info",b"info",u"metadata",b"metadata",u"parentIdentifier",b"parentIdentifier",u"queueIdentifier",b"queueIdentifier",u"requestIdentifier",b"requestIdentifier"]) -> None: ...

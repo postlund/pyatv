@@ -3,87 +3,89 @@
 THIS CODE IS AUTO-GENERATED - DO NOT EDIT!!!
 """
 
-from pyatv.mrp.protobuf.ProtocolMessage_pb2 import ProtocolMessage
+from .ProtocolMessage_pb2 import ProtocolMessage
 
 
-from pyatv.mrp.protobuf import ClientUpdatesConfigMessage_pb2
-from pyatv.mrp.protobuf import CryptoPairingMessage_pb2
-from pyatv.mrp.protobuf import DeviceInfoMessage_pb2
-from pyatv.mrp.protobuf import GetKeyboardSessionMessage_pb2
-from pyatv.mrp.protobuf import KeyboardMessage_pb2
-from pyatv.mrp.protobuf import NotificationMessage_pb2
-from pyatv.mrp.protobuf import PlaybackQueueRequestMessage_pb2
-from pyatv.mrp.protobuf import RegisterForGameControllerEventsMessage_pb2
-from pyatv.mrp.protobuf import RegisterHIDDeviceMessage_pb2
-from pyatv.mrp.protobuf import RegisterHIDDeviceResultMessage_pb2
-from pyatv.mrp.protobuf import RegisterVoiceInputDeviceMessage_pb2
-from pyatv.mrp.protobuf import RegisterVoiceInputDeviceResponseMessage_pb2
-from pyatv.mrp.protobuf import SendCommandMessage_pb2
-from pyatv.mrp.protobuf import SendCommandResultMessage_pb2
-from pyatv.mrp.protobuf import SendHIDEventMessage_pb2
-from pyatv.mrp.protobuf import SendPackedVirtualTouchEventMessage_pb2
-from pyatv.mrp.protobuf import SetArtworkMessage_pb2
-from pyatv.mrp.protobuf import SetConnectionStateMessage_pb2
-from pyatv.mrp.protobuf import SetHiliteModeMessage_pb2
-from pyatv.mrp.protobuf import SetNowPlayingClientMessage_pb2
-from pyatv.mrp.protobuf import SetStateMessage_pb2
-from pyatv.mrp.protobuf import TextInputMessage_pb2
-from pyatv.mrp.protobuf import TransactionMessage_pb2
-from pyatv.mrp.protobuf import UpdateClientMessage_pb2
-from pyatv.mrp.protobuf import UpdateContentItemMessage_pb2
-from pyatv.mrp.protobuf import VolumeControlAvailabilityMessage_pb2
-from pyatv.mrp.protobuf import WakeDeviceMessage_pb2
+from . import ClientUpdatesConfigMessage_pb2
+from . import CryptoPairingMessage_pb2
+from . import DeviceInfoMessage_pb2
+from . import GetKeyboardSessionMessage_pb2
+from . import KeyboardMessage_pb2
+from . import NotificationMessage_pb2
+from . import PlaybackQueueRequestMessage_pb2
+from . import RegisterForGameControllerEventsMessage_pb2
+from . import RegisterHIDDeviceMessage_pb2
+from . import RegisterHIDDeviceResultMessage_pb2
+from . import RegisterVoiceInputDeviceMessage_pb2
+from . import RegisterVoiceInputDeviceResponseMessage_pb2
+from . import SendCommandMessage_pb2
+from . import SendCommandResultMessage_pb2
+from . import SendHIDEventMessage_pb2
+from . import SendPackedVirtualTouchEventMessage_pb2
+from . import SetArtworkMessage_pb2
+from . import SetConnectionStateMessage_pb2
+from . import SetDefaultSupportedCommandsMessage_pb2
+from . import SetHiliteModeMessage_pb2
+from . import SetNowPlayingClientMessage_pb2
+from . import SetStateMessage_pb2
+from . import TextInputMessage_pb2
+from . import TransactionMessage_pb2
+from . import UpdateClientMessage_pb2
+from . import UpdateContentItemMessage_pb2
+from . import VolumeControlAvailabilityMessage_pb2
+from . import WakeDeviceMessage_pb2
 
 
-from pyatv.mrp.protobuf.AudioFormatSettingsMessage_pb2 import AudioFormatSettings
-from pyatv.mrp.protobuf.ClientUpdatesConfigMessage_pb2 import ClientUpdatesConfigMessage
-from pyatv.mrp.protobuf.CommandInfo_pb2 import CommandInfo
-from pyatv.mrp.protobuf.CommandOptions_pb2 import CommandOptions
-from pyatv.mrp.protobuf.ContentItemMetadata_pb2 import ContentItemMetadata
-from pyatv.mrp.protobuf.ContentItem_pb2 import ContentItem
-from pyatv.mrp.protobuf.CryptoPairingMessage_pb2 import CryptoPairingMessage
-from pyatv.mrp.protobuf.DeviceInfoMessage_pb2 import DeviceInfoMessage
-from pyatv.mrp.protobuf.GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
-from pyatv.mrp.protobuf.KeyboardMessage_pb2 import KeyboardMessage
-from pyatv.mrp.protobuf.LanguageOption_pb2 import LanguageOption
-from pyatv.mrp.protobuf.NotificationMessage_pb2 import NotificationMessage
-from pyatv.mrp.protobuf.NowPlayingClient_pb2 import NowPlayingClient
-from pyatv.mrp.protobuf.NowPlayingInfo_pb2 import NowPlayingInfo
-from pyatv.mrp.protobuf.NowPlayingPlayer_pb2 import NowPlayingPlayer
-from pyatv.mrp.protobuf.Origin_pb2 import Origin
-from pyatv.mrp.protobuf.PlaybackQueueCapabilities_pb2 import PlaybackQueueCapabilities
-from pyatv.mrp.protobuf.PlaybackQueueContext_pb2 import PlaybackQueueContext
-from pyatv.mrp.protobuf.PlaybackQueueRequestMessage_pb2 import PlaybackQueueRequestMessage
-from pyatv.mrp.protobuf.PlaybackQueue_pb2 import PlaybackQueue
-from pyatv.mrp.protobuf.PlayerPath_pb2 import PlayerPath
-from pyatv.mrp.protobuf.RegisterForGameControllerEventsMessage_pb2 import RegisterForGameControllerEventsMessage
-from pyatv.mrp.protobuf.RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
-from pyatv.mrp.protobuf.RegisterHIDDeviceResultMessage_pb2 import RegisterHIDDeviceResultMessage
-from pyatv.mrp.protobuf.RegisterVoiceInputDeviceMessage_pb2 import RegisterVoiceInputDeviceMessage
-from pyatv.mrp.protobuf.RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDeviceResponseMessage
-from pyatv.mrp.protobuf.SendCommandMessage_pb2 import SendCommandMessage
-from pyatv.mrp.protobuf.SendCommandResultMessage_pb2 import SendCommandResultMessage
-from pyatv.mrp.protobuf.SendHIDEventMessage_pb2 import SendHIDEventMessage
-from pyatv.mrp.protobuf.SendPackedVirtualTouchEventMessage_pb2 import SendPackedVirtualTouchEventMessage
-from pyatv.mrp.protobuf.SetArtworkMessage_pb2 import SetArtworkMessage
-from pyatv.mrp.protobuf.SetConnectionStateMessage_pb2 import SetConnectionStateMessage
-from pyatv.mrp.protobuf.SetHiliteModeMessage_pb2 import SetHiliteModeMessage
-from pyatv.mrp.protobuf.SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
-from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage
-from pyatv.mrp.protobuf.SupportedCommands_pb2 import SupportedCommands
-from pyatv.mrp.protobuf.TextEditingAttributesMessage_pb2 import TextEditingAttributes
-from pyatv.mrp.protobuf.TextInputMessage_pb2 import TextInputMessage
-from pyatv.mrp.protobuf.TextInputTraitsMessage_pb2 import TextInputTraits
-from pyatv.mrp.protobuf.TransactionKey_pb2 import TransactionKey
-from pyatv.mrp.protobuf.TransactionMessage_pb2 import TransactionMessage
-from pyatv.mrp.protobuf.TransactionPacket_pb2 import TransactionPacket
-from pyatv.mrp.protobuf.TransactionPackets_pb2 import TransactionPackets
-from pyatv.mrp.protobuf.UpdateClientMessage_pb2 import UpdateClientMessage
-from pyatv.mrp.protobuf.UpdateContentItemMessage_pb2 import UpdateContentItemMessage
-from pyatv.mrp.protobuf.VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
-from pyatv.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
-from pyatv.mrp.protobuf.VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
-from pyatv.mrp.protobuf.WakeDeviceMessage_pb2 import WakeDeviceMessage
+from .AudioFormatSettingsMessage_pb2 import AudioFormatSettings
+from .ClientUpdatesConfigMessage_pb2 import ClientUpdatesConfigMessage
+from .CommandInfo_pb2 import CommandInfo
+from .CommandOptions_pb2 import CommandOptions
+from .ContentItemMetadata_pb2 import ContentItemMetadata
+from .ContentItem_pb2 import ContentItem
+from .CryptoPairingMessage_pb2 import CryptoPairingMessage
+from .DeviceInfoMessage_pb2 import DeviceInfoMessage
+from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
+from .KeyboardMessage_pb2 import KeyboardMessage
+from .LanguageOption_pb2 import LanguageOption
+from .NotificationMessage_pb2 import NotificationMessage
+from .NowPlayingClient_pb2 import NowPlayingClient
+from .NowPlayingInfo_pb2 import NowPlayingInfo
+from .NowPlayingPlayer_pb2 import NowPlayingPlayer
+from .Origin_pb2 import Origin
+from .PlaybackQueueCapabilities_pb2 import PlaybackQueueCapabilities
+from .PlaybackQueueContext_pb2 import PlaybackQueueContext
+from .PlaybackQueueRequestMessage_pb2 import PlaybackQueueRequestMessage
+from .PlaybackQueue_pb2 import PlaybackQueue
+from .PlayerPath_pb2 import PlayerPath
+from .RegisterForGameControllerEventsMessage_pb2 import RegisterForGameControllerEventsMessage
+from .RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
+from .RegisterHIDDeviceResultMessage_pb2 import RegisterHIDDeviceResultMessage
+from .RegisterVoiceInputDeviceMessage_pb2 import RegisterVoiceInputDeviceMessage
+from .RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDeviceResponseMessage
+from .SendCommandMessage_pb2 import SendCommandMessage
+from .SendCommandResultMessage_pb2 import SendCommandResultMessage
+from .SendHIDEventMessage_pb2 import SendHIDEventMessage
+from .SendPackedVirtualTouchEventMessage_pb2 import SendPackedVirtualTouchEventMessage
+from .SetArtworkMessage_pb2 import SetArtworkMessage
+from .SetConnectionStateMessage_pb2 import SetConnectionStateMessage
+from .SetDefaultSupportedCommandsMessage_pb2 import SetDefaultSupportedCommandsMessage
+from .SetHiliteModeMessage_pb2 import SetHiliteModeMessage
+from .SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
+from .SetStateMessage_pb2 import SetStateMessage
+from .SupportedCommands_pb2 import SupportedCommands
+from .TextEditingAttributesMessage_pb2 import TextEditingAttributes
+from .TextInputMessage_pb2 import TextInputMessage
+from .TextInputTraitsMessage_pb2 import TextInputTraits
+from .TransactionKey_pb2 import TransactionKey
+from .TransactionMessage_pb2 import TransactionMessage
+from .TransactionPacket_pb2 import TransactionPacket
+from .TransactionPackets_pb2 import TransactionPackets
+from .UpdateClientMessage_pb2 import UpdateClientMessage
+from .UpdateContentItemMessage_pb2 import UpdateContentItemMessage
+from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
+from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
+from .VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
+from .WakeDeviceMessage_pb2 import WakeDeviceMessage
 
 
 _EXTENSION_LOOKUP = {
@@ -106,6 +108,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: SendPackedVirtualTouchEventMessage_pb2.sendPackedVirtualTouchEventMessage,
     ProtocolMessage.SET_ARTWORK_MESSAGE: SetArtworkMessage_pb2.setArtworkMessage,
     ProtocolMessage.SET_CONNECTION_STATE_MESSAGE: SetConnectionStateMessage_pb2.setConnectionStateMessage,
+    ProtocolMessage.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: SetDefaultSupportedCommandsMessage_pb2.setDefaultSupportedCommandsMessage,
     ProtocolMessage.SET_HILITE_MODE_MESSAGE: SetHiliteModeMessage_pb2.setHiliteModeMessage,
     ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE: SetNowPlayingClientMessage_pb2.setNowPlayingClientMessage,
     ProtocolMessage.SET_STATE_MESSAGE: SetStateMessage_pb2.setStateMessage,
@@ -136,6 +139,7 @@ SEND_HID_EVENT_MESSAGE = ProtocolMessage.SEND_HID_EVENT_MESSAGE
 SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = ProtocolMessage.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE
 SET_ARTWORK_MESSAGE = ProtocolMessage.SET_ARTWORK_MESSAGE
 SET_CONNECTION_STATE_MESSAGE = ProtocolMessage.SET_CONNECTION_STATE_MESSAGE
+SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = ProtocolMessage.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE
 SET_HILITE_MODE_MESSAGE = ProtocolMessage.SET_HILITE_MODE_MESSAGE
 SET_NOW_PLAYING_CLIENT_MESSAGE = ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE
 SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
@@ -156,4 +160,3 @@ def _inner_message(self):
 
 
 ProtocolMessage.inner = _inner_message  # type: ignore
-

@@ -23,50 +23,57 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+builtin___str = str
+
+
 class TextInputMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class ActionType(int):
+    class ActionType(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> TextInputMessage.ActionType: ...
+        def Value(cls, name: builtin___str) -> 'TextInputMessage.ActionType': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[TextInputMessage.ActionType]: ...
+        def values(cls) -> typing___List['TextInputMessage.ActionType']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, TextInputMessage.ActionType]]: ...
-        Unknown = typing___cast(TextInputMessage.ActionType, 0)
-        Insert = typing___cast(TextInputMessage.ActionType, 1)
-        Set = typing___cast(TextInputMessage.ActionType, 2)
-        Delete = typing___cast(TextInputMessage.ActionType, 3)
-        ClearText = typing___cast(TextInputMessage.ActionType, 4)
-    Unknown = typing___cast(TextInputMessage.ActionType, 0)
-    Insert = typing___cast(TextInputMessage.ActionType, 1)
-    Set = typing___cast(TextInputMessage.ActionType, 2)
-    Delete = typing___cast(TextInputMessage.ActionType, 3)
-    ClearText = typing___cast(TextInputMessage.ActionType, 4)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'TextInputMessage.ActionType']]: ...
+        Unknown = typing___cast('TextInputMessage.ActionType', 0)
+        Insert = typing___cast('TextInputMessage.ActionType', 1)
+        Set = typing___cast('TextInputMessage.ActionType', 2)
+        Delete = typing___cast('TextInputMessage.ActionType', 3)
+        ClearText = typing___cast('TextInputMessage.ActionType', 4)
+    Unknown = typing___cast('TextInputMessage.ActionType', 0)
+    Insert = typing___cast('TextInputMessage.ActionType', 1)
+    Set = typing___cast('TextInputMessage.ActionType', 2)
+    Delete = typing___cast('TextInputMessage.ActionType', 3)
+    ClearText = typing___cast('TextInputMessage.ActionType', 4)
 
-    timestamp = ... # type: float
+    timestamp = ... # type: builtin___float
     text = ... # type: typing___Text
     actionType = ... # type: TextInputMessage.ActionType
 
     def __init__(self,
         *,
-        timestamp : typing___Optional[float] = None,
+        timestamp : typing___Optional[builtin___float] = None,
         text : typing___Optional[typing___Text] = None,
         actionType : typing___Optional[TextInputMessage.ActionType] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> TextInputMessage: ...
+    def FromString(cls, s: builtin___bytes) -> TextInputMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"actionType",u"text",u"timestamp"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"actionType",u"text",u"timestamp"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"actionType",u"text",u"timestamp"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> None: ...
 
 textInputMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

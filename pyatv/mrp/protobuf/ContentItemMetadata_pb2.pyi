@@ -22,128 +22,135 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+builtin___str = str
+
+
 class ContentItemMetadata(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class MediaType(int):
+    class MediaType(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> ContentItemMetadata.MediaType: ...
+        def Value(cls, name: builtin___str) -> 'ContentItemMetadata.MediaType': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[ContentItemMetadata.MediaType]: ...
+        def values(cls) -> typing___List['ContentItemMetadata.MediaType']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, ContentItemMetadata.MediaType]]: ...
-        UnknownMediaType = typing___cast(ContentItemMetadata.MediaType, 0)
-        Audio = typing___cast(ContentItemMetadata.MediaType, 1)
-        Video = typing___cast(ContentItemMetadata.MediaType, 2)
-    UnknownMediaType = typing___cast(ContentItemMetadata.MediaType, 0)
-    Audio = typing___cast(ContentItemMetadata.MediaType, 1)
-    Video = typing___cast(ContentItemMetadata.MediaType, 2)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ContentItemMetadata.MediaType']]: ...
+        UnknownMediaType = typing___cast('ContentItemMetadata.MediaType', 0)
+        Audio = typing___cast('ContentItemMetadata.MediaType', 1)
+        Video = typing___cast('ContentItemMetadata.MediaType', 2)
+    UnknownMediaType = typing___cast('ContentItemMetadata.MediaType', 0)
+    Audio = typing___cast('ContentItemMetadata.MediaType', 1)
+    Video = typing___cast('ContentItemMetadata.MediaType', 2)
 
-    class MediaSubType(int):
+    class MediaSubType(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> ContentItemMetadata.MediaSubType: ...
+        def Value(cls, name: builtin___str) -> 'ContentItemMetadata.MediaSubType': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[ContentItemMetadata.MediaSubType]: ...
+        def values(cls) -> typing___List['ContentItemMetadata.MediaSubType']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, ContentItemMetadata.MediaSubType]]: ...
-        UnknownMediaSubType = typing___cast(ContentItemMetadata.MediaSubType, 0)
-        Music = typing___cast(ContentItemMetadata.MediaSubType, 1)
-        Podcast = typing___cast(ContentItemMetadata.MediaSubType, 4)
-        AudioBook = typing___cast(ContentItemMetadata.MediaSubType, 5)
-        ITunesU = typing___cast(ContentItemMetadata.MediaSubType, 6)
-    UnknownMediaSubType = typing___cast(ContentItemMetadata.MediaSubType, 0)
-    Music = typing___cast(ContentItemMetadata.MediaSubType, 1)
-    Podcast = typing___cast(ContentItemMetadata.MediaSubType, 4)
-    AudioBook = typing___cast(ContentItemMetadata.MediaSubType, 5)
-    ITunesU = typing___cast(ContentItemMetadata.MediaSubType, 6)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ContentItemMetadata.MediaSubType']]: ...
+        UnknownMediaSubType = typing___cast('ContentItemMetadata.MediaSubType', 0)
+        Music = typing___cast('ContentItemMetadata.MediaSubType', 1)
+        Podcast = typing___cast('ContentItemMetadata.MediaSubType', 4)
+        AudioBook = typing___cast('ContentItemMetadata.MediaSubType', 5)
+        ITunesU = typing___cast('ContentItemMetadata.MediaSubType', 6)
+    UnknownMediaSubType = typing___cast('ContentItemMetadata.MediaSubType', 0)
+    Music = typing___cast('ContentItemMetadata.MediaSubType', 1)
+    Podcast = typing___cast('ContentItemMetadata.MediaSubType', 4)
+    AudioBook = typing___cast('ContentItemMetadata.MediaSubType', 5)
+    ITunesU = typing___cast('ContentItemMetadata.MediaSubType', 6)
 
     title = ... # type: typing___Text
     subtitle = ... # type: typing___Text
-    isContainer = ... # type: bool
-    isPlayable = ... # type: bool
-    playbackProgress = ... # type: float
+    isContainer = ... # type: builtin___bool
+    isPlayable = ... # type: builtin___bool
+    playbackProgress = ... # type: builtin___float
     albumName = ... # type: typing___Text
     trackArtistName = ... # type: typing___Text
     albumArtistName = ... # type: typing___Text
     directorName = ... # type: typing___Text
-    seasonNumber = ... # type: int
-    episodeNumber = ... # type: int
-    releaseDate = ... # type: float
-    playCount = ... # type: int
-    duration = ... # type: float
+    seasonNumber = ... # type: builtin___int
+    episodeNumber = ... # type: builtin___int
+    releaseDate = ... # type: builtin___float
+    playCount = ... # type: builtin___int
+    duration = ... # type: builtin___float
     localizedContentRating = ... # type: typing___Text
-    isExplicitItem = ... # type: bool
-    playlistType = ... # type: int
-    radioStationType = ... # type: int
-    artworkAvailable = ... # type: bool
-    infoAvailable = ... # type: bool
-    languageOptionsAvailable = ... # type: bool
-    numberOfSections = ... # type: int
-    lyricsAvailable = ... # type: bool
-    editingStyleFlags = ... # type: int
-    isStreamingContent = ... # type: bool
-    isCurrentlyPlaying = ... # type: bool
+    isExplicitItem = ... # type: builtin___bool
+    playlistType = ... # type: builtin___int
+    radioStationType = ... # type: builtin___int
+    artworkAvailable = ... # type: builtin___bool
+    infoAvailable = ... # type: builtin___bool
+    languageOptionsAvailable = ... # type: builtin___bool
+    numberOfSections = ... # type: builtin___int
+    lyricsAvailable = ... # type: builtin___bool
+    editingStyleFlags = ... # type: builtin___int
+    isStreamingContent = ... # type: builtin___bool
+    isCurrentlyPlaying = ... # type: builtin___bool
     collectionIdentifier = ... # type: typing___Text
     profileIdentifier = ... # type: typing___Text
-    startTime = ... # type: float
+    startTime = ... # type: builtin___float
     artworkMIMEType = ... # type: typing___Text
     assetURLString = ... # type: typing___Text
     composer = ... # type: typing___Text
-    discNumber = ... # type: int
-    elapsedTime = ... # type: float
+    discNumber = ... # type: builtin___int
+    elapsedTime = ... # type: builtin___float
     genre = ... # type: typing___Text
-    isAlwaysLive = ... # type: bool
-    playbackRate = ... # type: float
-    chapterCount = ... # type: int
-    totalDiscCount = ... # type: int
-    totalTrackCount = ... # type: int
-    trackNumber = ... # type: int
+    isAlwaysLive = ... # type: builtin___bool
+    playbackRate = ... # type: builtin___float
+    chapterCount = ... # type: builtin___int
+    totalDiscCount = ... # type: builtin___int
+    totalTrackCount = ... # type: builtin___int
+    trackNumber = ... # type: builtin___int
     contentIdentifier = ... # type: typing___Text
-    isSharable = ... # type: bool
-    isLiked = ... # type: bool
-    isInWishList = ... # type: bool
-    radioStationIdentifier = ... # type: int
+    isSharable = ... # type: builtin___bool
+    isLiked = ... # type: builtin___bool
+    isInWishList = ... # type: builtin___bool
+    radioStationIdentifier = ... # type: builtin___int
     radioStationName = ... # type: typing___Text
     radioStationString = ... # type: typing___Text
-    iTunesStoreIdentifier = ... # type: int
-    iTunesStoreSubscriptionIdentifier = ... # type: int
-    iTunesStoreArtistIdentifier = ... # type: int
-    iTunesStoreAlbumIdentifier = ... # type: int
-    purchaseInfoData = ... # type: bytes
-    defaultPlaybackRate = ... # type: float
-    downloadState = ... # type: int
-    downloadProgress = ... # type: float
-    appMetricsData = ... # type: bytes
+    iTunesStoreIdentifier = ... # type: builtin___int
+    iTunesStoreSubscriptionIdentifier = ... # type: builtin___int
+    iTunesStoreArtistIdentifier = ... # type: builtin___int
+    iTunesStoreAlbumIdentifier = ... # type: builtin___int
+    purchaseInfoData = ... # type: builtin___bytes
+    defaultPlaybackRate = ... # type: builtin___float
+    downloadState = ... # type: builtin___int
+    downloadProgress = ... # type: builtin___float
+    appMetricsData = ... # type: builtin___bytes
     seriesName = ... # type: typing___Text
     mediaType = ... # type: ContentItemMetadata.MediaType
     mediaSubType = ... # type: ContentItemMetadata.MediaSubType
-    nowPlayingInfoData = ... # type: bytes
-    userInfoData = ... # type: bytes
-    isSteerable = ... # type: bool
+    nowPlayingInfoData = ... # type: builtin___bytes
+    userInfoData = ... # type: builtin___bytes
+    isSteerable = ... # type: builtin___bool
     artworkURL = ... # type: typing___Text
     lyricsURL = ... # type: typing___Text
-    deviceSpecificUserInfoData = ... # type: bytes
-    collectionInfoData = ... # type: bytes
-    elapsedTimeTimestamp = ... # type: float
-    inferredTimestamp = ... # type: float
+    deviceSpecificUserInfoData = ... # type: builtin___bytes
+    collectionInfoData = ... # type: builtin___bytes
+    elapsedTimeTimestamp = ... # type: builtin___float
+    inferredTimestamp = ... # type: builtin___float
     serviceIdentifier = ... # type: typing___Text
-    artworkDataWidth = ... # type: int
-    artworkDataHeight = ... # type: int
-    currentPlaybackDateData = ... # type: bytes
+    artworkDataWidth = ... # type: builtin___int
+    artworkDataHeight = ... # type: builtin___int
+    currentPlaybackDateData = ... # type: builtin___bytes
     artworkIdentifier = ... # type: typing___Text
-    isLoading = ... # type: bool
-    artworkURLTemplatesData = ... # type: bytes
-    legacyUniqueIdentifier = ... # type: int
-    episodeType = ... # type: int
+    isLoading = ... # type: builtin___bool
+    artworkURLTemplatesData = ... # type: builtin___bytes
+    legacyUniqueIdentifier = ... # type: builtin___int
+    episodeType = ... # type: builtin___int
     artworkFileURL = ... # type: typing___Text
     brandIdentifier = ... # type: typing___Text
     localizedDurationString = ... # type: typing___Text
@@ -152,93 +159,93 @@ class ContentItemMetadata(google___protobuf___message___Message):
         *,
         title : typing___Optional[typing___Text] = None,
         subtitle : typing___Optional[typing___Text] = None,
-        isContainer : typing___Optional[bool] = None,
-        isPlayable : typing___Optional[bool] = None,
-        playbackProgress : typing___Optional[float] = None,
+        isContainer : typing___Optional[builtin___bool] = None,
+        isPlayable : typing___Optional[builtin___bool] = None,
+        playbackProgress : typing___Optional[builtin___float] = None,
         albumName : typing___Optional[typing___Text] = None,
         trackArtistName : typing___Optional[typing___Text] = None,
         albumArtistName : typing___Optional[typing___Text] = None,
         directorName : typing___Optional[typing___Text] = None,
-        seasonNumber : typing___Optional[int] = None,
-        episodeNumber : typing___Optional[int] = None,
-        releaseDate : typing___Optional[float] = None,
-        playCount : typing___Optional[int] = None,
-        duration : typing___Optional[float] = None,
+        seasonNumber : typing___Optional[builtin___int] = None,
+        episodeNumber : typing___Optional[builtin___int] = None,
+        releaseDate : typing___Optional[builtin___float] = None,
+        playCount : typing___Optional[builtin___int] = None,
+        duration : typing___Optional[builtin___float] = None,
         localizedContentRating : typing___Optional[typing___Text] = None,
-        isExplicitItem : typing___Optional[bool] = None,
-        playlistType : typing___Optional[int] = None,
-        radioStationType : typing___Optional[int] = None,
-        artworkAvailable : typing___Optional[bool] = None,
-        infoAvailable : typing___Optional[bool] = None,
-        languageOptionsAvailable : typing___Optional[bool] = None,
-        numberOfSections : typing___Optional[int] = None,
-        lyricsAvailable : typing___Optional[bool] = None,
-        editingStyleFlags : typing___Optional[int] = None,
-        isStreamingContent : typing___Optional[bool] = None,
-        isCurrentlyPlaying : typing___Optional[bool] = None,
+        isExplicitItem : typing___Optional[builtin___bool] = None,
+        playlistType : typing___Optional[builtin___int] = None,
+        radioStationType : typing___Optional[builtin___int] = None,
+        artworkAvailable : typing___Optional[builtin___bool] = None,
+        infoAvailable : typing___Optional[builtin___bool] = None,
+        languageOptionsAvailable : typing___Optional[builtin___bool] = None,
+        numberOfSections : typing___Optional[builtin___int] = None,
+        lyricsAvailable : typing___Optional[builtin___bool] = None,
+        editingStyleFlags : typing___Optional[builtin___int] = None,
+        isStreamingContent : typing___Optional[builtin___bool] = None,
+        isCurrentlyPlaying : typing___Optional[builtin___bool] = None,
         collectionIdentifier : typing___Optional[typing___Text] = None,
         profileIdentifier : typing___Optional[typing___Text] = None,
-        startTime : typing___Optional[float] = None,
+        startTime : typing___Optional[builtin___float] = None,
         artworkMIMEType : typing___Optional[typing___Text] = None,
         assetURLString : typing___Optional[typing___Text] = None,
         composer : typing___Optional[typing___Text] = None,
-        discNumber : typing___Optional[int] = None,
-        elapsedTime : typing___Optional[float] = None,
+        discNumber : typing___Optional[builtin___int] = None,
+        elapsedTime : typing___Optional[builtin___float] = None,
         genre : typing___Optional[typing___Text] = None,
-        isAlwaysLive : typing___Optional[bool] = None,
-        playbackRate : typing___Optional[float] = None,
-        chapterCount : typing___Optional[int] = None,
-        totalDiscCount : typing___Optional[int] = None,
-        totalTrackCount : typing___Optional[int] = None,
-        trackNumber : typing___Optional[int] = None,
+        isAlwaysLive : typing___Optional[builtin___bool] = None,
+        playbackRate : typing___Optional[builtin___float] = None,
+        chapterCount : typing___Optional[builtin___int] = None,
+        totalDiscCount : typing___Optional[builtin___int] = None,
+        totalTrackCount : typing___Optional[builtin___int] = None,
+        trackNumber : typing___Optional[builtin___int] = None,
         contentIdentifier : typing___Optional[typing___Text] = None,
-        isSharable : typing___Optional[bool] = None,
-        isLiked : typing___Optional[bool] = None,
-        isInWishList : typing___Optional[bool] = None,
-        radioStationIdentifier : typing___Optional[int] = None,
+        isSharable : typing___Optional[builtin___bool] = None,
+        isLiked : typing___Optional[builtin___bool] = None,
+        isInWishList : typing___Optional[builtin___bool] = None,
+        radioStationIdentifier : typing___Optional[builtin___int] = None,
         radioStationName : typing___Optional[typing___Text] = None,
         radioStationString : typing___Optional[typing___Text] = None,
-        iTunesStoreIdentifier : typing___Optional[int] = None,
-        iTunesStoreSubscriptionIdentifier : typing___Optional[int] = None,
-        iTunesStoreArtistIdentifier : typing___Optional[int] = None,
-        iTunesStoreAlbumIdentifier : typing___Optional[int] = None,
-        purchaseInfoData : typing___Optional[bytes] = None,
-        defaultPlaybackRate : typing___Optional[float] = None,
-        downloadState : typing___Optional[int] = None,
-        downloadProgress : typing___Optional[float] = None,
-        appMetricsData : typing___Optional[bytes] = None,
+        iTunesStoreIdentifier : typing___Optional[builtin___int] = None,
+        iTunesStoreSubscriptionIdentifier : typing___Optional[builtin___int] = None,
+        iTunesStoreArtistIdentifier : typing___Optional[builtin___int] = None,
+        iTunesStoreAlbumIdentifier : typing___Optional[builtin___int] = None,
+        purchaseInfoData : typing___Optional[builtin___bytes] = None,
+        defaultPlaybackRate : typing___Optional[builtin___float] = None,
+        downloadState : typing___Optional[builtin___int] = None,
+        downloadProgress : typing___Optional[builtin___float] = None,
+        appMetricsData : typing___Optional[builtin___bytes] = None,
         seriesName : typing___Optional[typing___Text] = None,
         mediaType : typing___Optional[ContentItemMetadata.MediaType] = None,
         mediaSubType : typing___Optional[ContentItemMetadata.MediaSubType] = None,
-        nowPlayingInfoData : typing___Optional[bytes] = None,
-        userInfoData : typing___Optional[bytes] = None,
-        isSteerable : typing___Optional[bool] = None,
+        nowPlayingInfoData : typing___Optional[builtin___bytes] = None,
+        userInfoData : typing___Optional[builtin___bytes] = None,
+        isSteerable : typing___Optional[builtin___bool] = None,
         artworkURL : typing___Optional[typing___Text] = None,
         lyricsURL : typing___Optional[typing___Text] = None,
-        deviceSpecificUserInfoData : typing___Optional[bytes] = None,
-        collectionInfoData : typing___Optional[bytes] = None,
-        elapsedTimeTimestamp : typing___Optional[float] = None,
-        inferredTimestamp : typing___Optional[float] = None,
+        deviceSpecificUserInfoData : typing___Optional[builtin___bytes] = None,
+        collectionInfoData : typing___Optional[builtin___bytes] = None,
+        elapsedTimeTimestamp : typing___Optional[builtin___float] = None,
+        inferredTimestamp : typing___Optional[builtin___float] = None,
         serviceIdentifier : typing___Optional[typing___Text] = None,
-        artworkDataWidth : typing___Optional[int] = None,
-        artworkDataHeight : typing___Optional[int] = None,
-        currentPlaybackDateData : typing___Optional[bytes] = None,
+        artworkDataWidth : typing___Optional[builtin___int] = None,
+        artworkDataHeight : typing___Optional[builtin___int] = None,
+        currentPlaybackDateData : typing___Optional[builtin___bytes] = None,
         artworkIdentifier : typing___Optional[typing___Text] = None,
-        isLoading : typing___Optional[bool] = None,
-        artworkURLTemplatesData : typing___Optional[bytes] = None,
-        legacyUniqueIdentifier : typing___Optional[int] = None,
-        episodeType : typing___Optional[int] = None,
+        isLoading : typing___Optional[builtin___bool] = None,
+        artworkURLTemplatesData : typing___Optional[builtin___bytes] = None,
+        legacyUniqueIdentifier : typing___Optional[builtin___int] = None,
+        episodeType : typing___Optional[builtin___int] = None,
         artworkFileURL : typing___Optional[typing___Text] = None,
         brandIdentifier : typing___Optional[typing___Text] = None,
         localizedDurationString : typing___Optional[typing___Text] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> ContentItemMetadata: ...
+    def FromString(cls, s: builtin___bytes) -> ContentItemMetadata: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"albumArtistName",u"albumName",u"appMetricsData",u"artworkAvailable",u"artworkDataHeight",u"artworkDataWidth",u"artworkFileURL",u"artworkIdentifier",u"artworkMIMEType",u"artworkURL",u"artworkURLTemplatesData",u"assetURLString",u"brandIdentifier",u"chapterCount",u"collectionIdentifier",u"collectionInfoData",u"composer",u"contentIdentifier",u"currentPlaybackDateData",u"defaultPlaybackRate",u"deviceSpecificUserInfoData",u"directorName",u"discNumber",u"downloadProgress",u"downloadState",u"duration",u"editingStyleFlags",u"elapsedTime",u"elapsedTimeTimestamp",u"episodeNumber",u"episodeType",u"genre",u"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",u"infoAvailable",u"isAlwaysLive",u"isContainer",u"isCurrentlyPlaying",u"isExplicitItem",u"isInWishList",u"isLiked",u"isLoading",u"isPlayable",u"isSharable",u"isSteerable",u"isStreamingContent",u"languageOptionsAvailable",u"legacyUniqueIdentifier",u"localizedContentRating",u"localizedDurationString",u"lyricsAvailable",u"lyricsURL",u"mediaSubType",u"mediaType",u"nowPlayingInfoData",u"numberOfSections",u"playCount",u"playbackProgress",u"playbackRate",u"playlistType",u"profileIdentifier",u"purchaseInfoData",u"radioStationIdentifier",u"radioStationName",u"radioStationString",u"radioStationType",u"releaseDate",u"seasonNumber",u"seriesName",u"serviceIdentifier",u"startTime",u"subtitle",u"title",u"totalDiscCount",u"totalTrackCount",u"trackArtistName",u"trackNumber",u"userInfoData"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"albumArtistName",u"albumName",u"appMetricsData",u"artworkAvailable",u"artworkDataHeight",u"artworkDataWidth",u"artworkFileURL",u"artworkIdentifier",u"artworkMIMEType",u"artworkURL",u"artworkURLTemplatesData",u"assetURLString",u"brandIdentifier",u"chapterCount",u"collectionIdentifier",u"collectionInfoData",u"composer",u"contentIdentifier",u"currentPlaybackDateData",u"defaultPlaybackRate",u"deviceSpecificUserInfoData",u"directorName",u"discNumber",u"downloadProgress",u"downloadState",u"duration",u"editingStyleFlags",u"elapsedTime",u"elapsedTimeTimestamp",u"episodeNumber",u"episodeType",u"genre",u"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",u"infoAvailable",u"isAlwaysLive",u"isContainer",u"isCurrentlyPlaying",u"isExplicitItem",u"isInWishList",u"isLiked",u"isLoading",u"isPlayable",u"isSharable",u"isSteerable",u"isStreamingContent",u"languageOptionsAvailable",u"legacyUniqueIdentifier",u"localizedContentRating",u"localizedDurationString",u"lyricsAvailable",u"lyricsURL",u"mediaSubType",u"mediaType",u"nowPlayingInfoData",u"numberOfSections",u"playCount",u"playbackProgress",u"playbackRate",u"playlistType",u"profileIdentifier",u"purchaseInfoData",u"radioStationIdentifier",u"radioStationName",u"radioStationString",u"radioStationType",u"releaseDate",u"seasonNumber",u"seriesName",u"serviceIdentifier",u"startTime",u"subtitle",u"title",u"totalDiscCount",u"totalTrackCount",u"trackArtistName",u"trackNumber",u"userInfoData"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"albumArtistName",u"albumName",u"appMetricsData",u"artworkAvailable",u"artworkDataHeight",u"artworkDataWidth",u"artworkFileURL",u"artworkIdentifier",u"artworkMIMEType",u"artworkURL",u"artworkURLTemplatesData",u"assetURLString",u"brandIdentifier",u"chapterCount",u"collectionIdentifier",u"collectionInfoData",u"composer",u"contentIdentifier",u"currentPlaybackDateData",u"defaultPlaybackRate",u"deviceSpecificUserInfoData",u"directorName",u"discNumber",u"downloadProgress",u"downloadState",u"duration",u"editingStyleFlags",u"elapsedTime",u"elapsedTimeTimestamp",u"episodeNumber",u"episodeType",u"genre",u"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",u"infoAvailable",u"isAlwaysLive",u"isContainer",u"isCurrentlyPlaying",u"isExplicitItem",u"isInWishList",u"isLiked",u"isLoading",u"isPlayable",u"isSharable",u"isSteerable",u"isStreamingContent",u"languageOptionsAvailable",u"legacyUniqueIdentifier",u"localizedContentRating",u"localizedDurationString",u"lyricsAvailable",u"lyricsURL",u"mediaSubType",u"mediaType",u"nowPlayingInfoData",u"numberOfSections",u"playCount",u"playbackProgress",u"playbackRate",u"playlistType",u"profileIdentifier",u"purchaseInfoData",u"radioStationIdentifier",u"radioStationName",u"radioStationString",u"radioStationType",u"releaseDate",u"seasonNumber",u"seriesName",u"serviceIdentifier",u"startTime",u"subtitle",u"title",u"totalDiscCount",u"totalTrackCount",u"trackArtistName",u"trackNumber",u"userInfoData"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"albumArtistName",b"albumArtistName",u"albumName",b"albumName",u"appMetricsData",b"appMetricsData",u"artworkAvailable",b"artworkAvailable",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"artworkFileURL",b"artworkFileURL",u"artworkIdentifier",b"artworkIdentifier",u"artworkMIMEType",b"artworkMIMEType",u"artworkURL",b"artworkURL",u"artworkURLTemplatesData",b"artworkURLTemplatesData",u"assetURLString",b"assetURLString",u"brandIdentifier",b"brandIdentifier",u"chapterCount",b"chapterCount",u"collectionIdentifier",b"collectionIdentifier",u"collectionInfoData",b"collectionInfoData",u"composer",b"composer",u"contentIdentifier",b"contentIdentifier",u"currentPlaybackDateData",b"currentPlaybackDateData",u"defaultPlaybackRate",b"defaultPlaybackRate",u"deviceSpecificUserInfoData",b"deviceSpecificUserInfoData",u"directorName",b"directorName",u"discNumber",b"discNumber",u"downloadProgress",b"downloadProgress",u"downloadState",b"downloadState",u"duration",b"duration",u"editingStyleFlags",b"editingStyleFlags",u"elapsedTime",b"elapsedTime",u"elapsedTimeTimestamp",b"elapsedTimeTimestamp",u"episodeNumber",b"episodeNumber",u"episodeType",b"episodeType",u"genre",b"genre",u"iTunesStoreAlbumIdentifier",b"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",b"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",b"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",b"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",b"inferredTimestamp",u"infoAvailable",b"infoAvailable",u"isAlwaysLive",b"isAlwaysLive",u"isContainer",b"isContainer",u"isCurrentlyPlaying",b"isCurrentlyPlaying",u"isExplicitItem",b"isExplicitItem",u"isInWishList",b"isInWishList",u"isLiked",b"isLiked",u"isLoading",b"isLoading",u"isPlayable",b"isPlayable",u"isSharable",b"isSharable",u"isSteerable",b"isSteerable",u"isStreamingContent",b"isStreamingContent",u"languageOptionsAvailable",b"languageOptionsAvailable",u"legacyUniqueIdentifier",b"legacyUniqueIdentifier",u"localizedContentRating",b"localizedContentRating",u"localizedDurationString",b"localizedDurationString",u"lyricsAvailable",b"lyricsAvailable",u"lyricsURL",b"lyricsURL",u"mediaSubType",b"mediaSubType",u"mediaType",b"mediaType",u"nowPlayingInfoData",b"nowPlayingInfoData",u"numberOfSections",b"numberOfSections",u"playCount",b"playCount",u"playbackProgress",b"playbackProgress",u"playbackRate",b"playbackRate",u"playlistType",b"playlistType",u"profileIdentifier",b"profileIdentifier",u"purchaseInfoData",b"purchaseInfoData",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"radioStationString",b"radioStationString",u"radioStationType",b"radioStationType",u"releaseDate",b"releaseDate",u"seasonNumber",b"seasonNumber",u"seriesName",b"seriesName",u"serviceIdentifier",b"serviceIdentifier",u"startTime",b"startTime",u"subtitle",b"subtitle",u"title",b"title",u"totalDiscCount",b"totalDiscCount",u"totalTrackCount",b"totalTrackCount",u"trackArtistName",b"trackArtistName",u"trackNumber",b"trackNumber",u"userInfoData",b"userInfoData"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"albumArtistName",b"albumArtistName",u"albumName",b"albumName",u"appMetricsData",b"appMetricsData",u"artworkAvailable",b"artworkAvailable",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"artworkFileURL",b"artworkFileURL",u"artworkIdentifier",b"artworkIdentifier",u"artworkMIMEType",b"artworkMIMEType",u"artworkURL",b"artworkURL",u"artworkURLTemplatesData",b"artworkURLTemplatesData",u"assetURLString",b"assetURLString",u"brandIdentifier",b"brandIdentifier",u"chapterCount",b"chapterCount",u"collectionIdentifier",b"collectionIdentifier",u"collectionInfoData",b"collectionInfoData",u"composer",b"composer",u"contentIdentifier",b"contentIdentifier",u"currentPlaybackDateData",b"currentPlaybackDateData",u"defaultPlaybackRate",b"defaultPlaybackRate",u"deviceSpecificUserInfoData",b"deviceSpecificUserInfoData",u"directorName",b"directorName",u"discNumber",b"discNumber",u"downloadProgress",b"downloadProgress",u"downloadState",b"downloadState",u"duration",b"duration",u"editingStyleFlags",b"editingStyleFlags",u"elapsedTime",b"elapsedTime",u"elapsedTimeTimestamp",b"elapsedTimeTimestamp",u"episodeNumber",b"episodeNumber",u"episodeType",b"episodeType",u"genre",b"genre",u"iTunesStoreAlbumIdentifier",b"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",b"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",b"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",b"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",b"inferredTimestamp",u"infoAvailable",b"infoAvailable",u"isAlwaysLive",b"isAlwaysLive",u"isContainer",b"isContainer",u"isCurrentlyPlaying",b"isCurrentlyPlaying",u"isExplicitItem",b"isExplicitItem",u"isInWishList",b"isInWishList",u"isLiked",b"isLiked",u"isLoading",b"isLoading",u"isPlayable",b"isPlayable",u"isSharable",b"isSharable",u"isSteerable",b"isSteerable",u"isStreamingContent",b"isStreamingContent",u"languageOptionsAvailable",b"languageOptionsAvailable",u"legacyUniqueIdentifier",b"legacyUniqueIdentifier",u"localizedContentRating",b"localizedContentRating",u"localizedDurationString",b"localizedDurationString",u"lyricsAvailable",b"lyricsAvailable",u"lyricsURL",b"lyricsURL",u"mediaSubType",b"mediaSubType",u"mediaType",b"mediaType",u"nowPlayingInfoData",b"nowPlayingInfoData",u"numberOfSections",b"numberOfSections",u"playCount",b"playCount",u"playbackProgress",b"playbackProgress",u"playbackRate",b"playbackRate",u"playlistType",b"playlistType",u"profileIdentifier",b"profileIdentifier",u"purchaseInfoData",b"purchaseInfoData",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"radioStationString",b"radioStationString",u"radioStationType",b"radioStationType",u"releaseDate",b"releaseDate",u"seasonNumber",b"seasonNumber",u"seriesName",b"seriesName",u"serviceIdentifier",b"serviceIdentifier",u"startTime",b"startTime",u"subtitle",b"subtitle",u"title",b"title",u"totalDiscCount",b"totalDiscCount",u"totalTrackCount",b"totalTrackCount",u"trackArtistName",b"trackArtistName",u"trackNumber",b"trackNumber",u"userInfoData",b"userInfoData"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"albumArtistName",b"albumArtistName",u"albumName",b"albumName",u"appMetricsData",b"appMetricsData",u"artworkAvailable",b"artworkAvailable",u"artworkDataHeight",b"artworkDataHeight",u"artworkDataWidth",b"artworkDataWidth",u"artworkFileURL",b"artworkFileURL",u"artworkIdentifier",b"artworkIdentifier",u"artworkMIMEType",b"artworkMIMEType",u"artworkURL",b"artworkURL",u"artworkURLTemplatesData",b"artworkURLTemplatesData",u"assetURLString",b"assetURLString",u"brandIdentifier",b"brandIdentifier",u"chapterCount",b"chapterCount",u"collectionIdentifier",b"collectionIdentifier",u"collectionInfoData",b"collectionInfoData",u"composer",b"composer",u"contentIdentifier",b"contentIdentifier",u"currentPlaybackDateData",b"currentPlaybackDateData",u"defaultPlaybackRate",b"defaultPlaybackRate",u"deviceSpecificUserInfoData",b"deviceSpecificUserInfoData",u"directorName",b"directorName",u"discNumber",b"discNumber",u"downloadProgress",b"downloadProgress",u"downloadState",b"downloadState",u"duration",b"duration",u"editingStyleFlags",b"editingStyleFlags",u"elapsedTime",b"elapsedTime",u"elapsedTimeTimestamp",b"elapsedTimeTimestamp",u"episodeNumber",b"episodeNumber",u"episodeType",b"episodeType",u"genre",b"genre",u"iTunesStoreAlbumIdentifier",b"iTunesStoreAlbumIdentifier",u"iTunesStoreArtistIdentifier",b"iTunesStoreArtistIdentifier",u"iTunesStoreIdentifier",b"iTunesStoreIdentifier",u"iTunesStoreSubscriptionIdentifier",b"iTunesStoreSubscriptionIdentifier",u"inferredTimestamp",b"inferredTimestamp",u"infoAvailable",b"infoAvailable",u"isAlwaysLive",b"isAlwaysLive",u"isContainer",b"isContainer",u"isCurrentlyPlaying",b"isCurrentlyPlaying",u"isExplicitItem",b"isExplicitItem",u"isInWishList",b"isInWishList",u"isLiked",b"isLiked",u"isLoading",b"isLoading",u"isPlayable",b"isPlayable",u"isSharable",b"isSharable",u"isSteerable",b"isSteerable",u"isStreamingContent",b"isStreamingContent",u"languageOptionsAvailable",b"languageOptionsAvailable",u"legacyUniqueIdentifier",b"legacyUniqueIdentifier",u"localizedContentRating",b"localizedContentRating",u"localizedDurationString",b"localizedDurationString",u"lyricsAvailable",b"lyricsAvailable",u"lyricsURL",b"lyricsURL",u"mediaSubType",b"mediaSubType",u"mediaType",b"mediaType",u"nowPlayingInfoData",b"nowPlayingInfoData",u"numberOfSections",b"numberOfSections",u"playCount",b"playCount",u"playbackProgress",b"playbackProgress",u"playbackRate",b"playbackRate",u"playlistType",b"playlistType",u"profileIdentifier",b"profileIdentifier",u"purchaseInfoData",b"purchaseInfoData",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"radioStationString",b"radioStationString",u"radioStationType",b"radioStationType",u"releaseDate",b"releaseDate",u"seasonNumber",b"seasonNumber",u"seriesName",b"seriesName",u"serviceIdentifier",b"serviceIdentifier",u"startTime",b"startTime",u"subtitle",b"subtitle",u"title",b"title",u"totalDiscCount",b"totalDiscCount",u"totalTrackCount",b"totalTrackCount",u"trackArtistName",b"trackArtistName",u"trackNumber",b"trackNumber",u"userInfoData",b"userInfoData"]) -> None: ...

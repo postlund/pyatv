@@ -15,6 +15,7 @@ _sym_db = _symbol_database.Default()
 
 from pyatv.mrp.protobuf import ContentItem_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ContentItem__pb2
 from pyatv.mrp.protobuf import PlaybackQueueContext_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueContext__pb2
+from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -22,9 +23,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n&pyatv/mrp/protobuf/PlaybackQueue.proto\x1a$pyatv/mrp/protobuf/ContentItem.proto\x1a-pyatv/mrp/protobuf/PlaybackQueueContext.proto\"\xc2\x01\n\rPlaybackQueue\x12\x10\n\x08location\x18\x01 \x01(\x05\x12\"\n\x0c\x63ontentItems\x18\x02 \x03(\x0b\x32\x0c.ContentItem\x12&\n\x07\x63ontext\x18\x03 \x01(\x0b\x32\x15.PlaybackQueueContext\x12\x11\n\trequestId\x18\x04 \x01(\t\x12\'\n\x1fsendingPlaybackQueueTransaction\x18\x06 \x01(\x08\x12\x17\n\x0fqueueIdentifier\x18\x07 \x01(\t')
+  serialized_pb=_b('\n&pyatv/mrp/protobuf/PlaybackQueue.proto\x1a$pyatv/mrp/protobuf/ContentItem.proto\x1a-pyatv/mrp/protobuf/PlaybackQueueContext.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"\xeb\x01\n\rPlaybackQueue\x12\x10\n\x08location\x18\x01 \x01(\x05\x12\"\n\x0c\x63ontentItems\x18\x02 \x03(\x0b\x32\x0c.ContentItem\x12&\n\x07\x63ontext\x18\x03 \x01(\x0b\x32\x15.PlaybackQueueContext\x12\x11\n\trequestId\x18\x04 \x01(\t\x12\'\n\x12resolvedPlayerPath\x18\x05 \x01(\x0b\x32\x0b.PlayerPath\x12\'\n\x1fsendingPlaybackQueueTransaction\x18\x06 \x01(\x08\x12\x17\n\x0fqueueIdentifier\x18\x07 \x01(\t')
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ContentItem__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueContext__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ContentItem__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueContext__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
 
 
 
@@ -65,14 +66,21 @@ _PLAYBACKQUEUE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sendingPlaybackQueueTransaction', full_name='PlaybackQueue.sendingPlaybackQueueTransaction', index=4,
+      name='resolvedPlayerPath', full_name='PlaybackQueue.resolvedPlayerPath', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sendingPlaybackQueueTransaction', full_name='PlaybackQueue.sendingPlaybackQueueTransaction', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='queueIdentifier', full_name='PlaybackQueue.queueIdentifier', index=5,
+      name='queueIdentifier', full_name='PlaybackQueue.queueIdentifier', index=6,
       number=7, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -90,12 +98,13 @@ _PLAYBACKQUEUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=128,
-  serialized_end=322,
+  serialized_start=165,
+  serialized_end=400,
 )
 
 _PLAYBACKQUEUE.fields_by_name['contentItems'].message_type = pyatv_dot_mrp_dot_protobuf_dot_ContentItem__pb2._CONTENTITEM
 _PLAYBACKQUEUE.fields_by_name['context'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlaybackQueueContext__pb2._PLAYBACKQUEUECONTEXT
+_PLAYBACKQUEUE.fields_by_name['resolvedPlayerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
 DESCRIPTOR.message_types_by_name['PlaybackQueue'] = _PLAYBACKQUEUE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

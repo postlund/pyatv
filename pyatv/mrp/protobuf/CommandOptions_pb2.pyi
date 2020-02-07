@@ -22,119 +22,126 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+builtin___str = str
+
+
 class CommandOptions(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class RepeatMode(int):
+    class RepeatMode(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> CommandOptions.RepeatMode: ...
+        def Value(cls, name: builtin___str) -> 'CommandOptions.RepeatMode': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[CommandOptions.RepeatMode]: ...
+        def values(cls) -> typing___List['CommandOptions.RepeatMode']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, CommandOptions.RepeatMode]]: ...
-        Unknown = typing___cast(CommandOptions.RepeatMode, 0)
-        One = typing___cast(CommandOptions.RepeatMode, 1)
-        All = typing___cast(CommandOptions.RepeatMode, 2)
-    Unknown = typing___cast(CommandOptions.RepeatMode, 0)
-    One = typing___cast(CommandOptions.RepeatMode, 1)
-    All = typing___cast(CommandOptions.RepeatMode, 2)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandOptions.RepeatMode']]: ...
+        Unknown = typing___cast('CommandOptions.RepeatMode', 0)
+        One = typing___cast('CommandOptions.RepeatMode', 1)
+        All = typing___cast('CommandOptions.RepeatMode', 2)
+    Unknown = typing___cast('CommandOptions.RepeatMode', 0)
+    One = typing___cast('CommandOptions.RepeatMode', 1)
+    All = typing___cast('CommandOptions.RepeatMode', 2)
 
-    class ShuffleMode(int):
+    class ShuffleMode(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> CommandOptions.ShuffleMode: ...
+        def Value(cls, name: builtin___str) -> 'CommandOptions.ShuffleMode': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[CommandOptions.ShuffleMode]: ...
+        def values(cls) -> typing___List['CommandOptions.ShuffleMode']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, CommandOptions.ShuffleMode]]: ...
-        Unkown = typing___cast(CommandOptions.ShuffleMode, 0)
-        Off = typing___cast(CommandOptions.ShuffleMode, 1)
-        Albums = typing___cast(CommandOptions.ShuffleMode, 2)
-        Songs = typing___cast(CommandOptions.ShuffleMode, 3)
-    Unkown = typing___cast(CommandOptions.ShuffleMode, 0)
-    Off = typing___cast(CommandOptions.ShuffleMode, 1)
-    Albums = typing___cast(CommandOptions.ShuffleMode, 2)
-    Songs = typing___cast(CommandOptions.ShuffleMode, 3)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandOptions.ShuffleMode']]: ...
+        Unkown = typing___cast('CommandOptions.ShuffleMode', 0)
+        Off = typing___cast('CommandOptions.ShuffleMode', 1)
+        Albums = typing___cast('CommandOptions.ShuffleMode', 2)
+        Songs = typing___cast('CommandOptions.ShuffleMode', 3)
+    Unkown = typing___cast('CommandOptions.ShuffleMode', 0)
+    Off = typing___cast('CommandOptions.ShuffleMode', 1)
+    Albums = typing___cast('CommandOptions.ShuffleMode', 2)
+    Songs = typing___cast('CommandOptions.ShuffleMode', 3)
 
     sourceId = ... # type: typing___Text
     mediaType = ... # type: typing___Text
-    externalPlayerCommand = ... # type: bool
-    skipInterval = ... # type: float
-    playbackRate = ... # type: float
-    rating = ... # type: float
-    negative = ... # type: bool
-    playbackPosition = ... # type: float
+    externalPlayerCommand = ... # type: builtin___bool
+    skipInterval = ... # type: builtin___float
+    playbackRate = ... # type: builtin___float
+    rating = ... # type: builtin___float
+    negative = ... # type: builtin___bool
+    playbackPosition = ... # type: builtin___float
     repeatMode = ... # type: CommandOptions.RepeatMode
     shuffleMode = ... # type: CommandOptions.ShuffleMode
-    trackID = ... # type: int
-    radioStationID = ... # type: int
+    trackID = ... # type: builtin___int
+    radioStationID = ... # type: builtin___int
     radioStationHash = ... # type: typing___Text
-    systemAppPlaybackQueueData = ... # type: bytes
+    systemAppPlaybackQueueData = ... # type: builtin___bytes
     destinationAppDisplayID = ... # type: typing___Text
-    sendOptions = ... # type: int
-    requestDefermentToPlaybackQueuePosition = ... # type: bool
+    sendOptions = ... # type: builtin___int
+    requestDefermentToPlaybackQueuePosition = ... # type: builtin___bool
     contextID = ... # type: typing___Text
-    shouldOverrideManuallyCuratedQueue = ... # type: bool
+    shouldOverrideManuallyCuratedQueue = ... # type: builtin___bool
     stationURL = ... # type: typing___Text
-    shouldBeginRadioPlayback = ... # type: bool
-    playbackQueueInsertionPosition = ... # type: int
+    shouldBeginRadioPlayback = ... # type: builtin___bool
+    playbackQueueInsertionPosition = ... # type: builtin___int
     contentItemID = ... # type: typing___Text
-    playbackQueueOffset = ... # type: int
-    playbackQueueDestinationOffset = ... # type: int
-    languageOption = ... # type: bytes
-    playbackQueueContext = ... # type: bytes
+    playbackQueueOffset = ... # type: builtin___int
+    playbackQueueDestinationOffset = ... # type: builtin___int
+    languageOption = ... # type: builtin___bytes
+    playbackQueueContext = ... # type: builtin___bytes
     insertAfterContentItemID = ... # type: typing___Text
     nowPlayingContentItemID = ... # type: typing___Text
-    replaceIntent = ... # type: int
+    replaceIntent = ... # type: builtin___int
 
     def __init__(self,
         *,
         sourceId : typing___Optional[typing___Text] = None,
         mediaType : typing___Optional[typing___Text] = None,
-        externalPlayerCommand : typing___Optional[bool] = None,
-        skipInterval : typing___Optional[float] = None,
-        playbackRate : typing___Optional[float] = None,
-        rating : typing___Optional[float] = None,
-        negative : typing___Optional[bool] = None,
-        playbackPosition : typing___Optional[float] = None,
+        externalPlayerCommand : typing___Optional[builtin___bool] = None,
+        skipInterval : typing___Optional[builtin___float] = None,
+        playbackRate : typing___Optional[builtin___float] = None,
+        rating : typing___Optional[builtin___float] = None,
+        negative : typing___Optional[builtin___bool] = None,
+        playbackPosition : typing___Optional[builtin___float] = None,
         repeatMode : typing___Optional[CommandOptions.RepeatMode] = None,
         shuffleMode : typing___Optional[CommandOptions.ShuffleMode] = None,
-        trackID : typing___Optional[int] = None,
-        radioStationID : typing___Optional[int] = None,
+        trackID : typing___Optional[builtin___int] = None,
+        radioStationID : typing___Optional[builtin___int] = None,
         radioStationHash : typing___Optional[typing___Text] = None,
-        systemAppPlaybackQueueData : typing___Optional[bytes] = None,
+        systemAppPlaybackQueueData : typing___Optional[builtin___bytes] = None,
         destinationAppDisplayID : typing___Optional[typing___Text] = None,
-        sendOptions : typing___Optional[int] = None,
-        requestDefermentToPlaybackQueuePosition : typing___Optional[bool] = None,
+        sendOptions : typing___Optional[builtin___int] = None,
+        requestDefermentToPlaybackQueuePosition : typing___Optional[builtin___bool] = None,
         contextID : typing___Optional[typing___Text] = None,
-        shouldOverrideManuallyCuratedQueue : typing___Optional[bool] = None,
+        shouldOverrideManuallyCuratedQueue : typing___Optional[builtin___bool] = None,
         stationURL : typing___Optional[typing___Text] = None,
-        shouldBeginRadioPlayback : typing___Optional[bool] = None,
-        playbackQueueInsertionPosition : typing___Optional[int] = None,
+        shouldBeginRadioPlayback : typing___Optional[builtin___bool] = None,
+        playbackQueueInsertionPosition : typing___Optional[builtin___int] = None,
         contentItemID : typing___Optional[typing___Text] = None,
-        playbackQueueOffset : typing___Optional[int] = None,
-        playbackQueueDestinationOffset : typing___Optional[int] = None,
-        languageOption : typing___Optional[bytes] = None,
-        playbackQueueContext : typing___Optional[bytes] = None,
+        playbackQueueOffset : typing___Optional[builtin___int] = None,
+        playbackQueueDestinationOffset : typing___Optional[builtin___int] = None,
+        languageOption : typing___Optional[builtin___bytes] = None,
+        playbackQueueContext : typing___Optional[builtin___bytes] = None,
         insertAfterContentItemID : typing___Optional[typing___Text] = None,
         nowPlayingContentItemID : typing___Optional[typing___Text] = None,
-        replaceIntent : typing___Optional[int] = None,
+        replaceIntent : typing___Optional[builtin___int] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> CommandOptions: ...
+    def FromString(cls, s: builtin___bytes) -> CommandOptions: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"contentItemID",u"contextID",u"destinationAppDisplayID",u"externalPlayerCommand",u"insertAfterContentItemID",u"languageOption",u"mediaType",u"negative",u"nowPlayingContentItemID",u"playbackPosition",u"playbackQueueContext",u"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",u"playbackQueueOffset",u"playbackRate",u"radioStationHash",u"radioStationID",u"rating",u"repeatMode",u"replaceIntent",u"requestDefermentToPlaybackQueuePosition",u"sendOptions",u"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",u"shuffleMode",u"skipInterval",u"sourceId",u"stationURL",u"systemAppPlaybackQueueData",u"trackID"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"contentItemID",u"contextID",u"destinationAppDisplayID",u"externalPlayerCommand",u"insertAfterContentItemID",u"languageOption",u"mediaType",u"negative",u"nowPlayingContentItemID",u"playbackPosition",u"playbackQueueContext",u"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",u"playbackQueueOffset",u"playbackRate",u"radioStationHash",u"radioStationID",u"rating",u"repeatMode",u"replaceIntent",u"requestDefermentToPlaybackQueuePosition",u"sendOptions",u"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",u"shuffleMode",u"skipInterval",u"sourceId",u"stationURL",u"systemAppPlaybackQueueData",u"trackID"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"contentItemID",u"contextID",u"destinationAppDisplayID",u"externalPlayerCommand",u"insertAfterContentItemID",u"languageOption",u"mediaType",u"negative",u"nowPlayingContentItemID",u"playbackPosition",u"playbackQueueContext",u"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",u"playbackQueueOffset",u"playbackRate",u"radioStationHash",u"radioStationID",u"rating",u"repeatMode",u"replaceIntent",u"requestDefermentToPlaybackQueuePosition",u"sendOptions",u"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",u"shuffleMode",u"skipInterval",u"sourceId",u"stationURL",u"systemAppPlaybackQueueData",u"trackID"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"contentItemID",b"contentItemID",u"contextID",b"contextID",u"destinationAppDisplayID",b"destinationAppDisplayID",u"externalPlayerCommand",b"externalPlayerCommand",u"insertAfterContentItemID",b"insertAfterContentItemID",u"languageOption",b"languageOption",u"mediaType",b"mediaType",u"negative",b"negative",u"nowPlayingContentItemID",b"nowPlayingContentItemID",u"playbackPosition",b"playbackPosition",u"playbackQueueContext",b"playbackQueueContext",u"playbackQueueDestinationOffset",b"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",b"playbackQueueInsertionPosition",u"playbackQueueOffset",b"playbackQueueOffset",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationID",b"radioStationID",u"rating",b"rating",u"repeatMode",b"repeatMode",u"replaceIntent",b"replaceIntent",u"requestDefermentToPlaybackQueuePosition",b"requestDefermentToPlaybackQueuePosition",u"sendOptions",b"sendOptions",u"shouldBeginRadioPlayback",b"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",b"shouldOverrideManuallyCuratedQueue",u"shuffleMode",b"shuffleMode",u"skipInterval",b"skipInterval",u"sourceId",b"sourceId",u"stationURL",b"stationURL",u"systemAppPlaybackQueueData",b"systemAppPlaybackQueueData",u"trackID",b"trackID"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"contentItemID",b"contentItemID",u"contextID",b"contextID",u"destinationAppDisplayID",b"destinationAppDisplayID",u"externalPlayerCommand",b"externalPlayerCommand",u"insertAfterContentItemID",b"insertAfterContentItemID",u"languageOption",b"languageOption",u"mediaType",b"mediaType",u"negative",b"negative",u"nowPlayingContentItemID",b"nowPlayingContentItemID",u"playbackPosition",b"playbackPosition",u"playbackQueueContext",b"playbackQueueContext",u"playbackQueueDestinationOffset",b"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",b"playbackQueueInsertionPosition",u"playbackQueueOffset",b"playbackQueueOffset",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationID",b"radioStationID",u"rating",b"rating",u"repeatMode",b"repeatMode",u"replaceIntent",b"replaceIntent",u"requestDefermentToPlaybackQueuePosition",b"requestDefermentToPlaybackQueuePosition",u"sendOptions",b"sendOptions",u"shouldBeginRadioPlayback",b"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",b"shouldOverrideManuallyCuratedQueue",u"shuffleMode",b"shuffleMode",u"skipInterval",b"skipInterval",u"sourceId",b"sourceId",u"stationURL",b"stationURL",u"systemAppPlaybackQueueData",b"systemAppPlaybackQueueData",u"trackID",b"trackID"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"contentItemID",b"contentItemID",u"contextID",b"contextID",u"destinationAppDisplayID",b"destinationAppDisplayID",u"externalPlayerCommand",b"externalPlayerCommand",u"insertAfterContentItemID",b"insertAfterContentItemID",u"languageOption",b"languageOption",u"mediaType",b"mediaType",u"negative",b"negative",u"nowPlayingContentItemID",b"nowPlayingContentItemID",u"playbackPosition",b"playbackPosition",u"playbackQueueContext",b"playbackQueueContext",u"playbackQueueDestinationOffset",b"playbackQueueDestinationOffset",u"playbackQueueInsertionPosition",b"playbackQueueInsertionPosition",u"playbackQueueOffset",b"playbackQueueOffset",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationID",b"radioStationID",u"rating",b"rating",u"repeatMode",b"repeatMode",u"replaceIntent",b"replaceIntent",u"requestDefermentToPlaybackQueuePosition",b"requestDefermentToPlaybackQueuePosition",u"sendOptions",b"sendOptions",u"shouldBeginRadioPlayback",b"shouldBeginRadioPlayback",u"shouldOverrideManuallyCuratedQueue",b"shouldOverrideManuallyCuratedQueue",u"shuffleMode",b"shuffleMode",u"skipInterval",b"skipInterval",u"sourceId",b"sourceId",u"stationURL",b"stationURL",u"systemAppPlaybackQueueData",b"systemAppPlaybackQueueData",u"trackID",b"trackID"]) -> None: ...

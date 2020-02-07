@@ -50,6 +50,8 @@ enum Command {
   ReorderPlaybackQueue = 55;
   RemoveFromPlaybackQueue = 56;
   PlayItemInPlaybackQueue = 57;
+  PrepareForSetQueue = 58;
+  SetPlaybackSession = 59;
 }
 
 message CommandInfo {
