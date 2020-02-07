@@ -22,12 +22,18 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class TransactionPacket(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    packetData = ... # type: bytes
+    packetData = ... # type: builtin___bytes
     identifier = ... # type: typing___Text
-    totalLength = ... # type: int
-    totalWritePosition = ... # type: int
+    totalLength = ... # type: builtin___int
+    totalWritePosition = ... # type: builtin___int
 
     @property
     def key(self) -> pyatv___mrp___protobuf___TransactionKey_pb2___TransactionKey: ...
@@ -35,18 +41,18 @@ class TransactionPacket(google___protobuf___message___Message):
     def __init__(self,
         *,
         key : typing___Optional[pyatv___mrp___protobuf___TransactionKey_pb2___TransactionKey] = None,
-        packetData : typing___Optional[bytes] = None,
+        packetData : typing___Optional[builtin___bytes] = None,
         identifier : typing___Optional[typing___Text] = None,
-        totalLength : typing___Optional[int] = None,
-        totalWritePosition : typing___Optional[int] = None,
+        totalLength : typing___Optional[builtin___int] = None,
+        totalWritePosition : typing___Optional[builtin___int] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> TransactionPacket: ...
+    def FromString(cls, s: builtin___bytes) -> TransactionPacket: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"key",u"packetData",u"totalLength",u"totalWritePosition"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"key",u"packetData",u"totalLength",u"totalWritePosition"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"identifier",u"key",u"packetData",u"totalLength",u"totalWritePosition"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"key",b"key",u"packetData",b"packetData",u"totalLength",b"totalLength",u"totalWritePosition",b"totalWritePosition"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"key",b"key",u"packetData",b"packetData",u"totalLength",b"totalLength",u"totalWritePosition",b"totalWritePosition"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"key",b"key",u"packetData",b"packetData",u"totalLength",b"totalLength",u"totalWritePosition",b"totalWritePosition"]) -> None: ...

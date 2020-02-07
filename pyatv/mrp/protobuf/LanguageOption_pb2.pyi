@@ -23,9 +23,15 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class LanguageOption(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    type = ... # type: int
+    type = ... # type: builtin___int
     languageTag = ... # type: typing___Text
     characteristics = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     displayName = ... # type: typing___Text
@@ -33,19 +39,19 @@ class LanguageOption(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        type : typing___Optional[int] = None,
+        type : typing___Optional[builtin___int] = None,
         languageTag : typing___Optional[typing___Text] = None,
         characteristics : typing___Optional[typing___Iterable[typing___Text]] = None,
         displayName : typing___Optional[typing___Text] = None,
         identifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> LanguageOption: ...
+    def FromString(cls, s: builtin___bytes) -> LanguageOption: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"displayName",u"identifier",u"languageTag",u"type"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"displayName",u"identifier",u"languageTag",u"type"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"characteristics",u"displayName",u"identifier",u"languageTag",u"type"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"displayName",b"displayName",u"identifier",b"identifier",u"languageTag",b"languageTag",u"type",b"type"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"displayName",b"displayName",u"identifier",b"identifier",u"languageTag",b"languageTag",u"type",b"type"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"characteristics",b"characteristics",u"displayName",b"displayName",u"identifier",b"identifier",u"languageTag",b"languageTag",u"type",b"type"]) -> None: ...

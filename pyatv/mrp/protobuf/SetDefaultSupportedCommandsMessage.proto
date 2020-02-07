@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "pyatv/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/mrp/protobuf/SupportedCommands.proto";
+
+extend ProtocolMessage {
+  optional SetDefaultSupportedCommandsMessage setDefaultSupportedCommandsMessage = 75;
+}
+
+message SetDefaultSupportedCommandsMessage {
+  optional SupportedCommands supportedCommands = 2;
+  optional string displayID = 4;
+}

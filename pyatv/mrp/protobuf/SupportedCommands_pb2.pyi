@@ -26,6 +26,12 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class SupportedCommands(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
 
@@ -37,7 +43,7 @@ class SupportedCommands(google___protobuf___message___Message):
         supportedCommands : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___CommandInfo_pb2___CommandInfo]] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> SupportedCommands: ...
+    def FromString(cls, s: builtin___bytes) -> SupportedCommands: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):

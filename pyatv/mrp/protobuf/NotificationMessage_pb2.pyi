@@ -24,18 +24,24 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class NotificationMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     notification = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    userInfo = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[bytes]
+    userInfo = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___bytes]
 
     def __init__(self,
         *,
         notification : typing___Optional[typing___Iterable[typing___Text]] = None,
-        userInfo : typing___Optional[typing___Iterable[bytes]] = None,
+        userInfo : typing___Optional[typing___Iterable[builtin___bytes]] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> NotificationMessage: ...
+    def FromString(cls, s: builtin___bytes) -> NotificationMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):

@@ -45,6 +45,7 @@ message ProtocolMessage {
     SET_NOW_PLAYING_CLIENT_MESSAGE = 46;
     UPDATE_CLIENT_MESSAGE = 55;
     UPDATE_CONTENT_ITEM_MESSAGE = 56;
+    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = 72;
   }
 
   optional Type type = 1; // Identifies which underlying message is filled in.

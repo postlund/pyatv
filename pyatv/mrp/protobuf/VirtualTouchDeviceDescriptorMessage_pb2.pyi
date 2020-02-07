@@ -17,27 +17,33 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class VirtualTouchDeviceDescriptor(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    absolute = ... # type: bool
-    integratedDisplay = ... # type: bool
-    screenSizeWidth = ... # type: float
-    screenSizeHeight = ... # type: float
+    absolute = ... # type: builtin___bool
+    integratedDisplay = ... # type: builtin___bool
+    screenSizeWidth = ... # type: builtin___float
+    screenSizeHeight = ... # type: builtin___float
 
     def __init__(self,
         *,
-        absolute : typing___Optional[bool] = None,
-        integratedDisplay : typing___Optional[bool] = None,
-        screenSizeWidth : typing___Optional[float] = None,
-        screenSizeHeight : typing___Optional[float] = None,
+        absolute : typing___Optional[builtin___bool] = None,
+        integratedDisplay : typing___Optional[builtin___bool] = None,
+        screenSizeWidth : typing___Optional[builtin___float] = None,
+        screenSizeHeight : typing___Optional[builtin___float] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> VirtualTouchDeviceDescriptor: ...
+    def FromString(cls, s: builtin___bytes) -> VirtualTouchDeviceDescriptor: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"absolute",u"integratedDisplay",u"screenSizeHeight",u"screenSizeWidth"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"absolute",u"integratedDisplay",u"screenSizeHeight",u"screenSizeWidth"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"absolute",u"integratedDisplay",u"screenSizeHeight",u"screenSizeWidth"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"absolute",b"absolute",u"integratedDisplay",b"integratedDisplay",u"screenSizeHeight",b"screenSizeHeight",u"screenSizeWidth",b"screenSizeWidth"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"absolute",b"absolute",u"integratedDisplay",b"integratedDisplay",u"screenSizeHeight",b"screenSizeHeight",u"screenSizeWidth",b"screenSizeWidth"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"absolute",b"absolute",u"integratedDisplay",b"integratedDisplay",u"screenSizeHeight",b"screenSizeHeight",u"screenSizeWidth",b"screenSizeWidth"]) -> None: ...

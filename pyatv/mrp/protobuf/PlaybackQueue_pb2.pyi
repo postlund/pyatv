@@ -20,6 +20,10 @@ from pyatv.mrp.protobuf.PlaybackQueueContext_pb2 import (
     PlaybackQueueContext as pyatv___mrp___protobuf___PlaybackQueueContext_pb2___PlaybackQueueContext,
 )
 
+from pyatv.mrp.protobuf.PlayerPath_pb2 import (
+    PlayerPath as pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath,
+)
+
 from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
@@ -31,11 +35,17 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class PlaybackQueue(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    location = ... # type: int
+    location = ... # type: builtin___int
     requestId = ... # type: typing___Text
-    sendingPlaybackQueueTransaction = ... # type: bool
+    sendingPlaybackQueueTransaction = ... # type: builtin___bool
     queueIdentifier = ... # type: typing___Text
 
     @property
@@ -44,22 +54,26 @@ class PlaybackQueue(google___protobuf___message___Message):
     @property
     def context(self) -> pyatv___mrp___protobuf___PlaybackQueueContext_pb2___PlaybackQueueContext: ...
 
+    @property
+    def resolvedPlayerPath(self) -> pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath: ...
+
     def __init__(self,
         *,
-        location : typing___Optional[int] = None,
+        location : typing___Optional[builtin___int] = None,
         contentItems : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___ContentItem_pb2___ContentItem]] = None,
         context : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueContext_pb2___PlaybackQueueContext] = None,
         requestId : typing___Optional[typing___Text] = None,
-        sendingPlaybackQueueTransaction : typing___Optional[bool] = None,
+        resolvedPlayerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
+        sendingPlaybackQueueTransaction : typing___Optional[builtin___bool] = None,
         queueIdentifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> PlaybackQueue: ...
+    def FromString(cls, s: builtin___bytes) -> PlaybackQueue: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"context",u"location",u"queueIdentifier",u"requestId",u"sendingPlaybackQueueTransaction"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",u"context",u"location",u"queueIdentifier",u"requestId",u"sendingPlaybackQueueTransaction"]) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"context",u"location",u"queueIdentifier",u"requestId",u"resolvedPlayerPath",u"sendingPlaybackQueueTransaction"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",u"context",u"location",u"queueIdentifier",u"requestId",u"resolvedPlayerPath",u"sendingPlaybackQueueTransaction"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",b"contentItems",u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> None: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> builtin___bool: ...
+        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",b"contentItems",u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> None: ...

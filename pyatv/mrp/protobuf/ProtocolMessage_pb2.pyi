@@ -22,122 +22,131 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+builtin___str = str
+
+
 class ProtocolMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Type(int):
+    class Type(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> ProtocolMessage.Type: ...
+        def Value(cls, name: builtin___str) -> 'ProtocolMessage.Type': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[ProtocolMessage.Type]: ...
+        def values(cls) -> typing___List['ProtocolMessage.Type']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, ProtocolMessage.Type]]: ...
-        SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.Type, 1)
-        SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.Type, 2)
-        GET_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 3)
-        SET_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 4)
-        SET_ARTWORK_MESSAGE = typing___cast(ProtocolMessage.Type, 5)
-        REGISTER_HID_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 6)
-        REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast(ProtocolMessage.Type, 7)
-        SEND_HID_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 8)
-        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 10)
-        NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.Type, 11)
-        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.Type, 12)
-        DEVICE_INFO_MESSAGE = typing___cast(ProtocolMessage.Type, 15)
-        CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast(ProtocolMessage.Type, 16)
-        VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast(ProtocolMessage.Type, 17)
-        GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 18)
-        REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 19)
-        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 20)
-        UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 21)
-        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast(ProtocolMessage.Type, 22)
-        KEYBOARD_MESSAGE = typing___cast(ProtocolMessage.Type, 23)
-        GET_KEYBOARD_SESSION_MESSAGE = typing___cast(ProtocolMessage.Type, 24)
-        TEXT_INPUT_MESSAGE = typing___cast(ProtocolMessage.Type, 25)
-        GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast(ProtocolMessage.Type, 26)
-        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 27)
-        REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 28)
-        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 29)
-        SET_RECORDING_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 30)
-        SEND_VOICE_INPUT_MESSAGE = typing___cast(ProtocolMessage.Type, 31)
-        PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast(ProtocolMessage.Type, 32)
-        TRANSACTION_MESSAGE = typing___cast(ProtocolMessage.Type, 33)
-        CRYPTO_PAIRING_MESSAGE = typing___cast(ProtocolMessage.Type, 34)
-        GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.Type, 35)
-        SET_READY_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 36)
-        DEVICE_INFO_UPDATE_MESSAGE = typing___cast(ProtocolMessage.Type, 37)
-        SET_CONNECTION_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 38)
-        SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.Type, 40)
-        WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 41)
-        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 43)
-        SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 46)
-        UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 55)
-        UPDATE_CONTENT_ITEM_MESSAGE = typing___cast(ProtocolMessage.Type, 56)
-    SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.Type, 1)
-    SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.Type, 2)
-    GET_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 3)
-    SET_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 4)
-    SET_ARTWORK_MESSAGE = typing___cast(ProtocolMessage.Type, 5)
-    REGISTER_HID_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 6)
-    REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast(ProtocolMessage.Type, 7)
-    SEND_HID_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 8)
-    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 10)
-    NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.Type, 11)
-    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.Type, 12)
-    DEVICE_INFO_MESSAGE = typing___cast(ProtocolMessage.Type, 15)
-    CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast(ProtocolMessage.Type, 16)
-    VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast(ProtocolMessage.Type, 17)
-    GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 18)
-    REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 19)
-    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 20)
-    UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.Type, 21)
-    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast(ProtocolMessage.Type, 22)
-    KEYBOARD_MESSAGE = typing___cast(ProtocolMessage.Type, 23)
-    GET_KEYBOARD_SESSION_MESSAGE = typing___cast(ProtocolMessage.Type, 24)
-    TEXT_INPUT_MESSAGE = typing___cast(ProtocolMessage.Type, 25)
-    GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast(ProtocolMessage.Type, 26)
-    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 27)
-    REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 28)
-    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.Type, 29)
-    SET_RECORDING_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 30)
-    SEND_VOICE_INPUT_MESSAGE = typing___cast(ProtocolMessage.Type, 31)
-    PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast(ProtocolMessage.Type, 32)
-    TRANSACTION_MESSAGE = typing___cast(ProtocolMessage.Type, 33)
-    CRYPTO_PAIRING_MESSAGE = typing___cast(ProtocolMessage.Type, 34)
-    GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.Type, 35)
-    SET_READY_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 36)
-    DEVICE_INFO_UPDATE_MESSAGE = typing___cast(ProtocolMessage.Type, 37)
-    SET_CONNECTION_STATE_MESSAGE = typing___cast(ProtocolMessage.Type, 38)
-    SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.Type, 40)
-    WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.Type, 41)
-    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.Type, 43)
-    SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 46)
-    UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.Type, 55)
-    UPDATE_CONTENT_ITEM_MESSAGE = typing___cast(ProtocolMessage.Type, 56)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ProtocolMessage.Type']]: ...
+        SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
+        SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
+        GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
+        SET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 4)
+        SET_ARTWORK_MESSAGE = typing___cast('ProtocolMessage.Type', 5)
+        REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
+        REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
+        SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
+        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
+        NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
+        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
+        DEVICE_INFO_MESSAGE = typing___cast('ProtocolMessage.Type', 15)
+        CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast('ProtocolMessage.Type', 16)
+        VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast('ProtocolMessage.Type', 17)
+        GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 18)
+        REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 19)
+        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 20)
+        UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 21)
+        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast('ProtocolMessage.Type', 22)
+        KEYBOARD_MESSAGE = typing___cast('ProtocolMessage.Type', 23)
+        GET_KEYBOARD_SESSION_MESSAGE = typing___cast('ProtocolMessage.Type', 24)
+        TEXT_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 25)
+        GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast('ProtocolMessage.Type', 26)
+        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 27)
+        REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 28)
+        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 29)
+        SET_RECORDING_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 30)
+        SEND_VOICE_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 31)
+        PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast('ProtocolMessage.Type', 32)
+        TRANSACTION_MESSAGE = typing___cast('ProtocolMessage.Type', 33)
+        CRYPTO_PAIRING_MESSAGE = typing___cast('ProtocolMessage.Type', 34)
+        GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast('ProtocolMessage.Type', 35)
+        SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
+        DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
+        SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
+        SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
+        WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
+        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
+        SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
+        UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
+        UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+        SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
+    SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
+    SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
+    GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
+    SET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 4)
+    SET_ARTWORK_MESSAGE = typing___cast('ProtocolMessage.Type', 5)
+    REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
+    REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
+    SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
+    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
+    NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
+    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
+    DEVICE_INFO_MESSAGE = typing___cast('ProtocolMessage.Type', 15)
+    CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast('ProtocolMessage.Type', 16)
+    VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast('ProtocolMessage.Type', 17)
+    GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 18)
+    REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 19)
+    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 20)
+    UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 21)
+    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast('ProtocolMessage.Type', 22)
+    KEYBOARD_MESSAGE = typing___cast('ProtocolMessage.Type', 23)
+    GET_KEYBOARD_SESSION_MESSAGE = typing___cast('ProtocolMessage.Type', 24)
+    TEXT_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 25)
+    GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast('ProtocolMessage.Type', 26)
+    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 27)
+    REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 28)
+    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 29)
+    SET_RECORDING_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 30)
+    SEND_VOICE_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 31)
+    PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast('ProtocolMessage.Type', 32)
+    TRANSACTION_MESSAGE = typing___cast('ProtocolMessage.Type', 33)
+    CRYPTO_PAIRING_MESSAGE = typing___cast('ProtocolMessage.Type', 34)
+    GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast('ProtocolMessage.Type', 35)
+    SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
+    DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
+    SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
+    SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
+    WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
+    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
+    SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
+    UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
+    UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
 
     type = ... # type: ProtocolMessage.Type
     identifier = ... # type: typing___Text
-    priority = ... # type: int
-    timestamp = ... # type: int
+    priority = ... # type: builtin___int
+    timestamp = ... # type: builtin___int
 
     def __init__(self,
         *,
         type : typing___Optional[ProtocolMessage.Type] = None,
         identifier : typing___Optional[typing___Text] = None,
-        priority : typing___Optional[int] = None,
-        timestamp : typing___Optional[int] = None,
+        priority : typing___Optional[builtin___int] = None,
+        timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> ProtocolMessage: ...
+    def FromString(cls, s: builtin___bytes) -> ProtocolMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"priority",u"timestamp",u"type"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"priority",u"timestamp",u"type"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"identifier",u"priority",u"timestamp",u"type"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...

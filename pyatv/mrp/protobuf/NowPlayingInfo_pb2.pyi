@@ -22,95 +22,102 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+builtin___str = str
+
+
 class NowPlayingInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class RepeatMode(int):
+    class RepeatMode(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> NowPlayingInfo.RepeatMode: ...
+        def Value(cls, name: builtin___str) -> 'NowPlayingInfo.RepeatMode': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[NowPlayingInfo.RepeatMode]: ...
+        def values(cls) -> typing___List['NowPlayingInfo.RepeatMode']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, NowPlayingInfo.RepeatMode]]: ...
-        Unknown = typing___cast(NowPlayingInfo.RepeatMode, 0)
-        One = typing___cast(NowPlayingInfo.RepeatMode, 1)
-        All = typing___cast(NowPlayingInfo.RepeatMode, 2)
-    Unknown = typing___cast(NowPlayingInfo.RepeatMode, 0)
-    One = typing___cast(NowPlayingInfo.RepeatMode, 1)
-    All = typing___cast(NowPlayingInfo.RepeatMode, 2)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'NowPlayingInfo.RepeatMode']]: ...
+        Unknown = typing___cast('NowPlayingInfo.RepeatMode', 0)
+        One = typing___cast('NowPlayingInfo.RepeatMode', 1)
+        All = typing___cast('NowPlayingInfo.RepeatMode', 2)
+    Unknown = typing___cast('NowPlayingInfo.RepeatMode', 0)
+    One = typing___cast('NowPlayingInfo.RepeatMode', 1)
+    All = typing___cast('NowPlayingInfo.RepeatMode', 2)
 
-    class ShuffleMode(int):
+    class ShuffleMode(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
-        def Name(cls, number: int) -> str: ...
+        def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: str) -> NowPlayingInfo.ShuffleMode: ...
+        def Value(cls, name: builtin___str) -> 'NowPlayingInfo.ShuffleMode': ...
         @classmethod
-        def keys(cls) -> typing___List[str]: ...
+        def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List[NowPlayingInfo.ShuffleMode]: ...
+        def values(cls) -> typing___List['NowPlayingInfo.ShuffleMode']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[str, NowPlayingInfo.ShuffleMode]]: ...
-        Unkown = typing___cast(NowPlayingInfo.ShuffleMode, 0)
-        Off = typing___cast(NowPlayingInfo.ShuffleMode, 1)
-        Albums = typing___cast(NowPlayingInfo.ShuffleMode, 2)
-        Songs = typing___cast(NowPlayingInfo.ShuffleMode, 3)
-    Unkown = typing___cast(NowPlayingInfo.ShuffleMode, 0)
-    Off = typing___cast(NowPlayingInfo.ShuffleMode, 1)
-    Albums = typing___cast(NowPlayingInfo.ShuffleMode, 2)
-    Songs = typing___cast(NowPlayingInfo.ShuffleMode, 3)
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'NowPlayingInfo.ShuffleMode']]: ...
+        Unkown = typing___cast('NowPlayingInfo.ShuffleMode', 0)
+        Off = typing___cast('NowPlayingInfo.ShuffleMode', 1)
+        Albums = typing___cast('NowPlayingInfo.ShuffleMode', 2)
+        Songs = typing___cast('NowPlayingInfo.ShuffleMode', 3)
+    Unkown = typing___cast('NowPlayingInfo.ShuffleMode', 0)
+    Off = typing___cast('NowPlayingInfo.ShuffleMode', 1)
+    Albums = typing___cast('NowPlayingInfo.ShuffleMode', 2)
+    Songs = typing___cast('NowPlayingInfo.ShuffleMode', 3)
 
     album = ... # type: typing___Text
     artist = ... # type: typing___Text
-    duration = ... # type: float
-    elapsedTime = ... # type: float
-    playbackRate = ... # type: float
+    duration = ... # type: builtin___float
+    elapsedTime = ... # type: builtin___float
+    playbackRate = ... # type: builtin___float
     repeatMode = ... # type: NowPlayingInfo.RepeatMode
     shuffleMode = ... # type: NowPlayingInfo.ShuffleMode
-    timestamp = ... # type: float
+    timestamp = ... # type: builtin___float
     title = ... # type: typing___Text
-    uniqueIdentifier = ... # type: int
-    isExplicitTrack = ... # type: bool
-    isMusicApp = ... # type: bool
-    radioStationIdentifier = ... # type: int
+    uniqueIdentifier = ... # type: builtin___int
+    isExplicitTrack = ... # type: builtin___bool
+    isMusicApp = ... # type: builtin___bool
+    radioStationIdentifier = ... # type: builtin___int
     radioStationHash = ... # type: typing___Text
     radioStationName = ... # type: typing___Text
-    artworkDataDigest = ... # type: bytes
-    isAlwaysLive = ... # type: bool
-    isAdvertisement = ... # type: bool
+    artworkDataDigest = ... # type: builtin___bytes
+    isAlwaysLive = ... # type: builtin___bool
+    isAdvertisement = ... # type: builtin___bool
 
     def __init__(self,
         *,
         album : typing___Optional[typing___Text] = None,
         artist : typing___Optional[typing___Text] = None,
-        duration : typing___Optional[float] = None,
-        elapsedTime : typing___Optional[float] = None,
-        playbackRate : typing___Optional[float] = None,
+        duration : typing___Optional[builtin___float] = None,
+        elapsedTime : typing___Optional[builtin___float] = None,
+        playbackRate : typing___Optional[builtin___float] = None,
         repeatMode : typing___Optional[NowPlayingInfo.RepeatMode] = None,
         shuffleMode : typing___Optional[NowPlayingInfo.ShuffleMode] = None,
-        timestamp : typing___Optional[float] = None,
+        timestamp : typing___Optional[builtin___float] = None,
         title : typing___Optional[typing___Text] = None,
-        uniqueIdentifier : typing___Optional[int] = None,
-        isExplicitTrack : typing___Optional[bool] = None,
-        isMusicApp : typing___Optional[bool] = None,
-        radioStationIdentifier : typing___Optional[int] = None,
+        uniqueIdentifier : typing___Optional[builtin___int] = None,
+        isExplicitTrack : typing___Optional[builtin___bool] = None,
+        isMusicApp : typing___Optional[builtin___bool] = None,
+        radioStationIdentifier : typing___Optional[builtin___int] = None,
         radioStationHash : typing___Optional[typing___Text] = None,
         radioStationName : typing___Optional[typing___Text] = None,
-        artworkDataDigest : typing___Optional[bytes] = None,
-        isAlwaysLive : typing___Optional[bool] = None,
-        isAdvertisement : typing___Optional[bool] = None,
+        artworkDataDigest : typing___Optional[builtin___bytes] = None,
+        isAlwaysLive : typing___Optional[builtin___bool] = None,
+        isAdvertisement : typing___Optional[builtin___bool] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> NowPlayingInfo: ...
+    def FromString(cls, s: builtin___bytes) -> NowPlayingInfo: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"album",u"artist",u"artworkDataDigest",u"duration",u"elapsedTime",u"isAdvertisement",u"isAlwaysLive",u"isExplicitTrack",u"isMusicApp",u"playbackRate",u"radioStationHash",u"radioStationIdentifier",u"radioStationName",u"repeatMode",u"shuffleMode",u"timestamp",u"title",u"uniqueIdentifier"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"album",u"artist",u"artworkDataDigest",u"duration",u"elapsedTime",u"isAdvertisement",u"isAlwaysLive",u"isExplicitTrack",u"isMusicApp",u"playbackRate",u"radioStationHash",u"radioStationIdentifier",u"radioStationName",u"repeatMode",u"shuffleMode",u"timestamp",u"title",u"uniqueIdentifier"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"album",u"artist",u"artworkDataDigest",u"duration",u"elapsedTime",u"isAdvertisement",u"isAlwaysLive",u"isExplicitTrack",u"isMusicApp",u"playbackRate",u"radioStationHash",u"radioStationIdentifier",u"radioStationName",u"repeatMode",u"shuffleMode",u"timestamp",u"title",u"uniqueIdentifier"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...

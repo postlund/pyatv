@@ -18,31 +18,37 @@ from typing_extensions import (
 )
 
 
+builtin___bool = bool
+builtin___bytes = bytes
+builtin___float = float
+builtin___int = int
+
+
 class ClientUpdatesConfigMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    artworkUpdates = ... # type: bool
-    nowPlayingUpdates = ... # type: bool
-    volumeUpdates = ... # type: bool
-    keyboardUpdates = ... # type: bool
-    outputDeviceUpdates = ... # type: bool
+    artworkUpdates = ... # type: builtin___bool
+    nowPlayingUpdates = ... # type: builtin___bool
+    volumeUpdates = ... # type: builtin___bool
+    keyboardUpdates = ... # type: builtin___bool
+    outputDeviceUpdates = ... # type: builtin___bool
 
     def __init__(self,
         *,
-        artworkUpdates : typing___Optional[bool] = None,
-        nowPlayingUpdates : typing___Optional[bool] = None,
-        volumeUpdates : typing___Optional[bool] = None,
-        keyboardUpdates : typing___Optional[bool] = None,
-        outputDeviceUpdates : typing___Optional[bool] = None,
+        artworkUpdates : typing___Optional[builtin___bool] = None,
+        nowPlayingUpdates : typing___Optional[builtin___bool] = None,
+        volumeUpdates : typing___Optional[builtin___bool] = None,
+        keyboardUpdates : typing___Optional[builtin___bool] = None,
+        outputDeviceUpdates : typing___Optional[builtin___bool] = None,
         ) -> None: ...
     @classmethod
-    def FromString(cls, s: bytes) -> ClientUpdatesConfigMessage: ...
+    def FromString(cls, s: builtin___bytes) -> ClientUpdatesConfigMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"artworkUpdates",u"keyboardUpdates",u"nowPlayingUpdates",u"outputDeviceUpdates",u"volumeUpdates"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"artworkUpdates",u"keyboardUpdates",u"nowPlayingUpdates",u"outputDeviceUpdates",u"volumeUpdates"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"artworkUpdates",u"keyboardUpdates",u"nowPlayingUpdates",u"outputDeviceUpdates",u"volumeUpdates"]) -> None: ...
     else:
-        def HasField(self, field_name: typing_extensions___Literal[u"artworkUpdates",b"artworkUpdates",u"keyboardUpdates",b"keyboardUpdates",u"nowPlayingUpdates",b"nowPlayingUpdates",u"outputDeviceUpdates",b"outputDeviceUpdates",u"volumeUpdates",b"volumeUpdates"]) -> bool: ...
+        def HasField(self, field_name: typing_extensions___Literal[u"artworkUpdates",b"artworkUpdates",u"keyboardUpdates",b"keyboardUpdates",u"nowPlayingUpdates",b"nowPlayingUpdates",u"outputDeviceUpdates",b"outputDeviceUpdates",u"volumeUpdates",b"volumeUpdates"]) -> builtin___bool: ...
         def ClearField(self, field_name: typing_extensions___Literal[u"artworkUpdates",b"artworkUpdates",u"keyboardUpdates",b"keyboardUpdates",u"nowPlayingUpdates",b"nowPlayingUpdates",u"outputDeviceUpdates",b"outputDeviceUpdates",u"volumeUpdates",b"volumeUpdates"]) -> None: ...
 
 clientUpdatesConfigMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
