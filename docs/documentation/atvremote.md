@@ -230,4 +230,14 @@ If you want additional help for a specific command, use help:
 ### Logging and debugging
 
 You can enable additional debugging information by specifying
-either `--verbose` or `--debug.`.
+either `--verbose` or `--debug.`. By default `pyatv` will limit some log points in length,
+mainly due to an excessive amount of data might be logged otherwise. This mainly applies to
+binary data (raw protocol data) and protobuf messages. These limits can be overriden by
+setting the following environment variables:
+
+    $ export PYATV_BINARY_MAX_LINE=1000
+    $ export PYATV_PROTOBUF_MAX_LINE=1000
+    $ atvremote --debug ... playing
+
+In general, you shouldn't have to change these, but under some cicrumstances the complete
+logs might be deseriable.

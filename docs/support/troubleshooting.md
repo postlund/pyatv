@@ -23,3 +23,8 @@ settings menu on your Apple TV. The code should be visible there.
 
 Make sure you have *Allow Access* set to *Anyone on the Same Network* for
 AirPlay on your Apple TV. For details, see issue [#377](https://github.com/postlund/pyatv/issues/377).
+
+### How do I get additional logs that I can attach when creating an issue?
+
+You can pass `--debug` to `atvremote` to get extensive debug logs. For more details, see
+the [atvremote](../../documentation/atvremote) page.
