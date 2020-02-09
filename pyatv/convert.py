@@ -7,7 +7,7 @@ from pyatv.const import (
 
 def media_kind(kind):
     """Convert iTunes media kind to API representation."""
-    if kind in [1]:
+    if kind in [1, 32770]:
         return MediaType.Unknown
     if kind in [3, 7, 11, 12, 13, 18, 32]:
         return MediaType.Video

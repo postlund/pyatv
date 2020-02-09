@@ -12,6 +12,7 @@ from pyatv.const import (
 # https://github.com/melloware/dacp-net/blob/master/Melloware.DACP/DACPResponse.cs
 # Key: cmst.cmmk
 MEDIA_KIND_UNKNOWN = 1
+MEDIA_KIND_UNKNOWN2 = 32770  # Reported in #182
 MEDIA_KIND_SONG = 2
 MEDIA_KIND_MOVIE = 3
 MEDIA_KIND_PODCAST = 4
@@ -54,6 +55,8 @@ class ConvertTest(unittest.TestCase):
     def test_unknown_media_kind(self):
         self.assertEqual(MediaType.Unknown,
                          convert.media_kind(MEDIA_KIND_UNKNOWN))
+        self.assertEqual(MediaType.Unknown,
+                         convert.media_kind(MEDIA_KIND_UNKNOWN2))
 
     def test_video_media_kinds(self):
         self.assertEqual(MediaType.Video,
