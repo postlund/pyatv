@@ -19,6 +19,7 @@ TEST_TAGS = {
     'conb': parser.DmapTag('container', 'container 2'),
     'igno': parser.DmapTag(tags.read_ignore, 'ignore'),
     'plst': parser.DmapTag(tags.read_bplist, 'bplist'),
+    'byte': parser.DmapTag(tags.read_bytes, 'bytes'),
 }
 
 
@@ -63,6 +64,12 @@ class ParserTest(unittest.TestCase):
         parsed = parser.parse(in_data, lookup_tag)
         self.assertEqual(1, len(parsed))
         self.assertEqual(data, parser.first(parsed, 'plst'))
+
+    def test_parse_bytes(self):
+        in_data = tags.raw_tag('byte', b'\x01\xAA\xFF\x45')
+        parsed = parser.parse(in_data, lookup_tag)
+        self.assertEqual(1, len(parsed))
+        self.assertEqual('0x01aaff45', parser.first(parsed, 'byte'))
 
     def test_parse_value_in_container(self):
         in_data = tags.container_tag('cona',
