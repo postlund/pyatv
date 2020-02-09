@@ -3,7 +3,7 @@
 import logging
 from .parser import DmapTag
 from .tags import (
-    read_bool, read_uint, read_str, read_ignore, read_bplist)
+    read_bool, read_bytes, read_uint, read_str, read_ignore, read_bplist)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ _TAGS = {
     'cang': DmapTag(read_str,    'dacp.nowplayinggenre'),
     'canl': DmapTag(read_str,    'daap.nowplayingalbum'),
     'cann': DmapTag(read_str,    'daap.nowplayingtrack'),
+    'canp': DmapTag(read_bytes,  'daap.nowplayingid'),
     'cant': DmapTag(read_uint,   'dacp.remainingtime'),
     'capr': DmapTag(read_uint,   'dacp.protocolversion'),
     'caps': DmapTag(read_uint,   'dacp.playstatus'),
@@ -85,9 +86,13 @@ _TAGS = {
     'atSV': DmapTag(read_uint,   'unknown tag'),
     'caks': DmapTag(read_uint,   'unknown tag'),
     'caov': DmapTag(read_uint,   'unknown tag'),
+    'capl': DmapTag(read_bytes,  'unknown tag'),
     'casc': DmapTag(read_uint,   'unknown tag'),
     'cass': DmapTag(read_uint,   'unknown tag'),
     'ceQA': DmapTag(read_uint,   'unknown tag'),
+    'ceQU': DmapTag(read_bool,   'unknown tag'),
+    'ceMQ': DmapTag(read_bool,   'unknown tag'),
+    'ceNQ': DmapTag(read_uint,   'unknown tag'),
     'cmbe': DmapTag(read_str,    'unknown tag'),
     'cmcc': DmapTag(read_str,    'unknown tag'),
     'cmce': DmapTag(read_str,    'unknown tag'),

@@ -1,6 +1,7 @@
 """Util functions for extracting and constructing DMAP data."""
 
 import plistlib
+import binascii
 
 
 def read_str(data, start, length):
@@ -24,6 +25,11 @@ def read_bplist(data, start, length):
     # pylint: disable=no-member
     return plistlib.loads(data[start:start+length],
                           fmt=plistlib.FMT_BINARY)
+
+
+def read_bytes(data, start, length):
+    """Extract binary data (in hex) from a position in a sequence."""
+    return '0x' + binascii.hexlify(data[start:start+length]).decode('ascii')
 
 
 # pylint: disable=unused-argument
