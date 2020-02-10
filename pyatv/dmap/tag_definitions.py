@@ -79,6 +79,7 @@ _TAGS = {
     'mtco': DmapTag(read_uint,   'dmap.containercount'),
 
     # Tags with (yet) unknown purpose
+    'aead': DmapTag(read_bytes,  'unknown tag'),
     'aeFR': DmapTag(read_uint,   'unknown tag'),
     'aeSX': DmapTag(read_uint,   'unknown tag'),
     'asse': DmapTag(read_uint,   'unknown tag'),
@@ -93,6 +94,7 @@ _TAGS = {
     'ceQU': DmapTag(read_bool,   'unknown tag'),
     'ceMQ': DmapTag(read_bool,   'unknown tag'),
     'ceNQ': DmapTag(read_uint,   'unknown tag'),
+    'ceNR': DmapTag(read_bytes,  'unknown tag'),
     'cmbe': DmapTag(read_str,    'unknown tag'),
     'cmcc': DmapTag(read_str,    'unknown tag'),
     'cmce': DmapTag(read_str,    'unknown tag'),
