@@ -1,5 +1,24 @@
 # CHANGES
 
+## 0.4.0a14 (2020-02-11)
+
+*Changes:*
+
+* Added some missing DMAP tags
+* Limit log print outs to not flood logs
+* Minor updates to protobuf definitions
+
+*All changes:*
+
+```
+5f46dac Consolidate protobuf scripts into one script
+0cfb9fc Ignore some unknown DMAP tags
+ad95943 Supress unknown DMAP media kind
+413eb32 Add some missing DMAP tags
+bfa5a45 New protobuf message and minor updates
+8ee3183 Limit log printouts for binary data att protobuf
+```
+
 ## 0.4.0a13 (2020-01-31)
 
 *Changes:*
