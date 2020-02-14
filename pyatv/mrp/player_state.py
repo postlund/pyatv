@@ -1,10 +1,12 @@
 """Module responsible for keeping track of media player states."""
 
+import math
 import asyncio
 import logging
 from datetime import datetime, timedelta
 
 from pyatv.mrp import protobuf
+from pyatv.mrp.protobuf import SetStateMessage_pb2
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +33,13 @@ class PlayerState:
     def playback_state(self):
         """Playback state of device."""
         if self.metadata and self.metadata.HasField('playbackRate'):
-            return 0 < self.metadata.playbackRate > 0
+            ssm = SetStateMessage_pb2.SetStateMessage
+            playback_rate = self.metadata.playbackRate
+            if math.isclose(playback_rate, 0.0):
+                return ssm.Paused
+            if math.isclose(playback_rate, 1.0):
+                return ssm.Playing
+            return ssm.Seeking
 
         return self._playback_state
 

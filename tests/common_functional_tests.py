@@ -412,3 +412,20 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         playing = await self.playing(device_state=DeviceState.Loading)
         self.assertEqual(playing.device_state, DeviceState.Loading)
+
+    @unittest_run_loop
+    async def test_metadata_seeking(self):
+        self.usecase.example_video(paused=False, playback_rate=2.0)
+
+        playing = await self.playing(title='dummy')
+        self.assertEqual(playing.device_state, DeviceState.Seeking)
+
+        self.usecase.example_video(
+            paused=False, title='dummy2', playback_rate=1.0)
+        playing = await self.playing(title='dummy2')
+        self.assertEqual(playing.device_state, DeviceState.Playing)
+
+        self.usecase.example_video(
+            paused=False, title='dummy3', playback_rate=-1.0)
+        playing = await self.playing(title='dummy3')
+        self.assertEqual(playing.device_state, DeviceState.Seeking)

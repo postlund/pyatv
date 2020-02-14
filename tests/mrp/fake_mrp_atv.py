@@ -82,11 +82,11 @@ def _fill_item(item, metadata):
         md.title = metadata.title
     if metadata.genre:
         md.genre = metadata.genre
-    if metadata.total_time:
+    if metadata.total_time is not None:
         md.duration = metadata.total_time
-    if metadata.position:
+    if metadata.position is not None:
         md.elapsedTime = metadata.position
-    if metadata.playback_rate:
+    if metadata.playback_rate is not None:
         md.playbackRate = metadata.playback_rate
     if metadata.media_type:
         md.mediaType = metadata.media_type
@@ -365,8 +365,9 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def example_video(self, **kwargs):
         """Play some example video."""
-        self.video_playing(paused=True, title='dummy',
-                           total_time=123, position=3, **kwargs)
+        kwargs.setdefault('title', 'dummy')
+        kwargs.setdefault('paused', True)
+        self.video_playing(total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
