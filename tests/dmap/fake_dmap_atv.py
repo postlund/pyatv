@@ -1,5 +1,6 @@
 """Fake DMAP Apple TV device for tests."""
 
+import math
 import logging
 
 from collections import namedtuple
@@ -51,6 +52,7 @@ class PlayingResponse:
         self.mediakind = kwargs.get('mediakind', None)
         self.playstatus = kwargs.get('playstatus', None)
         self.repeat = kwargs.get('repeat', None)
+        self.playback_rate = kwargs.get('playback_rate')
         self.revision = revision
         self.shuffle = shuffle
         self.force_close = kwargs.get('force_close', False)
@@ -153,8 +155,21 @@ class FakeAppleTV(FakeAirPlayDevice):
             # Not a valid response as a real device, just to make tests fail
             return web.Response(status=500)
 
-        if playing.paused is not None:
+        if playing.playback_rate is not None:
+            # TODO : Magic constants
+            if math.isclose(playing.playback_rate, 0.0):
+                playstatus = 3
+            elif math.isclose(playing.playback_rate, 1.0):
+                playstatus = 4
+            elif playing.playback_rate > 0.0:
+                playstatus = 6
+            else:
+                playstatus = 5
+            body += tags.uint32_tag('caps', playstatus)
+        elif playing.paused is not None:
             body += tags.uint32_tag('caps', 3 if playing.paused else 4)
+        elif playing.playstatus is not None:
+            body += tags.uint32_tag('caps', playing.playstatus)
 
         if playing.title is not None:
             body += tags.string_tag('cann', playing.title)
@@ -179,9 +194,6 @@ class FakeAppleTV(FakeAirPlayDevice):
 
         if playing.mediakind is not None:
             body += tags.uint32_tag('cmmk', playing.mediakind)
-
-        if playing.playstatus is not None:
-            body += tags.uint32_tag('caps', playing.playstatus)
 
         if playing.repeat is not None:
             body += tags.uint8_tag('carp', playing.repeat)
@@ -319,16 +331,18 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device.responses['playing'].insert(
             0, PlayingResponse(force_close=True))
 
-    def example_video(self, **kwargs):
+    def example_video(self, paused=True, **kwargs):
         """Play some example video."""
-        self.video_playing(paused=True, title='dummy',
-                           total_time=123, position=3, **kwargs)
+        kwargs.setdefault('title', 'dummy')
+        kwargs.setdefault('paused', True)
+        self.video_playing(total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
         revision = 0
         shuffle = False
         repeat = None
+        playback_rate = kwargs.get('playback_rate', None)
         if 'revision' in kwargs:
             revision = kwargs['revision']
         if 'shuffle' in kwargs:
@@ -339,7 +353,8 @@ class AppleTVUseCases(AirPlayUseCases):
             revision=revision,
             paused=paused, title=title,
             total_time=total_time, position=position,
-            mediakind=3, shuffle=shuffle, repeat=repeat))
+            mediakind=3, shuffle=shuffle, repeat=repeat,
+            playback_rate=playback_rate))
 
     def music_playing(self, paused, artist, album, title, genre,
                       total_time, position):
