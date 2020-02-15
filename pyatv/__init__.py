@@ -137,7 +137,7 @@ class ZeroconfScanner(BaseScanner):
         info = await zeroconf.get_service_info(
             service_type, name, timeout=2000)
         if info.address is None:
-            _LOGGER.warning("Failed to resolve %s (%s)", service_type, name)
+            _LOGGER.debug("Failed to resolve %s (%s)", service_type, name)
             return
 
         address = ip_address(info.address)
