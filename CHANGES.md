@@ -1,5 +1,19 @@
 # CHANGES
 
+## 0.4.0a15 (2020-02-15)
+
+*Changes:*
+
+* Fix minor state bug and implement seeking in MRP
+
+*All changes:*
+
+```
+9ab37c6 Change zeroconf warning to debug
+3155e84 mrp: Fix device state handling
+7b6aacb Bump mypy-protobuf from 1.17 to 1.18
+```
+
 ## 0.4.0a14 (2020-02-11)
 
 *Changes:*
