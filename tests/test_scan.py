@@ -30,9 +30,9 @@ HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
 HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
     'BBBB', b'Apple TV 2', IP_2, b'bbbb')
 HOMESHARING_SERVICE_3 = zeroconf_stub.homesharing_service(
-    'CCCC', b'Apple TV 3', IP_3, b'cccc')
+    'CCCC', b'Apple TV\xC2\xA03', IP_3, b'cccc')
 DEVICE_SERVICE_1 = zeroconf_stub.device_service(
-    'CCCC', b'Apple TV 3', IP_3)
+    'CCCC', b'Apple TV\xC2\xA03', IP_3)
 MRP_SERVICE_1 = zeroconf_stub.mrp_service(
     'DDDD', b'Apple TV 4', IP_4, MRP_ID_1)
 MRP_SERVICE_2 = zeroconf_stub.mrp_service(

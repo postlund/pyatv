@@ -37,7 +37,8 @@ ALL_SERVICES = [
 def _property_decode(properties, prop):
     value = properties.get(prop.encode('utf-8'))
     if value:
-        return value.decode('utf-8')
+        # Remove non-breaking-space (0xA2A0) before decoding
+        return value.replace(b'\xC2\xA0', b' ').decode('utf-8')
     return None
 
 
