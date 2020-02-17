@@ -74,6 +74,7 @@ def _fill_item(item, metadata):
         item.identifier = metadata.identifier
 
     md = item.metadata
+    md.elapsedTimeTimestamp = _COCOA_BASE
     if metadata.artist:
         md.trackArtistName = metadata.artist
     if metadata.album:
@@ -103,7 +104,6 @@ def _set_state_message(metadata, identifier):
     inner = set_state.inner()
     inner.playbackState = metadata.playback_state
     inner.displayName = 'Fake Player'
-    inner.playbackStateTimestamp = _COCOA_BASE
 
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()

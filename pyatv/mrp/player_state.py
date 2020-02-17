@@ -3,19 +3,12 @@
 import math
 import asyncio
 import logging
-from datetime import datetime, timedelta
 
 from pyatv.mrp import protobuf
 from pyatv.mrp.protobuf import SetStateMessage_pb2
 
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def _cocoa_to_timestamp(time):
-    delta = datetime(2001, 1, 1) - datetime(1970, 1, 1)
-    time_seconds = (timedelta(seconds=time) + delta).total_seconds()
-    return datetime.fromtimestamp(time_seconds)
 
 
 class PlayerState:
@@ -25,7 +18,6 @@ class PlayerState:
         """Initialize a new PlayerState instance."""
         self._playback_state = None
         self.supported_commands = []
-        self.timestamp = None
         self.items = []
         self.location = 0
 
@@ -72,10 +64,6 @@ class PlayerState:
         if setstate.HasField('supportedCommands'):
             self.supported_commands = \
                 setstate.supportedCommands.supportedCommands
-
-        if setstate.HasField('playbackStateTimestamp'):
-            self.timestamp = _cocoa_to_timestamp(
-                int(setstate.playbackStateTimestamp))
 
         if setstate.HasField('playbackQueue'):
             queue = setstate.playbackQueue

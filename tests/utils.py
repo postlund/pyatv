@@ -103,6 +103,9 @@ def faketime(module_name, *times):
                 time = time.replace(tzinfo=tz)
             return time
 
+        def __call__(self, *args, **kwargs):
+            return datetime(*args, **kwargs)
+
         def __getattr__(self, attr):
             """Redirect non-stubbed functions to original module."""
             return getattr(datetime, attr)

@@ -13,7 +13,8 @@ from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp.protobuf import CommandInfo_pb2, SetStateMessage_pb2
+from pyatv.mrp.protobuf import CommandInfo_pb2
+from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, ArtworkInfo)
@@ -42,6 +43,12 @@ _KEY_LOOKUP = {
 
     # 'mic': [12, 0x04, 0],  # Siri
 }
+
+
+def _cocoa_to_timestamp(time):
+    delta = datetime.datetime(2001, 1, 1) - datetime.datetime(1970, 1, 1)
+    time_seconds = (datetime.timedelta(seconds=time) + delta).total_seconds()
+    return datetime.datetime.fromtimestamp(time_seconds)
 
 
 # pylint: disable=too-many-public-methods
@@ -172,24 +179,17 @@ class MrpPlaying(Playing):
         return MediaType.Unknown
 
     @property
-    def device_state(self):  # pylint: disable=too-many-return-statements
+    def device_state(self):
         """Device state, e.g. playing or paused."""
-        state = self._state.playback_state
-        ssm = SetStateMessage_pb2.SetStateMessage
-        if state is None:
-            return DeviceState.Idle
-        if state == ssm.Playing:
-            return DeviceState.Playing
-        if state == ssm.Paused:
-            return DeviceState.Paused
-        if state == ssm.Stopped:
-            return DeviceState.Stopped
-        if state == ssm.Interrupted:
-            return DeviceState.Loading
-        if state == ssm.Seeking:
-            return DeviceState.Seeking
-
-        return DeviceState.Paused
+        return {
+            None: DeviceState.Idle,
+            ssm.Playing: DeviceState.Playing,
+            ssm.Paused: DeviceState.Paused,
+            ssm.Stopped: DeviceState.Stopped,
+            ssm.Interrupted: DeviceState.Loading,
+            ssm.Seeking: DeviceState.Seeking
+            }.get(self._state.playback_state,
+                  DeviceState.Paused)
 
     @property
     def title(self):
@@ -222,17 +222,16 @@ class MrpPlaying(Playing):
     @property
     def position(self):
         """Position in the playing media (seconds)."""
+        elapsed_timestamp = self._state.metadata_field('elapsedTimeTimestamp')
+
         # If we don't have reference time, we can't do anything
-        if not self._state.timestamp:
+        if not elapsed_timestamp:
             return None
 
-        elapsed_time = self._state.metadata_field('elapsedTime')
-        now = datetime.datetime.now()
-        diff = (now - self._state.timestamp).total_seconds()
+        elapsed_time = self._state.metadata_field('elapsedTime') or 0
+        diff = (datetime.datetime.now() - _cocoa_to_timestamp(
+            elapsed_timestamp)).total_seconds()
 
-        # If elapsed time is available, we make the assumption that
-        # it is zero (playback started at reference time)
-        elapsed_time = elapsed_time or 0
         if self.device_state == DeviceState.Playing:
             return int(elapsed_time + diff)
         return int(elapsed_time)
