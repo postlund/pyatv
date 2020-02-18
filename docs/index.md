@@ -23,6 +23,9 @@ So, head over to [Getting started](getting-started) to get going!
 
 If you need help or have questions, check out the [Support](support) page instead.
 
+In case you have developed for pyatv 0.3.x before, there's a short migration guide
+[here](support/migration) that will help you port your code to 0.4.x or later.
+
 # Features
 
 Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = Apple TV 4 and later):
@@ -38,9 +41,9 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes*      |
+| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes*      |
+| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       |
 | --------------------------------------------------------------- |--------- | --------- |
 | Fetch artwork                                                   | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
@@ -48,12 +51,12 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Media type and play state                                       | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Change media position                                           | Yes      | Yes*      |
+| Change media position                                           | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
-| Shuffle and repeat                                              | Yes      | Yes*      |
+| Shuffle and repeat                                              | Yes      | Yes       |
 
-
-*\* Some support exists but has not been thoroughly tested to verify that it works satisfactory*
+As pyatv is still under heavy development, expect there to be bugs. Please create an issue
+if you experience any issues.
 
 # Who is making this?
 
