@@ -1,5 +1,18 @@
 # CHANGES
 
+## 0.4.0a16 (2020-02-18)
+
+*Changes:*
+
+* Fixes position in MRP
+
+*All changes:*
+
+```
+511e83e mrp: Fix calcuation of position
+1ba1030 scan: Remove non-breaking space in names
+```
+
 ## 0.4.0a15 (2020-02-15)
 
 *Changes:*
