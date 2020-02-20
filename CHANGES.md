@@ -1,5 +1,19 @@
 # CHANGES
 
+## 0.4.0 (2020-02-20)
+
+*Changes:*
+
+The 0.4.0 release is here! It contains too many changes to list.
+Have a glance a pre-releases to get an idea of what it contains.
+
+*All changes:*
+
+```
+46a5399 docs: Add basic migration instructions
+f0789c1 Bump mypy-protobuf from 1.18 to 1.19
+```
+
 ## 0.4.0a16 (2020-02-18)
 
 *Changes:*

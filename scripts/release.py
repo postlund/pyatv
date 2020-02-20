@@ -117,7 +117,7 @@ def insert_changes(version):
     _LOGGER.info("Adding entry to CHANGES.md")
     changes = Path("CHANGES.md").read_text().split("\n")
 
-    if changes[2].startswith('## ' + version):
+    if changes[2].startswith('## ' + version + ' '):
         _LOGGER.info("Changelog entry already present")
     else:
         version_str = "{0} ({1})".format(
@@ -151,7 +151,8 @@ def verify_changes(version):
 
 def verify_and_create_commit(version):
     """Verify git commits."""
-    if version in call("git --no-pager log -10"):
+    version_regex = r"Release " + version + r"\n"
+    if re.findall(version_regex, call("git --no-pager log -10")):
         bail("A release commit already seems to exist!")
 
     if "Changes to be committed:" not in call("git status"):
@@ -172,7 +173,8 @@ def create_tag(version):
     if version.is_prerelease:
         _LOGGER.info("Not creating tag for pre-release")
     else:
-        raise NotImplementedError()
+        _LOGGER.info("Creating tag for release %s", version)
+        call("git tag v{0}", version)
 
 
 def main():
@@ -203,7 +205,7 @@ def main():
     parser.add_argument("--skip-outputs", default=False,
                         action="store_true",
                         help="do not generate outputs")
-    parser.add_argument("--skip-tag", default=True,
+    parser.add_argument("--skip-tag", default=False,
                         action="store_true",
                         help="skip creating git tag")
 
