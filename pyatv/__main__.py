@@ -254,6 +254,11 @@ class PushListener:
         """Inform about an error and restart push updates."""
         print("An error occurred (restarting): {0}".format(exception))
 
+    @staticmethod
+    def powerstate_update(_, powerstate):
+        """Print what is current power state when it changes."""
+        print(str(powerstate), flush=True)
+
 
 class DeviceListener(interface.DeviceListener):
     """Internal listener for generic device updates."""

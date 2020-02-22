@@ -372,6 +372,8 @@ class MrpPushUpdater(PushUpdater):
         """Power State was updated."""
         try:
             powerstate = self.psm.powerState
+            self.loop.call_soon(
+                self.listener.powerstate_update, self, powerstate)
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.debug('Power State error occurred: %s', ex)
 
