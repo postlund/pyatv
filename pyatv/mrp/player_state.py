@@ -181,5 +181,5 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
             self.powerState = 0
         
         if self.listener:
-                await self.listener.power_state_updated()
+                await self.listener.powerstate_updated()
         _LOGGER.debug('Power state is now %s', self.powerState)

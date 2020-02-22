@@ -368,7 +368,7 @@ class MrpPushUpdater(PushUpdater):
             _LOGGER.debug('Playstatus error occurred: %s', ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
-    async def power_state_updated(self):
+    async def powerstate_updated(self):
         """Power State was updated."""
         try:
             powerstate = self.psm.powerState
