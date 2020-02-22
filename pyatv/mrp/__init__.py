@@ -368,6 +368,13 @@ class MrpPushUpdater(PushUpdater):
             _LOGGER.debug('Playstatus error occurred: %s', ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
+    async def power_state_updated(self):
+        """Power State was updated."""
+        try:
+            powerstate = self.psm.powerState
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.debug('Power State error occurred: %s', ex)
+
 
 class MrpAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""

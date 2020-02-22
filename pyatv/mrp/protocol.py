@@ -166,8 +166,8 @@ class MrpProtocol:
                 self._outstanding[identifier].semaphore, message)
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
-        else:
-            self._dispatch(message)
+
+        self._dispatch(message)
 
     def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
