@@ -14,6 +14,7 @@ from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,6 +28,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class ProtocolMessage(google___protobuf___message___Message):
@@ -140,13 +144,13 @@ class ProtocolMessage(google___protobuf___message___Message):
         priority : typing___Optional[builtin___int] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> ProtocolMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> ProtocolMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ProtocolMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"priority",u"timestamp",u"type"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"identifier",u"priority",u"timestamp",u"type"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...

@@ -11,6 +11,7 @@ from google.protobuf.message import (
 from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -22,6 +23,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class TransactionKey(google___protobuf___message___Message):
@@ -34,13 +38,13 @@ class TransactionKey(google___protobuf___message___Message):
         identifier : typing___Optional[typing___Text] = None,
         userData : typing___Optional[builtin___bytes] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> TransactionKey: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> TransactionKey: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionKey: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",u"userData"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"identifier",u"userData"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> None: ...

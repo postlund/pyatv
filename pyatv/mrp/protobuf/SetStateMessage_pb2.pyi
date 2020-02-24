@@ -39,6 +39,7 @@ from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -52,6 +53,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SetStateMessage(google___protobuf___message___Message):
@@ -117,15 +121,15 @@ class SetStateMessage(google___protobuf___message___Message):
         request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage] = None,
         playbackStateTimestamp : typing___Optional[builtin___float] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SetStateMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SetStateMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SetStateMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"displayID",u"displayName",u"nowPlayingInfo",u"playbackQueue",u"playbackQueueCapabilities",u"playbackState",u"playbackStateTimestamp",u"playerPath",u"request",u"supportedCommands"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"displayID",u"displayName",u"nowPlayingInfo",u"playbackQueue",u"playbackQueueCapabilities",u"playbackState",u"playbackStateTimestamp",u"playerPath",u"request",u"supportedCommands"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> None: ...
 
 setStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

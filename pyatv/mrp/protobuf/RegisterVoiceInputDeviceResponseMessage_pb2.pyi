@@ -11,6 +11,7 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -22,6 +23,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class RegisterVoiceInputDeviceResponseMessage(google___protobuf___message___Message):
@@ -34,15 +38,15 @@ class RegisterVoiceInputDeviceResponseMessage(google___protobuf___message___Mess
         deviceID : typing___Optional[builtin___int] = None,
         errorCode : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> RegisterVoiceInputDeviceResponseMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> RegisterVoiceInputDeviceResponseMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RegisterVoiceInputDeviceResponseMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceID",u"errorCode"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceID",u"errorCode"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> None: ...
 
 registerVoiceInputDeviceResponseMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

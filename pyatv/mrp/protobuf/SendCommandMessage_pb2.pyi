@@ -23,6 +23,7 @@ from pyatv.mrp.protobuf.PlayerPath_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -34,6 +35,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SendCommandMessage(google___protobuf___message___Message):
@@ -52,15 +56,15 @@ class SendCommandMessage(google___protobuf___message___Message):
         options : typing___Optional[pyatv___mrp___protobuf___CommandOptions_pb2___CommandOptions] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SendCommandMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SendCommandMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendCommandMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"command",u"options",u"playerPath"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"command",u"options",u"playerPath"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"command",b"command",u"options",b"options",u"playerPath",b"playerPath"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"command",b"command",u"options",b"options",u"playerPath",b"playerPath"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"command",b"command",u"options",b"options",u"playerPath",b"playerPath"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"command",b"command",u"options",b"options",u"playerPath",b"playerPath"]) -> None: ...
 
 sendCommandMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

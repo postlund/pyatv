@@ -11,6 +11,7 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -22,6 +23,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class VolumeControlAvailabilityMessage(google___protobuf___message___Message):
@@ -34,15 +38,15 @@ class VolumeControlAvailabilityMessage(google___protobuf___message___Message):
         volumeControlAvailable : typing___Optional[builtin___bool] = None,
         volumeCapabilities : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> VolumeControlAvailabilityMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> VolumeControlAvailabilityMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VolumeControlAvailabilityMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",u"volumeControlAvailable"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",u"volumeControlAvailable"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> None: ...
 
 volumeControlAvailabilityMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

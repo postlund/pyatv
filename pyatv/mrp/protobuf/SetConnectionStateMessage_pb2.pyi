@@ -14,6 +14,7 @@ from typing import (
     List as typing___List,
     Optional as typing___Optional,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,6 +28,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SetConnectionStateMessage(google___protobuf___message___Message):
@@ -56,15 +60,15 @@ class SetConnectionStateMessage(google___protobuf___message___Message):
         *,
         state : typing___Optional[SetConnectionStateMessage.ConnectionState] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SetConnectionStateMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SetConnectionStateMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SetConnectionStateMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"state"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"state"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> None: ...
 
 setConnectionStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
