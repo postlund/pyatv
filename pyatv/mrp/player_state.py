@@ -92,7 +92,7 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self.protocol = protocol
         self.loop = loop
         self.states = {}
-        self.powerState = None
+        self.is_powered_on = None
         self.active = None
         self._listener = None
         self._add_listeners()
@@ -175,11 +175,9 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
 
     async def _handle_device_info_message(self, message, _):
         logicalDeviceCount = message.inner().logicalDeviceCount
-        if logicalDeviceCount >= 1:
-            self.powerState = 1
-        else:
-            self.powerState = 0
+
+        self.is_powered_on = logicalDeviceCount >= 1
         
         if self.listener:
-                await self.listener.powerstate_updated()
-        _LOGGER.debug('Power state is now %s', self.powerState)
+            self.listener.powerstate_updated()
+        _LOGGER.debug('Power state is now %s', self.is_powered_on)

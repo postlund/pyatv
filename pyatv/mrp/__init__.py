@@ -368,12 +368,11 @@ class MrpPushUpdater(PushUpdater):
             _LOGGER.debug('Playstatus error occurred: %s', ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
-    async def powerstate_updated(self):
+    def powerstate_updated(self):
         """Power State was updated."""
         try:
-            powerstate = self.psm.powerState
             self.loop.call_soon(
-                self.listener.powerstate_update, self, powerstate)
+                self.listener.powerstate_update, self, self.psm.is_powered_on)
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.debug('Power State error occurred: %s', ex)
 
