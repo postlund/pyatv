@@ -18,6 +18,7 @@ from typing import (
     List as typing___List,
     Optional as typing___Optional,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -31,6 +32,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class TextInputTraits(google___protobuf___message___Message):
@@ -152,13 +156,13 @@ class TextInputTraits(google___protobuf___message___Message):
         validTextRangeLength : typing___Optional[builtin___int] = None,
         PINEntrySeparatorIndexes : typing___Optional[typing___Iterable[builtin___int]] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> TextInputTraits: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> TextInputTraits: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TextInputTraits: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"autocapitalizationType",u"autocorrection",u"enablesReturnKeyAutomatically",u"keyboardType",u"returnKeyType",u"secureTextEntry",u"spellchecking",u"validTextRangeLength",u"validTextRangeLocation"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"PINEntrySeparatorIndexes",u"autocapitalizationType",u"autocorrection",u"enablesReturnKeyAutomatically",u"keyboardType",u"returnKeyType",u"secureTextEntry",u"spellchecking",u"validTextRangeLength",u"validTextRangeLocation"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"PINEntrySeparatorIndexes",b"PINEntrySeparatorIndexes",u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"PINEntrySeparatorIndexes",b"PINEntrySeparatorIndexes",u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> None: ...

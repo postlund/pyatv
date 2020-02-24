@@ -11,6 +11,7 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -22,6 +23,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SetHiliteModeMessage(google___protobuf___message___Message):
@@ -32,15 +36,15 @@ class SetHiliteModeMessage(google___protobuf___message___Message):
         *,
         hiliteMode : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SetHiliteModeMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SetHiliteModeMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SetHiliteModeMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"hiliteMode"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"hiliteMode"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"hiliteMode",b"hiliteMode"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"hiliteMode",b"hiliteMode"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"hiliteMode",b"hiliteMode"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"hiliteMode",b"hiliteMode"]) -> None: ...
 
 setHiliteModeMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

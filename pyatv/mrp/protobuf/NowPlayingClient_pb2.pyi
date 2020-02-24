@@ -16,6 +16,7 @@ from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -27,6 +28,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class NowPlayingClient(google___protobuf___message___Message):
@@ -49,13 +53,13 @@ class NowPlayingClient(google___protobuf___message___Message):
         displayName : typing___Optional[typing___Text] = None,
         bundleIdentifierHierarchys : typing___Optional[typing___Iterable[typing___Text]] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> NowPlayingClient: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> NowPlayingClient: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> NowPlayingClient: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",u"displayName",u"nowPlayingVisibility",u"parentApplicationBundleIdentifier",u"processIdentifier",u"processUserIdentifier"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",u"bundleIdentifierHierarchys",u"displayName",u"nowPlayingVisibility",u"parentApplicationBundleIdentifier",u"processIdentifier",u"processUserIdentifier"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"bundleIdentifierHierarchys",b"bundleIdentifierHierarchys",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"bundleIdentifierHierarchys",b"bundleIdentifierHierarchys",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> None: ...

@@ -15,6 +15,7 @@ from pyatv.mrp.protobuf.TextEditingAttributesMessage_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -26,6 +27,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class KeyboardMessage(google___protobuf___message___Message):
@@ -42,15 +46,15 @@ class KeyboardMessage(google___protobuf___message___Message):
         attributes : typing___Optional[pyatv___mrp___protobuf___TextEditingAttributesMessage_pb2___TextEditingAttributes] = None,
         encryptedTextCyphertext : typing___Optional[builtin___bytes] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> KeyboardMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> KeyboardMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> KeyboardMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"attributes",u"encryptedTextCyphertext",u"state"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"attributes",u"encryptedTextCyphertext",u"state"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> None: ...
 
 keyboardMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

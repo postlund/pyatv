@@ -14,6 +14,7 @@ from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,6 +28,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class NowPlayingInfo(google___protobuf___message___Message):
@@ -111,13 +115,13 @@ class NowPlayingInfo(google___protobuf___message___Message):
         isAlwaysLive : typing___Optional[builtin___bool] = None,
         isAdvertisement : typing___Optional[builtin___bool] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> NowPlayingInfo: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> NowPlayingInfo: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> NowPlayingInfo: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"album",u"artist",u"artworkDataDigest",u"duration",u"elapsedTime",u"isAdvertisement",u"isAlwaysLive",u"isExplicitTrack",u"isMusicApp",u"playbackRate",u"radioStationHash",u"radioStationIdentifier",u"radioStationName",u"repeatMode",u"shuffleMode",u"timestamp",u"title",u"uniqueIdentifier"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"album",u"artist",u"artworkDataDigest",u"duration",u"elapsedTime",u"isAdvertisement",u"isAlwaysLive",u"isExplicitTrack",u"isMusicApp",u"playbackRate",u"radioStationHash",u"radioStationIdentifier",u"radioStationName",u"repeatMode",u"shuffleMode",u"timestamp",u"title",u"uniqueIdentifier"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"album",b"album",u"artist",b"artist",u"artworkDataDigest",b"artworkDataDigest",u"duration",b"duration",u"elapsedTime",b"elapsedTime",u"isAdvertisement",b"isAdvertisement",u"isAlwaysLive",b"isAlwaysLive",u"isExplicitTrack",b"isExplicitTrack",u"isMusicApp",b"isMusicApp",u"playbackRate",b"playbackRate",u"radioStationHash",b"radioStationHash",u"radioStationIdentifier",b"radioStationIdentifier",u"radioStationName",b"radioStationName",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"timestamp",b"timestamp",u"title",b"title",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...

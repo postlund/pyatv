@@ -16,6 +16,7 @@ from google.protobuf.message import (
 from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -27,6 +28,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SendCommandResultMessage(google___protobuf___message___Message):
@@ -41,15 +45,15 @@ class SendCommandResultMessage(google___protobuf___message___Message):
         handlerReturnStatus : typing___Optional[builtin___int] = None,
         handlerReturnStatusDatas : typing___Optional[typing___Iterable[builtin___bytes]] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SendCommandResultMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SendCommandResultMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendCommandResultMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"errorCode",u"handlerReturnStatus"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"errorCode",u"handlerReturnStatus",u"handlerReturnStatusDatas"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"errorCode",b"errorCode",u"handlerReturnStatus",b"handlerReturnStatus"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"errorCode",b"errorCode",u"handlerReturnStatus",b"handlerReturnStatus",u"handlerReturnStatusDatas",b"handlerReturnStatusDatas"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"errorCode",b"errorCode",u"handlerReturnStatus",b"handlerReturnStatus"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"errorCode",b"errorCode",u"handlerReturnStatus",b"handlerReturnStatus",u"handlerReturnStatusDatas",b"handlerReturnStatusDatas"]) -> None: ...
 
 sendCommandResultMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
