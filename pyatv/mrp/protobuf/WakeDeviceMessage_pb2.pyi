@@ -9,8 +9,15 @@ from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from typing import (
+    Union as typing___Union,
+)
+
 
 builtin___bytes = bytes
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class WakeDeviceMessage(google___protobuf___message___Message):
@@ -18,8 +25,12 @@ class WakeDeviceMessage(google___protobuf___message___Message):
 
     def __init__(self,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> WakeDeviceMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> WakeDeviceMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> WakeDeviceMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
 

@@ -19,6 +19,7 @@ from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -32,6 +33,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class Command(builtin___int):
@@ -235,13 +239,13 @@ class CommandInfo(google___protobuf___message___Message):
         supportedInsertionPositions : typing___Optional[typing___Iterable[builtin___int]] = None,
         supportsSharedQueue : typing___Optional[builtin___bool] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> CommandInfo: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CommandInfo: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CommandInfo: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"active",u"canScrub",u"command",u"enabled",u"localizedShortTitle",u"localizedTitle",u"maximumRating",u"minimumRating",u"numAvailableSkips",u"presentationStyle",u"repeatMode",u"shuffleMode",u"skipFrequency",u"skipInterval",u"supportsSharedQueue"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"active",u"canScrub",u"command",u"enabled",u"localizedShortTitle",u"localizedTitle",u"maximumRating",u"minimumRating",u"numAvailableSkips",u"preferredIntervals",u"presentationStyle",u"repeatMode",u"shuffleMode",u"skipFrequency",u"skipInterval",u"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",u"supportedPlaybackQueueTypes",u"supportedRates",u"supportsSharedQueue"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportsSharedQueue",b"supportsSharedQueue"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"preferredIntervals",b"preferredIntervals",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportedCustomQueueIdentifiers",b"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",b"supportedInsertionPositions",u"supportedPlaybackQueueTypes",b"supportedPlaybackQueueTypes",u"supportedRates",b"supportedRates",u"supportsSharedQueue",b"supportsSharedQueue"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportsSharedQueue",b"supportsSharedQueue"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"preferredIntervals",b"preferredIntervals",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportedCustomQueueIdentifiers",b"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",b"supportedInsertionPositions",u"supportedPlaybackQueueTypes",b"supportedPlaybackQueueTypes",u"supportedRates",b"supportedRates",u"supportsSharedQueue",b"supportsSharedQueue"]) -> None: ...

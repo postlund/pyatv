@@ -18,6 +18,7 @@ from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -31,6 +32,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class Origin(google___protobuf___message___Message):
@@ -68,13 +72,13 @@ class Origin(google___protobuf___message___Message):
         identifier : typing___Optional[builtin___int] = None,
         deviceInfo : typing___Optional[pyatv___mrp___protobuf___DeviceInfoMessage_pb2___DeviceInfoMessage] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> Origin: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> Origin: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Origin: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceInfo",u"displayName",u"identifier",u"type"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceInfo",u"displayName",u"identifier",u"type"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> None: ...

@@ -9,6 +9,11 @@ from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from typing import (
+    Optional as typing___Optional,
+    Union as typing___Union,
+)
+
 from typing_extensions import (
     Literal as typing_extensions___Literal,
 )
@@ -18,6 +23,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class CryptoPairingMessage(google___protobuf___message___Message):
@@ -30,21 +38,21 @@ class CryptoPairingMessage(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        pairingData : builtin___bytes,
-        status : builtin___int,
-        isRetrying : builtin___bool,
-        isUsingSystemPairing : builtin___bool,
-        state : builtin___int,
+        pairingData : typing___Optional[builtin___bytes] = None,
+        status : typing___Optional[builtin___int] = None,
+        isRetrying : typing___Optional[builtin___bool] = None,
+        isUsingSystemPairing : typing___Optional[builtin___bool] = None,
+        state : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> CryptoPairingMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> CryptoPairingMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CryptoPairingMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"isRetrying",u"isUsingSystemPairing",u"pairingData",u"state",u"status"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"isRetrying",u"isUsingSystemPairing",u"pairingData",u"state",u"status"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"isRetrying",b"isRetrying",u"isUsingSystemPairing",b"isUsingSystemPairing",u"pairingData",b"pairingData",u"state",b"state",u"status",b"status"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"isRetrying",b"isRetrying",u"isUsingSystemPairing",b"isUsingSystemPairing",u"pairingData",b"pairingData",u"state",b"state",u"status",b"status"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"isRetrying",b"isRetrying",u"isUsingSystemPairing",b"isUsingSystemPairing",u"pairingData",b"pairingData",u"state",b"state",u"status",b"status"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"isRetrying",b"isRetrying",u"isUsingSystemPairing",b"isUsingSystemPairing",u"pairingData",b"pairingData",u"state",b"state",u"status",b"status"]) -> None: ...
 
 cryptoPairingMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

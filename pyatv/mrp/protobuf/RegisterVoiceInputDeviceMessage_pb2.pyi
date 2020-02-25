@@ -15,6 +15,7 @@ from pyatv.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -26,6 +27,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class RegisterVoiceInputDeviceMessage(google___protobuf___message___Message):
@@ -38,15 +42,15 @@ class RegisterVoiceInputDeviceMessage(google___protobuf___message___Message):
         *,
         deviceDescriptor : typing___Optional[pyatv___mrp___protobuf___VoiceInputDeviceDescriptorMessage_pb2___VoiceInputDeviceDescriptor] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> RegisterVoiceInputDeviceMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> RegisterVoiceInputDeviceMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RegisterVoiceInputDeviceMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceDescriptor"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceDescriptor"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"deviceDescriptor",b"deviceDescriptor"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"deviceDescriptor",b"deviceDescriptor"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"deviceDescriptor",b"deviceDescriptor"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"deviceDescriptor",b"deviceDescriptor"]) -> None: ...
 
 registerVoiceInputDeviceMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

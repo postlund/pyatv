@@ -25,6 +25,7 @@ from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -36,6 +37,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class PlaybackQueueRequestMessage(google___protobuf___message___Message):
@@ -82,15 +86,15 @@ class PlaybackQueueRequestMessage(google___protobuf___message___Message):
         label : typing___Optional[typing___Text] = None,
         isLegacyNowPlayingInfoRequest : typing___Optional[builtin___bool] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> PlaybackQueueRequestMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> PlaybackQueueRequestMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> PlaybackQueueRequestMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"artworkHeight",u"artworkWidth",u"cachingPolicy",u"context",u"includeInfo",u"includeLanguageOptions",u"includeLyrics",u"includeMetadata",u"includeSections",u"isLegacyNowPlayingInfoRequest",u"label",u"length",u"location",u"playerPath",u"requestID",u"returnContentItemAssetsInUserCompletion"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"artworkHeight",u"artworkWidth",u"cachingPolicy",u"contentItemIdentifiers",u"context",u"includeInfo",u"includeLanguageOptions",u"includeLyrics",u"includeMetadata",u"includeSections",u"isLegacyNowPlayingInfoRequest",u"label",u"length",u"location",u"playerPath",u"requestID",u"returnContentItemAssetsInUserCompletion"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"contentItemIdentifiers",b"contentItemIdentifiers",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"artworkHeight",b"artworkHeight",u"artworkWidth",b"artworkWidth",u"cachingPolicy",b"cachingPolicy",u"contentItemIdentifiers",b"contentItemIdentifiers",u"context",b"context",u"includeInfo",b"includeInfo",u"includeLanguageOptions",b"includeLanguageOptions",u"includeLyrics",b"includeLyrics",u"includeMetadata",b"includeMetadata",u"includeSections",b"includeSections",u"isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest",u"label",b"label",u"length",b"length",u"location",b"location",u"playerPath",b"playerPath",u"requestID",b"requestID",u"returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> None: ...
 
 playbackQueueRequestMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

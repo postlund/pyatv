@@ -14,6 +14,7 @@ from typing import (
     List as typing___List,
     Optional as typing___Optional,
     Tuple as typing___Tuple,
+    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,6 +28,9 @@ builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
 builtin___str = str
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class SendPackedVirtualTouchEventMessage(google___protobuf___message___Message):
@@ -60,15 +64,15 @@ class SendPackedVirtualTouchEventMessage(google___protobuf___message___Message):
         *,
         data : typing___Optional[builtin___bytes] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> SendPackedVirtualTouchEventMessage: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SendPackedVirtualTouchEventMessage: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendPackedVirtualTouchEventMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"data"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"data"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> None: ...
 
 sendPackedVirtualTouchEventMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

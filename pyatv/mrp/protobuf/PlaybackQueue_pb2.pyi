@@ -28,6 +28,7 @@ from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
+    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -39,6 +40,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
+if sys.version_info < (3,):
+    builtin___buffer = buffer
+    builtin___unicode = unicode
 
 
 class PlaybackQueue(google___protobuf___message___Message):
@@ -67,13 +71,13 @@ class PlaybackQueue(google___protobuf___message___Message):
         sendingPlaybackQueueTransaction : typing___Optional[builtin___bool] = None,
         queueIdentifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
-    @classmethod
-    def FromString(cls, s: builtin___bytes) -> PlaybackQueue: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> PlaybackQueue: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> PlaybackQueue: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    if sys.version_info >= (3,):
-        def HasField(self, field_name: typing_extensions___Literal[u"context",u"location",u"queueIdentifier",u"requestId",u"resolvedPlayerPath",u"sendingPlaybackQueueTransaction"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",u"context",u"location",u"queueIdentifier",u"requestId",u"resolvedPlayerPath",u"sendingPlaybackQueueTransaction"]) -> None: ...
-    else:
-        def HasField(self, field_name: typing_extensions___Literal[u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> builtin___bool: ...
-        def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",b"contentItems",u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",b"contentItems",u"context",b"context",u"location",b"location",u"queueIdentifier",b"queueIdentifier",u"requestId",b"requestId",u"resolvedPlayerPath",b"resolvedPlayerPath",u"sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> None: ...
