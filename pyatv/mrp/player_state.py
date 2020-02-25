@@ -92,7 +92,6 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self.protocol = protocol
         self.loop = loop
         self.states = {}
-        self.is_powered_on = None
         self.active = None
         self._listener = None
         self._add_listeners()
@@ -106,12 +105,6 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self.protocol.add_listener(
             self._handle_set_now_playing_client,
             protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_device_info_message,
-            protobuf.DEVICE_INFO_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_device_info_message,
-            protobuf.DEVICE_INFO_UPDATE_MESSAGE)
 
     @property
     def listener(self):
@@ -172,12 +165,3 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
 
             if self.listener:
                 await self.listener.state_updated()
-
-    async def _handle_device_info_message(self, message, _):
-        logicalDeviceCount = message.inner().logicalDeviceCount
-
-        self.is_powered_on = logicalDeviceCount >= 1
-        
-        if self.listener:
-            self.listener.powerstate_updated()
-        _LOGGER.debug('Power state is now %s', self.is_powered_on)

@@ -410,6 +410,43 @@ class DeviceListener:
         """Device connection was (intentionally) closed."""
         raise NotImplementedError()
 
+class PowerListener:
+    """Listener interface for power updates."""
+
+    @abstractmethod
+    def powerstate_update(self, old_state, new_state):
+        """Device power state was updated."""
+        raise NotImplementedError()
+
+class Power:
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        """Initialize a new AppleTV."""
+        self.__listener = None
+
+    @property
+    def listener(self):
+        """Object receiving power state updates.
+
+        Must be an object conforming to PowerListener.
+        """
+        return self.__listener
+
+    @abstractproperty
+    def power_state(self):
+        """Return device power state."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    def turn_on(self):
+        """Turn device on."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    def turn_off(self):
+        """Turn device off."""
+        raise exceptions.NotSupportedError()
 
 class AppleTV:
     """Base class representing an Apple TV."""
@@ -469,4 +506,9 @@ class AppleTV:
     @abstractproperty
     def stream(self):
         """Return API for streaming media."""
+        raise exceptions.NotSupportedError()
+
+    @abstractproperty
+    def power(self):
+        """Return API for power management."""
         raise exceptions.NotSupportedError()

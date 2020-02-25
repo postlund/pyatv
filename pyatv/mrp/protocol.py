@@ -36,6 +36,7 @@ class MrpProtocol:
         self.connection.listener = self
         self.srp = srp
         self.service = service
+        self.device_info = None
         self._outstanding = {}
         self._listeners = {}
         self._initial_message_sent = False
@@ -65,7 +66,7 @@ class MrpProtocol:
         msg = messages.device_information(
             'pyatv', self.srp.pairing_id.decode())
 
-        await self.send_and_receive(msg)
+        self.device_info = await self.send_and_receive(msg)
         self._initial_message_sent = True
 
         # This is a hack to support re-use of a protocol object in
@@ -166,8 +167,8 @@ class MrpProtocol:
                 self._outstanding[identifier].semaphore, message)
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
-
-        self._dispatch(message)
+        else:
+            self._dispatch(message)
 
     def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
