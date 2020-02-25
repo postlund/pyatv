@@ -61,101 +61,114 @@ class MrpRemoteControl(RemoteControl):
         self.protocol = protocol
 
     async def _press_key(self, key, hold=False):
-        lookup = _KEY_LOOKUP.get(key, None)
-        if lookup:
-            await self.protocol.send(
-                messages.send_hid_event(lookup[0], lookup[1], True))
-            if hold:
-                await asyncio.sleep(lookup[2])
-            await self.protocol.send(
-                messages.send_hid_event(lookup[0], lookup[1], False))
-        else:
-            raise Exception('unknown key: ' + key)
+        lookup = _KEY_LOOKUP.get(key)
+        if not lookup:
+            raise Exception('unsupported key: ' + key)
 
-    def up(self):
+        await self.protocol.send_and_receive(
+            messages.send_hid_event(lookup[0], lookup[1], True))
+
+        if hold:
+            await asyncio.sleep(lookup[2])
+
+        await self.protocol.send_and_receive(
+            messages.send_hid_event(lookup[0], lookup[1], False))
+
+    async def _send_command(self, command):
+        resp = await self.protocol.send_and_receive(messages.command(command))
+        inner = resp.inner()
+
+        if inner.errorCode != 0:
+            raise exceptions.CommandError(
+                "Command {0} failed: {1}, {2}".format(
+                    command, inner.errorCode, inner.handlerReturnStatus))
+
+    async def up(self):
         """Press key up."""
-        return self._press_key('up')
+        await self._press_key('up')
 
-    def down(self):
+    async def down(self):
         """Press key down."""
-        return self._press_key('down')
+        await self._press_key('down')
 
-    def left(self):
+    async def left(self):
         """Press key left."""
-        return self._press_key('left')
+        await self._press_key('left')
 
-    def right(self):
+    async def right(self):
         """Press key right."""
-        return self._press_key('right')
+        await self._press_key('right')
 
-    def play(self):
+    async def play(self):
         """Press key play."""
-        return self.protocol.send(messages.command(CommandInfo_pb2.Play))
+        await self._send_command(CommandInfo_pb2.Play)
 
-    def pause(self):
+    async def pause(self):
         """Press key play."""
-        return self.protocol.send(messages.command(CommandInfo_pb2.Pause))
+        await self._send_command(CommandInfo_pb2.Pause)
 
-    def stop(self):
+    async def stop(self):
         """Press key stop."""
-        return self.protocol.send(messages.command(CommandInfo_pb2.Stop))
+        await self._send_command(CommandInfo_pb2.Stop)
 
-    def next(self):
+    async def next(self):
         """Press key next."""
-        return self.protocol.send(messages.command(CommandInfo_pb2.NextTrack))
+        await self._send_command(CommandInfo_pb2.NextTrack)
 
-    def previous(self):
+    async def previous(self):
         """Press key previous."""
-        return self.protocol.send(
-            messages.command(CommandInfo_pb2.PreviousTrack))
+        await self._send_command(CommandInfo_pb2.PreviousTrack)
 
-    def select(self):
+    async def select(self):
         """Press key select."""
-        return self._press_key('select')
+        await self._press_key('select')
 
-    def menu(self):
+    async def menu(self):
         """Press key menu."""
-        return self._press_key('menu')
+        await self._press_key('menu')
 
-    def volume_up(self):
+    async def volume_up(self):
         """Press key volume up."""
-        return self._press_key('volume_up')
+        await self._press_key('volume_up')
 
-    def volume_down(self):
+    async def volume_down(self):
         """Press key volume down."""
-        return self._press_key('volume_down')
+        await self._press_key('volume_down')
 
-    def home(self):
+    async def home(self):
         """Press key home."""
-        return self._press_key('home')
+        await self._press_key('home')
 
-    def home_hold(self):
+    async def home_hold(self):
         """Hold key home."""
-        return self._press_key('home', hold=True)
+        await self._press_key('home', hold=True)
 
-    def top_menu(self):
+    async def top_menu(self):
         """Go to main menu (long press menu)."""
-        return self._press_key('topmenu')
+        await self._press_key('topmenu')
 
-    def suspend(self):
+    async def suspend(self):
         """Suspend the device."""
-        return self._press_key('suspend')
+        await self._press_key('suspend')
 
-    def wakeup(self):
+    async def wakeup(self):
         """Wake up the device."""
-        return self._press_key('wakeup')
+        await self._press_key('wakeup')
 
-    def set_position(self, pos):
+    async def set_position(self, pos):
         """Seek in the current playing media."""
-        return self.protocol.send(messages.seek_to_position(pos))
+        await self.protocol.send_and_receive(
+            messages.seek_to_position(pos))
 
-    def set_shuffle(self, shuffle_state):
+    async def set_shuffle(self, shuffle_state):
         """Change shuffle mode to on or off."""
-        return self.protocol.send(messages.shuffle(shuffle_state))
+        await self.protocol.send_and_receive(
+            messages.shuffle(shuffle_state))
 
-    def set_repeat(self, repeat_state):
+    async def set_repeat(self, repeat_state):
         """Change repeat state."""
-        return self.protocol.send(messages.repeat(repeat_state))
+        await self.protocol.send_and_receive(
+            messages.repeat(repeat_state))
 
 
 class MrpPlaying(Playing):

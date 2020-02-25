@@ -59,3 +59,7 @@ class BackOffError(Exception):
 
 class PlaybackError(Exception):
     """Thrown when media playback failed."""
+
+
+class CommandError(Exception):
+    """Thrown when a command (e.g. play or pause) failed."""

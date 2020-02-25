@@ -47,6 +47,7 @@ class ProtocolMessage(google___protobuf___message___Message):
         def values(cls) -> typing___List['ProtocolMessage.Type']: ...
         @classmethod
         def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ProtocolMessage.Type']]: ...
+        UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
         SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
         SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
         GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
@@ -55,6 +56,7 @@ class ProtocolMessage(google___protobuf___message___Message):
         REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
         REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
         SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
+        SEND_HID_REPORT_MESSAGE = typing___cast('ProtocolMessage.Type', 9)
         SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
         NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
         CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
@@ -82,13 +84,17 @@ class ProtocolMessage(google___protobuf___message___Message):
         SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
         DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
         SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
+        SEND_BUTTON_EVENT = typing___cast('ProtocolMessage.Type', 39)
         SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
         WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
+        GENERIC_MESSAGE = typing___cast('ProtocolMessage.Type', 42)
         SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
+        SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
         SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
         UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
         UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
+    UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
     SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
     SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
     GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
@@ -97,6 +103,7 @@ class ProtocolMessage(google___protobuf___message___Message):
     REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
     REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
     SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
+    SEND_HID_REPORT_MESSAGE = typing___cast('ProtocolMessage.Type', 9)
     SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
     NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
     CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
@@ -124,9 +131,12 @@ class ProtocolMessage(google___protobuf___message___Message):
     SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
     DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
     SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
+    SEND_BUTTON_EVENT = typing___cast('ProtocolMessage.Type', 39)
     SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
     WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
+    GENERIC_MESSAGE = typing___cast('ProtocolMessage.Type', 42)
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
+    SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
     SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
     UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
     UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
@@ -134,14 +144,16 @@ class ProtocolMessage(google___protobuf___message___Message):
 
     type = ... # type: ProtocolMessage.Type
     identifier = ... # type: typing___Text
-    priority = ... # type: builtin___int
+    authenticationToken = ... # type: typing___Text
+    errorCode = ... # type: builtin___int
     timestamp = ... # type: builtin___int
 
     def __init__(self,
         *,
         type : typing___Optional[ProtocolMessage.Type] = None,
         identifier : typing___Optional[typing___Text] = None,
-        priority : typing___Optional[builtin___int] = None,
+        authenticationToken : typing___Optional[typing___Text] = None,
+        errorCode : typing___Optional[builtin___int] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
@@ -152,5 +164,5 @@ class ProtocolMessage(google___protobuf___message___Message):
         def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ProtocolMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"priority",b"priority",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...

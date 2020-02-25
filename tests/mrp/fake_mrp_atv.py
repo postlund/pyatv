@@ -200,7 +200,7 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.update_state(identifier)
 
     def get_player_state(self, identifier):
-        return self.states[identifier]
+        return self.states.get(identifier)
 
     def set_active_player(self, identifier):
         if identifier is not None and identifier not in self.states:
@@ -280,45 +280,48 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 
         if down_press == 1:
             self.outstanding_keypresses.add((use_page, usage))
+            self.send(messages.create(0, identifier=message.identifier))
         elif down_press == 0:
             if (use_page, usage) in self.outstanding_keypresses:
                 self.last_button_pressed = _convert_key_press(use_page, usage)
                 self.outstanding_keypresses.remove((use_page, usage))
                 _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+                self.send(messages.create(0, identifier=message.identifier))
             else:
                 _LOGGER.error('Missing key down for %d,%d', use_page, usage)
         else:
             _LOGGER.error('Invalid key press state: %d', down_press)
 
     def handle_send_command(self, message, inner):
+        state = self.get_player_state(self.active_player)
         button = _COMMAND_LOOKUP.get(inner.command)
         if button:
             self.last_button_pressed = button
             _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
         elif inner.command == cmd.ChangeRepeatMode:
-            state = self.get_player_state(self.active_player)
-            repeatMode = inner.options.repeatMode
-            if repeatMode == protobuf.CommandInfo.One:
-                state.repeat = const.RepeatState.Track
-            elif repeatMode == protobuf.CommandInfo.All:
-                state.repeat = const.RepeatState.All
-            else:
-                state.repeat = const.RepeatState.Off
+            state.repeat = {
+                protobuf.CommandInfo.One: const.RepeatState.Track,
+                protobuf.CommandInfo.All: const.RepeatState.All,
+                }.get(inner.options.repeatMode,
+                      const.RepeatState.Off)
             self.update_state(self.active_player)
             _LOGGER.debug('Change repeat state to %s', state.repeat)
         elif inner.command == cmd.ChangeShuffleMode:
-            state = self.get_player_state(self.active_player)
             state.shuffle = inner.options.shuffleMode
             self.update_state(self.active_player)
             _LOGGER.debug('Change shuffle state to %s', state.shuffle)
         elif inner.command == cmd.SeekToPlaybackPosition:
-            state = self.get_player_state(self.active_player)
             state.position = inner.options.playbackPosition
             self.update_state(self.active_player)
             _LOGGER.debug('Seek to position: %d', state.position)
         else:
             _LOGGER.warning(
                 'Unhandled button press: %s', message.inner().command)
+            self.send(messages.command_result(
+                message.identifier, error_code=1234))
+            return
+
+        self.send(messages.command_result(message.identifier))
 
     def handle_playback_queue_request(self, message, inner):
         setstate = messages.create(
