@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n(pyatv/mrp/protobuf/ProtocolMessage.proto\"\x95\x0c\n\x0fProtocolMessage\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.ProtocolMessage.Type\x12\x12\n\nidentifier\x18\x02 \x01(\t\x12\x10\n\x08priority\x18\x04 \x01(\x05\x12\x11\n\ttimestamp\x18\x05 \x01(\x04\"\x99\x0b\n\x04Type\x12\x18\n\x14SEND_COMMAND_MESSAGE\x10\x01\x12\x1f\n\x1bSEND_COMMAND_RESULT_MESSAGE\x10\x02\x12\x15\n\x11GET_STATE_MESSAGE\x10\x03\x12\x15\n\x11SET_STATE_MESSAGE\x10\x04\x12\x17\n\x13SET_ARTWORK_MESSAGE\x10\x05\x12\x1f\n\x1bREGISTER_HID_DEVICE_MESSAGE\x10\x06\x12&\n\"REGISTER_HID_DEVICE_RESULT_MESSAGE\x10\x07\x12\x1a\n\x16SEND_HID_EVENT_MESSAGE\x10\x08\x12$\n SEND_VIRTUAL_TOUCH_EVENT_MESSAGE\x10\n\x12\x18\n\x14NOTIFICATION_MESSAGE\x10\x0b\x12.\n*CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE\x10\x0c\x12\x17\n\x13\x44\x45VICE_INFO_MESSAGE\x10\x0f\x12!\n\x1d\x43LIENT_UPDATES_CONFIG_MESSAGE\x10\x10\x12\'\n#VOLUME_CONTROL_AVAILABILITY_MESSAGE\x10\x11\x12\x1b\n\x17GAME_CONTROLLER_MESSAGE\x10\x12\x12$\n REGISTER_GAME_CONTROLLER_MESSAGE\x10\x13\x12-\n)REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE\x10\x14\x12&\n\"UNREGISTER_GAME_CONTROLLER_MESSAGE\x10\x15\x12/\n+REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE\x10\x16\x12\x14\n\x10KEYBOARD_MESSAGE\x10\x17\x12 \n\x1cGET_KEYBOARD_SESSION_MESSAGE\x10\x18\x12\x16\n\x12TEXT_INPUT_MESSAGE\x10\x19\x12#\n\x1fGET_VOICE_INPUT_DEVICES_MESSAGE\x10\x1a\x12,\n(GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE\x10\x1b\x12\'\n#REGISTER_VOICE_INPUT_DEVICE_MESSAGE\x10\x1c\x12\x30\n,REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE\x10\x1d\x12\x1f\n\x1bSET_RECORDING_STATE_MESSAGE\x10\x1e\x12\x1c\n\x18SEND_VOICE_INPUT_MESSAGE\x10\x1f\x12\"\n\x1ePLAYBACK_QUEUE_REQUEST_MESSAGE\x10 \x12\x17\n\x13TRANSACTION_MESSAGE\x10!\x12\x1a\n\x16\x43RYPTO_PAIRING_MESSAGE\x10\"\x12&\n\"GAME_CONTROLLER_PROPERTIES_MESSAGE\x10#\x12\x1b\n\x17SET_READY_STATE_MESSAGE\x10$\x12\x1e\n\x1a\x44\x45VICE_INFO_UPDATE_MESSAGE\x10%\x12 \n\x1cSET_CONNECTION_STATE_MESSAGE\x10&\x12\x1b\n\x17SET_HILITE_MODE_MESSAGE\x10(\x12\x17\n\x13WAKE_DEVICE_MESSAGE\x10)\x12+\n\'SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE\x10+\x12\"\n\x1eSET_NOW_PLAYING_CLIENT_MESSAGE\x10.\x12\x19\n\x15UPDATE_CLIENT_MESSAGE\x10\x37\x12\x1f\n\x1bUPDATE_CONTENT_ITEM_MESSAGE\x10\x38\x12*\n&SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE\x10H*\x08\x08\x06\x10\x80\x80\x80\x80\x02'
+  serialized_pb=b'\n(pyatv/mrp/protobuf/ProtocolMessage.proto\"\xa8\r\n\x0fProtocolMessage\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.ProtocolMessage.Type\x12\x12\n\nidentifier\x18\x02 \x01(\t\x12\x1b\n\x13\x61uthenticationToken\x18\x03 \x01(\t\x12\x11\n\terrorCode\x18\x04 \x01(\r\x12\x11\n\ttimestamp\x18\x05 \x01(\x04\"\x8e\x0c\n\x04Type\x12\x13\n\x0fUNKNOWN_MESSAGE\x10\x00\x12\x18\n\x14SEND_COMMAND_MESSAGE\x10\x01\x12\x1f\n\x1bSEND_COMMAND_RESULT_MESSAGE\x10\x02\x12\x15\n\x11GET_STATE_MESSAGE\x10\x03\x12\x15\n\x11SET_STATE_MESSAGE\x10\x04\x12\x17\n\x13SET_ARTWORK_MESSAGE\x10\x05\x12\x1f\n\x1bREGISTER_HID_DEVICE_MESSAGE\x10\x06\x12&\n\"REGISTER_HID_DEVICE_RESULT_MESSAGE\x10\x07\x12\x1a\n\x16SEND_HID_EVENT_MESSAGE\x10\x08\x12\x1b\n\x17SEND_HID_REPORT_MESSAGE\x10\t\x12$\n SEND_VIRTUAL_TOUCH_EVENT_MESSAGE\x10\n\x12\x18\n\x14NOTIFICATION_MESSAGE\x10\x0b\x12.\n*CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE\x10\x0c\x12\x17\n\x13\x44\x45VICE_INFO_MESSAGE\x10\x0f\x12!\n\x1d\x43LIENT_UPDATES_CONFIG_MESSAGE\x10\x10\x12\'\n#VOLUME_CONTROL_AVAILABILITY_MESSAGE\x10\x11\x12\x1b\n\x17GAME_CONTROLLER_MESSAGE\x10\x12\x12$\n REGISTER_GAME_CONTROLLER_MESSAGE\x10\x13\x12-\n)REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE\x10\x14\x12&\n\"UNREGISTER_GAME_CONTROLLER_MESSAGE\x10\x15\x12/\n+REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE\x10\x16\x12\x14\n\x10KEYBOARD_MESSAGE\x10\x17\x12 \n\x1cGET_KEYBOARD_SESSION_MESSAGE\x10\x18\x12\x16\n\x12TEXT_INPUT_MESSAGE\x10\x19\x12#\n\x1fGET_VOICE_INPUT_DEVICES_MESSAGE\x10\x1a\x12,\n(GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE\x10\x1b\x12\'\n#REGISTER_VOICE_INPUT_DEVICE_MESSAGE\x10\x1c\x12\x30\n,REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE\x10\x1d\x12\x1f\n\x1bSET_RECORDING_STATE_MESSAGE\x10\x1e\x12\x1c\n\x18SEND_VOICE_INPUT_MESSAGE\x10\x1f\x12\"\n\x1ePLAYBACK_QUEUE_REQUEST_MESSAGE\x10 \x12\x17\n\x13TRANSACTION_MESSAGE\x10!\x12\x1a\n\x16\x43RYPTO_PAIRING_MESSAGE\x10\"\x12&\n\"GAME_CONTROLLER_PROPERTIES_MESSAGE\x10#\x12\x1b\n\x17SET_READY_STATE_MESSAGE\x10$\x12\x1e\n\x1a\x44\x45VICE_INFO_UPDATE_MESSAGE\x10%\x12 \n\x1cSET_CONNECTION_STATE_MESSAGE\x10&\x12\x15\n\x11SEND_BUTTON_EVENT\x10\'\x12\x1b\n\x17SET_HILITE_MODE_MESSAGE\x10(\x12\x17\n\x13WAKE_DEVICE_MESSAGE\x10)\x12\x13\n\x0fGENERIC_MESSAGE\x10*\x12+\n\'SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE\x10+\x12\x15\n\x11SEND_LYRICS_EVENT\x10,\x12\"\n\x1eSET_NOW_PLAYING_CLIENT_MESSAGE\x10.\x12\x19\n\x15UPDATE_CLIENT_MESSAGE\x10\x37\x12\x1f\n\x1bUPDATE_CONTENT_ITEM_MESSAGE\x10\x38\x12*\n&SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE\x10H*\x08\x08\x06\x10\x80\x80\x80\x80\x02'
 )
 
 
@@ -30,178 +30,198 @@ _PROTOCOLMESSAGE_TYPE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='SEND_COMMAND_MESSAGE', index=0, number=1,
+      name='UNKNOWN_MESSAGE', index=0, number=0,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_COMMAND_RESULT_MESSAGE', index=1, number=2,
+      name='SEND_COMMAND_MESSAGE', index=1, number=1,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GET_STATE_MESSAGE', index=2, number=3,
+      name='SEND_COMMAND_RESULT_MESSAGE', index=2, number=2,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_STATE_MESSAGE', index=3, number=4,
+      name='GET_STATE_MESSAGE', index=3, number=3,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_ARTWORK_MESSAGE', index=4, number=5,
+      name='SET_STATE_MESSAGE', index=4, number=4,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_HID_DEVICE_MESSAGE', index=5, number=6,
+      name='SET_ARTWORK_MESSAGE', index=5, number=5,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_HID_DEVICE_RESULT_MESSAGE', index=6, number=7,
+      name='REGISTER_HID_DEVICE_MESSAGE', index=6, number=6,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_HID_EVENT_MESSAGE', index=7, number=8,
+      name='REGISTER_HID_DEVICE_RESULT_MESSAGE', index=7, number=7,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_VIRTUAL_TOUCH_EVENT_MESSAGE', index=8, number=10,
+      name='SEND_HID_EVENT_MESSAGE', index=8, number=8,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NOTIFICATION_MESSAGE', index=9, number=11,
+      name='SEND_HID_REPORT_MESSAGE', index=9, number=9,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE', index=10, number=12,
+      name='SEND_VIRTUAL_TOUCH_EVENT_MESSAGE', index=10, number=10,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='DEVICE_INFO_MESSAGE', index=11, number=15,
+      name='NOTIFICATION_MESSAGE', index=11, number=11,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CLIENT_UPDATES_CONFIG_MESSAGE', index=12, number=16,
+      name='CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE', index=12, number=12,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='VOLUME_CONTROL_AVAILABILITY_MESSAGE', index=13, number=17,
+      name='DEVICE_INFO_MESSAGE', index=13, number=15,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GAME_CONTROLLER_MESSAGE', index=14, number=18,
+      name='CLIENT_UPDATES_CONFIG_MESSAGE', index=14, number=16,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_GAME_CONTROLLER_MESSAGE', index=15, number=19,
+      name='VOLUME_CONTROL_AVAILABILITY_MESSAGE', index=15, number=17,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE', index=16, number=20,
+      name='GAME_CONTROLLER_MESSAGE', index=16, number=18,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='UNREGISTER_GAME_CONTROLLER_MESSAGE', index=17, number=21,
+      name='REGISTER_GAME_CONTROLLER_MESSAGE', index=17, number=19,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE', index=18, number=22,
+      name='REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE', index=18, number=20,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='KEYBOARD_MESSAGE', index=19, number=23,
+      name='UNREGISTER_GAME_CONTROLLER_MESSAGE', index=19, number=21,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GET_KEYBOARD_SESSION_MESSAGE', index=20, number=24,
+      name='REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE', index=20, number=22,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='TEXT_INPUT_MESSAGE', index=21, number=25,
+      name='KEYBOARD_MESSAGE', index=21, number=23,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GET_VOICE_INPUT_DEVICES_MESSAGE', index=22, number=26,
+      name='GET_KEYBOARD_SESSION_MESSAGE', index=22, number=24,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE', index=23, number=27,
+      name='TEXT_INPUT_MESSAGE', index=23, number=25,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_VOICE_INPUT_DEVICE_MESSAGE', index=24, number=28,
+      name='GET_VOICE_INPUT_DEVICES_MESSAGE', index=24, number=26,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE', index=25, number=29,
+      name='GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE', index=25, number=27,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_RECORDING_STATE_MESSAGE', index=26, number=30,
+      name='REGISTER_VOICE_INPUT_DEVICE_MESSAGE', index=26, number=28,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_VOICE_INPUT_MESSAGE', index=27, number=31,
+      name='REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE', index=27, number=29,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='PLAYBACK_QUEUE_REQUEST_MESSAGE', index=28, number=32,
+      name='SET_RECORDING_STATE_MESSAGE', index=28, number=30,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='TRANSACTION_MESSAGE', index=29, number=33,
+      name='SEND_VOICE_INPUT_MESSAGE', index=29, number=31,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CRYPTO_PAIRING_MESSAGE', index=30, number=34,
+      name='PLAYBACK_QUEUE_REQUEST_MESSAGE', index=30, number=32,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GAME_CONTROLLER_PROPERTIES_MESSAGE', index=31, number=35,
+      name='TRANSACTION_MESSAGE', index=31, number=33,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_READY_STATE_MESSAGE', index=32, number=36,
+      name='CRYPTO_PAIRING_MESSAGE', index=32, number=34,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='DEVICE_INFO_UPDATE_MESSAGE', index=33, number=37,
+      name='GAME_CONTROLLER_PROPERTIES_MESSAGE', index=33, number=35,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_CONNECTION_STATE_MESSAGE', index=34, number=38,
+      name='SET_READY_STATE_MESSAGE', index=34, number=36,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_HILITE_MODE_MESSAGE', index=35, number=40,
+      name='DEVICE_INFO_UPDATE_MESSAGE', index=35, number=37,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='WAKE_DEVICE_MESSAGE', index=36, number=41,
+      name='SET_CONNECTION_STATE_MESSAGE', index=36, number=38,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE', index=37, number=43,
+      name='SEND_BUTTON_EVENT', index=37, number=39,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_NOW_PLAYING_CLIENT_MESSAGE', index=38, number=46,
+      name='SET_HILITE_MODE_MESSAGE', index=38, number=40,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='UPDATE_CLIENT_MESSAGE', index=39, number=55,
+      name='WAKE_DEVICE_MESSAGE', index=39, number=41,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='UPDATE_CONTENT_ITEM_MESSAGE', index=40, number=56,
+      name='GENERIC_MESSAGE', index=40, number=42,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE', index=41, number=72,
+      name='SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE', index=41, number=43,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SEND_LYRICS_EVENT', index=42, number=44,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SET_NOW_PLAYING_CLIENT_MESSAGE', index=43, number=46,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UPDATE_CLIENT_MESSAGE', index=44, number=55,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UPDATE_CONTENT_ITEM_MESSAGE', index=45, number=56,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE', index=46, number=72,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=159,
-  serialized_end=1592,
+  serialized_start=189,
+  serialized_end=1739,
 )
 _sym_db.RegisterEnumDescriptor(_PROTOCOLMESSAGE_TYPE)
 
@@ -216,7 +236,7 @@ _PROTOCOLMESSAGE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='type', full_name='ProtocolMessage.type', index=0,
       number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -228,14 +248,21 @@ _PROTOCOLMESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='priority', full_name='ProtocolMessage.priority', index=2,
-      number=4, type=5, cpp_type=1, label=1,
+      name='authenticationToken', full_name='ProtocolMessage.authenticationToken', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='errorCode', full_name='ProtocolMessage.errorCode', index=3,
+      number=4, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ProtocolMessage.timestamp', index=3,
+      name='timestamp', full_name='ProtocolMessage.timestamp', index=4,
       number=5, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -255,7 +282,7 @@ _PROTOCOLMESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=45,
-  serialized_end=1602,
+  serialized_end=1749,
 )
 
 _PROTOCOLMESSAGE.fields_by_name['type'].enum_type = _PROTOCOLMESSAGE_TYPE
