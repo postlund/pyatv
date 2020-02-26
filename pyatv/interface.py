@@ -434,7 +434,7 @@ class Power:
         return self.__listener
 
     @abstractproperty
-    def power_state(self):
+    async def power_state(self):
         """Return device power state."""
         raise exceptions.NotSupportedError()
 
