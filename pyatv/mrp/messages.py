@@ -7,11 +7,11 @@ from pyatv.mrp import protobuf
 from pyatv.mrp import tlv8
 
 
-def create(message_type, priority=0, identifier=None):
+def create(message_type, error_code=0, identifier=None):
     """Create a ProtocolMessage."""
     message = protobuf.ProtocolMessage()
     message.type = message_type
-    message.priority = priority
+    message.errorCode = error_code
     if identifier:
         message.identifier = identifier
     return message
@@ -121,6 +121,16 @@ def command(cmd):
     message = create(protobuf.SEND_COMMAND_MESSAGE)
     send_command = message.inner()
     send_command.command = cmd
+    return message
+
+
+def command_result(identifier, error_code=0):
+    """Playback command request."""
+    message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE,
+                     identifier=identifier)
+    inner = message.inner()
+    inner.errorCode = error_code
+    inner.handlerReturnStatus = 0
     return message
 
 

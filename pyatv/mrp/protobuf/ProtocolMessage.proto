@@ -3,7 +3,8 @@ syntax = "proto2";
 message ProtocolMessage {
   extensions 6 to max;
 
-  enum Type { 
+  enum Type {
+    UNKNOWN_MESSAGE = 0;
     SEND_COMMAND_MESSAGE = 1;
     SEND_COMMAND_RESULT_MESSAGE = 2;
     GET_STATE_MESSAGE = 3;
@@ -12,6 +13,7 @@ message ProtocolMessage {
     REGISTER_HID_DEVICE_MESSAGE = 6;
     REGISTER_HID_DEVICE_RESULT_MESSAGE = 7;
     SEND_HID_EVENT_MESSAGE = 8;
+    SEND_HID_REPORT_MESSAGE = 9;
     SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = 10;
     NOTIFICATION_MESSAGE = 11;
     CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = 12;
@@ -39,9 +41,12 @@ message ProtocolMessage {
     SET_READY_STATE_MESSAGE = 36;
     DEVICE_INFO_UPDATE_MESSAGE = 37;
     SET_CONNECTION_STATE_MESSAGE = 38;
+    SEND_BUTTON_EVENT = 39;
     SET_HILITE_MODE_MESSAGE = 40;
     WAKE_DEVICE_MESSAGE = 41;
+    GENERIC_MESSAGE = 42;
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = 43;
+    SEND_LYRICS_EVENT = 44;
     SET_NOW_PLAYING_CLIENT_MESSAGE = 46;
     UPDATE_CLIENT_MESSAGE = 55;
     UPDATE_CONTENT_ITEM_MESSAGE = 56;
@@ -50,6 +55,7 @@ message ProtocolMessage {
 
   optional Type type = 1; // Identifies which underlying message is filled in.
   optional string identifier = 2;
-  optional int32 priority = 4;
+  optional string authenticationToken = 3;
+  optional uint32 errorCode = 4;
   optional uint64 timestamp = 5;
 }

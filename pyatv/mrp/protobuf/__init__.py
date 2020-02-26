@@ -22,11 +22,13 @@ from . import SendCommandMessage_pb2
 from . import SendCommandResultMessage_pb2
 from . import SendHIDEventMessage_pb2
 from . import SendPackedVirtualTouchEventMessage_pb2
+from . import SendVoiceInputMessage_pb2
 from . import SetArtworkMessage_pb2
 from . import SetConnectionStateMessage_pb2
 from . import SetDefaultSupportedCommandsMessage_pb2
 from . import SetHiliteModeMessage_pb2
 from . import SetNowPlayingClientMessage_pb2
+from . import SetRecordingStateMessage_pb2
 from . import SetStateMessage_pb2
 from . import TextInputMessage_pb2
 from . import TransactionMessage_pb2
@@ -62,15 +64,22 @@ from .RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
 from .RegisterHIDDeviceResultMessage_pb2 import RegisterHIDDeviceResultMessage
 from .RegisterVoiceInputDeviceMessage_pb2 import RegisterVoiceInputDeviceMessage
 from .RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDeviceResponseMessage
+from .SendButtonEventMessage_pb2 import SendButtonEventMessage
 from .SendCommandMessage_pb2 import SendCommandMessage
 from .SendCommandResultMessage_pb2 import SendCommandResultMessage
 from .SendHIDEventMessage_pb2 import SendHIDEventMessage
 from .SendPackedVirtualTouchEventMessage_pb2 import SendPackedVirtualTouchEventMessage
+from .SendVoiceInputMessage_pb2 import AudioBuffer
+from .SendVoiceInputMessage_pb2 import AudioDataBlock
+from .SendVoiceInputMessage_pb2 import AudioStreamPacketDescription
+from .SendVoiceInputMessage_pb2 import AudioTime
+from .SendVoiceInputMessage_pb2 import SendVoiceInputMessage
 from .SetArtworkMessage_pb2 import SetArtworkMessage
 from .SetConnectionStateMessage_pb2 import SetConnectionStateMessage
 from .SetDefaultSupportedCommandsMessage_pb2 import SetDefaultSupportedCommandsMessage
 from .SetHiliteModeMessage_pb2 import SetHiliteModeMessage
 from .SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
+from .SetRecordingStateMessage_pb2 import SetRecordingStateMessage
 from .SetStateMessage_pb2 import SetStateMessage
 from .SupportedCommands_pb2 import SupportedCommands
 from .TextEditingAttributesMessage_pb2 import TextEditingAttributes
@@ -106,11 +115,13 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE: SendCommandResultMessage_pb2.sendCommandResultMessage,
     ProtocolMessage.SEND_HID_EVENT_MESSAGE: SendHIDEventMessage_pb2.sendHIDEventMessage,
     ProtocolMessage.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: SendPackedVirtualTouchEventMessage_pb2.sendPackedVirtualTouchEventMessage,
+    ProtocolMessage.SEND_VOICE_INPUT_MESSAGE: SendVoiceInputMessage_pb2.sendVoiceInputMessage,
     ProtocolMessage.SET_ARTWORK_MESSAGE: SetArtworkMessage_pb2.setArtworkMessage,
     ProtocolMessage.SET_CONNECTION_STATE_MESSAGE: SetConnectionStateMessage_pb2.setConnectionStateMessage,
     ProtocolMessage.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: SetDefaultSupportedCommandsMessage_pb2.setDefaultSupportedCommandsMessage,
     ProtocolMessage.SET_HILITE_MODE_MESSAGE: SetHiliteModeMessage_pb2.setHiliteModeMessage,
     ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE: SetNowPlayingClientMessage_pb2.setNowPlayingClientMessage,
+    ProtocolMessage.SET_RECORDING_STATE_MESSAGE: SetRecordingStateMessage_pb2.setRecordingStateMessage,
     ProtocolMessage.SET_STATE_MESSAGE: SetStateMessage_pb2.setStateMessage,
     ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
@@ -138,11 +149,13 @@ SEND_COMMAND_MESSAGE = ProtocolMessage.SEND_COMMAND_MESSAGE
 SEND_COMMAND_RESULT_MESSAGE = ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE
 SEND_HID_EVENT_MESSAGE = ProtocolMessage.SEND_HID_EVENT_MESSAGE
 SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = ProtocolMessage.SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE
+SEND_VOICE_INPUT_MESSAGE = ProtocolMessage.SEND_VOICE_INPUT_MESSAGE
 SET_ARTWORK_MESSAGE = ProtocolMessage.SET_ARTWORK_MESSAGE
 SET_CONNECTION_STATE_MESSAGE = ProtocolMessage.SET_CONNECTION_STATE_MESSAGE
 SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = ProtocolMessage.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE
 SET_HILITE_MODE_MESSAGE = ProtocolMessage.SET_HILITE_MODE_MESSAGE
 SET_NOW_PLAYING_CLIENT_MESSAGE = ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE
+SET_RECORDING_STATE_MESSAGE = ProtocolMessage.SET_RECORDING_STATE_MESSAGE
 SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
 TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
