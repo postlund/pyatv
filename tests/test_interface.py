@@ -151,7 +151,7 @@ class InterfaceTest(unittest.TestCase):
     def test_playing_media_type_and_playstate(self):
         out = str(PlayingDummy())
         self.assertIn(convert.media_type_str(MediaType.Video), out)
-        self.assertIn(convert.playstate_str(DeviceState.Playing), out)
+        self.assertIn(convert.device_state_str(DeviceState.Playing), out)
 
     def test_playing_title_artist_album_genre(self):
         out = str(PlayingDummy(
