@@ -18,9 +18,6 @@ import cryptography
 from google.protobuf.text_format import MessageToString
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-from pyatv.mrp import variant
-from pyatv.mrp.protobuf import ProtocolMessage_pb2 as PB
-
 
 PROTOBUF_VERSION = "3.11.4"
 
@@ -271,7 +268,8 @@ def verify_generated_code():
 
 
 def _print_single_message(data, unknown_fields):
-    parsed = PB.ProtocolMessage()
+    from pyatv.mrp.protobuf import ProtocolMessage
+    parsed = ProtocolMessage()
     parsed.ParseFromString(data)
     output = MessageToString(parsed, print_unknown_fields=unknown_fields)
     print(output)
@@ -279,6 +277,8 @@ def _print_single_message(data, unknown_fields):
 
 def decode_and_print_message(args):
     """Decode and print protobuf messages."""
+    from pyatv.mrp import variant
+
     buf = binascii.unhexlify(args.message)
     if not args.stream:
         buf = variant.write_variant(len(buf)) + buf
