@@ -350,9 +350,7 @@ class MrpPower(Power):
         self.remote = remote
         self._power_state = None
         self._listener = None
-        self._add_listeners()
 
-    def _add_listeners(self):
         self.protocol.add_listener(
             self.update_power_state,
             protobuf.DEVICE_INFO_MESSAGE)
@@ -360,45 +358,39 @@ class MrpPower(Power):
             self.update_power_state,
             protobuf.DEVICE_INFO_UPDATE_MESSAGE)
 
-    async def _turn_on(self):
-        await self.remote.menu()
-
-    async def _turn_off(self):
-        await self.remote.home_hold()
-        await self.remote.select()
-
     async def _get_current_power_state(self):
         if self._power_state is None:
             current_power_state = await self.update_power_state(self.protocol.device_info, protobuf.DEVICE_INFO_MESSAGE)
             return current_power_state
-        else:
-            return self._power_state
+        
+        return self._power_state
 
+    @property
     def power_state(self):
         """Return device power state."""
         return self._get_current_power_state()
 
-    def turn_on(self):
+    async def turn_on(self):
         """Turn device on."""
-        return self._turn_on()
+        test = await self.remote.menu()
 
-    def turn_off(self):
+    async def turn_off(self):
         """Turn device off."""
-        return self._turn_off()
+        await self.remote.home_hold()
+        await self.remote.select()
 
     async def update_power_state(self, message, _):
-        
-        logicalDeviceCount = message.inner().logicalDeviceCount
-    
-        if logicalDeviceCount >= 1:
-            self._power_state = PowerState.On
-        elif logicalDeviceCount == 0:
-            self._power_state = PowerState.Off
-        else:
-            self._power_state = PowerState.Unknown
-        
+        self._power_state = self._get_power_state(message)
         _LOGGER.debug('Power state is now %s', self._power_state)
-        return self._power_state
+
+    @staticmethod
+    def _get_power_state(device_info):
+        logicalDeviceCount = device_info.inner().logicalDeviceCount
+        if logicalDeviceCount >= 1:
+            return PowerState.On
+        elif logicalDeviceCount == 0:
+            return PowerState.Off
+        return PowerState.Unknown
 
 
 class MrpPushUpdater(PushUpdater):

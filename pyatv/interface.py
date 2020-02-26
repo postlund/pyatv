@@ -422,7 +422,7 @@ class Power:
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        """Initialize a new AppleTV."""
+        """Initialize a new Power instance."""
         self.__listener = None
 
     @property
@@ -439,12 +439,12 @@ class Power:
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    def turn_on(self):
+    async def turn_on(self):
         """Turn device on."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    def turn_off(self):
+    async def turn_off(self):
         """Turn device off."""
         raise exceptions.NotSupportedError()
 
