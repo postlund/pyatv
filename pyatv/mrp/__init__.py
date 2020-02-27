@@ -367,11 +367,12 @@ class MrpPower(Power):
 
     async def turn_on(self):
         """Turn device on."""
-        await self.remote.wakeup()
+        await self.remote.menu()
 
     async def turn_off(self):
         """Turn device off."""
-        await self.remote.suspend()
+        await self.remote.home_hold()
+        await self.remote.select()
 
     async def _update_power_state(self, message, _):
         old_state = self.power_state
