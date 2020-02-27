@@ -482,6 +482,11 @@ class MrpAppleTV(AppleTV):
         self._protocol.stop()
 
     @property
+    def device_info(self):
+        """Return API for device information."""
+        raise exceptions.NotSupportedError()
+
+    @property
     def service(self):
         """Return service used to connect to the Apple TV."""
         return self._mrp_service

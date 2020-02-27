@@ -3,7 +3,9 @@
 import unittest
 
 from pyatv import (convert, exceptions, interface)
-from pyatv.const import MediaType, DeviceState, RepeatState, ShuffleState
+from pyatv.const import (
+    MediaType, DeviceState, RepeatState, ShuffleState,
+    OperatingSystem, DeviceModel)
 
 
 class TestClass:
@@ -207,3 +209,40 @@ class InterfaceTest(unittest.TestCase):
             metadata.artwork_id()
         with self.assertRaises(exceptions.NotSupportedError):
             metadata.playing()
+
+
+class DeviceInfoTest(unittest.TestCase):
+
+    def test_fields_set(self):
+        dev_info = interface.DeviceInfo(
+            OperatingSystem.TvOS, '1.2.3', '19A123',
+            DeviceModel.Gen4K, 'aa:bb:cc:dd:ee:ff')
+
+        self.assertEqual(dev_info.operating_system, OperatingSystem.TvOS)
+        self.assertEqual(dev_info.version, '1.2.3')
+        self.assertEqual(dev_info.build_number, '19A123')
+        self.assertEqual(dev_info.model, DeviceModel.Gen4K)
+        self.assertEqual(dev_info.mac, 'aa:bb:cc:dd:ee:ff')
+
+    def test_apple_tv_software_str(self):
+        dev_info = interface.DeviceInfo(
+            OperatingSystem.Legacy, '2.2.3', '13D333',
+            DeviceModel.Gen3, 'aa:bb:cc:dd:ee:ff')
+
+        self.assertEqual(
+            str(dev_info), '3 ATV SW 2.2.3 build 13D333')
+
+    def test_tvos_str(self):
+        dev_info = interface.DeviceInfo(
+            OperatingSystem.TvOS, '1.2.3', '19A123',
+            DeviceModel.Gen4K, 'aa:bb:cc:dd:ee:ff')
+
+        self.assertEqual(
+            str(dev_info), '4K tvOS 1.2.3 build 19A123')
+
+    def test_unknown_str(self):
+        dev_info = interface.DeviceInfo(
+            OperatingSystem.Unknown, None, None,
+            DeviceModel.Unknown, None)
+
+        self.assertEqual(str(dev_info), 'Unknown Model Unknown OS')

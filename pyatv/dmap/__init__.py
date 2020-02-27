@@ -481,6 +481,11 @@ class DmapAppleTV(AppleTV):
             self.listener.connection_closed()
 
     @property
+    def device_info(self):
+        """Return API for device information."""
+        raise exceptions.NotSupportedError()
+
+    @property
     def service(self):
         """Return service used to connect to the Apple TV.."""
         return self._dmap_service
