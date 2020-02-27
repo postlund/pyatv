@@ -353,16 +353,14 @@ class MrpPower(Power):
 
         self.protocol.add_listener(
             self.update_power_state,
-            protobuf.DEVICE_INFO_MESSAGE)
-        self.protocol.add_listener(
-            self.update_power_state,
             protobuf.DEVICE_INFO_UPDATE_MESSAGE)
     
     def _get_current_power_state(self):
         latest_device_info = self.device_info or self.protocol.device_info
         return self._get_power_state(latest_device_info)
 
-    async def power_state(self):
+    @property
+    def power_state(self):
         """Return device power state."""
         currect_power_state = self._get_current_power_state()
         return currect_power_state
@@ -377,7 +375,7 @@ class MrpPower(Power):
         await self.remote.select()
 
     async def update_power_state(self, message, _):
-        old_state = await self.power_state()
+        old_state = await self.power_state
         new_state = self._get_power_state(message)
         self.device_info = message
 
