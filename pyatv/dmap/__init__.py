@@ -504,3 +504,8 @@ class DmapAppleTV(AppleTV):
     def stream(self):
         """Return API for streaming media."""
         return self._airplay
+
+    @property
+    def power(self):
+        """Return API for streaming media."""
+        return self._dmap_power
