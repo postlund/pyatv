@@ -8,7 +8,7 @@ from collections import namedtuple
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 
 from pyatv import (convert, exceptions, net)
-
+from pyatv.const import OperatingSystem, DeviceModel
 
 ArtworkInfo = namedtuple('ArtworkInfo', 'bytes mimetype')
 
@@ -400,6 +400,8 @@ class Stream:  # pylint: disable=too-few-public-methods
 class DeviceListener:
     """Listener interface for generic device updates."""
 
+    __metaclass__ = ABCMeta
+
     @abstractmethod
     def connection_lost(self, exception):
         """Device was unexpectedly disconnected."""
@@ -462,6 +464,63 @@ class Power:
         raise exceptions.NotSupportedError()
 
 
+class DeviceInfo:
+    """General information about device."""
+
+    def __init__(self, os, version, build_number, model, mac):  # pylint: disable=too-many-arguments  # noqa
+        """Initialize a new DeviceInfo instance."""
+        self._os = os
+        self._version = version
+        self._build_number = build_number
+        self._model = model
+        self._mac = mac
+
+    @property
+    def operating_system(self):
+        """Operating system running on device."""
+        return self._os
+
+    @property
+    def version(self):
+        """Operating system version."""
+        return self._version
+
+    @property
+    def build_number(self):
+        """Operating system build number, e.g. 17K795."""
+        return self._build_number
+
+    @property
+    def model(self):
+        """Hardware model name, e.g 3, 4 or 4K."""
+        return self._model
+
+    @property
+    def mac(self):
+        """Device MAC address."""
+        return self._mac
+
+    def __str__(self):
+        """Convert device info to readable string."""
+        if self.model != DeviceModel.Unknown:
+            output = self.model.name.replace('Gen', '')
+        else:
+            output = 'Unknown Model'
+
+        output += ' ' + {
+            OperatingSystem.Legacy: 'ATV SW',
+            OperatingSystem.TvOS: 'tvOS',
+        }.get(self.operating_system, 'Unknown OS')
+
+        if self.version:
+            output += ' ' + self.version
+
+        if self.build_number:
+            output += ' build ' + self.build_number
+
+        return output
+
+
 class AppleTV:
     """Base class representing an Apple TV."""
 
@@ -495,6 +554,11 @@ class AppleTV:
     @abstractmethod
     async def close(self):
         """Close connection and release allocated resources."""
+        raise exceptions.NotSupportedError()
+
+    @abstractproperty
+    def device_info(self):
+        """Return API for device information."""
         raise exceptions.NotSupportedError()
 
     @abstractproperty

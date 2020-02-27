@@ -60,3 +60,21 @@ class PowerState(Enum):
     Unknown = 0
     Off = 1
     On = 2
+
+
+class OperatingSystem(Enum):
+    """Operating system on device."""
+
+    Unknown = 0
+    Legacy = 1  # Pre-tvOS (Apple TV Software)
+    TvOS = 2
+
+
+class DeviceModel(Enum):
+    """Hardware device models."""
+
+    Unknown = 0
+    Gen2 = 1
+    Gen3 = 2
+    Gen4 = 3
+    Gen4K = 4
