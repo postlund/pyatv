@@ -7,6 +7,7 @@ from copy import copy
 
 
 from pyatv import exceptions
+from pyatv.const import MediaType, DeviceState
 from pyatv.dmap import parser
 from .tag_definitions import lookup_tag
 
@@ -24,6 +25,50 @@ _DMAP_HEADERS = {
 
 
 DEFAULT_TIMEOUT = 10.0  # Seconds
+
+
+def media_kind(kind):
+    """Convert iTunes media kind to API representation."""
+    if kind in [1, 32770]:
+        return MediaType.Unknown
+    if kind in [3, 7, 11, 12, 13, 18, 32]:
+        return MediaType.Video
+    if kind in [2, 4, 10, 14, 17, 21, 36]:
+        return MediaType.Music
+    if kind in [8, 64]:
+        return MediaType.TV
+
+    raise exceptions.UnknownMediaKindError('Unknown media kind: ' + str(kind))
+
+
+def playstate(state):
+    """Convert iTunes playstate to API representation."""
+    # pylint: disable=too-many-return-statements
+    if state == 0 or state is None:
+        return DeviceState.Idle
+    if state == 1:
+        return DeviceState.Loading
+    if state == 2:
+        return DeviceState.Stopped
+    if state == 3:
+        return DeviceState.Paused
+    if state == 4:
+        return DeviceState.Playing
+    if state in (5, 6):
+        return DeviceState.Seeking
+
+    raise exceptions.UnknownPlayStateError('Unknown playstate: ' + str(state))
+
+
+def ms_to_s(time):
+    """Convert time in ms to seconds."""
+    if time is None:
+        return 0
+
+    # Happens in some special cases, just return 0
+    if time >= (2**32 - 1):
+        return 0
+    return round(time / 1000.0)
 
 
 class DaapRequester:

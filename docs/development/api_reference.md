@@ -11,6 +11,8 @@ files:
     description: Configuration and services.
   - name: const.py
     description: Various constants.
+  - name: convert.py
+    description: Conversion methods, e.g. constants to string.
   - name: exceptions.py
     description: Exceptions that are specific to this library.
   - name: helpers.py

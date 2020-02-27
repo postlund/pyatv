@@ -5,10 +5,10 @@ import asyncio
 
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import (exceptions, convert, net)
+from pyatv import (exceptions, net)
 from pyatv.cache import Cache
 from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState
-from pyatv.dmap import (parser, tags)
+from pyatv.dmap import (daap, parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
@@ -232,7 +232,7 @@ class DmapPlaying(Playing):
 
         mediakind = parser.first(self.playstatus, 'cmst', 'cmmk')
         if mediakind is not None:
-            return convert.media_kind(mediakind)
+            return daap.media_kind(mediakind)
 
         # Fallback: if artist or album exists we assume music (not present
         # for video)
@@ -245,7 +245,7 @@ class DmapPlaying(Playing):
     def device_state(self):
         """Device state, e.g. playing or paused."""
         state = parser.first(self.playstatus, 'cmst', 'caps')
-        return convert.playstate(state)
+        return daap.playstate(state)
 
     @property
     def title(self):
@@ -298,7 +298,7 @@ class DmapPlaying(Playing):
 
     def _get_time_in_seconds(self, tag):
         time = parser.first(self.playstatus, 'cmst', tag)
-        return convert.ms_to_s(time)
+        return daap.ms_to_s(time)
 
 
 class DmapMetadata(Metadata):

@@ -214,7 +214,7 @@ class Playing:
         output.append('  Media type: {0}'.format(
             convert.media_type_str(self.media_type)))
         output.append('Device state: {0}'.format(
-            convert.playstate_str(self.device_state)))
+            convert.device_state_str(self.device_state)))
 
         if self.title is not None:
             output.append('       Title: {0}'.format(self.title))
