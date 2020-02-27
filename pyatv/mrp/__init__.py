@@ -17,7 +17,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater, ArtworkInfo, Power, PowerListener)
+                             Playing, PushUpdater, ArtworkInfo, Power)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -339,13 +339,6 @@ class MrpMetadata(Metadata):
         return MrpPlaying(self.psm.playing)
 
 
-class PowerListener(PowerListener):
-    """Internal listener for power state updates."""
-
-    def powerstate_update(self, old_state, new_state):
-        """Device power state was updated."""
-
-
 class MrpPower(Power):
     """Implementation of API for retrieving a power state from an Apple TV."""
 
@@ -355,8 +348,7 @@ class MrpPower(Power):
         self.loop = loop
         self.protocol = protocol
         self.remote = remote
-        self._current_power_state = None
-        self._new_power_state = None
+        self.device_info = None
         self.__listener = None
 
         self.protocol.add_listener(
@@ -365,22 +357,14 @@ class MrpPower(Power):
         self.protocol.add_listener(
             self.update_power_state,
             protobuf.DEVICE_INFO_UPDATE_MESSAGE)
-
-    async def _get_current_power_state(self):
-        if self._current_power_state is None:
-            updated_power_state = await self.update_power_state(self.protocol.device_info, protobuf.DEVICE_INFO_MESSAGE)
-            return updated_power_state
-        
-        return self._current_power_state
-
-    @property
-    def listener(self):
-        """Object receiving power state updates."""
-        return self.__listener
+    
+    def _get_current_power_state(self):
+        latest_device_info = self.device_info or self.protocol.device_info
+        return self._get_power_state(latest_device_info)
 
     async def power_state(self):
         """Return device power state."""
-        currect_power_state = await self._get_current_power_state()
+        currect_power_state = self._get_current_power_state()
         return currect_power_state
 
     async def turn_on(self):
@@ -393,16 +377,14 @@ class MrpPower(Power):
         await self.remote.select()
 
     async def update_power_state(self, message, _):
-        self._new_power_state = self._get_power_state(message)
+        old_state = await self.power_state()
+        new_state = self._get_power_state(message)
+        self.device_info = message
 
-        if self._new_power_state != self._current_power_state:      
+        if new_state != old_state:
+            _LOGGER.debug('Power state changed from %s to %s', old_state, new_state)
             if self.listener:
-                self.loop.call_soon(self.listener.powerstate_update, self._current_power_state, self._new_power_state)
-            
-            self._current_power_state = self._new_power_state
-            _LOGGER.debug('Power state is now %s', self._current_power_state)
-            return self._current_power_state
-        
+                self.loop.call_soon(self.listener.powerstate_update, old_state, new_state)
 
     @staticmethod
     def _get_power_state(device_info):

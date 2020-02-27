@@ -433,6 +433,14 @@ class Power:
         """
         return self.__listener
 
+    @listener.setter  # type: ignore
+    def listener(self, listener):
+        """Object that receives updates.
+        This should be an object implementing method:
+        - powerstate_update(old_state, new_state)
+        """
+        self.__listener = listener
+
     @abstractproperty
     async def power_state(self):
         """Return device power state."""
