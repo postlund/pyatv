@@ -375,7 +375,7 @@ class MrpPower(Power):
         await self.remote.select()
 
     async def update_power_state(self, message, _):
-        old_state = await self.power_state
+        old_state = self.power_state
         new_state = self._get_power_state(message)
         self.device_info = message
 
