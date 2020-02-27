@@ -410,7 +410,8 @@ class DeviceListener:
         """Device connection was (intentionally) closed."""
         raise NotImplementedError()
 
-class PowerListener:
+
+class PowerListener:  # pylint: disable=too-few-public-methods
     """Listener interface for power updates."""
 
     @abstractmethod
@@ -418,7 +419,10 @@ class PowerListener:
         """Device power state was updated."""
         raise NotImplementedError()
 
+
 class Power:
+    """Base class for retrieving power state from an Apple TV."""
+
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -436,6 +440,7 @@ class Power:
     @listener.setter  # type: ignore
     def listener(self, listener):
         """Object that receives updates.
+
         This should be an object implementing method:
         - powerstate_update(old_state, new_state)
         """
@@ -455,6 +460,7 @@ class Power:
     async def turn_off(self):
         """Turn device off."""
         raise exceptions.NotSupportedError()
+
 
 class AppleTV:
     """Base class representing an Apple TV."""

@@ -352,9 +352,9 @@ class MrpPower(Power):
         self.__listener = None
 
         self.protocol.add_listener(
-            self.update_power_state,
+            self._update_power_state,
             protobuf.DEVICE_INFO_UPDATE_MESSAGE)
-    
+
     def _get_current_power_state(self):
         latest_device_info = self.device_info or self.protocol.device_info
         return self._get_power_state(latest_device_info)
@@ -374,22 +374,25 @@ class MrpPower(Power):
         await self.remote.home_hold()
         await self.remote.select()
 
-    async def update_power_state(self, message, _):
+    async def _update_power_state(self, message, _):
         old_state = self.power_state
         new_state = self._get_power_state(message)
         self.device_info = message
 
         if new_state != old_state:
-            _LOGGER.debug('Power state changed from %s to %s', old_state, new_state)
+            _LOGGER.debug(
+                'Power state changed from %s to %s',
+                old_state, new_state)
             if self.listener:
-                self.loop.call_soon(self.listener.powerstate_update, old_state, new_state)
+                self.loop.call_soon(
+                    self.listener.powerstate_update, old_state, new_state)
 
     @staticmethod
     def _get_power_state(device_info):
-        logicalDeviceCount = device_info.inner().logicalDeviceCount
-        if logicalDeviceCount >= 1:
+        logical_device_count = device_info.inner().logicalDeviceCount
+        if logical_device_count >= 1:
             return PowerState.On
-        elif logicalDeviceCount == 0:
+        if logical_device_count == 0:
             return PowerState.Off
         return PowerState.Unknown
 
