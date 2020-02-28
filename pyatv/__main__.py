@@ -78,6 +78,7 @@ class GlobalCommands:
         _print_commands('Power', interface.Power)
         _print_commands('Playing', interface.Playing)
         _print_commands('AirPlay', interface.Stream)
+        _print_commands('Device Info', interface.DeviceInfo)
         _print_commands('Device', DeviceCommands)
         _print_commands('Global', self.__class__)
 
@@ -94,6 +95,7 @@ class GlobalCommands:
                  interface.Power,
                  interface.Playing,
                  interface.Stream,
+                 interface.DeviceInfo,
                  self.__class__,
                  DeviceCommands]
         for cmd in iface:
@@ -496,6 +498,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     power = retrieve_commands(interface.Power)
     playing = retrieve_commands(interface.Playing)
     stream = retrieve_commands(interface.Stream)
+    device_info = retrieve_commands(interface.DeviceInfo)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -523,6 +526,10 @@ async def _handle_device_command(args, cmd, atv, loop):
     if cmd in stream:
         return (await _exec_command(
             atv.stream, cmd, True, *cmd_args))
+
+    if cmd in device_info:
+        return (await _exec_command(
+            atv.device_info, cmd, True, *cmd_args))
 
     logging.error('Unknown command: %s', cmd)
     return 1

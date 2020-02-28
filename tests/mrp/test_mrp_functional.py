@@ -4,7 +4,8 @@ import logging
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv.const import DeviceState, ShuffleState, PowerState
+from pyatv.const import (
+    DeviceState, ShuffleState, PowerState, OperatingSystem)
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
@@ -168,3 +169,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await until(lambda: self.atv.power.power_state == PowerState.On)
         self.assertEqual(listener.old_state, PowerState.Off)
         self.assertEqual(listener.new_state, PowerState.On)
+
+    @unittest_run_loop
+    async def test_basic_device_info(self):
+        self.assertEqual(self.atv.device_info.operating_system,
+                         OperatingSystem.TvOS)
