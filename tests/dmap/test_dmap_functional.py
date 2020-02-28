@@ -7,7 +7,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
-from pyatv.const import ShuffleState
+from pyatv.const import (ShuffleState, PowerState)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -168,3 +168,17 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             await atv.stream.play_url('http://123')
 
         await atv.close()
+
+    @unittest_run_loop
+    async def test_unsupported_power_state(self):
+
+        # Check if power state return PowerState.Unknown as expected
+        self.assertEqual(self.atv.power.power_state, PowerState.Unknown)
+
+        # Call turn_on and check for exception
+        with self.assertRaises(exceptions.NotSupportedError):
+            await self.atv.power.turn_on()
+
+        # Call turn_off and check for exception
+        with self.assertRaises(exceptions.NotSupportedError):
+            await self.atv.power.turn_off()
