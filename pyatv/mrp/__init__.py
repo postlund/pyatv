@@ -450,6 +450,7 @@ class MrpAppleTV(AppleTV):
         super().__init__()
 
         self._session = session
+        self._config = config
         self._mrp_service = config.get_service(Protocol.MRP)
 
         self._connection = MrpConnection(
@@ -484,7 +485,7 @@ class MrpAppleTV(AppleTV):
     @property
     def device_info(self):
         """Return API for device information."""
-        raise exceptions.NotSupportedError()
+        return self._config.device_info
 
     @property
     def service(self):

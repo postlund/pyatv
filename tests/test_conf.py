@@ -3,7 +3,7 @@
 import unittest
 
 from pyatv import (conf, exceptions)
-from pyatv.const import Protocol
+from pyatv.const import Protocol, OperatingSystem, DeviceModel
 
 ADDRESS_1 = '127.0.0.1'
 ADDRESS_2 = '192.168.0.1'
@@ -15,6 +15,16 @@ IDENTIFIER_2 = 'id2'
 IDENTIFIER_3 = 'id3'
 CREDENTIALS_1 = 'cred1'
 
+MRP_PROPERTIES = {
+    b'SystemBuildVersion': b'17K795',
+    b'macAddress': b'ff:ee:dd:cc:bb:aa',
+}
+
+AIRPLAY_PROPERTIES = {
+    b'model': b'AppleTV6,2',
+    b'deviceid': b'aa:bb:cc:dd:ee:ff',
+}
+
 
 class ConfTest(unittest.TestCase):
 
@@ -22,9 +32,10 @@ class ConfTest(unittest.TestCase):
         self.config = conf.AppleTV(ADDRESS_1, NAME)
         self.dmap_service = conf.DmapService(
             IDENTIFIER_1, None, port=PORT_1)
-        self.mrp_service = conf.MrpService(IDENTIFIER_2, PORT_2)
+        self.mrp_service = conf.MrpService(
+            IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES)
         self.airplay_service = conf.AirPlayService(
-            IDENTIFIER_3, PORT_1)
+            IDENTIFIER_3, PORT_1, properties=AIRPLAY_PROPERTIES)
 
     def test_address_and_name(self):
         self.assertEqual(self.config.address, ADDRESS_1)
@@ -108,6 +119,36 @@ class ConfTest(unittest.TestCase):
         self.config.set_credentials(Protocol.DMAP, 'dummy')
         self.assertEqual(
             self.config.get_service(Protocol.DMAP).credentials, 'dummy')
+
+    def test_empty_device_info(self):
+        device_info = self.config.device_info
+        self.assertEqual(device_info.operating_system, OperatingSystem.Unknown)
+        self.assertIsNone(device_info.version)
+        self.assertIsNone(device_info.build_number)
+        self.assertEqual(device_info.model, DeviceModel.Unknown)
+        self.assertIsNone(device_info.mac)
+
+    def test_tvos_device_info(self):
+        self.config.add_service(self.mrp_service)
+        self.config.add_service(self.airplay_service)
+
+        device_info = self.config.device_info
+        self.assertEqual(device_info.operating_system, OperatingSystem.TvOS)
+        self.assertEqual(device_info.version, '13.3.1')
+        self.assertEqual(device_info.build_number, '17K795')
+        self.assertEqual(device_info.model, DeviceModel.Gen4K)
+        self.assertEqual(device_info.mac, 'FF:EE:DD:CC:BB:AA')
+
+    def test_legacy_device_info(self):
+        self.config.add_service(self.dmap_service)
+        self.config.add_service(self.airplay_service)
+
+        device_info = self.config.device_info
+        self.assertEqual(device_info.operating_system, OperatingSystem.Legacy)
+        self.assertIsNone(device_info.version)
+        self.assertIsNone(device_info.build_number)
+        self.assertEqual(device_info.model, DeviceModel.Gen4K)
+        self.assertEqual(device_info.mac, 'AA:BB:CC:DD:EE:FF')
 
     # This test is a bit strange and couples to protocol specific services,
     # but it's mainly to exercise string as that is important. Might refactor

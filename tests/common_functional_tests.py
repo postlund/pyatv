@@ -10,7 +10,6 @@ from pyatv import exceptions, interface
 from pyatv.const import (
     Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
 from pyatv.conf import AppleTV, AirPlayService
-from tests import zeroconf_stub
 from tests.utils import stub_sleep, until, faketime
 
 

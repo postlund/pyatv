@@ -7,7 +7,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
 from pyatv.conf import (AirPlayService, DmapService, AppleTV)
-from pyatv.const import (ShuffleState, PowerState)
+from pyatv.const import ShuffleState, PowerState, OperatingSystem
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -182,3 +182,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # Call turn_off and check for exception
         with self.assertRaises(exceptions.NotSupportedError):
             await self.atv.power.turn_off()
+
+    @unittest_run_loop
+    async def test_basic_device_info(self):
+        self.assertEqual(self.atv.device_info.operating_system,
+                         OperatingSystem.Legacy)

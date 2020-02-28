@@ -70,28 +70,31 @@ class BaseScanner:  # pylint: disable=too-few-public-methods
         identifier = service_name.split('.')[0]
         name = _property_decode(properties, 'Name')
         hsgid = _property_decode(properties, 'hG')
-        service = conf.DmapService(identifier, hsgid, port=port)
+        service = conf.DmapService(
+            identifier, hsgid, port=port, properties=properties)
         self._handle_service(address, name, service)
 
     def _non_hs_service(self, service_name, address, port, properties):
         """Add a new device without Home Sharing to discovered list."""
         identifier = service_name.split('.')[0]
         name = _property_decode(properties, 'CtlN')
-        service = conf.DmapService(identifier, None, port=port)
+        service = conf.DmapService(
+            identifier, None, port=port, properties=properties)
         self._handle_service(address, name, service)
 
     def _mrp_service(self, _, address, port, properties):
         """Add a new MediaRemoteProtocol device to discovered list."""
         identifier = _property_decode(properties, 'UniqueIdentifier')
         name = _property_decode(properties, 'Name')
-        service = conf.MrpService(identifier, port)
+        service = conf.MrpService(identifier, port, properties=properties)
         self._handle_service(address, name, service)
 
     def _airplay_service(self, service_name, address, port, properties):
         """Add a new AirPlay device to discovered list."""
         identifier = _property_decode(properties, 'deviceid')
         name = service_name.replace('.' + AIRPLAY_SERVICE, '')
-        service = conf.AirPlayService(identifier, port)
+        service = conf.AirPlayService(
+            identifier, port, properties=properties)
         self._handle_service(address, name, service)
 
     def _handle_service(self, address, name, service):

@@ -451,7 +451,7 @@ class DmapAppleTV(AppleTV):
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
-
+        self._config = config
         self._dmap_service = config.get_service(Protocol.DMAP)
         daap_http = HttpSession(
             session,
@@ -483,7 +483,7 @@ class DmapAppleTV(AppleTV):
     @property
     def device_info(self):
         """Return API for device information."""
-        raise exceptions.NotSupportedError()
+        return self._config.device_info
 
     @property
     def service(self):
