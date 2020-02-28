@@ -35,8 +35,8 @@ def retrieve_commands(obj):
         if not inspect.isfunction(obj.__dict__[func]) and \
            not isinstance(obj.__dict__[func], property):
             continue
-        if func.startswith('_'):
-            continue
+        if func.startswith('_') or func == 'listener':
+            continue   
         commands[func] = _get_first_sentence_in_pydoc(
             obj.__dict__[func])
     return commands
