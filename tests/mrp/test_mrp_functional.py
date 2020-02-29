@@ -1,9 +1,10 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import logging
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv.const import DeviceState, ShuffleState
+from pyatv.const import DeviceState, ShuffleState, PowerState
 from pyatv.conf import (AirPlayService, MrpService, AppleTV)
 
 from tests import common_functional_tests
@@ -12,6 +13,7 @@ from tests.mrp.fake_mrp_atv import (
     FakeAppleTV, AppleTVUseCases)
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 
+_LOGGER = logging.getLogger(__name__)
 
 ARTWORK_BYTES = b'1234'
 ARTWORK_MIMETYPE = 'image/png'
@@ -136,3 +138,11 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title='dummy3', playback_rate=0.0)
         playing = await self.playing(title='dummy3')
         self.assertEqual(playing.device_state, DeviceState.Paused)
+
+    @unittest_run_loop
+    async def test_power_state(self):
+        self.assertEqual(self.atv.power.power_state, PowerState.On)
+        await self.atv.power.turn_off()
+        await until(lambda: self.atv.power.power_state == PowerState.Off)
+        await self.atv.power.turn_on()
+        await until(lambda: self.atv.power.power_state == PowerState.On)

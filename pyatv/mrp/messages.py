@@ -42,6 +42,31 @@ def device_information(name, identifier):
     return message
 
 
+def device_information_update(name, identifier, logical_device_count):
+    """Create a new DEVICE_INFO_UPDATE_MESSAGE."""
+    # pylint: disable=no-member
+    message = create(protobuf.DEVICE_INFO_UPDATE_MESSAGE)
+    info = message.inner()
+    info.allowsPairing = True
+    info.applicationBundleIdentifier = 'com.apple.TVRemote'
+    info.applicationBundleVersion = '344.28'
+    info.lastSupportedMessageType = 77
+    info.localizedModelName = 'iPhone'
+    info.name = name
+    info.protocolVersion = 1
+    info.sharedQueueVersion = 2
+    info.supportsACL = True
+    info.supportsExtendedMotion = True
+    info.supportsSharedQueue = True
+    info.supportsSystemPairing = True
+    info.systemBuildVersion = '17B111'
+    info.systemMediaApplication = "com.apple.TVMusic"
+    info.uniqueIdentifier = identifier
+    info.deviceClass = 1
+    info.logicalDeviceCount = logical_device_count
+    return message
+
+
 def set_connection_state():
     """Create a new SET_CONNECTION_STATE."""
     message = create(protobuf.ProtocolMessage.SET_CONNECTION_STATE_MESSAGE)
