@@ -79,7 +79,7 @@ Here is a simple example:
 class PowerListener:
 
     def powerstate_update(self, old_state, new_state):
-        print('Power state changed from %s to %s', old_state, new_state)
+        print('Power state changed from {0:s} to {1:s}'.format(old_state, new_state))
 
 
 atv.power.listener = PowerListener()

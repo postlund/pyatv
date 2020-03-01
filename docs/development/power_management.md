@@ -33,6 +33,7 @@ await pwrc.turn_off()
 To get current power state use following function:
 
 ```python
+@property
 def power_state(self):
 ```
 
