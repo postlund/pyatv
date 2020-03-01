@@ -34,12 +34,16 @@ ALL_SERVICES = [
 ]
 
 
-def _property_decode(properties, prop):
-    value = properties.get(prop.encode('utf-8'))
-    if value:
-        # Remove non-breaking-space (0xA2A0) before decoding
-        return value.replace(b'\xC2\xA0', b' ').decode('utf-8')
-    return None
+def _decode_properties(properties):
+    def _decode(value):
+        try:
+            # Remove non-breaking-space (0xA2A0) before decoding
+            return value.replace(b'\xC2\xA0', b' ').decode('utf-8')
+        except Exception:  # pylint: disable=broad-except
+            return value
+        return None
+
+    return {k.decode('utf-8'): _decode(v) for k, v in properties.items()}
 
 
 class BaseScanner:  # pylint: disable=too-few-public-methods
@@ -68,8 +72,8 @@ class BaseScanner:  # pylint: disable=too-few-public-methods
     def _hs_service(self, service_name, address, port, properties):
         """Add a new device to discovered list."""
         identifier = service_name.split('.')[0]
-        name = _property_decode(properties, 'Name')
-        hsgid = _property_decode(properties, 'hG')
+        name = properties.get('Name')
+        hsgid = properties.get('hG')
         service = conf.DmapService(
             identifier, hsgid, port=port, properties=properties)
         self._handle_service(address, name, service)
@@ -77,21 +81,21 @@ class BaseScanner:  # pylint: disable=too-few-public-methods
     def _non_hs_service(self, service_name, address, port, properties):
         """Add a new device without Home Sharing to discovered list."""
         identifier = service_name.split('.')[0]
-        name = _property_decode(properties, 'CtlN')
+        name = properties.get('CtlN')
         service = conf.DmapService(
             identifier, None, port=port, properties=properties)
         self._handle_service(address, name, service)
 
     def _mrp_service(self, _, address, port, properties):
         """Add a new MediaRemoteProtocol device to discovered list."""
-        identifier = _property_decode(properties, 'UniqueIdentifier')
-        name = _property_decode(properties, 'Name')
+        identifier = properties.get('UniqueIdentifier')
+        name = properties.get('Name')
         service = conf.MrpService(identifier, port, properties=properties)
         self._handle_service(address, name, service)
 
     def _airplay_service(self, service_name, address, port, properties):
         """Add a new AirPlay device to discovered list."""
-        identifier = _property_decode(properties, 'deviceid')
+        identifier = properties.get('deviceid')
         name = service_name.replace('.' + AIRPLAY_SERVICE, '')
         service = conf.AirPlayService(
             identifier, port, properties=properties)
@@ -146,7 +150,8 @@ class ZeroconfScanner(BaseScanner):
 
         address = ip_address(info.address)
         self.service_discovered(
-            info.type, info.name, address, info.port, info.properties)
+            info.type, info.name, address, info.port,
+            _decode_properties(info.properties))
 
 
 class UnicastMdnsScanner(BaseScanner):
@@ -192,7 +197,8 @@ class UnicastMdnsScanner(BaseScanner):
                 continue
 
             self.service_discovered(
-                service_name, resource.qname + '.', host, port, resource.rd)
+                service_name, resource.qname + '.', host, port,
+                _decode_properties(resource.rd))
 
     @staticmethod
     def _get_port(response, qname):

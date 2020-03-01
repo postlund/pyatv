@@ -92,18 +92,13 @@ class AppleTV:
         else:
             os_type = OperatingSystem.Unknown
 
-        build = properties.get(b'SystemBuildVersion')
-        if build:
-            build = build.decode('ascii')
-
-        model = properties.get(b'model')
-        if model:
-            model = model.decode('ascii')
+        build = properties.get('SystemBuildVersion')
+        model = properties.get('model')
 
         mac = properties.get(
-            b'macAddress', properties.get(b'deviceid'))
+            'macAddress', properties.get('deviceid'))
         if mac:
-            mac = mac.decode('ascii').upper()
+            mac = mac.upper()
 
         return DeviceInfo(
             os_type, lookup_version(build), build,

@@ -39,6 +39,8 @@ MRP_SERVICE_2 = zeroconf_stub.mrp_service(
     'EEEE', b'Apple TV 5', IP_5, MRP_ID_2)
 AIRPLAY_SERVICE_1 = zeroconf_stub.airplay_service(
     'Apple TV 6', IP_6, AIRPLAY_ID)
+AIRPLAY_SERVICE_2 = zeroconf_stub.airplay_service(
+    'Apple TV 4', IP_4, AIRPLAY_ID)
 
 
 def _get_atv(atvs, ip):
@@ -149,6 +151,16 @@ class ScanZeroconfTest(asynctest.TestCase):
         self.assertEqual(atvs[0].name, 'Apple TV 2')
         self.assertEqual(atvs[0].address, ipaddress.ip_address(IP_2))
 
+    async def test_scan_device_info(self):
+        zeroconf_stub.stub(pyatv, MRP_SERVICE_1, AIRPLAY_SERVICE_2)
+
+        atvs = await pyatv.scan(
+          self.loop, timeout=0, protocol=Protocol.MRP)
+        self.assertEqual(len(atvs), 1)
+
+        device_info = atvs[0].device_info
+        self.assertEqual(device_info.mac, AIRPLAY_ID)
+
 
 class ScanUnicastDnsTest(asynctest.TestCase):
 
@@ -231,3 +243,15 @@ class ScanUnicastDnsTest(asynctest.TestCase):
         self.assertDevice(
             atvs[0], 'Apple TV Device', IP_LOCALHOST,
             'Apple TV', Protocol.DMAP, 3689)
+
+    async def test_scan_device_info(self):
+        self.server.add_service(
+            fake_udns.mrp_service('Apple TV', 'Apple TV MRP', MRP_ID_1))
+        self.server.add_service(
+            fake_udns.airplay_service('Apple TV', AIRPLAY_ID))
+
+        atvs = await self.scan()
+        self.assertEqual(len(atvs), 1)
+
+        device_info = atvs[0].device_info
+        self.assertEqual(device_info.mac, AIRPLAY_ID)

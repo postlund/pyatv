@@ -21,11 +21,6 @@ ARTWORK_MIMETYPE = 'image/png'
 ARTWORK_ID = 'artwork_id1'
 EXAMPLE_STREAM = 'http://stream'
 
-HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
-    'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
-HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
-    'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
-
 
 async def poll(fn, **kwargs):
     result = await fn()
