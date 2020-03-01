@@ -67,6 +67,11 @@ def device_information_update(name, identifier, logical_device_count):
     return message
 
 
+def wake_device():
+    """Create a new WAKE_DEVICE_MESSAGE."""
+    return create(protobuf.ProtocolMessage.WAKE_DEVICE_MESSAGE)
+
+
 def set_connection_state():
     """Create a new SET_CONNECTION_STATE."""
     message = create(protobuf.ProtocolMessage.SET_CONNECTION_STATE_MESSAGE)

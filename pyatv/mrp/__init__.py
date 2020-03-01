@@ -367,7 +367,7 @@ class MrpPower(Power):
 
     async def turn_on(self):
         """Turn device on."""
-        await self.remote.menu()
+        await self.protocol.send_and_receive(messages.wake_device())
 
     async def turn_off(self):
         """Turn device off."""
