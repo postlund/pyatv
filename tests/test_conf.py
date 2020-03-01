@@ -16,13 +16,13 @@ IDENTIFIER_3 = 'id3'
 CREDENTIALS_1 = 'cred1'
 
 MRP_PROPERTIES = {
-    b'SystemBuildVersion': b'17K795',
-    b'macAddress': b'ff:ee:dd:cc:bb:aa',
+    'SystemBuildVersion': '17K795',
+    'macAddress': 'ff:ee:dd:cc:bb:aa',
 }
 
 AIRPLAY_PROPERTIES = {
-    b'model': b'AppleTV6,2',
-    b'deviceid': b'aa:bb:cc:dd:ee:ff',
+    'model': 'AppleTV6,2',
+    'deviceid': 'aa:bb:cc:dd:ee:ff',
 }
 
 
