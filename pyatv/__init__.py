@@ -41,7 +41,6 @@ def _decode_properties(properties):
             return value.replace(b'\xC2\xA0', b' ').decode('utf-8')
         except Exception:  # pylint: disable=broad-except
             return value
-        return None
 
     return {k.decode('utf-8'): _decode(v) for k, v in properties.items()}
 

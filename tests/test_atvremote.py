@@ -156,6 +156,12 @@ class AtvremoteTest(AioHTTPTestCase):
         self.exit(0)
 
     @unittest_run_loop
+    async def test_device_info(self):
+        await self.atvremote("--id", MRP_ID, "device_info")
+        self.has_output("tvOS", AIRPLAY_ID)
+        self.exit(0)
+
+    @unittest_run_loop
     async def test_mrp_auth(self):
         await self.atvremote(
             "--id", MRP_ID,

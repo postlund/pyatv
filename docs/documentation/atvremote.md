@@ -172,7 +172,7 @@ Or check the current power state:
 Several commands are supported by the library. Easiest is just to use the command
 called `commands`, as it will present a list of availble commands:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A commands
+    $ atvremote --id 00:11:22:33:44:54 commands
     Remote control commands:
      - down - Press key down
      - home - Press key home
@@ -241,7 +241,7 @@ called `commands`, as it will present a list of availble commands:
 
 You can for instance get what is currently playing with `playing`:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A playing
+    $ atvremote --id 00:11:22:33:44:54 playing
       Media type: Music
     Device state: Playing
         Position: 0/397s (0.0%)
@@ -250,15 +250,19 @@ You can for instance get what is currently playing with `playing`:
 
 Or seek in the currently playing media:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A set_position=123
+    $ atvremote --id 00:11:22:33:44:54 set_position=123
 
 Check operating system version:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A version
+    $ atvremote --id 00:11:22:33:44:54 version
+
+Or all device information (same as seen with `atvremote scan`):
+
+    $ atvremote --id 00:11:22:33:44:54 device_info
 
 Play a video via AirPlay:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A play_url=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+    $ atvremote --id 00:11:22:33:44:54 play_url=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 
 If you want additional help for a specific command, use help:
 

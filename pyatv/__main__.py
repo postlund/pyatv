@@ -243,6 +243,13 @@ class DeviceCommands:
         self.atv.push_updater.stop()
         return 0
 
+    async def device_info(self):
+        """Print various information about the device."""
+        devinfo = self.atv.device_info
+        print("Model/SW: {0}\n     MAC: {1}".format(
+            devinfo, devinfo.mac))
+        return 0
+
 
 class PushListener:
     """Internal listener for push updates."""
