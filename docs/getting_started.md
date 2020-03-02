@@ -38,7 +38,7 @@ Use `scan` to find devices:
 Each device is identified by one or more unique identifiers. You can pick any
 of them and pass to `--id` or use its name with `-n`:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A ...
+    $ atvremote --id 00:11:22:33:44:54 ...
     OR
     $ atvremote -n "Living Room" ...
 
@@ -51,7 +51,7 @@ stream a video to it for instance.
 
 Pairing with MRP:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A --protocol mrp pair
+    $ atvremote --id 00:11:22:33:44:54 --protocol mrp pair
     Enter PIN on screen: 1234
     Pairing seems to have succeeded, yey!
     You may now use these credentials: 1650c36b816812561ee1a2ce55441c4d59aeee8287d3d0b90ad41e221c2ccc9b:eb6d47687f82327501d26e77bc3ee8b752034ad397c80cba37d91132717a1721:61383462633431372d383336362d346464632d386533622d333964356265303932663132:39376263616162332d356330652d343136362d623634302d326438656135616161636237
@@ -59,7 +59,7 @@ Pairing with MRP:
 The obtained credentials must be passed to `--mrp-credentials` for every call. It
 is recommended that you save them to a file, e.g. `mrp_creds`, and call like this:
 
-    atvremote --id 40:CB:C0:A8:DE:9A --mrp-credentials `cat mrp_creds` ...
+    atvremote --id 00:11:22:33:44:54 --mrp-credentials `cat mrp_creds` ...
 
 If you want to pair AirPlay as well, you do it in the exact same way but specify
 `--protocol airplay` and load the credentials with `--airplay-credentials`
@@ -68,7 +68,7 @@ instead.
 You can of course specify `--mrp-credentials` and `--airplay-credentials`
 at the same time:
 
-    atvremote --id 40:CB:C0:A8:DE:9A --mrp-credentials `cat mrp_creds` --airplay-credentials `cat airplay_creds` ...
+    atvremote --id 00:11:22:33:44:54 --mrp-credentials `cat mrp_creds` --airplay-credentials `cat airplay_creds` ...
 
 *NB: Currently, pyatv does not have any methods of storing credentials persistently,
 that is why this process is cumbersome. Work to improve this is planned for a later
@@ -78,7 +78,7 @@ version, see issue [#243](https://github.com/postlund/pyatv/issues/243).*
 
 Once you have credentials, you can start controlling the device and asking for status:
 
-    $ atvremote --id 40:CB:C0:A8:DE:9A --mrp-credentials `cat mrp_creds` playing
+    $ atvremote --id 00:11:22:33:44:54 --mrp-credentials `cat mrp_creds` playing
     Media type: Unknown
     Play state: Paused
     $ atvremote --id ... --mrp-credentials ... play

@@ -10,7 +10,7 @@ link_group: development
 operating system (and version) it runs or its hardware model (3, 4K, etc.).
 This information is exposed via the interface `interface.DeviceInfo`.
 
-## Using the Device Information APi
+## Using the Device Information API
 
 After connecting to a device, you get get device info via `device_info`:
 
