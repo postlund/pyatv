@@ -9,7 +9,7 @@ from ipaddress import ip_address
 from aiozeroconf import ServiceBrowser, Zeroconf
 import netifaces
 
-from pyatv import (conf, exceptions, net, udns)
+from pyatv import conf, exceptions, net, udns
 from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
@@ -21,16 +21,16 @@ from pyatv.airplay.pairing import AirPlayPairingHandler
 
 _LOGGER = logging.getLogger(__name__)
 
-HOMESHARING_SERVICE = '_appletv-v2._tcp.local.'
-DEVICE_SERVICE = '_touch-able._tcp.local.'
-MEDIAREMOTE_SERVICE = '_mediaremotetv._tcp.local.'
-AIRPLAY_SERVICE = '_airplay._tcp.local.'
+HOMESHARING_SERVICE = "_appletv-v2._tcp.local."
+DEVICE_SERVICE = "_touch-able._tcp.local."
+MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local."
+AIRPLAY_SERVICE = "_airplay._tcp.local."
 
 ALL_SERVICES = [
     HOMESHARING_SERVICE,
     DEVICE_SERVICE,
     MEDIAREMOTE_SERVICE,
-    AIRPLAY_SERVICE
+    AIRPLAY_SERVICE,
 ]
 
 
@@ -38,11 +38,11 @@ def _decode_properties(properties):
     def _decode(value):
         try:
             # Remove non-breaking-space (0xA2A0) before decoding
-            return value.replace(b'\xC2\xA0', b' ').decode('utf-8')
+            return value.replace(b"\xC2\xA0", b" ").decode("utf-8")
         except Exception:  # pylint: disable=broad-except
             return value
 
-    return {k.decode('utf-8'): _decode(v) for k, v in properties.items()}
+    return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
 
 
 class BaseScanner:  # pylint: disable=too-few-public-methods
@@ -53,59 +53,62 @@ class BaseScanner:  # pylint: disable=too-few-public-methods
         self._found_devices = {}
 
     def service_discovered(  # pylint: disable=too-many-arguments
-            self, service_type, service_name, address, port, properties):
+        self, service_type, service_name, address, port, properties
+    ):
         """Call when a service was discovered."""
         supported_types = {
             HOMESHARING_SERVICE: self._hs_service,
             DEVICE_SERVICE: self._non_hs_service,
             MEDIAREMOTE_SERVICE: self._mrp_service,
-            AIRPLAY_SERVICE: self._airplay_service
+            AIRPLAY_SERVICE: self._airplay_service,
         }
 
         handler = supported_types.get(service_type)
         if handler:
             handler(service_name, address, port, properties)
         else:
-            _LOGGER.warning('Discovered unknown device: %s', service_type)
+            _LOGGER.warning("Discovered unknown device: %s", service_type)
 
     def _hs_service(self, service_name, address, port, properties):
         """Add a new device to discovered list."""
-        identifier = service_name.split('.')[0]
-        name = properties.get('Name')
-        hsgid = properties.get('hG')
-        service = conf.DmapService(
-            identifier, hsgid, port=port, properties=properties)
+        identifier = service_name.split(".")[0]
+        name = properties.get("Name")
+        hsgid = properties.get("hG")
+        service = conf.DmapService(identifier, hsgid, port=port, properties=properties)
         self._handle_service(address, name, service)
 
     def _non_hs_service(self, service_name, address, port, properties):
         """Add a new device without Home Sharing to discovered list."""
-        identifier = service_name.split('.')[0]
-        name = properties.get('CtlN')
-        service = conf.DmapService(
-            identifier, None, port=port, properties=properties)
+        identifier = service_name.split(".")[0]
+        name = properties.get("CtlN")
+        service = conf.DmapService(identifier, None, port=port, properties=properties)
         self._handle_service(address, name, service)
 
     def _mrp_service(self, _, address, port, properties):
         """Add a new MediaRemoteProtocol device to discovered list."""
-        identifier = properties.get('UniqueIdentifier')
-        name = properties.get('Name')
+        identifier = properties.get("UniqueIdentifier")
+        name = properties.get("Name")
         service = conf.MrpService(identifier, port, properties=properties)
         self._handle_service(address, name, service)
 
     def _airplay_service(self, service_name, address, port, properties):
         """Add a new AirPlay device to discovered list."""
-        identifier = properties.get('deviceid')
-        name = service_name.replace('.' + AIRPLAY_SERVICE, '')
-        service = conf.AirPlayService(
-            identifier, port, properties=properties)
+        identifier = properties.get("deviceid")
+        name = service_name.replace("." + AIRPLAY_SERVICE, "")
+        service = conf.AirPlayService(identifier, port, properties=properties)
         self._handle_service(address, name, service)
 
     def _handle_service(self, address, name, service):
         if address not in self._found_devices:
             self._found_devices[address] = conf.AppleTV(address, name)
 
-        _LOGGER.debug('Auto-discovered %s at %s:%d (%s)',
-                      name, address, service.port, service.protocol)
+        _LOGGER.debug(
+            "Auto-discovered %s at %s:%d (%s)",
+            name,
+            address,
+            service.port,
+            service.protocol,
+        )
 
         atv = self._found_devices[address]
         atv.add_service(service)
@@ -127,7 +130,7 @@ class ZeroconfScanner(BaseScanner):
             ServiceBrowser(zeroconf, DEVICE_SERVICE, self)
             ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self)
             ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self)
-            _LOGGER.debug('Discovering devices for %d seconds', timeout)
+            _LOGGER.debug("Discovering devices for %d seconds", timeout)
             await asyncio.sleep(timeout)
         finally:
             await zeroconf.close()
@@ -141,16 +144,19 @@ class ZeroconfScanner(BaseScanner):
         """Handle callback when a service is removed."""
 
     async def _internal_add(self, zeroconf, service_type, name):
-        info = await zeroconf.get_service_info(
-            service_type, name, timeout=2000)
+        info = await zeroconf.get_service_info(service_type, name, timeout=2000)
         if info.address is None:
             _LOGGER.debug("Failed to resolve %s (%s)", service_type, name)
             return
 
         address = ip_address(info.address)
         self.service_discovered(
-            info.type, info.name, address, info.port,
-            _decode_properties(info.properties))
+            info.type,
+            info.name,
+            address,
+            info.port,
+            _decode_properties(info.properties),
+        )
 
 
 class UnicastMdnsScanner(BaseScanner):
@@ -165,18 +171,20 @@ class UnicastMdnsScanner(BaseScanner):
     async def discover(self, timeout):
         """Start discovery of devices and services."""
         results = await asyncio.gather(
-            *[self._get_services(host, timeout) for host in self.hosts])
+            *[self._get_services(host, timeout) for host in self.hosts]
+        )
         for host, response in results:
             if response is not None:
                 self._handle_response(host, response)
         return self._found_devices
 
     async def _get_services(self, host, timeout):
-        port = os.environ.get('PYATV_UDNS_PORT', 5353)  # For testing purposes
+        port = os.environ.get("PYATV_UDNS_PORT", 5353)  # For testing purposes
         services = [s[0:-1] for s in ALL_SERVICES]
         try:
             response = await udns.request(
-                self.loop, host, services, port=port, timeout=timeout)
+                self.loop, host, services, port=port, timeout=timeout
+            )
         except asyncio.TimeoutError:
             response = None
         return host, response
@@ -186,18 +194,22 @@ class UnicastMdnsScanner(BaseScanner):
             if resource.qtype != udns.QTYPE_TXT:
                 continue
 
-            service_name = '.'.join(resource.qname.split('.')[1:]) + '.'
+            service_name = ".".join(resource.qname.split(".")[1:]) + "."
             if service_name not in ALL_SERVICES:
                 continue
 
             port = UnicastMdnsScanner._get_port(response, resource.qname)
             if not port:
-                _LOGGER.warning('Missing port for %s', resource.qname)
+                _LOGGER.warning("Missing port for %s", resource.qname)
                 continue
 
             self.service_discovered(
-                service_name, resource.qname + '.', host, port,
-                _decode_properties(resource.rd))
+                service_name,
+                resource.qname + ".",
+                host,
+                port,
+                _decode_properties(resource.rd),
+            )
 
     @staticmethod
     def _get_port(response, qname):
@@ -206,13 +218,14 @@ class UnicastMdnsScanner(BaseScanner):
                 continue
 
             if resource.qname == qname:
-                return resource.rd.get('port')
+                return resource.rd.get("port")
 
         return None
 
 
 async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
+
     def _should_include(atv):
         if not atv.ready:
             return False
@@ -267,7 +280,8 @@ async def pair(config, protocol, loop, session=None, **kwargs):
     service = config.get_service(protocol)
     if not service:
         raise exceptions.NoServiceError(
-            'no service available for protocol ' + str(protocol))
+            "no service available for protocol " + str(protocol)
+        )
 
     protocol_handlers = {
         Protocol.DMAP: DmapPairingHandler,

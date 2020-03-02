@@ -28,10 +28,10 @@ def device_information(name, identifier, logical_device_count=None):
 
     info = message.inner()
     info.allowsPairing = True
-    info.applicationBundleIdentifier = 'com.apple.TVRemote'
-    info.applicationBundleVersion = '344.28'
+    info.applicationBundleIdentifier = "com.apple.TVRemote"
+    info.applicationBundleVersion = "344.28"
     info.lastSupportedMessageType = 77
-    info.localizedModelName = 'iPhone'
+    info.localizedModelName = "iPhone"
     info.name = name
     info.protocolVersion = 1
     info.sharedQueueVersion = 2
@@ -39,7 +39,7 @@ def device_information(name, identifier, logical_device_count=None):
     info.supportsExtendedMotion = True
     info.supportsSharedQueue = True
     info.supportsSystemPairing = True
-    info.systemBuildVersion = '17B111'
+    info.systemBuildVersion = "17B111"
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
     info.deviceClass = 1
@@ -78,8 +78,7 @@ def crypto_pairing(pairing_data, is_pairing=False):
     return message
 
 
-def client_updates_config(artwork=True, now_playing=False,
-                          volume=False, keyboard=True):
+def client_updates_config(artwork=True, now_playing=False, volume=False, keyboard=True):
     """Create a new CLIENT_UPDATES_CONFIG_MESSAGE."""
     message = create(protobuf.CLIENT_UPDATES_CONFIG_MESSAGE)
     config = message.inner()
@@ -109,19 +108,23 @@ def send_hid_event(use_page, usage, down):
     # TODO: This should be generated somehow. I guess it's mach AbsoluteTime
     # which is tricky to generate. The device does not seem to care much about
     # the value though, so hardcode something here.
-    abstime = binascii.unhexlify(b'438922cf08020000')
+    abstime = binascii.unhexlify(b"438922cf08020000")
 
-    data = use_page.to_bytes(2, byteorder='big')
-    data += usage.to_bytes(2, byteorder='big')
-    data += (1 if down else 0).to_bytes(2, byteorder='big')
+    data = use_page.to_bytes(2, byteorder="big")
+    data += usage.to_bytes(2, byteorder="big")
+    data += (1 if down else 0).to_bytes(2, byteorder="big")
 
     # This is the format that the device expects. Some day I might take some
     # time to decode it for real, but this is fine for now.
-    event.hidEventData = abstime + \
-        binascii.unhexlify(b'00000000000000000100000000000000020' +
-                           b'00000200000000300000001000000000000') + \
-        data + \
-        binascii.unhexlify(b'0000000000000001000000')
+    event.hidEventData = (
+        abstime
+        + binascii.unhexlify(
+            b"00000000000000000100000000000000020"
+            + b"00000200000000300000001000000000000"
+        )
+        + data
+        + binascii.unhexlify(b"0000000000000001000000")
+    )
 
     return message
 
@@ -136,8 +139,7 @@ def command(cmd):
 
 def command_result(identifier, error_code=0):
     """Playback command request."""
-    message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE,
-                     identifier=identifier)
+    message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE, identifier=identifier)
     inner = message.inner()
     inner.errorCode = error_code
     inner.handlerReturnStatus = 0

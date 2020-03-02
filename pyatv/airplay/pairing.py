@@ -7,13 +7,13 @@ from collections import namedtuple
 from pyatv import exceptions, net
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.airplay.srp import (SRPAuthHandler, new_credentials)
+from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.airplay.auth import DeviceAuthenticator
 from pyatv.support import error_handler
 
 _LOGGER = logging.getLogger(__name__)
 
-AuthData = namedtuple('AuthData', 'identifier seed credentials')
+AuthData = namedtuple("AuthData", "identifier seed credentials")
 
 
 class AirPlayPairingHandler(PairingHandler):
@@ -24,8 +24,8 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session, config.get_service(Protocol.AirPlay))
         self.srp = SRPAuthHandler()
         self.http = net.HttpSession(
-            session,
-            'http://{0}:{1}/'.format(config.address, self.service.port))
+            session, "http://{0}:{1}/".format(config.address, self.service.port)
+        )
         self.auther = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
         self.srp.initialize(binascii.unhexlify(self.auth_data.seed))
@@ -38,9 +38,9 @@ class AirPlayPairingHandler(PairingHandler):
         # If service has credentials, use those. Otherwise generate new.
         if self.service.credentials is None:
             identifier, seed = new_credentials()
-            credentials = '{0}:{1}'.format(identifier, seed.decode().upper())
+            credentials = "{0}:{1}".format(identifier, seed.decode().upper())
         else:
-            split = credentials.split(':')
+            split = credentials.split(":")
             identifier = split[0]
             seed = split[1]
         return AuthData(identifier, seed, credentials)
@@ -52,21 +52,23 @@ class AirPlayPairingHandler(PairingHandler):
 
     def begin(self):
         """Start pairing process."""
-        _LOGGER.debug('Starting AirPlay pairing with credentials %s',
-                      self.auth_data.credentials)
+        _LOGGER.debug(
+            "Starting AirPlay pairing with credentials %s", self.auth_data.credentials
+        )
         self.pairing_complete = False
-        return error_handler(self.auther.start_authentication,
-                             exceptions.PairingError)
+        return error_handler(self.auther.start_authentication, exceptions.PairingError)
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
-            raise exceptions.PairingError('no pin given')
+            raise exceptions.PairingError("no pin given")
 
-        await error_handler(self.auther.finish_authentication,
-                            exceptions.PairingError,
-                            self.auth_data.identifier,
-                            self.pin_code)
+        await error_handler(
+            self.auther.finish_authentication,
+            exceptions.PairingError,
+            self.auth_data.identifier,
+            self.pin_code,
+        )
 
         self.service.credentials = self.auth_data.credentials
         self.pairing_complete = True

@@ -16,7 +16,7 @@ async def pair_with_device(loop):
     atvs = await scan(loop, timeout=5, protocol=Protocol.MRP)
 
     if not atvs:
-        print('No device found', file=sys.stderr)
+        print("No device found", file=sys.stderr)
         return
 
     pairing = await pair(atvs[0], Protocol.MRP, loop)
@@ -28,13 +28,14 @@ async def pair_with_device(loop):
 
     # Give some feedback about the process
     if pairing.has_paired:
-        print('Paired with device!')
-        print('Credentials:', pairing.service.credentials)
+        print("Paired with device!")
+        print("Credentials:", pairing.service.credentials)
     else:
-        print('Did not pair with device!')
+        print("Did not pair with device!")
 
     await pairing.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Setup event loop and connect
     LOOP.run_until_complete(pair_with_device(LOOP))

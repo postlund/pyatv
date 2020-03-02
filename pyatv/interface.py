@@ -5,24 +5,24 @@ import inspect
 import hashlib
 
 from collections import namedtuple
-from abc import (ABCMeta, abstractmethod, abstractproperty)
+from abc import ABCMeta, abstractmethod, abstractproperty
 
-from pyatv import (convert, exceptions, net)
+from pyatv import convert, exceptions, net
 from pyatv.const import OperatingSystem, DeviceModel
 
-ArtworkInfo = namedtuple('ArtworkInfo', 'bytes mimetype')
+ArtworkInfo = namedtuple("ArtworkInfo", "bytes mimetype")
 
 
 def _get_first_sentence_in_pydoc(obj):
     doc = obj.__doc__
-    index = doc.find('.')
+    index = doc.find(".")
     if index == -1:
         # Here we have no leading . so return everything
         return doc
 
     # Try to find the first complete sentence and respect
     # abbreviations correctly
-    match = re.findall(r'(.*\.[^A-Z]*)\.(?: [A-Z].*|)', doc)
+    match = re.findall(r"(.*\.[^A-Z]*)\.(?: [A-Z].*|)", doc)
     if len(match) == 1:
         return match[0]
     return doc[0:index]
@@ -32,13 +32,13 @@ def retrieve_commands(obj):
     """Retrieve all commands and help texts from an API object."""
     commands = {}  # Name and help
     for func in obj.__dict__:
-        if not inspect.isfunction(obj.__dict__[func]) and \
-           not isinstance(obj.__dict__[func], property):
+        if not inspect.isfunction(obj.__dict__[func]) and not isinstance(
+            obj.__dict__[func], property
+        ):
             continue
-        if func.startswith('_') or func == 'listener':
+        if func.startswith("_") or func == "listener":
             continue
-        commands[func] = _get_first_sentence_in_pydoc(
-            obj.__dict__[func])
+        commands[func] = _get_first_sentence_in_pydoc(obj.__dict__[func])
     return commands
 
 
@@ -211,42 +211,45 @@ class Playing:
     def __str__(self):
         """Convert this playing object to a readable string."""
         output = []
-        output.append('  Media type: {0}'.format(
-            convert.media_type_str(self.media_type)))
-        output.append('Device state: {0}'.format(
-            convert.device_state_str(self.device_state)))
+        output.append(
+            "  Media type: {0}".format(convert.media_type_str(self.media_type))
+        )
+        output.append(
+            "Device state: {0}".format(convert.device_state_str(self.device_state))
+        )
 
         if self.title is not None:
-            output.append('       Title: {0}'.format(self.title))
+            output.append("       Title: {0}".format(self.title))
 
         if self.artist is not None:
-            output.append('      Artist: {0}'.format(self.artist))
+            output.append("      Artist: {0}".format(self.artist))
 
         if self.album is not None:
-            output.append('       Album: {0}'.format(self.album))
+            output.append("       Album: {0}".format(self.album))
 
         if self.genre is not None:
-            output.append('       Genre: {0}'.format(self.genre))
+            output.append("       Genre: {0}".format(self.genre))
 
         position = self.position
         total_time = self.total_time
         if position is not None and total_time is not None and total_time != 0:
-            output.append('    Position: {0}/{1}s ({2:.1%})'.format(
-                position, total_time, float(position)/float(total_time)))
+            output.append(
+                "    Position: {0}/{1}s ({2:.1%})".format(
+                    position, total_time, float(position) / float(total_time)
+                )
+            )
         elif position is not None and position != 0:
-            output.append('    Position: {0}s'.format(position))
+            output.append("    Position: {0}s".format(position))
         elif total_time is not None and position != 0:
-            output.append('  Total time: {0}s'.format(total_time))
+            output.append("  Total time: {0}s".format(total_time))
 
         if self.repeat is not None:
-            output.append('      Repeat: {0}'.format(
-                convert.repeat_str(self.repeat)))
+            output.append("      Repeat: {0}".format(convert.repeat_str(self.repeat)))
 
         if self.shuffle is not None:
-            output.append('     Shuffle: {0}'.format(
-                convert.shuffle_str(self.shuffle)))
+            output.append("     Shuffle: {0}".format(convert.shuffle_str(self.shuffle)))
 
-        return '\n'.join(output)
+        return "\n".join(output)
 
     @property
     def hash(self):
@@ -255,9 +258,10 @@ class Playing:
         The hash is based on title, artist, album and total time. It should
         always be the same for the same content, but it is not guaranteed.
         """
-        base = '{0}{1}{2}{3}'.format(
-            self.title, self.artist, self.album, self.total_time)
-        return hashlib.sha256(base.encode('utf-8')).hexdigest()
+        base = "{0}{1}{2}{3}".format(
+            self.title, self.artist, self.album, self.total_time
+        )
+        return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
     @abstractproperty
     def media_type(self):
@@ -467,7 +471,9 @@ class Power:
 class DeviceInfo:
     """General information about device."""
 
-    def __init__(self, os, version, build_number, model, mac):  # pylint: disable=too-many-arguments  # noqa
+    def __init__(
+        self, os, version, build_number, model, mac
+    ):  # pylint: disable=too-many-arguments  # noqa
         """Initialize a new DeviceInfo instance."""
         self._os = os
         self._version = version
@@ -503,20 +509,20 @@ class DeviceInfo:
     def __str__(self):
         """Convert device info to readable string."""
         if self.model != DeviceModel.Unknown:
-            output = self.model.name.replace('Gen', '')
+            output = self.model.name.replace("Gen", "")
         else:
-            output = 'Unknown Model'
+            output = "Unknown Model"
 
-        output += ' ' + {
-            OperatingSystem.Legacy: 'ATV SW',
-            OperatingSystem.TvOS: 'tvOS',
-        }.get(self.operating_system, 'Unknown OS')
+        output += " " + {
+            OperatingSystem.Legacy: "ATV SW",
+            OperatingSystem.TvOS: "tvOS",
+        }.get(self.operating_system, "Unknown OS")
 
         if self.version:
-            output += ' ' + self.version
+            output += " " + self.version
 
         if self.build_number:
-            output += ' build ' + self.build_number
+            output += " build " + self.build_number
 
         return output
 

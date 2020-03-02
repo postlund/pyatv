@@ -56,7 +56,7 @@ from pyatv.conf import MrpService
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp import (chacha20, protobuf, variant)
+from pyatv.mrp import chacha20, protobuf, variant
 from pyatv.support import log_binary
 
 # SRP server auth lives with the test code for now and we need to add that path
@@ -68,8 +68,8 @@ from tests.mrp.mrp_server_auth import MrpServerAuth, SERVER_IDENTIFIER
 
 _LOGGER = logging.getLogger(__name__)
 
-DEVICE_NAME = 'Proxy'
-AIRPLAY_IDENTIFIER = '4D797FD3-3538-427E-A47B-A32FC6CF3A6A'
+DEVICE_NAME = "Proxy"
+AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 
 
 class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
@@ -80,7 +80,7 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
         super().__init__(self, DEVICE_NAME)
         self.loop = loop
         self.auther = MrpServerAuth(self, DEVICE_NAME)
-        self.buffer = b''
+        self.buffer = b""
         self.transport = None
         self.chacha = None
         self.connection = None
@@ -89,8 +89,11 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
         """Start the proxy instance."""
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
-            self.loop, self.connection, SRPAuthHandler(),
-            MrpService(None, port, credentials=credentials))
+            self.loop,
+            self.connection,
+            SRPAuthHandler(),
+            MrpService(None, port, credentials=credentials),
+        )
         await protocol.start(skip_initial_messages=True)
         self.connection.listener = self
         self._process_buffer()
@@ -101,16 +104,15 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
 
     def enable_encryption(self, input_key, output_key):
         """Enable encryption with specified keys."""
-        self.chacha = chacha20.Chacha20Cipher(
-            input_key, output_key)
+        self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
 
     def send(self, message):
         """Send protobuf message to client."""
         data = message.SerializeToString()
-        _LOGGER.info('<<(DECRYPTED): %s', message)
+        _LOGGER.info("<<(DECRYPTED): %s", message)
         if self.chacha:
             data = self.chacha.encrypt(data)
-            log_binary(_LOGGER, '<<(ENCRYPTED)', Message=message)
+            log_binary(_LOGGER, "<<(ENCRYPTED)", Message=message)
 
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
@@ -120,17 +122,17 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(raw)
 
-        log_binary(_LOGGER, 'ATV->APP', Raw=raw)
-        _LOGGER.info('ATV->APP Parsed: %s', parsed)
+        log_binary(_LOGGER, "ATV->APP", Raw=raw)
+        _LOGGER.info("ATV->APP Parsed: %s", parsed)
         if self.chacha:
             raw = self.chacha.encrypt(raw)
-            log_binary(_LOGGER, 'ATV->APP', Encrypted=raw)
+            log_binary(_LOGGER, "ATV->APP", Encrypted=raw)
 
         length = variant.write_variant(len(raw))
         try:
             self.transport.write(length + raw)
         except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception('Failed to send to app')
+            _LOGGER.exception("Failed to send to app")
 
     def message_received(self, _, raw):
         """Message received from ATV."""
@@ -151,12 +153,12 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
             data = raw[:length]
             self.buffer = raw[length:]
             if self.chacha:
-                log_binary(_LOGGER, 'ENC Phone->ATV', Encrypted=data)
+                log_binary(_LOGGER, "ENC Phone->ATV", Encrypted=data)
                 data = self.chacha.decrypt(data)
 
             message = protobuf.ProtocolMessage()
             message.ParseFromString(data)
-            _LOGGER.info('(DEC Phone->ATV): %s', message)
+            _LOGGER.info("(DEC Phone->ATV): %s", message)
 
             try:
                 if message.type == protobuf.DEVICE_INFO_MESSAGE:
@@ -166,32 +168,33 @@ class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
                 else:
                     self.connection.send_raw(data)
             except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception('Error while dispatching message')
+                _LOGGER.exception("Error while dispatching message")
 
 
 async def publish_zeroconf(zconf, ip_address, port):
     """Publish zeroconf service for ATV proxy instance."""
     props = {
-        b'ModelName': 'Apple TV',
-        b'AllowPairing': b'YES',
-        b'macAddress': b'40:cb:c0:12:34:56',
-        b'BluetoothAddress': False,
-        b'Name': DEVICE_NAME.encode(),
-        b'UniqueIdentifier': SERVER_IDENTIFIER.encode(),
-        b'SystemBuildVersion': b'17K499',
-        b'LocalAirPlayReceiverPairingIdentity': AIRPLAY_IDENTIFIER.encode(),
-        }
+        b"ModelName": "Apple TV",
+        b"AllowPairing": b"YES",
+        b"macAddress": b"40:cb:c0:12:34:56",
+        b"BluetoothAddress": False,
+        b"Name": DEVICE_NAME.encode(),
+        b"UniqueIdentifier": SERVER_IDENTIFIER.encode(),
+        b"SystemBuildVersion": b"17K499",
+        b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
+    }
 
     service = ServiceInfo(
-        '_mediaremotetv._tcp.local.',
-        DEVICE_NAME + '._mediaremotetv._tcp.local.',
+        "_mediaremotetv._tcp.local.",
+        DEVICE_NAME + "._mediaremotetv._tcp.local.",
         address=socket.inet_aton(ip_address),
         port=port,
         weight=0,
         priority=0,
-        properties=props)
+        properties=props,
+    )
     await zconf.register_service(service)
-    _LOGGER.debug('Published zeroconf service: %s', service)
+    _LOGGER.debug("Published zeroconf service: %s", service)
 
     return service
 
@@ -202,9 +205,10 @@ async def main(loop):
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     if len(sys.argv) != 5:
-        print("Usage: {0} <credentials> <local ip> "
-              "<atv ip> <atv port>".format(
-                  sys.argv[0]))
+        print(
+            "Usage: {0} <credentials> <local ip> "
+            "<atv ip> <atv port>".format(sys.argv[0])
+        )
         sys.exit(1)
 
     credentials = sys.argv[1]
@@ -217,16 +221,16 @@ async def main(loop):
         try:
             proxy = ProxyMrpAppleTV(loop)
             asyncio.ensure_future(
-                proxy.start(atv_ip_addr, atv_port, credentials),
-                loop=loop)
+                proxy.start(atv_ip_addr, atv_port, credentials), loop=loop
+            )
         except Exception:
             _LOGGER.exception("failed to start proxy")
         return proxy
 
     # Setup server used to publish a fake MRP server
-    server = await loop.create_server(proxy_factory, '0.0.0.0')
+    server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
-    _LOGGER.error('Started MRP server at port %d', port)
+    _LOGGER.error("Started MRP server at port %d", port)
 
     service = await publish_zeroconf(zconf, local_ip_addr, port)
 
@@ -236,5 +240,5 @@ async def main(loop):
     await zconf.unregister_service(service)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main(asyncio.get_event_loop()))

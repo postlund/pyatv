@@ -20,13 +20,15 @@ def stub_sleep():
     Calling this function stubs asyncio.sleep globally, so technically it only
     needs to be called once.
     """
-    if not hasattr(asyncio, '_real_sleep'):
+    if not hasattr(asyncio, "_real_sleep"):
         # This is a special "hack" to schedule the sleep at the end of the
         # event queue in order to give other possibility to run.
         async def fake_sleep(time=None, loop=None):
             async def dummy():
                 pass
+
             await asyncio.ensure_future(dummy())
+
         asyncio._real_sleep = asyncio.sleep
         asyncio.sleep = fake_sleep
 
@@ -34,7 +36,7 @@ def stub_sleep():
 async def simple_get(url):
     """Perform a GET-request to a specified URL."""
     session = ClientSession()
-    response = await session.request('GET', url)
+    response = await session.request("GET", url)
     if response.status < 200 or response.status >= 300:
         response.close()
         await session.close()
@@ -69,7 +71,7 @@ async def until(pred, timeout=5, **kwargs):
                 raise asyncio.TimeoutError()
 
         # Use original method if stubbed
-        if hasattr(asyncio, '_real_sleep'):
+        if hasattr(asyncio, "_real_sleep"):
             await asyncio._real_sleep(0.5)
         else:
             await asyncio.sleep(0.5)
@@ -77,17 +79,18 @@ async def until(pred, timeout=5, **kwargs):
 
 def faketime(module_name, *times):
     """Monkey patch datetime.now to return fake time."""
+
     class FakeDatetime:
         def __init__(self, times):
             self.times = times
 
         def __enter__(self):
             module = import_module(module_name)
-            setattr(module.datetime, 'datetime', self)
+            setattr(module.datetime, "datetime", self)
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             module = import_module(module_name)
-            setattr(module.datetime, 'datetime', datetime)
+            setattr(module.datetime, "datetime", datetime)
 
         def now(self, tz=None):
             """Replace times from now to fake values."""

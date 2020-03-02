@@ -1,24 +1,21 @@
 """Functional authentication tests with fake MRP Apple TV."""
 
-from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
+from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
 from pyatv.const import Protocol
-from pyatv.conf import (MrpService, AppleTV)
-from tests.mrp.fake_mrp_atv import (FakeAppleTV, AppleTVUseCases)
-from tests.mrp.mrp_server_auth import (
-    PIN_CODE, CLIENT_IDENTIFIER, CLIENT_CREDENTIALS)
+from pyatv.conf import MrpService, AppleTV
+from tests.mrp.fake_mrp_atv import FakeAppleTV, AppleTVUseCases
+from tests.mrp.mrp_server_auth import PIN_CODE, CLIENT_IDENTIFIER, CLIENT_CREDENTIALS
 
 
 class MrpAuthFunctionalTest(AioHTTPTestCase):
-
     def setUp(self):
         AioHTTPTestCase.setUp(self)
 
-        self.service = MrpService(
-            CLIENT_IDENTIFIER, self.fake_atv.port)
-        self.conf = AppleTV('127.0.0.1', 'Apple TV')
+        self.service = MrpService(CLIENT_IDENTIFIER, self.fake_atv.port)
+        self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.service)
 
     async def tearDownAsync(self):
@@ -32,8 +29,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_pairing_with_device(self):
-        self.handle = await pyatv.pair(
-            self.conf, Protocol.MRP, self.loop)
+        self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
         self.assertTrue(self.handle.device_provides_pin)
 
@@ -47,8 +43,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
-        self.handle = await pyatv.pair(
-            self.conf, Protocol.MRP, self.loop)
+        self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
         self.assertTrue(self.handle.device_provides_pin)
 

@@ -13,13 +13,13 @@ DEFAULT_TIMEOUT = 10.0  # Seconds
 
 def is_custom_session(session):
     """Return if a ClientSession was created by pyatv."""
-    return hasattr(session, '_pyatv')
+    return hasattr(session, "_pyatv")
 
 
 async def create_session(loop):
     """Create aiohttp ClientSession manged by pyatv."""
     session = ClientSession(loop=loop)
-    setattr(session, '_pyatv', True)
+    setattr(session, "_pyatv", True)
     return session
 
 
@@ -34,12 +34,14 @@ class HttpSession:
     async def get_data(self, path, headers=None, timeout=None):
         """Perform a GET request."""
         url = self.base_url + path
-        _LOGGER.debug('GET URL: %s', url)
+        _LOGGER.debug("GET URL: %s", url)
         resp = None
         try:
             resp = await self._session.get(
-                url, headers=headers,
-                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
+                url,
+                headers=headers,
+                timeout=DEFAULT_TIMEOUT if timeout is None else timeout,
+            )
             if resp.content_length is not None:
                 resp_data = await resp.read()
             else:
@@ -56,14 +58,17 @@ class HttpSession:
     async def post_data(self, path, data=None, headers=None, timeout=None):
         """Perform a POST request."""
         url = self.base_url + path
-        _LOGGER.debug('POST URL: %s', url)
+        _LOGGER.debug("POST URL: %s", url)
         self._log_data(data, False)
 
         resp = None
         try:
             resp = await self._session.post(
-                url, headers=headers, data=data,
-                timeout=DEFAULT_TIMEOUT if timeout is None else timeout)
+                url,
+                headers=headers,
+                data=data,
+                timeout=DEFAULT_TIMEOUT if timeout is None else timeout,
+            )
             if resp.content_length is not None:
                 resp_data = await resp.read()
             else:
@@ -82,8 +87,10 @@ class HttpSession:
     def _log_data(data, is_recv):
         if data and _LOGGER.isEnabledFor(logging.DEBUG):
             output = data[0:128]
-            _LOGGER.debug('%s Data[%d]: %s%s',
-                          '<-' if is_recv else '->',
-                          len(data),
-                          binascii.hexlify(output),
-                          '...' if len(output) != len(data) else '')
+            _LOGGER.debug(
+                "%s Data[%d]: %s%s",
+                "<-" if is_recv else "->",
+                len(data),
+                binascii.hexlify(output),
+                "..." if len(output) != len(data) else "",
+            )

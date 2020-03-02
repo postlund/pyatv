@@ -53,48 +53,30 @@ class ConvertTest(unittest.TestCase):
     # MEDIA KIND TESTS
 
     def test_unknown_media_kind(self):
-        self.assertEqual(MediaType.Unknown,
-                         media_kind(MEDIA_KIND_UNKNOWN))
-        self.assertEqual(MediaType.Unknown,
-                         media_kind(MEDIA_KIND_UNKNOWN2))
+        self.assertEqual(MediaType.Unknown, media_kind(MEDIA_KIND_UNKNOWN))
+        self.assertEqual(MediaType.Unknown, media_kind(MEDIA_KIND_UNKNOWN2))
 
     def test_video_media_kinds(self):
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_MOVIE))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_MUSICVIDEO))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_MUSICVIDEO2))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_VIDEOPASS))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_HOMEVIDEO))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_FUTUREVIDEO))
-        self.assertEqual(MediaType.Video,
-                         media_kind(MEDIA_KIND_ITUNESU))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MOVIE))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MUSICVIDEO))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MUSICVIDEO2))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_VIDEOPASS))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_HOMEVIDEO))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_FUTUREVIDEO))
+        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_ITUNESU))
 
     def test_music_media_kinds(self):
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_SONG))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_PODCAST))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_PODCAST2))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_COACHEDAUDIO))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_RINGTONE))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_VOICEMEMO))
-        self.assertEqual(MediaType.Music,
-                         media_kind(MEDIA_KIND_ALERTTONE))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_SONG))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_PODCAST))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_PODCAST2))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_COACHEDAUDIO))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_RINGTONE))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_VOICEMEMO))
+        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_ALERTTONE))
 
     def test_tv_kinds(self):
-        self.assertEqual(MediaType.TV,
-                         media_kind(MEDIA_KIND_TVSHOW))
-        self.assertEqual(MediaType.TV,
-                         media_kind(MEDIA_KIND_TVSHOW2))
+        self.assertEqual(MediaType.TV, media_kind(MEDIA_KIND_TVSHOW))
+        self.assertEqual(MediaType.TV, media_kind(MEDIA_KIND_TVSHOW2))
 
     def test_unknown_media_kind_throws(self):
         with self.assertRaises(exceptions.UnknownMediaKindError):
@@ -107,24 +89,16 @@ class ConvertTest(unittest.TestCase):
         # valid value. But it is supported nonetheless because that makes
         # usage nicer. None means that the field is not included in a
         # server response, which matches the behavior of dmap.first.
-        self.assertEqual(DeviceState.Idle,
-                         playstate(None))
+        self.assertEqual(DeviceState.Idle, playstate(None))
 
     def test_regular_playstates(self):
-        self.assertEqual(DeviceState.Idle,
-                         playstate(PLAY_STATE_IDLE))
-        self.assertEqual(DeviceState.Loading,
-                         playstate(PLAY_STATE_LOADING))
-        self.assertEqual(DeviceState.Stopped,
-                         playstate(PLAY_STATE_STOPPED))
-        self.assertEqual(DeviceState.Paused,
-                         playstate(PLAY_STATE_PAUSED))
-        self.assertEqual(DeviceState.Playing,
-                         playstate(PLAY_STATE_PLAYING))
-        self.assertEqual(DeviceState.Seeking,
-                         playstate(PLAY_STATE_FORWARD))
-        self.assertEqual(DeviceState.Seeking,
-                         playstate(PLAY_STATE_BACKWARD))
+        self.assertEqual(DeviceState.Idle, playstate(PLAY_STATE_IDLE))
+        self.assertEqual(DeviceState.Loading, playstate(PLAY_STATE_LOADING))
+        self.assertEqual(DeviceState.Stopped, playstate(PLAY_STATE_STOPPED))
+        self.assertEqual(DeviceState.Paused, playstate(PLAY_STATE_PAUSED))
+        self.assertEqual(DeviceState.Playing, playstate(PLAY_STATE_PLAYING))
+        self.assertEqual(DeviceState.Seeking, playstate(PLAY_STATE_FORWARD))
+        self.assertEqual(DeviceState.Seeking, playstate(PLAY_STATE_BACKWARD))
 
     def test_unknown_playstate_throws(self):
         with self.assertRaises(exceptions.UnknownPlayStateError):
@@ -143,4 +117,4 @@ class ConvertTest(unittest.TestCase):
     def test_invalid_time(self):
         # Sometimes really large times are reported during buffering, this test
         # handles those special cases.
-        self.assertEqual(0, ms_to_s(2**32 - 1))
+        self.assertEqual(0, ms_to_s(2 ** 32 - 1))

@@ -3,14 +3,19 @@
 import binascii
 from asynctest.mock import patch
 
-from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
+from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import pair, exceptions
 from pyatv.const import Protocol
-from pyatv.conf import (AirPlayService, AppleTV)
+from pyatv.conf import AirPlayService, AppleTV
 from tests.airplay.fake_airplay_device import (
-    FakeAirPlayDevice, AirPlayUseCases, DEVICE_CREDENTIALS, DEVICE_PIN,
-    DEVICE_IDENTIFIER, DEVICE_AUTH_KEY)
+    FakeAirPlayDevice,
+    AirPlayUseCases,
+    DEVICE_CREDENTIALS,
+    DEVICE_PIN,
+    DEVICE_IDENTIFIER,
+    DEVICE_AUTH_KEY,
+)
 
 
 def predetermined_key(num):
@@ -21,14 +26,12 @@ def predetermined_key(num):
 
 
 class PairFunctionalTest(AioHTTPTestCase):
-
     def setUp(self):
         AioHTTPTestCase.setUp(self)
         self.pairing = None
 
-        self.service = AirPlayService(
-            'airplay_id', port=self.server.port)
-        self.conf = AppleTV('127.0.0.1', 'Apple TV')
+        self.service = AirPlayService("airplay_id", port=self.server.port)
+        self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.service)
 
     async def tearDownAsync(self):
@@ -43,8 +46,7 @@ class PairFunctionalTest(AioHTTPTestCase):
     async def do_pairing(self, pin=DEVICE_PIN):
         self.usecase.airplay_require_authentication()
 
-        self.pairing = await pair(
-            self.conf, Protocol.AirPlay, self.loop)
+        self.pairing = await pair(self.conf, Protocol.AirPlay, self.loop)
 
         self.assertTrue(self.pairing.device_provides_pin)
 
@@ -69,13 +71,12 @@ class PairFunctionalTest(AioHTTPTestCase):
             await self.do_pairing(None)
 
     @unittest_run_loop
-    @patch('os.urandom')
+    @patch("os.urandom")
     async def test_pairing_with_device_new_credentials(self, rand_func):
         rand_func.side_effect = predetermined_key
         await self.do_pairing()
 
     @unittest_run_loop
     async def test_pairing_with_device_existing_credentials(self):
-        self.conf.get_service(
-            Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
+        self.conf.get_service(Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
         await self.do_pairing()

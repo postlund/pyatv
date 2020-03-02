@@ -4,7 +4,7 @@ import asynctest
 
 from asynctest.mock import patch
 
-from pyatv import (conf, helpers)
+from pyatv import conf, helpers
 
 
 class MockAppleTV:
@@ -16,28 +16,26 @@ class MockAppleTV:
 
 
 class HelpersTest(asynctest.TestCase):
-
     def setUp(self):
-        self.config = conf.AppleTV('address', 'name')
+        self.config = conf.AppleTV("address", "name")
         self.mock_device = asynctest.mock.Mock(MockAppleTV())
 
-    @patch('pyatv.scan', return_value=[])
+    @patch("pyatv.scan", return_value=[])
     def test_auto_connect_with_no_device(self, scan_func):
         self.device_found = True
 
         async def found_handler():
-            self.assertTrue(False, msg='should not be called')
+            self.assertTrue(False, msg="should not be called")
 
         async def not_found_handler():
             self.device_found = False
 
-        helpers.auto_connect(found_handler,
-                             not_found=not_found_handler)
+        helpers.auto_connect(found_handler, not_found=not_found_handler)
 
         self.assertFalse(self.device_found)
 
-    @patch('pyatv.scan')
-    @patch('pyatv.connect')
+    @patch("pyatv.scan")
+    @patch("pyatv.connect")
     def test_auto_connect_with_device(self, connect_func, scan_func):
         scan_func.return_value = [self.config]
         connect_func.return_value = self.mock_device

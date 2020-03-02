@@ -58,9 +58,7 @@ def _inner_message(self):
 ProtocolMessage.inner = _inner_message  # type: ignore
 """
 
-MessageInfo = namedtuple(
-    "MessageInfo", ["module", "title", "accessor", "const"]
-)
+MessageInfo = namedtuple("MessageInfo", ["module", "title", "accessor", "const"])
 
 
 def _protobuf_url():
@@ -158,9 +156,7 @@ def extract_message_info():
                 continue
 
             constant = stripped.split(" ")[0]
-            title = (
-                constant.title().replace("_", "").replace("Hid", "HID")
-            )  # Hack...
+            title = constant.title().replace("_", "").replace("Hid", "HID")  # Hack...
             accessor = title[0].lower() + title[1:]
 
             if not os.path.exists(os.path.join(BASE_PATH, title + ".proto")):
@@ -215,9 +211,7 @@ def generate_module_code():
     for module_name, message_name in extract_unreferenced_messages():
         if message_name not in message_names:
             message_names.add(message_name)
-            messages.append(
-                "from .{0} import {1}".format(module_name, message_name)
-            )
+            messages.append("from .{0} import {1}".format(module_name, message_name))
 
     return OUTPUT_TEMPLATE.format(
         packages="\n".join(sorted(packages)),
@@ -269,6 +263,7 @@ def verify_generated_code():
 
 def _print_single_message(data, unknown_fields):
     from pyatv.mrp.protobuf import ProtocolMessage
+
     parsed = ProtocolMessage()
     parsed.ParseFromString(data)
     output = MessageToString(parsed, print_unknown_fields=unknown_fields)
@@ -296,9 +291,7 @@ def _decrypt_chacha20poly1305(data, nounce, key):
     """Decrypt data with specified key and nounce."""
     data = binascii.unhexlify(data)
     input_key = binascii.unhexlify(key)
-    input_nonce = b"\x00\x00\x00\x00" + nounce.to_bytes(
-        length=8, byteorder="little"
-    )
+    input_nonce = b"\x00\x00\x00\x00" + nounce.to_bytes(length=8, byteorder="little")
     chacha = ChaCha20Poly1305(input_key)
     try:
         print("Trying key {0} with nounce {1}".format(input_key, input_nonce))
@@ -336,10 +329,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d",
-        "--download",
-        action="store_true",
-        help="download protobuf compiler",
+        "-d", "--download", action="store_true", help="download protobuf compiler",
     )
     parser.add_argument(
         "-f",
@@ -355,10 +345,7 @@ def main():
     decode = subparsers.add_parser("decode", help="decode protobuf message(s)")
     decode.add_argument("message", help="message in hex to decode")
     decode.add_argument(
-        "-u",
-        "--unknown-fields",
-        action="store_true",
-        help="include unknown fields",
+        "-u", "--unknown-fields", action="store_true", help="include unknown fields",
     )
     decode.add_argument(
         "-s",
@@ -371,18 +358,10 @@ def main():
     decrypt.add_argument("message", help="message in hex to decrypt")
     decrypt.add_argument("keys", nargs="+", help="keys to decrypt with")
     decrypt.add_argument(
-        "-l",
-        "--nounce-lower",
-        type=int,
-        default=0,
-        help="start value for nounce",
+        "-l", "--nounce-lower", type=int, default=0, help="start value for nounce",
     )
     decrypt.add_argument(
-        "-u",
-        "--nounce-upper",
-        type=int,
-        default=128,
-        help="upper value for nounce",
+        "-u", "--nounce-upper", type=int, default=128, help="upper value for nounce",
     )
 
     args = parser.parse_args()

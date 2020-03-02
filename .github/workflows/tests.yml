@@ -14,7 +14,7 @@ jobs:
           - macos-latest
           - windows-2016
           # - windows-latest  # broken on github?
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v1

@@ -5,18 +5,18 @@ in dicts.
 """
 
 # Some of the defined tags used by the pairing process
-TLV_METHOD = '0'
-TLV_IDENTIFIER = '1'
-TLV_SALT = '2'
-TLV_PUBLIC_KEY = '3'
-TLV_PROOF = '4'
-TLV_ENCRYPTED_DATA = '5'
-TLV_SEQ_NO = '6'
-TLV_ERROR = '7'
-TLV_BACK_OFF = '8'
-TLV_SIGNATURE = '10'
+TLV_METHOD = "0"
+TLV_IDENTIFIER = "1"
+TLV_SALT = "2"
+TLV_PUBLIC_KEY = "3"
+TLV_PROOF = "4"
+TLV_ENCRYPTED_DATA = "5"
+TLV_SEQ_NO = "6"
+TLV_ERROR = "7"
+TLV_BACK_OFF = "8"
+TLV_SIGNATURE = "10"
 
-ERROR_AUTHENTICATION = '2'
+ERROR_AUTHENTICATION = "2"
 
 
 def read_tlv(data):
@@ -25,6 +25,7 @@ def read_tlv(data):
     If value is larger than 255 bytes, it is split up in multiple chunks. So
     the same tag might occurr several times.
     """
+
     def _parse(data, pos, size, result=None):
         if result is None:
             result = {}
@@ -32,21 +33,21 @@ def read_tlv(data):
             return result
 
         tag = str(data[pos])
-        length = data[pos+1]
-        value = data[pos+2:pos+2+length]
+        length = data[pos + 1]
+        value = data[pos + 2 : pos + 2 + length]
 
         if tag in result:
             result[tag] += value  # value > 255 is split up
         else:
             result[tag] = value
-        return _parse(data, pos+2+length, size, result)
+        return _parse(data, pos + 2 + length, size, result)
 
     return _parse(data, 0, len(data))
 
 
 def write_tlv(data):
     """Convert a dict to TLV8 bytes."""
-    tlv = b''
+    tlv = b""
     for key, value in data.items():
         tag = bytes([int(key)])
         length = len(value)
@@ -58,7 +59,7 @@ def write_tlv(data):
             size = min(length, 255)
             tlv += tag
             tlv += bytes([size])
-            tlv += value[pos:pos+size]
+            tlv += value[pos : pos + size]
             pos += size
             length -= size
     return tlv
