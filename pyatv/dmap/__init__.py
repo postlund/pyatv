@@ -14,6 +14,8 @@ from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, ArtworkInfo, Power)
+from pyatv.support import deprecated
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -191,11 +193,13 @@ class DmapRemoteControl(RemoteControl):
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
+    @deprecated
     def suspend(self):
         """Suspend the device."""
         # Not supported by DMAP
         raise exceptions.NotSupportedError()
 
+    @deprecated
     def wakeup(self):
         """Wake up the device."""
         raise exceptions.NotSupportedError()

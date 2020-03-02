@@ -18,6 +18,7 @@ from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
                              Playing, PushUpdater, ArtworkInfo, Power)
+from pyatv.support import deprecated
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,10 +148,12 @@ class MrpRemoteControl(RemoteControl):
         """Go to main menu (long press menu)."""
         await self._press_key('topmenu')
 
+    @deprecated
     async def suspend(self):
         """Suspend the device."""
         await self._press_key('suspend')
 
+    @deprecated
     async def wakeup(self):
         """Wake up the device."""
         await self._press_key('wakeup')
