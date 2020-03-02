@@ -64,7 +64,7 @@ class ScanZeroconfTest(asynctest.TestCase):
             MRP_SERVICE_1, AIRPLAY_SERVICE_1)
 
         atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 4)
+        self.assertEqual(len(atvs), 3)
 
         # First device
         dev1 = _get_atv(atvs, IP_1)
@@ -80,11 +80,6 @@ class ScanZeroconfTest(asynctest.TestCase):
         dev3 = _get_atv(atvs, IP_4)
         self.assertIsNotNone(dev3)
         self.assertEqual(dev3.identifier, MRP_ID_1)
-
-        # Fourth device
-        dev4 = _get_atv(atvs, IP_6)
-        self.assertIsNotNone(dev4)
-        self.assertEqual(dev4.identifier, AIRPLAY_ID)
 
     async def test_scan_no_home_sharing(self):
         zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
@@ -132,15 +127,7 @@ class ScanZeroconfTest(asynctest.TestCase):
         zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
 
         atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, 'Apple TV 6')
-        self.assertEqual(atvs[0].address, ipaddress.ip_address('10.0.0.6'))
-
-        services = atvs[0].services
-        self.assertEqual(len(services), 1)
-
-        service = services[0]
-        self.assertEqual(service.port, 7000)
+        self.assertEqual(len(atvs), 0)
 
     async def test_scan_for_particular_device(self):
         zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
@@ -216,11 +203,7 @@ class ScanUnicastDnsTest(asynctest.TestCase):
             fake_udns.airplay_service('Apple TV', AIRPLAY_ID))
 
         atvs = await self.scan()
-        self.assertEqual(len(atvs), 1)
-
-        self.assertDevice(
-            atvs[0], 'Apple TV', IP_LOCALHOST,
-            AIRPLAY_ID, Protocol.AirPlay, 7000)
+        self.assertEqual(len(atvs), 0)
 
     async def test_scan_homesharing(self):
         self.server.add_service(

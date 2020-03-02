@@ -20,6 +20,13 @@ class AppleTV:
         self._services = {}
 
     @property
+    def ready(self):
+        """Return if configuration is ready, i.e. has a main service."""
+        has_dmap = Protocol.DMAP in self._services
+        has_mrp = Protocol.MRP in self._services
+        return has_dmap or has_mrp
+
+    @property
     def identifier(self):
         """Return one of the identifiers associated with this device."""
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:

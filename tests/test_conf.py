@@ -161,6 +161,24 @@ class ConfTest(unittest.TestCase):
         self.assertEqual(device_info.model, DeviceModel.Gen4K)
         self.assertEqual(device_info.mac, 'AA:BB:CC:DD:EE:FF')
 
+    def test_ready_dmap(self):
+        self.assertFalse(self.config.ready)
+
+        self.config.add_service(self.airplay_service)
+        self.assertFalse(self.config.ready)
+
+        self.config.add_service(self.dmap_service)
+        self.assertTrue(self.config.ready)
+
+    def test_ready_mrp(self):
+        self.assertFalse(self.config.ready)
+
+        self.config.add_service(self.airplay_service)
+        self.assertFalse(self.config.ready)
+
+        self.config.add_service(self.mrp_service)
+        self.assertTrue(self.config.ready)
+
     # This test is a bit strange and couples to protocol specific services,
     # but it's mainly to exercise string as that is important. Might refactor
     # this in the future.

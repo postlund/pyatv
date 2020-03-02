@@ -28,7 +28,7 @@ Currently `pyatv` supports three protocols:
 | Media Remote Protocol (MRP) | Control device and get metadata | tvOS (any version), e.g. Apple TV 4 and later |
 | AirPlay | Stream video to a device | All devices |
 
-At least one of `DMAP` and `MRP` must be present in order to connect to a device, otherwise `pyatv.connect` will raise an exception.
+At least one of `DMAP` and `MRP` must be present in order to connect to a device, otherwise `pyatv.connect` will raise an exception. Prior to version 0.4.1, `pyatv` would return configurations for pure `AirPlay` devices, e.g. wireless speakers. But since `pyatv` can't connect to these devices, they are no longer returned by `pyatv.scan`.
 
 There are methods in `pyatv.conf.AppleTV` to add and retrieve services. When using `pyatv.scan`, all discovered protocols will be added automatically and all relevant information (e.g. which port is used) is stored as well. When manually creating a configuration, you have to provide this information yourself (e.g. via `pyatv.conf.DmapService` for `DMAP`, and so on).
 

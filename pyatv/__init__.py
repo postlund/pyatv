@@ -214,6 +214,9 @@ class UnicastMdnsScanner(BaseScanner):
 async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
     def _should_include(atv):
+        if not atv.ready:
+            return False
+
         if identifier and identifier not in atv.all_identifiers:
             return False
 
