@@ -1,5 +1,39 @@
 # CHANGES
 
+## 0.4.1a1 (2020-03-02)
+
+*Changes:*
+
+* Add power interface
+* Add device information interface
+* Convert module (convert.py) is now public API
+
+*Notes:*
+
+* General improvements to protobuf handling (for developers)
+
+*All changes:*
+
+```
+e4f6590 devinfo: Minor clean ups
+d645d5a devinfo: Add device_info to atvremote
+33622b8 devinfo: Get version from osvers
+e3ad40b devinfo: Add documentation
+df8f6a1 devinfo: Clean up zeroconf properties
+908d2ea devinfo: Add support for device info
+8da7fd2 devinfo: Add helpers for extracting device info
+cb8d73a if: Add interface for device information
+d8624fd MRP Power State support (#458)
+1f97630 if: Tidy up convert module and make it public
+ce926b0 protobuf: Move pyatv imports in protobuf.py
+554d965 gha: Trigger on both push and pull_request
+a8ab245 gh: Run actions on pull requests
+024284b mrp: Add some protobuf definitions for voice
+ac3ae13 mrp: Wait for command responses
+c765dbe mrp: Download protoc and verify generated code
+070946f Bump codecov from 2.0.15 to 2.0.16
+```
+
 ## 0.4.0 (2020-02-20)
 
 *Changes:*
