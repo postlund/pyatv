@@ -246,8 +246,8 @@ class DeviceCommands:
     async def device_info(self):
         """Print various information about the device."""
         devinfo = self.atv.device_info
-        print("Model/SW: {0}\n     MAC: {1}".format(
-            devinfo, devinfo.mac))
+        print("Model/SW:", devinfo)
+        print("     MAC:", devinfo.mac)
         return 0
 
 
