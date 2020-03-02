@@ -3,6 +3,8 @@
 import asyncio
 import logging
 import binascii
+import warnings
+import functools
 from os import environ
 
 from google.protobuf.text_format import MessageToString
@@ -58,3 +60,18 @@ def log_protobuf(logger, text, message):
         msg_str = '\n'.join([_shorten(x, line_length) for x in lines])
 
         logger.debug('%s: %s', text, msg_str)
+
+
+# https://stackoverflow.com/questions/2536307/
+#   decorators-in-the-python-standard-lib-deprecated-specifically
+def deprecated(func):
+    """Decorate functions that are deprecated."""
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.warn("Call to deprecated function {}.".format(func.__name__),
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        return func(*args, **kwargs)
+    return new_func
