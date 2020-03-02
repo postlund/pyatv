@@ -35,6 +35,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
+| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      |
+| --------------------------------------------------------------- | -------- | --------- |
 | Push updates                                                    | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Remote control pairing                                          | Yes      | Yes       |
@@ -56,6 +58,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | Shuffle and repeat                                              | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Power management                                                | No       | Yes       |
+
+*\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/) page.*
 
 As pyatv is still under heavy development, expect there to be bugs. Please create an issue
 if you experience any issues.

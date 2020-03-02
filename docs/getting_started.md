@@ -25,7 +25,9 @@ Use `scan` to find devices:
     $ atvremote scan
     ========================================
            Name: Living Room
+       Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
+            MAC: AA:BB:CC:DD:EE:FF
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55
