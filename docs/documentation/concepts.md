@@ -32,6 +32,10 @@ At least one of `DMAP` and `MRP` must be present in order to connect to a device
 
 There are methods in `pyatv.conf.AppleTV` to add and retrieve services. When using `pyatv.scan`, all discovered protocols will be added automatically and all relevant information (e.g. which port is used) is stored as well. When manually creating a configuration, you have to provide this information yourself (e.g. via `pyatv.conf.DmapService` for `DMAP`, and so on).
 
+### Device Metadata
+
+In some cases it's interesting to show some more user friendly metadata, like which operating system and version a device runs.  There's no "good" way of getting this information, but `pyatv` will pull bits and pieces from the metadata received during scanning to make a good guess. Information from both the main protocol (`DMAP` or `MRP`) and `AirPlay` are used, so if you have disabled `AirPlay`, you will lose some metadata (e.g. tvOS version).
+
 ### Identifiers
 
 An important concept for `pyatv` is to be able to *uniquely* identify a device. You should be able to say: "I want to find and connect to *this* specific device" and `pyatv` should be able to do that for you. This of course means that you cannot use common identifiers, like IP-address or device name, as they can change at any time. And how many devices named "Living Room" arent' there in the world?
@@ -43,7 +47,9 @@ If you perform a scan with `atvremote`, you can see all the available identifier
     $ atvremote scan
     ========================================
            Name: Living Room
+       Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
+            MAC: AA:BB:CC:DD:EE:FF
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55

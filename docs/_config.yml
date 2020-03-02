@@ -58,6 +58,8 @@ page_links:
       title: Start
     - link: /development/scan_pair_and_connect/
       title: Scan, Pair and Connect
+    - link: /development/device_info/
+      title: Device Information
     - link: /development/control/
       title: Control
     - link: /development/power_management/

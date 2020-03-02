@@ -492,7 +492,7 @@ class DeviceInfo:
 
     @property
     def model(self):
-        """Hardware model name, e.g 3, 4 or 4K."""
+        """Hardware model name, e.g. 3, 4 or 4K."""
         return self._model
 
     @property

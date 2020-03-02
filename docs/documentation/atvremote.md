@@ -17,7 +17,9 @@ To find devices, use the `scan` command:
     $ atvremote scan
     ========================================
            Name: Living Room
+       Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
+            MAC: AA:BB:CC:DD:EE:FF
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55
@@ -26,7 +28,9 @@ To find devices, use the `scan` command:
      - Protocol: AirPlay, Port: 7000, Credentials: None
 
            Name: Kitchen
+       Model/SW: 3 ATV SW
         Address: 10.0.0.11
+	    MAC: AA:AA:AA:AA:AA:AA
     Identifiers:
      - ABCDEFABCDEFABCD
      - AA:BB:CC:DD:EE:FF
@@ -45,7 +49,9 @@ scan for specific devices ("unicast") by specifying `--scan-hosts`:
     $ atvremote --scan-hosts 10.0.0.10 scan
     ========================================
            Name: Living Room
+       Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
+            MAC: AA:BB:CC:DD:EE:FF
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55
@@ -215,6 +221,13 @@ called `commands`, as it will present a list of availble commands:
     AirPlay commands:
      - play_url - Play media from an URL on the device
 
+    Device Info commands:
+     - build_number - Operating system build number, e.g
+     - mac - Device MAC address
+     - model - Hardware model name, e.g
+     - operating_system - Operating system running on device
+     - version - Operating system version
+
     Device commands:
      - artwork_save - Download artwork and save it to artwork.png
      - cli - Enter commands in a simple CLI
@@ -238,6 +251,10 @@ You can for instance get what is currently playing with `playing`:
 Or seek in the currently playing media:
 
     $ atvremote --id 40:CB:C0:A8:DE:9A set_position=123
+
+Check operating system version:
+
+    $ atvremote --id 40:CB:C0:A8:DE:9A version
 
 Play a video via AirPlay:
 
