@@ -7,7 +7,7 @@ import datetime
 
 from pyatv import exceptions, net
 from pyatv.const import (
-    Protocol, MediaType, DeviceState, RepeatState, ShuffleState)
+    Protocol, MediaType, DeviceState, RepeatState, ShuffleState, PowerState)
 from pyatv.cache import Cache
 from pyatv.mrp import (messages, protobuf)
 from pyatv.mrp.srp import SRPAuthHandler
@@ -17,7 +17,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater, ArtworkInfo)
+                             Playing, PushUpdater, ArtworkInfo, Power)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -339,6 +339,64 @@ class MrpMetadata(Metadata):
         return MrpPlaying(self.psm.playing)
 
 
+class MrpPower(Power):
+    """Implementation of API for retrieving a power state from an Apple TV."""
+
+    def __init__(self, loop, protocol, remote):
+        """Initialize a new MrpPower instance."""
+        super().__init__()
+        self.loop = loop
+        self.protocol = protocol
+        self.remote = remote
+        self.device_info = None
+        self.__listener = None
+
+        self.protocol.add_listener(
+            self._update_power_state,
+            protobuf.DEVICE_INFO_UPDATE_MESSAGE)
+
+    def _get_current_power_state(self):
+        latest_device_info = self.device_info or self.protocol.device_info
+        return self._get_power_state(latest_device_info)
+
+    @property
+    def power_state(self):
+        """Return device power state."""
+        currect_power_state = self._get_current_power_state()
+        return currect_power_state
+
+    async def turn_on(self):
+        """Turn device on."""
+        await self.protocol.send_and_receive(messages.wake_device())
+
+    async def turn_off(self):
+        """Turn device off."""
+        await self.remote.home_hold()
+        await self.remote.select()
+
+    async def _update_power_state(self, message, _):
+        old_state = self.power_state
+        new_state = self._get_power_state(message)
+        self.device_info = message
+
+        if new_state != old_state:
+            _LOGGER.debug(
+                'Power state changed from %s to %s',
+                old_state, new_state)
+            if self.listener:
+                self.loop.call_soon(
+                    self.listener.powerstate_update, old_state, new_state)
+
+    @staticmethod
+    def _get_power_state(device_info):
+        logical_device_count = device_info.inner().logicalDeviceCount
+        if logical_device_count >= 1:
+            return PowerState.On
+        if logical_device_count == 0:
+            return PowerState.Off
+        return PowerState.Unknown
+
+
 class MrpPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
@@ -404,6 +462,8 @@ class MrpAppleTV(AppleTV):
         self._mrp_remote = MrpRemoteControl(loop, self._protocol)
         self._mrp_metadata = MrpMetadata(
             self._protocol, self._psm, config.identifier)
+        self._mrp_power = MrpPower(
+            loop, self._protocol, self._mrp_remote)
         self._mrp_push_updater = MrpPushUpdater(
             loop, self._mrp_metadata, self._psm)
         self._airplay = airplay
@@ -445,3 +505,8 @@ class MrpAppleTV(AppleTV):
     def stream(self):
         """Return API for streaming media."""
         return self._airplay
+
+    @property
+    def power(self):
+        """Return API for streaming media."""
+        return self._mrp_power

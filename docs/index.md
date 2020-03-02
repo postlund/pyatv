@@ -54,6 +54,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | Change media position                                           | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Shuffle and repeat                                              | Yes      | Yes       |
+| --------------------------------------------------------------- | -------- | --------- |
+| Power management                                                | No       | Yes       |
 
 As pyatv is still under heavy development, expect there to be bugs. Please create an issue
 if you experience any issues.

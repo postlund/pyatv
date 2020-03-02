@@ -141,6 +141,26 @@ without having to ask the device for it:
 
 Updates will be displayed when they happen. Just press ENTER to stop.
 
+## Power management
+
+Power management commands are supported by MRP devices only. 
+
+List of supported devices:
+ - Apple TV Gen 4
+ - Apple TV 4K
+
+You can turn your Apple TV on:
+
+    $ atvremote -i 00:11:22:33:44:54 turn_on
+
+Or turn it off:
+
+    $ atvremote -i 00:11:22:33:44:54 turn_off
+
+Or check the current power state:
+
+    $ atvremote -i 00:11:22:33:44:54 power_state
+
 ## Working with commands
 
 Several commands are supported by the library. Easiest is just to use the command
@@ -173,6 +193,11 @@ called `commands`, as it will present a list of availble commands:
      - artwork - Return artwork for what is currently playing (or None)
      - device_id - Return a unique identifier for current device
      - playing - Return what is currently playing
+
+    Power commands:
+     - power_state - Return device power state
+     - turn_off - Turn device off
+     - turn_on - Turn device on
 
     Playing commands:
      - album - Album of the currently playing song

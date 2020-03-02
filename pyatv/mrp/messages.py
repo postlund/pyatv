@@ -17,10 +17,15 @@ def create(message_type, error_code=0, identifier=None):
     return message
 
 
-def device_information(name, identifier):
+def device_information(name, identifier, logical_device_count=None):
     """Create a new DEVICE_INFO_MESSAGE."""
     # pylint: disable=no-member
-    message = create(protobuf.DEVICE_INFO_MESSAGE)
+    if logical_device_count is not None:
+        message = create(protobuf.DEVICE_INFO_UPDATE_MESSAGE)
+    else:
+        message = create(protobuf.DEVICE_INFO_MESSAGE)
+        logical_device_count = 1
+
     info = message.inner()
     info.allowsPairing = True
     info.applicationBundleIdentifier = 'com.apple.TVRemote'
@@ -38,8 +43,13 @@ def device_information(name, identifier):
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
     info.deviceClass = 1
-    info.logicalDeviceCount = 1
+    info.logicalDeviceCount = logical_device_count
     return message
+
+
+def wake_device():
+    """Create a new WAKE_DEVICE_MESSAGE."""
+    return create(protobuf.ProtocolMessage.WAKE_DEVICE_MESSAGE)
 
 
 def set_connection_state():

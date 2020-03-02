@@ -60,6 +60,8 @@ page_links:
       title: Scan, Pair and Connect
     - link: /development/control/
       title: Control
+    - link: /development/power_management/
+      title: Power Management
     - link: /development/metadata/
       title: Metadata
     - link: /development/listeners/

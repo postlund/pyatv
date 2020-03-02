@@ -7,12 +7,13 @@ from aiohttp.client_exceptions import ClientError
 
 from pyatv import (exceptions, net)
 from pyatv.cache import Cache
-from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState
+from pyatv.const import (Protocol, MediaType, RepeatState,
+                         ShuffleState, PowerState)
 from pyatv.dmap import (daap, parser, tags)
 from pyatv.dmap.daap import DaapRequester
 from pyatv.net import HttpSession
 from pyatv.interface import (AppleTV, RemoteControl, Metadata,
-                             Playing, PushUpdater, ArtworkInfo)
+                             Playing, PushUpdater, ArtworkInfo, Power)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -345,6 +346,23 @@ class DmapMetadata(Metadata):
         return await self.apple_tv.playstatus()
 
 
+class DmapPower(Power):
+    """Implementation of API for retrieving a power state from an Apple TV."""
+
+    @property
+    def power_state(self):
+        """Return device power state."""
+        return PowerState.Unknown
+
+    async def turn_on(self):
+        """Turn device on."""
+        raise exceptions.NotSupportedError()
+
+    async def turn_off(self):
+        """Turn device off."""
+        raise exceptions.NotSupportedError()
+
+
 class DmapPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
@@ -444,6 +462,7 @@ class DmapAppleTV(AppleTV):
         self._apple_tv = BaseDmapAppleTV(self._requester)
         self._dmap_remote = DmapRemoteControl(self._apple_tv)
         self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
+        self._dmap_power = DmapPower()
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
         self._airplay = airplay
 
@@ -485,3 +504,8 @@ class DmapAppleTV(AppleTV):
     def stream(self):
         """Return API for streaming media."""
         return self._airplay
+
+    @property
+    def power(self):
+        """Return API for streaming media."""
+        return self._dmap_power

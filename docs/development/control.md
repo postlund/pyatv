@@ -12,7 +12,7 @@ change playback (play, pause, etc.).
 
 ## Using the Remote Control API
 
-After connecting to a device, you get get the remote control via `remote_control`:
+After connecting to a device, you get the remote control via `remote_control`:
 
 ```python
 atv = await pyatv.connect(config, ...)

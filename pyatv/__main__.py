@@ -75,6 +75,7 @@ class GlobalCommands:
         """Print a list with available commands."""
         _print_commands('Remote control', interface.RemoteControl)
         _print_commands('Metadata', interface.Metadata)
+        _print_commands('Power', interface.Power)
         _print_commands('Playing', interface.Playing)
         _print_commands('AirPlay', interface.Stream)
         _print_commands('Device', DeviceCommands)
@@ -90,6 +91,7 @@ class GlobalCommands:
 
         iface = [interface.RemoteControl,
                  interface.Metadata,
+                 interface.Power,
                  interface.Playing,
                  interface.Stream,
                  self.__class__,
@@ -491,6 +493,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     device = retrieve_commands(DeviceCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
     metadata = retrieve_commands(interface.Metadata)
+    power = retrieve_commands(interface.Power)
     playing = retrieve_commands(interface.Playing)
     stream = retrieve_commands(interface.Stream)
 
@@ -507,6 +510,10 @@ async def _handle_device_command(args, cmd, atv, loop):
     if cmd in metadata:
         return (await _exec_command(
             atv.metadata, cmd, True, *cmd_args))
+
+    if cmd in power:
+        return (await _exec_command(
+            atv.power, cmd, True, *cmd_args))
 
     if cmd in playing:
         playing_resp = await atv.metadata.playing()

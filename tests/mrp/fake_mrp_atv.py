@@ -283,6 +283,13 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
             self.send(messages.create(0, identifier=message.identifier))
         elif down_press == 0:
             if (use_page, usage) in self.outstanding_keypresses:
+                if (
+                    _convert_key_press(use_page, usage) == 'select'
+                    and self.last_button_pressed == 'home'
+                   ):
+                    msg = messages.device_information(
+                        'pyatv', message.identifier, 0)
+                    self.send(msg)
                 self.last_button_pressed = _convert_key_press(use_page, usage)
                 self.outstanding_keypresses.remove((use_page, usage))
                 _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
@@ -333,6 +340,11 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         item.artworkDataWidth = 456
         item.artworkDataHeight = 789
         self.send(setstate)
+
+    def handle_wake_device(self, message, inner):
+        msg = messages.device_information('pyatv', message.identifier, 1)
+        self.send(msg)
+        self.send(messages.command_result(message.identifier))
 
 
 class AppleTVUseCases(AirPlayUseCases):

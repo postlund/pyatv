@@ -52,3 +52,11 @@ class ShuffleState(Enum):
     Off = 0
     Albums = 1
     Songs = 2
+
+
+class PowerState(Enum):
+    """All supported power states."""
+
+    Unknown = 0
+    Off = 1
+    On = 2

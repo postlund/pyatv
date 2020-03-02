@@ -35,7 +35,7 @@ def retrieve_commands(obj):
         if not inspect.isfunction(obj.__dict__[func]) and \
            not isinstance(obj.__dict__[func], property):
             continue
-        if func.startswith('_'):
+        if func.startswith('_') or func == 'listener':
             continue
         commands[func] = _get_first_sentence_in_pydoc(
             obj.__dict__[func])
@@ -411,6 +411,57 @@ class DeviceListener:
         raise NotImplementedError()
 
 
+class PowerListener:  # pylint: disable=too-few-public-methods
+    """Listener interface for power updates."""
+
+    @abstractmethod
+    def powerstate_update(self, old_state, new_state):
+        """Device power state was updated."""
+        raise NotImplementedError()
+
+
+class Power:
+    """Base class for retrieving power state from an Apple TV."""
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        """Initialize a new Power instance."""
+        self.__listener = None
+
+    @property
+    def listener(self):
+        """Object receiving power state updates.
+
+        Must be an object conforming to PowerListener.
+        """
+        return self.__listener
+
+    @listener.setter  # type: ignore
+    def listener(self, listener):
+        """Object that receives updates.
+
+        This should be an object implementing method:
+        - powerstate_update(old_state, new_state)
+        """
+        self.__listener = listener
+
+    @abstractproperty
+    def power_state(self):
+        """Return device power state."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    async def turn_on(self):
+        """Turn device on."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    async def turn_off(self):
+        """Turn device off."""
+        raise exceptions.NotSupportedError()
+
+
 class AppleTV:
     """Base class representing an Apple TV."""
 
@@ -469,4 +520,9 @@ class AppleTV:
     @abstractproperty
     def stream(self):
         """Return API for streaming media."""
+        raise exceptions.NotSupportedError()
+
+    @abstractproperty
+    def power(self):
+        """Return API for power management."""
         raise exceptions.NotSupportedError()
