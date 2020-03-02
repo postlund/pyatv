@@ -23,6 +23,7 @@ MRP_PROPERTIES = {
 AIRPLAY_PROPERTIES = {
     'model': 'AppleTV6,2',
     'deviceid': 'aa:bb:cc:dd:ee:ff',
+    'osvers': '8.0.0',
 }
 
 
@@ -134,9 +135,19 @@ class ConfTest(unittest.TestCase):
 
         device_info = self.config.device_info
         self.assertEqual(device_info.operating_system, OperatingSystem.TvOS)
-        self.assertEqual(device_info.version, '13.3.1')
+        self.assertEqual(device_info.version, '8.0.0')
         self.assertEqual(device_info.build_number, '17K795')
         self.assertEqual(device_info.model, DeviceModel.Gen4K)
+        self.assertEqual(device_info.mac, 'FF:EE:DD:CC:BB:AA')
+
+    def test_tvos_device_info_no_airplay(self):
+        self.config.add_service(self.mrp_service)
+
+        device_info = self.config.device_info
+        self.assertEqual(device_info.operating_system, OperatingSystem.TvOS)
+        self.assertEqual(device_info.version, '13.3.1')
+        self.assertEqual(device_info.build_number, '17K795')
+        self.assertEqual(device_info.model, DeviceModel.Unknown)
         self.assertEqual(device_info.mac, 'FF:EE:DD:CC:BB:AA')
 
     def test_legacy_device_info(self):
@@ -145,7 +156,7 @@ class ConfTest(unittest.TestCase):
 
         device_info = self.config.device_info
         self.assertEqual(device_info.operating_system, OperatingSystem.Legacy)
-        self.assertIsNone(device_info.version)
+        self.assertEqual(device_info.version, '8.0.0')
         self.assertIsNone(device_info.build_number)
         self.assertEqual(device_info.model, DeviceModel.Gen4K)
         self.assertEqual(device_info.mac, 'AA:BB:CC:DD:EE:FF')

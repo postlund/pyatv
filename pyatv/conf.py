@@ -94,15 +94,15 @@ class AppleTV:
 
         build = properties.get('SystemBuildVersion')
         model = properties.get('model')
+        version = properties.get('osvers', lookup_version(build))
 
         mac = properties.get(
             'macAddress', properties.get('deviceid'))
         if mac:
             mac = mac.upper()
 
-        return DeviceInfo(
-            os_type, lookup_version(build), build,
-            lookup_model(model), mac)
+        return DeviceInfo(os_type, version, build,
+                          lookup_model(model), mac)
 
     def _all_properties(self):
         properties = {}
