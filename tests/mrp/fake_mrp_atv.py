@@ -6,40 +6,39 @@ import struct
 from datetime import datetime
 
 from pyatv import const
-from pyatv.mrp import (chacha20, messages, protobuf, variant)
+from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
-from tests.airplay.fake_airplay_device import (
-    FakeAirPlayDevice, AirPlayUseCases)
+from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
 from tests.mrp.mrp_server_auth import MrpServerAuth
 
 _LOGGER = logging.getLogger(__name__)
 
 _KEY_LOOKUP = {
     # name: [usage_page, usage, button hold time (seconds)]
-    'up': [1, 0x8C, 0],
-    'down': [1, 0x8D, 0],
-    'left': [1, 0x8B, 0],
-    'right': [1, 0x8A, 0],
-    'stop': [12, 0xB7, 0],
-    'next': [12, 0xB5, 0],
-    'previous': [12, 0xB6, 0],
-    'select': [1, 0x89, 0],
-    'menu': [1, 0x86, 0],
-    'topmenu': [12, 0x60, 0],
-    'home': [12, 0x40, 1],
-    'suspend': [1, 0x82, 0],
-    'wakeup': [1, 0x83, 0],
-    'volume_up': [12, 0xE9, 0],
-    'volume_down': [12, 0xEA, 0],
+    "up": [1, 0x8C, 0],
+    "down": [1, 0x8D, 0],
+    "left": [1, 0x8B, 0],
+    "right": [1, 0x8A, 0],
+    "stop": [12, 0xB7, 0],
+    "next": [12, 0xB5, 0],
+    "previous": [12, 0xB6, 0],
+    "select": [1, 0x89, 0],
+    "menu": [1, 0x86, 0],
+    "topmenu": [12, 0x60, 0],
+    "home": [12, 0x40, 1],
+    "suspend": [1, 0x82, 0],
+    "wakeup": [1, 0x83, 0],
+    "volume_up": [12, 0xE9, 0],
+    "volume_down": [12, 0xEA, 0],
 }
 
 _COMMAND_LOOKUP = {
-    cmd.Play: 'play',
-    cmd.Pause: 'pause',
-    cmd.Stop: 'stop',
-    cmd.NextTrack: 'nextitem',
-    cmd.PreviousTrack: 'previtem',
+    cmd.Play: "play",
+    cmd.Pause: "pause",
+    cmd.Stop: "stop",
+    cmd.NextTrack: "nextitem",
+    cmd.PreviousTrack: "previtem",
 }
 
 _REPEAT_LOOKUP = {
@@ -56,17 +55,15 @@ _SHUFFLE_LOOKUP = {
 _COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
 
 
-DEVICE_NAME = 'Fake MRP ATV'
-PLAYER_IDENTIFIER = 'com.github.postlund.pyatv'
+DEVICE_NAME = "Fake MRP ATV"
+PLAYER_IDENTIFIER = "com.github.postlund.pyatv"
 
 
 def _convert_key_press(use_page, usage):
     for name, codes in _KEY_LOOKUP.items():
         if codes[0] == use_page and codes[1] == usage:
             return name
-    raise Exception(
-        'unsupported key: use_page={0}, usage={1}'.format(
-            use_page, usage))
+    raise Exception("unsupported key: use_page={0}, usage={1}".format(use_page, usage))
 
 
 def _fill_item(item, metadata):
@@ -103,7 +100,7 @@ def _set_state_message(metadata, identifier):
     set_state = messages.create(protobuf.SET_STATE_MESSAGE)
     inner = set_state.inner()
     inner.playbackState = metadata.playback_state
-    inner.displayName = 'Fake Player'
+    inner.displayName = "Fake Player"
 
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()
@@ -126,21 +123,20 @@ def _set_state_message(metadata, identifier):
 
 
 class PlayingMetadata:
-
     def __init__(self, **kwargs):
         """Initialize a new PlayingMetadata."""
-        self.identifier = kwargs.get('identifier')
-        self.playback_state = kwargs.get('playback_state')
-        self.title = kwargs.get('title')
-        self.artist = kwargs.get('artist')
-        self.album = kwargs.get('album')
-        self.genre = kwargs.get('genre')
-        self.total_time = kwargs.get('total_time')
-        self.position = kwargs.get('position')
-        self.repeat = kwargs.get('repeat')
-        self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get('shuffle'))
-        self.media_type = kwargs.get('media_type')
-        self.playback_rate = kwargs.get('playback_rate')
+        self.identifier = kwargs.get("identifier")
+        self.playback_state = kwargs.get("playback_state")
+        self.title = kwargs.get("title")
+        self.artist = kwargs.get("artist")
+        self.album = kwargs.get("album")
+        self.genre = kwargs.get("genre")
+        self.total_time = kwargs.get("total_time")
+        self.position = kwargs.get("position")
+        self.repeat = kwargs.get("repeat")
+        self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get("shuffle"))
+        self.media_type = kwargs.get("media_type")
+        self.playback_rate = kwargs.get("playback_rate")
         self.artwork = None
         self.artwork_mimetype = None
 
@@ -161,14 +157,14 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.has_authenticated = False
 
         self.server = None
-        self.buffer = b''
+        self.buffer = b""
         self.chacha = None
         self.transport = None
 
     async def start(self, app):
-        coro = self.loop.create_server(lambda: self, '127.0.0.1')
+        coro = self.loop.create_server(lambda: self, "127.0.0.1")
         self.server = await self.loop.create_task(coro)
-        _LOGGER.info('Started MRP server at port %d', self.port)
+        _LOGGER.info("Started MRP server at port %d", self.port)
 
     @property
     def port(self):
@@ -179,8 +175,7 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 
     def enable_encryption(self, input_key, output_key):
         """Enable encryption with specified keys."""
-        self.chacha = chacha20.Chacha20Cipher(
-            input_key, output_key)
+        self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
         self.has_authenticated = True
 
     def send(self, message):
@@ -204,11 +199,10 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 
     def set_active_player(self, identifier):
         if identifier is not None and identifier not in self.states:
-            raise Exception('invalid player: %s', identifier)
+            raise Exception("invalid player: %s", identifier)
 
         self.active_player = identifier
-        now_playing = messages.create(
-            protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
+        now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
         client = now_playing.inner().client
         if identifier:
             client.bundleIdentifier = identifier
@@ -241,26 +235,25 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 
             parsed = protobuf.ProtocolMessage()
             parsed.ParseFromString(data)
-            _LOGGER.info('Incoming message: %s', parsed)
+            _LOGGER.info("Incoming message: %s", parsed)
 
             try:
-                name = parsed.Type.Name(
-                    parsed.type).lower().replace('_message', '')
+                name = parsed.Type.Name(parsed.type).lower().replace("_message", "")
 
-                _LOGGER.debug('Received %s message', name)
-                getattr(self, 'handle_' + name)(parsed, parsed.inner())
+                _LOGGER.debug("Received %s message", name)
+                getattr(self, "handle_" + name)(parsed, parsed.inner())
             except AttributeError:
-                _LOGGER.exception('No message handler for ' + str(parsed))
+                _LOGGER.exception("No message handler for " + str(parsed))
             except Exception:
-                _LOGGER.exception('Error while dispatching message')
+                _LOGGER.exception("Error while dispatching message")
 
     def handle_device_info(self, message, inner):
-        resp = messages.device_information(DEVICE_NAME, '1234')
+        resp = messages.device_information(DEVICE_NAME, "1234")
         resp.identifier = message.identifier
         self.send(resp)
 
     def handle_set_connection_state(self, message, inner):
-        _LOGGER.debug('Changed connection state to %d', inner.state)
+        _LOGGER.debug("Changed connection state to %d", inner.state)
         self.connection_state = inner.state
 
     def handle_client_updates_config(self, message, inner):
@@ -269,14 +262,15 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
         # not use them so ignore for now
-        self.send(messages.create(
-            protobuf.KEYBOARD_MESSAGE, identifier=message.identifier))
+        self.send(
+            messages.create(protobuf.KEYBOARD_MESSAGE, identifier=message.identifier)
+        )
 
     def handle_send_hid_event(self, message, inner):
         # These corresponds to the bytes mapping to pressed key (see
         # send_hid_event in pyatv/mrp/messages.py)
         start = inner.hidEventData[43:49]
-        use_page, usage, down_press = struct.unpack('>HHH', start)
+        use_page, usage, down_press = struct.unpack(">HHH", start)
 
         if down_press == 1:
             self.outstanding_keypresses.add((use_page, usage))
@@ -284,55 +278,52 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         elif down_press == 0:
             if (use_page, usage) in self.outstanding_keypresses:
                 if (
-                    _convert_key_press(use_page, usage) == 'select'
-                    and self.last_button_pressed == 'home'
-                   ):
-                    msg = messages.device_information(
-                        'pyatv', message.identifier, 0)
+                    _convert_key_press(use_page, usage) == "select"
+                    and self.last_button_pressed == "home"
+                ):
+                    msg = messages.device_information("pyatv", message.identifier, 0)
                     self.send(msg)
                 self.last_button_pressed = _convert_key_press(use_page, usage)
                 self.outstanding_keypresses.remove((use_page, usage))
-                _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+                _LOGGER.debug("Pressed button: %s", self.last_button_pressed)
                 self.send(messages.create(0, identifier=message.identifier))
             else:
-                _LOGGER.error('Missing key down for %d,%d', use_page, usage)
+                _LOGGER.error("Missing key down for %d,%d", use_page, usage)
         else:
-            _LOGGER.error('Invalid key press state: %d', down_press)
+            _LOGGER.error("Invalid key press state: %d", down_press)
 
     def handle_send_command(self, message, inner):
         state = self.get_player_state(self.active_player)
         button = _COMMAND_LOOKUP.get(inner.command)
         if button:
             self.last_button_pressed = button
-            _LOGGER.debug('Pressed button: %s', self.last_button_pressed)
+            _LOGGER.debug("Pressed button: %s", self.last_button_pressed)
         elif inner.command == cmd.ChangeRepeatMode:
             state.repeat = {
                 protobuf.CommandInfo.One: const.RepeatState.Track,
                 protobuf.CommandInfo.All: const.RepeatState.All,
-                }.get(inner.options.repeatMode,
-                      const.RepeatState.Off)
+            }.get(inner.options.repeatMode, const.RepeatState.Off)
             self.update_state(self.active_player)
-            _LOGGER.debug('Change repeat state to %s', state.repeat)
+            _LOGGER.debug("Change repeat state to %s", state.repeat)
         elif inner.command == cmd.ChangeShuffleMode:
             state.shuffle = inner.options.shuffleMode
             self.update_state(self.active_player)
-            _LOGGER.debug('Change shuffle state to %s', state.shuffle)
+            _LOGGER.debug("Change shuffle state to %s", state.shuffle)
         elif inner.command == cmd.SeekToPlaybackPosition:
             state.position = inner.options.playbackPosition
             self.update_state(self.active_player)
-            _LOGGER.debug('Seek to position: %d', state.position)
+            _LOGGER.debug("Seek to position: %d", state.position)
         else:
-            _LOGGER.warning(
-                'Unhandled button press: %s', message.inner().command)
-            self.send(messages.command_result(
-                message.identifier, error_code=1234))
+            _LOGGER.warning("Unhandled button press: %s", message.inner().command)
+            self.send(messages.command_result(message.identifier, error_code=1234))
             return
 
         self.send(messages.command_result(message.identifier))
 
     def handle_playback_queue_request(self, message, inner):
         setstate = messages.create(
-            protobuf.SET_STATE_MESSAGE, identifier=message.identifier)
+            protobuf.SET_STATE_MESSAGE, identifier=message.identifier
+        )
         queue = setstate.inner().playbackQueue
         queue.location = 0
         item = queue.contentItems.add()
@@ -342,7 +333,7 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.send(setstate)
 
     def handle_wake_device(self, message, inner):
-        msg = messages.device_information('pyatv', message.identifier, 1)
+        msg = messages.device_information("pyatv", message.identifier, 1)
         self.send(msg)
         self.send(messages.command_result(message.identifier))
 
@@ -354,7 +345,7 @@ class AppleTVUseCases(AirPlayUseCases):
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
 
-    def change_artwork(self, artwork, mimetype, identifier='artwork'):
+    def change_artwork(self, artwork, mimetype, identifier="artwork"):
         """Call this method to change artwork response."""
         metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
         metadata.artwork = artwork
@@ -380,29 +371,38 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def example_video(self, **kwargs):
         """Play some example video."""
-        kwargs.setdefault('title', 'dummy')
-        kwargs.setdefault('paused', True)
+        kwargs.setdefault("title", "dummy")
+        kwargs.setdefault("paused", True)
         self.video_playing(total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
         metadata = PlayingMetadata(
             playback_state=ssm.Paused if paused else ssm.Playing,
-            title=title, total_time=total_time,
-            position=position, media_type=protobuf.ContentItemMetadata.Video,
-            **kwargs)
+            title=title,
+            total_time=total_time,
+            position=position,
+            media_type=protobuf.ContentItemMetadata.Video,
+            **kwargs,
+        )
         self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)
 
-    def music_playing(self, paused, artist, album, title, genre,
-                      total_time, position, **kwargs):
+    def music_playing(
+        self, paused, artist, album, title, genre, total_time, position, **kwargs
+    ):
         """Call this method to change what is currently plaing to music."""
         metadata = PlayingMetadata(
             playback_state=ssm.Paused if paused else ssm.Playing,
-            artist=artist, album=album, title=title, genre=genre,
-            total_time=total_time, position=position,
+            artist=artist,
+            album=album,
+            title=title,
+            genre=genre,
+            total_time=total_time,
+            position=position,
             media_type=protobuf.ContentItemMetadata.Music,
-            **kwargs)
+            **kwargs,
+        )
         self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)
 

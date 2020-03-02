@@ -20,13 +20,10 @@ class MrpPairingHandler(PairingHandler):
     def __init__(self, config, session, loop):
         """Initialize a new MrpPairingHandler."""
         super().__init__(session, config.get_service(Protocol.MRP))
-        self.connection = MrpConnection(
-            config.address, self.service.port, loop)
+        self.connection = MrpConnection(config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
-        self.protocol = MrpProtocol(
-            loop, self.connection, self.srp, self.service)
-        self.pairing_procedure = MrpPairingProcedure(
-            self.protocol, self.srp)
+        self.protocol = MrpProtocol(loop, self.connection, self.srp, self.service)
+        self.pairing_procedure = MrpPairingProcedure(self.protocol, self.srp)
         self.pin_code = None
 
     async def close(self):
@@ -41,18 +38,22 @@ class MrpPairingHandler(PairingHandler):
 
     def begin(self):
         """Start pairing process."""
-        return error_handler(self.pairing_procedure.start_pairing,
-                             exceptions.PairingError)
+        return error_handler(
+            self.pairing_procedure.start_pairing, exceptions.PairingError
+        )
 
     async def finish(self):
         """Stop pairing process."""
         if not self.pin_code:
-            raise exceptions.PairingError('no pin given')
+            raise exceptions.PairingError("no pin given")
 
-        self.service.credentials = str(await error_handler(
-            self.pairing_procedure.finish_pairing,
-            exceptions.PairingError,
-            self.pin_code))
+        self.service.credentials = str(
+            await error_handler(
+                self.pairing_procedure.finish_pairing,
+                exceptions.PairingError,
+                self.pin_code,
+            )
+        )
 
     @property
     def device_provides_pin(self):

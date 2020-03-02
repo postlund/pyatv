@@ -4,16 +4,15 @@ import unittest
 
 from pyatv.cache import Cache
 
-ID1 = 'id1'
-ID2 = 'id2'
-ID3 = 'id3'
+ID1 = "id1"
+ID2 = "id2"
+ID3 = "id3"
 DATA1 = 123
 DATA2 = 456
 DATA3 = 789
 
 
 class CacheTest(unittest.TestCase):
-
     def setUp(self):
         self.cache = Cache(limit=2)
 

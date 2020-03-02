@@ -14,13 +14,13 @@ from .tag_definitions import lookup_tag
 _LOGGER = logging.getLogger(__name__)
 
 _DMAP_HEADERS = {
-    'Accept': '*/*',
-    'Accept-Encoding': 'gzip',
-    'Client-DAAP-Version': '3.13',
-    'Client-ATV-Sharing-Version': '1.2',
-    'Client-iTunes-Sharing-Version': '3.15',
-    'User-Agent': 'Remote/1021',
-    'Viewer-Only-Client': '1',
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip",
+    "Client-DAAP-Version": "3.13",
+    "Client-ATV-Sharing-Version": "1.2",
+    "Client-iTunes-Sharing-Version": "3.15",
+    "User-Agent": "Remote/1021",
+    "Viewer-Only-Client": "1",
 }
 
 
@@ -38,7 +38,7 @@ def media_kind(kind):
     if kind in [8, 64]:
         return MediaType.TV
 
-    raise exceptions.UnknownMediaKindError('Unknown media kind: ' + str(kind))
+    raise exceptions.UnknownMediaKindError("Unknown media kind: " + str(kind))
 
 
 def playstate(state):
@@ -57,7 +57,7 @@ def playstate(state):
     if state in (5, 6):
         return DeviceState.Seeking
 
-    raise exceptions.UnknownPlayStateError('Unknown playstate: ' + str(state))
+    raise exceptions.UnknownPlayStateError("Unknown playstate: " + str(state))
 
 
 def ms_to_s(time):
@@ -66,7 +66,7 @@ def ms_to_s(time):
         return 0
 
     # Happens in some special cases, just return 0
-    if time >= (2**32 - 1):
+    if time >= (2 ** 32 - 1):
         return 0
     return round(time / 1000.0)
 
@@ -89,37 +89,36 @@ class DaapRequester:
         # an infinte loop.
         def _login_request():
             return self.http.get_data(
-                self._mkurl('login?[AUTH]&hasFP=1',
-                            session=False, login_id=True),
-                headers=_DMAP_HEADERS)
+                self._mkurl("login?[AUTH]&hasFP=1", session=False, login_id=True),
+                headers=_DMAP_HEADERS,
+            )
 
         resp = await self._do(_login_request, is_login=True)
-        self._session_id = parser.first(resp, 'mlog', 'mlid')
+        self._session_id = parser.first(resp, "mlog", "mlid")
 
-        _LOGGER.info('Logged in and got session id %s', self._session_id)
+        _LOGGER.info("Logged in and got session id %s", self._session_id)
         return self._session_id
 
     async def get(self, cmd, daap_data=True, timeout=None, **args):
         """Perform a DAAP GET command."""
+
         def _get_request():
             return self.http.get_data(
-                self._mkurl(cmd, *args),
-                headers=_DMAP_HEADERS,
-                timeout=timeout)
+                self._mkurl(cmd, *args), headers=_DMAP_HEADERS, timeout=timeout
+            )
 
         await self._assure_logged_in()
         return await self._do(_get_request, is_daap=daap_data)
 
     async def post(self, cmd, data=None, timeout=None, **args):
         """Perform DAAP POST command with optional data."""
+
         def _post_request():
             headers = copy(_DMAP_HEADERS)
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
             return self.http.post_data(
-                self._mkurl(cmd, *args),
-                data=data,
-                headers=headers,
-                timeout=timeout)
+                self._mkurl(cmd, *args), data=data, headers=headers, timeout=timeout
+            )
 
         await self._assure_logged_in()
         return await self._do(_post_request)
@@ -129,39 +128,36 @@ class DaapRequester:
         if is_daap:
             resp = parser.parse(resp, lookup_tag)
 
-        self._log_response(str(action.__name__) + ': %s', resp, is_daap)
+        self._log_response(str(action.__name__) + ": %s", resp, is_daap)
         if 200 <= status < 300:
             return resp
 
         if not is_login:
             # If a request fails, try to login again before retrying
-            _LOGGER.info('implicitly logged out, logging in again')
+            _LOGGER.info("implicitly logged out, logging in again")
             await self.login()
 
         # Retry once if we got a bad response, otherwise bail out
         if retry:
-            return (await self._do(
-                action, False, is_login=is_login, is_daap=is_daap))
+            return await self._do(action, False, is_login=is_login, is_daap=is_daap)
 
-        raise exceptions.AuthenticationError(
-            'failed to login: ' + str(status))
+        raise exceptions.AuthenticationError("failed to login: " + str(status))
 
     def _mkurl(self, cmd, *args, session=True, login_id=False):
-        url = '{}'.format(cmd.format(*args))
+        url = "{}".format(cmd.format(*args))
         parameters = []
         if login_id:
-            if re.match(r'0x[0-9a-fA-F]{16}', self._login_id):
-                parameters.append('pairing-guid={}'.format(self._login_id))
+            if re.match(r"0x[0-9a-fA-F]{16}", self._login_id):
+                parameters.append("pairing-guid={}".format(self._login_id))
             else:
-                parameters.append('hsgid={}'.format(self._login_id))
+                parameters.append("hsgid={}".format(self._login_id))
         if session:
-            parameters.insert(0, 'session-id={}'.format(self._session_id))
-        return url.replace('[AUTH]', '&'.join(parameters))
+            parameters.insert(0, "session-id={}".format(self._session_id))
+        return url.replace("[AUTH]", "&".join(parameters))
 
     async def _assure_logged_in(self):
         if self._session_id != 0:
-            _LOGGER.debug('Already logged in, re-using seasion id %d',
-                          self._session_id)
+            _LOGGER.debug("Already logged in, re-using seasion id %d", self._session_id)
         else:
             await self.login()
 

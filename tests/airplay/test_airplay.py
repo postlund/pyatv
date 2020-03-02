@@ -1,20 +1,18 @@
 """Functional tests for Airplay."""
 
 from aiohttp import ClientSession
-from aiohttp.test_utils import (AioHTTPTestCase, unittest_run_loop)
+from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
 from pyatv.airplay import player
-from tests.airplay.fake_airplay_device import (
-    FakeAirPlayDevice, AirPlayUseCases)
+from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
 
 
-STREAM = 'http://airplaystream'
+STREAM = "http://airplaystream"
 START_POSITION = 0.8
 
 
 class AirPlayPlayerTest(AioHTTPTestCase):
-
     async def setUpAsync(self):
         await AioHTTPTestCase.setUpAsync(self)
 
@@ -26,7 +24,8 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         self.session = ClientSession(loop=self.loop)
         http = net.HttpSession(
-          self.session, 'http://127.0.0.1:{0}/'.format(self.server.port))
+            self.session, "http://127.0.0.1:{0}/".format(self.server.port)
+        )
         self.player = player.AirPlayPlayer(self.loop, http)
 
     async def tearDownAsync(self):
@@ -69,8 +68,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         await self.player.play_url(STREAM, position=START_POSITION)
 
-        self.assertEqual(
-            self.fake_device.play_count, 3)  # Two retries + success
+        self.assertEqual(self.fake_device.play_count, 3)  # Two retries + success
 
     @unittest_run_loop
     async def test_play_with_too_many_retries(self):

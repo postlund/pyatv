@@ -1,6 +1,6 @@
 asynctest==0.13.0
+black==19.10b0
 flake8==3.7.9
-pylint==2.4.4
 codecov==2.0.16
 pytest==5.3.5
 pytest-cov==2.8.1

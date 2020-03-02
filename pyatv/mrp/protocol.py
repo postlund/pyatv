@@ -13,8 +13,8 @@ from pyatv.mrp.srp import Credentials
 
 _LOGGER = logging.getLogger(__name__)
 
-Listener = namedtuple('Listener', 'func data')
-OutstandingMessage = namedtuple('OutstandingMessage', 'semaphore response')
+Listener = namedtuple("Listener", "func data")
+OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
 
 
 # pylint: disable=too-many-instance-attributes
@@ -58,13 +58,11 @@ class MrpProtocol:
         # In case credentials have been given externally (i.e. not by pairing
         # with a device), then use that client id
         if self.service.credentials:
-            self.srp.pairing_id = Credentials.parse(
-                self.service.credentials).client_id
+            self.srp.pairing_id = Credentials.parse(self.service.credentials).client_id
 
         # The first message must always be DEVICE_INFORMATION, otherwise the
         # device will not respond with anything
-        msg = messages.device_information(
-            'pyatv', self.srp.pairing_id.decode())
+        msg = messages.device_information("pyatv", self.srp.pairing_id.decode())
 
         self.device_info = await self.send_and_receive(msg)
         self._initial_message_sent = True
@@ -87,8 +85,9 @@ class MrpProtocol:
     def stop(self):
         """Disconnect from device."""
         if self._outstanding:
-            _LOGGER.warning('There were %d outstanding requests',
-                            len(self._outstanding))
+            _LOGGER.warning(
+                "There were %d outstanding requests", len(self._outstanding)
+            )
 
         self._initial_message_sent = False
         self._outstanding = {}
@@ -119,8 +118,7 @@ class MrpProtocol:
         await self._connect_and_encrypt()
         self.connection.send(message)
 
-    async def send_and_receive(self, message,
-                               generate_identifier=True, timeout=5):
+    async def send_and_receive(self, message, generate_identifier=True, timeout=5):
         """Send a message and wait for a response."""
         await self._connect_and_encrypt()
 
@@ -135,7 +133,7 @@ class MrpProtocol:
             identifier = str(uuid.uuid4())
             message.identifier = identifier
         else:
-            identifier = 'type_' + str(message.type)
+            identifier = "type_" + str(message.type)
 
         self.connection.send(message)
         return await self._receive(identifier, timeout)
@@ -146,8 +144,7 @@ class MrpProtocol:
 
         try:
             # The connection instance will dispatch the message
-            await asyncio.wait_for(
-                semaphore.acquire(), timeout, loop=self.loop)
+            await asyncio.wait_for(semaphore.acquire(), timeout, loop=self.loop)
 
         except:  # noqa
             del self._outstanding[identifier]
@@ -161,10 +158,11 @@ class MrpProtocol:
         """Message was received from device."""
         # If the message identifer is outstanding, then someone is
         # waiting for the respone so we save it here
-        identifier = message.identifier or 'type_' + str(message.type)
+        identifier = message.identifier or "type_" + str(message.type)
         if identifier in self._outstanding:
             outstanding = OutstandingMessage(
-                self._outstanding[identifier].semaphore, message)
+                self._outstanding[identifier].semaphore, message
+            )
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
         else:
@@ -172,9 +170,10 @@ class MrpProtocol:
 
     def _dispatch(self, message):
         for listener in self._listeners.get(message.type, []):
-            _LOGGER.debug('Dispatching message with type %d (%s) to %s',
-                          message.type,
-                          type(message.inner()).__name__,
-                          listener)
-            asyncio.ensure_future(
-                listener.func(message, listener.data), loop=self.loop)
+            _LOGGER.debug(
+                "Dispatching message with type %d (%s) to %s",
+                message.type,
+                type(message.inner()).__name__,
+                listener,
+            )
+            asyncio.ensure_future(listener.func(message, listener.data), loop=self.loop)

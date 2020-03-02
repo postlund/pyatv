@@ -3,22 +3,21 @@
 import unittest
 
 from collections import OrderedDict
-from pyatv.mrp.tlv8 import (read_tlv, write_tlv)
+from pyatv.mrp.tlv8 import read_tlv, write_tlv
 
-SINGLE_KEY_IN = {'10': b'123'}
-SINGLE_KEY_OUT = b'\x0a\x03\x31\x32\x33'
+SINGLE_KEY_IN = {"10": b"123"}
+SINGLE_KEY_OUT = b"\x0a\x03\x31\x32\x33"
 
 # Use OrderedDict as a regular dict might get keys in different order every
 # run, making the output not match
-DOUBLE_KEY_IN = OrderedDict([('1', b'111'), ('4', b'222')])
-DOUBLE_KEY_OUT = b'\x01\x03\x31\x31\x31\x04\x03\x32\x32\x32'
+DOUBLE_KEY_IN = OrderedDict([("1", b"111"), ("4", b"222")])
+DOUBLE_KEY_OUT = b"\x01\x03\x31\x31\x31\x04\x03\x32\x32\x32"
 
-LARGE_KEY_IN = {'2': b'\x31'*256}
-LARGE_KEY_OUT = b'\x02\xff' + b'\x31' * 255 + b'\x02\x01\x31'
+LARGE_KEY_IN = {"2": b"\x31" * 256}
+LARGE_KEY_OUT = b"\x02\xff" + b"\x31" * 255 + b"\x02\x01\x31"
 
 
 class Tlv8Test(unittest.TestCase):
-
     def test_write_single_key(self):
         self.assertEqual(write_tlv(SINGLE_KEY_IN), SINGLE_KEY_OUT)
 

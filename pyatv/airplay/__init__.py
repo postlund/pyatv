@@ -26,20 +26,18 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
 
     def _get_credentials(self):
         if self.service.credentials is None:
-            _LOGGER.debug('No AirPlay credentials loaded')
+            _LOGGER.debug("No AirPlay credentials loaded")
             return None
 
-        split = self.service.credentials.split(':')
-        _LOGGER.debug(
-            'Loaded AirPlay credentials: %s',
-            self.service.credentials)
+        split = self.service.credentials.split(":")
+        _LOGGER.debug("Loaded AirPlay credentials: %s", self.service.credentials)
 
         return split[1]
 
     async def _player(self, session):
         http = net.HttpSession(
-            session, 'http://{0}:{1}/'.format(
-                self.config.address, self.service.port))
+            session, "http://{0}:{1}/".format(self.config.address, self.service.port)
+        )
         player = AirPlayPlayer(self.loop, http)
 
         # If credentials have been loaded, do device verification first
@@ -60,8 +58,7 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         play duration.
         """
         if not self.service:
-            raise exceptions.NotSupportedError(
-                "AirPlay service is not available")
+            raise exceptions.NotSupportedError("AirPlay service is not available")
 
         # This creates a new ClientSession every time something is played.
         # It is not recommended by aiohttp, but it is the only way not having
@@ -69,7 +66,7 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         session = await net.create_session(self.loop)
         try:
             player = await self._player(session)
-            position = int(kwargs.get('position', 0))
+            position = int(kwargs.get("position", 0))
             return await player.play_url(url, position)
         finally:
             await session.close()

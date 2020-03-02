@@ -6,36 +6,37 @@ import ipaddress
 from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
-from pyatv.conf import (AirPlayService, DmapService, AppleTV)
+from pyatv.conf import AirPlayService, DmapService, AppleTV
 from pyatv.const import ShuffleState, PowerState, OperatingSystem
 from pyatv.dmap import pairing
-from tests.dmap.fake_dmap_atv import (FakeAppleTV, AppleTVUseCases)
+from tests.dmap.fake_dmap_atv import FakeAppleTV, AppleTVUseCases
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
-from tests import (zeroconf_stub, common_functional_tests)
+from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
 
-HSGID = '12345-6789-0'
-PAIRING_GUID = '0x0000000000000001'
+HSGID = "12345-6789-0"
+PAIRING_GUID = "0x0000000000000001"
 SESSION_ID = 55555
-REMOTE_NAME = 'pyatv remote'
+REMOTE_NAME = "pyatv remote"
 PIN_CODE = 1234
 
-ARTWORK_BYTES = b'1234'
-ARTWORK_MIMETYPE = 'image/png'
-AIRPLAY_STREAM = 'http://stream'
+ARTWORK_BYTES = b"1234"
+ARTWORK_MIMETYPE = "image/png"
+AIRPLAY_STREAM = "http://stream"
 
 # This is valid for the PAIR in the pairing module and pin 1234
 # (extracted form a real device)
-PAIRINGCODE = '690E6FF61E0D7C747654A42AED17047D'
+PAIRINGCODE = "690E6FF61E0D7C747654A42AED17047D"
 
 HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
-    'AAAA', b'Apple TV 1', '10.0.0.1', b'aaaa')
+    "AAAA", b"Apple TV 1", "10.0.0.1", b"aaaa"
+)
 HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
-    'BBBB', b'Apple TV 2', '10.0.0.2', b'bbbb')
+    "BBBB", b"Apple TV 2", "10.0.0.2", b"bbbb"
+)
 
 
 class DummyPushListener:
-
     @staticmethod
     def playstatus_update(updater, playstatus):
         updater.stop()
@@ -46,32 +47,29 @@ class DummyPushListener:
 
 
 class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
-
     async def setUpAsync(self):
         await super().setUpAsync()
         self.atv = await self.get_connected_device(HSGID)
 
         # TODO: currently stubs internal method, should provide stub
         # for netifaces later
-        pairing._get_private_ip_addresses = \
-            lambda: [ipaddress.ip_address('10.0.0.1')]
+        pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
 
     async def tearDownAsync(self):
         await self.atv.close()
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(
-            HSGID, PAIRING_GUID, SESSION_ID, self)
+        self.fake_atv = FakeAppleTV(HSGID, PAIRING_GUID, SESSION_ID, self)
         self.usecase = AppleTVUseCases(self.fake_atv)
         return self.fake_atv.app
 
     async def get_connected_device(self, hsgid):
-        self.dmap_service = DmapService(
-            'dmap_id', hsgid, port=self.server.port)
+        self.dmap_service = DmapService("dmap_id", hsgid, port=self.server.port)
         self.airplay_service = AirPlayService(
-            'airplay_id', self.server.port, DEVICE_CREDENTIALS)
-        self.conf = AppleTV('127.0.0.1', 'Apple TV')
+            "airplay_id", self.server.port, DEVICE_CREDENTIALS
+        )
+        self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.dmap_service)
         self.conf.add_service(self.airplay_service)
         return await connect(self.conf, self.loop)
@@ -129,12 +127,11 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         # Callback is scheduled on the event loop, so a semaphore is used
         # to synchronize with the loop
-        await asyncio.wait_for(
-            self.atv.listener.lost_sem.acquire(), timeout=3.0)
+        await asyncio.wait_for(self.atv.listener.lost_sem.acquire(), timeout=3.0)
 
     @unittest_run_loop
     async def test_button_unsupported_raises(self):
-        buttons = ['home', 'volume_up', 'volume_down', 'suspend', 'wakeup']
+        buttons = ["home", "volume_up", "volume_down", "suspend", "wakeup"]
         for button in buttons:
             with self.assertRaises(exceptions.NotSupportedError):
                 await getattr(self.atv.remote_control, button)()
@@ -159,13 +156,13 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_play_url_no_service(self):
-        conf = AppleTV('127.0.0.1', 'Apple TV')
+        conf = AppleTV("127.0.0.1", "Apple TV")
         conf.add_service(self.dmap_service)
 
         atv = await connect(conf, self.loop)
 
         with self.assertRaises(exceptions.NotSupportedError):
-            await atv.stream.play_url('http://123')
+            await atv.stream.play_url("http://123")
 
         await atv.close()
 
@@ -185,5 +182,4 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_basic_device_info(self):
-        self.assertEqual(self.atv.device_info.operating_system,
-                         OperatingSystem.Legacy)
+        self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.Legacy)

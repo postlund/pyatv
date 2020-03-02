@@ -2,10 +2,15 @@
 
 import unittest
 
-from pyatv import (convert, exceptions, interface)
+from pyatv import convert, exceptions, interface
 from pyatv.const import (
-    MediaType, DeviceState, RepeatState, ShuffleState,
-    OperatingSystem, DeviceModel)
+    MediaType,
+    DeviceState,
+    RepeatState,
+    ShuffleState,
+    OperatingSystem,
+    DeviceModel,
+)
 
 
 class TestClass:
@@ -39,12 +44,19 @@ class TestClass:
 
 
 class PlayingDummy(interface.Playing):
-
-    def __init__(self, media_type=MediaType.Video,
-                 device_state=DeviceState.Playing, title=None,
-                 artist=None, album=None, genre=None, total_time=None,
-                 position=None, shuffle=ShuffleState.Songs,
-                 repeat=RepeatState.Track):
+    def __init__(
+        self,
+        media_type=MediaType.Video,
+        device_state=DeviceState.Playing,
+        title=None,
+        artist=None,
+        album=None,
+        genre=None,
+        total_time=None,
+        position=None,
+        shuffle=ShuffleState.Songs,
+        repeat=RepeatState.Track,
+    ):
         self._media_type = media_type
         self._device_state = device_state
         self._title = title
@@ -108,7 +120,6 @@ class PlayingDummy(interface.Playing):
 
 
 class MetadataDummy(interface.Metadata):
-
     def artwork(self):
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError()
@@ -123,7 +134,6 @@ class MetadataDummy(interface.Metadata):
 
 
 class InterfaceTest(unittest.TestCase):
-
     def setUp(self):
         self.methods = interface.retrieve_commands(TestClass)
 
@@ -131,22 +141,19 @@ class InterfaceTest(unittest.TestCase):
 
     def test_get_commands(self):
         self.assertEqual(5, len(self.methods))
-        self.assertTrue('test_method' in self.methods)
-        self.assertTrue('another_method' in self.methods)
-        self.assertTrue('some_property' in self.methods)
-        self.assertTrue('abbrev_help' in self.methods)
+        self.assertTrue("test_method" in self.methods)
+        self.assertTrue("another_method" in self.methods)
+        self.assertTrue("some_property" in self.methods)
+        self.assertTrue("abbrev_help" in self.methods)
 
     def test_get_first_sentence_without_leading_period_in_pydoc(self):
-        self.assertEqual('Help text', self.methods['test_method'])
-        self.assertEqual(
-            'Some other help text', self.methods['another_method'])
-        self.assertEqual('Property help', self.methods['some_property'])
+        self.assertEqual("Help text", self.methods["test_method"])
+        self.assertEqual("Some other help text", self.methods["another_method"])
+        self.assertEqual("Property help", self.methods["some_property"])
 
     def test_try_to_be_smart_with_abbreviations(self):
-        self.assertEqual(
-            'Type, e.g. a, b or c', self.methods['abbrev_help'])
-        self.assertEqual(
-            'Type, e.g. a, b or c', self.methods['abbrev_help_more_text'])
+        self.assertEqual("Type, e.g. a, b or c", self.methods["abbrev_help"])
+        self.assertEqual("Type, e.g. a, b or c", self.methods["abbrev_help_more_text"])
 
     # PLAYING STR
 
@@ -156,52 +163,58 @@ class InterfaceTest(unittest.TestCase):
         self.assertIn(convert.device_state_str(DeviceState.Playing), out)
 
     def test_playing_title_artist_album_genre(self):
-        out = str(PlayingDummy(
-            title='mytitle', artist='myartist',
-            album='myalbum', genre='mygenre'))
-        self.assertIn('mytitle', out)
-        self.assertIn('myartist', out)
-        self.assertIn('myalbum', out)
-        self.assertIn('mygenre', out)
+        out = str(
+            PlayingDummy(
+                title="mytitle", artist="myartist", album="myalbum", genre="mygenre"
+            )
+        )
+        self.assertIn("mytitle", out)
+        self.assertIn("myartist", out)
+        self.assertIn("myalbum", out)
+        self.assertIn("mygenre", out)
 
     def test_playing_only_position(self):
-        self.assertIn('1234', str(PlayingDummy(position=1234)))
+        self.assertIn("1234", str(PlayingDummy(position=1234)))
 
     def test_playing_only_total_time(self):
-        self.assertIn('5678', str(PlayingDummy(total_time=5678)))
+        self.assertIn("5678", str(PlayingDummy(total_time=5678)))
 
     def test_playing_both_position_and_total_time(self):
         out = str(PlayingDummy(position=1234, total_time=5678))
-        self.assertIn('1234/5678', out)
+        self.assertIn("1234/5678", out)
 
     def test_playing_shuffle_and_repeat(self):
         out = str(PlayingDummy())
-        self.assertIn('Shuffle: Songs', out)
-        self.assertIn('Repeat: Track', out)
+        self.assertIn("Shuffle: Songs", out)
+        self.assertIn("Repeat: Track", out)
 
     # OTHER
 
     def test_playing_generate_same_hash(self):
         playing = PlayingDummy(
-            title='title', artist='artist', album='album', total_time=123)
+            title="title", artist="artist", album="album", total_time=123
+        )
         self.assertEqual(
-            '538df531d1715629fdd87affd0c5957bcbf54cd89180778071e6535b7df4e22c',
-            playing.hash)
+            "538df531d1715629fdd87affd0c5957bcbf54cd89180778071e6535b7df4e22c",
+            playing.hash,
+        )
 
         playing2 = PlayingDummy(
-            title='dummy', artist='test', album='none', total_time=321)
+            title="dummy", artist="test", album="none", total_time=321
+        )
         self.assertEqual(
-            '80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade',
-            playing2.hash)
+            "80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade",
+            playing2.hash,
+        )
 
     # METADATA
 
     def test_metadata_device_id(self):
-        self.assertEqual(MetadataDummy('dummy').device_id, 'dummy')
+        self.assertEqual(MetadataDummy("dummy").device_id, "dummy")
 
     # Dummy test for the sake of code coverage
     def test_metadata_rest_not_supported(self):
-        metadata = MetadataDummy('dummy')
+        metadata = MetadataDummy("dummy")
 
         with self.assertRaises(exceptions.NotSupportedError):
             metadata.artwork()
@@ -212,37 +225,46 @@ class InterfaceTest(unittest.TestCase):
 
 
 class DeviceInfoTest(unittest.TestCase):
-
     def test_fields_set(self):
         dev_info = interface.DeviceInfo(
-            OperatingSystem.TvOS, '1.2.3', '19A123',
-            DeviceModel.Gen4K, 'aa:bb:cc:dd:ee:ff')
+            OperatingSystem.TvOS,
+            "1.2.3",
+            "19A123",
+            DeviceModel.Gen4K,
+            "aa:bb:cc:dd:ee:ff",
+        )
 
         self.assertEqual(dev_info.operating_system, OperatingSystem.TvOS)
-        self.assertEqual(dev_info.version, '1.2.3')
-        self.assertEqual(dev_info.build_number, '19A123')
+        self.assertEqual(dev_info.version, "1.2.3")
+        self.assertEqual(dev_info.build_number, "19A123")
         self.assertEqual(dev_info.model, DeviceModel.Gen4K)
-        self.assertEqual(dev_info.mac, 'aa:bb:cc:dd:ee:ff')
+        self.assertEqual(dev_info.mac, "aa:bb:cc:dd:ee:ff")
 
     def test_apple_tv_software_str(self):
         dev_info = interface.DeviceInfo(
-            OperatingSystem.Legacy, '2.2.3', '13D333',
-            DeviceModel.Gen3, 'aa:bb:cc:dd:ee:ff')
+            OperatingSystem.Legacy,
+            "2.2.3",
+            "13D333",
+            DeviceModel.Gen3,
+            "aa:bb:cc:dd:ee:ff",
+        )
 
-        self.assertEqual(
-            str(dev_info), '3 ATV SW 2.2.3 build 13D333')
+        self.assertEqual(str(dev_info), "3 ATV SW 2.2.3 build 13D333")
 
     def test_tvos_str(self):
         dev_info = interface.DeviceInfo(
-            OperatingSystem.TvOS, '1.2.3', '19A123',
-            DeviceModel.Gen4K, 'aa:bb:cc:dd:ee:ff')
+            OperatingSystem.TvOS,
+            "1.2.3",
+            "19A123",
+            DeviceModel.Gen4K,
+            "aa:bb:cc:dd:ee:ff",
+        )
 
-        self.assertEqual(
-            str(dev_info), '4K tvOS 1.2.3 build 19A123')
+        self.assertEqual(str(dev_info), "4K tvOS 1.2.3 build 19A123")
 
     def test_unknown_str(self):
         dev_info = interface.DeviceInfo(
-            OperatingSystem.Unknown, None, None,
-            DeviceModel.Unknown, None)
+            OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None
+        )
 
-        self.assertEqual(str(dev_info), 'Unknown Model Unknown OS')
+        self.assertEqual(str(dev_info), "Unknown Model Unknown OS")

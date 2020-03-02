@@ -53,8 +53,11 @@ def sanity_check():
 def call(cmd, *args, show_output=False):
     """Call a shell command."""
     result = subprocess.run(
-        cmd.format(*args), shell=True, check=True,
-        stdout=subprocess.PIPE if not show_output else None)
+        cmd.format(*args),
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE if not show_output else None,
+    )
     return None if show_output else result.stdout.decode("utf-8")
 
 
@@ -98,9 +101,8 @@ def update_version(version):
     splitted = version.split(".")
     for i, component in enumerate(["MAJOR", "MINOR", "PATCH"]):
         output = re.sub(
-            "(" + component + "_VERSION =).*",
-            "\\1 '" + splitted[i] + "'",
-            output)
+            "(" + component + "_VERSION =).*", "\\1 '" + splitted[i] + "'", output
+        )
 
     with open("pyatv/const.py", "w") as wh:
         wh.write(output)
@@ -117,11 +119,10 @@ def insert_changes(version):
     _LOGGER.info("Adding entry to CHANGES.md")
     changes = Path("CHANGES.md").read_text().split("\n")
 
-    if changes[2].startswith('## ' + version + ' '):
+    if changes[2].startswith("## " + version + " "):
         _LOGGER.info("Changelog entry already present")
     else:
-        version_str = "{0} ({1})".format(
-            version, datetime.now().strftime("%Y-%m-%d"))
+        version_str = "{0} ({1})".format(version, datetime.now().strftime("%Y-%m-%d"))
 
         _LOGGER.info("Finding previous release commit")
         message = call('git log -1 --grep="^Release [0-9]"')
@@ -131,9 +132,11 @@ def insert_changes(version):
         all_changes = call("git log --oneline {0}..HEAD", commit_sha)
 
         with open("CHANGES.md", "w") as fw:
-            fw.write(CHANGES_TEMPLATE.format(
-                version=version_str,
-                all_changes=all_changes.rstrip()))
+            fw.write(
+                CHANGES_TEMPLATE.format(
+                    version=version_str, all_changes=all_changes.rstrip()
+                )
+            )
             fw.write("\n".join(changes[2:]))
 
 
@@ -179,43 +182,65 @@ def create_tag(version):
 
 def main():
     """Script starts here."""
-    logging.basicConfig(
-        level=logging.INFO, format="[%(levelname)s] %(message)s")
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
     parser = argparse.ArgumentParser(description="release maker")
     parser.add_argument("version", help="version to release")
-    parser.add_argument("--skip-branch", default=False,
-                        action="store_true",
-                        help="skip creating branch")
-    parser.add_argument("--skip-dependencies", default=False,
-                        action="store_true",
-                        help="skip installing dependencies")
-    parser.add_argument("--skip-update-version", default=False,
-                        action="store_true",
-                        help="skip updating version")
-    parser.add_argument("--skip-changes", default=False,
-                        action="store_true",
-                        help="skip updating CHANGES.md")
-    parser.add_argument("--skip-verify-changes", default=False,
-                        action="store_true",
-                        help="skip verify content in CHANGES.md")
-    parser.add_argument("--skip-commit", default=False,
-                        action="store_true",
-                        help="skip git commit")
-    parser.add_argument("--skip-outputs", default=False,
-                        action="store_true",
-                        help="do not generate outputs")
-    parser.add_argument("--skip-tag", default=False,
-                        action="store_true",
-                        help="skip creating git tag")
+    parser.add_argument(
+        "--skip-branch", default=False, action="store_true", help="skip creating branch"
+    )
+    parser.add_argument(
+        "--skip-dependencies",
+        default=False,
+        action="store_true",
+        help="skip installing dependencies",
+    )
+    parser.add_argument(
+        "--skip-update-version",
+        default=False,
+        action="store_true",
+        help="skip updating version",
+    )
+    parser.add_argument(
+        "--skip-changes",
+        default=False,
+        action="store_true",
+        help="skip updating CHANGES.md",
+    )
+    parser.add_argument(
+        "--skip-verify-changes",
+        default=False,
+        action="store_true",
+        help="skip verify content in CHANGES.md",
+    )
+    parser.add_argument(
+        "--skip-commit", default=False, action="store_true", help="skip git commit"
+    )
+    parser.add_argument(
+        "--skip-outputs",
+        default=False,
+        action="store_true",
+        help="do not generate outputs",
+    )
+    parser.add_argument(
+        "--skip-tag", default=False, action="store_true", help="skip creating git tag"
+    )
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-p", default=False, action="store_true",
-                       dest="prepare_release",
-                       help="prepare a release")
-    group.add_argument("-m", default=False, action="store_true",
-                       dest="make_release",
-                       help="make a release")
+    group.add_argument(
+        "-p",
+        default=False,
+        action="store_true",
+        dest="prepare_release",
+        help="prepare a release",
+    )
+    group.add_argument(
+        "-m",
+        default=False,
+        action="store_true",
+        dest="make_release",
+        help="make a release",
+    )
 
     args = parser.parse_args()
 
@@ -237,8 +262,7 @@ def main():
             update_version(version)
         if not args.skip_changes:
             insert_changes(version)
-        _LOGGER.info(
-            "Update CHANGES.md and add files to include with git add")
+        _LOGGER.info("Update CHANGES.md and add files to include with git add")
     elif args.make_release:
         _LOGGER.info("Making release %s", version)
         if not args.skip_verify_changes:
@@ -256,5 +280,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

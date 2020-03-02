@@ -24,7 +24,7 @@ class PlayerState:
     @property
     def playback_state(self):
         """Playback state of device."""
-        if self.metadata and self.metadata.HasField('playbackRate'):
+        if self.metadata and self.metadata.HasField("playbackRate"):
             ssm = SetStateMessage_pb2.SetStateMessage
             playback_rate = self.metadata.playbackRate
             if math.isclose(playback_rate, 0.0):
@@ -58,14 +58,13 @@ class PlayerState:
 
     def handle_set_state(self, setstate):
         """Update current state with new data from SetStateMessage."""
-        if setstate.HasField('playbackState'):
+        if setstate.HasField("playbackState"):
             self._playback_state = setstate.playbackState
 
-        if setstate.HasField('supportedCommands'):
-            self.supported_commands = \
-                setstate.supportedCommands.supportedCommands
+        if setstate.HasField("supportedCommands"):
+            self.supported_commands = setstate.supportedCommands.supportedCommands
 
-        if setstate.HasField('playbackQueue'):
+        if setstate.HasField("playbackQueue"):
             queue = setstate.playbackQueue
             self.items = queue.contentItems
             self.location = queue.location
@@ -97,14 +96,13 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self._add_listeners()
 
     def _add_listeners(self):
+        self.protocol.add_listener(self._handle_set_state, protobuf.SET_STATE_MESSAGE)
         self.protocol.add_listener(
-            self._handle_set_state, protobuf.SET_STATE_MESSAGE)
+            self._handle_content_item_update, protobuf.UPDATE_CONTENT_ITEM_MESSAGE
+        )
         self.protocol.add_listener(
-            self._handle_content_item_update,
-            protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_set_now_playing_client,
-            protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
+            self._handle_set_now_playing_client, protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE
+        )
 
     @property
     def listener(self):
@@ -116,8 +114,7 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         """Change current listener."""
         self._listener = new_listener
         if self.listener:
-            asyncio.ensure_future(
-                self.listener.state_updated(), loop=self.loop)
+            asyncio.ensure_future(self.listener.state_updated(), loop=self.loop)
 
     @property
     def playing(self):
@@ -154,14 +151,14 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
                     await self.listener.state_updated()
         else:
             _LOGGER.warning(
-                'Received ContentItemUpdate for unknown player %s',
-                identifier)
+                "Received ContentItemUpdate for unknown player %s", identifier
+            )
 
     async def _handle_set_now_playing_client(self, message, _):
         identifier = message.inner().client.bundleIdentifier
         if identifier != self.active:
             self.active = identifier
-            _LOGGER.debug('Active player is now %s', self.active)
+            _LOGGER.debug("Active player is now %s", self.active)
 
             if self.listener:
                 await self.listener.state_updated()

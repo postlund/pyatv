@@ -7,7 +7,7 @@ from pyatv import helpers
 async def print_what_is_playing(atv):
     """Print what is playing for the discovered device."""
     playing = await atv.metadata.playing()
-    print('Currently playing:')
+    print("Currently playing:")
     print(playing)
 
 

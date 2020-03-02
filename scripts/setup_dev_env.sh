@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYTHON="python3.8 python3.7 python3.6 python3.5"
+PYTHON="python3.8 python3.7 python3.6"
 
 found_version=
 for p in $PYTHON

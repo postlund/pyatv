@@ -10,8 +10,8 @@ from pyatv.exceptions import AuthenticationError
 _LOGGER = logging.getLogger(__name__)
 
 _AIRPLAY_HEADERS = {
-    'User-Agent': 'AirPlay/320.20',
-    'Connection': 'keep-alive',
+    "User-Agent": "AirPlay/320.20",
+    "Connection": "keep-alive",
 }
 
 
@@ -28,10 +28,9 @@ class DeviceAuthenticator:
 
         This method will show the expected PIN on screen.
         """
-        _, code = await self.http.post_data(
-            'pair-pin-start', headers=_AIRPLAY_HEADERS)
+        _, code = await self.http.post_data("pair-pin-start", headers=_AIRPLAY_HEADERS)
         if code != 200:
-            raise AuthenticationError('pair start failed')
+            raise AuthenticationError("pair start failed")
 
     async def finish_authentication(self, username, password):
         """Finish authentication process.
@@ -41,36 +40,33 @@ class DeviceAuthenticator:
         """
         # Step 1
         self.srp.step1(username, password)
-        data = await self._send_plist(
-            'step1', method='pin', user=username)
+        data = await self._send_plist("step1", method="pin", user=username)
         resp = plistlib.loads(data)
 
         # Step 2
-        pub_key, key_proof = self.srp.step2(resp['pk'], resp['salt'])
+        pub_key, key_proof = self.srp.step2(resp["pk"], resp["salt"])
         await self._send_plist(
-            'step2',
-            pk=binascii.unhexlify(pub_key),
-            proof=binascii.unhexlify(key_proof))
+            "step2", pk=binascii.unhexlify(pub_key), proof=binascii.unhexlify(key_proof)
+        )
 
         # Step 3
         epk, tag = self.srp.step3()
-        await self._send_plist('step3', epk=epk, authTag=tag)
+        await self._send_plist("step3", epk=epk, authTag=tag)
         return True
 
     async def _send_plist(self, step, **kwargs):
         plist = dict((str(k), v) for k, v in kwargs.items())
 
         headers = copy(_AIRPLAY_HEADERS)
-        headers['Content-Type'] = 'application/x-apple-binary-plist'
+        headers["Content-Type"] = "application/x-apple-binary-plist"
 
         # TODO: For some reason pylint does not find FMT_BINARY, why?
         # pylint: disable=no-member
         resp, code = await self.http.post_data(
-            'pair-setup-pin',
-            data=plistlib.dumps(plist, fmt=plistlib.FMT_BINARY))
+            "pair-setup-pin", data=plistlib.dumps(plist, fmt=plistlib.FMT_BINARY)
+        )
         if code != 200:
-            raise AuthenticationError(
-                '{0} failed with code {1}'.format(step, code))
+            raise AuthenticationError("{0} failed with code {1}".format(step, code))
         return resp
 
 
@@ -85,21 +81,20 @@ class AuthenticationVerifier:
 
     async def verify_authed(self):
         """Verify if device is allowed to use AirPlau."""
-        resp = await self._send(self.srp.verify1(), 'verify1')
+        resp = await self._send(self.srp.verify1(), "verify1")
 
         atv_public_secret = resp[0:32]
         data = resp[32:]  # TODO: what is this?
-        await self._send(
-            self.srp.verify2(atv_public_secret, data), 'verify2')
+        await self._send(self.srp.verify2(atv_public_secret, data), "verify2")
         return True
 
     async def _send(self, data, step):
         headers = copy(_AIRPLAY_HEADERS)
-        headers['Content-Type'] = 'application/octet-stream'
+        headers["Content-Type"] = "application/octet-stream"
 
         resp, code = await self.http.post_data(
-            'pair-verify', data=data, headers=headers)
+            "pair-verify", data=data, headers=headers
+        )
         if code != 200:
-            raise AuthenticationError(
-                '{0} failed with code {1}'.format(step, code))
+            raise AuthenticationError("{0} failed with code {1}".format(step, code))
         return resp

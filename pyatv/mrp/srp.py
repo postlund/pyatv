@@ -7,7 +7,7 @@ import hashlib
 import logging
 
 import curve25519
-from srptools import (SRPContext, SRPClientSession, constants)
+from srptools import SRPContext, SRPClientSession, constants
 from ed25519 import BadPrefixError, BadSignatureError
 from ed25519.keys import SigningKey, VerifyingKey
 
@@ -17,7 +17,7 @@ from cryptography.hazmat.backends import default_backend
 
 from pyatv import exceptions
 from pyatv.support import log_binary
-from pyatv.mrp import (tlv8, chacha20)
+from pyatv.mrp import tlv8, chacha20
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ class Credentials:
     @classmethod
     def parse(cls, detail_string):
         """Parse a string represention of Credentials."""
-        split = detail_string.split(':')
+        split = detail_string.split(":")
         if len(split) != 4:
-            raise exceptions.InvalidCredentialsError('invalid credentials')
+            raise exceptions.InvalidCredentialsError("invalid credentials")
 
         ltpk = binascii.unhexlify(split[0])
         ltsk = binascii.unhexlify(split[1])
@@ -48,11 +48,12 @@ class Credentials:
 
     def __str__(self):
         """Return a string representation of credentials."""
-        return '{0}:{1}:{2}:{3}'.format(
-            binascii.hexlify(self.ltpk).decode('utf-8'),
-            binascii.hexlify(self.ltsk).decode('utf-8'),
-            binascii.hexlify(self.atv_id).decode('utf-8'),
-            binascii.hexlify(self.client_id).decode('utf-8'))
+        return "{0}:{1}:{2}:{3}".format(
+            binascii.hexlify(self.ltpk).decode("utf-8"),
+            binascii.hexlify(self.ltsk).decode("utf-8"),
+            binascii.hexlify(self.atv_id).decode("utf-8"),
+            binascii.hexlify(self.client_id).decode("utf-8"),
+        )
 
 
 def hkdf_expand(salt, info, shared_secret):
@@ -62,7 +63,7 @@ def hkdf_expand(salt, info, shared_secret):
         length=32,
         salt=salt.encode(),
         info=info.encode(),
-        backend=default_backend()
+        backend=default_backend(),
     )
     return hkdf.derive(shared_secret)
 
@@ -97,66 +98,75 @@ class SRPAuthHandler:
         """First verification step."""
         # No additional hashing used
         self._shared = self._verify_private.get_shared_key(
-            curve25519.Public(session_pub_key), hashfunc=lambda x: x)
+            curve25519.Public(session_pub_key), hashfunc=lambda x: x
+        )
 
-        session_key = hkdf_expand('Pair-Verify-Encrypt-Salt',
-                                  'Pair-Verify-Encrypt-Info',
-                                  self._shared)
+        session_key = hkdf_expand(
+            "Pair-Verify-Encrypt-Salt", "Pair-Verify-Encrypt-Info", self._shared
+        )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         decrypted_tlv = tlv8.read_tlv(
-            chacha.decrypt(encrypted, nounce='PV-Msg02'.encode()))
+            chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
+        )
 
         identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
         signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
 
         if identifier != credentials.atv_id:
-            raise exceptions.AuthenticationError('incorrect device response')
+            raise exceptions.AuthenticationError("incorrect device response")
 
-        info = session_pub_key + \
-            bytes(identifier) + self._verify_public.serialize()
+        info = session_pub_key + bytes(identifier) + self._verify_public.serialize()
         ltpk = VerifyingKey(bytes(credentials.ltpk))
 
         try:
             ltpk.verify(bytes(signature), bytes(info))
         except (BadPrefixError, BadSignatureError) as ex:
-            raise exceptions.AuthenticationError('signature error') from ex
+            raise exceptions.AuthenticationError("signature error") from ex
 
-        device_info = self._verify_public.serialize() + \
-            credentials.client_id + session_pub_key
+        device_info = (
+            self._verify_public.serialize() + credentials.client_id + session_pub_key
+        )
 
         device_signature = SigningKey(credentials.ltsk).sign(device_info)
 
-        tlv = tlv8.write_tlv({tlv8.TLV_IDENTIFIER: credentials.client_id,
-                              tlv8.TLV_SIGNATURE: device_signature})
+        tlv = tlv8.write_tlv(
+            {
+                tlv8.TLV_IDENTIFIER: credentials.client_id,
+                tlv8.TLV_SIGNATURE: device_signature,
+            }
+        )
 
-        return chacha.encrypt(tlv, nounce='PV-Msg03'.encode())
+        return chacha.encrypt(tlv, nounce="PV-Msg03".encode())
 
     def verify2(self):
         """Last verification step.
 
         The derived keys (output, input) are returned here.
         """
-        output_key = hkdf_expand('MediaRemote-Salt',
-                                 'MediaRemote-Write-Encryption-Key',
-                                 self._shared)
+        output_key = hkdf_expand(
+            "MediaRemote-Salt", "MediaRemote-Write-Encryption-Key", self._shared
+        )
 
-        input_key = hkdf_expand('MediaRemote-Salt',
-                                'MediaRemote-Read-Encryption-Key',
-                                self._shared)
+        input_key = hkdf_expand(
+            "MediaRemote-Salt", "MediaRemote-Read-Encryption-Key", self._shared
+        )
 
-        log_binary(_LOGGER, 'Keys', Output=output_key, Input=input_key)
+        log_binary(_LOGGER, "Keys", Output=output_key, Input=input_key)
         return output_key, input_key
 
     def step1(self, pin):
         """First pairing step."""
         context = SRPContext(
-            'Pair-Setup', str(pin),
+            "Pair-Setup",
+            str(pin),
             prime=constants.PRIME_3072,
             generator=constants.PRIME_3072_GEN,
-            hash_func=hashlib.sha512)
+            hash_func=hashlib.sha512,
+        )
         self._session = SRPClientSession(
-            context, binascii.hexlify(self._auth_private).decode())
+            context, binascii.hexlify(self._auth_private).decode()
+        )
 
     def step2(self, atv_pub_key, atv_salt):
         """Second pairing step."""
@@ -165,59 +175,67 @@ class SRPAuthHandler:
         self._client_session_key, _, _ = self._session.process(pk_str, salt)
 
         if not self._session.verify_proof(self._session.key_proof_hash):
-            raise exceptions.AuthenticationError('proofs do not match')
+            raise exceptions.AuthenticationError("proofs do not match")
 
         pub_key = binascii.unhexlify(self._session.public)
         proof = binascii.unhexlify(self._session.key_proof)
-        log_binary(_LOGGER, 'Client', Public=pub_key, Proof=proof)
+        log_binary(_LOGGER, "Client", Public=pub_key, Proof=proof)
         return pub_key, proof
 
     def step3(self):
         """Third pairing step."""
         ios_device_x = hkdf_expand(
-            'Pair-Setup-Controller-Sign-Salt',
-            'Pair-Setup-Controller-Sign-Info',
-            binascii.unhexlify(self._client_session_key))
+            "Pair-Setup-Controller-Sign-Salt",
+            "Pair-Setup-Controller-Sign-Info",
+            binascii.unhexlify(self._client_session_key),
+        )
 
         self._session_key = hkdf_expand(
-            'Pair-Setup-Encrypt-Salt',
-            'Pair-Setup-Encrypt-Info',
-            binascii.unhexlify(self._client_session_key))
+            "Pair-Setup-Encrypt-Salt",
+            "Pair-Setup-Encrypt-Info",
+            binascii.unhexlify(self._client_session_key),
+        )
 
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
-        tlv = tlv8.write_tlv({tlv8.TLV_IDENTIFIER: self.pairing_id,
-                              tlv8.TLV_PUBLIC_KEY: self._auth_public,
-                              tlv8.TLV_SIGNATURE: device_signature})
+        tlv = tlv8.write_tlv(
+            {
+                tlv8.TLV_IDENTIFIER: self.pairing_id,
+                tlv8.TLV_PUBLIC_KEY: self._auth_public,
+                tlv8.TLV_SIGNATURE: device_signature,
+            }
+        )
 
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        encrypted_data = chacha.encrypt(tlv, nounce='PS-Msg05'.encode())
-        log_binary(_LOGGER, 'Data', Encrypted=encrypted_data)
+        encrypted_data = chacha.encrypt(tlv, nounce="PS-Msg05".encode())
+        log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
     def step4(self, encrypted_data):
         """Last pairing step."""
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        decrypted_tlv_bytes = chacha.decrypt(
-            encrypted_data, nounce='PS-Msg06'.encode())
+        decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nounce="PS-Msg06".encode())
 
         if not decrypted_tlv_bytes:
-            raise exceptions.AuthenticationError('data decrypt failed')
+            raise exceptions.AuthenticationError("data decrypt failed")
 
         decrypted_tlv = tlv8.read_tlv(decrypted_tlv_bytes)
-        _LOGGER.debug('PS-Msg06: %s', decrypted_tlv)
+        _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
         atv_identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
         atv_signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
         atv_pub_key = decrypted_tlv[tlv8.TLV_PUBLIC_KEY]
-        log_binary(_LOGGER,
-                   'Device',
-                   Identifier=atv_identifier,
-                   Signature=atv_signature,
-                   Public=atv_pub_key)
+        log_binary(
+            _LOGGER,
+            "Device",
+            Identifier=atv_identifier,
+            Signature=atv_signature,
+            Public=atv_pub_key,
+        )
 
         # TODO: verify signature here
 
-        return Credentials(atv_pub_key, self._signing_key.to_seed(),
-                           atv_identifier, self.pairing_id)
+        return Credentials(
+            atv_pub_key, self._signing_key.to_seed(), atv_identifier, self.pairing_id
+        )

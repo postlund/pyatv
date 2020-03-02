@@ -1,5 +1,5 @@
 """Configuration when connecting to an Apple TV."""
-from pyatv import (convert, exceptions)
+from pyatv import convert, exceptions
 from pyatv.const import Protocol, OperatingSystem
 from pyatv.device_info import lookup_model, lookup_version
 from pyatv.interface import DeviceInfo
@@ -68,16 +68,16 @@ class AppleTV:
 
     def main_service(self, protocol=None):
         """Return suggested service used to establish connection."""
-        protocols = [protocol] if protocol is not None else \
-            [Protocol.MRP, Protocol.DMAP]
+        protocols = (
+            [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
+        )
 
         for prot in protocols:
             service = self.get_service(prot)
             if service is not None:
                 return service
 
-        raise exceptions.NoServiceError(
-            'no service to connect to')
+        raise exceptions.NoServiceError("no service to connect to")
 
     def set_credentials(self, protocol, credentials):
         """Set credentials for a protocol if it exists."""
@@ -99,17 +99,15 @@ class AppleTV:
         else:
             os_type = OperatingSystem.Unknown
 
-        build = properties.get('SystemBuildVersion')
-        model = properties.get('model')
-        version = properties.get('osvers', lookup_version(build))
+        build = properties.get("SystemBuildVersion")
+        model = properties.get("model")
+        version = properties.get("osvers", lookup_version(build))
 
-        mac = properties.get(
-            'macAddress', properties.get('deviceid'))
+        mac = properties.get("macAddress", properties.get("deviceid"))
         if mac:
             mac = mac.upper()
 
-        return DeviceInfo(os_type, version, build,
-                          lookup_model(model), mac)
+        return DeviceInfo(os_type, version, build, lookup_model(model), mac)
 
     def _all_properties(self):
         properties = {}
@@ -126,18 +124,25 @@ class AppleTV:
     def __str__(self):
         """Return a string representation of this object."""
         device_info = self.device_info
-        services = [' - {0}'.format(s) for s in self._services.values()]
-        identifiers = [' - {0}'.format(x) for x in self.all_identifiers]
-        return '       Name: {0}\n' \
-               '   Model/SW: {1}\n' \
-               '    Address: {2}\n' \
-               '        MAC: {3}\n' \
-               'Identifiers:\n' \
-               '{4}\n' \
-               'Services:\n' \
-               '{5}'.format(self.name, device_info, self.address,
-                            device_info.mac,
-                            '\n'.join(identifiers), '\n'.join(services))
+        services = [" - {0}".format(s) for s in self._services.values()]
+        identifiers = [" - {0}".format(x) for x in self.all_identifiers]
+        return (
+            "       Name: {0}\n"
+            "   Model/SW: {1}\n"
+            "    Address: {2}\n"
+            "        MAC: {3}\n"
+            "Identifiers:\n"
+            "{4}\n"
+            "Services:\n"
+            "{5}".format(
+                self.name,
+                device_info,
+                self.address,
+                device_info.mac,
+                "\n".join(identifiers),
+                "\n".join(services),
+            )
+        )
 
 
 # pylint: disable=too-few-public-methods
@@ -164,9 +169,9 @@ class BaseService:
 
     def __str__(self):
         """Return a string representation of this object."""
-        return 'Protocol: {0}, Port: {1}, Credentials: {2}'.format(
-            convert.protocol_str(self.protocol), self.port,
-            self.credentials)
+        return "Protocol: {0}, Port: {1}, Credentials: {2}".format(
+            convert.protocol_str(self.protocol), self.port, self.credentials
+        )
 
 
 # pylint: disable=too-few-public-methods
@@ -193,8 +198,7 @@ class MrpService(BaseService):
 class AirPlayService(BaseService):
     """Representation of an AirPlay service."""
 
-    def __init__(self, identifier, port=7000,
-                 credentials=None, properties=None):
+    def __init__(self, identifier, port=7000, credentials=None, properties=None):
         """Initialize a new AirPlayService."""
         super().__init__(identifier, Protocol.AirPlay, port, properties)
         self.credentials = credentials
