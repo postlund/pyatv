@@ -5,9 +5,13 @@ import hashlib
 import binascii
 from collections import namedtuple
 
-import curve25519
 from srptools import SRPContext, SRPServerSession, constants
 from ed25519.keys import SigningKey
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.x25519 import (
+    X25519PrivateKey,
+    X25519PublicKey,
+)
 
 from pyatv.mrp import chacha20, messages, protobuf, tlv8
 from pyatv.mrp.srp import hkdf_expand
@@ -43,13 +47,13 @@ def seed():
 def generate_keys(seed):
     """Generate server encryption keys from seed."""
     signing_key = SigningKey(seed)
-    verify_private = curve25519.Private(secret=seed)
+    verify_private = X25519PrivateKey.from_private_bytes(seed)
     return ServerKeys(
         sign=signing_key,
         auth=signing_key.to_bytes(),
         auth_pub=signing_key.get_verifying_key().to_bytes(),
         verify=verify_private,
-        verify_pub=verify_private.get_public(),
+        verify_pub=verify_private.public_key(),
     )
 
 
@@ -139,11 +143,13 @@ class MrpServerAuth:
         getattr(self, method)(pairing_data)
 
     def _seqno1_paired(self, pairing_data):
-        server_pub_key = self.keys.verify_pub.serialize()
+        server_pub_key = self.keys.verify_pub.public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        )
         client_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
 
-        shared_key = self.keys.verify.get_shared_key(
-            curve25519.Public(client_pub_key), hashfunc=lambda x: x
+        shared_key = self.keys.verify.exchange(
+            X25519PublicKey.from_public_bytes(client_pub_key)
         )
 
         session_key = hkdf_expand(
