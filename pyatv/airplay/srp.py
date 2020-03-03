@@ -5,10 +5,10 @@ import hashlib
 import binascii
 import logging
 
-from ed25519.keys import SigningKey
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
@@ -93,10 +93,16 @@ class SRPAuthHandler:
         to doing authentication or verification.
         """
         self.seed = seed or os.urandom(32)  # Generate new seed if not provided
-        signing_key = SigningKey(self.seed)
-        verifying_key = signing_key.get_verifying_key()
-        self._auth_private = signing_key.to_seed()
-        self._auth_public = verifying_key.to_bytes()
+        signing_key = Ed25519PrivateKey.from_private_bytes(self.seed)
+        verifying_key = signing_key.public_key()
+        self._auth_private = signing_key.private_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PrivateFormat.Raw,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        self._auth_public = verifying_key.public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        )
         log_binary(
             _LOGGER,
             "Authentication keys",
@@ -143,7 +149,7 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Pair-Verify-AES", Key=aes_key, IV=aes_iv)
 
         # Sign public keys and encrypt with AES
-        signer = SigningKey(self._auth_private)
+        signer = Ed25519PrivateKey.from_private_bytes(self._auth_private)
         signed = signer.sign(self._public_bytes + atv_public_key)
         signature, _ = aes_encrypt(modes.CTR, aes_key, aes_iv, data, signed)
         log_binary(_LOGGER, "Signature", Signature=signature)
