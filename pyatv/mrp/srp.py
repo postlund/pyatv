@@ -6,14 +6,17 @@ import binascii
 import hashlib
 import logging
 
-import curve25519
 from srptools import SRPContext, SRPClientSession, constants
 from ed25519 import BadPrefixError, BadSignatureError
 from ed25519.keys import SigningKey, VerifyingKey
 
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.x25519 import (
+    X25519PrivateKey,
+    X25519PublicKey,
+)
 
 from pyatv import exceptions
 from pyatv.support import log_binary
@@ -80,6 +83,7 @@ class SRPAuthHandler:
         self._auth_public = None
         self._verify_private = None
         self._verify_public = None
+        self._public_bytes = None
         self._session = None
         self._shared = None
         self._session_key = None
@@ -90,15 +94,17 @@ class SRPAuthHandler:
         self._signing_key = SigningKey(os.urandom(32))
         self._auth_private = self._signing_key.to_seed()
         self._auth_public = self._signing_key.get_verifying_key().to_bytes()
-        self._verify_private = curve25519.Private(secret=os.urandom(32))
-        self._verify_public = self._verify_private.get_public()
-        return self._auth_public, self._verify_public.serialize()
+        self._verify_private = X25519PrivateKey.from_private_bytes(os.urandom(32))
+        self._verify_public = self._verify_private.public_key()
+        self._public_bytes = self._verify_public.public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        )
+        return self._auth_public, self._public_bytes
 
     def verify1(self, credentials, session_pub_key, encrypted):
         """First verification step."""
-        # No additional hashing used
-        self._shared = self._verify_private.get_shared_key(
-            curve25519.Public(session_pub_key), hashfunc=lambda x: x
+        self._shared = self._verify_private.exchange(
+            X25519PublicKey.from_public_bytes(session_pub_key)
         )
 
         session_key = hkdf_expand(
@@ -116,7 +122,7 @@ class SRPAuthHandler:
         if identifier != credentials.atv_id:
             raise exceptions.AuthenticationError("incorrect device response")
 
-        info = session_pub_key + bytes(identifier) + self._verify_public.serialize()
+        info = session_pub_key + bytes(identifier) + self._public_bytes
         ltpk = VerifyingKey(bytes(credentials.ltpk))
 
         try:
@@ -124,9 +130,7 @@ class SRPAuthHandler:
         except (BadPrefixError, BadSignatureError) as ex:
             raise exceptions.AuthenticationError("signature error") from ex
 
-        device_info = (
-            self._verify_public.serialize() + credentials.client_id + session_pub_key
-        )
+        device_info = self._public_bytes + credentials.client_id + session_pub_key
 
         device_signature = SigningKey(credentials.ltsk).sign(device_info)
 
