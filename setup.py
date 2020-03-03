@@ -37,7 +37,6 @@ setup(
         'netifaces>=0.10.0',
         'protobuf>=3.8.0',
         'srptools>=0.2.0',
-        'tlslite-ng>=0.7.0',
     ],
     test_suite='tests',
     keywords=['apple', 'tv'],
