@@ -42,7 +42,6 @@ To get the work done, `pyatv` requires some other pieces of software, more speci
 - netifaces >= 0.10.0
 - protobuf >= 3.4.0
 - srptools >= 0.2.0
-- tlslite-ng >= 0.7.0
 
 ### Roadmap
 
