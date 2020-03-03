@@ -7,12 +7,15 @@ import hashlib
 import logging
 
 from srptools import SRPContext, SRPClientSession, constants
-from ed25519 import BadPrefixError, BadSignatureError
-from ed25519.keys import SigningKey, VerifyingKey
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
@@ -91,9 +94,15 @@ class SRPAuthHandler:
 
     def initialize(self):
         """Initialize operation by generating new keys."""
-        self._signing_key = SigningKey(os.urandom(32))
-        self._auth_private = self._signing_key.to_seed()
-        self._auth_public = self._signing_key.get_verifying_key().to_bytes()
+        self._signing_key = Ed25519PrivateKey.from_private_bytes(os.urandom(32))
+        self._auth_private = self._signing_key.private_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PrivateFormat.Raw,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        self._auth_public = self._signing_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        )
         self._verify_private = X25519PrivateKey.from_private_bytes(os.urandom(32))
         self._verify_public = self._verify_private.public_key()
         self._public_bytes = self._verify_public.public_bytes(
@@ -123,16 +132,18 @@ class SRPAuthHandler:
             raise exceptions.AuthenticationError("incorrect device response")
 
         info = session_pub_key + bytes(identifier) + self._public_bytes
-        ltpk = VerifyingKey(bytes(credentials.ltpk))
+        ltpk = Ed25519PublicKey.from_public_bytes(bytes(credentials.ltpk))
 
         try:
             ltpk.verify(bytes(signature), bytes(info))
-        except (BadPrefixError, BadSignatureError) as ex:
+        except InvalidSignature as ex:
             raise exceptions.AuthenticationError("signature error") from ex
 
         device_info = self._public_bytes + credentials.client_id + session_pub_key
 
-        device_signature = SigningKey(credentials.ltsk).sign(device_info)
+        device_signature = Ed25519PrivateKey.from_private_bytes(credentials.ltsk).sign(
+            device_info
+        )
 
         tlv = tlv8.write_tlv(
             {
@@ -241,5 +252,5 @@ class SRPAuthHandler:
         # TODO: verify signature here
 
         return Credentials(
-            atv_pub_key, self._signing_key.to_seed(), atv_identifier, self.pairing_id
+            atv_pub_key, self._auth_private, atv_identifier, self.pairing_id
         )

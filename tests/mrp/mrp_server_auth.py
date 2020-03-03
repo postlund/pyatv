@@ -6,8 +6,8 @@ import binascii
 from collections import namedtuple
 
 from srptools import SRPContext, SRPServerSession, constants
-from ed25519.keys import SigningKey
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
@@ -30,28 +30,25 @@ CLIENT_CREDENTIALS = (
     + "64653932323964393833"
 )
 SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A69"
+PRIVATE_KEY = 32 * b"\xAA"
 
 ServerKeys = namedtuple("ServerKeys", "sign auth auth_pub verify verify_pub")
 
 
-# This is a hack. When using a constant, e.g. 32 * '\xAA', will be corrupted
-# for the second client that connects. Not sure why, but this works...
-def seed():
-    """Generate a static signing seed."""
-    a = b""
-    for _ in range(32):
-        a += b"\xAA"
-    return a
-
-
 def generate_keys(seed):
     """Generate server encryption keys from seed."""
-    signing_key = SigningKey(seed)
+    signing_key = Ed25519PrivateKey.from_private_bytes(seed)
     verify_private = X25519PrivateKey.from_private_bytes(seed)
     return ServerKeys(
         sign=signing_key,
-        auth=signing_key.to_bytes(),
-        auth_pub=signing_key.get_verifying_key().to_bytes(),
+        auth=signing_key.private_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PrivateFormat.Raw,
+            encryption_algorithm=serialization.NoEncryption(),
+        ),
+        auth_pub=signing_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        ),
         verify=verify_private,
         verify_pub=verify_private.public_key(),
     )
@@ -97,7 +94,7 @@ class MrpServerAuth:
         self.input_key = None
         self.output_key = None
         self.has_paired = False
-        self.keys = generate_keys(seed())
+        self.keys = generate_keys(PRIVATE_KEY)
         self.session, self.salt = new_server_session(self.keys, str(PIN_CODE))
 
     def handle_device_info(self, message, _):
