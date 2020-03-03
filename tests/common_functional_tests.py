@@ -142,6 +142,11 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await until(lambda: self.fake_atv.last_button_pressed == "play")
 
     @unittest_run_loop
+    async def test_button_play_pause(self):
+        await self.atv.remote_control.play_pause()
+        await until(lambda: self.fake_atv.last_button_pressed == "playpause")
+
+    @unittest_run_loop
     async def test_button_pause(self):
         await self.atv.remote_control.pause()
         await until(lambda: self.fake_atv.last_button_pressed == "pause")

@@ -124,6 +124,11 @@ class RemoteControl:  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
     @abstractmethod
+    def play_pause(self):
+        """Toggle between play and pause."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
     def pause(self):
         """Press key play."""
         raise exceptions.NotSupportedError()

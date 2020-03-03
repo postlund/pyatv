@@ -80,7 +80,7 @@ class FakeAppleTV(FakeAirPlayDevice):
         )
         self.app.router.add_get("/ctrl-int/1/nowplayingartwork", self.handle_artwork)
         self.app.router.add_post("/ctrl-int/1/setproperty", self.handle_set_property)
-        for button in ["play", "pause", "stop", "nextitem", "previtem"]:
+        for button in ["play", "playpause", "pause", "stop", "nextitem", "previtem"]:
             self.app.router.add_post(
                 "/ctrl-int/1/" + button, self.handle_playback_button
             )
