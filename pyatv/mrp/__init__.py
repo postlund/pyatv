@@ -5,7 +5,7 @@ import logging
 import asyncio
 import datetime
 
-from pyatv import exceptions, net
+from pyatv import exceptions
 from pyatv.const import (
     Protocol,
     MediaType,
@@ -14,7 +14,8 @@ from pyatv.const import (
     ShuffleState,
     PowerState,
 )
-from pyatv.cache import Cache
+from pyatv.support import net
+from pyatv.support.cache import Cache
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection

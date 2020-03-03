@@ -2,7 +2,7 @@
 
 import unittest
 
-from pyatv.cache import Cache
+from pyatv.support.cache import Cache
 
 ID1 = "id1"
 ID2 = "id2"

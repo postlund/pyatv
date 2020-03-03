@@ -4,12 +4,12 @@ import logging
 import binascii
 from collections import namedtuple
 
-from pyatv import exceptions, net
+from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.airplay.auth import DeviceAuthenticator
-from pyatv.support import error_handler
+from pyatv.support import error_handler, net
 
 _LOGGER = logging.getLogger(__name__)
 

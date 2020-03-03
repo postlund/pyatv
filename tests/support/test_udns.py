@@ -3,7 +3,7 @@
 import unittest
 import asynctest
 
-from pyatv import udns
+from pyatv.support import udns
 from tests import fake_udns
 
 

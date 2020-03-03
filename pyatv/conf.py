@@ -1,7 +1,7 @@
 """Configuration when connecting to an Apple TV."""
 from pyatv import convert, exceptions
 from pyatv.const import Protocol, OperatingSystem
-from pyatv.device_info import lookup_model, lookup_version
+from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.interface import DeviceInfo
 
 

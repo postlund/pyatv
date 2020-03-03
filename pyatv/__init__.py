@@ -9,7 +9,7 @@ from ipaddress import ip_address
 from aiozeroconf import ServiceBrowser, Zeroconf
 import netifaces
 
-from pyatv import conf, exceptions, net, udns
+from pyatv import conf, exceptions
 from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
@@ -17,6 +17,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.airplay.pairing import AirPlayPairingHandler
+from pyatv.support import net, udns
 
 
 _LOGGER = logging.getLogger(__name__)

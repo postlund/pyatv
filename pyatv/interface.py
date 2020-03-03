@@ -7,8 +7,9 @@ import hashlib
 from collections import namedtuple
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from pyatv import convert, exceptions, net
+from pyatv import convert, exceptions
 from pyatv.const import OperatingSystem, DeviceModel
+from pyatv.support import net
 
 ArtworkInfo = namedtuple("ArtworkInfo", "bytes mimetype")
 
