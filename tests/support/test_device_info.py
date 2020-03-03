@@ -3,7 +3,7 @@
 import unittest
 
 from pyatv.const import DeviceModel
-from pyatv.device_info import lookup_model, lookup_version
+from pyatv.support.device_info import lookup_model, lookup_version
 
 
 class DeviceInfoTest(unittest.TestCase):

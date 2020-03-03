@@ -5,12 +5,12 @@ import asyncio
 
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import exceptions, net
-from pyatv.cache import Cache
+from pyatv import exceptions
+from pyatv.support import net
+from pyatv.support.cache import Cache
 from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState, PowerState
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
-from pyatv.net import HttpSession
 from pyatv.interface import (
     AppleTV,
     RemoteControl,
@@ -460,7 +460,7 @@ class DmapAppleTV(AppleTV):
         self._session = session
         self._config = config
         self._dmap_service = config.get_service(Protocol.DMAP)
-        daap_http = HttpSession(
+        daap_http = net.HttpSession(
             session, "http://{0}:{1}/".format(config.address, self._dmap_service.port)
         )
         self._requester = DaapRequester(daap_http, self._dmap_service.credentials)

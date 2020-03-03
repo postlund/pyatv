@@ -3,9 +3,10 @@
 import logging
 import binascii
 
-from pyatv import net, exceptions
+from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.interface import Stream
+from pyatv.support import net
 
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import SRPAuthHandler
