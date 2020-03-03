@@ -152,6 +152,10 @@ class DmapRemoteControl(RemoteControl):
         """Press key play."""
         return self.apple_tv.ctrl_int_cmd("play")
 
+    def play_pause(self):
+        """Toggle between play and pause."""
+        return self.apple_tv.ctrl_int_cmd("playpause")
+
     def pause(self):
         """Press key pause."""
         return self.apple_tv.ctrl_int_cmd("pause")

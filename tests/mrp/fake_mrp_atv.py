@@ -35,6 +35,7 @@ _KEY_LOOKUP = {
 
 _COMMAND_LOOKUP = {
     cmd.Play: "play",
+    cmd.TogglePlayPause: "playpause",
     cmd.Pause: "pause",
     cmd.Stop: "stop",
     cmd.NextTrack: "nextitem",

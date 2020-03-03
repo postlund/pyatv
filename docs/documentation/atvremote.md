@@ -182,6 +182,7 @@ called `commands`, as it will present a list of availble commands:
      - next - Press key next
      - pause - Press key play
      - play - Press key play
+     - play_pause - Toggle between play and pause
      - previous - Press key previous
      - right - Press key right
      - select - Press key select

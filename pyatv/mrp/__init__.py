@@ -121,6 +121,10 @@ class MrpRemoteControl(RemoteControl):
         """Press key play."""
         await self._send_command(CommandInfo_pb2.Play)
 
+    async def play_pause(self):
+        """Toggle between play and pause."""
+        await self._send_command(CommandInfo_pb2.TogglePlayPause)
+
     async def pause(self):
         """Press key play."""
         await self._send_command(CommandInfo_pb2.Pause)
