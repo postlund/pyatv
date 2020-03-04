@@ -73,6 +73,21 @@ class CommonFunctionalTests(AioHTTPTestCase):
             await pyatv.pair(conf, Protocol.DMAP, self.loop)
 
     @unittest_run_loop
+    async def test_invalid_credentials_format(self):
+        self.conf.main_service().credentials = "bad"
+
+        with self.assertRaises(exceptions.InvalidCredentialsError):
+            await pyatv.connect(self.conf, loop=self.loop)
+
+    @unittest_run_loop
+    async def test_invalid_airplay_credentials_format(self):
+        self.conf.get_service(Protocol.AirPlay).credentials = "bad"
+        self.usecase.airplay_require_authentication()
+
+        with self.assertRaises(exceptions.InvalidCredentialsError):
+            await pyatv.connect(self.conf, loop=self.loop)
+
+    @unittest_run_loop
     async def test_play_url(self):
         self.usecase.airplay_playback_idle()
         self.usecase.airplay_playback_playing()
@@ -85,7 +100,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
         self.conf.get_service(Protocol.AirPlay).credentials = None
-        self.usecase.airplay_require_authentication()
+        self.usecase.airplay_always_fail_authentication()
 
         with self.assertRaises(exceptions.AuthenticationError):
             await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)

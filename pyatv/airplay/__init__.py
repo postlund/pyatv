@@ -1,5 +1,6 @@
 """Implementation of external API for AirPlay."""
 
+import re
 import logging
 import binascii
 
@@ -24,11 +25,17 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         self.loop = loop
         self.service = self.config.get_service(Protocol.AirPlay)
         self.identifier = None
+        self.credentials = self._get_credentials()
 
     def _get_credentials(self):
-        if self.service.credentials is None:
+        if not self.service or self.service.credentials is None:
             _LOGGER.debug("No AirPlay credentials loaded")
             return None
+
+        if not re.match(r"[0-9A-Fa-f]{16}:[0-9A-Fa-f]{64}", self.service.credentials):
+            raise exceptions.InvalidCredentialsError(
+                f"invalid credentials: {self.service.credentials}"
+            )
 
         split = self.service.credentials.split(":")
         _LOGGER.debug("Loaded AirPlay credentials: %s", self.service.credentials)
@@ -42,10 +49,9 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         player = AirPlayPlayer(self.loop, http)
 
         # If credentials have been loaded, do device verification first
-        credentials = self._get_credentials()
-        if credentials:
+        if self.credentials:
             srp = SRPAuthHandler()
-            srp.initialize(binascii.unhexlify(credentials))
+            srp.initialize(binascii.unhexlify(self.credentials))
             verifier = AuthenticationVerifier(http, srp)
             await verifier.verify_authed()
 
