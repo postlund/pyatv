@@ -147,10 +147,16 @@ class DaapRequester:
         url = "{}".format(cmd.format(*args))
         parameters = []
         if login_id:
-            if re.match(r"0x[0-9a-fA-F]{16}", self._login_id):
+            if re.match(r"0x[0-9A-Fa-f]{16}", self._login_id):
                 parameters.append("pairing-guid={}".format(self._login_id))
-            else:
+            elif re.match(
+                r"[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}", self._login_id
+            ):
                 parameters.append("hsgid={}".format(self._login_id))
+            else:
+                raise exceptions.InvalidCredentialsError(
+                    "invalid credentials: " + self._login_id
+                )
         if session:
             parameters.insert(0, "session-id={}".format(self._session_id))
         return url.replace("[AUTH]", "&".join(parameters))

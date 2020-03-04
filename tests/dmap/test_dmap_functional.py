@@ -14,7 +14,7 @@ from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
 
-HSGID = "12345-6789-0"
+HSGID = "12345678-6789-1111-2222-012345678911"
 PAIRING_GUID = "0x0000000000000001"
 SESSION_ID = 55555
 REMOTE_NAME = "pyatv remote"

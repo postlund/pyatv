@@ -38,7 +38,9 @@ class Credentials:
         """Parse a string represention of Credentials."""
         split = detail_string.split(":")
         if len(split) != 4:
-            raise exceptions.InvalidCredentialsError("invalid credentials")
+            raise exceptions.InvalidCredentialsError(
+                "invalid credentials: " + detail_string
+            )
 
         ltpk = binascii.unhexlify(split[0])
         ltsk = binascii.unhexlify(split[1])

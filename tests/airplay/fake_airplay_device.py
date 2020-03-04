@@ -43,6 +43,7 @@ class FakeAirPlayDevice:
         self.responses = {}
         self.responses["airplay_playback"] = []
         self.has_authenticated = True
+        self.always_auth_fail = False
         self.last_airplay_url = None
         self.last_airplay_start = None
         self.last_airplay_uuid = None
@@ -73,13 +74,14 @@ class FakeAirPlayDevice:
 
     async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
+
         self.play_count += 1
 
+        if self.always_auth_fail or not self.has_authenticated:
+            return web.Response(status=503)
         if self.injected_play_fails > 0:
             self.injected_play_fails -= 1
             return web.Response(status=500)
-        if not self.has_authenticated:
-            return web.Response(status=503)
 
         headers = request.headers
 
@@ -174,6 +176,10 @@ class AirPlayUseCases:
     def airplay_require_authentication(self):
         """Require device authentication for AirPlay."""
         self.device.has_authenticated = False
+
+    def airplay_always_fail_authentication(self):
+        """Always fail authentication for AirPlay."""
+        self.device.always_auth_fail = True
 
     def airplay_playback_playing_no_permission(self):
         """Make playback-info return forbidden."""
