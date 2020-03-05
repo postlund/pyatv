@@ -2,13 +2,22 @@
 
 import logging
 import asyncio
+from typing import Dict
 
 from aiohttp.client_exceptions import ClientError
 
 from pyatv import exceptions
 from pyatv.support import net
 from pyatv.support.cache import Cache
-from pyatv.const import Protocol, MediaType, RepeatState, ShuffleState, PowerState
+from pyatv.const import (
+    Protocol,
+    MediaType,
+    RepeatState,
+    ShuffleState,
+    PowerState,
+    FeatureState,
+    FeatureName,
+)
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.interface import (
@@ -19,6 +28,8 @@ from pyatv.interface import (
     PushUpdater,
     ArtworkInfo,
     Power,
+    Features,
+    FeatureInfo,
 )
 from pyatv.support import deprecated
 
@@ -453,6 +464,18 @@ class DmapPushUpdater(PushUpdater):
         self._future = None
 
 
+class DmapFeatures(Features):
+    """Implementation of API for supported feature functionality."""
+
+    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+        """Return current state of a feature."""
+        return FeatureInfo(state=FeatureState.Unsupported)
+
+    def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
+        """Return state of all features."""
+        return {}
+
+
 class DmapAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""
 
@@ -474,6 +497,7 @@ class DmapAppleTV(AppleTV):
         self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
         self._dmap_power = DmapPower()
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
+        self._dmap_features = DmapFeatures()
         self._airplay = airplay
 
     def connect(self):
@@ -524,3 +548,8 @@ class DmapAppleTV(AppleTV):
     def power(self):
         """Return API for streaming media."""
         return self._dmap_power
+
+    @property
+    def features(self) -> Features:
+        """Return features interface."""
+        return self._dmap_features
