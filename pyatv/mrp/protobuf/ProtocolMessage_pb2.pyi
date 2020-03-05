@@ -91,8 +91,10 @@ class ProtocolMessage(google___protobuf___message___Message):
         SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
         SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
         SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
+        SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
         UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
         UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+        UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
     UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
     SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
@@ -138,8 +140,10 @@ class ProtocolMessage(google___protobuf___message___Message):
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
     SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
     SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
+    SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
     UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
     UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+    UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
 
     type = ... # type: ProtocolMessage.Type
