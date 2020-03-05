@@ -2,11 +2,12 @@
 
 import logging
 import asyncio
-from typing import Dict
+from typing import Dict, List
 
+from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import exceptions
+from pyatv import conf, exceptions
 from pyatv.support import net
 from pyatv.support.cache import Cache
 from pyatv.const import (
@@ -22,6 +23,8 @@ from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.interface import (
     AppleTV,
+    DeviceInfo,
+    Stream,
     RemoteControl,
     Metadata,
     Playing,
@@ -40,6 +43,43 @@ _PSU_CMD = "ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}"
 _ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]"
 _CTRL_PROMPT_CMD = "ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0"
 
+# Features that are always considered to be available
+_AVAILABLE_FEATURES = [
+    FeatureName.Down,
+    FeatureName.Left,
+    FeatureName.Menu,
+    FeatureName.Right,
+    FeatureName.Select,
+    FeatureName.TopMenu,
+    FeatureName.Up,
+]  # type: List[FeatureName]
+
+# Features that are supported by the device but we don't now if available
+_UNKNOWN_FEATURES = [
+    FeatureName.Artwork,
+    FeatureName.Next,
+    FeatureName.Pause,
+    FeatureName.Play,
+    FeatureName.PlayPause,
+    FeatureName.Previous,
+    FeatureName.SetPosition,
+    FeatureName.SetRepeat,
+    FeatureName.SetShuffle,
+    FeatureName.Stop,
+]  # type: List[FeatureName]
+
+# Features that are considered available if corresponding field is present
+_FIELD_FEATURES = {
+    FeatureName.Title: ("cmst", "caps"),
+    FeatureName.Artist: ("cmst", "cann"),
+    FeatureName.Album: ("cmst", "canl"),
+    FeatureName.Genre: ("cmst", "cang"),
+    FeatureName.TotalTime: ("cmst", "cast"),
+    FeatureName.Position: ("cmst", "cant"),
+    FeatureName.Shuffle: ("cmst", "cash"),
+    FeatureName.Repeat: ("cmst", "carp"),
+}  # type: Dict[FeatureName, tuple]
+
 
 class BaseDmapAppleTV:
     """Common protocol logic used to interact with an Apple TV."""
@@ -48,6 +88,7 @@ class BaseDmapAppleTV:
         """Initialize a new Apple TV base implemenation."""
         self.daap = requester
         self.playstatus_revision = 0
+        self.latest_playing = None
         self.latest_hash = None
 
     async def playstatus(self, use_revision=False, timeout=None):
@@ -61,9 +102,9 @@ class BaseDmapAppleTV:
         cmd_url = _PSU_CMD.format(self.playstatus_revision if use_revision else 0)
         resp = await self.daap.get(cmd_url, timeout=timeout)
         self.playstatus_revision = parser.first(resp, "cmst", "cmsr")
-        playing = DmapPlaying(resp)
-        self.latest_hash = playing.hash
-        return playing
+        self.latest_playing = DmapPlaying(resp)
+        self.latest_hash = self.latest_playing.hash
+        return self.latest_playing
 
     async def artwork(self):
         """Return an image file (png) for what is currently playing.
@@ -467,13 +508,33 @@ class DmapPushUpdater(PushUpdater):
 class DmapFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
+    def __init__(self, config: conf.AppleTV, apple_tv: BaseDmapAppleTV) -> None:
+        """Initialize a new DmapFeatures instance."""
+        self.config = config
+        self.apple_tv = apple_tv
+
     def get_feature(self, feature: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
+        if feature in _AVAILABLE_FEATURES:
+            return FeatureInfo(state=FeatureState.Available)
+        if feature in _UNKNOWN_FEATURES:
+            return FeatureInfo(state=FeatureState.Unknown)
+        if feature in _FIELD_FEATURES:
+            available = self._is_available(_FIELD_FEATURES[feature])
+            return FeatureInfo(
+                state=FeatureState.Available if available else FeatureState.Unavailable
+            )
+        if feature == FeatureName.PlayUrl:
+            if self.config.get_service(Protocol.AirPlay) is not None:
+                return FeatureInfo(state=FeatureState.Available)
+
         return FeatureInfo(state=FeatureState.Unsupported)
 
-    def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
-        """Return state of all features."""
-        return {}
+    def _is_available(self, field: tuple) -> bool:
+        if not self.apple_tv.latest_playing:
+            return False
+
+        return parser.first(self.apple_tv.latest_playing.playstatus, *field) is not None
 
 
 class DmapAppleTV(AppleTV):
@@ -481,12 +542,15 @@ class DmapAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, config, airplay):
+    def __init__(
+        self, loop, session: ClientSession, config: conf.AppleTV, airplay: Stream
+    ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
         self._session = session
         self._config = config
         self._dmap_service = config.get_service(Protocol.DMAP)
+        assert self._dmap_service is not None
         daap_http = net.HttpSession(
             session, "http://{0}:{1}/".format(config.address, self._dmap_service.port)
         )
@@ -497,17 +561,17 @@ class DmapAppleTV(AppleTV):
         self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
         self._dmap_power = DmapPower()
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
-        self._dmap_features = DmapFeatures()
+        self._dmap_features = DmapFeatures(config, self._apple_tv)
         self._airplay = airplay
 
-    def connect(self):
+    async def connect(self) -> None:
         """Initiate connection to device.
 
         No need to call it yourself, it's done automatically.
         """
-        return self._requester.login()
+        await self._requester.login()
 
-    async def close(self):
+    async def close(self) -> None:
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             await self._session.close()
@@ -515,7 +579,7 @@ class DmapAppleTV(AppleTV):
             self.listener.connection_closed()
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return API for device information."""
         return self._config.device_info
 
@@ -525,27 +589,27 @@ class DmapAppleTV(AppleTV):
         return self._dmap_service
 
     @property
-    def remote_control(self):
+    def remote_control(self) -> RemoteControl:
         """Return API for controlling the Apple TV."""
         return self._dmap_remote
 
     @property
-    def metadata(self):
+    def metadata(self) -> Metadata:
         """Return API for retrieving metadata from Apple TV."""
         return self._dmap_metadata
 
     @property
-    def push_updater(self):
+    def push_updater(self) -> PushUpdater:
         """Return API for handling push update from the Apple TV."""
         return self._dmap_push_updater
 
     @property
-    def stream(self):
+    def stream(self) -> Stream:
         """Return API for streaming media."""
         return self._airplay
 
     @property
-    def power(self):
+    def power(self) -> Power:
         """Return API for streaming media."""
         return self._dmap_power
 
