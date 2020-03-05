@@ -1,10 +1,16 @@
 """Various helper methods."""
 
 import asyncio
+from typing import Callable
+
 import pyatv
 
 
-def auto_connect(handler, timeout=5, not_found=None):
+def auto_connect(
+    handler: Callable[[pyatv.interface.AppleTV], None],
+    timeout: int = 5,
+    not_found: Callable[[], None] = None,
+) -> None:
     """Short method for connecting to a device.
 
     This is a convenience method that create an event loop, auto discovers

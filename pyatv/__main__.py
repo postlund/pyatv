@@ -255,7 +255,7 @@ class DeviceCommands:
         return 0
 
 
-class PushListener:
+class PushListener(interface.PushListener):
     """Internal listener for push updates."""
 
     @staticmethod

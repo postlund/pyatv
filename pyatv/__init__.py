@@ -4,12 +4,15 @@ import os
 import asyncio
 import logging
 import datetime  # noqa
-from ipaddress import ip_address
+from abc import ABC, abstractmethod
+from ipaddress import IPv4Address, ip_address
+from typing import List, Dict
 
+import aiohttp
 from aiozeroconf import ServiceBrowser, Zeroconf
 import netifaces
 
-from pyatv import conf, exceptions
+from pyatv import conf, exceptions, interface
 from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
@@ -35,23 +38,27 @@ ALL_SERVICES = [
 ]
 
 
-def _decode_properties(properties):
-    def _decode(value):
+def _decode_properties(properties) -> Dict[str, str]:
+    def _decode(value: bytes):
         try:
             # Remove non-breaking-space (0xA2A0) before decoding
             return value.replace(b"\xC2\xA0", b" ").decode("utf-8")
         except Exception:  # pylint: disable=broad-except
-            return value
+            return str(value)
 
     return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
 
 
-class BaseScanner:  # pylint: disable=too-few-public-methods
+class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
     """Base scanner for service discovery."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new BaseScanner."""
-        self._found_devices = {}
+        self._found_devices = {}  # type: Dict[IPv4Address, conf.BaseService]
+
+    @abstractmethod
+    async def discover(self, timeout: int):
+        """Start discovery of devices and services."""
 
     def service_discovered(  # pylint: disable=too-many-arguments
         self, service_type, service_name, address, port, properties
@@ -224,7 +231,13 @@ class UnicastMdnsScanner(BaseScanner):
         return None
 
 
-async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
+async def scan(
+    loop: asyncio.AbstractEventLoop,
+    timeout: int = 5,
+    identifier: str = None,
+    protocol: Protocol = None,
+    hosts: List[str] = None,
+) -> List[conf.AppleTV]:
     """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
 
     def _should_include(atv):
@@ -239,6 +252,7 @@ async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
 
         return True
 
+    scanner: BaseScanner
     if hosts:
         scanner = UnicastMdnsScanner(hosts, loop)
     else:
@@ -248,7 +262,12 @@ async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
     return [device for device in devices if _should_include(device)]
 
 
-async def connect(config, loop, protocol=None, session=None):
+async def connect(
+    config: conf.AppleTV,
+    loop: asyncio.AbstractEventLoop,
+    protocol: Protocol = None,
+    session: aiohttp.ClientSession = None,
+) -> interface.AppleTV:
     """Connect and logins to an Apple TV."""
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
@@ -276,7 +295,13 @@ async def connect(config, loop, protocol=None, session=None):
     return atv
 
 
-async def pair(config, protocol, loop, session=None, **kwargs):
+async def pair(
+    config: conf.AppleTV,
+    protocol: Protocol,
+    loop: asyncio.AbstractEventLoop,
+    session: aiohttp.ClientSession = None,
+    **kwargs
+):
     """Pair with an Apple TV."""
     service = config.get_service(protocol)
     if not service:
