@@ -232,6 +232,8 @@ called `commands`, as it will present a list of availble commands:
     Device commands:
      - artwork_save - Download artwork and save it to artwork.png
      - cli - Enter commands in a simple CLI
+     - device_info - Print various information about the device
+     - features - Print a list of all features and options
      - push_updates - Listen for push updates
 
     Global commands:
@@ -256,10 +258,57 @@ Or seek in the currently playing media:
 Check operating system version:
 
     $ atvremote --id 00:11:22:33:44:54 version
+    13.3.1
 
 Or all device information (same as seen with `atvremote scan`):
 
     $ atvremote --id 00:11:22:33:44:54 device_info
+    Model/SW: 4K tvOS 13.3.1 build 17K795
+         MAC: 00:11:22:33:44:55
+
+Perhaps see suuported features:
+
+    $ atvremote -n Vardagsrum -s 10.0.10.81 features
+    Feature list:
+    -------------
+    Up: Available
+    Down: Available
+    Left: Available
+    Right: Available
+    Play: Unavailable
+    PlayPause: Unavailable
+    Pause: Unavailable
+    Stop: Unavailable
+    Next: Unavailable
+    Previous: Unavailable
+    Select: Available
+    Menu: Available
+    VolumeUp: Unknown
+    VolumeDown: Unknown
+    Home: Available
+    HomeHold: Available
+    TopMenu: Available
+    SetPosition: Unavailable
+    SetShuffle: Unavailable
+    SetRepeat: Unavailable
+    Title: Available
+    Artist: Available
+    Album: Available
+    Genre: Available
+    TotalTime: Available
+    Position: Available
+    Shuffle: Unavailable
+    Repeat: Unavailable
+    Artwork: Available
+    PlayUrl: Available
+    TurnOn: Available
+    TurnOff: Available
+
+    Legend:
+    -------
+    Available: Supported by device and usable now
+    Unavailable: Supported by device but not usable nowUnknown: Supported by the device but availability not known
+    Unsupported: Not supported by this device (or by pyatv)
 
 Play a video via AirPlay:
 

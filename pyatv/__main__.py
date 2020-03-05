@@ -254,6 +254,30 @@ class DeviceCommands:
         print("     MAC:", devinfo.mac)
         return 0
 
+    async def features(self) -> int:
+        """Print a list of all features and options."""
+        unsupported = bool(
+            len(self.args.command) == 2 and self.args.command[1] == "all"
+        )
+        all_features = self.atv.features.all_features(include_unsupported=unsupported)
+
+        print("Feature list:")
+        print("-------------")
+        for name, feature in all_features.items():
+            output = f"{name.name}: {feature.state.name}"
+            options = [f"{k}={v}" for k, v in feature.options.items()]
+            if options:
+                output += f", Options={', '.join(options)}"
+            print(output)
+
+        print("\nLegend:")
+        print("-------")
+        print("Available: Supported by device and usable now")
+        print("Unavailable: Supported by device but not usable now")
+        print("Unknown: Supported by the device but availability not known")
+        print("Unsupported: Not supported by this device (or by pyatv)")
+        return 0
+
 
 class PushListener(interface.PushListener):
     """Internal listener for push updates."""
