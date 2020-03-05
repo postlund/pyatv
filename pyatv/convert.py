@@ -3,7 +3,7 @@
 from pyatv.const import Protocol, MediaType, DeviceState, RepeatState, ShuffleState
 
 
-def device_state_str(state):
+def device_state_str(state: DeviceState) -> str:
     """Convert internal API device state to string."""
     return {
         None: "Idle",
@@ -16,7 +16,7 @@ def device_state_str(state):
     }.get(state, "Unsupported")
 
 
-def media_type_str(mediatype):
+def media_type_str(mediatype: MediaType) -> str:
     """Convert internal API media type to string."""
     return {
         MediaType.Unknown: "Unknown",
@@ -26,7 +26,7 @@ def media_type_str(mediatype):
     }.get(mediatype, "Unsupported")
 
 
-def repeat_str(state):
+def repeat_str(state: RepeatState) -> str:
     """Convert internal API repeat state to string."""
     return {
         RepeatState.Off: "Off",
@@ -35,7 +35,7 @@ def repeat_str(state):
     }.get(state, "Unsupported")
 
 
-def shuffle_str(state):
+def shuffle_str(state: ShuffleState) -> str:
     """Convert internal API shuffle state to string."""
     return {
         ShuffleState.Off: "Off",
@@ -44,7 +44,7 @@ def shuffle_str(state):
     }.get(state, "Unsupported")
 
 
-def protocol_str(protocol):
+def protocol_str(protocol: Protocol) -> str:
     """Convert internal API protocol to string."""
     return {
         Protocol.MRP: "MRP",

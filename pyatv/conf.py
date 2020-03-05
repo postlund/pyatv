@@ -1,8 +1,11 @@
 """Configuration when connecting to an Apple TV."""
-from pyatv import convert, exceptions
+from ipaddress import IPv4Address
+from typing import Dict, List, Optional
+
+from pyatv import exceptions
 from pyatv.const import Protocol, OperatingSystem
 from pyatv.support.device_info import lookup_model, lookup_version
-from pyatv.interface import DeviceInfo
+from pyatv.interface import BaseService, DeviceInfo
 
 
 class AppleTV:
@@ -13,35 +16,35 @@ class AppleTV:
     AirPlay.
     """
 
-    def __init__(self, address, name):
+    def __init__(self, address: IPv4Address, name: str) -> None:
         """Initialize a new AppleTV."""
         self.address = address
         self.name = name
-        self._services = {}
+        self._services = {}  # type: Dict[Protocol, BaseService]
 
     @property
-    def ready(self):
+    def ready(self) -> bool:
         """Return if configuration is ready, i.e. has a main service."""
         has_dmap = Protocol.DMAP in self._services
         has_mrp = Protocol.MRP in self._services
         return has_dmap or has_mrp
 
     @property
-    def identifier(self):
+    def identifier(self) -> Optional[str]:
         """Return one of the identifiers associated with this device."""
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
-            service = self.get_service(prot)
+            service = self._services.get(prot)
             if service:
                 return service.identifier
         return None
 
     @property
-    def all_identifiers(self):
+    def all_identifiers(self) -> List[str]:
         """Return all unique identifiers for this device."""
         services = self.services
         return [x.identifier for x in services if x.identifier is not None]
 
-    def add_service(self, service):
+    def add_service(self, service: BaseService) -> None:
         """Add a new service.
 
         If the service already exists, it will be merged.
@@ -52,7 +55,7 @@ class AppleTV:
         else:
             self._services[service.protocol] = service
 
-    def get_service(self, protocol):
+    def get_service(self, protocol: Protocol) -> Optional[BaseService]:
         """Look up a service based on protocol.
 
         If a service with the specified protocol is not available, None is
@@ -61,25 +64,24 @@ class AppleTV:
         return self._services.get(protocol)
 
     @property
-    def services(self):
+    def services(self) -> List[BaseService]:
         """Return all supported services."""
-        services = set(self._services.keys())
-        return [self.get_service(x) for x in services]
+        return list(self._services.values())
 
-    def main_service(self, protocol=None):
+    def main_service(self, protocol: Protocol = None) -> BaseService:
         """Return suggested service used to establish connection."""
         protocols = (
             [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
         )
 
         for prot in protocols:
-            service = self.get_service(prot)
+            service = self._services.get(prot)
             if service is not None:
                 return service
 
         raise exceptions.NoServiceError("no service to connect to")
 
-    def set_credentials(self, protocol, credentials):
+    def set_credentials(self, protocol: Protocol, credentials: str) -> bool:
         """Set credentials for a protocol if it exists."""
         service = self.get_service(protocol)
         if service:
@@ -88,7 +90,7 @@ class AppleTV:
         return False
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return general device information."""
         properties = self._all_properties()
 
@@ -109,19 +111,19 @@ class AppleTV:
 
         return DeviceInfo(os_type, version, build, lookup_model(model), mac)
 
-    def _all_properties(self):
-        properties = {}
+    def _all_properties(self) -> Dict[str, str]:
+        properties = {}  # type: Dict[str, str]
         for service in self.services:
             properties.update(service.properties)
         return properties
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare instance with another instance."""
         if isinstance(other, self.__class__):
             return self.identifier == other.identifier
         return False
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of this object."""
         device_info = self.device_info
         services = [" - {0}".format(s) for s in self._services.values()]
@@ -146,39 +148,16 @@ class AppleTV:
 
 
 # pylint: disable=too-few-public-methods
-class BaseService:
-    """Base class for protocol services."""
-
-    def __init__(self, identifier, protocol, port, properties):
-        """Initialize a new BaseService."""
-        self.__identifier = identifier
-        self.protocol = protocol
-        self.port = port
-        self.credentials = None
-        self.properties = properties or {}
-
-    @property
-    def identifier(self):
-        """Return unique identifier associated with this service."""
-        return self.__identifier
-
-    def merge(self, other):
-        """Merge with other service of same type."""
-        self.credentials = other.credentials or self.credentials
-        self.properties.update(other.properties)
-
-    def __str__(self):
-        """Return a string representation of this object."""
-        return "Protocol: {0}, Port: {1}, Credentials: {2}".format(
-            convert.protocol_str(self.protocol), self.port, self.credentials
-        )
-
-
-# pylint: disable=too-few-public-methods
 class DmapService(BaseService):
     """Representation of a DMAP service."""
 
-    def __init__(self, identifier, credentials, port=None, properties=None):
+    def __init__(
+        self,
+        identifier: str,
+        credentials: str,
+        port: int = None,
+        properties: Optional[Dict[str, str]] = None,
+    ) -> None:
         """Initialize a new DmapService."""
         super().__init__(identifier, Protocol.DMAP, port or 3689, properties)
         self.credentials = credentials
@@ -188,7 +167,13 @@ class DmapService(BaseService):
 class MrpService(BaseService):
     """Representation of a MediaRemote Protocol service."""
 
-    def __init__(self, identifier, port, credentials=None, properties=None):
+    def __init__(
+        self,
+        identifier: str,
+        port: int,
+        credentials: str = None,
+        properties: Optional[Dict[str, str]] = None,
+    ) -> None:
         """Initialize a new MrpService."""
         super().__init__(identifier, Protocol.MRP, port, properties)
         self.credentials = credentials
@@ -198,7 +183,13 @@ class MrpService(BaseService):
 class AirPlayService(BaseService):
     """Representation of an AirPlay service."""
 
-    def __init__(self, identifier, port=7000, credentials=None, properties=None):
+    def __init__(
+        self,
+        identifier: str,
+        port: int = 7000,
+        credentials: str = None,
+        properties: Optional[Dict[str, str]] = None,
+    ) -> None:
         """Initialize a new AirPlayService."""
         super().__init__(identifier, Protocol.AirPlay, port, properties)
         self.credentials = credentials
