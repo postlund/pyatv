@@ -4,6 +4,7 @@ import math
 import logging
 import asyncio
 import datetime
+from typing import Dict
 
 from pyatv import exceptions
 from pyatv.const import (
@@ -13,6 +14,8 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
     PowerState,
+    FeatureState,
+    FeatureName,
 )
 from pyatv.support import net
 from pyatv.support.cache import Cache
@@ -31,6 +34,8 @@ from pyatv.interface import (
     PushUpdater,
     ArtworkInfo,
     Power,
+    Features,
+    FeatureInfo,
 )
 from pyatv.support import deprecated
 
@@ -460,6 +465,18 @@ class MrpPushUpdater(PushUpdater):
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
 
+class MrpFeatures(Features):
+    """Implementation of API for supported feature functionality."""
+
+    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+        """Return current state of a feature."""
+        return FeatureInfo(state=FeatureState.Unsupported)
+
+    def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
+        """Return state of all features."""
+        return {}
+
+
 class MrpAppleTV(AppleTV):
     """Implementation of API support for Apple TV."""
 
@@ -486,6 +503,7 @@ class MrpAppleTV(AppleTV):
         self._mrp_metadata = MrpMetadata(self._protocol, self._psm, config.identifier)
         self._mrp_power = MrpPower(loop, self._protocol, self._mrp_remote)
         self._mrp_push_updater = MrpPushUpdater(loop, self._mrp_metadata, self._psm)
+        self._mrp_features = MrpFeatures()
         self._airplay = airplay
 
     async def connect(self):
@@ -535,3 +553,8 @@ class MrpAppleTV(AppleTV):
     def power(self):
         """Return API for streaming media."""
         return self._mrp_power
+
+    @property
+    def features(self) -> Features:
+        """Return features interface."""
+        return self._mrp_features
