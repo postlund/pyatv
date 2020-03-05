@@ -56,6 +56,13 @@ class PlayerState:
             return getattr(metadata, field)
         return None
 
+    def command_info(self, command):
+        """Return supported command info."""
+        for cmd in self.supported_commands:
+            if cmd.command == command:
+                return cmd
+        return None
+
     def handle_set_state(self, setstate):
         """Update current state with new data from SetStateMessage."""
         if setstate.HasField("playbackState"):
