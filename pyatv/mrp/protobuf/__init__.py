@@ -79,6 +79,7 @@ from .SetConnectionStateMessage_pb2 import SetConnectionStateMessage
 from .SetDefaultSupportedCommandsMessage_pb2 import SetDefaultSupportedCommandsMessage
 from .SetHiliteModeMessage_pb2 import SetHiliteModeMessage
 from .SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
+from .SetNowPlayingPlayerMessage_pb2 import SetNowPlayingPlayerMessage
 from .SetRecordingStateMessage_pb2 import SetRecordingStateMessage
 from .SetStateMessage_pb2 import SetStateMessage
 from .SupportedCommands_pb2 import SupportedCommands
