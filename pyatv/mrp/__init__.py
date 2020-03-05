@@ -4,9 +4,11 @@ import math
 import logging
 import asyncio
 import datetime
-from typing import Dict
+from typing import Dict, List
 
-from pyatv import exceptions
+from aiohttp import ClientSession
+
+from pyatv import conf, exceptions
 from pyatv.const import (
     Protocol,
     MediaType,
@@ -28,6 +30,8 @@ from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (
     AppleTV,
+    DeviceInfo,
+    Stream,
     RemoteControl,
     Metadata,
     Playing,
@@ -62,6 +66,45 @@ _KEY_LOOKUP = {
     "volume_down": [12, 0xEA, 0],
     # 'mic': [12, 0x04, 0],  # Siri
 }
+
+_FEATURES_SUPPORTED = [
+    FeatureName.Down,
+    FeatureName.Home,
+    FeatureName.HomeHold,
+    FeatureName.Left,
+    FeatureName.Menu,
+    FeatureName.Right,
+    FeatureName.Select,
+    FeatureName.TopMenu,
+    FeatureName.Up,
+    FeatureName.TurnOn,
+    FeatureName.TurnOff,
+    FeatureName.PowerState,
+]  # type: List[FeatureName]
+
+_FEATURE_COMMAND_MAP = {
+    FeatureName.Next: CommandInfo_pb2.NextTrack,
+    FeatureName.Pause: CommandInfo_pb2.Pause,
+    FeatureName.Play: CommandInfo_pb2.Play,
+    FeatureName.PlayPause: CommandInfo_pb2.TogglePlayPause,
+    FeatureName.Previous: CommandInfo_pb2.PreviousTrack,
+    FeatureName.Stop: CommandInfo_pb2.Stop,
+    FeatureName.SetPosition: CommandInfo_pb2.SeekToPlaybackPosition,
+    FeatureName.SetRepeat: CommandInfo_pb2.ChangeRepeatMode,
+    FeatureName.SetShuffle: CommandInfo_pb2.ChangeShuffleMode,
+    FeatureName.Shuffle: CommandInfo_pb2.ChangeShuffleMode,
+    FeatureName.Repeat: CommandInfo_pb2.ChangeRepeatMode,
+}  # type: Dict[FeatureName, CommandInfo_pb2.Command]
+
+# Features that are considered available if corresponding
+_FIELD_FEATURES = {
+    FeatureName.Title: "title",
+    FeatureName.Artist: "trackArtistName",
+    FeatureName.Album: "albumName",
+    FeatureName.Genre: "genre",
+    FeatureName.TotalTime: "duration",
+    FeatureName.Position: "elapsedTimeTimestamp",
+}  # type: Dict[FeatureName, str]
 
 
 def _cocoa_to_timestamp(time):
@@ -275,16 +318,10 @@ class MrpPlaying(Playing):
             return int(elapsed_time + diff)
         return int(elapsed_time)
 
-    def _get_command_info(self, command):
-        for cmd in self._state.supported_commands:
-            if cmd.command == command:
-                return cmd
-        return None
-
     @property
     def shuffle(self):
         """If shuffle is enabled or not."""
-        info = self._get_command_info(CommandInfo_pb2.ChangeShuffleMode)
+        info = self._state.command_info(CommandInfo_pb2.ChangeShuffleMode)
         if info is None:
             return ShuffleState.Off
         if info.shuffleMode == protobuf.CommandInfo.Off:
@@ -297,7 +334,7 @@ class MrpPlaying(Playing):
     @property
     def repeat(self):
         """Repeat mode."""
-        info = self._get_command_info(CommandInfo_pb2.ChangeRepeatMode)
+        info = self._state.command_info(CommandInfo_pb2.ChangeRepeatMode)
         if info is None:
             return RepeatState.Off
         if info.repeatMode == protobuf.CommandInfo.One:
@@ -468,13 +505,43 @@ class MrpPushUpdater(PushUpdater):
 class MrpFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
+    def __init__(self, config: conf.AppleTV, psm: PlayerStateManager):
+        """Initialize a new MrpFeatures instance."""
+        self.config = config
+        self.psm = psm
+
     def get_feature(self, feature: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
-        return FeatureInfo(state=FeatureState.Unsupported)
+        if feature in _FEATURES_SUPPORTED:
+            return FeatureInfo(state=FeatureState.Available)
+        if feature == FeatureName.Artwork:
+            metadata = self.psm.playing.metadata
+            if metadata and metadata.artworkAvailable:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
+        if feature == FeatureName.PlayUrl:
+            if self.config.get_service(Protocol.AirPlay) is not None:
+                return FeatureInfo(state=FeatureState.Available)
 
-    def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
-        """Return state of all features."""
-        return {}
+        field_name = _FIELD_FEATURES.get(feature)
+        if field_name:
+            available = self.psm.playing.metadata_field(field_name) is not None
+            return FeatureInfo(
+                state=FeatureState.Available if available else FeatureState.Unavailable
+            )
+
+        cmd_id = _FEATURE_COMMAND_MAP.get(feature)
+        if cmd_id:
+            cmd = self.psm.playing.command_info(cmd_id)
+            if cmd and cmd.enabled:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
+
+        # Support for volume is not supported in pyatv yet, so leave as unknown for now
+        if feature in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
+            return FeatureInfo(state=FeatureState.Unknown)
+
+        return FeatureInfo(state=FeatureState.Unsupported)
 
 
 class MrpAppleTV(AppleTV):
@@ -482,13 +549,16 @@ class MrpAppleTV(AppleTV):
 
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, session, config, airplay):
+    def __init__(
+        self, loop, session: ClientSession, config: conf.AppleTV, airplay: Stream
+    ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
 
         self._session = session
         self._config = config
         self._mrp_service = config.get_service(Protocol.MRP)
+        assert self._mrp_service is not None
 
         self._connection = MrpConnection(
             config.address, self._mrp_service.port, loop, atv=self
@@ -503,24 +573,24 @@ class MrpAppleTV(AppleTV):
         self._mrp_metadata = MrpMetadata(self._protocol, self._psm, config.identifier)
         self._mrp_power = MrpPower(loop, self._protocol, self._mrp_remote)
         self._mrp_push_updater = MrpPushUpdater(loop, self._mrp_metadata, self._psm)
-        self._mrp_features = MrpFeatures()
+        self._mrp_features = MrpFeatures(self._config, self._psm)
         self._airplay = airplay
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Initiate connection to device.
 
         No need to call it yourself, it's done automatically.
         """
         await self._protocol.start()
 
-    async def close(self):
+    async def close(self) -> None:
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             await self._session.close()
         self._protocol.stop()
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return API for device information."""
         return self._config.device_info
 
@@ -530,27 +600,27 @@ class MrpAppleTV(AppleTV):
         return self._mrp_service
 
     @property
-    def remote_control(self):
+    def remote_control(self) -> RemoteControl:
         """Return API for controlling the Apple TV."""
         return self._mrp_remote
 
     @property
-    def metadata(self):
+    def metadata(self) -> Metadata:
         """Return API for retrieving metadata from Apple TV."""
         return self._mrp_metadata
 
     @property
-    def push_updater(self):
+    def push_updater(self) -> PushUpdater:
         """Return API for handling push update from the Apple TV."""
         return self._mrp_push_updater
 
     @property
-    def stream(self):
+    def stream(self) -> Stream:
         """Return API for streaming media."""
         return self._airplay
 
     @property
-    def power(self):
+    def power(self) -> Power:
         """Return API for streaming media."""
         return self._mrp_power
 
