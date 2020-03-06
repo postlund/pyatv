@@ -102,3 +102,10 @@ The final step is to connect to a device. It is done via `pyatv.connect`, which 
 ## Metadata and push updates
 
 The object you get when connecting follows the interface specified in the `interface` module. You can get *metadata*, e.g. what is currently playing via the `metadata` property. You don't have to poll the device for that information, you can use the `interface.PushUpdater` interface to receive updates instantly as they happen via a callback interface.
+
+## Features
+
+Depending on hardware model and software, various features might be supported or not. Siri is for
+instance only supported by devices running tvOS. Certain actions might not be possible to perform
+due to the device state, e.g. pressing "pause" is not possible unless something is playing. In `pyatv`,
+it's possible to obtain information about the availability of features using `interface.Features`.

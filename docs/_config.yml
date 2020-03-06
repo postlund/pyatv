@@ -66,6 +66,8 @@ page_links:
       title: Control
     - link: /development/power_management/
       title: Power Management
+    - link: /development/features/
+      title: Features
     - link: /development/metadata/
       title: Metadata
     - link: /development/listeners/
