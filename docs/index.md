@@ -41,6 +41,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Remote control pairing                                          | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
+| List supported features                                         | Yes**    | Yes       |
+| --------------------------------------------------------------- | -------- | --------- |
 | AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       |
@@ -60,6 +62,7 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | Power management                                                | No       | Yes       |
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/) page.*
+*\*\* Limited support due to restrictions in protocol.*
 
 As pyatv is still under heavy development, expect there to be bugs. Please create an issue
 if you experience any issues.
