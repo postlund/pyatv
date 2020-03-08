@@ -7,7 +7,15 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions, interface
-from pyatv.const import Protocol, MediaType, DeviceState, RepeatState, ShuffleState
+from pyatv.const import (
+    Protocol,
+    MediaType,
+    DeviceState,
+    RepeatState,
+    ShuffleState,
+    FeatureName,
+    FeatureState,
+)
 from pyatv.conf import AppleTV, AirPlayService
 from tests.utils import stub_sleep, until, faketime
 
@@ -49,6 +57,14 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     async def playing(self, **kwargs):
         return await until(poll, fn=self.atv.metadata.playing, **kwargs)
+
+    def assertFeatures(self, state, *features):
+        for feature in features:
+            self.assertEqual(
+                self.atv.features.get_feature(feature).state,
+                state,
+                f"{feature} has wrong state",
+            )
 
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
@@ -441,3 +457,31 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.usecase.example_video(paused=False, title="dummy3", playback_rate=-1.0)
         playing = await self.playing(title="dummy3")
         self.assertEqual(playing.device_state, DeviceState.Seeking)
+
+    @unittest_run_loop
+    async def test_features_when_playing(self):
+        feature_list = [
+            FeatureName.Title,
+            FeatureName.Artist,
+            FeatureName.Album,
+            FeatureName.Genre,
+            FeatureName.TotalTime,
+            FeatureName.Position,
+        ]
+
+        # At first, no feature is available
+        self.usecase.nothing_playing()
+        await self.playing()
+        self.assertFeatures(FeatureState.Unavailable, *feature_list)
+
+        # Play some music and all features should be available
+        self.usecase.example_music()
+        await self.playing(title="music")
+        self.assertFeatures(FeatureState.Available, *feature_list)
+
+    @unittest_run_loop
+    async def test_features_play_url(self):
+        # TODO: The test always sets up AirPlay, so PlayUrl will always be available.
+        # In the future (after migrating to pytest fixtures), I will add a test where
+        # AirPlay is not available.
+        self.assertFeatures(FeatureState.Available, FeatureName.PlayUrl)

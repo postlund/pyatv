@@ -103,6 +103,11 @@ def _set_state_message(metadata, identifier):
     inner.playbackState = metadata.playback_state
     inner.displayName = "Fake Player"
 
+    for command in metadata.supported_commands:
+        item = inner.supportedCommands.supportedCommands.add()
+        item.command = command
+        item.enabled = True
+
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()
         cmd.command = protobuf.CommandInfo_pb2.ChangeRepeatMode
@@ -138,6 +143,7 @@ class PlayingMetadata:
         self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get("shuffle"))
         self.media_type = kwargs.get("media_type")
         self.playback_rate = kwargs.get("playback_rate")
+        self.supported_commands = kwargs.get("supported_commands", [])
         self.artwork = None
         self.artwork_mimetype = None
 
@@ -347,7 +353,7 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device = fake_apple_tv
 
     def change_artwork(self, artwork, mimetype, identifier="artwork"):
-        """Call this method to change artwork response."""
+        """Call to change artwork response."""
         metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
         metadata.artwork = artwork
         metadata.artwork_mimetype = mimetype
@@ -367,7 +373,7 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device.item_update(change, PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
-        """Call this method to put device in idle state."""
+        """Call to put device in idle state."""
         self.device.set_active_player(None)
 
     def example_video(self, **kwargs):
@@ -377,7 +383,7 @@ class AppleTVUseCases(AirPlayUseCases):
         self.video_playing(total_time=123, position=3, **kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
-        """Call this method to change what is currently plaing to video."""
+        """Call to change what is currently plaing to video."""
         metadata = PlayingMetadata(
             playback_state=ssm.Paused if paused else ssm.Playing,
             title=title,
@@ -389,10 +395,21 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)
 
+    def example_music(self, **kwargs):
+        """Play some example music."""
+        kwargs.setdefault("paused", True)
+        kwargs.setdefault("title", "music")
+        kwargs.setdefault("artist", "artist")
+        kwargs.setdefault("album", "album")
+        kwargs.setdefault("total_time", 49)
+        kwargs.setdefault("position", 22)
+        kwargs.setdefault("genre", "genre")
+        self.music_playing(**kwargs)
+
     def music_playing(
         self, paused, artist, album, title, genre, total_time, position, **kwargs
     ):
-        """Call this method to change what is currently plaing to music."""
+        """Call to change what is currently plaing to music."""
         metadata = PlayingMetadata(
             playback_state=ssm.Paused if paused else ssm.Playing,
             artist=artist,
@@ -408,7 +425,7 @@ class AppleTVUseCases(AirPlayUseCases):
         self.device.set_active_player(PLAYER_IDENTIFIER)
 
     def media_is_loading(self):
-        """Call this method to put device in a loading state."""
+        """Call to put device in a loading state."""
         metadata = PlayingMetadata(playback_state=ssm.Interrupted)
         self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.device.set_active_player(PLAYER_IDENTIFIER)

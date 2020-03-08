@@ -7,6 +7,7 @@ from collections import namedtuple
 
 from aiohttp import web
 
+from pyatv.const import ShuffleState, RepeatState
 from pyatv.dmap import parser, tags, tag_definitions
 from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
 from tests import utils
@@ -38,21 +39,21 @@ DEVICE_CREDENTIALS = DEVICE_IDENTIFIER + ":" + DEVICE_AUTH_KEY
 class PlayingResponse:
     """Response returned by command playstatusupdate."""
 
-    def __init__(self, revision=0, shuffle=False, **kwargs):
+    def __init__(self, revision=0, **kwargs):
         """Initialize a new PlayingResponse."""
-        self.paused = kwargs.get("paused", None)
-        self.title = kwargs.get("title", None)
-        self.artist = kwargs.get("artist", None)
-        self.album = kwargs.get("album", None)
-        self.genre = kwargs.get("genre", None)
-        self.total_time = kwargs.get("total_time", None)
-        self.position = kwargs.get("position", None)
-        self.mediakind = kwargs.get("mediakind", None)
-        self.playstatus = kwargs.get("playstatus", None)
-        self.repeat = kwargs.get("repeat", None)
+        self.paused = kwargs.get("paused")
+        self.title = kwargs.get("title")
+        self.artist = kwargs.get("artist")
+        self.album = kwargs.get("album")
+        self.genre = kwargs.get("genre")
+        self.total_time = kwargs.get("total_time")
+        self.position = kwargs.get("position")
+        self.mediakind = kwargs.get("mediakind")
+        self.playstatus = kwargs.get("playstatus")
+        self.repeat = kwargs.get("repeat")
         self.playback_rate = kwargs.get("playback_rate")
         self.revision = revision
-        self.shuffle = shuffle
+        self.shuffle = kwargs.get("shuffle")
         self.force_close = kwargs.get("force_close", False)
 
 
@@ -185,16 +186,18 @@ class FakeAppleTV(FakeAirPlayDevice):
 
             if playing.position is not None:
                 pos = playing.total_time - playing.position
-                print(playing.total_time, playing.position)
+                print(playing.total_time, playing.position, pos * 1000)
                 body += tags.uint32_tag("cant", pos * 1000)  # sec -> ms
 
         if playing.mediakind is not None:
             body += tags.uint32_tag("cmmk", playing.mediakind)
 
         if playing.repeat is not None:
-            body += tags.uint8_tag("carp", playing.repeat)
+            body += tags.uint8_tag("carp", playing.repeat.value)
 
-        body += tags.uint8_tag("cash", playing.shuffle)
+        if playing.shuffle is not None:
+            body += tags.uint8_tag("cash", playing.shuffle.value)
+
         body += tags.uint32_tag("cmsr", playing.revision + 1)
 
         return web.Response(body=tags.container_tag("cmst", body), status=200)
@@ -207,10 +210,12 @@ class FakeAppleTV(FakeAirPlayDevice):
             self._get_response("playing").position = int(playtime / 1000)
         elif "dacp.shufflestate" in request.rel_url.query:
             shuffle = int(request.rel_url.query["dacp.shufflestate"])
-            self._get_response("playing").shuffle = shuffle == 1
+            self._get_response("playing").shuffle = (
+                ShuffleState.Songs if shuffle == 1 else ShuffleState.Off
+            )
         elif "dacp.repeatstate" in request.rel_url.query:
             repeat = int(request.rel_url.query["dacp.repeatstate"])
-            self._get_response("playing").repeat = repeat
+            self._get_response("playing").repeat = RepeatState(repeat)
         else:
             web.Response(body=b"", status=500)
 
@@ -337,15 +342,15 @@ class AppleTVUseCases(AirPlayUseCases):
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call this method to change what is currently plaing to video."""
         revision = 0
-        shuffle = False
+        shuffle = None
         repeat = None
         playback_rate = kwargs.get("playback_rate", None)
         if "revision" in kwargs:
             revision = kwargs["revision"]
         if "shuffle" in kwargs:
-            shuffle = kwargs["shuffle"].value
+            shuffle = kwargs["shuffle"]
         if "repeat" in kwargs:
-            repeat = kwargs["repeat"].value
+            repeat = kwargs["repeat"]
         self.device.responses["playing"].insert(
             0,
             PlayingResponse(
@@ -361,8 +366,21 @@ class AppleTVUseCases(AirPlayUseCases):
             ),
         )
 
-    def music_playing(self, paused, artist, album, title, genre, total_time, position):
-        """Call this method to change what is currently plaing to music."""
+    def example_music(self, **kwargs):
+        """Play some example music."""
+        kwargs.setdefault("paused", True)
+        kwargs.setdefault("title", "music")
+        kwargs.setdefault("artist", "artist")
+        kwargs.setdefault("album", "album")
+        kwargs.setdefault("total_time", 49)
+        kwargs.setdefault("position", 22)
+        kwargs.setdefault("genre", "genre")
+        self.music_playing(**kwargs)
+
+    def music_playing(
+        self, paused, artist, album, title, genre, total_time, position, **kwargs
+    ):
+        """Call this method to change what is currently playing to music."""
         self.device.responses["playing"].insert(
             0,
             PlayingResponse(
@@ -374,6 +392,7 @@ class AppleTVUseCases(AirPlayUseCases):
                 position=position,
                 genre=genre,
                 mediakind=2,
+                **kwargs,
             ),
         )
 

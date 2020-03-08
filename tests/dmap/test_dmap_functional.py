@@ -7,7 +7,14 @@ from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
 from pyatv.conf import AirPlayService, DmapService, AppleTV
-from pyatv.const import ShuffleState, PowerState, OperatingSystem
+from pyatv.const import (
+    ShuffleState,
+    RepeatState,
+    PowerState,
+    OperatingSystem,
+    FeatureState,
+    FeatureName,
+)
 from pyatv.dmap import pairing
 from tests.dmap.fake_dmap_atv import FakeAppleTV, AppleTVUseCases
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
@@ -106,16 +113,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
 
     @unittest_run_loop
-    async def test_login_with_hsgid_succeed(self):
-        session_id = await self.atv.connect()
-        self.assertEqual(SESSION_ID, session_id)
-
-    @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
         await self.atv.close()
         self.atv = await self.get_connected_device(PAIRING_GUID)
-        session_id = await self.atv.connect()
-        self.assertEqual(SESSION_ID, session_id)
+        await self.atv.connect()
 
     @unittest_run_loop
     async def test_connection_lost(self):
@@ -183,3 +184,65 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.Legacy)
+
+    @unittest_run_loop
+    async def test_always_available_features(self):
+        self.assertFeatures(
+            FeatureState.Available,
+            FeatureName.Down,
+            FeatureName.Left,
+            FeatureName.Menu,
+            FeatureName.Right,
+            FeatureName.Select,
+            FeatureName.TopMenu,
+            FeatureName.Up,
+        )
+
+    @unittest_run_loop
+    async def test_unsupported_features(self):
+        self.assertFeatures(
+            FeatureState.Unsupported,
+            FeatureName.VolumeUp,
+            FeatureName.VolumeDown,
+            FeatureName.Home,
+            FeatureName.HomeHold,
+            FeatureName.Suspend,
+            FeatureName.WakeUp,
+            FeatureName.PowerState,
+            FeatureName.TurnOn,
+            FeatureName.TurnOff,
+        )
+
+    @unittest_run_loop
+    async def test_always_unknown_features(self):
+        self.assertFeatures(
+            FeatureState.Unknown,
+            FeatureName.Artwork,
+            FeatureName.Next,
+            FeatureName.Pause,
+            FeatureName.Play,
+            FeatureName.PlayPause,
+            FeatureName.Previous,
+            FeatureName.SetPosition,
+            FeatureName.SetRepeat,
+            FeatureName.SetShuffle,
+            FeatureName.Stop,
+        )
+
+    @unittest_run_loop
+    async def test_features_shuffle_repeat(self):
+        self.usecase.nothing_playing()
+        await self.playing()
+
+        self.assertFeatures(
+            FeatureState.Unavailable, FeatureName.Shuffle, FeatureName.Repeat,
+        )
+
+        self.usecase.example_music(
+            shuffle=ShuffleState.Albums, repeat=RepeatState.Track
+        )
+        await self.playing(title="music")
+
+        self.assertFeatures(
+            FeatureState.Available, FeatureName.Shuffle, FeatureName.Repeat,
+        )

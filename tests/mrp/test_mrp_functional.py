@@ -4,8 +4,16 @@ import logging
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
-from pyatv.const import DeviceState, ShuffleState, PowerState, OperatingSystem
+from pyatv.const import (
+    DeviceState,
+    ShuffleState,
+    PowerState,
+    OperatingSystem,
+    FeatureState,
+    FeatureName,
+)
 from pyatv.conf import AirPlayService, MrpService, AppleTV
+from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
@@ -168,3 +176,59 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
+
+    @unittest_run_loop
+    async def test_always_available_features(self):
+        self.assertFeatures(
+            FeatureState.Available,
+            FeatureName.Down,
+            FeatureName.Home,
+            FeatureName.HomeHold,
+            FeatureName.Left,
+            FeatureName.Menu,
+            FeatureName.Right,
+            FeatureName.Select,
+            FeatureName.TopMenu,
+            FeatureName.Up,
+            FeatureName.TurnOn,
+            FeatureName.TurnOff,
+            FeatureName.PowerState,
+        )
+
+    @unittest_run_loop
+    async def test_features_artwork(self):
+        self.assertFeatures(FeatureState.Unavailable, FeatureName.Artwork)
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE, ARTWORK_ID)
+        await self.playing(title="dummy")
+
+        self.assertFeatures(FeatureState.Available, FeatureName.Artwork)
+
+    @unittest_run_loop
+    async def test_features_with_supported_commands(self):
+        feature_map = {
+            FeatureName.Next: CommandInfo_pb2.NextTrack,
+            FeatureName.Pause: CommandInfo_pb2.Pause,
+            FeatureName.Play: CommandInfo_pb2.Play,
+            FeatureName.PlayPause: CommandInfo_pb2.TogglePlayPause,
+            FeatureName.Previous: CommandInfo_pb2.PreviousTrack,
+            FeatureName.Stop: CommandInfo_pb2.Stop,
+            FeatureName.SetPosition: CommandInfo_pb2.SeekToPlaybackPosition,
+            FeatureName.SetRepeat: CommandInfo_pb2.ChangeRepeatMode,
+            FeatureName.SetShuffle: CommandInfo_pb2.ChangeShuffleMode,
+            FeatureName.Shuffle: CommandInfo_pb2.ChangeShuffleMode,
+            FeatureName.Repeat: CommandInfo_pb2.ChangeRepeatMode,
+        }
+
+        # No supported commands by default
+        self.usecase.example_video()
+        await self.playing(title="dummy")
+        self.assertFeatures(FeatureState.Unavailable, *feature_map.keys())
+
+        # Inject all expected commands to be enabled
+        self.usecase.example_video(
+            title="dummy2", supported_commands=list(feature_map.values())
+        )
+        await self.playing(title="dummy2")
+        self.assertFeatures(FeatureState.Available, *feature_map.keys())
