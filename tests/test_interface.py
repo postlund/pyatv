@@ -3,6 +3,7 @@
 import unittest
 
 from pyatv import convert, exceptions, interface
+from pyatv.interface import FeatureInfo
 from pyatv.const import (
     MediaType,
     DeviceState,
@@ -10,6 +11,8 @@ from pyatv.const import (
     ShuffleState,
     OperatingSystem,
     DeviceModel,
+    FeatureState,
+    FeatureName,
 )
 
 
@@ -131,6 +134,15 @@ class MetadataDummy(interface.Metadata):
     def playing(self):
         """Return what is currently playing."""
         raise exceptions.NotSupportedError()
+
+
+class FeaturesDummy(interface.Features):
+    def __init__(self, state):
+        self.state = state
+
+    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+        """Return current state of a feature."""
+        return FeatureInfo(state=self.state)
 
 
 class InterfaceTest(unittest.TestCase):
@@ -268,3 +280,19 @@ class DeviceInfoTest(unittest.TestCase):
         )
 
         self.assertEqual(str(dev_info), "Unknown Model Unknown OS")
+
+
+class FeaturesTest(unittest.TestCase):
+    def test_all_unsupported_features(self):
+        features = FeaturesDummy(FeatureState.Unsupported)
+        self.assertFalse(features.all_features())
+
+    def test_all_include_unsupported_features(self):
+        features = FeaturesDummy(FeatureState.Unsupported)
+        all_features = features.all_features(include_unsupported=True)
+
+        self.assertEqual(set(all_features.keys()), set(FeatureName))
+        self.assertEqual(
+            set([ft.state for ft in all_features.values()]),
+            set([FeatureState.Unsupported]),
+        )
