@@ -78,7 +78,7 @@ def crypto_pairing(pairing_data, is_pairing=False):
     return message
 
 
-def client_updates_config(artwork=True, now_playing=False, volume=False, keyboard=True):
+def client_updates_config(artwork=True, now_playing=False, volume=True, keyboard=True):
     """Create a new CLIENT_UPDATES_CONFIG_MESSAGE."""
     message = create(protobuf.CLIENT_UPDATES_CONFIG_MESSAGE)
     config = message.inner()
