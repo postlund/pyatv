@@ -1,0 +1,532 @@
+---
+layout: template
+title: API - pyatv
+permalink: /api/
+link_group: api
+---
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyatv</code></h1>
+<p><a href="#sidebar">Jump to table of contents</a></p>
+</header>
+<section id="section-intro">
+<p>Library for controlling an Apple TV.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Library for controlling an Apple TV.&#34;&#34;&#34;
+
+import os
+import asyncio
+import logging
+import datetime  # noqa
+from abc import ABC, abstractmethod
+from ipaddress import IPv4Address, ip_address
+from typing import List, Dict
+
+import aiohttp
+from aiozeroconf import ServiceBrowser, Zeroconf
+import netifaces
+
+from pyatv import conf, exceptions, interface
+from pyatv.airplay import AirPlayStreamAPI
+from pyatv.const import Protocol
+from pyatv.dmap import DmapAppleTV
+from pyatv.dmap.pairing import DmapPairingHandler
+from pyatv.mrp import MrpAppleTV
+from pyatv.mrp.pairing import MrpPairingHandler
+from pyatv.airplay.pairing import AirPlayPairingHandler
+from pyatv.support import net, udns
+
+
+_LOGGER = logging.getLogger(__name__)
+
+HOMESHARING_SERVICE = &#34;_appletv-v2._tcp.local.&#34;
+DEVICE_SERVICE = &#34;_touch-able._tcp.local.&#34;
+MEDIAREMOTE_SERVICE = &#34;_mediaremotetv._tcp.local.&#34;
+AIRPLAY_SERVICE = &#34;_airplay._tcp.local.&#34;
+
+ALL_SERVICES = [
+    HOMESHARING_SERVICE,
+    DEVICE_SERVICE,
+    MEDIAREMOTE_SERVICE,
+    AIRPLAY_SERVICE,
+]
+
+
+def _decode_properties(properties) -&gt; Dict[str, str]:
+    def _decode(value: bytes):
+        try:
+            # Remove non-breaking-space (0xA2A0) before decoding
+            return value.replace(b&#34;\xC2\xA0&#34;, b&#34; &#34;).decode(&#34;utf-8&#34;)
+        except Exception:  # pylint: disable=broad-except
+            return str(value)
+
+    return {k.decode(&#34;utf-8&#34;): _decode(v) for k, v in properties.items()}
+
+
+class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
+    &#34;&#34;&#34;Base scanner for service discovery.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialize a new BaseScanner.&#34;&#34;&#34;
+        self._found_devices = {}  # type: Dict[IPv4Address, conf.BaseService]
+
+    @abstractmethod
+    async def discover(self, timeout: int):
+        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
+
+    def service_discovered(  # pylint: disable=too-many-arguments
+        self, service_type, service_name, address, port, properties
+    ):
+        &#34;&#34;&#34;Call when a service was discovered.&#34;&#34;&#34;
+        supported_types = {
+            HOMESHARING_SERVICE: self._hs_service,
+            DEVICE_SERVICE: self._non_hs_service,
+            MEDIAREMOTE_SERVICE: self._mrp_service,
+            AIRPLAY_SERVICE: self._airplay_service,
+        }
+
+        handler = supported_types.get(service_type)
+        if handler:
+            handler(service_name, address, port, properties)
+        else:
+            _LOGGER.warning(&#34;Discovered unknown device: %s&#34;, service_type)
+
+    def _hs_service(self, service_name, address, port, properties):
+        &#34;&#34;&#34;Add a new device to discovered list.&#34;&#34;&#34;
+        identifier = service_name.split(&#34;.&#34;)[0]
+        name = properties.get(&#34;Name&#34;)
+        hsgid = properties.get(&#34;hG&#34;)
+        service = conf.DmapService(identifier, hsgid, port=port, properties=properties)
+        self._handle_service(address, name, service)
+
+    def _non_hs_service(self, service_name, address, port, properties):
+        &#34;&#34;&#34;Add a new device without Home Sharing to discovered list.&#34;&#34;&#34;
+        identifier = service_name.split(&#34;.&#34;)[0]
+        name = properties.get(&#34;CtlN&#34;)
+        service = conf.DmapService(identifier, None, port=port, properties=properties)
+        self._handle_service(address, name, service)
+
+    def _mrp_service(self, _, address, port, properties):
+        &#34;&#34;&#34;Add a new MediaRemoteProtocol device to discovered list.&#34;&#34;&#34;
+        identifier = properties.get(&#34;UniqueIdentifier&#34;)
+        name = properties.get(&#34;Name&#34;)
+        service = conf.MrpService(identifier, port, properties=properties)
+        self._handle_service(address, name, service)
+
+    def _airplay_service(self, service_name, address, port, properties):
+        &#34;&#34;&#34;Add a new AirPlay device to discovered list.&#34;&#34;&#34;
+        identifier = properties.get(&#34;deviceid&#34;)
+        name = service_name.replace(&#34;.&#34; + AIRPLAY_SERVICE, &#34;&#34;)
+        service = conf.AirPlayService(identifier, port, properties=properties)
+        self._handle_service(address, name, service)
+
+    def _handle_service(self, address, name, service):
+        if address not in self._found_devices:
+            self._found_devices[address] = conf.AppleTV(address, name)
+
+        _LOGGER.debug(
+            &#34;Auto-discovered %s at %s:%d (%s)&#34;,
+            name,
+            address,
+            service.port,
+            service.protocol,
+        )
+
+        atv = self._found_devices[address]
+        atv.add_service(service)
+
+
+class ZeroconfScanner(BaseScanner):
+    &#34;&#34;&#34;Service discovery based on Zeroconf.&#34;&#34;&#34;
+
+    def __init__(self, loop):
+        &#34;&#34;&#34;Initialize a new ZeroconfScanner.&#34;&#34;&#34;
+        super().__init__()
+        self.loop = loop
+
+    async def discover(self, timeout):
+        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
+        zeroconf = Zeroconf(self.loop, address_family=[netifaces.AF_INET])
+        try:
+            ServiceBrowser(zeroconf, HOMESHARING_SERVICE, self)
+            ServiceBrowser(zeroconf, DEVICE_SERVICE, self)
+            ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self)
+            ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self)
+            _LOGGER.debug(&#34;Discovering devices for %d seconds&#34;, timeout)
+            await asyncio.sleep(timeout)
+        finally:
+            await zeroconf.close()
+        return self._found_devices
+
+    def add_service(self, zeroconf, service_type, name):
+        &#34;&#34;&#34;Handle callback from zeroconf when a service has been discovered.&#34;&#34;&#34;
+        asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
+
+    def remove_service(self, zeroconf, service_type, name):
+        &#34;&#34;&#34;Handle callback when a service is removed.&#34;&#34;&#34;
+
+    async def _internal_add(self, zeroconf, service_type, name):
+        info = await zeroconf.get_service_info(service_type, name, timeout=2000)
+        if info.address is None:
+            _LOGGER.debug(&#34;Failed to resolve %s (%s)&#34;, service_type, name)
+            return
+
+        address = ip_address(info.address)
+        self.service_discovered(
+            info.type,
+            info.name,
+            address,
+            info.port,
+            _decode_properties(info.properties),
+        )
+
+
+class UnicastMdnsScanner(BaseScanner):
+    &#34;&#34;&#34;Service discovery based on unicast MDNS.&#34;&#34;&#34;
+
+    def __init__(self, hosts, loop):
+        &#34;&#34;&#34;Initialize a new UnicastMdnsScanner.&#34;&#34;&#34;
+        super().__init__()
+        self.hosts = hosts
+        self.loop = loop
+
+    async def discover(self, timeout):
+        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
+        results = await asyncio.gather(
+            *[self._get_services(host, timeout) for host in self.hosts]
+        )
+        for host, response in results:
+            if response is not None:
+                self._handle_response(host, response)
+        return self._found_devices
+
+    async def _get_services(self, host, timeout):
+        port = os.environ.get(&#34;PYATV_UDNS_PORT&#34;, 5353)  # For testing purposes
+        services = [s[0:-1] for s in ALL_SERVICES]
+        try:
+            response = await udns.request(
+                self.loop, host, services, port=port, timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            response = None
+        return host, response
+
+    def _handle_response(self, host, response):
+        for resource in response.resources:
+            if resource.qtype != udns.QTYPE_TXT:
+                continue
+
+            service_name = &#34;.&#34;.join(resource.qname.split(&#34;.&#34;)[1:]) + &#34;.&#34;
+            if service_name not in ALL_SERVICES:
+                continue
+
+            port = UnicastMdnsScanner._get_port(response, resource.qname)
+            if not port:
+                _LOGGER.warning(&#34;Missing port for %s&#34;, resource.qname)
+                continue
+
+            self.service_discovered(
+                service_name,
+                resource.qname + &#34;.&#34;,
+                host,
+                port,
+                _decode_properties(resource.rd),
+            )
+
+    @staticmethod
+    def _get_port(response, qname):
+        for resource in response.resources:
+            if resource.qtype != udns.QTYPE_SRV:
+                continue
+
+            if resource.qname == qname:
+                return resource.rd.get(&#34;port&#34;)
+
+        return None
+
+
+async def scan(
+    loop: asyncio.AbstractEventLoop,
+    timeout: int = 5,
+    identifier: str = None,
+    protocol: Protocol = None,
+    hosts: List[str] = None,
+) -&gt; List[conf.AppleTV]:
+    &#34;&#34;&#34;Scan for Apple TVs using zeroconf (bonjour) and returns them.&#34;&#34;&#34;
+
+    def _should_include(atv):
+        if not atv.ready:
+            return False
+
+        if identifier and identifier not in atv.all_identifiers:
+            return False
+
+        if protocol and atv.get_service(protocol) is None:
+            return False
+
+        return True
+
+    scanner: BaseScanner
+    if hosts:
+        scanner = UnicastMdnsScanner(hosts, loop)
+    else:
+        scanner = ZeroconfScanner(loop)
+
+    devices = (await scanner.discover(timeout)).values()
+    return [device for device in devices if _should_include(device)]
+
+
+async def connect(
+    config: conf.AppleTV,
+    loop: asyncio.AbstractEventLoop,
+    protocol: Protocol = None,
+    session: aiohttp.ClientSession = None,
+) -&gt; interface.AppleTV:
+    &#34;&#34;&#34;Connect and logins to an Apple TV.&#34;&#34;&#34;
+    if config.identifier is None:
+        raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
+
+    service = config.main_service(protocol=protocol)
+
+    supported_implementations = {
+        Protocol.DMAP: DmapAppleTV,
+        Protocol.MRP: MrpAppleTV,
+    }
+
+    implementation = supported_implementations.get(service.protocol, None)
+    if not implementation:
+        raise exceptions.UnsupportedProtocolError(str(service.protocol))
+
+    # If no session is given, create a default one
+    if session is None:
+        session = await net.create_session(loop=loop)
+
+    # AirPlay stream API is the same for both DMAP and MRP
+    airplay = AirPlayStreamAPI(config, loop)
+
+    atv = implementation(loop, session, config, airplay)
+    await atv.connect()
+    return atv
+
+
+async def pair(
+    config: conf.AppleTV,
+    protocol: Protocol,
+    loop: asyncio.AbstractEventLoop,
+    session: aiohttp.ClientSession = None,
+    **kwargs
+):
+    &#34;&#34;&#34;Pair with an Apple TV.&#34;&#34;&#34;
+    service = config.get_service(protocol)
+    if not service:
+        raise exceptions.NoServiceError(
+            &#34;no service available for protocol &#34; + str(protocol)
+        )
+
+    protocol_handlers = {
+        Protocol.DMAP: DmapPairingHandler,
+        Protocol.MRP: MrpPairingHandler,
+        Protocol.AirPlay: AirPlayPairingHandler,
+    }
+
+    handler = protocol_handlers.get(protocol, None)
+    if handler is None:
+        raise exceptions.UnsupportedProtocolError(str(protocol))
+
+    if session is None:
+        session = await net.create_session(loop)
+
+    return handler(config, session, loop, **kwargs)</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="pyatv.conf" href="conf.html">pyatv.conf</a></code></dt>
+<dd>
+<section class="desc"><p>Configuration when connecting to an Apple TV.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.const" href="const.html">pyatv.const</a></code></dt>
+<dd>
+<section class="desc"><p>Constants used in the public API.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.convert" href="convert.html">pyatv.convert</a></code></dt>
+<dd>
+<section class="desc"><p>Various types of extraction and conversion functions.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.exceptions" href="exceptions.html">pyatv.exceptions</a></code></dt>
+<dd>
+<section class="desc"><p>Local exceptions used by library.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.helpers" href="helpers.html">pyatv.helpers</a></code></dt>
+<dd>
+<section class="desc"><p>Various helper methods.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.interface" href="interface.html">pyatv.interface</a></code></dt>
+<dd>
+<section class="desc"><p>API exposed by the library.</p></section>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pyatv.connect"><code class="name flex">
+<span>async def <span class="ident">connect</span></span>(<span>config, loop, protocol=None, session=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Connect and logins to an Apple TV.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def connect(
+    config: conf.AppleTV,
+    loop: asyncio.AbstractEventLoop,
+    protocol: Protocol = None,
+    session: aiohttp.ClientSession = None,
+) -&gt; interface.AppleTV:
+    &#34;&#34;&#34;Connect and logins to an Apple TV.&#34;&#34;&#34;
+    if config.identifier is None:
+        raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
+
+    service = config.main_service(protocol=protocol)
+
+    supported_implementations = {
+        Protocol.DMAP: DmapAppleTV,
+        Protocol.MRP: MrpAppleTV,
+    }
+
+    implementation = supported_implementations.get(service.protocol, None)
+    if not implementation:
+        raise exceptions.UnsupportedProtocolError(str(service.protocol))
+
+    # If no session is given, create a default one
+    if session is None:
+        session = await net.create_session(loop=loop)
+
+    # AirPlay stream API is the same for both DMAP and MRP
+    airplay = AirPlayStreamAPI(config, loop)
+
+    atv = implementation(loop, session, config, airplay)
+    await atv.connect()
+    return atv</code></pre>
+</details>
+</dd>
+<dt id="pyatv.pair"><code class="name flex">
+<span>async def <span class="ident">pair</span></span>(<span>config, protocol, loop, session=None, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pair with an Apple TV.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def pair(
+    config: conf.AppleTV,
+    protocol: Protocol,
+    loop: asyncio.AbstractEventLoop,
+    session: aiohttp.ClientSession = None,
+    **kwargs
+):
+    &#34;&#34;&#34;Pair with an Apple TV.&#34;&#34;&#34;
+    service = config.get_service(protocol)
+    if not service:
+        raise exceptions.NoServiceError(
+            &#34;no service available for protocol &#34; + str(protocol)
+        )
+
+    protocol_handlers = {
+        Protocol.DMAP: DmapPairingHandler,
+        Protocol.MRP: MrpPairingHandler,
+        Protocol.AirPlay: AirPlayPairingHandler,
+    }
+
+    handler = protocol_handlers.get(protocol, None)
+    if handler is None:
+        raise exceptions.UnsupportedProtocolError(str(protocol))
+
+    if session is None:
+        session = await net.create_session(loop)
+
+    return handler(config, session, loop, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="pyatv.scan"><code class="name flex">
+<span>async def <span class="ident">scan</span></span>(<span>loop, timeout=5, identifier=None, protocol=None, hosts=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Scan for Apple TVs using zeroconf (bonjour) and returns them.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def scan(
+    loop: asyncio.AbstractEventLoop,
+    timeout: int = 5,
+    identifier: str = None,
+    protocol: Protocol = None,
+    hosts: List[str] = None,
+) -&gt; List[conf.AppleTV]:
+    &#34;&#34;&#34;Scan for Apple TVs using zeroconf (bonjour) and returns them.&#34;&#34;&#34;
+
+    def _should_include(atv):
+        if not atv.ready:
+            return False
+
+        if identifier and identifier not in atv.all_identifiers:
+            return False
+
+        if protocol and atv.get_service(protocol) is None:
+            return False
+
+        return True
+
+    scanner: BaseScanner
+    if hosts:
+        scanner = UnicastMdnsScanner(hosts, loop)
+    else:
+        scanner = ZeroconfScanner(loop)
+
+    devices = (await scanner.discover(timeout)).values()
+    return [device for device in devices if _should_include(device)]</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="pyatv.conf" href="conf.html">pyatv.conf</a></code></li>
+<li><code><a title="pyatv.const" href="const.html">pyatv.const</a></code></li>
+<li><code><a title="pyatv.convert" href="convert.html">pyatv.convert</a></code></li>
+<li><code><a title="pyatv.exceptions" href="exceptions.html">pyatv.exceptions</a></code></li>
+<li><code><a title="pyatv.helpers" href="helpers.html">pyatv.helpers</a></code></li>
+<li><code><a title="pyatv.interface" href="interface.html">pyatv.interface</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pyatv.connect" href="#pyatv.connect">connect</a></code></li>
+<li><code><a title="pyatv.pair" href="#pyatv.pair">pair</a></code></li>
+<li><code><a title="pyatv.scan" href="#pyatv.scan">scan</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+</footer>

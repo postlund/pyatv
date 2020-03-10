@@ -40,6 +40,8 @@ top_pages:
     title: Documentation
   - link: /development/
     title: Development
+  - link: /api/
+    title: API Reference
   - link: /support/
     title: Support
 
