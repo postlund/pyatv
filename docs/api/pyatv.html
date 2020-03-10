@@ -10,12 +10,12 @@ link_group: api
 <p><a href="#sidebar">Jump to table of contents</a></p>
 </header>
 <section id="section-intro">
-<p>Library for controlling an Apple TV.</p>
+<p>Main routines for interacting with an Apple TV.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Library for controlling an Apple TV.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Main routines for interacting with an Apple TV.&#34;&#34;&#34;
 
 import os
 import asyncio
@@ -255,7 +255,7 @@ async def scan(
     protocol: Protocol = None,
     hosts: List[str] = None,
 ) -&gt; List[conf.AppleTV]:
-    &#34;&#34;&#34;Scan for Apple TVs using zeroconf (bonjour) and returns them.&#34;&#34;&#34;
+    &#34;&#34;&#34;Scan for Apple TVs on network and return their configurations.&#34;&#34;&#34;
 
     def _should_include(atv):
         if not atv.ready:
@@ -285,18 +285,16 @@ async def connect(
     protocol: Protocol = None,
     session: aiohttp.ClientSession = None,
 ) -&gt; interface.AppleTV:
-    &#34;&#34;&#34;Connect and logins to an Apple TV.&#34;&#34;&#34;
+    &#34;&#34;&#34;Connect to a device based on a configuration.&#34;&#34;&#34;
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
 
     service = config.main_service(protocol=protocol)
 
-    supported_implementations = {
-        Protocol.DMAP: DmapAppleTV,
-        Protocol.MRP: MrpAppleTV,
-    }
+    implementation = {Protocol.DMAP: DmapAppleTV, Protocol.MRP: MrpAppleTV}.get(
+        service.protocol
+    )
 
-    implementation = supported_implementations.get(service.protocol, None)
     if not implementation:
         raise exceptions.UnsupportedProtocolError(str(service.protocol))
 
@@ -319,20 +317,19 @@ async def pair(
     session: aiohttp.ClientSession = None,
     **kwargs
 ):
-    &#34;&#34;&#34;Pair with an Apple TV.&#34;&#34;&#34;
+    &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
     service = config.get_service(protocol)
     if not service:
         raise exceptions.NoServiceError(
             &#34;no service available for protocol &#34; + str(protocol)
         )
 
-    protocol_handlers = {
+    handler = {
         Protocol.DMAP: DmapPairingHandler,
         Protocol.MRP: MrpPairingHandler,
         Protocol.AirPlay: AirPlayPairingHandler,
-    }
+    }.get(protocol)
 
-    handler = protocol_handlers.get(protocol, None)
     if handler is None:
         raise exceptions.UnsupportedProtocolError(str(protocol))
 
@@ -347,7 +344,7 @@ async def pair(
 <dl>
 <dt><code class="name"><a title="pyatv.conf" href="conf.html">pyatv.conf</a></code></dt>
 <dd>
-<section class="desc"><p>Configuration when connecting to an Apple TV.</p></section>
+<section class="desc"><p>Configuration used when connecting to a device …</p></section>
 </dd>
 <dt><code class="name"><a title="pyatv.const" href="const.html">pyatv.const</a></code></dt>
 <dd>
@@ -367,7 +364,7 @@ async def pair(
 </dd>
 <dt><code class="name"><a title="pyatv.interface" href="interface.html">pyatv.interface</a></code></dt>
 <dd>
-<section class="desc"><p>API exposed by the library.</p></section>
+<section class="desc"><p>Public interface exposed by library …</p></section>
 </dd>
 </dl>
 </section>
@@ -380,7 +377,7 @@ async def pair(
 <span>async def <span class="ident">connect</span></span>(<span>config, loop, protocol=None, session=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Connect and logins to an Apple TV.</p></section>
+<section class="desc"><p>Connect to a device based on a configuration.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -391,18 +388,16 @@ async def pair(
     protocol: Protocol = None,
     session: aiohttp.ClientSession = None,
 ) -&gt; interface.AppleTV:
-    &#34;&#34;&#34;Connect and logins to an Apple TV.&#34;&#34;&#34;
+    &#34;&#34;&#34;Connect to a device based on a configuration.&#34;&#34;&#34;
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
 
     service = config.main_service(protocol=protocol)
 
-    supported_implementations = {
-        Protocol.DMAP: DmapAppleTV,
-        Protocol.MRP: MrpAppleTV,
-    }
+    implementation = {Protocol.DMAP: DmapAppleTV, Protocol.MRP: MrpAppleTV}.get(
+        service.protocol
+    )
 
-    implementation = supported_implementations.get(service.protocol, None)
     if not implementation:
         raise exceptions.UnsupportedProtocolError(str(service.protocol))
 
@@ -422,7 +417,7 @@ async def pair(
 <span>async def <span class="ident">pair</span></span>(<span>config, protocol, loop, session=None, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Pair with an Apple TV.</p></section>
+<section class="desc"><p>Pair a protocol for an Apple TV.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -434,20 +429,19 @@ async def pair(
     session: aiohttp.ClientSession = None,
     **kwargs
 ):
-    &#34;&#34;&#34;Pair with an Apple TV.&#34;&#34;&#34;
+    &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
     service = config.get_service(protocol)
     if not service:
         raise exceptions.NoServiceError(
             &#34;no service available for protocol &#34; + str(protocol)
         )
 
-    protocol_handlers = {
+    handler = {
         Protocol.DMAP: DmapPairingHandler,
         Protocol.MRP: MrpPairingHandler,
         Protocol.AirPlay: AirPlayPairingHandler,
-    }
+    }.get(protocol)
 
-    handler = protocol_handlers.get(protocol, None)
     if handler is None:
         raise exceptions.UnsupportedProtocolError(str(protocol))
 
@@ -461,7 +455,7 @@ async def pair(
 <span>async def <span class="ident">scan</span></span>(<span>loop, timeout=5, identifier=None, protocol=None, hosts=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Scan for Apple TVs using zeroconf (bonjour) and returns them.</p></section>
+<section class="desc"><p>Scan for Apple TVs on network and return their configurations.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -473,7 +467,7 @@ async def pair(
     protocol: Protocol = None,
     hosts: List[str] = None,
 ) -&gt; List[conf.AppleTV]:
-    &#34;&#34;&#34;Scan for Apple TVs using zeroconf (bonjour) and returns them.&#34;&#34;&#34;
+    &#34;&#34;&#34;Scan for Apple TVs on network and return their configurations.&#34;&#34;&#34;
 
     def _should_include(atv):
         if not atv.ready:

@@ -3,7 +3,7 @@ import logging
 import struct
 from collections import namedtuple
 
-from pyatv import udns
+from pyatv.support import udns
 
 _LOGGER = logging.getLogger(__name__)
 

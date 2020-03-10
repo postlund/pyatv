@@ -11,13 +11,12 @@ def auto_connect(
     timeout: int = 5,
     not_found: Callable[[], None] = None,
 ) -> None:
-    """Short method for connecting to a device.
+    """Connect to first discovered device.
 
-    This is a convenience method that create an event loop, auto discovers
-    devices, picks the first device found, connects to it and passes it to a
-    user provided handler. An optional error handler can be provided that is
-    called when no device was found. Very inflexible in many cases, but can be
-    handys sometimes when trying things.
+    This is a convenience method that auto discovers devices, picks the first
+    device found, connects to it and passes it to a user provided handler. An
+    optional error handler can be provided that is called when no device was found.
+    Very inflexible in many cases, but can be handys sometimes when trying things.
 
     Note: both handler and not_found must be coroutines
     """

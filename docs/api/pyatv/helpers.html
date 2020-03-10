@@ -28,13 +28,12 @@ def auto_connect(
     timeout: int = 5,
     not_found: Callable[[], None] = None,
 ) -&gt; None:
-    &#34;&#34;&#34;Short method for connecting to a device.
+    &#34;&#34;&#34;Connect to first discovered device.
 
-    This is a convenience method that create an event loop, auto discovers
-    devices, picks the first device found, connects to it and passes it to a
-    user provided handler. An optional error handler can be provided that is
-    called when no device was found. Very inflexible in many cases, but can be
-    handys sometimes when trying things.
+    This is a convenience method that auto discovers devices, picks the first
+    device found, connects to it and passes it to a user provided handler. An
+    optional error handler can be provided that is called when no device was found.
+    Very inflexible in many cases, but can be handys sometimes when trying things.
 
     Note: both handler and not_found must be coroutines
     &#34;&#34;&#34;
@@ -69,12 +68,11 @@ def auto_connect(
 <span>def <span class="ident">auto_connect</span></span>(<span>handler, timeout=5, not_found=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Short method for connecting to a device.</p>
-<p>This is a convenience method that create an event loop, auto discovers
-devices, picks the first device found, connects to it and passes it to a
-user provided handler. An optional error handler can be provided that is
-called when no device was found. Very inflexible in many cases, but can be
-handys sometimes when trying things.</p>
+<section class="desc"><p>Connect to first discovered device.</p>
+<p>This is a convenience method that auto discovers devices, picks the first
+device found, connects to it and passes it to a user provided handler. An
+optional error handler can be provided that is called when no device was found.
+Very inflexible in many cases, but can be handys sometimes when trying things.</p>
 <p>Note: both handler and not_found must be coroutines</p></section>
 <details class="source">
 <summary>
@@ -85,13 +83,12 @@ handys sometimes when trying things.</p>
     timeout: int = 5,
     not_found: Callable[[], None] = None,
 ) -&gt; None:
-    &#34;&#34;&#34;Short method for connecting to a device.
+    &#34;&#34;&#34;Connect to first discovered device.
 
-    This is a convenience method that create an event loop, auto discovers
-    devices, picks the first device found, connects to it and passes it to a
-    user provided handler. An optional error handler can be provided that is
-    called when no device was found. Very inflexible in many cases, but can be
-    handys sometimes when trying things.
+    This is a convenience method that auto discovers devices, picks the first
+    device found, connects to it and passes it to a user provided handler. An
+    optional error handler can be provided that is called when no device was found.
+    Very inflexible in many cases, but can be handys sometimes when trying things.
 
     Note: both handler and not_found must be coroutines
     &#34;&#34;&#34;
