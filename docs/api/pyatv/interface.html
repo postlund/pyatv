@@ -10,12 +10,18 @@ link_group: api
 <p><a href="#sidebar">Jump to table of contents</a></p>
 </header>
 <section id="section-intro">
-<p>API exposed by the library.</p>
+<p>Public interface exposed by library.</p>
+<p>This module contains all the interfaces that represents a generic Apple TV device and
+all its features.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;API exposed by the library.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Public interface exposed by library.
+
+This module contains all the interfaces that represents a generic Apple TV device and
+all its features.
+&#34;&#34;&#34;
 
 import re
 import inspect
@@ -53,15 +59,18 @@ class FeatureInfo(NamedTuple):
     options: Optional[Dict[str, object]] = {}
 
 
-def feature(name, index):
-    &#34;&#34;&#34;Decorate functions and properties as a feature.&#34;&#34;&#34;
+def feature(index, name, doc):
+    &#34;&#34;&#34;Decorate functions and properties as a feature.
+
+    Note: This is an internal function.
+    &#34;&#34;&#34;
 
     def _wraps(obj):
         if index in _ALL_FEATURES:
             raise Exception(
                 f&#34;Index {index} collides between {name} and {_ALL_FEATURES[index]}&#34;
             )
-        _ALL_FEATURES[index] = name
+        _ALL_FEATURES[index] = (name, doc)
         return obj
 
     return _wraps
@@ -184,133 +193,133 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     # pylint: disable=invalid-name
     @abstractmethod
-    @feature(&#34;Up&#34;, 0)
+    @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
     def up(self) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Down&#34;, 1)
+    @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
     def down(self) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Left&#34;, 2)
+    @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
     def left(self) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Right&#34;, 3)
+    @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
     def right(self) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Play&#34;, 4)
+    @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
     def play(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;PlayPause&#34;, 5)
+    @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
     def play_pause(self) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Pause&#34;, 6)
+    @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
     def pause(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Stop&#34;, 7)
+    @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
     def stop(self) -&gt; None:
         &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Next&#34;, 8)
+    @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
     def next(self) -&gt; None:
         &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Previous&#34;, 9)
+    @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
     def previous(self) -&gt; None:
         &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Select&#34;, 10)
+    @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
     def select(self) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Menu&#34;, 11)
+    @feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
     def menu(self) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;VolumeUp&#34;, 12)
+    @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
     def volume_up(self) -&gt; None:
         &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;VolumeDown&#34;, 13)
+    @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
     def volume_down(self) -&gt; None:
         &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Home&#34;, 14)
+    @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
     def home(self) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;HomeHold&#34;, 15)
+    @feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
     def home_hold(self) -&gt; None:
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TopMenu&#34;, 16)
+    @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
     def top_menu(self) -&gt; None:
         &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Suspend&#34;, 17)
+    @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
     def suspend(self) -&gt; None:
         &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;WakeUp&#34;, 18)
+    @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
     def wakeup(self) -&gt; None:
         &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetPosition&#34;, 19)
+    @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
     def set_position(self, pos) -&gt; None:
         &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetShuffle&#34;, 20)
+    @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
     def set_shuffle(self, shuffle_state) -&gt; None:
         &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetRepeat&#34;, 21)
+    @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
     def set_repeat(self, repeat_state) -&gt; None:
         &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -388,56 +397,56 @@ class Playing(ABC):
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Title&#34;, 22)
+    @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Artist&#34;, 23)
+    @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Album&#34;, 24)
+    @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Genre&#34;, 25)
+    @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;TotalTime&#34;, 26)
+    @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
     def total_time(self) -&gt; int:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Position&#34;, 27)
+    @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
     def position(self) -&gt; int:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Shuffle&#34;, 28)
+    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
     def shuffle(self) -&gt; const.ShuffleState:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Repeat&#34;, 29)
+    @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
     def repeat(self) -&gt; const.RepeatState:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -456,7 +465,7 @@ class Metadata(ABC):
         return self._identifier
 
     @abstractmethod
-    @feature(&#34;Artwork&#34;, 30)
+    @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
     def artwork(self) -&gt; Optional[ArtworkInfo]:
         &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -534,7 +543,7 @@ class Stream(ABC):  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
 
     @abstractmethod
-    @feature(&#34;PlayUrl&#34;, 31)
+    @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -591,19 +600,19 @@ class Power(ABC):
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;PowerState&#34;, 32)
+    @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
     def power_state(self) -&gt; const.PowerState:
         &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TurnOn&#34;, 33)
+    @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
     async def turn_on(self) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TurnOff&#34;, 34)
+    @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
     async def turn_off(self) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -781,23 +790,27 @@ class AppleTV(ABC):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="pyatv.interface.feature"><code class="name flex">
-<span>def <span class="ident">feature</span></span>(<span>name, index)</span>
+<span>def <span class="ident">feature</span></span>(<span>index, name, doc)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Decorate functions and properties as a feature.</p></section>
+<section class="desc"><p>Decorate functions and properties as a feature.</p>
+<p>Note: This is an internal function.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def feature(name, index):
-    &#34;&#34;&#34;Decorate functions and properties as a feature.&#34;&#34;&#34;
+<pre><code class="python">def feature(index, name, doc):
+    &#34;&#34;&#34;Decorate functions and properties as a feature.
+
+    Note: This is an internal function.
+    &#34;&#34;&#34;
 
     def _wraps(obj):
         if index in _ALL_FEATURES:
             raise Exception(
                 f&#34;Index {index} collides between {name} and {_ALL_FEATURES[index]}&#34;
             )
-        _ALL_FEATURES[index] = name
+        _ALL_FEATURES[index] = (name, doc)
         return obj
 
     return _wraps</code></pre>
@@ -1550,7 +1563,7 @@ def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
         return self._identifier
 
     @abstractmethod
-    @feature(&#34;Artwork&#34;, 30)
+    @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
     def artwork(self) -&gt; Optional[ArtworkInfo]:
         &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -1617,7 +1630,7 @@ def device_id(self) -&gt; Optional[str]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Artwork&#34;, 30)
+@feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
 def artwork(self) -&gt; Optional[ArtworkInfo]:
     &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -1902,56 +1915,56 @@ def pin(self, pin) -&gt; None:
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Title&#34;, 22)
+    @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Artist&#34;, 23)
+    @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Album&#34;, 24)
+    @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Genre&#34;, 25)
+    @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;TotalTime&#34;, 26)
+    @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
     def total_time(self) -&gt; int:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Position&#34;, 27)
+    @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
     def position(self) -&gt; int:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Shuffle&#34;, 28)
+    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
     def shuffle(self) -&gt; const.ShuffleState:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;Repeat&#34;, 29)
+    @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
     def repeat(self) -&gt; const.RepeatState:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
@@ -1976,7 +1989,7 @@ def pin(self, pin) -&gt; None:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Album&#34;, 24)
+@feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
 def album(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -1991,7 +2004,7 @@ def album(self) -&gt; Optional[str]:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Artist&#34;, 23)
+@feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
 def artist(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2020,7 +2033,7 @@ def device_state(self) -&gt; const.DeviceState:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Genre&#34;, 25)
+@feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
 def genre(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2071,7 +2084,7 @@ def media_type(self) -&gt; const.MediaType:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Position&#34;, 27)
+@feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
 def position(self) -&gt; int:
     &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2086,7 +2099,7 @@ def position(self) -&gt; int:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Repeat&#34;, 29)
+@feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
 def repeat(self) -&gt; const.RepeatState:
     &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2101,7 +2114,7 @@ def repeat(self) -&gt; const.RepeatState:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Shuffle&#34;, 28)
+@feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
 def shuffle(self) -&gt; const.ShuffleState:
     &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2116,7 +2129,7 @@ def shuffle(self) -&gt; const.ShuffleState:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;Title&#34;, 22)
+@feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
 def title(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2131,7 +2144,7 @@ def title(self) -&gt; Optional[str]:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;TotalTime&#34;, 26)
+@feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
 def total_time(self) -&gt; int:
     &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2175,19 +2188,19 @@ def total_time(self) -&gt; int:
 
     @property  # type: ignore
     @abstractmethod
-    @feature(&#34;PowerState&#34;, 32)
+    @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
     def power_state(self) -&gt; const.PowerState:
         &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TurnOn&#34;, 33)
+    @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
     async def turn_on(self) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TurnOff&#34;, 34)
+    @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
     async def turn_off(self) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
@@ -2229,7 +2242,7 @@ def listener(self) -&gt; Optional[PowerListener]:
 </summary>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
-@feature(&#34;PowerState&#34;, 32)
+@feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
 def power_state(self) -&gt; const.PowerState:
     &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2248,7 +2261,7 @@ def power_state(self) -&gt; const.PowerState:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;TurnOff&#34;, 34)
+@feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
 async def turn_off(self) -&gt; None:
     &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2264,7 +2277,7 @@ async def turn_off(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;TurnOn&#34;, 33)
+@feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
 async def turn_on(self) -&gt; None:
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2517,133 +2530,133 @@ def stop(self) -&gt; None:
 
     # pylint: disable=invalid-name
     @abstractmethod
-    @feature(&#34;Up&#34;, 0)
+    @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
     def up(self) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Down&#34;, 1)
+    @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
     def down(self) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Left&#34;, 2)
+    @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
     def left(self) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Right&#34;, 3)
+    @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
     def right(self) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Play&#34;, 4)
+    @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
     def play(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;PlayPause&#34;, 5)
+    @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
     def play_pause(self) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Pause&#34;, 6)
+    @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
     def pause(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Stop&#34;, 7)
+    @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
     def stop(self) -&gt; None:
         &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Next&#34;, 8)
+    @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
     def next(self) -&gt; None:
         &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Previous&#34;, 9)
+    @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
     def previous(self) -&gt; None:
         &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Select&#34;, 10)
+    @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
     def select(self) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Menu&#34;, 11)
+    @feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
     def menu(self) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;VolumeUp&#34;, 12)
+    @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
     def volume_up(self) -&gt; None:
         &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;VolumeDown&#34;, 13)
+    @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
     def volume_down(self) -&gt; None:
         &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Home&#34;, 14)
+    @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
     def home(self) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;HomeHold&#34;, 15)
+    @feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
     def home_hold(self) -&gt; None:
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;TopMenu&#34;, 16)
+    @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
     def top_menu(self) -&gt; None:
         &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;Suspend&#34;, 17)
+    @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
     def suspend(self) -&gt; None:
         &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;WakeUp&#34;, 18)
+    @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
     def wakeup(self) -&gt; None:
         &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetPosition&#34;, 19)
+    @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
     def set_position(self, pos) -&gt; None:
         &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetShuffle&#34;, 20)
+    @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
     def set_shuffle(self, shuffle_state) -&gt; None:
         &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(&#34;SetRepeat&#34;, 21)
+    @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
     def set_repeat(self, repeat_state) -&gt; None:
         &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
@@ -2669,7 +2682,7 @@ def stop(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Down&#34;, 1)
+@feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
 def down(self) -&gt; None:
     &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2685,7 +2698,7 @@ def down(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Home&#34;, 14)
+@feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
 def home(self) -&gt; None:
     &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2701,7 +2714,7 @@ def home(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;HomeHold&#34;, 15)
+@feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
 def home_hold(self) -&gt; None:
     &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2717,7 +2730,7 @@ def home_hold(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Left&#34;, 2)
+@feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
 def left(self) -&gt; None:
     &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2733,7 +2746,7 @@ def left(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Menu&#34;, 11)
+@feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
 def menu(self) -&gt; None:
     &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2749,7 +2762,7 @@ def menu(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Next&#34;, 8)
+@feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
 def next(self) -&gt; None:
     &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2765,7 +2778,7 @@ def next(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Pause&#34;, 6)
+@feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
 def pause(self) -&gt; None:
     &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2781,7 +2794,7 @@ def pause(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Play&#34;, 4)
+@feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
 def play(self) -&gt; None:
     &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2797,7 +2810,7 @@ def play(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;PlayPause&#34;, 5)
+@feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
 def play_pause(self) -&gt; None:
     &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2813,7 +2826,7 @@ def play_pause(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Previous&#34;, 9)
+@feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
 def previous(self) -&gt; None:
     &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2829,7 +2842,7 @@ def previous(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Right&#34;, 3)
+@feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
 def right(self) -&gt; None:
     &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2845,7 +2858,7 @@ def right(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Select&#34;, 10)
+@feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
 def select(self) -&gt; None:
     &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2861,7 +2874,7 @@ def select(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;SetPosition&#34;, 19)
+@feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
 def set_position(self, pos) -&gt; None:
     &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2877,7 +2890,7 @@ def set_position(self, pos) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;SetRepeat&#34;, 21)
+@feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
 def set_repeat(self, repeat_state) -&gt; None:
     &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2893,7 +2906,7 @@ def set_repeat(self, repeat_state) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;SetShuffle&#34;, 20)
+@feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
 def set_shuffle(self, shuffle_state) -&gt; None:
     &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2909,7 +2922,7 @@ def set_shuffle(self, shuffle_state) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Stop&#34;, 7)
+@feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
 def stop(self) -&gt; None:
     &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2925,7 +2938,7 @@ def stop(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Suspend&#34;, 17)
+@feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
 def suspend(self) -&gt; None:
     &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2941,7 +2954,7 @@ def suspend(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;TopMenu&#34;, 16)
+@feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
 def top_menu(self) -&gt; None:
     &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2957,7 +2970,7 @@ def top_menu(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;Up&#34;, 0)
+@feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
 def up(self) -&gt; None:
     &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2973,7 +2986,7 @@ def up(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;VolumeDown&#34;, 13)
+@feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
 def volume_down(self) -&gt; None:
     &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2989,7 +3002,7 @@ def volume_down(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;VolumeUp&#34;, 12)
+@feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
 def volume_up(self) -&gt; None:
     &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3005,7 +3018,7 @@ def volume_up(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;WakeUp&#34;, 18)
+@feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
 def wakeup(self) -&gt; None:
     &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3026,7 +3039,7 @@ def wakeup(self) -&gt; None:
     &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
 
     @abstractmethod
-    @feature(&#34;PlayUrl&#34;, 31)
+    @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
@@ -3051,7 +3064,7 @@ def wakeup(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(&#34;PlayUrl&#34;, 31)
+@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
 def play_url(self, url: str, **kwargs) -&gt; None:
     &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>

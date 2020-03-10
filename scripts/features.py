@@ -9,10 +9,18 @@ class FeatureName(Enum):
 """
 
 
+ENUM_VALUE_TEMPLATE = """    {name} = {index}
+    \"\"\"{doc}\"\"\"
+"""
+
+
 def main():
     """Script starts here."""
     features = interface._ALL_FEATURES
-    enum_values = "\n".join(f"    {name} = {index}" for index, name in features.items())
+    enum_values = "\n".join(
+        ENUM_VALUE_TEMPLATE.format(name=tmp[0], index=index, doc=tmp[1])
+        for index, tmp in features.items()
+    )
     print(FEATURE_TEMPLATE.format(enum=enum_values))
 
     print("Next free index:", max(features.keys()) + 1)

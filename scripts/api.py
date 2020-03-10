@@ -50,8 +50,8 @@ def generate():
     """Generate API reference."""
     for output_file, html in _api_modules():
         print("Generating", output_file)
-        with open(output_file, "w") as fh:
-            fh.write(html)
+        with open(output_file, "wb") as fh:
+            fh.write(html.encode("utf-8"))
 
     return 0
 
@@ -60,7 +60,7 @@ def verify():
     """Verify that API reference is up-to-date."""
     for output_file, html in _api_modules():
         print("Verifying", output_file)
-        expected_output = Path(output_file).read_text()
+        expected_output = Path(output_file).read_text(encoding="utf-8")
         if html != expected_output:
             print("File content mismatch - run: api.py generate", file=sys.stderr)
             return 1

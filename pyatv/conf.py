@@ -1,4 +1,12 @@
-"""Configuration when connecting to an Apple TV."""
+"""Configuration used when connecting to a device.
+
+A configuration describes a device, e.g. it's name, IP address and credentials. It is
+possible to manually create a configuration, but generally scanning for devices will
+provide configurations for you.
+
+For a configuration to be usable ("ready") it must have either a `DMAP` or `MRP`
+configuration (or both), as connecting to plain `AirPlay` devices it not supported.
+"""
 from ipaddress import IPv4Address
 from typing import Dict, List, Optional
 
@@ -12,7 +20,7 @@ class AppleTV:
     """Representation of an Apple TV configuration.
 
     An instance of this class represents a single device. A device can have
-    several services, depending on the protocols it supports, e.g. DMAP or
+    several services depending on the protocols it supports, e.g. DMAP or
     AirPlay.
     """
 
@@ -31,7 +39,7 @@ class AppleTV:
 
     @property
     def identifier(self) -> Optional[str]:
-        """Return one of the identifiers associated with this device."""
+        """Return the main identifier associated with this device."""
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
             service = self._services.get(prot)
             if service:
@@ -41,8 +49,7 @@ class AppleTV:
     @property
     def all_identifiers(self) -> List[str]:
         """Return all unique identifiers for this device."""
-        services = self.services
-        return [x.identifier for x in services if x.identifier is not None]
+        return [x.identifier for x in self.services if x.identifier is not None]
 
     def add_service(self, service: BaseService) -> None:
         """Add a new service.
@@ -165,7 +172,7 @@ class DmapService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
-    """Representation of a MediaRemote Protocol service."""
+    """Representation of a MediaRemote Protocol (MRP) service."""
 
     def __init__(
         self,

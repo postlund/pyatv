@@ -1,4 +1,4 @@
-"""Library for controlling an Apple TV."""
+"""Main routines for interacting with an Apple TV."""
 
 import os
 import asyncio
@@ -238,7 +238,7 @@ async def scan(
     protocol: Protocol = None,
     hosts: List[str] = None,
 ) -> List[conf.AppleTV]:
-    """Scan for Apple TVs using zeroconf (bonjour) and returns them."""
+    """Scan for Apple TVs on network and return their configurations."""
 
     def _should_include(atv):
         if not atv.ready:
@@ -268,18 +268,16 @@ async def connect(
     protocol: Protocol = None,
     session: aiohttp.ClientSession = None,
 ) -> interface.AppleTV:
-    """Connect and logins to an Apple TV."""
+    """Connect to a device based on a configuration."""
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
     service = config.main_service(protocol=protocol)
 
-    supported_implementations = {
-        Protocol.DMAP: DmapAppleTV,
-        Protocol.MRP: MrpAppleTV,
-    }
+    implementation = {Protocol.DMAP: DmapAppleTV, Protocol.MRP: MrpAppleTV}.get(
+        service.protocol
+    )
 
-    implementation = supported_implementations.get(service.protocol, None)
     if not implementation:
         raise exceptions.UnsupportedProtocolError(str(service.protocol))
 
@@ -302,20 +300,19 @@ async def pair(
     session: aiohttp.ClientSession = None,
     **kwargs
 ):
-    """Pair with an Apple TV."""
+    """Pair a protocol for an Apple TV."""
     service = config.get_service(protocol)
     if not service:
         raise exceptions.NoServiceError(
             "no service available for protocol " + str(protocol)
         )
 
-    protocol_handlers = {
+    handler = {
         Protocol.DMAP: DmapPairingHandler,
         Protocol.MRP: MrpPairingHandler,
         Protocol.AirPlay: AirPlayPairingHandler,
-    }
+    }.get(protocol)
 
-    handler = protocol_handlers.get(protocol, None)
     if handler is None:
         raise exceptions.UnsupportedProtocolError(str(protocol))
 

@@ -10,12 +10,25 @@ link_group: api
 <p><a href="#sidebar">Jump to table of contents</a></p>
 </header>
 <section id="section-intro">
-<p>Configuration when connecting to an Apple TV.</p>
+<p>Configuration used when connecting to a device.</p>
+<p>A configuration describes a device, e.g. it's name, IP address and credentials. It is
+possible to manually create a configuration, but generally scanning for devices will
+provide configurations for you.</p>
+<p>For a configuration to be usable ("ready") it must have either a <code>DMAP</code> or <code>MRP</code>
+configuration (or both), as connecting to plain <code>AirPlay</code> devices it not supported.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;Configuration when connecting to an Apple TV.&#34;&#34;&#34;
+<pre><code class="python">&#34;&#34;&#34;Configuration used when connecting to a device.
+
+A configuration describes a device, e.g. it&#39;s name, IP address and credentials. It is
+possible to manually create a configuration, but generally scanning for devices will
+provide configurations for you.
+
+For a configuration to be usable (&#34;ready&#34;) it must have either a `DMAP` or `MRP`
+configuration (or both), as connecting to plain `AirPlay` devices it not supported.
+&#34;&#34;&#34;
 from ipaddress import IPv4Address
 from typing import Dict, List, Optional
 
@@ -29,7 +42,7 @@ class AppleTV:
     &#34;&#34;&#34;Representation of an Apple TV configuration.
 
     An instance of this class represents a single device. A device can have
-    several services, depending on the protocols it supports, e.g. DMAP or
+    several services depending on the protocols it supports, e.g. DMAP or
     AirPlay.
     &#34;&#34;&#34;
 
@@ -48,7 +61,7 @@ class AppleTV:
 
     @property
     def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return one of the identifiers associated with this device.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
             service = self._services.get(prot)
             if service:
@@ -58,8 +71,7 @@ class AppleTV:
     @property
     def all_identifiers(self) -&gt; List[str]:
         &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-        services = self.services
-        return [x.identifier for x in services if x.identifier is not None]
+        return [x.identifier for x in self.services if x.identifier is not None]
 
     def add_service(self, service: BaseService) -&gt; None:
         &#34;&#34;&#34;Add a new service.
@@ -182,7 +194,7 @@ class DmapService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
-    &#34;&#34;&#34;Representation of a MediaRemote Protocol service.&#34;&#34;&#34;
+    &#34;&#34;&#34;Representation of a MediaRemote Protocol (MRP) service.&#34;&#34;&#34;
 
     def __init__(
         self,
@@ -267,7 +279,7 @@ class AirPlayService(BaseService):
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
 <p>An instance of this class represents a single device. A device can have
-several services, depending on the protocols it supports, e.g. DMAP or
+several services depending on the protocols it supports, e.g. DMAP or
 AirPlay.</p>
 <p>Initialize a new AppleTV.</p></section>
 <details class="source">
@@ -278,7 +290,7 @@ AirPlay.</p>
     &#34;&#34;&#34;Representation of an Apple TV configuration.
 
     An instance of this class represents a single device. A device can have
-    several services, depending on the protocols it supports, e.g. DMAP or
+    several services depending on the protocols it supports, e.g. DMAP or
     AirPlay.
     &#34;&#34;&#34;
 
@@ -297,7 +309,7 @@ AirPlay.</p>
 
     @property
     def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return one of the identifiers associated with this device.&#34;&#34;&#34;
+        &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
             service = self._services.get(prot)
             if service:
@@ -307,8 +319,7 @@ AirPlay.</p>
     @property
     def all_identifiers(self) -&gt; List[str]:
         &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-        services = self.services
-        return [x.identifier for x in services if x.identifier is not None]
+        return [x.identifier for x in self.services if x.identifier is not None]
 
     def add_service(self, service: BaseService) -&gt; None:
         &#34;&#34;&#34;Add a new service.
@@ -424,8 +435,7 @@ AirPlay.</p>
 <pre><code class="python">@property
 def all_identifiers(self) -&gt; List[str]:
     &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-    services = self.services
-    return [x.identifier for x in services if x.identifier is not None]</code></pre>
+    return [x.identifier for x in self.services if x.identifier is not None]</code></pre>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span></code></dt>
@@ -460,14 +470,14 @@ def device_info(self) -&gt; DeviceInfo:
 </dd>
 <dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span></code></dt>
 <dd>
-<section class="desc"><p>Return one of the identifiers associated with this device.</p></section>
+<section class="desc"><p>Return the main identifier associated with this device.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
 def identifier(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return one of the identifiers associated with this device.&#34;&#34;&#34;
+    &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
     for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
         service = self._services.get(prot)
         if service:
@@ -635,14 +645,14 @@ returned.</p></section>
 <span>(</span><span>identifier, port, credentials=None, properties=None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Representation of a MediaRemote Protocol service.</p>
+<section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
 <p>Initialize a new MrpService.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class MrpService(BaseService):
-    &#34;&#34;&#34;Representation of a MediaRemote Protocol service.&#34;&#34;&#34;
+    &#34;&#34;&#34;Representation of a MediaRemote Protocol (MRP) service.&#34;&#34;&#34;
 
     def __init__(
         self,
