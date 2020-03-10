@@ -1,0 +1,527 @@
+---
+layout: template
+title: API - pyatv.const
+permalink: /api//const
+link_group: api
+---
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyatv.const</code></h1>
+<p><a href="#sidebar">Jump to table of contents</a></p>
+</header>
+<section id="section-intro">
+<p>Constants used in the public API.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Constants used in the public API.&#34;&#34;&#34;
+
+from enum import Enum
+
+
+MAJOR_VERSION = &#34;0&#34;
+MINOR_VERSION = &#34;4&#34;
+PATCH_VERSION = &#34;1a1&#34;
+__short_version__ = &#34;{}.{}&#34;.format(MAJOR_VERSION, MINOR_VERSION)
+__version__ = &#34;{}.{}&#34;.format(__short_version__, PATCH_VERSION)
+
+
+class Protocol(Enum):
+    &#34;&#34;&#34;All supported protocol.&#34;&#34;&#34;
+
+    DMAP = 1
+    MRP = 2
+    AirPlay = 3
+
+
+class MediaType(Enum):
+    &#34;&#34;&#34;All suuported media types.&#34;&#34;&#34;
+
+    Unknown = 0
+    Video = 1
+    Music = 2
+    TV = 3
+
+
+class DeviceState(Enum):
+    &#34;&#34;&#34;All supported device states.&#34;&#34;&#34;
+
+    Idle = 0
+    Loading = 1
+    Paused = 2
+    Playing = 3
+    Stopped = 4
+    Seeking = 5
+
+
+class RepeatState(Enum):
+    &#34;&#34;&#34;All supported repeat states.&#34;&#34;&#34;
+
+    Off = 0
+    Track = 1
+    All = 2
+
+
+class ShuffleState(Enum):
+    &#34;&#34;&#34;All supported shuffle states.&#34;&#34;&#34;
+
+    Off = 0
+    Albums = 1
+    Songs = 2
+
+
+class PowerState(Enum):
+    &#34;&#34;&#34;All supported power states.&#34;&#34;&#34;
+
+    Unknown = 0
+    Off = 1
+    On = 2
+
+
+class OperatingSystem(Enum):
+    &#34;&#34;&#34;Operating system on device.&#34;&#34;&#34;
+
+    Unknown = 0
+    Legacy = 1  # Pre-tvOS (Apple TV Software)
+    TvOS = 2
+
+
+class DeviceModel(Enum):
+    &#34;&#34;&#34;Hardware device models.&#34;&#34;&#34;
+
+    Unknown = 0
+    Gen2 = 1
+    Gen3 = 2
+    Gen4 = 3
+    Gen4K = 4</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyatv.const.DeviceModel"><code class="flex name class">
+<span>class <span class="ident">DeviceModel</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Hardware device models.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeviceModel(Enum):
+    &#34;&#34;&#34;Hardware device models.&#34;&#34;&#34;
+
+    Unknown = 0
+    Gen2 = 1
+    Gen3 = 2
+    Gen4 = 3
+    Gen4K = 4</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.DeviceModel.Gen2"><code class="name">var <span class="ident">Gen2</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.Gen3"><code class="name">var <span class="ident">Gen3</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.Gen4"><code class="name">var <span class="ident">Gen4</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.Gen4K"><code class="name">var <span class="ident">Gen4K</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.DeviceState"><code class="flex name class">
+<span>class <span class="ident">DeviceState</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported device states.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeviceState(Enum):
+    &#34;&#34;&#34;All supported device states.&#34;&#34;&#34;
+
+    Idle = 0
+    Loading = 1
+    Paused = 2
+    Playing = 3
+    Stopped = 4
+    Seeking = 5</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.DeviceState.Idle"><code class="name">var <span class="ident">Idle</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceState.Loading"><code class="name">var <span class="ident">Loading</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceState.Paused"><code class="name">var <span class="ident">Paused</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceState.Playing"><code class="name">var <span class="ident">Playing</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceState.Seeking"><code class="name">var <span class="ident">Seeking</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.DeviceState.Stopped"><code class="name">var <span class="ident">Stopped</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.MediaType"><code class="flex name class">
+<span>class <span class="ident">MediaType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All suuported media types.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MediaType(Enum):
+    &#34;&#34;&#34;All suuported media types.&#34;&#34;&#34;
+
+    Unknown = 0
+    Video = 1
+    Music = 2
+    TV = 3</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.MediaType.Music"><code class="name">var <span class="ident">Music</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.MediaType.TV"><code class="name">var <span class="ident">TV</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.MediaType.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.MediaType.Video"><code class="name">var <span class="ident">Video</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.OperatingSystem"><code class="flex name class">
+<span>class <span class="ident">OperatingSystem</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Operating system on device.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OperatingSystem(Enum):
+    &#34;&#34;&#34;Operating system on device.&#34;&#34;&#34;
+
+    Unknown = 0
+    Legacy = 1  # Pre-tvOS (Apple TV Software)
+    TvOS = 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.OperatingSystem.Legacy"><code class="name">var <span class="ident">Legacy</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.OperatingSystem.TvOS"><code class="name">var <span class="ident">TvOS</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.OperatingSystem.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.PowerState"><code class="flex name class">
+<span>class <span class="ident">PowerState</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported power states.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PowerState(Enum):
+    &#34;&#34;&#34;All supported power states.&#34;&#34;&#34;
+
+    Unknown = 0
+    Off = 1
+    On = 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.PowerState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.PowerState.On"><code class="name">var <span class="ident">On</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.PowerState.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.Protocol"><code class="flex name class">
+<span>class <span class="ident">Protocol</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported protocol.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Protocol(Enum):
+    &#34;&#34;&#34;All supported protocol.&#34;&#34;&#34;
+
+    DMAP = 1
+    MRP = 2
+    AirPlay = 3</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.Protocol.AirPlay"><code class="name">var <span class="ident">AirPlay</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.Protocol.DMAP"><code class="name">var <span class="ident">DMAP</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.Protocol.MRP"><code class="name">var <span class="ident">MRP</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.RepeatState"><code class="flex name class">
+<span>class <span class="ident">RepeatState</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported repeat states.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RepeatState(Enum):
+    &#34;&#34;&#34;All supported repeat states.&#34;&#34;&#34;
+
+    Off = 0
+    Track = 1
+    All = 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.RepeatState.All"><code class="name">var <span class="ident">All</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.RepeatState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.RepeatState.Track"><code class="name">var <span class="ident">Track</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.ShuffleState"><code class="flex name class">
+<span>class <span class="ident">ShuffleState</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported shuffle states.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ShuffleState(Enum):
+    &#34;&#34;&#34;All supported shuffle states.&#34;&#34;&#34;
+
+    Off = 0
+    Albums = 1
+    Songs = 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.ShuffleState.Albums"><code class="name">var <span class="ident">Albums</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.ShuffleState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.ShuffleState.Songs"><code class="name">var <span class="ident">Songs</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyatv" href="index.html">pyatv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.const.DeviceModel" href="#pyatv.const.DeviceModel">DeviceModel</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.DeviceModel.Gen2" href="#pyatv.const.DeviceModel.Gen2">Gen2</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.Gen3" href="#pyatv.const.DeviceModel.Gen3">Gen3</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.Gen4" href="#pyatv.const.DeviceModel.Gen4">Gen4</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.Gen4K" href="#pyatv.const.DeviceModel.Gen4K">Gen4K</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.Unknown" href="#pyatv.const.DeviceModel.Unknown">Unknown</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.DeviceState" href="#pyatv.const.DeviceState">DeviceState</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.const.DeviceState.Idle" href="#pyatv.const.DeviceState.Idle">Idle</a></code></li>
+<li><code><a title="pyatv.const.DeviceState.Loading" href="#pyatv.const.DeviceState.Loading">Loading</a></code></li>
+<li><code><a title="pyatv.const.DeviceState.Paused" href="#pyatv.const.DeviceState.Paused">Paused</a></code></li>
+<li><code><a title="pyatv.const.DeviceState.Playing" href="#pyatv.const.DeviceState.Playing">Playing</a></code></li>
+<li><code><a title="pyatv.const.DeviceState.Seeking" href="#pyatv.const.DeviceState.Seeking">Seeking</a></code></li>
+<li><code><a title="pyatv.const.DeviceState.Stopped" href="#pyatv.const.DeviceState.Stopped">Stopped</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.MediaType" href="#pyatv.const.MediaType">MediaType</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.MediaType.Music" href="#pyatv.const.MediaType.Music">Music</a></code></li>
+<li><code><a title="pyatv.const.MediaType.TV" href="#pyatv.const.MediaType.TV">TV</a></code></li>
+<li><code><a title="pyatv.const.MediaType.Unknown" href="#pyatv.const.MediaType.Unknown">Unknown</a></code></li>
+<li><code><a title="pyatv.const.MediaType.Video" href="#pyatv.const.MediaType.Video">Video</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.OperatingSystem" href="#pyatv.const.OperatingSystem">OperatingSystem</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.OperatingSystem.Legacy" href="#pyatv.const.OperatingSystem.Legacy">Legacy</a></code></li>
+<li><code><a title="pyatv.const.OperatingSystem.TvOS" href="#pyatv.const.OperatingSystem.TvOS">TvOS</a></code></li>
+<li><code><a title="pyatv.const.OperatingSystem.Unknown" href="#pyatv.const.OperatingSystem.Unknown">Unknown</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.PowerState" href="#pyatv.const.PowerState">PowerState</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.PowerState.Off" href="#pyatv.const.PowerState.Off">Off</a></code></li>
+<li><code><a title="pyatv.const.PowerState.On" href="#pyatv.const.PowerState.On">On</a></code></li>
+<li><code><a title="pyatv.const.PowerState.Unknown" href="#pyatv.const.PowerState.Unknown">Unknown</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.Protocol" href="#pyatv.const.Protocol">Protocol</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.Protocol.AirPlay" href="#pyatv.const.Protocol.AirPlay">AirPlay</a></code></li>
+<li><code><a title="pyatv.const.Protocol.DMAP" href="#pyatv.const.Protocol.DMAP">DMAP</a></code></li>
+<li><code><a title="pyatv.const.Protocol.MRP" href="#pyatv.const.Protocol.MRP">MRP</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.RepeatState" href="#pyatv.const.RepeatState">RepeatState</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.RepeatState.All" href="#pyatv.const.RepeatState.All">All</a></code></li>
+<li><code><a title="pyatv.const.RepeatState.Off" href="#pyatv.const.RepeatState.Off">Off</a></code></li>
+<li><code><a title="pyatv.const.RepeatState.Track" href="#pyatv.const.RepeatState.Track">Track</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.ShuffleState" href="#pyatv.const.ShuffleState">ShuffleState</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.ShuffleState.Albums" href="#pyatv.const.ShuffleState.Albums">Albums</a></code></li>
+<li><code><a title="pyatv.const.ShuffleState.Off" href="#pyatv.const.ShuffleState.Off">Off</a></code></li>
+<li><code><a title="pyatv.const.ShuffleState.Songs" href="#pyatv.const.ShuffleState.Songs">Songs</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+</footer>

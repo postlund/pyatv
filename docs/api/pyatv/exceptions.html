@@ -1,0 +1,470 @@
+---
+layout: template
+title: API - pyatv.exceptions
+permalink: /api//exceptions
+link_group: api
+---
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyatv.exceptions</code></h1>
+<p><a href="#sidebar">Jump to table of contents</a></p>
+</header>
+<section id="section-intro">
+<p>Local exceptions used by library.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Local exceptions used by library.&#34;&#34;&#34;
+
+
+class NoServiceError(Exception):
+    &#34;&#34;&#34;Thrown when connecting to a device with no usable service.&#34;&#34;&#34;
+
+
+class UnsupportedProtocolError(Exception):
+    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.&#34;&#34;&#34;
+
+
+class ConnectionFailedError(Exception):
+    &#34;&#34;&#34;Thrown when connection fails, e.g. refused or timed out.&#34;&#34;&#34;
+
+
+class PairingError(Exception):
+    &#34;&#34;&#34;Thrown when pairing fails.&#34;&#34;&#34;
+
+
+class AuthenticationError(Exception):
+    &#34;&#34;&#34;Thrown when authentication fails.&#34;&#34;&#34;
+
+
+class NotSupportedError(NotImplementedError):
+    &#34;&#34;&#34;Thrown when trying to perform an action that is not supported.&#34;&#34;&#34;
+
+
+class InvalidDmapDataError(Exception):
+    &#34;&#34;&#34;Thrown when invalid DMAP data is parsed.&#34;&#34;&#34;
+
+
+class UnknownMediaKindError(Exception):
+    &#34;&#34;&#34;Thrown when an unknown media kind is found.&#34;&#34;&#34;
+
+
+class UnknownPlayStateError(Exception):
+    &#34;&#34;&#34;Thrown when an unknown play state is found.&#34;&#34;&#34;
+
+
+class NoAsyncListenerError(Exception):
+    &#34;&#34;&#34;Thrown when starting AsyncUpdater with no listener.&#34;&#34;&#34;
+
+
+class NoCredentialsError(Exception):
+    &#34;&#34;&#34;Thrown if credentials are missing.&#34;&#34;&#34;
+
+
+class InvalidCredentialsError(Exception):
+    &#34;&#34;&#34;Thrown if credentials are invalid.&#34;&#34;&#34;
+
+
+class DeviceIdMissingError(Exception):
+    &#34;&#34;&#34;Thrown when device id is missing.&#34;&#34;&#34;
+
+
+class BackOffError(Exception):
+    &#34;&#34;&#34;Thrown when device mandates a backoff period.&#34;&#34;&#34;
+
+
+class PlaybackError(Exception):
+    &#34;&#34;&#34;Thrown when media playback failed.&#34;&#34;&#34;
+
+
+class CommandError(Exception):
+    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyatv.exceptions.AuthenticationError"><code class="flex name class">
+<span>class <span class="ident">AuthenticationError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when authentication fails.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AuthenticationError(Exception):
+    &#34;&#34;&#34;Thrown when authentication fails.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.BackOffError"><code class="flex name class">
+<span>class <span class="ident">BackOffError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when device mandates a backoff period.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BackOffError(Exception):
+    &#34;&#34;&#34;Thrown when device mandates a backoff period.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.CommandError"><code class="flex name class">
+<span>class <span class="ident">CommandError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when a command (e.g. play or pause) failed.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CommandError(Exception):
+    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.ConnectionFailedError"><code class="flex name class">
+<span>class <span class="ident">ConnectionFailedError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when connection fails, e.g. refused or timed out.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ConnectionFailedError(Exception):
+    &#34;&#34;&#34;Thrown when connection fails, e.g. refused or timed out.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.DeviceIdMissingError"><code class="flex name class">
+<span>class <span class="ident">DeviceIdMissingError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when device id is missing.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeviceIdMissingError(Exception):
+    &#34;&#34;&#34;Thrown when device id is missing.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.InvalidCredentialsError"><code class="flex name class">
+<span>class <span class="ident">InvalidCredentialsError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown if credentials are invalid.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InvalidCredentialsError(Exception):
+    &#34;&#34;&#34;Thrown if credentials are invalid.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.InvalidDmapDataError"><code class="flex name class">
+<span>class <span class="ident">InvalidDmapDataError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when invalid DMAP data is parsed.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InvalidDmapDataError(Exception):
+    &#34;&#34;&#34;Thrown when invalid DMAP data is parsed.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.NoAsyncListenerError"><code class="flex name class">
+<span>class <span class="ident">NoAsyncListenerError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when starting AsyncUpdater with no listener.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoAsyncListenerError(Exception):
+    &#34;&#34;&#34;Thrown when starting AsyncUpdater with no listener.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.NoCredentialsError"><code class="flex name class">
+<span>class <span class="ident">NoCredentialsError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown if credentials are missing.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoCredentialsError(Exception):
+    &#34;&#34;&#34;Thrown if credentials are missing.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.NoServiceError"><code class="flex name class">
+<span>class <span class="ident">NoServiceError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when connecting to a device with no usable service.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoServiceError(Exception):
+    &#34;&#34;&#34;Thrown when connecting to a device with no usable service.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.NotSupportedError"><code class="flex name class">
+<span>class <span class="ident">NotSupportedError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when trying to perform an action that is not supported.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NotSupportedError(NotImplementedError):
+    &#34;&#34;&#34;Thrown when trying to perform an action that is not supported.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.NotImplementedError</li>
+<li>builtins.RuntimeError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.PairingError"><code class="flex name class">
+<span>class <span class="ident">PairingError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when pairing fails.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PairingError(Exception):
+    &#34;&#34;&#34;Thrown when pairing fails.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.PlaybackError"><code class="flex name class">
+<span>class <span class="ident">PlaybackError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when media playback failed.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PlaybackError(Exception):
+    &#34;&#34;&#34;Thrown when media playback failed.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.UnknownMediaKindError"><code class="flex name class">
+<span>class <span class="ident">UnknownMediaKindError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when an unknown media kind is found.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnknownMediaKindError(Exception):
+    &#34;&#34;&#34;Thrown when an unknown media kind is found.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.UnknownPlayStateError"><code class="flex name class">
+<span>class <span class="ident">UnknownPlayStateError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when an unknown play state is found.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnknownPlayStateError(Exception):
+    &#34;&#34;&#34;Thrown when an unknown play state is found.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.UnsupportedProtocolError"><code class="flex name class">
+<span>class <span class="ident">UnsupportedProtocolError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when an unsupported protocol was requested.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnsupportedProtocolError(Exception):
+    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyatv" href="index.html">pyatv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.exceptions.AuthenticationError" href="#pyatv.exceptions.AuthenticationError">AuthenticationError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.BackOffError" href="#pyatv.exceptions.BackOffError">BackOffError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.CommandError" href="#pyatv.exceptions.CommandError">CommandError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.ConnectionFailedError" href="#pyatv.exceptions.ConnectionFailedError">ConnectionFailedError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.DeviceIdMissingError" href="#pyatv.exceptions.DeviceIdMissingError">DeviceIdMissingError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.InvalidCredentialsError" href="#pyatv.exceptions.InvalidCredentialsError">InvalidCredentialsError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.InvalidDmapDataError" href="#pyatv.exceptions.InvalidDmapDataError">InvalidDmapDataError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.NoAsyncListenerError" href="#pyatv.exceptions.NoAsyncListenerError">NoAsyncListenerError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.NoCredentialsError" href="#pyatv.exceptions.NoCredentialsError">NoCredentialsError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.NoServiceError" href="#pyatv.exceptions.NoServiceError">NoServiceError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.NotSupportedError" href="#pyatv.exceptions.NotSupportedError">NotSupportedError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.PairingError" href="#pyatv.exceptions.PairingError">PairingError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.PlaybackError" href="#pyatv.exceptions.PlaybackError">PlaybackError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.UnknownMediaKindError" href="#pyatv.exceptions.UnknownMediaKindError">UnknownMediaKindError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.UnknownPlayStateError" href="#pyatv.exceptions.UnknownPlayStateError">UnknownPlayStateError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.UnsupportedProtocolError" href="#pyatv.exceptions.UnsupportedProtocolError">UnsupportedProtocolError</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
+</footer>
