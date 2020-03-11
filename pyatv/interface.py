@@ -436,13 +436,13 @@ class Playing(ABC):
 class App:
     """Information about an app."""
 
-    def __init__(self, name: str, identifier: str) -> None:
+    def __init__(self, name: Optional[str], identifier: str) -> None:
         """Initialize a new App instance."""
         self._name = name
         self._identifier = identifier
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """User friendly name of app."""
         return self._name
 
@@ -493,7 +493,8 @@ class Metadata(ABC):
 
         Do note that this property returns which app is currently playing something and
         not which app is currently active. If nothing is playing, the corresponding
-        feature will be unavailable."""
+        feature will be unavailable.
+        """
         raise exceptions.NotSupportedError()
 
 

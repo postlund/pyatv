@@ -125,6 +125,7 @@ def _set_state_message(metadata, identifier):
     client = inner.playerPath.client
     client.processIdentifier = 123
     client.bundleIdentifier = identifier
+
     return set_state
 
 
@@ -225,6 +226,13 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         client.processIdentifier = 123
         client.bundleIdentifier = identifier
 
+        self.send(msg)
+
+    def update_client(self, display_name, identifier):
+        msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
+        client = msg.inner().client
+        client.bundleIdentifier = identifier
+        client.displayName = display_name
         self.send(msg)
 
     def data_received(self, data):
@@ -371,6 +379,10 @@ class AppleTVUseCases(AirPlayUseCases):
         # Create a temporary metadata instance with requested parameters
         change = PlayingMetadata(**kwargs)
         self.device.item_update(change, PLAYER_IDENTIFIER)
+
+    def update_client(self, display_name):
+        """Update playing client with new information."""
+        self.device.update_client(display_name, PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
         """Call to put device in idle state."""

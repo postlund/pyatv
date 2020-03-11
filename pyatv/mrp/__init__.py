@@ -406,7 +406,11 @@ class MrpMetadata(Metadata):
     @property
     def app(self) -> Optional[App]:
         """Return information about running app."""
-        raise exceptions.NotSupportedError()
+        state = self.psm.playing
+        if state.client:
+            name = state.client.displayName or None
+            return App(name, state.client.bundleIdentifier)
+        return None
 
 
 class MrpPower(Power):
@@ -540,6 +544,11 @@ class MrpFeatures(Features):
         if cmd_id:
             cmd = self.psm.playing.command_info(cmd_id)
             if cmd and cmd.enabled:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
+
+        if feature == FeatureName.App:
+            if self.psm.playing.client:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 

@@ -20,6 +20,7 @@ class PlayerState:
         self.supported_commands = []
         self.items = []
         self.location = 0
+        self.client = None
 
     @property
     def playback_state(self):
@@ -76,6 +77,9 @@ class PlayerState:
             self.items = queue.contentItems
             self.location = queue.location
 
+        if setstate.HasField("playerPath"):
+            self.client = setstate.playerPath.client
+
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
         for updated_item in item_update.contentItems:
@@ -88,6 +92,11 @@ class PlayerState:
                     # NB: MergeFrom will append repeated fields (which is
                     # likely not what is expected)!
                     existing.metadata.MergeFrom(updated_item.metadata)
+
+    def handle_update_client(self, msg):
+        """Handle client updates."""
+        _LOGGER.debug("Updated client")
+        self.client = msg.client
 
 
 class PlayerStateManager:  # pylint: disable=too-few-public-methods
@@ -109,6 +118,9 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         )
         self.protocol.add_listener(
             self._handle_set_now_playing_client, protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE
+        )
+        self.protocol.add_listener(
+            self._handle_update_client, protobuf.UPDATE_CLIENT_MESSAGE
         )
 
     @property
@@ -169,3 +181,20 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
 
             if self.listener:
                 await self.listener.state_updated()
+
+    async def _handle_update_client(self, message, _):
+        update_client = message.inner()
+        identifier = update_client.client.bundleIdentifier
+
+        if identifier in self.states:
+            state = self.states[identifier]
+            state.handle_update_client(update_client)
+
+            # Only trigger callback if current state changed
+            if identifier == self.active:
+                if self.listener:
+                    await self.listener.state_updated()
+        else:
+            _LOGGER.warning(
+                "Received UpdateClientMessage for unknown player %s", identifier
+            )

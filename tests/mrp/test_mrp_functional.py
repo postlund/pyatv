@@ -17,7 +17,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
-from tests.mrp.fake_mrp_atv import FakeAppleTV, AppleTVUseCases
+from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, FakeAppleTV, AppleTVUseCases
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,6 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 ARTWORK_BYTES = b"1234"
 ARTWORK_MIMETYPE = "image/png"
 ARTWORK_ID = "artwork_id1"
+
+APP_NAME = "Demo App"
 
 
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
@@ -232,3 +234,28 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         )
         await self.playing(title="dummy2")
         self.assertFeatures(FeatureState.Available, *feature_map.keys())
+
+    @unittest_run_loop
+    async def test_playing_app(self):
+        self.usecase.nothing_playing()
+        # await self.playing()
+
+        self.assertIsNone(self.atv.metadata.app)
+        self.assertEqual(
+            self.atv.features.get_feature(FeatureName.App).state,
+            FeatureState.Unavailable,
+        )
+
+        self.usecase.example_video()
+        await self.playing(title="dummy")
+
+        self.assertIsNone(self.atv.metadata.app.name)
+        self.assertEqual(self.atv.metadata.app.identifier, PLAYER_IDENTIFIER)
+        self.assertEqual(
+            self.atv.features.get_feature(FeatureName.App).state, FeatureState.Available
+        )
+
+        self.usecase.update_client(APP_NAME)
+        self.usecase.change_metadata(title="dummy2")
+        await self.playing(title="dummy2")
+        self.assertEqual(self.atv.metadata.app.name, APP_NAME)
