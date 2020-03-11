@@ -238,7 +238,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_playing_app(self):
         self.usecase.nothing_playing()
-        # await self.playing()
 
         self.assertIsNone(self.atv.metadata.app)
         self.assertEqual(

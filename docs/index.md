@@ -53,6 +53,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
+| App used for playback                                           | No       | Yes       |
+| --------------------------------------------------------------- | -------- | --------- |
 | Media type and play state                                       | Yes      | Yes       |
 | --------------------------------------------------------------- | -------- | --------- |
 | Change media position                                           | Yes      | Yes       |
@@ -62,6 +64,7 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | Power management                                                | No       | Yes       |
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/) page.*
+
 *\*\* Limited support due to restrictions in protocol.*
 
 As pyatv is still under heavy development, expect there to be bugs. Please create an issue
