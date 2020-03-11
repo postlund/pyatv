@@ -18,7 +18,7 @@
       <a class="github-button" href="https://github.com/sponsors/postlund" data-icon="octicon-heart" aria-label="Sponsor @postlund on GitHub">Sponsor</a>
       <h2 class="project-tagline">{{ page.description | default: site.description | default: site.github.project_tagline }}</h2>
       {% for p in site.top_pages %}
-        <a href="{{ site.baseurl | append:"/" | append:p.link }}" class="btn">
+        <a href="{{ p.link | relative_url }}" class="btn">
           {% assign sub = p.link | split:"/" %}
           {% if sub[1] == page.link_group %}
             <b>{{ p.title }}</b>
@@ -36,9 +36,9 @@
       <div style="text-align: center; width: 100%">
         {% for p in site.page_links[page.link_group] %}
           {% if page.permalink == p.link %}
-            <b><a href="{{ site.baseurl | append:"/" | append:p.link }}" style="display: inline;">{{ p.title }}</a></b>
+            <b><a href="{{ p.link | relative_url }}" style="display: inline;">{{ p.title }}</a></b>
           {% else %}
-            <a href="{{ site.baseurl | append:"/" | append:p.link }}" style="display: inline;">{{ p.title }}</a>
+            <a href="{{ p.link | relative_url }}" style="display: inline;">{{ p.title }}</a>
           {% endif %}
           {% if p != site.page_links[page.link_group].last %}| {% endif %}
         {% endfor %}
