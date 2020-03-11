@@ -11,16 +11,17 @@ A python client library for the Apple TV
 This is a python3 library for controlling and querying information from an Apple TV. It is built
 upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
 
-All the documentation you need is available **[here](https://postlund.github.io/pyatv/)**.
+All the documentation you need is available **[at pyatv.dev](https://pyatv.dev)**.
 
 # Shortcuts to the good stuff
 
 To save you some time, here are some shortcuts:
 
-* [Getting started](https://postlund.github.io/pyatv/getting-started/)
-* [Documentation](https://postlund.github.io/pyatv/documentation/)
-* [Development](https://postlund.github.io/pyatv/development/)
-* [Support](https://postlund.github.io/pyatv/support/)
+* [Getting started](https://pyatv.dev/getting-started)
+* [Documentation](https://pyatv.dev/documentation)
+* [Development](https://pyatv.dev/development)
+* [API Reference](https://pyatv.dev/api)
+* [Support](https://pyatv.dev/support)
 
 # Why is the README so short?
 
