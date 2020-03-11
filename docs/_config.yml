@@ -3,7 +3,7 @@ email: pierre.staahl@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   a python client library for the Apple TV
 url: "https://pyatv.dev"
-baseurl: /pyatv
+baseurl: /
 twitter_username: postlund
 github_username:  postlund
 
