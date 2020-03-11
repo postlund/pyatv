@@ -125,7 +125,6 @@ def _set_state_message(metadata, identifier):
     client = inner.playerPath.client
     client.processIdentifier = 123
     client.bundleIdentifier = identifier
-
     return set_state
 
 

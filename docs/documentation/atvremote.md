@@ -197,6 +197,7 @@ called `commands`, as it will present a list of availble commands:
      - wakeup - Wake up the device
 
     Metadata commands:
+     - app - Return information about current app playing something
      - artwork - Return artwork for what is currently playing (or None)
      - device_id - Return a unique identifier for current device
      - playing - Return what is currently playing
@@ -309,6 +310,11 @@ Perhaps see suuported features:
     Available: Supported by device and usable now
     Unavailable: Supported by device but not usable nowUnknown: Supported by the device but availability not known
     Unsupported: Not supported by this device (or by pyatv)
+
+Show active app:
+
+    $ atvremote --id 00:11:22:33:44:54 app
+    App: Musik (com.apple.TVMusic)
 
 Play a video via AirPlay:
 

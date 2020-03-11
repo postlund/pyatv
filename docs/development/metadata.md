@@ -80,3 +80,14 @@ playing2 = await atv.metadata.playing()
 if playing2.hash != playing.hash:
     print('Content has changed')
 ```
+
+## Active App
+
+Is is possible to get information about the app that is currently playing something via
+`atv.metadata.app`.
+
+```python
+app = atv.metadata.app
+print("Name:", app.name)
+print("Identifier:", app.identifier)
+```

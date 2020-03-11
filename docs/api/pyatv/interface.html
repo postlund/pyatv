@@ -455,13 +455,13 @@ class Playing(ABC):
 class App:
     &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
 
-    def __init__(self, name: str, identifier: str) -&gt; None:
+    def __init__(self, name: Optional[str], identifier: str) -&gt; None:
         &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
         self._name = name
         self._identifier = identifier
 
     @property
-    def name(self) -&gt; str:
+    def name(self) -&gt; Optional[str]:
         &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
         return self._name
 
@@ -507,12 +507,13 @@ class Metadata(ABC):
     @property  # type: ignore
     @abstractmethod
     @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-    def app(self) -&gt; App:
+    def app(self) -&gt; Optional[App]:
         &#34;&#34;&#34;Return information about current app playing something.
 
         Do note that this property returns which app is currently playing something and
         not which app is currently active. If nothing is playing, the corresponding
-        feature will be unavailable.&#34;&#34;&#34;
+        feature will be unavailable.
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
 
@@ -892,13 +893,13 @@ class AppleTV(ABC):
 <pre><code class="python">class App:
     &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
 
-    def __init__(self, name: str, identifier: str) -&gt; None:
+    def __init__(self, name: Optional[str], identifier: str) -&gt; None:
         &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
         self._name = name
         self._identifier = identifier
 
     @property
-    def name(self) -&gt; str:
+    def name(self) -&gt; Optional[str]:
         &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
         return self._name
 
@@ -934,7 +935,7 @@ def identifier(self) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def name(self) -&gt; str:
+def name(self) -&gt; Optional[str]:
     &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
     return self._name</code></pre>
 </details>
@@ -1679,12 +1680,13 @@ def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
     @property  # type: ignore
     @abstractmethod
     @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-    def app(self) -&gt; App:
+    def app(self) -&gt; Optional[App]:
         &#34;&#34;&#34;Return information about current app playing something.
 
         Do note that this property returns which app is currently playing something and
         not which app is currently active. If nothing is playing, the corresponding
-        feature will be unavailable.&#34;&#34;&#34;
+        feature will be unavailable.
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1711,12 +1713,13 @@ feature will be unavailable.</p></section>
 <pre><code class="python">@property  # type: ignore
 @abstractmethod
 @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-def app(self) -&gt; App:
+def app(self) -&gt; Optional[App]:
     &#34;&#34;&#34;Return information about current app playing something.
 
     Do note that this property returns which app is currently playing something and
     not which app is currently active. If nothing is playing, the corresponding
-    feature will be unavailable.&#34;&#34;&#34;
+    feature will be unavailable.
+    &#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
