@@ -2,7 +2,7 @@
 
 import logging
 import asyncio
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientError
@@ -26,6 +26,7 @@ from pyatv.interface import (
     DeviceInfo,
     Stream,
     RemoteControl,
+    App,
     Metadata,
     Playing,
     PushUpdater,
@@ -410,6 +411,11 @@ class DmapMetadata(Metadata):
     async def playing(self):
         """Return current device state."""
         return await self.apple_tv.playstatus()
+
+    @property
+    def app(self) -> Optional[App]:
+        """Return information about running app."""
+        raise exceptions.NotSupportedError()
 
 
 class DmapPower(Power):

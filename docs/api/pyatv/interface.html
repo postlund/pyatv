@@ -452,6 +452,29 @@ class Playing(ABC):
         raise exceptions.NotSupportedError()
 
 
+class App:
+    &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
+
+    def __init__(self, name: str, identifier: str) -&gt; None:
+        &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
+        return self._name
+
+    @property
+    def identifier(self) -&gt; str:
+        &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
+        return self._identifier
+
+    def __str__(self) -&gt; str:
+        &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
+        return f&#34;App: {self.name} ({self.identifier})&#34;
+
+
 class Metadata(ABC):
     &#34;&#34;&#34;Base class for retrieving metadata from an Apple TV.&#34;&#34;&#34;
 
@@ -479,6 +502,17 @@ class Metadata(ABC):
     @abstractmethod
     def playing(self) -&gt; Playing:
         &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @property  # type: ignore
+    @abstractmethod
+    @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
+    def app(self) -&gt; App:
+        &#34;&#34;&#34;Return information about current app playing something.
+
+        Do note that this property returns which app is currently playing something and
+        not which app is currently active. If nothing is playing, the corresponding
+        feature will be unavailable.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
 
@@ -844,6 +878,69 @@ class AppleTV(ABC):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="pyatv.interface.App"><code class="flex name class">
+<span>class <span class="ident">App</span></span>
+<span>(</span><span>name, identifier)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Information about an app.</p>
+<p>Initialize a new App instance.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class App:
+    &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
+
+    def __init__(self, name: str, identifier: str) -&gt; None:
+        &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
+        return self._name
+
+    @property
+    def identifier(self) -&gt; str:
+        &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
+        return self._identifier
+
+    def __str__(self) -&gt; str:
+        &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
+        return f&#34;App: {self.name} ({self.identifier})&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.App.identifier"><code class="name">var <span class="ident">identifier</span></code></dt>
+<dd>
+<section class="desc"><p>Return a unique bundle id for the app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def identifier(self) -&gt; str:
+    &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
+    return self._identifier</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.App.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<section class="desc"><p>User friendly name of app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self) -&gt; str:
+    &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
+    return self._name</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="pyatv.interface.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
 </code></dt>
@@ -1577,6 +1674,17 @@ def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
     @abstractmethod
     def playing(self) -&gt; Playing:
         &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @property  # type: ignore
+    @abstractmethod
+    @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
+    def app(self) -&gt; App:
+        &#34;&#34;&#34;Return information about current app playing something.
+
+        Do note that this property returns which app is currently playing something and
+        not which app is currently active. If nothing is playing, the corresponding
+        feature will be unavailable.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1590,6 +1698,28 @@ def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
 </ul>
 <h3>Instance variables</h3>
 <dl>
+<dt id="pyatv.interface.Metadata.app"><code class="name">var <span class="ident">app</span></code></dt>
+<dd>
+<section class="desc"><p>Return information about current app playing something.</p>
+<p>Do note that this property returns which app is currently playing something and
+not which app is currently active. If nothing is playing, the corresponding
+feature will be unavailable.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property  # type: ignore
+@abstractmethod
+@feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
+def app(self) -&gt; App:
+    &#34;&#34;&#34;Return information about current app playing something.
+
+    Do note that this property returns which app is currently playing something and
+    not which app is currently active. If nothing is playing, the corresponding
+    feature will be unavailable.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
 <dt id="pyatv.interface.Metadata.artwork_id"><code class="name">var <span class="ident">artwork_id</span></code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current artwork.</p></section>
@@ -3095,6 +3225,13 @@ def play_url(self, url: str, **kwargs) -&gt; None:
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="pyatv.interface.App" href="#pyatv.interface.App">App</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.App.identifier" href="#pyatv.interface.App.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.App.name" href="#pyatv.interface.App.name">name</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.interface.AppleTV.close" href="#pyatv.interface.AppleTV.close">close</a></code></li>
@@ -3158,6 +3295,7 @@ def play_url(self, url: str, **kwargs) -&gt; None:
 <li>
 <h4><code><a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></h4>
 <ul class="">
+<li><code><a title="pyatv.interface.Metadata.app" href="#pyatv.interface.Metadata.app">app</a></code></li>
 <li><code><a title="pyatv.interface.Metadata.artwork" href="#pyatv.interface.Metadata.artwork">artwork</a></code></li>
 <li><code><a title="pyatv.interface.Metadata.artwork_id" href="#pyatv.interface.Metadata.artwork_id">artwork_id</a></code></li>
 <li><code><a title="pyatv.interface.Metadata.device_id" href="#pyatv.interface.Metadata.device_id">device_id</a></code></li>

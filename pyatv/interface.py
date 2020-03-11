@@ -433,6 +433,29 @@ class Playing(ABC):
         raise exceptions.NotSupportedError()
 
 
+class App:
+    """Information about an app."""
+
+    def __init__(self, name: str, identifier: str) -> None:
+        """Initialize a new App instance."""
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -> str:
+        """User friendly name of app."""
+        return self._name
+
+    @property
+    def identifier(self) -> str:
+        """Return a unique bundle id for the app."""
+        return self._identifier
+
+    def __str__(self) -> str:
+        """Convert app info to readable string."""
+        return f"App: {self.name} ({self.identifier})"
+
+
 class Metadata(ABC):
     """Base class for retrieving metadata from an Apple TV."""
 
@@ -460,6 +483,17 @@ class Metadata(ABC):
     @abstractmethod
     def playing(self) -> Playing:
         """Return what is currently playing."""
+        raise exceptions.NotSupportedError()
+
+    @property  # type: ignore
+    @abstractmethod
+    @feature(35, "App", "App playing media.")
+    def app(self) -> Optional[App]:
+        """Return information about current app playing something.
+
+        Do note that this property returns which app is currently playing something and
+        not which app is currently active. If nothing is playing, the corresponding
+        feature will be unavailable."""
         raise exceptions.NotSupportedError()
 
 

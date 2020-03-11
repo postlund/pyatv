@@ -4,7 +4,7 @@ import math
 import logging
 import asyncio
 import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from aiohttp import ClientSession
 
@@ -33,6 +33,7 @@ from pyatv.interface import (
     DeviceInfo,
     Stream,
     RemoteControl,
+    App,
     Metadata,
     Playing,
     PushUpdater,
@@ -401,6 +402,11 @@ class MrpMetadata(Metadata):
     async def playing(self):
         """Return what is currently playing."""
         return MrpPlaying(self.psm.playing)
+
+    @property
+    def app(self) -> Optional[App]:
+        """Return information about running app."""
+        raise exceptions.NotSupportedError()
 
 
 class MrpPower(Power):

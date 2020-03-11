@@ -252,6 +252,9 @@ class FeatureName(Enum):
     Artwork = 30
     """Playing media artwork."""
 
+    App = 35
+    """App playing media."""
+
     PlayUrl = 31
     """Stream a URL on device."""
 
