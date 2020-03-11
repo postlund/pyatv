@@ -82,9 +82,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return await connect(self.conf, self.loop)
 
     @unittest_run_loop
-    async def test_not_supportedt(self):
+    async def test_app_not_supported(self):
         with self.assertRaises(exceptions.NotSupportedError):
-            await self.atv.remote_control.suspend()
+            self.atv.metadata.app
 
     @unittest_run_loop
     async def test_connect_failed(self):
@@ -211,6 +211,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.PowerState,
             FeatureName.TurnOn,
             FeatureName.TurnOff,
+            FeatureName.App,
         )
 
     @unittest_run_loop

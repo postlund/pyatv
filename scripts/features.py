@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Create feature list enum from code."""
 from pyatv import interface
 

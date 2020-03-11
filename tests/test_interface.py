@@ -135,6 +135,11 @@ class MetadataDummy(interface.Metadata):
         """Return what is currently playing."""
         raise exceptions.NotSupportedError()
 
+    @property
+    def app(self):
+        """Return information about running app."""
+        raise exceptions.NotSupportedError()
+
 
 class FeaturesDummy(interface.Features):
     def __init__(self, state):
@@ -296,3 +301,15 @@ class FeaturesTest(unittest.TestCase):
             set([ft.state for ft in all_features.values()]),
             set([FeatureState.Unsupported]),
         )
+
+
+class AppTest(unittest.TestCase):
+    def setUp(self):
+        self.app = interface.App("name", "id")
+
+    def test_app_properties(self):
+        self.assertEqual(self.app.name, "name")
+        self.assertEqual(self.app.identifier, "id")
+
+    def test_app_str(self):
+        self.assertEqual("App: name (id)", str(self.app))
