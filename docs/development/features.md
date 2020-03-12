@@ -6,7 +6,7 @@ link_group: development
 ---
 # Features
 
-It is possible to obtain information about available features of a device, e.g. if it supports playback actions or power management, using `interface.Features`. Supported features are listed in `const.FeatureName`.
+It is possible to obtain information about available features of a device, e.g. if it supports playback actions or power management, using {% include api i="interface.Features" %}. Supported features are listed in {% include api i="const.FeatureName" %}.
 
 ## Feature State
 
@@ -23,14 +23,14 @@ Because of technical reasons, the state of some features are not possible to det
 
 ## Using the Features API
 
-After connecting to a device, you get the interface via `features`:
+After connecting to a device, you get the interface via {% include api i="interface.AppleTV.features" %}:
 
 ```python
 atv = await pyatv.connect(config, ...)
 ft = atv.features
 ```
 
-To obtain current state of a feature, e.g. `FeatureName.Play`, use `get_feature`:
+To obtain current state of a feature, e.g. {% include api i="const.FeatureName.Play" %}, use {% include api i="interface.Features.get_feature" %}:
 
 ```python
 from const import FeatureName, FeatureState
@@ -40,9 +40,9 @@ if info.state == FeatureState.Available:
     await atv.remote_control.play()
 else:
     print("Play is not possible right now")
-``
+```
 
-The state of all features can be obtained via `all_features`. By default, this method will exclude unsupported features. Pass `include_unsupported=True` when calling to include state of all features:
+The state of all features can be obtained via {% include api i="interface.Features.all_features" %}. By default, this method will exclude unsupported features. Pass `include_unsupported=True` when calling to include state of all features:
 
 ```python
 all_features = ft.features.all_features(include_unsupported=unsupported)

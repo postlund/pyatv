@@ -32,7 +32,7 @@ playing = await atv.metadata.playing()
 ```
 
 You can easily extract fields like title, album or media type. See
-`pyatv.interface.Playing` and `pyatv.const`.
+{% include api i="interface.Playing" %}.
 
 ## Artwork
 
@@ -42,11 +42,11 @@ To retrieve the artwork, use the asynchronous artwork method:
 artwork = await atv.metadata.artwork()
 ```
 
-This will return an `pyatv.interface.Metadata.ArtworkInfo`, containing the image bytes and mimetype. If no artwork is available,
+This will return an {% include api i="interface.ArtworkInfo" %}, containing the image bytes and mimetype. If no artwork is available,
 `None` is returned instead.
 
 Remember that the artwork is relatively large, so you should try to minimize
-this call. More information is available at `pyatv.interface.Metadata.artwork`.
+this call. More information is available at  {% include api i="interface.Metadata.artwork" %}.
 
 ## Device identifier
 
@@ -84,10 +84,12 @@ if playing2.hash != playing.hash:
 ## Active App
 
 Is is possible to get information about the app that is currently playing something via
-`atv.metadata.app`.
+ {% include api i="interface.Metadata.app" %}:
 
 ```python
 app = atv.metadata.app
 print("Name:", app.name)
 print("Identifier:", app.identifier)
 ```
+
+It conforms to the  {% include api i="interface.App" %} interface.

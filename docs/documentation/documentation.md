@@ -9,7 +9,7 @@ link_group: documentation
 This section covers general parts of `pyatv`, like how to install it, concepts and terminology to
 understand how it works. More or less everything that is not *how* you develop with it.
 
-Before diving into code, make sure you read and understand the [Concepts](documentation/concepts/)
+Before diving into code, make sure you read and understand the [Concepts](concepts/)
 first.
 
 ## Installing pyatv
@@ -41,8 +41,8 @@ To get the work done, `pyatv` requires some other pieces of software, more speci
 - protobuf >= 3.4.0
 - srptools >= 0.2.0
 
-### Roadmap
+### Milestones
 
-Current roadmap is available on GitHub:
+Current milestones ate available on GitHub:
 
 **[Roadmap](https://github.com/postlund/pyatv/milestones)**

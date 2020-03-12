@@ -44,7 +44,7 @@ way to not hammer the device in case of errors.
 It is possible to get callbacks whenever a device loses its connection. Two methods
 are used: one for expected loss, e.g. manually disconnecting and one for unexpected
 loss, e.g. a crash or network problem. The API is defined by the
-`interface.DeviceLister` interface and works similarly to how push updates works.
+{% include api i="interface.DeviceListener" %} interface and works similarly to how push updates works.
 
 Here is a simple example:
 
@@ -71,7 +71,7 @@ a connection, the callbacks in this interface will be called.
 
 It is possible to get callbacks whenever a device power state is changed, 
 e.g. the device turned on or turned off. The API is defined by the
-`interface.PowerListener` interface and works similarly to how push updates works.
+ {% include api i="interface.PowerListener" %} interface and works similarly to how push updates works.
 
 Here is a simple example:
 
