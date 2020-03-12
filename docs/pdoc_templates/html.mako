@@ -10,7 +10,7 @@
     if not isinstance(d, pdoc.Doc) or isinstance(d, pdoc.External) and not external_links:
         return name
     url = d.url(relative_to=module, link_prefix=link_prefix,
-                top_ancestor=not show_inherited_members)
+                top_ancestor=not show_inherited_members).replace(".html", "")
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
 
@@ -121,8 +121,6 @@
     </nav>
   % endif
   <h1 class="title">${'Namespace' if module.is_namespace else 'Module'} <code>${module.name}</code></h1>
-
-  <p><a href="#sidebar">Jump to table of contents</a></p>
   </header>
 
   <section id="section-intro">
@@ -352,10 +350,10 @@ link_group: api
     ${show_module_list(modules)}
   </article>
 % else:
+  ${module_index(module)}
   <article id="content">
     ${show_module(module)}
   </article>
-  ${module_index(module)}
 % endif
 
 <footer id="footer">

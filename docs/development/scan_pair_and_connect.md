@@ -77,8 +77,8 @@ async def pair(config, protocol, loop, session=None, **kwargs):
 
 ### Usage
 
-Calling `pyatv.pair` returns a _pairing handler_ conforming to the interface
-`interface.PairingHandler`. The usage flow is more or less generic in order to support
+Calling {% include api i="pyatv.pair" %} returns a _pairing handler_ conforming to the interface
+{% include api i="interface.PairingHandler" %}. The usage flow is more or less generic in order to support
 protocols that either requires a PIN entered on the device (`DMAP`) or in the client
 (`MRP` and `AirPlay`). It more or less looks like this:
 
@@ -97,7 +97,7 @@ to succeed (or timeout), in order to know when to call `finish`. This is only ap
 to the case when `device_provides_pin` is False. Now you have to poll `has_paired` or
 just require that pairing succeeds within a time frame.
 
-If an error occurs, e.g. incorrect PIN, `exceptions.PairingError` is raised.
+If an error occurs, e.g. incorrect PIN, {% include api i="exceptions.PairingError" %} is raised.
 
 Translating the flow above into code looks like this:
 
@@ -185,7 +185,7 @@ The following extra settings are supported by `DMAP`:
 | pairing_guid | Custom value for `pairing_guid` (credentials) with format `0xXXXXXXXXXXXXXXXX`. |
 | zeroconf | If you want to use a custom `aiozeroconf.Zeroconf` instance, you can pass it here. |
 
-You pass these via `kwargs` to `pyatv.pair`:
+You pass these via `kwargs` to {% include api i="pyatv.pair" %}:
 
 ```python
 pairing = await pyatv.pair(config, Protocol.DMAP, name='my remote')
@@ -213,7 +213,7 @@ async def connect(config, loop, protocol=None, session=None):
 
 ### Usage
 
-Connecting is simply done by passing a config to `pyatv.connect`:
+Connecting is simply done by passing a config to {% include api i="pyatv.conncet" %}:
 
 ```python
 # Get a configuration with scan
@@ -224,9 +224,9 @@ atv = await pyatv.connect(atvs[0], loop)
 ```
 
 By default, `MRP` will be the preferred protocol if both `MRP` and `DMAP` are present. It
-is not possible to connect just `AirPlay` - `exceptions.UnsupportedProtocolError` will be
+is not possible to connect just `AirPlay` -  {% include api i="exceptions.UnsupportedProtocolError" %} will be
 raised. The configuration must also have an `identifier`, otherwise
-`exceptions.DeviceIdMissingError` will be raised.
+{% include api i="exceptions.DeviceIdMissingError" %}  will be raised.
 
 Remember to load any previously obtained credentials before connecting.
 

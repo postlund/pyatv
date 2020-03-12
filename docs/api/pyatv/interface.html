@@ -4,10 +4,202 @@ title: API - pyatv.interface
 permalink: /api//interface
 link_group: api
 ---
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyatv" href="index">pyatv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pyatv.interface.feature" href="#pyatv.interface.feature">feature</a></code></li>
+<li><code><a title="pyatv.interface.retrieve_commands" href="#pyatv.interface.retrieve_commands">retrieve_commands</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.interface.App" href="#pyatv.interface.App">App</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.App.identifier" href="#pyatv.interface.App.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.App.name" href="#pyatv.interface.App.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.interface.AppleTV.close" href="#pyatv.interface.AppleTV.close">close</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.connect" href="#pyatv.interface.AppleTV.connect">connect</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.device_info" href="#pyatv.interface.AppleTV.device_info">device_info</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.features" href="#pyatv.interface.AppleTV.features">features</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.listener" href="#pyatv.interface.AppleTV.listener">listener</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.metadata" href="#pyatv.interface.AppleTV.metadata">metadata</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.power" href="#pyatv.interface.AppleTV.power">power</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.push_updater" href="#pyatv.interface.AppleTV.push_updater">push_updater</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.remote_control" href="#pyatv.interface.AppleTV.remote_control">remote_control</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.service" href="#pyatv.interface.AppleTV.service">service</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.stream" href="#pyatv.interface.AppleTV.stream">stream</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.ArtworkInfo.bytes" href="#pyatv.interface.ArtworkInfo.bytes">bytes</a></code></li>
+<li><code><a title="pyatv.interface.ArtworkInfo.mimetype" href="#pyatv.interface.ArtworkInfo.mimetype">mimetype</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.BaseService.identifier" href="#pyatv.interface.BaseService.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.merge" href="#pyatv.interface.BaseService.merge">merge</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.DeviceInfo.build_number" href="#pyatv.interface.DeviceInfo.build_number">build_number</a></code></li>
+<li><code><a title="pyatv.interface.DeviceInfo.mac" href="#pyatv.interface.DeviceInfo.mac">mac</a></code></li>
+<li><code><a title="pyatv.interface.DeviceInfo.model" href="#pyatv.interface.DeviceInfo.model">model</a></code></li>
+<li><code><a title="pyatv.interface.DeviceInfo.operating_system" href="#pyatv.interface.DeviceInfo.operating_system">operating_system</a></code></li>
+<li><code><a title="pyatv.interface.DeviceInfo.version" href="#pyatv.interface.DeviceInfo.version">version</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.DeviceListener" href="#pyatv.interface.DeviceListener">DeviceListener</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.DeviceListener.connection_closed" href="#pyatv.interface.DeviceListener.connection_closed">connection_closed</a></code></li>
+<li><code><a title="pyatv.interface.DeviceListener.connection_lost" href="#pyatv.interface.DeviceListener.connection_lost">connection_lost</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.FeatureInfo.options" href="#pyatv.interface.FeatureInfo.options">options</a></code></li>
+<li><code><a title="pyatv.interface.FeatureInfo.state" href="#pyatv.interface.FeatureInfo.state">state</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Features" href="#pyatv.interface.Features">Features</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Features.all_features" href="#pyatv.interface.Features.all_features">all_features</a></code></li>
+<li><code><a title="pyatv.interface.Features.get_feature" href="#pyatv.interface.Features.get_feature">get_feature</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Metadata.app" href="#pyatv.interface.Metadata.app">app</a></code></li>
+<li><code><a title="pyatv.interface.Metadata.artwork" href="#pyatv.interface.Metadata.artwork">artwork</a></code></li>
+<li><code><a title="pyatv.interface.Metadata.artwork_id" href="#pyatv.interface.Metadata.artwork_id">artwork_id</a></code></li>
+<li><code><a title="pyatv.interface.Metadata.device_id" href="#pyatv.interface.Metadata.device_id">device_id</a></code></li>
+<li><code><a title="pyatv.interface.Metadata.playing" href="#pyatv.interface.Metadata.playing">playing</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.PairingHandler" href="#pyatv.interface.PairingHandler">PairingHandler</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.interface.PairingHandler.begin" href="#pyatv.interface.PairingHandler.begin">begin</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.close" href="#pyatv.interface.PairingHandler.close">close</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.device_provides_pin" href="#pyatv.interface.PairingHandler.device_provides_pin">device_provides_pin</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.finish" href="#pyatv.interface.PairingHandler.finish">finish</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.has_paired" href="#pyatv.interface.PairingHandler.has_paired">has_paired</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.pin" href="#pyatv.interface.PairingHandler.pin">pin</a></code></li>
+<li><code><a title="pyatv.interface.PairingHandler.service" href="#pyatv.interface.PairingHandler.service">service</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.interface.Playing.album" href="#pyatv.interface.Playing.album">album</a></code></li>
+<li><code><a title="pyatv.interface.Playing.artist" href="#pyatv.interface.Playing.artist">artist</a></code></li>
+<li><code><a title="pyatv.interface.Playing.device_state" href="#pyatv.interface.Playing.device_state">device_state</a></code></li>
+<li><code><a title="pyatv.interface.Playing.genre" href="#pyatv.interface.Playing.genre">genre</a></code></li>
+<li><code><a title="pyatv.interface.Playing.hash" href="#pyatv.interface.Playing.hash">hash</a></code></li>
+<li><code><a title="pyatv.interface.Playing.media_type" href="#pyatv.interface.Playing.media_type">media_type</a></code></li>
+<li><code><a title="pyatv.interface.Playing.position" href="#pyatv.interface.Playing.position">position</a></code></li>
+<li><code><a title="pyatv.interface.Playing.repeat" href="#pyatv.interface.Playing.repeat">repeat</a></code></li>
+<li><code><a title="pyatv.interface.Playing.shuffle" href="#pyatv.interface.Playing.shuffle">shuffle</a></code></li>
+<li><code><a title="pyatv.interface.Playing.title" href="#pyatv.interface.Playing.title">title</a></code></li>
+<li><code><a title="pyatv.interface.Playing.total_time" href="#pyatv.interface.Playing.total_time">total_time</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Power.listener" href="#pyatv.interface.Power.listener">listener</a></code></li>
+<li><code><a title="pyatv.interface.Power.power_state" href="#pyatv.interface.Power.power_state">power_state</a></code></li>
+<li><code><a title="pyatv.interface.Power.turn_off" href="#pyatv.interface.Power.turn_off">turn_off</a></code></li>
+<li><code><a title="pyatv.interface.Power.turn_on" href="#pyatv.interface.Power.turn_on">turn_on</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.PowerListener" href="#pyatv.interface.PowerListener">PowerListener</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.PowerListener.powerstate_update" href="#pyatv.interface.PowerListener.powerstate_update">powerstate_update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.PushListener.playstatus_error" href="#pyatv.interface.PushListener.playstatus_error">playstatus_error</a></code></li>
+<li><code><a title="pyatv.interface.PushListener.playstatus_update" href="#pyatv.interface.PushListener.playstatus_update">playstatus_update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.PushUpdater.active" href="#pyatv.interface.PushUpdater.active">active</a></code></li>
+<li><code><a title="pyatv.interface.PushUpdater.listener" href="#pyatv.interface.PushUpdater.listener">listener</a></code></li>
+<li><code><a title="pyatv.interface.PushUpdater.start" href="#pyatv.interface.PushUpdater.start">start</a></code></li>
+<li><code><a title="pyatv.interface.PushUpdater.stop" href="#pyatv.interface.PushUpdater.stop">stop</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.RemoteControl" href="#pyatv.interface.RemoteControl">RemoteControl</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.interface.RemoteControl.down" href="#pyatv.interface.RemoteControl.down">down</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.home" href="#pyatv.interface.RemoteControl.home">home</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.home_hold" href="#pyatv.interface.RemoteControl.home_hold">home_hold</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.left" href="#pyatv.interface.RemoteControl.left">left</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.menu" href="#pyatv.interface.RemoteControl.menu">menu</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.next" href="#pyatv.interface.RemoteControl.next">next</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.pause" href="#pyatv.interface.RemoteControl.pause">pause</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.play" href="#pyatv.interface.RemoteControl.play">play</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.play_pause" href="#pyatv.interface.RemoteControl.play_pause">play_pause</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.previous" href="#pyatv.interface.RemoteControl.previous">previous</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.right" href="#pyatv.interface.RemoteControl.right">right</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.select" href="#pyatv.interface.RemoteControl.select">select</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.set_position" href="#pyatv.interface.RemoteControl.set_position">set_position</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.set_repeat" href="#pyatv.interface.RemoteControl.set_repeat">set_repeat</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.set_shuffle" href="#pyatv.interface.RemoteControl.set_shuffle">set_shuffle</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.stop" href="#pyatv.interface.RemoteControl.stop">stop</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.suspend" href="#pyatv.interface.RemoteControl.suspend">suspend</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.top_menu" href="#pyatv.interface.RemoteControl.top_menu">top_menu</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.up" href="#pyatv.interface.RemoteControl.up">up</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.volume_down" href="#pyatv.interface.RemoteControl.volume_down">volume_down</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.volume_up" href="#pyatv.interface.RemoteControl.volume_up">volume_up</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.wakeup" href="#pyatv.interface.RemoteControl.wakeup">wakeup</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Stream.play_url" href="#pyatv.interface.Stream.play_url">play_url</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 <article id="content">
 <header>
 <h1 class="title">Module <code>pyatv.interface</code></h1>
-<p><a href="#sidebar">Jump to table of contents</a></p>
 </header>
 <section id="section-intro">
 <p>Public interface exposed by library.</p>
@@ -1290,9 +1482,9 @@ async def connect(self) -&gt; None:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="pyatv.conf.AirPlayService" href="conf.html#pyatv.conf.AirPlayService">AirPlayService</a></li>
-<li><a title="pyatv.conf.DmapService" href="conf.html#pyatv.conf.DmapService">DmapService</a></li>
-<li><a title="pyatv.conf.MrpService" href="conf.html#pyatv.conf.MrpService">MrpService</a></li>
+<li><a title="pyatv.conf.AirPlayService" href="conf#pyatv.conf.AirPlayService">AirPlayService</a></li>
+<li><a title="pyatv.conf.DmapService" href="conf#pyatv.conf.DmapService">DmapService</a></li>
+<li><a title="pyatv.conf.MrpService" href="conf#pyatv.conf.MrpService">MrpService</a></li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -3208,199 +3400,6 @@ def play_url(self, url: str, **kwargs) -&gt; None:
 </dl>
 </section>
 </article>
-<nav id="sidebar">
-<h1>Index</h1>
-<div class="toc">
-<ul></ul>
-</div>
-<ul id="index">
-<li><h3>Super-module</h3>
-<ul>
-<li><code><a title="pyatv" href="index.html">pyatv</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="pyatv.interface.feature" href="#pyatv.interface.feature">feature</a></code></li>
-<li><code><a title="pyatv.interface.retrieve_commands" href="#pyatv.interface.retrieve_commands">retrieve_commands</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="pyatv.interface.App" href="#pyatv.interface.App">App</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.App.identifier" href="#pyatv.interface.App.identifier">identifier</a></code></li>
-<li><code><a title="pyatv.interface.App.name" href="#pyatv.interface.App.name">name</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></code></h4>
-<ul class="two-column">
-<li><code><a title="pyatv.interface.AppleTV.close" href="#pyatv.interface.AppleTV.close">close</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.connect" href="#pyatv.interface.AppleTV.connect">connect</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.device_info" href="#pyatv.interface.AppleTV.device_info">device_info</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.features" href="#pyatv.interface.AppleTV.features">features</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.listener" href="#pyatv.interface.AppleTV.listener">listener</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.metadata" href="#pyatv.interface.AppleTV.metadata">metadata</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.power" href="#pyatv.interface.AppleTV.power">power</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.push_updater" href="#pyatv.interface.AppleTV.push_updater">push_updater</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.remote_control" href="#pyatv.interface.AppleTV.remote_control">remote_control</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.service" href="#pyatv.interface.AppleTV.service">service</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.stream" href="#pyatv.interface.AppleTV.stream">stream</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.ArtworkInfo.bytes" href="#pyatv.interface.ArtworkInfo.bytes">bytes</a></code></li>
-<li><code><a title="pyatv.interface.ArtworkInfo.mimetype" href="#pyatv.interface.ArtworkInfo.mimetype">mimetype</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.BaseService.identifier" href="#pyatv.interface.BaseService.identifier">identifier</a></code></li>
-<li><code><a title="pyatv.interface.BaseService.merge" href="#pyatv.interface.BaseService.merge">merge</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.DeviceInfo.build_number" href="#pyatv.interface.DeviceInfo.build_number">build_number</a></code></li>
-<li><code><a title="pyatv.interface.DeviceInfo.mac" href="#pyatv.interface.DeviceInfo.mac">mac</a></code></li>
-<li><code><a title="pyatv.interface.DeviceInfo.model" href="#pyatv.interface.DeviceInfo.model">model</a></code></li>
-<li><code><a title="pyatv.interface.DeviceInfo.operating_system" href="#pyatv.interface.DeviceInfo.operating_system">operating_system</a></code></li>
-<li><code><a title="pyatv.interface.DeviceInfo.version" href="#pyatv.interface.DeviceInfo.version">version</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.DeviceListener" href="#pyatv.interface.DeviceListener">DeviceListener</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.DeviceListener.connection_closed" href="#pyatv.interface.DeviceListener.connection_closed">connection_closed</a></code></li>
-<li><code><a title="pyatv.interface.DeviceListener.connection_lost" href="#pyatv.interface.DeviceListener.connection_lost">connection_lost</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.FeatureInfo.options" href="#pyatv.interface.FeatureInfo.options">options</a></code></li>
-<li><code><a title="pyatv.interface.FeatureInfo.state" href="#pyatv.interface.FeatureInfo.state">state</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.Features" href="#pyatv.interface.Features">Features</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.Features.all_features" href="#pyatv.interface.Features.all_features">all_features</a></code></li>
-<li><code><a title="pyatv.interface.Features.get_feature" href="#pyatv.interface.Features.get_feature">get_feature</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.Metadata.app" href="#pyatv.interface.Metadata.app">app</a></code></li>
-<li><code><a title="pyatv.interface.Metadata.artwork" href="#pyatv.interface.Metadata.artwork">artwork</a></code></li>
-<li><code><a title="pyatv.interface.Metadata.artwork_id" href="#pyatv.interface.Metadata.artwork_id">artwork_id</a></code></li>
-<li><code><a title="pyatv.interface.Metadata.device_id" href="#pyatv.interface.Metadata.device_id">device_id</a></code></li>
-<li><code><a title="pyatv.interface.Metadata.playing" href="#pyatv.interface.Metadata.playing">playing</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.PairingHandler" href="#pyatv.interface.PairingHandler">PairingHandler</a></code></h4>
-<ul class="two-column">
-<li><code><a title="pyatv.interface.PairingHandler.begin" href="#pyatv.interface.PairingHandler.begin">begin</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.close" href="#pyatv.interface.PairingHandler.close">close</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.device_provides_pin" href="#pyatv.interface.PairingHandler.device_provides_pin">device_provides_pin</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.finish" href="#pyatv.interface.PairingHandler.finish">finish</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.has_paired" href="#pyatv.interface.PairingHandler.has_paired">has_paired</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.pin" href="#pyatv.interface.PairingHandler.pin">pin</a></code></li>
-<li><code><a title="pyatv.interface.PairingHandler.service" href="#pyatv.interface.PairingHandler.service">service</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a></code></h4>
-<ul class="two-column">
-<li><code><a title="pyatv.interface.Playing.album" href="#pyatv.interface.Playing.album">album</a></code></li>
-<li><code><a title="pyatv.interface.Playing.artist" href="#pyatv.interface.Playing.artist">artist</a></code></li>
-<li><code><a title="pyatv.interface.Playing.device_state" href="#pyatv.interface.Playing.device_state">device_state</a></code></li>
-<li><code><a title="pyatv.interface.Playing.genre" href="#pyatv.interface.Playing.genre">genre</a></code></li>
-<li><code><a title="pyatv.interface.Playing.hash" href="#pyatv.interface.Playing.hash">hash</a></code></li>
-<li><code><a title="pyatv.interface.Playing.media_type" href="#pyatv.interface.Playing.media_type">media_type</a></code></li>
-<li><code><a title="pyatv.interface.Playing.position" href="#pyatv.interface.Playing.position">position</a></code></li>
-<li><code><a title="pyatv.interface.Playing.repeat" href="#pyatv.interface.Playing.repeat">repeat</a></code></li>
-<li><code><a title="pyatv.interface.Playing.shuffle" href="#pyatv.interface.Playing.shuffle">shuffle</a></code></li>
-<li><code><a title="pyatv.interface.Playing.title" href="#pyatv.interface.Playing.title">title</a></code></li>
-<li><code><a title="pyatv.interface.Playing.total_time" href="#pyatv.interface.Playing.total_time">total_time</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.Power.listener" href="#pyatv.interface.Power.listener">listener</a></code></li>
-<li><code><a title="pyatv.interface.Power.power_state" href="#pyatv.interface.Power.power_state">power_state</a></code></li>
-<li><code><a title="pyatv.interface.Power.turn_off" href="#pyatv.interface.Power.turn_off">turn_off</a></code></li>
-<li><code><a title="pyatv.interface.Power.turn_on" href="#pyatv.interface.Power.turn_on">turn_on</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.PowerListener" href="#pyatv.interface.PowerListener">PowerListener</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.PowerListener.powerstate_update" href="#pyatv.interface.PowerListener.powerstate_update">powerstate_update</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.PushListener.playstatus_error" href="#pyatv.interface.PushListener.playstatus_error">playstatus_error</a></code></li>
-<li><code><a title="pyatv.interface.PushListener.playstatus_update" href="#pyatv.interface.PushListener.playstatus_update">playstatus_update</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.PushUpdater.active" href="#pyatv.interface.PushUpdater.active">active</a></code></li>
-<li><code><a title="pyatv.interface.PushUpdater.listener" href="#pyatv.interface.PushUpdater.listener">listener</a></code></li>
-<li><code><a title="pyatv.interface.PushUpdater.start" href="#pyatv.interface.PushUpdater.start">start</a></code></li>
-<li><code><a title="pyatv.interface.PushUpdater.stop" href="#pyatv.interface.PushUpdater.stop">stop</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.RemoteControl" href="#pyatv.interface.RemoteControl">RemoteControl</a></code></h4>
-<ul class="two-column">
-<li><code><a title="pyatv.interface.RemoteControl.down" href="#pyatv.interface.RemoteControl.down">down</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.home" href="#pyatv.interface.RemoteControl.home">home</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.home_hold" href="#pyatv.interface.RemoteControl.home_hold">home_hold</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.left" href="#pyatv.interface.RemoteControl.left">left</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.menu" href="#pyatv.interface.RemoteControl.menu">menu</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.next" href="#pyatv.interface.RemoteControl.next">next</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.pause" href="#pyatv.interface.RemoteControl.pause">pause</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.play" href="#pyatv.interface.RemoteControl.play">play</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.play_pause" href="#pyatv.interface.RemoteControl.play_pause">play_pause</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.previous" href="#pyatv.interface.RemoteControl.previous">previous</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.right" href="#pyatv.interface.RemoteControl.right">right</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.select" href="#pyatv.interface.RemoteControl.select">select</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.set_position" href="#pyatv.interface.RemoteControl.set_position">set_position</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.set_repeat" href="#pyatv.interface.RemoteControl.set_repeat">set_repeat</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.set_shuffle" href="#pyatv.interface.RemoteControl.set_shuffle">set_shuffle</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.stop" href="#pyatv.interface.RemoteControl.stop">stop</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.suspend" href="#pyatv.interface.RemoteControl.suspend">suspend</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.top_menu" href="#pyatv.interface.RemoteControl.top_menu">top_menu</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.up" href="#pyatv.interface.RemoteControl.up">up</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.volume_down" href="#pyatv.interface.RemoteControl.volume_down">volume_down</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.volume_up" href="#pyatv.interface.RemoteControl.volume_up">volume_up</a></code></li>
-<li><code><a title="pyatv.interface.RemoteControl.wakeup" href="#pyatv.interface.RemoteControl.wakeup">wakeup</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.interface.Stream.play_url" href="#pyatv.interface.Stream.play_url">play_url</a></code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</nav>
 <footer id="footer">
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.5</a>.</p>
 </footer>

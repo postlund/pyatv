@@ -63,7 +63,7 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- |
 | Power management                                                | No       | Yes       |
 
-*\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/) page.*
+*\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*
 
 *\*\* Limited support due to restrictions in protocol.*
 

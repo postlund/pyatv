@@ -12,7 +12,7 @@ very limited. Only two features are supported:
 - Device authentication ("pairing")
 - Playing media via URL
 
-In the external interface, AirPlay support is implemented via the `interface.Stream`
+In the external interface, AirPlay support is implemented via the {% include api i="interface.Stream" %}
 API.
 
 Additional features will be added as needed.
@@ -54,7 +54,7 @@ as no existing credentials are provided. So there is nothing special here.
 
 ## Playing media
 
-Playing a URL is as simple as passing the URL to `play_url`:
+Playing a URL is as simple as passing the URL to {% include api i="interface.Stream.play_url" %}:
 
 ```python
 url = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'

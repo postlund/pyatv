@@ -7,7 +7,7 @@ link_group: development
 # Power Management
 
 Power management of a device is done with the power interface,
-`interface.Power`. It allows you to turn on, turn off and get current
+{% include api i="interface.Power" %}. It allows you to turn on, turn off and get current
 power state.
 
 List of supported devices:
@@ -16,7 +16,7 @@ List of supported devices:
 
 ## Using the Power Management API
 
-After connecting to a device, you get the power management via `power`:
+After connecting to a device, you get the power management via {% include api i="interface.AppleTV.power" %}:
 
 ```python
 atv = await pyatv.connect(config, ...)
