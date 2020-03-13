@@ -35,15 +35,16 @@ link_group: api
 <pre><code class="python">&#34;&#34;&#34;Various helper methods.&#34;&#34;&#34;
 
 import asyncio
-from typing import Callable
+from typing import Callable, Optional
 
 import pyatv
 
 
-def auto_connect(
+async def auto_connect(
     handler: Callable[[pyatv.interface.AppleTV], None],
     timeout: int = 5,
     not_found: Callable[[], None] = None,
+    loop: Optional[asyncio.AbstractEventLoop] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Connect to first discovered device.
 
@@ -54,24 +55,24 @@ def auto_connect(
 
     Note: both handler and not_found must be coroutines
     &#34;&#34;&#34;
-    # A coroutine is used so we can connect to the device while being inside
-    # the event loop
+    # Scan and do connect in the event loop
     async def _handle(loop):
         atvs = await pyatv.scan(loop, timeout=timeout)
 
         # Take the first device found
         if atvs:
             atv = await pyatv.connect(atvs[0], loop)
+
             try:
                 await handler(atv)
             finally:
-                await atv.logout()
+                await atv.close()
         else:
             if not_found is not None:
                 await not_found()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(_handle(loop))</code></pre>
+    loop = loop or asyncio.get_event_loop()
+    await _handle(loop)</code></pre>
 </details>
 </section>
 <section>
@@ -82,7 +83,7 @@ def auto_connect(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="pyatv.helpers.auto_connect"><code class="name flex">
-<span>def <span class="ident">auto_connect</span></span>(<span>handler, timeout=5, not_found=None)</span>
+<span>async def <span class="ident">auto_connect</span></span>(<span>handler, timeout=5, not_found=None, loop=None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Connect to first discovered device.</p>
@@ -95,10 +96,11 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def auto_connect(
+<pre><code class="python">async def auto_connect(
     handler: Callable[[pyatv.interface.AppleTV], None],
     timeout: int = 5,
     not_found: Callable[[], None] = None,
+    loop: Optional[asyncio.AbstractEventLoop] = None,
 ) -&gt; None:
     &#34;&#34;&#34;Connect to first discovered device.
 
@@ -109,24 +111,24 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 
     Note: both handler and not_found must be coroutines
     &#34;&#34;&#34;
-    # A coroutine is used so we can connect to the device while being inside
-    # the event loop
+    # Scan and do connect in the event loop
     async def _handle(loop):
         atvs = await pyatv.scan(loop, timeout=timeout)
 
         # Take the first device found
         if atvs:
             atv = await pyatv.connect(atvs[0], loop)
+
             try:
                 await handler(atv)
             finally:
-                await atv.logout()
+                await atv.close()
         else:
             if not_found is not None:
                 await not_found()
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(_handle(loop))</code></pre>
+    loop = loop or asyncio.get_event_loop()
+    await _handle(loop)</code></pre>
 </details>
 </dd>
 </dl>

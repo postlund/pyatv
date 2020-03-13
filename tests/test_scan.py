@@ -2,9 +2,10 @@
 
 import pyatv
 import ipaddress
-import asynctest
 
 from unittest.mock import patch
+
+import pytest
 
 from pyatv.const import Protocol
 from tests import fake_udns, zeroconf_stub
@@ -48,187 +49,215 @@ def _get_atv(atvs, ip):
     return None
 
 
-class ScanZeroconfTest(asynctest.TestCase):
-    async def test_scan_no_device_found(self):
-        zeroconf_stub.stub(pyatv)
-
-        atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 0)
-
-    async def test_scan(self):
-        zeroconf_stub.stub(
-            pyatv,
-            HOMESHARING_SERVICE_1,
-            HOMESHARING_SERVICE_2,
-            MRP_SERVICE_1,
-            AIRPLAY_SERVICE_1,
-        )
-
-        atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 3)
-
-        # First device
-        dev1 = _get_atv(atvs, IP_1)
-        self.assertIsNotNone(dev1)
-        self.assertEqual(dev1.identifier, "AAAA")
-
-        # Second device
-        dev2 = _get_atv(atvs, IP_2)
-        self.assertIsNotNone(dev2)
-        self.assertEqual(dev2.identifier, "BBBB")
-
-        # Third device
-        dev3 = _get_atv(atvs, IP_4)
-        self.assertIsNotNone(dev3)
-        self.assertEqual(dev3.identifier, MRP_ID_1)
-
-    async def test_scan_no_home_sharing(self):
-        zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
-
-        atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, "Apple TV 3")
-        self.assertEqual(atvs[0].address, ipaddress.ip_address(IP_3))
-
-        atv = atvs[0]
-        self.assertEqual(atv.get_service(Protocol.DMAP).port, 3689)
-
-    async def test_scan_home_sharing_merge(self):
-        zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)
-
-        atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, "Apple TV 3")
-        self.assertEqual(atvs[0].address, ipaddress.ip_address("10.0.0.3"))
-
-        service = atvs[0].main_service()
-        self.assertEqual(service.credentials, "cccc")
-        self.assertEqual(service.port, 3689)
-
-    async def test_scan_mrp(self):
-        zeroconf_stub.stub(pyatv, MRP_SERVICE_1, MRP_SERVICE_2, DEVICE_SERVICE_1)
-
-        atvs = await pyatv.scan(self.loop, timeout=0, protocol=Protocol.MRP)
-        self.assertEqual(len(atvs), 2)
-
-        dev1 = _get_atv(atvs, IP_4)
-        self.assertIsNotNone(dev1)
-        self.assertEqual(dev1.name, "Apple TV 4")
-        self.assertIsNotNone(dev1.get_service(Protocol.MRP))
-
-        dev2 = _get_atv(atvs, IP_5)
-        self.assertIsNotNone(dev2)
-        self.assertEqual(dev2.name, "Apple TV 5")
-        self.assertIsNotNone(dev2.get_service(Protocol.MRP))
-
-    async def test_scan_airplay_device(self):
-        zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
-
-        atvs = await pyatv.scan(self.loop, timeout=0)
-        self.assertEqual(len(atvs), 0)
-
-    async def test_scan_for_particular_device(self):
-        zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
-
-        atvs = await pyatv.scan(self.loop, timeout=0, identifier="BBBB")
-        self.assertEqual(len(atvs), 1)
-        self.assertEqual(atvs[0].name, "Apple TV 2")
-        self.assertEqual(atvs[0].address, ipaddress.ip_address(IP_2))
-
-    async def test_scan_device_info(self):
-        zeroconf_stub.stub(pyatv, MRP_SERVICE_1, AIRPLAY_SERVICE_2)
-
-        atvs = await pyatv.scan(self.loop, timeout=0, protocol=Protocol.MRP)
-        self.assertEqual(len(atvs), 1)
-
-        device_info = atvs[0].device_info
-        self.assertEqual(device_info.mac, AIRPLAY_ID)
+def assert_device(atv, name, address, identifier, protocol, port, creds=None):
+    assert atv.name == name
+    assert atv.address == address
+    assert atv.identifier == identifier
+    assert atv.get_service(protocol)
+    assert atv.get_service(protocol).port == port
+    assert atv.get_service(protocol).credentials == creds
 
 
-class ScanUnicastDnsTest(asynctest.TestCase):
-    async def setUp(self, *services):
-        self.server = fake_udns.FakeUdns(self.loop)
-        await self.server.start()
+@pytest.fixture
+async def udns_server(event_loop):
+    server = fake_udns.FakeUdns(event_loop)
+    await server.start()
+    yield server
+    server.close()
 
-    async def scan(self):
-        port = str(self.server.port)
+
+@pytest.fixture
+async def udns_scan(event_loop, udns_server):
+    async def _scan():
+        port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
-            return await pyatv.scan(self.loop, hosts=[IP_LOCALHOST])
+            return await pyatv.scan(event_loop, hosts=[IP_LOCALHOST])
 
-    def assertDevice(self, atv, name, address, identifier, protocol, port, creds=None):
-        self.assertEqual(atv.name, name)
-        self.assertEqual(atv.address, address)
-        self.assertEqual(atv.identifier, identifier)
-        self.assertIsNotNone(atv.get_service(protocol))
-        self.assertEqual(atv.get_service(protocol).port, port)
-        self.assertEqual(atv.get_service(protocol).credentials, creds)
+    yield _scan
 
-    async def test_scan_no_results(self):
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 0)
 
-    async def test_missing_port(self):
-        self.server.add_service(
-            fake_udns.mrp_service("dummy", "dummy", "dummy", port=None)
-        )
+@pytest.mark.asyncio
+async def test_zeroconf_scan_no_device_found(event_loop):
+    zeroconf_stub.stub(pyatv)
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 0)
+    atvs = await pyatv.scan(event_loop, timeout=0)
+    assert len(atvs) == 0
 
-    async def test_missing_properties(self):
-        self.server.add_service(fake_udns.FakeDnsService("dummy", 1234, None))
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 0)
+@pytest.mark.asyncio
+async def test_zeroconf_scan(event_loop):
+    zeroconf_stub.stub(
+        pyatv,
+        HOMESHARING_SERVICE_1,
+        HOMESHARING_SERVICE_2,
+        MRP_SERVICE_1,
+        AIRPLAY_SERVICE_1,
+    )
 
-    async def test_scan_mrp(self):
-        self.server.add_service(
-            fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1)
-        )
+    atvs = await pyatv.scan(event_loop, timeout=0)
+    assert len(atvs) == 3
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 1)
+    # First device
+    dev1 = _get_atv(atvs, IP_1)
+    assert dev1
+    assert dev1.identifier == "AAAA"
 
-        self.assertDevice(
-            atvs[0], "Apple TV MRP", IP_LOCALHOST, MRP_ID_1, Protocol.MRP, 49152
-        )
+    # Second device
+    dev2 = _get_atv(atvs, IP_2)
+    assert dev2
+    assert dev2.identifier == "BBBB"
 
-    async def test_scan_airplay(self):
-        self.server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+    # Third device
+    dev3 = _get_atv(atvs, IP_4)
+    assert dev3
+    assert dev3.identifier == MRP_ID_1
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 0)
 
-    async def test_scan_homesharing(self):
-        self.server.add_service(
-            fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID)
-        )
+@pytest.mark.asyncio
+async def test_zeroconf_scan_no_home_sharing(event_loop):
+    zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 1)
+    atvs = await pyatv.scan(event_loop, timeout=0)
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV 3"
+    assert atvs[0].address == ipaddress.ip_address(IP_3)
 
-        self.assertDevice(
-            atvs[0], "Apple TV HS", IP_LOCALHOST, "abcd", Protocol.DMAP, 3689, HSGID
-        )
+    atv = atvs[0]
+    assert atv.get_service(Protocol.DMAP).port == 3689
 
-    async def test_scan_no_homesharing(self):
-        self.server.add_service(fake_udns.device_service("Apple TV", "Apple TV Device"))
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 1)
+@pytest.mark.asyncio
+async def test_zeroconf_scan_home_sharing_merge(event_loop):
+    zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)
 
-        self.assertDevice(
-            atvs[0], "Apple TV Device", IP_LOCALHOST, "Apple TV", Protocol.DMAP, 3689
-        )
+    atvs = await pyatv.scan(event_loop, timeout=0)
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV 3"
+    assert atvs[0].address == ipaddress.ip_address("10.0.0.3")
 
-    async def test_scan_device_info(self):
-        self.server.add_service(
-            fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1)
-        )
-        self.server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+    service = atvs[0].main_service()
+    assert service.credentials == "cccc"
+    assert service.port == 3689
 
-        atvs = await self.scan()
-        self.assertEqual(len(atvs), 1)
 
-        device_info = atvs[0].device_info
-        self.assertEqual(device_info.mac, AIRPLAY_ID)
+@pytest.mark.asyncio
+async def test_zeroconf_scan_mrp(event_loop):
+    zeroconf_stub.stub(pyatv, MRP_SERVICE_1, MRP_SERVICE_2, DEVICE_SERVICE_1)
+
+    atvs = await pyatv.scan(event_loop, timeout=0, protocol=Protocol.MRP)
+    assert len(atvs) == 2
+
+    dev1 = _get_atv(atvs, IP_4)
+    assert dev1
+    assert dev1.name == "Apple TV 4"
+    assert dev1.get_service(Protocol.MRP)
+
+    dev2 = _get_atv(atvs, IP_5)
+    assert dev2
+    assert dev2.name == "Apple TV 5"
+    assert dev2.get_service(Protocol.MRP)
+
+
+@pytest.mark.asyncio
+async def test_zeroconf_scan_airplay_device(event_loop):
+    zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
+
+    atvs = await pyatv.scan(event_loop, timeout=0)
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_zeroconf_scan_for_particular_device(event_loop):
+    zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
+
+    atvs = await pyatv.scan(event_loop, timeout=0, identifier="BBBB")
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV 2"
+    assert atvs[0].address == ipaddress.ip_address(IP_2)
+
+
+@pytest.mark.asyncio
+async def test_zeroconf_scan_device_info(event_loop):
+    zeroconf_stub.stub(pyatv, MRP_SERVICE_1, AIRPLAY_SERVICE_2)
+
+    atvs = await pyatv.scan(event_loop, timeout=0, protocol=Protocol.MRP)
+    assert len(atvs) == 1
+
+    device_info = atvs[0].device_info
+    assert device_info.mac == AIRPLAY_ID
+
+
+@pytest.mark.asyncio
+async def test_udns_scan_no_results(udns_scan):
+    atvs = await udns_scan()
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_udns_missing_port(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.mrp_service("dummy", "dummy", "dummy", port=None))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_udns_missing_properties(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.FakeDnsService("dummy", 1234, None))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_udns_scan_mrp(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 1
+
+    assert_device(atvs[0], "Apple TV MRP", IP_LOCALHOST, MRP_ID_1, Protocol.MRP, 49152)
+
+
+@pytest.mark.asyncio
+async def test_udns_scan_airplay(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_udns_scan_homesharing(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0], "Apple TV HS", IP_LOCALHOST, "abcd", Protocol.DMAP, 3689, HSGID
+    )
+
+
+@pytest.mark.asyncio
+async def test_scan_no_homesharing(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.device_service("Apple TV", "Apple TV Device"))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0], "Apple TV Device", IP_LOCALHOST, "Apple TV", Protocol.DMAP, 3689
+    )
+
+
+@pytest.mark.asyncio
+async def test_scan_device_info(udns_server, udns_scan):
+    udns_server.add_service(fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1))
+    udns_server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+
+    atvs = await udns_scan()
+    assert len(atvs) == 1
+
+    device_info = atvs[0].device_info
+    assert device_info.mac == AIRPLAY_ID

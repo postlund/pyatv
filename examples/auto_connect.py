@@ -1,5 +1,6 @@
 """Simple example that connects to a device with autodiscover."""
 
+import asyncio
 from pyatv import helpers
 
 
@@ -11,5 +12,4 @@ async def print_what_is_playing(atv):
     print(playing)
 
 
-# logout is automatically performed by auto_connect
-helpers.auto_connect(print_what_is_playing)
+asyncio.get_event_loop().run_until_complete(helpers.auto_connect(print_what_is_playing))

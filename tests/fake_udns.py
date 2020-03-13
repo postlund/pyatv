@@ -69,16 +69,19 @@ class FakeUdns(asyncio.Protocol):
 
     async def start(self):
         _LOGGER.debug("Starting fake UDNS server")
-        self.server = await self.loop.create_datagram_endpoint(
+        self.server, _ = await self.loop.create_datagram_endpoint(
             lambda: self, local_addr=("127.0.0.1", None)
         )
+
+    def close(self):
+        self.server.close()
 
     def add_service(self, service):
         self.services[service[0]] = service[1]
 
     @property
     def port(self):
-        return self.server[0].get_extra_info("socket").getsockname()[1]
+        return self.server.get_extra_info("socket").getsockname()[1]
 
     def connection_made(self, transport):
         self.transport = transport

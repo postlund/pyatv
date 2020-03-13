@@ -1,7 +1,9 @@
 """Test suit for pairing process with Apple TV."""
 
-import asynctest
 import ipaddress
+
+import pytest
+from unittest.mock import MagicMock
 
 from pyatv import conf
 from pyatv.dmap import pairing, parser, tag_definitions
@@ -31,117 +33,137 @@ RANDOM_PAIRING_GUID = "0x5B03A9CF4A983143"
 RANDOM_PAIRING_CODE = "7AF2D0B8629DE3C704D40A14C9E8CB93"
 
 
-class PairingTest(asynctest.TestCase):
-    async def setUp(self):
-        self.service = conf.DmapService(None, None)
-        self.config = conf.AppleTV("Apple TV", "127.0.0.1")
-        self.config.add_service(self.service)
-        self.zeroconf = zeroconf_stub.stub(pairing)
-        self.pairing = None
+def pairing_url(zeroconf, pairing_code):
+    service = zeroconf.registered_services[0]
+    return (
+        f"http://127.0.0.1:{service.port}/"
+        + f"pairing?pairingcode={pairing_code}&servicename=test"
+    )
 
-        # TODO: currently stubs internal method, should provide stub
-        # for netifaces later
-        pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
 
-    async def tearDown(self):
-        await self.pairing.finish()
+@pytest.fixture
+def mock_random():
+    pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
-    async def _start(
-        self, pin_code=PIN_CODE, pairing_guid=PAIRING_GUID, name=REMOTE_NAME
-    ):
-        options = {"zeroconf": self.zeroconf}
+
+@pytest.fixture
+def mock_pairing_ip():
+    # TODO: currently stubs internal method, should provide stub
+    # for netifaces later
+    pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
+
+
+@pytest.fixture
+async def mock_pairing(event_loop, mock_pairing_ip):
+    obj = MagicMock()
+
+    service = conf.DmapService(None, None)
+    config = conf.AppleTV("Apple TV", "127.0.0.1")
+    config.add_service(service)
+    zeroconf = zeroconf_stub.stub(pairing)
+
+    async def _start(pin_code=PIN_CODE, pairing_guid=PAIRING_GUID, name=REMOTE_NAME):
+        options = {"zeroconf": zeroconf}
         if pairing_guid:
             options["pairing_guid"] = pairing_guid
         if name:
             options["name"] = name
 
-        self.pairing = pairing.DmapPairingHandler(
-            self.config, None, self.loop, **options
-        )
-        await self.pairing.begin()
-        self.pairing.pin(pin_code)
+        obj.pairing = pairing.DmapPairingHandler(config, None, event_loop, **options)
+        await obj.pairing.begin()
+        obj.pairing.pin(pin_code)
+        return obj.pairing, zeroconf, service
 
-    async def test_zeroconf_service_published(self):
-        await self._start()
+    yield _start
+    await obj.pairing.finish()
+    await obj.pairing.close()
 
-        self.assertEqual(
-            len(self.zeroconf.registered_services),
-            1,
-            msg="no zeroconf service registered",
-        )
 
-        service = self.zeroconf.registered_services[0]
-        self.assertEqual(
-            service.properties[b"DvNm"], REMOTE_NAME, msg="remote name does not match"
-        )
+@pytest.mark.asyncio
+async def test_zeroconf_service_published(mock_pairing):
+    _, zeroconf, service = await mock_pairing()
 
-    async def test_succesful_pairing(self):
-        await self._start()
+    assert len(zeroconf.registered_services) == 1, "no zeroconf service registered"
 
-        url = self._pairing_url(PAIRING_CODE)
-        data, _ = await utils.simple_get(url)
+    service = zeroconf.registered_services[0]
+    assert service.properties[b"DvNm"] == REMOTE_NAME, "remote name does not match"
 
-        await self.pairing.finish()
 
-        # Verify content returned in pairingresponse
-        parsed = parser.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(parser.first(parsed, "cmpa", "cmpg"), 1)
-        self.assertEqual(parser.first(parsed, "cmpa", "cmnm"), REMOTE_NAME)
-        self.assertEqual(parser.first(parsed, "cmpa", "cmty"), "iPhone")
+@pytest.mark.asyncio
+async def test_succesful_pairing(mock_pairing):
+    pairing, zeroconf, service = await mock_pairing()
 
-        self.assertEqual(self.service.credentials, PAIRING_GUID)
+    url = pairing_url(zeroconf, PAIRING_CODE)
+    data, _ = await utils.simple_get(url)
 
-    async def test_successful_pairing_random_pairing_guid_generated(self):
-        pairing.random.getrandbits = lambda x: RANDOM_128_BITS
+    await pairing.finish()
 
-        await self._start(pairing_guid=None)
+    # Verify content returned in pairingresponse
+    parsed = parser.parse(data, tag_definitions.lookup_tag)
+    assert parser.first(parsed, "cmpa", "cmpg") == 1
+    assert parser.first(parsed, "cmpa", "cmnm") == REMOTE_NAME
+    assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
-        url = self._pairing_url(RANDOM_PAIRING_CODE)
-        await utils.simple_get(url)
+    assert service.credentials == PAIRING_GUID
 
-        await self.pairing.finish()
 
-        self.assertEqual(self.service.credentials, RANDOM_PAIRING_GUID)
+@pytest.mark.asyncio
+async def test_successful_pairing_random_pairing_guid_generated(
+    mock_random, mock_pairing
+):
+    pairing, zeroconf, service = await mock_pairing(pairing_guid=None)
 
-    async def test_succesful_pairing_with_any_pin(self):
-        await self._start(pin_code=None)
+    url = pairing_url(zeroconf, RANDOM_PAIRING_CODE)
+    await utils.simple_get(url)
 
-        url = self._pairing_url("invalid_pairing_code")
-        _, status = await utils.simple_get(url)
+    await pairing.finish()
 
-        self.assertEqual(status, 200)
+    assert service.credentials == RANDOM_PAIRING_GUID
 
-    async def test_succesful_pairing_with_pin_leadering_zeros(self):
-        await self._start(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
 
-        url = self._pairing_url(PAIRING_CODE3)
-        _, status = await utils.simple_get(url)
+@pytest.mark.asyncio
+async def test_succesful_pairing_with_any_pin(mock_pairing):
+    _, zeroconf, _ = await mock_pairing(pin_code=None)
 
-        self.assertEqual(status, 200)
+    url = pairing_url(zeroconf, "invalid_pairing_code")
+    _, status = await utils.simple_get(url)
 
-    async def test_pair_custom_pairing_guid(self):
-        await self._start(pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2)
+    assert status == 200
 
-        url = self._pairing_url(PAIRING_CODE2)
-        data, _ = await utils.simple_get(url)
 
-        await self.pairing.finish()
+@pytest.mark.asyncio
+async def test_succesful_pairing_with_pin_leadering_zeros(mock_pairing):
+    _, zeroconf, _ = await mock_pairing(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
 
-        # Verify content returned in pairingresponse
-        parsed = parser.parse(data, tag_definitions.lookup_tag)
-        self.assertEqual(parser.first(parsed, "cmpa", "cmpg"), int(PAIRING_GUID2, 16))
+    url = pairing_url(zeroconf, PAIRING_CODE3)
+    _, status = await utils.simple_get(url)
 
-        self.assertEqual(self.service.credentials, PAIRING_GUID2)
+    assert status == 200
 
-    async def test_failed_pairing(self):
-        await self._start()
 
-        url = self._pairing_url("wrong")
-        _, status = await utils.simple_get(url)
+@pytest.mark.asyncio
+async def test_pair_custom_pairing_guid(mock_pairing):
+    pairing, zeroconf, service = await mock_pairing(
+        pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2
+    )
 
-        self.assertEqual(status, 500)
+    url = pairing_url(zeroconf, PAIRING_CODE2)
+    data, _ = await utils.simple_get(url)
 
-    def _pairing_url(self, pairing_code):
-        service = self.zeroconf.registered_services[0]
-        server = "http://127.0.0.1:{}".format(service.port)
-        return "{}/pairing?pairingcode={}&servicename=test".format(server, pairing_code)
+    await pairing.finish()
+
+    # Verify content returned in pairingresponse
+    parsed = parser.parse(data, tag_definitions.lookup_tag)
+    assert parser.first(parsed, "cmpa", "cmpg") == int(PAIRING_GUID2, 16)
+
+    assert service.credentials == PAIRING_GUID2
+
+
+@pytest.mark.asyncio
+async def test_failed_pairing(mock_pairing):
+    _, zeroconf, _ = await mock_pairing()
+
+    url = pairing_url(zeroconf, "wrong")
+    _, status = await utils.simple_get(url)
+
+    assert status == 500
