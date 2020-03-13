@@ -1,51 +1,70 @@
 """Functional tests for helper methods. Agnostic to protocol implementation."""
 
-import asynctest
+from unittest.mock import MagicMock, patch
 
-from asynctest.mock import patch
+import pytest
 
 from pyatv import conf, helpers
 
 
-class MockAppleTV:
-    """Used to mock a device."""
+@pytest.fixture
+def mock_scan():
+    atvs = []
+    with patch("pyatv.scan") as _mock_scan:
 
-    async def logout(self):
-        """Fake logout method."""
-        pass
+        async def _scan(*args, **kwargs):
+            return atvs
+
+        _mock_scan.side_effect = _scan
+        yield atvs
 
 
-class HelpersTest(asynctest.TestCase):
-    def setUp(self):
-        self.config = conf.AppleTV("address", "name")
-        self.mock_device = asynctest.mock.Mock(MockAppleTV())
+@pytest.fixture
+def mock_connect():
+    with patch("pyatv.connect") as _mock_connect:
+        yield _mock_connect
 
-    @patch("pyatv.scan", return_value=[])
-    def test_auto_connect_with_no_device(self, scan_func):
-        self.device_found = True
 
-        async def found_handler():
-            self.assertTrue(False, msg="should not be called")
+@pytest.mark.asyncio
+async def test_auto_connect_with_no_device(mock_scan):
+    obj = MagicMock()
+    obj.found = True
 
-        async def not_found_handler():
-            self.device_found = False
+    async def found_handler():
+        assert False, "should not be called"
 
-        helpers.auto_connect(found_handler, not_found=not_found_handler)
+    async def not_found_handler():
+        obj.found = False
 
-        self.assertFalse(self.device_found)
+    await helpers.auto_connect(found_handler, not_found=not_found_handler)
 
-    @patch("pyatv.scan")
-    @patch("pyatv.connect")
-    def test_auto_connect_with_device(self, connect_func, scan_func):
-        scan_func.return_value = [self.config]
-        connect_func.return_value = self.mock_device
+    assert not obj.found
 
-        self.found_device = None
 
-        async def found_handler(atv):
-            self.found_device = atv
+@pytest.mark.asyncio
+async def test_auto_connect_with_device(mock_scan, mock_connect):
+    obj = MagicMock()
+    obj.found = None
+    obj.closed = False
 
-        helpers.auto_connect(found_handler)
+    async def _close():
+        obj.closed = True
 
-        self.assertEqual(self.found_device, self.mock_device)
-        self.assertTrue(self.mock_device.logout.called)
+    config = conf.AppleTV("address", "name")
+    mock_device = MagicMock()
+    mock_device.close = _close
+
+    mock_scan.append(config)
+
+    async def _connect(*arsgs):
+        return mock_device
+
+    mock_connect.side_effect = _connect
+
+    async def found_handler(atv):
+        obj.found = atv
+
+    await helpers.auto_connect(found_handler)
+
+    assert obj.found == mock_device
+    assert obj.closed

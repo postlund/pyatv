@@ -1,7 +1,7 @@
 """Functional pairing tests using the API with a fake AirPlay Apple TV."""
 
 import binascii
-from asynctest.mock import patch
+from unittest.mock import patch
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
@@ -70,8 +70,8 @@ class PairFunctionalTest(AioHTTPTestCase):
         with self.assertRaises(exceptions.PairingError):
             await self.do_pairing(None)
 
-    @unittest_run_loop
     @patch("os.urandom")
+    @unittest_run_loop
     async def test_pairing_with_device_new_credentials(self, rand_func):
         rand_func.side_effect = predetermined_key
         await self.do_pairing()

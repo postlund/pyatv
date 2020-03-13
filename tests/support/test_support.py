@@ -2,11 +2,10 @@
 
 import os
 import asyncio
-import unittest
 import logging
 from unittest.mock import MagicMock, patch
 
-import asynctest
+import pytest
 
 from pyatv import exceptions
 from pyatv.support import error_handler, log_binary, log_protobuf
@@ -15,6 +14,20 @@ from pyatv.mrp.protobuf import ProtocolMessage
 
 class TestException(Exception):
     pass
+
+
+@pytest.fixture(name="logger")
+async def logger_fixture():
+    logger = MagicMock()
+    logger.return_value = True
+    yield logger
+
+
+@pytest.fixture
+async def message():
+    msg = ProtocolMessage()
+    msg.identifier = "aaaaaaaaaa"
+    yield msg
 
 
 async def doraise(exception):
@@ -29,93 +42,86 @@ def _debug_string(logger):
     return formatting % args
 
 
-class SupporErrorHandlerTest(asynctest.TestCase):
-    async def test_return_value(self):
-        async def _returns():
-            return 123
+async def test_error_handler_return_value():
+    async def _returns():
+        return 123
 
-        self.assertEqual(await error_handler(_returns, TestException), 123)
-
-    async def test_oserror(self):
-        with self.assertRaises(exceptions.ConnectionFailedError):
-            await error_handler(doraise, TestException, OSError)
-
-    async def test_timeout(self):
-        with self.assertRaises(exceptions.ConnectionFailedError):
-            await error_handler(doraise, TestException, asyncio.TimeoutError)
-
-    async def test_backoff(self):
-        with self.assertRaises(exceptions.BackOffError):
-            await error_handler(doraise, TestException, exceptions.BackOffError)
-
-    async def test_no_credentials(self):
-        with self.assertRaises(exceptions.NoCredentialsError):
-            await error_handler(doraise, TestException, exceptions.NoCredentialsError)
-
-    async def test_other_exception(self):
-        with self.assertRaises(TestException):
-            await error_handler(doraise, TestException, Exception)
+    assert await error_handler(_returns, TestException) == 123
 
 
-class SupporLogBinaryTest(unittest.TestCase):
-    def setUp(self):
-        self.logger = MagicMock()
-        self.logger.return_value = True
-
-    def test_no_log_if_not_debug(self):
-        self.logger.isEnabledFor.return_value = False
-        log_binary(self.logger, "test")
-        self.logger.isEnabledFor.assert_called_with(logging.DEBUG)
-
-    def test_log_no_args_if_enabled(self):
-        log_binary(self.logger, "testing")
-        self.assertEqual(_debug_string(self.logger), "testing ()")
-
-    def test_log_single_arg_if_enabled(self):
-        log_binary(self.logger, "abc", test=b"\x01\x02")
-        self.assertEqual(_debug_string(self.logger), "abc (test=0102)")
-
-    def test_log_multiple_args_if_enabled(self):
-        log_binary(self.logger, "k", test=b"\x01\x02", dummy=b"\xfe")
-        self.assertEqual(_debug_string(self.logger), "k (dummy=fe, test=0102)")
-
-    def test_log_limit_output(self):
-        log_binary(self.logger, "msg", a=b"\x01" * 1024, b=b"\x02" * 1024)
-
-        # Output will become:
-        # msg (a=, b=)
-        # Which is length 12. Then add 2 * 512 for limit = 1036
-        self.assertEqual(len(_debug_string(self.logger)), 1036)
-
-    @patch.dict(os.environ, {"PYATV_BINARY_MAX_LINE": "5"})
-    def test_log_with_length_override(self):
-        log_binary(self.logger, "msg", a=b"\x01" * 20, b=b"\x02" * 20)
-        self.assertEqual(_debug_string(self.logger), "msg (a=01..., b=02...)")
+async def test_error_handleroserror():
+    with pytest.raises(exceptions.ConnectionFailedError):
+        await error_handler(doraise, TestException, OSError)
 
 
-class SupportLogProtobufTest(unittest.TestCase):
-    def setUp(self):
-        self.logger = MagicMock()
-        self.logger.return_value = True
+async def test_error_handler_timeout():
+    with pytest.raises(exceptions.ConnectionFailedError):
+        await error_handler(doraise, TestException, asyncio.TimeoutError)
 
-        self.msg = ProtocolMessage()
-        self.msg.identifier = "aaaaaaaaaa"
 
-    def test_no_log_if_not_debug(self):
-        self.logger.isEnabledFor.return_value = False
-        log_protobuf(self.logger, "test", self.msg)
-        self.logger.isEnabledFor.assert_called_with(logging.DEBUG)
+async def test_error_handler_backoff():
+    with pytest.raises(exceptions.BackOffError):
+        await error_handler(doraise, TestException, exceptions.BackOffError)
 
-    def test_log_message(self):
-        log_protobuf(self.logger, "test", self.msg)
-        self.assertEqual(_debug_string(self.logger), 'test: identifier: "aaaaaaaaaa"')
 
-    def test_log_limit_message_max_length(self):
-        self.msg.identifier = "a" * 200
-        log_protobuf(self.logger, "test", self.msg)
-        self.assertEqual(len(_debug_string(self.logger)), 156)
+async def test_error_handler_no_credentials():
+    with pytest.raises(exceptions.NoCredentialsError):
+        await error_handler(doraise, TestException, exceptions.NoCredentialsError)
 
-    @patch.dict(os.environ, {"PYATV_PROTOBUF_MAX_LINE": "5"})
-    def test_log_with_length_override(self):
-        log_protobuf(self.logger, "text", self.msg)
-        self.assertEqual(_debug_string(self.logger), "text: id...")
+
+async def test_error_handler_other_exception():
+    with pytest.raises(TestException):
+        await error_handler(doraise, TestException, Exception)
+
+
+def test_log_binary_no_log_if_not_debug(logger):
+    logger.isEnabledFor.return_value = False
+    log_binary(logger, "test")
+    logger.isEnabledFor.assert_called_with(logging.DEBUG)
+
+
+def test_log_binary_log_no_args_if_enabled(logger):
+    log_binary(logger, "testing")
+    assert _debug_string(logger) == "testing ()"
+
+
+def test_log_binary_log_single_arg_if_enabled(logger):
+    log_binary(logger, "abc", test=b"\x01\x02")
+    assert _debug_string(logger) == "abc (test=0102)"
+
+
+def test_log_binary_log_multiple_args_if_enabled(logger):
+    log_binary(logger, "k", test=b"\x01\x02", dummy=b"\xfe")
+    assert _debug_string(logger) == "k (dummy=fe, test=0102)"
+
+
+def test_log_binary_log_limit_output(logger):
+    log_binary(logger, "msg", a=b"\x01" * 1024, b=b"\x02" * 1024)
+
+    # Output will become:
+    # msg (a=, b=)
+    # Which is length 12. Then add 2 * 512 for limit = 1036
+    assert len(_debug_string(logger)) == 1036
+
+
+def test_protobuf_no_log_if_not_debug(logger, message):
+    logger.isEnabledFor.return_value = False
+    log_protobuf(logger, "test", message)
+    logger.isEnabledFor.assert_called_with(logging.DEBUG)
+
+
+def test_protobuf_log_message(logger, message):
+    log_protobuf(logger, "test", message)
+    assert _debug_string(logger) == 'test: identifier: "aaaaaaaaaa"'
+
+
+def test_protobuf_log_limit_message_max_length(logger, message):
+    message.identifier = "a" * 200
+    log_protobuf(logger, "test", message)
+    assert len(_debug_string(logger)) == 156
+
+
+@patch.dict(os.environ, {"PYATV_PROTOBUF_MAX_LINE": "5"})
+def test_protobuf_log_with_length_override(logger, message):
+    log_protobuf(logger, "text", message)
+    assert _debug_string(logger) == "text: id..."
