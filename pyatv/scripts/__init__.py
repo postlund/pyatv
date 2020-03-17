@@ -1,0 +1,1 @@
+"""Scripts bundled with pyatv."""

@@ -18,6 +18,7 @@ def _filter_func(doc):
         "mrp",
         "dmap",
         "support",
+        "scripts",
     ]:
         if doc.refname.startswith("pyatv." + exclude):
             return False

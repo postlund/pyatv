@@ -2,7 +2,7 @@
 source = pyatv
 
 omit =
-    pyatv/__main__.py
+    pyatv/scripts/atvremote.py
     pyatv/mrp/protobuf/*.py
 
 [report]
