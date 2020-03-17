@@ -10,7 +10,7 @@ from unittest.mock import patch
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
-from pyatv import __main__ as atvremote
+from pyatv.scripts import atvremote
 from tests import fake_udns, zeroconf_stub
 from tests.utils import stub_sleep
 from tests.airplay.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS

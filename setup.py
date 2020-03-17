@@ -42,7 +42,7 @@ setup(
     tests_require=['tox', 'pytest==5.4.1', 'pytest-xdist==1.31.0'],
     entry_points={
         'console_scripts': [
-            'atvremote = pyatv.__main__:main'
+            'atvremote = pyatv.scripts.atvremote:main'
         ]
     },
     classifiers=[
