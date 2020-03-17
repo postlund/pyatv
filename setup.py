@@ -43,7 +43,8 @@ setup(
     entry_points={
         'console_scripts': [
             'atvremote = pyatv.scripts.atvremote:main',
-            'atvproxy = pyatv.scripts.atvproxy:main'
+            'atvproxy = pyatv.scripts.atvproxy:main',
+            'atvscript = pyatv.scripts.atvscript:main'
         ]
     },
     classifiers=[

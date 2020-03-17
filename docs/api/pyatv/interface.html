@@ -713,11 +713,11 @@ class PushListener(ABC):
     &#34;&#34;&#34;Listener interface for push updates.&#34;&#34;&#34;
 
     @abstractmethod
-    def playstatus_update(self, playstatus: Playing) -&gt; None:
+    def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
         &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;
 
     @abstractmethod
-    def playstatus_error(self, exception: Exception) -&gt; None:
+    def playstatus_error(self, updater, exception: Exception) -&gt; None:
         &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;
 
 
@@ -2671,11 +2671,11 @@ def powerstate_update(
     &#34;&#34;&#34;Listener interface for push updates.&#34;&#34;&#34;
 
     @abstractmethod
-    def playstatus_update(self, playstatus: Playing) -&gt; None:
+    def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
         &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;
 
     @abstractmethod
-    def playstatus_error(self, exception: Exception) -&gt; None:
+    def playstatus_error(self, updater, exception: Exception) -&gt; None:
         &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -2685,11 +2685,12 @@ def powerstate_update(
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.scripts.atvremote.PushListener</li>
+<li>pyatv.scripts.atvscript.PushPrinter</li>
 </ul>
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.PushListener.playstatus_error"><code class="name flex">
-<span>def <span class="ident">playstatus_error</span></span>(<span>self, exception)</span>
+<span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Inform about an error when updating play status.</p></section>
@@ -2698,12 +2699,12 @@ def powerstate_update(
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def playstatus_error(self, exception: Exception) -&gt; None:
+def playstatus_error(self, updater, exception: Exception) -&gt; None:
     &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.PushListener.playstatus_update"><code class="name flex">
-<span>def <span class="ident">playstatus_update</span></span>(<span>self, playstatus)</span>
+<span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Inform about changes to what is currently playing.</p></section>
@@ -2712,7 +2713,7 @@ def playstatus_error(self, exception: Exception) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def playstatus_update(self, playstatus: Playing) -&gt; None:
+def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
     &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
