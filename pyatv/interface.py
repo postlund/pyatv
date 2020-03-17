@@ -502,11 +502,11 @@ class PushListener(ABC):
     """Listener interface for push updates."""
 
     @abstractmethod
-    def playstatus_update(self, playstatus: Playing) -> None:
+    def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Inform about changes to what is currently playing."""
 
     @abstractmethod
-    def playstatus_error(self, exception: Exception) -> None:
+    def playstatus_error(self, updater, exception: Exception) -> None:
         """Inform about an error when updating play status."""
 
 

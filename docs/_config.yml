@@ -41,6 +41,8 @@ page_links:
       title: atvremote
     - link: /documentation/atvproxy/
       title: atvproxy
+    - link: /documentation/atvscript/
+      title: atvscript
   development:
     - link: /development/
       title: Start
