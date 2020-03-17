@@ -19,7 +19,7 @@
 #
 # Argument order: <credentials> <local ip> <atv ip> <atv port>
 #
-# It shoulf be possible to pair with your phone using pin "1111". When the
+# It shoulfd be possible to pair with your phone using pin "1111". When the
 # proxy receives a connection, it will start by connecting to the Apple TV and
 # then continue with setting up encryption and relaying messages. The same
 # static key pair is hardcoded, so it is possible to reconnect again layer
@@ -27,28 +27,24 @@
 #
 # Please note that this script is perhaps not a 100% accurate MITM of all
 # traffic. It takes shortcuts and doesn't imitate everything correctly, so some
-# traffic might be missed. Also note that printed protobuf messages are based
-# on the definitions in pyatv. If new fields have been added by Apple, they
-# will not be seen in the logs.
+# traffic might be missed.
 #
 # Some suggestions for improvements:
 #
 # * Use pyatv to discover device (based on device id) to not have to enter all
 #   details on command line
-# * Use argparse for arguments
 # * Base proxy device name on real device (e.g. Bedroom -> Bedroom Proxy)
 # * Re-work logging to make it more clear what is what
-# * General clean-ups
 #
 # Help to improve the proxy is greatly appreciated! I will only make
 # improvements in case I personally see any benefits of doing so.
 """Simple MRP proxy server to intercept traffic."""
 
-import os
 import sys
 import socket
 import asyncio
 import logging
+import argparse
 
 from aiozeroconf import Zeroconf, ServiceInfo
 
@@ -57,14 +53,8 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
+from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
 from pyatv.support import log_binary
-
-# SRP server auth lives with the test code for now and we need to add that path
-# so python finds it. This should be removed once fake devices are part of the
-# real library code.
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
-
-from tests.mrp.mrp_server_auth import MrpServerAuth, SERVER_IDENTIFIER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +62,7 @@ DEVICE_NAME = "Proxy"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 
 
-class ProxyMrpAppleTV(MrpServerAuth, asyncio.Protocol):
+class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
     def __init__(self, loop):
@@ -199,40 +189,26 @@ async def publish_zeroconf(zconf, ip_address, port):
     return service
 
 
-async def main(loop):
-    """Script starts here."""
-    # To get logging from pyatv
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
-    if len(sys.argv) != 5:
-        print(
-            "Usage: {0} <credentials> <local ip> "
-            "<atv ip> <atv port>".format(sys.argv[0])
-        )
-        sys.exit(1)
-
-    credentials = sys.argv[1]
-    local_ip_addr = sys.argv[2]
-    atv_ip_addr = sys.argv[3]
-    atv_port = int(sys.argv[4])
-    zconf = Zeroconf(loop)
-
+async def _start_mrp_proxy(loop, args):
     def proxy_factory():
         try:
-            proxy = ProxyMrpAppleTV(loop)
+            proxy = MrpAppleTVProxy(loop)
             asyncio.ensure_future(
-                proxy.start(atv_ip_addr, atv_port, credentials), loop=loop
+                proxy.start(args.remote_ip, args.remote_port, args.credentials),
+                loop=loop,
             )
         except Exception:
             _LOGGER.exception("failed to start proxy")
         return proxy
 
+    zconf = Zeroconf(loop)
+
     # Setup server used to publish a fake MRP server
     server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
-    _LOGGER.error("Started MRP server at port %d", port)
+    _LOGGER.info("Started MRP server at port %d", port)
 
-    service = await publish_zeroconf(zconf, local_ip_addr, port)
+    service = await publish_zeroconf(zconf, args.local_ip, port)
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
@@ -240,5 +216,35 @@ async def main(loop):
     await zconf.unregister_service(service)
 
 
+async def appstart(loop):
+    """Start the asyncio event loop and runs the application."""
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(title="sub-commands", dest="command")
+    mrp = subparsers.add_parser("mrp", help="MRP proxy")
+    mrp.add_argument("credentials", help="MRP credentials")
+    mrp.add_argument("local_ip", help="local IP address")
+    mrp.add_argument("remote_ip", help="Apple TV IP address")
+    mrp.add_argument("remote_port", help="MRP port")
+
+    args = parser.parse_args()
+    if not args.command:
+        parser.error("No command specified")
+        return 1
+
+    # To get logging from pyatv
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+    if args.command == "mrp":
+        await _start_mrp_proxy(loop, args)
+
+    return 0
+
+
+def main():
+    """Application start here."""
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(appstart(loop))
+
+
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main(asyncio.get_event_loop()))
+    sys.exit(main())

@@ -39,6 +39,8 @@ page_links:
       title: Protocols
     - link: /documentation/atvremote/
       title: atvremote
+    - link: /documentation/atvproxy/
+      title: atvproxy
   development:
     - link: /development/
       title: Start
