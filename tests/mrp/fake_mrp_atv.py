@@ -9,8 +9,8 @@ from pyatv import const
 from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
+from pyatv.mrp.server_auth import MrpServerAuth
 from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
-from tests.mrp.mrp_server_auth import MrpServerAuth
 
 _LOGGER = logging.getLogger(__name__)
 
