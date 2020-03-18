@@ -552,9 +552,12 @@ class MrpFeatures(Features):
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
-        # Support for volume is not supported in pyatv yet, so leave as unknown for now
         if feature in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
-            return FeatureInfo(state=FeatureState.Unknown)
+            if self.psm.volume_controls_available is None:
+                return FeatureInfo(state=FeatureState.Unknown)
+            if self.psm.volume_controls_available:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
 
         return FeatureInfo(state=FeatureState.Unsupported)
 

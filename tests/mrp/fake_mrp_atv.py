@@ -234,6 +234,11 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         client.displayName = display_name
         self.send(msg)
 
+    def volume_control(self, available):
+        msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
+        msg.inner().volumeControlAvailable = available
+        self.send(msg)
+
     def data_received(self, data):
         self.buffer += data
 
@@ -358,6 +363,10 @@ class AppleTVUseCases(AirPlayUseCases):
     def __init__(self, fake_apple_tv):
         """Initialize a new AppleTVUseCases."""
         self.device = fake_apple_tv
+
+    def change_volume_control(self, available):
+        """Change volume control availaility."""
+        self.device.volume_control(available)
 
     def change_artwork(self, artwork, mimetype, identifier="artwork"):
         """Call to change artwork response."""

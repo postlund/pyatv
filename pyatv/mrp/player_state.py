@@ -108,6 +108,7 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         self.loop = loop
         self.states = {}
         self.active = None
+        self.volume_controls_available = None
         self._listener = None
         self._add_listeners()
 
@@ -121,6 +122,10 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         )
         self.protocol.add_listener(
             self._handle_update_client, protobuf.UPDATE_CLIENT_MESSAGE
+        )
+        self.protocol.add_listener(
+            self._volume_control_availability,
+            protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE,
         )
 
     @property
@@ -198,3 +203,12 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
             _LOGGER.warning(
                 "Received UpdateClientMessage for unknown player %s", identifier
             )
+
+    async def _volume_control_availability(self, message, _):
+        self.volume_controls_available = message.inner().volumeControlAvailable
+        _LOGGER.debug(
+            "Volume control availability is now %s", self.volume_controls_available
+        )
+
+        if self.listener:
+            await self.listener.state_updated()
