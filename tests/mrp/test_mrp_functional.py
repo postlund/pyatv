@@ -236,6 +236,24 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertFeatures(FeatureState.Available, *feature_map.keys())
 
     @unittest_run_loop
+    async def test_volume_controls(self):
+        controls = [FeatureName.VolumeUp, FeatureName.VolumeDown]
+
+        self.assertFeatures(FeatureState.Unknown, *controls)
+
+        self.usecase.change_volume_control(available=False)
+        self.usecase.example_video()
+        await self.playing(title="dummy")
+
+        self.assertFeatures(FeatureState.Unavailable, *controls)
+
+        self.usecase.change_volume_control(available=True)
+        self.usecase.example_video(title="dummy2")
+        await self.playing(title="dummy2")
+
+        self.assertFeatures(FeatureState.Available, *controls)
+
+    @unittest_run_loop
     async def test_playing_app(self):
         self.usecase.nothing_playing()
 
