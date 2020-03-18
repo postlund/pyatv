@@ -129,6 +129,7 @@ class ZeroconfScanner(BaseScanner):
         """Initialize a new ZeroconfScanner."""
         super().__init__()
         self.loop = loop
+        self.pending = set()
 
     async def discover(self, timeout):
         """Start discovery of devices and services."""
@@ -140,13 +141,18 @@ class ZeroconfScanner(BaseScanner):
             ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self)
             _LOGGER.debug("Discovering devices for %d seconds", timeout)
             await asyncio.sleep(timeout)
+
+            if self.pending:
+                await asyncio.wait(self.pending)
         finally:
             await zeroconf.close()
         return self._found_devices
 
     def add_service(self, zeroconf, service_type, name):
         """Handle callback from zeroconf when a service has been discovered."""
-        asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
+        self.pending.add(
+            asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
+        )
 
     def remove_service(self, zeroconf, service_type, name):
         """Handle callback when a service is removed."""
