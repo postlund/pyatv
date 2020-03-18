@@ -33,7 +33,7 @@ setup(
         'aiozeroconf>=0.1.8',
         'cryptography>=1.8.1',
         'netifaces>=0.10.0',
-        'protobuf>=3.8.0',
+        'protobuf>=3.6.0',
         'srptools>=0.2.0',
     ],
     test_suite='tests',
