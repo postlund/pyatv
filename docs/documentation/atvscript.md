@@ -59,7 +59,7 @@ $ atvscript scan
 {"result": "success", "devices": [{"name": "Vardagsrum", "address": "10.0.10.81", "identifier": "xxx"}, {"name": "Apple\u00a0TV", "address": "10.0.10.123", "identifier": "xxx"}]}
 ```
 
-## What is Playing
+### What is Playing
 
 To get what is playing:
 
@@ -70,7 +70,7 @@ $ atvscript -s 10.0.10.81 playing
 
 Some of the fields, like `media_type` and `device_state` uses the names from their corresponding enum, but in lower case. Check out {% include api i="const.DeviceState" %} for instance to find valid values for `device_state`.
 
-## Remote Control
+### Remote Control
 
 All buttons in {% include api i="interface.RemoteControl" %} are supported by `atvscript`
 except for the ones beginning with `set_`:
@@ -80,7 +80,7 @@ $ atvscript -s 10.0.10.81 menu
 {"result": "success", "command": "menu"}
 ```
 
-## Push Updates
+### Push Updates
 
 Push updates are printed to the terminal as they happen:
 

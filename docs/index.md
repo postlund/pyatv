@@ -30,7 +30,6 @@ In case you have developed for pyatv 0.3.x before, there's a short migration gui
 
 Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = Apple TV 4 and later):
 
-
 | **Feature**                                                     | **DMAP** | **MRP**   |
 | --------------------------------------------------------------- | -------- | --------- |
 | Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       |
@@ -67,8 +66,9 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 
 *\*\* Limited support due to restrictions in protocol.*
 
-As pyatv is still under heavy development, expect there to be bugs. Please create an issue
-if you experience any issues.
+There are also few utility scripts bundled with `pyatv` that makes it easy to try the library
+out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy) and
+[atvscript](documentation/atvscript).
 
 # Who is making this?
 
