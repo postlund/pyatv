@@ -6,31 +6,22 @@ import inspect
 
 from datetime import datetime
 from importlib import import_module
+from asyncio import sleep as real_sleep
 
 from aiohttp import ClientSession
 
 
 def stub_sleep():
-    """Stub asyncio.sleep and keep reference to real sleep.
+    """Stub asyncio.sleep to not make tests slow."""
+    # This is a special "hack" to schedule the sleep at the end of the
+    # event queue in order to give other possibility to run.
+    async def fake_sleep(time=None, loop=None):
+        async def dummy():
+            pass
 
-    The tests should not sleep as that makes them slow, but the until function
-    below must be able to do so (as it is polling). This method makes sure we
-    still have a reference to original sleep in test environment.
+        await asyncio.ensure_future(dummy())
 
-    Calling this function stubs asyncio.sleep globally, so technically it only
-    needs to be called once.
-    """
-    if not hasattr(asyncio, "_real_sleep"):
-        # This is a special "hack" to schedule the sleep at the end of the
-        # event queue in order to give other possibility to run.
-        async def fake_sleep(time=None, loop=None):
-            async def dummy():
-                pass
-
-            await asyncio.ensure_future(dummy())
-
-        asyncio._real_sleep = asyncio.sleep
-        asyncio.sleep = fake_sleep
+    asyncio.sleep = fake_sleep
 
 
 async def simple_get(url):
@@ -70,11 +61,7 @@ async def until(pred, timeout=5, **kwargs):
             if deadline - time.time() <= 0:
                 raise asyncio.TimeoutError()
 
-        # Use original method if stubbed
-        if hasattr(asyncio, "_real_sleep"):
-            await asyncio._real_sleep(0.5)
-        else:
-            await asyncio.sleep(0.5)
+        await real_sleep(0.01)
 
 
 def faketime(module_name, *times):
