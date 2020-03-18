@@ -1,6 +1,7 @@
 """Support functions used in library."""
 
 import asyncio
+import inspect
 import logging
 import binascii
 import warnings
@@ -14,6 +15,8 @@ from pyatv import exceptions
 
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512
+
+_HAS_PRINT_UNKNOWN = "print_unknown_fields" in inspect.getargspec(MessageToString).args
 
 
 def _shorten(text, length):
@@ -57,7 +60,13 @@ def log_protobuf(logger, text, message):
         override_length = int(environ.get("PYATV_PROTOBUF_MAX_LINE", 0))
         line_length = override_length or _PROTOBUF_LINE_LENGTH
 
-        lines = MessageToString(message, print_unknown_fields=True).splitlines()
+        # Workaround to support older versions of protobuf (remove this
+        # at some point)
+        kwargs = {}
+        if _HAS_PRINT_UNKNOWN:
+            kwargs["print_unknown_fields"] = True
+
+        lines = MessageToString(message, **kwargs).splitlines()
         msg_str = "\n".join([_shorten(x, line_length) for x in lines])
 
         logger.debug("%s: %s", text, msg_str)
