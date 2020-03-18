@@ -1,6 +1,6 @@
 black==19.10b0
 flake8==3.7.9
-codecov==2.0.16
+codecov==2.0.21
 pytest==5.4.1
 pytest-asyncio==0.10.0
 pytest-cov==2.8.1
