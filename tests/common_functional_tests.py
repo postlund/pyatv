@@ -359,7 +359,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.atv.push_updater.start()
 
         # Check that we got the right one
-        await until(lambda: listener.playing is not None)
+        await until(lambda: listener.playing and listener.playing.title == "video2")
         self.assertEqual(listener.playing.title, "video2")
 
     @unittest_run_loop
