@@ -1,5 +1,81 @@
 # CHANGES
 
+## 0.5.0 (2020-03-19)
+
+*Changes:*
+
+* Add power interface
+* Add device information interface
+* Add playing app interface
+* New scripts: atvscript and atvproxy
+* External interface now has type hints
+* Pure AirPlay devices are no longer returned by scan
+* Files have been moved around and the public interface
+  is now well-defined
+* Documentation has moved to pyatv.dev
+
+*Breaking Changes:*
+
+* suspend and wakeup in the remote control interface are now
+  deprecated. They did not work very well. Use the power interface
+  instead.
+* Black is now used for linting and black does not support
+  python 3.5, so support for python 3.5 has been dropped.
+* helpers.auto_connect is now a coroutine
+
+*Notes:*
+
+* Lots of updates to documentation and tests have been made
+* An API reference is now available at pyatv.dev
+
+*All changes:*
+
+```
+0cf6689 mrp: Support volume control features
+11b59f1 protobuf: Workaround for older versions
+9398768 docs: Minor fixes
+947bb04 tests: Make push updates test more robust
+40a45ea tests: Add initial tests for atvscript
+e3af8fc tests: Break out script test environment
+fae8525 tests: Fix broken sleep stub
+865483a scan: Wait for pending tasks
+365ae6d scripts: Add atvscript
+10af6e9 scripts: Add atvproxy
+b96098e scripts: Move atvremote
+0f8e5cd build(deps): bump codecov from 2.0.16 to 2.0.21
+a2143d5 build(deps): bump pytest from 5.3.5 to 5.4.1
+f45f879 test: Migrate from asynctest to pytest-asyncio
+b3fa547 docs: Add links to API reference
+f41cc11 docs: Add documentation for app support
+b91f5d5 mrp: Add app support
+0dbe373 if: Add interface for app
+bdc01f3 docs: Fix relative links
+5661c36 docs: Fix baseurl
+e3bcb7a docs: Change domain to pyatv.dev
+e8e364c Create CNAME
+3917092 build(deps): bump mypy from 0.761 to 0.770
+766b438 docs: Clean up and improve documentation
+3c99ae6 features: Add tests for features
+364ac39 atvremote: Add support for features
+6a97526 docs: Add documentation for features
+a63ed69 mrp: Add basic support for features
+1cee19c dmap: Add basic support for features
+a025cdd if: Add interface for supported features
+dbc75fa protobuf: Update messages
+86cecad docs: Add API documentation
+1912891 mrp: Subscribe to volume updates
+778257f cq: Add typing hints to public interface
+6bf74e7 cq: Handle invalid credentials
+5a6c8de cq: Remove need for ed25519
+b2b8e58 cq: Remove need for curve25519-donna
+18d3894 cq: Remove need for tlslite-ng
+cf3048d if: Add support for play_pause
+181adc9 cq: Move internal modules to support directory
+eaf5176 cq: Move from pylint to black for linting
+5e056f1 if: Deprecate suspend and wakeup
+08b0b37 scan: Do not include pure AirPlay devices
+```
+
 ## 0.4.1a1 (2020-03-02)
 
 *Changes:*
