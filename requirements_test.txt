@@ -1,7 +1,7 @@
 black==19.10b0
 deepdiff==4.3.1
 flake8==3.7.9
-codecov==2.0.21
+codecov==2.0.22
 pytest==5.4.1
 pytest-asyncio==0.10.0
 pytest-cov==2.8.1
