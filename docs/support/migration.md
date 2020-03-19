@@ -12,6 +12,22 @@ and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request.
 
+## From 0.4.0 to 0.5.0
+
+### General Changes
+
+* None
+
+### Deprecations
+
+* Python 3.6 or later is now required
+* `suspend` and `wakeup` in {% include api i="interface.RemoteControl" %}
+  have been deprecated. Use {% include api i="interface.Power.turn_on" %}
+  and {% include api i="interface.Power.turn_off" %} instead.
+* {% include api i="helpers.auto_connect" %} is now a coroutine. The
+  [example](https://github.com/postlund/pyatv/blob/master/examples/auto_connect.py)
+  has been updated.
+
 ## From 0.3.x to 0.4.0
 
 ### General Changes
