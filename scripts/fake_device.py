@@ -14,7 +14,7 @@ from aiozeroconf import Zeroconf, ServiceInfo
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 
-from tests.mrp.fake_mrp_atv import FakeAppleTV
+from tests.mrp.fake_mrp_atv import FakeAppleTV, FakeDeviceState
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,8 +64,9 @@ async def appstart(loop):
     level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(level=level, stream=sys.stdout)
 
+    state = FakeDeviceState()
     zconf = Zeroconf(loop)
-    server = await loop.create_server(lambda: FakeAppleTV(loop), "0.0.0.0")
+    server = await loop.create_server(lambda: FakeAppleTV(loop, state=state), "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started fake MRP device at port %d", port)
 

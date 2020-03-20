@@ -148,19 +148,26 @@ class PlayingMetadata:
         self.artwork_mimetype = None
 
 
-class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
-    """Implementation of a fake MRP Apple TV."""
-
-    def __init__(self, loop):
-        FakeAirPlayDevice.__init__(self)
-        MrpServerAuth.__init__(self, self, DEVICE_NAME)
-        self.loop = loop
-        self.app.on_startup.append(self.start)
+class FakeDeviceState:
+    def __init__(self):
+        """State of a fake MRP device."""
         self.outstanding_keypresses = set()  # Pressed but not released
         self.last_button_pressed = None
         self.connection_state = None
         self.states = {}
         self.active_player = None
+        self.powered_on = True
+
+
+class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
+    """Implementation of a fake MRP Apple TV."""
+
+    def __init__(self, loop, state=None):
+        FakeAirPlayDevice.__init__(self)
+        MrpServerAuth.__init__(self, self, DEVICE_NAME)
+        self.state = state or FakeDeviceState()
+        self.loop = loop
+        self.app.on_startup.append(self.start)
         self.has_authenticated = False
 
         self.server = None
@@ -168,7 +175,7 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.chacha = None
         self.transport = None
 
-    async def start(self, app):
+    async def start(self, _):
         coro = self.loop.create_server(lambda: self, "127.0.0.1")
         self.server = await self.loop.create_task(coro)
         _LOGGER.info("Started MRP server at port %d", self.port)
@@ -176,6 +183,11 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     @property
     def port(self):
         return self.server.sockets[0].getsockname()[1]
+
+    # Workaround for common tests until state is extracted in fake DMAP device
+    @property
+    def last_button_pressed(self):
+        return self.state.last_button_pressed
 
     def connection_made(self, transport):
         self.transport = transport
@@ -186,6 +198,9 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.has_authenticated = True
 
     def send(self, message):
+        if not self.transport:
+            return
+
         data = message.SerializeToString()
         if self.chacha:
             data = self.chacha.encrypt(data)
@@ -194,21 +209,21 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         self.transport.write(length + data)
 
     def update_state(self, identifier):
-        state = self.states[identifier]
+        state = self.state.states[identifier]
         self.send(_set_state_message(state, identifier))
 
     def set_player_state(self, identifier, state):
-        self.states[identifier] = state
+        self.state.states[identifier] = state
         self.update_state(identifier)
 
     def get_player_state(self, identifier):
-        return self.states.get(identifier)
+        return self.state.states.get(identifier)
 
     def set_active_player(self, identifier):
-        if identifier is not None and identifier not in self.states:
+        if identifier is not None and identifier not in self.state.states:
             raise Exception("invalid player: %s", identifier)
 
-        self.active_player = identifier
+        self.state.active_player = identifier
         now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
         client = now_playing.inner().client
         if identifier:
@@ -239,6 +254,13 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         msg.inner().volumeControlAvailable = available
         self.send(msg)
 
+    def _send_device_info(self, identifier=None, update=False):
+        resp = messages.device_information(DEVICE_NAME, "1234", update=update)
+        if identifier:
+            resp.identifier = identifier
+        resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
+        self.send(resp)
+
     def data_received(self, data):
         self.buffer += data
 
@@ -267,13 +289,13 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
     def handle_device_info(self, message, inner):
-        resp = messages.device_information(DEVICE_NAME, "1234")
-        resp.identifier = message.identifier
-        self.send(resp)
+        # resp = messages.device_information(DEVICE_NAME, message.identifier)
+        # self.send(resp)
+        self._send_device_info(update=False, identifier=message.identifier)
 
     def handle_set_connection_state(self, message, inner):
         _LOGGER.debug("Changed connection state to %d", inner.state)
-        self.connection_state = inner.state
+        self.state.connection_state = inner.state
 
     def handle_client_updates_config(self, message, inner):
         pass
@@ -292,19 +314,19 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         use_page, usage, down_press = struct.unpack(">HHH", start)
 
         if down_press == 1:
-            self.outstanding_keypresses.add((use_page, usage))
+            self.state.outstanding_keypresses.add((use_page, usage))
             self.send(messages.create(0, identifier=message.identifier))
         elif down_press == 0:
-            if (use_page, usage) in self.outstanding_keypresses:
+            if (use_page, usage) in self.state.outstanding_keypresses:
                 if (
                     _convert_key_press(use_page, usage) == "select"
-                    and self.last_button_pressed == "home"
+                    and self.state.last_button_pressed == "home"
                 ):
-                    msg = messages.device_information("pyatv", message.identifier, 0)
-                    self.send(msg)
-                self.last_button_pressed = _convert_key_press(use_page, usage)
-                self.outstanding_keypresses.remove((use_page, usage))
-                _LOGGER.debug("Pressed button: %s", self.last_button_pressed)
+                    self.state.powered_on = False
+                    self._send_device_info(update=True)
+                self.state.last_button_pressed = _convert_key_press(use_page, usage)
+                self.state.outstanding_keypresses.remove((use_page, usage))
+                _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
                 self.send(messages.create(0, identifier=message.identifier))
             else:
                 _LOGGER.error("Missing key down for %d,%d", use_page, usage)
@@ -312,25 +334,25 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
             _LOGGER.error("Invalid key press state: %d", down_press)
 
     def handle_send_command(self, message, inner):
-        state = self.get_player_state(self.active_player)
+        state = self.get_player_state(self.state.active_player)
         button = _COMMAND_LOOKUP.get(inner.command)
         if button:
-            self.last_button_pressed = button
-            _LOGGER.debug("Pressed button: %s", self.last_button_pressed)
+            self.state.last_button_pressed = button
+            _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
         elif inner.command == cmd.ChangeRepeatMode:
             state.repeat = {
                 protobuf.CommandInfo.One: const.RepeatState.Track,
                 protobuf.CommandInfo.All: const.RepeatState.All,
             }.get(inner.options.repeatMode, const.RepeatState.Off)
-            self.update_state(self.active_player)
+            self.update_state(self.state.active_player)
             _LOGGER.debug("Change repeat state to %s", state.repeat)
         elif inner.command == cmd.ChangeShuffleMode:
             state.shuffle = inner.options.shuffleMode
-            self.update_state(self.active_player)
+            self.update_state(self.state.active_player)
             _LOGGER.debug("Change shuffle state to %s", state.shuffle)
         elif inner.command == cmd.SeekToPlaybackPosition:
             state.position = inner.options.playbackPosition
-            self.update_state(self.active_player)
+            self.update_state(self.state.active_player)
             _LOGGER.debug("Seek to position: %d", state.position)
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
@@ -346,15 +368,15 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         queue = setstate.inner().playbackQueue
         queue.location = 0
         item = queue.contentItems.add()
-        item.artworkData = self.states[self.active_player].artwork
+        item.artworkData = self.state.states[self.state.active_player].artwork
         item.artworkDataWidth = 456
         item.artworkDataHeight = 789
         self.send(setstate)
 
     def handle_wake_device(self, message, inner):
-        msg = messages.device_information("pyatv", message.identifier, 1)
-        self.send(msg)
         self.send(messages.command_result(message.identifier))
+        self.state.powered_on = True
+        self._send_device_info(update=True)
 
 
 class AppleTVUseCases(AirPlayUseCases):
