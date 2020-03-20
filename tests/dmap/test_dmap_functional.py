@@ -67,7 +67,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(HSGID, PAIRING_GUID, SESSION_ID, self)
+        self.fake_atv = FakeAppleTV(HSGID, PAIRING_GUID, SESSION_ID)
         self.usecase = AppleTVUseCases(self.fake_atv)
         return self.fake_atv.app
 

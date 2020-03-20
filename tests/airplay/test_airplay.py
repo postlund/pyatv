@@ -33,7 +33,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         await self.session.close()
 
     async def get_application(self, loop=None):
-        self.fake_device = FakeAirPlayDevice(self)
+        self.fake_device = FakeAirPlayDevice()
         self.usecase = AirPlayUseCases(self.fake_device)
         return self.fake_device.app
 

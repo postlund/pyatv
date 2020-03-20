@@ -60,9 +60,9 @@ class PlayingResponse:
 class FakeAppleTV(FakeAirPlayDevice):
     """Implementation of a fake DMAP Apple TV."""
 
-    def __init__(self, hsgid, pairing_guid, session_id, testcase):
+    def __init__(self, hsgid, pairing_guid, session_id):
         """Initialize a new FakeAppleTV."""
-        super().__init__(testcase)
+        super().__init__()
 
         self.responses["login"] = [LoginResponse(session_id, 200)]
         self.responses["artwork"] = []
@@ -249,19 +249,17 @@ class FakeAppleTV(FakeAirPlayDevice):
 
         # Verify content returned in pairingresponse
         parsed = parser.parse(data, tag_definitions.lookup_tag)
-        self.tc.assertEqual(parser.first(parsed, "cmpa", "cmpg"), 1)
-        self.tc.assertEqual(
-            parser.first(parsed, "cmpa", "cmnm"), pairing_response.remote_name
-        )
-        self.tc.assertEqual(parser.first(parsed, "cmpa", "cmty"), "iPhone")
+        assert parser.first(parsed, "cmpa", "cmpg") == 1
+        assert parser.first(parsed, "cmpa", "cmnm") == pairing_response.remote_name
+        assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
     # Verifies that all needed headers are included in the request. Should be
     # checked in all requests, but that seems a bit too much and not that
     # necessary.
     def _verify_headers(self, request):
         for header in EXPECTED_HEADERS:
-            self.tc.assertIn(header, request.headers)
-            self.tc.assertEqual(request.headers[header], EXPECTED_HEADERS[header])
+            assert header in request.headers
+            assert request.headers[header] == EXPECTED_HEADERS[header]
 
     # This method makes sure that the correct login id and/or session id is
     # included in the GET-parameters. As this is extremely important for
@@ -274,22 +272,18 @@ class FakeAppleTV(FakeAirPlayDevice):
         # Either hsgid or pairing-guid should be present
         if check_login_id:
             if "hsgid" in params:
-                self.tc.assertEqual(
-                    params["hsgid"], self.hsgid, msg="hsgid does not match"
-                )
+                assert params["hsgid"] == self.hsgid, "hsgid does not match"
             elif "pairing-guid" in params:
-                self.tc.assertEqual(
-                    params["pairing-guid"],
-                    self.pairing_guid,
-                    msg="pairing-guid does not match",
-                )
+                assert (
+                    params["pairing-guid"] == self.pairing_guid
+                ), "pairing-guid does not match"
             else:
-                self.tc.assertTrue(False, "hsgid or pairing-guid not found")
+                assert False, "hsgid or pairing-guid not found"
 
         if check_session:
-            self.tc.assertEqual(
-                int(params["session-id"]), self.session, msg="session id does not match"
-            )
+            assert (
+                int(params["session-id"]) == self.session
+            ), "session id does not match"
 
 
 class AppleTVUseCases(AirPlayUseCases):

@@ -78,7 +78,7 @@ class ScriptTest(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self, self.loop)
+        self.fake_atv = FakeAppleTV(self.loop)
         self.usecase = AppleTVUseCases(self.fake_atv)
         self.fake_udns = fake_udns.FakeUdns(self.loop)
         return self.fake_atv.app

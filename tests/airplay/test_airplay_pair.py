@@ -39,7 +39,7 @@ class PairFunctionalTest(AioHTTPTestCase):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAirPlayDevice(self)
+        self.fake_atv = FakeAirPlayDevice()
         self.usecase = AirPlayUseCases(self.fake_atv)
         return self.fake_atv.app
 
