@@ -151,8 +151,8 @@ class PlayingMetadata:
 class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, testcase, loop):
-        FakeAirPlayDevice.__init__(self, testcase)
+    def __init__(self, loop):
+        FakeAirPlayDevice.__init__(self)
         MrpServerAuth.__init__(self, self, DEVICE_NAME)
         self.loop = loop
         self.app.on_startup.append(self.start)

@@ -28,7 +28,7 @@ class AirPlayAuthTest(AioHTTPTestCase):
         await self.session.close()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAirPlayDevice(self)
+        self.fake_atv = FakeAirPlayDevice()
         return self.fake_atv.app
 
     @unittest_run_loop

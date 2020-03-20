@@ -39,7 +39,7 @@ AirPlayPlaybackResponse = namedtuple("AirPlayPlaybackResponse", "code content")
 
 
 class FakeAirPlayDevice:
-    def __init__(self, testcase):
+    def __init__(self):
         self.responses = {}
         self.responses["airplay_playback"] = []
         self.has_authenticated = True
@@ -49,7 +49,6 @@ class FakeAirPlayDevice:
         self.last_airplay_uuid = None
         self.play_count = 0
         self.injected_play_fails = 0
-        self.tc = testcase
         self.app = web.Application()
 
         self.app.router.add_post("/play", self.handle_airplay_play)
@@ -86,8 +85,8 @@ class FakeAirPlayDevice:
         headers = request.headers
 
         # Verify headers first
-        self.tc.assertEqual(headers["User-Agent"], "MediaControl/1.0")
-        self.tc.assertEqual(headers["Content-Type"], "application/x-apple-binary-plist")
+        assert headers["User-Agent"] == "MediaControl/1.0"
+        assert headers["Content-Type"] == "application/x-apple-binary-plist"
 
         body = await request.read()
         parsed = plistlib.loads(body)

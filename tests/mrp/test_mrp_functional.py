@@ -44,7 +44,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self, self.loop)
+        self.fake_atv = FakeAppleTV(self.loop)
         self.usecase = AppleTVUseCases(self.fake_atv)
         return self.fake_atv.app
 
