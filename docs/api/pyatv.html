@@ -82,8 +82,12 @@ ALL_SERVICES = [
 def _decode_properties(properties) -&gt; Dict[str, str]:
     def _decode(value: bytes):
         try:
-            # Remove non-breaking-space (0xA2A0) before decoding
-            return value.replace(b&#34;\xC2\xA0&#34;, b&#34; &#34;).decode(&#34;utf-8&#34;)
+            # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
+            return (
+                value.replace(b&#34;\xC2\xA0&#34;, b&#34; &#34;)
+                .replace(b&#34;\x00\xA0&#34;, b&#34; &#34;)
+                .decode(&#34;utf-8&#34;)
+            )
         except Exception:  # pylint: disable=broad-except
             return str(value)
 
