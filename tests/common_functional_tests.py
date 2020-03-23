@@ -135,67 +135,67 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_button_up(self):
         await self.atv.remote_control.up()
-        await until(lambda: self.fake_atv.last_button_pressed == "up")
+        await until(lambda: self.state.last_button_pressed == "up")
 
     @unittest_run_loop
     async def test_button_down(self):
         await self.atv.remote_control.down()
-        await until(lambda: self.fake_atv.last_button_pressed == "down")
+        await until(lambda: self.state.last_button_pressed == "down")
 
     @unittest_run_loop
     async def test_button_left(self):
         await self.atv.remote_control.left()
-        await until(lambda: self.fake_atv.last_button_pressed == "left")
+        await until(lambda: self.state.last_button_pressed == "left")
 
     @unittest_run_loop
     async def test_button_right(self):
         await self.atv.remote_control.right()
-        await until(lambda: self.fake_atv.last_button_pressed == "right")
+        await until(lambda: self.state.last_button_pressed == "right")
 
     @unittest_run_loop
     async def test_button_select(self):
         await self.atv.remote_control.select()
-        await until(lambda: self.fake_atv.last_button_pressed == "select")
+        await until(lambda: self.state.last_button_pressed == "select")
 
     @unittest_run_loop
     async def test_button_menu(self):
         await self.atv.remote_control.menu()
-        await until(lambda: self.fake_atv.last_button_pressed == "menu")
+        await until(lambda: self.state.last_button_pressed == "menu")
 
     @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
-        await until(lambda: self.fake_atv.last_button_pressed == "topmenu")
+        await until(lambda: self.state.last_button_pressed == "topmenu")
 
     @unittest_run_loop
     async def test_button_play(self):
         await self.atv.remote_control.play()
-        await until(lambda: self.fake_atv.last_button_pressed == "play")
+        await until(lambda: self.state.last_button_pressed == "play")
 
     @unittest_run_loop
     async def test_button_play_pause(self):
         await self.atv.remote_control.play_pause()
-        await until(lambda: self.fake_atv.last_button_pressed == "playpause")
+        await until(lambda: self.state.last_button_pressed == "playpause")
 
     @unittest_run_loop
     async def test_button_pause(self):
         await self.atv.remote_control.pause()
-        await until(lambda: self.fake_atv.last_button_pressed == "pause")
+        await until(lambda: self.state.last_button_pressed == "pause")
 
     @unittest_run_loop
     async def test_button_stop(self):
         await self.atv.remote_control.stop()
-        await until(lambda: self.fake_atv.last_button_pressed == "stop")
+        await until(lambda: self.state.last_button_pressed == "stop")
 
     @unittest_run_loop
     async def test_button_next(self):
         await self.atv.remote_control.next()
-        await until(lambda: self.fake_atv.last_button_pressed == "nextitem")
+        await until(lambda: self.state.last_button_pressed == "nextitem")
 
     @unittest_run_loop
     async def test_button_previous(self):
         await self.atv.remote_control.previous()
-        await until(lambda: self.fake_atv.last_button_pressed == "previtem")
+        await until(lambda: self.state.last_button_pressed == "previtem")
 
     def test_metadata_device_id(self):
         self.assertIn(self.atv.metadata.device_id, self.conf.all_identifiers)

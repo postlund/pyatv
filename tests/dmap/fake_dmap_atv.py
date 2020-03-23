@@ -25,9 +25,7 @@ EXPECTED_HEADERS = {
 }
 
 LoginResponse = namedtuple("LoginResponse", "session, status")
-ArtworkResponse = namedtuple("ArtworkResponse", "content, status")
 AirPlayPlaybackResponse = namedtuple("AirPlayPlaybackResponse", "content")
-PairingResponse = namedtuple("PairingResponse", "remote_name, pairing_code")
 
 
 DEVICE_IDENTIFIER = "75FBEEC773CFC563"
@@ -55,24 +53,63 @@ class PlayingResponse:
         self.revision = revision
         self.shuffle = kwargs.get("shuffle")
         self.force_close = kwargs.get("force_close", False)
+        self.artwork = kwargs.get("artwork")
+        self.artwork_status = kwargs.get("artwork_status")
+
+
+class DmapDeviceState:
+    def __init__(self, hsgid, pairing_guid, session_id):
+        self.device = None
+        self.hsgid = hsgid
+        self.pairing_guid = pairing_guid
+        self.session_id = session_id
+        self.login_response = LoginResponse(session_id, 200)
+        self.playing = None
+        self.pairing_responses = {}  # Remote name -> expected code
+        self.session = None
+        self.last_button_pressed = None
+        self.buttons_press_count = 0
+
+    async def trigger_bonjour(self, stubbed_zeroconf):
+        """Act upon available Bonjour services."""
+        # Add more services here when needed
+        for service in stubbed_zeroconf.registered_services:
+            if service.type != "_touch-remote._tcp.local.":
+                continue
+
+            # Look for the response matching this remote
+            remote_name = service.properties[b"DvNm"]
+            for remote_name, expected_code in self.pairing_responses.items():
+                if remote_name == remote_name:
+                    return await self.perform_pairing(
+                        remote_name, expected_code, service.port
+                    )
+
+    async def perform_pairing(self, remote_name, expected_code, port):
+        """Pair with a remote client.
+
+        This will perform a GET-request to the specified port and hand over
+        information to the client (pyatv) so that the pairing process can be
+        completed.
+        """
+        server = f"http://127.0.0.1:{port}"
+        url = f"{server}/pairing?pairingcode={expected_code}&servicename=test"
+        data, _ = await utils.simple_get(url)
+
+        # Verify content returned in pairingresponse
+        parsed = parser.parse(data, tag_definitions.lookup_tag)
+        assert parser.first(parsed, "cmpa", "cmpg") == 1
+        assert parser.first(parsed, "cmpa", "cmnm") == remote_name
+        assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
 
 class FakeAppleTV(FakeAirPlayDevice):
     """Implementation of a fake DMAP Apple TV."""
 
-    def __init__(self, hsgid, pairing_guid, session_id):
+    def __init__(self, state):
         """Initialize a new FakeAppleTV."""
         super().__init__()
-
-        self.responses["login"] = [LoginResponse(session_id, 200)]
-        self.responses["artwork"] = []
-        self.responses["playing"] = []
-        self.responses["pairing"] = []
-        self.hsgid = hsgid
-        self.pairing_guid = pairing_guid
-        self.session = None
-        self.last_button_pressed = None
-        self.buttons_press_count = 0
+        self.state = state
 
         self.app.router.add_get("/login", self.handle_login)
         self.app.router.add_get("/ctrl-int/1/playstatusupdate", self.handle_playstatus)
@@ -86,22 +123,25 @@ class FakeAppleTV(FakeAirPlayDevice):
                 "/ctrl-int/1/" + button, self.handle_playback_button
             )
 
+    @property
+    def usecase(self):
+        return AppleTVUseCases(self.state, self)
+
     async def handle_login(self, request):
         """Handle login requests."""
         self._verify_headers(request)
         self._verify_auth_parameters(request, check_login_id=True, check_session=False)
 
-        data = self._get_response("login")
-        mlid = tags.uint32_tag("mlid", data.session)
+        mlid = tags.uint32_tag("mlid", self.state.login_response.session)
         mlog = tags.container_tag("mlog", mlid)
-        self.session = data.session
-        return web.Response(body=mlog, status=data.status)
+        self.state.session = self.state.login_response.session
+        return web.Response(body=mlog, status=self.state.login_response.status)
 
     async def handle_playback_button(self, request):
         """Handle playback buttons."""
         self._verify_auth_parameters(request)
-        self.last_button_pressed = request.rel_url.path.split("/")[-1]
-        self.buttons_press_count += 1
+        self.state.last_button_pressed = request.rel_url.path.split("/")[-1]
+        self.state.buttons_press_count += 1
         return web.Response(status=200)
 
     async def handle_remote_button(self, request):
@@ -109,15 +149,15 @@ class FakeAppleTV(FakeAirPlayDevice):
         self._verify_auth_parameters(request)
         content = await request.content.read()
         parsed = parser.parse(content, tag_definitions.lookup_tag)
-        self.last_button_pressed = self._convert_button(parsed)
-        self.buttons_press_count += 1
+        self.state.last_button_pressed = self._convert_button(parsed)
+        self.state.buttons_press_count += 1
         return web.Response(status=200)
 
     def _convert_button(self, data):
         value = parser.first(data, "cmbe")
 
         # Consider navigation buttons if six commands have been received
-        if self.buttons_press_count == 6:
+        if self.state.buttons_press_count == 6:
             if value == "touchUp&time=6&point=20,250":
                 return "up"
             elif value == "touchUp&time=6&point=20,275":
@@ -132,15 +172,15 @@ class FakeAppleTV(FakeAirPlayDevice):
     async def handle_artwork(self, request):
         """Handle artwork requests."""
         self._verify_auth_parameters(request)
-        artwork = self._get_response("artwork")
-        return web.Response(body=artwork.content, status=artwork.status)
+        playing = self.state.playing
+        return web.Response(body=playing.artwork, status=playing.artwork_status)
 
     async def handle_playstatus(self, request):
         """Handle  playstatus (currently playing) requests."""
         self._verify_auth_parameters(request)
 
         body = b""
-        playing = self._get_response("playing")
+        playing = self.state.playing
 
         # Check if connection should be closed to trigger error on client side
         if playing.force_close:
@@ -207,51 +247,19 @@ class FakeAppleTV(FakeAirPlayDevice):
         self._verify_auth_parameters(request)
         if "dacp.playingtime" in request.rel_url.query:
             playtime = int(request.rel_url.query["dacp.playingtime"])
-            self._get_response("playing").position = int(playtime / 1000)
+            self.state.playing.position = int(playtime / 1000)
         elif "dacp.shufflestate" in request.rel_url.query:
             shuffle = int(request.rel_url.query["dacp.shufflestate"])
-            self._get_response("playing").shuffle = (
+            self.state.playing.shuffle = (
                 ShuffleState.Songs if shuffle == 1 else ShuffleState.Off
             )
         elif "dacp.repeatstate" in request.rel_url.query:
             repeat = int(request.rel_url.query["dacp.repeatstate"])
-            self._get_response("playing").repeat = RepeatState(repeat)
+            self.state.playing.repeat = RepeatState(repeat)
         else:
             web.Response(body=b"", status=500)
 
         return web.Response(body=b"", status=200)
-
-    async def trigger_bonjour(self, stubbed_zeroconf):
-        """Act upon available Bonjour services."""
-        # Add more services here when needed
-        for service in stubbed_zeroconf.registered_services:
-            if service.type != "_touch-remote._tcp.local.":
-                continue
-
-            # Look for the response matching this remote
-            remote_name = service.properties[b"DvNm"]
-            for response in self.responses["pairing"]:
-                if response.remote_name == remote_name:
-                    return await self.perform_pairing(response, service.port)
-
-    async def perform_pairing(self, pairing_response, port):
-        """Pair with a remote client.
-
-        This will perform a GET-request to the specified port and hand over
-        information to the client (pyatv) so that the pairing process can be
-        completed.
-        """
-        server = "http://127.0.0.1:{}".format(port)
-        url = "{}/pairing?pairingcode={}&servicename=test".format(
-            server, pairing_response.pairing_code
-        )
-        data, _ = await utils.simple_get(url)
-
-        # Verify content returned in pairingresponse
-        parsed = parser.parse(data, tag_definitions.lookup_tag)
-        assert parser.first(parsed, "cmpa", "cmpg") == 1
-        assert parser.first(parsed, "cmpa", "cmnm") == pairing_response.remote_name
-        assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
     # Verifies that all needed headers are included in the request. Should be
     # checked in all requests, but that seems a bit too much and not that
@@ -272,17 +280,17 @@ class FakeAppleTV(FakeAirPlayDevice):
         # Either hsgid or pairing-guid should be present
         if check_login_id:
             if "hsgid" in params:
-                assert params["hsgid"] == self.hsgid, "hsgid does not match"
+                assert params["hsgid"] == self.state.hsgid, "hsgid does not match"
             elif "pairing-guid" in params:
                 assert (
-                    params["pairing-guid"] == self.pairing_guid
+                    params["pairing-guid"] == self.state.pairing_guid
                 ), "pairing-guid does not match"
             else:
                 assert False, "hsgid or pairing-guid not found"
 
         if check_session:
             assert (
-                int(params["session-id"]) == self.session
+                int(params["session-id"]) == self.state.session
             ), "session id does not match"
 
 
@@ -292,40 +300,39 @@ class AppleTVUseCases(AirPlayUseCases):
     Extend and use this class to alter behavior of a fake Apple TV device.
     """
 
-    def __init__(self, fake_apple_tv):
+    def __init__(self, state, airplay_device):
         """Initialize a new AppleTVUseCases."""
-        self.device = fake_apple_tv
+        super().__init__(airplay_device)
+        self.state = state
 
     def force_relogin(self, session):
         """Call this method to change current session id."""
-        self.device.responses["login"].append(LoginResponse(session, 200))
+        self.state.login_response = LoginResponse(session, 200)
 
-    def make_login_fail(self, immediately=True):
+    def make_login_fail(self):
         """Call this method to make login fail with response 503."""
-        response = LoginResponse(0, 503)
-        if immediately:
-            self.device.responses["login"].append(response)
-        else:
-            self.device.responses["login"].insert(0, response)
+        self.state.login_response = LoginResponse(0, 503)
 
     def change_artwork(self, artwork, mimetype, identifier=None):
         """Call this method to change artwork response."""
-        self.device.responses["artwork"].append(ArtworkResponse(artwork, 200))
+        self.state.playing.artwork = artwork
+        self.state.playing.artwork_status = 200
 
     def artwork_no_permission(self):
         """Make artwork fail with no permission.
 
         This corresponds to have been logged out for some reason.
         """
-        self.device.responses["artwork"].insert(0, ArtworkResponse(None, 403))
+        self.state.playing.artwork = None
+        self.state.playing.artwork_status = 403
 
     def nothing_playing(self):
         """Call this method to put device in idle state."""
-        self.device.responses["playing"].insert(0, PlayingResponse())
+        self.state.playing = PlayingResponse()
 
     def server_closes_connection(self):
         """Call this method to force server to close connection on request."""
-        self.device.responses["playing"].insert(0, PlayingResponse(force_close=True))
+        self.state.playing = PlayingResponse(force_close=True)
 
     def example_video(self, paused=True, **kwargs):
         """Play some example video."""
@@ -345,19 +352,16 @@ class AppleTVUseCases(AirPlayUseCases):
             shuffle = kwargs["shuffle"]
         if "repeat" in kwargs:
             repeat = kwargs["repeat"]
-        self.device.responses["playing"].insert(
-            0,
-            PlayingResponse(
-                revision=revision,
-                paused=paused,
-                title=title,
-                total_time=total_time,
-                position=position,
-                mediakind=3,
-                shuffle=shuffle,
-                repeat=repeat,
-                playback_rate=playback_rate,
-            ),
+        self.state.playing = PlayingResponse(
+            revision=revision,
+            paused=paused,
+            title=title,
+            total_time=total_time,
+            position=position,
+            mediakind=3,
+            shuffle=shuffle,
+            repeat=repeat,
+            playback_rate=playback_rate,
         )
 
     def example_music(self, **kwargs):
@@ -375,30 +379,25 @@ class AppleTVUseCases(AirPlayUseCases):
         self, paused, artist, album, title, genre, total_time, position, **kwargs
     ):
         """Call this method to change what is currently playing to music."""
-        self.device.responses["playing"].insert(
-            0,
-            PlayingResponse(
-                paused=paused,
-                title=title,
-                artist=artist,
-                album=album,
-                total_time=total_time,
-                position=position,
-                genre=genre,
-                mediakind=2,
-                **kwargs,
-            ),
+        self.state.playing = PlayingResponse(
+            paused=paused,
+            title=title,
+            artist=artist,
+            album=album,
+            total_time=total_time,
+            position=position,
+            genre=genre,
+            mediakind=2,
+            **kwargs,
         )
 
     def media_is_loading(self):
         """Call this method to put device in a loading state."""
-        self.device.responses["playing"].insert(0, PlayingResponse(playstatus=1))
+        self.state.playing = PlayingResponse(playstatus=1)
 
     def pairing_response(self, remote_name, expected_pairing_code):
         """Reponse when a pairing request is made."""
-        self.device.responses["pairing"].insert(
-            0, PairingResponse(remote_name, expected_pairing_code)
-        )
+        self.state.pairing_responses[remote_name] = expected_pairing_code
 
     async def act_on_bonjour_services(self, stubbed_zeroconf):
         """Act on available Bonjour services.
@@ -406,4 +405,4 @@ class AppleTVUseCases(AirPlayUseCases):
         This will make the device look at published services and perform
         actions base on these. Most imporant for the pairing process.
         """
-        await self.device.trigger_bonjour(stubbed_zeroconf)
+        await self.state.trigger_bonjour(stubbed_zeroconf)

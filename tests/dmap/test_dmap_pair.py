@@ -8,7 +8,7 @@ import pyatv
 from pyatv.const import Protocol
 from pyatv.conf import DmapService, AppleTV
 from pyatv.dmap import pairing
-from tests.dmap.fake_dmap_atv import FakeAppleTV, AppleTVUseCases
+from tests.dmap.fake_dmap_atv import DmapDeviceState, FakeAppleTV
 from tests import zeroconf_stub
 
 HSGID = "12345-6789-0"
@@ -42,8 +42,8 @@ class DmapPairFunctionalTest(AioHTTPTestCase):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(HSGID, PAIRING_GUID, SESSION_ID)
-        self.usecase = AppleTVUseCases(self.fake_atv)
+        self.fake_atv = FakeAppleTV(DmapDeviceState(HSGID, PAIRING_GUID, SESSION_ID))
+        self.usecase = self.fake_atv.usecase
         return self.fake_atv.app
 
     async def initiate_pairing(self, name=REMOTE_NAME, pairing_guid=PAIRING_GUID):
