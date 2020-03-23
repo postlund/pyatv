@@ -7,7 +7,7 @@ from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.conf import MrpService, AppleTV
 from pyatv.mrp.server_auth import PIN_CODE, CLIENT_IDENTIFIER, CLIENT_CREDENTIALS
-from tests.mrp.fake_mrp_atv import FakeAppleTV, AppleTVUseCases
+from tests.mrp.fake_mrp_atv import FakeAppleTV
 
 
 class MrpAuthFunctionalTest(AioHTTPTestCase):
@@ -24,7 +24,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)
-        self.usecase = AppleTVUseCases(self.fake_atv)
+        self.usecase = self.fake_atv.usecase
         return self.fake_atv.app
 
     @unittest_run_loop
