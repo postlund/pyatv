@@ -8,9 +8,16 @@ import logging
 import argparse
 from enum import Enum
 
-from pyatv import connect, scan
+from pyatv import connect, const, scan
 from pyatv.const import Protocol
-from pyatv.interface import Playing, RemoteControl, PushListener, retrieve_commands
+from pyatv.interface import (
+    App,
+    Playing,
+    RemoteControl,
+    PushListener,
+    PowerListener,
+    retrieve_commands,
+)
 from pyatv.scripts import TransformProtocol, TransformScanHosts, TransformOutput
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,17 +26,34 @@ _LOGGER = logging.getLogger(__name__)
 class PushPrinter(PushListener):
     """Listen for push updates and print changes."""
 
-    def __init__(self, formatter):
-        """Initialize a new PushListener."""
+    def __init__(self, formatter, atv):
+        """Initialize a new PushPrinter."""
         self.formatter = formatter
+        self.atv = atv
 
     def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Inform about changes to what is currently playing."""
-        print(self.formatter(output_playing(playstatus)))
+        print(self.formatter(output_playing(playstatus, self.atv.metadata.app)))
 
     def playstatus_error(self, updater, exception: Exception) -> None:
         """Inform about an error when updating play status."""
         print(self.formatter(output(False, exception=exception)))
+
+
+class PowerPrinter(PowerListener):
+    """Listen for power updates and print changes."""
+
+    def __init__(self, formatter):
+        """Initialize a new PowerPrinter."""
+        self.formatter = formatter
+
+    def powerstate_update(
+        self, old_state: const.PowerState, new_state: const.PowerState
+    ):
+        """Device power state was updated."""
+        print(
+            self.formatter(output(True, values={"power_state": new_state.name.lower()}))
+        )
 
 
 def output(success: bool, error=None, exception=None, values=None):
@@ -44,7 +68,7 @@ def output(success: bool, error=None, exception=None, values=None):
     return output
 
 
-def output_playing(playing: Playing):
+def output_playing(playing: Playing, app: App):
     """Produce output for what is currently playing."""
 
     def _convert(field):
@@ -54,17 +78,29 @@ def output_playing(playing: Playing):
 
     commands = retrieve_commands(Playing)
     values = {k: _convert(getattr(playing, k)) for k in commands.keys()}
+    if app:
+        values["app"] = app.name
+        values["app_id"] = app.identifier
+    else:
+        values["app"] = None
+        values["app_id"] = None
     return output(True, values=values)
 
 
-async def _scan_devices(loop):
+async def _scan_devices(loop, hosts):
     atvs = []
-    for atv in await scan(loop):
+    for atv in await scan(loop, hosts=hosts):
+        services = []
+        for service in atv.services:
+            services.append(
+                {"protocol": service.protocol.name.lower(), "port": service.port}
+            )
         atvs.append(
             {
                 "name": atv.name,
                 "address": str(atv.address),
                 "identifier": atv.identifier,
+                "services": services,
             }
         )
     return output(True, values={"devices": atvs})
@@ -98,7 +134,7 @@ async def _autodiscover_device(args, loop):
 
 async def _handle_command(args, loop):
     if args.command == "scan":
-        return await _scan_devices(loop)
+        return await _scan_devices(loop, args.scan_hosts)
 
     config = await _autodiscover_device(args, loop)
     if not config:
@@ -107,11 +143,17 @@ async def _handle_command(args, loop):
     atv = await connect(config, loop, protocol=Protocol.MRP)
 
     if args.command == "playing":
-        return output_playing(await atv.metadata.playing())
+        return output_playing(await atv.metadata.playing(), atv.metadata.app)
 
     if args.command == "push_updates":
-        atv.push_updater.listener = PushPrinter(args.output)
+        atv.power.listener = PowerPrinter(args.output)
+        atv.push_updater.listener = PushPrinter(args.output, atv)
         atv.push_updater.start()
+        print(
+            args.output(
+                output(True, values={"power_state": atv.power.power_state.name.lower()})
+            )
+        )
         await loop.run_in_executor(None, sys.stdin.readline)
         return output(True, values={"push_updates": "finished"})
 

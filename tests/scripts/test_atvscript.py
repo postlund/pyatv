@@ -26,8 +26,21 @@ class AtvscriptTest(ScriptTest):
             {
                 "result": "success",
                 "devices": [
-                    {"name": "Apple TV 1", "address": IP_1, "identifier": DMAP_ID},
-                    {"name": "Apple TV 2", "address": IP_2, "identifier": MRP_ID},
+                    {
+                        "name": "Apple TV 1",
+                        "address": IP_1,
+                        "identifier": DMAP_ID,
+                        "services": [{"protocol": "dmap", "port": 3689}],
+                    },
+                    {
+                        "name": "Apple TV 2",
+                        "address": IP_2,
+                        "identifier": MRP_ID,
+                        "services": [
+                            {"protocol": "mrp", "port": self.fake_atv.port},
+                            {"protocol": "airplay", "port": self.server.port},
+                        ],
+                    },
                 ],
             },
         )
@@ -50,6 +63,8 @@ class AtvscriptTest(ScriptTest):
                 "position": None,
                 "shuffle": "off",
                 "repeat": "off",
+                "app": None,
+                "app_id": None,
             }
         )
         self.exit(0)
