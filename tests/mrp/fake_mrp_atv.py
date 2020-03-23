@@ -103,10 +103,11 @@ def _set_state_message(metadata, identifier):
     inner.playbackState = metadata.playback_state
     inner.displayName = "Fake Player"
 
-    for command in metadata.supported_commands:
-        item = inner.supportedCommands.supportedCommands.add()
-        item.command = command
-        item.enabled = True
+    if metadata.supported_commands:
+        for command in metadata.supported_commands:
+            item = inner.supportedCommands.supportedCommands.add()
+            item.command = command
+            item.enabled = True
 
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()
@@ -116,7 +117,7 @@ def _set_state_message(metadata, identifier):
     if metadata.shuffle:
         cmd = inner.supportedCommands.supportedCommands.add()
         cmd.command = protobuf.CommandInfo_pb2.ChangeShuffleMode
-        cmd.shuffleMode = metadata.shuffle
+        cmd.shuffleMode = _SHUFFLE_LOOKUP.get(metadata.shuffle)
 
     queue = inner.playbackQueue
     queue.location = 0
@@ -128,9 +129,9 @@ def _set_state_message(metadata, identifier):
     return set_state
 
 
-class PlayingMetadata:
+class PlayingState:
     def __init__(self, **kwargs):
-        """Initialize a new PlayingMetadata."""
+        """Initialize a new PlayingState."""
         self.identifier = kwargs.get("identifier")
         self.playback_state = kwargs.get("playback_state")
         self.title = kwargs.get("title")
@@ -140,23 +141,75 @@ class PlayingMetadata:
         self.total_time = kwargs.get("total_time")
         self.position = kwargs.get("position")
         self.repeat = kwargs.get("repeat")
-        self.shuffle = _SHUFFLE_LOOKUP.get(kwargs.get("shuffle"))
+        self.shuffle = kwargs.get("shuffle")
         self.media_type = kwargs.get("media_type")
         self.playback_rate = kwargs.get("playback_rate")
-        self.supported_commands = kwargs.get("supported_commands", [])
-        self.artwork = None
-        self.artwork_mimetype = None
+        self.supported_commands = kwargs.get("supported_commands")
+        self.artwork = kwargs.get("artwork")
+        self.artwork_mimetype = kwargs.get("artwork_mimetype")
 
 
-class FakeDeviceState:
+class MrpDeviceState:
     def __init__(self):
         """State of a fake MRP device."""
+        self.device = None
         self.outstanding_keypresses = set()  # Pressed but not released
         self.last_button_pressed = None
         self.connection_state = None
         self.states = {}
         self.active_player = None
         self.powered_on = True
+
+    def update_state(self, identifier):
+        state = self.states[identifier]
+        self.device.send(_set_state_message(state, identifier))
+
+    def set_player_state(self, identifier, state):
+        self.states[identifier] = state
+        self.update_state(identifier)
+
+    def get_player_state(self, identifier):
+        return self.states.get(identifier)
+
+    def set_active_player(self, identifier):
+        if identifier is not None and identifier not in self.states:
+            raise Exception("invalid player: %s", identifier)
+
+        self.active_player = identifier
+        now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
+        client = now_playing.inner().client
+        if identifier:
+            client.bundleIdentifier = identifier
+        self.device.send(now_playing)
+
+    def item_update(self, metadata, identifier):
+        msg = messages.create(protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
+        inner = msg.inner()
+
+        _fill_item(inner.contentItems.add(), metadata)
+
+        client = inner.playerPath.client
+        client.processIdentifier = 123
+        client.bundleIdentifier = identifier
+
+        state = self.get_player_state(identifier)
+        for var, value in vars(metadata).items():
+            if value:
+                setattr(state, var, value)
+
+        self.device.send(msg)
+
+    def update_client(self, display_name, identifier):
+        msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
+        client = msg.inner().client
+        client.bundleIdentifier = identifier
+        client.displayName = display_name
+        self.device.send(msg)
+
+    def volume_control(self, available):
+        msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
+        msg.inner().volumeControlAvailable = available
+        self.device.send(msg)
 
 
 class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
@@ -165,7 +218,8 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     def __init__(self, loop, state=None):
         FakeAirPlayDevice.__init__(self)
         MrpServerAuth.__init__(self, self, DEVICE_NAME)
-        self.state = state or FakeDeviceState()
+        self.state = state or MrpDeviceState()
+        self.state.device = self
         self.loop = loop
         self.app.on_startup.append(self.start)
         self.has_authenticated = False
@@ -179,6 +233,10 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
         coro = self.loop.create_server(lambda: self, "127.0.0.1")
         self.server = await self.loop.create_task(coro)
         _LOGGER.info("Started MRP server at port %d", self.port)
+
+    @property
+    def usecase(self):
+        return AppleTVUseCases(self.state, self)
 
     @property
     def port(self):
@@ -207,52 +265,6 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
-
-    def update_state(self, identifier):
-        state = self.state.states[identifier]
-        self.send(_set_state_message(state, identifier))
-
-    def set_player_state(self, identifier, state):
-        self.state.states[identifier] = state
-        self.update_state(identifier)
-
-    def get_player_state(self, identifier):
-        return self.state.states.get(identifier)
-
-    def set_active_player(self, identifier):
-        if identifier is not None and identifier not in self.state.states:
-            raise Exception("invalid player: %s", identifier)
-
-        self.state.active_player = identifier
-        now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
-        client = now_playing.inner().client
-        if identifier:
-            client.bundleIdentifier = identifier
-        self.send(now_playing)
-
-    def item_update(self, metadata, identifier):
-        msg = messages.create(protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
-        inner = msg.inner()
-
-        _fill_item(inner.contentItems.add(), metadata)
-
-        client = inner.playerPath.client
-        client.processIdentifier = 123
-        client.bundleIdentifier = identifier
-
-        self.send(msg)
-
-    def update_client(self, display_name, identifier):
-        msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
-        client = msg.inner().client
-        client.bundleIdentifier = identifier
-        client.displayName = display_name
-        self.send(msg)
-
-    def volume_control(self, available):
-        msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
-        msg.inner().volumeControlAvailable = available
-        self.send(msg)
 
     def _send_device_info(self, identifier=None, update=False):
         resp = messages.device_information(DEVICE_NAME, "1234", update=update)
@@ -334,7 +346,7 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
             _LOGGER.error("Invalid key press state: %d", down_press)
 
     def handle_send_command(self, message, inner):
-        state = self.get_player_state(self.state.active_player)
+        state = self.state.get_player_state(self.state.active_player)
         button = _COMMAND_LOOKUP.get(inner.command)
         if button:
             self.state.last_button_pressed = button
@@ -344,15 +356,19 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
                 protobuf.CommandInfo.One: const.RepeatState.Track,
                 protobuf.CommandInfo.All: const.RepeatState.All,
             }.get(inner.options.repeatMode, const.RepeatState.Off)
-            self.update_state(self.state.active_player)
+            self.state.update_state(self.state.active_player)
             _LOGGER.debug("Change repeat state to %s", state.repeat)
         elif inner.command == cmd.ChangeShuffleMode:
-            state.shuffle = inner.options.shuffleMode
-            self.update_state(self.state.active_player)
+            state.shuffle = {
+                protobuf.CommandInfo.Off: const.ShuffleState.Off,
+                protobuf.CommandInfo.Albums: const.ShuffleState.Albums,
+                protobuf.CommandInfo.Songs: const.ShuffleState.Songs,
+            }.get(inner.options.shuffleMode, const.ShuffleState.Off)
+            self.state.update_state(self.state.active_player)
             _LOGGER.debug("Change shuffle state to %s", state.shuffle)
         elif inner.command == cmd.SeekToPlaybackPosition:
             state.position = inner.options.playbackPosition
-            self.update_state(self.state.active_player)
+            self.state.update_state(self.state.active_player)
             _LOGGER.debug("Seek to position: %d", state.position)
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
@@ -382,41 +398,42 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 class AppleTVUseCases(AirPlayUseCases):
     """Wrapper for altering behavior of a FakeMrpAppleTV instance."""
 
-    def __init__(self, fake_apple_tv):
+    def __init__(self, device_state, airplay_device):
         """Initialize a new AppleTVUseCases."""
-        self.device = fake_apple_tv
+        super().__init__(airplay_device)
+        self.state = device_state
 
     def change_volume_control(self, available):
         """Change volume control availaility."""
-        self.device.volume_control(available)
+        self.state.volume_control(available)
 
     def change_artwork(self, artwork, mimetype, identifier="artwork"):
         """Call to change artwork response."""
-        metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
+        metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
         metadata.artwork = artwork
         metadata.artwork_mimetype = mimetype
         metadata.artwork_identifier = identifier
-        self.device.update_state(PLAYER_IDENTIFIER)
+        self.state.update_state(PLAYER_IDENTIFIER)
 
     def change_metadata(self, **kwargs):
         """Change metadata for item via ContentItemUpdate."""
-        metadata = self.device.get_player_state(PLAYER_IDENTIFIER)
+        metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
 
         # Update saved metadata
         for key, value in kwargs.items():
             setattr(metadata, key, value)
 
         # Create a temporary metadata instance with requested parameters
-        change = PlayingMetadata(**kwargs)
-        self.device.item_update(change, PLAYER_IDENTIFIER)
+        change = PlayingState(**kwargs)
+        self.state.item_update(change, PLAYER_IDENTIFIER)
 
     def update_client(self, display_name):
         """Update playing client with new information."""
-        self.device.update_client(display_name, PLAYER_IDENTIFIER)
+        self.state.update_client(display_name, PLAYER_IDENTIFIER)
 
     def nothing_playing(self):
         """Call to put device in idle state."""
-        self.device.set_active_player(None)
+        self.state.set_active_player(None)
 
     def example_video(self, **kwargs):
         """Play some example video."""
@@ -426,7 +443,7 @@ class AppleTVUseCases(AirPlayUseCases):
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call to change what is currently plaing to video."""
-        metadata = PlayingMetadata(
+        metadata = PlayingState(
             playback_state=ssm.Paused if paused else ssm.Playing,
             title=title,
             total_time=total_time,
@@ -434,8 +451,8 @@ class AppleTVUseCases(AirPlayUseCases):
             media_type=protobuf.ContentItemMetadata.Video,
             **kwargs,
         )
-        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
-        self.device.set_active_player(PLAYER_IDENTIFIER)
+        self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
+        self.state.set_active_player(PLAYER_IDENTIFIER)
 
     def example_music(self, **kwargs):
         """Play some example music."""
@@ -452,7 +469,7 @@ class AppleTVUseCases(AirPlayUseCases):
         self, paused, artist, album, title, genre, total_time, position, **kwargs
     ):
         """Call to change what is currently plaing to music."""
-        metadata = PlayingMetadata(
+        metadata = PlayingState(
             playback_state=ssm.Paused if paused else ssm.Playing,
             artist=artist,
             album=album,
@@ -463,11 +480,11 @@ class AppleTVUseCases(AirPlayUseCases):
             media_type=protobuf.ContentItemMetadata.Music,
             **kwargs,
         )
-        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
-        self.device.set_active_player(PLAYER_IDENTIFIER)
+        self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
+        self.state.set_active_player(PLAYER_IDENTIFIER)
 
     def media_is_loading(self):
         """Call to put device in a loading state."""
-        metadata = PlayingMetadata(playback_state=ssm.Interrupted)
-        self.device.set_player_state(PLAYER_IDENTIFIER, metadata)
-        self.device.set_active_player(PLAYER_IDENTIFIER)
+        metadata = PlayingState(playback_state=ssm.Interrupted)
+        self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
+        self.state.set_active_player(PLAYER_IDENTIFIER)

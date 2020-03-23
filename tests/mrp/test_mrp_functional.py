@@ -17,7 +17,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
-from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, FakeAppleTV, AppleTVUseCases
+from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, FakeAppleTV
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)
-        self.usecase = AppleTVUseCases(self.fake_atv)
+        self.usecase = self.fake_atv.usecase
         return self.fake_atv.app
 
     async def get_connected_device(self):
