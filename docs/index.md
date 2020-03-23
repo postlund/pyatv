@@ -77,4 +77,4 @@ project that I put a few hours in every now and then to maintain. If you find it
 please consider to sponsor me! :heart:
 
 Of course, this is an open source project which means I couldn't do it all by myself.
-I have created dedicated page for [acknowledgments](support/acknowledgments)!
+I have created dedicated page for [acknowledgements](support/acknowledgments)!
