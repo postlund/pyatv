@@ -1044,7 +1044,7 @@ class AppleTV(ABC):
 </details>
 </dd>
 <dt id="pyatv.interface.retrieve_commands"><code class="name flex">
-<span>def <span class="ident">retrieve_commands</span></span>(<span>obj)</span>
+<span>def <span class="ident">retrieve_commands</span></span>(<span>obj: object)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Retrieve all commands and help texts from an API object.</p></section>
@@ -1073,7 +1073,7 @@ class AppleTV(ABC):
 <dl>
 <dt id="pyatv.interface.App"><code class="flex name class">
 <span>class <span class="ident">App</span></span>
-<span>(</span><span>name, identifier)</span>
+<span>(</span><span>name: Union[str, NoneType], identifier: str)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Information about an app.</p>
@@ -1369,7 +1369,7 @@ def stream(self) -&gt; Stream:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.AppleTV.close"><code class="name flex">
-<span>async def <span class="ident">close</span></span>(<span>self)</span>
+<span>async def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
@@ -1384,7 +1384,7 @@ async def close(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.connect"><code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>self)</span>
+<span>async def <span class="ident">connect</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Initiate connection to device.</p>
@@ -1406,7 +1406,7 @@ async def connect(self) -&gt; None:
 </dd>
 <dt id="pyatv.interface.ArtworkInfo"><code class="flex name class">
 <span>class <span class="ident">ArtworkInfo</span></span>
-<span>(</span><span>bytes, mimetype)</span>
+<span>(</span><span>bytes: bytes, mimetype: str)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Artwork information.</p></section>
@@ -1438,7 +1438,7 @@ async def connect(self) -&gt; None:
 </dd>
 <dt id="pyatv.interface.BaseService"><code class="flex name class">
 <span>class <span class="ident">BaseService</span></span>
-<span>(</span><span>identifier, protocol, port, properties)</span>
+<span>(</span><span>identifier: str, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Union[Dict[str, str], NoneType])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for protocol services.</p>
@@ -1505,7 +1505,7 @@ def identifier(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.BaseService.merge"><code class="name flex">
-<span>def <span class="ident">merge</span></span>(<span>self, other)</span>
+<span>def <span class="ident">merge</span></span>(<span>self, other) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Merge with other service of same type.</p></section>
@@ -1523,7 +1523,7 @@ def identifier(self) -&gt; str:
 </dd>
 <dt id="pyatv.interface.DeviceInfo"><code class="flex name class">
 <span>class <span class="ident">DeviceInfo</span></span>
-<span>(</span><span>os, version, build_number, model, mac)</span>
+<span>(</span><span>os: <a title="pyatv.const.OperatingSystem" href="const#pyatv.const.OperatingSystem">OperatingSystem</a>, version: Union[str, NoneType], build_number: Union[str, NoneType], model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a>, mac: Union[str, NoneType])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>General information about device.</p>
@@ -1697,7 +1697,7 @@ def version(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.DeviceListener.connection_closed"><code class="name flex">
-<span>def <span class="ident">connection_closed</span></span>(<span>self)</span>
+<span>def <span class="ident">connection_closed</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Device connection was (intentionally) closed.</p></section>
@@ -1712,7 +1712,7 @@ def connection_closed(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.DeviceListener.connection_lost"><code class="name flex">
-<span>def <span class="ident">connection_lost</span></span>(<span>self, exception)</span>
+<span>def <span class="ident">connection_lost</span></span>(<span>self, exception: Exception) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Device was unexpectedly disconnected.</p></section>
@@ -1730,7 +1730,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </dd>
 <dt id="pyatv.interface.FeatureInfo"><code class="flex name class">
 <span>class <span class="ident">FeatureInfo</span></span>
-<span>(</span><span>state, options={})</span>
+<span>(</span><span>state: <a title="pyatv.const.FeatureState" href="const#pyatv.const.FeatureState">FeatureState</a>, options: Union[Dict[str, object], NoneType] = {})</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Feature state and options.</p></section>
@@ -1798,7 +1798,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Features.all_features"><code class="name flex">
-<span>def <span class="ident">all_features</span></span>(<span>self, include_unsupported=False)</span>
+<span>def <span class="ident">all_features</span></span>(<span>self, include_unsupported=False) -> Dict[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>, <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a>]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return state of all features.</p></section>
@@ -1817,7 +1817,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.Features.get_feature"><code class="name flex">
-<span>def <span class="ident">get_feature</span></span>(<span>self, feature)</span>
+<span>def <span class="ident">get_feature</span></span>(<span>self, feature: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>) -> <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return current state of a feature.</p></section>
@@ -1835,7 +1835,7 @@ def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
 </dd>
 <dt id="pyatv.interface.Metadata"><code class="flex name class">
 <span>class <span class="ident">Metadata</span></span>
-<span>(</span><span>identifier)</span>
+<span>(</span><span>identifier: str)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for retrieving metadata from an Apple TV.</p>
@@ -1950,7 +1950,7 @@ def device_id(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Metadata.artwork"><code class="name flex">
-<span>def <span class="ident">artwork</span></span>(<span>self)</span>
+<span>def <span class="ident">artwork</span></span>(<span>self) -> Union[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>, NoneType]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return artwork for what is currently playing (or None).</p></section>
@@ -1966,7 +1966,7 @@ def artwork(self) -&gt; Optional[ArtworkInfo]:
 </details>
 </dd>
 <dt id="pyatv.interface.Metadata.playing"><code class="name flex">
-<span>def <span class="ident">playing</span></span>(<span>self)</span>
+<span>def <span class="ident">playing</span></span>(<span>self) -> <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a></span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return what is currently playing.</p></section>
@@ -1984,7 +1984,7 @@ def playing(self) -&gt; Playing:
 </dd>
 <dt id="pyatv.interface.PairingHandler"><code class="flex name class">
 <span>class <span class="ident">PairingHandler</span></span>
-<span>(</span><span>session, service)</span>
+<span>(</span><span>session: aiohttp.client.ClientSession, service: <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for API used to pair with an Apple TV.</p>
@@ -2102,7 +2102,7 @@ def service(self) -&gt; BaseService:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.PairingHandler.begin"><code class="name flex">
-<span>async def <span class="ident">begin</span></span>(<span>self)</span>
+<span>async def <span class="ident">begin</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Start pairing process.</p></section>
@@ -2117,7 +2117,7 @@ async def begin(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.PairingHandler.close"><code class="name flex">
-<span>async def <span class="ident">close</span></span>(<span>self)</span>
+<span>async def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Call to free allocated resources after pairing.</p></section>
@@ -2132,7 +2132,7 @@ async def begin(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.PairingHandler.finish"><code class="name flex">
-<span>async def <span class="ident">finish</span></span>(<span>self)</span>
+<span>async def <span class="ident">finish</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Stop pairing process.</p></section>
@@ -2147,7 +2147,7 @@ async def finish(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.PairingHandler.pin"><code class="name flex">
-<span>def <span class="ident">pin</span></span>(<span>self, pin)</span>
+<span>def <span class="ident">pin</span></span>(<span>self, pin) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Pin code used for pairing.</p></section>
@@ -2581,7 +2581,7 @@ def power_state(self) -&gt; const.PowerState:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Power.turn_off"><code class="name flex">
-<span>async def <span class="ident">turn_off</span></span>(<span>self)</span>
+<span>async def <span class="ident">turn_off</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device off.</p></section>
@@ -2597,7 +2597,7 @@ async def turn_off(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.Power.turn_on"><code class="name flex">
-<span>async def <span class="ident">turn_on</span></span>(<span>self)</span>
+<span>async def <span class="ident">turn_on</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device on.</p></section>
@@ -2640,7 +2640,7 @@ async def turn_on(self) -&gt; None:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.PowerListener.powerstate_update"><code class="name flex">
-<span>def <span class="ident">powerstate_update</span></span>(<span>self, old_state, new_state)</span>
+<span>def <span class="ident">powerstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a>, new_state: <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a>)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Device power state was updated.</p></section>
@@ -2690,7 +2690,7 @@ def powerstate_update(
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.PushListener.playstatus_error"><code class="name flex">
-<span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception)</span>
+<span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception: Exception) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Inform about an error when updating play status.</p></section>
@@ -2704,7 +2704,7 @@ def playstatus_error(self, updater, exception: Exception) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.PushListener.playstatus_update"><code class="name flex">
-<span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus)</span>
+<span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Inform about changes to what is currently playing.</p></section>
@@ -2815,7 +2815,7 @@ def listener(self) -&gt; Optional[PushListener]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.PushUpdater.start"><code class="name flex">
-<span>def <span class="ident">start</span></span>(<span>self, initial_delay=0)</span>
+<span>def <span class="ident">start</span></span>(<span>self, initial_delay: int = 0) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Begin to listen to updates.</p>
@@ -2834,7 +2834,7 @@ def start(self, initial_delay: int = 0) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.PushUpdater.stop"><code class="name flex">
-<span>def <span class="ident">stop</span></span>(<span>self)</span>
+<span>def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>No longer forward updates to listener.</p></section>
@@ -3007,7 +3007,7 @@ def stop(self) -&gt; None:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.RemoteControl.down"><code class="name flex">
-<span>def <span class="ident">down</span></span>(<span>self)</span>
+<span>def <span class="ident">down</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key down.</p></section>
@@ -3023,7 +3023,7 @@ def down(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home"><code class="name flex">
-<span>def <span class="ident">home</span></span>(<span>self)</span>
+<span>def <span class="ident">home</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key home.</p></section>
@@ -3039,7 +3039,7 @@ def home(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home_hold"><code class="name flex">
-<span>def <span class="ident">home_hold</span></span>(<span>self)</span>
+<span>def <span class="ident">home_hold</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Hold key home.</p></section>
@@ -3055,7 +3055,7 @@ def home_hold(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.left"><code class="name flex">
-<span>def <span class="ident">left</span></span>(<span>self)</span>
+<span>def <span class="ident">left</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key left.</p></section>
@@ -3071,7 +3071,7 @@ def left(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.menu"><code class="name flex">
-<span>def <span class="ident">menu</span></span>(<span>self)</span>
+<span>def <span class="ident">menu</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key menu.</p></section>
@@ -3087,7 +3087,7 @@ def menu(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.next"><code class="name flex">
-<span>def <span class="ident">next</span></span>(<span>self)</span>
+<span>def <span class="ident">next</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key next.</p></section>
@@ -3103,7 +3103,7 @@ def next(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.pause"><code class="name flex">
-<span>def <span class="ident">pause</span></span>(<span>self)</span>
+<span>def <span class="ident">pause</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key play.</p></section>
@@ -3119,7 +3119,7 @@ def pause(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play"><code class="name flex">
-<span>def <span class="ident">play</span></span>(<span>self)</span>
+<span>def <span class="ident">play</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key play.</p></section>
@@ -3135,7 +3135,7 @@ def play(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play_pause"><code class="name flex">
-<span>def <span class="ident">play_pause</span></span>(<span>self)</span>
+<span>def <span class="ident">play_pause</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Toggle between play and pause.</p></section>
@@ -3151,7 +3151,7 @@ def play_pause(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.previous"><code class="name flex">
-<span>def <span class="ident">previous</span></span>(<span>self)</span>
+<span>def <span class="ident">previous</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key previous.</p></section>
@@ -3167,7 +3167,7 @@ def previous(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.right"><code class="name flex">
-<span>def <span class="ident">right</span></span>(<span>self)</span>
+<span>def <span class="ident">right</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key right.</p></section>
@@ -3183,7 +3183,7 @@ def right(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self)</span>
+<span>def <span class="ident">select</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key select.</p></section>
@@ -3199,7 +3199,7 @@ def select(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_position"><code class="name flex">
-<span>def <span class="ident">set_position</span></span>(<span>self, pos)</span>
+<span>def <span class="ident">set_position</span></span>(<span>self, pos) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Seek in the current playing media.</p></section>
@@ -3215,7 +3215,7 @@ def set_position(self, pos) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_repeat"><code class="name flex">
-<span>def <span class="ident">set_repeat</span></span>(<span>self, repeat_state)</span>
+<span>def <span class="ident">set_repeat</span></span>(<span>self, repeat_state) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Change repeat state.</p></section>
@@ -3231,7 +3231,7 @@ def set_repeat(self, repeat_state) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_shuffle"><code class="name flex">
-<span>def <span class="ident">set_shuffle</span></span>(<span>self, shuffle_state)</span>
+<span>def <span class="ident">set_shuffle</span></span>(<span>self, shuffle_state) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Change shuffle mode to on or off.</p></section>
@@ -3247,7 +3247,7 @@ def set_shuffle(self, shuffle_state) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.stop"><code class="name flex">
-<span>def <span class="ident">stop</span></span>(<span>self)</span>
+<span>def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key stop.</p></section>
@@ -3263,7 +3263,7 @@ def stop(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.suspend"><code class="name flex">
-<span>def <span class="ident">suspend</span></span>(<span>self)</span>
+<span>def <span class="ident">suspend</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Suspend the device.</p></section>
@@ -3279,7 +3279,7 @@ def suspend(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.top_menu"><code class="name flex">
-<span>def <span class="ident">top_menu</span></span>(<span>self)</span>
+<span>def <span class="ident">top_menu</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Go to main menu (long press menu).</p></section>
@@ -3295,7 +3295,7 @@ def top_menu(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.up"><code class="name flex">
-<span>def <span class="ident">up</span></span>(<span>self)</span>
+<span>def <span class="ident">up</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key up.</p></section>
@@ -3311,7 +3311,7 @@ def up(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_down"><code class="name flex">
-<span>def <span class="ident">volume_down</span></span>(<span>self)</span>
+<span>def <span class="ident">volume_down</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key volume down.</p></section>
@@ -3327,7 +3327,7 @@ def volume_down(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_up"><code class="name flex">
-<span>def <span class="ident">volume_up</span></span>(<span>self)</span>
+<span>def <span class="ident">volume_up</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key volume up.</p></section>
@@ -3343,7 +3343,7 @@ def volume_up(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.wakeup"><code class="name flex">
-<span>def <span class="ident">wakeup</span></span>(<span>self)</span>
+<span>def <span class="ident">wakeup</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Wake up the device.</p></section>
@@ -3389,7 +3389,7 @@ def wakeup(self) -&gt; None:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Stream.play_url"><code class="name flex">
-<span>def <span class="ident">play_url</span></span>(<span>self, url, **kwargs)</span>
+<span>def <span class="ident">play_url</span></span>(<span>self, url: str, **kwargs) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Play media from an URL on the device.</p></section>

@@ -75,6 +75,8 @@ page_links:
       title: Troubleshooting
     - link: /support/faq/
       title: FAQ
+    - link: /support/acknowledgements/
+      title: Acknowledgements
 
 exclude:
   - Gemfile

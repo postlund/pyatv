@@ -1,9 +1,3 @@
 # Contributors
 
-Pierre Ståhl
-
-Pierrick Rouxel
-
-Rob Nee
-
-Robbie Trencheny
+See [this page](https://pyatv.dev/support/acknowledgements/#contributors)

@@ -18,7 +18,9 @@ A private key is hardcoded into the proxy, so you can re-connect to it again
 multiple times without having to re-pair. Even when restarting the proxy. This
 of course means that **there is no security when using the proxy**.
 
-*Note: This is an incubating script and may change behavior with short notice.*
+*Note: This is an incubating script and may change behavior with short notice.
+It also depends on the internal API, meaning you should not use it as a
+reference for your own projects.*
 
 # Using the Proxy
 

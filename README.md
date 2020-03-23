@@ -22,8 +22,3 @@ To save you some time, here are some shortcuts:
 * [Development](https://pyatv.dev/development)
 * [API Reference](https://pyatv.dev/api)
 * [Support](https://pyatv.dev/support)
-
-# Why is the README so short?
-
-As much information as possible is available via GitHub pages in order to minimize the amount
-of duplicated information. That is why.
