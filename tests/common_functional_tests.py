@@ -111,7 +111,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, EXAMPLE_STREAM)
+        self.assertEqual(self.fake_atv.airplay_state.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
@@ -130,7 +130,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.last_airplay_url, EXAMPLE_STREAM)
+        self.assertEqual(self.fake_atv.airplay_state.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_button_up(self):

@@ -300,9 +300,9 @@ class AppleTVUseCases(AirPlayUseCases):
     Extend and use this class to alter behavior of a fake Apple TV device.
     """
 
-    def __init__(self, state, airplay_device):
+    def __init__(self, state, fake_device):
         """Initialize a new AppleTVUseCases."""
-        super().__init__(airplay_device)
+        super().__init__(fake_device.airplay_state)
         self.state = state
 
     def force_relogin(self, session):
