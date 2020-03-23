@@ -274,7 +274,7 @@ class AirPlayService(BaseService):
 <dl>
 <dt id="pyatv.conf.AirPlayService"><code class="flex name class">
 <span>class <span class="ident">AirPlayService</span></span>
-<span>(</span><span>identifier, port=7000, credentials=None, properties=None)</span>
+<span>(</span><span>identifier: str, port: int = 7000, credentials: str = None, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
@@ -313,7 +313,7 @@ class AirPlayService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address, name)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -556,7 +556,7 @@ def services(self) -&gt; List[BaseService]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.conf.AppleTV.add_service"><code class="name flex">
-<span>def <span class="ident">add_service</span></span>(<span>self, service)</span>
+<span>def <span class="ident">add_service</span></span>(<span>self, service: <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Add a new service.</p>
@@ -578,7 +578,7 @@ def services(self) -&gt; List[BaseService]:
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.get_service"><code class="name flex">
-<span>def <span class="ident">get_service</span></span>(<span>self, protocol)</span>
+<span>def <span class="ident">get_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> Union[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>, NoneType]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Look up a service based on protocol.</p>
@@ -598,7 +598,7 @@ returned.</p></section>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.main_service"><code class="name flex">
-<span>def <span class="ident">main_service</span></span>(<span>self, protocol=None)</span>
+<span>def <span class="ident">main_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None) -> <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return suggested service used to establish connection.</p></section>
@@ -621,7 +621,7 @@ returned.</p></section>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.set_credentials"><code class="name flex">
-<span>def <span class="ident">set_credentials</span></span>(<span>self, protocol, credentials)</span>
+<span>def <span class="ident">set_credentials</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, credentials: str) -> bool</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Set credentials for a protocol if it exists.</p></section>
@@ -642,7 +642,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>
-<span>(</span><span>identifier, credentials, port=None, properties=None)</span>
+<span>(</span><span>identifier: str, credentials: str, port: int = None, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
@@ -681,7 +681,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.MrpService"><code class="flex name class">
 <span>class <span class="ident">MrpService</span></span>
-<span>(</span><span>identifier, port, credentials=None, properties=None)</span>
+<span>(</span><span>identifier: str, port: int, credentials: str = None, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>

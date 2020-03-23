@@ -4,7 +4,7 @@ title: pyatv
 ---
 # Main Page
 
-This is a python3 library for controlling and querying information from an Apple TV. It is built
+This is a python 3.6 (or later) library for controlling and querying information from an Apple TV. It is built
 upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
 
 Support for tvOS is still in early stages, but feel free to give it a spin:
@@ -30,37 +30,37 @@ In case you have developed for pyatv 0.3.x before, there's a short migration gui
 
 Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = Apple TV 4 and later):
 
-| **Feature**                                                     | **DMAP** | **MRP**   |
-| --------------------------------------------------------------- | -------- | --------- |
-| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      |
-| --------------------------------------------------------------- | -------- | --------- |
-| Push updates                                                    | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Remote control pairing                                          | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| List supported features                                         | Yes**    | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       |
-| --------------------------------------------------------------- |--------- | --------- |
-| Fetch artwork                                                   | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| App used for playback                                           | No       | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Media type and play state                                       | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Change media position                                           | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Shuffle and repeat                                              | Yes      | Yes       |
-| --------------------------------------------------------------- | -------- | --------- |
-| Power management                                                | No       | Yes       |
+| **Feature**                                                     | **DMAP** | **MRP**   | **Links** |
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Push updates                                                    | Yes      | Yes       | [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Remote control pairing                                          | Yes      | Yes       | [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| List supported features                                         | Yes**    | Yes       | [Doc](development/features), {% include api i="interface.Features" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       | [Doc](development/airplay), {% include api i="interface.Stream" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- |--------- | --------- | --------- |
+| Fetch artwork                                                   | Yes      | Yes       | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| App used for playback                                           | No       | Yes       | [Doc](development/metadata/#active-app), {% include api i="interface.App" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Media type and play state                                       | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Change media position                                           | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata.set_position" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Shuffle and repeat                                              | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Power management                                                | No       | Yes       | [Doc](development/power_management), {% include api i="interface.Power" %}
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*
 
@@ -75,3 +75,6 @@ out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/at
 I, Pierre Ståhl, is the lead developer and maintainer of this library. It is a hobby
 project that I put a few hours in every now and then to maintain. If you find it useful,
 please consider to sponsor me! :heart:
+
+Of course, this is an open source project which means I couldn't do it all by myself.
+I have created dedicated page for [acknowledgments](support/acknowledgments)!
