@@ -33,7 +33,7 @@ ft = atv.features
 To obtain current state of a feature, e.g. {% include api i="const.FeatureName.Play" %}, use {% include api i="interface.Features.get_feature" %}:
 
 ```python
-from const import FeatureName, FeatureState
+from pyatv.const import FeatureName, FeatureState
 
 info = ft.get_feature(FeatureName.Play)
 if info.state == FeatureState.Available:
