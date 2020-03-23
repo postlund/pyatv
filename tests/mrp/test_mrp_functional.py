@@ -17,7 +17,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
-from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, FakeAppleTV
+from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, MrpDeviceState, FakeAppleTV
 from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,7 +44,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self.loop)
+        self.state = MrpDeviceState()
+        self.fake_atv = FakeAppleTV(self.loop, state=self.state)
         self.usecase = self.fake_atv.usecase
         return self.fake_atv.app
 
@@ -54,27 +55,27 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_button_home(self):
         await self.atv.remote_control.home()
-        await until(lambda: self.fake_atv.last_button_pressed == "home")
+        await until(lambda: self.state.last_button_pressed == "home")
 
     @unittest_run_loop
     async def test_button_volume_up(self):
         await self.atv.remote_control.volume_up()
-        await until(lambda: self.fake_atv.last_button_pressed == "volume_up")
+        await until(lambda: self.state.last_button_pressed == "volume_up")
 
     @unittest_run_loop
     async def test_button_volume_down(self):
         await self.atv.remote_control.volume_down()
-        await until(lambda: self.fake_atv.last_button_pressed == "volume_down")
+        await until(lambda: self.state.last_button_pressed == "volume_down")
 
     @unittest_run_loop
     async def test_button_suspend(self):
         await self.atv.remote_control.suspend()
-        await until(lambda: self.fake_atv.last_button_pressed == "suspend")
+        await until(lambda: self.state.last_button_pressed == "suspend")
 
     @unittest_run_loop
     async def test_button_wakeup(self):
         await self.atv.remote_control.wakeup()
-        await until(lambda: self.fake_atv.last_button_pressed == "wakeup")
+        await until(lambda: self.state.last_button_pressed == "wakeup")
 
     @unittest_run_loop
     async def test_shuffle_state_albums(self):

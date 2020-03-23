@@ -242,11 +242,6 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
     def port(self):
         return self.server.sockets[0].getsockname()[1]
 
-    # Workaround for common tests until state is extracted in fake DMAP device
-    @property
-    def last_button_pressed(self):
-        return self.state.last_button_pressed
-
     def connection_made(self, transport):
         self.transport = transport
 
