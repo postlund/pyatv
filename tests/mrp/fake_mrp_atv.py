@@ -393,9 +393,9 @@ class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
 class AppleTVUseCases(AirPlayUseCases):
     """Wrapper for altering behavior of a FakeMrpAppleTV instance."""
 
-    def __init__(self, device_state, airplay_device):
+    def __init__(self, device_state, fake_device):
         """Initialize a new AppleTVUseCases."""
-        super().__init__(airplay_device)
+        super().__init__(fake_device.airplay_state)
         self.state = device_state
 
     def change_volume_control(self, available):

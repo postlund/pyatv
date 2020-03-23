@@ -5,7 +5,11 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
 from pyatv.airplay import player
-from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
+from tests.airplay.fake_airplay_device import (
+    FakeAirPlayDevice,
+    AirPlayUseCases,
+    AirPlayDeviceState,
+)
 
 
 STREAM = "http://airplaystream"
@@ -33,8 +37,9 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         await self.session.close()
 
     async def get_application(self, loop=None):
-        self.fake_device = FakeAirPlayDevice()
-        self.usecase = AirPlayUseCases(self.fake_device)
+        self.state = AirPlayDeviceState()
+        self.fake_device = FakeAirPlayDevice(self.state)
+        self.usecase = AirPlayUseCases(self.state)
         return self.fake_device.app
 
     async def fake_asyncio_sleep(self, time, loop=None):
@@ -48,9 +53,9 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         await self.player.play_url(STREAM, position=START_POSITION)
 
-        self.assertEqual(self.fake_device.last_airplay_url, STREAM)
-        self.assertEqual(self.fake_device.last_airplay_start, START_POSITION)
-        self.assertIsNotNone(self.fake_device.last_airplay_uuid)
+        self.assertEqual(self.state.last_airplay_url, STREAM)
+        self.assertEqual(self.state.last_airplay_start, START_POSITION)
+        self.assertIsNotNone(self.state.last_airplay_uuid)
         self.assertEqual(self.no_of_sleeps, 2)  # playback + idle = 3
 
     @unittest_run_loop
@@ -68,7 +73,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
 
         await self.player.play_url(STREAM, position=START_POSITION)
 
-        self.assertEqual(self.fake_device.play_count, 3)  # Two retries + success
+        self.assertEqual(self.state.play_count, 3)  # Two retries + success
 
     @unittest_run_loop
     async def test_play_with_too_many_retries(self):
