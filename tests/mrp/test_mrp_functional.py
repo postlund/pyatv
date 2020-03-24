@@ -5,6 +5,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
 from pyatv.const import (
+    Protocol,
     DeviceState,
     ShuffleState,
     PowerState,
@@ -17,11 +18,8 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
-from tests.fake_device.mrp import (
-    PLAYER_IDENTIFIER,
-    FakeMrpState,
-    FakeMrpService,
-)
+from tests.fake_device import FakeAppleTV
+from tests.fake_device.mrp import PLAYER_IDENTIFIER
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,7 +35,9 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def setUpAsync(self):
         await super().setUpAsync()
         self.conf = AppleTV("127.0.0.1", "Test device")
-        self.conf.add_service(MrpService("mrp_id", self.fake_atv.port))
+        self.conf.add_service(
+            MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
+        )
         self.conf.add_service(
             AirPlayService("airplay_id", self.server.port, DEVICE_CREDENTIALS)
         )
@@ -48,9 +48,11 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.state = FakeMrpState()
-        self.fake_atv = FakeMrpService(self.loop, state=self.state)
-        self.usecase = self.fake_atv.usecase
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.state, self.usecase = self.fake_atv.add_service(Protocol.MRP)
+        self.airplay_state, self.airplay_usecase = self.fake_atv.add_service(
+            Protocol.AirPlay
+        )
         return self.fake_atv.app
 
     async def get_connected_device(self):

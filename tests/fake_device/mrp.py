@@ -10,7 +10,6 @@ from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
 from pyatv.mrp.server_auth import MrpServerAuth
-from tests.fake_device.airplay import FakeAirPlayService, AirPlayUseCases
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -212,16 +211,14 @@ class FakeMrpState:
         self.device.send(msg)
 
 
-class FakeMrpService(FakeAirPlayService, MrpServerAuth, asyncio.Protocol):
+class FakeMrpService(MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, loop, state=None):
-        FakeAirPlayService.__init__(self)
+    def __init__(self, state, app, loop):
         MrpServerAuth.__init__(self, self, DEVICE_NAME)
-        self.state = state or FakeMrpState()
+        self.state = state
         self.state.device = self
         self.loop = loop
-        self.app.on_startup.append(self.start)
         self.has_authenticated = False
 
         self.server = None
@@ -229,14 +226,13 @@ class FakeMrpService(FakeAirPlayService, MrpServerAuth, asyncio.Protocol):
         self.chacha = None
         self.transport = None
 
-    async def start(self, _):
+    async def start(self):
+        if self.server:
+            return
+
         coro = self.loop.create_server(lambda: self, "127.0.0.1")
         self.server = await self.loop.create_task(coro)
         _LOGGER.info("Started MRP server at port %d", self.port)
-
-    @property
-    def usecase(self):
-        return AppleTVUseCases(self.state, self)
 
     @property
     def port(self):
@@ -390,13 +386,12 @@ class FakeMrpService(FakeAirPlayService, MrpServerAuth, asyncio.Protocol):
         self._send_device_info(update=True)
 
 
-class AppleTVUseCases(AirPlayUseCases):
+class FakeMrpUseCases:
     """Wrapper for altering behavior of a FakeMrpAppleTV instance."""
 
-    def __init__(self, device_state, fake_device):
-        """Initialize a new AppleTVUseCases."""
-        super().__init__(fake_device.airplay_state)
-        self.state = device_state
+    def __init__(self, state):
+        """Initialize a new FakeMrpUseCases."""
+        self.state = state
 
     def change_volume_control(self, available):
         """Change volume control availaility."""

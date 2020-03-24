@@ -9,7 +9,6 @@ from aiohttp import web
 
 from pyatv.const import ShuffleState, RepeatState
 from pyatv.dmap import parser, tags, tag_definitions
-from tests.fake_device.airplay import FakeAirPlayService, AirPlayUseCases
 from tests import utils
 
 _LOGGER = logging.getLogger(__name__)
@@ -103,13 +102,13 @@ class FakeDmapState:
         assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
 
-class FakeDmapService(FakeAirPlayService):
+class FakeDmapService:
     """Implementation of a fake DMAP Apple TV."""
 
-    def __init__(self, state):
+    def __init__(self, state, app, loop):
         """Initialize a new FakeAppleTV."""
-        super().__init__()
         self.state = state
+        self.app = app
 
         self.app.router.add_get("/login", self.handle_login)
         self.app.router.add_get("/ctrl-int/1/playstatusupdate", self.handle_playstatus)
@@ -123,9 +122,8 @@ class FakeDmapService(FakeAirPlayService):
                 "/ctrl-int/1/" + button, self.handle_playback_button
             )
 
-    @property
-    def usecase(self):
-        return AppleTVUseCases(self.state, self)
+    async def start(self):
+        pass
 
     async def handle_login(self, request):
         """Handle login requests."""
@@ -294,15 +292,14 @@ class FakeDmapService(FakeAirPlayService):
             ), "session id does not match"
 
 
-class AppleTVUseCases(AirPlayUseCases):
+class FakeDmapUseCases:
     """Wrapper for altering behavior of a FakeAppleTV instance.
 
     Extend and use this class to alter behavior of a fake Apple TV device.
     """
 
-    def __init__(self, state, fake_device):
+    def __init__(self, state):
         """Initialize a new AppleTVUseCases."""
-        super().__init__(fake_device.airplay_state)
         self.state = state
 
     def force_relogin(self, session):

@@ -2,6 +2,7 @@
 
 from aiohttp.test_utils import unittest_run_loop
 
+from pyatv.const import Protocol
 from pyatv.mrp.server_auth import CLIENT_CREDENTIALS
 from tests.fake_device.airplay import DEVICE_PIN, DEVICE_CREDENTIALS
 from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, AIRPLAY_ID, ScriptTest
@@ -71,7 +72,7 @@ class AtvremoteTest(ScriptTest):
         await self.atvremote(
             "--id", MRP_ID, "--mrp-credentials", CLIENT_CREDENTIALS, "playing"
         )
-        self.assertTrue(self.fake_atv.has_authenticated)
+        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_authenticated)
         self.has_output("Device state: Idle")
         self.exit(0)
 
@@ -80,7 +81,7 @@ class AtvremoteTest(ScriptTest):
         await self.atvremote(
             "--id", MRP_ID, "--mrp-credentials", "30:31:32:33", "playing"
         )
-        self.assertFalse(self.fake_atv.has_authenticated)
+        self.assertFalse(self.fake_atv.get_service(Protocol.MRP).has_authenticated)
         self.has_error("AuthenticationError:")
         self.exit(1)
 
@@ -93,7 +94,7 @@ class AtvremoteTest(ScriptTest):
             "--protocol",
             "mrp",
             "--port",
-            str(self.fake_atv.port),
+            str(self.fake_atv.get_port(Protocol.MRP)),
             "--id",
             MRP_ID,
             "--manual",

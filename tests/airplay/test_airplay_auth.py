@@ -5,12 +5,13 @@ import binascii
 from aiohttp import ClientSession
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from pyatv.const import Protocol
 from pyatv.airplay import srp
 from pyatv.airplay.auth import DeviceAuthenticator, AuthenticationVerifier
 from pyatv.exceptions import AuthenticationError
 from pyatv.support.net import HttpSession
+from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import (
-    FakeAirPlayService,
     DEVICE_IDENTIFIER,
     DEVICE_AUTH_KEY,
     DEVICE_PIN,
@@ -28,7 +29,8 @@ class AirPlayAuthTest(AioHTTPTestCase):
         await self.session.close()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAirPlayService()
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.fake_atv.add_service(Protocol.AirPlay)
         return self.fake_atv.app
 
     @unittest_run_loop

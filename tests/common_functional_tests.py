@@ -98,39 +98,39 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_invalid_airplay_credentials_format(self):
         self.conf.get_service(Protocol.AirPlay).credentials = "bad"
-        self.usecase.airplay_require_authentication()
+        self.airplay_usecase.airplay_require_authentication()
 
         with self.assertRaises(exceptions.InvalidCredentialsError):
             await pyatv.connect(self.conf, loop=self.loop)
 
     @unittest_run_loop
     async def test_play_url(self):
-        self.usecase.airplay_playback_idle()
-        self.usecase.airplay_playback_playing()
-        self.usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_playback_playing()
+        self.airplay_usecase.airplay_playback_idle()
 
         await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.airplay_state.last_airplay_url, EXAMPLE_STREAM)
+        self.assertEqual(self.airplay_state.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
         self.conf.get_service(Protocol.AirPlay).credentials = None
-        self.usecase.airplay_always_fail_authentication()
+        self.airplay_usecase.airplay_always_fail_authentication()
 
         with self.assertRaises(exceptions.AuthenticationError):
             await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
     @unittest_run_loop
     async def test_play_url_authenticated(self):
-        self.usecase.airplay_require_authentication()
-        self.usecase.airplay_playback_idle()
-        self.usecase.airplay_playback_playing()
-        self.usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_require_authentication()
+        self.airplay_usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_playback_playing()
+        self.airplay_usecase.airplay_playback_idle()
 
         await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
-        self.assertEqual(self.fake_atv.airplay_state.last_airplay_url, EXAMPLE_STREAM)
+        self.assertEqual(self.airplay_state.last_airplay_url, EXAMPLE_STREAM)
 
     @unittest_run_loop
     async def test_button_up(self):
