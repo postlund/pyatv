@@ -13,7 +13,7 @@ from aiohttp.test_utils import AioHTTPTestCase
 import pyatv
 from tests import fake_udns, zeroconf_stub
 from tests.utils import stub_sleep
-from tests.mrp.fake_mrp_atv import FakeAppleTV
+from tests.fake_device.fake_mrp_atv import FakeAppleTV
 
 
 IP_1 = "10.0.0.1"

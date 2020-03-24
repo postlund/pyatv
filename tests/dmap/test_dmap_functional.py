@@ -16,8 +16,8 @@ from pyatv.const import (
     FeatureName,
 )
 from pyatv.dmap import pairing
-from tests.dmap.fake_dmap_atv import DmapDeviceState, FakeAppleTV
-from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
+from tests.fake_device.fake_dmap_atv import DmapDeviceState, FakeAppleTV
+from tests.fake_device.fake_airplay_device import DEVICE_CREDENTIALS
 from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
 

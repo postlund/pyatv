@@ -17,8 +17,12 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
 from tests.utils import until, faketime
-from tests.mrp.fake_mrp_atv import PLAYER_IDENTIFIER, MrpDeviceState, FakeAppleTV
-from tests.airplay.fake_airplay_device import DEVICE_CREDENTIALS
+from tests.fake_device.fake_mrp_atv import (
+    PLAYER_IDENTIFIER,
+    MrpDeviceState,
+    FakeAppleTV,
+)
+from tests.fake_device.fake_airplay_device import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
 

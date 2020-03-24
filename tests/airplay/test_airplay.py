@@ -5,7 +5,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
 from pyatv.airplay import player
-from tests.airplay.fake_airplay_device import (
+from tests.fake_device.fake_airplay_device import (
     FakeAirPlayDevice,
     AirPlayUseCases,
     AirPlayDeviceState,

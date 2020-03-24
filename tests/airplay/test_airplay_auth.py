@@ -9,7 +9,7 @@ from pyatv.airplay import srp
 from pyatv.airplay.auth import DeviceAuthenticator, AuthenticationVerifier
 from pyatv.exceptions import AuthenticationError
 from pyatv.support.net import HttpSession
-from tests.airplay.fake_airplay_device import (
+from tests.fake_device.fake_airplay_device import (
     FakeAirPlayDevice,
     DEVICE_IDENTIFIER,
     DEVICE_AUTH_KEY,

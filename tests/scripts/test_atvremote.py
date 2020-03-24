@@ -3,7 +3,7 @@
 from aiohttp.test_utils import unittest_run_loop
 
 from pyatv.mrp.server_auth import CLIENT_CREDENTIALS
-from tests.airplay.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS
+from tests.fake_device.fake_airplay_device import DEVICE_PIN, DEVICE_CREDENTIALS
 from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, AIRPLAY_ID, ScriptTest
 
 
