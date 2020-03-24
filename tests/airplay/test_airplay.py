@@ -5,10 +5,10 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
 from pyatv.airplay import player
-from tests.fake_device.fake_airplay_device import (
-    FakeAirPlayDevice,
+from tests.fake_device.airplay import (
+    FakeAirPlayService,
     AirPlayUseCases,
-    AirPlayDeviceState,
+    FakeAirPlayState,
 )
 
 
@@ -37,8 +37,8 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         await self.session.close()
 
     async def get_application(self, loop=None):
-        self.state = AirPlayDeviceState()
-        self.fake_device = FakeAirPlayDevice(self.state)
+        self.state = FakeAirPlayState()
+        self.fake_device = FakeAirPlayService(self.state)
         self.usecase = AirPlayUseCases(self.state)
         return self.fake_device.app
 

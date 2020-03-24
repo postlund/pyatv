@@ -13,7 +13,7 @@ from aiohttp.test_utils import AioHTTPTestCase
 import pyatv
 from tests import fake_udns, zeroconf_stub
 from tests.utils import stub_sleep
-from tests.fake_device.fake_mrp_atv import FakeAppleTV
+from tests.fake_device.mrp import FakeMrpService
 
 
 IP_1 = "10.0.0.1"
@@ -78,7 +78,7 @@ class ScriptTest(AioHTTPTestCase):
         self.usecase.airplay_playback_idle()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self.loop)
+        self.fake_atv = FakeMrpService(self.loop)
         self.usecase = self.fake_atv.usecase
         self.fake_udns = fake_udns.FakeUdns(self.loop)
         return self.fake_atv.app

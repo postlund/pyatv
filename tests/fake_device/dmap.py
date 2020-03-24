@@ -9,7 +9,7 @@ from aiohttp import web
 
 from pyatv.const import ShuffleState, RepeatState
 from pyatv.dmap import parser, tags, tag_definitions
-from tests.fake_device.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
+from tests.fake_device.airplay import FakeAirPlayService, AirPlayUseCases
 from tests import utils
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class PlayingResponse:
         self.artwork_status = kwargs.get("artwork_status")
 
 
-class DmapDeviceState:
+class FakeDmapState:
     def __init__(self, hsgid, pairing_guid, session_id):
         self.device = None
         self.hsgid = hsgid
@@ -103,7 +103,7 @@ class DmapDeviceState:
         assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
 
-class FakeAppleTV(FakeAirPlayDevice):
+class FakeDmapService(FakeAirPlayService):
     """Implementation of a fake DMAP Apple TV."""
 
     def __init__(self, state):
