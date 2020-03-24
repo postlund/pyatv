@@ -11,9 +11,10 @@ from unittest.mock import patch
 from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
+from pyatv.const import Protocol
 from tests import fake_udns, zeroconf_stub
 from tests.utils import stub_sleep
-from tests.fake_device.mrp import FakeMrpService
+from tests.fake_device import FakeAppleTV
 
 
 IP_1 = "10.0.0.1"
@@ -57,7 +58,11 @@ class ScriptTest(AioHTTPTestCase):
         )
         services.append(
             zeroconf_stub.mrp_service(
-                "DDDD", b"Apple TV 2", IP_2, MRP_ID, port=self.fake_atv.port
+                "DDDD",
+                b"Apple TV 2",
+                IP_2,
+                MRP_ID,
+                port=self.fake_atv.get_port(Protocol.MRP),
             )
         )
         services.append(
@@ -68,19 +73,24 @@ class ScriptTest(AioHTTPTestCase):
         zeroconf_stub.stub(pyatv, *services)
 
         self.fake_udns.add_service(
-            fake_udns.mrp_service("DDDD", "Apple TV 2", MRP_ID, port=self.fake_atv.port)
+            fake_udns.mrp_service(
+                "DDDD", "Apple TV 2", MRP_ID, port=self.fake_atv.get_port(Protocol.MRP)
+            )
         )
         self.fake_udns.add_service(
             fake_udns.airplay_service("Apple TV 2", AIRPLAY_ID, port=airplay_port)
         )
 
-        self.usecase.airplay_playback_playing()
-        self.usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_playback_playing()
+        self.airplay_usecase.airplay_playback_idle()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeMrpService(self.loop)
-        self.usecase = self.fake_atv.usecase
         self.fake_udns = fake_udns.FakeUdns(self.loop)
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.state, self.usecase = self.fake_atv.add_service(Protocol.MRP)
+        self.airplay_state, self.airplay_usecase = self.fake_atv.add_service(
+            Protocol.AirPlay
+        )
         return self.fake_atv.app
 
     def user_input(self, text):

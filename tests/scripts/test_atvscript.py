@@ -5,6 +5,7 @@ import json
 from deepdiff import DeepDiff
 from aiohttp.test_utils import unittest_run_loop
 
+from pyatv.const import Protocol
 from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, ScriptTest
 
 HASH = "ca496c14642c78af6dd4250191fe175f6dafd72b4c33bcbab43c454aae051da1"
@@ -16,7 +17,6 @@ class AtvscriptTest(ScriptTest):
 
     def assertJsonOutput(self, expected):
         actual = json.loads(self.stdout)
-        print(actual)
         self.assertEqual(DeepDiff(actual, expected), {})
 
     @unittest_run_loop
@@ -37,7 +37,10 @@ class AtvscriptTest(ScriptTest):
                         "address": IP_2,
                         "identifier": MRP_ID,
                         "services": [
-                            {"protocol": "mrp", "port": self.fake_atv.port},
+                            {
+                                "protocol": "mrp",
+                                "port": self.fake_atv.get_port(Protocol.MRP),
+                            },
                             {"protocol": "airplay", "port": self.server.port},
                         ],
                     },

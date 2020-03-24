@@ -8,6 +8,7 @@ from aiohttp.test_utils import unittest_run_loop
 from pyatv import connect, exceptions
 from pyatv.conf import AirPlayService, DmapService, AppleTV
 from pyatv.const import (
+    Protocol,
     ShuffleState,
     RepeatState,
     PowerState,
@@ -16,7 +17,7 @@ from pyatv.const import (
     FeatureName,
 )
 from pyatv.dmap import pairing
-from tests.fake_device.dmap import FakeDmapState, FakeDmapService
+from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
@@ -67,9 +68,13 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.state = FakeDmapState(HSGID, PAIRING_GUID, SESSION_ID)
-        self.fake_atv = FakeDmapService(self.state)
-        self.usecase = self.fake_atv.usecase
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.state, self.usecase = self.fake_atv.add_service(
+            Protocol.DMAP, hsgid=HSGID, pairing_guid=PAIRING_GUID, session_id=SESSION_ID
+        )
+        self.airplay_state, self.airplay_usecase = self.fake_atv.add_service(
+            Protocol.AirPlay
+        )
         return self.fake_atv.app
 
     async def get_connected_device(self, hsgid):

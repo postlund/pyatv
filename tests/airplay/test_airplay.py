@@ -4,12 +4,9 @@ from aiohttp import ClientSession
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
+from pyatv.const import Protocol
 from pyatv.airplay import player
-from tests.fake_device.airplay import (
-    FakeAirPlayService,
-    AirPlayUseCases,
-    FakeAirPlayState,
-)
+from tests.fake_device import FakeAppleTV
 
 
 STREAM = "http://airplaystream"
@@ -33,14 +30,13 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         self.player = player.AirPlayPlayer(self.loop, http)
 
     async def tearDownAsync(self):
-        await AioHTTPTestCase.tearDownAsync(self)
         await self.session.close()
+        await AioHTTPTestCase.tearDownAsync(self)
 
     async def get_application(self, loop=None):
-        self.state = FakeAirPlayState()
-        self.fake_device = FakeAirPlayService(self.state)
-        self.usecase = AirPlayUseCases(self.state)
-        return self.fake_device.app
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.state, self.usecase = self.fake_atv.add_service(Protocol.AirPlay)
+        return self.fake_atv.app
 
     async def fake_asyncio_sleep(self, time, loop=None):
         self.no_of_sleeps += 1

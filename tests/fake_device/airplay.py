@@ -51,9 +51,9 @@ class FakeAirPlayState:
 
 
 class FakeAirPlayService:
-    def __init__(self, state=None):
-        self.airplay_state = state or FakeAirPlayState()
-        self.app = web.Application()
+    def __init__(self, state, app, loop):
+        self.state = state
+        self.app = app
 
         self.app.router.add_post("/play", self.handle_airplay_play)
         self.app.router.add_get("/playback-info", self.handle_airplay_playback_info)
@@ -61,18 +61,18 @@ class FakeAirPlayService:
         self.app.router.add_post("/pair-setup-pin", self.handle_pair_setup_pin)
         self.app.router.add_post("/pair-verify", self.handle_airplay_pair_verify)
 
+    async def start(self):
+        pass
+
     async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
 
-        self.airplay_state.play_count += 1
+        self.state.play_count += 1
 
-        if (
-            self.airplay_state.always_auth_fail
-            or not self.airplay_state.has_authenticated
-        ):
+        if self.state.always_auth_fail or not self.state.has_authenticated:
             return web.Response(status=503)
-        if self.airplay_state.injected_play_fails > 0:
-            self.airplay_state.injected_play_fails -= 1
+        if self.state.injected_play_fails > 0:
+            self.state.injected_play_fails -= 1
             return web.Response(status=500)
 
         headers = request.headers
@@ -84,15 +84,15 @@ class FakeAirPlayService:
         body = await request.read()
         parsed = plistlib.loads(body)
 
-        self.airplay_state.last_airplay_url = parsed["Content-Location"]
-        self.airplay_state.last_airplay_start = parsed["Start-Position"]
-        self.airplay_state.last_airplay_uuid = parsed["X-Apple-Session-ID"]
+        self.state.last_airplay_url = parsed["Content-Location"]
+        self.state.last_airplay_start = parsed["Start-Position"]
+        self.state.last_airplay_uuid = parsed["X-Apple-Session-ID"]
 
         return web.Response(status=200)
 
     async def handle_airplay_playback_info(self, request):
         """Handle AirPlay playback-info requests."""
-        response = self.airplay_state.airplay_responses.pop()
+        response = self.state.airplay_responses.pop()
         return web.Response(body=response.content, status=response.code)
 
     # TODO: Extract device auth code to separate module and make it more
@@ -133,27 +133,27 @@ class FakeAirPlayService:
                 body=binascii.unhexlify(_DEVICE_VERIFY_STEP1_RESP), status=200
             )
         elif hexlified == _DEVICE_VERIFY_STEP2:
-            self.airplay_state.has_authenticated = True
+            self.state.has_authenticated = True
             return web.Response(body=_DEVICE_VERIFY_STEP2_RESP, status=200)
 
         return web.Response(body=b"", status=503)
 
 
-class AirPlayUseCases:
+class FakeAirPlayUseCases:
     """Wrapper for altering behavior of a FakeAirPlayDevice instance."""
 
     def __init__(self, state):
         """Initialize a new AirPlayUseCases."""
-        self.airplay_state = state
+        self.state = state
 
     def airplay_play_failure(self, count):
         """Make play command fail a number of times."""
-        self.airplay_state.injected_play_fails = count
+        self.state.injected_play_fails = count
 
     def airplay_playback_idle(self):
         """Make playback-info return idle info."""
         plist = dict(readyToPlay=False, uuid=123)
-        self.airplay_state.airplay_responses.insert(
+        self.state.airplay_responses.insert(
             0, AirPlayPlaybackResponse(200, plistlib.dumps(plist))
         )
 
@@ -161,20 +161,18 @@ class AirPlayUseCases:
         """Make playback-info return that something is playing."""
         # This is _not_ complete, currently not needed
         plist = dict(duration=0.8)
-        self.airplay_state.airplay_responses.insert(
+        self.state.airplay_responses.insert(
             0, AirPlayPlaybackResponse(200, plistlib.dumps(plist))
         )
 
     def airplay_require_authentication(self):
         """Require device authentication for AirPlay."""
-        self.airplay_state.has_authenticated = False
+        self.state.has_authenticated = False
 
     def airplay_always_fail_authentication(self):
         """Always fail authentication for AirPlay."""
-        self.airplay_state.always_auth_fail = True
+        self.state.always_auth_fail = True
 
     def airplay_playback_playing_no_permission(self):
         """Make playback-info return forbidden."""
-        self.airplay_state.airplay_responses.insert(
-            0, AirPlayPlaybackResponse(403, None)
-        )
+        self.state.airplay_responses.insert(0, AirPlayPlaybackResponse(403, None))

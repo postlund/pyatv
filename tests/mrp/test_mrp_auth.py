@@ -7,14 +7,16 @@ from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.conf import MrpService, AppleTV
 from pyatv.mrp.server_auth import PIN_CODE, CLIENT_IDENTIFIER, CLIENT_CREDENTIALS
-from tests.fake_device.mrp import FakeMrpService
+from tests.fake_device import FakeAppleTV
 
 
 class MrpAuthFunctionalTest(AioHTTPTestCase):
     def setUp(self):
         AioHTTPTestCase.setUp(self)
 
-        self.service = MrpService(CLIENT_IDENTIFIER, self.fake_atv.port)
+        self.service = MrpService(
+            CLIENT_IDENTIFIER, self.fake_atv.get_port(Protocol.MRP)
+        )
         self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.service)
 
@@ -23,8 +25,8 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeMrpService(self.loop)
-        self.usecase = self.fake_atv.usecase
+        self.fake_atv = FakeAppleTV(self.loop)
+        self.state, self.usecase = self.fake_atv.add_service(Protocol.MRP)
         return self.fake_atv.app
 
     @unittest_run_loop
@@ -39,7 +41,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         await self.handle.finish()
 
         self.assertTrue(self.handle.has_paired)
-        self.assertTrue(self.fake_atv.has_paired)
+        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_paired)
 
     @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
@@ -54,7 +56,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
             await self.handle.finish()
 
         self.assertFalse(self.handle.has_paired)
-        self.assertFalse(self.fake_atv.has_paired)
+        self.assertFalse(self.fake_atv.get_service(Protocol.MRP).has_paired)
 
     @unittest_run_loop
     async def test_pairing_authentication(self):
@@ -62,4 +64,4 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
         self.handle = await pyatv.connect(self.conf, self.loop)
 
-        self.assertTrue(self.fake_atv.has_authenticated)
+        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_authenticated)

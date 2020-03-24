@@ -8,9 +8,8 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from pyatv import pair, exceptions
 from pyatv.const import Protocol
 from pyatv.conf import AirPlayService, AppleTV
+from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import (
-    FakeAirPlayService,
-    AirPlayUseCases,
     DEVICE_CREDENTIALS,
     DEVICE_PIN,
     DEVICE_IDENTIFIER,
@@ -39,8 +38,8 @@ class PairFunctionalTest(AioHTTPTestCase):
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):
-        self.fake_atv = FakeAirPlayService()
-        self.usecase = AirPlayUseCases(self.fake_atv)
+        self.fake_atv = FakeAppleTV(self.loop)
+        _, self.usecase = self.fake_atv.add_service(Protocol.AirPlay)
         return self.fake_atv.app
 
     async def do_pairing(self, pin=DEVICE_PIN):
