@@ -38,7 +38,7 @@ _DEVICE_VERIFY_STEP2_RESP = b""  # Value not used by pyatv
 AirPlayPlaybackResponse = namedtuple("AirPlayPlaybackResponse", "code content")
 
 
-class AirPlayDeviceState:
+class FakeAirPlayState:
     def __init__(self):
         self.airplay_responses = []
         self.has_authenticated = True
@@ -50,9 +50,9 @@ class AirPlayDeviceState:
         self.injected_play_fails = 0
 
 
-class FakeAirPlayDevice:
+class FakeAirPlayService:
     def __init__(self, state=None):
-        self.airplay_state = state or AirPlayDeviceState()
+        self.airplay_state = state or FakeAirPlayState()
         self.app = web.Application()
 
         self.app.router.add_post("/play", self.handle_airplay_play)

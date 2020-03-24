@@ -10,7 +10,7 @@ from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
 from pyatv.mrp.server_auth import MrpServerAuth
-from tests.fake_device.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
+from tests.fake_device.airplay import FakeAirPlayService, AirPlayUseCases
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -149,7 +149,7 @@ class PlayingState:
         self.artwork_mimetype = kwargs.get("artwork_mimetype")
 
 
-class MrpDeviceState:
+class FakeMrpState:
     def __init__(self):
         """State of a fake MRP device."""
         self.device = None
@@ -212,13 +212,13 @@ class MrpDeviceState:
         self.device.send(msg)
 
 
-class FakeAppleTV(FakeAirPlayDevice, MrpServerAuth, asyncio.Protocol):
+class FakeMrpService(FakeAirPlayService, MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
     def __init__(self, loop, state=None):
-        FakeAirPlayDevice.__init__(self)
+        FakeAirPlayService.__init__(self)
         MrpServerAuth.__init__(self, self, DEVICE_NAME)
-        self.state = state or MrpDeviceState()
+        self.state = state or FakeMrpState()
         self.state.device = self
         self.loop = loop
         self.app.on_startup.append(self.start)
