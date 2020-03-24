@@ -8,7 +8,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from pyatv import pair, exceptions
 from pyatv.const import Protocol
 from pyatv.conf import AirPlayService, AppleTV
-from tests.airplay.fake_airplay_device import (
+from tests.fake_device.fake_airplay_device import (
     FakeAirPlayDevice,
     AirPlayUseCases,
     DEVICE_CREDENTIALS,

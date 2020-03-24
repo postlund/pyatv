@@ -9,7 +9,7 @@ from aiohttp import web
 
 from pyatv.const import ShuffleState, RepeatState
 from pyatv.dmap import parser, tags, tag_definitions
-from tests.airplay.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
+from tests.fake_device.fake_airplay_device import FakeAirPlayDevice, AirPlayUseCases
 from tests import utils
 
 _LOGGER = logging.getLogger(__name__)

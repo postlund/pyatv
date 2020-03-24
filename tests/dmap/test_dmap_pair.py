@@ -8,7 +8,7 @@ import pyatv
 from pyatv.const import Protocol
 from pyatv.conf import DmapService, AppleTV
 from pyatv.dmap import pairing
-from tests.dmap.fake_dmap_atv import DmapDeviceState, FakeAppleTV
+from tests.fake_device.fake_dmap_atv import DmapDeviceState, FakeAppleTV
 from tests import zeroconf_stub
 
 HSGID = "12345-6789-0"
