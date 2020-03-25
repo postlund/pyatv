@@ -7,6 +7,8 @@ from collections import namedtuple
 
 from aiohttp import web
 
+from tests import utils
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -55,6 +57,7 @@ class FakeAirPlayService:
         self.state = state
         self.port = None
         self.app = app
+        self.runner = None
 
         self.app.router.add_post("/play", self.handle_airplay_play)
         self.app.router.add_get("/playback-info", self.handle_airplay_playback_info)
@@ -63,10 +66,16 @@ class FakeAirPlayService:
         self.app.router.add_post("/pair-verify", self.handle_airplay_pair_verify)
 
     async def start(self, start_web_server):
-        pass
+        if start_web_server:
+            self.port = utils.unused_port()
+            self.runner = web.AppRunner(self.app)
+            await self.runner.setup()
+            site = web.TCPSite(self.runner, "0.0.0.0", self.port)
+            await site.start()
 
     async def cleanup(self):
-        pass
+        if self.runner:
+            await self.runner.cleanup()
 
     async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
@@ -96,7 +105,11 @@ class FakeAirPlayService:
 
     async def handle_airplay_playback_info(self, request):
         """Handle AirPlay playback-info requests."""
-        response = self.state.airplay_responses.pop()
+        if self.state.airplay_responses:
+            response = self.state.airplay_responses.pop()
+        else:
+            plist = dict(readyToPlay=False, uuid=123)
+            response = AirPlayPlaybackResponse(200, plistlib.dumps(plist))
         return web.Response(body=response.content, status=response.code)
 
     # TODO: Extract device auth code to separate module and make it more

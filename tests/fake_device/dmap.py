@@ -102,15 +102,6 @@ class FakeDmapState:
         assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
 
-def unused_port() -> int:
-    """Return a port that is unused on the current host."""
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-
-
 class FakeDmapService:
     """Implementation of a fake DMAP Apple TV."""
 
@@ -135,7 +126,7 @@ class FakeDmapService:
 
     async def start(self, start_web_server: bool):
         if start_web_server:
-            self.port = unused_port()
+            self.port = utils.unused_port()
             self.runner = web.AppRunner(self.app)
             await self.runner.setup()
             site = web.TCPSite(self.runner, "0.0.0.0", self.port)
