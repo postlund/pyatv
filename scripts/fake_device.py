@@ -80,7 +80,15 @@ async def appstart(loop):
     parser.add_argument(
         "-d", "--debug", default=False, action="store_true", help="enable debug logs"
     )
+
+    protocols = parser.add_argument_group("protocols")
+    parser.add_argument(
+        "--mrp", default=False, action="store_true", help="enable MRP protocol"
+    )
     args = parser.parse_args()
+
+    if not args.mrp:
+        parser.error("no protocol enabled (see --help)")
 
     level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(
@@ -93,15 +101,16 @@ async def appstart(loop):
     tasks = []
     zconf = Zeroconf(loop)
     fake_atv = FakeAppleTV(loop)
-    state, usecase = fake_atv.add_service(Protocol.MRP)
+    if args.mrp:
+        _, usecase = fake_atv.add_service(Protocol.MRP)
+        if args.demo:
+            tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
+
     await fake_atv.start()
 
     service = await publish_zeroconf(
         zconf, args.local_ip, fake_atv.get_port(Protocol.MRP)
     )
-
-    if args.demo:
-        tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
