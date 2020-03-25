@@ -145,12 +145,12 @@ class BaseDmapAppleTV:
 class DmapRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, apple_tv):
+    def __init__(self, apple_tv) -> None:
         """Initialize remote control instance."""
         super().__init__()
         self.apple_tv = apple_tv
 
-    async def up(self):
+    async def up(self) -> None:
         """Press key up."""
         await self._send_commands(
             self._move("Down", 0, 20, 275),
@@ -162,7 +162,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 6, 20, 250),
         )
 
-    async def down(self):
+    async def down(self) -> None:
         """Press key down."""
         await self._send_commands(
             self._move("Down", 0, 20, 250),
@@ -174,7 +174,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 6, 20, 275),
         )
 
-    async def left(self):
+    async def left(self) -> None:
         """Press key left."""
         await self._send_commands(
             self._move("Down", 0, 75, 100),
@@ -186,7 +186,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 7, 50, 100),
         )
 
-    async def right(self):
+    async def right(self) -> None:
         """Press key right."""
         await self._send_commands(
             self._move("Down", 0, 50, 100),
@@ -203,74 +203,74 @@ class DmapRemoteControl(RemoteControl):
         data = "touch{0}&time={1}&point={2},{3}".format(direction, time, point1, point2)
         return tags.uint8_tag("cmcc", 0x30) + tags.string_tag("cmbe", data)
 
-    async def _send_commands(self, *cmds):
+    async def _send_commands(self, *cmds) -> None:
         for cmd in cmds:
             await self.apple_tv.controlprompt_data(cmd)
 
-    def play(self):
+    async def play(self) -> None:
         """Press key play."""
-        return self.apple_tv.ctrl_int_cmd("play")
+        await self.apple_tv.ctrl_int_cmd("play")
 
-    def play_pause(self):
+    async def play_pause(self) -> None:
         """Toggle between play and pause."""
-        return self.apple_tv.ctrl_int_cmd("playpause")
+        await self.apple_tv.ctrl_int_cmd("playpause")
 
-    def pause(self):
+    async def pause(self) -> None:
         """Press key pause."""
-        return self.apple_tv.ctrl_int_cmd("pause")
+        await self.apple_tv.ctrl_int_cmd("pause")
 
-    def stop(self):
+    async def stop(self) -> None:
         """Press key stop."""
-        return self.apple_tv.ctrl_int_cmd("stop")
+        await self.apple_tv.ctrl_int_cmd("stop")
 
-    def next(self):
+    async def next(self) -> None:
         """Press key next."""
-        return self.apple_tv.ctrl_int_cmd("nextitem")
+        await self.apple_tv.ctrl_int_cmd("nextitem")
 
-    def previous(self):
+    async def previous(self) -> None:
         """Press key previous."""
-        return self.apple_tv.ctrl_int_cmd("previtem")
+        await self.apple_tv.ctrl_int_cmd("previtem")
 
-    def select(self):
+    async def select(self) -> None:
         """Press key select."""
-        return self.apple_tv.controlprompt_cmd("select")
+        await self.apple_tv.controlprompt_cmd("select")
 
-    def menu(self):
+    async def menu(self) -> None:
         """Press key menu."""
-        return self.apple_tv.controlprompt_cmd("menu")
+        await self.apple_tv.controlprompt_cmd("menu")
 
-    def top_menu(self):
+    async def top_menu(self) -> None:
         """Press key topmenu."""
-        return self.apple_tv.controlprompt_cmd("topmenu")
+        await self.apple_tv.controlprompt_cmd("topmenu")
 
-    def volume_up(self):
+    async def volume_up(self) -> None:
         """Press key volume up."""
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
-    def volume_down(self):
+    async def volume_down(self) -> None:
         """Press key volume down."""
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
-    def home(self):
+    async def home(self) -> None:
         """Press key home."""
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
-    def home_hold(self):
+    async def home_hold(self) -> None:
         """Hold key home."""
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
     @deprecated
-    def suspend(self):
+    async def suspend(self) -> None:
         """Suspend the device."""
         # Not supported by DMAP
         raise exceptions.NotSupportedError()
 
     @deprecated
-    def wakeup(self):
+    async def wakeup(self) -> None:
         """Wake up the device."""
         raise exceptions.NotSupportedError()
 
@@ -292,19 +292,19 @@ class DmapRemoteControl(RemoteControl):
         if current_position:
             await self.set_position(current_position - _DEFAULT_SKIP_TIME)
 
-    def set_position(self, pos):
+    async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         time_in_ms = int(pos) * 1000
-        return self.apple_tv.set_property("dacp.playingtime", time_in_ms)
+        await self.apple_tv.set_property("dacp.playingtime", time_in_ms)
 
-    def set_shuffle(self, shuffle_state):
+    async def set_shuffle(self, shuffle_state: ShuffleState) -> None:
         """Change shuffle mode to on or off."""
         state = 0 if shuffle_state == ShuffleState.Off else 1
-        return self.apple_tv.set_property("dacp.shufflestate", state)
+        await self.apple_tv.set_property("dacp.shufflestate", state)
 
-    def set_repeat(self, repeat_state):
+    async def set_repeat(self, repeat_state: RepeatState) -> None:
         """Change repeat mode."""
-        return self.apple_tv.set_property("dacp.repeatstate", repeat_state.value)
+        await self.apple_tv.set_property("dacp.repeatstate", repeat_state.value)
 
 
 class DmapPlaying(Playing):

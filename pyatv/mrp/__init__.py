@@ -122,13 +122,13 @@ def _cocoa_to_timestamp(time):
 class MrpRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, loop, psm, protocol):
+    def __init__(self, loop, psm, protocol) -> None:
         """Initialize a new MrpRemoteControl."""
         self.loop = loop
         self.psm = psm
         self.protocol = protocol
 
-    async def _press_key(self, key, hold=False):
+    async def _press_key(self, key: str, hold: bool = False) -> None:
         lookup = _KEY_LOOKUP.get(key)
         if not lookup:
             raise Exception("unsupported key: " + key)
@@ -159,81 +159,81 @@ class MrpRemoteControl(RemoteControl):
             f"{scr.HandlerReturnStatus.Name(inner.handlerReturnStatus)}"
         )
 
-    async def up(self):
+    async def up(self) -> None:
         """Press key up."""
         await self._press_key("up")
 
-    async def down(self):
+    async def down(self) -> None:
         """Press key down."""
         await self._press_key("down")
 
-    async def left(self):
+    async def left(self) -> None:
         """Press key left."""
         await self._press_key("left")
 
-    async def right(self):
+    async def right(self) -> None:
         """Press key right."""
         await self._press_key("right")
 
-    async def play(self):
+    async def play(self) -> None:
         """Press key play."""
         await self._send_command(CommandInfo_pb2.Play)
 
-    async def play_pause(self):
+    async def play_pause(self) -> None:
         """Toggle between play and pause."""
         await self._send_command(CommandInfo_pb2.TogglePlayPause)
 
-    async def pause(self):
+    async def pause(self) -> None:
         """Press key play."""
         await self._send_command(CommandInfo_pb2.Pause)
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Press key stop."""
         await self._send_command(CommandInfo_pb2.Stop)
 
-    async def next(self):
+    async def next(self) -> None:
         """Press key next."""
         await self._send_command(CommandInfo_pb2.NextTrack)
 
-    async def previous(self):
+    async def previous(self) -> None:
         """Press key previous."""
         await self._send_command(CommandInfo_pb2.PreviousTrack)
 
-    async def select(self):
+    async def select(self) -> None:
         """Press key select."""
         await self._press_key("select")
 
-    async def menu(self):
+    async def menu(self) -> None:
         """Press key menu."""
         await self._press_key("menu")
 
-    async def volume_up(self):
+    async def volume_up(self) -> None:
         """Press key volume up."""
         await self._press_key("volume_up")
 
-    async def volume_down(self):
+    async def volume_down(self) -> None:
         """Press key volume down."""
         await self._press_key("volume_down")
 
-    async def home(self):
+    async def home(self) -> None:
         """Press key home."""
         await self._press_key("home")
 
-    async def home_hold(self):
+    async def home_hold(self) -> None:
         """Hold key home."""
         await self._press_key("home", hold=True)
 
-    async def top_menu(self):
+    async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
         await self._press_key("topmenu")
 
     @deprecated
-    async def suspend(self):
+    async def suspend(self) -> None:
         """Suspend the device."""
         await self._press_key("suspend")
 
     @deprecated
-    async def wakeup(self):
+    async def wakeup(self) -> None:
         """Wake up the device."""
         await self._press_key("wakeup")
 
@@ -262,15 +262,15 @@ class MrpRemoteControl(RemoteControl):
 
         await self._send_command(command, skipInterval=skip_interval)
 
-    async def set_position(self, pos):
+    async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         await self.protocol.send_and_receive(messages.seek_to_position(pos))
 
-    async def set_shuffle(self, shuffle_state):
+    async def set_shuffle(self, shuffle_state: ShuffleState) -> None:
         """Change shuffle mode to on or off."""
         await self.protocol.send_and_receive(messages.shuffle(shuffle_state))
 
-    async def set_repeat(self, repeat_state):
+    async def set_repeat(self, repeat_state: RepeatState) -> None:
         """Change repeat state."""
         await self.protocol.send_and_receive(messages.repeat(repeat_state))
 
