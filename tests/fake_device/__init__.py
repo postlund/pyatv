@@ -10,13 +10,13 @@ from tests.fake_device.airplay import (
     FakeAirPlayState,
 )
 from tests.fake_device.dmap import FakeDmapService, FakeDmapUseCases, FakeDmapState
-from tests.fake_device.mrp import FakeMrpService, FakeMrpUseCases, FakeMrpState
+from tests.fake_device.mrp import FakeMrpServiceFactory, FakeMrpUseCases, FakeMrpState
 
 
 FACTORIES = {
     Protocol.AirPlay: (FakeAirPlayService, FakeAirPlayState, FakeAirPlayUseCases),
     Protocol.DMAP: (FakeDmapService, FakeDmapState, FakeDmapUseCases),
-    Protocol.MRP: (FakeMrpService, FakeMrpState, FakeMrpUseCases),
+    Protocol.MRP: (FakeMrpServiceFactory, FakeMrpState, FakeMrpUseCases),
 }
 
 
@@ -26,13 +26,19 @@ class FakeAppleTV:
         self.app = web.Application()
         self.loop = loop
         self.app.on_startup.append(self._app_start)
+        self._has_started = False
 
     async def _app_start(self, _):
         await self.start()
 
     async def start(self) -> None:
+        if self._has_started:
+            return
+
         for service in self.services.values():
             await service[0].start()
+
+        self._has_started = True
 
     def add_service(self, protocol: Protocol, **kwargs):
         service_factory, state_factory, usecase_factory = FACTORIES.get(protocol)
@@ -42,12 +48,6 @@ class FakeAppleTV:
         usecase = usecase_factory(state)
         self.services[protocol] = (service, state, usecase)
         return state, usecase
-
-    # Disclaimer: At some point, this should be removed. Currently only one connection
-    # is "allowed" per session. In the future, one "service object" should be created
-    # per connection. When that is the case, this method makes no sense anymore.
-    def get_service(self, protocol: Protocol):
-        return self.services[protocol][0]
 
     # Disclaimer: The implementation is adapted to work with unit tests for now. Since
     # both AirPlay and DMAP depends on the test case to set up a web server, serving

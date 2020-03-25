@@ -41,7 +41,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         await self.handle.finish()
 
         self.assertTrue(self.handle.has_paired)
-        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_paired)
+        self.assertTrue(self.state.has_paired)
 
     @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
@@ -56,7 +56,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
             await self.handle.finish()
 
         self.assertFalse(self.handle.has_paired)
-        self.assertFalse(self.fake_atv.get_service(Protocol.MRP).has_paired)
+        self.assertFalse(self.state.has_paired)
 
     @unittest_run_loop
     async def test_pairing_authentication(self):
@@ -64,4 +64,4 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
         self.handle = await pyatv.connect(self.conf, self.loop)
 
-        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_authenticated)
+        self.assertTrue(self.state.has_authenticated)

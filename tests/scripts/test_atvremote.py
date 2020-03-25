@@ -72,7 +72,7 @@ class AtvremoteTest(ScriptTest):
         await self.atvremote(
             "--id", MRP_ID, "--mrp-credentials", CLIENT_CREDENTIALS, "playing"
         )
-        self.assertTrue(self.fake_atv.get_service(Protocol.MRP).has_authenticated)
+        self.assertTrue(self.state.has_authenticated)
         self.has_output("Device state: Idle")
         self.exit(0)
 
@@ -81,7 +81,7 @@ class AtvremoteTest(ScriptTest):
         await self.atvremote(
             "--id", MRP_ID, "--mrp-credentials", "30:31:32:33", "playing"
         )
-        self.assertFalse(self.fake_atv.get_service(Protocol.MRP).has_authenticated)
+        self.assertFalse(self.state.has_authenticated)
         self.has_error("AuthenticationError:")
         self.exit(1)
 
