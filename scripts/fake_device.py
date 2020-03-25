@@ -17,7 +17,7 @@ from tests.fake_device import FakeAppleTV
 
 _LOGGER = logging.getLogger(__name__)
 
-DEVICE_NAME = "FakeMRP"
+DEVICE_NAME = "FakeATV"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 
 SERVER_IDENTIFIER = "6D797FD3-3538-427E-A47B-A32FC6CF3A69"
@@ -94,6 +94,23 @@ async def publish_dmap_zeroconf(zconf, address, port):
     )
 
 
+async def publish_airplay_zeroconf(zconf, address, port):
+    """Publish AirPlay Zeroconf service."""
+    props = {
+        b"deviceid": b"00:01:02:03:04:05",
+        b"model": b"AppleTV3,1",
+        b"pi": b"4EE5AF58-7E5D-465A-935E-82E4DB74385D",
+        b"flags": b"0x44",
+        b"vv": b"2",
+        b"features": b"0x5A7FFFF7,0xE",
+        b"pk": b"3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98",  # noqa
+        b"srcvers": b"220.68",
+    }
+    return await publish_service(
+        zconf, "_airplay._tcp.local.", DEVICE_NAME, address, port, props
+    )
+
+
 async def appstart(loop):
     """Script starts here."""
     parser = argparse.ArgumentParser()
@@ -112,9 +129,12 @@ async def appstart(loop):
     protocols.add_argument(
         "--dmap", default=False, action="store_true", help="enable DMAP protocol"
     )
+    protocols.add_argument(
+        "--airplay", default=False, action="store_true", help="enable AirPlay protocol"
+    )
     args = parser.parse_args()
 
-    if not (args.mrp or args.dmap):
+    if not (args.mrp or args.dmap or args.airplay):
         parser.error("no protocol enabled (see --help)")
 
     level = logging.DEBUG if args.debug else logging.WARNING
@@ -141,6 +161,9 @@ async def appstart(loop):
         if args.demo:
             tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
 
+    if args.airplay:
+        _, usecase = fake_atv.add_service(Protocol.AirPlay)
+
     await fake_atv.start()
 
     if args.mrp:
@@ -154,6 +177,13 @@ async def appstart(loop):
         services.append(
             await publish_dmap_zeroconf(
                 zconf, args.local_ip, fake_atv.get_port(Protocol.DMAP)
+            )
+        )
+
+    if args.airplay:
+        services.append(
+            await publish_airplay_zeroconf(
+                zconf, args.local_ip, fake_atv.get_port(Protocol.AirPlay)
             )
         )
 
