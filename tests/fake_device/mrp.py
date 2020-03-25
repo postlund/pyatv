@@ -229,12 +229,16 @@ class FakeMrpServiceFactory:
         self.loop = loop
         self.server = None
 
-    async def start(self):
+    async def start(self, start_web_server: bool):
         coro = self.loop.create_server(
             lambda: FakeMrpService(self.state, self.app, self.loop), "0.0.0.0"
         )
         self.server = await self.loop.create_task(coro)
         _LOGGER.info("Started MRP server at port %d", self.port)
+
+    async def cleanup(self):
+        if self.server:
+            self.server.close()
 
     @property
     def port(self):

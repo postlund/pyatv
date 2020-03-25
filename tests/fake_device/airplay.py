@@ -53,6 +53,7 @@ class FakeAirPlayState:
 class FakeAirPlayService:
     def __init__(self, state, app, loop):
         self.state = state
+        self.port = None
         self.app = app
 
         self.app.router.add_post("/play", self.handle_airplay_play)
@@ -61,7 +62,10 @@ class FakeAirPlayService:
         self.app.router.add_post("/pair-setup-pin", self.handle_pair_setup_pin)
         self.app.router.add_post("/pair-verify", self.handle_airplay_pair_verify)
 
-    async def start(self):
+    async def start(self, start_web_server):
+        pass
+
+    async def cleanup(self):
         pass
 
     async def handle_airplay_play(self, request):

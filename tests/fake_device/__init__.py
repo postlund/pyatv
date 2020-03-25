@@ -21,12 +21,14 @@ FACTORIES = {
 
 
 class FakeAppleTV:
-    def __init__(self, loop) -> None:
+    def __init__(self, loop, test_mode=True) -> None:
         self.services = {}  # Protocol > (service, state, usecase)
-        self.app = web.Application()
+        self.app = web.Application() if test_mode else None
         self.loop = loop
-        self.app.on_startup.append(self._app_start)
+        self.test_mode = test_mode
         self._has_started = False
+        if test_mode:
+            self.app.on_startup.append(self._app_start)
 
     async def _app_start(self, _):
         await self.start()
@@ -36,25 +38,27 @@ class FakeAppleTV:
             return
 
         for service in self.services.values():
-            await service[0].start()
+            await service[0].start(not self.test_mode)
 
         self._has_started = True
+
+    async def stop(self) -> None:
+        for service in self.services.values():
+            await service[0].cleanup()
+
+        self._has_started = False
 
     def add_service(self, protocol: Protocol, **kwargs):
         service_factory, state_factory, usecase_factory = FACTORIES.get(protocol)
 
         state = state_factory(**kwargs)
-        service = service_factory(state, self.app, self.loop)
+        service = service_factory(
+            state, self.app if self.test_mode else web.Application(), self.loop
+        )
         usecase = usecase_factory(state)
         self.services[protocol] = (service, state, usecase)
         return state, usecase
 
-    # Disclaimer: The implementation is adapted to work with unit tests for now. Since
-    # both AirPlay and DMAP depends on the test case to set up a web server, serving
-    # each service, it is only the test case that knows about the port. This should be
-    # changed in the future to not depend on running in a test environment, but this is
-    # a first step.
+    # Disclaimer: When running in "test mode", only MRP is supported here!
     def get_port(self, protocol: Protocol) -> int:
-        if protocol == Protocol.MRP:
-            return self.services[protocol][0].port
-        raise Exception("not supported for protocol: " + protocol.name)
+        return self.services[protocol][0].port
