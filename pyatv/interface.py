@@ -7,7 +7,7 @@ all its features.
 import re
 import inspect
 import hashlib
-from typing import Dict, Optional, NamedTuple
+from typing import Any, Dict, Optional, NamedTuple, Callable, TypeVar, Tuple
 
 from abc import ABC, abstractmethod
 
@@ -26,7 +26,9 @@ from pyatv.support import net
 __pdoc__ = {}
 __pdoc__["feature"] = False
 
-_ALL_FEATURES = {}  # type: Dict[int, str]
+_ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
+
+ReturnType = TypeVar("ReturnType", bound=Callable[..., Any])
 
 
 class ArtworkInfo(NamedTuple):
@@ -43,21 +45,22 @@ class FeatureInfo(NamedTuple):
     options: Optional[Dict[str, object]] = {}
 
 
-def feature(index, name, doc):
+def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnType]:
     """Decorate functions and properties as a feature.
 
     Note: This is an internal function.
     """
 
-    def _wraps(obj):
+    def _feat_decorator(func: ReturnType) -> ReturnType:
         if index in _ALL_FEATURES:
             raise Exception(
                 f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
             )
         _ALL_FEATURES[index] = (name, doc)
-        return obj
 
-    return _wraps
+        return func
+
+    return _feat_decorator
 
 
 def _get_first_sentence_in_pydoc(obj):
@@ -178,115 +181,115 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
     # pylint: disable=invalid-name
     @abstractmethod
     @feature(0, "Up", "Up button on remote.")
-    def up(self) -> None:
+    async def up(self) -> None:
         """Press key up."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(1, "Down", "Down button on remote.")
-    def down(self) -> None:
+    async def down(self) -> None:
         """Press key down."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(2, "Left", "Left button on remote.")
-    def left(self) -> None:
+    async def left(self) -> None:
         """Press key left."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(3, "Right", "Right button on remote.")
-    def right(self) -> None:
+    async def right(self) -> None:
         """Press key right."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(4, "Play", "Start playing media.")
-    def play(self) -> None:
+    async def play(self) -> None:
         """Press key play."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(5, "PlayPause", "Toggle between play/pause.")
-    def play_pause(self) -> None:
+    async def play_pause(self) -> None:
         """Toggle between play and pause."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(6, "Pause", "Pause playing media.")
-    def pause(self) -> None:
+    async def pause(self) -> None:
         """Press key play."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(7, "Stop", "Stop playing media.")
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Press key stop."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(8, "Next", "Change to next item.")
-    def next(self) -> None:
+    async def next(self) -> None:
         """Press key next."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(9, "Previous", "Change to previous item.")
-    def previous(self) -> None:
+    async def previous(self) -> None:
         """Press key previous."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(10, "Select", "Select current option.")
-    def select(self) -> None:
+    async def select(self) -> None:
         """Press key select."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(11, "Menu", "Go back to previous menu.")
-    def menu(self) -> None:
+    async def menu(self) -> None:
         """Press key menu."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(12, "VolumeUp", "Increase volume.")
-    def volume_up(self) -> None:
+    async def volume_up(self) -> None:
         """Press key volume up."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(13, "VolumeDown", "Decrease volume.")
-    def volume_down(self) -> None:
+    async def volume_down(self) -> None:
         """Press key volume down."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(14, "Home", "Home/TV button.")
-    def home(self) -> None:
+    async def home(self) -> None:
         """Press key home."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(15, "HomeHold", "Long-press home button.")
-    def home_hold(self) -> None:
+    async def home_hold(self) -> None:
         """Hold key home."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(16, "TopMenu", "Go to main menu.")
-    def top_menu(self) -> None:
+    async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(17, "Suspend", "Suspend device (deprecated; use Power.turn_off).")
-    def suspend(self) -> None:
+    async def suspend(self) -> None:
         """Suspend the device."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(18, "WakeUp", "Wake up device (deprecated; use Power.turn_on).")
-    def wakeup(self) -> None:
+    async def wakeup(self) -> None:
         """Wake up the device."""
         raise exceptions.NotSupportedError()
 
@@ -294,7 +297,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
     @feature(
         36, "SkipForward", "Skip forward a time interval.",
     )
-    def skip_forward(self) -> None:
+    async def skip_forward(self) -> None:
         """Skip forward a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
@@ -303,7 +306,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(37, "SkipBackward", "Skip backwards a time interval.")
-    def skip_backward(self) -> None:
+    async def skip_backward(self) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
@@ -312,19 +315,19 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(19, "SetPosition", "Seek to position.")
-    def set_position(self, pos) -> None:
+    async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(20, "SetShuffle", "Change shuffle state.")
-    def set_shuffle(self, shuffle_state) -> None:
+    async def set_shuffle(self, shuffle_state: const.ShuffleState) -> None:
         """Change shuffle mode to on or off."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(21, "SetRepeat", "Change repeat state.")
-    def set_repeat(self, repeat_state) -> None:
+    async def set_repeat(self, repeat_state: const.RepeatState) -> None:
         """Change repeat state."""
         raise exceptions.NotSupportedError()
 
@@ -493,7 +496,7 @@ class Metadata(ABC):
 
     @abstractmethod
     @feature(30, "Artwork", "Playing media artwork.")
-    def artwork(self) -> Optional[ArtworkInfo]:
+    async def artwork(self) -> Optional[ArtworkInfo]:
         """Return artwork for what is currently playing (or None)."""
         raise exceptions.NotSupportedError()
 
@@ -504,7 +507,7 @@ class Metadata(ABC):
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    def playing(self) -> Playing:
+    async def playing(self) -> Playing:
         """Return what is currently playing."""
         raise exceptions.NotSupportedError()
 
@@ -583,7 +586,7 @@ class Stream(ABC):  # pylint: disable=too-few-public-methods
 
     @abstractmethod
     @feature(31, "PlayUrl", "Stream a URL on device.")
-    def play_url(self, url: str, **kwargs) -> None:
+    async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
         raise exceptions.NotSupportedError()
 
