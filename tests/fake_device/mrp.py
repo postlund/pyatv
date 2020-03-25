@@ -6,6 +6,7 @@ import struct
 from datetime import datetime
 
 from pyatv import const
+from pyatv.support import log_protobuf
 from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
@@ -151,17 +152,27 @@ class PlayingState:
 class FakeMrpState:
     def __init__(self):
         """State of a fake MRP device."""
-        self.device = None
+        self.clients = []
         self.outstanding_keypresses = set()  # Pressed but not released
         self.last_button_pressed = None
         self.connection_state = None
         self.states = {}
         self.active_player = None
         self.powered_on = True
+        self.has_authenticated = False
+
+    def _send(self, msg):
+        for client in self.clients:
+            client.send(msg)
+
+    # This is a hack for now (if anyone has paired, OK...)
+    @property
+    def has_paired(self):
+        return any([client.has_paired for client in self.clients])
 
     def update_state(self, identifier):
         state = self.states[identifier]
-        self.device.send(_set_state_message(state, identifier))
+        self._send(_set_state_message(state, identifier))
 
     def set_player_state(self, identifier, state):
         self.states[identifier] = state
@@ -179,7 +190,7 @@ class FakeMrpState:
         client = now_playing.inner().client
         if identifier:
             client.bundleIdentifier = identifier
-        self.device.send(now_playing)
+        self._send(now_playing)
 
     def item_update(self, metadata, identifier):
         msg = messages.create(protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
@@ -196,19 +207,38 @@ class FakeMrpState:
             if value:
                 setattr(state, var, value)
 
-        self.device.send(msg)
+        self._send(msg)
 
     def update_client(self, display_name, identifier):
         msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
         client = msg.inner().client
         client.bundleIdentifier = identifier
         client.displayName = display_name
-        self.device.send(msg)
+        self._send(msg)
 
     def volume_control(self, available):
         msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
         msg.inner().volumeControlAvailable = available
-        self.device.send(msg)
+        self._send(msg)
+
+
+class FakeMrpServiceFactory:
+    def __init__(self, state, app, loop):
+        self.state = state
+        self.app = app
+        self.loop = loop
+        self.server = None
+
+    async def start(self):
+        coro = self.loop.create_server(
+            lambda: FakeMrpService(self.state, self.app, self.loop), "0.0.0.0"
+        )
+        self.server = await self.loop.create_task(coro)
+        _LOGGER.info("Started MRP server at port %d", self.port)
+
+    @property
+    def port(self):
+        return self.server.sockets[0].getsockname()[1]
 
 
 class FakeMrpService(MrpServerAuth, asyncio.Protocol):
@@ -217,34 +247,27 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
     def __init__(self, state, app, loop):
         MrpServerAuth.__init__(self, self, DEVICE_NAME)
         self.state = state
-        self.state.device = self
+        self.state.clients.append(self)
+        self.app = app
         self.loop = loop
-        self.has_authenticated = False
 
-        self.server = None
         self.buffer = b""
         self.chacha = None
         self.transport = None
 
-    async def start(self):
-        if self.server:
-            return
-
-        coro = self.loop.create_server(lambda: self, "127.0.0.1")
-        self.server = await self.loop.create_task(coro)
-        _LOGGER.info("Started MRP server at port %d", self.port)
-
-    @property
-    def port(self):
-        return self.server.sockets[0].getsockname()[1]
-
     def connection_made(self, transport):
+        _LOGGER.debug("Client connected")
         self.transport = transport
+
+    def connection_lost(self, exc):
+        _LOGGER.debug("Client disconnected")
+        self.transport = None
+        self.state.clients.remove(self)
 
     def enable_encryption(self, input_key, output_key):
         """Enable encryption with specified keys."""
         self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
-        self.has_authenticated = True
+        self.state.has_authenticated = True
 
     def send(self, message):
         if not self.transport:
@@ -256,6 +279,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
         length = variant.write_variant(len(data))
         self.transport.write(length + data)
+        log_protobuf(_LOGGER, ">> Send: Protobuf", message)
 
     def _send_device_info(self, identifier=None, update=False):
         resp = messages.device_information(DEVICE_NAME, "1234", update=update)
@@ -279,7 +303,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
             parsed = protobuf.ProtocolMessage()
             parsed.ParseFromString(data)
-            _LOGGER.info("Incoming message: %s", parsed)
+            log_protobuf(_LOGGER, "<< Receive: Protobuf", parsed)
 
             try:
                 name = parsed.Type.Name(parsed.type).lower().replace("_message", "")
@@ -292,8 +316,6 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
     def handle_device_info(self, message, inner):
-        # resp = messages.device_information(DEVICE_NAME, message.identifier)
-        # self.send(resp)
         self._send_device_info(update=False, identifier=message.identifier)
 
     def handle_set_connection_state(self, message, inner):
@@ -301,7 +323,12 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         self.state.connection_state = inner.state
 
     def handle_client_updates_config(self, message, inner):
-        pass
+        for identifier, metadata in self.state.states.items():
+            self.send(_set_state_message(metadata, identifier))
+
+        # Trigger sending of SetNowPlayingClientMessage
+        if self.state.active_player:
+            self.state.set_active_player(self.state.active_player)
 
     def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
