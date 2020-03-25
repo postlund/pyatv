@@ -63,7 +63,7 @@ class FakeDmapState:
         self.pairing_guid = pairing_guid
         self.session_id = session_id
         self.login_response = LoginResponse(session_id, 200)
-        self.playing = None
+        self.playing = PlayingResponse()
         self.pairing_responses = {}  # Remote name -> expected code
         self.session = None
         self.last_button_pressed = None
@@ -102,13 +102,24 @@ class FakeDmapState:
         assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
 
+def unused_port() -> int:
+    """Return a port that is unused on the current host."""
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
 class FakeDmapService:
     """Implementation of a fake DMAP Apple TV."""
 
     def __init__(self, state, app, loop):
         """Initialize a new FakeAppleTV."""
         self.state = state
+        self.port = None
         self.app = app
+        self.runner = None
 
         self.app.router.add_get("/login", self.handle_login)
         self.app.router.add_get("/ctrl-int/1/playstatusupdate", self.handle_playstatus)
@@ -122,8 +133,17 @@ class FakeDmapService:
                 "/ctrl-int/1/" + button, self.handle_playback_button
             )
 
-    async def start(self):
-        pass
+    async def start(self, start_web_server: bool):
+        if start_web_server:
+            self.port = unused_port()
+            self.runner = web.AppRunner(self.app)
+            await self.runner.setup()
+            site = web.TCPSite(self.runner, "0.0.0.0", self.port)
+            await site.start()
+
+    async def cleanup(self):
+        if self.runner:
+            await self.runner.cleanup()
 
     async def handle_login(self, request):
         """Handle login requests."""

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Set up a fake device.
-
-Currently only supports MRP.
-"""
+"""Set up a fake device."""
 import os
 import sys
 import socket
@@ -25,6 +22,10 @@ AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 
 SERVER_IDENTIFIER = "6D797FD3-3538-427E-A47B-A32FC6CF3A69"
 
+HSGID = "12345678-6789-1111-2222-012345678911"
+PAIRING_GUID = "0x0000000000000001"
+SESSION_ID = 55555
+
 
 async def _alter_playing(usecase):
     while True:
@@ -42,8 +43,23 @@ async def _alter_playing(usecase):
             logging.exception("Exception in output loop")
 
 
-async def publish_zeroconf(zconf, ip_address, port):
-    """Publish zeroconf service for ATV proxy instance."""
+async def publish_service(zconf, service, name, address, port, props):
+    """Publish a Zeroconf service."""
+    service = ServiceInfo(
+        service,
+        name + "." + service,
+        address=socket.inet_aton(address),
+        port=port,
+        properties=props,
+    )
+    await zconf.register_service(service)
+    _LOGGER.debug("Published zeroconf service: %s", service)
+
+    return service
+
+
+async def publish_mrp_zeroconf(zconf, address, port):
+    """Publish MRP Zeroconf service."""
     props = {
         b"ModelName": "Apple TV",
         b"AllowPairing": b"YES",
@@ -54,20 +70,28 @@ async def publish_zeroconf(zconf, ip_address, port):
         b"SystemBuildVersion": b"17K499",
         b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
     }
-
-    service = ServiceInfo(
-        "_mediaremotetv._tcp.local.",
-        DEVICE_NAME + "._mediaremotetv._tcp.local.",
-        address=socket.inet_aton(ip_address),
-        port=port,
-        weight=0,
-        priority=0,
-        properties=props,
+    return await publish_service(
+        zconf, "_mediaremotetv._tcp.local.", DEVICE_NAME, address, port, props
     )
-    await zconf.register_service(service)
-    _LOGGER.debug("Published zeroconf service: %s", service)
 
-    return service
+
+async def publish_dmap_zeroconf(zconf, address, port):
+    """Publish DMAP Zeroconf service."""
+    props = {
+        b"DFID": b"2",
+        b"PrVs": b"65538",
+        b"hG": HSGID.encode(),
+        b"Name": DEVICE_NAME.encode(),
+        b"txtvers": b"1",
+        b"atSV": b"65541",
+        b"MiTPV": b"196611",
+        b"EiTS": b"1",
+        b"fs": b"2",
+        b"MniT": b"167845888",
+    }
+    return await publish_service(
+        zconf, "_appletv-v2._tcp.local.", "fakedev", address, port, props
+    )
 
 
 async def appstart(loop):
@@ -82,12 +106,15 @@ async def appstart(loop):
     )
 
     protocols = parser.add_argument_group("protocols")
-    parser.add_argument(
+    protocols.add_argument(
         "--mrp", default=False, action="store_true", help="enable MRP protocol"
+    )
+    protocols.add_argument(
+        "--dmap", default=False, action="store_true", help="enable DMAP protocol"
     )
     args = parser.parse_args()
 
-    if not args.mrp:
+    if not (args.mrp or args.dmap):
         parser.error("no protocol enabled (see --help)")
 
     level = logging.DEBUG if args.debug else logging.WARNING
@@ -99,26 +126,47 @@ async def appstart(loop):
     )
 
     tasks = []
+    services = []
     zconf = Zeroconf(loop)
-    fake_atv = FakeAppleTV(loop)
+    fake_atv = FakeAppleTV(loop, test_mode=False)
     if args.mrp:
         _, usecase = fake_atv.add_service(Protocol.MRP)
         if args.demo:
             tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
 
+    if args.dmap:
+        _, usecase = fake_atv.add_service(
+            Protocol.DMAP, hsgid=HSGID, pairing_guid=PAIRING_GUID, session_id=SESSION_ID
+        )
+        if args.demo:
+            tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
+
     await fake_atv.start()
 
-    service = await publish_zeroconf(
-        zconf, args.local_ip, fake_atv.get_port(Protocol.MRP)
-    )
+    if args.mrp:
+        services.append(
+            await publish_mrp_zeroconf(
+                zconf, args.local_ip, fake_atv.get_port(Protocol.MRP)
+            )
+        )
+
+    if args.dmap:
+        services.append(
+            await publish_dmap_zeroconf(
+                zconf, args.local_ip, fake_atv.get_port(Protocol.DMAP)
+            )
+        )
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
 
+    await fake_atv.stop()
+
     for task in tasks:
         task.cancel()
 
-    await zconf.unregister_service(service)
+    for service in services:
+        await zconf.unregister_service(service)
 
     print("Exiting")
 
