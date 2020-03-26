@@ -42,11 +42,13 @@ the device and use the obtained credentials with playing media. See
 
 ### Q6. When I scan, other devices like AirPlay speakers and iTunes libraries show up. Why is that?
 
-Apple has re-used several protocols across different products. AirPlay is AirPlay and
+~~Apple has re-used several protocols across different products. AirPlay is AirPlay and
 there's no practical difference if it's on a speaker or an Apple TV: it's the same
 thing. Because of this, they might show up in the scan results. In the future some
 devices might be filtered (like pure AirPlay devices, since you can't connect to them
-anyway), but for now they are there.
+anyway), but for now they are there.~~
+
+This is no longer the case. From `pyatv` 0.5.0, pure AirPlay devices are no longer included in the scan result.
 
 ## Technical Questions
 
