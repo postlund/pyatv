@@ -29,8 +29,8 @@ class AirPlayPairingHandler(PairingHandler):
         self.auther = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
         self.srp.initialize(binascii.unhexlify(self.auth_data.seed))
-        self.pairing_complete = False
         self.pin_code = None
+        self._has_paired = False
 
     def _setup_credentials(self):
         credentials = self.service.credentials
@@ -48,7 +48,7 @@ class AirPlayPairingHandler(PairingHandler):
     @property
     def has_paired(self):
         """If a successful pairing has been performed."""
-        return self.pairing_complete
+        return self._has_paired
 
     def begin(self):
         """Start pairing process."""
@@ -71,7 +71,7 @@ class AirPlayPairingHandler(PairingHandler):
         )
 
         self.service.credentials = self.auth_data.credentials
-        self.pairing_complete = True
+        self._has_paired = True
 
     def pin(self, pin):
         """Pin code used for pairing."""

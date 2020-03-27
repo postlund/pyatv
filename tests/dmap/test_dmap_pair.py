@@ -63,6 +63,7 @@ class DmapPairFunctionalTest(AioHTTPTestCase):
     async def test_pairing_with_device(self):
         await self.initiate_pairing()
 
+        self.assertFalse(self.pairing.has_paired)
         self.assertFalse(self.pairing.device_provides_pin)
 
         await self.pairing.begin()

@@ -33,6 +33,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
     async def test_pairing_with_device(self):
         self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
+        self.assertIsNone(self.service.credentials)
         self.assertTrue(self.handle.device_provides_pin)
 
         await self.handle.begin()
@@ -42,11 +43,32 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
         self.assertTrue(self.handle.has_paired)
         self.assertTrue(self.state.has_paired)
+        self.assertIsNotNone(self.service.credentials)
+
+    @unittest_run_loop
+    async def test_pairing_with_existing_credentials(self):
+        self.service.credentials = CLIENT_CREDENTIALS
+
+        self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
+
+        self.assertFalse(self.handle.has_paired)
+        self.assertIsNotNone(self.service.credentials)
+        self.assertTrue(self.handle.device_provides_pin)
+
+        await self.handle.begin()
+        self.handle.pin(PIN_CODE)
+
+        await self.handle.finish()
+
+        self.assertTrue(self.handle.has_paired)
+        self.assertTrue(self.state.has_paired)
+        self.assertIsNotNone(self.service.credentials)
 
     @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
+        self.assertIsNone(self.service.credentials)
         self.assertTrue(self.handle.device_provides_pin)
 
         await self.handle.begin()
@@ -57,9 +79,10 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
 
         self.assertFalse(self.handle.has_paired)
         self.assertFalse(self.state.has_paired)
+        self.assertIsNone(self.service.credentials)
 
     @unittest_run_loop
-    async def test_pairing_authentication(self):
+    async def test_authentication(self):
         self.service.credentials = CLIENT_CREDENTIALS
 
         self.handle = await pyatv.connect(self.conf, self.loop)
