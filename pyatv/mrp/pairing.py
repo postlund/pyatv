@@ -25,6 +25,7 @@ class MrpPairingHandler(PairingHandler):
         self.protocol = MrpProtocol(loop, self.connection, self.srp, self.service)
         self.pairing_procedure = MrpPairingProcedure(self.protocol, self.srp)
         self.pin_code = None
+        self._has_paired = False
 
     async def close(self):
         """Call to free allocated resources after pairing."""
@@ -34,7 +35,7 @@ class MrpPairingHandler(PairingHandler):
     @property
     def has_paired(self):
         """If a successful pairing has been performed."""
-        return self.service.credentials is not None
+        return self._has_paired
 
     def begin(self):
         """Start pairing process."""
@@ -54,6 +55,7 @@ class MrpPairingHandler(PairingHandler):
                 self.pin_code,
             )
         )
+        self._has_paired = True
 
     @property
     def device_provides_pin(self):
