@@ -17,5 +17,6 @@ assignees: ''
  - OS: [e.g. Debian]
  - Python: [e.g. 3.6.2]
  - pyatv: [e.g. 0.3.10]
+- Apple TV: [e.g. Apple TV 4K tvOS 13.4]
 
 **Additional context**
