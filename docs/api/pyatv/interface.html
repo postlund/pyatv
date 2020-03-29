@@ -17,7 +17,6 @@ link_group: api
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pyatv.interface.feature" href="#pyatv.interface.feature">feature</a></code></li>
 <li><code><a title="pyatv.interface.retrieve_commands" href="#pyatv.interface.retrieve_commands">retrieve_commands</a></code></li>
 </ul>
 </li>
@@ -233,6 +232,9 @@ from pyatv.const import (
     FeatureName,
 )
 from pyatv.support import net
+
+__pdoc__ = {}
+__pdoc__[&#34;feature&#34;] = False
 
 _ALL_FEATURES = {}  # type: Dict[int, str]
 
@@ -1016,33 +1018,6 @@ class AppleTV(ABC):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pyatv.interface.feature"><code class="name flex">
-<span>def <span class="ident">feature</span></span>(<span>index, name, doc)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Decorate functions and properties as a feature.</p>
-<p>Note: This is an internal function.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def feature(index, name, doc):
-    &#34;&#34;&#34;Decorate functions and properties as a feature.
-
-    Note: This is an internal function.
-    &#34;&#34;&#34;
-
-    def _wraps(obj):
-        if index in _ALL_FEATURES:
-            raise Exception(
-                f&#34;Index {index} collides between {name} and {_ALL_FEATURES[index]}&#34;
-            )
-        _ALL_FEATURES[index] = (name, doc)
-        return obj
-
-    return _wraps</code></pre>
-</details>
-</dd>
 <dt id="pyatv.interface.retrieve_commands"><code class="name flex">
 <span>def <span class="ident">retrieve_commands</span></span>(<span>obj: object)</span>
 </code></dt>

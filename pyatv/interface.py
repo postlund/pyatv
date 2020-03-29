@@ -23,6 +23,9 @@ from pyatv.const import (
 )
 from pyatv.support import net
 
+__pdoc__ = {}
+__pdoc__["feature"] = False
+
 _ALL_FEATURES = {}  # type: Dict[int, str]
 
 
