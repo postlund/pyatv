@@ -134,17 +134,22 @@ class ZeroconfScanner(BaseScanner):
     async def discover(self, timeout):
         """Start discovery of devices and services."""
         zeroconf = Zeroconf(self.loop, address_family=[netifaces.AF_INET])
+        browsers = []
         try:
-            ServiceBrowser(zeroconf, HOMESHARING_SERVICE, self)
-            ServiceBrowser(zeroconf, DEVICE_SERVICE, self)
-            ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self)
-            ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self)
+            browsers += [
+                ServiceBrowser(zeroconf, HOMESHARING_SERVICE, self),
+                ServiceBrowser(zeroconf, DEVICE_SERVICE, self),
+                ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self),
+                ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self),
+            ]
             _LOGGER.debug("Discovering devices for %d seconds", timeout)
             await asyncio.sleep(timeout)
 
             if self.pending:
                 await asyncio.wait(self.pending)
         finally:
+            for browser in browsers:
+                browser.cancel()
             await zeroconf.close()
         return self._found_devices
 
