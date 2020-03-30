@@ -100,9 +100,15 @@ class ServiceBrowserStub:
 
     def __init__(self, zeroconf, service_type, listener):
         """Create a new instance of ServiceBrowser."""
+        zeroconf.browsers.append(self)
+        self.service_type = service_type
+        self.is_running = True
         for service in zeroconf.services:
             if service.type == service_type:
                 listener.add_service(zeroconf, service_type, service.name)
+
+    def cancel(self):
+        self.is_running = False
 
 
 class ZeroconfStub:
@@ -110,6 +116,7 @@ class ZeroconfStub:
 
     def __init__(self, services):
         """Create a new instance of Zeroconf."""
+        self.browsers = []
         self.services = services
         self.registered_services = []
 
@@ -129,7 +136,8 @@ class ZeroconfStub:
 
     async def close(self):
         """Stub for closing zeroconf (does nothing)."""
-        pass
+        for browser in self.browsers:
+            assert not browser.is_running, f"{browser.service_type} was not cancelled"
 
 
 def stub(module, *services):
