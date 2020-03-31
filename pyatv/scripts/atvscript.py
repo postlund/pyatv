@@ -33,11 +33,14 @@ class PushPrinter(PushListener):
 
     def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Inform about changes to what is currently playing."""
-        print(self.formatter(output_playing(playstatus, self.atv.metadata.app)))
+        print(
+            self.formatter(output_playing(playstatus, self.atv.metadata.app)),
+            flush=True,
+        )
 
     def playstatus_error(self, updater, exception: Exception) -> None:
         """Inform about an error when updating play status."""
-        print(self.formatter(output(False, exception=exception)))
+        print(self.formatter(output(False, exception=exception)), flush=True)
 
 
 class PowerPrinter(PowerListener):
@@ -52,7 +55,10 @@ class PowerPrinter(PowerListener):
     ):
         """Device power state was updated."""
         print(
-            self.formatter(output(True, values={"power_state": new_state.name.lower()}))
+            self.formatter(
+                output(True, values={"power_state": new_state.name.lower()})
+            ),
+            flush=True,
         )
 
 
@@ -152,7 +158,8 @@ async def _handle_command(args, loop):
         print(
             args.output(
                 output(True, values={"power_state": atv.power.power_state.name.lower()})
-            )
+            ),
+            flush=True,
         )
         await loop.run_in_executor(None, sys.stdin.readline)
         return output(True, values={"push_updates": "finished"})
@@ -216,9 +223,9 @@ async def appstart(loop):
     args = parser.parse_args()
 
     try:
-        print(args.output(await _handle_command(args, loop)))
+        print(args.output(await _handle_command(args, loop)), flush=True)
     except Exception as ex:
-        print(args.output(output(False, exception=ex)))
+        print(args.output(output(False, exception=ex)), flush=True)
 
     return 0
 
