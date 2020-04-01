@@ -74,7 +74,7 @@ def output_playing(playing: Playing, app: App):
     def _convert(field):
         if isinstance(field, Enum):
             return field.name.lower()
-        return field
+        return field if field else None
 
     commands = retrieve_commands(Playing)
     values = {k: _convert(getattr(playing, k)) for k in commands.keys()}
