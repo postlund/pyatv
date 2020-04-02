@@ -92,7 +92,8 @@ def _fill_item(item, metadata):
     if metadata.artwork_mimetype:
         md.artworkAvailable = True
         md.artworkMIMEType = metadata.artwork_mimetype
-        md.artworkIdentifier = metadata.artwork_identifier
+        if metadata.artwork_identifier:
+            md.artworkIdentifier = metadata.artwork_identifier
 
 
 def _set_state_message(metadata, identifier):

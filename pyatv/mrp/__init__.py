@@ -397,6 +397,7 @@ class MrpMetadata(Metadata):
                 return metadata.artworkIdentifier
             if metadata.HasField("contentIdentifier"):
                 return metadata.contentIdentifier
+            return self.psm.playing.item_identifier
         return None
 
     async def playing(self):
