@@ -99,6 +99,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.metadata.artwork_id, ARTWORK_ID)
 
     @unittest_run_loop
+    async def test_metadata_artwork_id_no_identifier(self):
+        self.usecase.example_video(identifier="some_id")
+        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE, None)
+
+        await self.playing(title="dummy")
+        self.assertEqual(self.atv.metadata.artwork_id, "some_id")
+
+    @unittest_run_loop
     async def test_item_updates(self):
         self.usecase.video_playing(
             False, "dummy", 100, 1, identifier="id", artist="some artist"
