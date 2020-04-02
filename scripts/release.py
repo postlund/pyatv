@@ -83,7 +83,7 @@ def create_branch(version):
 
     branch_name = "release_" + version.replace(".", "_")
     _LOGGER.info("Checking out new branch %s", branch_name)
-    call("git checkout -b {0} origin/master", branch_name)
+    call("git checkout -b {0}", branch_name)
 
 
 def install_dependencies():
