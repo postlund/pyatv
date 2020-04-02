@@ -12,6 +12,8 @@ from pathlib import Path
 from datetime import datetime
 from packaging.version import Version, InvalidVersion
 
+import api
+
 _LOGGER = logging.getLogger(__name__)
 
 CHANGES_TEMPLATE = """# CHANGES
@@ -101,7 +103,7 @@ def update_version(version):
     splitted = version.split(".")
     for i, component in enumerate(["MAJOR", "MINOR", "PATCH"]):
         output = re.sub(
-            "(" + component + "_VERSION =).*", "\\1 '" + splitted[i] + "'", output
+            "(" + component + "_VERSION =).*", '\\1 "' + splitted[i] + '"', output
         )
 
     with open("pyatv/const.py", "w") as wh:
@@ -171,6 +173,12 @@ def verify_and_create_commit(version):
             bail("Missing file {0} in commit", filename)
 
 
+def generate_api_docs():
+    """Generate API documentation."""
+    _LOGGER.info("Generating API documentation")
+    api.generate()
+
+
 def create_tag(version):
     """Create a git tag for the release."""
     if version.is_prerelease:
@@ -225,6 +233,9 @@ def main():
     parser.add_argument(
         "--skip-tag", default=False, action="store_true", help="skip creating git tag"
     )
+    parser.add_argument(
+        "--skip-api", default=False, action="store_true", help="skip API generation"
+    )
 
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -267,6 +278,8 @@ def main():
         _LOGGER.info("Making release %s", version)
         if not args.skip_verify_changes:
             verify_changes(version)
+        if not args.skip_api:
+            generate_api_docs()
         if not args.skip_commit:
             verify_and_create_commit(version)
         if not args.skip_outputs:

@@ -8,6 +8,9 @@ from pathlib import Path
 
 import pdoc
 
+warnings.filterwarnings("ignore")
+pdoc.tpl_lookup.directories.insert(0, os.path.join("docs", "pdoc_templates"))
+
 
 def _filter_func(doc):
     for exclude in [
@@ -80,9 +83,6 @@ def main():
     )
 
     args = parser.parse_args()
-
-    warnings.filterwarnings("ignore")
-    pdoc.tpl_lookup.directories.insert(0, os.path.join("docs", "pdoc_templates"))
 
     if args.command == "generate":
         return generate()
