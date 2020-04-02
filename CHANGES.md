@@ -1,5 +1,21 @@
 # CHANGES
 
+## 0.5.1 (2020-04-02)
+
+*Changes:*
+
+* Fix broken artwork when certain identifiers are missing (MRP only)
+* Do not leak zeroconf resources when scanning
+
+*All changes:*
+
+```
+6ea8577 release: Use current commit instead of master
+00d5b8a mrp: Handle artwork without identifier
+8250453 scan: Clean up pending service browsers
+63e02e2 mrp: Add tvOS 13.4 build number
+```
+
 ## 0.5.0 (2020-03-19)
 
 *Changes:*
