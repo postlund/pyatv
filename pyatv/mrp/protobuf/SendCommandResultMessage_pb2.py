@@ -12,6 +12,7 @@ _sym_db = _symbol_database.Default()
 
 
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
+from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,9 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n1pyatv/mrp/protobuf/SendCommandResultMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"l\n\x18SendCommandResultMessage\x12\x11\n\terrorCode\x18\x01 \x01(\r\x12\x1b\n\x13handlerReturnStatus\x18\x02 \x01(\r\x12 \n\x18handlerReturnStatusDatas\x18\x03 \x03(\x0c:M\n\x18sendCommandResultMessage\x12\x10.ProtocolMessage\x18\x07 \x01(\x0b\x32\x19.SendCommandResultMessage'
+  serialized_pb=b'\n1pyatv/mrp/protobuf/SendCommandResultMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"\x92\x06\n\x18SendCommandResultMessage\x12\x36\n\tsendError\x18\x01 \x01(\x0e\x32#.SendCommandResultMessage.SendError\x12J\n\x13handlerReturnStatus\x18\x02 \x01(\x0e\x32-.SendCommandResultMessage.HandlerReturnStatus\x12 \n\x18handlerReturnStatusDatas\x18\x03 \x03(\x0c\x12\x11\n\tcommandID\x18\x04 \x01(\t\x12\x1f\n\nplayerPath\x18\x05 \x01(\x0b\x32\x0b.PlayerPath\"\xe1\x01\n\tSendError\x12\x0b\n\x07NoError\x10\x00\x12\x17\n\x13\x41pplicationNotFound\x10\x01\x12\x14\n\x10\x43onnectionFailed\x10\x02\x12\x0b\n\x07Ignored\x10\x03\x12\x1d\n\x19\x43ouldNotLaunchApplication\x10\x04\x12\x0c\n\x08TimedOut\x10\x05\x12\x16\n\x12OriginDoesNotExist\x10\x06\x12\x12\n\x0eInvalidOptions\x10\x07\x12\x15\n\x11NoCommandHandlers\x10\x08\x12\x1b\n\x17\x41pplicationNotInstalled\x10\t\"\xb7\x02\n\x13HandlerReturnStatus\x12\x0b\n\x07Success\x10\x00\x12\x11\n\rNoSuchContent\x10\x01\x12\x11\n\rCommandFailed\x10\x02\x12\x1e\n\x1aNoActionableNowPlayingItem\x10\n\x12\x12\n\x0e\x44\x65viceNotFound\x10\x14\x12\x0f\n\x0bUIKitLegacy\x10\x03\x12\x14\n\x10SkipAdProhibited\x10\x64\x12\x16\n\x12QueueIsUserCurated\x10\x65\x12\x1d\n\x19UserModifiedQueueDisabled\x10\x66\x12\x33\n/UserQueueModificationNotSupportedForCurrentItem\x10g\x12&\n\"SubscriptionRequiredForSharedQueue\x10h:M\n\x18sendCommandResultMessage\x12\x10.ProtocolMessage\x18\x07 \x01(\x0b\x32\x19.SendCommandResultMessage'
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
 
 
 SENDCOMMANDRESULTMESSAGE_FIELD_NUMBER = 7
@@ -33,6 +34,118 @@ sendCommandResultMessage = _descriptor.FieldDescriptor(
   is_extension=True, extension_scope=None,
   serialized_options=None, file=DESCRIPTOR)
 
+_SENDCOMMANDRESULTMESSAGE_SENDERROR = _descriptor.EnumDescriptor(
+  name='SendError',
+  full_name='SendCommandResultMessage.SendError',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='NoError', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ApplicationNotFound', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ConnectionFailed', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Ignored', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CouldNotLaunchApplication', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TimedOut', index=5, number=5,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='OriginDoesNotExist', index=6, number=6,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='InvalidOptions', index=7, number=7,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NoCommandHandlers', index=8, number=8,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ApplicationNotInstalled', index=9, number=9,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=380,
+  serialized_end=605,
+)
+_sym_db.RegisterEnumDescriptor(_SENDCOMMANDRESULTMESSAGE_SENDERROR)
+
+_SENDCOMMANDRESULTMESSAGE_HANDLERRETURNSTATUS = _descriptor.EnumDescriptor(
+  name='HandlerReturnStatus',
+  full_name='SendCommandResultMessage.HandlerReturnStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Success', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NoSuchContent', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CommandFailed', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NoActionableNowPlayingItem', index=3, number=10,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DeviceNotFound', index=4, number=20,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UIKitLegacy', index=5, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SkipAdProhibited', index=6, number=100,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='QueueIsUserCurated', index=7, number=101,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UserModifiedQueueDisabled', index=8, number=102,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='UserQueueModificationNotSupportedForCurrentItem', index=9, number=103,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SubscriptionRequiredForSharedQueue', index=10, number=104,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=608,
+  serialized_end=919,
+)
+_sym_db.RegisterEnumDescriptor(_SENDCOMMANDRESULTMESSAGE_HANDLERRETURNSTATUS)
+
 
 _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
   name='SendCommandResultMessage',
@@ -42,15 +155,15 @@ _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='errorCode', full_name='SendCommandResultMessage.errorCode', index=0,
-      number=1, type=13, cpp_type=3, label=1,
+      name='sendError', full_name='SendCommandResultMessage.sendError', index=0,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='handlerReturnStatus', full_name='SendCommandResultMessage.handlerReturnStatus', index=1,
-      number=2, type=13, cpp_type=3, label=1,
+      number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -62,11 +175,27 @@ _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='commandID', full_name='SendCommandResultMessage.commandID', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='playerPath', full_name='SendCommandResultMessage.playerPath', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
+    _SENDCOMMANDRESULTMESSAGE_SENDERROR,
+    _SENDCOMMANDRESULTMESSAGE_HANDLERRETURNSTATUS,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -74,10 +203,15 @@ _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=95,
-  serialized_end=203,
+  serialized_start=133,
+  serialized_end=919,
 )
 
+_SENDCOMMANDRESULTMESSAGE.fields_by_name['sendError'].enum_type = _SENDCOMMANDRESULTMESSAGE_SENDERROR
+_SENDCOMMANDRESULTMESSAGE.fields_by_name['handlerReturnStatus'].enum_type = _SENDCOMMANDRESULTMESSAGE_HANDLERRETURNSTATUS
+_SENDCOMMANDRESULTMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
+_SENDCOMMANDRESULTMESSAGE_SENDERROR.containing_type = _SENDCOMMANDRESULTMESSAGE
+_SENDCOMMANDRESULTMESSAGE_HANDLERRETURNSTATUS.containing_type = _SENDCOMMANDRESULTMESSAGE
 DESCRIPTOR.message_types_by_name['SendCommandResultMessage'] = _SENDCOMMANDRESULTMESSAGE
 DESCRIPTOR.extensions_by_name['sendCommandResultMessage'] = sendCommandResultMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)

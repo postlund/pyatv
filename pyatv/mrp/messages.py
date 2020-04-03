@@ -134,12 +134,16 @@ def command(cmd):
     return message
 
 
-def command_result(identifier, error_code=0):
+def command_result(
+    identifier, sendError=protobuf.SendCommandResultMessage.SendError.NoError
+):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE, identifier=identifier)
     inner = message.inner()
-    inner.errorCode = error_code
-    inner.handlerReturnStatus = 0
+    inner.sendError = sendError
+    inner.handlerReturnStatus = (
+        protobuf.SendCommandResultMessage.HandlerReturnStatus.Success
+    )
     return message
 
 
