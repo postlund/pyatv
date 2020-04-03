@@ -144,12 +144,12 @@ class MrpRemoteControl(RemoteControl):
         resp = await self.protocol.send_and_receive(messages.command(command))
         inner = resp.inner()
 
-        if inner.sendError != scr.SendError.NoError:
-            raise exceptions.CommandError(
-                "Command {0} failed: {1}, {2}".format(
-                    command, inner.errorCode, inner.handlerReturnStatus
-                )
-            )
+        if inner.sendError == scr.SendError.NoError:
+            return
+
+        raise exceptions.CommandError(
+            f"Command {command} failed: {inner.sendError}, {inner.handlerReturnStatus}"
+        )
 
     async def up(self):
         """Press key up."""
