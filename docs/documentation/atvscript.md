@@ -105,3 +105,26 @@ $ atvscript -s 10.0.10.81 push_updates
 Current power state is always printed as the first update.
 
 When pressing ENTER, the script will exit (as seen on the last line).
+
+### Connection Status
+
+Listening to push updates is a long-lived process and the connection might be closed at some point, e.g.
+due to device reboot or network issues. If this happens, `connection` will be set to `closed`:
+
+```
+$ atvscript --id 6D797FD3-3538-427E-A47B-A32FC6CF3A69 push_updates
+{"result": "success", "power_state": "on"}
+...
+{"result": "failure", "connection": "closed"}
+```
+
+In case of abnormal disconnection, `connection` will be set to `lost` and an exception will be
+included:
+
+```
+{"result": "success", "power_state": "on"}
+...
+{"result": "failure", "exception": "something bad happened", "connection": "closed"}
+```
+
+The script will also exit (without requiring user interaction) with a non-zero exit code.

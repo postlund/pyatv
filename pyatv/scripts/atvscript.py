@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tool modelled to be used for scripting."""
 
+import os
 import sys
 import json
 import asyncio
@@ -16,6 +17,7 @@ from pyatv.interface import (
     RemoteControl,
     PushListener,
     PowerListener,
+    DeviceListener,
     retrieve_commands,
 )
 from pyatv.scripts import TransformProtocol, TransformScanHosts, TransformOutput
@@ -60,6 +62,32 @@ class PowerPrinter(PowerListener):
             ),
             flush=True,
         )
+
+
+class DevicePrinter(DeviceListener):
+    """Listen for generic device updates and print them."""
+
+    def __init__(self, formatter, waiter):
+        """Initialize a new DeviceListener."""
+        self.formatter = formatter
+        self.waiter = waiter
+
+    def connection_lost(self, exception):
+        """Call when unexpectedly being disconnected from device."""
+        print(
+            self.formatter(
+                output(False, exception=exception, values={"connection": "lost"})
+            ),
+            flush=True,
+        )
+        self.waiter.cancel()
+
+    def connection_closed(self):
+        """Call when connection was (intentionally) closed."""
+        print(
+            self.formatter(output(False, values={"connection": "closed"})), flush=True
+        )
+        self.waiter.cancel()
 
 
 def output(success: bool, error=None, exception=None, values=None):
@@ -147,12 +175,20 @@ async def _handle_command(args, loop):
         return output(False, "device_not_found")
 
     atv = await connect(config, loop, protocol=Protocol.MRP)
+    try:
+        return await _run_command(atv, args, loop)
+    finally:
+        await atv.close()
 
+
+async def _run_command(atv, args, loop):
     if args.command == "playing":
         return output_playing(await atv.metadata.playing(), atv.metadata.app)
 
     if args.command == "push_updates":
+        waiter = loop.run_in_executor(None, sys.stdin.readline)
         atv.power.listener = PowerPrinter(args.output)
+        atv.listener = DevicePrinter(args.output, waiter)
         atv.push_updater.listener = PushPrinter(args.output, atv)
         atv.push_updater.start()
         print(
@@ -161,7 +197,7 @@ async def _handle_command(args, loop):
             ),
             flush=True,
         )
-        await loop.run_in_executor(None, sys.stdin.readline)
+        await waiter
         return output(True, values={"push_updates": "finished"})
 
     rc = retrieve_commands(RemoteControl)
@@ -235,6 +271,8 @@ def main():
     loop = asyncio.get_event_loop()
     try:
         return loop.run_until_complete(appstart(loop))
+    except asyncio.CancelledError:
+        os._exit(1)  # This is not pretty but will work for now
     except KeyboardInterrupt:
         return 0
 
