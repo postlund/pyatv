@@ -35,6 +35,141 @@ if sys.version_info < (3,):
 
 class ProtocolMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class ErrorCode(builtin___int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: builtin___int) -> builtin___str: ...
+        @classmethod
+        def Value(cls, name: builtin___str) -> 'ProtocolMessage.ErrorCode': ...
+        @classmethod
+        def keys(cls) -> typing___List[builtin___str]: ...
+        @classmethod
+        def values(cls) -> typing___List['ProtocolMessage.ErrorCode']: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ProtocolMessage.ErrorCode']]: ...
+        NO_ERROR = typing___cast('ProtocolMessage.ErrorCode', 0)
+        INVALID_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 2)
+        OPERATION_NOT_PERMITTED = typing___cast('ProtocolMessage.ErrorCode', 3)
+        CLIENT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 4)
+        ORIGIN_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 5)
+        UNSUPPORTED_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 6)
+        FAILED_TO_SET_PICKED_ROUTE = typing___cast('ProtocolMessage.ErrorCode', 7)
+        FAILED_TO_REGISTER_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 8)
+        FAILED_TO_REMOVE_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 9)
+        THE_APPLICATION_ACTIVITY_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 10)
+        THE_APP_HAS_NOT_SETUP_A_BROWSABLE_CONTENT_ENDPOINT = typing___cast('ProtocolMessage.ErrorCode', 11)
+        THE_REQUESTED_BROWSABLE_CONTENT_API_IS_NOT_SUPPORTED_BY_THE_APPLICATION = typing___cast('ProtocolMessage.ErrorCode', 12)
+        THE_NOTFICATION_HAS_NOT_BEEN_WHITELISTED_BY_THE_SERVER = typing___cast('ProtocolMessage.ErrorCode', 13)
+        OPERATION_REQUIRES_A_CLIENT_CALLBACK_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 14)
+        OPERATION_REQUIRES_A_CLIENT_DATA_SOURCE_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 15)
+        REQUESTED_DATA_IS_OUT_OF_DATE_AND_SHOULD_BE_REQUESTED_AGAIN = typing___cast('ProtocolMessage.ErrorCode', 16)
+        THE_DEVICES_ENFORCED_VOLUME_LIMIT_HAS_BEEN_EXCEEDED = typing___cast('ProtocolMessage.ErrorCode', 17)
+        VOLUME_VALUE_IS_OUT_OF_RANGE = typing___cast('ProtocolMessage.ErrorCode', 18)
+        VOLUME_IS_ALREADY_AT_THE_MAXIMUM_VALUE = typing___cast('ProtocolMessage.ErrorCode', 19)
+        VOLUME_IS_ALREADY_MUTED = typing___cast('ProtocolMessage.ErrorCode', 20)
+        VOICE_INPUT_ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 21)
+        THE_VOICE_INPUT_DEVICE_IS_NOT_REGISTERED_OR_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 22)
+        ENCRYPTION_FAILURE = typing___cast('ProtocolMessage.ErrorCode', 23)
+        ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 24)
+        THE_CLIENTS_APPLICATION_CANCELLED_THE_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 25)
+        THE_OPERATION_TIMED_OUT = typing___cast('ProtocolMessage.ErrorCode', 26)
+        THE_SPECIFIED_PLAYER_PATH_OBJECT_WAS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 27)
+        ADDING_OR_REMOVING_DEVICES_FROM_THE_AV_OUTPUT_CONTEXT_HAS_FAILED = typing___cast('ProtocolMessage.ErrorCode', 28)
+        COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 29)
+        THE_SPECIFIED_CONTENT_ITEM_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 30)
+        THE_SPECIFIED_OFFSET_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 31)
+        THE_SPECIFIED_OUTPUT_CONTEXT_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 32)
+        ONE_OR_MORE_SPECIFIED_OUTPUT_DEVICES_ARE_NOT_GROUPABLE = typing___cast('ProtocolMessage.ErrorCode', 33)
+        THE_SPECIFIED_OUTPUT_CONTEXT_DOES_NOT_SUPPORT_ADDING_MORE_THAN_ONE_OUTPUT_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 34)
+        COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 35)
+        ENDPOINT_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 36)
+        OUTPUT_DEVICE_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 37)
+        CODER_MUST_SUPPORT_KEY_VALUE_CODING = typing___cast('ProtocolMessage.ErrorCode', 38)
+        COULD_NOT_FIND_THE_GIVEN_OUTPUTDEVICE = typing___cast('ProtocolMessage.ErrorCode', 39)
+        FAILED_TO_CONNECT_TO_REMOTE_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 100)
+        AUTHENTICATION_TOKEN_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 101)
+        RECORDING_SESSION_IS_ALREADY_IN_PROGRESS_ON_THIS_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 102)
+        THE_DEVICE_IS_NOT_CURRENTLY_RECORDING = typing___cast('ProtocolMessage.ErrorCode', 103)
+        THE_CLIENT_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 104)
+        THE_SERVER_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 105)
+        THE_CONNECTION_HAS_BEEN_CANCELLED_BY_THE_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 106)
+        PAIRING_FUNCTIONALITY_IS_LOCKED_DUE_TO_SECURITY_REASONS = typing___cast('ProtocolMessage.ErrorCode', 107)
+        THE_CLIENTS_OPERATING_SYSTEM_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 108)
+        THE_CLIENTS_APPLICATION_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 109)
+        THE_DEVICE_IS_NOT_PAIRED = typing___cast('ProtocolMessage.ErrorCode', 110)
+        THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_THE_USER_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 111)
+        THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_A_TIMEOUT_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 112)
+        THE_CONNECTION_TIMEDOUT = typing___cast('ProtocolMessage.ErrorCode', 113)
+        PAIRING_WITH_THIS_DEVICE_IS_BLOCKED = typing___cast('ProtocolMessage.ErrorCode', 114)
+        THE_DEVICE_IS_GOING_TO_SLEEP = typing___cast('ProtocolMessage.ErrorCode', 115)
+        CONNECTION_BLOCKED_BY_SERVER = typing___cast('ProtocolMessage.ErrorCode', 116)
+        MRAVENDPOINT_WAS_DEALLOCATED_WHILE_WAITING_FOR_DEVICE_TO_CONNECT = typing___cast('ProtocolMessage.ErrorCode', 117)
+        OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_NO_LONGER_BE_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 200)
+        OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_BECOME_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 201)
+        OUTPUT_CONTEXT_MODIFICATION_REQUESTED_NO_TOPOLOGY_CHANGE = typing___cast('ProtocolMessage.ErrorCode', 202)
+        UNKNOWN_ERROR = typing___cast('ProtocolMessage.ErrorCode', 299)
+    NO_ERROR = typing___cast('ProtocolMessage.ErrorCode', 0)
+    INVALID_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 2)
+    OPERATION_NOT_PERMITTED = typing___cast('ProtocolMessage.ErrorCode', 3)
+    CLIENT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 4)
+    ORIGIN_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 5)
+    UNSUPPORTED_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 6)
+    FAILED_TO_SET_PICKED_ROUTE = typing___cast('ProtocolMessage.ErrorCode', 7)
+    FAILED_TO_REGISTER_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 8)
+    FAILED_TO_REMOVE_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 9)
+    THE_APPLICATION_ACTIVITY_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 10)
+    THE_APP_HAS_NOT_SETUP_A_BROWSABLE_CONTENT_ENDPOINT = typing___cast('ProtocolMessage.ErrorCode', 11)
+    THE_REQUESTED_BROWSABLE_CONTENT_API_IS_NOT_SUPPORTED_BY_THE_APPLICATION = typing___cast('ProtocolMessage.ErrorCode', 12)
+    THE_NOTFICATION_HAS_NOT_BEEN_WHITELISTED_BY_THE_SERVER = typing___cast('ProtocolMessage.ErrorCode', 13)
+    OPERATION_REQUIRES_A_CLIENT_CALLBACK_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 14)
+    OPERATION_REQUIRES_A_CLIENT_DATA_SOURCE_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 15)
+    REQUESTED_DATA_IS_OUT_OF_DATE_AND_SHOULD_BE_REQUESTED_AGAIN = typing___cast('ProtocolMessage.ErrorCode', 16)
+    THE_DEVICES_ENFORCED_VOLUME_LIMIT_HAS_BEEN_EXCEEDED = typing___cast('ProtocolMessage.ErrorCode', 17)
+    VOLUME_VALUE_IS_OUT_OF_RANGE = typing___cast('ProtocolMessage.ErrorCode', 18)
+    VOLUME_IS_ALREADY_AT_THE_MAXIMUM_VALUE = typing___cast('ProtocolMessage.ErrorCode', 19)
+    VOLUME_IS_ALREADY_MUTED = typing___cast('ProtocolMessage.ErrorCode', 20)
+    VOICE_INPUT_ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 21)
+    THE_VOICE_INPUT_DEVICE_IS_NOT_REGISTERED_OR_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 22)
+    ENCRYPTION_FAILURE = typing___cast('ProtocolMessage.ErrorCode', 23)
+    ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 24)
+    THE_CLIENTS_APPLICATION_CANCELLED_THE_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 25)
+    THE_OPERATION_TIMED_OUT = typing___cast('ProtocolMessage.ErrorCode', 26)
+    THE_SPECIFIED_PLAYER_PATH_OBJECT_WAS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 27)
+    ADDING_OR_REMOVING_DEVICES_FROM_THE_AV_OUTPUT_CONTEXT_HAS_FAILED = typing___cast('ProtocolMessage.ErrorCode', 28)
+    COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 29)
+    THE_SPECIFIED_CONTENT_ITEM_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 30)
+    THE_SPECIFIED_OFFSET_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 31)
+    THE_SPECIFIED_OUTPUT_CONTEXT_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 32)
+    ONE_OR_MORE_SPECIFIED_OUTPUT_DEVICES_ARE_NOT_GROUPABLE = typing___cast('ProtocolMessage.ErrorCode', 33)
+    THE_SPECIFIED_OUTPUT_CONTEXT_DOES_NOT_SUPPORT_ADDING_MORE_THAN_ONE_OUTPUT_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 34)
+    COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 35)
+    ENDPOINT_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 36)
+    OUTPUT_DEVICE_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 37)
+    CODER_MUST_SUPPORT_KEY_VALUE_CODING = typing___cast('ProtocolMessage.ErrorCode', 38)
+    COULD_NOT_FIND_THE_GIVEN_OUTPUTDEVICE = typing___cast('ProtocolMessage.ErrorCode', 39)
+    FAILED_TO_CONNECT_TO_REMOTE_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 100)
+    AUTHENTICATION_TOKEN_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 101)
+    RECORDING_SESSION_IS_ALREADY_IN_PROGRESS_ON_THIS_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 102)
+    THE_DEVICE_IS_NOT_CURRENTLY_RECORDING = typing___cast('ProtocolMessage.ErrorCode', 103)
+    THE_CLIENT_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 104)
+    THE_SERVER_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 105)
+    THE_CONNECTION_HAS_BEEN_CANCELLED_BY_THE_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 106)
+    PAIRING_FUNCTIONALITY_IS_LOCKED_DUE_TO_SECURITY_REASONS = typing___cast('ProtocolMessage.ErrorCode', 107)
+    THE_CLIENTS_OPERATING_SYSTEM_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 108)
+    THE_CLIENTS_APPLICATION_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 109)
+    THE_DEVICE_IS_NOT_PAIRED = typing___cast('ProtocolMessage.ErrorCode', 110)
+    THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_THE_USER_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 111)
+    THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_A_TIMEOUT_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 112)
+    THE_CONNECTION_TIMEDOUT = typing___cast('ProtocolMessage.ErrorCode', 113)
+    PAIRING_WITH_THIS_DEVICE_IS_BLOCKED = typing___cast('ProtocolMessage.ErrorCode', 114)
+    THE_DEVICE_IS_GOING_TO_SLEEP = typing___cast('ProtocolMessage.ErrorCode', 115)
+    CONNECTION_BLOCKED_BY_SERVER = typing___cast('ProtocolMessage.ErrorCode', 116)
+    MRAVENDPOINT_WAS_DEALLOCATED_WHILE_WAITING_FOR_DEVICE_TO_CONNECT = typing___cast('ProtocolMessage.ErrorCode', 117)
+    OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_NO_LONGER_BE_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 200)
+    OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_BECOME_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 201)
+    OUTPUT_CONTEXT_MODIFICATION_REQUESTED_NO_TOPOLOGY_CHANGE = typing___cast('ProtocolMessage.ErrorCode', 202)
+    UNKNOWN_ERROR = typing___cast('ProtocolMessage.ErrorCode', 299)
+
     class Type(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
@@ -149,7 +284,7 @@ class ProtocolMessage(google___protobuf___message___Message):
     type = ... # type: ProtocolMessage.Type
     identifier = ... # type: typing___Text
     authenticationToken = ... # type: typing___Text
-    errorCode = ... # type: builtin___int
+    errorCode = ... # type: ProtocolMessage.ErrorCode
     timestamp = ... # type: builtin___int
 
     def __init__(self,
@@ -157,7 +292,7 @@ class ProtocolMessage(google___protobuf___message___Message):
         type : typing___Optional[ProtocolMessage.Type] = None,
         identifier : typing___Optional[typing___Text] = None,
         authenticationToken : typing___Optional[typing___Text] = None,
-        errorCode : typing___Optional[builtin___int] = None,
+        errorCode : typing___Optional[ProtocolMessage.ErrorCode] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
