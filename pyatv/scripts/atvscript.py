@@ -7,6 +7,7 @@ import json
 import asyncio
 import logging
 import argparse
+import datetime
 from enum import Enum
 
 from pyatv import connect, const, scan
@@ -92,7 +93,8 @@ class DevicePrinter(DeviceListener):
 
 def output(success: bool, error=None, exception=None, values=None):
     """Produce output in intermediate format before conversion."""
-    output = {"result": "success" if success else "failure"}
+    now = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat()
+    output = {"result": "success" if success else "failure", "datetime": str(now)}
     if error:
         output["error"] = error
     if exception:

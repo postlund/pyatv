@@ -13,7 +13,7 @@ from aiohttp.test_utils import AioHTTPTestCase
 import pyatv
 from pyatv.const import Protocol
 from tests import fake_udns, zeroconf_stub
-from tests.utils import stub_sleep
+from tests.utils import stub_sleep, faketime
 from tests.fake_device import FakeAppleTV
 
 
@@ -113,7 +113,8 @@ class ScriptTest(AioHTTPTestCase):
         with capture_output(argv, inputs) as (out, err):
             udns_port = str(self.fake_udns.port)
             with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port}):
-                module = import_module(f"pyatv.scripts.{script}")
-                self.retcode = await module.appstart(self.loop)
-                self.stdout = out.getvalue()
-                self.stderr = err.getvalue()
+                with faketime("pyatv", 0):
+                    module = import_module(f"pyatv.scripts.{script}")
+                    self.retcode = await module.appstart(self.loop)
+                    self.stdout = out.getvalue()
+                    self.stderr = err.getvalue()
