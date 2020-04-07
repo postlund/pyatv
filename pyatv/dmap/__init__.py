@@ -268,6 +268,20 @@ class DmapRemoteControl(RemoteControl):
         """Wake up the device."""
         raise exceptions.NotSupportedError()
 
+    async def skip_forward(self) -> None:
+        """Skip forward a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
+    async def skip_backward(self) -> None:
+        """Skip backwards a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
     def set_position(self, pos):
         """Seek in the current playing media."""
         time_in_ms = int(pos) * 1000

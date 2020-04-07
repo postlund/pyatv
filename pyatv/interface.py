@@ -291,6 +291,26 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
     @abstractmethod
+    @feature(
+        36, "SkipForward", "Skip forward a time interval.",
+    )
+    def skip_forward(self) -> None:
+        """Skip forward a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    @feature(37, "SkipBackward", "Skip backwards a time interval.")
+    def skip_backward(self) -> None:
+        """Skip backwards a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
     @feature(19, "SetPosition", "Seek to position.")
     def set_position(self, pos) -> None:
         """Seek in the current playing media."""

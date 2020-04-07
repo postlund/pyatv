@@ -177,6 +177,8 @@ link_group: api
 <li><code><a title="pyatv.interface.RemoteControl.set_position" href="#pyatv.interface.RemoteControl.set_position">set_position</a></code></li>
 <li><code><a title="pyatv.interface.RemoteControl.set_repeat" href="#pyatv.interface.RemoteControl.set_repeat">set_repeat</a></code></li>
 <li><code><a title="pyatv.interface.RemoteControl.set_shuffle" href="#pyatv.interface.RemoteControl.set_shuffle">set_shuffle</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.skip_backward" href="#pyatv.interface.RemoteControl.skip_backward">skip_backward</a></code></li>
+<li><code><a title="pyatv.interface.RemoteControl.skip_forward" href="#pyatv.interface.RemoteControl.skip_forward">skip_forward</a></code></li>
 <li><code><a title="pyatv.interface.RemoteControl.stop" href="#pyatv.interface.RemoteControl.stop">stop</a></code></li>
 <li><code><a title="pyatv.interface.RemoteControl.suspend" href="#pyatv.interface.RemoteControl.suspend">suspend</a></code></li>
 <li><code><a title="pyatv.interface.RemoteControl.top_menu" href="#pyatv.interface.RemoteControl.top_menu">top_menu</a></code></li>
@@ -498,6 +500,26 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
     @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
     def wakeup(self) -&gt; None:
         &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    @feature(
+        36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+    )
+    def skip_forward(self) -&gt; None:
+        &#34;&#34;&#34;Skip forward a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        &#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
+    def skip_backward(self) -&gt; None:
+        &#34;&#34;&#34;Skip backwards a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
@@ -2958,6 +2980,26 @@ def stop(self) -&gt; None:
         raise exceptions.NotSupportedError()
 
     @abstractmethod
+    @feature(
+        36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+    )
+    def skip_forward(self) -&gt; None:
+        &#34;&#34;&#34;Skip forward a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        &#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
+    def skip_backward(self) -&gt; None:
+        &#34;&#34;&#34;Skip backwards a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        &#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
     @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
     def set_position(self, pos) -&gt; None:
         &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
@@ -3223,6 +3265,48 @@ def set_repeat(self, repeat_state) -&gt; None:
 @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
 def set_shuffle(self, shuffle_state) -&gt; None:
     &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.RemoteControl.skip_backward"><code class="name flex">
+<span>def <span class="ident">skip_backward</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Skip backwards a time interval.</p>
+<p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+@feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
+def skip_backward(self) -&gt; None:
+    &#34;&#34;&#34;Skip backwards a time interval.
+
+    Skip interval is typically 15-30s, but is decided by the app.
+    &#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.RemoteControl.skip_forward"><code class="name flex">
+<span>def <span class="ident">skip_forward</span></span>(<span>self) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Skip forward a time interval.</p>
+<p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+@feature(
+    36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+)
+def skip_forward(self) -&gt; None:
+    &#34;&#34;&#34;Skip forward a time interval.
+
+    Skip interval is typically 15-30s, but is decided by the app.
+    &#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
