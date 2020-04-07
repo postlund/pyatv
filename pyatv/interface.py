@@ -243,7 +243,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(11, "Menu", "Go back to previos menu.")
+    @feature(11, "Menu", "Go back to previous menu.")
     def menu(self) -> None:
         """Press key menu."""
         raise exceptions.NotSupportedError()

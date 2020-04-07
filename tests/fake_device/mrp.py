@@ -426,7 +426,7 @@ class FakeMrpUseCases:
         self.state = state
 
     def change_volume_control(self, available):
-        """Change volume control availaility."""
+        """Change volume control availability."""
         self.state.volume_control(available)
 
     def change_artwork(self, artwork, mimetype, identifier="artwork"):

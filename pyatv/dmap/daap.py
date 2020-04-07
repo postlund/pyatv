@@ -74,7 +74,7 @@ def ms_to_s(time):
 class DaapRequester:
     """Helper class that makes it easy to perform DAAP requests.
 
-    It will automatically do login and other necesarry book-keeping.
+    It will automatically do login and other necessary book-keeping.
     """
 
     def __init__(self, http, login_id):
@@ -86,7 +86,7 @@ class DaapRequester:
     async def login(self):
         """Login to Apple TV using specified login id."""
         # Do not use session.get_data(...) in login as that would end up in
-        # an infinte loop.
+        # an infinite loop.
         def _login_request():
             return self.http.get_data(
                 self._mkurl("login?[AUTH]&hasFP=1", session=False, login_id=True),

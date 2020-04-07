@@ -23,7 +23,7 @@ async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
 
 **identifier:** filter to scan for *one* particular device
 
-**protocol:** filter fo scan for devices with a particular protocol
+**protocol:** filter for devices with a particular protocol
 (`Protocol.DMAP`, `Protocol.MRP` or `Protocol.AirPlay`)
 
 **hosts:** list of hosts to specifically scan for, e.g. `['10.0.0.1', '10.0.0.2']`

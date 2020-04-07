@@ -14,7 +14,7 @@ via callbacks using a `listener`.
 
 The push update API is based on a regular callback interface. When playstatus
 information is available, a method called ``playstatus_update`` is called.
-Similarily, ``playstatus_error`` is called if an error occur. See the
+Similarly, ``playstatus_error`` is called if an error occur. See the
 following example:
 
 ```python
@@ -33,7 +33,7 @@ atv.push_updater.start()
 ```
 
 Assuming the connection to the device is still active, push updates will
-continue to be delivered after an error has happened. The paramater
+continue to be delivered after an error has happened. The parameter
 `initial_delay` to `start` specifies the delay that should be used before
 "trying to deliver updates again", but it might also be ignored if it is
 deemed not necessary. The reason for its existence is purly to provide a
@@ -64,7 +64,7 @@ atv.listener = DeviceListener()
 A small note here about this API. For `MRP` this works fine as that protocol
 is connection oriented. It's another case for `DMAP`, since that protocol is
 request based. For now, this interface is implemented by the push updates
-API (to be clear: for `DMAP`). So when the push updates API failes to establish
+API (to be clear: for `DMAP`). So when the push updates API fails to establish
 a connection, the callbacks in this interface will be called.
 
 ## Power State Updates

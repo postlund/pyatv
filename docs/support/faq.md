@@ -14,7 +14,7 @@ This page tries to answer some common questions.
 
 See [Troubleshooting](../troubleshooting/) for some hints on locating the issue.
 
-### Q2. My Apple TV turns on everytime I send a command with atvremote (it turns on my TV, receiver, etc). How do I disable that?
+### Q2. My Apple TV turns on every time I send a command with atvremote (it turns on my TV, receiver, etc). How do I disable that?
 
 You can't. The device will turn itself on whenever a request is made to it
 (and of course `atvremote` does that). It is how Apple has designed it. The only

@@ -64,10 +64,10 @@ class AirPlayAuthTest(AioHTTPTestCase):
         handler = srp.SRPAuthHandler()
         handler.initialize(INVALID_AUTH_KEY)
 
-        auther = DeviceAuthenticator(http, handler)
-        await auther.start_authentication()
+        authenticator = DeviceAuthenticator(http, handler)
+        await authenticator.start_authentication()
         with self.assertRaises(AuthenticationError):
-            await auther.finish_authentication(DEVICE_IDENTIFIER, DEVICE_PIN)
+            await authenticator.finish_authentication(DEVICE_IDENTIFIER, DEVICE_PIN)
 
     @unittest_run_loop
     async def test_auth_failed(self):
@@ -77,8 +77,8 @@ class AirPlayAuthTest(AioHTTPTestCase):
         handler = srp.SRPAuthHandler()
         handler.initialize(binascii.unhexlify(DEVICE_AUTH_KEY))
 
-        auther = DeviceAuthenticator(http, handler)
-        await auther.start_authentication()
+        authenticator = DeviceAuthenticator(http, handler)
+        await authenticator.start_authentication()
         self.assertTrue(
-            (await auther.finish_authentication(DEVICE_IDENTIFIER, DEVICE_PIN))
+            (await authenticator.finish_authentication(DEVICE_IDENTIFIER, DEVICE_PIN))
         )

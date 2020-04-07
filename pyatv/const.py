@@ -193,7 +193,7 @@ class FeatureName(Enum):
     """Select current option."""
 
     Menu = 11
-    """Go back to previos menu."""
+    """Go back to previous menu."""
 
     VolumeUp = 12
     """Increase volume."""

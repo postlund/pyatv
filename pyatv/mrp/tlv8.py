@@ -23,7 +23,7 @@ def read_tlv(data):
     """Parse TLV8 bytes into a dict.
 
     If value is larger than 255 bytes, it is split up in multiple chunks. So
-    the same tag might occurr several times.
+    the same tag might occur several times.
     """
 
     def _parse(data, pos, size, result=None):

@@ -62,7 +62,7 @@ message CommandInfo {
   }
 
   enum ShuffleMode {
-    Unkown = 0;
+    Unknown = 0;
     Off = 1;
     Albums = 2;
     Songs = 3;

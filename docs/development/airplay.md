@@ -26,11 +26,11 @@ to do this again. The actual feature has been available for a while but as
 opt-in, so it would have to be explicitly enabled. Now it is enabled by default
 and cannot be disabled. Devices not running tvOS (e.g. Apple TV 2nd and 3rd
 generation) are not affected, even though device authentication can be enabled
-on theses devices as well.
+on these devices as well.
 
 The device authentication process is based on the *Secure Remote Password*
 protocol (SRP), with slight modifications. All the reverse engineering required
-for this process was made by funtax (GitHub username) and has merly been ported
+for this process was made by funtax (GitHub username) and has merely been ported
 to python for usage in this library. Please see references at bottom of page
 for reference implementation.
 

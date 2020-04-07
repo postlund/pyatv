@@ -86,7 +86,7 @@ class BaseDmapAppleTV:
     """Common protocol logic used to interact with an Apple TV."""
 
     def __init__(self, requester):
-        """Initialize a new Apple TV base implemenation."""
+        """Initialize a new Apple TV base implementation."""
         self.daap = requester
         self.playstatus_revision = 0
         self.latest_playing = None
