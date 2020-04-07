@@ -229,6 +229,20 @@ class MrpRemoteControl(RemoteControl):
         """Wake up the device."""
         await self._press_key("wakeup")
 
+    async def skip_forward(self) -> None:
+        """Skip forward a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
+    async def skip_backward(self) -> None:
+        """Skip backwards a time interval.
+
+        Skip interval is typically 15-30s, but is decided by the app.
+        """
+        raise exceptions.NotSupportedError()
+
     async def set_position(self, pos):
         """Seek in the current playing media."""
         await self.protocol.send_and_receive(messages.seek_to_position(pos))

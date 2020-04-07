@@ -66,6 +66,8 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.SetRepeat" href="#pyatv.const.FeatureName.SetRepeat">SetRepeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetShuffle" href="#pyatv.const.FeatureName.SetShuffle">SetShuffle</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Shuffle" href="#pyatv.const.FeatureName.Shuffle">Shuffle</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SkipBackward" href="#pyatv.const.FeatureName.SkipBackward">SkipBackward</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SkipForward" href="#pyatv.const.FeatureName.SkipForward">SkipForward</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Stop" href="#pyatv.const.FeatureName.Stop">Stop</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Suspend" href="#pyatv.const.FeatureName.Suspend">Suspend</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Title" href="#pyatv.const.FeatureName.Title">Title</a></code></li>
@@ -369,6 +371,12 @@ class FeatureName(Enum):
     WakeUp = 18
     &#34;&#34;&#34;Wake up device (deprecated; use Power.turn_on).&#34;&#34;&#34;
 
+    SkipForward = 36
+    &#34;&#34;&#34;Skip forward a time interval.&#34;&#34;&#34;
+
+    SkipBackward = 37
+    &#34;&#34;&#34;Skip backwards a time interval.&#34;&#34;&#34;
+
     SetPosition = 19
     &#34;&#34;&#34;Seek to position.&#34;&#34;&#34;
 
@@ -619,6 +627,12 @@ class FeatureName(Enum):
     WakeUp = 18
     &#34;&#34;&#34;Wake up device (deprecated; use Power.turn_on).&#34;&#34;&#34;
 
+    SkipForward = 36
+    &#34;&#34;&#34;Skip forward a time interval.&#34;&#34;&#34;
+
+    SkipBackward = 37
+    &#34;&#34;&#34;Skip backwards a time interval.&#34;&#34;&#34;
+
     SetPosition = 19
     &#34;&#34;&#34;Seek to position.&#34;&#34;&#34;
 
@@ -775,6 +789,14 @@ class FeatureName(Enum):
 <dt id="pyatv.const.FeatureName.Shuffle"><code class="name">var <span class="ident">Shuffle</span></code></dt>
 <dd>
 <section class="desc"><p>Shuffle stat.e</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SkipBackward"><code class="name">var <span class="ident">SkipBackward</span></code></dt>
+<dd>
+<section class="desc"><p>Skip backwards a time interval.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SkipForward"><code class="name">var <span class="ident">SkipForward</span></code></dt>
+<dd>
+<section class="desc"><p>Skip forward a time interval.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.Stop"><code class="name">var <span class="ident">Stop</span></code></dt>
 <dd>
