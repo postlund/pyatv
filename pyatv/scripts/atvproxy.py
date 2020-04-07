@@ -69,7 +69,6 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         """Initialize a new instance of ProxyMrpAppleTV."""
         super().__init__(self, DEVICE_NAME)
         self.loop = loop
-        self.auther = MrpServerAuth(self, DEVICE_NAME)
         self.buffer = b""
         self.transport = None
         self.chacha = None

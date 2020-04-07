@@ -21,10 +21,10 @@ the following keys pre-defined keys:
 
 | Key | Meaning |
 | --- | ------- |
-| result | `success` if command was sucessful, else `failure`.
-| datetime | Date and time (ISO8601) when event ocurred (was printed), e.g. 2020-04-06T18:51:04.758569+02:00.
-| error | An error occured and this is a well defined string representing the error. Values: `device_not_found`, `unsupported_command`.
-| exception | If an unexpected exception ocurred, this key contains the exception message.
+| result | `success` if command was successful, else `failure`.
+| datetime | Date and time (ISO8601) when event occurred (was printed), e.g. 2020-04-06T18:51:04.758569+02:00.
+| error | An error occurred and this is a well defined string representing the error. Values: `device_not_found`, `unsupported_command`.
+| exception | If an unexpected exception occurred, this key contains the exception message.
 
 `error` and `exception` will only be present if `result` is set to `failure`. Any
 additional keys not mentioned here are part of the command response.

@@ -404,7 +404,7 @@ class FakeDmapUseCases:
         self.state.playing = PlayingResponse(playstatus=1)
 
     def pairing_response(self, remote_name, expected_pairing_code):
-        """Reponse when a pairing request is made."""
+        """Response when a pairing request is made."""
         self.state.pairing_responses[remote_name] = expected_pairing_code
 
     async def act_on_bonjour_services(self, stubbed_zeroconf):

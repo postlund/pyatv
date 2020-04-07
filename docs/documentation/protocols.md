@@ -20,7 +20,7 @@ focus on the technical aspects used to implement DMAP/DACP/DAAP in pyatv.
 
 At its core, DMAP is basically a HTTP server (running on port 3689) that responds to specific
 commands and streams events back to the client. Data is requested using GET and POST with
-special URLs. Data in the responses is usually in a specic binary format, but depending on
+special URLs. Data in the responses is usually in a specific binary format, but depending on
 the request it can also be something else (like a PNG file for artwork). The
 binary protocol will be explained first, as that makes it easier to understand
 the requests.

@@ -124,7 +124,7 @@ class MrpProtocol:
 
         # Some messages will respond with the same identifier as used in the
         # corresponding request. Others will not and one example is the crypto
-        # message (for pairing). They will never include an identifer, but it
+        # message (for pairing). They will never include an identifier, but it
         # it is in turn only possible to have one of those message outstanding
         # at one time (i.e. it's not possible to mix up the responses). In
         # those cases, a "fake" identifier is used that includes the message
@@ -156,7 +156,7 @@ class MrpProtocol:
 
     def message_received(self, message, _):
         """Message was received from device."""
-        # If the message identifer is outstanding, then someone is
+        # If the message identifier is outstanding, then someone is
         # waiting for the respone so we save it here
         identifier = message.identifier or "type_" + str(message.type)
         if identifier in self._outstanding:

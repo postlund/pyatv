@@ -122,7 +122,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         with faketime("pyatv", 0):
             await self.playing(title="dummy")
 
-            # Trigger update of single item by chaging title
+            # Trigger update of single item by changing title
             self.usecase.change_metadata(title="foobar", identifier="id")
             playing = await self.playing(title="foobar")
 

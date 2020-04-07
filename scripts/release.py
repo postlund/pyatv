@@ -100,10 +100,10 @@ def update_version(version):
     _LOGGER.info("Updating with new version: %s", version)
 
     output = Path("pyatv/const.py").read_text()
-    splitted = version.split(".")
+    split = version.split(".")
     for i, component in enumerate(["MAJOR", "MINOR", "PATCH"]):
         output = re.sub(
-            "(" + component + "_VERSION =).*", '\\1 "' + splitted[i] + '"', output
+            "(" + component + "_VERSION =).*", '\\1 "' + split[i] + '"', output
         )
 
     with open("pyatv/const.py", "w") as wh:
@@ -111,7 +111,7 @@ def update_version(version):
 
 
 def generate_outputs():
-    """Generate ouput artifacts for pypi."""
+    """Generate output artifacts for pypi."""
     _LOGGER.info("Generating outputs")
     call("python3 setup.py sdist bdist_wheel", show_output=False)
 

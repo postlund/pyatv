@@ -44,9 +44,9 @@ def _api_modules():
 
     for mod in modules:
         for module_name, html in _recursive_htmls(mod):
-            splitted = module_name.split(".")
-            splitted[-1] = splitted[-1] + ".html"
-            output_file = os.path.join("docs", "api", *splitted)
+            split = module_name.split(".")
+            split[-1] = split[-1] + ".html"
+            output_file = os.path.join("docs", "api", *split)
             yield output_file, html
 
 

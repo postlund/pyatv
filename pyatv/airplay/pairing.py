@@ -26,7 +26,7 @@ class AirPlayPairingHandler(PairingHandler):
         self.http = net.HttpSession(
             session, "http://{0}:{1}/".format(config.address, self.service.port)
         )
-        self.auther = DeviceAuthenticator(self.http, self.srp)
+        self.authenticator = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
         self.srp.initialize(binascii.unhexlify(self.auth_data.seed))
         self.pin_code = None
@@ -56,7 +56,9 @@ class AirPlayPairingHandler(PairingHandler):
             "Starting AirPlay pairing with credentials %s", self.auth_data.credentials
         )
         self.pairing_complete = False
-        return error_handler(self.auther.start_authentication, exceptions.PairingError)
+        return error_handler(
+            self.authenticator.start_authentication, exceptions.PairingError
+        )
 
     async def finish(self):
         """Stop pairing process."""
@@ -64,7 +66,7 @@ class AirPlayPairingHandler(PairingHandler):
             raise exceptions.PairingError("no pin given")
 
         await error_handler(
-            self.auther.finish_authentication,
+            self.authenticator.finish_authentication,
             exceptions.PairingError,
             self.auth_data.identifier,
             self.pin_code,

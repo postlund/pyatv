@@ -453,7 +453,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
+    @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
     def menu(self) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -2910,7 +2910,7 @@ def stop(self) -&gt; None:
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
+    @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
     def menu(self) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -3060,7 +3060,7 @@ def left(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(11, &#34;Menu&#34;, &#34;Go back to previos menu.&#34;)
+@feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
 def menu(self) -&gt; None:
     &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>

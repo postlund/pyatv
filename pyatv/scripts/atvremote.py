@@ -222,7 +222,7 @@ class DeviceCommands:
                 break
 
             if command == "cli":
-                print("Command not availble here")
+                print("Command not available here")
                 continue
 
             await _handle_device_command(self.args, command, self.atv, self.loop)

@@ -18,7 +18,7 @@ This is to lower the amount of device calls needed. Artwork is retrieved
 separately.
 
 When using push updates, new updates are *pushed* from the Apple TV when
-someting of interest happens. The exact same data that is available when
+something of interest happens. The exact same data that is available when
 polling, is passed to a callback provided by the API user.
 
 Push updates are described further in the [Listeners](../listeners) section.

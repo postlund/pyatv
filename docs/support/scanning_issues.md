@@ -24,7 +24,7 @@ The latter two seems to be most common. Lets break them down.
 
 ## Timing issues
 
-Timing isssues can happen because `pyatv` only scans for a small period of time. By
+Timing issues can happen because `pyatv` only scans for a small period of time. By
 saying "scan", we actually mean sending out requests and waiting for responses. The
 wait time should be long enough to receive all responses but short enough to not be
 annoying to the user. Waiting five minutes for a scan to finish *is* annoying. By
