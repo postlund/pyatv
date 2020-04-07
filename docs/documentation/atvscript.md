@@ -22,11 +22,12 @@ the following keys pre-defined keys:
 | Key | Meaning |
 | --- | ------- |
 | result | `success` if command was sucessful, else `failure`.
+| datetime | Date and time (ISO8601) when event ocurred (was printed), e.g. 2020-04-06T18:51:04.758569+02:00.
 | error | An error occured and this is a well defined string representing the error. Values: `device_not_found`, `unsupported_command`.
 | exception | If an unexpected exception ocurred, this key contains the exception message.
 
 `error` and `exception` will only be present if `result` is set to `failure`. Any
-additional keys are part of the command response.
+additional keys not mentioned here are part of the command response.
 
 
 ## Specifying Device and Credentials
@@ -48,7 +49,8 @@ only be the requested device.
 
 ## Command Reference
 
-This section documents the supported commands.
+This section documents the supported commands. JSON output has been prettified for some
+commands to make them easier to read. One command response is *always* printed per line.
 
 ### Scanning
 
@@ -56,7 +58,53 @@ It is possible to scan for devices with the `scan` command:
 
 ```shell
 $ atvscript scan
-{"result": "success", "devices": [{"name": "Vardagsrum", "address": "10.0.10.81", "identifier": "xxx", "services": [{"protocol": "mrp", "port": 49152}, {"protocol": "airplay", "port": 7000}]}, {"name": "Apple\u00a0TV", "address": "10.0.10.123", "identifier": "xxx", "services": [{"protocol": "airplay", "port": 7000}, {"protocol": "dmap", "port": 3689}]}, {"name": "Proxy", "address": "10.0.10.254", "identifier": "xxx", "services": [{"protocol": "mrp", "port": 47531}]}]}
+{
+  "result": "success",
+  "datetime": "2020-04-06T18:51:04.758569+02:00",
+  "devices": [
+    {
+      "name": "Vardagsrum",
+      "address": "10.0.10.81",
+      "identifier": "xxx",
+      "services": [
+        {
+          "protocol": "mrp",
+          "port": 49152
+        },
+        {
+          "protocol": "airplay",
+          "port": 7000
+        }
+      ]
+    },
+    {
+      "name": "Apple TV",
+      "address": "10.0.10.123",
+      "identifier": "xxx",
+      "services": [
+        {
+          "protocol": "airplay",
+          "port": 7000
+        },
+        {
+          "protocol": "dmap",
+          "port": 3689
+        }
+      ]
+    },
+    {
+      "name": "Proxy",
+      "address": "10.0.10.254",
+      "identifier": "xxx",
+      "services": [
+        {
+          "protocol": "mrp",
+          "port": 47531
+        }
+      ]
+    }
+  ]
+}
 ```
 
 Scanning also respects the `--scan-hosts` (`-s`) flag, which is useful sometimes if scanning
@@ -64,7 +112,27 @@ is flaky:
 
 ```shell
 $ atvscript -s 10.0.10.81 scan
-{"result": "success", "devices": [{"name": "Vardagsrum", "address": "10.0.10.81", "identifier": "xxx", "services": [{"protocol": "mrp", "port": 49152}, {"protocol": "airplay", "port": 7000}]}]}
+{
+  "result": "success",
+  "datetime": "2020-04-06T18:51:04.758569+02:00",
+  "devices": [
+    {
+      "name": "Vardagsrum",
+      "address": "10.0.10.81",
+      "identifier": "xxx",
+      "services": [
+        {
+          "protocol": "mrp",
+          "port": 49152
+        },
+        {
+          "protocol": "airplay",
+          "port": 7000
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ### What is Playing
@@ -73,7 +141,23 @@ To get what is playing:
 
 ```shell
 $ atvscript -s 10.0.10.81 playing
-{"result": "success", "hash": "azyFEzFpSNOSGq9ZvcaX4A\u2206DcpumkUoRty+R098MQeIKA", "media_type": "music", "device_state": "paused", "title": "Ordinary World (Live)", "artist": "Duran Duran", "album": "From Mediterranea With Love - EP", "genre": "Rock", "total_time": 395, "position": 1, "shuffle": "off", "repeat": "off", "app": "Musik", "app_id": "com.apple.TVMusic"}
+{
+  "result": "success",
+  "datetime": "2020-04-06T18:51:04.758569+02:00",
+  "hash": "azyFEzFpSNOSGq9ZvcaX4A∆DcpumkUoRty+R098MQeIKA",
+  "media_type": "music",
+  "device_state": "paused",
+  "title": "Ordinary World (Live)",
+  "artist": "Duran Duran",
+  "album": "From Mediterranea With Love - EP",
+  "genre": "Rock",
+  "total_time": 395,
+  "position": 1,
+  "shuffle": "off",
+  "repeat": "off",
+  "app": "Musik",
+  "app_id": "com.apple.TVMusic"
+}
 ```
 
 Some of the fields, like `media_type` and `device_state` uses the names from their corresponding enum, but in lower case. Check out {% include api i="const.DeviceState" %} for instance to find valid values for `device_state`.
@@ -85,7 +169,7 @@ except for the ones beginning with `set_`:
 
 ```shell
 $ atvscript -s 10.0.10.81 menu
-{"result": "success", "command": "menu"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "command": "menu"}
 ```
 
 ### Push and Power Updates
@@ -94,12 +178,12 @@ Push and power updates are printed to the terminal as they happen:
 
 ```shell
 $ atvscript -s 10.0.10.81 push_updates
-{"result": "success", "power_state": "off"}
-{"result": "success", "hash": "azyFEzFpSNOSGq9ZvcaX4A\u2206DcpumkUoRty+R098MQeIKA", "media_type": "music", "device_state": "paused", "title": "Ordinary World (Live)", "artist": "Duran Duran", "album": "From Mediterranea With Love - EP", "genre": "Rock", "total_time": 395, "position": 1, "shuffle": "off", "repeat": "off", "app": "Musik", "app_id": "com.apple.TVMusic"}
-{"result": "success", "power_state": "on"}
-{"result": "success", "power_state": "off"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "off"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "hash": "azyFEzFpSNOSGq9ZvcaX4A\u2206DcpumkUoRty+R098MQeIKA", "media_type": "music", "device_state": "paused", "title": "Ordinary World (Live)", "artist": "Duran Duran", "album": "From Mediterranea With Love - EP", "genre": "Rock", "total_time": 395, "position": 1, "shuffle": "off", "repeat": "off", "app": "Musik", "app_id": "com.apple.TVMusic"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "on"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "off"}
 
-{"result": "success", "push_updates": "finished"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "push_updates": "finished"}
 ```
 
 Current power state is always printed as the first update.
@@ -113,18 +197,18 @@ due to device reboot or network issues. If this happens, `connection` will be se
 
 ```
 $ atvscript --id 6D797FD3-3538-427E-A47B-A32FC6CF3A69 push_updates
-{"result": "success", "power_state": "on"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "on"}
 ...
-{"result": "failure", "connection": "closed"}
+{"result": "failure", "datetime": "2020-04-06T18:51:04.758569+02:00", "connection": "closed"}
 ```
 
 In case of abnormal disconnection, `connection` will be set to `lost` and an exception will be
 included:
 
 ```
-{"result": "success", "power_state": "on"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "on"}
 ...
-{"result": "failure", "exception": "something bad happened", "connection": "closed"}
+{"result": "failure", "datetime": "2020-04-06T18:51:04.758569+02:00", "exception": "something bad happened", "connection": "closed"}
 ```
 
 The script will also exit (without requiring user interaction) with a non-zero exit code.
