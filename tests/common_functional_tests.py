@@ -485,3 +485,17 @@ class CommonFunctionalTests(AioHTTPTestCase):
         # In the future (after migrating to pytest fixtures), I will add a test where
         # AirPlay is not available.
         self.assertFeatures(FeatureState.Available, FeatureName.PlayUrl)
+
+    @unittest_run_loop
+    async def test_playing_immutable(self):
+        self.usecase.example_video()
+        playing = await self.playing(title="dummy")
+
+        # This is not allowed to modify "playing" instance above
+        self.usecase.example_music()
+        await self.playing(title="music")
+
+        # Not a conclusive check but enough to cover the basic idea
+        self.assertEqual(playing.title, "dummy")
+        self.assertEqual(playing.total_time, 123)
+        self.assertEqual(playing.position, 3)
