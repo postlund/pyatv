@@ -186,8 +186,11 @@ called `commands`, as it will present a list of available commands:
      - previous - Press key previous
      - right - Press key right
      - select - Press key select
-     - set_position - Seek in the current playing media - set_repeat - Change repeat mode
+     - set_position - Seek in the current playing media
+     - set_repeat - Change repeat state
      - set_shuffle - Change shuffle mode to on or off
+     - skip_backward - Skip backwards a time interval
+     - skip_forward - Skip forward a time interval
      - stop - Press key stop
      - suspend - Suspend the device
      - top_menu - Go to main menu (long press menu)
@@ -199,6 +202,7 @@ called `commands`, as it will present a list of available commands:
     Metadata commands:
      - app - Return information about current app playing something
      - artwork - Return artwork for what is currently playing (or None)
+     - artwork_id - Return a unique identifier for current artwork
      - device_id - Return a unique identifier for current device
      - playing - Return what is currently playing
 
@@ -210,10 +214,10 @@ called `commands`, as it will present a list of available commands:
     Playing commands:
      - album - Album of the currently playing song
      - artist - Artist of the currently playing song
+     - device_state - Device state, e.g. playing or paused
      - genre - Genre of the currently playing song
      - hash - Create a unique hash for what is currently playing
      - media_type - Type of media is currently playing, e.g. video, music
-     - device_state - Device state, e.g. playing or paused
      - position - Position in the playing media (seconds)
      - repeat - Repeat mode
      - shuffle - If shuffle is enabled or not
@@ -276,12 +280,12 @@ Perhaps see supported features:
     Down: Available
     Left: Available
     Right: Available
-    Play: Unavailable
-    PlayPause: Unavailable
-    Pause: Unavailable
-    Stop: Unavailable
-    Next: Unavailable
-    Previous: Unavailable
+    Play: Available
+    PlayPause: Available
+    Pause: Available
+    Stop: Available
+    Next: Available
+    Previous: Available
     Select: Available
     Menu: Available
     VolumeUp: Unknown
@@ -289,26 +293,31 @@ Perhaps see supported features:
     Home: Available
     HomeHold: Available
     TopMenu: Available
-    SetPosition: Unavailable
-    SetShuffle: Unavailable
-    SetRepeat: Unavailable
+    SkipForward: Unavailable
+    SkipBackward: Unavailable
+    SetPosition: Available
+    SetShuffle: Available
+    SetRepeat: Available
     Title: Available
     Artist: Available
     Album: Available
     Genre: Available
     TotalTime: Available
     Position: Available
-    Shuffle: Unavailable
-    Repeat: Unavailable
+    Shuffle: Available
+    Repeat: Available
     Artwork: Available
+    App: Available
     PlayUrl: Available
+    PowerState: Available
     TurnOn: Available
     TurnOff: Available
 
     Legend:
     -------
     Available: Supported by device and usable now
-    Unavailable: Supported by device but not usable nowUnknown: Supported by the device but availability not known
+    Unavailable: Supported by device but not usable now
+    Unknown: Supported by the device but availability not known
     Unsupported: Not supported by this device (or by pyatv)
 
 Show active app:
