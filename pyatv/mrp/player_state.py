@@ -3,6 +3,7 @@
 import math
 import asyncio
 import logging
+from copy import deepcopy
 
 from pyatv.mrp import protobuf
 from pyatv.mrp.protobuf import SetStateMessage_pb2
@@ -70,15 +71,17 @@ class PlayerState:
             self._playback_state = setstate.playbackState
 
         if setstate.HasField("supportedCommands"):
-            self.supported_commands = setstate.supportedCommands.supportedCommands
+            self.supported_commands = deepcopy(
+                setstate.supportedCommands.supportedCommands
+            )
 
         if setstate.HasField("playbackQueue"):
             queue = setstate.playbackQueue
-            self.items = queue.contentItems
+            self.items = deepcopy(queue.contentItems)
             self.location = queue.location
 
         if setstate.HasField("playerPath"):
-            self.client = setstate.playerPath.client
+            self.client = deepcopy(setstate.playerPath.client)
 
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
@@ -96,7 +99,7 @@ class PlayerState:
     def handle_update_client(self, msg):
         """Handle client updates."""
         _LOGGER.debug("Updated client")
-        self.client = msg.client
+        self.client = deepcopy(msg.client)
 
 
 class PlayerStateManager:  # pylint: disable=too-few-public-methods

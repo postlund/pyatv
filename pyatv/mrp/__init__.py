@@ -4,6 +4,7 @@ import math
 import logging
 import asyncio
 import datetime
+from copy import deepcopy
 from typing import Dict, List, Optional
 
 from aiohttp import ClientSession
@@ -435,7 +436,7 @@ class MrpMetadata(Metadata):
 
     async def playing(self):
         """Return what is currently playing."""
-        return MrpPlaying(self.psm.playing)
+        return MrpPlaying(deepcopy(self.psm.playing))
 
     @property
     def app(self) -> Optional[App]:
