@@ -236,6 +236,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.SetShuffle: CommandInfo_pb2.ChangeShuffleMode,
             FeatureName.Shuffle: CommandInfo_pb2.ChangeShuffleMode,
             FeatureName.Repeat: CommandInfo_pb2.ChangeRepeatMode,
+            FeatureName.SkipForward: CommandInfo_pb2.SkipForward,
+            FeatureName.SkipBackward: CommandInfo_pb2.SkipBackward,
         }
 
         # No supported commands by default
@@ -291,3 +293,31 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title="dummy2")
         await self.playing(title="dummy2")
         self.assertEqual(self.atv.metadata.app.name, APP_NAME)
+
+    @unittest_run_loop
+    async def test_skip_forward_backward(self):
+        self.usecase.example_video(
+            supported_commands=[
+                CommandInfo_pb2.SkipForward,
+                CommandInfo_pb2.SkipBackward,
+            ],
+            skip_time=12,
+        )
+
+        # Get initial position and use as base
+        prev_position = (await self.playing(title="dummy")).position
+
+        await self.atv.remote_control.skip_forward()
+        self.usecase.change_metadata(title="dummy2")
+        metadata = await self.playing(title="dummy2")
+        self.assertEqual(metadata.position, prev_position + 12)
+        prev_position = metadata.position
+
+        # Change skip time 8 to verify that we respect provided values
+        self.usecase.change_state(title="dummy3", skip_time=8)
+        metadata = await self.playing(title="dummy3")
+
+        await self.atv.remote_control.skip_backward()
+        self.usecase.change_metadata(title="dummy4")
+        metadata = await self.playing(title="dummy4")
+        self.assertEqual(metadata.position, prev_position - 8)

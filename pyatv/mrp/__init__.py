@@ -96,6 +96,8 @@ _FEATURE_COMMAND_MAP = {
     FeatureName.SetShuffle: CommandInfo_pb2.ChangeShuffleMode,
     FeatureName.Shuffle: CommandInfo_pb2.ChangeShuffleMode,
     FeatureName.Repeat: CommandInfo_pb2.ChangeRepeatMode,
+    FeatureName.SkipForward: CommandInfo_pb2.SkipForward,
+    FeatureName.SkipBackward: CommandInfo_pb2.SkipBackward,
 }  # type: Dict[FeatureName, CommandInfo_pb2.Command]
 
 # Features that are considered available if corresponding
@@ -119,9 +121,10 @@ def _cocoa_to_timestamp(time):
 class MrpRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, loop, protocol):
+    def __init__(self, loop, psm, protocol):
         """Initialize a new MrpRemoteControl."""
         self.loop = loop
+        self.psm = psm
         self.protocol = protocol
 
     async def _press_key(self, key, hold=False):
@@ -140,15 +143,19 @@ class MrpRemoteControl(RemoteControl):
             messages.send_hid_event(lookup[0], lookup[1], False)
         )
 
-    async def _send_command(self, command):
-        resp = await self.protocol.send_and_receive(messages.command(command))
+    async def _send_command(self, command, **kwargs):
+        resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
         inner = resp.inner()
 
         if inner.sendError == scr.SendError.NoError:
             return
 
+        print(scr.SendError.Name(inner.sendError))
         raise exceptions.CommandError(
-            f"Command {command} failed: {inner.sendError}, {inner.handlerReturnStatus}"
+            f"{CommandInfo_pb2.Command.Name(command)} failed: "
+            f"SendError={scr.SendError.Name(inner.sendError)}, "
+            "HandlerReturnStatus="
+            f"{scr.HandlerReturnStatus.Name(inner.handlerReturnStatus)}"
         )
 
     async def up(self):
@@ -234,14 +241,25 @@ class MrpRemoteControl(RemoteControl):
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        raise exceptions.NotSupportedError()
+        await self._skip_command(CommandInfo_pb2.SkipForward)
 
     async def skip_backward(self) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        raise exceptions.NotSupportedError()
+        await self._skip_command(CommandInfo_pb2.SkipBackward)
+
+    async def _skip_command(self, command) -> None:
+        info = self.psm.playing.command_info(command)
+
+        # Pick the first preferred interval for simplicity
+        if info and info.preferredIntervals:
+            skip_interval = info.preferredIntervals[0]
+        else:
+            skip_interval = 15  # Default value
+
+        await self._send_command(command, skipInterval=skip_interval)
 
     async def set_position(self, pos):
         """Seek in the current playing media."""
@@ -603,7 +621,7 @@ class MrpAppleTV(AppleTV):
         )
         self._psm = PlayerStateManager(self._protocol, loop)
 
-        self._mrp_remote = MrpRemoteControl(loop, self._protocol)
+        self._mrp_remote = MrpRemoteControl(loop, self._psm, self._protocol)
         self._mrp_metadata = MrpMetadata(self._protocol, self._psm, config.identifier)
         self._mrp_power = MrpPower(loop, self._protocol, self._mrp_remote)
         self._mrp_push_updater = MrpPushUpdater(loop, self._mrp_metadata, self._psm)
