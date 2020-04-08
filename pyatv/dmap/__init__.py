@@ -40,6 +40,10 @@ from pyatv.support import deprecated
 
 _LOGGER = logging.getLogger(__name__)
 
+# Skip forward/backwards isn't supported by the protocol so it is simulated by seeking
+# this many seconds forward/backwards in time
+_DEFAULT_SKIP_TIME = 10
+
 _PSU_CMD = "ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}"
 _ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]"
 _CTRL_PROMPT_CMD = "ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0"
@@ -67,6 +71,8 @@ _UNKNOWN_FEATURES = [
     FeatureName.SetRepeat,
     FeatureName.SetShuffle,
     FeatureName.Stop,
+    FeatureName.SkipForward,
+    FeatureName.SkipBackward,
 ]  # type: List[FeatureName]
 
 # Features that are considered available if corresponding field is present
@@ -273,14 +279,18 @@ class DmapRemoteControl(RemoteControl):
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        raise exceptions.NotSupportedError()
+        current_position = (await self.apple_tv.playstatus()).position
+        if current_position:
+            await self.set_position(current_position + _DEFAULT_SKIP_TIME)
 
     async def skip_backward(self) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        raise exceptions.NotSupportedError()
+        current_position = (await self.apple_tv.playstatus()).position
+        if current_position:
+            await self.set_position(current_position - _DEFAULT_SKIP_TIME)
 
     def set_position(self, pos):
         """Seek in the current playing media."""

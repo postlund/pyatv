@@ -43,6 +43,8 @@ HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
     "BBBB", b"Apple TV 2", "10.0.0.2", b"bbbb"
 )
 
+SKIP_TIME = 10
+
 
 class DummyPushListener:
     @staticmethod
@@ -234,6 +236,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.SetRepeat,
             FeatureName.SetShuffle,
             FeatureName.Stop,
+            FeatureName.SkipForward,  # Depends on SetPosition
+            FeatureName.SkipBackward,  # Depends on SetPosition
         )
 
     @unittest_run_loop
@@ -253,3 +257,18 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertFeatures(
             FeatureState.Available, FeatureName.Shuffle, FeatureName.Repeat,
         )
+
+    @unittest_run_loop
+    async def test_skip_forward_backward(self):
+        self.usecase.example_video()
+
+        prev_position = (await self.playing(title="dummy")).position
+
+        await self.atv.remote_control.skip_forward()
+        metadata = await self.playing()
+        self.assertEqual(metadata.position, prev_position + SKIP_TIME)
+        prev_position = metadata.position
+
+        await self.atv.remote_control.skip_backward()
+        metadata = await self.playing()
+        self.assertEqual(metadata.position, prev_position - SKIP_TIME)
