@@ -126,21 +126,23 @@ def send_hid_event(use_page, usage, down):
     return message
 
 
-def command(cmd):
+def command(cmd, **kwargs):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_MESSAGE)
     send_command = message.inner()
     send_command.command = cmd
+    for key, value in kwargs.items():
+        setattr(send_command.options, key, value)
     return message
 
 
 def command_result(
-    identifier, sendError=protobuf.SendCommandResultMessage.SendError.NoError
+    identifier, send_error=protobuf.SendCommandResultMessage.SendError.NoError
 ):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE, identifier=identifier)
     inner = message.inner()
-    inner.sendError = sendError
+    inner.sendError = send_error
     inner.handlerReturnStatus = (
         protobuf.SendCommandResultMessage.HandlerReturnStatus.Success
     )

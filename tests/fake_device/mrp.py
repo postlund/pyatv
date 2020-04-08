@@ -10,6 +10,7 @@ from pyatv.support import log_protobuf
 from pyatv.mrp import chacha20, messages, protobuf, variant
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SetStateMessage as ssm
+from pyatv.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.mrp.server_auth import MrpServerAuth
 
 _LOGGER = logging.getLogger(__name__)
@@ -110,6 +111,13 @@ def _set_state_message(metadata, identifier):
             item.command = command
             item.enabled = True
 
+            if command in [
+                protobuf.CommandInfo_pb2.SkipForward,
+                protobuf.CommandInfo_pb2.SkipBackward,
+            ]:
+                if metadata.skip_time is not None:
+                    item.preferredIntervals.append(metadata.skip_time)
+
     if metadata.repeat and metadata.repeat != const.RepeatState.Off:
         cmd = inner.supportedCommands.supportedCommands.add()
         cmd.command = protobuf.CommandInfo_pb2.ChangeRepeatMode
@@ -148,6 +156,7 @@ class PlayingState:
         self.supported_commands = kwargs.get("supported_commands")
         self.artwork = kwargs.get("artwork")
         self.artwork_mimetype = kwargs.get("artwork_mimetype")
+        self.skip_time = kwargs.get("skip_time")
 
 
 class FakeMrpState:
@@ -393,9 +402,21 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             state.position = inner.options.playbackPosition
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Seek to position: %d", state.position)
+        elif inner.command == cmd.SkipForward:
+            state.position += int(inner.options.skipInterval)
+            self.state.update_state(self.state.active_player)
+            _LOGGER.debug("Skip forward %ds", inner.options.skipInterval)
+        elif inner.command == cmd.SkipBackward:
+            state.position -= int(inner.options.skipInterval)
+            self.state.update_state(self.state.active_player)
+            _LOGGER.debug("Skip backwards %d", inner.options.skipInterval)
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
-            self.send(messages.command_result(message.identifier, error_code=1234))
+            self.send(
+                messages.command_result(
+                    message.identifier, send_error=scr.SendError.NoCommandHandlers
+                )
+            )
             return
 
         self.send(messages.command_result(message.identifier))
@@ -449,6 +470,16 @@ class FakeMrpUseCases:
         change = PlayingState(**kwargs)
         self.state.item_update(change, PLAYER_IDENTIFIER)
 
+    def change_state(self, **kwargs):
+        """Update playing state and set SetStateMessage."""
+        metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
+
+        # Update saved metadata
+        for key, value in kwargs.items():
+            setattr(metadata, key, value)
+
+        self.state.update_state(PLAYER_IDENTIFIER)
+
     def update_client(self, display_name):
         """Update playing client with new information."""
         self.state.update_client(display_name, PLAYER_IDENTIFIER)
@@ -461,7 +492,9 @@ class FakeMrpUseCases:
         """Play some example video."""
         kwargs.setdefault("title", "dummy")
         kwargs.setdefault("paused", True)
-        self.video_playing(total_time=123, position=3, **kwargs)
+        kwargs.setdefault("position", 3)
+        kwargs.setdefault("total_time", 123)
+        self.video_playing(**kwargs)
 
     def video_playing(self, paused, title, total_time, position, **kwargs):
         """Call to change what is currently plaing to video."""
