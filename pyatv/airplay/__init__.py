@@ -1,5 +1,6 @@
 """Implementation of external API for AirPlay."""
 
+import os
 import re
 import logging
 import binascii
@@ -12,6 +13,7 @@ from pyatv.support import net
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.airplay.auth import AuthenticationVerifier
+from pyatv.airplay.server import StaticFileWebServer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +69,15 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         if not self.service:
             raise exceptions.NotSupportedError("AirPlay service is not available")
 
+        server = None
+
+        if os.path.exists(url):
+            _LOGGER.debug("URL %s is a local file, setting up web server", url)
+            server_address = net.get_local_address_reaching(self.config.address)
+            server = StaticFileWebServer(url, server_address)
+            await server.start()
+            url = server.file_address
+
         # This creates a new ClientSession every time something is played.
         # It is not recommended by aiohttp, but it is the only way not having
         # a dangling connection laying around. So it will have to do for now.
@@ -77,3 +88,5 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
             return await player.play_url(url, position)
         finally:
             await session.close()
+            if server:
+                await server.close()

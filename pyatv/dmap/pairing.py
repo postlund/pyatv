@@ -18,9 +18,7 @@ from pyatv.interface import PairingHandler
 _LOGGER = logging.getLogger(__name__)
 
 
-# TODO: netifaces is written in C and pylint does not find members
-# of that library correctly. Maybe there is a solution to this?
-# pylint: disable=no-member
+# Maybe replace with pyatv.net.get_local_address_reaching?
 def _get_private_ip_addresses():
     for iface in netifaces.interfaces():
         addresses = netifaces.ifaddresses(iface)

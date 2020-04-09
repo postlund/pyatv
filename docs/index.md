@@ -42,7 +42,7 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | List supported features                                         | Yes**    | Yes       | [Doc](development/features), {% include api i="interface.Features" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| AirPlay stream URL (including tvOS 10.2+)                       | Yes      | Yes       | [Doc](development/airplay), {% include api i="interface.Stream" %}
+| AirPlay stream URL (including local files)                      | Yes      | Yes       | [Doc](development/airplay), {% include api i="interface.Stream" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |

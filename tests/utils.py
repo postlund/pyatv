@@ -101,12 +101,3 @@ def faketime(module_name, *times):
             return getattr(datetime, attr)
 
     return FakeDatetime(list(times))
-
-
-def unused_port() -> int:
-    """Return a port that is unused on the current host."""
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]

@@ -1,8 +1,12 @@
 """Methods used to make GET/POST requests."""
 
+import socket
 import logging
 import binascii
+from ipaddress import IPv4Interface, IPv4Address
+from typing import Optional
 
+import netifaces
 from aiohttp import ClientSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,6 +25,23 @@ async def create_session(loop):
     session = ClientSession(loop=loop)
     setattr(session, "_pyatv", True)
     return session
+
+
+def unused_port() -> int:
+    """Return a port that is unused on the current host."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:
+    """Get address of a local interface within same subnet as provided address."""
+    for iface in netifaces.interfaces():
+        for addr in netifaces.ifaddresses(iface).get(netifaces.AF_INET, []):
+            iface = IPv4Interface(addr["addr"] + "/" + addr["netmask"])
+            if dest_ip in iface.network:
+                return iface.ip
+    return None
 
 
 class HttpSession:
