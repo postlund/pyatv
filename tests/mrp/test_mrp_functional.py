@@ -1,6 +1,7 @@
 """Functional tests using the API with a fake Apple TV."""
 
 import logging
+from ipaddress import IPv4Address
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
@@ -34,7 +35,7 @@ APP_NAME = "Demo App"
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def setUpAsync(self):
         await super().setUpAsync()
-        self.conf = AppleTV("127.0.0.1", "Test device")
+        self.conf = AppleTV(IPv4Address("127.0.0.1"), "Test device")
         self.conf.add_service(
             MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
         )

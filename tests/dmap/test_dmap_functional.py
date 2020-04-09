@@ -84,7 +84,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.airplay_service = AirPlayService(
             "airplay_id", self.server.port, DEVICE_CREDENTIALS
         )
-        self.conf = AppleTV("127.0.0.1", "Apple TV")
+        self.conf = AppleTV(ipaddress.IPv4Address("127.0.0.1"), "Apple TV")
         self.conf.add_service(self.dmap_service)
         self.conf.add_service(self.airplay_service)
         return await connect(self.conf, self.loop)

@@ -1,7 +1,8 @@
 """Common functional tests for all protocols."""
 
-import logging
 import asyncio
+import logging
+from pathlib import Path
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
@@ -27,6 +28,8 @@ ARTWORK_BYTES2 = b"4321"
 ARTWORK_MIMETYPE = "image/png"
 ARTWORK_ID = "artwork_id1"
 EXAMPLE_STREAM = "http://stream"
+
+LOCAL_FILE = str(Path(__file__).parent.joinpath("airplay", "testfile.txt"))
 
 
 async def poll(fn, **kwargs):
@@ -131,6 +134,22 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
         self.assertEqual(self.airplay_state.last_airplay_url, EXAMPLE_STREAM)
+
+    # This is not a very good test as it doesn't really test that much. Once I get
+    # around improving the AirPlay testing situation this should be improved.
+    @unittest_run_loop
+    async def test_play_local_file(self):
+        self.airplay_usecase.airplay_playback_idle()
+        self.airplay_usecase.airplay_playback_playing()
+        self.airplay_usecase.airplay_playback_idle()
+
+        await self.atv.stream.play_url(LOCAL_FILE)
+
+        self.assertRegex(
+            self.airplay_state.last_airplay_url, r"http://127.0.0.1:[0-9]+/testfile.txt"
+        )
+        self.assertEqual(self.airplay_state.last_airplay_start, 0)
+        self.assertIsNotNone(self.airplay_state.last_airplay_uuid)
 
     @unittest_run_loop
     async def test_button_up(self):

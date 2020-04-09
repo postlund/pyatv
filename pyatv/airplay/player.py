@@ -38,6 +38,8 @@ class AirPlayPlayer:
 
         retry = 0
         while retry < PLAY_RETRIES:
+            _LOGGER.debug("Starting to play %s", url)
+
             # pylint: disable=no-member
             _, status = await self.http.post_data(
                 "play",

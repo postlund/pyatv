@@ -9,6 +9,7 @@ from aiohttp import web
 
 from pyatv.const import ShuffleState, RepeatState
 from pyatv.dmap import parser, tags, tag_definitions
+from pyatv.support.net import unused_port
 from tests import utils
 
 _LOGGER = logging.getLogger(__name__)
@@ -126,7 +127,7 @@ class FakeDmapService:
 
     async def start(self, start_web_server: bool):
         if start_web_server:
-            self.port = utils.unused_port()
+            self.port = unused_port()
             self.runner = web.AppRunner(self.app)
             await self.runner.setup()
             site = web.TCPSite(self.runner, "0.0.0.0", self.port)
