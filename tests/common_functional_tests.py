@@ -222,7 +222,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_close_connection(self):
         self.atv.listener = DummyDeviceListener()
-        await self.atv.close()
+        self.atv.close()
 
         await asyncio.wait_for(self.atv.listener.closed_sem.acquire(), timeout=3.0)
 

@@ -12,6 +12,13 @@ and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request.
 
+## From 0.5.0 to 0.6.0
+
+### General Changes
+
+  * {% include api i="interface.AppleTV.close" %} has been changed to a
+    regular function instead of a coroutine.
+
 ## From 0.4.0 to 0.5.0
 
 ### General Changes

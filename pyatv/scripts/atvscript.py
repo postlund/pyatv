@@ -180,7 +180,7 @@ async def _handle_command(args, loop):
     try:
         return await _run_command(atv, args, loop)
     finally:
-        await atv.close()
+        atv.close()
 
 
 async def _run_command(atv, args, loop):

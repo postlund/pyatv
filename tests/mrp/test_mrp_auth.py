@@ -1,5 +1,7 @@
 """Functional authentication tests with fake MRP Apple TV."""
 
+import inspect
+
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
@@ -21,7 +23,10 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.conf.add_service(self.service)
 
     async def tearDownAsync(self):
-        await self.handle.close()
+        if inspect.iscoroutinefunction(self.handle):
+            await self.handle.close()
+        else:
+            self.handle.close()
         await super().tearDownAsync()
 
     async def get_application(self, loop=None):

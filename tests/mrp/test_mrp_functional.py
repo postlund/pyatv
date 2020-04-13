@@ -44,9 +44,9 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         )
         self.atv = await self.get_connected_device()
 
-    async def tearDownAsync(self):
-        await self.atv.close()
-        await super().tearDownAsync()
+    def tearDown(self):
+        self.atv.close()
+        super().tearDown()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)

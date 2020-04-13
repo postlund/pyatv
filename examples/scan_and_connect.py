@@ -26,7 +26,7 @@ async def print_what_is_playing(loop):
         print(playing)
     finally:
         # Do not forget to close
-        await atv.close()
+        atv.close()
 
 
 if __name__ == "__main__":
