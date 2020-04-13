@@ -47,12 +47,11 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
     obj.found = None
     obj.closed = False
 
-    async def _close():
+    def _close():
         obj.closed = True
 
     config = conf.AppleTV("address", "name")
     mock_device = MagicMock()
-    mock_device.close = _close
 
     mock_scan.append(config)
 
@@ -67,4 +66,4 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
     await helpers.auto_connect(found_handler)
 
     assert obj.found == mock_device
-    assert obj.closed
+    mock_device.close.assert_called_once()

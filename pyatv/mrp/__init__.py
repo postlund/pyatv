@@ -636,10 +636,10 @@ class MrpAppleTV(AppleTV):
         """
         await self._protocol.start()
 
-    async def close(self) -> None:
+    def close(self) -> None:
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
-            await self._session.close()
+            asyncio.ensure_future(self._session.close())
         self._protocol.stop()
 
     @property

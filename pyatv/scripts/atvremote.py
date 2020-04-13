@@ -550,7 +550,7 @@ async def _handle_commands(args, config, loop):
             if ret != 0:
                 return ret
     finally:
-        await atv.close()
+        atv.close()
 
     return 0
 

@@ -768,7 +768,7 @@ class AppleTV(ABC):
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    async def close(self) -> None:
+    def close(self) -> None:
         """Close connection and release allocated resources."""
         raise exceptions.NotSupportedError()
 

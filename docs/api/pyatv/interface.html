@@ -980,7 +980,7 @@ class AppleTV(ABC):
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    async def close(self) -&gt; None:
+    def close(self) -&gt; None:
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -1170,7 +1170,7 @@ def name(self) -&gt; Optional[str]:
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    async def close(self) -&gt; None:
+    def close(self) -&gt; None:
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -1366,7 +1366,7 @@ def stream(self) -&gt; Stream:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.AppleTV.close"><code class="name flex">
-<span>async def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
+<span>def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
@@ -1375,7 +1375,7 @@ def stream(self) -&gt; Stream:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-async def close(self) -&gt; None:
+def close(self) -&gt; None:
     &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>

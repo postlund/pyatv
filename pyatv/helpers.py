@@ -32,7 +32,7 @@ async def auto_connect(
             try:
                 await handler(atv)
             finally:
-                await atv.close()
+                atv.close()
         else:
             if not_found is not None:
                 await not_found()

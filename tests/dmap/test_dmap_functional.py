@@ -65,9 +65,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # for netifaces later
         pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
 
-    async def tearDownAsync(self):
-        await self.atv.close()
-        await super().tearDownAsync()
+    def tearDown(self):
+        self.atv.close()
+        super().tearDown()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)
@@ -122,7 +122,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
-        await self.atv.close()
+        self.atv.close()
         self.atv = await self.get_connected_device(PAIRING_GUID)
         await self.atv.connect()
 
@@ -173,7 +173,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         with self.assertRaises(exceptions.NotSupportedError):
             await atv.stream.play_url("http://123")
 
-        await atv.close()
+        atv.close()
 
     @unittest_run_loop
     async def test_unsupported_power_state(self):
