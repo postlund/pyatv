@@ -458,7 +458,6 @@ class MrpPower(Power):
         self.protocol = protocol
         self.remote = remote
         self.device_info = None
-        self.__listener = None
 
         self.protocol.add_listener(
             self._update_power_state, protobuf.DEVICE_INFO_UPDATE_MESSAGE
@@ -490,10 +489,7 @@ class MrpPower(Power):
 
         if new_state != old_state:
             _LOGGER.debug("Power state changed from %s to %s", old_state, new_state)
-            if self.listener:
-                self.loop.call_soon(
-                    self.listener.powerstate_update, old_state, new_state
-                )
+            self.loop.call_soon(self.listener.powerstate_update, old_state, new_state)
 
     @staticmethod
     def _get_power_state(device_info):
@@ -514,7 +510,6 @@ class MrpPushUpdater(PushUpdater):
         self.loop = loop
         self.metadata = metadata
         self.psm = psm
-        self.listener = None
 
     @property
     def active(self):

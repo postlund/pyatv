@@ -36,7 +36,6 @@ link_group: api
 <li><code><a title="pyatv.interface.AppleTV.connect" href="#pyatv.interface.AppleTV.connect">connect</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.device_info" href="#pyatv.interface.AppleTV.device_info">device_info</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.features" href="#pyatv.interface.AppleTV.features">features</a></code></li>
-<li><code><a title="pyatv.interface.AppleTV.listener" href="#pyatv.interface.AppleTV.listener">listener</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.metadata" href="#pyatv.interface.AppleTV.metadata">metadata</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.power" href="#pyatv.interface.AppleTV.power">power</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.push_updater" href="#pyatv.interface.AppleTV.push_updater">push_updater</a></code></li>
@@ -131,7 +130,6 @@ link_group: api
 <li>
 <h4><code><a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></h4>
 <ul class="">
-<li><code><a title="pyatv.interface.Power.listener" href="#pyatv.interface.Power.listener">listener</a></code></li>
 <li><code><a title="pyatv.interface.Power.power_state" href="#pyatv.interface.Power.power_state">power_state</a></code></li>
 <li><code><a title="pyatv.interface.Power.turn_off" href="#pyatv.interface.Power.turn_off">turn_off</a></code></li>
 <li><code><a title="pyatv.interface.Power.turn_on" href="#pyatv.interface.Power.turn_on">turn_on</a></code></li>
@@ -154,7 +152,6 @@ link_group: api
 <h4><code><a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.PushUpdater.active" href="#pyatv.interface.PushUpdater.active">active</a></code></li>
-<li><code><a title="pyatv.interface.PushUpdater.listener" href="#pyatv.interface.PushUpdater.listener">listener</a></code></li>
 <li><code><a title="pyatv.interface.PushUpdater.start" href="#pyatv.interface.PushUpdater.start">start</a></code></li>
 <li><code><a title="pyatv.interface.PushUpdater.stop" href="#pyatv.interface.PushUpdater.stop">stop</a></code></li>
 </ul>
@@ -189,6 +186,12 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.StateProducer.listener" href="#pyatv.interface.StateProducer.listener">listener</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.Stream.play_url" href="#pyatv.interface.Stream.play_url">play_url</a></code></li>
@@ -220,6 +223,7 @@ import re
 import inspect
 import hashlib
 from typing import Any, Dict, Optional, NamedTuple, Callable, TypeVar, Tuple
+import weakref
 
 from abc import ABC, abstractmethod
 
@@ -255,6 +259,54 @@ class FeatureInfo(NamedTuple):
 
     state: FeatureState
     options: Optional[Dict[str, object]] = {}
+
+
+class _ListenerProxy:
+    &#34;&#34;&#34;Proxy to call functions in a listener.
+
+    A proxy instance maintains a weak reference to a listener object and allows calling
+    functions in the listener. If no listener is set or the weak reference has expired,
+    a null-function (doing nothing) is returned so that nothing happens. This makes it
+    safe to call functions without having to check if either a listener has been set at
+    all or if the listener implements the called function.
+    &#34;&#34;&#34;
+
+    def __init__(self, listener):
+        &#34;&#34;&#34;Initialize a new ListenerProxy instance.&#34;&#34;&#34;
+        self.listener = listener
+
+    def __getattr__(self, attr):
+        &#34;&#34;&#34;Dynamically find target method in listener.&#34;&#34;&#34;
+        if self.listener is not None:
+            listener = self.listener()
+            if hasattr(listener, attr):
+                return getattr(listener, attr)
+
+        return lambda *args, **kwargs: None
+
+
+class StateProducer:
+    &#34;&#34;&#34;Base class for objects announcing state changes to a listener.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialize a new StateProducer instance.&#34;&#34;&#34;
+        self.__listener: Optional[weakref.ReferenceType[Any]] = None
+
+    @property
+    def listener(self):
+        &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
+        return _ListenerProxy(self.__listener)
+
+    @listener.setter
+    def listener(self, target) -&gt; None:
+        &#34;&#34;&#34;Change current listener object.
+
+        Set to None to remove active listener.
+        &#34;&#34;&#34;
+        if target is not None:
+            self.__listener = weakref.ref(target)
+        else:
+            self.__listener = None
 
 
 def feature(index: int, name: str, doc: str) -&gt; Callable[[ReturnType], ReturnType]:
@@ -748,36 +800,17 @@ class PushListener(ABC):
         &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;
 
 
-class PushUpdater(ABC):
-    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.&#34;&#34;&#34;
+class PushUpdater(ABC, StateProducer):
+    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
-        self.__listener: Optional[PushListener] = None
+    Listener interface: `pyatv.interface.PushListener`
+    &#34;&#34;&#34;
 
     @property
     @abstractmethod
     def active(self) -&gt; bool:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
-
-    @property
-    def listener(self) -&gt; Optional[PushListener]:
-        &#34;&#34;&#34;Object (PushUpdaterListener) that receives updates.&#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PushListener]) -&gt; None:
-        &#34;&#34;&#34;Object that receives updates.
-
-        This should be an object implementing two methods:
-        - playstatus_update(updater, playstatus)
-        - playstatus_error(updater, exception)
-
-        The first method is called when a new update happens and the second one
-        is called if an error occurs.
-        &#34;&#34;&#34;
-        self.__listener = listener
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
@@ -828,29 +861,11 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
         raise NotImplementedError()
 
 
-class Power(ABC):
-    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.&#34;&#34;&#34;
+class Power(ABC, StateProducer):
+    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new Power instance.&#34;&#34;&#34;
-        self.__listener: Optional[PowerListener] = None
-
-    @property
-    def listener(self) -&gt; Optional[PowerListener]:
-        &#34;&#34;&#34;Object receiving power state updates.
-
-        Must be an object conforming to PowerListener.
-        &#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PowerListener]) -&gt; None:
-        &#34;&#34;&#34;Object that receives updates.
-
-        This should be an object implementing method:
-        - powerstate_update(old_state, new_state)
-        &#34;&#34;&#34;
-        self.__listener = listener
+    Listener interface: `pyatv.interfaces.PowerListener`
+    &#34;&#34;&#34;
 
     @property  # type: ignore
     @abstractmethod
@@ -954,25 +969,11 @@ class Features(ABC):
         return features
 
 
-class AppleTV(ABC):
-    &#34;&#34;&#34;Base class representing an Apple TV.&#34;&#34;&#34;
+class AppleTV(ABC, StateProducer):
+    &#34;&#34;&#34;Base class representing an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self.__listener: Optional[DeviceListener] = None
-
-    @property
-    def listener(self) -&gt; Optional[DeviceListener]:
-        &#34;&#34;&#34;Object receiving generic device updates.
-
-        Must be an object conforming to DeviceListener.
-        &#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, target: Optional[DeviceListener]):
-        &#34;&#34;&#34;Change object receiving generic device updates.&#34;&#34;&#34;
-        self.__listener = target
+    Listener interface: `pyatv.interfaces.DeviceListener`
+    &#34;&#34;&#34;
 
     @abstractmethod
     async def connect(self) -&gt; None:
@@ -1139,30 +1140,17 @@ def name(self) -&gt; Optional[str]:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class representing an Apple TV.</p>
-<p>Initialize a new AppleTV.</p></section>
+<p>Listener interface: <code>pyatv.interfaces.DeviceListener</code></p>
+<p>Initialize a new StateProducer instance.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class AppleTV(ABC):
-    &#34;&#34;&#34;Base class representing an Apple TV.&#34;&#34;&#34;
+<pre><code class="python">class AppleTV(ABC, StateProducer):
+    &#34;&#34;&#34;Base class representing an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self.__listener: Optional[DeviceListener] = None
-
-    @property
-    def listener(self) -&gt; Optional[DeviceListener]:
-        &#34;&#34;&#34;Object receiving generic device updates.
-
-        Must be an object conforming to DeviceListener.
-        &#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, target: Optional[DeviceListener]):
-        &#34;&#34;&#34;Change object receiving generic device updates.&#34;&#34;&#34;
-        self.__listener = target
+    Listener interface: `pyatv.interfaces.DeviceListener`
+    &#34;&#34;&#34;
 
     @abstractmethod
     async def connect(self) -&gt; None:
@@ -1228,6 +1216,7 @@ def name(self) -&gt; Optional[str]:
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
+<li><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1262,23 +1251,6 @@ def device_info(self) -&gt; DeviceInfo:
 def features(self) -&gt; Features:
     &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
-</details>
-</dd>
-<dt id="pyatv.interface.AppleTV.listener"><code class="name">var <span class="ident">listener</span> -> Union[<a title="pyatv.interface.DeviceListener" href="#pyatv.interface.DeviceListener">DeviceListener</a>, NoneType]</code></dt>
-<dd>
-<section class="desc"><p>Object receiving generic device updates.</p>
-<p>Must be an object conforming to DeviceListener.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def listener(self) -&gt; Optional[DeviceListener]:
-    &#34;&#34;&#34;Object receiving generic device updates.
-
-    Must be an object conforming to DeviceListener.
-    &#34;&#34;&#34;
-    return self.__listener</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.metadata"><code class="name">var <span class="ident">metadata</span> -> <a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></dt>
@@ -1403,6 +1375,14 @@ async def connect(self) -&gt; None:
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.StateProducer.listener" href="#pyatv.interface.StateProducer.listener">listener</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="pyatv.interface.ArtworkInfo"><code class="flex name class">
 <span>class <span class="ident">ArtworkInfo</span></span>
@@ -2487,34 +2467,17 @@ def total_time(self) -&gt; int:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for retrieving power state from an Apple TV.</p>
-<p>Initialize a new Power instance.</p></section>
+<p>Listener interface: <code>pyatv.interfaces.PowerListener</code></p>
+<p>Initialize a new StateProducer instance.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Power(ABC):
-    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.&#34;&#34;&#34;
+<pre><code class="python">class Power(ABC, StateProducer):
+    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new Power instance.&#34;&#34;&#34;
-        self.__listener: Optional[PowerListener] = None
-
-    @property
-    def listener(self) -&gt; Optional[PowerListener]:
-        &#34;&#34;&#34;Object receiving power state updates.
-
-        Must be an object conforming to PowerListener.
-        &#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PowerListener]) -&gt; None:
-        &#34;&#34;&#34;Object that receives updates.
-
-        This should be an object implementing method:
-        - powerstate_update(old_state, new_state)
-        &#34;&#34;&#34;
-        self.__listener = listener
+    Listener interface: `pyatv.interfaces.PowerListener`
+    &#34;&#34;&#34;
 
     @property  # type: ignore
     @abstractmethod
@@ -2538,6 +2501,7 @@ def total_time(self) -&gt; int:
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
+<li><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -2546,23 +2510,6 @@ def total_time(self) -&gt; int:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.Power.listener"><code class="name">var <span class="ident">listener</span> -> Union[<a title="pyatv.interface.PowerListener" href="#pyatv.interface.PowerListener">PowerListener</a>, NoneType]</code></dt>
-<dd>
-<section class="desc"><p>Object receiving power state updates.</p>
-<p>Must be an object conforming to PowerListener.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def listener(self) -&gt; Optional[PowerListener]:
-    &#34;&#34;&#34;Object receiving power state updates.
-
-    Must be an object conforming to PowerListener.
-    &#34;&#34;&#34;
-    return self.__listener</code></pre>
-</details>
-</dd>
 <dt id="pyatv.interface.Power.power_state"><code class="name">var <span class="ident">power_state</span> -> <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a></code></dt>
 <dd>
 <section class="desc"><p>Return device power state.</p></section>
@@ -2614,6 +2561,14 @@ async def turn_on(self) -&gt; None:
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.StateProducer.listener" href="#pyatv.interface.StateProducer.listener">listener</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="pyatv.interface.PowerListener"><code class="flex name class">
 <span>class <span class="ident">PowerListener</span></span>
@@ -2729,41 +2684,23 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for push/async updates from an Apple TV.</p>
-<p>Initialize a new PushUpdater.</p></section>
+<p>Listener interface: <code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></p>
+<p>Initialize a new StateProducer instance.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class PushUpdater(ABC):
-    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.&#34;&#34;&#34;
+<pre><code class="python">class PushUpdater(ABC, StateProducer):
+    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.
 
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
-        self.__listener: Optional[PushListener] = None
+    Listener interface: `pyatv.interface.PushListener`
+    &#34;&#34;&#34;
 
     @property
     @abstractmethod
     def active(self) -&gt; bool:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
-
-    @property
-    def listener(self) -&gt; Optional[PushListener]:
-        &#34;&#34;&#34;Object (PushUpdaterListener) that receives updates.&#34;&#34;&#34;
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PushListener]) -&gt; None:
-        &#34;&#34;&#34;Object that receives updates.
-
-        This should be an object implementing two methods:
-        - playstatus_update(updater, playstatus)
-        - playstatus_error(updater, exception)
-
-        The first method is called when a new update happens and the second one
-        is called if an error occurs.
-        &#34;&#34;&#34;
-        self.__listener = listener
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
@@ -2781,6 +2718,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
+<li><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -2801,19 +2739,6 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 def active(self) -&gt; bool:
     &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
-</details>
-</dd>
-<dt id="pyatv.interface.PushUpdater.listener"><code class="name">var <span class="ident">listener</span> -> Union[<a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a>, NoneType]</code></dt>
-<dd>
-<section class="desc"><p>Object (PushUpdaterListener) that receives updates.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def listener(self) -&gt; Optional[PushListener]:
-    &#34;&#34;&#34;Object (PushUpdaterListener) that receives updates.&#34;&#34;&#34;
-    return self.__listener</code></pre>
 </details>
 </dd>
 </dl>
@@ -2854,6 +2779,14 @@ def stop(self) -&gt; None:
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.StateProducer.listener" href="#pyatv.interface.StateProducer.listener">listener</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="pyatv.interface.RemoteControl"><code class="flex name class">
 <span>class <span class="ident">RemoteControl</span></span>
@@ -3423,6 +3356,62 @@ async def volume_up(self) -&gt; None:
 async def wakeup(self) -&gt; None:
     &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.interface.StateProducer"><code class="flex name class">
+<span>class <span class="ident">StateProducer</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Base class for objects announcing state changes to a listener.</p>
+<p>Initialize a new StateProducer instance.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class StateProducer:
+    &#34;&#34;&#34;Base class for objects announcing state changes to a listener.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        &#34;&#34;&#34;Initialize a new StateProducer instance.&#34;&#34;&#34;
+        self.__listener: Optional[weakref.ReferenceType[Any]] = None
+
+    @property
+    def listener(self):
+        &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
+        return _ListenerProxy(self.__listener)
+
+    @listener.setter
+    def listener(self, target) -&gt; None:
+        &#34;&#34;&#34;Change current listener object.
+
+        Set to None to remove active listener.
+        &#34;&#34;&#34;
+        if target is not None:
+            self.__listener = weakref.ref(target)
+        else:
+            self.__listener = None</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></li>
+<li><a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></li>
+<li><a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.StateProducer.listener"><code class="name">var <span class="ident">listener</span></code></dt>
+<dd>
+<section class="desc"><p>Return current listener object.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def listener(self):
+    &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
+    return _ListenerProxy(self.__listener)</code></pre>
 </details>
 </dd>
 </dl>

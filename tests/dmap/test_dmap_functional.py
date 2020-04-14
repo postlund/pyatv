@@ -130,13 +130,15 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def test_connection_lost(self):
         self.usecase.server_closes_connection()
 
-        self.atv.listener = DummyDeviceListener()
-        self.atv.push_updater.listener = DummyPushListener()
+        device_listener = DummyDeviceListener()
+        push_listener = DummyPushListener()
+        self.atv.listener = device_listener
+        self.atv.push_updater.listener = push_listener
         self.atv.push_updater.start()
 
         # Callback is scheduled on the event loop, so a semaphore is used
         # to synchronize with the loop
-        await asyncio.wait_for(self.atv.listener.lost_sem.acquire(), timeout=3.0)
+        await asyncio.wait_for(device_listener.lost_sem.acquire(), timeout=3.0)
 
     @unittest_run_loop
     async def test_button_unsupported_raises(self):
