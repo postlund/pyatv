@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Tool modelled to be used for scripting."""
 
-import os
 import sys
 import json
 import asyncio
 import logging
 import argparse
 import datetime
+import traceback
 from enum import Enum
 
 from pyatv import connect, const, scan
@@ -68,10 +68,10 @@ class PowerPrinter(PowerListener):
 class DevicePrinter(DeviceListener):
     """Listen for generic device updates and print them."""
 
-    def __init__(self, formatter, waiter):
+    def __init__(self, formatter, abort_sem):
         """Initialize a new DeviceListener."""
         self.formatter = formatter
-        self.waiter = waiter
+        self.abort_sem = abort_sem
 
     def connection_lost(self, exception):
         """Call when unexpectedly being disconnected from device."""
@@ -81,14 +81,22 @@ class DevicePrinter(DeviceListener):
             ),
             flush=True,
         )
-        self.waiter.cancel()
+        self.abort_sem.release()
 
     def connection_closed(self):
         """Call when connection was (intentionally) closed."""
-        print(
-            self.formatter(output(False, values={"connection": "closed"})), flush=True
-        )
-        self.waiter.cancel()
+        print(self.formatter(output(True, values={"connection": "closed"})), flush=True)
+        self.abort_sem.release()
+
+
+async def wait_for_input(loop, abort_sem):
+    """Wait for user input (enter) or abort signal."""
+    reader = asyncio.StreamReader(loop=loop)
+    reader_protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
+    await asyncio.wait(
+        [reader.readline(), abort_sem.acquire()], return_when=asyncio.FIRST_COMPLETED
+    )
 
 
 def output(success: bool, error=None, exception=None, values=None):
@@ -99,6 +107,11 @@ def output(success: bool, error=None, exception=None, values=None):
         output["error"] = error
     if exception:
         output["exception"] = str(exception)
+        output["stacktrace"] = "".join(
+            traceback.format_exception(
+                type(exception), exception, exception.__traceback__
+            )
+        )
     if values:
         output.update(**values)
     return output
@@ -168,7 +181,7 @@ async def _autodiscover_device(args, loop):
     return apple_tv
 
 
-async def _handle_command(args, loop):
+async def _handle_command(args, abort_sem, loop):
     if args.command == "scan":
         return await _scan_devices(loop, args.scan_hosts)
 
@@ -178,20 +191,23 @@ async def _handle_command(args, loop):
 
     atv = await connect(config, loop, protocol=Protocol.MRP)
     try:
-        return await _run_command(atv, args, loop)
+        return await _run_command(atv, args, abort_sem, loop)
     finally:
         atv.close()
 
 
-async def _run_command(atv, args, loop):
+async def _run_command(atv, args, abort_sem, loop):
     if args.command == "playing":
         return output_playing(await atv.metadata.playing(), atv.metadata.app)
 
     if args.command == "push_updates":
-        waiter = loop.run_in_executor(None, sys.stdin.readline)
-        atv.power.listener = PowerPrinter(args.output)
-        atv.listener = DevicePrinter(args.output, waiter)
-        atv.push_updater.listener = PushPrinter(args.output, atv)
+        power_listener = PowerPrinter(args.output)
+        device_listener = DevicePrinter(args.output, abort_sem)
+        push_listener = PushPrinter(args.output, atv)
+
+        atv.power.listener = power_listener
+        atv.listener = device_listener
+        atv.push_updater.listener = push_listener
         atv.push_updater.start()
         print(
             args.output(
@@ -199,7 +215,7 @@ async def _run_command(atv, args, loop):
             ),
             flush=True,
         )
-        await waiter
+        await wait_for_input(loop, abort_sem)
         return output(True, values={"push_updates": "finished"})
 
     rc = retrieve_commands(RemoteControl)
@@ -259,9 +275,20 @@ async def appstart(loop):
     )
 
     args = parser.parse_args()
+    abort_sem = asyncio.Semaphore(0)
+
+    def _handle_exception(loop, context):
+        kwargs = {"error": context["message"]}
+        if "exception" in context:
+            kwargs["exception"] = context["exception"]
+
+        print(args.output(output(False, **kwargs)))
+        abort_sem.release()
+
+    loop.set_exception_handler(_handle_exception)
 
     try:
-        print(args.output(await _handle_command(args, loop)), flush=True)
+        print(args.output(await _handle_command(args, abort_sem, loop)), flush=True)
     except Exception as ex:
         print(args.output(output(False, exception=ex)), flush=True)
 
@@ -273,8 +300,6 @@ def main():
     loop = asyncio.get_event_loop()
     try:
         return loop.run_until_complete(appstart(loop))
-    except asyncio.CancelledError:
-        os._exit(1)  # This is not pretty but will work for now
     except KeyboardInterrupt:
         return 0
 
