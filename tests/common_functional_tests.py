@@ -221,7 +221,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_close_connection(self):
-        self.atv.listener = DummyDeviceListener()
+        listener = DummyDeviceListener()
+        self.atv.listener = listener
         self.atv.close()
 
         await asyncio.wait_for(self.atv.listener.closed_sem.acquire(), timeout=3.0)
@@ -398,7 +399,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         self.assertFalse(self.atv.push_updater.active)
 
-        self.atv.push_updater.listener = DummyPushListener()
+        listener = DummyPushListener()
+        self.atv.push_updater.listener = listener
         self.atv.push_updater.start()
         self.assertTrue(self.atv.push_updater.active)
 

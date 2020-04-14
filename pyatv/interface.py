@@ -8,6 +8,7 @@ import re
 import inspect
 import hashlib
 from typing import Any, Dict, Optional, NamedTuple, Callable, TypeVar, Tuple
+import weakref
 
 from abc import ABC, abstractmethod
 
@@ -43,6 +44,54 @@ class FeatureInfo(NamedTuple):
 
     state: FeatureState
     options: Optional[Dict[str, object]] = {}
+
+
+class _ListenerProxy:
+    """Proxy to call functions in a listener.
+
+    A proxy instance maintains a weak reference to a listener object and allows calling
+    functions in the listener. If no listener is set or the weak reference has expired,
+    a null-function (doing nothing) is returned so that nothing happens. This makes it
+    safe to call functions without having to check if either a listener has been set at
+    all or if the listener implements the called function.
+    """
+
+    def __init__(self, listener):
+        """Initialize a new ListenerProxy instance."""
+        self.listener = listener
+
+    def __getattr__(self, attr):
+        """Dynamically find target method in listener."""
+        if self.listener is not None:
+            listener = self.listener()
+            if hasattr(listener, attr):
+                return getattr(listener, attr)
+
+        return lambda *args, **kwargs: None
+
+
+class StateProducer:
+    """Base class for objects announcing state changes to a listener."""
+
+    def __init__(self) -> None:
+        """Initialize a new StateProducer instance."""
+        self.__listener: Optional[weakref.ReferenceType[Any]] = None
+
+    @property
+    def listener(self):
+        """Return current listener object."""
+        return _ListenerProxy(self.__listener)
+
+    @listener.setter
+    def listener(self, target) -> None:
+        """Change current listener object.
+
+        Set to None to remove active listener.
+        """
+        if target is not None:
+            self.__listener = weakref.ref(target)
+        else:
+            self.__listener = None
 
 
 def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnType]:
@@ -536,36 +585,17 @@ class PushListener(ABC):
         """Inform about an error when updating play status."""
 
 
-class PushUpdater(ABC):
-    """Base class for push/async updates from an Apple TV."""
+class PushUpdater(ABC, StateProducer):
+    """Base class for push/async updates from an Apple TV.
 
-    def __init__(self) -> None:
-        """Initialize a new PushUpdater."""
-        self.__listener: Optional[PushListener] = None
+    Listener interface: `pyatv.interface.PushListener`
+    """
 
     @property
     @abstractmethod
     def active(self) -> bool:
         """Return if push updater has been started."""
         raise exceptions.NotSupportedError()
-
-    @property
-    def listener(self) -> Optional[PushListener]:
-        """Object (PushUpdaterListener) that receives updates."""
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PushListener]) -> None:
-        """Object that receives updates.
-
-        This should be an object implementing two methods:
-        - playstatus_update(updater, playstatus)
-        - playstatus_error(updater, exception)
-
-        The first method is called when a new update happens and the second one
-        is called if an error occurs.
-        """
-        self.__listener = listener
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -> None:
@@ -616,29 +646,11 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
         raise NotImplementedError()
 
 
-class Power(ABC):
-    """Base class for retrieving power state from an Apple TV."""
+class Power(ABC, StateProducer):
+    """Base class for retrieving power state from an Apple TV.
 
-    def __init__(self) -> None:
-        """Initialize a new Power instance."""
-        self.__listener: Optional[PowerListener] = None
-
-    @property
-    def listener(self) -> Optional[PowerListener]:
-        """Object receiving power state updates.
-
-        Must be an object conforming to PowerListener.
-        """
-        return self.__listener
-
-    @listener.setter
-    def listener(self, listener: Optional[PowerListener]) -> None:
-        """Object that receives updates.
-
-        This should be an object implementing method:
-        - powerstate_update(old_state, new_state)
-        """
-        self.__listener = listener
+    Listener interface: `pyatv.interfaces.PowerListener`
+    """
 
     @property  # type: ignore
     @abstractmethod
@@ -742,25 +754,11 @@ class Features(ABC):
         return features
 
 
-class AppleTV(ABC):
-    """Base class representing an Apple TV."""
+class AppleTV(ABC, StateProducer):
+    """Base class representing an Apple TV.
 
-    def __init__(self) -> None:
-        """Initialize a new AppleTV."""
-        self.__listener: Optional[DeviceListener] = None
-
-    @property
-    def listener(self) -> Optional[DeviceListener]:
-        """Object receiving generic device updates.
-
-        Must be an object conforming to DeviceListener.
-        """
-        return self.__listener
-
-    @listener.setter
-    def listener(self, target: Optional[DeviceListener]):
-        """Change object receiving generic device updates."""
-        self.__listener = target
+    Listener interface: `pyatv.interfaces.DeviceListener`
+    """
 
     @abstractmethod
     async def connect(self) -> None:

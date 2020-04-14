@@ -3,6 +3,7 @@
 import math
 import asyncio
 import logging
+import weakref
 from copy import deepcopy
 
 from pyatv.mrp import protobuf
@@ -134,14 +135,18 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
     @property
     def listener(self):
         """Return current listener."""
-        return self._listener
+        if self._listener is None:
+            return None
+        return self._listener()
 
     @listener.setter
     def listener(self, new_listener):
         """Change current listener."""
-        self._listener = new_listener
-        if self.listener:
+        if new_listener is not None:
+            self._listener = weakref.ref(new_listener)
             asyncio.ensure_future(self.listener.state_updated(), loop=self.loop)
+        else:
+            self._listener = None
 
     @property
     def playing(self):

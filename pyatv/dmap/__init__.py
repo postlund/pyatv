@@ -2,6 +2,7 @@
 
 import logging
 import asyncio
+import weakref
 from typing import Dict, List, Optional
 
 from aiohttp import ClientSession
@@ -467,7 +468,7 @@ class DmapPushUpdater(PushUpdater):
         super().__init__()
         self._loop = loop
         self._atv = apple_tv
-        self._listener = listener
+        self._listener = weakref.ref(listener)
         self._future = None
         self._initial_delay = 0
 
@@ -521,8 +522,9 @@ class DmapPushUpdater(PushUpdater):
 
             except ClientError as ex:
                 _LOGGER.exception("A communication error happened")
-                if self._listener and self._listener.listener:
-                    self._loop.call_soon(self._listener.listener.connection_lost, ex)
+                listener = self._listener()
+                if listener:
+                    self._loop.call_soon(listener.listener.connection_lost, ex)
 
                 break
 
@@ -605,8 +607,7 @@ class DmapAppleTV(AppleTV):
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             asyncio.ensure_future(self._session.close())
-        if self.listener:
-            self.listener.connection_closed()
+        self.listener.connection_closed()
 
     @property
     def device_info(self) -> DeviceInfo:

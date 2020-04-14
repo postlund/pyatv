@@ -540,9 +540,11 @@ def _extract_command_with_args(cmd):
 
 
 async def _handle_commands(args, config, loop):
+    device_listener = DeviceListener()
+    push_listener = PushListener()
     atv = await connect(config, loop, protocol=args.protocol)
-    atv.listener = DeviceListener()
-    atv.push_updater.listener = PushListener()
+    atv.listener = device_listener
+    atv.push_updater.listener = push_listener
 
     try:
         for cmd in args.command:
