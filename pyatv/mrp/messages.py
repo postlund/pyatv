@@ -155,9 +155,9 @@ def repeat(mode):
     options = message.inner().options
     options.sendOptions = 0
     if mode == const.RepeatState.Track:
-        options.repeatMode = protobuf.CommandInfo.One
+        options.repeatMode = protobuf.RepeatMode.One
     elif mode == const.RepeatState.All:
-        options.repeatMode = protobuf.CommandInfo.All
+        options.repeatMode = protobuf.RepeatMode.All
     return message
 
 
@@ -167,11 +167,11 @@ def shuffle(state):
     options = message.inner().options
     options.sendOptions = 0
     if state == const.ShuffleState.Off:
-        options.shuffleMode = protobuf.CommandInfo.Off
+        options.shuffleMode = protobuf.ShuffleMode.Off
     elif state == const.ShuffleState.Albums:
-        options.shuffleMode = protobuf.CommandInfo.Albums
+        options.shuffleMode = protobuf.ShuffleMode.Albums
     else:
-        options.shuffleMode = protobuf.CommandInfo.Songs
+        options.shuffleMode = protobuf.ShuffleMode.Songs
     return message
 
 

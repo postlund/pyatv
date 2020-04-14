@@ -1,26 +1,15 @@
 syntax = "proto2";
 
+import "pyatv/mrp/protobuf/Common.proto";
+
 message NowPlayingInfo {
-  enum RepeatMode {
-    Unknown = 0;
-    One = 1;
-    All = 2;
-  }
-
-  enum ShuffleMode {
-    Unknown = 0;
-    Off = 1;
-    Albums = 2;
-    Songs = 3;
-  }
-
   optional string album = 1;
   optional string artist = 2;
   optional double duration = 3;
   optional double elapsedTime = 4;
   optional float playbackRate = 5;
-  optional RepeatMode repeatMode = 6;
-  optional ShuffleMode shuffleMode = 7;
+  optional RepeatMode.Enum repeatMode = 6;
+  optional ShuffleMode.Enum shuffleMode = 7;
   optional double timestamp = 8;
   optional string title = 9;
   optional uint64 uniqueIdentifier = 10;

@@ -1,19 +1,8 @@
 syntax = "proto2";
 
+import "pyatv/mrp/protobuf/Common.proto";
+
 message CommandOptions {
-  enum RepeatMode {
-    Unknown = 0;
-    One = 1;
-    All = 2;
-  }
-
-  enum ShuffleMode {
-    Unknown = 0;
-    Off = 1;
-    Albums = 2;
-    Songs = 3;
-  }
-
   optional string sourceId = 2;
   optional string mediaType = 3;
   optional bool externalPlayerCommand = 4;
@@ -22,8 +11,8 @@ message CommandOptions {
   optional float rating = 7;
   optional bool negative = 8;
   optional double playbackPosition = 9;
-  optional RepeatMode repeatMode = 10;
-  optional ShuffleMode shuffleMode = 11;
+  optional RepeatMode.Enum repeatMode = 10;
+  optional ShuffleMode.Enum shuffleMode = 11;
   optional uint64 trackID = 12;
   optional int64 radioStationID = 13;
   optional string radioStationHash = 14;

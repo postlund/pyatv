@@ -2,20 +2,21 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
-    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
 )
 
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from pyatv.mrp.protobuf.Common_pb2 import (
+    RepeatMode as pyatv___mrp___protobuf___Common_pb2___RepeatMode,
+    ShuffleMode as pyatv___mrp___protobuf___Common_pb2___ShuffleMode,
+)
+
 from typing import (
-    List as typing___List,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
     Union as typing___Union,
-    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -27,7 +28,6 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
 if sys.version_info < (3,):
     builtin___buffer = buffer
     builtin___unicode = unicode
@@ -35,46 +35,6 @@ if sys.version_info < (3,):
 
 class CommandOptions(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class RepeatMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'CommandOptions.RepeatMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['CommandOptions.RepeatMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandOptions.RepeatMode']]: ...
-        Unknown = typing___cast('CommandOptions.RepeatMode', 0)
-        One = typing___cast('CommandOptions.RepeatMode', 1)
-        All = typing___cast('CommandOptions.RepeatMode', 2)
-    Unknown = typing___cast('CommandOptions.RepeatMode', 0)
-    One = typing___cast('CommandOptions.RepeatMode', 1)
-    All = typing___cast('CommandOptions.RepeatMode', 2)
-
-    class ShuffleMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'CommandOptions.ShuffleMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['CommandOptions.ShuffleMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandOptions.ShuffleMode']]: ...
-        Unkown = typing___cast('CommandOptions.ShuffleMode', 0)
-        Off = typing___cast('CommandOptions.ShuffleMode', 1)
-        Albums = typing___cast('CommandOptions.ShuffleMode', 2)
-        Songs = typing___cast('CommandOptions.ShuffleMode', 3)
-    Unkown = typing___cast('CommandOptions.ShuffleMode', 0)
-    Off = typing___cast('CommandOptions.ShuffleMode', 1)
-    Albums = typing___cast('CommandOptions.ShuffleMode', 2)
-    Songs = typing___cast('CommandOptions.ShuffleMode', 3)
-
     sourceId = ... # type: typing___Text
     mediaType = ... # type: typing___Text
     externalPlayerCommand = ... # type: builtin___bool
@@ -83,8 +43,8 @@ class CommandOptions(google___protobuf___message___Message):
     rating = ... # type: builtin___float
     negative = ... # type: builtin___bool
     playbackPosition = ... # type: builtin___float
-    repeatMode = ... # type: CommandOptions.RepeatMode
-    shuffleMode = ... # type: CommandOptions.ShuffleMode
+    repeatMode = ... # type: pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum
+    shuffleMode = ... # type: pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum
     trackID = ... # type: builtin___int
     radioStationID = ... # type: builtin___int
     radioStationHash = ... # type: typing___Text
@@ -116,8 +76,8 @@ class CommandOptions(google___protobuf___message___Message):
         rating : typing___Optional[builtin___float] = None,
         negative : typing___Optional[builtin___bool] = None,
         playbackPosition : typing___Optional[builtin___float] = None,
-        repeatMode : typing___Optional[CommandOptions.RepeatMode] = None,
-        shuffleMode : typing___Optional[CommandOptions.ShuffleMode] = None,
+        repeatMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum] = None,
+        shuffleMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum] = None,
         trackID : typing___Optional[builtin___int] = None,
         radioStationID : typing___Optional[builtin___int] = None,
         radioStationHash : typing___Optional[typing___Text] = None,

@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+import "pyatv/mrp/protobuf/Common.proto";
+
 enum Command {
   Unknown = 0;
   Play = 1;
@@ -55,19 +57,6 @@ enum Command {
 }
 
 message CommandInfo {
-  enum RepeatMode {
-    Unknown = 0;
-    One = 1;
-    All = 2;
-  }
-
-  enum ShuffleMode {
-    Unknown = 0;
-    Off = 1;
-    Albums = 2;
-    Songs = 3;
-  }
-
   optional Command command = 1;
   optional bool enabled = 2;
   optional bool active = 3;
@@ -77,8 +66,8 @@ message CommandInfo {
   optional float maximumRating = 7;
   repeated float supportedRates = 8;
   optional string localizedShortTitle = 9;
-  optional RepeatMode repeatMode = 10;
-  optional ShuffleMode shuffleMode = 11;
+  optional RepeatMode.Enum repeatMode = 10;
+  optional ShuffleMode.Enum shuffleMode = 11;
   optional int32 presentationStyle = 12;
   optional int32 skipInterval = 13;
   optional int32 numAvailableSkips = 14;

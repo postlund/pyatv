@@ -13,6 +13,11 @@ from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from pyatv.mrp.protobuf.Common_pb2 import (
+    RepeatMode as pyatv___mrp___protobuf___Common_pb2___RepeatMode,
+    ShuffleMode as pyatv___mrp___protobuf___Common_pb2___ShuffleMode,
+)
+
 from typing import (
     Iterable as typing___Iterable,
     List as typing___List,
@@ -155,46 +160,6 @@ SetPlaybackSession = typing___cast('Command', 59)
 
 class CommandInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class RepeatMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'CommandInfo.RepeatMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['CommandInfo.RepeatMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandInfo.RepeatMode']]: ...
-        Unknown = typing___cast('CommandInfo.RepeatMode', 0)
-        One = typing___cast('CommandInfo.RepeatMode', 1)
-        All = typing___cast('CommandInfo.RepeatMode', 2)
-    Unknown = typing___cast('CommandInfo.RepeatMode', 0)
-    One = typing___cast('CommandInfo.RepeatMode', 1)
-    All = typing___cast('CommandInfo.RepeatMode', 2)
-
-    class ShuffleMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'CommandInfo.ShuffleMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['CommandInfo.ShuffleMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'CommandInfo.ShuffleMode']]: ...
-        Unkown = typing___cast('CommandInfo.ShuffleMode', 0)
-        Off = typing___cast('CommandInfo.ShuffleMode', 1)
-        Albums = typing___cast('CommandInfo.ShuffleMode', 2)
-        Songs = typing___cast('CommandInfo.ShuffleMode', 3)
-    Unkown = typing___cast('CommandInfo.ShuffleMode', 0)
-    Off = typing___cast('CommandInfo.ShuffleMode', 1)
-    Albums = typing___cast('CommandInfo.ShuffleMode', 2)
-    Songs = typing___cast('CommandInfo.ShuffleMode', 3)
-
     command = ... # type: Command
     enabled = ... # type: builtin___bool
     active = ... # type: builtin___bool
@@ -204,8 +169,8 @@ class CommandInfo(google___protobuf___message___Message):
     maximumRating = ... # type: builtin___float
     supportedRates = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
     localizedShortTitle = ... # type: typing___Text
-    repeatMode = ... # type: CommandInfo.RepeatMode
-    shuffleMode = ... # type: CommandInfo.ShuffleMode
+    repeatMode = ... # type: pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum
+    shuffleMode = ... # type: pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum
     presentationStyle = ... # type: builtin___int
     skipInterval = ... # type: builtin___int
     numAvailableSkips = ... # type: builtin___int
@@ -227,8 +192,8 @@ class CommandInfo(google___protobuf___message___Message):
         maximumRating : typing___Optional[builtin___float] = None,
         supportedRates : typing___Optional[typing___Iterable[builtin___float]] = None,
         localizedShortTitle : typing___Optional[typing___Text] = None,
-        repeatMode : typing___Optional[CommandInfo.RepeatMode] = None,
-        shuffleMode : typing___Optional[CommandInfo.ShuffleMode] = None,
+        repeatMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum] = None,
+        shuffleMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum] = None,
         presentationStyle : typing___Optional[builtin___int] = None,
         skipInterval : typing___Optional[builtin___int] = None,
         numAvailableSkips : typing___Optional[builtin___int] = None,

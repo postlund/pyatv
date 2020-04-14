@@ -42,6 +42,8 @@ from .AudioFormatSettingsMessage_pb2 import AudioFormatSettings
 from .ClientUpdatesConfigMessage_pb2 import ClientUpdatesConfigMessage
 from .CommandInfo_pb2 import CommandInfo
 from .CommandOptions_pb2 import CommandOptions
+from .Common_pb2 import RepeatMode
+from .Common_pb2 import ShuffleMode
 from .ContentItemMetadata_pb2 import ContentItemMetadata
 from .ContentItem_pb2 import ContentItem
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
