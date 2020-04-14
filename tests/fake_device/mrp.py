@@ -44,14 +44,14 @@ _COMMAND_LOOKUP = {
 }
 
 _REPEAT_LOOKUP = {
-    const.RepeatState.Track: protobuf.CommandInfo.One,
-    const.RepeatState.All: protobuf.CommandInfo.All,
+    const.RepeatState.Track: protobuf.RepeatMode.One,
+    const.RepeatState.All: protobuf.RepeatMode.All,
 }
 
 _SHUFFLE_LOOKUP = {
-    const.ShuffleState.Off: protobuf.CommandInfo.Off,
-    const.ShuffleState.Albums: protobuf.CommandInfo.Albums,
-    const.ShuffleState.Songs: protobuf.CommandInfo.Songs,
+    const.ShuffleState.Off: protobuf.ShuffleMode.Off,
+    const.ShuffleState.Albums: protobuf.ShuffleMode.Albums,
+    const.ShuffleState.Songs: protobuf.ShuffleMode.Songs,
 }
 
 _COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
@@ -385,16 +385,16 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
         elif inner.command == cmd.ChangeRepeatMode:
             state.repeat = {
-                protobuf.CommandInfo.One: const.RepeatState.Track,
-                protobuf.CommandInfo.All: const.RepeatState.All,
+                protobuf.RepeatMode.One: const.RepeatState.Track,
+                protobuf.RepeatMode.All: const.RepeatState.All,
             }.get(inner.options.repeatMode, const.RepeatState.Off)
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Change repeat state to %s", state.repeat)
         elif inner.command == cmd.ChangeShuffleMode:
             state.shuffle = {
-                protobuf.CommandInfo.Off: const.ShuffleState.Off,
-                protobuf.CommandInfo.Albums: const.ShuffleState.Albums,
-                protobuf.CommandInfo.Songs: const.ShuffleState.Songs,
+                protobuf.ShuffleMode.Off: const.ShuffleState.Off,
+                protobuf.ShuffleMode.Albums: const.ShuffleState.Albums,
+                protobuf.ShuffleMode.Songs: const.ShuffleState.Songs,
             }.get(inner.options.shuffleMode, const.ShuffleState.Off)
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Change shuffle state to %s", state.shuffle)

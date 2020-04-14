@@ -2,20 +2,21 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
-    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
 )
 
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from pyatv.mrp.protobuf.Common_pb2 import (
+    RepeatMode as pyatv___mrp___protobuf___Common_pb2___RepeatMode,
+    ShuffleMode as pyatv___mrp___protobuf___Common_pb2___ShuffleMode,
+)
+
 from typing import (
-    List as typing___List,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
     Union as typing___Union,
-    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -27,7 +28,6 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
 if sys.version_info < (3,):
     builtin___buffer = buffer
     builtin___unicode = unicode
@@ -35,53 +35,13 @@ if sys.version_info < (3,):
 
 class NowPlayingInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class RepeatMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'NowPlayingInfo.RepeatMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['NowPlayingInfo.RepeatMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'NowPlayingInfo.RepeatMode']]: ...
-        Unknown = typing___cast('NowPlayingInfo.RepeatMode', 0)
-        One = typing___cast('NowPlayingInfo.RepeatMode', 1)
-        All = typing___cast('NowPlayingInfo.RepeatMode', 2)
-    Unknown = typing___cast('NowPlayingInfo.RepeatMode', 0)
-    One = typing___cast('NowPlayingInfo.RepeatMode', 1)
-    All = typing___cast('NowPlayingInfo.RepeatMode', 2)
-
-    class ShuffleMode(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'NowPlayingInfo.ShuffleMode': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['NowPlayingInfo.ShuffleMode']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'NowPlayingInfo.ShuffleMode']]: ...
-        Unkown = typing___cast('NowPlayingInfo.ShuffleMode', 0)
-        Off = typing___cast('NowPlayingInfo.ShuffleMode', 1)
-        Albums = typing___cast('NowPlayingInfo.ShuffleMode', 2)
-        Songs = typing___cast('NowPlayingInfo.ShuffleMode', 3)
-    Unkown = typing___cast('NowPlayingInfo.ShuffleMode', 0)
-    Off = typing___cast('NowPlayingInfo.ShuffleMode', 1)
-    Albums = typing___cast('NowPlayingInfo.ShuffleMode', 2)
-    Songs = typing___cast('NowPlayingInfo.ShuffleMode', 3)
-
     album = ... # type: typing___Text
     artist = ... # type: typing___Text
     duration = ... # type: builtin___float
     elapsedTime = ... # type: builtin___float
     playbackRate = ... # type: builtin___float
-    repeatMode = ... # type: NowPlayingInfo.RepeatMode
-    shuffleMode = ... # type: NowPlayingInfo.ShuffleMode
+    repeatMode = ... # type: pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum
+    shuffleMode = ... # type: pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum
     timestamp = ... # type: builtin___float
     title = ... # type: typing___Text
     uniqueIdentifier = ... # type: builtin___int
@@ -101,8 +61,8 @@ class NowPlayingInfo(google___protobuf___message___Message):
         duration : typing___Optional[builtin___float] = None,
         elapsedTime : typing___Optional[builtin___float] = None,
         playbackRate : typing___Optional[builtin___float] = None,
-        repeatMode : typing___Optional[NowPlayingInfo.RepeatMode] = None,
-        shuffleMode : typing___Optional[NowPlayingInfo.ShuffleMode] = None,
+        repeatMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum] = None,
+        shuffleMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum] = None,
         timestamp : typing___Optional[builtin___float] = None,
         title : typing___Optional[typing___Text] = None,
         uniqueIdentifier : typing___Optional[builtin___int] = None,

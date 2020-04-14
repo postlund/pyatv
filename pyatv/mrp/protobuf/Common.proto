@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+message RepeatMode {
+  enum Enum {
+    Unknown = 0;
+    One = 1;
+    All = 2;
+  }
+}
+
+message ShuffleMode {
+  enum Enum {
+    Unknown = 0;
+    Off = 1;
+    Albums = 2;
+    Songs = 3;
+  }
+}

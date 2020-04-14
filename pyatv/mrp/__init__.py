@@ -359,9 +359,9 @@ class MrpPlaying(Playing):
         info = self._state.command_info(CommandInfo_pb2.ChangeShuffleMode)
         if info is None:
             return ShuffleState.Off
-        if info.shuffleMode == protobuf.CommandInfo.Off:
+        if info.shuffleMode == protobuf.ShuffleMode.Off:
             return ShuffleState.Off
-        if info.shuffleMode == protobuf.CommandInfo.Albums:
+        if info.shuffleMode == protobuf.ShuffleMode.Albums:
             return ShuffleState.Albums
 
         return ShuffleState.Songs
@@ -372,7 +372,7 @@ class MrpPlaying(Playing):
         info = self._state.command_info(CommandInfo_pb2.ChangeRepeatMode)
         if info is None:
             return RepeatState.Off
-        if info.repeatMode == protobuf.CommandInfo.One:
+        if info.repeatMode == protobuf.RepeatMode.One:
             return RepeatState.Track
 
         return RepeatState.All
