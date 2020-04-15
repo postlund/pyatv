@@ -65,3 +65,4 @@ class MrpPairingHandler(PairingHandler):
     def pin(self, pin):
         """Pin code used for pairing."""
         self.pin_code = str(pin).zfill(4)
+        _LOGGER.debug("MRP PIN changed to %s", self.pin_code)

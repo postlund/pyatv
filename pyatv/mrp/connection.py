@@ -23,18 +23,24 @@ class MrpConnection(
         self.atv = atv
         self.loop = loop
         self.listener = None
+        self._log_str = ""
         self._buffer = b""
         self._chacha = None
         self._transport = None
 
     def connection_made(self, transport):
         """Device connection was made."""
-        _LOGGER.debug("Connected to device")
+        _LOGGER.debug("Connection made to device")
         self._transport = transport
+        extra_info = transport.get_extra_info("socket")
+        dstaddr, dstport = extra_info.getpeername()
+        srcaddr, srcport = extra_info.getsockname()
+        self._log_str = f"{srcaddr}:{srcport}<->{dstaddr}:{dstport} "
+        _LOGGER.debug(self._log_str + "Connection established")
 
     def connection_lost(self, exc):
         """Device connection was dropped."""
-        _LOGGER.debug("Disconnected from device: %s", exc)
+        _LOGGER.debug(self._log_str + "Disconnected from device: %s", exc)
         self._transport = None
 
         if self.atv and self.atv.listener:
@@ -42,6 +48,13 @@ class MrpConnection(
                 self.atv.listener.connection_closed()
             else:
                 self.atv.listener.connection_lost(exc)
+
+    def eof_received(self):
+        """Device sent EOF (no more data)."""
+        _LOGGER.debug(self._log_str + "Received EOF from server")
+        if self._transport.can_write_eof():
+            self._transport.write_eof()
+        self._transport.close()
 
     def enable_encryption(self, output_key, input_key):
         """Enable encryption with the specified keys."""
@@ -58,6 +71,7 @@ class MrpConnection(
 
     def close(self):
         """Close connection to device."""
+        _LOGGER.debug("Closing connection")
         if self._transport:
             self._transport.close()
         self._transport = None
@@ -67,21 +81,21 @@ class MrpConnection(
         """Send message to device."""
         serialized = message.SerializeToString()
 
-        log_binary(_LOGGER, ">> Send", Data=serialized)
+        log_binary(_LOGGER, self._log_str + ">> Send", Data=serialized)
         if self._chacha:
             serialized = self._chacha.encrypt(serialized)
-            log_binary(_LOGGER, ">> Send", Encrypted=serialized)
+            log_binary(_LOGGER, self._log_str + ">> Send", Encrypted=serialized)
 
         data = write_variant(len(serialized)) + serialized
         self._transport.write(data)
-        log_protobuf(_LOGGER, ">> Send: Protobuf", message)
+        log_protobuf(_LOGGER, self._log_str + ">> Send: Protobuf", message)
 
     def send_raw(self, data):
         """Send message to device."""
-        log_binary(_LOGGER, ">> Send raw", Data=data)
+        log_binary(_LOGGER, self._log_str + ">> Send raw", Data=data)
         if self._chacha:
             data = self._chacha.encrypt(data)
-            log_binary(_LOGGER, ">> Send raw", Encrypted=data)
+            log_binary(_LOGGER, self._log_str + ">> Send raw", Encrypted=data)
 
         data = write_variant(len(data)) + data
         self._transport.write(data)
@@ -91,14 +105,16 @@ class MrpConnection(
         # A message might be split over several reads, so we store a buffer and
         # try to decode messages from that buffer
         self._buffer += data
-        log_binary(_LOGGER, "<< Receive", Data=data)
+        log_binary(_LOGGER, self._log_str + "<< Receive", Data=data)
 
         while self._buffer:
             # The variant tells us how much data must follow
             length, raw = read_variant(self._buffer)
             if len(raw) < length:
                 _LOGGER.debug(
-                    "Require %d bytes but only %d in buffer", length, len(raw)
+                    self._log_str + "Require %d bytes but only %d in buffer",
+                    length,
+                    len(raw),
                 )
                 break
 
@@ -108,16 +124,16 @@ class MrpConnection(
             try:
                 self._handle_message(data)
             except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Failed to handle message")
+                _LOGGER.exception(self._log_str + "Failed to handle message")
 
     def _handle_message(self, data):
         if self._chacha:
             data = self._chacha.decrypt(data)
-            log_binary(_LOGGER, "<< Receive", Decrypted=data)
+            log_binary(_LOGGER, self._log_str + "<< Receive", Decrypted=data)
 
         parsed = protobuf.ProtocolMessage()
         parsed.ParseFromString(data)
-        log_protobuf(_LOGGER, "<< Receive: Protobuf", parsed)
+        log_protobuf(_LOGGER, self._log_str + "<< Receive: Protobuf", parsed)
 
         if self.listener:
             self.listener.message_received(parsed, data)

@@ -2,12 +2,13 @@
 
 import socket
 import logging
-import binascii
 from ipaddress import IPv4Interface, IPv4Address
 from typing import Optional
 
 import netifaces
 from aiohttp import ClientSession
+
+from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,8 +64,14 @@ class HttpSession:
                 headers=headers,
                 timeout=DEFAULT_TIMEOUT if timeout is None else timeout,
             )
+            _LOGGER.debug(
+                "Response: status=%d, headers=[%s]",
+                resp.status,
+                ", ".join([f"{key}={value}" for key, value in resp.headers.items()]),
+            )
             if resp.content_length is not None:
                 resp_data = await resp.read()
+                log_binary(_LOGGER, "<< GET", Data=resp_data)
             else:
                 resp_data = None
             return resp_data, resp.status
@@ -80,7 +87,7 @@ class HttpSession:
         """Perform a POST request."""
         url = self.base_url + path
         _LOGGER.debug("POST URL: %s", url)
-        self._log_data(data, False)
+        log_binary(_LOGGER, ">> POST", Data=data)
 
         resp = None
         try:
@@ -90,11 +97,16 @@ class HttpSession:
                 data=data,
                 timeout=DEFAULT_TIMEOUT if timeout is None else timeout,
             )
+            _LOGGER.debug(
+                "Response: status=%d, headers=[%s]",
+                resp.status,
+                ", ".join([f"{key}={value}" for key, value in resp.headers.items()]),
+            )
             if resp.content_length is not None:
                 resp_data = await resp.read()
             else:
                 resp_data = None
-            self._log_data(resp_data, True)
+                log_binary(_LOGGER, "<< POST", Data=resp_data)
             return resp_data, resp.status
         except Exception as ex:
             if resp is not None:
@@ -103,15 +115,3 @@ class HttpSession:
         finally:
             if resp is not None:
                 await resp.release()
-
-    @staticmethod
-    def _log_data(data, is_recv):
-        if data and _LOGGER.isEnabledFor(logging.DEBUG):
-            output = data[0:128]
-            _LOGGER.debug(
-                "%s Data[%d]: %s%s",
-                "<-" if is_recv else "->",
-                len(data),
-                binascii.hexlify(output),
-                "..." if len(output) != len(data) else "",
-            )

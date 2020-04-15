@@ -85,6 +85,11 @@ def test_log_binary_log_no_args_if_enabled(logger):
     assert _debug_string(logger) == "testing ()"
 
 
+def test_log_binary_log_empty_value_if_enabled(logger):
+    log_binary(logger, "testing", test=None)
+    assert _debug_string(logger) == "testing (test=)"
+
+
 def test_log_binary_log_single_arg_if_enabled(logger):
     log_binary(logger, "abc", test=b"\x01\x02")
     assert _debug_string(logger) == "abc (test=0102)"
