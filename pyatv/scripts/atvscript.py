@@ -253,6 +253,12 @@ async def appstart(loop):
         default=json.dumps,
         action=TransformOutput,
     )
+    parser.add_argument(
+        "--debug",
+        help="save debug log to atvscript.log",
+        action="store_true",
+        dest="debug",
+    )
 
     creds = parser.add_argument_group("credentials")
     creds.add_argument(
@@ -276,6 +282,15 @@ async def appstart(loop):
 
     args = parser.parse_args()
     abort_sem = asyncio.Semaphore(0)
+
+    if args.debug:
+        # Only allow saving to file to make sure output always has the specified format
+        logging.basicConfig(
+            filename="atvscript.log",
+            level=logging.DEBUG,
+            format="%(asctime)s %(levelname)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
     def _handle_exception(loop, context):
         kwargs = {"error": context["message"]}
