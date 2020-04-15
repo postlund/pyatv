@@ -61,7 +61,7 @@ _KEY_LOOKUP = {
     "previous": [12, 0xB6, 0],
     "select": [1, 0x89, 0],
     "menu": [1, 0x86, 0],
-    "topmenu": [12, 0x60, 0],
+    "topmenu": [1, 0x86, 1],
     "home": [12, 0x40, 1],
     "suspend": [1, 0x82, 0],
     "wakeup": [1, 0x83, 0],
@@ -225,7 +225,7 @@ class MrpRemoteControl(RemoteControl):
 
     async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
-        await self._press_key("topmenu")
+        await self._press_key("topmenu", hold=True)
 
     @deprecated
     async def suspend(self) -> None:
