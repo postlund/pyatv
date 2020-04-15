@@ -182,11 +182,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await until(lambda: self.state.last_button_pressed == "menu")
 
     @unittest_run_loop
-    async def test_button_top_menu(self):
-        await self.atv.remote_control.top_menu()
-        await until(lambda: self.state.last_button_pressed == "topmenu")
-
-    @unittest_run_loop
     async def test_button_play(self):
         await self.atv.remote_control.play()
         await until(lambda: self.state.last_button_pressed == "play")

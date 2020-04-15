@@ -21,6 +21,7 @@ from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
+from tests.utils import until
 
 HSGID = "12345678-6789-1111-2222-012345678911"
 PAIRING_GUID = "0x0000000000000001"
@@ -146,6 +147,11 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         for button in buttons:
             with self.assertRaises(exceptions.NotSupportedError):
                 await getattr(self.atv.remote_control, button)()
+
+    @unittest_run_loop
+    async def test_button_top_menu(self):
+        await self.atv.remote_control.top_menu()
+        await until(lambda: self.state.last_button_pressed == "topmenu")
 
     @unittest_run_loop
     async def test_shuffle_state_albums(self):
