@@ -101,6 +101,7 @@ class DmapPairingHandler(
     def pin(self, pin):
         """Pin code used for pairing."""
         self._pin_code = pin
+        _LOGGER.debug("DMAP PIN changed to %s", self._pin_code)
 
     @property
     def device_provides_pin(self):

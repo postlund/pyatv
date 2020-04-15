@@ -24,7 +24,7 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session, config.get_service(Protocol.AirPlay))
         self.srp = SRPAuthHandler()
         self.http = net.HttpSession(
-            session, "http://{0}:{1}/".format(config.address, self.service.port)
+            session, f"http://{config.address}:{self.service.port}/"
         )
         self.authenticator = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
@@ -38,7 +38,7 @@ class AirPlayPairingHandler(PairingHandler):
         # If service has credentials, use those. Otherwise generate new.
         if self.service.credentials is None:
             identifier, seed = new_credentials()
-            credentials = "{0}:{1}".format(identifier, seed.decode().upper())
+            credentials = f"{identifier}:{seed.decode().upper()}"
         else:
             split = credentials.split(":")
             identifier = split[0]
@@ -78,6 +78,7 @@ class AirPlayPairingHandler(PairingHandler):
     def pin(self, pin):
         """Pin code used for pairing."""
         self.pin_code = str(pin).zfill(4)
+        _LOGGER.debug("AirPlay PIN changed to %s", self.pin_code)
 
     @property
     def device_provides_pin(self):

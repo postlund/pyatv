@@ -46,7 +46,7 @@ def log_binary(logger, message, **kwargs):
 
         output = (
             "{0}={1}".format(
-                k, _shorten(binascii.hexlify(bytearray(v)).decode(), line_length)
+                k, _shorten(binascii.hexlify(bytearray(v or b"")).decode(), line_length)
             )
             for k, v in sorted(kwargs.items())
         )

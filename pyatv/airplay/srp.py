@@ -197,6 +197,7 @@ class SRPAuthHandler:
 
         aes_key = hash_sha512("Pair-Setup-AES-Key", session_key)[0:16]
         tmp = bytearray(hash_sha512("Pair-Setup-AES-IV", session_key)[0:16])
+        _LOGGER.debug("Increase last byte from %d to %s", tmp[-1], tmp[-1] + 1)
         tmp[-1] = tmp[-1] + 1  # Last byte must be increased by 1
         aes_iv = bytes(tmp)
         log_binary(_LOGGER, "Pair-Setup-AES", Key=aes_key, IV=aes_iv)
