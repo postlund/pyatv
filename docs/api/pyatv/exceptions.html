@@ -48,6 +48,9 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.NoServiceError" href="#pyatv.exceptions.NoServiceError">NoServiceError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.NonLocalSubnetError" href="#pyatv.exceptions.NonLocalSubnetError">NonLocalSubnetError</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.NotSupportedError" href="#pyatv.exceptions.NotSupportedError">NotSupportedError</a></code></h4>
 </li>
 <li>
@@ -143,7 +146,11 @@ class PlaybackError(Exception):
 
 
 class CommandError(Exception):
-    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;
+
+
+class NonLocalSubnetError(Exception):
+    &#34;&#34;&#34;Thrown when address it not in any local subnet.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -338,6 +345,25 @@ class CommandError(Exception):
 </summary>
 <pre><code class="python">class NoServiceError(Exception):
     &#34;&#34;&#34;Thrown when connecting to a device with no usable service.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.NonLocalSubnetError"><code class="flex name class">
+<span>class <span class="ident">NonLocalSubnetError</span></span>
+<span>(</span><span>...)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when address it not in any local subnet.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NonLocalSubnetError(Exception):
+    &#34;&#34;&#34;Thrown when address it not in any local subnet.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

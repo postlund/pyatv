@@ -1,7 +1,11 @@
 """Functional tests for unicast DNS."""
 
+from ipaddress import IPv4Address
+from unittest.mock import patch
+
 import pytest
 
+from pyatv import exceptions
 from pyatv.support import udns
 from tests import fake_udns
 
@@ -13,6 +17,13 @@ TEST_SERVICES = {
         name="Kitchen", port=1234, properties={"Name": "Kitchen", "foo": "=bar"}
     ),
 }
+
+
+@pytest.fixture(autouse=True)
+def stub_local_address():
+    with patch("pyatv.net.get_local_address_reaching") as mock:
+        mock.return_value = IPv4Address("127.0.0.1")
+        yield mock
 
 
 @pytest.fixture
@@ -46,6 +57,13 @@ def test_qname_with_label():
     ret, rest = udns.qname_decode(ptr, message)
     assert ret == "label.test"
     assert rest == b"\xAB\xCD"
+
+
+@pytest.mark.asyncio
+async def test_non_local_address(event_loop, stub_local_address):
+    stub_local_address.return_value = None
+    with pytest.raises(exceptions.NonLocalSubnetError):
+        await udns.request(event_loop, "1.2.3.4", [])
 
 
 @pytest.mark.asyncio

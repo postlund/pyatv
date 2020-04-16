@@ -63,3 +63,7 @@ class PlaybackError(Exception):
 
 class CommandError(Exception):
     """Thrown when a command (e.g. play or pause) failed."""
+
+
+class NonLocalSubnetError(Exception):
+    """Thrown when address it not in any local subnet."""

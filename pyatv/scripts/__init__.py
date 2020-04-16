@@ -24,13 +24,14 @@ class TransformProtocol(argparse.Action):
 
 
 # pylint: disable=too-few-public-methods
-class TransformScanHosts(argparse.Action):
+class VerifyScanHosts(argparse.Action):
     """Transform scan hosts into array."""
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Split hosts and save as array."""
-        ips = [ip_address(ip) for ip in values.split(",")]
-        setattr(namespace, self.dest, ips)
+        ip_split = values.split(",")
+        [ip_address(ip) for ip in ip_split]
+        setattr(namespace, self.dest, ip_split)
 
 
 # pylint: disable=too-few-public-methods
