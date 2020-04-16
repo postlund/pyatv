@@ -12,8 +12,7 @@ jobs:
         platform:
           - ubuntu-latest
           - macos-latest
-          - windows-2016
-          # - windows-latest  # broken on github?
+          - windows-latest
         python-version: [3.6, 3.7, 3.8]
 
     steps:
@@ -22,6 +21,21 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+    - name: RC.exe  # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
+      if: runner.os == 'Windows'
+      run: |
+        function Invoke-VSDevEnvironment {
+        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+            $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
+            $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
+          & "${env:COMSPEC}" /s /c "`"$Command`" -no_logo && set" | Foreach-Object {
+                if ($_ -match '^([^=]+)=(.*)') {
+                    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+                }
+            }
+        }
+        Invoke-VSDevEnvironment
+        Get-Command rc.exe | Format-Table -AutoSize
     - name: Install dependencies
       run: |
         python -m pip install --upgrade setuptools pip wheel
