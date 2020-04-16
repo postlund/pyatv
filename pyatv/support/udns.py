@@ -2,9 +2,11 @@
 import asyncio
 import struct
 import logging
+from ipaddress import IPv4Address
 from collections import namedtuple
+from typing import List, cast
 
-from pyatv.support import log_binary
+from pyatv.support import exceptions, net, log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -242,14 +244,26 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.semaphore.release()
 
 
-async def request(loop, address, services, port=5353, timeout=4):
+async def request(
+    loop: asyncio.AbstractEventLoop,
+    address: str,
+    services: List[str],
+    port: int = 5353,
+    timeout: int = 4,
+):
     """Send request for services to a host."""
+    if not net.get_local_address_reaching(IPv4Address(address)):
+        raise exceptions.NonLocalSubnetError(
+            f"address {address} is not in any local subnet"
+        )
+
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: UnicastDnsSdClientProtocol(loop, services, address),
-        remote_addr=(str(address), port),
+        remote_addr=(address, port),
     )
 
     try:
-        return await protocol.get_response(timeout)
+
+        return await cast(UnicastDnsSdClientProtocol, protocol).get_response(timeout)
     finally:
         transport.close()
