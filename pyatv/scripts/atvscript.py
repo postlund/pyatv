@@ -21,7 +21,7 @@ from pyatv.interface import (
     DeviceListener,
     retrieve_commands,
 )
-from pyatv.scripts import TransformProtocol, TransformScanHosts, TransformOutput
+from pyatv.scripts import TransformProtocol, VerifyScanHosts, TransformOutput
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -244,7 +244,7 @@ async def appstart(loop):
         help="scan specific hosts",
         dest="scan_hosts",
         default=None,
-        action=TransformScanHosts,
+        action=VerifyScanHosts,
     )
     parser.add_argument(
         "--output",

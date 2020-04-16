@@ -14,7 +14,7 @@ from pyatv.const import Protocol, ShuffleState, RepeatState
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
-from pyatv.scripts import TransformProtocol, TransformScanHosts
+from pyatv.scripts import TransformProtocol, VerifyScanHosts
 
 
 def _print_commands(title, api):
@@ -358,7 +358,7 @@ async def cli_handler(loop):
         help="scan specific hosts",
         dest="scan_hosts",
         default=None,
-        action=TransformScanHosts,
+        action=VerifyScanHosts,
     )
     parser.add_argument(
         "--version",
