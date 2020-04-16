@@ -16,6 +16,10 @@ Please see [this](../scanning_issues/) page on scanning issues.
 
 ### No PIN code is displayed when I try to pair with AirPlay
 
+First check that you've got Apple TV assigned to a "room" in the correct HomeKit
+home. Go to Settings, Airplay and Homekit, and make sure that "Room" has a valid
+value assigned. Then retry pairing.
+
 If no screen is displayed with the PIN code, try navigating to the AirPlay
 settings menu on your Apple TV. The code should be visible there.
 
