@@ -3,6 +3,7 @@
 import asyncio
 import logging
 
+from pyatv.interface import StateProducer
 from pyatv.mrp import chacha20
 from pyatv.mrp import protobuf
 from pyatv.mrp.variant import read_variant, write_variant
@@ -12,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class MrpConnection(
-    asyncio.Protocol
+    asyncio.Protocol, StateProducer
 ):  # pylint: disable=too-many-instance-attributes  # noqa
     """Network layer that encryptes/decryptes and (de)serializes messages."""
 
@@ -22,7 +23,6 @@ class MrpConnection(
         self.port = port
         self.atv = atv
         self.loop = loop
-        self.listener = None
         self._log_str = ""
         self._buffer = b""
         self._chacha = None
@@ -43,7 +43,7 @@ class MrpConnection(
         _LOGGER.debug(self._log_str + "Disconnected from device: %s", exc)
         self._transport = None
 
-        if self.atv and self.atv.listener:
+        if self.atv:
             if exc is None:
                 self.atv.listener.connection_closed()
             else:
@@ -71,7 +71,7 @@ class MrpConnection(
 
     def close(self):
         """Close connection to device."""
-        _LOGGER.debug("Closing connection")
+        _LOGGER.debug(self._log_str + "Closing connection")
         if self._transport:
             self._transport.close()
         self._transport = None
@@ -135,5 +135,4 @@ class MrpConnection(
         parsed.ParseFromString(data)
         log_protobuf(_LOGGER, self._log_str + "<< Receive: Protobuf", parsed)
 
-        if self.listener:
-            self.listener.message_received(parsed, data)
+        self.listener.message_received(parsed, data)
