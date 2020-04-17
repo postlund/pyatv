@@ -13,7 +13,10 @@ from pyatv.support import log_binary
 _LOGGER = logging.getLogger(__name__)
 
 
-DEFAULT_TIMEOUT = 10.0  # Seconds
+# This timeout is rather long and that is for a reason. If a device is sleeping, it
+# automatically wakes up when a service is requested from it. Up to 20 seconds or so
+# have been seen. So to deal with that, keep this high.
+DEFAULT_TIMEOUT = 25.0  # Seconds
 
 
 def is_custom_session(session):
