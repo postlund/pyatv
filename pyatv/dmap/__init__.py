@@ -246,13 +246,11 @@ class DmapRemoteControl(RemoteControl):
 
     async def volume_up(self) -> None:
         """Press key volume up."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
+        await self.apple_tv.ctrl_int_cmd("volumeup")
 
     async def volume_down(self) -> None:
         """Press key volume down."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
+        await self.apple_tv.ctrl_int_cmd("volumedown")
 
     async def home(self) -> None:
         """Press key home."""
@@ -552,21 +550,24 @@ class DmapFeatures(Features):
         if feature in _UNKNOWN_FEATURES:
             return FeatureInfo(state=FeatureState.Unknown)
         if feature in _FIELD_FEATURES:
-            available = self._is_available(_FIELD_FEATURES[feature])
-            return FeatureInfo(
-                state=FeatureState.Available if available else FeatureState.Unavailable
-            )
+            return FeatureInfo(state=self._is_available(_FIELD_FEATURES[feature]))
+        if feature == FeatureName.VolumeUp:
+            return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
+        if feature == FeatureName.VolumeDown:
+            return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
         if feature == FeatureName.PlayUrl:
             if self.config.get_service(Protocol.AirPlay) is not None:
                 return FeatureInfo(state=FeatureState.Available)
 
         return FeatureInfo(state=FeatureState.Unsupported)
 
-    def _is_available(self, field: tuple) -> bool:
-        if not self.apple_tv.latest_playing:
-            return False
-
-        return parser.first(self.apple_tv.latest_playing.playstatus, *field) is not None
+    def _is_available(self, field: tuple, expected_value=None) -> FeatureState:
+        if self.apple_tv.latest_playing:
+            value = parser.first(self.apple_tv.latest_playing.playstatus, *field)
+            if value is not None:
+                if not expected_value or expected_value == value:
+                    return FeatureState.Available
+        return FeatureState.Unavailable
 
 
 class DmapAppleTV(AppleTV):

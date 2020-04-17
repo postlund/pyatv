@@ -60,6 +60,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Shuffle and repeat                                              | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
+| Volume Controls                                                 | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
 | Power management                                                | No       | Yes       | [Doc](development/power_management), {% include api i="interface.Power" %}
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*

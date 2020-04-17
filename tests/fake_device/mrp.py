@@ -30,8 +30,8 @@ _KEY_LOOKUP = {
     "home": [12, 0x40, 1],
     "suspend": [1, 0x82, 0],
     "wakeup": [1, 0x83, 0],
-    "volume_up": [12, 0xE9, 0],
-    "volume_down": [12, 0xEA, 0],
+    "volumeup": [12, 0xE9, 0],
+    "volumedown": [12, 0xEA, 0],
 }
 
 _COMMAND_LOOKUP = {

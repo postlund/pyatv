@@ -211,6 +211,16 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.atv.remote_control.previous()
         await until(lambda: self.state.last_button_pressed == "previtem")
 
+    @unittest_run_loop
+    async def test_button_volume_up(self):
+        await self.atv.remote_control.volume_up()
+        await until(lambda: self.state.last_button_pressed == "volumeup")
+
+    @unittest_run_loop
+    async def test_button_volume_down(self):
+        await self.atv.remote_control.volume_down()
+        await until(lambda: self.state.last_button_pressed == "volumedown")
+
     def test_metadata_device_id(self):
         self.assertIn(self.atv.metadata.device_id, self.conf.all_identifiers)
 
@@ -515,3 +525,21 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertEqual(playing.title, "dummy")
         self.assertEqual(playing.total_time, 123)
         self.assertEqual(playing.position, 3)
+
+    @unittest_run_loop
+    async def test_volume_controls(self):
+        controls = [FeatureName.VolumeUp, FeatureName.VolumeDown]
+
+        self.assertFeatures(FeatureState.Unavailable, *controls)
+
+        self.usecase.change_volume_control(available=False)
+        self.usecase.example_video()
+        await self.playing(title="dummy")
+
+        self.assertFeatures(FeatureState.Unavailable, *controls)
+
+        self.usecase.change_volume_control(available=True)
+        self.usecase.example_video(title="dummy2")
+        await self.playing(title="dummy2")
+
+        self.assertFeatures(FeatureState.Available, *controls)

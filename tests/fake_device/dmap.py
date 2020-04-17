@@ -67,6 +67,7 @@ class FakeDmapState:
         self.playing = PlayingResponse()
         self.pairing_responses = {}  # Remote name -> expected code
         self.session = None
+        self.volume_controls = False
         self.last_button_pressed = None
         self.buttons_press_count = 0
 
@@ -120,7 +121,16 @@ class FakeDmapService:
         )
         self.app.router.add_get("/ctrl-int/1/nowplayingartwork", self.handle_artwork)
         self.app.router.add_post("/ctrl-int/1/setproperty", self.handle_set_property)
-        for button in ["play", "playpause", "pause", "stop", "nextitem", "previtem"]:
+        for button in [
+            "play",
+            "playpause",
+            "pause",
+            "stop",
+            "nextitem",
+            "previtem",
+            "volumedown",
+            "volumeup",
+        ]:
             self.app.router.add_post(
                 "/ctrl-int/1/" + button, self.handle_playback_button
             )
@@ -236,7 +246,6 @@ class FakeDmapService:
 
             if playing.position is not None:
                 pos = playing.total_time - playing.position
-                print(playing.total_time, playing.position, pos * 1000)
                 body += tags.uint32_tag("cant", pos * 1000)  # sec -> ms
 
         if playing.mediakind is not None:
@@ -247,6 +256,9 @@ class FakeDmapService:
 
         if playing.shuffle is not None:
             body += tags.uint8_tag("cash", playing.shuffle.value)
+
+        if self.state.volume_controls is not None:
+            body += tags.uint8_tag("cavc", self.state.volume_controls)
 
         body += tags.uint32_tag("cmsr", playing.revision + 1)
 
@@ -313,6 +325,10 @@ class FakeDmapUseCases:
     def __init__(self, state):
         """Initialize a new AppleTVUseCases."""
         self.state = state
+
+    def change_volume_control(self, available):
+        """Change volume control availability."""
+        self.state.volume_controls = available
 
     def force_relogin(self, session):
         """Call this method to change current session id."""

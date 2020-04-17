@@ -583,8 +583,6 @@ class MrpFeatures(Features):
             return FeatureInfo(state=FeatureState.Unavailable)
 
         if feature in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
-            if self.psm.volume_controls_available is None:
-                return FeatureInfo(state=FeatureState.Unknown)
             if self.psm.volume_controls_available:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
