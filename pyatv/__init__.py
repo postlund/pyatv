@@ -185,7 +185,7 @@ class ZeroconfScanner(BaseScanner):
 class UnicastMdnsScanner(BaseScanner):
     """Service discovery based on unicast MDNS."""
 
-    def __init__(self, hosts: List[str], loop: asyncio.AbstractEventLoop):
+    def __init__(self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop):
         """Initialize a new UnicastMdnsScanner."""
         super().__init__()
         self.hosts = hosts
@@ -201,18 +201,18 @@ class UnicastMdnsScanner(BaseScanner):
                 self._handle_response(host, response)
         return self._found_devices
 
-    async def _get_services(self, host: str, timeout: int):
+    async def _get_services(self, host: IPv4Address, timeout: int):
         port = int(os.environ.get("PYATV_UDNS_PORT", 5353))  # For testing purposes
         services = [s[0:-1] for s in ALL_SERVICES]
         try:
             response = await udns.request(
-                self.loop, host, services, port=port, timeout=timeout
+                self.loop, str(host), services, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
             response = None
         return host, response
 
-    def _handle_response(self, host: int, response: udns.DnsMessage):
+    def _handle_response(self, host: IPv4Address, response: udns.DnsMessage):
         for resource in response.resources:
             if resource.qtype != udns.QTYPE_TXT:
                 continue
@@ -269,7 +269,7 @@ async def scan(
 
     scanner: BaseScanner
     if hosts:
-        scanner = UnicastMdnsScanner(hosts, loop)
+        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
     else:
         scanner = ZeroconfScanner(loop)
 
