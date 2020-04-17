@@ -143,7 +143,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     @unittest_run_loop
     async def test_button_unsupported_raises(self):
-        buttons = ["home", "volume_up", "volume_down", "suspend", "wakeup"]
+        buttons = ["home", "suspend", "wakeup"]
         for button in buttons:
             with self.assertRaises(exceptions.NotSupportedError):
                 await getattr(self.atv.remote_control, button)()
@@ -218,8 +218,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def test_unsupported_features(self):
         self.assertFeatures(
             FeatureState.Unsupported,
-            FeatureName.VolumeUp,
-            FeatureName.VolumeDown,
             FeatureName.Home,
             FeatureName.HomeHold,
             FeatureName.Suspend,

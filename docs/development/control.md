@@ -24,6 +24,7 @@ You can then control via the available functions:
 ```python
 await rc.up()
 await rc.select()
+await rc.volume_up()
 await rc.set_position(100)
 ```
 

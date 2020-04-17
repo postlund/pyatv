@@ -65,16 +65,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await until(lambda: self.state.last_button_pressed == "home")
 
     @unittest_run_loop
-    async def test_button_volume_up(self):
-        await self.atv.remote_control.volume_up()
-        await until(lambda: self.state.last_button_pressed == "volume_up")
-
-    @unittest_run_loop
-    async def test_button_volume_down(self):
-        await self.atv.remote_control.volume_down()
-        await until(lambda: self.state.last_button_pressed == "volume_down")
-
-    @unittest_run_loop
     async def test_button_suspend(self):
         await self.atv.remote_control.suspend()
         await until(lambda: self.state.last_button_pressed == "suspend")
@@ -252,24 +242,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         )
         await self.playing(title="dummy2")
         self.assertFeatures(FeatureState.Available, *feature_map.keys())
-
-    @unittest_run_loop
-    async def test_volume_controls(self):
-        controls = [FeatureName.VolumeUp, FeatureName.VolumeDown]
-
-        self.assertFeatures(FeatureState.Unknown, *controls)
-
-        self.usecase.change_volume_control(available=False)
-        self.usecase.example_video()
-        await self.playing(title="dummy")
-
-        self.assertFeatures(FeatureState.Unavailable, *controls)
-
-        self.usecase.change_volume_control(available=True)
-        self.usecase.example_video(title="dummy2")
-        await self.playing(title="dummy2")
-
-        self.assertFeatures(FeatureState.Available, *controls)
 
     @unittest_run_loop
     async def test_playing_app(self):
