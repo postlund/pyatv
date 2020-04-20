@@ -5,6 +5,13 @@ import pytest
 from pyatv.support.net import unused_port
 
 from tests.fake_knock import create_knock_server
+from tests.utils import stub_sleep
+
+
+@pytest.fixture(autouse=True, name="stub_sleep")
+def stub_sleep_fixture():
+    stub_sleep()
+    yield
 
 
 @pytest.fixture

@@ -66,6 +66,7 @@ class FakeUdns(asyncio.Protocol):
         self.loop = loop
         self.server = None
         self.services = services or {}
+        self.skip_count = 0  # Ignore sending respone to this many requests
 
     async def start(self):
         _LOGGER.debug("Starting fake UDNS server")
@@ -83,12 +84,21 @@ class FakeUdns(asyncio.Protocol):
     def port(self):
         return self.server.get_extra_info("socket").getsockname()[1]
 
+    @property
+    def request_count(self):
+        return self._recv_count
+
     def connection_made(self, transport):
         self.transport = transport
 
     def datagram_received(self, data, addr):
         msg = udns.DnsMessage().unpack(data)
         _LOGGER.debug("Received DNS request: %s", msg)
+
+        if self.skip_count > 0:
+            _LOGGER.debug("Not sending DNS response (%d)", self.skip_count)
+            self.skip_count -= 1
+            return
 
         resp = udns.DnsMessage()
         resp.flags = 0x0840

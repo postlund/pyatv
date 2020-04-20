@@ -34,10 +34,14 @@ async def udns_server(event_loop):
     server.close()
 
 
-async def request(event_loop, udns_server, service_name):
+async def request(event_loop, udns_server, service_name, timeout=1):
     return (
         await udns.request(
-            event_loop, "127.0.0.1", [service_name], port=udns_server.port, timeout=1
+            event_loop,
+            "127.0.0.1",
+            [service_name],
+            port=udns_server.port,
+            timeout=timeout,
         ),
         TEST_SERVICES.get(service_name),
     )
@@ -135,3 +139,12 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
     assert len(rd) == len(data.properties)
     for k, v in data.properties.items():
         assert rd[k.encode("ascii")] == v.encode("ascii")
+
+
+@pytest.mark.asyncio
+async def test_resend_if_no_response(event_loop, udns_server):
+    udns_server.skip_count = 2
+    resp, _ = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
+    assert len(resp.questions) == 1
+    assert len(resp.answers) == 1
+    assert len(resp.resources) == 2
