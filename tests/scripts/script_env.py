@@ -114,7 +114,15 @@ class ScriptTest(AioHTTPTestCase):
             udns_port = str(self.fake_udns.port)
             with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port}):
                 with faketime("pyatv", 0):
-                    module = import_module(f"pyatv.scripts.{script}")
-                    self.retcode = await module.appstart(self.loop)
-                    self.stdout = out.getvalue()
-                    self.stderr = err.getvalue()
+                    # Stub away port knocking and ignore result (not tested here)
+                    with patch("pyatv.support.knock.knock") as mock_knock:
+
+                        async def _no_action(*args):
+                            pass
+
+                        mock_knock.side_effect = _no_action
+
+                        module = import_module(f"pyatv.scripts.{script}")
+                        self.retcode = await module.appstart(self.loop)
+                        self.stdout = out.getvalue()
+                        self.stderr = err.getvalue()

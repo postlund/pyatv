@@ -1,0 +1,40 @@
+"""Module used to knock on TCP ports.
+
+This module will open a TCP-connection to one or more ports on a given host and
+immediately close it. The use case for this is to wake a device sleeping via a Bonjour
+sleep proxy. Such a device will automatically be woken up in case any of its services
+are accessed, something this module will try to emulate.
+"""
+
+import socket
+import select
+import asyncio
+import logging
+
+from typing import List
+from ipaddress import IPv4Address
+
+_LOGGER = logging.getLogger(__name__)
+
+
+# Performs the actual "knock". This can most certainly be done with asyncio code, but
+# works for now.
+def _synch_knock(address: IPv4Address, port: int):
+    _LOGGER.debug("Knocking at port %d on %s", port, address)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setblocking(False)
+
+    socket_address = (str(address), port)
+    s.connect_ex(socket_address)
+    select.select([s], [s], [s], 0.1)
+    s.close()
+
+
+async def knock(
+    address: IPv4Address, ports: List[int], loop: asyncio.AbstractEventLoop
+):
+    """Knock on a set of ports for a given host."""
+    await asyncio.wait(
+        [loop.run_in_executor(None, _synch_knock, address, port) for port in ports]
+    )

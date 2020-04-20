@@ -20,7 +20,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.support import net, udns
+from pyatv.support import net, knock, udns
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +36,11 @@ ALL_SERVICES = [
     MEDIAREMOTE_SERVICE,
     AIRPLAY_SERVICE,
 ]
+
+# These ports have been "arbitrarily" chosen (see issue #580) because a device normally
+# listen on them (more or less). They are used as best-effort when for unicast scanning
+# to try to wake up a device. Both issue #580 and #595 are good references to read.
+KNOCK_PORTS = [3689, 7000, 49152, 32498]
 
 
 def _decode_properties(properties) -> Dict[str, str]:
@@ -205,6 +210,7 @@ class UnicastMdnsScanner(BaseScanner):
         port = int(os.environ.get("PYATV_UDNS_PORT", 5353))  # For testing purposes
         services = [s[0:-1] for s in ALL_SERVICES]
         try:
+            await knock.knock(host, KNOCK_PORTS, self.loop)
             response = await udns.request(
                 self.loop, str(host), services, port=port, timeout=timeout
             )
