@@ -486,7 +486,7 @@ async def _autodiscover_device(args, loop):
     _set_credentials(Protocol.MRP, "mrp_credentials")
     _set_credentials(Protocol.AirPlay, "airplay_credentials")
 
-    logging.info("Auto-discovered %s at %s", args.name, args.address)
+    logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
     return apple_tv
 

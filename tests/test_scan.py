@@ -41,6 +41,8 @@ MRP_SERVICE_2 = zeroconf_stub.mrp_service("EEEE", b"Apple TV 5", IP_5, MRP_ID_2)
 AIRPLAY_SERVICE_1 = zeroconf_stub.airplay_service("Apple TV 6", IP_6, AIRPLAY_ID)
 AIRPLAY_SERVICE_2 = zeroconf_stub.airplay_service("Apple TV 4", IP_4, AIRPLAY_ID)
 
+DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
+
 
 def _get_atv(atvs, ip):
     for atv in atvs:
@@ -58,8 +60,10 @@ def assert_device(atv, name, address, identifier, protocol, port, creds=None):
     assert atv.get_service(protocol).credentials == creds
 
 
+# stub_knock_server is added here to make sure all UDNS tests uses a stubbed
+# knock server
 @pytest.fixture
-async def udns_server(event_loop):
+async def udns_server(event_loop, stub_knock_server):
     server = fake_udns.FakeUdns(event_loop)
     await server.start()
     yield server
@@ -248,7 +252,7 @@ async def test_udns_scan_homesharing(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_scan_no_homesharing(udns_server, udns_scan):
+async def test_udns_scan_no_homesharing(udns_server, udns_scan):
     udns_server.add_service(fake_udns.device_service("Apple TV", "Apple TV Device"))
 
     atvs = await udns_scan()
@@ -265,7 +269,7 @@ async def test_scan_no_homesharing(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_scan_device_info(udns_server, udns_scan):
+async def test_udns_scan_device_info(udns_server, udns_scan):
     udns_server.add_service(fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1))
     udns_server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
 
@@ -274,3 +278,9 @@ async def test_scan_device_info(udns_server, udns_scan):
 
     device_info = atvs[0].device_info
     assert device_info.mac == AIRPLAY_ID
+
+
+@pytest.mark.asyncio
+async def test_udns_scan_port_knock(udns_scan, stub_knock_server):
+    await udns_scan()
+    assert stub_knock_server == DEFAULT_KNOCK_PORTS
