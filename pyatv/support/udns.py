@@ -1,4 +1,5 @@
 """Minimalistic unicast DNS-SD implementation."""
+import math
 import asyncio
 import struct
 import logging
@@ -202,30 +203,37 @@ class DnsMessage:
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
     """Protocol to make unicast MDNS requests."""
 
-    def __init__(self, loop, services, host):
+    def __init__(self, loop, services, host, timeout):
         """Initialize a new UnicastDnsSdClientProtocol."""
         self.message = create_request(services)
         self.host = host
+        self.timeout = timeout
         self.loop = loop
         self.transport = None
         self.semaphore = asyncio.Semaphore(value=0, loop=loop)
         self.result = None
+        self._task = None
 
-    async def get_response(self, timeout):
+    async def get_response(self):
         """Get respoonse with a maximum timeout."""
         await asyncio.wait_for(
-            self.semaphore.acquire(), timeout=timeout, loop=self.loop
+            self.semaphore.acquire(), timeout=self.timeout, loop=self.loop
         )
         return self.result
 
     def connection_made(self, transport):
         """Establish connection to host."""
-        log_binary(
-            _LOGGER, "Sending DNS request to " + str(self.host), Data=self.message
-        )
-
         self.transport = transport
-        self.transport.sendto(self.message)
+        self._task = asyncio.ensure_future(self._resend_loop())
+
+    async def _resend_loop(self):
+        for _ in range(math.ceil(self.timeout)):
+            log_binary(
+                _LOGGER, "Sending DNS request to " + str(self.host), Data=self.message
+            )
+
+            self.transport.sendto(self.message)
+            await asyncio.sleep(1)
 
     def datagram_received(self, data, _):
         """DNS response packet received."""
@@ -233,15 +241,22 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
         self.result = DnsMessage().unpack(data)
         self.transport.close()
+        self._finished()
 
     def error_received(self, exc):
         """Error received during communication."""
         _LOGGER.debug("Error during DNS lookup for %s: %s", self.host, exc)
-        self.semaphore.release()
+        self._finished()
 
     def connection_lost(self, exc):
         """Lose connection to host."""
+        self._finished()
+
+    def _finished(self):
+        _LOGGER.debug("Cleaning up after UDNS request")
         self.semaphore.release()
+        if self._task:
+            self._task.cancel()
 
 
 async def request(
@@ -258,12 +273,11 @@ async def request(
         )
 
     transport, protocol = await loop.create_datagram_endpoint(
-        lambda: UnicastDnsSdClientProtocol(loop, services, address),
+        lambda: UnicastDnsSdClientProtocol(loop, services, address, timeout),
         remote_addr=(address, port),
     )
 
     try:
-
-        return await cast(UnicastDnsSdClientProtocol, protocol).get_response(timeout)
+        return await cast(UnicastDnsSdClientProtocol, protocol).get_response()
     finally:
         transport.close()
