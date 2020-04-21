@@ -12,7 +12,7 @@ from pyatv.support import error_handler, log_binary, log_protobuf
 from pyatv.mrp.protobuf import ProtocolMessage
 
 
-class TestException(Exception):
+class DummyException(Exception):
     pass
 
 
@@ -46,32 +46,32 @@ async def test_error_handler_return_value():
     async def _returns():
         return 123
 
-    assert await error_handler(_returns, TestException) == 123
+    assert await error_handler(_returns, DummyException) == 123
 
 
 async def test_error_handleroserror():
     with pytest.raises(exceptions.ConnectionFailedError):
-        await error_handler(doraise, TestException, OSError)
+        await error_handler(doraise, DummyException, OSError)
 
 
 async def test_error_handler_timeout():
     with pytest.raises(exceptions.ConnectionFailedError):
-        await error_handler(doraise, TestException, asyncio.TimeoutError)
+        await error_handler(doraise, DummyException, asyncio.TimeoutError)
 
 
 async def test_error_handler_backoff():
     with pytest.raises(exceptions.BackOffError):
-        await error_handler(doraise, TestException, exceptions.BackOffError)
+        await error_handler(doraise, DummyException, exceptions.BackOffError)
 
 
 async def test_error_handler_no_credentials():
     with pytest.raises(exceptions.NoCredentialsError):
-        await error_handler(doraise, TestException, exceptions.NoCredentialsError)
+        await error_handler(doraise, DummyException, exceptions.NoCredentialsError)
 
 
 async def test_error_handler_other_exception():
-    with pytest.raises(TestException):
-        await error_handler(doraise, TestException, Exception)
+    with pytest.raises(DummyException):
+        await error_handler(doraise, DummyException, Exception)
 
 
 def test_log_binary_no_log_if_not_debug(logger):

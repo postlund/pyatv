@@ -203,21 +203,20 @@ class DnsMessage:
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
     """Protocol to make unicast MDNS requests."""
 
-    def __init__(self, loop, services, host, timeout):
+    def __init__(self, services, host, timeout):
         """Initialize a new UnicastDnsSdClientProtocol."""
         self.message = create_request(services)
         self.host = host
         self.timeout = timeout
-        self.loop = loop
         self.transport = None
-        self.semaphore = asyncio.Semaphore(value=0, loop=loop)
+        self.semaphore = asyncio.Semaphore(value=0)
         self.result = None
         self._task = None
 
     async def get_response(self):
         """Get respoonse with a maximum timeout."""
         await asyncio.wait_for(
-            self.semaphore.acquire(), timeout=self.timeout, loop=self.loop
+            self.semaphore.acquire(), timeout=self.timeout,
         )
         return self.result
 
@@ -273,7 +272,7 @@ async def request(
         )
 
     transport, protocol = await loop.create_datagram_endpoint(
-        lambda: UnicastDnsSdClientProtocol(loop, services, address, timeout),
+        lambda: UnicastDnsSdClientProtocol(services, address, timeout),
         remote_addr=(address, port),
     )
 

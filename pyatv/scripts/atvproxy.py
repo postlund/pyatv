@@ -78,7 +78,6 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         """Start the proxy instance."""
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
-            self.loop,
             self.connection,
             SRPAuthHandler(),
             MrpService(None, port, credentials=credentials),

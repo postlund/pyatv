@@ -23,7 +23,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.conf.add_service(self.service)
 
     async def tearDownAsync(self):
-        if inspect.iscoroutinefunction(self.handle):
+        if inspect.iscoroutinefunction(self.handle.close):
             await self.handle.close()
         else:
             self.handle.close()
