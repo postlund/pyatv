@@ -122,7 +122,12 @@ def _cocoa_to_timestamp(time):
 class MrpRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
 
-    def __init__(self, loop, psm, protocol) -> None:
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        psm: PlayerStateManager,
+        protocol: MrpProtocol,
+    ) -> None:
         """Initialize a new MrpRemoteControl."""
         self.loop = loop
         self.psm = psm
@@ -181,7 +186,16 @@ class MrpRemoteControl(RemoteControl):
 
     async def play_pause(self) -> None:
         """Toggle between play and pause."""
-        await self._send_command(CommandInfo_pb2.TogglePlayPause)
+        # Cannot use the feature interface here since it emulates the feature state
+        cmd = self.psm.playing.command_info(CommandInfo_pb2.TogglePlayPause)
+        if cmd and cmd.enabled:
+            await self._send_command(CommandInfo_pb2.TogglePlayPause)
+        else:
+            state = self.psm.playing.playback_state
+            if state == ssm.Playing:
+                await self.pause()
+            elif state == ssm.Paused:
+                await self.play()
 
     async def pause(self) -> None:
         """Press key play."""
@@ -570,6 +584,21 @@ class MrpFeatures(Features):
                 state=FeatureState.Available if available else FeatureState.Unavailable
             )
 
+        # Special case for PlayPause emulation. Based on the behavior in the Youtube
+        # app, only the "opposite" feature to current state is available. E.g. if
+        # something is playing, then pause will be available but not play. So take that
+        # into consideration here.
+        if feature == FeatureName.PlayPause:
+            playback_state = self.psm.playing.playback_state
+            if playback_state == ssm.Playing and self.in_state(
+                FeatureState.Available, FeatureName.Pause
+            ):
+                return FeatureInfo(state=FeatureState.Available)
+            if playback_state == ssm.Paused and self.in_state(
+                FeatureState.Available, FeatureName.Play
+            ):
+                return FeatureInfo(state=FeatureState.Available)
+
         cmd_id = _FEATURE_COMMAND_MAP.get(feature)
         if cmd_id:
             cmd = self.psm.playing.command_info(cmd_id)
@@ -596,7 +625,11 @@ class MrpAppleTV(AppleTV):
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
     def __init__(
-        self, loop, session: ClientSession, config: conf.AppleTV, airplay: Stream
+        self,
+        loop: asyncio.AbstractEventLoop,
+        session: ClientSession,
+        config: conf.AppleTV,
+        airplay: Stream,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()

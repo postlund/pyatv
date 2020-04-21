@@ -7,7 +7,17 @@ all its features.
 import re
 import inspect
 import hashlib
-from typing import Any, Dict, Optional, NamedTuple, Callable, TypeVar, Tuple
+from typing import (
+    Any,
+    Dict,
+    Optional,
+    NamedTuple,
+    Callable,
+    TypeVar,
+    Tuple,
+    Union,
+    List,
+)
 import weakref
 
 from abc import ABC, abstractmethod
@@ -757,6 +767,24 @@ class Features(ABC):
             if feature.state != FeatureState.Unsupported or include_unsupported:
                 features[name] = feature
         return features
+
+    def in_state(
+        self,
+        states: Union[List[FeatureState], FeatureState],
+        *feature_names: FeatureName
+    ):
+        """Return if features are in a specific state.
+
+        This method will return True if all given features are in the state specified
+        by "states". If "states" is a list of states, it is enough for the feature to be
+        in one of the listed states.
+        """
+        for name in feature_names:
+            feature = self.get_feature(name)
+            expected_states = states if isinstance(states, list) else [states]
+            if feature.state not in expected_states:
+                return False
+        return True
 
 
 class AppleTV(ABC, StateProducer):

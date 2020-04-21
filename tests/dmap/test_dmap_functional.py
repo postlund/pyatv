@@ -154,6 +154,11 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await until(lambda: self.state.last_button_pressed == "topmenu")
 
     @unittest_run_loop
+    async def test_button_play_pause(self):
+        await self.atv.remote_control.play_pause()
+        await until(lambda: self.state.last_button_pressed == "playpause")
+
+    @unittest_run_loop
     async def test_shuffle_state_albums(self):
         # DMAP does not support "albums" as shuffle state, so it is
         # mapped to "songs"
