@@ -294,3 +294,30 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title="dummy4")
         metadata = await self.playing(title="dummy4")
         self.assertEqual(metadata.position, prev_position - 8)
+
+    @unittest_run_loop
+    async def test_button_play_pause(self):
+        self.usecase.example_video(supported_commands=[CommandInfo_pb2.TogglePlayPause])
+
+        await self.playing(title="dummy")
+        await self.atv.remote_control.play_pause()
+        await until(lambda: self.state.last_button_pressed == "playpause")
+
+    @unittest_run_loop
+    async def test_play_pause_emulation(self):
+        self.usecase.example_video(paused=False)
+        await self.playing(device_state=DeviceState.Playing)
+        self.assertFeatures(FeatureState.Unavailable, FeatureName.PlayPause)
+
+        await self.atv.remote_control.play_pause()
+        await until(lambda: self.state.last_button_pressed == "pause")
+
+        self.usecase.example_video(
+            paused=True,
+            supported_commands=[CommandInfo_pb2.Play, CommandInfo_pb2.Pause],
+        )
+        await self.playing(device_state=DeviceState.Paused)
+        self.assertFeatures(FeatureState.Available, FeatureName.PlayPause)
+
+        await self.atv.remote_control.play_pause()
+        await until(lambda: self.state.last_button_pressed == "play")

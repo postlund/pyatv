@@ -45,7 +45,26 @@ else:
 The state of all features can be obtained via {% include api i="interface.Features.all_features" %}. By default, this method will exclude unsupported features. Pass `include_unsupported=True` when calling to include state of all features:
 
 ```python
-all_features = ft.features.all_features(include_unsupported=unsupported)
+all_features = ft.all_features(include_unsupported=unsupported)
 for name, feature in all_features.items():
     print(f"{name} = {feature.state}")
+```
+
+There's a helper method, {% include api i="interface.Features.in_state" %}, that checks if one or
+more features are in one or several states:
+
+```python
+# Check if Play is available
+if ft.in_state(FeatureState.Available, FeatureName.Play):
+    pass
+
+# Check if Play is either available or unsupported
+if ft.in_state([FeatureState.Available, FeatureState.Unsupported],
+               FeatureName.Play):
+    pass
+
+# Check if Play *and* Pause are supported
+if not ft.in_state(FeatureName.Unsupported, FeatureName.Play, FeatureName.Pause):
+    pass
+
 ```

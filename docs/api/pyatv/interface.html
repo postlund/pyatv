@@ -87,6 +87,7 @@ link_group: api
 <ul class="">
 <li><code><a title="pyatv.interface.Features.all_features" href="#pyatv.interface.Features.all_features">all_features</a></code></li>
 <li><code><a title="pyatv.interface.Features.get_feature" href="#pyatv.interface.Features.get_feature">get_feature</a></code></li>
+<li><code><a title="pyatv.interface.Features.in_state" href="#pyatv.interface.Features.in_state">in_state</a></code></li>
 </ul>
 </li>
 <li>
@@ -223,7 +224,17 @@ all its features.
 import re
 import inspect
 import hashlib
-from typing import Any, Dict, Optional, NamedTuple, Callable, TypeVar, Tuple
+from typing import (
+    Any,
+    Dict,
+    Optional,
+    NamedTuple,
+    Callable,
+    TypeVar,
+    Tuple,
+    Union,
+    List,
+)
 import weakref
 
 from abc import ABC, abstractmethod
@@ -973,6 +984,24 @@ class Features(ABC):
             if feature.state != FeatureState.Unsupported or include_unsupported:
                 features[name] = feature
         return features
+
+    def in_state(
+        self,
+        states: Union[List[FeatureState], FeatureState],
+        *feature_names: FeatureName
+    ):
+        &#34;&#34;&#34;Return if features are in a specific state.
+
+        This method will return True if all given features are in the state specified
+        by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
+        in one of the listed states.
+        &#34;&#34;&#34;
+        for name in feature_names:
+            feature = self.get_feature(name)
+            expected_states = states if isinstance(states, list) else [states]
+            if feature.state not in expected_states:
+                return False
+        return True
 
 
 class AppleTV(ABC, StateProducer):
@@ -1771,7 +1800,25 @@ def connection_lost(self, exception: Exception) -&gt; None:
             feature = self.get_feature(name)
             if feature.state != FeatureState.Unsupported or include_unsupported:
                 features[name] = feature
-        return features</code></pre>
+        return features
+
+    def in_state(
+        self,
+        states: Union[List[FeatureState], FeatureState],
+        *feature_names: FeatureName
+    ):
+        &#34;&#34;&#34;Return if features are in a specific state.
+
+        This method will return True if all given features are in the state specified
+        by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
+        in one of the listed states.
+        &#34;&#34;&#34;
+        for name in feature_names:
+            feature = self.get_feature(name)
+            expected_states = states if isinstance(states, list) else [states]
+            if feature.state not in expected_states:
+                return False
+        return True</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1816,6 +1863,37 @@ def connection_lost(self, exception: Exception) -&gt; None:
 def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
     &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
     raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.Features.in_state"><code class="name flex">
+<span>def <span class="ident">in_state</span></span>(<span>self, states: Union[List[pyatv.const.FeatureState], pyatv.const.FeatureState], *feature_names: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return if features are in a specific state.</p>
+<p>This method will return True if all given features are in the state specified
+by "states". If "states" is a list of states, it is enough for the feature to be
+in one of the listed states.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def in_state(
+    self,
+    states: Union[List[FeatureState], FeatureState],
+    *feature_names: FeatureName
+):
+    &#34;&#34;&#34;Return if features are in a specific state.
+
+    This method will return True if all given features are in the state specified
+    by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
+    in one of the listed states.
+    &#34;&#34;&#34;
+    for name in feature_names:
+        feature = self.get_feature(name)
+        expected_states = states if isinstance(states, list) else [states]
+        if feature.state not in expected_states:
+            return False
+    return True</code></pre>
 </details>
 </dd>
 </dl>
