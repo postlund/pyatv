@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -31,11 +32,12 @@ async def knock_server(event_loop):
 
 @pytest.fixture
 def stub_knock_server():
-    knocked_ports = set()
     with patch("pyatv.support.knock.knock") as knock:
+        info = SimpleNamespace(ports=set(), knock_count=0)
 
         async def _stub_knock(address, ports, loop):
-            knocked_ports.update(ports)
+            info.ports.update(ports)
+            info.knock_count += 1
 
         knock.side_effect = _stub_knock
-        yield knocked_ports
+        yield info

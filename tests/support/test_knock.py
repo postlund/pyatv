@@ -5,7 +5,7 @@ from ipaddress import ip_address
 import pytest
 
 from pyatv.support.net import unused_port
-from pyatv.support.knock import knock
+from pyatv.support.knock import knock, knocker
 
 from tests.fake_knock import create_knock_server
 from tests.utils import until
@@ -27,3 +27,10 @@ async def test_multi_port_knock(event_loop, knock_server):
     await knock(LOCALHOST, [server1.port, server2.port], event_loop)
     await until(lambda: server1.got_knock)
     await until(lambda: server2.got_knock)
+
+
+@pytest.mark.asyncio
+async def test_continuous_knocking(event_loop, knock_server):
+    server = await knock_server()
+    await knocker(LOCALHOST, [server.port], event_loop, timeout=6)
+    await until(lambda: server.count == 3)

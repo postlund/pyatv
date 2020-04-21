@@ -72,10 +72,10 @@ async def udns_server(event_loop, stub_knock_server):
 
 @pytest.fixture
 async def udns_scan(event_loop, udns_server):
-    async def _scan():
+    async def _scan(timeout=1):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
-            return await pyatv.scan(event_loop, hosts=[IP_LOCALHOST])
+            return await pyatv.scan(event_loop, hosts=[IP_LOCALHOST], timeout=timeout)
 
     yield _scan
 
@@ -283,4 +283,5 @@ async def test_udns_scan_device_info(udns_server, udns_scan):
 @pytest.mark.asyncio
 async def test_udns_scan_port_knock(udns_scan, stub_knock_server):
     await udns_scan()
-    assert stub_knock_server == DEFAULT_KNOCK_PORTS
+    assert stub_knock_server.ports == DEFAULT_KNOCK_PORTS
+    assert stub_knock_server.knock_count == 1
