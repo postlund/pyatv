@@ -22,7 +22,7 @@ class MrpPairingHandler(PairingHandler):
         super().__init__(session, config.get_service(Protocol.MRP))
         self.connection = MrpConnection(config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
-        self.protocol = MrpProtocol(loop, self.connection, self.srp, self.service)
+        self.protocol = MrpProtocol(self.connection, self.srp, self.service)
         self.pairing_procedure = MrpPairingProcedure(self.protocol, self.srp)
         self.pin_code = None
         self._has_paired = False

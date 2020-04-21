@@ -29,9 +29,8 @@ class MrpProtocol:
     It provides an API for sending and receiving messages.
     """
 
-    def __init__(self, loop, connection, srp, service):
+    def __init__(self, connection, srp, service):
         """Initialize a new MrpProtocol."""
-        self.loop = loop
         self.connection = connection
         self.connection.listener = self
         self.srp = srp
@@ -139,12 +138,12 @@ class MrpProtocol:
         return await self._receive(identifier, timeout)
 
     async def _receive(self, identifier, timeout):
-        semaphore = asyncio.Semaphore(value=0, loop=self.loop)
+        semaphore = asyncio.Semaphore(value=0)
         self._outstanding[identifier] = OutstandingMessage(semaphore, None)
 
         try:
             # The connection instance will dispatch the message
-            await asyncio.wait_for(semaphore.acquire(), timeout, loop=self.loop)
+            await asyncio.wait_for(semaphore.acquire(), timeout)
 
         except:  # noqa
             del self._outstanding[identifier]
@@ -176,4 +175,4 @@ class MrpProtocol:
                 type(message.inner()).__name__,
                 listener,
             )
-            asyncio.ensure_future(listener.func(message, listener.data), loop=self.loop)
+            asyncio.ensure_future(listener.func(message, listener.data))
