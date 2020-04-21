@@ -9,6 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 class KnockServer(asyncio.Protocol):
     def __init__(self, port):
         self.got_knock = False
+        self.count = 0
         self.port = port
 
     def connection_made(self, transport):
@@ -19,6 +20,7 @@ class KnockServer(asyncio.Protocol):
 
     def connection_lost(self, exc):
         self.got_knock = True
+        self.count += 1
         self.transport = None
 
     def data_received(self, data):
