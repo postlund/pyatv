@@ -302,6 +302,8 @@ async def appstart(loop):
 
     loop.set_exception_handler(_handle_exception)
 
+    _LOGGER.debug("Started atvscript")
+
     try:
         print(args.output(await _handle_command(args, abort_sem, loop)), flush=True)
     except Exception as ex:
