@@ -56,3 +56,13 @@ This is no longer the case. From `pyatv` 0.5.0, pure AirPlay devices are no long
 
 No, the library is implemented with asyncio, introduced in python 3.4. A plain
 synchronous library is currently out of scope and not a priority.
+
+## Apps (tvOS)
+
+Some apps behave in unexpected ways that are out of control of this library, i.e. nothing can be done in `pyatv` to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
+
+### Netflix (com.netflix.Netflix)
+
+* Previews in the main menu yields play status updates (usually with what was played most recently, not content of the preview). A workaround is to disable these previews, see [this](https://help.netflix.com/sv/node/2102) page.
+* During episode intros and "next episode" screens the device goes to idle state.
+* Sometimes the app name in {% include api i="interface.Metadata.app" %} is never set.
