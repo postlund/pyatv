@@ -9,6 +9,10 @@ from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from pyatv.mrp.protobuf.PlayerPath_pb2 import (
+    PlayerPath as pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath,
+)
+
 from pyatv.mrp.protobuf.TransactionPackets_pb2 import (
     TransactionPackets as pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets,
 )
@@ -39,10 +43,14 @@ class TransactionMessage(google___protobuf___message___Message):
     @property
     def packets(self) -> pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets: ...
 
+    @property
+    def playerPath(self) -> pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath: ...
+
     def __init__(self,
         *,
         name : typing___Optional[builtin___int] = None,
         packets : typing___Optional[pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets] = None,
+        playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -52,8 +60,8 @@ class TransactionMessage(google___protobuf___message___Message):
         def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets",u"playerPath",b"playerPath"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets",u"playerPath",b"playerPath"]) -> None: ...
 global___TransactionMessage = TransactionMessage
 
 transactionMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

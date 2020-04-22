@@ -13,6 +13,7 @@ _sym_db = _symbol_database.Default()
 
 from pyatv.mrp.protobuf import TransactionPackets_pb2 as pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
+from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -20,9 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n+pyatv/mrp/protobuf/TransactionMessage.proto\x1a+pyatv/mrp/protobuf/TransactionPackets.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"H\n\x12TransactionMessage\x12\x0c\n\x04name\x18\x01 \x01(\x04\x12$\n\x07packets\x18\x02 \x01(\x0b\x32\x13.TransactionPackets:A\n\x12transactionMessage\x12\x10.ProtocolMessage\x18& \x01(\x0b\x32\x13.TransactionMessage'
+  serialized_pb=b'\n+pyatv/mrp/protobuf/TransactionMessage.proto\x1a+pyatv/mrp/protobuf/TransactionPackets.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"i\n\x12TransactionMessage\x12\x0c\n\x04name\x18\x01 \x01(\x04\x12$\n\x07packets\x18\x02 \x01(\x0b\x32\x13.TransactionPackets\x12\x1f\n\nplayerPath\x18\x03 \x01(\x0b\x32\x0b.PlayerPath:A\n\x12transactionMessage\x12\x10.ProtocolMessage\x18& \x01(\x0b\x32\x13.TransactionMessage'
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
 
 
 TRANSACTIONMESSAGE_FIELD_NUMBER = 38
@@ -56,6 +57,13 @@ _TRANSACTIONMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='playerPath', full_name='TransactionMessage.playerPath', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -68,11 +76,12 @@ _TRANSACTIONMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=134,
-  serialized_end=206,
+  serialized_start=171,
+  serialized_end=276,
 )
 
 _TRANSACTIONMESSAGE.fields_by_name['packets'].message_type = pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2._TRANSACTIONPACKETS
+_TRANSACTIONMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
 DESCRIPTOR.message_types_by_name['TransactionMessage'] = _TRANSACTIONMESSAGE
 DESCRIPTOR.extensions_by_name['transactionMessage'] = transactionMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
