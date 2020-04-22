@@ -59,6 +59,7 @@ class TextInputTraits(google___protobuf___message___Message):
     WORDS = typing___cast('TextInputTraits.AutocapitalizationType', 1)
     SENTENCES = typing___cast('TextInputTraits.AutocapitalizationType', 2)
     CHARACTERS = typing___cast('TextInputTraits.AutocapitalizationType', 3)
+    global___AutocapitalizationType = AutocapitalizationType
 
     class KeyboardType(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
@@ -94,6 +95,7 @@ class TextInputTraits(google___protobuf___message___Message):
     DECIMAL_PAD = typing___cast('TextInputTraits.KeyboardType', 8)
     TWITTER = typing___cast('TextInputTraits.KeyboardType', 9)
     WEB_SEARCH = typing___cast('TextInputTraits.KeyboardType', 10)
+    global___KeyboardType = KeyboardType
 
     class ReturnKeyType(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
@@ -131,10 +133,11 @@ class TextInputTraits(google___protobuf___message___Message):
     DONE = typing___cast('TextInputTraits.ReturnKeyType', 9)
     EMERGENCY_CALL = typing___cast('TextInputTraits.ReturnKeyType', 10)
     CONTINUE = typing___cast('TextInputTraits.ReturnKeyType', 11)
+    global___ReturnKeyType = ReturnKeyType
 
-    autocapitalizationType = ... # type: TextInputTraits.AutocapitalizationType
-    keyboardType = ... # type: TextInputTraits.KeyboardType
-    returnKeyType = ... # type: TextInputTraits.ReturnKeyType
+    autocapitalizationType = ... # type: global___TextInputTraits.AutocapitalizationType
+    keyboardType = ... # type: global___TextInputTraits.KeyboardType
+    returnKeyType = ... # type: global___TextInputTraits.ReturnKeyType
     autocorrection = ... # type: builtin___bool
     spellchecking = ... # type: builtin___bool
     enablesReturnKeyAutomatically = ... # type: builtin___bool
@@ -145,9 +148,9 @@ class TextInputTraits(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        autocapitalizationType : typing___Optional[TextInputTraits.AutocapitalizationType] = None,
-        keyboardType : typing___Optional[TextInputTraits.KeyboardType] = None,
-        returnKeyType : typing___Optional[TextInputTraits.ReturnKeyType] = None,
+        autocapitalizationType : typing___Optional[global___TextInputTraits.AutocapitalizationType] = None,
+        keyboardType : typing___Optional[global___TextInputTraits.KeyboardType] = None,
+        returnKeyType : typing___Optional[global___TextInputTraits.ReturnKeyType] = None,
         autocorrection : typing___Optional[builtin___bool] = None,
         spellchecking : typing___Optional[builtin___bool] = None,
         enablesReturnKeyAutomatically : typing___Optional[builtin___bool] = None,
@@ -166,3 +169,4 @@ class TextInputTraits(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"PINEntrySeparatorIndexes",b"PINEntrySeparatorIndexes",u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> None: ...
+global___TextInputTraits = TextInputTraits

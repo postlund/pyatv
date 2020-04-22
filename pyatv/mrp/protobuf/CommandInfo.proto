@@ -77,4 +77,9 @@ message CommandInfo {
   repeated string supportedCustomQueueIdentifiers = 18;
   repeated int32 supportedInsertionPositions = 19;
   optional bool supportsSharedQueue = 20;
+  optional int32 upNextItemCount = 21;
+  optional float preferredPlaybackRate = 22;
+  repeated string supportedPlaybackSessionTypes = 23;
+  repeated string currentPlaybackSessionTypes = 24;
+  optional string playbackSessionIdentifier = 25;
 }

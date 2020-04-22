@@ -53,12 +53,13 @@ class SetRecordingStateMessage(google___protobuf___message___Message):
     Unknown = typing___cast('SetRecordingStateMessage.RecordingState', 0)
     Recording = typing___cast('SetRecordingStateMessage.RecordingState', 1)
     NotRecording = typing___cast('SetRecordingStateMessage.RecordingState', 2)
+    global___RecordingState = RecordingState
 
-    state = ... # type: SetRecordingStateMessage.RecordingState
+    state = ... # type: global___SetRecordingStateMessage.RecordingState
 
     def __init__(self,
         *,
-        state : typing___Optional[SetRecordingStateMessage.RecordingState] = None,
+        state : typing___Optional[global___SetRecordingStateMessage.RecordingState] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -70,5 +71,6 @@ class SetRecordingStateMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> None: ...
+global___SetRecordingStateMessage = SetRecordingStateMessage
 
 setRecordingStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

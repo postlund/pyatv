@@ -84,10 +84,11 @@ class SetStateMessage(google___protobuf___message___Message):
     Stopped = typing___cast('SetStateMessage.PlaybackState', 3)
     Interrupted = typing___cast('SetStateMessage.PlaybackState', 4)
     Seeking = typing___cast('SetStateMessage.PlaybackState', 5)
+    global___PlaybackState = PlaybackState
 
     displayID = ... # type: typing___Text
     displayName = ... # type: typing___Text
-    playbackState = ... # type: SetStateMessage.PlaybackState
+    playbackState = ... # type: global___SetStateMessage.PlaybackState
     playbackStateTimestamp = ... # type: builtin___float
 
     @property
@@ -115,7 +116,7 @@ class SetStateMessage(google___protobuf___message___Message):
         playbackQueue : typing___Optional[pyatv___mrp___protobuf___PlaybackQueue_pb2___PlaybackQueue] = None,
         displayID : typing___Optional[typing___Text] = None,
         displayName : typing___Optional[typing___Text] = None,
-        playbackState : typing___Optional[SetStateMessage.PlaybackState] = None,
+        playbackState : typing___Optional[global___SetStateMessage.PlaybackState] = None,
         playbackQueueCapabilities : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueCapabilities_pb2___PlaybackQueueCapabilities] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage] = None,
@@ -131,5 +132,6 @@ class SetStateMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> None: ...
+global___SetStateMessage = SetStateMessage
 
 setStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

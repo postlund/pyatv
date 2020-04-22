@@ -77,6 +77,7 @@ class SendCommandResultMessage(google___protobuf___message___Message):
     InvalidOptions = typing___cast('SendCommandResultMessage.SendError', 7)
     NoCommandHandlers = typing___cast('SendCommandResultMessage.SendError', 8)
     ApplicationNotInstalled = typing___cast('SendCommandResultMessage.SendError', 9)
+    global___SendError = SendError
 
     class HandlerReturnStatus(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
@@ -112,9 +113,10 @@ class SendCommandResultMessage(google___protobuf___message___Message):
     UserModifiedQueueDisabled = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 102)
     UserQueueModificationNotSupportedForCurrentItem = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 103)
     SubscriptionRequiredForSharedQueue = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 104)
+    global___HandlerReturnStatus = HandlerReturnStatus
 
-    sendError = ... # type: SendCommandResultMessage.SendError
-    handlerReturnStatus = ... # type: SendCommandResultMessage.HandlerReturnStatus
+    sendError = ... # type: global___SendCommandResultMessage.SendError
+    handlerReturnStatus = ... # type: global___SendCommandResultMessage.HandlerReturnStatus
     handlerReturnStatusDatas = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___bytes]
     commandID = ... # type: typing___Text
 
@@ -123,8 +125,8 @@ class SendCommandResultMessage(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        sendError : typing___Optional[SendCommandResultMessage.SendError] = None,
-        handlerReturnStatus : typing___Optional[SendCommandResultMessage.HandlerReturnStatus] = None,
+        sendError : typing___Optional[global___SendCommandResultMessage.SendError] = None,
+        handlerReturnStatus : typing___Optional[global___SendCommandResultMessage.HandlerReturnStatus] = None,
         handlerReturnStatusDatas : typing___Optional[typing___Iterable[builtin___bytes]] = None,
         commandID : typing___Optional[typing___Text] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
@@ -139,5 +141,6 @@ class SendCommandResultMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"commandID",b"commandID",u"handlerReturnStatus",b"handlerReturnStatus",u"playerPath",b"playerPath",u"sendError",b"sendError"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"commandID",b"commandID",u"handlerReturnStatus",b"handlerReturnStatus",u"handlerReturnStatusDatas",b"handlerReturnStatusDatas",u"playerPath",b"playerPath",u"sendError",b"sendError"]) -> None: ...
+global___SendCommandResultMessage = SendCommandResultMessage
 
 sendCommandResultMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

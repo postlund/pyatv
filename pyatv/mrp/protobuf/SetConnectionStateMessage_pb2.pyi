@@ -53,12 +53,13 @@ class SetConnectionStateMessage(google___protobuf___message___Message):
     Connecting = typing___cast('SetConnectionStateMessage.ConnectionState', 1)
     Connected = typing___cast('SetConnectionStateMessage.ConnectionState', 2)
     Disconnected = typing___cast('SetConnectionStateMessage.ConnectionState', 3)
+    global___ConnectionState = ConnectionState
 
-    state = ... # type: SetConnectionStateMessage.ConnectionState
+    state = ... # type: global___SetConnectionStateMessage.ConnectionState
 
     def __init__(self,
         *,
-        state : typing___Optional[SetConnectionStateMessage.ConnectionState] = None,
+        state : typing___Optional[global___SetConnectionStateMessage.ConnectionState] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -70,5 +71,6 @@ class SetConnectionStateMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"state",b"state"]) -> None: ...
+global___SetConnectionStateMessage = SetConnectionStateMessage
 
 setConnectionStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

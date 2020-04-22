@@ -9,6 +9,10 @@ from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
+from pyatv.mrp.protobuf.NowPlayingClient_pb2 import (
+    NowPlayingClient as pyatv___mrp___protobuf___NowPlayingClient_pb2___NowPlayingClient,
+)
+
 from typing import (
     Optional as typing___Optional,
     Union as typing___Union,
@@ -28,24 +32,26 @@ if sys.version_info < (3,):
     builtin___unicode = unicode
 
 
-class SendHIDEventMessage(google___protobuf___message___Message):
+class RemoveClientMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    hidEventData = ... # type: builtin___bytes
+
+    @property
+    def client(self) -> pyatv___mrp___protobuf___NowPlayingClient_pb2___NowPlayingClient: ...
 
     def __init__(self,
         *,
-        hidEventData : typing___Optional[builtin___bytes] = None,
+        client : typing___Optional[pyatv___mrp___protobuf___NowPlayingClient_pb2___NowPlayingClient] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
-        def FromString(cls, s: builtin___bytes) -> SendHIDEventMessage: ...
+        def FromString(cls, s: builtin___bytes) -> RemoveClientMessage: ...
     else:
         @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendHIDEventMessage: ...
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RemoveClientMessage: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal[u"hidEventData",b"hidEventData"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"hidEventData",b"hidEventData"]) -> None: ...
-global___SendHIDEventMessage = SendHIDEventMessage
+    def HasField(self, field_name: typing_extensions___Literal[u"client",b"client"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"client",b"client"]) -> None: ...
+global___RemoveClientMessage = RemoveClientMessage
 
-sendHIDEventMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+removeClientMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

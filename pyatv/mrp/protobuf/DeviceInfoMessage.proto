@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 import "pyatv/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/mrp/protobuf/Common.proto";
 
 extend ProtocolMessage {
   optional DeviceInfoMessage deviceInfoMessage = 20;
@@ -26,14 +27,14 @@ message DeviceInfoMessage {
   optional uint32 sharedQueueVersion = 17;
   optional string deviceUID = 19;
   optional string managedConfigDeviceID = 20;
-  optional int32 deviceClass = 21;
+  optional DeviceClass.Enum deviceClass = 21;
   optional uint32 logicalDeviceCount = 22;
   optional bool tightlySyncedGroup = 23;
   optional bool isProxyGroupPlayer = 24;
   optional string tightSyncUID = 25;
   optional string groupUID = 26;
   optional string groupName = 27;
-  // optional <> groupedDevices = 28;
+  repeated DeviceInfoMessage groupedDevices = 28;
   optional bool isGroupLeader = 29;
   optional bool isAirplayActive = 30;
   optional string systemPodcastApplication = 31;
