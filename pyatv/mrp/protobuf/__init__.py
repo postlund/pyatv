@@ -18,6 +18,8 @@ from . import RegisterHIDDeviceMessage_pb2
 from . import RegisterHIDDeviceResultMessage_pb2
 from . import RegisterVoiceInputDeviceMessage_pb2
 from . import RegisterVoiceInputDeviceResponseMessage_pb2
+from . import RemoveClientMessage_pb2
+from . import RemovePlayerMessage_pb2
 from . import SendCommandMessage_pb2
 from . import SendCommandResultMessage_pb2
 from . import SendHIDEventMessage_pb2
@@ -34,6 +36,7 @@ from . import TextInputMessage_pb2
 from . import TransactionMessage_pb2
 from . import UpdateClientMessage_pb2
 from . import UpdateContentItemMessage_pb2
+from . import UpdateOutputDeviceMessage_pb2
 from . import VolumeControlAvailabilityMessage_pb2
 from . import WakeDeviceMessage_pb2
 
@@ -42,6 +45,9 @@ from .AudioFormatSettingsMessage_pb2 import AudioFormatSettings
 from .ClientUpdatesConfigMessage_pb2 import ClientUpdatesConfigMessage
 from .CommandInfo_pb2 import CommandInfo
 from .CommandOptions_pb2 import CommandOptions
+from .Common_pb2 import DeviceClass
+from .Common_pb2 import DeviceSubType
+from .Common_pb2 import DeviceType
 from .Common_pb2 import RepeatMode
 from .Common_pb2 import ShuffleMode
 from .ContentItemMetadata_pb2 import ContentItemMetadata
@@ -66,6 +72,8 @@ from .RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
 from .RegisterHIDDeviceResultMessage_pb2 import RegisterHIDDeviceResultMessage
 from .RegisterVoiceInputDeviceMessage_pb2 import RegisterVoiceInputDeviceMessage
 from .RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDeviceResponseMessage
+from .RemoveClientMessage_pb2 import RemoveClientMessage
+from .RemovePlayerMessage_pb2 import RemovePlayerMessage
 from .SendButtonEventMessage_pb2 import SendButtonEventMessage
 from .SendCommandMessage_pb2 import SendCommandMessage
 from .SendCommandResultMessage_pb2 import SendCommandResultMessage
@@ -94,9 +102,13 @@ from .TransactionPacket_pb2 import TransactionPacket
 from .TransactionPackets_pb2 import TransactionPackets
 from .UpdateClientMessage_pb2 import UpdateClientMessage
 from .UpdateContentItemMessage_pb2 import UpdateContentItemMessage
+from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceDescriptor
+from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceSourceInfo
+from .UpdateOutputDeviceMessage_pb2 import UpdateOutputDeviceMessage
 from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from .VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
+from .VolumeControlCapabilitiesDidChange_pb2 import VolumeControlCapabilitiesDidChangeMessage
 from .WakeDeviceMessage_pb2 import WakeDeviceMessage
 
 
@@ -114,6 +126,8 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE: RegisterHIDDeviceResultMessage_pb2.registerHIDDeviceResultMessage,
     ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_MESSAGE: RegisterVoiceInputDeviceMessage_pb2.registerVoiceInputDeviceMessage,
     ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: RegisterVoiceInputDeviceResponseMessage_pb2.registerVoiceInputDeviceResponseMessage,
+    ProtocolMessage.REMOVE_CLIENT_MESSAGE: RemoveClientMessage_pb2.removeClientMessage,
+    ProtocolMessage.REMOVE_PLAYER_MESSAGE: RemovePlayerMessage_pb2.removePlayerMessage,
     ProtocolMessage.SEND_COMMAND_MESSAGE: SendCommandMessage_pb2.sendCommandMessage,
     ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE: SendCommandResultMessage_pb2.sendCommandResultMessage,
     ProtocolMessage.SEND_HID_EVENT_MESSAGE: SendHIDEventMessage_pb2.sendHIDEventMessage,
@@ -130,6 +144,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
     ProtocolMessage.UPDATE_CLIENT_MESSAGE: UpdateClientMessage_pb2.updateClientMessage,
     ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE: UpdateContentItemMessage_pb2.updateContentItemMessage,
+    ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE: UpdateOutputDeviceMessage_pb2.updateOutputDeviceMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
 }
@@ -148,6 +163,8 @@ REGISTER_HID_DEVICE_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_MESSAGE
 REGISTER_HID_DEVICE_RESULT_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE
 REGISTER_VOICE_INPUT_DEVICE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_MESSAGE
 REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE
+REMOVE_CLIENT_MESSAGE = ProtocolMessage.REMOVE_CLIENT_MESSAGE
+REMOVE_PLAYER_MESSAGE = ProtocolMessage.REMOVE_PLAYER_MESSAGE
 SEND_COMMAND_MESSAGE = ProtocolMessage.SEND_COMMAND_MESSAGE
 SEND_COMMAND_RESULT_MESSAGE = ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE
 SEND_HID_EVENT_MESSAGE = ProtocolMessage.SEND_HID_EVENT_MESSAGE
@@ -164,6 +181,7 @@ TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
 UPDATE_CLIENT_MESSAGE = ProtocolMessage.UPDATE_CLIENT_MESSAGE
 UPDATE_CONTENT_ITEM_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE
+UPDATE_OUTPUT_DEVICE_MESSAGE = ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 

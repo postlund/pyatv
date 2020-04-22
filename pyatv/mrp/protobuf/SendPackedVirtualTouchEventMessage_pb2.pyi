@@ -57,6 +57,7 @@ class SendPackedVirtualTouchEventMessage(google___protobuf___message___Message):
     Stationary = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 3)
     Ended = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 4)
     Cancelled = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 5)
+    global___Phase = Phase
 
     data = ... # type: builtin___bytes
 
@@ -74,5 +75,6 @@ class SendPackedVirtualTouchEventMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> None: ...
+global___SendPackedVirtualTouchEventMessage = SendPackedVirtualTouchEventMessage
 
 sendPackedVirtualTouchEventMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

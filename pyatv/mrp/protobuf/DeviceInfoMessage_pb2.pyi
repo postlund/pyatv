@@ -6,11 +6,16 @@ from google.protobuf.descriptor import (
 )
 
 from google.protobuf.internal.containers import (
+    RepeatedCompositeFieldContainer as google___protobuf___internal___containers___RepeatedCompositeFieldContainer,
     RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
 )
 
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
+)
+
+from pyatv.mrp.protobuf.Common_pb2 import (
+    DeviceClass as pyatv___mrp___protobuf___Common_pb2___DeviceClass,
 )
 
 from typing import (
@@ -55,7 +60,7 @@ class DeviceInfoMessage(google___protobuf___message___Message):
     sharedQueueVersion = ... # type: builtin___int
     deviceUID = ... # type: typing___Text
     managedConfigDeviceID = ... # type: typing___Text
-    deviceClass = ... # type: builtin___int
+    deviceClass = ... # type: pyatv___mrp___protobuf___Common_pb2___DeviceClass.Enum
     logicalDeviceCount = ... # type: builtin___int
     tightlySyncedGroup = ... # type: builtin___bool
     isProxyGroupPlayer = ... # type: builtin___bool
@@ -68,6 +73,9 @@ class DeviceInfoMessage(google___protobuf___message___Message):
     enderDefaultGroupUID = ... # type: typing___Text
     airplayReceivers = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     linkAgent = ... # type: typing___Text
+
+    @property
+    def groupedDevices(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___DeviceInfoMessage]: ...
 
     def __init__(self,
         *,
@@ -90,13 +98,14 @@ class DeviceInfoMessage(google___protobuf___message___Message):
         sharedQueueVersion : typing___Optional[builtin___int] = None,
         deviceUID : typing___Optional[typing___Text] = None,
         managedConfigDeviceID : typing___Optional[typing___Text] = None,
-        deviceClass : typing___Optional[builtin___int] = None,
+        deviceClass : typing___Optional[pyatv___mrp___protobuf___Common_pb2___DeviceClass.Enum] = None,
         logicalDeviceCount : typing___Optional[builtin___int] = None,
         tightlySyncedGroup : typing___Optional[builtin___bool] = None,
         isProxyGroupPlayer : typing___Optional[builtin___bool] = None,
         tightSyncUID : typing___Optional[typing___Text] = None,
         groupUID : typing___Optional[typing___Text] = None,
         groupName : typing___Optional[typing___Text] = None,
+        groupedDevices : typing___Optional[typing___Iterable[global___DeviceInfoMessage]] = None,
         isGroupLeader : typing___Optional[builtin___bool] = None,
         isAirplayActive : typing___Optional[builtin___bool] = None,
         systemPodcastApplication : typing___Optional[typing___Text] = None,
@@ -113,6 +122,7 @@ class DeviceInfoMessage(google___protobuf___message___Message):
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"deviceClass",b"deviceClass",u"deviceUID",b"deviceUID",u"enderDefaultGroupUID",b"enderDefaultGroupUID",u"groupName",b"groupName",u"groupUID",b"groupUID",u"isAirplayActive",b"isAirplayActive",u"isGroupLeader",b"isGroupLeader",u"isProxyGroupPlayer",b"isProxyGroupPlayer",u"lastSupportedMessageType",b"lastSupportedMessageType",u"linkAgent",b"linkAgent",u"localizedModelName",b"localizedModelName",u"logicalDeviceCount",b"logicalDeviceCount",u"managedConfigDeviceID",b"managedConfigDeviceID",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"systemPodcastApplication",b"systemPodcastApplication",u"tightSyncUID",b"tightSyncUID",u"tightlySyncedGroup",b"tightlySyncedGroup",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"airplayReceivers",b"airplayReceivers",u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"deviceClass",b"deviceClass",u"deviceUID",b"deviceUID",u"enderDefaultGroupUID",b"enderDefaultGroupUID",u"groupName",b"groupName",u"groupUID",b"groupUID",u"isAirplayActive",b"isAirplayActive",u"isGroupLeader",b"isGroupLeader",u"isProxyGroupPlayer",b"isProxyGroupPlayer",u"lastSupportedMessageType",b"lastSupportedMessageType",u"linkAgent",b"linkAgent",u"localizedModelName",b"localizedModelName",u"logicalDeviceCount",b"logicalDeviceCount",u"managedConfigDeviceID",b"managedConfigDeviceID",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"systemPodcastApplication",b"systemPodcastApplication",u"tightSyncUID",b"tightSyncUID",u"tightlySyncedGroup",b"tightlySyncedGroup",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"airplayReceivers",b"airplayReceivers",u"allowsPairing",b"allowsPairing",u"applicationBundleIdentifier",b"applicationBundleIdentifier",u"applicationBundleVersion",b"applicationBundleVersion",u"bluetoothAddress",b"bluetoothAddress",u"connected",b"connected",u"deviceClass",b"deviceClass",u"deviceUID",b"deviceUID",u"enderDefaultGroupUID",b"enderDefaultGroupUID",u"groupName",b"groupName",u"groupUID",b"groupUID",u"groupedDevices",b"groupedDevices",u"isAirplayActive",b"isAirplayActive",u"isGroupLeader",b"isGroupLeader",u"isProxyGroupPlayer",b"isProxyGroupPlayer",u"lastSupportedMessageType",b"lastSupportedMessageType",u"linkAgent",b"linkAgent",u"localizedModelName",b"localizedModelName",u"logicalDeviceCount",b"logicalDeviceCount",u"managedConfigDeviceID",b"managedConfigDeviceID",u"name",b"name",u"protocolVersion",b"protocolVersion",u"sharedQueueVersion",b"sharedQueueVersion",u"supportsACL",b"supportsACL",u"supportsExtendedMotion",b"supportsExtendedMotion",u"supportsSharedQueue",b"supportsSharedQueue",u"supportsSystemPairing",b"supportsSystemPairing",u"systemBuildVersion",b"systemBuildVersion",u"systemMediaApplication",b"systemMediaApplication",u"systemPodcastApplication",b"systemPodcastApplication",u"tightSyncUID",b"tightSyncUID",u"tightlySyncedGroup",b"tightlySyncedGroup",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+global___DeviceInfoMessage = DeviceInfoMessage
 
 deviceInfoMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

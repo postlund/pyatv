@@ -53,12 +53,13 @@ class RegisterForGameControllerEventsMessage(google___protobuf___message___Messa
     Motion = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 1)
     Buttons = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 2)
     Digitizer = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 3)
+    global___InputModeFlags = InputModeFlags
 
-    inputModeFlags = ... # type: RegisterForGameControllerEventsMessage.InputModeFlags
+    inputModeFlags = ... # type: global___RegisterForGameControllerEventsMessage.InputModeFlags
 
     def __init__(self,
         *,
-        inputModeFlags : typing___Optional[RegisterForGameControllerEventsMessage.InputModeFlags] = None,
+        inputModeFlags : typing___Optional[global___RegisterForGameControllerEventsMessage.InputModeFlags] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -70,5 +71,6 @@ class RegisterForGameControllerEventsMessage(google___protobuf___message___Messa
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"inputModeFlags",b"inputModeFlags"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"inputModeFlags",b"inputModeFlags"]) -> None: ...
+global___RegisterForGameControllerEventsMessage = RegisterForGameControllerEventsMessage
 
 registerForGameControllerEventsMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

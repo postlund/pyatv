@@ -58,16 +58,17 @@ class TextInputMessage(google___protobuf___message___Message):
     Set = typing___cast('TextInputMessage.ActionType', 2)
     Delete = typing___cast('TextInputMessage.ActionType', 3)
     ClearText = typing___cast('TextInputMessage.ActionType', 4)
+    global___ActionType = ActionType
 
     timestamp = ... # type: builtin___float
     text = ... # type: typing___Text
-    actionType = ... # type: TextInputMessage.ActionType
+    actionType = ... # type: global___TextInputMessage.ActionType
 
     def __init__(self,
         *,
         timestamp : typing___Optional[builtin___float] = None,
         text : typing___Optional[typing___Text] = None,
-        actionType : typing___Optional[TextInputMessage.ActionType] = None,
+        actionType : typing___Optional[global___TextInputMessage.ActionType] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -79,5 +80,6 @@ class TextInputMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> None: ...
+global___TextInputMessage = TextInputMessage
 
 textInputMessage = ... # type: google___protobuf___descriptor___FieldDescriptor

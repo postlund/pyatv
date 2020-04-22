@@ -39,7 +39,7 @@ def device_information(name, identifier, update=False):
     info.systemBuildVersion = "17B111"
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
-    info.deviceClass = 1
+    info.deviceClass = protobuf.DeviceClass.iPhone
     info.logicalDeviceCount = 1
     return message
 

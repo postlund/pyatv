@@ -169,6 +169,7 @@ class ProtocolMessage(google___protobuf___message___Message):
     OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_BECOME_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 201)
     OUTPUT_CONTEXT_MODIFICATION_REQUESTED_NO_TOPOLOGY_CHANGE = typing___cast('ProtocolMessage.ErrorCode', 202)
     UNKNOWN_ERROR = typing___cast('ProtocolMessage.ErrorCode', 299)
+    global___ErrorCode = ErrorCode
 
     class Type(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
@@ -227,8 +228,11 @@ class ProtocolMessage(google___protobuf___message___Message):
         SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
         SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
         SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
+        REMOVE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 53)
+        REMOVE_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 54)
         UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
         UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+        VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast('ProtocolMessage.Type', 64)
         UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
     UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
@@ -276,23 +280,27 @@ class ProtocolMessage(google___protobuf___message___Message):
     SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
     SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
     SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
+    REMOVE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 53)
+    REMOVE_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 54)
     UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
     UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
+    VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast('ProtocolMessage.Type', 64)
     UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
+    global___Type = Type
 
-    type = ... # type: ProtocolMessage.Type
+    type = ... # type: global___ProtocolMessage.Type
     identifier = ... # type: typing___Text
     authenticationToken = ... # type: typing___Text
-    errorCode = ... # type: ProtocolMessage.ErrorCode
+    errorCode = ... # type: global___ProtocolMessage.ErrorCode
     timestamp = ... # type: builtin___int
 
     def __init__(self,
         *,
-        type : typing___Optional[ProtocolMessage.Type] = None,
+        type : typing___Optional[global___ProtocolMessage.Type] = None,
         identifier : typing___Optional[typing___Text] = None,
         authenticationToken : typing___Optional[typing___Text] = None,
-        errorCode : typing___Optional[ProtocolMessage.ErrorCode] = None,
+        errorCode : typing___Optional[global___ProtocolMessage.ErrorCode] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
@@ -305,3 +313,4 @@ class ProtocolMessage(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...
+global___ProtocolMessage = ProtocolMessage

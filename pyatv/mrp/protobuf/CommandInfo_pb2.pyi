@@ -157,10 +157,11 @@ RemoveFromPlaybackQueue = typing___cast('Command', 56)
 PlayItemInPlaybackQueue = typing___cast('Command', 57)
 PrepareForSetQueue = typing___cast('Command', 58)
 SetPlaybackSession = typing___cast('Command', 59)
+global___Command = Command
 
 class CommandInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    command = ... # type: Command
+    command = ... # type: global___Command
     enabled = ... # type: builtin___bool
     active = ... # type: builtin___bool
     preferredIntervals = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
@@ -180,10 +181,15 @@ class CommandInfo(google___protobuf___message___Message):
     supportedCustomQueueIdentifiers = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
     supportedInsertionPositions = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
     supportsSharedQueue = ... # type: builtin___bool
+    upNextItemCount = ... # type: builtin___int
+    preferredPlaybackRate = ... # type: builtin___float
+    supportedPlaybackSessionTypes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    currentPlaybackSessionTypes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    playbackSessionIdentifier = ... # type: typing___Text
 
     def __init__(self,
         *,
-        command : typing___Optional[Command] = None,
+        command : typing___Optional[global___Command] = None,
         enabled : typing___Optional[builtin___bool] = None,
         active : typing___Optional[builtin___bool] = None,
         preferredIntervals : typing___Optional[typing___Iterable[builtin___float]] = None,
@@ -203,6 +209,11 @@ class CommandInfo(google___protobuf___message___Message):
         supportedCustomQueueIdentifiers : typing___Optional[typing___Iterable[typing___Text]] = None,
         supportedInsertionPositions : typing___Optional[typing___Iterable[builtin___int]] = None,
         supportsSharedQueue : typing___Optional[builtin___bool] = None,
+        upNextItemCount : typing___Optional[builtin___int] = None,
+        preferredPlaybackRate : typing___Optional[builtin___float] = None,
+        supportedPlaybackSessionTypes : typing___Optional[typing___Iterable[typing___Text]] = None,
+        currentPlaybackSessionTypes : typing___Optional[typing___Iterable[typing___Text]] = None,
+        playbackSessionIdentifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
     if sys.version_info >= (3,):
         @classmethod
@@ -212,5 +223,6 @@ class CommandInfo(google___protobuf___message___Message):
         def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CommandInfo: ...
     def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportsSharedQueue",b"supportsSharedQueue"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"preferredIntervals",b"preferredIntervals",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportedCustomQueueIdentifiers",b"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",b"supportedInsertionPositions",u"supportedPlaybackQueueTypes",b"supportedPlaybackQueueTypes",u"supportedRates",b"supportedRates",u"supportsSharedQueue",b"supportsSharedQueue"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"playbackSessionIdentifier",b"playbackSessionIdentifier",u"preferredPlaybackRate",b"preferredPlaybackRate",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportsSharedQueue",b"supportsSharedQueue",u"upNextItemCount",b"upNextItemCount"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"currentPlaybackSessionTypes",b"currentPlaybackSessionTypes",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"playbackSessionIdentifier",b"playbackSessionIdentifier",u"preferredIntervals",b"preferredIntervals",u"preferredPlaybackRate",b"preferredPlaybackRate",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportedCustomQueueIdentifiers",b"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",b"supportedInsertionPositions",u"supportedPlaybackQueueTypes",b"supportedPlaybackQueueTypes",u"supportedPlaybackSessionTypes",b"supportedPlaybackSessionTypes",u"supportedRates",b"supportedRates",u"supportsSharedQueue",b"supportsSharedQueue",u"upNextItemCount",b"upNextItemCount"]) -> None: ...
+global___CommandInfo = CommandInfo

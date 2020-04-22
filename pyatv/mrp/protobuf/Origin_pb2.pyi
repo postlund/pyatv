@@ -57,8 +57,9 @@ class Origin(google___protobuf___message___Message):
     Unknown = typing___cast('Origin.Type', 0)
     Local = typing___cast('Origin.Type', 1)
     Custom = typing___cast('Origin.Type', 2)
+    global___Type = Type
 
-    type = ... # type: Origin.Type
+    type = ... # type: global___Origin.Type
     displayName = ... # type: typing___Text
     identifier = ... # type: builtin___int
 
@@ -67,7 +68,7 @@ class Origin(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        type : typing___Optional[Origin.Type] = None,
+        type : typing___Optional[global___Origin.Type] = None,
         displayName : typing___Optional[typing___Text] = None,
         identifier : typing___Optional[builtin___int] = None,
         deviceInfo : typing___Optional[pyatv___mrp___protobuf___DeviceInfoMessage_pb2___DeviceInfoMessage] = None,
@@ -82,3 +83,4 @@ class Origin(google___protobuf___message___Message):
     def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> None: ...
+global___Origin = Origin
