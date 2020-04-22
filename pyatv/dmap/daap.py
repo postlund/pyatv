@@ -9,6 +9,7 @@ from copy import copy
 from pyatv import exceptions
 from pyatv.const import MediaType, DeviceState
 from pyatv.dmap import parser
+from pyatv.support import log_binary
 from .tag_definitions import lookup_tag
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,10 +89,9 @@ class DaapRequester:
         # Do not use session.get_data(...) in login as that would end up in
         # an infinite loop.
         def _login_request():
-            return self.http.get_data(
-                self._mkurl("login?[AUTH]&hasFP=1", session=False, login_id=True),
-                headers=_DMAP_HEADERS,
-            )
+            url = self._mkurl("login?[AUTH]&hasFP=1", session=False, login_id=True)
+            _login_request.log_text = "Login request: " + url
+            return self.http.get_data(url, headers=_DMAP_HEADERS,)
 
         resp = await self._do(_login_request, is_login=True)
         self._session_id = parser.first(resp, "mlog", "mlid")
@@ -103,9 +103,9 @@ class DaapRequester:
         """Perform a DAAP GET command."""
 
         def _get_request():
-            return self.http.get_data(
-                self._mkurl(cmd, *args), headers=_DMAP_HEADERS, timeout=timeout
-            )
+            url = self._mkurl(cmd, *args)
+            _get_request.log_text = "GET request: " + url
+            return self.http.get_data(url, headers=_DMAP_HEADERS, timeout=timeout)
 
         await self._assure_logged_in()
         return await self._do(_get_request, is_daap=daap_data)
@@ -114,11 +114,11 @@ class DaapRequester:
         """Perform DAAP POST command with optional data."""
 
         def _post_request():
+            url = self._mkurl(cmd, *args)
+            _post_request.log_text = "POST request: " + url
             headers = copy(_DMAP_HEADERS)
             headers["Content-Type"] = "application/x-www-form-urlencoded"
-            return self.http.post_data(
-                self._mkurl(cmd, *args), data=data, headers=headers, timeout=timeout
-            )
+            return self.http.post_data(url, data=data, headers=headers, timeout=timeout)
 
         await self._assure_logged_in()
         return await self._do(_post_request)
@@ -128,7 +128,7 @@ class DaapRequester:
         if is_daap:
             resp = parser.parse(resp, lookup_tag)
 
-        self._log_response(str(action.__name__) + ": %s", resp, is_daap)
+        self._log_response(action.log_text, resp, is_daap)
         if 200 <= status < 300:
             return resp
 
@@ -174,7 +174,7 @@ class DaapRequester:
     @staticmethod
     def _log_response(text, data, is_daap):
         if _LOGGER.isEnabledFor(logging.INFO):
-            formatted = data
             if is_daap:
-                formatted = parser.pprint(data, lookup_tag)
-            _LOGGER.debug(text, formatted)
+                _LOGGER.debug(parser.pprint(data, lookup_tag))
+            else:
+                log_binary(_LOGGER, text, Data=data)
