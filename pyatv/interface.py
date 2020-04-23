@@ -47,6 +47,8 @@ class ArtworkInfo(NamedTuple):
 
     bytes: bytes
     mimetype: str
+    width: int
+    height: int
 
 
 class FeatureInfo(NamedTuple):
@@ -555,8 +557,15 @@ class Metadata(ABC):
 
     @abstractmethod
     @feature(30, "Artwork", "Playing media artwork.")
-    async def artwork(self) -> Optional[ArtworkInfo]:
-        """Return artwork for what is currently playing (or None)."""
+    async def artwork(self, width=512, height=None) -> Optional[ArtworkInfo]:
+        """Return artwork for what is currently playing (or None).
+
+        The parameters "width" and "height" makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
+        """
         raise exceptions.NotSupportedError()
 
     @property

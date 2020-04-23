@@ -42,11 +42,24 @@ To retrieve the artwork, use the asynchronous artwork method:
 artwork = await atv.metadata.artwork()
 ```
 
-This will return an {% include api i="interface.ArtworkInfo" %}, containing the image bytes and mimetype. If no artwork is available,
-`None` is returned instead.
+This will return an {% include api i="interface.ArtworkInfo" %}, containing the image bytes,
+mimetype and dimensions. If no artwork is available, `None` is returned instead. If dimensions
+could not be determined by the device, `width` and `height` will be set to -1.
+
+It is also possible to request artwork with a particular size by passing `width` and `height`:
+
+```python
+artwork = await atv.metadata.artwork(width=300, height=200)
+```
+
+Do note that this is the desired size and the device might return artwork with another size,
+e.g. to keep aspect ratio or if specified size it not available. You can pass `None` as one
+of the arguments to let the device maintain aspect ratio of the image.
 
 Remember that the artwork is relatively large, so you should try to minimize
 this call. More information is available at  {% include api i="interface.Metadata.artwork" %}.
+Internally, a small cache is used for the last few requested artworks. The size of this cache
+is not yet configurable and you should write a feature request if you need to change it.
 
 ## Device identifier
 
