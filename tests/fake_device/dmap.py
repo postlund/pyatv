@@ -70,6 +70,8 @@ class FakeDmapState:
         self.volume_controls = False
         self.last_button_pressed = None
         self.buttons_press_count = 0
+        self.last_artwork_width = None
+        self.last_artwork_height = None
 
     async def trigger_bonjour(self, stubbed_zeroconf):
         """Act upon available Bonjour services."""
@@ -192,8 +194,16 @@ class FakeDmapService:
     async def handle_artwork(self, request):
         """Handle artwork requests."""
         self._verify_auth_parameters(request)
-        playing = self.state.playing
-        return web.Response(body=playing.artwork, status=playing.artwork_status)
+
+        if "mh" in request.query:
+            self.state.last_artwork_height = int(request.query.get("mh"))
+
+        if "mw" in request.query:
+            self.state.last_artwork_width = int(request.query.get("mw"))
+
+        return web.Response(
+            body=self.state.playing.artwork, status=self.state.playing.artwork_status
+        )
 
     async def handle_playstatus(self, request):
         """Handle  playstatus (currently playing) requests."""

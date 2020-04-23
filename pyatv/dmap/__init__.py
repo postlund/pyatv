@@ -46,7 +46,7 @@ _LOGGER = logging.getLogger(__name__)
 _DEFAULT_SKIP_TIME = 10
 
 _PSU_CMD = "ctrl-int/1/playstatusupdate?[AUTH]&revision-number={0}"
-_ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw=1024&mh=576&[AUTH]"
+_ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw={width}&mh={height}&[AUTH]"
 _CTRL_PROMPT_CMD = "ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0"
 
 # Features that are always considered to be available
@@ -114,16 +114,10 @@ class BaseDmapAppleTV:
         self.latest_hash = self.latest_playing.hash
         return self.latest_playing
 
-    async def artwork(self, width=None, height=None) -> Optional[ArtworkInfo]:
-        """Return artwork for what is currently playing (or None).
-
-        The parameters "width" and "height" makes it possible to request artwork of a
-        specific size. This is just a request, the device might impose restrictions and
-        return artwork of a different size. Set both parameters to None to request
-        default size. Set one of them and let the other one be None to keep original
-        aspect ratio.
-        """
-        art = await self.daap.get(_ARTWORK_CMD, daap_data=False)
+    async def artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Return artwork for what is currently playing (or None)."""
+        url = _ARTWORK_CMD.format(width=width or 0, height=height or 0)
+        art = await self.daap.get(url, daap_data=False)
         return art if art != b"" else None
 
     def ctrl_int_cmd(self, cmd):
@@ -405,8 +399,15 @@ class DmapMetadata(Metadata):
         self.apple_tv = apple_tv
         self.artwork_cache = Cache(limit=4)
 
-    async def artwork(self):
-        """Return artwork for what is currently playing (or None)."""
+    async def artwork(self, width=512, height=None) -> Optional[ArtworkInfo]:
+        """Return artwork for what is currently playing (or None).
+
+        The parameters "width" and "height" makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
+        """
         # Having to fetch "playing" here is not ideal, but an identifier is
         # needed and we cannot trust any previous identifiers. So we have to do
         # this until a better solution comes along.
@@ -416,18 +417,13 @@ class DmapMetadata(Metadata):
             _LOGGER.debug("Retrieved artwork %s from cache", identifier)
             return self.artwork_cache.get(identifier)
 
-        artwork = await self._fetch_artwork()
-        if artwork:
-            self.artwork_cache.put(identifier, artwork)
-            return artwork
-
-        return None
-
-    async def _fetch_artwork(self):
         _LOGGER.debug("Fetching artwork")
-        data = await self.apple_tv.artwork()
-        if data:
-            return ArtworkInfo(data, "image/png")
+        artwork = await self.apple_tv.artwork(width, height)
+        if artwork:
+            info = ArtworkInfo(bytes=artwork, mimetype="image/png", width=-1, height=-1)
+            self.artwork_cache.put(identifier, info)
+            return info
+
         return None
 
     @property
