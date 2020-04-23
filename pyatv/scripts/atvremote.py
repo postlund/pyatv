@@ -227,9 +227,9 @@ class DeviceCommands:
 
             await _handle_device_command(self.args, command, self.atv, self.loop)
 
-    async def artwork_save(self):
+    async def artwork_save(self, width=None, height=None):
         """Download artwork and save it to artwork.png."""
-        artwork = await self.atv.metadata.artwork()
+        artwork = await self.atv.metadata.artwork(width=width, height=height)
         if artwork is not None:
             with open("artwork.png", "wb") as file:
                 file.write(artwork.bytes)

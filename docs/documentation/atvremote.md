@@ -329,6 +329,12 @@ Play a video via AirPlay:
 
     $ atvremote --id 00:11:22:33:44:54 play_url=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 
+Artwork with a specific size (width,height):
+
+    $ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1
+
+Using -1 will let the device decide that parameter in order to keep aspect ratio.
+
 If you want additional help for a specific command, use help:
 
     $ atvremote help pair
