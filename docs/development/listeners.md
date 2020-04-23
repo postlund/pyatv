@@ -18,7 +18,7 @@ Similarly, ``playstatus_error`` is called if an error occur. See the
 following example:
 
 ```python
-class PushListener:
+class MyPushListener(interface.PushListener):
 
     def playstatus_update(self, updater, playstatus):
         # Currently playing in playstatus
@@ -27,7 +27,7 @@ class PushListener:
         # Error in exception
 
 
-listener = PushListener()
+listener = MyPushListener()
 atv.push_updater.listener = listener
 atv.push_updater.start()
 ```
@@ -49,7 +49,7 @@ loss, e.g. a crash or network problem. The API is defined by the
 Here is a simple example:
 
 ```python
-class DeviceListener:
+class MyDeviceListener(interface.DeviceListener):
 
     def connection_lost(self, exception):
         print("Lost connection:", str(exception))
@@ -58,7 +58,8 @@ class DeviceListener:
         print("Connection closed!")
 
 
-atv.listener = DeviceListener()
+listener = MyDeviceListener()
+atv.listener = listener
 ```
 
 A small note here about this API. For `MRP` this works fine as that protocol
@@ -76,13 +77,14 @@ e.g. the device turned on or turned off. The API is defined by the
 Here is a simple example:
 
 ```python
-class PowerListener:
+class MyPowerListener(interface.PowerListener):
 
     def powerstate_update(self, old_state, new_state):
         print('Power state changed from {0:s} to {1:s}'.format(old_state, new_state))
 
 
-atv.power.listener = PowerListener()
+listener = MyPowerListener()
+atv.power.listener = listener
 ```
 
 A small note here about this API. Power state updates are working for `MRP` devices
