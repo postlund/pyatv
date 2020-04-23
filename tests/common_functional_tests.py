@@ -26,6 +26,8 @@ _LOGGER = logging.getLogger(__name__)
 ARTWORK_BYTES = b"1234"
 ARTWORK_BYTES2 = b"4321"
 ARTWORK_MIMETYPE = "image/png"
+ARTWORK_WIDTH = 512
+ARTWORK_HEIGHT = 512
 ARTWORK_ID = "artwork_id1"
 EXAMPLE_STREAM = "http://stream"
 

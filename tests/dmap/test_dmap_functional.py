@@ -122,6 +122,23 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
 
     @unittest_run_loop
+    async def test_metadata_artwork_size(self):
+        self.usecase.example_video()
+        self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
+        await self.playing(title="dummy")
+
+        # DMAP does not indicate dimensions of artwork, so -1 is returned here. In the
+        # future, extracting dimensions from PNG header should be feasible.
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertIsNotNone(artwork)
+        self.assertEqual(artwork.width, -1)
+        self.assertEqual(artwork.height, -1)
+
+        # Verify that the specified width and height was requested
+        self.assertEqual(self.state.last_artwork_width, 123)
+        self.assertEqual(self.state.last_artwork_height, 456)
+
+    @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
         self.atv.close()
         self.atv = await self.get_connected_device(PAIRING_GUID)
