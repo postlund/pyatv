@@ -2,6 +2,7 @@
 
 import os
 import re
+import asyncio
 import logging
 import binascii
 
@@ -28,6 +29,14 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         self.service = self.config.get_service(Protocol.AirPlay)
         self.identifier = None
         self.credentials = self._get_credentials()
+        self._play_task = None
+
+    def close(self):
+        """Close and free resources."""
+        if self._play_task is not None:
+            _LOGGER.debug("Stopping AirPlay play task")
+            self._play_task.cancel()
+            self._play_task = None
 
     def _get_credentials(self):
         if not self.service or self.service.credentials is None:
@@ -85,8 +94,10 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         try:
             player = await self._player(session)
             position = int(kwargs.get("position", 0))
-            return await player.play_url(url, position)
+            self._play_task = asyncio.ensure_future(player.play_url(url, position))
+            return await self._play_task
         finally:
+            self._play_task = None
             await session.close()
             if server:
                 await server.close()

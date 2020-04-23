@@ -35,7 +35,7 @@ class StaticFileWebServer:
 
     async def close(self):
         """Stop the web server and free resources."""
-        _LOGGER.debug("closing airplay")
+        _LOGGER.debug("Closing local AirPlay web server")
         await self.runner.cleanup()
 
     @property

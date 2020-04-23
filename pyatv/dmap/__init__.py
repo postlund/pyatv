@@ -608,6 +608,8 @@ class DmapAppleTV(AppleTV):
         """Close connection and release allocated resources."""
         if net.is_custom_session(self._session):
             asyncio.ensure_future(self._session.close())
+        self._airplay.close()
+        self.push_updater.stop()
         self.listener.connection_closed()
 
     @property
