@@ -156,6 +156,8 @@ class PlayingState:
         self.supported_commands = kwargs.get("supported_commands")
         self.artwork = kwargs.get("artwork")
         self.artwork_mimetype = kwargs.get("artwork_mimetype")
+        self.artwork_width = kwargs.get("artwork_width")
+        self.artwork_height = kwargs.get("artwork_height")
         self.skip_time = kwargs.get("skip_time")
 
 
@@ -422,6 +424,8 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         self.send(messages.command_result(message.identifier))
 
     def handle_playback_queue_request(self, message, inner):
+        state = self.state.get_player_state(self.state.active_player)
+
         setstate = messages.create(
             protobuf.SET_STATE_MESSAGE, identifier=message.identifier
         )
@@ -429,8 +433,8 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         queue.location = 0
         item = queue.contentItems.add()
         item.artworkData = self.state.states[self.state.active_player].artwork
-        item.artworkDataWidth = 456
-        item.artworkDataHeight = 789
+        item.artworkDataWidth = state.artwork_width or 456
+        item.artworkDataHeight = state.artwork_height or 789
         self.send(setstate)
 
     def handle_wake_device(self, message, inner):
@@ -450,12 +454,16 @@ class FakeMrpUseCases:
         """Change volume control availability."""
         self.state.volume_control(available)
 
-    def change_artwork(self, artwork, mimetype, identifier="artwork"):
+    def change_artwork(
+        self, artwork, mimetype, identifier="artwork", width=None, height=None
+    ):
         """Call to change artwork response."""
         metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
         metadata.artwork = artwork
         metadata.artwork_mimetype = mimetype
         metadata.artwork_identifier = identifier
+        metadata.artwork_width = width
+        metadata.artwork_height = height
         self.state.update_state(PLAYER_IDENTIFIER)
 
     def change_metadata(self, **kwargs):

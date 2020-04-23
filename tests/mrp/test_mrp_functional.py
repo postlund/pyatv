@@ -105,6 +105,20 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.metadata.artwork_id, "some_id")
 
     @unittest_run_loop
+    async def test_metadata_artwork_width_and_height(self):
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            ARTWORK_BYTES, ARTWORK_MIMETYPE, width=111, height=222
+        )
+
+        await self.playing(title="dummy")
+
+        # Request one size but simulate that a smaller artwork was returned
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertEqual(artwork.width, 111)
+        self.assertEqual(artwork.height, 222)
+
+    @unittest_run_loop
     async def test_item_updates(self):
         self.usecase.video_playing(
             False, "dummy", 100, 1, identifier="id", artist="some artist"

@@ -407,7 +407,7 @@ class MrpMetadata(Metadata):
         self.psm = psm
         self.artwork_cache = Cache(limit=4)
 
-    async def artwork(self, width=None, height=None) -> Optional[ArtworkInfo]:
+    async def artwork(self, width=512, height=None) -> Optional[ArtworkInfo]:
         """Return artwork for what is currently playing (or None).
 
         The parameters "width" and "height" makes it possible to request artwork of a
@@ -425,17 +425,17 @@ class MrpMetadata(Metadata):
             _LOGGER.debug("Retrieved artwork %s from cache", identifier)
             return self.artwork_cache.get(identifier)
 
-        artwork = await self._fetch_artwork()
+        artwork = await self._fetch_artwork(width or 0, height or -1)
         if artwork:
             self.artwork_cache.put(identifier, artwork)
             return artwork
 
         return None
 
-    async def _fetch_artwork(self):
+    async def _fetch_artwork(self, width, height):
         playing = self.psm.playing
         resp = await self.psm.protocol.send_and_receive(
-            messages.playback_queue_request(playing.location)
+            messages.playback_queue_request(playing.location, width, height)
         )
         if not resp.HasField("type"):
             return None
@@ -444,8 +444,8 @@ class MrpMetadata(Metadata):
         return ArtworkInfo(
             bytes=item.artworkData,
             mimetype=playing.metadata.artworkMIMEType,
-            width=-1,
-            height=-1,
+            width=item.artworkDataWidth,
+            height=item.artworkDataHeight,
         )
 
     @property
