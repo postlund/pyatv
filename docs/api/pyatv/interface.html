@@ -48,7 +48,9 @@ link_group: api
 <h4><code><a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.ArtworkInfo.bytes" href="#pyatv.interface.ArtworkInfo.bytes">bytes</a></code></li>
+<li><code><a title="pyatv.interface.ArtworkInfo.height" href="#pyatv.interface.ArtworkInfo.height">height</a></code></li>
 <li><code><a title="pyatv.interface.ArtworkInfo.mimetype" href="#pyatv.interface.ArtworkInfo.mimetype">mimetype</a></code></li>
+<li><code><a title="pyatv.interface.ArtworkInfo.width" href="#pyatv.interface.ArtworkInfo.width">width</a></code></li>
 </ul>
 </li>
 <li>
@@ -264,6 +266,8 @@ class ArtworkInfo(NamedTuple):
 
     bytes: bytes
     mimetype: str
+    width: int
+    height: int
 
 
 class FeatureInfo(NamedTuple):
@@ -772,8 +776,15 @@ class Metadata(ABC):
 
     @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(self) -&gt; Optional[ArtworkInfo]:
-        &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
+    async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+        &#34;&#34;&#34;Return artwork for what is currently playing (or None).
+
+        The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property
@@ -1421,7 +1432,7 @@ async def connect(self) -&gt; None:
 </dd>
 <dt id="pyatv.interface.ArtworkInfo"><code class="flex name class">
 <span>class <span class="ident">ArtworkInfo</span></span>
-<span>(</span><span>bytes: bytes, mimetype: str)</span>
+<span>(</span><span>bytes: bytes, mimetype: str, width: int, height: int)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Artwork information.</p></section>
@@ -1433,7 +1444,9 @@ async def connect(self) -&gt; None:
     &#34;&#34;&#34;Artwork information.&#34;&#34;&#34;
 
     bytes: bytes
-    mimetype: str</code></pre>
+    mimetype: str
+    width: int
+    height: int</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1445,9 +1458,17 @@ async def connect(self) -&gt; None:
 <dd>
 <section class="desc"><p>Alias for field number 0</p></section>
 </dd>
+<dt id="pyatv.interface.ArtworkInfo.height"><code class="name">var <span class="ident">height</span> -> int</code></dt>
+<dd>
+<section class="desc"><p>Alias for field number 3</p></section>
+</dd>
 <dt id="pyatv.interface.ArtworkInfo.mimetype"><code class="name">var <span class="ident">mimetype</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Alias for field number 1</p></section>
+</dd>
+<dt id="pyatv.interface.ArtworkInfo.width"><code class="name">var <span class="ident">width</span> -> int</code></dt>
+<dd>
+<section class="desc"><p>Alias for field number 2</p></section>
 </dd>
 </dl>
 </dd>
@@ -1923,8 +1944,15 @@ in one of the listed states.</p></section>
 
     @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(self) -&gt; Optional[ArtworkInfo]:
-        &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
+    async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+        &#34;&#34;&#34;Return artwork for what is currently playing (or None).
+
+        The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property
@@ -2015,18 +2043,30 @@ def device_id(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Metadata.artwork"><code class="name flex">
-<span>async def <span class="ident">artwork</span></span>(<span>self) -> Union[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>, NoneType]</span>
+<span>async def <span class="ident">artwork</span></span>(<span>self, width=512, height=None) -> Union[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>, NoneType]</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Return artwork for what is currently playing (or None).</p></section>
+<section class="desc"><p>Return artwork for what is currently playing (or None).</p>
+<p>The parameters "width" and "height" makes it possible to request artwork of a
+specific size. This is just a request, the device might impose restrictions and
+return artwork of a different size. Set both parameters to None to request
+default size. Set one of them and let the other one be None to keep original
+aspect ratio.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-async def artwork(self) -&gt; Optional[ArtworkInfo]:
-    &#34;&#34;&#34;Return artwork for what is currently playing (or None).&#34;&#34;&#34;
+async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+    &#34;&#34;&#34;Return artwork for what is currently playing (or None).
+
+    The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
+    specific size. This is just a request, the device might impose restrictions and
+    return artwork of a different size. Set both parameters to None to request
+    default size. Set one of them and let the other one be None to keep original
+    aspect ratio.
+    &#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>

@@ -114,10 +114,14 @@ class BaseDmapAppleTV:
         self.latest_hash = self.latest_playing.hash
         return self.latest_playing
 
-    async def artwork(self):
-        """Return an image file (png) for what is currently playing.
+    async def artwork(self, width=None, height=None) -> Optional[ArtworkInfo]:
+        """Return artwork for what is currently playing (or None).
 
-        None is returned if no artwork is available. Must be logged in.
+        The parameters "width" and "height" makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
         """
         art = await self.daap.get(_ARTWORK_CMD, daap_data=False)
         return art if art != b"" else None

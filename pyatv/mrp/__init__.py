@@ -407,8 +407,15 @@ class MrpMetadata(Metadata):
         self.psm = psm
         self.artwork_cache = Cache(limit=4)
 
-    async def artwork(self):
-        """Return artwork for what is currently playing (or None)."""
+    async def artwork(self, width=None, height=None) -> Optional[ArtworkInfo]:
+        """Return artwork for what is currently playing (or None).
+
+        The parameters "width" and "height" makes it possible to request artwork of a
+        specific size. This is just a request, the device might impose restrictions and
+        return artwork of a different size. Set both parameters to None to request
+        default size. Set one of them and let the other one be None to keep original
+        aspect ratio.
+        """
         identifier = self.artwork_id
         if not identifier:
             _LOGGER.debug("No artwork available")
@@ -434,7 +441,12 @@ class MrpMetadata(Metadata):
             return None
 
         item = resp.inner().playbackQueue.contentItems[playing.location]
-        return ArtworkInfo(item.artworkData, playing.metadata.artworkMIMEType)
+        return ArtworkInfo(
+            bytes=item.artworkData,
+            mimetype=playing.metadata.artworkMIMEType,
+            width=-1,
+            height=-1,
+        )
 
     @property
     def artwork_id(self):
