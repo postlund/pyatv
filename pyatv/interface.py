@@ -615,6 +615,11 @@ class Stream(ABC):  # pylint: disable=too-few-public-methods
     """Base class for stream functionality."""
 
     @abstractmethod
+    def close(self) -> None:
+        """Close connection and release allocated resources."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
     @feature(31, "PlayUrl", "Stream a URL on device.")
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
