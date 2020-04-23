@@ -348,7 +348,9 @@ class FakeDmapUseCases:
         """Call this method to make login fail with response 503."""
         self.state.login_response = LoginResponse(0, 503)
 
-    def change_artwork(self, artwork, mimetype, identifier=None):
+    def change_artwork(
+        self, artwork, mimetype, identifier=None, width=None, height=None
+    ):
         """Call this method to change artwork response."""
         self.state.playing.artwork = artwork
         self.state.playing.artwork_status = 200
