@@ -1,12 +1,35 @@
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
+import netifaces
 
 from pyatv.support.net import unused_port
 
 from tests.fake_knock import create_knock_server
 from tests.utils import stub_sleep
+
+
+@pytest.fixture(autouse=True)
+def stub_netifaces():
+    methods = {
+        "interfaces": Mock(return_value=["eth0"]),
+        "ifaddresses": Mock(
+            return_value={
+                netifaces.AF_INET: [
+                    {
+                        "addr": "10.0.10.1",
+                        "netmask": "255.255.255.0",
+                        "broadcast": "10.0.10.255",
+                    },
+                    {"addr": "127.0.0.1", "netmask": "255.0.0.0",},
+                ]
+            }
+        ),
+    }
+
+    with patch.multiple("netifaces", **methods):
+        yield
 
 
 @pytest.fixture(autouse=True, name="stub_sleep")

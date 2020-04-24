@@ -47,14 +47,7 @@ def mock_random():
 
 
 @pytest.fixture
-def mock_pairing_ip():
-    # TODO: currently stubs internal method, should provide stub
-    # for netifaces later
-    pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
-
-
-@pytest.fixture
-async def mock_pairing(event_loop, mock_pairing_ip):
+async def mock_pairing(event_loop):
     obj = MagicMock()
 
     service = conf.DmapService(None, None)

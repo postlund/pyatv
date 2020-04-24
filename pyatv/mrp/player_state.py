@@ -89,7 +89,7 @@ class PlayerState:
         for updated_item in item_update.contentItems:
             for existing in self.items:
                 if updated_item.identifier == existing.identifier:
-                    # TODO: Other parts of the ContentItem should be merged as
+                    # Other parts of the ContentItem should be merged as
                     # well, but those are not used right now so will do that
                     # when needed.
                     #
