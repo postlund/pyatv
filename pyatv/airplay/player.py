@@ -12,7 +12,6 @@ _LOGGER = logging.getLogger(__name__)
 
 PLAY_RETRIES = 3
 WAIT_RETRIES = 5
-TIMEOUT = 10
 HEADERS = {
     "User-Agent": "MediaControl/1.0",
     "Content-Type": "application/x-apple-binary-plist",
@@ -45,7 +44,6 @@ class AirPlayPlayer:
                 "play",
                 headers=HEADERS,
                 data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
-                timeout=TIMEOUT,
             )
 
             # Sometimes AirPlay fails with "Internal Server Error", we

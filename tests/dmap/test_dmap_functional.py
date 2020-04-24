@@ -62,10 +62,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().setUpAsync()
         self.atv = await self.get_connected_device(HSGID)
 
-        # TODO: currently stubs internal method, should provide stub
-        # for netifaces later
-        pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
-
     def tearDown(self):
         self.atv.close()
         super().tearDown()

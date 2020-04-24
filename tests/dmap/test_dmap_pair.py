@@ -31,10 +31,6 @@ class DmapPairFunctionalTest(AioHTTPTestCase):
         self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.service)
 
-        # TODO: currently stubs internal method, should provide stub
-        # for netifaces later
-        pairing._get_private_ip_addresses = lambda: [ipaddress.ip_address("10.0.0.1")]
-
         self.zeroconf = zeroconf_stub.stub(pyatv.dmap.pairing)
 
     async def tearDownAsync(self):
