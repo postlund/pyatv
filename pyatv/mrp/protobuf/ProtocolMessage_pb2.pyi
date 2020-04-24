@@ -33,144 +33,161 @@ if sys.version_info < (3,):
     builtin___unicode = unicode
 
 
-class ProtocolMessage(google___protobuf___message___Message):
+class ErrorCode(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class ErrorCode(builtin___int):
+    class Enum(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
         def Name(cls, number: builtin___int) -> builtin___str: ...
         @classmethod
-        def Value(cls, name: builtin___str) -> 'ProtocolMessage.ErrorCode': ...
+        def Value(cls, name: builtin___str) -> 'ErrorCode.Enum': ...
         @classmethod
         def keys(cls) -> typing___List[builtin___str]: ...
         @classmethod
-        def values(cls) -> typing___List['ProtocolMessage.ErrorCode']: ...
+        def values(cls) -> typing___List['ErrorCode.Enum']: ...
         @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ProtocolMessage.ErrorCode']]: ...
-        NO_ERROR = typing___cast('ProtocolMessage.ErrorCode', 0)
-        INVALID_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 2)
-        OPERATION_NOT_PERMITTED = typing___cast('ProtocolMessage.ErrorCode', 3)
-        CLIENT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 4)
-        ORIGIN_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 5)
-        UNSUPPORTED_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 6)
-        FAILED_TO_SET_PICKED_ROUTE = typing___cast('ProtocolMessage.ErrorCode', 7)
-        FAILED_TO_REGISTER_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 8)
-        FAILED_TO_REMOVE_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 9)
-        THE_APPLICATION_ACTIVITY_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 10)
-        THE_APP_HAS_NOT_SETUP_A_BROWSABLE_CONTENT_ENDPOINT = typing___cast('ProtocolMessage.ErrorCode', 11)
-        THE_REQUESTED_BROWSABLE_CONTENT_API_IS_NOT_SUPPORTED_BY_THE_APPLICATION = typing___cast('ProtocolMessage.ErrorCode', 12)
-        THE_NOTFICATION_HAS_NOT_BEEN_WHITELISTED_BY_THE_SERVER = typing___cast('ProtocolMessage.ErrorCode', 13)
-        OPERATION_REQUIRES_A_CLIENT_CALLBACK_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 14)
-        OPERATION_REQUIRES_A_CLIENT_DATA_SOURCE_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 15)
-        REQUESTED_DATA_IS_OUT_OF_DATE_AND_SHOULD_BE_REQUESTED_AGAIN = typing___cast('ProtocolMessage.ErrorCode', 16)
-        THE_DEVICES_ENFORCED_VOLUME_LIMIT_HAS_BEEN_EXCEEDED = typing___cast('ProtocolMessage.ErrorCode', 17)
-        VOLUME_VALUE_IS_OUT_OF_RANGE = typing___cast('ProtocolMessage.ErrorCode', 18)
-        VOLUME_IS_ALREADY_AT_THE_MAXIMUM_VALUE = typing___cast('ProtocolMessage.ErrorCode', 19)
-        VOLUME_IS_ALREADY_MUTED = typing___cast('ProtocolMessage.ErrorCode', 20)
-        VOICE_INPUT_ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 21)
-        THE_VOICE_INPUT_DEVICE_IS_NOT_REGISTERED_OR_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 22)
-        ENCRYPTION_FAILURE = typing___cast('ProtocolMessage.ErrorCode', 23)
-        ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 24)
-        THE_CLIENTS_APPLICATION_CANCELLED_THE_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 25)
-        THE_OPERATION_TIMED_OUT = typing___cast('ProtocolMessage.ErrorCode', 26)
-        THE_SPECIFIED_PLAYER_PATH_OBJECT_WAS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 27)
-        ADDING_OR_REMOVING_DEVICES_FROM_THE_AV_OUTPUT_CONTEXT_HAS_FAILED = typing___cast('ProtocolMessage.ErrorCode', 28)
-        COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 29)
-        THE_SPECIFIED_CONTENT_ITEM_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 30)
-        THE_SPECIFIED_OFFSET_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 31)
-        THE_SPECIFIED_OUTPUT_CONTEXT_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 32)
-        ONE_OR_MORE_SPECIFIED_OUTPUT_DEVICES_ARE_NOT_GROUPABLE = typing___cast('ProtocolMessage.ErrorCode', 33)
-        THE_SPECIFIED_OUTPUT_CONTEXT_DOES_NOT_SUPPORT_ADDING_MORE_THAN_ONE_OUTPUT_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 34)
-        COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 35)
-        ENDPOINT_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 36)
-        OUTPUT_DEVICE_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 37)
-        CODER_MUST_SUPPORT_KEY_VALUE_CODING = typing___cast('ProtocolMessage.ErrorCode', 38)
-        COULD_NOT_FIND_THE_GIVEN_OUTPUTDEVICE = typing___cast('ProtocolMessage.ErrorCode', 39)
-        FAILED_TO_CONNECT_TO_REMOTE_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 100)
-        AUTHENTICATION_TOKEN_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 101)
-        RECORDING_SESSION_IS_ALREADY_IN_PROGRESS_ON_THIS_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 102)
-        THE_DEVICE_IS_NOT_CURRENTLY_RECORDING = typing___cast('ProtocolMessage.ErrorCode', 103)
-        THE_CLIENT_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 104)
-        THE_SERVER_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 105)
-        THE_CONNECTION_HAS_BEEN_CANCELLED_BY_THE_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 106)
-        PAIRING_FUNCTIONALITY_IS_LOCKED_DUE_TO_SECURITY_REASONS = typing___cast('ProtocolMessage.ErrorCode', 107)
-        THE_CLIENTS_OPERATING_SYSTEM_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 108)
-        THE_CLIENTS_APPLICATION_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 109)
-        THE_DEVICE_IS_NOT_PAIRED = typing___cast('ProtocolMessage.ErrorCode', 110)
-        THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_THE_USER_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 111)
-        THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_A_TIMEOUT_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 112)
-        THE_CONNECTION_TIMEDOUT = typing___cast('ProtocolMessage.ErrorCode', 113)
-        PAIRING_WITH_THIS_DEVICE_IS_BLOCKED = typing___cast('ProtocolMessage.ErrorCode', 114)
-        THE_DEVICE_IS_GOING_TO_SLEEP = typing___cast('ProtocolMessage.ErrorCode', 115)
-        CONNECTION_BLOCKED_BY_SERVER = typing___cast('ProtocolMessage.ErrorCode', 116)
-        MRAVENDPOINT_WAS_DEALLOCATED_WHILE_WAITING_FOR_DEVICE_TO_CONNECT = typing___cast('ProtocolMessage.ErrorCode', 117)
-        OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_NO_LONGER_BE_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 200)
-        OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_BECOME_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 201)
-        OUTPUT_CONTEXT_MODIFICATION_REQUESTED_NO_TOPOLOGY_CHANGE = typing___cast('ProtocolMessage.ErrorCode', 202)
-        UNKNOWN_ERROR = typing___cast('ProtocolMessage.ErrorCode', 299)
-    NO_ERROR = typing___cast('ProtocolMessage.ErrorCode', 0)
-    INVALID_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 2)
-    OPERATION_NOT_PERMITTED = typing___cast('ProtocolMessage.ErrorCode', 3)
-    CLIENT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 4)
-    ORIGIN_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 5)
-    UNSUPPORTED_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 6)
-    FAILED_TO_SET_PICKED_ROUTE = typing___cast('ProtocolMessage.ErrorCode', 7)
-    FAILED_TO_REGISTER_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 8)
-    FAILED_TO_REMOVE_CUSTOM_ORIGIN = typing___cast('ProtocolMessage.ErrorCode', 9)
-    THE_APPLICATION_ACTIVITY_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 10)
-    THE_APP_HAS_NOT_SETUP_A_BROWSABLE_CONTENT_ENDPOINT = typing___cast('ProtocolMessage.ErrorCode', 11)
-    THE_REQUESTED_BROWSABLE_CONTENT_API_IS_NOT_SUPPORTED_BY_THE_APPLICATION = typing___cast('ProtocolMessage.ErrorCode', 12)
-    THE_NOTFICATION_HAS_NOT_BEEN_WHITELISTED_BY_THE_SERVER = typing___cast('ProtocolMessage.ErrorCode', 13)
-    OPERATION_REQUIRES_A_CLIENT_CALLBACK_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 14)
-    OPERATION_REQUIRES_A_CLIENT_DATA_SOURCE_TO_HAVE_BEEN_REGISTERED = typing___cast('ProtocolMessage.ErrorCode', 15)
-    REQUESTED_DATA_IS_OUT_OF_DATE_AND_SHOULD_BE_REQUESTED_AGAIN = typing___cast('ProtocolMessage.ErrorCode', 16)
-    THE_DEVICES_ENFORCED_VOLUME_LIMIT_HAS_BEEN_EXCEEDED = typing___cast('ProtocolMessage.ErrorCode', 17)
-    VOLUME_VALUE_IS_OUT_OF_RANGE = typing___cast('ProtocolMessage.ErrorCode', 18)
-    VOLUME_IS_ALREADY_AT_THE_MAXIMUM_VALUE = typing___cast('ProtocolMessage.ErrorCode', 19)
-    VOLUME_IS_ALREADY_MUTED = typing___cast('ProtocolMessage.ErrorCode', 20)
-    VOICE_INPUT_ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 21)
-    THE_VOICE_INPUT_DEVICE_IS_NOT_REGISTERED_OR_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 22)
-    ENCRYPTION_FAILURE = typing___cast('ProtocolMessage.ErrorCode', 23)
-    ENDPOINT_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 24)
-    THE_CLIENTS_APPLICATION_CANCELLED_THE_OPERATION = typing___cast('ProtocolMessage.ErrorCode', 25)
-    THE_OPERATION_TIMED_OUT = typing___cast('ProtocolMessage.ErrorCode', 26)
-    THE_SPECIFIED_PLAYER_PATH_OBJECT_WAS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 27)
-    ADDING_OR_REMOVING_DEVICES_FROM_THE_AV_OUTPUT_CONTEXT_HAS_FAILED = typing___cast('ProtocolMessage.ErrorCode', 28)
-    COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 29)
-    THE_SPECIFIED_CONTENT_ITEM_DOES_NOT_EXIST = typing___cast('ProtocolMessage.ErrorCode', 30)
-    THE_SPECIFIED_OFFSET_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 31)
-    THE_SPECIFIED_OUTPUT_CONTEXT_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 32)
-    ONE_OR_MORE_SPECIFIED_OUTPUT_DEVICES_ARE_NOT_GROUPABLE = typing___cast('ProtocolMessage.ErrorCode', 33)
-    THE_SPECIFIED_OUTPUT_CONTEXT_DOES_NOT_SUPPORT_ADDING_MORE_THAN_ONE_OUTPUT_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 34)
-    COULD_NOT_FIND_THE_SPECIFIED_NOW_PLAYING_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 35)
-    ENDPOINT_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 36)
-    OUTPUT_DEVICE_VOLUME_CONTROL_IS_ONLY_POSSIBLE_IF_THE_ENDPOINT_IS_PICKED_OR_REMOTE_CONTROLLABLE = typing___cast('ProtocolMessage.ErrorCode', 37)
-    CODER_MUST_SUPPORT_KEY_VALUE_CODING = typing___cast('ProtocolMessage.ErrorCode', 38)
-    COULD_NOT_FIND_THE_GIVEN_OUTPUTDEVICE = typing___cast('ProtocolMessage.ErrorCode', 39)
-    FAILED_TO_CONNECT_TO_REMOTE_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 100)
-    AUTHENTICATION_TOKEN_IS_INVALID = typing___cast('ProtocolMessage.ErrorCode', 101)
-    RECORDING_SESSION_IS_ALREADY_IN_PROGRESS_ON_THIS_DEVICE = typing___cast('ProtocolMessage.ErrorCode', 102)
-    THE_DEVICE_IS_NOT_CURRENTLY_RECORDING = typing___cast('ProtocolMessage.ErrorCode', 103)
-    THE_CLIENT_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 104)
-    THE_SERVER_HAS_DISCONNECTED = typing___cast('ProtocolMessage.ErrorCode', 105)
-    THE_CONNECTION_HAS_BEEN_CANCELLED_BY_THE_CLIENT = typing___cast('ProtocolMessage.ErrorCode', 106)
-    PAIRING_FUNCTIONALITY_IS_LOCKED_DUE_TO_SECURITY_REASONS = typing___cast('ProtocolMessage.ErrorCode', 107)
-    THE_CLIENTS_OPERATING_SYSTEM_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 108)
-    THE_CLIENTS_APPLICATION_VERSION_IS_TOO_OLD = typing___cast('ProtocolMessage.ErrorCode', 109)
-    THE_DEVICE_IS_NOT_PAIRED = typing___cast('ProtocolMessage.ErrorCode', 110)
-    THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_THE_USER_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 111)
-    THE_PIN_PAIRING_DIALOG_WAS_REMOVED_BY_A_TIMEOUT_BEFORE_PAIRING_OCCOURED = typing___cast('ProtocolMessage.ErrorCode', 112)
-    THE_CONNECTION_TIMEDOUT = typing___cast('ProtocolMessage.ErrorCode', 113)
-    PAIRING_WITH_THIS_DEVICE_IS_BLOCKED = typing___cast('ProtocolMessage.ErrorCode', 114)
-    THE_DEVICE_IS_GOING_TO_SLEEP = typing___cast('ProtocolMessage.ErrorCode', 115)
-    CONNECTION_BLOCKED_BY_SERVER = typing___cast('ProtocolMessage.ErrorCode', 116)
-    MRAVENDPOINT_WAS_DEALLOCATED_WHILE_WAITING_FOR_DEVICE_TO_CONNECT = typing___cast('ProtocolMessage.ErrorCode', 117)
-    OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_NO_LONGER_BE_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 200)
-    OUTPUT_CONTEXT_MODIFICATION_CAUSED_A_DEVICE_TO_BECOME_A_PROXY_GROUP_PLAYER = typing___cast('ProtocolMessage.ErrorCode', 201)
-    OUTPUT_CONTEXT_MODIFICATION_REQUESTED_NO_TOPOLOGY_CHANGE = typing___cast('ProtocolMessage.ErrorCode', 202)
-    UNKNOWN_ERROR = typing___cast('ProtocolMessage.ErrorCode', 299)
-    global___ErrorCode = ErrorCode
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ErrorCode.Enum']]: ...
+        NoError = typing___cast('ErrorCode.Enum', 0)
+        UnknownError = typing___cast('ErrorCode.Enum', 1)
+        InvalidOperation = typing___cast('ErrorCode.Enum', 2)
+        OperationNotPermitted = typing___cast('ErrorCode.Enum', 3)
+        ClientDoesNotExist = typing___cast('ErrorCode.Enum', 4)
+        OriginDoesNotExist = typing___cast('ErrorCode.Enum', 5)
+        UnsupportedOperation = typing___cast('ErrorCode.Enum', 6)
+        FailedToSetPickedRoute = typing___cast('ErrorCode.Enum', 7)
+        FailedToRegisterCustomOrigin = typing___cast('ErrorCode.Enum', 8)
+        FailedToRemoveCustomOrigin = typing___cast('ErrorCode.Enum', 9)
+        TheApplicationActivityDoesNotExist = typing___cast('ErrorCode.Enum', 10)
+        TheAppHasNotSetupABrowsableContentEndpoint = typing___cast('ErrorCode.Enum', 11)
+        TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast('ErrorCode.Enum', 12)
+        TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast('ErrorCode.Enum', 13)
+        OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 14)
+        OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 15)
+        RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast('ErrorCode.Enum', 16)
+        TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast('ErrorCode.Enum', 17)
+        VolumeValueIsOutOfRange = typing___cast('ErrorCode.Enum', 18)
+        VolumeIsAlreadyAtTheMaximumValue = typing___cast('ErrorCode.Enum', 19)
+        VolumeIsAlreadyMuted = typing___cast('ErrorCode.Enum', 20)
+        VoiceInputEndpointDoesNotExist = typing___cast('ErrorCode.Enum', 21)
+        TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast('ErrorCode.Enum', 22)
+        EncryptionFailure = typing___cast('ErrorCode.Enum', 23)
+        EndpointDoesNotExist = typing___cast('ErrorCode.Enum', 24)
+        TheClientsApplicationCancelledTheOperation = typing___cast('ErrorCode.Enum', 25)
+        TheOperationTimedOut = typing___cast('ErrorCode.Enum', 26)
+        TheSpecifiedPlayerPathObjectWasInvalid = typing___cast('ErrorCode.Enum', 27)
+        AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast('ErrorCode.Enum', 28)
+        CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast('ErrorCode.Enum', 29)
+        TheSpecifiedContentItemDoesNotExist = typing___cast('ErrorCode.Enum', 30)
+        TheSpecifiedOffsetIsInvalid = typing___cast('ErrorCode.Enum', 31)
+        TheSpecifiedOutputContextIsInvalid = typing___cast('ErrorCode.Enum', 32)
+        OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast('ErrorCode.Enum', 33)
+        TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast('ErrorCode.Enum', 34)
+        CouldNotFindTheSpecifiedNowPlayingClient = typing___cast('ErrorCode.Enum', 35)
+        EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 36)
+        OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 37)
+        CoderMustSupportKeyValueCoding = typing___cast('ErrorCode.Enum', 38)
+        CouldNotFindTheGivenOutputdevice = typing___cast('ErrorCode.Enum', 39)
+        FailedToConnectToRemoteDevice = typing___cast('ErrorCode.Enum', 100)
+        AuthenticationTokenIsInvalid = typing___cast('ErrorCode.Enum', 101)
+        RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast('ErrorCode.Enum', 102)
+        TheDeviceIsNotCurrentlyRecording = typing___cast('ErrorCode.Enum', 103)
+        TheClientHasDisconnected = typing___cast('ErrorCode.Enum', 104)
+        TheServerHasDisconnected = typing___cast('ErrorCode.Enum', 105)
+        TheConnectionHasBeenCancelledByTheClient = typing___cast('ErrorCode.Enum', 106)
+        PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast('ErrorCode.Enum', 107)
+        TheClientsOperatingSystemVersionIsTooOld = typing___cast('ErrorCode.Enum', 108)
+        TheClientsApplicationVersionIsTooOld = typing___cast('ErrorCode.Enum', 109)
+        TheDeviceIsNotPaired = typing___cast('ErrorCode.Enum', 110)
+        ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast('ErrorCode.Enum', 111)
+        ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast('ErrorCode.Enum', 112)
+        TheConnectionTimedout = typing___cast('ErrorCode.Enum', 113)
+        PairingWithThisDeviceIsBlocked = typing___cast('ErrorCode.Enum', 114)
+        TheDeviceIsGoingToSleep = typing___cast('ErrorCode.Enum', 115)
+        ConnectionBlockedByServer = typing___cast('ErrorCode.Enum', 116)
+        MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast('ErrorCode.Enum', 117)
+        OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 200)
+        OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 201)
+        OutputContextModificationRequestedNoTopologyChange = typing___cast('ErrorCode.Enum', 202)
+        OtherUnknownError = typing___cast('ErrorCode.Enum', 299)
+    NoError = typing___cast('ErrorCode.Enum', 0)
+    UnknownError = typing___cast('ErrorCode.Enum', 1)
+    InvalidOperation = typing___cast('ErrorCode.Enum', 2)
+    OperationNotPermitted = typing___cast('ErrorCode.Enum', 3)
+    ClientDoesNotExist = typing___cast('ErrorCode.Enum', 4)
+    OriginDoesNotExist = typing___cast('ErrorCode.Enum', 5)
+    UnsupportedOperation = typing___cast('ErrorCode.Enum', 6)
+    FailedToSetPickedRoute = typing___cast('ErrorCode.Enum', 7)
+    FailedToRegisterCustomOrigin = typing___cast('ErrorCode.Enum', 8)
+    FailedToRemoveCustomOrigin = typing___cast('ErrorCode.Enum', 9)
+    TheApplicationActivityDoesNotExist = typing___cast('ErrorCode.Enum', 10)
+    TheAppHasNotSetupABrowsableContentEndpoint = typing___cast('ErrorCode.Enum', 11)
+    TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast('ErrorCode.Enum', 12)
+    TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast('ErrorCode.Enum', 13)
+    OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 14)
+    OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 15)
+    RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast('ErrorCode.Enum', 16)
+    TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast('ErrorCode.Enum', 17)
+    VolumeValueIsOutOfRange = typing___cast('ErrorCode.Enum', 18)
+    VolumeIsAlreadyAtTheMaximumValue = typing___cast('ErrorCode.Enum', 19)
+    VolumeIsAlreadyMuted = typing___cast('ErrorCode.Enum', 20)
+    VoiceInputEndpointDoesNotExist = typing___cast('ErrorCode.Enum', 21)
+    TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast('ErrorCode.Enum', 22)
+    EncryptionFailure = typing___cast('ErrorCode.Enum', 23)
+    EndpointDoesNotExist = typing___cast('ErrorCode.Enum', 24)
+    TheClientsApplicationCancelledTheOperation = typing___cast('ErrorCode.Enum', 25)
+    TheOperationTimedOut = typing___cast('ErrorCode.Enum', 26)
+    TheSpecifiedPlayerPathObjectWasInvalid = typing___cast('ErrorCode.Enum', 27)
+    AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast('ErrorCode.Enum', 28)
+    CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast('ErrorCode.Enum', 29)
+    TheSpecifiedContentItemDoesNotExist = typing___cast('ErrorCode.Enum', 30)
+    TheSpecifiedOffsetIsInvalid = typing___cast('ErrorCode.Enum', 31)
+    TheSpecifiedOutputContextIsInvalid = typing___cast('ErrorCode.Enum', 32)
+    OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast('ErrorCode.Enum', 33)
+    TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast('ErrorCode.Enum', 34)
+    CouldNotFindTheSpecifiedNowPlayingClient = typing___cast('ErrorCode.Enum', 35)
+    EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 36)
+    OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 37)
+    CoderMustSupportKeyValueCoding = typing___cast('ErrorCode.Enum', 38)
+    CouldNotFindTheGivenOutputdevice = typing___cast('ErrorCode.Enum', 39)
+    FailedToConnectToRemoteDevice = typing___cast('ErrorCode.Enum', 100)
+    AuthenticationTokenIsInvalid = typing___cast('ErrorCode.Enum', 101)
+    RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast('ErrorCode.Enum', 102)
+    TheDeviceIsNotCurrentlyRecording = typing___cast('ErrorCode.Enum', 103)
+    TheClientHasDisconnected = typing___cast('ErrorCode.Enum', 104)
+    TheServerHasDisconnected = typing___cast('ErrorCode.Enum', 105)
+    TheConnectionHasBeenCancelledByTheClient = typing___cast('ErrorCode.Enum', 106)
+    PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast('ErrorCode.Enum', 107)
+    TheClientsOperatingSystemVersionIsTooOld = typing___cast('ErrorCode.Enum', 108)
+    TheClientsApplicationVersionIsTooOld = typing___cast('ErrorCode.Enum', 109)
+    TheDeviceIsNotPaired = typing___cast('ErrorCode.Enum', 110)
+    ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast('ErrorCode.Enum', 111)
+    ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast('ErrorCode.Enum', 112)
+    TheConnectionTimedout = typing___cast('ErrorCode.Enum', 113)
+    PairingWithThisDeviceIsBlocked = typing___cast('ErrorCode.Enum', 114)
+    TheDeviceIsGoingToSleep = typing___cast('ErrorCode.Enum', 115)
+    ConnectionBlockedByServer = typing___cast('ErrorCode.Enum', 116)
+    MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast('ErrorCode.Enum', 117)
+    OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 200)
+    OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 201)
+    OutputContextModificationRequestedNoTopologyChange = typing___cast('ErrorCode.Enum', 202)
+    OtherUnknownError = typing___cast('ErrorCode.Enum', 299)
+    global___Enum = Enum
 
+
+    def __init__(self,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> ErrorCode: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ErrorCode: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+global___ErrorCode = ErrorCode
+
+class ProtocolMessage(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     class Type(builtin___int):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
         @classmethod
@@ -292,7 +309,7 @@ class ProtocolMessage(google___protobuf___message___Message):
     type = ... # type: global___ProtocolMessage.Type
     identifier = ... # type: typing___Text
     authenticationToken = ... # type: typing___Text
-    errorCode = ... # type: global___ProtocolMessage.ErrorCode
+    errorCode = ... # type: global___ErrorCode.Enum
     timestamp = ... # type: builtin___int
 
     def __init__(self,
@@ -300,7 +317,7 @@ class ProtocolMessage(google___protobuf___message___Message):
         type : typing___Optional[global___ProtocolMessage.Type] = None,
         identifier : typing___Optional[typing___Text] = None,
         authenticationToken : typing___Optional[typing___Text] = None,
-        errorCode : typing___Optional[global___ProtocolMessage.ErrorCode] = None,
+        errorCode : typing___Optional[global___ErrorCode.Enum] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
     if sys.version_info >= (3,):

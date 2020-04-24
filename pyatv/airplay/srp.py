@@ -80,7 +80,6 @@ class SRPAuthHandler:
         """Initialize a new SRPAuthHandler."""
         self.seed = None
         self.session = None
-        self.client_session_key = None  # TODO: can this be removed?
         self._auth_private = None
         self._auth_public = None
         self._verify_private = None
@@ -175,8 +174,8 @@ class SRPAuthHandler:
         self._check_initialized()
         pk_str = binascii.hexlify(pub_key).decode()
         salt = binascii.hexlify(salt).decode()
-        self.client_session_key, _, _ = self.session.process(pk_str, salt)
-        _LOGGER.debug("Client session key: %s", self.client_session_key)
+        client_session_key, _, _ = self.session.process(pk_str, salt)
+        _LOGGER.debug("Client session key: %s", client_session_key)
 
         # Generate client public and session key proof.
         client_public = self.session.public
@@ -192,8 +191,7 @@ class SRPAuthHandler:
     def step3(self):
         """Last authentication step."""
         self._check_initialized()
-        # TODO: verify: self.client_session_key same as self.session.key_b64()?
-        session_key = binascii.unhexlify(self.client_session_key)
+        session_key = binascii.unhexlify(self.session.key)
 
         aes_key = hash_sha512("Pair-Setup-AES-Key", session_key)[0:16]
         tmp = bytearray(hash_sha512("Pair-Setup-AES-IV", session_key)[0:16])

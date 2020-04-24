@@ -57,7 +57,7 @@ class AirPlayAuthTest(AioHTTPTestCase):
         self.assertTrue((await verifier.verify_authed()))
 
     @unittest_run_loop
-    async def test_auth_successful(self):
+    async def test_auth_failed(self):
         http = HttpSession(
             self.session, "http://127.0.0.1:{0}/".format(self.server.port)
         )
@@ -70,7 +70,7 @@ class AirPlayAuthTest(AioHTTPTestCase):
             await authenticator.finish_authentication(DEVICE_IDENTIFIER, DEVICE_PIN)
 
     @unittest_run_loop
-    async def test_auth_failed(self):
+    async def test_auth_successful(self):
         http = HttpSession(
             self.session, "http://127.0.0.1:{0}/".format(self.server.port)
         )

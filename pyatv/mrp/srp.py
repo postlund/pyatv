@@ -92,7 +92,6 @@ class SRPAuthHandler:
         self._session = None
         self._shared = None
         self._session_key = None
-        self._client_session_key = None  # TODO: can remove?
 
     def initialize(self):
         """Initialize operation by generating new keys."""
@@ -189,7 +188,7 @@ class SRPAuthHandler:
         """Second pairing step."""
         pk_str = binascii.hexlify(atv_pub_key).decode()
         salt = binascii.hexlify(atv_salt).decode()
-        self._client_session_key, _, _ = self._session.process(pk_str, salt)
+        self._session.process(pk_str, salt)
 
         if not self._session.verify_proof(self._session.key_proof_hash):
             raise exceptions.AuthenticationError("proofs do not match")
@@ -204,13 +203,13 @@ class SRPAuthHandler:
         ios_device_x = hkdf_expand(
             "Pair-Setup-Controller-Sign-Salt",
             "Pair-Setup-Controller-Sign-Info",
-            binascii.unhexlify(self._client_session_key),
+            binascii.unhexlify(self._session.key),
         )
 
         self._session_key = hkdf_expand(
             "Pair-Setup-Encrypt-Salt",
             "Pair-Setup-Encrypt-Info",
-            binascii.unhexlify(self._client_session_key),
+            binascii.unhexlify(self._session.key),
         )
 
         device_info = ios_device_x + self.pairing_id + self._auth_public
