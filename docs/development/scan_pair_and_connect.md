@@ -155,7 +155,7 @@ And an example:
 ```python
 # Restored from file
 identifier = '...'
-credentials = {1: 'xxx'}
+stored_credentials = {1: 'xxx'}
 
 # Find device and restore credentials
 atvs = pyatv.scan(loop, identifier=identifier)
@@ -163,7 +163,7 @@ atvs = pyatv.scan(loop, identifier=identifier)
 # Error handling here
 
 atv = atvs[0]
-for protocol, credentials in credentials.items():
+for protocol, credentials in stored_credentials.items():
     atv.set_credentials(protocol, credentials)
 
 ```
