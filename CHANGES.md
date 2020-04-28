@@ -1,5 +1,119 @@
 # CHANGES
 
+## 0.6.0 (2020-04-28)
+
+*Changes:*
+
+* Stream local files via AirPlay
+* Unicast scanning will now wake up sleeping devices automatically
+* Support for skip_forward and skip_backward
+* Support volume_up and volume_down (DMAP)
+* Artwork can be retrieved with custom width and height
+* top_menu now goes to main menu on tvOS
+* play_pause will be emulated by play/pause on tvOS if not natively supported
+* Fix retrieval of artwork with missing identifier
+* Many improvements to atvscript (timestamp, exception handling, etc.)
+
+*Notes:*
+
+* Default timeout for HTTP requests (DMAP and AirPlay) has been increased to
+  25 seconds to deal with waking up devices
+* Weak references are now used for all listeners, see
+  https://pyatv.dev/support/troubleshooting if you have any problems
+* Unicast scanning for hosts outside of any local subnet will
+  result in exceptions.NonLocalSubnetError
+* Resources are now properly cleaned up when closing a device, e.g.
+  anything playing with AirPlay will be disconnected
+* Additional log points have been added and existing log points have been
+  changed to be more consistent within pyatv
+
+*All changes:*
+
+```
+e81e031 docs: Rename variable in credentials example
+206b5de atvremote: Support width/height in artwork_save
+f023d88 mrp: Add support for artwork width/height
+4f4b85a dmap: Add limited support for artwork width/height
+42b38e3 if: Add width and height to artwork method
+d9986bc cq: Fix a bunch of TODOs in the code
+a4bd413 airplay: Use default timeout for HTTP requests
+bd580be docs: Inherit from listener interfaces
+c122c00 mrp: Add fallback for play_pause
+3ec1fb6 cq: Clean up resources when closing a device
+e22b2a8 dmap: Minor log improvements to DAAP
+6c41457 mrp: Fix TransationMessage definition
+ff7dbad mrp: Add more missing protobuf definitions
+2cd723a cq: Fix warnings from tests
+15aed64 atvscript: Add start log entry
+d0ca073 docs: Add apps section to FAQ
+5f7d141 knock: Support for continuously knocking ports
+95884fb udns: Send UDNS request every second
+751e691 udns: Port knock to wake sleeping devices
+b533935 net: Change timeout to 25 seconds
+32ce9ea mrp: Make connection listener into weakref
+5544cd8 cq: Various debug log improvements
+d451bfd scan: Fix type bug in scan_hosts
+8f56efb dmap: Add support for volume_up and volume_down
+4c7140b docs: Clarify when no PIN is displayed
+261b0b2 gha: Test on windows-latest
+991ea6f udns: Verify address in any local subnet
+2887a05 build(deps): bump pdoc3 from 0.8.0 to 0.8.1
+d79ba1a docs: Add stacktrace key to atvscript
+7fb6ed0 mrp: Change topmenu to go to main menu
+62b3e4e if: Use weak references for listeners
+8fc8d90 docs: Add type annotations for properties
+cb3b08c build(deps): bump pdoc3 from 0.7.5 to 0.8.0
+2be2a24 atvscript: Add debug flag
+91c1b98 atvscript: Make more robust to errors
+1b2262d mrp: Fix broken protobuf messages
+9faed04 if: Change close to not be a coroutine
+a821a2c airplay: Add support for streaming local file
+13cc9d3 mrp: Make Playing objects immutable
+e874ad2 docs: Minor updates for skip_forward/backward
+d16076a dmap: Implement skip_forward and skip_backward
+6786d89 mrp: Implement skip_forward and skip_backward
+9fe9f83 if: Add skip_forward and skip_backward
+b9fb540 cq: Add codespell for code and docs
+40d54ec cq: Improvements to tox
+89892bd atvscript: Add timestamp to output
+755c507 atvscript: Add device listener
+30c4f1f mrp: Add error codes
+32b6c55 mrp: Fix naming bug I introduced
+64f98fd mrp: Add error code to SendCommandResultMessage
+b82379c release: Adapt script to recent changes
+ca29655 release: Use current commit instead of master
+5ca58a7 atvscript: Flush output of each line
+feca6ea mrp: Handle artwork without identifier
+1486f62 atvscript: Treat empty strings as None
+b7f5d01 scan: Clean up pending service browsers
+ee5b828 Update issue templates
+37c26ee build(deps): bump mypy-protobuf from 1.19 to 1.20
+a32aaa4 docs: Exclude internal function
+768a449 bug: Make pairing interface consistent
+33775cd mrp: Add tvOS 13.4 build number
+44297ac docs: Update FAQ regarding AirPlay
+861fc9b fake_device: Add initial support for AirPlay
+5aeeed6 fake_device: Initial support for DMAP
+3953301 fake_device: Add protocol flag for MRP
+3ad6450 fake_device: Add demo mode in fake_device
+4212173 tests: Multi-client support for fake MRP service
+fe24dc4 tests: Use one fake device with multiple services
+72a79ba tests: Refactor fake devices
+8a0f057 tests: Move all fake devices to common directory
+e6b80dd tests: Begin extraction of fake AirPlay state
+67963d1 tests: Begin extraction of fake DMAP state
+33e4c2c tests: Begin extraction of fake MRP state
+84dec4a scripts: Add features to atvscript
+20a2027 scan: Remove non-breaking space
+af2c4a2 docs: Fix typo in link
+24087d8 gha: Remove push from trigger
+0dcc36f docs: Add edit link at bottom
+7abc2e3 docs: Various minor updates
+04c86fe tests: Break out state in MRP fake device
+f088bcd scripts: Add start of fake device script
+1f8480d tests: Clean up asserts in fake devices
+```
+
 ## 0.5.0 (2020-03-19)
 
 *Changes:*
