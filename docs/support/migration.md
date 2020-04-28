@@ -18,6 +18,7 @@ request.
 
   * {% include api i="interface.AppleTV.close" %} has been changed to a
     regular function instead of a coroutine.
+  * All listeners are now stored as weak references
 
 ## From 0.4.0 to 0.5.0
 
