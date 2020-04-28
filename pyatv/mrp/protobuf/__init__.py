@@ -76,7 +76,9 @@ from .RemoveClientMessage_pb2 import RemoveClientMessage
 from .RemovePlayerMessage_pb2 import RemovePlayerMessage
 from .SendButtonEventMessage_pb2 import SendButtonEventMessage
 from .SendCommandMessage_pb2 import SendCommandMessage
+from .SendCommandResultMessage_pb2 import HandlerReturnStatus
 from .SendCommandResultMessage_pb2 import SendCommandResultMessage
+from .SendCommandResultMessage_pb2 import SendError
 from .SendHIDEventMessage_pb2 import SendHIDEventMessage
 from .SendPackedVirtualTouchEventMessage_pb2 import SendPackedVirtualTouchEventMessage
 from .SendVoiceInputMessage_pb2 import AudioBuffer

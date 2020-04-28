@@ -7,8 +7,8 @@ extend ProtocolMessage {
   optional SendCommandResultMessage sendCommandResultMessage = 7;
 }
 
-message SendCommandResultMessage {
-  enum SendError {
+message SendError {
+  enum Enum {
     NoError = 0;  // This is None in original message definitions (no-go with python)
     ApplicationNotFound = 1;
     ConnectionFailed = 2;
@@ -20,8 +20,10 @@ message SendCommandResultMessage {
     NoCommandHandlers = 8;
     ApplicationNotInstalled = 9;
   }
+}
 
-  enum HandlerReturnStatus {
+message HandlerReturnStatus {
+  enum Enum {
     Success = 0;
     NoSuchContent = 1;
     CommandFailed = 2;
@@ -34,9 +36,11 @@ message SendCommandResultMessage {
     UserQueueModificationNotSupportedForCurrentItem = 103;
     SubscriptionRequiredForSharedQueue = 104;
   }
+}
 
-  optional SendError sendError = 1;
-  optional HandlerReturnStatus handlerReturnStatus = 2;
+message SendCommandResultMessage {
+  optional SendError.Enum sendError = 1;
+  optional HandlerReturnStatus.Enum handlerReturnStatus = 2;
   repeated bytes handlerReturnStatusDatas = 3;
   optional string commandID = 4;
   optional PlayerPath playerPath = 5;
