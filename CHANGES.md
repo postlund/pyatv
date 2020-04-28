@@ -1,5 +1,17 @@
 # CHANGES
 
+## 0.6.1 (2020-04-28)
+
+*Changes:*
+
+* Fixes compatibility issues with older protobuf versions
+
+*All changes:*
+
+```
+230cf9c mrp: Fixes to support older protobuf versions
+```
+
 ## 0.6.0 (2020-04-28)
 
 *Changes:*
