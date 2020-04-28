@@ -416,7 +416,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
             self.send(
                 messages.command_result(
-                    message.identifier, send_error=scr.SendError.NoCommandHandlers
+                    message.identifier, send_error=protobuf.SendError.NoCommandHandlers
                 )
             )
             return

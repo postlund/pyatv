@@ -27,7 +27,6 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.protobuf import CommandInfo_pb2
-from pyatv.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (
@@ -153,15 +152,14 @@ class MrpRemoteControl(RemoteControl):
         resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
         inner = resp.inner()
 
-        if inner.sendError == scr.SendError.NoError:
+        if inner.sendError == protobuf.SendError.NoError:
             return
 
-        print(scr.SendError.Name(inner.sendError))
         raise exceptions.CommandError(
             f"{CommandInfo_pb2.Command.Name(command)} failed: "
-            f"SendError={scr.SendError.Name(inner.sendError)}, "
+            f"SendError={protobuf.SendError.Enum.Name(inner.sendError)}, "
             "HandlerReturnStatus="
-            f"{scr.HandlerReturnStatus.Name(inner.handlerReturnStatus)}"
+            f"{protobuf.HandlerReturnStatus.Enum.Name(inner.handlerReturnStatus)}"
         )
 
     async def up(self) -> None:

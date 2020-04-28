@@ -43,80 +43,110 @@ if sys.version_info < (3,):
     builtin___unicode = unicode
 
 
+class SendError(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class Enum(builtin___int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: builtin___int) -> builtin___str: ...
+        @classmethod
+        def Value(cls, name: builtin___str) -> 'SendError.Enum': ...
+        @classmethod
+        def keys(cls) -> typing___List[builtin___str]: ...
+        @classmethod
+        def values(cls) -> typing___List['SendError.Enum']: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'SendError.Enum']]: ...
+        NoError = typing___cast('SendError.Enum', 0)
+        ApplicationNotFound = typing___cast('SendError.Enum', 1)
+        ConnectionFailed = typing___cast('SendError.Enum', 2)
+        Ignored = typing___cast('SendError.Enum', 3)
+        CouldNotLaunchApplication = typing___cast('SendError.Enum', 4)
+        TimedOut = typing___cast('SendError.Enum', 5)
+        OriginDoesNotExist = typing___cast('SendError.Enum', 6)
+        InvalidOptions = typing___cast('SendError.Enum', 7)
+        NoCommandHandlers = typing___cast('SendError.Enum', 8)
+        ApplicationNotInstalled = typing___cast('SendError.Enum', 9)
+    NoError = typing___cast('SendError.Enum', 0)
+    ApplicationNotFound = typing___cast('SendError.Enum', 1)
+    ConnectionFailed = typing___cast('SendError.Enum', 2)
+    Ignored = typing___cast('SendError.Enum', 3)
+    CouldNotLaunchApplication = typing___cast('SendError.Enum', 4)
+    TimedOut = typing___cast('SendError.Enum', 5)
+    OriginDoesNotExist = typing___cast('SendError.Enum', 6)
+    InvalidOptions = typing___cast('SendError.Enum', 7)
+    NoCommandHandlers = typing___cast('SendError.Enum', 8)
+    ApplicationNotInstalled = typing___cast('SendError.Enum', 9)
+    global___Enum = Enum
+
+
+    def __init__(self,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> SendError: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendError: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+global___SendError = SendError
+
+class HandlerReturnStatus(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    class Enum(builtin___int):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        @classmethod
+        def Name(cls, number: builtin___int) -> builtin___str: ...
+        @classmethod
+        def Value(cls, name: builtin___str) -> 'HandlerReturnStatus.Enum': ...
+        @classmethod
+        def keys(cls) -> typing___List[builtin___str]: ...
+        @classmethod
+        def values(cls) -> typing___List['HandlerReturnStatus.Enum']: ...
+        @classmethod
+        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'HandlerReturnStatus.Enum']]: ...
+        Success = typing___cast('HandlerReturnStatus.Enum', 0)
+        NoSuchContent = typing___cast('HandlerReturnStatus.Enum', 1)
+        CommandFailed = typing___cast('HandlerReturnStatus.Enum', 2)
+        NoActionableNowPlayingItem = typing___cast('HandlerReturnStatus.Enum', 10)
+        DeviceNotFound = typing___cast('HandlerReturnStatus.Enum', 20)
+        UIKitLegacy = typing___cast('HandlerReturnStatus.Enum', 3)
+        SkipAdProhibited = typing___cast('HandlerReturnStatus.Enum', 100)
+        QueueIsUserCurated = typing___cast('HandlerReturnStatus.Enum', 101)
+        UserModifiedQueueDisabled = typing___cast('HandlerReturnStatus.Enum', 102)
+        UserQueueModificationNotSupportedForCurrentItem = typing___cast('HandlerReturnStatus.Enum', 103)
+        SubscriptionRequiredForSharedQueue = typing___cast('HandlerReturnStatus.Enum', 104)
+    Success = typing___cast('HandlerReturnStatus.Enum', 0)
+    NoSuchContent = typing___cast('HandlerReturnStatus.Enum', 1)
+    CommandFailed = typing___cast('HandlerReturnStatus.Enum', 2)
+    NoActionableNowPlayingItem = typing___cast('HandlerReturnStatus.Enum', 10)
+    DeviceNotFound = typing___cast('HandlerReturnStatus.Enum', 20)
+    UIKitLegacy = typing___cast('HandlerReturnStatus.Enum', 3)
+    SkipAdProhibited = typing___cast('HandlerReturnStatus.Enum', 100)
+    QueueIsUserCurated = typing___cast('HandlerReturnStatus.Enum', 101)
+    UserModifiedQueueDisabled = typing___cast('HandlerReturnStatus.Enum', 102)
+    UserQueueModificationNotSupportedForCurrentItem = typing___cast('HandlerReturnStatus.Enum', 103)
+    SubscriptionRequiredForSharedQueue = typing___cast('HandlerReturnStatus.Enum', 104)
+    global___Enum = Enum
+
+
+    def __init__(self,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> HandlerReturnStatus: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> HandlerReturnStatus: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+global___HandlerReturnStatus = HandlerReturnStatus
+
 class SendCommandResultMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class SendError(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'SendCommandResultMessage.SendError': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['SendCommandResultMessage.SendError']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'SendCommandResultMessage.SendError']]: ...
-        NoError = typing___cast('SendCommandResultMessage.SendError', 0)
-        ApplicationNotFound = typing___cast('SendCommandResultMessage.SendError', 1)
-        ConnectionFailed = typing___cast('SendCommandResultMessage.SendError', 2)
-        Ignored = typing___cast('SendCommandResultMessage.SendError', 3)
-        CouldNotLaunchApplication = typing___cast('SendCommandResultMessage.SendError', 4)
-        TimedOut = typing___cast('SendCommandResultMessage.SendError', 5)
-        OriginDoesNotExist = typing___cast('SendCommandResultMessage.SendError', 6)
-        InvalidOptions = typing___cast('SendCommandResultMessage.SendError', 7)
-        NoCommandHandlers = typing___cast('SendCommandResultMessage.SendError', 8)
-        ApplicationNotInstalled = typing___cast('SendCommandResultMessage.SendError', 9)
-    NoError = typing___cast('SendCommandResultMessage.SendError', 0)
-    ApplicationNotFound = typing___cast('SendCommandResultMessage.SendError', 1)
-    ConnectionFailed = typing___cast('SendCommandResultMessage.SendError', 2)
-    Ignored = typing___cast('SendCommandResultMessage.SendError', 3)
-    CouldNotLaunchApplication = typing___cast('SendCommandResultMessage.SendError', 4)
-    TimedOut = typing___cast('SendCommandResultMessage.SendError', 5)
-    OriginDoesNotExist = typing___cast('SendCommandResultMessage.SendError', 6)
-    InvalidOptions = typing___cast('SendCommandResultMessage.SendError', 7)
-    NoCommandHandlers = typing___cast('SendCommandResultMessage.SendError', 8)
-    ApplicationNotInstalled = typing___cast('SendCommandResultMessage.SendError', 9)
-    global___SendError = SendError
-
-    class HandlerReturnStatus(builtin___int):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'SendCommandResultMessage.HandlerReturnStatus': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['SendCommandResultMessage.HandlerReturnStatus']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'SendCommandResultMessage.HandlerReturnStatus']]: ...
-        Success = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 0)
-        NoSuchContent = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 1)
-        CommandFailed = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 2)
-        NoActionableNowPlayingItem = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 10)
-        DeviceNotFound = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 20)
-        UIKitLegacy = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 3)
-        SkipAdProhibited = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 100)
-        QueueIsUserCurated = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 101)
-        UserModifiedQueueDisabled = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 102)
-        UserQueueModificationNotSupportedForCurrentItem = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 103)
-        SubscriptionRequiredForSharedQueue = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 104)
-    Success = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 0)
-    NoSuchContent = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 1)
-    CommandFailed = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 2)
-    NoActionableNowPlayingItem = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 10)
-    DeviceNotFound = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 20)
-    UIKitLegacy = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 3)
-    SkipAdProhibited = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 100)
-    QueueIsUserCurated = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 101)
-    UserModifiedQueueDisabled = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 102)
-    UserQueueModificationNotSupportedForCurrentItem = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 103)
-    SubscriptionRequiredForSharedQueue = typing___cast('SendCommandResultMessage.HandlerReturnStatus', 104)
-    global___HandlerReturnStatus = HandlerReturnStatus
-
-    sendError = ... # type: global___SendCommandResultMessage.SendError
-    handlerReturnStatus = ... # type: global___SendCommandResultMessage.HandlerReturnStatus
+    sendError = ... # type: global___SendError.Enum
+    handlerReturnStatus = ... # type: global___HandlerReturnStatus.Enum
     handlerReturnStatusDatas = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___bytes]
     commandID = ... # type: typing___Text
 
@@ -125,8 +155,8 @@ class SendCommandResultMessage(google___protobuf___message___Message):
 
     def __init__(self,
         *,
-        sendError : typing___Optional[global___SendCommandResultMessage.SendError] = None,
-        handlerReturnStatus : typing___Optional[global___SendCommandResultMessage.HandlerReturnStatus] = None,
+        sendError : typing___Optional[global___SendError.Enum] = None,
+        handlerReturnStatus : typing___Optional[global___HandlerReturnStatus.Enum] = None,
         handlerReturnStatusDatas : typing___Optional[typing___Iterable[builtin___bytes]] = None,
         commandID : typing___Optional[typing___Text] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
