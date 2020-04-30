@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-import os
+from pathlib import Path
+from os.path import join, dirname
 from setuptools import setup, find_packages
 
 # Read in version without importing pyatv
@@ -9,9 +10,14 @@ from setuptools import setup, find_packages
 exec(compile(open('pyatv/const.py', "rb").read(), 'pyatv/const.py', 'exec'))
 
 
-# Read content of a file and return as a string
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    """Read content of a file and return as a string."""
+    return Path(join(dirname(__file__), fname)).read_text()
+
+
+def get_requirements():
+    """Retuen requirements with loose version restrictions."""
+    return read("base_versions.txt").replace("==", ">=").split("\n")
 
 
 setup(
@@ -28,18 +34,11 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        'aiohttp>=3.0.1, <4',
-        'aiozeroconf>=0.1.8',
-        'cryptography>=1.8.1',
-        'netifaces>=0.10.0',
-        'protobuf>=3.6.0',
-        'srptools>=0.2.0',
-    ],
+    install_requires=get_requirements(),
     test_suite='tests',
     keywords=['apple', 'tv'],
     setup_requires=['pytest-runner'],
-    tests_require=['tox', 'pytest==5.4.1', 'pytest-xdist==1.31.0'],
+    tests_require=['tox==3.14.6', 'pytest==5.4.1', 'pytest-xdist==1.31.0'],
     entry_points={
         'console_scripts': [
             'atvremote = pyatv.scripts.atvremote:main',
