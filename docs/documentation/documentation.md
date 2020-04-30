@@ -33,12 +33,12 @@ To try out the latest development version (a.k.a. `master` on GitHub), you can i
 
 To get the work done, `pyatv` requires some other pieces of software, more specifically:
 
-- python >= 3.5.3
-- aiohttp >= 3.0.1, <4
+- python >= 3.6.0
+- aiohttp >= 3.1.0, <4
 - aiozeroconf >= 0.1.8
-- cryptography >= 1.8.1
+- cryptography >= 2.6
 - netifaces >= 0.10.0
-- protobuf >= 3.4.0
+- protobuf >= 3.6.0
 - srptools >= 0.2.0
 
 ### Milestones

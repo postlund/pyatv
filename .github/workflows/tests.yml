@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ${{ matrix.platform }}
     strategy:
-      max-parallel: 4
+      max-parallel: 8
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
@@ -41,7 +41,10 @@ jobs:
         python -m pip install --upgrade setuptools pip wheel
         python -m pip install tox-gh-actions
     - name: Test with tox
-      run: tox
+      run: tox -q -p auto
+    - name: Regression
+      run: tox -q -p auto -e regression
+      if: matrix.python-version == '3.8' && runner.os == 'Linux'
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
