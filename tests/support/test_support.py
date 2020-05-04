@@ -17,14 +17,14 @@ class DummyException(Exception):
 
 
 @pytest.fixture(name="logger")
-async def logger_fixture():
+def logger_fixture():
     logger = MagicMock()
     logger.return_value = True
     yield logger
 
 
 @pytest.fixture
-async def message():
+def message():
     msg = ProtocolMessage()
     msg.identifier = "aaaaaaaaaa"
     yield msg
