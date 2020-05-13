@@ -13,7 +13,7 @@ from pyatv.const import Protocol
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 
-from tests.fake_device import FakeAppleTV
+from tests.fake_device import FakeAppleTV  # noqa
 
 _LOGGER = logging.getLogger(__name__)
 
