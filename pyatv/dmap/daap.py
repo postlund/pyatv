@@ -134,7 +134,7 @@ class DaapRequester:
 
         # Seems to be the case?
         if status == 500:
-            raise exceptions.NotSupportedError(f"command not supported at this stage")
+            raise exceptions.NotSupportedError("command not supported at this stage")
 
         if not is_login:
             # If a request fails, try to login again before retrying
