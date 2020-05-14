@@ -38,15 +38,14 @@
 #
 # Help to improve the proxy is greatly appreciated! I will only make
 # improvements in case I personally see any benefits of doing so.
-"""Simple MRP proxy server to intercept traffic."""
+"""Simple proxy server to intercept traffic."""
 
 import sys
-import socket
 import asyncio
 import logging
 import argparse
 
-from aiozeroconf import Zeroconf, ServiceInfo
+from aiozeroconf import Zeroconf
 
 from pyatv.conf import MrpService
 from pyatv.mrp.srp import SRPAuthHandler
@@ -54,6 +53,7 @@ from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
+from pyatv.scripts import publish_service
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -159,7 +159,62 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
 
-async def publish_zeroconf(zconf, ip_address, port):
+class RemoteConnection(asyncio.Protocol):
+    """Connection to host of interest."""
+
+    def __init__(self, loop):
+        """Initialize a new RemoteConnection."""
+        self.loop = loop
+        self.transport = None
+        self.callback = None
+
+    def connection_made(self, transport):
+        """Connect to host was established."""
+        extra_info = transport.get_extra_info("socket")
+
+        _LOGGER.debug("Connected to remote host %s", extra_info.getpeername())
+        self.transport = transport
+
+    def connection_lost(self, exc):
+        """Lose connection to host."""
+        _LOGGER.debug("Disconnected from remote host")
+        self.transport = None
+
+    def data_received(self, data):
+        """Receive data from host."""
+        log_binary(_LOGGER, "Data from remote", Data=data)
+        self.callback.transport.write(data)
+
+
+class RelayConnection(asyncio.Protocol):
+    """Connection to initiating device, e.g. a phone."""
+
+    def __init__(self, loop, connection):
+        """Initialize a new RelayConnection."""
+        self.loop = loop
+        self.transport = None
+        self.connection = connection
+
+    def connection_made(self, transport):
+        """Connect to host was established."""
+        extra_info = transport.get_extra_info("socket")
+
+        _LOGGER.debug("Client connected %s", extra_info.getpeername())
+        self.transport = transport
+        self.connection.callback = self
+
+    def connection_lost(self, exc):
+        """Lose connection to host."""
+        _LOGGER.debug("Client disconnected")
+        self.transport = None
+
+    def data_received(self, data):
+        """Receive data from host."""
+        log_binary(_LOGGER, "Data from client", Data=data)
+        self.connection.transport.write(data)
+
+
+async def publish_mrp_service(zconf, address, port):
     """Publish zeroconf service for ATV proxy instance."""
     props = {
         b"ModelName": "Apple TV",
@@ -172,22 +227,12 @@ async def publish_zeroconf(zconf, ip_address, port):
         b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
     }
 
-    service = ServiceInfo(
-        "_mediaremotetv._tcp.local.",
-        DEVICE_NAME + "._mediaremotetv._tcp.local.",
-        address=socket.inet_aton(ip_address),
-        port=port,
-        weight=0,
-        priority=0,
-        properties=props,
+    return await publish_service(
+        zconf, "_mediaremotetv._tcp.local.", DEVICE_NAME, address, port, props
     )
-    await zconf.register_service(service)
-    _LOGGER.debug("Published zeroconf service: %s", service)
-
-    return service
 
 
-async def _start_mrp_proxy(loop, args):
+async def _start_mrp_proxy(loop, args, zconf):
     def proxy_factory():
         try:
             proxy = MrpAppleTVProxy(loop)
@@ -199,30 +244,59 @@ async def _start_mrp_proxy(loop, args):
             _LOGGER.exception("failed to start proxy")
         return proxy
 
-    zconf = Zeroconf(loop)
-
     # Setup server used to publish a fake MRP server
     server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started MRP server at port %d", port)
 
-    service = await publish_zeroconf(zconf, args.local_ip, port)
+    service = await publish_mrp_service(zconf, args.local_ip, port)
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
 
-    await zconf.unregister_service(service)
+    return service
+
+
+async def _start_relay(loop, args, zconf):
+    transport, protocol = await loop.create_connection(
+        lambda: RemoteConnection(loop), args.remote_ip, args.remote_port
+    )
+
+    coro = loop.create_server(lambda: RelayConnection(loop, protocol), "0.0.0.0")
+    server = await loop.create_task(coro)
+    port = server.sockets[0].getsockname()[1]
+
+    props = dict({(prop.split("=")[0], prop.split("=")[1]) for prop in args.properties})
+
+    service = await publish_service(
+        zconf, args.service_type, args.name, args.local_ip, port, props
+    )
+
+    print("Press ENTER to quit")
+    await loop.run_in_executor(None, sys.stdin.readline)
+
+    server.close()
+    return service
 
 
 async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="sub-commands", dest="command")
+
     mrp = subparsers.add_parser("mrp", help="MRP proxy")
     mrp.add_argument("credentials", help="MRP credentials")
     mrp.add_argument("local_ip", help="local IP address")
     mrp.add_argument("remote_ip", help="Apple TV IP address")
     mrp.add_argument("remote_port", help="MRP port")
+
+    relay = subparsers.add_parser("relay", help="Relay traffic to host")
+    relay.add_argument("local_ip", help="local IP address")
+    relay.add_argument("remote_ip", help="Remote host")
+    relay.add_argument("remote_port", help="Remote port")
+    relay.add_argument("name", help="Service name")
+    relay.add_argument("service_type", help="Service type")
+    relay.add_argument("-p", "--properties", nargs="+", help="Service properties")
 
     args = parser.parse_args()
     if not args.command:
@@ -230,10 +304,19 @@ async def appstart(loop):
         return 1
 
     # To get logging from pyatv
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        stream=sys.stdout,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format="%(asctime)s %(levelname)s: %(message)s",
+    )
 
+    zconf = Zeroconf(loop)
     if args.command == "mrp":
-        await _start_mrp_proxy(loop, args)
+        service = await _start_mrp_proxy(loop, args, zconf)
+    elif args.command == "relay":
+        service = await _start_relay(loop, args, zconf)
+    await zconf.unregister_service(service)
 
     return 0
 
