@@ -10,6 +10,7 @@ ADDRESS_2 = "192.168.0.1"
 NAME = "Alice"
 PORT_1 = 1234
 PORT_2 = 5678
+PORT_3 = 1111
 IDENTIFIER_1 = "id1"
 IDENTIFIER_2 = "id2"
 IDENTIFIER_3 = "id3"
@@ -31,6 +32,7 @@ MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES)
 AIRPLAY_SERVICE = conf.AirPlayService(
     IDENTIFIER_3, PORT_1, properties=AIRPLAY_PROPERTIES
 )
+COMPANION_SERVICE = conf.CompanionService(PORT_3)
 
 
 @pytest.fixture
@@ -55,6 +57,7 @@ def test_add_services_and_get(config):
     config.add_service(DMAP_SERVICE)
     config.add_service(MRP_SERVICE)
     config.add_service(AIRPLAY_SERVICE)
+    config.add_service(COMPANION_SERVICE)
 
     services = config.services
     assert len(services), 3

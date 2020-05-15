@@ -23,6 +23,8 @@ MRP_ID_1 = "mrp_id_1"
 
 AIRPLAY_ID = "AA:BB:CC:DD:EE:FF"
 
+COMPANION_PORT = 1234
+
 DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
 
 
@@ -98,6 +100,11 @@ async def test_multicast_scan(
     udns_server.add_service(
         fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
     )
+    udns_server.add_service(
+        fake_udns.companion_service(
+            "Companion Device", address=IP_3, port=COMPANION_PORT
+        )
+    )
 
     atvs = await multicast_scan()
     assert len(atvs) == 3
@@ -165,6 +172,38 @@ async def test_multicast_scan_mrp(udns_server, multicast_scan):
     assert dev1
     assert dev1.name == "Apple TV MRP 1"
     assert dev1.get_service(Protocol.MRP)
+
+
+@pytest.mark.asyncio
+async def test_multicast_scan_mrp_with_companion(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.companion_service("Companion", IP_1, COMPANION_PORT)
+    )
+
+    atvs = await multicast_scan(protocol=Protocol.MRP)
+    assert len(atvs) == 1
+
+    dev1 = _get_atv(atvs, IP_1)
+    assert dev1
+    assert dev1.name == "Apple TV MRP 1"
+    assert dev1.get_service(Protocol.MRP)
+
+    companion = dev1.get_service(Protocol.Companion)
+    assert companion
+    assert companion.port == COMPANION_PORT
+
+
+@pytest.mark.asyncio
+async def test_multicast_scan_companion_device(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.companion_service("Companion", IP_1, COMPANION_PORT)
+    )
+
+    atvs = await multicast_scan()
+    assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
@@ -274,6 +313,16 @@ async def test_unicast_scan_mrp(udns_server, unicast_scan):
 async def test_unicast_scan_airplay(udns_server, unicast_scan):
     udns_server.add_service(
         fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+    )
+
+    atvs = await unicast_scan()
+    assert len(atvs) == 0
+
+
+@pytest.mark.asyncio
+async def test_unicast_scan_comapnion(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.companion_service("Companion", IP_1, COMPANION_PORT)
     )
 
     atvs = await unicast_scan()

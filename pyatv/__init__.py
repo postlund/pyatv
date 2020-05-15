@@ -10,6 +10,7 @@ import aiohttp
 from pyatv import conf, exceptions, interface
 from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
+from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
@@ -95,6 +96,7 @@ async def pair(
         Protocol.DMAP: DmapPairingHandler,
         Protocol.MRP: MrpPairingHandler,
         Protocol.AirPlay: AirPlayPairingHandler,
+        Protocol.Companion: CompanionPairingHandler,
     }.get(protocol)
 
     if handler is None:

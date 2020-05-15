@@ -22,8 +22,12 @@ class TransformProtocol(argparse.Action):
             setattr(namespace, self.dest, const.Protocol.DMAP)
         elif values == "airplay":
             setattr(namespace, self.dest, const.Protocol.AirPlay)
+        elif values == "companion":
+            setattr(namespace, self.dest, const.Protocol.Companion)
         else:
-            raise argparse.ArgumentTypeError("Valid protocols are: mrp, dmap, airplay")
+            raise argparse.ArgumentTypeError(
+                "Valid protocols are: mrp, dmap, airplay, companion"
+            )
 
 
 # pylint: disable=too-few-public-methods

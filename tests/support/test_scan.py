@@ -8,6 +8,7 @@ from pyatv.support.scan import (
     DEVICE_SERVICE,
     MEDIAREMOTE_SERVICE,
     AIRPLAY_SERVICE,
+    COMPANION_SERVICE,
     get_unique_identifiers,
 )
 
@@ -16,6 +17,7 @@ HS = Service(HOMESHARING_SERVICE, "name", None, 0, {"hG": "hs_id"})
 DEVICE = Service(DEVICE_SERVICE, "dev_id", None, 0, {})
 MRP = Service(MEDIAREMOTE_SERVICE, "name", None, 0, {"UniqueIdentifier": "mrp_id"})
 AIRPLAY = Service(AIRPLAY_SERVICE, "name", None, 0, {"deviceid": "airplay_id"})
+COMPANION = Service(COMPANION_SERVICE, "name", None, 0, {})
 
 
 @pytest.fixture
@@ -64,6 +66,7 @@ def test_unique_identifier_multiple(response):
     response.services.append(DEVICE)
     response.services.append(MRP)
     response.services.append(AIRPLAY)
+    response.services.append(COMPANION)
 
     identifiers = list(get_unique_identifiers(response))
     assert len(identifiers) == 4

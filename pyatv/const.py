@@ -23,6 +23,9 @@ class Protocol(Enum):
     AirPlay = 3
     """Protocol constant representing AirPlay."""
 
+    Companion = 4
+    """Protocol constant representing Companion link."""
+
 
 class MediaType(Enum):
     """All supported media types."""
