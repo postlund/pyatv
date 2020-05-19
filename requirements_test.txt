@@ -1,5 +1,5 @@
 black==19.10b0
-codecov==2.0.22
+codecov==2.1.0
 deepdiff==4.3.2
 flake8==3.7.9
 pytest==5.4.2
