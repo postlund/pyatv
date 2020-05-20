@@ -35,9 +35,7 @@ is length of the data, so key and length are not included in this size.
 
 A TLV looks like this:
 
-    +---------------+------------------+--------------------+
-    | Key (4 bytes) | Length (4 bytes) | Data (Length bytes |
-    +---------------+------------------+--------------------+
+| Key (4 bytes) | Length (4 bytes) | Data (Length bytes |
 
 Multiple TLVs are usually embedded in one DMAP data stream and TLVs may also
 be nested, to form a tree:
