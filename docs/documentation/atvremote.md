@@ -95,7 +95,7 @@ It is also possible to use the device name by specifying `-n` instead:
 ### Manually specifying a device
 
 It is possible to bypass the automatic scanning that `atvremote` performs
-by passing the `--manual` flag. This is convenvient if you rely on an external
+by passing the `--manual` flag. This is convenient if you rely on an external
 scanning process or to shorten the turn-around time during development testing.
 However, doing so means that you mainly lose all benefits of unique identifiers.
 They lose meaning completely. Only use this mode if you know what you are doing
