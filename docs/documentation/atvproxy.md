@@ -10,7 +10,7 @@ for instance Wireshark and analyze it. Since it's very hard to extract the
 used keys, decryption is more or less not possible. To cicrumvent this, you
 can use the MRP Proxy. It will publish a device on the network called `Proxy`,
 that it is possible to pair with using the Remote app. The proxy itself will
-establish a connection to the device of interest and rely messages between
+establish a connection to the device of interest and relay messages between
 your iOS device and the Apple TV. One set of encryption keys are used between
 the proxy and Apple TV and another set between the proxy and your iOS device.
 
