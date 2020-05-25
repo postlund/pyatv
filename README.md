@@ -2,6 +2,7 @@ A python client library for the Apple TV
 ========================================
 ![Tests](https://github.com/postlund/pyatv/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
 [![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
