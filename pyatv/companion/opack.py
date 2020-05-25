@@ -21,13 +21,13 @@ def pack(data):
         if data < 0x28:
             return bytes([data + 8])
         if data <= 0xFF:
-            return bytes([0x30]) + data.to_bytes(1, byteorder="big")
+            return bytes([0x30]) + data.to_bytes(1, byteorder="little")
         if data <= 0xFFFF:
-            return bytes([0x31]) + data.to_bytes(2, byteorder="big")
+            return bytes([0x31]) + data.to_bytes(2, byteorder="little")
         if data <= 0xFFFFFF:
-            return bytes([0x32]) + data.to_bytes(3, byteorder="big")
+            return bytes([0x32]) + data.to_bytes(3, byteorder="little")
         if data <= 0xFFFFFFFF:
-            return bytes([0x33]) + data.to_bytes(4, byteorder="big")
+            return bytes([0x33]) + data.to_bytes(4, byteorder="little")
     if isinstance(data, float):
         return struct.pack(">d", data)
     if isinstance(data, str):
@@ -35,24 +35,32 @@ def pack(data):
         if len(encoded) <= 0x20:
             return bytes([0x40 + len(encoded)]) + encoded
         if len(encoded) <= 0xFF:
-            return bytes([0x61]) + len(encoded).to_bytes(1, byteorder="big") + encoded
+            return (
+                bytes([0x61]) + len(encoded).to_bytes(1, byteorder="little") + encoded
+            )
         if len(encoded) <= 0xFFFF:
-            return bytes([0x62]) + len(encoded).to_bytes(2, byteorder="big") + encoded
+            return (
+                bytes([0x62]) + len(encoded).to_bytes(2, byteorder="little") + encoded
+            )
         if len(encoded) <= 0xFFFFFF:
-            return bytes([0x63]) + len(encoded).to_bytes(3, byteorder="big") + encoded
+            return (
+                bytes([0x63]) + len(encoded).to_bytes(3, byteorder="little") + encoded
+            )
         if len(encoded) <= 0xFFFFFFFF:
-            return bytes([0x64]) + len(encoded).to_bytes(4, byteorder="big") + encoded
+            return (
+                bytes([0x64]) + len(encoded).to_bytes(4, byteorder="little") + encoded
+            )
     if isinstance(data, bytes):
         if len(data) <= 0x20:
             return bytes([0x70 + len(data)]) + data
         if len(data) <= 0xFF:
-            return bytes([0x91]) + len(data).to_bytes(1, byteorder="big") + data
+            return bytes([0x91]) + len(data).to_bytes(1, byteorder="little") + data
         if len(data) <= 0xFFFF:
-            return bytes([0x92]) + len(data).to_bytes(2, byteorder="big") + data
+            return bytes([0x92]) + len(data).to_bytes(2, byteorder="little") + data
         if len(data) <= 0xFFFFFF:
-            return bytes([0x93]) + len(data).to_bytes(3, byteorder="big") + data
+            return bytes([0x93]) + len(data).to_bytes(3, byteorder="little") + data
         if len(data) <= 0xFFFFFFFF:
-            return bytes([0x94]) + len(data).to_bytes(4, byteorder="big") + data
+            return bytes([0x94]) + len(data).to_bytes(4, byteorder="little") + data
     if isinstance(data, list):
         return bytes([0xD0 + len(data)]) + b"".join(pack(x) for x in data)
     if isinstance(data, dict):
@@ -82,7 +90,7 @@ def unpack(data):
     if (data[0] & 0xF0) == 0x30:
         noof_bytes = (data[0] & 0xF) + 1
         return (
-            int.from_bytes(data[1 : 1 + noof_bytes], byteorder="big"),
+            int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little"),
             data[1 + noof_bytes :],
         )
     if 0x40 <= data[0] <= 0x60:
@@ -90,7 +98,7 @@ def unpack(data):
         return data[1 : 1 + length].decode("utf-8"), data[1 + length :]
     if 0x60 < data[0] <= 0x64:
         noof_bytes = data[0] & 0xF
-        length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="big")
+        length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little")
         return (
             data[1 + noof_bytes : 1 + noof_bytes + length].decode("utf-8"),
             data[1 + noof_bytes + length :],
@@ -100,7 +108,7 @@ def unpack(data):
         return data[1 : 1 + length], data[1 + length :]
     if 0x90 < data[0] <= 0x94:
         noof_bytes = data[0] & 0xF
-        length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="big")
+        length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little")
         return (
             data[1 + noof_bytes : 1 + noof_bytes + length],
             data[1 + noof_bytes + length :],

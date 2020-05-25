@@ -35,9 +35,9 @@ def test_pack_small_integers():
 
 def test_pack_larger_integers():
     assert pack(0x28) == b"\x30\x28"
-    assert pack(0x1FF) == b"\x31\x01\xFF"
-    assert pack(0x1FFFF) == b"\x32\x01\xFF\xFF"
-    assert pack(0x1FFFFFF) == b"\x33\x01\xFF\xFF\xFF"
+    assert pack(0x1FF) == b"\x31\xFF\x01"
+    assert pack(0x1FFFF) == b"\x32\xFF\xFF\x01"
+    assert pack(0x1FFFFFF) == b"\x33\xFF\xFF\xFF\x01"
 
 
 def test_pack_float64():
@@ -52,7 +52,7 @@ def test_pack_short_strings():
 
 def test_pack_longer_strings():
     assert pack(33 * "a") == b"\x61\x21" + (33 * b"\x61")
-    assert pack(256 * "a") == b"\x62\x01\x00" + (256 * b"\x61")
+    assert pack(256 * "a") == b"\x62\x00\x01" + (256 * b"\x61")
 
 
 def test_pack_short_raw_bytes():
@@ -63,7 +63,7 @@ def test_pack_short_raw_bytes():
 
 def test_pack_longer_raw_bytes():
     assert pack(33 * b"\x61") == b"\x91\x21" + (33 * b"\x61")
-    assert pack(256 * b"\x61") == b"\x92\x01\x00" + (256 * b"\x61")
+    assert pack(256 * b"\x61") == b"\x92\x00\x01" + (256 * b"\x61")
 
 
 def test_pack_array():
@@ -105,9 +105,9 @@ def test_unpack_small_integers():
 
 def test_unpack_larger_integers():
     assert unpack(b"\x30\x28") == (0x28, b"")
-    assert unpack(b"\x31\x01\xFF") == (0x1FF, b"")
-    assert unpack(b"\x32\x01\xFF\xFF") == (0x1FFFF, b"")
-    assert unpack(b"\x33\x01\xFF\xFF\xFF") == (0x1FFFFFF, b"")
+    assert unpack(b"\x31\xFf\x01") == (0x1FF, b"")
+    assert unpack(b"\x32\xFF\xFF\x01") == (0x1FFFF, b"")
+    assert unpack(b"\x33\xFF\xFF\xFF\x01") == (0x1FFFFFF, b"")
 
 
 def test_pack_unfloat32():
@@ -126,7 +126,7 @@ def test_unpack_short_strings():
 
 def test_unpack_longer_strings():
     assert unpack(b"\x61\x21" + (33 * b"\x61")) == (33 * "a", b"")
-    assert unpack(b"\x62\x01\x00" + (256 * b"\x61")) == (256 * "a", b"")
+    assert unpack(b"\x62\x00\x01" + (256 * b"\x61")) == (256 * "a", b"")
 
 
 def test_unpack_short_raw_bytes():
@@ -137,7 +137,7 @@ def test_unpack_short_raw_bytes():
 
 def test_unpack_longer_raw_bytes():
     assert unpack(b"\x91\x21" + (33 * b"\x61")) == (33 * b"\x61", b"")
-    assert unpack(b"\x92\x01\x00" + (256 * b"\x61")) == (256 * b"\x61", b"")
+    assert unpack(b"\x92\x00\x01" + (256 * b"\x61")) == (256 * b"\x61", b"")
 
 
 def test_unpack_array():
