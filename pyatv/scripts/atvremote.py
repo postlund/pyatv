@@ -9,7 +9,13 @@ import argparse
 import traceback
 
 from pyatv import const, exceptions, interface, scan, connect, pair
-from pyatv.conf import AppleTV, DmapService, MrpService, AirPlayService
+from pyatv.conf import (
+    AppleTV,
+    DmapService,
+    MrpService,
+    AirPlayService,
+    CompanionService,
+)
 from pyatv.const import Protocol, ShuffleState, RepeatState, InputAction
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
@@ -138,6 +144,9 @@ class GlobalCommands:
         apple_tv.set_credentials(const.Protocol.AirPlay, self.args.airplay_credentials)
         apple_tv.set_credentials(const.Protocol.DMAP, self.args.dmap_credentials)
         apple_tv.set_credentials(const.Protocol.MRP, self.args.mrp_credentials)
+        apple_tv.set_credentials(
+            const.Protocol.Companion, self.args.companion_credentials
+        )
 
         # Protocol specific options
         if self.args.protocol == const.Protocol.DMAP:
@@ -420,6 +429,12 @@ async def cli_handler(loop):
         dest="airplay_credentials",
         default=None,
     )
+    creds.add_argument(
+        "--companion-credentials",
+        help="credentials for companion link",
+        dest="companion_credentials",
+        default=None,
+    )
 
     debug = parser.add_argument_group("debugging")
     debug.add_argument(
@@ -502,6 +517,7 @@ async def _autodiscover_device(args, loop):
     _set_credentials(Protocol.DMAP, "dmap_credentials")
     _set_credentials(Protocol.MRP, "mrp_credentials")
     _set_credentials(Protocol.AirPlay, "airplay_credentials")
+    _set_credentials(Protocol.Companion, "companion_credentials")
 
     logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
@@ -519,6 +535,10 @@ def _manual_device(args):
     if args.airplay_credentials:
         config.add_service(
             AirPlayService(args.id, credentials=args.airplay_credentials)
+        )
+    if args.companion_credentials:
+        config.add_service(
+            CompanionService(args.port, credentials=args.companion_credentials)
         )
     return config
 
