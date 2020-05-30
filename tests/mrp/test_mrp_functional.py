@@ -335,3 +335,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         await self.atv.remote_control.play_pause()
         await until(lambda: self.state.last_button_pressed == "play")
+
+    @unittest_run_loop
+    async def test_incorrect_playback_rate_set(self):
+        self.usecase.example_video(playback_rate=0.0, paused=False)
+
+        playing = await self.playing(title="dummy")
+        assert playing.device_state == DeviceState.Playing
