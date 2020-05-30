@@ -66,3 +66,14 @@ Some apps behave in unexpected ways that are out of control of this library, i.e
 * Previews in the main menu yields play status updates (usually with what was played most recently, not content of the preview). A workaround is to disable these previews, see [this](https://help.netflix.com/sv/node/2102) page.
 * During episode intros and "next episode" screens the device goes to idle state.
 * Sometimes the app name in {% include api i="interface.Metadata.app" %} is never set.
+
+### playbackRate issue
+
+Some apps incorrectly set the metadata item "playbackRate" as 0.0 instead of 1.0 which causes `pyatv` to report the media as paused at all times. A workaround for this issue has been pushed at [#673](https://github.com/postlund/pyatv/pull/673), seeking, fast-forwarding or rewinding will still return a "paused" state.
+
+Apps known to cause this issue are listed below
+
+* Amazon Prime Video (com.amazon.aiv.AIVApp)
+* BBC iPlayer (uk.co.bbc.iplayer)
+
+
