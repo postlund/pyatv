@@ -5,7 +5,6 @@ import asyncio
 import weakref
 from typing import Dict, List, Optional
 
-from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientError
 
 from pyatv import conf, exceptions
@@ -37,6 +36,7 @@ from pyatv.interface import (
     FeatureInfo,
 )
 from pyatv.support import deprecated
+from pyatv.support.net import ClientSessionManager
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -576,16 +576,21 @@ class DmapAppleTV(AppleTV):
     # This is a container class so it's OK with many attributes
     # pylint: disable=too-many-instance-attributes
     def __init__(
-        self, loop, session: ClientSession, config: conf.AppleTV, airplay: Stream
+        self,
+        loop,
+        session_manager: ClientSessionManager,
+        config: conf.AppleTV,
+        airplay: Stream,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
-        self._session = session
+        self._session_manager = session_manager
         self._config = config
         self._dmap_service = config.get_service(Protocol.DMAP)
         assert self._dmap_service is not None
         daap_http = net.HttpSession(
-            session, "http://{0}:{1}/".format(config.address, self._dmap_service.port)
+            session_manager.session,
+            f"http://{config.address}:{self._dmap_service.port}/",
         )
         self._requester = DaapRequester(daap_http, self._dmap_service.credentials)
 
@@ -606,8 +611,7 @@ class DmapAppleTV(AppleTV):
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
-        if net.is_custom_session(self._session):
-            asyncio.ensure_future(self._session.close())
+        asyncio.ensure_future(self._session_manager.close())
         self._airplay.close()
         self.push_updater.stop()
         self.listener.connection_closed()

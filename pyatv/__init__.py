@@ -306,14 +306,10 @@ async def connect(
     if not implementation:
         raise exceptions.UnsupportedProtocolError(str(service.protocol))
 
-    # If no session is given, create a default one
-    if session is None:
-        session = await net.create_session(loop=loop)
-
     # AirPlay stream API is the same for both DMAP and MRP
     airplay = AirPlayStreamAPI(config, loop)
 
-    atv = implementation(loop, session, config, airplay)
+    atv = implementation(loop, await net.create_session(session), config, airplay)
     await atv.connect()
     return atv
 
@@ -341,7 +337,4 @@ async def pair(
     if handler is None:
         raise exceptions.UnsupportedProtocolError(str(protocol))
 
-    if session is None:
-        session = await net.create_session(loop)
-
-    return handler(config, session, loop, **kwargs)
+    return handler(config, await net.create_session(session), loop, **kwargs)

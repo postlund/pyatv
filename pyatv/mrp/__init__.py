@@ -7,8 +7,6 @@ import datetime
 from copy import deepcopy
 from typing import Dict, List, Optional
 
-from aiohttp import ClientSession
-
 from pyatv import conf, exceptions
 from pyatv.const import (
     Protocol,
@@ -20,7 +18,6 @@ from pyatv.const import (
     FeatureState,
     FeatureName,
 )
-from pyatv.support import net
 from pyatv.support.cache import Cache
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.srp import SRPAuthHandler
@@ -44,6 +41,7 @@ from pyatv.interface import (
     FeatureInfo,
 )
 from pyatv.support import deprecated
+from pyatv.support.net import ClientSessionManager
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -636,14 +634,14 @@ class MrpAppleTV(AppleTV):
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,
-        session: ClientSession,
+        session_manager: ClientSessionManager,
         config: conf.AppleTV,
         airplay: Stream,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
 
-        self._session = session
+        self._session_manager = session_manager
         self._config = config
         self._mrp_service = config.get_service(Protocol.MRP)
         assert self._mrp_service is not None
@@ -671,8 +669,7 @@ class MrpAppleTV(AppleTV):
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
-        if net.is_custom_session(self._session):
-            asyncio.ensure_future(self._session.close())
+        asyncio.ensure_future(self._session_manager.close())
         self._airplay.close()
         self.push_updater.stop()
         self._protocol.stop()

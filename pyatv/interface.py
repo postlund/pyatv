@@ -22,8 +22,6 @@ import weakref
 
 from abc import ABC, abstractmethod
 
-import aiohttp
-
 from pyatv import const, convert, exceptions
 from pyatv.const import (
     Protocol,
@@ -190,9 +188,11 @@ class BaseService:
 class PairingHandler(ABC):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, session: aiohttp.ClientSession, service: BaseService) -> None:
+    def __init__(
+        self, session_manager: net.ClientSessionManager, service: BaseService
+    ) -> None:
         """Initialize a new instance of PairingHandler."""
-        self.session = session
+        self.session_manager = session_manager
         self._service = service
 
     @property
@@ -202,8 +202,7 @@ class PairingHandler(ABC):
 
     async def close(self) -> None:
         """Call to free allocated resources after pairing."""
-        if net.is_custom_session(self.session):
-            await self.session.close()
+        await self.session_manager.close()
 
     @abstractmethod
     def pin(self, pin) -> None:
