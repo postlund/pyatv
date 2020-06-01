@@ -6,6 +6,8 @@ import asyncio
 import logging
 import binascii
 
+from aiohttp import ClientSession
+
 from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.interface import Stream
@@ -22,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config, loop):
+    def __init__(self, config, loop: asyncio.AbstractEventLoop) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
         self.loop = loop
@@ -31,7 +33,7 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         self.credentials = self._get_credentials()
         self._play_task = None
 
-    def close(self):
+    def close(self) -> None:
         """Close and free resources."""
         if self._play_task is not None:
             _LOGGER.debug("Stopping AirPlay play task")
@@ -53,9 +55,9 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
 
         return split[1]
 
-    async def _player(self, session):
+    async def _player(self, session: ClientSession) -> AirPlayPlayer:
         http = net.HttpSession(
-            session, "http://{0}:{1}/".format(self.config.address, self.service.port)
+            session, f"http://{self.config.address}:{self.service.port}/"
         )
         player = AirPlayPlayer(self.loop, http)
 
@@ -90,14 +92,14 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
         # This creates a new ClientSession every time something is played.
         # It is not recommended by aiohttp, but it is the only way not having
         # a dangling connection laying around. So it will have to do for now.
-        session = await net.create_session(self.loop)
+        session_manager = await net.create_session()
         try:
-            player = await self._player(session)
+            player = await self._player(session_manager.session)
             position = int(kwargs.get("position", 0))
             self._play_task = asyncio.ensure_future(player.play_url(url, position))
             return await self._play_task
         finally:
             self._play_task = None
-            await session.close()
+            await session_manager.close()
             if server:
                 await server.close()

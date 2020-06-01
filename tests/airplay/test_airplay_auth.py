@@ -23,7 +23,7 @@ INVALID_AUTH_KEY = binascii.unhexlify("0" * 64)
 
 class AirPlayAuthTest(AioHTTPTestCase):
     async def setUpAsync(self):
-        self.session = ClientSession(loop=self.loop)
+        self.session = ClientSession()
 
     async def tearDownAsync(self):
         await self.session.close()

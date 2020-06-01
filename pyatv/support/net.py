@@ -19,16 +19,30 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 25.0  # Seconds
 
 
-def is_custom_session(session):
-    """Return if a ClientSession was created by pyatv."""
-    return hasattr(session, "_pyatv")
+class ClientSessionManager:
+    """Manages an aiohttp ClientSession instance."""
+
+    def __init__(self, session: ClientSession, should_close: bool) -> None:
+        """Initialize a new ClientSessionManager."""
+        self._session = session
+        self._should_close = should_close
+
+    @property
+    def session(self) -> ClientSession:
+        """Return client session."""
+        return self._session
+
+    async def close(self) -> None:
+        """Close session."""
+        if self._should_close:
+            await self.session.close()
 
 
-async def create_session(loop):
+async def create_session(
+    session: Optional[ClientSession] = None,
+) -> ClientSessionManager:
     """Create aiohttp ClientSession manged by pyatv."""
-    session = ClientSession(loop=loop)
-    setattr(session, "_pyatv", True)
-    return session
+    return ClientSessionManager(session or ClientSession(), session is None)
 
 
 def unused_port() -> int:
@@ -51,9 +65,9 @@ def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:
 class HttpSession:
     """This class simplifies GET/POST requests."""
 
-    def __init__(self, client_session, base_url):
+    def __init__(self, client_session: ClientSession, base_url: str):
         """Initialize a new HttpSession."""
-        self._session = client_session  # aiohttp session
+        self._session = client_session
         self.base_url = base_url
 
     async def get_data(self, path, headers=None, timeout=None):

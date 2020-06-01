@@ -10,6 +10,7 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.connection import MrpConnection
 from pyatv.support import error_handler
+from pyatv.support.net import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,9 +18,9 @@ _LOGGER = logging.getLogger(__name__)
 class MrpPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, config, session, loop):
+    def __init__(self, config, session_manager: ClientSessionManager, loop):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session, config.get_service(Protocol.MRP))
+        super().__init__(session_manager, config.get_service(Protocol.MRP))
         self.connection = MrpConnection(config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(self.connection, self.srp, self.service)

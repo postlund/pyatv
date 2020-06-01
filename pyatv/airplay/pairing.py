@@ -19,12 +19,12 @@ AuthData = namedtuple("AuthData", "identifier seed credentials")
 class AirPlayPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, config, session, _):
+    def __init__(self, config, session_manager: net.ClientSessionManager, _):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session, config.get_service(Protocol.AirPlay))
+        super().__init__(session_manager, config.get_service(Protocol.AirPlay))
         self.srp = SRPAuthHandler()
         self.http = net.HttpSession(
-            session, f"http://{config.address}:{self.service.port}/"
+            session_manager.session, f"http://{config.address}:{self.service.port}/"
         )
         self.authenticator = DeviceAuthenticator(self.http, self.srp)
         self.auth_data = self._setup_credentials()
