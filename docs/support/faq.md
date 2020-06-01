@@ -75,5 +75,6 @@ Apps known to cause this issue are listed below
 
 * Amazon Prime Video (com.amazon.aiv.AIVApp)
 * BBC iPlayer (uk.co.bbc.iplayer)
+* Telia Play (com.teliasonera.playplus.telia)
 
 
