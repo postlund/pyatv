@@ -467,8 +467,7 @@ class MrpMetadata(Metadata):
         """Return information about running app."""
         state = self.psm.playing
         if state.client:
-            name = state.client.displayName or None
-            return App(name, state.client.bundleIdentifier)
+            return App(state.client.displayName, state.client.bundleIdentifier)
         return None
 
 

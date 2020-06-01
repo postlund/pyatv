@@ -57,6 +57,7 @@ _SHUFFLE_LOOKUP = {
 _COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
 
 
+APP_NAME = "Test app"
 DEVICE_NAME = "Fake MRP ATV"
 PLAYER_IDENTIFIER = "com.github.postlund.pyatv"
 
@@ -135,6 +136,7 @@ def _set_state_message(metadata, identifier):
     client = inner.playerPath.client
     client.processIdentifier = 123
     client.bundleIdentifier = identifier
+    client.displayName = APP_NAME
     return set_state
 
 
@@ -225,7 +227,8 @@ class FakeMrpState:
         msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
         client = msg.inner().client
         client.bundleIdentifier = identifier
-        client.displayName = display_name
+        if display_name is not None:
+            client.displayName = display_name
         self._send(msg)
 
     def volume_control(self, available):
