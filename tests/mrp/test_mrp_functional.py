@@ -196,6 +196,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(listener.new_state, PowerState.On)
 
     @unittest_run_loop
+    async def test_power_state_acknowledgement(self):
+        self.assertEqual(self.atv.power.power_state, PowerState.On)
+        await self.atv.power.turn_off(await_new_state=True)
+        self.assertEqual(self.atv.power.power_state, PowerState.Off)
+        await self.atv.power.turn_on(await_new_state=True)
+        self.assertEqual(self.atv.power.power_state, PowerState.On)
+
+    @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
 
