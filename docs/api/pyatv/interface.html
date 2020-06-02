@@ -903,13 +903,13 @@ class Power(ABC, StateProducer):
 
     @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self) -&gt; None:
+    async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self) -&gt; None:
+    async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -2611,13 +2611,13 @@ def total_time(self) -&gt; int:
 
     @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self) -&gt; None:
+    async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self) -&gt; None:
+    async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -2652,7 +2652,7 @@ def power_state(self) -&gt; const.PowerState:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Power.turn_off"><code class="name flex">
-<span>async def <span class="ident">turn_off</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">turn_off</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device off.</p></section>
@@ -2662,13 +2662,13 @@ def power_state(self) -&gt; const.PowerState:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-async def turn_off(self) -&gt; None:
+async def turn_off(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Power.turn_on"><code class="name flex">
-<span>async def <span class="ident">turn_on</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">turn_on</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device on.</p></section>
@@ -2678,7 +2678,7 @@ async def turn_off(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-async def turn_on(self) -&gt; None:
+async def turn_on(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>

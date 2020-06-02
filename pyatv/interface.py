@@ -684,13 +684,13 @@ class Power(ABC, StateProducer):
 
     @abstractmethod
     @feature(33, "TurnOn", "Turn device on.")
-    async def turn_on(self) -> None:
+    async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(34, "TurnOff", "Turn off device.")
-    async def turn_off(self) -> None:
+    async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         raise exceptions.NotSupportedError()
 

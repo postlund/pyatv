@@ -445,15 +445,15 @@ class DmapPower(Power):
     """Implementation of API for retrieving a power state from an Apple TV."""
 
     @property
-    def power_state(self):
+    def power_state(self) -> PowerState:
         """Return device power state."""
         return PowerState.Unknown
 
-    async def turn_on(self):
+    async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         raise exceptions.NotSupportedError()
 
-    async def turn_off(self):
+    async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         raise exceptions.NotSupportedError()
 

@@ -472,36 +472,48 @@ class MrpMetadata(Metadata):
 class MrpPower(Power):
     """Implementation of API for retrieving a power state from an Apple TV."""
 
-    def __init__(self, loop, protocol, remote):
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        protocol: MrpProtocol,
+        remote: MrpRemoteControl,
+    ) -> None:
         """Initialize a new MrpPower instance."""
         super().__init__()
         self.loop = loop
         self.protocol = protocol
         self.remote = remote
         self.device_info = None
+        self._waiters: Dict[PowerState, asyncio.Event] = {}
 
         self.protocol.add_listener(
             self._update_power_state, protobuf.DEVICE_INFO_UPDATE_MESSAGE
         )
 
-    def _get_current_power_state(self):
+    def _get_current_power_state(self) -> PowerState:
         latest_device_info = self.device_info or self.protocol.device_info
         return self._get_power_state(latest_device_info)
 
     @property
-    def power_state(self):
+    def power_state(self) -> PowerState:
         """Return device power state."""
         currect_power_state = self._get_current_power_state()
         return currect_power_state
 
-    async def turn_on(self):
+    async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         await self.protocol.send_and_receive(messages.wake_device())
 
-    async def turn_off(self):
+        if await_new_state and self.power_state != PowerState.On:
+            await self._waiters.setdefault(PowerState.On, asyncio.Event()).wait()
+
+    async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         await self.remote.home_hold()
         await self.remote.select()
+
+        if await_new_state and self.power_state != PowerState.Off:
+            await self._waiters.setdefault(PowerState.Off, asyncio.Event()).wait()
 
     async def _update_power_state(self, message, _):
         old_state = self.power_state
@@ -512,8 +524,12 @@ class MrpPower(Power):
             _LOGGER.debug("Power state changed from %s to %s", old_state, new_state)
             self.loop.call_soon(self.listener.powerstate_update, old_state, new_state)
 
+        if new_state in self._waiters:
+            self._waiters[new_state].set()
+            del self._waiters[new_state]
+
     @staticmethod
-    def _get_power_state(device_info):
+    def _get_power_state(device_info) -> PowerState:
         logical_device_count = device_info.inner().logicalDeviceCount
         if logical_device_count >= 1:
             return PowerState.On
