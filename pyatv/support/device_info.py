@@ -1,11 +1,12 @@
 """Lookup methods for device data."""
 
 import re
+from typing import Optional, Dict
 
 from pyatv.const import DeviceModel
 
 
-_MODEL_LIST = {
+_MODEL_LIST: Dict[str, DeviceModel] = {
     "AppleTV2,1": DeviceModel.Gen2,
     "AppleTV3,1": DeviceModel.Gen3,
     "AppleTV3,2": DeviceModel.Gen3,
@@ -14,8 +15,16 @@ _MODEL_LIST = {
 }
 
 
+_INTERNAL_NAME_LIST: Dict[str, DeviceModel] = {
+    "K66AP": DeviceModel.Gen2,
+    "J33AP": DeviceModel.Gen3,
+    "J33IAP": DeviceModel.Gen3,
+    "J42dAP": DeviceModel.Gen4,
+    "J105aAP": DeviceModel.Gen4K,
+}
+
 # Incomplete list here!
-_VERSION_LIST = {
+_VERSION_LIST: Dict[str, str] = {
     "17J586": "13.0",
     "17K82": "13.2",
     "17K449": "13.3",
@@ -26,17 +35,22 @@ _VERSION_LIST = {
 }
 
 
-def lookup_model(identifier):
+def lookup_model(identifier: Optional[str]):
     """Lookup device model from identifier."""
-    return _MODEL_LIST.get(identifier, DeviceModel.Unknown)
+    return _MODEL_LIST.get(identifier or "", DeviceModel.Unknown)
 
 
-def lookup_version(build):
+def lookup_internal_name(name: Optional[str]):
+    """Lookup device model from internal Apple model name."""
+    return _INTERNAL_NAME_LIST.get(name or "", DeviceModel.Unknown)
+
+
+def lookup_version(build: Optional[str]):
     """Lookup OS version from build."""
     if not build:
         return None
 
-    version = _VERSION_LIST.get(build)
+    version = _VERSION_LIST.get(build or "")
     if version:
         return version
 
