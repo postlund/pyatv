@@ -91,6 +91,14 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.const.InputAction" href="#pyatv.const.InputAction">InputAction</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.InputAction.DoubleTap" href="#pyatv.const.InputAction.DoubleTap">DoubleTap</a></code></li>
+<li><code><a title="pyatv.const.InputAction.Hold" href="#pyatv.const.InputAction.Hold">Hold</a></code></li>
+<li><code><a title="pyatv.const.InputAction.SingleTap" href="#pyatv.const.InputAction.SingleTap">SingleTap</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.const.MediaType" href="#pyatv.const.MediaType">MediaType</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.const.MediaType.Music" href="#pyatv.const.MediaType.Music">Music</a></code></li>
@@ -289,6 +297,19 @@ class DeviceModel(Enum):
 
     Gen4K = 4
     &#34;&#34;&#34;Device model is Apple TV 4K.&#34;&#34;&#34;
+
+
+class InputAction(Enum):
+    &#34;&#34;&#34;Type of input when pressing a button.&#34;&#34;&#34;
+
+    SingleTap = 0
+    &#34;&#34;&#34;Press and release quickly.&#34;&#34;&#34;
+
+    DoubleTap = 1
+    &#34;&#34;&#34;Press and release twice quickly.&#34;&#34;&#34;
+
+    Hold = 2
+    &#34;&#34;&#34;Press and hold for one second before releasing.&#34;&#34;&#34;
 
 
 class FeatureState(Enum):
@@ -894,6 +915,48 @@ class FeatureName(Enum):
 <dt id="pyatv.const.FeatureState.Unsupported"><code class="name">var <span class="ident">Unsupported</span></code></dt>
 <dd>
 <section class="desc"><p>Device does not support this feature.</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.InputAction"><code class="flex name class">
+<span>class <span class="ident">InputAction</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Type of input when pressing a button.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InputAction(Enum):
+    &#34;&#34;&#34;Type of input when pressing a button.&#34;&#34;&#34;
+
+    SingleTap = 0
+    &#34;&#34;&#34;Press and release quickly.&#34;&#34;&#34;
+
+    DoubleTap = 1
+    &#34;&#34;&#34;Press and release twice quickly.&#34;&#34;&#34;
+
+    Hold = 2
+    &#34;&#34;&#34;Press and hold for one second before releasing.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.InputAction.DoubleTap"><code class="name">var <span class="ident">DoubleTap</span></code></dt>
+<dd>
+<section class="desc"><p>Press and release twice quickly.</p></section>
+</dd>
+<dt id="pyatv.const.InputAction.Hold"><code class="name">var <span class="ident">Hold</span></code></dt>
+<dd>
+<section class="desc"><p>Press and hold for one second before releasing.</p></section>
+</dd>
+<dt id="pyatv.const.InputAction.SingleTap"><code class="name">var <span class="ident">SingleTap</span></code></dt>
+<dd>
+<section class="desc"><p>Press and release quickly.</p></section>
 </dd>
 </dl>
 </dd>

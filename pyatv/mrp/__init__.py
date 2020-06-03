@@ -17,6 +17,7 @@ from pyatv.const import (
     PowerState,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.support.cache import Cache
 from pyatv.mrp import messages, protobuf
@@ -160,19 +161,19 @@ class MrpRemoteControl(RemoteControl):
             f"{protobuf.HandlerReturnStatus.Enum.Name(inner.handlerReturnStatus)}"
         )
 
-    async def up(self) -> None:
+    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         await self._press_key("up")
 
-    async def down(self) -> None:
+    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
         await self._press_key("down")
 
-    async def left(self) -> None:
+    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
         await self._press_key("left")
 
-    async def right(self) -> None:
+    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
         await self._press_key("right")
 
@@ -209,11 +210,11 @@ class MrpRemoteControl(RemoteControl):
         """Press key previous."""
         await self._send_command(CommandInfo_pb2.PreviousTrack)
 
-    async def select(self) -> None:
+    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
         await self._press_key("select")
 
-    async def menu(self) -> None:
+    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
         await self._press_key("menu")
 
@@ -225,10 +226,11 @@ class MrpRemoteControl(RemoteControl):
         """Press key volume down."""
         await self._press_key("volume_down")
 
-    async def home(self) -> None:
+    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
         await self._press_key("home")
 
+    @deprecated
     async def home_hold(self) -> None:
         """Hold key home."""
         await self._press_key("home", hold=True)

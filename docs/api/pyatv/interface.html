@@ -248,6 +248,7 @@ from pyatv.const import (
     DeviceModel,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.support import net
 
@@ -460,25 +461,25 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
     # pylint: disable=invalid-name
     @abstractmethod
     @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-    async def up(self) -&gt; None:
+    async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-    async def down(self) -&gt; None:
+    async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-    async def left(self) -&gt; None:
+    async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-    async def right(self) -&gt; None:
+    async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -520,13 +521,13 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-    async def select(self) -&gt; None:
+    async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-    async def menu(self) -&gt; None:
+    async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -544,12 +545,14 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-    async def home(self) -&gt; None:
+    async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
+    @feature(
+        15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
+    )
     async def home_hold(self) -&gt; None:
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -2926,25 +2929,25 @@ def stop(self) -&gt; None:
     # pylint: disable=invalid-name
     @abstractmethod
     @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-    async def up(self) -&gt; None:
+    async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-    async def down(self) -&gt; None:
+    async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-    async def left(self) -&gt; None:
+    async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-    async def right(self) -&gt; None:
+    async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -2986,13 +2989,13 @@ def stop(self) -&gt; None:
 
     @abstractmethod
     @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-    async def select(self) -&gt; None:
+    async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-    async def menu(self) -&gt; None:
+    async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -3010,12 +3013,14 @@ def stop(self) -&gt; None:
 
     @abstractmethod
     @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-    async def home(self) -&gt; None:
+    async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
+    @feature(
+        15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
+    )
     async def home_hold(self) -&gt; None:
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
@@ -3088,7 +3093,7 @@ def stop(self) -&gt; None:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.RemoteControl.down"><code class="name flex">
-<span>async def <span class="ident">down</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">down</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key down.</p></section>
@@ -3098,13 +3103,13 @@ def stop(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-async def down(self) -&gt; None:
+async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home"><code class="name flex">
-<span>async def <span class="ident">home</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">home</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key home.</p></section>
@@ -3114,7 +3119,7 @@ async def down(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-async def home(self) -&gt; None:
+async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -3129,14 +3134,16 @@ async def home(self) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-@feature(15, &#34;HomeHold&#34;, &#34;Long-press home button.&#34;)
+@feature(
+    15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
+)
 async def home_hold(self) -&gt; None:
     &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.left"><code class="name flex">
-<span>async def <span class="ident">left</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">left</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key left.</p></section>
@@ -3146,13 +3153,13 @@ async def home_hold(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-async def left(self) -&gt; None:
+async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.menu"><code class="name flex">
-<span>async def <span class="ident">menu</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">menu</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key menu.</p></section>
@@ -3162,7 +3169,7 @@ async def left(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-async def menu(self) -&gt; None:
+async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -3248,7 +3255,7 @@ async def previous(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.right"><code class="name flex">
-<span>async def <span class="ident">right</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">right</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key right.</p></section>
@@ -3258,13 +3265,13 @@ async def previous(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-async def right(self) -&gt; None:
+async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.select"><code class="name flex">
-<span>async def <span class="ident">select</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">select</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key select.</p></section>
@@ -3274,7 +3281,7 @@ async def right(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-async def select(self) -&gt; None:
+async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -3418,7 +3425,7 @@ async def top_menu(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.up"><code class="name flex">
-<span>async def <span class="ident">up</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">up</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Press key up.</p></section>
@@ -3428,7 +3435,7 @@ async def top_menu(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-async def up(self) -&gt; None:
+async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>

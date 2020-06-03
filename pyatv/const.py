@@ -136,6 +136,19 @@ class DeviceModel(Enum):
     """Device model is Apple TV 4K."""
 
 
+class InputAction(Enum):
+    """Type of input when pressing a button."""
+
+    SingleTap = 0
+    """Press and release quickly."""
+
+    DoubleTap = 1
+    """Press and release twice quickly."""
+
+    Hold = 2
+    """Press and hold for one second before releasing."""
+
+
 class FeatureState(Enum):
     """State of a particular feature."""
 
