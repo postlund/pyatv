@@ -150,9 +150,11 @@ def repeat(mode):
     message = command(protobuf.CommandInfo_pb2.ChangeRepeatMode)
     options = message.inner().options
     options.sendOptions = 0
-    if mode == const.RepeatState.Track:
+    if mode == const.RepeatState.Off:
+        options.repeatMode = protobuf.RepeatMode.Off
+    elif mode == const.RepeatState.Track:
         options.repeatMode = protobuf.RepeatMode.One
-    elif mode == const.RepeatState.All:
+    else:
         options.repeatMode = protobuf.RepeatMode.All
     return message
 

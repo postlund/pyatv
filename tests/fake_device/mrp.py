@@ -44,6 +44,7 @@ _COMMAND_LOOKUP = {
 }
 
 _REPEAT_LOOKUP = {
+    const.RepeatState.Off: protobuf.RepeatMode.Off,
     const.RepeatState.Track: protobuf.RepeatMode.One,
     const.RepeatState.All: protobuf.RepeatMode.All,
 }
@@ -119,7 +120,7 @@ def _set_state_message(metadata, identifier):
                 if metadata.skip_time is not None:
                     item.preferredIntervals.append(metadata.skip_time)
 
-    if metadata.repeat and metadata.repeat != const.RepeatState.Off:
+    if metadata.repeat:
         cmd = inner.supportedCommands.supportedCommands.add()
         cmd.command = protobuf.CommandInfo_pb2.ChangeRepeatMode
         cmd.repeatMode = _REPEAT_LOOKUP[metadata.repeat]
@@ -390,6 +391,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
         elif inner.command == cmd.ChangeRepeatMode:
             state.repeat = {
+                protobuf.RepeatMode.Off: const.RepeatState.Off,
                 protobuf.RepeatMode.One: const.RepeatState.Track,
                 protobuf.RepeatMode.All: const.RepeatState.All,
             }.get(inner.options.repeatMode, const.RepeatState.Off)

@@ -40,11 +40,13 @@ class RepeatMode(google___protobuf___message___Message):
         @classmethod
         def items(cls) -> typing___List[typing___Tuple[builtin___str, 'RepeatMode.Enum']]: ...
         Unknown = typing___cast('RepeatMode.Enum', 0)
-        One = typing___cast('RepeatMode.Enum', 1)
-        All = typing___cast('RepeatMode.Enum', 2)
+        Off = typing___cast('RepeatMode.Enum', 1)
+        One = typing___cast('RepeatMode.Enum', 2)
+        All = typing___cast('RepeatMode.Enum', 3)
     Unknown = typing___cast('RepeatMode.Enum', 0)
-    One = typing___cast('RepeatMode.Enum', 1)
-    All = typing___cast('RepeatMode.Enum', 2)
+    Off = typing___cast('RepeatMode.Enum', 1)
+    One = typing___cast('RepeatMode.Enum', 2)
+    All = typing___cast('RepeatMode.Enum', 3)
     global___Enum = Enum
 
 

@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"3\n\nRepeatMode\"%\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03One\x10\x01\x12\x07\n\x03\x41ll\x10\x02\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\xca\x01\n\rDeviceSubType\"\xb8\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r'
+  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"<\n\nRepeatMode\".\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\x07\n\x03One\x10\x02\x12\x07\n\x03\x41ll\x10\x03\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\xca\x01\n\rDeviceSubType\"\xb8\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r'
 )
 
 
@@ -34,18 +34,22 @@ _REPEATMODE_ENUM = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='One', index=1, number=1,
+      name='Off', index=1, number=1,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='All', index=2, number=2,
+      name='One', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='All', index=3, number=3,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=49,
-  serialized_end=86,
+  serialized_end=95,
 )
 _sym_db.RegisterEnumDescriptor(_REPEATMODE_ENUM)
 
@@ -74,8 +78,8 @@ _SHUFFLEMODE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=103,
-  serialized_end=154,
+  serialized_start=112,
+  serialized_end=163,
 )
 _sym_db.RegisterEnumDescriptor(_SHUFFLEMODE_ENUM)
 
@@ -128,8 +132,8 @@ _DEVICECLASS_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=172,
-  serialized_end=294,
+  serialized_start=181,
+  serialized_end=303,
 )
 _sym_db.RegisterEnumDescriptor(_DEVICECLASS_ENUM)
 
@@ -166,8 +170,8 @@ _DEVICETYPE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=310,
-  serialized_end=394,
+  serialized_start=319,
+  serialized_end=403,
 )
 _sym_db.RegisterEnumDescriptor(_DEVICETYPE_ENUM)
 
@@ -236,8 +240,8 @@ _DEVICESUBTYPE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=415,
-  serialized_end=599,
+  serialized_start=424,
+  serialized_end=608,
 )
 _sym_db.RegisterEnumDescriptor(_DEVICESUBTYPE_ENUM)
 
@@ -263,7 +267,7 @@ _REPEATMODE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=86,
+  serialized_end=95,
 )
 
 
@@ -287,8 +291,8 @@ _SHUFFLEMODE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=88,
-  serialized_end=154,
+  serialized_start=97,
+  serialized_end=163,
 )
 
 
@@ -312,8 +316,8 @@ _DEVICECLASS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=157,
-  serialized_end=294,
+  serialized_start=166,
+  serialized_end=303,
 )
 
 
@@ -337,8 +341,8 @@ _DEVICETYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=296,
-  serialized_end=394,
+  serialized_start=305,
+  serialized_end=403,
 )
 
 
@@ -362,8 +366,8 @@ _DEVICESUBTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=397,
-  serialized_end=599,
+  serialized_start=406,
+  serialized_end=608,
 )
 
 _REPEATMODE_ENUM.containing_type = _REPEATMODE
