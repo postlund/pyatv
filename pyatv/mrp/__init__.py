@@ -384,8 +384,10 @@ class MrpPlaying(Playing):
             return RepeatState.Off
         if info.repeatMode == protobuf.RepeatMode.One:
             return RepeatState.Track
+        if info.repeatMode == protobuf.RepeatMode.All:
+            return RepeatState.All
 
-        return RepeatState.All
+        return RepeatState.Off
 
     @property
     def hash(self):

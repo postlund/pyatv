@@ -3,8 +3,9 @@ syntax = "proto2";
 message RepeatMode {
   enum Enum {
     Unknown = 0;
-    One = 1;
-    All = 2;
+    Off = 1;
+    One = 2;
+    All = 3;
   }
 }
 
