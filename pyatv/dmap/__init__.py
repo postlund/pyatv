@@ -18,6 +18,7 @@ from pyatv.const import (
     PowerState,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
@@ -149,7 +150,7 @@ class DmapRemoteControl(RemoteControl):
         super().__init__()
         self.apple_tv = apple_tv
 
-    async def up(self) -> None:
+    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         await self._send_commands(
             self._move("Down", 0, 20, 275),
@@ -161,7 +162,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 6, 20, 250),
         )
 
-    async def down(self) -> None:
+    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
         await self._send_commands(
             self._move("Down", 0, 20, 250),
@@ -173,7 +174,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 6, 20, 275),
         )
 
-    async def left(self) -> None:
+    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
         await self._send_commands(
             self._move("Down", 0, 75, 100),
@@ -185,7 +186,7 @@ class DmapRemoteControl(RemoteControl):
             self._move("Up", 7, 50, 100),
         )
 
-    async def right(self) -> None:
+    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
         await self._send_commands(
             self._move("Down", 0, 50, 100),
@@ -230,11 +231,11 @@ class DmapRemoteControl(RemoteControl):
         """Press key previous."""
         await self.apple_tv.ctrl_int_cmd("previtem")
 
-    async def select(self) -> None:
+    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
         await self.apple_tv.controlprompt_cmd("select")
 
-    async def menu(self) -> None:
+    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
         await self.apple_tv.controlprompt_cmd("menu")
 
@@ -250,11 +251,12 @@ class DmapRemoteControl(RemoteControl):
         """Press key volume down."""
         await self.apple_tv.ctrl_int_cmd("volumedown")
 
-    async def home(self) -> None:
+    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
         # DMAP support unknown
         raise exceptions.NotSupportedError()
 
+    @deprecated
     async def home_hold(self) -> None:
         """Hold key home."""
         # DMAP support unknown

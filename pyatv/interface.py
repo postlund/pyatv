@@ -29,6 +29,7 @@ from pyatv.const import (
     DeviceModel,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.support import net
 
@@ -241,25 +242,25 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
     # pylint: disable=invalid-name
     @abstractmethod
     @feature(0, "Up", "Up button on remote.")
-    async def up(self) -> None:
+    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(1, "Down", "Down button on remote.")
-    async def down(self) -> None:
+    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(2, "Left", "Left button on remote.")
-    async def left(self) -> None:
+    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(3, "Right", "Right button on remote.")
-    async def right(self) -> None:
+    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
         raise exceptions.NotSupportedError()
 
@@ -301,13 +302,13 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(10, "Select", "Select current option.")
-    async def select(self) -> None:
+    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(11, "Menu", "Go back to previous menu.")
-    async def menu(self) -> None:
+    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
         raise exceptions.NotSupportedError()
 
@@ -325,12 +326,14 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(14, "Home", "Home/TV button.")
-    async def home(self) -> None:
+    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod
-    @feature(15, "HomeHold", "Long-press home button.")
+    @feature(
+        15, "HomeHold", "Long-press home button (deprecated: use RemoteControl.home)."
+    )
     async def home_hold(self) -> None:
         """Hold key home."""
         raise exceptions.NotSupportedError()
