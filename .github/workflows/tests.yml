@@ -52,5 +52,4 @@ jobs:
         file: ./coverage.xml
         flags: unittests
         name: pyatv
-        yml: ./.codecov.yml
         fail_ci_if_error: true
