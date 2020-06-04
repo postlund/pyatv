@@ -48,6 +48,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- |--------- | --------- | --------- |
+| Different input actions (tap, double tap, hold)                 | Yes      | No        | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- |--------- | --------- | --------- |
 | Fetch artwork                                                   | Yes      | Yes       | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata" %}

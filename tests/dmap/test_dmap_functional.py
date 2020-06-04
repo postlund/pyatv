@@ -15,6 +15,7 @@ from pyatv.const import (
     OperatingSystem,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.dmap import pairing
 from tests.fake_device import FakeAppleTV
@@ -164,7 +165,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
-        await until(lambda: self.state.last_button_pressed == "topmenu")
+        await self.waitForButtonPress("topmenu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_play_pause(self):

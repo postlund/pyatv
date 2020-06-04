@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from pathlib import Path
+from typing import Optional
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
@@ -16,6 +17,7 @@ from pyatv.const import (
     ShuffleState,
     FeatureName,
     FeatureState,
+    InputAction,
 )
 from pyatv.conf import AppleTV, AirPlayService
 from tests.utils import stub_sleep, unstub_sleep, until, faketime
@@ -74,6 +76,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
                 state,
                 f"{feature} has wrong state",
             )
+
+    async def waitForButtonPress(self, button: str, action: Optional[InputAction]):
+        await until(lambda: self.state.last_button_pressed == button)
+        await until(lambda: self.state.last_button_action == action)
 
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
@@ -160,57 +166,57 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_button_up(self):
         await self.atv.remote_control.up()
-        await until(lambda: self.state.last_button_pressed == "up")
+        await self.waitForButtonPress("up", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_down(self):
         await self.atv.remote_control.down()
-        await until(lambda: self.state.last_button_pressed == "down")
+        await self.waitForButtonPress("down", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_left(self):
         await self.atv.remote_control.left()
-        await until(lambda: self.state.last_button_pressed == "left")
+        await self.waitForButtonPress("left", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_right(self):
         await self.atv.remote_control.right()
-        await until(lambda: self.state.last_button_pressed == "right")
+        await self.waitForButtonPress("right", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_select(self):
         await self.atv.remote_control.select()
-        await until(lambda: self.state.last_button_pressed == "select")
+        await self.waitForButtonPress("select", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_menu(self):
         await self.atv.remote_control.menu()
-        await until(lambda: self.state.last_button_pressed == "menu")
+        await self.waitForButtonPress("menu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_play(self):
         await self.atv.remote_control.play()
-        await until(lambda: self.state.last_button_pressed == "play")
+        await self.waitForButtonPress("play", None)
 
     @unittest_run_loop
     async def test_button_pause(self):
         await self.atv.remote_control.pause()
-        await until(lambda: self.state.last_button_pressed == "pause")
+        await self.waitForButtonPress("pause", None)
 
     @unittest_run_loop
     async def test_button_stop(self):
         await self.atv.remote_control.stop()
-        await until(lambda: self.state.last_button_pressed == "stop")
+        await self.waitForButtonPress("stop", None)
 
     @unittest_run_loop
     async def test_button_next(self):
         await self.atv.remote_control.next()
-        await until(lambda: self.state.last_button_pressed == "nextitem")
+        await self.waitForButtonPress("nextitem", None)
 
     @unittest_run_loop
     async def test_button_previous(self):
         await self.atv.remote_control.previous()
-        await until(lambda: self.state.last_button_pressed == "previtem")
+        await self.waitForButtonPress("previtem", None)
 
     @unittest_run_loop
     async def test_button_volume_up(self):

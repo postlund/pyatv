@@ -10,7 +10,7 @@ import traceback
 
 from pyatv import const, exceptions, interface, scan, connect, pair
 from pyatv.conf import AppleTV, DmapService, MrpService, AirPlayService
-from pyatv.const import Protocol, ShuffleState, RepeatState
+from pyatv.const import Protocol, ShuffleState, RepeatState, InputAction
 from pyatv.dmap import tag_definitions
 from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
@@ -528,6 +528,8 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
+        if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
+            return [InputAction(args[0])]
         return args
 
     equal_sign = cmd.find("=")

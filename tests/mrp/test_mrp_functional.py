@@ -13,6 +13,7 @@ from pyatv.const import (
     OperatingSystem,
     FeatureState,
     FeatureName,
+    InputAction,
 )
 from pyatv.conf import AirPlayService, MrpService, AppleTV
 from pyatv.mrp.protobuf import CommandInfo_pb2
@@ -60,9 +61,68 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return await pyatv.connect(self.conf, loop=self.loop)
 
     @unittest_run_loop
+    async def test_button_up_actions(self):
+        await self.atv.remote_control.up(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("up", InputAction.DoubleTap)
+
+        await self.atv.remote_control.up(action=InputAction.Hold)
+        await self.waitForButtonPress("up", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_down_actions(self):
+        await self.atv.remote_control.down(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("down", InputAction.DoubleTap)
+
+        await self.atv.remote_control.down(action=InputAction.Hold)
+        await self.waitForButtonPress("down", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_left_actions(self):
+        await self.atv.remote_control.left(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("left", InputAction.DoubleTap)
+
+        await self.atv.remote_control.left(action=InputAction.Hold)
+        await self.waitForButtonPress("left", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_right_actions(self):
+        await self.atv.remote_control.right(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("right", InputAction.DoubleTap)
+
+        await self.atv.remote_control.right(action=InputAction.Hold)
+        await self.waitForButtonPress("right", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_top_menu(self):
+        await self.atv.remote_control.top_menu()
+        await self.waitForButtonPress("top_menu", InputAction.SingleTap)
+
+    @unittest_run_loop
     async def test_button_home(self):
         await self.atv.remote_control.home()
-        await until(lambda: self.state.last_button_pressed == "home")
+        await self.waitForButtonPress("home", InputAction.SingleTap)
+
+        await self.atv.remote_control.home(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("home", InputAction.DoubleTap)
+
+        await self.atv.remote_control.home(action=InputAction.Hold)
+        await self.waitForButtonPress("home", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_select_actions(self):
+        await self.atv.remote_control.select(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("select", InputAction.DoubleTap)
+
+        await self.atv.remote_control.select(action=InputAction.Hold)
+        await self.waitForButtonPress("select", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_menu_actions(self):
+        await self.atv.remote_control.menu(action=InputAction.DoubleTap)
+        await self.waitForButtonPress("menu", InputAction.DoubleTap)
+
+        await self.atv.remote_control.menu(action=InputAction.Hold)
+        await self.waitForButtonPress("menu", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_suspend(self):

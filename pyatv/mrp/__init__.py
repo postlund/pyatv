@@ -5,7 +5,7 @@ import logging
 import asyncio
 import datetime
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.const import (
@@ -49,24 +49,25 @@ _LOGGER = logging.getLogger(__name__)
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
-    # name: [usage_page, usage, button hold time (seconds)]
-    "up": [1, 0x8C, 0],
-    "down": [1, 0x8D, 0],
-    "left": [1, 0x8B, 0],
-    "right": [1, 0x8A, 0],
-    "stop": [12, 0xB7, 0],
-    "next": [12, 0xB5, 0],
-    "previous": [12, 0xB6, 0],
-    "select": [1, 0x89, 0],
-    "menu": [1, 0x86, 0],
-    "topmenu": [1, 0x86, 1],
-    "home": [12, 0x40, 1],
-    "suspend": [1, 0x82, 0],
-    "wakeup": [1, 0x83, 0],
-    "volume_up": [12, 0xE9, 0],
-    "volume_down": [12, 0xEA, 0],
-    # 'mic': [12, 0x04, 0],  # Siri
-}
+    # name: [usage_page, usage]
+    "up": (1, 0x8C),
+    "down": (1, 0x8D),
+    "left": (1, 0x8B),
+    "right": (1, 0x8A),
+    "stop": (12, 0xB7),
+    "next": (12, 0xB5),
+    "previous": (12, 0xB6),
+    "select": (1, 0x89),
+    "menu": (1, 0x86),
+    "topmenu": (12, 0x60),
+    "home": (12, 0x40),
+    "suspend": (1, 0x82),
+    "wakeup": (1, 0x83),
+    "volume_up": (12, 0xE9),
+    "volume_down": (12, 0xEA),
+    # 'mic': (12, 0x04),  # Siri
+}  # Dict[str, Tuple[int, int]]
+
 
 _FEATURES_SUPPORTED = [
     FeatureName.Down,
@@ -131,21 +132,33 @@ class MrpRemoteControl(RemoteControl):
         self.psm = psm
         self.protocol = protocol
 
-    async def _press_key(self, key: str, hold: bool = False) -> None:
-        lookup = _KEY_LOOKUP.get(key)
-        if not lookup:
-            raise Exception("unsupported key: " + key)
+    async def _press_key(self, key: str, action: InputAction) -> None:
+        async def _do_press(keycode: Tuple[int, int], hold: bool):
+            await self.protocol.send_and_receive(
+                messages.send_hid_event(keycode[0], keycode[1], True)
+            )
 
-        await self.protocol.send_and_receive(
-            messages.send_hid_event(lookup[0], lookup[1], True)
-        )
+            if hold:
+                # Hardcoded hold time for one second
+                await asyncio.sleep(1)
 
-        if hold:
-            await asyncio.sleep(lookup[2])
+            await self.protocol.send_and_receive(
+                messages.send_hid_event(keycode[0], keycode[1], False)
+            )
 
-        await self.protocol.send_and_receive(
-            messages.send_hid_event(lookup[0], lookup[1], False)
-        )
+        keycode = _KEY_LOOKUP.get(key)
+        if not keycode:
+            raise Exception(f"unsupported key: {key}")
+
+        if action == InputAction.SingleTap:
+            await _do_press(keycode, False)
+        elif action == InputAction.DoubleTap:
+            await _do_press(keycode, False)
+            await _do_press(keycode, False)
+        elif action == InputAction.Hold:
+            await _do_press(keycode, True)
+        else:
+            raise Exception(f"unsupported input action: {action}")
 
     async def _send_command(self, command, **kwargs):
         resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
@@ -163,19 +176,19 @@ class MrpRemoteControl(RemoteControl):
 
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
-        await self._press_key("up")
+        await self._press_key("up", action)
 
     async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
-        await self._press_key("down")
+        await self._press_key("down", action)
 
     async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
-        await self._press_key("left")
+        await self._press_key("left", action)
 
     async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
-        await self._press_key("right")
+        await self._press_key("right", action)
 
     async def play(self) -> None:
         """Press key play."""
@@ -212,42 +225,42 @@ class MrpRemoteControl(RemoteControl):
 
     async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
-        await self._press_key("select")
+        await self._press_key("select", action)
 
     async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
-        await self._press_key("menu")
+        await self._press_key("menu", action)
 
     async def volume_up(self) -> None:
         """Press key volume up."""
-        await self._press_key("volume_up")
+        await self._press_key("volume_up", InputAction.SingleTap)
 
     async def volume_down(self) -> None:
         """Press key volume down."""
-        await self._press_key("volume_down")
+        await self._press_key("volume_down", InputAction.SingleTap)
 
     async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
-        await self._press_key("home")
+        await self._press_key("home", action)
 
     @deprecated
     async def home_hold(self) -> None:
         """Hold key home."""
-        await self._press_key("home", hold=True)
+        await self._press_key("home", InputAction.Hold)
 
     async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
-        await self._press_key("topmenu", hold=True)
+        await self._press_key("topmenu", InputAction.SingleTap)
 
     @deprecated
     async def suspend(self) -> None:
         """Suspend the device."""
-        await self._press_key("suspend")
+        await self._press_key("suspend", InputAction.SingleTap)
 
     @deprecated
     async def wakeup(self) -> None:
         """Wake up the device."""
-        await self._press_key("wakeup")
+        await self._press_key("wakeup", InputAction.SingleTap)
 
     async def skip_forward(self) -> None:
         """Skip forward a time interval.

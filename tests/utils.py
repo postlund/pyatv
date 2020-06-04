@@ -11,23 +11,31 @@ from asyncio import sleep as real_sleep
 from aiohttp import ClientSession
 
 
-def stub_sleep(fn=None):
+# This is a special "hack" to schedule the sleep at the end of the
+# event queue in order to give other possibility to run.
+async def _fake_sleep(time: float = None, loop=None):
+    async def dummy():
+        _fake_sleep._sleep_time += time
+
+    await asyncio.ensure_future(dummy())
+
+
+def stub_sleep(fn=None) -> float:
     """Stub asyncio.sleep to not make tests slow."""
-    # This is a special "hack" to schedule the sleep at the end of the
-    # event queue in order to give other possibility to run.
-    async def fake_sleep(time=None, loop=None):
-        async def dummy():
-            pass
+    asyncio.sleep = fn or _fake_sleep
 
-        await asyncio.ensure_future(dummy())
+    # Code for dealing with this should be extracted
+    if asyncio.sleep == _fake_sleep:
+        if not hasattr(asyncio.sleep, "_sleep_time"):
+            asyncio.sleep._sleep_time = 0.0
+        return asyncio.sleep._sleep_time
 
-    asyncio.sleep = fn or fake_sleep
+    return 0.0
 
 
 def unstub_sleep():
     """Restore original asyncio.sleep method."""
-    if hasattr(asyncio, "_orig_sleep"):
-        asyncio.sleep = real_sleep
+    asyncio.sleep = real_sleep
 
 
 async def simple_get(url):
