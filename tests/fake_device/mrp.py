@@ -4,6 +4,7 @@ import asyncio
 import logging
 import struct
 from datetime import datetime
+from typing import Dict, Tuple, Optional
 
 from pyatv import const
 from pyatv.support import log_protobuf
@@ -13,26 +14,28 @@ from pyatv.mrp.protobuf import SetStateMessage as ssm
 from pyatv.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.mrp.server_auth import MrpServerAuth
 
+from tests.utils import stub_sleep
+
 _LOGGER = logging.getLogger(__name__)
 
 _KEY_LOOKUP = {
-    # name: [usage_page, usage, button hold time (seconds)]
-    "up": [1, 0x8C, 0],
-    "down": [1, 0x8D, 0],
-    "left": [1, 0x8B, 0],
-    "right": [1, 0x8A, 0],
-    "stop": [12, 0xB7, 0],
-    "next": [12, 0xB5, 0],
-    "previous": [12, 0xB6, 0],
-    "select": [1, 0x89, 0],
-    "menu": [1, 0x86, 0],
-    "topmenu": [12, 0x60, 0],
-    "home": [12, 0x40, 1],
-    "suspend": [1, 0x82, 0],
-    "wakeup": [1, 0x83, 0],
-    "volumeup": [12, 0xE9, 0],
-    "volumedown": [12, 0xEA, 0],
-}
+    # (use_page, usage): button
+    (1, 0x8C): "up",
+    (1, 0x8D): "down",
+    (1, 0x8B): "left",
+    (1, 0x8A): "right",
+    (12, 0xB7): "stop",
+    (12, 0xB5): "next",
+    (12, 0xB6): "previous",
+    (1, 0x89): "select",
+    (1, 0x86): "menu",
+    (12, 0x60): "top_menu",
+    (12, 0x40): "home",
+    (1, 0x82): "suspend",
+    (1, 0x83): "wakeup",
+    (12, 0xE9): "volumeup",
+    (12, 0xEA): "volumedown",
+}  # Dict[Tuple(int, int), str]
 
 _COMMAND_LOOKUP = {
     cmd.Play: "play",
@@ -61,13 +64,6 @@ _COCOA_BASE = (datetime(1970, 1, 1) - datetime(2001, 1, 1)).total_seconds()
 APP_NAME = "Test app"
 DEVICE_NAME = "Fake MRP ATV"
 PLAYER_IDENTIFIER = "com.github.postlund.pyatv"
-
-
-def _convert_key_press(use_page, usage):
-    for name, codes in _KEY_LOOKUP.items():
-        if codes[0] == use_page and codes[1] == usage:
-            return name
-    raise Exception("unsupported key: use_page={0}, usage={1}".format(use_page, usage))
 
 
 def _fill_item(item, metadata):
@@ -168,8 +164,9 @@ class FakeMrpState:
     def __init__(self):
         """State of a fake MRP device."""
         self.clients = []
-        self.outstanding_keypresses = set()  # Pressed but not released
-        self.last_button_pressed = None
+        self.outstanding_keypresses = {}  # Dict[Tuple[int, int], flot]
+        self.last_button_pressed: Optional[str] = None
+        self.last_button_action: Optional[const.InputAction] = None
         self.connection_state = None
         self.states = {}
         self.active_player = None
@@ -358,24 +355,38 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         )
 
     def handle_send_hid_event(self, message, inner):
+        outstanding = self.state.outstanding_keypresses
+
         # These corresponds to the bytes mapping to pressed key (see
         # send_hid_event in pyatv/mrp/messages.py)
         start = inner.hidEventData[43:49]
         use_page, usage, down_press = struct.unpack(">HHH", start)
 
         if down_press == 1:
-            self.state.outstanding_keypresses.add((use_page, usage))
+            outstanding[(use_page, usage)] = stub_sleep()
             self.send(messages.create(0, identifier=message.identifier))
         elif down_press == 0:
-            if (use_page, usage) in self.state.outstanding_keypresses:
-                if (
-                    _convert_key_press(use_page, usage) == "select"
-                    and self.state.last_button_pressed == "home"
-                ):
+            if (use_page, usage) in outstanding:
+                pressed_key = _KEY_LOOKUP.get((use_page, usage))
+                if not pressed_key:
+                    raise Exception(
+                        f"unsupported key: use_page={use_page}, usage={usage}"
+                    )
+                if pressed_key == "select" and self.state.last_button_pressed == "home":
                     self.state.powered_on = False
                     self._send_device_info(update=True)
-                self.state.last_button_pressed = _convert_key_press(use_page, usage)
-                self.state.outstanding_keypresses.remove((use_page, usage))
+
+                time_diff = stub_sleep() - outstanding[(use_page, usage)]
+                if time_diff > 0.5:
+                    self.state.last_button_action = const.InputAction.Hold
+                elif self.state.last_button_pressed == pressed_key:
+                    # NB: Will report double tap for >= 3 clicks (fix when needed)
+                    self.state.last_button_action = const.InputAction.DoubleTap
+                else:
+                    self.state.last_button_action = const.InputAction.SingleTap
+
+                self.state.last_button_pressed = pressed_key
+                del outstanding[(use_page, usage)]
                 _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
                 self.send(messages.create(0, identifier=message.identifier))
             else:
@@ -426,6 +437,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             )
             return
 
+        self.state.last_button_action = None
         self.send(messages.command_result(message.identifier))
 
     def handle_playback_queue_request(self, message, inner):

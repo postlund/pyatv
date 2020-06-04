@@ -7,7 +7,7 @@ from collections import namedtuple
 
 from aiohttp import web
 
-from pyatv.const import ShuffleState, RepeatState
+from pyatv.const import ShuffleState, RepeatState, InputAction
 from pyatv.dmap import parser, tags, tag_definitions
 from pyatv.support.net import unused_port
 from tests import utils
@@ -69,6 +69,7 @@ class FakeDmapState:
         self.session = None
         self.volume_controls = False
         self.last_button_pressed = None
+        self.last_button_action = None
         self.buttons_press_count = 0
         self.last_artwork_width = None
         self.last_artwork_height = None
@@ -163,6 +164,7 @@ class FakeDmapService:
         """Handle playback buttons."""
         self._verify_auth_parameters(request)
         self.state.last_button_pressed = request.rel_url.path.split("/")[-1]
+        self.state.last_button_action = None
         self.state.buttons_press_count += 1
         return web.Response(status=200)
 
@@ -172,6 +174,7 @@ class FakeDmapService:
         content = await request.content.read()
         parsed = parser.parse(content, tag_definitions.lookup_tag)
         self.state.last_button_pressed = self._convert_button(parsed)
+        self.state.last_button_action = InputAction.SingleTap
         self.state.buttons_press_count += 1
         return web.Response(status=200)
 
