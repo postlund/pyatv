@@ -463,9 +463,11 @@ class MrpMetadata(Metadata):
     @property
     def app(self) -> Optional[App]:
         """Return information about running app."""
-        state = self.psm.playing
-        if state.client:
-            return App(state.client.displayName, state.client.bundleIdentifier)
+        player_path = self.psm.playing.player_path
+        if player_path and player_path.client:
+            return App(
+                player_path.client.displayName, player_path.client.bundleIdentifier
+            )
         return None
 
 
@@ -630,7 +632,8 @@ class MrpFeatures(Features):
             return FeatureInfo(state=FeatureState.Unavailable)
 
         if feature == FeatureName.App:
-            if self.psm.playing.client:
+            player_path = self.psm.playing.player_path
+            if player_path and player_path.client:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 

@@ -22,8 +22,7 @@ class PlayerState:
         self.supported_commands = []
         self.items = []
         self.location = 0
-        self.client = None
-        self.display_name = None
+        self.player_path = None
 
     @property
     def playback_state(self):
@@ -83,7 +82,7 @@ class PlayerState:
             self.location = queue.location
 
         if setstate.HasField("playerPath"):
-            self._save_client(setstate.playerPath.client)
+            self.player_path = deepcopy(setstate.playerPath)
 
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
@@ -100,14 +99,10 @@ class PlayerState:
 
     def handle_update_client(self, msg):
         """Handle client updates."""
-        self._save_client(msg.client)
-        _LOGGER.debug("Updated client with name %s", self.display_name)
-
-    def _save_client(self, client):
-        if self.client is None:
-            self.client = deepcopy(client)
-        else:
-            self.client.MergeFrom(client)
+        self.player_path.client.MergeFrom(msg.client)
+        _LOGGER.debug(
+            "Updated client with name %s", self.player_path.client.displayName
+        )
 
 
 class PlayerStateManager:  # pylint: disable=too-few-public-methods
