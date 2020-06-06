@@ -25,7 +25,7 @@ reference for your own projects.*
 Due to MRP using encryption, it's not possible to capture the traffic using
 for instance Wireshark and analyze it. Since it's very hard to extract the
 used keys, decryption is more or less not possible. To cicrumvent this, you
-can use the MRP Proxy. It will publish a device on the network called `Proxy`,
+can use the MRP Proxy. It will publish a proxy device on the network,
 that it is possible to pair with using the Remote app. The proxy itself will
 establish a connection to the device of interest and relay messages between
 your iOS device and the Apple TV. One set of encryption keys are used between
@@ -48,11 +48,8 @@ Save the generated credentials to a file, for instance `creds`.
 
 ## Running the Proxy
 
-In order to run the proxy you need to provide credentials (created above), an
-IP address of an interface that is on the same subnet as the device as well as
-device IP address and MRP port.
-
-You can get the last two parts with `atvremote`:
+In order to run the proxy you need to provide credentials (created above) and
+IP address of the device. You can find the address by scanning:
 
 ```shell
 $ atvremote scan
@@ -69,21 +66,24 @@ Services:
  - Protocol: AirPlay, Port: 7000, Credentials: None
 ```
 
-So device IP is 10.0.0.10 and port is 49152. You can get your local IP address
-with for instance `ifconfig`, refer to your operating system documentation for
-this part. Lets assume it is 10.0.0.2 in this case.
-
 To run the proxy, run:
 
 ```shell
-$ atvproxy mrp `cat creds` 10.0.0.2 10.0.0.10 49152
+$ atvproxy mrp `cat creds` 10.0.0.10
 ```
+
+### Manual Settings
+
+The script will automatically try to figure out which MRP port to use with
+unicast scanning, IP address of a local interface on the same network as the
+device as well as the device name. You can however provide these parameters
+manually with `--remote-port`, `--local-ip` and `--name`.
 
 ## Pairing and Looking at Traffic
 
-Open the Remote app and select the device called `Proxy`. Use pin code `1111`
-when pairing. The app should work and behave as expected and all traffic
-should be logged to console.
+Open the Remote app and select the device called `XXX Proxy`, where `XXX`
+is the name of your Apple TV. Use pin code `1111` when pairing. The app should
+work and behave as expected and all traffic should be logged to console.
 
 # Relay Proxy
 
