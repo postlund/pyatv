@@ -26,17 +26,15 @@ def stub_sleep():
 
 async def simple_get(url):
     """Perform a GET-request to a specified URL."""
-    session = ClientSession()
-    response = await session.request("GET", url)
-    if response.status < 200 or response.status >= 300:
-        response.close()
-        await session.close()
-        return None, response.status
+    async with ClientSession() as session:
+        async with session.get(url) as response:
 
-    data = await response.content.read()
-    response.close()
-    await session.close()
-    return data, response.status
+            if response.status < 200 or response.status >= 300:
+                return None, response.status
+
+            data = None
+            data = await response.content.read()
+            return data, response.status
 
 
 async def until(pred, timeout=5, **kwargs):

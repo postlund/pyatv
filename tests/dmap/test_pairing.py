@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 from pyatv import conf
 from pyatv.dmap import pairing, parser, tag_definitions
+from pyatv.support import net
 from tests import zeroconf_stub, utils
 
 
@@ -62,7 +63,9 @@ async def mock_pairing(event_loop):
         if name:
             options["name"] = name
 
-        obj.pairing = pairing.DmapPairingHandler(config, None, event_loop, **options)
+        obj.pairing = pairing.DmapPairingHandler(
+            config, await net.create_session(), event_loop, **options
+        )
         await obj.pairing.begin()
         obj.pairing.pin(pin_code)
         return obj.pairing, zeroconf, service
@@ -157,6 +160,6 @@ async def test_failed_pairing(mock_pairing):
     _, zeroconf, _ = await mock_pairing()
 
     url = pairing_url(zeroconf, "wrong")
-    _, status = await utils.simple_get(url)
+    data, status = await utils.simple_get(url)
 
     assert status == 500

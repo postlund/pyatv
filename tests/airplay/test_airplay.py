@@ -23,7 +23,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         player.asyncio.sleep = self.fake_asyncio_sleep
         self.no_of_sleeps = 0
 
-        self.session = ClientSession(loop=self.loop)
+        self.session = ClientSession()
         http = net.HttpSession(
             self.session, "http://127.0.0.1:{0}/".format(self.server.port)
         )

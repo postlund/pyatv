@@ -20,7 +20,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 from tests import common_functional_tests
 from tests.utils import until, faketime
 from tests.fake_device import FakeAppleTV
-from tests.fake_device.mrp import PLAYER_IDENTIFIER
+from tests.fake_device.mrp import APP_NAME, PLAYER_IDENTIFIER
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ ARTWORK_BYTES = b"1234"
 ARTWORK_MIMETYPE = "image/png"
 ARTWORK_ID = "artwork_id1"
 
-APP_NAME = "Demo App"
+DEMO_APP_NAME = "Demo App"
 
 
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
@@ -196,6 +196,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(listener.new_state, PowerState.On)
 
     @unittest_run_loop
+    async def test_power_state_acknowledgement(self):
+        self.assertEqual(self.atv.power.power_state, PowerState.On)
+        await self.atv.power.turn_off(await_new_state=True)
+        self.assertEqual(self.atv.power.power_state, PowerState.Off)
+        await self.atv.power.turn_on(await_new_state=True)
+        self.assertEqual(self.atv.power.power_state, PowerState.On)
+
+    @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
 
@@ -261,6 +269,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def test_playing_app(self):
         self.usecase.nothing_playing()
 
+        # Nothing playing => no app running
         self.assertIsNone(self.atv.metadata.app)
         self.assertEqual(
             self.atv.features.get_feature(FeatureName.App).state,
@@ -270,16 +279,24 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.example_video()
         await self.playing(title="dummy")
 
-        self.assertIsNone(self.atv.metadata.app.name)
+        # Video playing with default app
+        self.assertEqual(self.atv.metadata.app.name, APP_NAME)
         self.assertEqual(self.atv.metadata.app.identifier, PLAYER_IDENTIFIER)
         self.assertEqual(
             self.atv.features.get_feature(FeatureName.App).state, FeatureState.Available
         )
 
-        self.usecase.update_client(APP_NAME)
+        # Change app display_name name
+        self.usecase.update_client(display_name=DEMO_APP_NAME)
         self.usecase.change_metadata(title="dummy2")
         await self.playing(title="dummy2")
-        self.assertEqual(self.atv.metadata.app.name, APP_NAME)
+        self.assertEqual(self.atv.metadata.app.name, DEMO_APP_NAME)
+
+        # Do not include display name and re-use previous one
+        self.usecase.update_client(display_name=None)
+        self.usecase.change_metadata(title="dummy3")
+        await self.playing(title="dummy3")
+        self.assertEqual(self.atv.metadata.app.name, DEMO_APP_NAME)
 
     @unittest_run_loop
     async def test_skip_forward_backward(self):

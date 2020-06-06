@@ -45,12 +45,11 @@ jobs:
     - name: Regression
       run: tox -q -p auto -e regression
       if: matrix.python-version == '3.8' && runner.os == 'Linux'
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        name: pyatv
-        yml: ./.codecov.yml
-        fail_ci_if_error: true
+    #- name: Upload coverage to Codecov
+    #  uses: codecov/codecov-action@v1
+    #  with:
+    #    token: ${{ secrets.CODECOV_TOKEN }}
+    #    file: ./coverage.xml
+    #    flags: unittests
+    #    name: pyatv
+    #    fail_ci_if_error: true

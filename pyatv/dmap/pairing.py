@@ -14,6 +14,7 @@ import netifaces
 from pyatv.const import Protocol
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
+from pyatv.support.net import ClientSessionManager, unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,16 +45,18 @@ class DmapPairingHandler(
     that responds to pairing requests.
     """
 
-    def __init__(self, config, session, loop, **kwargs):
+    def __init__(self, config, session_manager: ClientSessionManager, loop, **kwargs):
         """Initialize a new instance."""
-        super().__init__(session, config.get_service(Protocol.DMAP))
+        super().__init__(session_manager, config.get_service(Protocol.DMAP))
         self._loop = loop
         self._zeroconf = kwargs.get(
             "zeroconf", Zeroconf(loop, address_family=[netifaces.AF_INET])
         )
         self._name = kwargs.get("name", "pyatv")
-        self._web_server = None
-        self._server = None
+        self.app = web.Application()
+        self.app.router.add_routes([web.get("/pairing", self.handle_request)])
+        self.runner = web.AppRunner(self.app)
+        self.site = None
         self._pin_code = None
         self._has_paired = False
         self._pairing_guid = (
@@ -63,13 +66,7 @@ class DmapPairingHandler(
     async def close(self):
         """Call to free allocated resources after pairing."""
         await self._zeroconf.close()
-        if self._web_server is not None:
-            await self._web_server.shutdown()
-            self._server.close()
-
-        if self._server is not None:
-            await self._server.wait_closed()
-
+        await self.runner.cleanup()
         await super().close()
 
     @property
@@ -82,15 +79,16 @@ class DmapPairingHandler(
 
     async def begin(self):
         """Start the pairing server and publish service."""
-        self._web_server = web.Server(self.handle_request, loop=self._loop)
-        self._server = await self._loop.create_server(self._web_server, "0.0.0.0")
+        port = unused_port()
 
-        # Get the allocated (random port) and include it in zeroconf service
-        allocated_port = self._server.sockets[0].getsockname()[1]
-        _LOGGER.debug("Started pairing web server at port %d", allocated_port)
+        await self.runner.setup()
+        self.site = web.TCPSite(self.runner, "0.0.0.0", port)
+        await self.site.start()
+
+        _LOGGER.debug("Started pairing web server at port %d", port)
 
         for ipaddr in _get_private_ip_addresses():
-            await self._publish_service(ipaddr, allocated_port)
+            await self._publish_service(ipaddr, port)
 
     async def finish(self):
         """Stop pairing server and unpublish service."""

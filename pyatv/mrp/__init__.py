@@ -7,8 +7,6 @@ import datetime
 from copy import deepcopy
 from typing import Dict, List, Optional
 
-from aiohttp import ClientSession
-
 from pyatv import conf, exceptions
 from pyatv.const import (
     Protocol,
@@ -20,7 +18,6 @@ from pyatv.const import (
     FeatureState,
     FeatureName,
 )
-from pyatv.support import net
 from pyatv.support.cache import Cache
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.srp import SRPAuthHandler
@@ -44,6 +41,7 @@ from pyatv.interface import (
     FeatureInfo,
 )
 from pyatv.support import deprecated
+from pyatv.support.net import ClientSessionManager
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -465,46 +463,59 @@ class MrpMetadata(Metadata):
     @property
     def app(self) -> Optional[App]:
         """Return information about running app."""
-        state = self.psm.playing
-        if state.client:
-            name = state.client.displayName or None
-            return App(name, state.client.bundleIdentifier)
+        player_path = self.psm.playing.player_path
+        if player_path and player_path.client:
+            return App(
+                player_path.client.displayName, player_path.client.bundleIdentifier
+            )
         return None
 
 
 class MrpPower(Power):
     """Implementation of API for retrieving a power state from an Apple TV."""
 
-    def __init__(self, loop, protocol, remote):
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        protocol: MrpProtocol,
+        remote: MrpRemoteControl,
+    ) -> None:
         """Initialize a new MrpPower instance."""
         super().__init__()
         self.loop = loop
         self.protocol = protocol
         self.remote = remote
         self.device_info = None
+        self._waiters: Dict[PowerState, asyncio.Event] = {}
 
         self.protocol.add_listener(
             self._update_power_state, protobuf.DEVICE_INFO_UPDATE_MESSAGE
         )
 
-    def _get_current_power_state(self):
+    def _get_current_power_state(self) -> PowerState:
         latest_device_info = self.device_info or self.protocol.device_info
         return self._get_power_state(latest_device_info)
 
     @property
-    def power_state(self):
+    def power_state(self) -> PowerState:
         """Return device power state."""
         currect_power_state = self._get_current_power_state()
         return currect_power_state
 
-    async def turn_on(self):
+    async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         await self.protocol.send_and_receive(messages.wake_device())
 
-    async def turn_off(self):
+        if await_new_state and self.power_state != PowerState.On:
+            await self._waiters.setdefault(PowerState.On, asyncio.Event()).wait()
+
+    async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         await self.remote.home_hold()
         await self.remote.select()
+
+        if await_new_state and self.power_state != PowerState.Off:
+            await self._waiters.setdefault(PowerState.Off, asyncio.Event()).wait()
 
     async def _update_power_state(self, message, _):
         old_state = self.power_state
@@ -515,8 +526,12 @@ class MrpPower(Power):
             _LOGGER.debug("Power state changed from %s to %s", old_state, new_state)
             self.loop.call_soon(self.listener.powerstate_update, old_state, new_state)
 
+        if new_state in self._waiters:
+            self._waiters[new_state].set()
+            del self._waiters[new_state]
+
     @staticmethod
-    def _get_power_state(device_info):
+    def _get_power_state(device_info) -> PowerState:
         logical_device_count = device_info.inner().logicalDeviceCount
         if logical_device_count >= 1:
             return PowerState.On
@@ -617,7 +632,8 @@ class MrpFeatures(Features):
             return FeatureInfo(state=FeatureState.Unavailable)
 
         if feature == FeatureName.App:
-            if self.psm.playing.client:
+            player_path = self.psm.playing.player_path
+            if player_path and player_path.client:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
@@ -637,14 +653,14 @@ class MrpAppleTV(AppleTV):
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,
-        session: ClientSession,
+        session_manager: ClientSessionManager,
         config: conf.AppleTV,
         airplay: Stream,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
 
-        self._session = session
+        self._session_manager = session_manager
         self._config = config
         self._mrp_service = config.get_service(Protocol.MRP)
         assert self._mrp_service is not None
@@ -672,8 +688,7 @@ class MrpAppleTV(AppleTV):
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
-        if net.is_custom_session(self._session):
-            asyncio.ensure_future(self._session.close())
+        asyncio.ensure_future(self._session_manager.close())
         self._airplay.close()
         self.push_updater.stop()
         self._protocol.stop()

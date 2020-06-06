@@ -241,8 +241,6 @@ import weakref
 
 from abc import ABC, abstractmethod
 
-import aiohttp
-
 from pyatv import const, convert, exceptions
 from pyatv.const import (
     Protocol,
@@ -409,9 +407,11 @@ class BaseService:
 class PairingHandler(ABC):
     &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
 
-    def __init__(self, session: aiohttp.ClientSession, service: BaseService) -&gt; None:
+    def __init__(
+        self, session_manager: net.ClientSessionManager, service: BaseService
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
-        self.session = session
+        self.session_manager = session_manager
         self._service = service
 
     @property
@@ -421,8 +421,7 @@ class PairingHandler(ABC):
 
     async def close(self) -&gt; None:
         &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-        if net.is_custom_session(self.session):
-            await self.session.close()
+        await self.session_manager.close()
 
     @abstractmethod
     def pin(self, pin) -&gt; None:
@@ -904,13 +903,13 @@ class Power(ABC, StateProducer):
 
     @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self) -&gt; None:
+    async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self) -&gt; None:
+    async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -2089,7 +2088,7 @@ async def playing(self) -&gt; Playing:
 </dd>
 <dt id="pyatv.interface.PairingHandler"><code class="flex name class">
 <span>class <span class="ident">PairingHandler</span></span>
-<span>(</span><span>session: aiohttp.client.ClientSession, service: <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>)</span>
+<span>(</span><span>session_manager: pyatv.support.net.ClientSessionManager, service: <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for API used to pair with an Apple TV.</p>
@@ -2101,9 +2100,11 @@ async def playing(self) -&gt; Playing:
 <pre><code class="python">class PairingHandler(ABC):
     &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
 
-    def __init__(self, session: aiohttp.ClientSession, service: BaseService) -&gt; None:
+    def __init__(
+        self, session_manager: net.ClientSessionManager, service: BaseService
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
-        self.session = session
+        self.session_manager = session_manager
         self._service = service
 
     @property
@@ -2113,8 +2114,7 @@ async def playing(self) -&gt; Playing:
 
     async def close(self) -&gt; None:
         &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-        if net.is_custom_session(self.session):
-            await self.session.close()
+        await self.session_manager.close()
 
     @abstractmethod
     def pin(self, pin) -&gt; None:
@@ -2232,8 +2232,7 @@ async def begin(self) -&gt; None:
 </summary>
 <pre><code class="python">async def close(self) -&gt; None:
     &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-    if net.is_custom_session(self.session):
-        await self.session.close()</code></pre>
+    await self.session_manager.close()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.PairingHandler.finish"><code class="name flex">
@@ -2612,13 +2611,13 @@ def total_time(self) -&gt; int:
 
     @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self) -&gt; None:
+    async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self) -&gt; None:
+    async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -2653,7 +2652,7 @@ def power_state(self) -&gt; const.PowerState:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Power.turn_off"><code class="name flex">
-<span>async def <span class="ident">turn_off</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">turn_off</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device off.</p></section>
@@ -2663,13 +2662,13 @@ def power_state(self) -&gt; const.PowerState:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-async def turn_off(self) -&gt; None:
+async def turn_off(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Power.turn_on"><code class="name flex">
-<span>async def <span class="ident">turn_on</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">turn_on</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Turn device on.</p></section>
@@ -2679,7 +2678,7 @@ async def turn_off(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-async def turn_on(self) -&gt; None:
+async def turn_on(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
