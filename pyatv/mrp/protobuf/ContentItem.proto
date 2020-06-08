@@ -3,12 +3,18 @@ syntax = "proto2";
 import "pyatv/mrp/protobuf/ContentItemMetadata.proto";
 import "pyatv/mrp/protobuf/LanguageOption.proto";
 
+message LanguageOptionGroup {
+  optional bool allowEmptySelection = 1;
+  optional LanguageOption defaultLanguageOption = 2;
+  repeated LanguageOption languageOptions = 3;
+}
+
 message ContentItem {
   optional string identifier = 1;
   optional ContentItemMetadata metadata = 2;
   optional bytes artworkData = 3;
   optional string info = 4;
-  repeated LanguageOption availableLanguageOptions = 5;
+  repeated LanguageOptionGroup availableLanguageOptions = 5;
   repeated LanguageOption currentLanguageOptions = 6;
 //  optional Lyrics lyrics = 7;
 //  repeated Sections sections = 8;

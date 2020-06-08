@@ -20,11 +20,56 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n$pyatv/mrp/protobuf/ContentItem.proto\x1a,pyatv/mrp/protobuf/ContentItemMetadata.proto\x1a\'pyatv/mrp/protobuf/LanguageOption.proto\"\xef\x02\n\x0b\x43ontentItem\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12&\n\x08metadata\x18\x02 \x01(\x0b\x32\x14.ContentItemMetadata\x12\x13\n\x0b\x61rtworkData\x18\x03 \x01(\x0c\x12\x0c\n\x04info\x18\x04 \x01(\t\x12\x31\n\x18\x61vailableLanguageOptions\x18\x05 \x03(\x0b\x32\x0f.LanguageOption\x12/\n\x16\x63urrentLanguageOptions\x18\x06 \x03(\x0b\x32\x0f.LanguageOption\x12\x18\n\x10parentIdentifier\x18\t \x01(\t\x12\x1a\n\x12\x61ncestorIdentifier\x18\n \x01(\t\x12\x17\n\x0fqueueIdentifier\x18\x0b \x01(\t\x12\x19\n\x11requestIdentifier\x18\x0c \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18\r \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18\x0e \x01(\x05'
+  serialized_pb=b'\n$pyatv/mrp/protobuf/ContentItem.proto\x1a,pyatv/mrp/protobuf/ContentItemMetadata.proto\x1a\'pyatv/mrp/protobuf/LanguageOption.proto\"\x8c\x01\n\x13LanguageOptionGroup\x12\x1b\n\x13\x61llowEmptySelection\x18\x01 \x01(\x08\x12.\n\x15\x64\x65\x66\x61ultLanguageOption\x18\x02 \x01(\x0b\x32\x0f.LanguageOption\x12(\n\x0flanguageOptions\x18\x03 \x03(\x0b\x32\x0f.LanguageOption\"\xf4\x02\n\x0b\x43ontentItem\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12&\n\x08metadata\x18\x02 \x01(\x0b\x32\x14.ContentItemMetadata\x12\x13\n\x0b\x61rtworkData\x18\x03 \x01(\x0c\x12\x0c\n\x04info\x18\x04 \x01(\t\x12\x36\n\x18\x61vailableLanguageOptions\x18\x05 \x03(\x0b\x32\x14.LanguageOptionGroup\x12/\n\x16\x63urrentLanguageOptions\x18\x06 \x03(\x0b\x32\x0f.LanguageOption\x12\x18\n\x10parentIdentifier\x18\t \x01(\t\x12\x1a\n\x12\x61ncestorIdentifier\x18\n \x01(\t\x12\x17\n\x0fqueueIdentifier\x18\x0b \x01(\t\x12\x19\n\x11requestIdentifier\x18\x0c \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18\r \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18\x0e \x01(\x05'
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ContentItemMetadata__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_LanguageOption__pb2.DESCRIPTOR,])
 
 
+
+
+_LANGUAGEOPTIONGROUP = _descriptor.Descriptor(
+  name='LanguageOptionGroup',
+  full_name='LanguageOptionGroup',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='allowEmptySelection', full_name='LanguageOptionGroup.allowEmptySelection', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='defaultLanguageOption', full_name='LanguageOptionGroup.defaultLanguageOption', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='languageOptions', full_name='LanguageOptionGroup.languageOptions', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=128,
+  serialized_end=268,
+)
 
 
 _CONTENTITEM = _descriptor.Descriptor(
@@ -130,15 +175,25 @@ _CONTENTITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=128,
-  serialized_end=495,
+  serialized_start=271,
+  serialized_end=643,
 )
 
+_LANGUAGEOPTIONGROUP.fields_by_name['defaultLanguageOption'].message_type = pyatv_dot_mrp_dot_protobuf_dot_LanguageOption__pb2._LANGUAGEOPTION
+_LANGUAGEOPTIONGROUP.fields_by_name['languageOptions'].message_type = pyatv_dot_mrp_dot_protobuf_dot_LanguageOption__pb2._LANGUAGEOPTION
 _CONTENTITEM.fields_by_name['metadata'].message_type = pyatv_dot_mrp_dot_protobuf_dot_ContentItemMetadata__pb2._CONTENTITEMMETADATA
-_CONTENTITEM.fields_by_name['availableLanguageOptions'].message_type = pyatv_dot_mrp_dot_protobuf_dot_LanguageOption__pb2._LANGUAGEOPTION
+_CONTENTITEM.fields_by_name['availableLanguageOptions'].message_type = _LANGUAGEOPTIONGROUP
 _CONTENTITEM.fields_by_name['currentLanguageOptions'].message_type = pyatv_dot_mrp_dot_protobuf_dot_LanguageOption__pb2._LANGUAGEOPTION
+DESCRIPTOR.message_types_by_name['LanguageOptionGroup'] = _LANGUAGEOPTIONGROUP
 DESCRIPTOR.message_types_by_name['ContentItem'] = _CONTENTITEM
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+LanguageOptionGroup = _reflection.GeneratedProtocolMessageType('LanguageOptionGroup', (_message.Message,), {
+  'DESCRIPTOR' : _LANGUAGEOPTIONGROUP,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItem_pb2'
+  # @@protoc_insertion_point(class_scope:LanguageOptionGroup)
+  })
+_sym_db.RegisterMessage(LanguageOptionGroup)
 
 ContentItem = _reflection.GeneratedProtocolMessageType('ContentItem', (_message.Message,), {
   'DESCRIPTOR' : _CONTENTITEM,
