@@ -41,6 +41,34 @@ if sys.version_info < (3,):
     builtin___unicode = unicode
 
 
+class LanguageOptionGroup(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    allowEmptySelection = ... # type: builtin___bool
+
+    @property
+    def defaultLanguageOption(self) -> pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption: ...
+
+    @property
+    def languageOptions(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]: ...
+
+    def __init__(self,
+        *,
+        allowEmptySelection : typing___Optional[builtin___bool] = None,
+        defaultLanguageOption : typing___Optional[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption] = None,
+        languageOptions : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]] = None,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> LanguageOptionGroup: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> LanguageOptionGroup: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"allowEmptySelection",b"allowEmptySelection",u"defaultLanguageOption",b"defaultLanguageOption"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"allowEmptySelection",b"allowEmptySelection",u"defaultLanguageOption",b"defaultLanguageOption",u"languageOptions",b"languageOptions"]) -> None: ...
+global___LanguageOptionGroup = LanguageOptionGroup
+
 class ContentItem(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     identifier = ... # type: typing___Text
@@ -57,7 +85,7 @@ class ContentItem(google___protobuf___message___Message):
     def metadata(self) -> pyatv___mrp___protobuf___ContentItemMetadata_pb2___ContentItemMetadata: ...
 
     @property
-    def availableLanguageOptions(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]: ...
+    def availableLanguageOptions(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___LanguageOptionGroup]: ...
 
     @property
     def currentLanguageOptions(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]: ...
@@ -68,7 +96,7 @@ class ContentItem(google___protobuf___message___Message):
         metadata : typing___Optional[pyatv___mrp___protobuf___ContentItemMetadata_pb2___ContentItemMetadata] = None,
         artworkData : typing___Optional[builtin___bytes] = None,
         info : typing___Optional[typing___Text] = None,
-        availableLanguageOptions : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]] = None,
+        availableLanguageOptions : typing___Optional[typing___Iterable[global___LanguageOptionGroup]] = None,
         currentLanguageOptions : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___LanguageOption_pb2___LanguageOption]] = None,
         parentIdentifier : typing___Optional[typing___Text] = None,
         ancestorIdentifier : typing___Optional[typing___Text] = None,

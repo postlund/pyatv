@@ -52,6 +52,7 @@ from .Common_pb2 import RepeatMode
 from .Common_pb2 import ShuffleMode
 from .ContentItemMetadata_pb2 import ContentItemMetadata
 from .ContentItem_pb2 import ContentItem
+from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
