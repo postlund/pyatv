@@ -1,11 +1,27 @@
 syntax = "proto2";
 
-import "pyatv/mrp/protobuf/TransactionPackets.proto";
 import "pyatv/mrp/protobuf/ProtocolMessage.proto";
 import "pyatv/mrp/protobuf/PlayerPath.proto";
 
 extend ProtocolMessage {
   optional TransactionMessage transactionMessage = 38;
+}
+
+message TransactionPackets {
+    repeated TransactionPacket packets = 1;
+}
+
+message TransactionPacket {
+    optional TransactionKey key = 1;
+    optional bytes packetData = 2;
+    optional string identifier = 3;
+    optional uint64 totalLength = 4;
+    optional uint64 totalWritePosition = 5;
+}
+
+message TransactionKey {
+    optional string identifier = 1;
+    optional bytes userData = 2;
 }
 
 message TransactionMessage {

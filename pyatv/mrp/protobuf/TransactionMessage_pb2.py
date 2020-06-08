@@ -11,7 +11,6 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from pyatv.mrp.protobuf import TransactionPackets_pb2 as pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2
 from pyatv.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 from pyatv.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
 
@@ -21,9 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n+pyatv/mrp/protobuf/TransactionMessage.proto\x1a+pyatv/mrp/protobuf/TransactionPackets.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"i\n\x12TransactionMessage\x12\x0c\n\x04name\x18\x01 \x01(\x04\x12$\n\x07packets\x18\x02 \x01(\x0b\x32\x13.TransactionPackets\x12\x1f\n\nplayerPath\x18\x03 \x01(\x0b\x32\x0b.PlayerPath:A\n\x12transactionMessage\x12\x10.ProtocolMessage\x18& \x01(\x0b\x32\x13.TransactionMessage'
+  serialized_pb=b'\n+pyatv/mrp/protobuf/TransactionMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a#pyatv/mrp/protobuf/PlayerPath.proto\"9\n\x12TransactionPackets\x12#\n\x07packets\x18\x01 \x03(\x0b\x32\x12.TransactionPacket\"\x8a\x01\n\x11TransactionPacket\x12\x1c\n\x03key\x18\x01 \x01(\x0b\x32\x0f.TransactionKey\x12\x12\n\npacketData\x18\x02 \x01(\x0c\x12\x12\n\nidentifier\x18\x03 \x01(\t\x12\x13\n\x0btotalLength\x18\x04 \x01(\x04\x12\x1a\n\x12totalWritePosition\x18\x05 \x01(\x04\"6\n\x0eTransactionKey\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x10\n\x08userData\x18\x02 \x01(\x0c\"i\n\x12TransactionMessage\x12\x0c\n\x04name\x18\x01 \x01(\x04\x12$\n\x07packets\x18\x02 \x01(\x0b\x32\x13.TransactionPackets\x12\x1f\n\nplayerPath\x18\x03 \x01(\x0b\x32\x0b.PlayerPath:A\n\x12transactionMessage\x12\x10.ProtocolMessage\x18& \x01(\x0b\x32\x13.TransactionMessage'
   ,
-  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
+  dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
 
 
 TRANSACTIONMESSAGE_FIELD_NUMBER = 38
@@ -34,6 +33,134 @@ transactionMessage = _descriptor.FieldDescriptor(
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
   serialized_options=None, file=DESCRIPTOR)
+
+
+_TRANSACTIONPACKETS = _descriptor.Descriptor(
+  name='TransactionPackets',
+  full_name='TransactionPackets',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='packets', full_name='TransactionPackets.packets', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=126,
+  serialized_end=183,
+)
+
+
+_TRANSACTIONPACKET = _descriptor.Descriptor(
+  name='TransactionPacket',
+  full_name='TransactionPacket',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='TransactionPacket.key', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='packetData', full_name='TransactionPacket.packetData', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='identifier', full_name='TransactionPacket.identifier', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='totalLength', full_name='TransactionPacket.totalLength', index=3,
+      number=4, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='totalWritePosition', full_name='TransactionPacket.totalWritePosition', index=4,
+      number=5, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=186,
+  serialized_end=324,
+)
+
+
+_TRANSACTIONKEY = _descriptor.Descriptor(
+  name='TransactionKey',
+  full_name='TransactionKey',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='identifier', full_name='TransactionKey.identifier', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='userData', full_name='TransactionKey.userData', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=326,
+  serialized_end=380,
+)
 
 
 _TRANSACTIONMESSAGE = _descriptor.Descriptor(
@@ -76,15 +203,41 @@ _TRANSACTIONMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=171,
-  serialized_end=276,
+  serialized_start=382,
+  serialized_end=487,
 )
 
-_TRANSACTIONMESSAGE.fields_by_name['packets'].message_type = pyatv_dot_mrp_dot_protobuf_dot_TransactionPackets__pb2._TRANSACTIONPACKETS
+_TRANSACTIONPACKETS.fields_by_name['packets'].message_type = _TRANSACTIONPACKET
+_TRANSACTIONPACKET.fields_by_name['key'].message_type = _TRANSACTIONKEY
+_TRANSACTIONMESSAGE.fields_by_name['packets'].message_type = _TRANSACTIONPACKETS
 _TRANSACTIONMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
+DESCRIPTOR.message_types_by_name['TransactionPackets'] = _TRANSACTIONPACKETS
+DESCRIPTOR.message_types_by_name['TransactionPacket'] = _TRANSACTIONPACKET
+DESCRIPTOR.message_types_by_name['TransactionKey'] = _TRANSACTIONKEY
 DESCRIPTOR.message_types_by_name['TransactionMessage'] = _TRANSACTIONMESSAGE
 DESCRIPTOR.extensions_by_name['transactionMessage'] = transactionMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+TransactionPackets = _reflection.GeneratedProtocolMessageType('TransactionPackets', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTIONPACKETS,
+  '__module__' : 'pyatv.mrp.protobuf.TransactionMessage_pb2'
+  # @@protoc_insertion_point(class_scope:TransactionPackets)
+  })
+_sym_db.RegisterMessage(TransactionPackets)
+
+TransactionPacket = _reflection.GeneratedProtocolMessageType('TransactionPacket', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTIONPACKET,
+  '__module__' : 'pyatv.mrp.protobuf.TransactionMessage_pb2'
+  # @@protoc_insertion_point(class_scope:TransactionPacket)
+  })
+_sym_db.RegisterMessage(TransactionPacket)
+
+TransactionKey = _reflection.GeneratedProtocolMessageType('TransactionKey', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTIONKEY,
+  '__module__' : 'pyatv.mrp.protobuf.TransactionMessage_pb2'
+  # @@protoc_insertion_point(class_scope:TransactionKey)
+  })
+_sym_db.RegisterMessage(TransactionKey)
 
 TransactionMessage = _reflection.GeneratedProtocolMessageType('TransactionMessage', (_message.Message,), {
   'DESCRIPTOR' : _TRANSACTIONMESSAGE,

@@ -5,6 +5,10 @@ from google.protobuf.descriptor import (
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
 )
 
+from google.protobuf.internal.containers import (
+    RepeatedCompositeFieldContainer as google___protobuf___internal___containers___RepeatedCompositeFieldContainer,
+)
+
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
@@ -13,12 +17,10 @@ from pyatv.mrp.protobuf.PlayerPath_pb2 import (
     PlayerPath as pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath,
 )
 
-from pyatv.mrp.protobuf.TransactionPackets_pb2 import (
-    TransactionPackets as pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets,
-)
-
 from typing import (
+    Iterable as typing___Iterable,
     Optional as typing___Optional,
+    Text as typing___Text,
     Union as typing___Union,
 )
 
@@ -36,12 +38,85 @@ if sys.version_info < (3,):
     builtin___unicode = unicode
 
 
+class TransactionPackets(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+
+    @property
+    def packets(self) -> google___protobuf___internal___containers___RepeatedCompositeFieldContainer[global___TransactionPacket]: ...
+
+    def __init__(self,
+        *,
+        packets : typing___Optional[typing___Iterable[global___TransactionPacket]] = None,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> TransactionPackets: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionPackets: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"packets",b"packets"]) -> None: ...
+global___TransactionPackets = TransactionPackets
+
+class TransactionPacket(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    packetData = ... # type: builtin___bytes
+    identifier = ... # type: typing___Text
+    totalLength = ... # type: builtin___int
+    totalWritePosition = ... # type: builtin___int
+
+    @property
+    def key(self) -> global___TransactionKey: ...
+
+    def __init__(self,
+        *,
+        key : typing___Optional[global___TransactionKey] = None,
+        packetData : typing___Optional[builtin___bytes] = None,
+        identifier : typing___Optional[typing___Text] = None,
+        totalLength : typing___Optional[builtin___int] = None,
+        totalWritePosition : typing___Optional[builtin___int] = None,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> TransactionPacket: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionPacket: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"key",b"key",u"packetData",b"packetData",u"totalLength",b"totalLength",u"totalWritePosition",b"totalWritePosition"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"key",b"key",u"packetData",b"packetData",u"totalLength",b"totalLength",u"totalWritePosition",b"totalWritePosition"]) -> None: ...
+global___TransactionPacket = TransactionPacket
+
+class TransactionKey(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    identifier = ... # type: typing___Text
+    userData = ... # type: builtin___bytes
+
+    def __init__(self,
+        *,
+        identifier : typing___Optional[typing___Text] = None,
+        userData : typing___Optional[builtin___bytes] = None,
+        ) -> None: ...
+    if sys.version_info >= (3,):
+        @classmethod
+        def FromString(cls, s: builtin___bytes) -> TransactionKey: ...
+    else:
+        @classmethod
+        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionKey: ...
+    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"identifier",b"identifier",u"userData",b"userData"]) -> None: ...
+global___TransactionKey = TransactionKey
+
 class TransactionMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
     name = ... # type: builtin___int
 
     @property
-    def packets(self) -> pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets: ...
+    def packets(self) -> global___TransactionPackets: ...
 
     @property
     def playerPath(self) -> pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath: ...
@@ -49,7 +124,7 @@ class TransactionMessage(google___protobuf___message___Message):
     def __init__(self,
         *,
         name : typing___Optional[builtin___int] = None,
-        packets : typing___Optional[pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets] = None,
+        packets : typing___Optional[global___TransactionPackets] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         ) -> None: ...
     if sys.version_info >= (3,):

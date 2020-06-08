@@ -98,10 +98,10 @@ from .SupportedCommands_pb2 import SupportedCommands
 from .TextEditingAttributesMessage_pb2 import TextEditingAttributes
 from .TextInputMessage_pb2 import TextInputMessage
 from .TextInputTraitsMessage_pb2 import TextInputTraits
-from .TransactionKey_pb2 import TransactionKey
+from .TransactionMessage_pb2 import TransactionKey
 from .TransactionMessage_pb2 import TransactionMessage
-from .TransactionPacket_pb2 import TransactionPacket
-from .TransactionPackets_pb2 import TransactionPackets
+from .TransactionMessage_pb2 import TransactionPacket
+from .TransactionMessage_pb2 import TransactionPackets
 from .UpdateClientMessage_pb2 import UpdateClientMessage
 from .UpdateContentItemMessage_pb2 import UpdateContentItemMessage
 from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceDescriptor
