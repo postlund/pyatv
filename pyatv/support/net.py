@@ -2,12 +2,14 @@
 
 import socket
 import logging
+import platform
 from ipaddress import IPv4Interface, IPv4Address
 from typing import Optional
 
 import netifaces
 from aiohttp import ClientSession
 
+from pyatv import exceptions
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -60,6 +62,55 @@ def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:
             if dest_ip in iface.network:
                 return iface.ip
     return None
+
+
+# Reference: https://stackoverflow.com/a/14855726
+def tcp_keepalive(sock) -> None:
+    """Configure keep-alive on a socket."""
+
+    def _setopt(option, value):
+        try:
+            if isinstance(option, str):
+                if hasattr(socket, option):
+                    option = getattr(socket, option)
+                else:
+                    raise exceptions.NotSupportedError(
+                        f"Option {option} is not supported"
+                    )
+
+            sock.setsockopt(socket.IPPROTO_TCP, option, value)
+        except OSError as ex:
+            raise exceptions.NotSupportedError(
+                f"Unable to set {option} on {sock}: {ex}"
+            )
+
+    current_platform = platform.system()
+
+    if not hasattr(socket, "SO_KEEPALIVE"):
+        raise exceptions.NotSupportedError("System does not support keep-alive")
+
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
+    # Look up options depending on operating system
+    optnames = {
+        # https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/bsd/netinet/tcp.h#L206  # noqa
+        "Darwin": (0x10, 0x101, 0x102),
+        "Linux": ("TCP_KEEPIDLE", "TCP_KEEPINTVL", "TCP_KEEPCNT"),
+        "Windows": ("TCP_KEEPIDLE", "TCP_KEEPINTVL", "TCP_KEEPCNT"),
+    }.get(current_platform, None)
+
+    if optnames is None:
+        raise exceptions.NotSupportedError(
+            f"{current_platform} does not support keep-alive"
+        )
+
+    # Default values are 1s idle time, 5s interval and 4 fails
+    idle, intvl, cnt = optnames
+    _setopt(idle, 1)
+    _setopt(intvl, 5)
+    _setopt(cnt, 4)
+
+    _LOGGER.info("Configured keep-alive on %s (%s)", sock, current_platform)
 
 
 class HttpSession:

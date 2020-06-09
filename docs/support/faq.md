@@ -111,13 +111,36 @@ It is still a bit unclear which version of OpenSsl that added support for ed2551
 so grab the latest one. Please refer to your operating system community on
 how to upgrade.
 
+### <a name="q11"></a>Q11. My Apple TV crashed/lost network connection/... and the connection in pyatv just hangs, why?
+
+To discover dangling connections, i.e. when the other device disappears without
+properly closing the connection, TCP keepalives are used. The support for this
+in python varies on different platforms. It might be the case that your operating
+system or version of python does not support TCP keep-alive properly, in which
+case this is a problem pyatv currently does not solve.
+
+A log point will indicate if configuration of keep-alive succeeded:
+
+```
+2020-06-10 22:31:28 INFO: Configured keep-alive on <asyncio.TransportSocket fd=8, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('10.0.10.254', 60849), raddr=('10.0.10.81', 49153)> (Linux)
+```
+
+Or a warning if not supported:
+
+```
+2020-06-10 22:32:28 WARNING: Keep-alive not supported: System does not support keep-alive
+```
+
+Most versions of macOS and Linux should work with no problems. For Windows, you need at
+least Windows 10 build 1709.
+
 ## <a name="apps"></a>Apps (tvOS)
 
 Some apps behave in unexpected ways that are out of control of this library, i.e. nothing can be done in `pyatv` to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
 
 ### Netflix (com.netflix.Netflix)
 
-* ~~Previews in the main menu yields play status updates (usually with what was played most recently, not content of the preview). A workaround is to disable these previews, see [this](https://help.netflix.com/sv/node/2102) page.~~
+* Previews in the main menu yields play status updates (usually with what was played most recently, not content of the preview). A workaround is to disable these previews, see [this](https://help.netflix.com/sv/node/2102) page.
 * During episode intros and "next episode" screens the device goes to idle state.
 
 ### playbackRate issue

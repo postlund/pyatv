@@ -1,6 +1,7 @@
 """Smoke test for atvscript."""
 
 import json
+import logging
 
 from deepdiff import DeepDiff
 from aiohttp.test_utils import unittest_run_loop
@@ -8,6 +9,7 @@ from aiohttp.test_utils import unittest_run_loop
 from pyatv.const import Protocol
 from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, ScriptTest
 
+_LOGGER = logging.getLogger(__name__)
 HASH = "ca496c14642c78af6dd4250191fe175f6dafd72b4c33bcbab43c454aae051da1"
 
 
@@ -16,6 +18,8 @@ class AtvscriptTest(ScriptTest):
         return await self.run_script("atvscript", *args)
 
     def assertJsonOutput(self, expected):
+        _LOGGER.debug("Stdout: %s", self.stdout)
+
         actual = json.loads(self.stdout)
 
         # Hack for now: only check that datetime is present to work around issue with
