@@ -10,7 +10,9 @@ Here is the *jumpstart* guide to get going fast!
 
 ## Installation
 
-    pip install {{ site.pyatv_version }}
+    pip3 install {{ site.pyatv_version }}
+
+See [Installing pyatv](/documentation/#installing-pyatv) for more alternatives.
 
 ## Using atvremote
 
