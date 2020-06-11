@@ -126,8 +126,8 @@ class SRPAuthHandler:
             chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
         )
 
-        identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
-        signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
+        identifier = decrypted_tlv[hap_tlv8.TlvValue.Identifier]
+        signature = decrypted_tlv[hap_tlv8.TlvValue.Signature]
 
         if identifier != credentials.atv_id:
             raise exceptions.AuthenticationError("incorrect device response")
@@ -148,8 +148,8 @@ class SRPAuthHandler:
 
         tlv = hap_tlv8.write_tlv(
             {
-                hap_tlv8.TLV_IDENTIFIER: credentials.client_id,
-                hap_tlv8.TLV_SIGNATURE: device_signature,
+                hap_tlv8.TlvValue.Identifier: credentials.client_id,
+                hap_tlv8.TlvValue.Signature: device_signature,
             }
         )
 
@@ -217,9 +217,9 @@ class SRPAuthHandler:
 
         tlv = hap_tlv8.write_tlv(
             {
-                hap_tlv8.TLV_IDENTIFIER: self.pairing_id,
-                hap_tlv8.TLV_PUBLIC_KEY: self._auth_public,
-                hap_tlv8.TLV_SIGNATURE: device_signature,
+                hap_tlv8.TlvValue.Identifier: self.pairing_id,
+                hap_tlv8.TlvValue.PublicKey: self._auth_public,
+                hap_tlv8.TlvValue.Signature: device_signature,
             }
         )
 
@@ -239,9 +239,9 @@ class SRPAuthHandler:
         decrypted_tlv = hap_tlv8.read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
-        atv_identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
-        atv_signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
-        atv_pub_key = decrypted_tlv[hap_tlv8.TLV_PUBLIC_KEY]
+        atv_identifier = decrypted_tlv[hap_tlv8.TlvValue.Identifier]
+        atv_signature = decrypted_tlv[hap_tlv8.TlvValue.Signature]
+        atv_pub_key = decrypted_tlv[hap_tlv8.TlvValue.PublicKey]
         log_binary(
             _LOGGER,
             "Device",
