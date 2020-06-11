@@ -212,7 +212,7 @@ class MrpServerAuth:
         else:
             msg = messages.crypto_pairing(
                 {
-                    hap_tlv8.TLV_ERROR: hap_tlv8.ERROR_AUTHENTICATION.encode(),
+                    hap_tlv8.TLV_ERROR: bytes([hap_tlv8.ERROR_AUTHENTICATION]),
                     hap_tlv8.TLV_SEQ_NO: b"\x04",
                 }
             )

@@ -5,18 +5,18 @@ in dicts.
 """
 
 # Some of the defined tags used by the pairing process
-TLV_METHOD = "0"
-TLV_IDENTIFIER = "1"
-TLV_SALT = "2"
-TLV_PUBLIC_KEY = "3"
-TLV_PROOF = "4"
-TLV_ENCRYPTED_DATA = "5"
-TLV_SEQ_NO = "6"
-TLV_ERROR = "7"
-TLV_BACK_OFF = "8"
-TLV_SIGNATURE = "10"
+TLV_METHOD = 0
+TLV_IDENTIFIER = 1
+TLV_SALT = 2
+TLV_PUBLIC_KEY = 3
+TLV_PROOF = 4
+TLV_ENCRYPTED_DATA = 5
+TLV_SEQ_NO = 6
+TLV_ERROR = 7
+TLV_BACK_OFF = 8
+TLV_SIGNATURE = 10
 
-ERROR_AUTHENTICATION = "2"
+ERROR_AUTHENTICATION = 2
 
 
 def read_tlv(data):
@@ -32,7 +32,7 @@ def read_tlv(data):
         if pos >= size:
             return result
 
-        tag = str(data[pos])
+        tag = int(data[pos])
         length = data[pos + 1]
         value = data[pos + 2 : pos + 2 + length]
 
