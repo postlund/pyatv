@@ -4,7 +4,7 @@ import binascii
 
 from pyatv import const
 from pyatv.mrp import protobuf
-from pyatv.mrp import tlv8
+from pyatv.support import hap_tlv8
 
 
 def create(message_type, error_code=0, identifier=None):
@@ -66,7 +66,7 @@ def crypto_pairing(pairing_data, is_pairing=False):
     message = create(protobuf.CRYPTO_PAIRING_MESSAGE)
     crypto = message.inner()
     crypto.status = 0
-    crypto.pairingData = tlv8.write_tlv(pairing_data)
+    crypto.pairingData = hap_tlv8.write_tlv(pairing_data)
 
     # Hardcoded values for now, might have to be changed
     crypto.isRetrying = False
