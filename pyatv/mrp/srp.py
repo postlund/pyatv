@@ -22,8 +22,8 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 
 from pyatv import exceptions
-from pyatv.support import log_binary
-from pyatv.mrp import tlv8, chacha20
+from pyatv.support import log_binary, hap_tlv8
+from pyatv.mrp import chacha20
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -122,12 +122,12 @@ class SRPAuthHandler:
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        decrypted_tlv = tlv8.read_tlv(
+        decrypted_tlv = hap_tlv8.read_tlv(
             chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
         )
 
-        identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
-        signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
+        identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
+        signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
 
         if identifier != credentials.atv_id:
             raise exceptions.AuthenticationError("incorrect device response")
@@ -146,10 +146,10 @@ class SRPAuthHandler:
             device_info
         )
 
-        tlv = tlv8.write_tlv(
+        tlv = hap_tlv8.write_tlv(
             {
-                tlv8.TLV_IDENTIFIER: credentials.client_id,
-                tlv8.TLV_SIGNATURE: device_signature,
+                hap_tlv8.TLV_IDENTIFIER: credentials.client_id,
+                hap_tlv8.TLV_SIGNATURE: device_signature,
             }
         )
 
@@ -215,11 +215,11 @@ class SRPAuthHandler:
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
-        tlv = tlv8.write_tlv(
+        tlv = hap_tlv8.write_tlv(
             {
-                tlv8.TLV_IDENTIFIER: self.pairing_id,
-                tlv8.TLV_PUBLIC_KEY: self._auth_public,
-                tlv8.TLV_SIGNATURE: device_signature,
+                hap_tlv8.TLV_IDENTIFIER: self.pairing_id,
+                hap_tlv8.TLV_PUBLIC_KEY: self._auth_public,
+                hap_tlv8.TLV_SIGNATURE: device_signature,
             }
         )
 
@@ -236,12 +236,12 @@ class SRPAuthHandler:
         if not decrypted_tlv_bytes:
             raise exceptions.AuthenticationError("data decrypt failed")
 
-        decrypted_tlv = tlv8.read_tlv(decrypted_tlv_bytes)
+        decrypted_tlv = hap_tlv8.read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
-        atv_identifier = decrypted_tlv[tlv8.TLV_IDENTIFIER]
-        atv_signature = decrypted_tlv[tlv8.TLV_SIGNATURE]
-        atv_pub_key = decrypted_tlv[tlv8.TLV_PUBLIC_KEY]
+        atv_identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
+        atv_signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
+        atv_pub_key = decrypted_tlv[hap_tlv8.TLV_PUBLIC_KEY]
         log_binary(
             _LOGGER,
             "Device",
