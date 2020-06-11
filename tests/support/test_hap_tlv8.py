@@ -1,7 +1,5 @@
 """Unit tests for pyatv.support.hap_tlv8."""
 
-import unittest
-
 from collections import OrderedDict
 from pyatv.support.hap_tlv8 import read_tlv, write_tlv
 
@@ -17,23 +15,27 @@ LARGE_KEY_IN = {"2": b"\x31" * 256}
 LARGE_KEY_OUT = b"\x02\xff" + b"\x31" * 255 + b"\x02\x01\x31"
 
 
-class Tlv8Test(unittest.TestCase):
-    def test_write_single_key(self):
-        self.assertEqual(write_tlv(SINGLE_KEY_IN), SINGLE_KEY_OUT)
+def test_write_single_key():
+    assert write_tlv(SINGLE_KEY_IN) == SINGLE_KEY_OUT
 
-    def test_write_two_keys(self):
-        self.assertEqual(write_tlv(DOUBLE_KEY_IN), DOUBLE_KEY_OUT)
 
-    def test_write_key_larger_than_255_bytes(self):
-        # This will actually result in two serialized TLVs, one being 255 bytes
-        # and the next one will contain the remaining one byte
-        self.assertEqual(write_tlv(LARGE_KEY_IN), LARGE_KEY_OUT)
+def test_write_two_keys():
+    assert write_tlv(DOUBLE_KEY_IN) == DOUBLE_KEY_OUT
 
-    def test_read_single_key(self):
-        self.assertEqual(read_tlv(SINGLE_KEY_OUT), SINGLE_KEY_IN)
 
-    def test_read_two_keys(self):
-        self.assertEqual(read_tlv(DOUBLE_KEY_OUT), DOUBLE_KEY_IN)
+def test_write_key_larger_than_255_bytes():
+    # This will actually result in two serialized TLVs, one being 255 bytes
+    # and the next one will contain the remaining one byte
+    assert write_tlv(LARGE_KEY_IN) == LARGE_KEY_OUT
 
-    def test_read_key_larger_than_255_bytes(self):
-        self.assertEqual(read_tlv(LARGE_KEY_OUT), LARGE_KEY_IN)
+
+def test_read_single_key():
+    assert read_tlv(SINGLE_KEY_OUT) == SINGLE_KEY_IN
+
+
+def test_read_two_keys():
+    assert read_tlv(DOUBLE_KEY_OUT) == DOUBLE_KEY_IN
+
+
+def test_read_key_larger_than_255_bytes():
+    assert read_tlv(LARGE_KEY_OUT) == LARGE_KEY_IN
