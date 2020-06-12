@@ -3,11 +3,13 @@
 import asyncio
 import logging
 
+from pyatv import exceptions
 from pyatv.interface import StateProducer
 from pyatv.mrp import chacha20
 from pyatv.mrp import protobuf
 from pyatv.mrp.variant import read_variant, write_variant
 from pyatv.support import log_binary, log_protobuf
+from pyatv.support.net import tcp_keepalive
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,9 +34,14 @@ class MrpConnection(
         """Device connection was made."""
         _LOGGER.debug("Connection made to device")
         self._transport = transport
-        extra_info = transport.get_extra_info("socket")
-        dstaddr, dstport = extra_info.getpeername()
-        srcaddr, srcport = extra_info.getsockname()
+        sock = transport.get_extra_info("socket")
+        try:
+            tcp_keepalive(sock)
+        except exceptions.NotSupportedError as ex:
+            _LOGGER.warning("Keep-alive not supported: %s", str(ex))
+
+        dstaddr, dstport = sock.getpeername()
+        srcaddr, srcport = sock.getsockname()
         self._log_str = f"{srcaddr}:{srcport}<->{dstaddr}:{dstport} "
         _LOGGER.debug(self._log_str + "Connection established")
 
