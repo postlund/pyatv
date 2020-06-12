@@ -4,19 +4,16 @@ import logging
 
 from pyatv import exceptions
 from pyatv.mrp import messages
-from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
 from pyatv.support import log_binary
-from pyatv.support.hap_tlv8 import TlvValue, read_tlv
+from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def _get_pairing_data(resp):
-    pairing_message = CryptoPairingMessage.cryptoPairingMessage
-    tlv = read_tlv(resp.Extensions[pairing_message].pairingData)
+    tlv = read_tlv(resp.inner().pairingData)
     if TlvValue.Error in tlv:
-        error = int.from_bytes(tlv[TlvValue.Error], byteorder="little")
-        raise exceptions.AuthenticationError("got error: " + str(error))
+        raise exceptions.AuthenticationError(stringify(tlv))
     return tlv
 
 
@@ -42,13 +39,6 @@ class MrpPairingProcedure:
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
-
-        if TlvValue.BackOff in pairing_data:
-            time = int.from_bytes(pairing_data[TlvValue.BACK_OFF], byteorder="little")
-            raise exceptions.BackOffError(
-                "please wait {0}s before trying again".format(time)
-            )
-
         self._atv_salt = pairing_data[TlvValue.Salt]
         self._atv_pub_key = pairing_data[TlvValue.PublicKey]
 
