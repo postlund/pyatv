@@ -1,7 +1,15 @@
 """Unit tests for pyatv.support.hap_tlv8."""
 
 from collections import OrderedDict
-from pyatv.support.hap_tlv8 import read_tlv, write_tlv
+from pyatv.support.hap_tlv8 import (
+    TlvValue,
+    ErrorCode,
+    Method,
+    State,
+    read_tlv,
+    write_tlv,
+    stringify,
+)
 
 SINGLE_KEY_IN = {10: b"123"}
 SINGLE_KEY_OUT = b"\x0a\x03\x31\x32\x33"
@@ -39,3 +47,72 @@ def test_read_two_keys():
 
 def test_read_key_larger_than_255_bytes():
     assert read_tlv(LARGE_KEY_OUT) == LARGE_KEY_IN
+
+
+def test_stringify_method():
+    assert stringify({TlvValue.Method: b"\x00"}) == "Method=PairSetup"
+    assert stringify({TlvValue.Method: b"\x02"}) == "Method=PairVerify"
+
+
+def test_stringify_seqno():
+    assert stringify({TlvValue.SeqNo: b"\x01"}) == "SeqNo=M1"
+    assert stringify({TlvValue.SeqNo: b"\x02"}) == "SeqNo=M2"
+    assert stringify({TlvValue.SeqNo: b"\x03"}) == "SeqNo=M3"
+    assert stringify({TlvValue.SeqNo: b"\x04"}) == "SeqNo=M4"
+    assert stringify({TlvValue.SeqNo: b"\x05"}) == "SeqNo=M5"
+    assert stringify({TlvValue.SeqNo: b"\x06"}) == "SeqNo=M6"
+
+
+def test_stringify_error():
+    assert stringify({TlvValue.Error: b"\x02"}) == "Error=Authentication"
+    assert stringify({TlvValue.Error: b"\x05"}) == "Error=MaxTries"
+
+
+def test_stringify_backoff():
+    assert stringify({TlvValue.BackOff: b"\x02\x00"}) == "BackOff=2s"
+
+
+def test_stringify_remainging_short():
+    values = [
+        TlvValue.Identifier,
+        TlvValue.Salt,
+        TlvValue.PublicKey,
+        TlvValue.Proof,
+        TlvValue.EncryptedData,
+        TlvValue.Certificate,
+        TlvValue.Signature,
+        TlvValue.Permissions,
+        TlvValue.FragmentData,
+        TlvValue.FragmentLast,
+    ]
+
+    for value in values:
+        assert stringify({value: b"\x00\x01\x02\x03"}) == f"{value.name}=4bytes"
+
+
+def test_stringify_multiple():
+    assert (
+        stringify(
+            {
+                TlvValue.Method: b"\x00",
+                TlvValue.SeqNo: b"\x01",
+                TlvValue.Error: b"\x03",
+                TlvValue.BackOff: b"\x01\x00",
+            }
+        )
+        == "Method=PairSetup, SeqNo=M1, Error=BackOff, BackOff=1s"
+    )
+
+
+def test_stringify_unknown_values():
+    assert (
+        stringify(
+            {
+                TlvValue.Method: b"\xAA",
+                TlvValue.SeqNo: b"\xAB",
+                TlvValue.Error: b"\xAC",
+                0xAD: b"\x01\x02\x03",
+            }
+        )
+        == "Method=0xaa, SeqNo=0xab, Error=0xac, 0xad=3bytes"
+    )
