@@ -3,19 +3,17 @@
 import logging
 
 from pyatv import exceptions
+from pyatv.mrp import messages
 from pyatv.support import log_binary
-from pyatv.mrp import tlv8, messages
-from pyatv.mrp.protobuf import CryptoPairingMessage_pb2 as CryptoPairingMessage
+from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def _get_pairing_data(resp):
-    pairing_message = CryptoPairingMessage.cryptoPairingMessage
-    tlv = tlv8.read_tlv(resp.Extensions[pairing_message].pairingData)
-    if tlv8.TLV_ERROR in tlv:
-        error = int.from_bytes(tlv[tlv8.TLV_ERROR], byteorder="little")
-        raise exceptions.AuthenticationError("got error: " + str(error))
+    tlv = read_tlv(resp.inner().pairingData)
+    if TlvValue.Error in tlv:
+        raise exceptions.AuthenticationError(stringify(tlv))
     return tlv
 
 
@@ -36,20 +34,13 @@ class MrpPairingProcedure:
         await self.protocol.start(skip_initial_messages=True)
 
         msg = messages.crypto_pairing(
-            {tlv8.TLV_METHOD: b"\x00", tlv8.TLV_SEQ_NO: b"\x01"}, is_pairing=True
+            {TlvValue.Method: b"\x00", TlvValue.SeqNo: b"\x01"}, is_pairing=True,
         )
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
-
-        if tlv8.TLV_BACK_OFF in pairing_data:
-            time = int.from_bytes(pairing_data[tlv8.TLV_BACK_OFF], byteorder="little")
-            raise exceptions.BackOffError(
-                "please wait {0}s before trying again".format(time)
-            )
-
-        self._atv_salt = pairing_data[tlv8.TLV_SALT]
-        self._atv_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
+        self._atv_salt = pairing_data[TlvValue.Salt]
+        self._atv_pub_key = pairing_data[TlvValue.PublicKey]
 
     async def finish_pairing(self, pin):
         """Finish pairing process."""
@@ -59,25 +50,25 @@ class MrpPairingProcedure:
 
         msg = messages.crypto_pairing(
             {
-                tlv8.TLV_SEQ_NO: b"\x03",
-                tlv8.TLV_PUBLIC_KEY: pub_key,
-                tlv8.TLV_PROOF: proof,
+                TlvValue.SeqNo: b"\x03",
+                TlvValue.PublicKey: pub_key,
+                TlvValue.Proof: proof,
             }
         )
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
-        atv_proof = pairing_data[tlv8.TLV_PROOF]
+        atv_proof = pairing_data[TlvValue.Proof]
         log_binary(_LOGGER, "Device", Proof=atv_proof)
 
         encrypted_data = self.srp.step3()
         msg = messages.crypto_pairing(
-            {tlv8.TLV_SEQ_NO: b"\x05", tlv8.TLV_ENCRYPTED_DATA: encrypted_data}
+            {TlvValue.SeqNo: b"\x05", TlvValue.EncryptedData: encrypted_data}
         )
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
         pairing_data = _get_pairing_data(resp)
-        encrypted_data = pairing_data[tlv8.TLV_ENCRYPTED_DATA]
+        encrypted_data = pairing_data[TlvValue.EncryptedData]
 
         return self.srp.step4(encrypted_data)
 
@@ -98,18 +89,18 @@ class MrpPairingVerifier:
         _, public_key = self.srp.initialize()
 
         msg = messages.crypto_pairing(
-            {tlv8.TLV_SEQ_NO: b"\x01", tlv8.TLV_PUBLIC_KEY: public_key}
+            {TlvValue.SeqNo: b"\x01", TlvValue.PublicKey: public_key}
         )
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
         resp = _get_pairing_data(resp)
-        session_pub_key = resp[tlv8.TLV_PUBLIC_KEY]
-        encrypted = resp[tlv8.TLV_ENCRYPTED_DATA]
+        session_pub_key = resp[TlvValue.PublicKey]
+        encrypted = resp[TlvValue.EncryptedData]
         log_binary(_LOGGER, "Device", Public=self.credentials.ltpk, Encrypted=encrypted)
 
         encrypted_data = self.srp.verify1(self.credentials, session_pub_key, encrypted)
         msg = messages.crypto_pairing(
-            {tlv8.TLV_SEQ_NO: b"\x03", tlv8.TLV_ENCRYPTED_DATA: encrypted_data}
+            {TlvValue.SeqNo: b"\x03", TlvValue.EncryptedData: encrypted_data}
         )
         await self.protocol.send_and_receive(msg, generate_identifier=False)
 

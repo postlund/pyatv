@@ -13,10 +13,10 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PublicKey,
 )
 
-from pyatv.mrp import chacha20, messages, protobuf, tlv8
+from pyatv.mrp import chacha20, messages, protobuf
 from pyatv.mrp.srp import hkdf_expand
 from pyatv.support import log_binary
-
+from pyatv.support.hap_tlv8 import TlvValue, ErrorCode, read_tlv, write_tlv
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -125,14 +125,14 @@ class MrpServerAuth:
     def handle_crypto_pairing(self, message, inner):
         """Handle incoming crypto pairing message."""
         _LOGGER.debug("Received crypto pairing message")
-        pairing_data = tlv8.read_tlv(inner.pairingData)
-        seqno = pairing_data[tlv8.TLV_SEQ_NO][0]
+        pairing_data = read_tlv(inner.pairingData)
+        seqno = pairing_data[TlvValue.SeqNo][0]
 
         # Work-around for now to support "tries" to auth before pairing
         if seqno == 1:
-            if tlv8.TLV_PUBLIC_KEY in pairing_data:
+            if TlvValue.PublicKey in pairing_data:
                 self.has_paired = True
-            elif tlv8.TLV_METHOD in pairing_data:
+            elif TlvValue.Method in pairing_data:
                 self.has_paired = False
 
         suffix = "paired" if self.has_paired else "pairing"
@@ -143,7 +143,7 @@ class MrpServerAuth:
         server_pub_key = self.keys.verify_pub.public_bytes(
             encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
         )
-        client_pub_key = pairing_data[tlv8.TLV_PUBLIC_KEY]
+        client_pub_key = pairing_data[TlvValue.PublicKey]
 
         shared_key = self.keys.verify.exchange(
             X25519PublicKey.from_public_bytes(client_pub_key)
@@ -156,8 +156,8 @@ class MrpServerAuth:
         info = server_pub_key + self.unique_id + client_pub_key
         signature = self.keys.sign.sign(info)
 
-        tlv = tlv8.write_tlv(
-            {tlv8.TLV_IDENTIFIER: self.unique_id, tlv8.TLV_SIGNATURE: signature}
+        tlv = write_tlv(
+            {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
@@ -165,9 +165,9 @@ class MrpServerAuth:
 
         msg = messages.crypto_pairing(
             {
-                tlv8.TLV_SEQ_NO: b"\x02",
-                tlv8.TLV_PUBLIC_KEY: server_pub_key,
-                tlv8.TLV_ENCRYPTED_DATA: encrypted,
+                TlvValue.SeqNo: b"\x02",
+                TlvValue.PublicKey: server_pub_key,
+                TlvValue.EncryptedData: encrypted,
             }
         )
 
@@ -185,33 +185,33 @@ class MrpServerAuth:
     def _seqno1_pairing(self, pairing_data):
         msg = messages.crypto_pairing(
             {
-                tlv8.TLV_SALT: binascii.unhexlify(self.salt),
-                tlv8.TLV_PUBLIC_KEY: binascii.unhexlify(self.session.public),
-                tlv8.TLV_SEQ_NO: b"\x02",
+                TlvValue.Salt: binascii.unhexlify(self.salt),
+                TlvValue.PublicKey: binascii.unhexlify(self.session.public),
+                TlvValue.SeqNo: b"\x02",
             }
         )
 
         self.delegate.send(msg)
 
     def _seqno3_paired(self, pairing_data):
-        self.delegate.send(messages.crypto_pairing({tlv8.TLV_SEQ_NO: b"\x04"}))
+        self.delegate.send(messages.crypto_pairing({TlvValue.SeqNo: b"\x04"}))
         self.delegate.enable_encryption(self.input_key, self.output_key)
 
     def _seqno3_pairing(self, pairing_data):
-        pubkey = binascii.hexlify(pairing_data[tlv8.TLV_PUBLIC_KEY]).decode()
+        pubkey = binascii.hexlify(pairing_data[TlvValue.PublicKey]).decode()
         self.session.process(pubkey, self.salt)
 
         proof = binascii.unhexlify(self.session.key_proof_hash)
-        if self.session.verify_proof(binascii.hexlify(pairing_data[tlv8.TLV_PROOF])):
+        if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
 
             msg = messages.crypto_pairing(
-                {tlv8.TLV_PROOF: proof, tlv8.TLV_SEQ_NO: b"\x04"}
+                {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
             )
         else:
             msg = messages.crypto_pairing(
                 {
-                    tlv8.TLV_ERROR: tlv8.ERROR_AUTHENTICATION.encode(),
-                    tlv8.TLV_SEQ_NO: b"\x04",
+                    TlvValue.Error: bytes([ErrorCode.Authentication]),
+                    TlvValue.SeqNo: b"\x04",
                 }
             )
 
@@ -233,11 +233,11 @@ class MrpServerAuth:
         device_info = acc_device_x + self.unique_id + self.keys.auth_pub
         signature = self.keys.sign.sign(device_info)
 
-        tlv = tlv8.write_tlv(
+        tlv = write_tlv(
             {
-                tlv8.TLV_IDENTIFIER: self.unique_id,
-                tlv8.TLV_PUBLIC_KEY: self.keys.auth_pub,
-                tlv8.TLV_SIGNATURE: signature,
+                TlvValue.Identifier: self.unique_id,
+                TlvValue.PublicKey: self.keys.auth_pub,
+                TlvValue.Signature: signature,
             }
         )
 
@@ -245,7 +245,7 @@ class MrpServerAuth:
         encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
 
         msg = messages.crypto_pairing(
-            {tlv8.TLV_SEQ_NO: b"\x06", tlv8.TLV_ENCRYPTED_DATA: encrypted}
+            {TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted}
         )
         self.has_paired = True
 

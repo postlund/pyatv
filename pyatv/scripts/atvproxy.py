@@ -1,49 +1,11 @@
 #!/usr/bin/env python3
-#
-# This is a hack to sort-of intercept traffic between an Apple TV and the iOS
-# app. It will establish a connection to the ATV-of-interest (using code from
-# pyatv to do so), publish a fake device called "ATVProxy" that can be paired
-# with the app and forward messages between the two devices. Two sets of
-# encryption keys are used: one set between ATV and this proxy and a second set
-# between this proxy and the app. So all messages are "re-encrypted".
-#
-# What you need is:
-#
-# * Credentials to device of interest (atvremote -a --id <device> pair)
-# * IP-address and port to the Apple TV of interest
-# * IP-address of an interface that is on the same network as the Apple TV
-#
-# Then you just call this script like:
-#
-#   python ./scripts/proxy.py `cat credentials` 10.0.0.20 10.0.10.30 49152
-#
-# Argument order: <credentials> <local ip> <atv ip> <atv port>
-#
-# It shoulfd be possible to pair with your phone using pin "1111". When the
-# proxy receives a connection, it will start by connecting to the Apple TV and
-# then continue with setting up encryption and relaying messages. The same
-# static key pair is hardcoded, so it is possible to reconnect again layer
-# without having to re-pair.
-#
-# Please note that this script is perhaps not a 100% accurate MITM of all
-# traffic. It takes shortcuts and doesn't imitate everything correctly, so some
-# traffic might be missed.
-#
-# Some suggestions for improvements:
-#
-# * Use pyatv to discover device (based on device id) to not have to enter all
-#   details on command line
-# * Base proxy device name on real device (e.g. Bedroom -> Bedroom Proxy)
-# * Re-work logging to make it more clear what is what
-#
-# Help to improve the proxy is greatly appreciated! I will only make
-# improvements in case I personally see any benefits of doing so.
 """Simple proxy server to intercept traffic."""
 
 import sys
 import asyncio
 import logging
 import argparse
+from ipaddress import IPv4Address
 
 from aiozeroconf import Zeroconf
 
@@ -54,12 +16,22 @@ from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
 from pyatv.scripts import publish_service
-from pyatv.support import log_binary
+from pyatv.support import log_binary, net, udns
 
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Proxy"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
+
+
+def _get_property(response, qtype, prop):
+    for resource in response.resources:
+        if resource.qtype != qtype:
+            continue
+
+        return resource.rd.get(prop)
+
+    raise Exception(f"missing qtype {qtype}")
 
 
 class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
@@ -214,21 +186,21 @@ class RelayConnection(asyncio.Protocol):
         self.connection.transport.write(data)
 
 
-async def publish_mrp_service(zconf, address, port):
+async def publish_mrp_service(zconf, address, port, name):
     """Publish zeroconf service for ATV proxy instance."""
     props = {
         b"ModelName": "Apple TV",
         b"AllowPairing": b"YES",
         b"macAddress": b"40:cb:c0:12:34:56",
         b"BluetoothAddress": False,
-        b"Name": DEVICE_NAME.encode(),
+        b"Name": name.encode(),
         b"UniqueIdentifier": SERVER_IDENTIFIER.encode(),
         b"SystemBuildVersion": b"17K499",
         b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
     }
 
     return await publish_service(
-        zconf, "_mediaremotetv._tcp.local.", DEVICE_NAME, address, port, props
+        zconf, "_mediaremotetv._tcp.local.", name, address, port, props
     )
 
 
@@ -244,12 +216,29 @@ async def _start_mrp_proxy(loop, args, zconf):
             _LOGGER.exception("failed to start proxy")
         return proxy
 
+    if args.local_ip is None:
+        args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
+
+    _LOGGER.debug("Binding to local address %s", args.local_ip)
+
+    if not (args.remote_port or args.name):
+        resp = await udns.request(loop, args.remote_ip, ["_mediaremotetv._tcp.local"])
+        if not args.remote_port:
+            args.remote_port = _get_property(resp, udns.QTYPE_SRV, "port")
+        if not args.name:
+            args.name = (
+                _get_property(resp, udns.QTYPE_TXT, b"Name").decode("utf-8") + " Proxy"
+            )
+
+    if not args.name:
+        args.name = DEVICE_NAME
+
     # Setup server used to publish a fake MRP server
     server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started MRP server at port %d", port)
 
-    service = await publish_mrp_service(zconf, args.local_ip, port)
+    service = await publish_mrp_service(zconf, args.local_ip, port, args.name)
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
@@ -286,9 +275,10 @@ async def appstart(loop):
 
     mrp = subparsers.add_parser("mrp", help="MRP proxy")
     mrp.add_argument("credentials", help="MRP credentials")
-    mrp.add_argument("local_ip", help="local IP address")
     mrp.add_argument("remote_ip", help="Apple TV IP address")
-    mrp.add_argument("remote_port", help="MRP port")
+    mrp.add_argument("--name", default=None, help="proxy device name")
+    mrp.add_argument("--local-ip", default=None, help="local IP address")
+    mrp.add_argument("--remote_port", default=None, help="MRP port")
 
     relay = subparsers.add_parser("relay", help="Relay traffic to host")
     relay.add_argument("local_ip", help="local IP address")
