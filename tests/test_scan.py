@@ -1,4 +1,4 @@
-"""Functional tests using the API with a fake Apple TV."""
+"""Scanning tests with fake mDNS responder.."""
 
 import pyatv
 from ipaddress import ip_address
@@ -8,38 +8,19 @@ from unittest.mock import patch
 import pytest
 
 from pyatv.const import Protocol
-from tests import fake_udns, zeroconf_stub
+from tests import fake_udns
 
 
 IP_1 = "10.0.0.1"
 IP_2 = "10.0.0.2"
 IP_3 = "10.0.0.3"
-IP_4 = "10.0.0.4"
-IP_5 = "10.0.0.5"
-IP_6 = "10.0.0.6"
 IP_LOCALHOST = "127.0.0.1"
 
 HSGID = "hsgid"
 
 MRP_ID_1 = "mrp_id_1"
-MRP_ID_2 = "mrp_id_2"
 
 AIRPLAY_ID = "AA:BB:CC:DD:EE:FF"
-
-HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
-    "AAAA", b"Apple TV 1", IP_1, b"aaaa"
-)
-HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
-    "BBBB", b"Apple TV 2", IP_2, b"bbbb"
-)
-HOMESHARING_SERVICE_3 = zeroconf_stub.homesharing_service(
-    "CCCC", b"Apple TV\xC2\xA03", IP_3, b"cccc"
-)
-DEVICE_SERVICE_1 = zeroconf_stub.device_service("CCCC", b"Apple TV\xC2\xA03", IP_3)
-MRP_SERVICE_1 = zeroconf_stub.mrp_service("DDDD", b"Apple TV\x00\xA04", IP_4, MRP_ID_1)
-MRP_SERVICE_2 = zeroconf_stub.mrp_service("EEEE", b"Apple TV 5", IP_5, MRP_ID_2)
-AIRPLAY_SERVICE_1 = zeroconf_stub.airplay_service("Apple TV 6", IP_6, AIRPLAY_ID)
-AIRPLAY_SERVICE_2 = zeroconf_stub.airplay_service("Apple TV 4", IP_4, AIRPLAY_ID)
 
 DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
 
@@ -71,7 +52,18 @@ async def udns_server(event_loop, stub_knock_server):
 
 
 @pytest.fixture
-async def udns_scan(event_loop, udns_server):
+async def multicast_scan(event_loop, udns_server):
+    async def _scan(timeout=1, identifier=None, protocol=None):
+        with fake_udns.stub_multicast(udns_server, event_loop):
+            return await pyatv.scan(
+                event_loop, identifier=identifier, protocol=protocol, timeout=timeout
+            )
+
+    yield _scan
+
+
+@pytest.fixture
+async def unicast_scan(event_loop, udns_server):
     async def _scan(timeout=1):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
@@ -81,110 +73,126 @@ async def udns_scan(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_no_device_found(event_loop):
-    zeroconf_stub.stub(pyatv)
-
-    atvs = await pyatv.scan(event_loop, timeout=0)
+async def test_multicast_scan_no_device_found(multicast_scan):
+    atvs = await multicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan(event_loop):
-    zeroconf_stub.stub(
-        pyatv,
-        HOMESHARING_SERVICE_1,
-        HOMESHARING_SERVICE_2,
-        MRP_SERVICE_1,
-        AIRPLAY_SERVICE_1,
+async def test_multicast_scan(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.homesharing_service("abcd", "Apple TV HS 2", HSGID, address=IP_2)
+    )
+    udns_server.add_service(
+        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
     )
 
-    atvs = await pyatv.scan(event_loop, timeout=0)
+    atvs = await multicast_scan()
     assert len(atvs) == 3
 
     # First device
     dev1 = _get_atv(atvs, IP_1)
     assert dev1
-    assert dev1.identifier == "AAAA"
+    assert dev1.identifier == MRP_ID_1
 
     # Second device
     dev2 = _get_atv(atvs, IP_2)
     assert dev2
-    assert dev2.identifier == "BBBB"
+    assert dev2.identifier == "abcd"
 
     # Third device
-    dev3 = _get_atv(atvs, IP_4)
+    dev3 = _get_atv(atvs, IP_3)
     assert dev3
-    assert dev3.identifier == MRP_ID_1
+    assert dev3.identifier == "efgh"
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_no_home_sharing(event_loop):
-    zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1)
+async def test_multicast_scan_no_home_sharing(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0)
+    atvs = await multicast_scan()
     assert len(atvs) == 1
-    assert atvs[0].name == "Apple TV 3"
-    assert atvs[0].address == ip_address(IP_3)
 
-    atv = atvs[0]
-    assert atv.get_service(Protocol.DMAP).port == 3689
+    assert_device(
+        atvs[0], "Apple TV Device", ip_address(IP_3), "efgh", Protocol.DMAP, 3689
+    )
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_home_sharing_merge(event_loop):
-    zeroconf_stub.stub(pyatv, DEVICE_SERVICE_1, HOMESHARING_SERVICE_3)
+async def test_multicast_scan_home_sharing_merge(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+    )
+    udns_server.add_service(
+        fake_udns.homesharing_service("efgh", "Apple TV Device", HSGID, address=IP_3)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0)
+    atvs = await multicast_scan()
     assert len(atvs) == 1
-    assert atvs[0].name == "Apple TV 3"
-    assert atvs[0].address == ip_address("10.0.0.3")
 
-    service = atvs[0].main_service()
-    assert service.credentials == "cccc"
-    assert service.port == 3689
+    assert_device(
+        atvs[0], "Apple TV Device", ip_address(IP_3), "efgh", Protocol.DMAP, 3689, HSGID
+    )
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_mrp(event_loop):
-    zeroconf_stub.stub(pyatv, MRP_SERVICE_1, MRP_SERVICE_2, DEVICE_SERVICE_1)
+async def test_multicast_scan_mrp(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0, protocol=Protocol.MRP)
-    assert len(atvs) == 2
+    atvs = await multicast_scan(protocol=Protocol.MRP)
+    assert len(atvs) == 1
 
-    dev1 = _get_atv(atvs, IP_4)
+    dev1 = _get_atv(atvs, IP_1)
     assert dev1
-    assert dev1.name == "Apple TV 4"
+    assert dev1.name == "Apple TV MRP 1"
     assert dev1.get_service(Protocol.MRP)
 
-    dev2 = _get_atv(atvs, IP_5)
-    assert dev2
-    assert dev2.name == "Apple TV 5"
-    assert dev2.get_service(Protocol.MRP)
-
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_airplay_device(event_loop):
-    zeroconf_stub.stub(pyatv, AIRPLAY_SERVICE_1)
+async def test_multicast_scan_airplay_device(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0)
+    atvs = await multicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_for_particular_device(event_loop):
-    zeroconf_stub.stub(pyatv, HOMESHARING_SERVICE_1, HOMESHARING_SERVICE_2)
+async def test_multicast_scan_for_particular_device(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.homesharing_service("efgh", "Apple TV Device", HSGID, address=IP_3)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0, identifier="BBBB")
+    atvs = await multicast_scan(identifier="efgh")
     assert len(atvs) == 1
-    assert atvs[0].name == "Apple TV 2"
-    assert atvs[0].address == ip_address(IP_2)
+    assert atvs[0].name == "Apple TV Device"
+    assert atvs[0].address == ip_address(IP_3)
 
 
 @pytest.mark.asyncio
-async def test_zeroconf_scan_device_info(event_loop):
-    zeroconf_stub.stub(pyatv, MRP_SERVICE_1, AIRPLAY_SERVICE_2)
+async def test_multicast_scan_device_info(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+    )
 
-    atvs = await pyatv.scan(event_loop, timeout=0, protocol=Protocol.MRP)
+    atvs = await multicast_scan(protocol=Protocol.MRP)
     assert len(atvs) == 1
 
     device_info = atvs[0].device_info
@@ -192,32 +200,32 @@ async def test_zeroconf_scan_device_info(event_loop):
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_no_results(udns_scan):
-    atvs = await udns_scan()
+async def test_unicast_scan_no_results(unicast_scan):
+    atvs = await unicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_udns_missing_port(udns_server, udns_scan):
+async def test_unicast_missing_port(udns_server, unicast_scan):
     udns_server.add_service(fake_udns.mrp_service("dummy", "dummy", "dummy", port=None))
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_udns_missing_properties(udns_server, udns_scan):
-    udns_server.add_service(fake_udns.FakeDnsService("dummy", 1234, None))
+async def test_unicast_missing_properties(udns_server, unicast_scan):
+    udns_server.add_service(fake_udns.FakeDnsService("dummy", IP_1, 1234, None))
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_mrp(udns_server, udns_scan):
+async def test_unicast_scan_mrp(udns_server, unicast_scan):
     udns_server.add_service(fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1))
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 1
 
     assert_device(
@@ -226,18 +234,22 @@ async def test_udns_scan_mrp(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_airplay(udns_server, udns_scan):
-    udns_server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+async def test_unicast_scan_airplay(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+    )
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_homesharing(udns_server, udns_scan):
-    udns_server.add_service(fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID))
+async def test_unicast_scan_homesharing(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID, address=IP_3)
+    )
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 1
 
     assert_device(
@@ -252,10 +264,12 @@ async def test_udns_scan_homesharing(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_no_homesharing(udns_server, udns_scan):
-    udns_server.add_service(fake_udns.device_service("Apple TV", "Apple TV Device"))
+async def test_unicast_scan_no_homesharing(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.device_service("Apple TV", "Apple TV Device", address=IP_2)
+    )
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 1
 
     assert_device(
@@ -269,11 +283,15 @@ async def test_udns_scan_no_homesharing(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_device_info(udns_server, udns_scan):
-    udns_server.add_service(fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1))
-    udns_server.add_service(fake_udns.airplay_service("Apple TV", AIRPLAY_ID))
+async def test_unicast_scan_device_info(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, address=IP_1)
+    )
+    udns_server.add_service(
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+    )
 
-    atvs = await udns_scan()
+    atvs = await unicast_scan()
     assert len(atvs) == 1
 
     device_info = atvs[0].device_info
@@ -281,7 +299,7 @@ async def test_udns_scan_device_info(udns_server, udns_scan):
 
 
 @pytest.mark.asyncio
-async def test_udns_scan_port_knock(udns_scan, stub_knock_server):
-    await udns_scan()
+async def test_unicast_scan_port_knock(unicast_scan, stub_knock_server):
+    await unicast_scan()
     assert stub_knock_server.ports == DEFAULT_KNOCK_PORTS
     assert stub_knock_server.knock_count == 1

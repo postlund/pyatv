@@ -5,12 +5,10 @@ import asyncio
 import logging
 import datetime  # noqa
 from abc import ABC, abstractmethod
-from ipaddress import IPv4Address, ip_address
+from ipaddress import IPv4Address
 from typing import List, Dict
 
 import aiohttp
-from aiozeroconf import ServiceBrowser, Zeroconf
-import netifaces
 
 from pyatv import conf, exceptions, interface
 from pyatv.airplay import AirPlayStreamAPI
@@ -131,63 +129,45 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         atv.add_service(service)
 
 
-class ZeroconfScanner(BaseScanner):
-    """Service discovery based on Zeroconf."""
+class BaseMdnsScanner(BaseScanner):
+    """Base scanner for MDNS service discovery."""
 
-    def __init__(self, loop):
-        """Initialize a new ZeroconfScanner."""
-        super().__init__()
-        self.loop = loop
-        self.pending = set()
+    def handle_response(self, host: IPv4Address, response: udns.DnsMessage):
+        """Handle received DNS message."""
+        for resource in response.answers + response.resources:
+            if resource.qtype != udns.QTYPE_TXT:
+                continue
 
-    async def discover(self, timeout):
-        """Start discovery of devices and services."""
-        zeroconf = Zeroconf(self.loop, address_family=[netifaces.AF_INET])
-        browsers = []
-        try:
-            browsers += [
-                ServiceBrowser(zeroconf, HOMESHARING_SERVICE, self),
-                ServiceBrowser(zeroconf, DEVICE_SERVICE, self),
-                ServiceBrowser(zeroconf, MEDIAREMOTE_SERVICE, self),
-                ServiceBrowser(zeroconf, AIRPLAY_SERVICE, self),
-            ]
-            _LOGGER.debug("Discovering devices for %d seconds", timeout)
-            await asyncio.sleep(timeout)
+            service_name = ".".join(resource.qname.split(".")[1:]) + "."
+            if service_name not in ALL_SERVICES:
+                continue
 
-            if self.pending:
-                await asyncio.wait(self.pending)
-        finally:
-            for browser in browsers:
-                browser.cancel()
-            await zeroconf.close()
-        return self._found_devices
+            port = BaseMdnsScanner._get_port(response, resource.qname)
+            if not port:
+                _LOGGER.warning("Missing port for %s", resource.qname)
+                continue
 
-    def add_service(self, zeroconf, service_type, name):
-        """Handle callback from zeroconf when a service has been discovered."""
-        self.pending.add(
-            asyncio.ensure_future(self._internal_add(zeroconf, service_type, name))
-        )
+            self.service_discovered(
+                service_name,
+                resource.qname + ".",
+                host,
+                port,
+                _decode_properties(resource.rd),
+            )
 
-    def remove_service(self, zeroconf, service_type, name):
-        """Handle callback when a service is removed."""
+    @staticmethod
+    def _get_port(response, qname):
+        for resource in response.answers + response.resources:
+            if resource.qtype != udns.QTYPE_SRV:
+                continue
 
-    async def _internal_add(self, zeroconf, service_type, name):
-        info = await zeroconf.get_service_info(service_type, name, timeout=2000)
-        if info.address is None:
-            _LOGGER.debug("Failed to resolve %s (%s)", service_type, name)
-            return
+            if resource.qname == qname:
+                return resource.rd.get("port")
 
-        address = ip_address(info.address)
-        self.service_discovered(
-            info.type,
-            info.name,
-            address,
-            info.port,
-            _decode_properties(info.properties),
-        )
+        return None
 
 
-class UnicastMdnsScanner(BaseScanner):
+class UnicastMdnsScanner(BaseMdnsScanner):
     """Service discovery based on unicast MDNS."""
 
     def __init__(self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop):
@@ -203,7 +183,7 @@ class UnicastMdnsScanner(BaseScanner):
         )
         for host, response in results:
             if response is not None:
-                self._handle_response(host, response)
+                self.handle_response(host, response)
         return self._found_devices
 
     async def _get_services(self, host: IPv4Address, timeout: int):
@@ -212,7 +192,7 @@ class UnicastMdnsScanner(BaseScanner):
         knocker = None
         try:
             knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
-            response = await udns.request(
+            response = await udns.unicast(
                 self.loop, str(host), services, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
@@ -222,38 +202,24 @@ class UnicastMdnsScanner(BaseScanner):
                 knocker.cancel()
         return host, response
 
-    def _handle_response(self, host: IPv4Address, response: udns.DnsMessage):
-        for resource in response.resources:
-            if resource.qtype != udns.QTYPE_TXT:
-                continue
 
-            service_name = ".".join(resource.qname.split(".")[1:]) + "."
-            if service_name not in ALL_SERVICES:
-                continue
+class MulticastMdnsScanner(BaseMdnsScanner):
+    """Service discovery based on multicast MDNS."""
 
-            port = UnicastMdnsScanner._get_port(response, resource.qname)
-            if not port:
-                _LOGGER.warning("Missing port for %s", resource.qname)
-                continue
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        """Initialize a new MulticastMdnsScanner."""
+        super().__init__()
+        self.loop = loop
 
-            self.service_discovered(
-                service_name,
-                resource.qname + ".",
-                host,
-                port,
-                _decode_properties(resource.rd),
-            )
+    async def discover(self, timeout: int):
+        """Start discovery of devices and services."""
+        services = [s[0:-1] for s in ALL_SERVICES]
+        results = await udns.multicast(self.loop, services)
 
-    @staticmethod
-    def _get_port(response, qname):
-        for resource in response.resources:
-            if resource.qtype != udns.QTYPE_SRV:
-                continue
-
-            if resource.qname == qname:
-                return resource.rd.get("port")
-
-        return None
+        for host, response in results:
+            if response is not None:
+                self.handle_response(host, response)
+        return self._found_devices
 
 
 async def scan(
@@ -281,7 +247,7 @@ async def scan(
     if hosts:
         scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
     else:
-        scanner = ZeroconfScanner(loop)
+        scanner = MulticastMdnsScanner(loop)
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]

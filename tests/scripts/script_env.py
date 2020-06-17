@@ -12,8 +12,8 @@ from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
 from pyatv.const import Protocol
-from tests import fake_udns, zeroconf_stub
-from tests.utils import stub_sleep, faketime
+from tests import fake_udns
+from tests.utils import stub_sleep, unstub_sleep, faketime
 from tests.fake_device import FakeAppleTV
 
 
@@ -49,36 +49,30 @@ class ScriptTest(AioHTTPTestCase):
         self.retcode = None
         self.inputs = []
 
+    def tearDown(self):
+        unstub_sleep()
+        AioHTTPTestCase.tearDown(self)
+
     def setup_environment(self):
         airplay_port = self.server.port
 
-        services = []
-        services.append(
-            zeroconf_stub.homesharing_service(DMAP_ID, b"Apple TV 1", IP_1, b"aaaa")
+        self.fake_udns.add_service(
+            fake_udns.homesharing_service(DMAP_ID, "Apple TV 1", "aaaa", address=IP_1)
         )
-        services.append(
-            zeroconf_stub.mrp_service(
-                "DDDD",
-                b"Apple TV 2",
-                IP_2,
-                MRP_ID,
-                port=self.fake_atv.get_port(Protocol.MRP),
-            )
-        )
-        services.append(
-            zeroconf_stub.airplay_service(
-                "Apple TV 2", IP_2, AIRPLAY_ID, port=airplay_port
-            )
-        )
-        zeroconf_stub.stub(pyatv, *services)
 
         self.fake_udns.add_service(
             fake_udns.mrp_service(
-                "DDDD", "Apple TV 2", MRP_ID, port=self.fake_atv.get_port(Protocol.MRP)
+                "DDDD",
+                "Apple TV 2",
+                MRP_ID,
+                address=IP_2,
+                port=self.fake_atv.get_port(Protocol.MRP),
             )
         )
         self.fake_udns.add_service(
-            fake_udns.airplay_service("Apple TV 2", AIRPLAY_ID, port=airplay_port)
+            fake_udns.airplay_service(
+                "Apple TV 2", AIRPLAY_ID, address=IP_2, port=airplay_port
+            )
         )
 
         self.airplay_usecase.airplay_playback_playing()
@@ -86,6 +80,7 @@ class ScriptTest(AioHTTPTestCase):
 
     async def get_application(self, loop=None):
         self.fake_udns = fake_udns.FakeUdns(self.loop)
+        self.fake_udns.ip_filter = IP_2
         self.fake_atv = FakeAppleTV(self.loop)
         self.state, self.usecase = self.fake_atv.add_service(Protocol.MRP)
         self.airplay_state, self.airplay_usecase = self.fake_atv.add_service(
@@ -113,16 +108,17 @@ class ScriptTest(AioHTTPTestCase):
         with capture_output(argv, inputs) as (out, err):
             udns_port = str(self.fake_udns.port)
             with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port}):
-                with faketime("pyatv", 0):
-                    # Stub away port knocking and ignore result (not tested here)
-                    with patch("pyatv.support.knock.knock") as mock_knock:
+                with fake_udns.stub_multicast(self.fake_udns, self.loop):
+                    with faketime("pyatv", 0):
+                        # Stub away port knocking and ignore result (not tested here)
+                        with patch("pyatv.support.knock.knock") as mock_knock:
 
-                        async def _no_action(*args):
-                            pass
+                            async def _no_action(*args):
+                                pass
 
-                        mock_knock.side_effect = _no_action
+                            mock_knock.side_effect = _no_action
 
-                        module = import_module(f"pyatv.scripts.{script}")
-                        self.retcode = await module.appstart(self.loop)
-                        self.stdout = out.getvalue()
-                        self.stderr = err.getvalue()
+                            module = import_module(f"pyatv.scripts.{script}")
+                            self.retcode = await module.appstart(self.loop)
+                            self.stdout = out.getvalue()
+                            self.stderr = err.getvalue()

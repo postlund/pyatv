@@ -18,7 +18,7 @@ from pyatv.const import (
     FeatureState,
 )
 from pyatv.conf import AppleTV, AirPlayService
-from tests.utils import stub_sleep, until, faketime
+from tests.utils import stub_sleep, unstub_sleep, until, faketime
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +56,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
     def setUp(self):
         AioHTTPTestCase.setUp(self)
         stub_sleep()
+
+    def tearDown(self):
+        unstub_sleep()
+        AioHTTPTestCase.tearDown(self)
 
     async def get_application(self, loop=None):
         raise NotImplementedError()

@@ -1,6 +1,9 @@
 import asyncio
 import logging
 import struct
+from unittest.mock import patch
+from contextlib import contextmanager
+from ipaddress import IPv4Address
 from collections import namedtuple
 
 from pyatv.support import udns
@@ -10,35 +13,39 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_QCLASS = 1
 DEFAULT_TTL = 10
 
-FakeDnsService = namedtuple("FakeDnsService", "name port properties")
+FakeDnsService = namedtuple("FakeDnsService", "name address port properties")
 
 
-def mrp_service(service_name, atv_name, identifier, port=49152):
+def mrp_service(service_name, atv_name, identifier, address="127.0.0.1", port=49152):
     service = FakeDnsService(
         name=service_name,
+        address=address,
         port=port,
         properties={"Name": atv_name, "UniqueIdentifier": identifier},
     )
     return ("_mediaremotetv._tcp.local", service)
 
 
-def airplay_service(atv_name, deviceid, port=7000):
+def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000):
     service = FakeDnsService(
-        name=atv_name, port=port, properties={"deviceid": deviceid}
+        name=atv_name, address=address, port=port, properties={"deviceid": deviceid}
     )
     return ("_airplay._tcp.local", service)
 
 
-def homesharing_service(service_name, atv_name, hsgid):
+def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1"):
     service = FakeDnsService(
-        name=service_name, port=3689, properties={"hG": hsgid, "Name": atv_name}
+        name=service_name,
+        address=address,
+        port=3689,
+        properties={"hG": hsgid, "Name": atv_name},
     )
     return ("_appletv-v2._tcp.local", service)
 
 
-def device_service(service_name, atv_name):
+def device_service(service_name, atv_name, address="127.0.0.1"):
     service = FakeDnsService(
-        name=service_name, port=3689, properties={"CtlN": atv_name}
+        name=service_name, address=address, port=3689, properties={"CtlN": atv_name}
     )
     return ("_touch-able._tcp.local", service)
 
@@ -67,6 +74,7 @@ class FakeUdns(asyncio.Protocol):
         self.server = None
         self.services = services or {}
         self.skip_count = 0  # Ignore sending respone to this many requests
+        self.ip_filter = None
 
     async def start(self):
         _LOGGER.debug("Starting fake UDNS server")
@@ -93,7 +101,7 @@ class FakeUdns(asyncio.Protocol):
 
     def datagram_received(self, data, addr):
         msg = udns.DnsMessage().unpack(data)
-        _LOGGER.debug("Received DNS request: %s", msg)
+        _LOGGER.debug("Received DNS request %s: %s", addr, msg)
 
         if self.skip_count > 0:
             _LOGGER.debug("Not sending DNS response (%d)", self.skip_count)
@@ -106,7 +114,9 @@ class FakeUdns(asyncio.Protocol):
 
         for question in resp.questions:
             service = self.services.get(question.qname)
-            if service is None:
+            if service is None or (
+                self.ip_filter and service.address != self.ip_filter
+            ):
                 continue
 
             # Add answer
@@ -125,3 +135,32 @@ class FakeUdns(asyncio.Protocol):
                 resp.resources.append(_mkresource(full_name, udns.QTYPE_TXT, rd))
 
         self.transport.sendto(resp.pack(), addr)
+
+
+@contextmanager
+def stub_multicast(udns_server, loop):
+    patcher = patch("pyatv.support.udns.multicast")
+
+    async def _multicast(loop, services, **kwargs):
+        hosts = set(service.address for service in udns_server.services.values())
+        devices = []
+        for host in hosts:
+            udns_server.ip_filter = host
+            devices.append(
+                (
+                    IPv4Address(host),
+                    await udns.unicast(
+                        loop, "127.0.0.1", services, port=udns_server.port
+                    ),
+                )
+            )
+        return devices
+
+    try:
+        patched_fn = patcher.start()
+        patched_fn.side_effect = _multicast
+        yield patched_fn
+    except Exception:
+        _LOGGER.exception("multicast scan failed")
+    finally:
+        patcher.stop()
