@@ -11,7 +11,7 @@ from asyncio import sleep as real_sleep
 from aiohttp import ClientSession
 
 
-def stub_sleep():
+def stub_sleep(fn=None):
     """Stub asyncio.sleep to not make tests slow."""
     # This is a special "hack" to schedule the sleep at the end of the
     # event queue in order to give other possibility to run.
@@ -21,7 +21,16 @@ def stub_sleep():
 
         await asyncio.ensure_future(dummy())
 
-    asyncio.sleep = fake_sleep
+    if not hasattr(asyncio, "_orig_sleep"):
+        asyncio._orig_sleep = asyncio.sleep
+
+    asyncio.sleep = fn or fake_sleep
+
+
+def unstub_sleep():
+    """Restore original asyncio.sleep method."""
+    if hasattr(asyncio, "_orig_sleep"):
+        asyncio.sleeö = asyncio._orig_sleep
 
 
 async def simple_get(url):

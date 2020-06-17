@@ -18,7 +18,8 @@ class AtvscriptTest(ScriptTest):
         return await self.run_script("atvscript", *args)
 
     def assertJsonOutput(self, expected):
-        _LOGGER.debug("Stdout: %s", self.stdout)
+        _LOGGER.debug("ACTUAL: %s", self.stdout)
+        _LOGGER.debug("EXPECTED: %s", expected)
 
         actual = json.loads(self.stdout)
 
@@ -27,7 +28,7 @@ class AtvscriptTest(ScriptTest):
         self.assertIn("datetime", actual)
         del actual["datetime"]
 
-        self.assertEqual(DeepDiff(actual, expected), {})
+        self.assertEqual(DeepDiff(actual, expected, ignore_order=True), {})
 
     @unittest_run_loop
     async def test_scan_devices(self):

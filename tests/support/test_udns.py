@@ -1,5 +1,7 @@
 """Functional tests for unicast DNS."""
 
+import asyncio
+import logging
 from ipaddress import IPv4Address
 from unittest.mock import patch
 
@@ -14,7 +16,10 @@ MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local"
 
 TEST_SERVICES = {
     MEDIAREMOTE_SERVICE: fake_udns.FakeDnsService(
-        name="Kitchen", port=1234, properties={"Name": "Kitchen", "foo": "=bar"}
+        name="Kitchen",
+        address="127.0.0.1",
+        port=1234,
+        properties={"Name": "Kitchen", "foo": "=bar"},
     ),
 }
 
@@ -34,9 +39,43 @@ async def udns_server(event_loop):
     server.close()
 
 
-async def request(event_loop, udns_server, service_name, timeout=1):
+# This is a very complex fixture that will hook into the receiver of multicast
+# responses and abort the "waiting" period whenever all responses have been received.
+# Mainly this is for not slowing down tests.
+@pytest.fixture
+async def multicast_fastexit(event_loop, monkeypatch):
+    # Interface used to set number of expected responses (1 by default)
+    expected_responses = [1]
+
+    def _set_expected_responses(responses):
+        expected_responses[0] = responses
+
+    # Replace create_datagram_endpoint with a method that captures the created
+    # endpoints and use a simple poller to detect if all responses have been received
+    create_endpoint = event_loop.create_datagram_endpoint
+
+    async def _create_datagram_endpoint(factory, **kwargs):
+        transport, protocol = await create_endpoint(factory, **kwargs)
+
+        async def _poll_responses():
+            while len(protocol.responses) != expected_responses[0]:
+                await asyncio.sleep(0.1)
+            protocol.semaphore.release()
+
+        asyncio.ensure_future(_poll_responses())
+
+        return transport, protocol
+
+    monkeypatch.setattr(
+        event_loop, "create_datagram_endpoint", _create_datagram_endpoint
+    )
+
+    yield _set_expected_responses
+
+
+async def unicast(event_loop, udns_server, service_name, timeout=1):
     return (
-        await udns.request(
+        await udns.unicast(
             event_loop,
             "127.0.0.1",
             [service_name],
@@ -67,12 +106,12 @@ def test_qname_with_label():
 async def test_non_local_address(event_loop, stub_local_address):
     stub_local_address.return_value = None
     with pytest.raises(exceptions.NonLocalSubnetError):
-        await udns.request(event_loop, "1.2.3.4", [])
+        await udns.unicast(event_loop, "1.2.3.4", [])
 
 
 @pytest.mark.asyncio
 async def test_non_existing_service(event_loop, udns_server):
-    resp, _ = await request(event_loop, udns_server, "_missing")
+    resp, _ = await unicast(event_loop, udns_server, "_missing")
     assert len(resp.questions) == 1
     assert len(resp.answers) == 0
     assert len(resp.resources) == 0
@@ -80,7 +119,7 @@ async def test_non_existing_service(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_service_has_expected_responses(event_loop, udns_server):
-    resp, _ = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
     assert len(resp.resources) == 2
@@ -88,7 +127,7 @@ async def test_service_has_expected_responses(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_service_has_valid_question(event_loop, udns_server):
-    resp, _ = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
 
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
@@ -98,7 +137,7 @@ async def test_service_has_valid_question(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_service_has_valid_answer(event_loop, udns_server):
-    resp, data = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
 
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
@@ -110,7 +149,7 @@ async def test_service_has_valid_answer(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_service_has_valid_srv_resource(event_loop, udns_server):
-    resp, data = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
 
     srv = get_qtype(resp.resources, udns.QTYPE_SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
@@ -127,7 +166,7 @@ async def test_service_has_valid_srv_resource(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_service_has_valid_txt_resource(event_loop, udns_server):
-    resp, data = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
 
     srv = get_qtype(resp.resources, udns.QTYPE_TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
@@ -144,7 +183,31 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
 @pytest.mark.asyncio
 async def test_resend_if_no_response(event_loop, udns_server):
     udns_server.skip_count = 2
-    resp, _ = await request(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
+    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
     assert len(resp.resources) == 2
+
+
+@pytest.mark.asyncio
+async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit):
+    multicast_fastexit(0)
+    await udns.multicast(event_loop, [], "127.0.0.1", udns_server.port)
+
+
+@pytest.mark.asyncio
+async def test_multicast_has_valid_response(
+    event_loop, udns_server, multicast_fastexit
+):
+    multicast_fastexit(1)
+
+    resp = await udns.multicast(
+        event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
+    )
+    assert len(resp) == 1
+
+    address, first = resp[0]
+    assert address == IPv4Address("127.0.0.1")
+    assert len(first.questions) == 1
+    assert len(first.answers) == 1
+    assert len(first.resources) == 2

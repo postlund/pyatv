@@ -7,7 +7,7 @@ import netifaces
 from pyatv.support.net import unused_port
 
 from tests.fake_knock import create_knock_server
-from tests.utils import stub_sleep
+from tests.utils import stub_sleep, unstub_sleep
 
 
 @pytest.fixture(autouse=True)
@@ -36,6 +36,7 @@ def stub_netifaces():
 def stub_sleep_fixture():
     stub_sleep()
     yield
+    unstub_sleep()
 
 
 @pytest.fixture

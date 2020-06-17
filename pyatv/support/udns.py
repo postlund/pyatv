@@ -3,6 +3,7 @@ import math
 import asyncio
 import struct
 import logging
+import socket
 from ipaddress import IPv4Address
 from collections import namedtuple
 from typing import List, cast
@@ -201,7 +202,7 @@ class DnsMessage:
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
-    """Protocol to make unicast MDNS requests."""
+    """Protocol to make unicast requests."""
 
     def __init__(self, services, host, timeout):
         """Initialize a new UnicastDnsSdClientProtocol."""
@@ -258,7 +259,62 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             self._task.cancel()
 
 
-async def request(
+class MulticastDnsSdClientProtocol(asyncio.Protocol):
+    """Protocol to make multicast requests."""
+
+    def __init__(self, services, address, port, timeout):
+        """Initialize a new MulticastDnsSdClientProtocol."""
+        self.message = create_request(services)
+        self.address = address
+        self.port = port
+        self.timeout = timeout
+        self.semaphore = asyncio.Semaphore(value=0)
+        self.transport = None
+        self.responses = {}
+
+    async def get_response(self):
+        """Get respoonse with a maximum timeout."""
+        # Semaphore used here as a quick-bailout when testing
+        try:
+            await asyncio.wait_for(self.semaphore.acquire(), timeout=self.timeout)
+        except asyncio.TimeoutError:
+            pass
+
+        if self._task:
+            self._task.cancel()
+
+        return list(self.responses.items())
+
+    def connection_made(self, transport):
+        """Establish connection to host."""
+        self.transport = transport
+        self._task = asyncio.ensure_future(self._resend_loop())
+
+    async def _resend_loop(self):
+        for _ in range(math.ceil(self.timeout)):
+            log_binary(
+                _LOGGER,
+                f"Sending multicast DNS request to {self.address}:{self.port}",
+                Data=self.message,
+            )
+
+            self.transport.sendto(self.message, (self.address, self.port))
+            await asyncio.sleep(1)
+
+    def datagram_received(self, data, addr):
+        """DNS response packet received."""
+        log_binary(_LOGGER, "Received DNS response from " + str(addr[0]), Data=data)
+        self.responses[IPv4Address(addr[0])] = DnsMessage().unpack(data)
+
+    def error_received(self, exc):
+        """Error received during communication."""
+        _LOGGER.debug("Error during MDNS lookup: %s", exc)
+        if self._task:
+            self._task.cancel()
+            self._task = None
+
+
+async def unicast(
     loop: asyncio.AbstractEventLoop,
     address: str,
     services: List[str],
@@ -278,5 +334,24 @@ async def request(
 
     try:
         return await cast(UnicastDnsSdClientProtocol, protocol).get_response()
+    finally:
+        transport.close()
+
+
+async def multicast(
+    loop: asyncio.AbstractEventLoop,
+    services: List[str],
+    address: str = "224.0.0.251",
+    port: int = 5353,
+    timeout: int = 4,
+):
+    """Send multicast request for services."""
+    transport, protocol = await loop.create_datagram_endpoint(
+        lambda: MulticastDnsSdClientProtocol(services, address, port, timeout),
+        family=socket.AF_INET,
+    )
+
+    try:
+        return await cast(MulticastDnsSdClientProtocol, protocol).get_response()
     finally:
         transport.close()
