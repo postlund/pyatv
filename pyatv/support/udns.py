@@ -346,9 +346,13 @@ async def multicast(
     timeout: int = 4,
 ):
     """Send multicast request for services."""
+    # Create and bind socket, otherwise it doesn't work on Windows
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(("", 0))
+
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: MulticastDnsSdClientProtocol(services, address, port, timeout),
-        family=socket.AF_INET,
+        sock=sock,
     )
 
     try:
