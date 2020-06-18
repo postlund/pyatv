@@ -4,7 +4,7 @@ import socket
 import logging
 import platform
 from ipaddress import IPv4Interface, IPv4Address
-from typing import Optional
+from typing import Optional, List
 
 import netifaces
 from aiohttp import ClientSession
@@ -62,6 +62,17 @@ def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:
             if dest_ip in iface.network:
                 return iface.ip
     return None
+
+
+def get_private_addresses() -> List[IPv4Address]:
+    """Get private (RFC1918 + loopback) addresses from all interfaces."""
+    addresses: List[IPv4Address] = []
+    for iface in netifaces.interfaces():
+        for addr in netifaces.ifaddresses(iface).get(netifaces.AF_INET, []):
+            ipaddr = IPv4Address(addr["addr"])
+            if ipaddr.is_private:
+                addresses.append(ipaddr)
+    return addresses
 
 
 # Reference: https://stackoverflow.com/a/14855726
