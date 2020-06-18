@@ -206,8 +206,7 @@ async def test_multicast_has_valid_response(
     )
     assert len(resp) == 1
 
-    address, first = resp[0]
-    assert address == IPv4Address("127.0.0.1")
+    first = resp[IPv4Address("127.0.0.1")]
     assert len(first.questions) == 1
     assert len(first.answers) == 1
     assert len(first.resources) == 2
