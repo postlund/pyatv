@@ -216,9 +216,12 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     async def get_response(self) -> DnsMessage:
         """Get respoonse with a maximum timeout."""
-        await asyncio.wait_for(
-            self.semaphore.acquire(), timeout=self.timeout,
-        )
+        try:
+            await asyncio.wait_for(
+                self.semaphore.acquire(), timeout=self.timeout,
+            )
+        finally:
+            self._finished()
         return self.result
 
     def connection_made(self, transport) -> None:
@@ -283,9 +286,9 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             await asyncio.wait_for(self.semaphore.acquire(), timeout=self.timeout)
         except asyncio.TimeoutError:
             pass
-
-        if self._task:
-            self._task.cancel()
+        finally:
+            if self._task:
+                self._task.cancel()
 
         return dict(self.responses.items())
 
