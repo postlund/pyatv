@@ -6,7 +6,7 @@ import logging
 import socket
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import List, cast
+from typing import Optional, Dict, List, cast
 
 from pyatv.support import exceptions, net, log_binary
 
@@ -109,13 +109,6 @@ def unpack_rr(ptr, msg):
     return ptr, data + (rd_data,)
 
 
-def create_request(services):
-    """Creste a new DnsMessage requesting specified services."""
-    msg = DnsMessage(0x35FF)
-    msg.questions += [DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services]
-    return msg.pack()
-
-
 class DnsMessage:
     """Represent a DNS message."""
 
@@ -201,27 +194,34 @@ class DnsMessage:
         )
 
 
+def create_request(services: List[str]) -> DnsMessage:
+    """Creste a new DnsMessage requesting specified services."""
+    msg = DnsMessage(0x35FF)
+    msg.questions += [DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services]
+    return msg.pack()
+
+
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
     """Protocol to make unicast requests."""
 
-    def __init__(self, services, host, timeout):
+    def __init__(self, services: List[str], host: str, timeout: int):
         """Initialize a new UnicastDnsSdClientProtocol."""
         self.message = create_request(services)
         self.host = host
         self.timeout = timeout
         self.transport = None
-        self.semaphore = asyncio.Semaphore(value=0)
-        self.result = None
-        self._task = None
+        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
+        self.result: DnsMessage = DnsMessage()
+        self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self):
+    async def get_response(self) -> DnsMessage:
         """Get respoonse with a maximum timeout."""
         await asyncio.wait_for(
             self.semaphore.acquire(), timeout=self.timeout,
         )
         return self.result
 
-    def connection_made(self, transport):
+    def connection_made(self, transport) -> None:
         """Establish connection to host."""
         self.transport = transport
         self._task = asyncio.ensure_future(self._resend_loop())
@@ -229,30 +229,31 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
     async def _resend_loop(self):
         for _ in range(math.ceil(self.timeout)):
             log_binary(
-                _LOGGER, "Sending DNS request to " + str(self.host), Data=self.message
+                _LOGGER, "Sending DNS request to " + self.host, Data=self.message
             )
 
             self.transport.sendto(self.message)
             await asyncio.sleep(1)
 
-    def datagram_received(self, data, _):
+    def datagram_received(self, data: bytes, _) -> None:
         """DNS response packet received."""
-        log_binary(_LOGGER, "Received DNS response from " + str(self.host), Data=data)
+        log_binary(_LOGGER, "Received DNS response from " + self.host, Data=data)
 
         self.result = DnsMessage().unpack(data)
-        self.transport.close()
         self._finished()
+        if self.transport:
+            self.transport.close()
 
-    def error_received(self, exc):
+    def error_received(self, exc) -> None:
         """Error received during communication."""
         _LOGGER.debug("Error during DNS lookup for %s: %s", self.host, exc)
         self._finished()
 
-    def connection_lost(self, exc):
+    def connection_lost(self, exc) -> None:
         """Lose connection to host."""
         self._finished()
 
-    def _finished(self):
+    def _finished(self) -> None:
         _LOGGER.debug("Cleaning up after UDNS request")
         self.semaphore.release()
         if self._task:
@@ -262,7 +263,9 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 class MulticastDnsSdClientProtocol(asyncio.Protocol):
     """Protocol to make multicast requests."""
 
-    def __init__(self, services, address, port, timeout):
+    def __init__(
+        self, services: List[str], address: str, port: int, timeout: int
+    ) -> None:
         """Initialize a new MulticastDnsSdClientProtocol."""
         self.message = create_request(services)
         self.address = address
@@ -270,9 +273,10 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         self.timeout = timeout
         self.semaphore = asyncio.Semaphore(value=0)
         self.transport = None
-        self.responses = {}
+        self.responses: Dict[IPv4Address, DnsMessage] = {}
+        self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self):
+    async def get_response(self) -> Dict[IPv4Address, DnsMessage]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -283,9 +287,9 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         if self._task:
             self._task.cancel()
 
-        return list(self.responses.items())
+        return dict(self.responses.items())
 
-    def connection_made(self, transport):
+    def connection_made(self, transport) -> None:
         """Establish connection to host."""
         self.transport = transport
         self._task = asyncio.ensure_future(self._resend_loop())
@@ -301,12 +305,12 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             self.transport.sendto(self.message, (self.address, self.port))
             await asyncio.sleep(1)
 
-    def datagram_received(self, data, addr):
+    def datagram_received(self, data, addr) -> None:
         """DNS response packet received."""
         log_binary(_LOGGER, "Received DNS response from " + str(addr[0]), Data=data)
         self.responses[IPv4Address(addr[0])] = DnsMessage().unpack(data)
 
-    def error_received(self, exc):
+    def error_received(self, exc) -> None:
         """Error received during communication."""
         _LOGGER.debug("Error during MDNS lookup: %s", exc)
         if self._task:
@@ -320,7 +324,7 @@ async def unicast(
     services: List[str],
     port: int = 5353,
     timeout: int = 4,
-):
+) -> DnsMessage:
     """Send request for services to a host."""
     if not net.get_local_address_reaching(IPv4Address(address)):
         raise exceptions.NonLocalSubnetError(
@@ -344,7 +348,7 @@ async def multicast(
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
-):
+) -> Dict[IPv4Address, DnsMessage]:
     """Send multicast request for services."""
     # Create and bind socket, otherwise it doesn't work on Windows
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

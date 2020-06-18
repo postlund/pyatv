@@ -196,7 +196,7 @@ class UnicastMdnsScanner(BaseMdnsScanner):
                 self.loop, str(host), services, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
-            response = None
+            return host, None
         finally:
             if knocker:
                 knocker.cancel()
@@ -216,7 +216,7 @@ class MulticastMdnsScanner(BaseMdnsScanner):
         services = [s[0:-1] for s in ALL_SERVICES]
         results = await udns.multicast(self.loop, services)
 
-        for host, response in results:
+        for host, response in results.items():
             if response is not None:
                 self.handle_response(host, response)
         return self._found_devices

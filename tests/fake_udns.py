@@ -143,16 +143,11 @@ def stub_multicast(udns_server, loop):
 
     async def _multicast(loop, services, **kwargs):
         hosts = set(service.address for service in udns_server.services.values())
-        devices = []
+        devices = {}
         for host in hosts:
             udns_server.ip_filter = host
-            devices.append(
-                (
-                    IPv4Address(host),
-                    await udns.unicast(
-                        loop, "127.0.0.1", services, port=udns_server.port
-                    ),
-                )
+            devices[IPv4Address(host)] = await udns.unicast(
+                loop, "127.0.0.1", services, port=udns_server.port
             )
         return devices
 
