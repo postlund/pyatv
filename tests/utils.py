@@ -21,16 +21,13 @@ def stub_sleep(fn=None):
 
         await asyncio.ensure_future(dummy())
 
-    if not hasattr(asyncio, "_orig_sleep"):
-        asyncio._orig_sleep = asyncio.sleep
-
     asyncio.sleep = fn or fake_sleep
 
 
 def unstub_sleep():
     """Restore original asyncio.sleep method."""
     if hasattr(asyncio, "_orig_sleep"):
-        asyncio.sleeö = asyncio._orig_sleep
+        asyncio.sleep = real_sleep
 
 
 async def simple_get(url):
