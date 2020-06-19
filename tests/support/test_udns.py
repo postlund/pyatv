@@ -10,6 +10,7 @@ import pytest
 from pyatv import exceptions
 from pyatv.support import udns
 from tests import fake_udns
+from tests.support import dns_utils
 
 
 MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local"
@@ -142,8 +143,8 @@ async def test_service_has_valid_answer(event_loop, udns_server):
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
     assert answer.qtype == udns.QTYPE_PTR
-    assert answer.qclass == fake_udns.DEFAULT_QCLASS
-    assert answer.ttl == fake_udns.DEFAULT_TTL
+    assert answer.qclass == dns_utils.DEFAULT_QCLASS
+    assert answer.ttl == dns_utils.DEFAULT_TTL
     assert answer.rd == data.name + "." + MEDIAREMOTE_SERVICE
 
 
@@ -154,8 +155,8 @@ async def test_service_has_valid_srv_resource(event_loop, udns_server):
     srv = get_qtype(resp.resources, udns.QTYPE_SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
     assert srv.qtype == udns.QTYPE_SRV
-    assert srv.qclass == fake_udns.DEFAULT_QCLASS
-    assert srv.ttl == fake_udns.DEFAULT_TTL
+    assert srv.qclass == dns_utils.DEFAULT_QCLASS
+    assert srv.ttl == dns_utils.DEFAULT_TTL
 
     rd = srv.rd
     assert rd["priority"] == 0
@@ -171,8 +172,8 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
     srv = get_qtype(resp.resources, udns.QTYPE_TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
     assert srv.qtype == udns.QTYPE_TXT
-    assert srv.qclass == fake_udns.DEFAULT_QCLASS
-    assert srv.ttl == fake_udns.DEFAULT_TTL
+    assert srv.qclass == dns_utils.DEFAULT_QCLASS
+    assert srv.ttl == dns_utils.DEFAULT_TTL
 
     rd = srv.rd
     assert len(rd) == len(data.properties)

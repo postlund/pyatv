@@ -8,10 +8,10 @@ from collections import namedtuple
 
 from pyatv.support import udns
 
-_LOGGER = logging.getLogger(__name__)
+from tests.support import dns_utils
 
-DEFAULT_QCLASS = 1
-DEFAULT_TTL = 10
+
+_LOGGER = logging.getLogger(__name__)
 
 FakeDnsService = namedtuple("FakeDnsService", "name address port properties")
 
@@ -48,24 +48,6 @@ def device_service(service_name, atv_name, address="127.0.0.1"):
         name=service_name, address=address, port=3689, properties={"CtlN": atv_name}
     )
     return ("_touch-able._tcp.local", service)
-
-
-def _mkanswer(qname, full_name):
-    return udns.DnsAnswer(
-        qname, udns.QTYPE_PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
-    )
-
-
-def _mkresource(qname, qtype, rd):
-    return udns.DnsResource(qname, qtype, DEFAULT_QCLASS, DEFAULT_TTL, len(rd), rd)
-
-
-def _mkproperties(properties):
-    rd = b""
-    for k, v in properties.items():
-        encoded = (k + "=" + v).encode("ascii")
-        rd += bytes([len(encoded)]) + encoded
-    return rd
 
 
 class FakeUdns(asyncio.Protocol):
@@ -121,18 +103,18 @@ class FakeUdns(asyncio.Protocol):
 
             # Add answer
             full_name = service.name + "." + question.qname
-            resp.answers.append(_mkanswer(question.qname, full_name))
+            resp.answers.append(dns_utils.answer(question.qname, full_name))
 
             # Add service (SRV) resource
             if service.port:
                 local_name = udns.qname_encode(service.name + ".local")
                 rd = struct.pack(">3H", 0, 0, service.port) + local_name
-                resp.resources.append(_mkresource(full_name, udns.QTYPE_SRV, rd))
+                resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_SRV, rd))
 
             # Add properties
             if service.properties:
-                rd = _mkproperties(service.properties)
-                resp.resources.append(_mkresource(full_name, udns.QTYPE_TXT, rd))
+                rd = dns_utils.properties(service.properties)
+                resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_TXT, rd))
 
         self.transport.sendto(resp.pack(), addr)
 
