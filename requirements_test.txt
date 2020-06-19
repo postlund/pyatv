@@ -9,6 +9,6 @@ pytest-timeout==1.4.1
 pytest-aiohttp==0.3.0
 pytest-xdist==1.32.0
 pydocstyle==5.0.2
-mypy==0.780
+mypy==0.781
 mypy-protobuf==1.23
 typed-ast==1.4.1
