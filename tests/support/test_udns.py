@@ -123,7 +123,7 @@ async def test_service_has_expected_responses(event_loop, udns_server):
     resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
-    assert len(resp.resources) == 2
+    assert len(resp.resources) == 3
 
 
 @pytest.mark.asyncio
@@ -182,12 +182,24 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
+async def test_service_has_valid_a_resource(event_loop, udns_server):
+    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+
+    srv = get_qtype(resp.resources, udns.QTYPE_A)
+    assert srv.qname == data.name + ".local"
+    assert srv.qtype == udns.QTYPE_A
+    assert srv.qclass == dns_utils.DEFAULT_QCLASS
+    assert srv.ttl == dns_utils.DEFAULT_TTL
+    assert srv.rd == "127.0.0.1"
+
+
+@pytest.mark.asyncio
 async def test_resend_if_no_response(event_loop, udns_server):
     udns_server.skip_count = 2
     resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
-    assert len(resp.resources) == 2
+    assert len(resp.resources) == 3
 
 
 @pytest.mark.asyncio
@@ -210,4 +222,4 @@ async def test_multicast_has_valid_response(
     first = resp[IPv4Address("127.0.0.1")]
     assert len(first.questions) == 1
     assert len(first.answers) == 1
-    assert len(first.resources) == 2
+    assert len(first.resources) == 3

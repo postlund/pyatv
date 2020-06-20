@@ -17,6 +17,7 @@ DnsQuestion = namedtuple("DnsQuestion", "qname qtype qclass")
 DnsAnswer = namedtuple("DnsAnswer", "qname qtype qclass ttl rd_length rd")
 DnsResource = namedtuple("DnsResource", "qname qtype qclass ttl rd_length rd")
 
+QTYPE_A = 0x0001
 QTYPE_PTR = 0x000C
 QTYPE_TXT = 0x0010
 QTYPE_SRV = 0x0021
@@ -105,6 +106,8 @@ def unpack_rr(ptr, msg):
         rd_data = parse_txt_dict(rd_data, msg)
     elif qtype == QTYPE_SRV:
         rd_data = parse_srv_dict(rd_data, msg)
+    elif qtype == QTYPE_A:
+        rd_data = str(IPv4Address(rd_data))
 
     return ptr, data + (rd_data,)
 
