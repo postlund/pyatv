@@ -111,6 +111,13 @@ class FakeUdns(asyncio.Protocol):
                 rd = struct.pack(">3H", 0, 0, service.port) + local_name
                 resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_SRV, rd))
 
+            # Add IP address
+            if service.address:
+                ipaddr = IPv4Address(service.address).packed
+                resp.resources.append(
+                    dns_utils.resource(service.name + ".local", udns.QTYPE_A, ipaddr)
+                )
+
             # Add properties
             if service.properties:
                 rd = dns_utils.properties(service.properties)
