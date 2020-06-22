@@ -160,13 +160,13 @@ class DmapService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
-        credentials: str,
-        port: int = None,
+        identifier: Optional[str],
+        credentials: Optional[str],
+        port: int = 3689,
         properties: Optional[Dict[str, str]] = None,
     ) -> None:
         """Initialize a new DmapService."""
-        super().__init__(identifier, Protocol.DMAP, port or 3689, properties)
+        super().__init__(identifier, Protocol.DMAP, port, properties)
         self.credentials = credentials
 
 
@@ -176,9 +176,9 @@ class MrpService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -> None:
         """Initialize a new MrpService."""
@@ -192,9 +192,9 @@ class AirPlayService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int = 7000,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -> None:
         """Initialize a new AirPlayService."""

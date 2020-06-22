@@ -21,14 +21,20 @@ def mrp_service(service_name, atv_name, identifier, address="127.0.0.1", port=49
         name=service_name,
         address=address,
         port=port,
-        properties={"Name": atv_name, "UniqueIdentifier": identifier},
+        properties={
+            b"Name": atv_name.encode("utf-8"),
+            b"UniqueIdentifier": identifier.encode("utf-8"),
+        },
     )
     return ("_mediaremotetv._tcp.local", service)
 
 
 def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000):
     service = FakeDnsService(
-        name=atv_name, address=address, port=port, properties={"deviceid": deviceid}
+        name=atv_name,
+        address=address,
+        port=port,
+        properties={b"deviceid": deviceid.encode("utf-8")},
     )
     return ("_airplay._tcp.local", service)
 
@@ -38,14 +44,17 @@ def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1"):
         name=service_name,
         address=address,
         port=3689,
-        properties={"hG": hsgid, "Name": atv_name},
+        properties={b"hG": hsgid.encode("utf-8"), b"Name": atv_name.encode("utf-8")},
     )
     return ("_appletv-v2._tcp.local", service)
 
 
 def device_service(service_name, atv_name, address="127.0.0.1"):
     service = FakeDnsService(
-        name=service_name, address=address, port=3689, properties={"CtlN": atv_name}
+        name=service_name,
+        address=address,
+        port=3689,
+        properties={b"CtlN": atv_name.encode("utf-8")},
     )
     return ("_touch-able._tcp.local", service)
 

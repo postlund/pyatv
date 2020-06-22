@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Optional
 from ipaddress import IPv4Address
 from unittest.mock import patch
 
@@ -20,7 +21,7 @@ TEST_SERVICES = {
         name="Kitchen",
         address="127.0.0.1",
         port=1234,
-        properties={"Name": "Kitchen", "foo": "=bar"},
+        properties={b"Name": b"Kitchen", b"foo": b"=bar"},
     ),
 }
 
@@ -85,6 +86,70 @@ async def unicast(event_loop, udns_server, service_name, timeout=1):
         ),
         TEST_SERVICES.get(service_name),
     )
+
+
+def add_service(
+    message: udns.DnsMessage,
+    service_type: Optional[str],
+    service_name: Optional[str],
+    address: Optional[str],
+    port: int,
+    properties: dict,
+):
+    if service_name is None:
+        return message
+
+    if address:
+        message.resources.append(
+            dns_utils.resource(service_name + ".local", udns.QTYPE_A, address)
+        )
+
+    # Remaining depends on service type
+    if service_type is None:
+        return message
+
+    message.answers.append(
+        dns_utils.answer(service_type, service_name + "." + service_type)
+    )
+
+    message.resources.append(
+        dns_utils.resource(
+            service_name + "." + service_type,
+            udns.QTYPE_SRV,
+            {
+                "priority": 0,
+                "weight": 0,
+                "port": port,
+                "target": service_name + ".local",
+            },
+        )
+    )
+
+    if properties:
+        message.resources.append(
+            dns_utils.resource(
+                service_name + "." + service_type,
+                udns.QTYPE_TXT,
+                {k.encode("utf-8"): v.encode("utf-8") for k, v in properties.items()},
+            )
+        )
+
+    return message
+
+
+def assert_service(
+    messages: udns.DnsMessage,
+    service_type: str,
+    service_name: str,
+    address: str,
+    port: int,
+    properties: dict,
+):
+    assert messages.type == service_type
+    assert messages.name == service_name
+    assert messages.address == (IPv4Address(address) if address else None)
+    assert messages.port == port
+    assert messages.properties == properties
 
 
 def get_qtype(messages, qtype):
@@ -178,7 +243,7 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
     rd = srv.rd
     assert len(rd) == len(data.properties)
     for k, v in data.properties.items():
-        assert rd[k.encode("ascii")] == v.encode("ascii")
+        assert rd[k] == v
 
 
 @pytest.mark.asyncio
@@ -223,3 +288,68 @@ async def test_multicast_has_valid_response(
     assert len(first.questions) == 1
     assert len(first.answers) == 1
     assert len(first.resources) == 3
+
+
+def test_parse_empty_service():
+    assert udns.parse_services(udns.DnsMessage()) == []
+
+
+def test_parse_no_service_type():
+    service_params = (None, "service", None, 0, {})
+    message = add_service(udns.DnsMessage(), *service_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 0
+
+
+def test_parse_no_service_name():
+    service_params = ("_abc._tcp.local", None, None, 0, {})
+    message = add_service(udns.DnsMessage(), *service_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 0
+
+
+def test_parse_with_name_and_type():
+    service_params = ("_abc._tcp.local", "service", None, 0, {})
+    message = add_service(udns.DnsMessage(), *service_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 1
+    assert_service(parsed[0], *service_params)
+
+
+def test_parse_with_port_and_address():
+    service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
+    message = add_service(udns.DnsMessage(), *service_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 1
+    assert_service(parsed[0], *service_params)
+
+
+def test_parse_single_service():
+    service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
+    message = add_service(udns.DnsMessage(), *service_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 1
+    assert_service(parsed[0], *service_params)
+
+
+def test_parse_double_service():
+    service1_params = ("_abc._tcp.local", "service1", "10.0.10.1", 123, {"foo": "bar"})
+    service2_params = (
+        "_def._tcp.local",
+        "service2",
+        "10.0.10.2",
+        456,
+        {"fizz": "buzz"},
+    )
+    message = add_service(udns.DnsMessage(), *service1_params)
+    message = add_service(message, *service2_params)
+
+    parsed = udns.parse_services(message)
+    assert len(parsed) == 2
+    assert_service(parsed[0], *service1_params)
+    assert_service(parsed[1], *service2_params)
