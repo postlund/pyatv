@@ -20,6 +20,6 @@ def resource(qname, qtype, rd):
 def properties(properties):
     rd = b""
     for k, v in properties.items():
-        encoded = (k + "=" + v).encode("ascii")
+        encoded = k + b"=" + v
         rd += bytes([len(encoded)]) + encoded
     return rd

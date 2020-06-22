@@ -30,12 +30,6 @@ link_group: api
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="pyatv.BaseMdnsScanner" href="#pyatv.BaseMdnsScanner">BaseMdnsScanner</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.BaseMdnsScanner.handle_response" href="#pyatv.BaseMdnsScanner.handle_response">handle_response</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="pyatv.MulticastMdnsScanner" href="#pyatv.MulticastMdnsScanner">MulticastMdnsScanner</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.MulticastMdnsScanner.discover" href="#pyatv.MulticastMdnsScanner.discover">discover</a></code></li>
@@ -80,12 +74,12 @@ from pyatv.support import net, knock, udns
 
 _LOGGER = logging.getLogger(__name__)
 
-HOMESHARING_SERVICE = &#34;_appletv-v2._tcp.local.&#34;
-DEVICE_SERVICE = &#34;_touch-able._tcp.local.&#34;
-MEDIAREMOTE_SERVICE = &#34;_mediaremotetv._tcp.local.&#34;
-AIRPLAY_SERVICE = &#34;_airplay._tcp.local.&#34;
+HOMESHARING_SERVICE: str = &#34;_appletv-v2._tcp.local&#34;
+DEVICE_SERVICE: str = &#34;_touch-able._tcp.local&#34;
+MEDIAREMOTE_SERVICE: str = &#34;_mediaremotetv._tcp.local&#34;
+AIRPLAY_SERVICE: str = &#34;_airplay._tcp.local&#34;
 
-ALL_SERVICES = [
+ALL_SERVICES: List[str] = [
     HOMESHARING_SERVICE,
     DEVICE_SERVICE,
     MEDIAREMOTE_SERVICE,
@@ -95,22 +89,7 @@ ALL_SERVICES = [
 # These ports have been &#34;arbitrarily&#34; chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
 # to try to wake up a device. Both issue #580 and #595 are good references to read.
-KNOCK_PORTS = [3689, 7000, 49152, 32498]
-
-
-def _decode_properties(properties) -&gt; Dict[str, str]:
-    def _decode(value: bytes):
-        try:
-            # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
-            return (
-                value.replace(b&#34;\xC2\xA0&#34;, b&#34; &#34;)
-                .replace(b&#34;\x00\xA0&#34;, b&#34; &#34;)
-                .decode(&#34;utf-8&#34;)
-            )
-        except Exception:  # pylint: disable=broad-except
-            return str(value)
-
-    return {k.decode(&#34;utf-8&#34;): _decode(v) for k, v in properties.items()}
+KNOCK_PORTS: List[int] = [3689, 7000, 49152, 32498]
 
 
 class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
@@ -118,62 +97,69 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
 
     def __init__(self) -&gt; None:
         &#34;&#34;&#34;Initialize a new BaseScanner.&#34;&#34;&#34;
-        self._found_devices = {}  # type: Dict[IPv4Address, conf.BaseService]
+        self._found_devices: Dict[IPv4Address, conf.AppleTV] = {}
 
     @abstractmethod
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
 
-    def service_discovered(  # pylint: disable=too-many-arguments
-        self, service_type, service_name, address, port, properties
-    ):
+    def service_discovered(self, service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Call when a service was discovered.&#34;&#34;&#34;
-        supported_types = {
+        {
             HOMESHARING_SERVICE: self._hs_service,
             DEVICE_SERVICE: self._non_hs_service,
             MEDIAREMOTE_SERVICE: self._mrp_service,
             AIRPLAY_SERVICE: self._airplay_service,
-        }
+        }.get(service.type, self._unsupported_service)(service)
 
-        handler = supported_types.get(service_type)
-        if handler:
-            handler(service_name, address, port, properties)
-        else:
-            _LOGGER.warning(&#34;Discovered unknown device: %s&#34;, service_type)
-
-    def _hs_service(self, service_name, address, port, properties):
+    def _hs_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device to discovered list.&#34;&#34;&#34;
-        identifier = service_name.split(&#34;.&#34;)[0]
-        name = properties.get(&#34;Name&#34;)
-        hsgid = properties.get(&#34;hG&#34;)
-        service = conf.DmapService(identifier, hsgid, port=port, properties=properties)
-        self._handle_service(address, name, service)
+        name = mdns_service.properties.get(&#34;Name&#34;)
+        service = conf.DmapService(
+            mdns_service.name,
+            mdns_service.properties.get(&#34;hG&#34;),
+            port=mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, name, service)
 
-    def _non_hs_service(self, service_name, address, port, properties):
+    def _non_hs_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device without Home Sharing to discovered list.&#34;&#34;&#34;
-        identifier = service_name.split(&#34;.&#34;)[0]
-        name = properties.get(&#34;CtlN&#34;)
-        service = conf.DmapService(identifier, None, port=port, properties=properties)
-        self._handle_service(address, name, service)
+        name = mdns_service.properties.get(&#34;CtlN&#34;)
+        service = conf.DmapService(
+            mdns_service.name,
+            None,
+            port=mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, name, service)
 
-    def _mrp_service(self, _, address, port, properties):
+    def _mrp_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new MediaRemoteProtocol device to discovered list.&#34;&#34;&#34;
-        identifier = properties.get(&#34;UniqueIdentifier&#34;)
-        name = properties.get(&#34;Name&#34;)
-        service = conf.MrpService(identifier, port, properties=properties)
-        self._handle_service(address, name, service)
+        name = mdns_service.properties.get(&#34;Name&#34;)
+        service = conf.MrpService(
+            mdns_service.properties.get(&#34;UniqueIdentifier&#34;),
+            mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, name, service)
 
-    def _airplay_service(self, service_name, address, port, properties):
+    def _airplay_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new AirPlay device to discovered list.&#34;&#34;&#34;
-        identifier = properties.get(&#34;deviceid&#34;)
-        name = service_name.replace(&#34;.&#34; + AIRPLAY_SERVICE, &#34;&#34;)
-        service = conf.AirPlayService(identifier, port, properties=properties)
-        self._handle_service(address, name, service)
+        service = conf.AirPlayService(
+            mdns_service.properties.get(&#34;deviceid&#34;),
+            mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, mdns_service.name, service)
 
-    def _handle_service(self, address, name, service):
-        if address not in self._found_devices:
-            self._found_devices[address] = conf.AppleTV(address, name)
+    def _unsupported_service(self, mdns_service: udns.Service) -&gt; None:
+        &#34;&#34;&#34;Handle unsupported service.&#34;&#34;&#34;
+        _LOGGER.warning(
+            &#34;Discovered unknown device %s (%s)&#34;, mdns_service.name, mdns_service.type
+        )
 
+    def _handle_service(self, address, name, service) -&gt; None:
         _LOGGER.debug(
             &#34;Auto-discovered %s at %s:%d (%s)&#34;,
             name,
@@ -182,52 +168,16 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             service.protocol,
         )
 
-        atv = self._found_devices[address]
+        atv = self._found_devices.setdefault(address, conf.AppleTV(address, name))
         atv.add_service(service)
 
 
-class BaseMdnsScanner(BaseScanner):
-    &#34;&#34;&#34;Base scanner for MDNS service discovery.&#34;&#34;&#34;
-
-    def handle_response(self, host: IPv4Address, response: udns.DnsMessage):
-        &#34;&#34;&#34;Handle received DNS message.&#34;&#34;&#34;
-        for resource in response.answers + response.resources:
-            if resource.qtype != udns.QTYPE_TXT:
-                continue
-
-            service_name = &#34;.&#34;.join(resource.qname.split(&#34;.&#34;)[1:]) + &#34;.&#34;
-            if service_name not in ALL_SERVICES:
-                continue
-
-            port = BaseMdnsScanner._get_port(response, resource.qname)
-            if not port:
-                _LOGGER.warning(&#34;Missing port for %s&#34;, resource.qname)
-                continue
-
-            self.service_discovered(
-                service_name,
-                resource.qname + &#34;.&#34;,
-                host,
-                port,
-                _decode_properties(resource.rd),
-            )
-
-    @staticmethod
-    def _get_port(response, qname):
-        for resource in response.answers + response.resources:
-            if resource.qtype != udns.QTYPE_SRV:
-                continue
-
-            if resource.qname == qname:
-                return resource.rd.get(&#34;port&#34;)
-
-        return None
-
-
-class UnicastMdnsScanner(BaseMdnsScanner):
+class UnicastMdnsScanner(BaseScanner):
     &#34;&#34;&#34;Service discovery based on unicast MDNS.&#34;&#34;&#34;
 
-    def __init__(self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop):
+    def __init__(
+        self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new UnicastMdnsScanner.&#34;&#34;&#34;
         super().__init__()
         self.hosts = hosts
@@ -238,19 +188,24 @@ class UnicastMdnsScanner(BaseMdnsScanner):
         results = await asyncio.gather(
             *[self._get_services(host, timeout) for host in self.hosts]
         )
+
         for host, response in results:
-            if response is not None:
-                self.handle_response(host, response)
+            if response is None:
+                continue
+
+            for service in udns.parse_services(response):
+                if service.address and service.port != 0:
+                    self.service_discovered(service)
+
         return self._found_devices
 
     async def _get_services(self, host: IPv4Address, timeout: int):
         port = int(os.environ.get(&#34;PYATV_UDNS_PORT&#34;, 5353))  # For testing purposes
-        services = [s[0:-1] for s in ALL_SERVICES]
         knocker = None
         try:
             knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
             response = await udns.unicast(
-                self.loop, str(host), services, port=port, timeout=timeout
+                self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
             return host, None
@@ -260,7 +215,7 @@ class UnicastMdnsScanner(BaseMdnsScanner):
         return host, response
 
 
-class MulticastMdnsScanner(BaseMdnsScanner):
+class MulticastMdnsScanner(BaseScanner):
     &#34;&#34;&#34;Service discovery based on multicast MDNS.&#34;&#34;&#34;
 
     def __init__(self, loop: asyncio.AbstractEventLoop):
@@ -270,12 +225,12 @@ class MulticastMdnsScanner(BaseMdnsScanner):
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        services = [s[0:-1] for s in ALL_SERVICES]
-        results = await udns.multicast(self.loop, services)
+        results = await udns.multicast(self.loop, ALL_SERVICES)
 
-        for host, response in results.items():
-            if response is not None:
-                self.handle_response(host, response)
+        for response in results.values():
+            for service in udns.parse_services(response):
+                if service.address and service.port != 0:
+                    self.service_discovered(service)
         return self._found_devices
 
 
@@ -513,100 +468,6 @@ async def pair(
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="pyatv.BaseMdnsScanner"><code class="flex name class">
-<span>class <span class="ident">BaseMdnsScanner</span></span>
-</code></dt>
-<dd>
-<section class="desc"><p>Base scanner for MDNS service discovery.</p>
-<p>Initialize a new BaseScanner.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class BaseMdnsScanner(BaseScanner):
-    &#34;&#34;&#34;Base scanner for MDNS service discovery.&#34;&#34;&#34;
-
-    def handle_response(self, host: IPv4Address, response: udns.DnsMessage):
-        &#34;&#34;&#34;Handle received DNS message.&#34;&#34;&#34;
-        for resource in response.answers + response.resources:
-            if resource.qtype != udns.QTYPE_TXT:
-                continue
-
-            service_name = &#34;.&#34;.join(resource.qname.split(&#34;.&#34;)[1:]) + &#34;.&#34;
-            if service_name not in ALL_SERVICES:
-                continue
-
-            port = BaseMdnsScanner._get_port(response, resource.qname)
-            if not port:
-                _LOGGER.warning(&#34;Missing port for %s&#34;, resource.qname)
-                continue
-
-            self.service_discovered(
-                service_name,
-                resource.qname + &#34;.&#34;,
-                host,
-                port,
-                _decode_properties(resource.rd),
-            )
-
-    @staticmethod
-    def _get_port(response, qname):
-        for resource in response.answers + response.resources:
-            if resource.qtype != udns.QTYPE_SRV:
-                continue
-
-            if resource.qname == qname:
-                return resource.rd.get(&#34;port&#34;)
-
-        return None</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>pyatv.BaseScanner</li>
-<li>abc.ABC</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="pyatv.MulticastMdnsScanner" href="#pyatv.MulticastMdnsScanner">MulticastMdnsScanner</a></li>
-<li>pyatv.UnicastMdnsScanner</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="pyatv.BaseMdnsScanner.handle_response"><code class="name flex">
-<span>def <span class="ident">handle_response</span></span>(<span>self, host: ipaddress.IPv4Address, response: pyatv.support.udns.DnsMessage)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Handle received DNS message.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_response(self, host: IPv4Address, response: udns.DnsMessage):
-    &#34;&#34;&#34;Handle received DNS message.&#34;&#34;&#34;
-    for resource in response.answers + response.resources:
-        if resource.qtype != udns.QTYPE_TXT:
-            continue
-
-        service_name = &#34;.&#34;.join(resource.qname.split(&#34;.&#34;)[1:]) + &#34;.&#34;
-        if service_name not in ALL_SERVICES:
-            continue
-
-        port = BaseMdnsScanner._get_port(response, resource.qname)
-        if not port:
-            _LOGGER.warning(&#34;Missing port for %s&#34;, resource.qname)
-            continue
-
-        self.service_discovered(
-            service_name,
-            resource.qname + &#34;.&#34;,
-            host,
-            port,
-            _decode_properties(resource.rd),
-        )</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 <dt id="pyatv.MulticastMdnsScanner"><code class="flex name class">
 <span>class <span class="ident">MulticastMdnsScanner</span></span>
 <span>(</span><span>loop: asyncio.events.AbstractEventLoop)</span>
@@ -618,7 +479,7 @@ async def pair(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class MulticastMdnsScanner(BaseMdnsScanner):
+<pre><code class="python">class MulticastMdnsScanner(BaseScanner):
     &#34;&#34;&#34;Service discovery based on multicast MDNS.&#34;&#34;&#34;
 
     def __init__(self, loop: asyncio.AbstractEventLoop):
@@ -628,17 +489,16 @@ async def pair(
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        services = [s[0:-1] for s in ALL_SERVICES]
-        results = await udns.multicast(self.loop, services)
+        results = await udns.multicast(self.loop, ALL_SERVICES)
 
-        for host, response in results.items():
-            if response is not None:
-                self.handle_response(host, response)
+        for response in results.values():
+            for service in udns.parse_services(response):
+                if service.address and service.port != 0:
+                    self.service_discovered(service)
         return self._found_devices</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="pyatv.BaseMdnsScanner" href="#pyatv.BaseMdnsScanner">BaseMdnsScanner</a></li>
 <li>pyatv.BaseScanner</li>
 <li>abc.ABC</li>
 </ul>
@@ -655,24 +515,16 @@ async def pair(
 </summary>
 <pre><code class="python">async def discover(self, timeout: int):
     &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-    services = [s[0:-1] for s in ALL_SERVICES]
-    results = await udns.multicast(self.loop, services)
+    results = await udns.multicast(self.loop, ALL_SERVICES)
 
-    for host, response in results.items():
-        if response is not None:
-            self.handle_response(host, response)
+    for response in results.values():
+        for service in udns.parse_services(response):
+            if service.address and service.port != 0:
+                self.service_discovered(service)
     return self._found_devices</code></pre>
 </details>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="pyatv.BaseMdnsScanner" href="#pyatv.BaseMdnsScanner">BaseMdnsScanner</a></b></code>:
-<ul class="hlist">
-<li><code><a title="pyatv.BaseMdnsScanner.handle_response" href="#pyatv.BaseMdnsScanner.handle_response">handle_response</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 </dl>
 </section>

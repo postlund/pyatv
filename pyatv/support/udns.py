@@ -6,7 +6,7 @@ import logging
 import socket
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import Optional, Dict, List, cast
+from typing import Optional, Dict, List, cast, NamedTuple, Union
 
 from pyatv.support import exceptions, net, log_binary
 
@@ -17,11 +17,37 @@ DnsQuestion = namedtuple("DnsQuestion", "qname qtype qclass")
 DnsAnswer = namedtuple("DnsAnswer", "qname qtype qclass ttl rd_length rd")
 DnsResource = namedtuple("DnsResource", "qname qtype qclass ttl rd_length rd")
 
+
+class Service(NamedTuple):
+    """Represent an MDNS service."""
+
+    type: str
+    name: str
+    address: Optional[IPv4Address]
+    port: int
+    properties: Dict[str, str]
+
+
 QTYPE_A = 0x0001
 QTYPE_PTR = 0x000C
 QTYPE_TXT = 0x0010
 QTYPE_SRV = 0x0021
 QTYPE_ANY = 0x00FF
+
+
+def _decode_properties(properties) -> Dict[str, str]:
+    def _decode(value: bytes):
+        try:
+            # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
+            return (
+                value.replace(b"\xC2\xA0", b" ")
+                .replace(b"\x00\xA0", b" ")
+                .decode("utf-8")
+            )
+        except Exception:  # pylint: disable=broad-except
+            return str(value)
+
+    return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
 
 
 def qname_encode(name):
@@ -198,10 +224,46 @@ class DnsMessage:
 
 
 def create_request(services: List[str]) -> DnsMessage:
-    """Creste a new DnsMessage requesting specified services."""
+    """Create a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services]
     return msg.pack()
+
+
+def parse_services(message: DnsMessage) -> List[Service]:
+    """Parse DNS response into Service objects."""
+    table: Dict[str, Dict[int, Union[DnsAnswer, DnsResource]]] = {}
+    services: List[str] = []
+    results: List[Service] = []
+
+    for record in message.answers + message.resources:
+        if record.qname.startswith("_"):
+            services.append(record.rd)
+        else:
+            table.setdefault(record.qname, {})[record.qtype] = record
+
+    for service in services:
+        service_name, _, service_type = service.partition(".")
+        device = table.get(service, {})
+
+        port = (QTYPE_SRV in device and device[QTYPE_SRV].rd["port"]) or 0
+        target = (QTYPE_SRV in device and device[QTYPE_SRV].rd["target"]) or None
+        properties = (QTYPE_TXT in device and device[QTYPE_TXT].rd) or {}
+
+        target_record = table.get(cast(str, target), {}).get(QTYPE_A)
+        address = IPv4Address(target_record.rd) if target_record else None
+
+        results.append(
+            Service(
+                service_type,
+                service_name,
+                address,
+                port,
+                _decode_properties(properties),
+            )
+        )
+
+    return results
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
