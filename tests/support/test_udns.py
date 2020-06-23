@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 from ipaddress import IPv4Address
 from unittest.mock import patch
 
@@ -88,68 +88,12 @@ async def unicast(event_loop, udns_server, service_name, timeout=1):
     )
 
 
-def add_service(
-    message: udns.DnsMessage,
-    service_type: Optional[str],
-    service_name: Optional[str],
-    address: Optional[str],
-    port: int,
-    properties: dict,
-):
-    if service_name is None:
-        return message
-
-    if address:
-        message.resources.append(
-            dns_utils.resource(service_name + ".local", udns.QTYPE_A, address)
-        )
-
-    # Remaining depends on service type
-    if service_type is None:
-        return message
-
-    message.answers.append(
-        dns_utils.answer(service_type, service_name + "." + service_type)
-    )
-
-    message.resources.append(
-        dns_utils.resource(
-            service_name + "." + service_type,
-            udns.QTYPE_SRV,
-            {
-                "priority": 0,
-                "weight": 0,
-                "port": port,
-                "target": service_name + ".local",
-            },
-        )
-    )
-
-    if properties:
-        message.resources.append(
-            dns_utils.resource(
-                service_name + "." + service_type,
-                udns.QTYPE_TXT,
-                {k.encode("utf-8"): v.encode("utf-8") for k, v in properties.items()},
-            )
-        )
-
-    return message
-
-
-def assert_service(
-    messages: udns.DnsMessage,
-    service_type: str,
-    service_name: str,
-    address: str,
-    port: int,
-    properties: dict,
-):
-    assert messages.type == service_type
-    assert messages.name == service_name
-    assert messages.address == (IPv4Address(address) if address else None)
-    assert messages.port == port
-    assert messages.properties == properties
+def get_response_for_service(
+    service: str,
+) -> Tuple[udns.DnsMessage, fake_udns.FakeDnsService]:
+    req = udns.create_request([service])
+    resp = fake_udns.create_response(req, TEST_SERVICES)
+    return udns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
 
 
 def get_qtype(messages, qtype):
@@ -176,25 +120,24 @@ async def test_non_local_address(event_loop, stub_local_address):
 
 
 @pytest.mark.asyncio
-async def test_non_existing_service(event_loop, udns_server):
-    resp, _ = await unicast(event_loop, udns_server, "_missing")
+async def test_non_existing_service():
+    resp, _ = get_response_for_service("_missing")
     assert len(resp.questions) == 1
     assert len(resp.answers) == 0
     assert len(resp.resources) == 0
 
 
 @pytest.mark.asyncio
-async def test_service_has_expected_responses(event_loop, udns_server):
-    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+async def test_service_has_expected_responses():
+    resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
     assert len(resp.resources) == 3
 
 
 @pytest.mark.asyncio
-async def test_service_has_valid_question(event_loop, udns_server):
-    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
-
+async def test_service_has_valid_question():
+    resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
     assert question.qtype == udns.QTYPE_ANY
@@ -202,9 +145,8 @@ async def test_service_has_valid_question(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_service_has_valid_answer(event_loop, udns_server):
-    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
-
+async def test_service_has_valid_answer():
+    resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
     assert answer.qtype == udns.QTYPE_PTR
@@ -214,8 +156,8 @@ async def test_service_has_valid_answer(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_service_has_valid_srv_resource(event_loop, udns_server):
-    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+async def test_service_has_valid_srv_resource():
+    resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = get_qtype(resp.resources, udns.QTYPE_SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
@@ -231,8 +173,8 @@ async def test_service_has_valid_srv_resource(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_service_has_valid_txt_resource(event_loop, udns_server):
-    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+async def test_service_has_valid_txt_resource():
+    resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = get_qtype(resp.resources, udns.QTYPE_TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
@@ -247,8 +189,8 @@ async def test_service_has_valid_txt_resource(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_service_has_valid_a_resource(event_loop, udns_server):
-    resp, data = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+async def test_service_has_valid_a_resource():
+    resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = get_qtype(resp.resources, udns.QTYPE_A)
     assert srv.qname == data.name + ".local"
@@ -258,13 +200,13 @@ async def test_service_has_valid_a_resource(event_loop, udns_server):
     assert srv.rd == "127.0.0.1"
 
 
-@pytest.mark.asyncio
-async def test_resend_if_no_response(event_loop, udns_server):
-    udns_server.skip_count = 2
-    resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
-    assert len(resp.questions) == 1
-    assert len(resp.answers) == 1
-    assert len(resp.resources) == 3
+# @pytest.mark.asyncio
+# async def test_resend_if_no_response(event_loop, udns_server):
+#     udns_server.skip_count = 2
+#     resp, _ = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
+#     assert len(resp.questions) == 1
+#     assert len(resp.answers) == 1
+#     assert len(resp.resources) == 3
 
 
 @pytest.mark.asyncio
@@ -274,9 +216,26 @@ async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit
 
 
 @pytest.mark.asyncio
-async def test_multicast_has_valid_response(
-    event_loop, udns_server, multicast_fastexit
-):
+async def test_unicast_has_valid_service(event_loop, udns_server):
+    resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    assert len(resp) == 1
+    assert resp[0].type == MEDIAREMOTE_SERVICE
+    assert resp[0].name == service.name
+    assert resp[0].port == service.port
+
+
+@pytest.mark.asyncio
+async def test_unicast_resend_if_no_response(event_loop, udns_server):
+    udns_server.skip_count = 2
+    resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
+    assert len(resp) == 1
+    assert resp[0].type == MEDIAREMOTE_SERVICE
+    assert resp[0].name == service.name
+    assert resp[0].port == service.port
+
+
+@pytest.mark.asyncio
+async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(1)
 
     resp = await udns.multicast(
@@ -284,10 +243,10 @@ async def test_multicast_has_valid_response(
     )
     assert len(resp) == 1
 
-    first = resp[IPv4Address("127.0.0.1")]
-    assert len(first.questions) == 1
-    assert len(first.answers) == 1
-    assert len(first.resources) == 3
+    first = resp[IPv4Address("127.0.0.1")][0]
+    assert first.type == MEDIAREMOTE_SERVICE
+    assert first.name == "Kitchen"
+    assert first.port == 1234
 
 
 def test_parse_empty_service():
@@ -296,7 +255,7 @@ def test_parse_empty_service():
 
 def test_parse_no_service_type():
     service_params = (None, "service", None, 0, {})
-    message = add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 0
@@ -304,7 +263,7 @@ def test_parse_no_service_type():
 
 def test_parse_no_service_name():
     service_params = ("_abc._tcp.local", None, None, 0, {})
-    message = add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 0
@@ -312,29 +271,29 @@ def test_parse_no_service_name():
 
 def test_parse_with_name_and_type():
     service_params = ("_abc._tcp.local", "service", None, 0, {})
-    message = add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 1
-    assert_service(parsed[0], *service_params)
+    dns_utils.assert_service(parsed[0], *service_params)
 
 
 def test_parse_with_port_and_address():
     service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
-    message = add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 1
-    assert_service(parsed[0], *service_params)
+    dns_utils.assert_service(parsed[0], *service_params)
 
 
 def test_parse_single_service():
     service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
-    message = add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 1
-    assert_service(parsed[0], *service_params)
+    dns_utils.assert_service(parsed[0], *service_params)
 
 
 def test_parse_double_service():
@@ -346,10 +305,10 @@ def test_parse_double_service():
         456,
         {"fizz": "buzz"},
     )
-    message = add_service(udns.DnsMessage(), *service1_params)
-    message = add_service(message, *service2_params)
+    message = dns_utils.add_service(udns.DnsMessage(), *service1_params)
+    message = dns_utils.add_service(message, *service2_params)
 
     parsed = udns.parse_services(message)
     assert len(parsed) == 2
-    assert_service(parsed[0], *service1_params)
-    assert_service(parsed[1], *service2_params)
+    dns_utils.assert_service(parsed[0], *service1_params)
+    dns_utils.assert_service(parsed[1], *service2_params)
