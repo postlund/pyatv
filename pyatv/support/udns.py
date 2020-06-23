@@ -280,7 +280,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.result: DnsMessage = DnsMessage()
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> DnsMessage:
+    async def get_response(self) -> List[Service]:
         """Get respoonse with a maximum timeout."""
         try:
             await asyncio.wait_for(
@@ -288,7 +288,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
-        return self.result
+        return parse_services(self.result)
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -345,7 +345,7 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         self.responses: Dict[IPv4Address, DnsMessage] = {}
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> Dict[IPv4Address, DnsMessage]:
+    async def get_response(self) -> Dict[IPv4Address, List[Service]]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -356,7 +356,9 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             if self._task:
                 self._task.cancel()
 
-        return dict(self.responses.items())
+        return {
+            host: parse_services(service) for host, service in self.responses.items()
+        }
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -393,7 +395,7 @@ async def unicast(
     services: List[str],
     port: int = 5353,
     timeout: int = 4,
-) -> DnsMessage:
+) -> List[Service]:
     """Send request for services to a host."""
     if not net.get_local_address_reaching(IPv4Address(address)):
         raise exceptions.NonLocalSubnetError(
@@ -417,7 +419,7 @@ async def multicast(
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
-) -> Dict[IPv4Address, DnsMessage]:
+) -> Dict[IPv4Address, List[Service]]:
     """Send multicast request for services."""
     # Create and bind socket, otherwise it doesn't work on Windows
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

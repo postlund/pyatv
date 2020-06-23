@@ -5,6 +5,7 @@ from unittest.mock import patch
 from contextlib import contextmanager
 from ipaddress import IPv4Address
 from collections import namedtuple
+from typing import List, Dict, Optional
 
 from pyatv.support import udns
 
@@ -59,12 +60,51 @@ def device_service(service_name, atv_name, address="127.0.0.1"):
     return ("_touch-able._tcp.local", service)
 
 
+def create_response(
+    request: bytes, services: Dict[str, FakeDnsService], ip_filter: Optional[str] = None
+):
+    msg = udns.DnsMessage().unpack(request)
+
+    resp = udns.DnsMessage()
+    resp.flags = 0x0840
+    resp.questions = msg.questions
+
+    for question in resp.questions:
+        service = services.get(question.qname)
+        if service is None or (ip_filter and service.address != ip_filter):
+            continue
+
+        # Add answer
+        full_name = service.name + "." + question.qname
+        resp.answers.append(dns_utils.answer(question.qname, full_name))
+
+        # Add service (SRV) resource
+        if service.port:
+            local_name = udns.qname_encode(service.name + ".local")
+            rd = struct.pack(">3H", 0, 0, service.port) + local_name
+            resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_SRV, rd))
+
+        # Add IP address
+        if service.address:
+            ipaddr = IPv4Address(service.address).packed
+            resp.resources.append(
+                dns_utils.resource(service.name + ".local", udns.QTYPE_A, ipaddr)
+            )
+
+        # Add properties
+        if service.properties:
+            rd = dns_utils.properties(service.properties)
+            resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_TXT, rd))
+
+    return resp
+
+
 class FakeUdns(asyncio.Protocol):
     def __init__(self, loop, services=None):
         self.loop = loop
         self.server = None
-        self.services = services or {}
-        self.skip_count = 0  # Ignore sending respone to this many requests
+        self.services: Dict[str, FakeDnsService] = services or {}
+        self.skip_count: int = 0  # Ignore sending respone to this many requests
         self.ip_filter = None
 
     async def start(self):
@@ -83,14 +123,10 @@ class FakeUdns(asyncio.Protocol):
     def port(self):
         return self.server.get_extra_info("socket").getsockname()[1]
 
-    @property
-    def request_count(self):
-        return self._recv_count
-
     def connection_made(self, transport):
         self.transport = transport
 
-    def datagram_received(self, data, addr):
+    def datagram_received(self, data: bytes, addr):
         msg = udns.DnsMessage().unpack(data)
         _LOGGER.debug("Received DNS request %s: %s", addr, msg)
 
@@ -99,39 +135,7 @@ class FakeUdns(asyncio.Protocol):
             self.skip_count -= 1
             return
 
-        resp = udns.DnsMessage()
-        resp.flags = 0x0840
-        resp.questions = msg.questions
-
-        for question in resp.questions:
-            service = self.services.get(question.qname)
-            if service is None or (
-                self.ip_filter and service.address != self.ip_filter
-            ):
-                continue
-
-            # Add answer
-            full_name = service.name + "." + question.qname
-            resp.answers.append(dns_utils.answer(question.qname, full_name))
-
-            # Add service (SRV) resource
-            if service.port:
-                local_name = udns.qname_encode(service.name + ".local")
-                rd = struct.pack(">3H", 0, 0, service.port) + local_name
-                resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_SRV, rd))
-
-            # Add IP address
-            if service.address:
-                ipaddr = IPv4Address(service.address).packed
-                resp.resources.append(
-                    dns_utils.resource(service.name + ".local", udns.QTYPE_A, ipaddr)
-                )
-
-            # Add properties
-            if service.properties:
-                rd = dns_utils.properties(service.properties)
-                resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_TXT, rd))
-
+        resp = create_response(data, self.services, self.ip_filter)
         self.transport.sendto(resp.pack(), addr)
 
 
