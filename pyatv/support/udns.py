@@ -54,7 +54,8 @@ def qname_encode(name):
     """Encode QNAME without using labels."""
 
     def _enc_word(word):
-        return bytes([len(word) & 0xFF]) + word.encode("ascii")
+        encoded = word.encode("utf-8")
+        return bytes([len(encoded) & 0xFF]) + encoded
 
     return b"".join([_enc_word(x) for x in name.split(".")]) + b"\x00"
 
@@ -81,7 +82,7 @@ def qname_decode(ptr, message, raw=False):
     name_components, rest = _rec(ptr)
     if raw:
         return name_components, rest[1:]
-    return ".".join([x.decode() for x in name_components]), rest[1:]
+    return ".".join([x.decode("utf-8") for x in name_components]), rest[1:]
 
 
 def parse_txt_dict(data, msg):
