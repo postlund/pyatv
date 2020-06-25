@@ -27,6 +27,13 @@ def properties(properties: Dict[bytes, bytes]) -> bytes:
     return rd
 
 
+def get_qtype(messages: udns.DnsMessage, qtype: int) -> Optional[udns.DnsResource]:
+    for message in messages:
+        if message.qtype == qtype:
+            return message
+    return None
+
+
 def add_service(
     message: udns.DnsMessage,
     service_type: Optional[str],

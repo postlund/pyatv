@@ -5,7 +5,7 @@ from unittest.mock import patch
 from contextlib import contextmanager
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 from pyatv.support import udns
 
@@ -60,8 +60,26 @@ def device_service(service_name, atv_name, address="127.0.0.1"):
     return ("_touch-able._tcp.local", service)
 
 
+def _lookup_service(
+    question: udns.DnsQuestion, services: Dict[str, FakeDnsService]
+) -> Tuple[Optional[FakeDnsService], Optional[str]]:
+    if question.qname.startswith("_"):
+        service = services.get(question.qname)
+        return service, service.name + "." + question.qname if service else None
+
+    service_name, _, service_type = question.qname.partition(".")
+    for name, service in services.items():
+        if service_type == name and service_name == service.name:
+            return service, question.qname
+
+    return None, None
+
+
 def create_response(
-    request: bytes, services: Dict[str, FakeDnsService], ip_filter: Optional[str] = None
+    request: bytes,
+    services: Dict[str, FakeDnsService],
+    ip_filter: Optional[str] = None,
+    sleep_proxy: bool = False,
 ):
     msg = udns.DnsMessage().unpack(request)
 
@@ -70,13 +88,17 @@ def create_response(
     resp.questions = msg.questions
 
     for question in resp.questions:
-        service = services.get(question.qname)
+        service, full_name = _lookup_service(question, services)
         if service is None or (ip_filter and service.address != ip_filter):
             continue
 
         # Add answer
-        full_name = service.name + "." + question.qname
-        resp.answers.append(dns_utils.answer(question.qname, full_name))
+        if full_name:
+            resp.answers.append(dns_utils.answer(question.qname, full_name))
+
+            # If acting as sleep proxy, just return a PTR
+            if sleep_proxy and question.qname.startswith("_"):
+                continue
 
         # Add service (SRV) resource
         if service.port:
@@ -106,6 +128,8 @@ class FakeUdns(asyncio.Protocol):
         self.services: Dict[str, FakeDnsService] = services or {}
         self.skip_count: int = 0  # Ignore sending respone to this many requests
         self.ip_filter = None
+        self.sleep_proxy: bool = False
+        self.request_count: int = 0
 
     async def start(self):
         _LOGGER.debug("Starting fake UDNS server")
@@ -135,8 +159,9 @@ class FakeUdns(asyncio.Protocol):
             self.skip_count -= 1
             return
 
-        resp = create_response(data, self.services, self.ip_filter)
+        resp = create_response(data, self.services, self.ip_filter, self.sleep_proxy)
         self.transport.sendto(resp.pack(), addr)
+        self.request_count += 1
 
 
 @contextmanager

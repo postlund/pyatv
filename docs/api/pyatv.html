@@ -193,7 +193,6 @@ class UnicastMdnsScanner(BaseScanner):
             for service in services:
                 if service.address and service.port != 0:
                     self.service_discovered(service)
-
         return self._found_devices
 
     async def _get_services(
@@ -224,7 +223,7 @@ class MulticastMdnsScanner(BaseScanner):
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        results = await udns.multicast(self.loop, ALL_SERVICES)
+        results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
 
         for services in results.values():
             for service in services:
@@ -488,7 +487,7 @@ async def pair(
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        results = await udns.multicast(self.loop, ALL_SERVICES)
+        results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
 
         for services in results.values():
             for service in services:
@@ -514,7 +513,7 @@ async def pair(
 </summary>
 <pre><code class="python">async def discover(self, timeout: int):
     &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-    results = await udns.multicast(self.loop, ALL_SERVICES)
+    results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
 
     for services in results.values():
         for service in services:

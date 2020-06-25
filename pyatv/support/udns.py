@@ -224,7 +224,7 @@ class DnsMessage:
         )
 
 
-def create_request(services: List[str]) -> DnsMessage:
+def create_request(services: List[str]) -> bytes:
     """Create a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services]
@@ -234,18 +234,22 @@ def create_request(services: List[str]) -> DnsMessage:
 def parse_services(message: DnsMessage) -> List[Service]:
     """Parse DNS response into Service objects."""
     table: Dict[str, Dict[int, Union[DnsAnswer, DnsResource]]] = {}
-    services: List[str] = []
-    results: List[Service] = []
+    ptrs: Dict[str, str] = {}  # qname -> real name
+    results: Dict[str, Service] = {}
 
+    # Create a global table with all records
     for record in message.answers + message.resources:
-        if record.qname.startswith("_"):
-            services.append(record.rd)
+        if record.qtype == QTYPE_PTR and record.qname.startswith("_"):
+            ptrs[record.qname] = record.rd
         else:
             table.setdefault(record.qname, {})[record.qtype] = record
 
-    for service in services:
+    # Build services
+    for service, device in table.items():
         service_name, _, service_type = service.partition(".")
-        device = table.get(service, {})
+
+        if not service_type.endswith("_tcp.local"):
+            continue
 
         port = (QTYPE_SRV in device and device[QTYPE_SRV].rd["port"]) or 0
         target = (QTYPE_SRV in device and device[QTYPE_SRV].rd["target"]) or None
@@ -254,17 +258,16 @@ def parse_services(message: DnsMessage) -> List[Service]:
         target_record = table.get(cast(str, target), {}).get(QTYPE_A)
         address = IPv4Address(target_record.rd) if target_record else None
 
-        results.append(
-            Service(
-                service_type,
-                service_name,
-                address,
-                port,
-                _decode_properties(properties),
-            )
+        results[service] = Service(
+            service_type, service_name, address, port, _decode_properties(properties),
         )
 
-    return results
+    # If there are PTRs to unknown services, create placeholders
+    for qname, real_name in ptrs.items():
+        if real_name not in results:
+            results[real_name] = Service(qname, real_name.split(".")[0], None, 0, {})
+
+    return list(results.values())
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
@@ -340,9 +343,10 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         self.address = address
         self.port = port
         self.timeout = timeout
-        self.semaphore = asyncio.Semaphore(value=0)
+        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.transport = None
-        self.responses: Dict[IPv4Address, DnsMessage] = {}
+        self.responses: Dict[IPv4Address, List[Service]] = {}
+        self._unicasts: Dict[IPv4Address, bytes] = {}
         self._task: Optional[asyncio.Future] = None
 
     async def get_response(self) -> Dict[IPv4Address, List[Service]]:
@@ -356,9 +360,7 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             if self._task:
                 self._task.cancel()
 
-        return {
-            host: parse_services(service) for host, service in self.responses.items()
-        }
+        return self.responses
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -374,12 +376,30 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             )
 
             self.transport.sendto(self.message, (self.address, self.port))
+
+            # Send unicast requests if devices are sleeping
+            for address, message in self._unicasts.items():
+                log_binary(
+                    _LOGGER,
+                    f"Sending unicast DNS request to {address}:{self.port}",
+                    Data=message,
+                )
+                self.transport.sendto(message, (address, self.port))
+
             await asyncio.sleep(1)
 
     def datagram_received(self, data, addr) -> None:
         """DNS response packet received."""
         log_binary(_LOGGER, "Received DNS response from " + str(addr[0]), Data=data)
-        self.responses[IPv4Address(addr[0])] = DnsMessage().unpack(data)
+        services = parse_services(DnsMessage().unpack(data))
+
+        is_sleep_proxy = all(service.port == 0 for service in services)
+        if is_sleep_proxy:
+            self._unicasts[addr[0]] = create_request(
+                [service.name + "." + service.type for service in services]
+            )
+        else:
+            self.responses[IPv4Address(addr[0])] = services
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
