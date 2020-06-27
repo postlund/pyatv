@@ -59,7 +59,7 @@ _KEY_LOOKUP = {
     "select": [1, 0x89, 0],
     "menu": [1, 0x86, 0],
     "topmenu": [1, 0x86, 1],
-    "home": [12, 0x40, 1],
+    "home": [12, 0x60, 1],
     "suspend": [1, 0x82, 0],
     "wakeup": [1, 0x83, 0],
     "volume_up": [12, 0xE9, 0],
