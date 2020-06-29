@@ -253,13 +253,7 @@ async def test_unicast_scan_homesharing(udns_server, unicast_scan):
     assert len(atvs) == 1
 
     assert_device(
-        atvs[0],
-        "Apple TV HS",
-        ip_address(IP_LOCALHOST),
-        "abcd",
-        Protocol.DMAP,
-        3689,
-        HSGID,
+        atvs[0], "Apple TV HS", ip_address(IP_3), "abcd", Protocol.DMAP, 3689, HSGID,
     )
 
 
@@ -273,12 +267,7 @@ async def test_unicast_scan_no_homesharing(udns_server, unicast_scan):
     assert len(atvs) == 1
 
     assert_device(
-        atvs[0],
-        "Apple TV Device",
-        ip_address(IP_LOCALHOST),
-        "Apple TV",
-        Protocol.DMAP,
-        3689,
+        atvs[0], "Apple TV Device", ip_address(IP_2), "Apple TV", Protocol.DMAP, 3689,
     )
 
 

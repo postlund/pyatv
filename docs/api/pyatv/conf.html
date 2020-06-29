@@ -221,13 +221,13 @@ class DmapService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
-        credentials: str,
-        port: int = None,
+        identifier: Optional[str],
+        credentials: Optional[str],
+        port: int = 3689,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.DMAP, port or 3689, properties)
+        super().__init__(identifier, Protocol.DMAP, port, properties)
         self.credentials = credentials
 
 
@@ -237,9 +237,9 @@ class MrpService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
@@ -253,9 +253,9 @@ class AirPlayService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int = 7000,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
@@ -274,7 +274,7 @@ class AirPlayService(BaseService):
 <dl>
 <dt id="pyatv.conf.AirPlayService"><code class="flex name class">
 <span>class <span class="ident">AirPlayService</span></span>
-<span>(</span><span>identifier: str, port: int = 7000, credentials: str = None, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Union[str, NoneType], port: int = 7000, credentials: Union[str, NoneType] = None, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
@@ -288,9 +288,9 @@ class AirPlayService(BaseService):
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int = 7000,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
@@ -642,7 +642,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>
-<span>(</span><span>identifier: str, credentials: str, port: int = None, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Union[str, NoneType], credentials: Union[str, NoneType], port: int = 3689, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
@@ -656,13 +656,13 @@ returned.</p></section>
 
     def __init__(
         self,
-        identifier: str,
-        credentials: str,
-        port: int = None,
+        identifier: Optional[str],
+        credentials: Optional[str],
+        port: int = 3689,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.DMAP, port or 3689, properties)
+        super().__init__(identifier, Protocol.DMAP, port, properties)
         self.credentials = credentials</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -681,7 +681,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.MrpService"><code class="flex name class">
 <span>class <span class="ident">MrpService</span></span>
-<span>(</span><span>identifier: str, port: int, credentials: str = None, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Union[str, NoneType], port: int, credentials: Union[str, NoneType] = None, properties: Union[Dict[str, str], NoneType] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
@@ -695,9 +695,9 @@ returned.</p></section>
 
     def __init__(
         self,
-        identifier: str,
+        identifier: Optional[str],
         port: int,
-        credentials: str = None,
+        credentials: Optional[str] = None,
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;

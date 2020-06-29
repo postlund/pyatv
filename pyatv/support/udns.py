@@ -6,7 +6,7 @@ import logging
 import socket
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import Optional, Dict, List, cast
+from typing import Optional, Dict, List, cast, NamedTuple, Union
 
 from pyatv.support import exceptions, net, log_binary
 
@@ -17,17 +17,45 @@ DnsQuestion = namedtuple("DnsQuestion", "qname qtype qclass")
 DnsAnswer = namedtuple("DnsAnswer", "qname qtype qclass ttl rd_length rd")
 DnsResource = namedtuple("DnsResource", "qname qtype qclass ttl rd_length rd")
 
+
+class Service(NamedTuple):
+    """Represent an MDNS service."""
+
+    type: str
+    name: str
+    address: Optional[IPv4Address]
+    port: int
+    properties: Dict[str, str]
+
+
+QTYPE_A = 0x0001
 QTYPE_PTR = 0x000C
 QTYPE_TXT = 0x0010
 QTYPE_SRV = 0x0021
 QTYPE_ANY = 0x00FF
 
 
+def _decode_properties(properties) -> Dict[str, str]:
+    def _decode(value: bytes):
+        try:
+            # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
+            return (
+                value.replace(b"\xC2\xA0", b" ")
+                .replace(b"\x00\xA0", b" ")
+                .decode("utf-8")
+            )
+        except Exception:  # pylint: disable=broad-except
+            return str(value)
+
+    return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
+
+
 def qname_encode(name):
     """Encode QNAME without using labels."""
 
     def _enc_word(word):
-        return bytes([len(word) & 0xFF]) + word.encode("ascii")
+        encoded = word.encode("utf-8")
+        return bytes([len(encoded) & 0xFF]) + encoded
 
     return b"".join([_enc_word(x) for x in name.split(".")]) + b"\x00"
 
@@ -54,7 +82,7 @@ def qname_decode(ptr, message, raw=False):
     name_components, rest = _rec(ptr)
     if raw:
         return name_components, rest[1:]
-    return ".".join([x.decode() for x in name_components]), rest[1:]
+    return ".".join([x.decode("utf-8") for x in name_components]), rest[1:]
 
 
 def parse_txt_dict(data, msg):
@@ -105,6 +133,8 @@ def unpack_rr(ptr, msg):
         rd_data = parse_txt_dict(rd_data, msg)
     elif qtype == QTYPE_SRV:
         rd_data = parse_srv_dict(rd_data, msg)
+    elif qtype == QTYPE_A:
+        rd_data = str(IPv4Address(rd_data))
 
     return ptr, data + (rd_data,)
 
@@ -194,11 +224,50 @@ class DnsMessage:
         )
 
 
-def create_request(services: List[str]) -> DnsMessage:
-    """Creste a new DnsMessage requesting specified services."""
+def create_request(services: List[str]) -> bytes:
+    """Create a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, QTYPE_ANY, 0x8001) for s in services]
     return msg.pack()
+
+
+def parse_services(message: DnsMessage) -> List[Service]:
+    """Parse DNS response into Service objects."""
+    table: Dict[str, Dict[int, Union[DnsAnswer, DnsResource]]] = {}
+    ptrs: Dict[str, str] = {}  # qname -> real name
+    results: Dict[str, Service] = {}
+
+    # Create a global table with all records
+    for record in message.answers + message.resources:
+        if record.qtype == QTYPE_PTR and record.qname.startswith("_"):
+            ptrs[record.qname] = record.rd
+        else:
+            table.setdefault(record.qname, {})[record.qtype] = record
+
+    # Build services
+    for service, device in table.items():
+        service_name, _, service_type = service.partition(".")
+
+        if not service_type.endswith("_tcp.local"):
+            continue
+
+        port = (QTYPE_SRV in device and device[QTYPE_SRV].rd["port"]) or 0
+        target = (QTYPE_SRV in device and device[QTYPE_SRV].rd["target"]) or None
+        properties = (QTYPE_TXT in device and device[QTYPE_TXT].rd) or {}
+
+        target_record = table.get(cast(str, target), {}).get(QTYPE_A)
+        address = IPv4Address(target_record.rd) if target_record else None
+
+        results[service] = Service(
+            service_type, service_name, address, port, _decode_properties(properties),
+        )
+
+    # If there are PTRs to unknown services, create placeholders
+    for qname, real_name in ptrs.items():
+        if real_name not in results:
+            results[real_name] = Service(qname, real_name.split(".")[0], None, 0, {})
+
+    return list(results.values())
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
@@ -214,7 +283,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.result: DnsMessage = DnsMessage()
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> DnsMessage:
+    async def get_response(self) -> List[Service]:
         """Get respoonse with a maximum timeout."""
         try:
             await asyncio.wait_for(
@@ -222,7 +291,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
-        return self.result
+        return parse_services(self.result)
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -274,12 +343,13 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         self.address = address
         self.port = port
         self.timeout = timeout
-        self.semaphore = asyncio.Semaphore(value=0)
+        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.transport = None
-        self.responses: Dict[IPv4Address, DnsMessage] = {}
+        self.responses: Dict[IPv4Address, List[Service]] = {}
+        self._unicasts: Dict[IPv4Address, bytes] = {}
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> Dict[IPv4Address, DnsMessage]:
+    async def get_response(self) -> Dict[IPv4Address, List[Service]]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -290,7 +360,7 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             if self._task:
                 self._task.cancel()
 
-        return dict(self.responses.items())
+        return self.responses
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -306,12 +376,30 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             )
 
             self.transport.sendto(self.message, (self.address, self.port))
+
+            # Send unicast requests if devices are sleeping
+            for address, message in self._unicasts.items():
+                log_binary(
+                    _LOGGER,
+                    f"Sending unicast DNS request to {address}:{self.port}",
+                    Data=message,
+                )
+                self.transport.sendto(message, (address, self.port))
+
             await asyncio.sleep(1)
 
     def datagram_received(self, data, addr) -> None:
         """DNS response packet received."""
         log_binary(_LOGGER, "Received DNS response from " + str(addr[0]), Data=data)
-        self.responses[IPv4Address(addr[0])] = DnsMessage().unpack(data)
+        services = parse_services(DnsMessage().unpack(data))
+
+        is_sleep_proxy = all(service.port == 0 for service in services)
+        if is_sleep_proxy:
+            self._unicasts[addr[0]] = create_request(
+                [service.name + "." + service.type for service in services]
+            )
+        else:
+            self.responses[IPv4Address(addr[0])] = services
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
@@ -327,7 +415,7 @@ async def unicast(
     services: List[str],
     port: int = 5353,
     timeout: int = 4,
-) -> DnsMessage:
+) -> List[Service]:
     """Send request for services to a host."""
     if not net.get_local_address_reaching(IPv4Address(address)):
         raise exceptions.NonLocalSubnetError(
@@ -351,7 +439,7 @@ async def multicast(
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
-) -> Dict[IPv4Address, DnsMessage]:
+) -> Dict[IPv4Address, List[Service]]:
     """Send multicast request for services."""
     # Create and bind socket, otherwise it doesn't work on Windows
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
