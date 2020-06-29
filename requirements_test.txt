@@ -1,14 +1,14 @@
 black==19.10b0
 codecov==2.1.7
-deepdiff==4.3.2
+deepdiff==5.0.0
 flake8==3.8.3
 pytest==5.4.3
-pytest-asyncio==0.12.0
+pytest-asyncio==0.14.0
 pytest-cov==2.10.0
 pytest-timeout==1.4.1
 pytest-aiohttp==0.3.0
 pytest-xdist==1.32.0
 pydocstyle==5.0.2
-mypy==0.780
+mypy==0.782
 mypy-protobuf==1.23
 typed-ast==1.4.1
