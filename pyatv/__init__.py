@@ -138,15 +138,15 @@ class UnicastMdnsScanner(BaseScanner):
             *[self._get_services(host, timeout) for host in self.hosts]
         )
 
-        for host, services in results:
-            for service in services:
+        for host, response in results:
+            for service in response.services:
                 if service.address and service.port != 0:
                     self.service_discovered(service)
         return self._found_devices
 
     async def _get_services(
         self, host: IPv4Address, timeout: int
-    ) -> Tuple[IPv4Address, List[udns.Service]]:
+    ) -> Tuple[IPv4Address, udns.Response]:
         port = int(os.environ.get("PYATV_UDNS_PORT", 5353))  # For testing purposes
         knocker = None
         try:
@@ -155,7 +155,7 @@ class UnicastMdnsScanner(BaseScanner):
                 self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
-            return host, []
+            return host, udns.Response([])
         finally:
             if knocker:
                 knocker.cancel()
@@ -174,8 +174,8 @@ class MulticastMdnsScanner(BaseScanner):
         """Start discovery of devices and services."""
         results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
 
-        for services in results.values():
-            for service in services:
+        for response in results.values():
+            for service in response.services:
                 if service.address and service.port != 0:
                     self.service_discovered(service)
         return self._found_devices
