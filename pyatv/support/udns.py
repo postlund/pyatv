@@ -28,6 +28,12 @@ class Service(NamedTuple):
     properties: Dict[str, str]
 
 
+class Response(NamedTuple):
+    """Represent response to an MDNS request."""
+
+    services: List[Service]
+
+
 QTYPE_A = 0x0001
 QTYPE_PTR = 0x000C
 QTYPE_TXT = 0x0010
@@ -283,7 +289,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.result: DnsMessage = DnsMessage()
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> List[Service]:
+    async def get_response(self) -> Response:
         """Get respoonse with a maximum timeout."""
         try:
             await asyncio.wait_for(
@@ -291,7 +297,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
-        return parse_services(self.result)
+        return Response(parse_services(self.result))
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -345,11 +351,11 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
         self.timeout = timeout
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.transport = None
-        self.responses: Dict[IPv4Address, List[Service]] = {}
+        self.responses: Dict[IPv4Address, Response] = {}
         self._unicasts: Dict[IPv4Address, bytes] = {}
         self._task: Optional[asyncio.Future] = None
 
-    async def get_response(self) -> Dict[IPv4Address, List[Service]]:
+    async def get_response(self) -> Dict[IPv4Address, Response]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -399,7 +405,7 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
                 [service.name + "." + service.type for service in services]
             )
         else:
-            self.responses[IPv4Address(addr[0])] = services
+            self.responses[IPv4Address(addr[0])] = Response(services)
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
@@ -415,7 +421,7 @@ async def unicast(
     services: List[str],
     port: int = 5353,
     timeout: int = 4,
-) -> List[Service]:
+) -> Response:
     """Send request for services to a host."""
     if not net.get_local_address_reaching(IPv4Address(address)):
         raise exceptions.NonLocalSubnetError(
@@ -439,7 +445,7 @@ async def multicast(
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
-) -> Dict[IPv4Address, List[Service]]:
+) -> Dict[IPv4Address, Response]:
     """Send multicast request for services."""
     # Create and bind socket, otherwise it doesn't work on Windows
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
