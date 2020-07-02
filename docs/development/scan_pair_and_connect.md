@@ -55,7 +55,9 @@ atvs = scan(loop, hosts=['10.0.0.1'])
 atvs = scan(loop, protocol=Protocol.MRP)
 ```
 
-A list is always returned, even if a filter is applied.
+A list is always returned, even if a filter is applied. See
+{% include api i="conf.AppleTV" %} for what you can do with a configuration
+(e.g. extract deep sleep state or available services).
 
 ## Pairing
 

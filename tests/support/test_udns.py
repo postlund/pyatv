@@ -213,7 +213,7 @@ async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit
 @pytest.mark.asyncio
 async def test_unicast_has_valid_service(event_loop, udns_server):
     resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
-    assert len(resp) == 1
+    assert len(resp.services) == 1
     assert resp.services[0].type == MEDIAREMOTE_SERVICE
     assert resp.services[0].name == service.name
     assert resp.services[0].port == service.port
@@ -223,7 +223,7 @@ async def test_unicast_has_valid_service(event_loop, udns_server):
 async def test_unicast_resend_if_no_response(event_loop, udns_server):
     udns_server.skip_count = 2
     resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
-    assert len(resp) == 1
+    assert len(resp.services) == 1
     assert resp.services[0].type == MEDIAREMOTE_SERVICE
     assert resp.services[0].name == service.name
     assert resp.services[0].port == service.port
@@ -234,7 +234,7 @@ async def test_unicast_specific_service(event_loop, udns_server):
     resp, _ = await unicast(
         event_loop, udns_server, SERVICE_NAME + "." + MEDIAREMOTE_SERVICE
     )
-    assert len(resp) == 1
+    assert len(resp.services) == 1
 
     service = TEST_SERVICES.get(MEDIAREMOTE_SERVICE)
     assert resp.services[0].type == MEDIAREMOTE_SERVICE
@@ -280,6 +280,26 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
     assert len(resp) == 1
+
+
+@pytest.mark.asyncio
+async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit):
+    multicast_fastexit(1, 0)
+
+    resp = await udns.multicast(
+        event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
+    )
+
+    assert not resp[IPv4Address("127.0.0.1")].deep_sleep
+
+    udns_server.sleep_proxy = True
+    multicast_fastexit(1, 0)
+
+    resp = await udns.multicast(
+        event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
+    )
+
+    assert resp[IPv4Address("127.0.0.1")].deep_sleep
 
 
 def test_parse_empty_service():

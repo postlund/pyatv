@@ -29,7 +29,7 @@ AIRPLAY_PROPERTIES = {
 
 class ConfTest(unittest.TestCase):
     def setUp(self):
-        self.config = conf.AppleTV(ADDRESS_1, NAME)
+        self.config = conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True)
         self.dmap_service = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
         self.mrp_service = conf.MrpService(
             IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES
@@ -192,3 +192,4 @@ class ConfTest(unittest.TestCase):
         self.assertIn("LOGIN_ID", output)
         self.assertIn(str(PORT_2), output)
         self.assertIn("3689", output)
+        self.assertIn("Deep Sleep: True", output)

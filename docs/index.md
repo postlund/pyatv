@@ -7,7 +7,7 @@ title: pyatv
 This is a python 3.6 (or later) library for controlling and querying information from an Apple TV. It is built
 upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
 
-Support for tvOS is still in early stages, but feel free to give it a spin:
+To install, use `pip`:
 
     pip install {{ site.pyatv_version }}
 
@@ -32,15 +32,15 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 
 | **Feature**                                                     | **DMAP** | **MRP**   | **Links** |
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | [Concept](documentation/concepts/#scanning), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
+| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | [Concept](documentation/concepts/#device-metadata), [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| Push updates                                                    | Yes      | Yes       | [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
+| Push updates                                                    | Yes      | Yes       | [Concept](documentation/concepts/#metadata-and-push-updates), [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| Remote control pairing                                          | Yes      | Yes       | [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
+| Remote control pairing                                          | Yes      | Yes       | [Concept](documentation/concepts/#pairing), [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
-| List supported features                                         | Yes**    | Yes       | [Doc](development/features), {% include api i="interface.Features" %}
+| List supported features                                         | Yes**    | Yes       | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | AirPlay stream URL (including local files)                      | Yes      | Yes       | [Doc](development/airplay), {% include api i="interface.Stream" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
@@ -48,7 +48,7 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- |--------- | --------- | --------- |
-| Different input actions (tap, double tap, hold)                 | Yes      | No        | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| Different input actions (tap, double tap, hold)                 | No       | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- |--------- | --------- | --------- |
 | Fetch artwork                                                   | Yes      | Yes       | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
@@ -65,10 +65,14 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 | Volume Controls                                                 | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | -------- | --------- | --------- |
 | Power management                                                | No       | Yes       | [Doc](development/power_management), {% include api i="interface.Power" %}
+| --------------------------------------------------------------- | -------- | --------- | --------- |
+| Deep Sleep Detection                                            | Yes***   | Yes***    | [Concept](documentation/concepts/#deep-sleep-detection), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*
 
 *\*\* Limited support due to restrictions in protocol.*
+
+*\*\*\* Experimental feature (not fully tested)*
 
 There are also few utility scripts bundled with `pyatv` that makes it easy to try the library
 out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy) and
