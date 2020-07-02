@@ -16,7 +16,7 @@ from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
 from pyatv.scripts import publish_service
-from pyatv.support import log_binary, net, udns
+from pyatv.support import log_binary, net, mdns
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -222,12 +222,12 @@ async def _start_mrp_proxy(loop, args, zconf):
     _LOGGER.debug("Binding to local address %s", args.local_ip)
 
     if not (args.remote_port or args.name):
-        resp = await udns.request(loop, args.remote_ip, ["_mediaremotetv._tcp.local"])
+        resp = await mdns.request(loop, args.remote_ip, ["_mediaremotetv._tcp.local"])
         if not args.remote_port:
-            args.remote_port = _get_property(resp, udns.QTYPE_SRV, "port")
+            args.remote_port = _get_property(resp, mdns.QTYPE_SRV, "port")
         if not args.name:
             args.name = (
-                _get_property(resp, udns.QTYPE_TXT, b"Name").decode("utf-8") + " Proxy"
+                _get_property(resp, mdns.QTYPE_TXT, b"Name").decode("utf-8") + " Proxy"
             )
 
     if not args.name:

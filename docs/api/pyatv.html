@@ -69,7 +69,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.support import net, knock, udns
+from pyatv.support import net, knock, mdns
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
 
-    def handle_response(self, response: udns.Response):
+    def handle_response(self, response: mdns.Response):
         &#34;&#34;&#34;Call when an MDNS response was received.&#34;&#34;&#34;
         for service in response.services:
             if service.address and service.port != 0:
@@ -113,7 +113,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
                 if atv:
                     atv.deep_sleep = response.deep_sleep
 
-    def _service_discovered(self, service: udns.Service) -&gt; None:
+    def _service_discovered(self, service: mdns.Service) -&gt; None:
         {
             HOMESHARING_SERVICE: self._hs_service,
             DEVICE_SERVICE: self._non_hs_service,
@@ -121,7 +121,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             AIRPLAY_SERVICE: self._airplay_service,
         }.get(service.type, self._unsupported_service)(service)
 
-    def _hs_service(self, mdns_service: udns.Service) -&gt; None:
+    def _hs_service(self, mdns_service: mdns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device to discovered list.&#34;&#34;&#34;
         name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
         service = conf.DmapService(
@@ -132,7 +132,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, name, service)
 
-    def _non_hs_service(self, mdns_service: udns.Service) -&gt; None:
+    def _non_hs_service(self, mdns_service: mdns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device without Home Sharing to discovered list.&#34;&#34;&#34;
         name = mdns_service.properties.get(&#34;CtlN&#34;, &#34;Unknown&#34;)
         service = conf.DmapService(
@@ -143,7 +143,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, name, service)
 
-    def _mrp_service(self, mdns_service: udns.Service) -&gt; None:
+    def _mrp_service(self, mdns_service: mdns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new MediaRemoteProtocol device to discovered list.&#34;&#34;&#34;
         name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
         service = conf.MrpService(
@@ -153,7 +153,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, name, service)
 
-    def _airplay_service(self, mdns_service: udns.Service) -&gt; None:
+    def _airplay_service(self, mdns_service: mdns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new AirPlay device to discovered list.&#34;&#34;&#34;
         service = conf.AirPlayService(
             mdns_service.properties.get(&#34;deviceid&#34;),
@@ -162,7 +162,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, mdns_service.name, service)
 
-    def _unsupported_service(self, mdns_service: udns.Service) -&gt; None:
+    def _unsupported_service(self, mdns_service: mdns.Service) -&gt; None:
         &#34;&#34;&#34;Handle unsupported service.&#34;&#34;&#34;
         _LOGGER.warning(
             &#34;Discovered unknown device %s (%s)&#34;, mdns_service.name, mdns_service.type
@@ -204,16 +204,16 @@ class UnicastMdnsScanner(BaseScanner):
             self.handle_response(response)
         return self._found_devices
 
-    async def _get_services(self, host: IPv4Address, timeout: int) -&gt; udns.Response:
+    async def _get_services(self, host: IPv4Address, timeout: int) -&gt; mdns.Response:
         port = int(os.environ.get(&#34;PYATV_UDNS_PORT&#34;, 5353))  # For testing purposes
         knocker = None
         try:
             knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
-            response = await udns.unicast(
+            response = await mdns.unicast(
                 self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
-            return udns.Response([], False)
+            return mdns.Response([], False)
         finally:
             if knocker:
                 knocker.cancel()
@@ -230,7 +230,7 @@ class MulticastMdnsScanner(BaseScanner):
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+        responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
         for _, response in responses.items():
             self.handle_response(response)
         return self._found_devices
@@ -491,7 +491,7 @@ async def pair(
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+        responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
         for _, response in responses.items():
             self.handle_response(response)
         return self._found_devices</code></pre>
@@ -514,7 +514,7 @@ async def pair(
 </summary>
 <pre><code class="python">async def discover(self, timeout: int):
     &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-    responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+    responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
     for _, response in responses.items():
         self.handle_response(response)
     return self._found_devices</code></pre>

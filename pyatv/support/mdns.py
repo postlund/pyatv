@@ -1,4 +1,4 @@
-"""Minimalistic unicast DNS-SD implementation."""
+"""Minimalistic DNS-SD implementation."""
 import math
 import asyncio
 import struct
@@ -42,7 +42,7 @@ QTYPE_SRV = 0x0021
 QTYPE_ANY = 0x00FF
 
 
-def _decode_properties(properties) -> Dict[str, str]:
+def _decode_properties(properties: Dict[bytes, bytes]) -> Dict[str, str]:
     def _decode(value: bytes):
         try:
             # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
@@ -57,7 +57,7 @@ def _decode_properties(properties) -> Dict[str, str]:
     return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
 
 
-def qname_encode(name):
+def qname_encode(name: str) -> bytes:
     """Encode QNAME without using labels."""
 
     def _enc_word(word):
