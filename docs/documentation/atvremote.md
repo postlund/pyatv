@@ -20,6 +20,7 @@ To find devices, use the `scan` command:
        Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
             MAC: AA:BB:CC:DD:EE:FF
+     Deep Sleep: False
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55
@@ -52,6 +53,7 @@ scan for specific devices ("unicast") by specifying `--scan-hosts`:
        Model/SW: 4K tvOS 13.3.1 build 17K795
         Address: 10.0.0.10
             MAC: AA:BB:CC:DD:EE:FF
+     Deep Sleep: False
     Identifiers:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55

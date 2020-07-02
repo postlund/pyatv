@@ -23,7 +23,10 @@ That's about it.
 
 ### <a name="q3"></a>Q3. Is it possible to "see" if a device is turned on before sending a command?
 
-No (there is at least no known way as of date).
+"Yes". Since version 0.7.0 it is possible to see (when scanning) if a device
+is in deep sleep mode. A device can however be asleep (appear off) without being
+in deep sleep, so it's not fully reliable. This is still also considered an
+experimental feature.
 
 ### <a name="q4"></a>Q4. Why is all or some metadata missing when I am playing some media on my device?
 

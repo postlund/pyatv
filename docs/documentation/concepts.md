@@ -97,6 +97,17 @@ not something that can be fixed in `pyatv`. To make this more clear, {% include 
 will raise {% include api i="pyatv.exceptions.NonLocalSubnetError" %} if an address that is outside of
 all local subnets is scanned.
 
+### Deep Sleep Detection
+
+When a device is in deep sleep mode, another node on the network called a
+*sleep proxy* will announce its prescence. It will also wake up the device
+using Wake-On-LAN in case a particular service is requested. When scanning,
+`pyatv` can detect if the response originates from a sleep proxy and
+deduce that a device is sleeping. This is indicated via the flag
+{% include api i="conf.AppleTV.deep_sleep" %}.
+
+*Please do note that this is an experimental feature.*
+
 ## Pairing
 
 Pairing is the process of obtaining credentials. You provide a configuration to the  {% include api i="pyatv.pair" %} method together with the protocol you want to pair. Usually you have to input a PIN code and then the credentials are returned via the `credentials` property in the service. This means that you can scan for a device, pass the configuration you got from {% include api i="pyatv.scan" %} to  {% include api i="pyatv.pair" %} and finish off by passing the same configuration to {% include api i="pyatv.connect" %}. As simple as that.

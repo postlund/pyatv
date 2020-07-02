@@ -57,7 +57,7 @@ import logging
 import datetime  # noqa
 from abc import ABC, abstractmethod
 from ipaddress import IPv4Address
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 import aiohttp
 
@@ -103,8 +103,17 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
 
-    def service_discovered(self, service: udns.Service) -&gt; None:
-        &#34;&#34;&#34;Call when a service was discovered.&#34;&#34;&#34;
+    def handle_response(self, response: udns.Response):
+        &#34;&#34;&#34;Call when an MDNS response was received.&#34;&#34;&#34;
+        for service in response.services:
+            if service.address and service.port != 0:
+                self._service_discovered(service)
+
+                atv = self._found_devices.get(service.address)
+                if atv:
+                    atv.deep_sleep = response.deep_sleep
+
+    def _service_discovered(self, service: udns.Service) -&gt; None:
         {
             HOMESHARING_SERVICE: self._hs_service,
             DEVICE_SERVICE: self._non_hs_service,
@@ -114,7 +123,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
 
     def _hs_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;Name&#34;)
+        name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
         service = conf.DmapService(
             mdns_service.name,
             mdns_service.properties.get(&#34;hG&#34;),
@@ -125,7 +134,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
 
     def _non_hs_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new device without Home Sharing to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;CtlN&#34;)
+        name = mdns_service.properties.get(&#34;CtlN&#34;, &#34;Unknown&#34;)
         service = conf.DmapService(
             mdns_service.name,
             None,
@@ -136,7 +145,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
 
     def _mrp_service(self, mdns_service: udns.Service) -&gt; None:
         &#34;&#34;&#34;Add a new MediaRemoteProtocol device to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;Name&#34;)
+        name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
         service = conf.MrpService(
             mdns_service.properties.get(&#34;UniqueIdentifier&#34;),
             mdns_service.port,
@@ -159,7 +168,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             &#34;Discovered unknown device %s (%s)&#34;, mdns_service.name, mdns_service.type
         )
 
-    def _handle_service(self, address, name, service) -&gt; None:
+    def _handle_service(
+        self, address, name: str, service: interface.BaseService
+    ) -&gt; None:
         _LOGGER.debug(
             &#34;Auto-discovered %s at %s:%d (%s)&#34;,
             name,
@@ -185,19 +196,15 @@ class UnicastMdnsScanner(BaseScanner):
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        results = await asyncio.gather(
+        responses = await asyncio.gather(
             *[self._get_services(host, timeout) for host in self.hosts]
         )
 
-        for host, response in results:
-            for service in response.services:
-                if service.address and service.port != 0:
-                    self.service_discovered(service)
+        for response in responses:
+            self.handle_response(response)
         return self._found_devices
 
-    async def _get_services(
-        self, host: IPv4Address, timeout: int
-    ) -&gt; Tuple[IPv4Address, udns.Response]:
+    async def _get_services(self, host: IPv4Address, timeout: int) -&gt; udns.Response:
         port = int(os.environ.get(&#34;PYATV_UDNS_PORT&#34;, 5353))  # For testing purposes
         knocker = None
         try:
@@ -206,11 +213,11 @@ class UnicastMdnsScanner(BaseScanner):
                 self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
-            return host, udns.Response([])
+            return udns.Response([], False)
         finally:
             if knocker:
                 knocker.cancel()
-        return host, response
+        return response
 
 
 class MulticastMdnsScanner(BaseScanner):
@@ -223,12 +230,9 @@ class MulticastMdnsScanner(BaseScanner):
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-
-        for response in results.values():
-            for service in response.services:
-                if service.address and service.port != 0:
-                    self.service_discovered(service)
+        responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+        for _, response in responses.items():
+            self.handle_response(response)
         return self._found_devices
 
 
@@ -487,12 +491,9 @@ async def pair(
 
     async def discover(self, timeout: int):
         &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-
-        for response in results.values():
-            for service in response.services:
-                if service.address and service.port != 0:
-                    self.service_discovered(service)
+        responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+        for _, response in responses.items():
+            self.handle_response(response)
         return self._found_devices</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -513,12 +514,9 @@ async def pair(
 </summary>
 <pre><code class="python">async def discover(self, timeout: int):
     &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-    results = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-
-    for response in results.values():
-        for service in response.services:
-            if service.address and service.port != 0:
-                self.service_discovered(service)
+    responses = await udns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+    for _, response in responses.items():
+        self.handle_response(response)
     return self._found_devices</code></pre>
 </details>
 </dd>

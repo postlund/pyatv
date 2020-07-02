@@ -24,11 +24,14 @@ link_group: api
 <h4><code><a title="pyatv.conf.AppleTV" href="#pyatv.conf.AppleTV">AppleTV</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.conf.AppleTV.add_service" href="#pyatv.conf.AppleTV.add_service">add_service</a></code></li>
+<li><code><a title="pyatv.conf.AppleTV.address" href="#pyatv.conf.AppleTV.address">address</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.all_identifiers" href="#pyatv.conf.AppleTV.all_identifiers">all_identifiers</a></code></li>
+<li><code><a title="pyatv.conf.AppleTV.deep_sleep" href="#pyatv.conf.AppleTV.deep_sleep">deep_sleep</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.device_info" href="#pyatv.conf.AppleTV.device_info">device_info</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.get_service" href="#pyatv.conf.AppleTV.get_service">get_service</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.identifier" href="#pyatv.conf.AppleTV.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.main_service" href="#pyatv.conf.AppleTV.main_service">main_service</a></code></li>
+<li><code><a title="pyatv.conf.AppleTV.name" href="#pyatv.conf.AppleTV.name">name</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.ready" href="#pyatv.conf.AppleTV.ready">ready</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.services" href="#pyatv.conf.AppleTV.services">services</a></code></li>
 <li><code><a title="pyatv.conf.AppleTV.set_credentials" href="#pyatv.conf.AppleTV.set_credentials">set_credentials</a></code></li>
@@ -85,11 +88,34 @@ class AppleTV:
     AirPlay.
     &#34;&#34;&#34;
 
-    def __init__(self, address: IPv4Address, name: str) -&gt; None:
+    def __init__(
+        self, address: IPv4Address, name: str, deep_sleep: bool = False
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self.address = address
-        self.name = name
-        self._services = {}  # type: Dict[Protocol, BaseService]
+        self._address = address
+        self._name = name
+        self._deep_sleep = deep_sleep
+        self._services: Dict[Protocol, BaseService] = {}
+
+    @property
+    def address(self) -&gt; IPv4Address:
+        &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
+        return self._address
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
+        return self._name
+
+    @property
+    def deep_sleep(self) -&gt; bool:
+        &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
+        return self._deep_sleep
+
+    @deep_sleep.setter
+    def deep_sleep(self, value: bool) -&gt; None:
+        &#34;&#34;&#34;Change device deep sleep mode.&#34;&#34;&#34;
+        self._deep_sleep = value
 
     @property
     def ready(self) -&gt; bool:
@@ -180,7 +206,7 @@ class AppleTV:
         return DeviceInfo(os_type, version, build, lookup_model(model), mac)
 
     def _all_properties(self) -&gt; Dict[str, str]:
-        properties = {}  # type: Dict[str, str]
+        properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -194,24 +220,18 @@ class AppleTV:
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
         device_info = self.device_info
-        services = [&#34; - {0}&#34;.format(s) for s in self._services.values()]
-        identifiers = [&#34; - {0}&#34;.format(x) for x in self.all_identifiers]
+        services = &#34;\n&#34;.join([&#34; - {0}&#34;.format(s) for s in self._services.values()])
+        identifiers = &#34;\n&#34;.join([&#34; - {0}&#34;.format(x) for x in self.all_identifiers])
         return (
-            &#34;       Name: {0}\n&#34;
-            &#34;   Model/SW: {1}\n&#34;
-            &#34;    Address: {2}\n&#34;
-            &#34;        MAC: {3}\n&#34;
-            &#34;Identifiers:\n&#34;
-            &#34;{4}\n&#34;
-            &#34;Services:\n&#34;
-            &#34;{5}&#34;.format(
-                self.name,
-                device_info,
-                self.address,
-                device_info.mac,
-                &#34;\n&#34;.join(identifiers),
-                &#34;\n&#34;.join(services),
-            )
+            f&#34;       Name: {self.name}\n&#34;
+            f&#34;   Model/SW: {device_info}\n&#34;
+            f&#34;    Address: {self.address}\n&#34;
+            f&#34;        MAC: {self.device_info.mac}\n&#34;
+            f&#34; Deep Sleep: {self.deep_sleep}\n&#34;
+            f&#34;Identifiers:\n&#34;
+            f&#34;{identifiers}\n&#34;
+            f&#34;Services:\n&#34;
+            f&#34;{services}&#34;
         )
 
 
@@ -313,7 +333,7 @@ class AirPlayService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -333,11 +353,34 @@ AirPlay.</p>
     AirPlay.
     &#34;&#34;&#34;
 
-    def __init__(self, address: IPv4Address, name: str) -&gt; None:
+    def __init__(
+        self, address: IPv4Address, name: str, deep_sleep: bool = False
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self.address = address
-        self.name = name
-        self._services = {}  # type: Dict[Protocol, BaseService]
+        self._address = address
+        self._name = name
+        self._deep_sleep = deep_sleep
+        self._services: Dict[Protocol, BaseService] = {}
+
+    @property
+    def address(self) -&gt; IPv4Address:
+        &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
+        return self._address
+
+    @property
+    def name(self) -&gt; str:
+        &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
+        return self._name
+
+    @property
+    def deep_sleep(self) -&gt; bool:
+        &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
+        return self._deep_sleep
+
+    @deep_sleep.setter
+    def deep_sleep(self, value: bool) -&gt; None:
+        &#34;&#34;&#34;Change device deep sleep mode.&#34;&#34;&#34;
+        self._deep_sleep = value
 
     @property
     def ready(self) -&gt; bool:
@@ -428,7 +471,7 @@ AirPlay.</p>
         return DeviceInfo(os_type, version, build, lookup_model(model), mac)
 
     def _all_properties(self) -&gt; Dict[str, str]:
-        properties = {}  # type: Dict[str, str]
+        properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -442,28 +485,35 @@ AirPlay.</p>
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
         device_info = self.device_info
-        services = [&#34; - {0}&#34;.format(s) for s in self._services.values()]
-        identifiers = [&#34; - {0}&#34;.format(x) for x in self.all_identifiers]
+        services = &#34;\n&#34;.join([&#34; - {0}&#34;.format(s) for s in self._services.values()])
+        identifiers = &#34;\n&#34;.join([&#34; - {0}&#34;.format(x) for x in self.all_identifiers])
         return (
-            &#34;       Name: {0}\n&#34;
-            &#34;   Model/SW: {1}\n&#34;
-            &#34;    Address: {2}\n&#34;
-            &#34;        MAC: {3}\n&#34;
-            &#34;Identifiers:\n&#34;
-            &#34;{4}\n&#34;
-            &#34;Services:\n&#34;
-            &#34;{5}&#34;.format(
-                self.name,
-                device_info,
-                self.address,
-                device_info.mac,
-                &#34;\n&#34;.join(identifiers),
-                &#34;\n&#34;.join(services),
-            )
+            f&#34;       Name: {self.name}\n&#34;
+            f&#34;   Model/SW: {device_info}\n&#34;
+            f&#34;    Address: {self.address}\n&#34;
+            f&#34;        MAC: {self.device_info.mac}\n&#34;
+            f&#34; Deep Sleep: {self.deep_sleep}\n&#34;
+            f&#34;Identifiers:\n&#34;
+            f&#34;{identifiers}\n&#34;
+            f&#34;Services:\n&#34;
+            f&#34;{services}&#34;
         )</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="pyatv.conf.AppleTV.address"><code class="name">var <span class="ident">address</span> -> ipaddress.IPv4Address</code></dt>
+<dd>
+<section class="desc"><p>IP address of device.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def address(self) -&gt; IPv4Address:
+    &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
+    return self._address</code></pre>
+</details>
+</dd>
 <dt id="pyatv.conf.AppleTV.all_identifiers"><code class="name">var <span class="ident">all_identifiers</span> -> List[str]</code></dt>
 <dd>
 <section class="desc"><p>Return all unique identifiers for this device.</p></section>
@@ -475,6 +525,19 @@ AirPlay.</p>
 def all_identifiers(self) -&gt; List[str]:
     &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
     return [x.identifier for x in self.services if x.identifier is not None]</code></pre>
+</details>
+</dd>
+<dt id="pyatv.conf.AppleTV.deep_sleep"><code class="name">var <span class="ident">deep_sleep</span> -> bool</code></dt>
+<dd>
+<section class="desc"><p>If device is in deep sleep.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def deep_sleep(self) -&gt; bool:
+    &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
+    return self._deep_sleep</code></pre>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="interface#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
@@ -522,6 +585,19 @@ def identifier(self) -&gt; Optional[str]:
         if service:
             return service.identifier
     return None</code></pre>
+</details>
+</dd>
+<dt id="pyatv.conf.AppleTV.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
+<dd>
+<section class="desc"><p>Name of device.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self) -&gt; str:
+    &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
+    return self._name</code></pre>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.ready"><code class="name">var <span class="ident">ready</span> -> bool</code></dt>

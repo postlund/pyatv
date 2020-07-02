@@ -32,6 +32,7 @@ class Response(NamedTuple):
     """Represent response to an MDNS request."""
 
     services: List[Service]
+    deep_sleep: bool
 
 
 QTYPE_A = 0x0001
@@ -297,7 +298,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
-        return Response(parse_services(self.result))
+        return Response(services=parse_services(self.result), deep_sleep=False)
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -405,7 +406,9 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
                 [service.name + "." + service.type for service in services]
             )
         else:
-            self.responses[IPv4Address(addr[0])] = Response(services)
+            self.responses[IPv4Address(addr[0])] = Response(
+                services=services, deep_sleep=(addr[0] in self._unicasts)
+            )
 
     def error_received(self, exc) -> None:
         """Error received during communication."""

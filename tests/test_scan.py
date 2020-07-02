@@ -184,6 +184,19 @@ async def test_multicast_scan_for_particular_device(udns_server, multicast_scan)
 
 
 @pytest.mark.asyncio
+async def test_multicast_scan_deep_sleeping_device(udns_server, multicast_scan):
+    udns_server.sleep_proxy = True
+
+    udns_server.add_service(
+        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+    )
+
+    atvs = await multicast_scan()
+    assert len(atvs) == 1
+    assert atvs[0].deep_sleep
+
+
+@pytest.mark.asyncio
 async def test_multicast_scan_device_info(udns_server, multicast_scan):
     udns_server.add_service(
         fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)

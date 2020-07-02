@@ -24,11 +24,34 @@ class AppleTV:
     AirPlay.
     """
 
-    def __init__(self, address: IPv4Address, name: str) -> None:
+    def __init__(
+        self, address: IPv4Address, name: str, deep_sleep: bool = False
+    ) -> None:
         """Initialize a new AppleTV."""
-        self.address = address
-        self.name = name
-        self._services = {}  # type: Dict[Protocol, BaseService]
+        self._address = address
+        self._name = name
+        self._deep_sleep = deep_sleep
+        self._services: Dict[Protocol, BaseService] = {}
+
+    @property
+    def address(self) -> IPv4Address:
+        """IP address of device."""
+        return self._address
+
+    @property
+    def name(self) -> str:
+        """Name of device."""
+        return self._name
+
+    @property
+    def deep_sleep(self) -> bool:
+        """If device is in deep sleep."""
+        return self._deep_sleep
+
+    @deep_sleep.setter
+    def deep_sleep(self, value: bool) -> None:
+        """Change device deep sleep mode."""
+        self._deep_sleep = value
 
     @property
     def ready(self) -> bool:
@@ -119,7 +142,7 @@ class AppleTV:
         return DeviceInfo(os_type, version, build, lookup_model(model), mac)
 
     def _all_properties(self) -> Dict[str, str]:
-        properties = {}  # type: Dict[str, str]
+        properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -133,24 +156,18 @@ class AppleTV:
     def __str__(self) -> str:
         """Return a string representation of this object."""
         device_info = self.device_info
-        services = [" - {0}".format(s) for s in self._services.values()]
-        identifiers = [" - {0}".format(x) for x in self.all_identifiers]
+        services = "\n".join([" - {0}".format(s) for s in self._services.values()])
+        identifiers = "\n".join([" - {0}".format(x) for x in self.all_identifiers])
         return (
-            "       Name: {0}\n"
-            "   Model/SW: {1}\n"
-            "    Address: {2}\n"
-            "        MAC: {3}\n"
-            "Identifiers:\n"
-            "{4}\n"
-            "Services:\n"
-            "{5}".format(
-                self.name,
-                device_info,
-                self.address,
-                device_info.mac,
-                "\n".join(identifiers),
-                "\n".join(services),
-            )
+            f"       Name: {self.name}\n"
+            f"   Model/SW: {device_info}\n"
+            f"    Address: {self.address}\n"
+            f"        MAC: {self.device_info.mac}\n"
+            f" Deep Sleep: {self.deep_sleep}\n"
+            f"Identifiers:\n"
+            f"{identifiers}\n"
+            f"Services:\n"
+            f"{services}"
         )
 
 
