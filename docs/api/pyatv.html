@@ -27,16 +27,6 @@ link_group: api
 <li><code><a title="pyatv.scan" href="#pyatv.scan">scan</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="pyatv.MulticastMdnsScanner" href="#pyatv.MulticastMdnsScanner">MulticastMdnsScanner</a></code></h4>
-<ul class="">
-<li><code><a title="pyatv.MulticastMdnsScanner.discover" href="#pyatv.MulticastMdnsScanner.discover">discover</a></code></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 </nav>
 <article id="content">
@@ -51,13 +41,10 @@ link_group: api
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Main routines for interacting with an Apple TV.&#34;&#34;&#34;
 
-import os
 import asyncio
-import logging
 import datetime  # noqa
-from abc import ABC, abstractmethod
 from ipaddress import IPv4Address
-from typing import List, Dict
+from typing import List
 
 import aiohttp
 
@@ -69,171 +56,8 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.support import net, knock, mdns
-
-
-_LOGGER = logging.getLogger(__name__)
-
-HOMESHARING_SERVICE: str = &#34;_appletv-v2._tcp.local&#34;
-DEVICE_SERVICE: str = &#34;_touch-able._tcp.local&#34;
-MEDIAREMOTE_SERVICE: str = &#34;_mediaremotetv._tcp.local&#34;
-AIRPLAY_SERVICE: str = &#34;_airplay._tcp.local&#34;
-
-ALL_SERVICES: List[str] = [
-    HOMESHARING_SERVICE,
-    DEVICE_SERVICE,
-    MEDIAREMOTE_SERVICE,
-    AIRPLAY_SERVICE,
-]
-
-# These ports have been &#34;arbitrarily&#34; chosen (see issue #580) because a device normally
-# listen on them (more or less). They are used as best-effort when for unicast scanning
-# to try to wake up a device. Both issue #580 and #595 are good references to read.
-KNOCK_PORTS: List[int] = [3689, 7000, 49152, 32498]
-
-
-class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;Base scanner for service discovery.&#34;&#34;&#34;
-
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new BaseScanner.&#34;&#34;&#34;
-        self._found_devices: Dict[IPv4Address, conf.AppleTV] = {}
-
-    @abstractmethod
-    async def discover(self, timeout: int):
-        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-
-    def handle_response(self, response: mdns.Response):
-        &#34;&#34;&#34;Call when an MDNS response was received.&#34;&#34;&#34;
-        for service in response.services:
-            if service.address and service.port != 0:
-                self._service_discovered(service)
-
-                atv = self._found_devices.get(service.address)
-                if atv:
-                    atv.deep_sleep = response.deep_sleep
-
-    def _service_discovered(self, service: mdns.Service) -&gt; None:
-        {
-            HOMESHARING_SERVICE: self._hs_service,
-            DEVICE_SERVICE: self._non_hs_service,
-            MEDIAREMOTE_SERVICE: self._mrp_service,
-            AIRPLAY_SERVICE: self._airplay_service,
-        }.get(service.type, self._unsupported_service)(service)
-
-    def _hs_service(self, mdns_service: mdns.Service) -&gt; None:
-        &#34;&#34;&#34;Add a new device to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
-        service = conf.DmapService(
-            mdns_service.name,
-            mdns_service.properties.get(&#34;hG&#34;),
-            port=mdns_service.port,
-            properties=mdns_service.properties,
-        )
-        self._handle_service(mdns_service.address, name, service)
-
-    def _non_hs_service(self, mdns_service: mdns.Service) -&gt; None:
-        &#34;&#34;&#34;Add a new device without Home Sharing to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;CtlN&#34;, &#34;Unknown&#34;)
-        service = conf.DmapService(
-            mdns_service.name,
-            None,
-            port=mdns_service.port,
-            properties=mdns_service.properties,
-        )
-        self._handle_service(mdns_service.address, name, service)
-
-    def _mrp_service(self, mdns_service: mdns.Service) -&gt; None:
-        &#34;&#34;&#34;Add a new MediaRemoteProtocol device to discovered list.&#34;&#34;&#34;
-        name = mdns_service.properties.get(&#34;Name&#34;, &#34;Unknown&#34;)
-        service = conf.MrpService(
-            mdns_service.properties.get(&#34;UniqueIdentifier&#34;),
-            mdns_service.port,
-            properties=mdns_service.properties,
-        )
-        self._handle_service(mdns_service.address, name, service)
-
-    def _airplay_service(self, mdns_service: mdns.Service) -&gt; None:
-        &#34;&#34;&#34;Add a new AirPlay device to discovered list.&#34;&#34;&#34;
-        service = conf.AirPlayService(
-            mdns_service.properties.get(&#34;deviceid&#34;),
-            mdns_service.port,
-            properties=mdns_service.properties,
-        )
-        self._handle_service(mdns_service.address, mdns_service.name, service)
-
-    def _unsupported_service(self, mdns_service: mdns.Service) -&gt; None:
-        &#34;&#34;&#34;Handle unsupported service.&#34;&#34;&#34;
-        _LOGGER.warning(
-            &#34;Discovered unknown device %s (%s)&#34;, mdns_service.name, mdns_service.type
-        )
-
-    def _handle_service(
-        self, address, name: str, service: interface.BaseService
-    ) -&gt; None:
-        _LOGGER.debug(
-            &#34;Auto-discovered %s at %s:%d (%s)&#34;,
-            name,
-            address,
-            service.port,
-            service.protocol,
-        )
-
-        atv = self._found_devices.setdefault(address, conf.AppleTV(address, name))
-        atv.add_service(service)
-
-
-class UnicastMdnsScanner(BaseScanner):
-    &#34;&#34;&#34;Service discovery based on unicast MDNS.&#34;&#34;&#34;
-
-    def __init__(
-        self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new UnicastMdnsScanner.&#34;&#34;&#34;
-        super().__init__()
-        self.hosts = hosts
-        self.loop = loop
-
-    async def discover(self, timeout: int):
-        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        responses = await asyncio.gather(
-            *[self._get_services(host, timeout) for host in self.hosts]
-        )
-
-        for response in responses:
-            self.handle_response(response)
-        return self._found_devices
-
-    async def _get_services(self, host: IPv4Address, timeout: int) -&gt; mdns.Response:
-        port = int(os.environ.get(&#34;PYATV_UDNS_PORT&#34;, 5353))  # For testing purposes
-        knocker = None
-        try:
-            knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
-            response = await mdns.unicast(
-                self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
-            )
-        except asyncio.TimeoutError:
-            return mdns.Response([], False)
-        finally:
-            if knocker:
-                knocker.cancel()
-        return response
-
-
-class MulticastMdnsScanner(BaseScanner):
-    &#34;&#34;&#34;Service discovery based on multicast MDNS.&#34;&#34;&#34;
-
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        &#34;&#34;&#34;Initialize a new MulticastMdnsScanner.&#34;&#34;&#34;
-        super().__init__()
-        self.loop = loop
-
-    async def discover(self, timeout: int):
-        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-        for _, response in responses.items():
-            self.handle_response(response)
-        return self._found_devices
+from pyatv.support import net
+from pyatv.support.scan import BaseScanner, UnicastMdnsScanner, MulticastMdnsScanner
 
 
 async def scan(
@@ -468,61 +292,6 @@ async def pair(
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="pyatv.MulticastMdnsScanner"><code class="flex name class">
-<span>class <span class="ident">MulticastMdnsScanner</span></span>
-<span>(</span><span>loop: asyncio.events.AbstractEventLoop)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Service discovery based on multicast MDNS.</p>
-<p>Initialize a new MulticastMdnsScanner.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MulticastMdnsScanner(BaseScanner):
-    &#34;&#34;&#34;Service discovery based on multicast MDNS.&#34;&#34;&#34;
-
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        &#34;&#34;&#34;Initialize a new MulticastMdnsScanner.&#34;&#34;&#34;
-        super().__init__()
-        self.loop = loop
-
-    async def discover(self, timeout: int):
-        &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-        responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-        for _, response in responses.items():
-            self.handle_response(response)
-        return self._found_devices</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>pyatv.BaseScanner</li>
-<li>abc.ABC</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="pyatv.MulticastMdnsScanner.discover"><code class="name flex">
-<span>async def <span class="ident">discover</span></span>(<span>self, timeout: int)</span>
-</code></dt>
-<dd>
-<section class="desc"><p>Start discovery of devices and services.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def discover(self, timeout: int):
-    &#34;&#34;&#34;Start discovery of devices and services.&#34;&#34;&#34;
-    responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
-    for _, response in responses.items():
-        self.handle_response(response)
-    return self._found_devices</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <footer id="footer">
