@@ -7,7 +7,7 @@ from ipaddress import IPv4Address
 from collections import namedtuple
 from typing import List, Dict, Optional, Tuple
 
-from pyatv.support import udns
+from pyatv.support import mdns
 
 from tests.support import dns_utils
 
@@ -61,7 +61,7 @@ def device_service(service_name, atv_name, address="127.0.0.1"):
 
 
 def _lookup_service(
-    question: udns.DnsQuestion, services: Dict[str, FakeDnsService]
+    question: mdns.DnsQuestion, services: Dict[str, FakeDnsService]
 ) -> Tuple[Optional[FakeDnsService], Optional[str]]:
     if question.qname.startswith("_"):
         service = services.get(question.qname)
@@ -81,9 +81,9 @@ def create_response(
     ip_filter: Optional[str] = None,
     sleep_proxy: bool = False,
 ):
-    msg = udns.DnsMessage().unpack(request)
+    msg = mdns.DnsMessage().unpack(request)
 
-    resp = udns.DnsMessage()
+    resp = mdns.DnsMessage()
     resp.flags = 0x0840
     resp.questions = msg.questions
 
@@ -102,21 +102,21 @@ def create_response(
 
         # Add service (SRV) resource
         if service.port:
-            local_name = udns.qname_encode(service.name + ".local")
+            local_name = mdns.qname_encode(service.name + ".local")
             rd = struct.pack(">3H", 0, 0, service.port) + local_name
-            resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_SRV, rd))
+            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_SRV, rd))
 
         # Add IP address
         if service.address:
             ipaddr = IPv4Address(service.address).packed
             resp.resources.append(
-                dns_utils.resource(service.name + ".local", udns.QTYPE_A, ipaddr)
+                dns_utils.resource(service.name + ".local", mdns.QTYPE_A, ipaddr)
             )
 
         # Add properties
         if service.properties:
             rd = dns_utils.properties(service.properties)
-            resp.resources.append(dns_utils.resource(full_name, udns.QTYPE_TXT, rd))
+            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_TXT, rd))
 
     return resp
 
@@ -151,7 +151,7 @@ class FakeUdns(asyncio.Protocol):
         self.transport = transport
 
     def datagram_received(self, data: bytes, addr):
-        msg = udns.DnsMessage().unpack(data)
+        msg = mdns.DnsMessage().unpack(data)
         _LOGGER.debug("Received DNS request %s: %s", addr, msg)
 
         if self.skip_count > 0:
@@ -166,7 +166,7 @@ class FakeUdns(asyncio.Protocol):
 
 @contextmanager
 def stub_multicast(udns_server, loop):
-    patcher = patch("pyatv.support.udns.multicast")
+    patcher = patch("pyatv.support.mdns.multicast")
 
     async def _multicast(loop, services, **kwargs):
         hosts = set(service.address for service in udns_server.services.values())
@@ -175,10 +175,10 @@ def stub_multicast(udns_server, loop):
         udns_server.sleep_proxy = False
         for host in hosts:
             udns_server.ip_filter = host
-            response = await udns.unicast(
+            response = await mdns.unicast(
                 loop, "127.0.0.1", services, port=udns_server.port
             )
-            devices[IPv4Address(host)] = udns.Response(response.services, sleep_proxy)
+            devices[IPv4Address(host)] = mdns.Response(response.services, sleep_proxy)
         return devices
 
     try:

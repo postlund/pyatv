@@ -1,4 +1,4 @@
-"""Functional tests for unicast DNS."""
+"""Functional tests pyatv.support.mdns."""
 
 import asyncio
 import logging
@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from pyatv import exceptions
-from pyatv.support import udns
+from pyatv.support import mdns
 from tests import fake_udns
 from tests.support import dns_utils
 
@@ -55,7 +55,7 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
         expected_responses[1] = request_count
 
     # Checks if either response or request count has been fulfilled
-    def _check_cond(protocol: udns.MulticastDnsSdClientProtocol) -> bool:
+    def _check_cond(protocol: mdns.MulticastDnsSdClientProtocol) -> bool:
         if len(protocol.responses) == expected_responses[0]:
             return False
         if expected_responses[1] == 0:
@@ -87,7 +87,7 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
 
 async def unicast(event_loop, udns_server, service_name, timeout=1):
     return (
-        await udns.unicast(
+        await mdns.unicast(
             event_loop,
             "127.0.0.1",
             [service_name],
@@ -100,17 +100,17 @@ async def unicast(event_loop, udns_server, service_name, timeout=1):
 
 def get_response_for_service(
     service: str,
-) -> Tuple[udns.DnsMessage, fake_udns.FakeDnsService]:
-    req = udns.create_request([service])
+) -> Tuple[mdns.DnsMessage, fake_udns.FakeDnsService]:
+    req = mdns.create_request([service])
     resp = fake_udns.create_response(req, TEST_SERVICES)
-    return udns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
+    return mdns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
 
 
 def test_qname_with_label():
     # This should resolve to "label.test" when reading from \x05
     message = b"aaaa" + b"\x04test\x00" + b"\x05label\xC0\x04\xAB\xCD"
     ptr = message[10:]
-    ret, rest = udns.qname_decode(ptr, message)
+    ret, rest = mdns.qname_decode(ptr, message)
     assert ret == "label.test"
     assert rest == b"\xAB\xCD"
 
@@ -119,7 +119,7 @@ def test_qname_with_label():
 async def test_non_local_address(event_loop, stub_local_address):
     stub_local_address.return_value = None
     with pytest.raises(exceptions.NonLocalSubnetError):
-        await udns.unicast(event_loop, "1.2.3.4", [])
+        await mdns.unicast(event_loop, "1.2.3.4", [])
 
 
 @pytest.mark.asyncio
@@ -143,7 +143,7 @@ async def test_service_has_valid_question():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
-    assert question.qtype == udns.QTYPE_ANY
+    assert question.qtype == mdns.QTYPE_ANY
     assert question.qclass == 0x8001
 
 
@@ -152,7 +152,7 @@ async def test_service_has_valid_answer():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
-    assert answer.qtype == udns.QTYPE_PTR
+    assert answer.qtype == mdns.QTYPE_PTR
     assert answer.qclass == dns_utils.DEFAULT_QCLASS
     assert answer.ttl == dns_utils.DEFAULT_TTL
     assert answer.rd == data.name + "." + MEDIAREMOTE_SERVICE
@@ -162,9 +162,9 @@ async def test_service_has_valid_answer():
 async def test_service_has_valid_srv_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, udns.QTYPE_SRV)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == udns.QTYPE_SRV
+    assert srv.qtype == mdns.QTYPE_SRV
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -179,9 +179,9 @@ async def test_service_has_valid_srv_resource():
 async def test_service_has_valid_txt_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, udns.QTYPE_TXT)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == udns.QTYPE_TXT
+    assert srv.qtype == mdns.QTYPE_TXT
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -195,9 +195,9 @@ async def test_service_has_valid_txt_resource():
 async def test_service_has_valid_a_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, udns.QTYPE_A)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_A)
     assert srv.qname == data.name + ".local"
-    assert srv.qtype == udns.QTYPE_A
+    assert srv.qtype == mdns.QTYPE_A
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
     assert srv.rd == "127.0.0.1"
@@ -207,7 +207,7 @@ async def test_service_has_valid_a_resource():
 async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(0, 0)
 
-    await udns.multicast(event_loop, [], "127.0.0.1", udns_server.port)
+    await mdns.multicast(event_loop, [], "127.0.0.1", udns_server.port)
 
 
 @pytest.mark.asyncio
@@ -246,7 +246,7 @@ async def test_unicast_specific_service(event_loop, udns_server):
 async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(1, 0)
 
-    resp = await udns.multicast(
+    resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
     assert len(resp) == 1
@@ -268,7 +268,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
         ),
     }
 
-    resp = await udns.multicast(
+    resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
     assert len(resp) == 0
@@ -276,7 +276,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
     multicast_fastexit(1, 0)
     udns_server.services = TEST_SERVICES
 
-    resp = await udns.multicast(
+    resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
     assert len(resp) == 1
@@ -286,7 +286,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
 async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(1, 0)
 
-    resp = await udns.multicast(
+    resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
@@ -295,7 +295,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
     udns_server.sleep_proxy = True
     multicast_fastexit(1, 0)
 
-    resp = await udns.multicast(
+    resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
@@ -303,48 +303,48 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
 
 
 def test_parse_empty_service():
-    assert udns.parse_services(udns.DnsMessage()) == []
+    assert mdns.parse_services(mdns.DnsMessage()) == []
 
 
 def test_parse_no_service_type():
     service_params = (None, "service", None, 0, {})
-    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 0
 
 
 def test_parse_no_service_name():
     service_params = ("_abc._tcp.local", None, None, 0, {})
-    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 0
 
 
 def test_parse_with_name_and_type():
     service_params = ("_abc._tcp.local", "service", None, 0, {})
-    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
 
 def test_parse_with_port_and_address():
     service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
-    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
 
 def test_parse_single_service():
     service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
-    message = dns_utils.add_service(udns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
@@ -358,10 +358,10 @@ def test_parse_double_service():
         456,
         {"fizz": "buzz"},
     )
-    message = dns_utils.add_service(udns.DnsMessage(), *service1_params)
+    message = dns_utils.add_service(mdns.DnsMessage(), *service1_params)
     message = dns_utils.add_service(message, *service2_params)
 
-    parsed = udns.parse_services(message)
+    parsed = mdns.parse_services(message)
     assert len(parsed) == 2
     dns_utils.assert_service(parsed[0], *service1_params)
     dns_utils.assert_service(parsed[1], *service2_params)
