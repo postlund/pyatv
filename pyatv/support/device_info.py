@@ -35,17 +35,17 @@ _VERSION_LIST: Dict[str, str] = {
 }
 
 
-def lookup_model(identifier: Optional[str]):
+def lookup_model(identifier: Optional[str]) -> DeviceModel:
     """Lookup device model from identifier."""
     return _MODEL_LIST.get(identifier or "", DeviceModel.Unknown)
 
 
-def lookup_internal_name(name: Optional[str]):
+def lookup_internal_name(name: Optional[str]) -> DeviceModel:
     """Lookup device model from internal Apple model name."""
     return _INTERNAL_NAME_LIST.get(name or "", DeviceModel.Unknown)
 
 
-def lookup_version(build: Optional[str]):
+def lookup_version(build: Optional[str]) -> Optional[str]:
     """Lookup OS version from build."""
     if not build:
         return None

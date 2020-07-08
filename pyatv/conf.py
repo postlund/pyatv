@@ -11,7 +11,7 @@ from ipaddress import IPv4Address
 from typing import Dict, List, Optional
 
 from pyatv import exceptions
-from pyatv.const import Protocol, OperatingSystem
+from pyatv.const import Protocol, OperatingSystem, DeviceModel
 from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.interface import BaseService, DeviceInfo
 
@@ -25,12 +25,17 @@ class AppleTV:
     """
 
     def __init__(
-        self, address: IPv4Address, name: str, deep_sleep: bool = False
+        self,
+        address: IPv4Address,
+        name: str,
+        deep_sleep: bool = False,
+        model: DeviceModel = DeviceModel.Unknown,
     ) -> None:
         """Initialize a new AppleTV."""
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
+        self._model = model
         self._services: Dict[Protocol, BaseService] = {}
 
     @property
@@ -47,11 +52,6 @@ class AppleTV:
     def deep_sleep(self) -> bool:
         """If device is in deep sleep."""
         return self._deep_sleep
-
-    @deep_sleep.setter
-    def deep_sleep(self, value: bool) -> None:
-        """Change device deep sleep mode."""
-        self._deep_sleep = value
 
     @property
     def ready(self) -> bool:
@@ -132,14 +132,19 @@ class AppleTV:
             os_type = OperatingSystem.Unknown
 
         build = properties.get("SystemBuildVersion")
-        model = properties.get("model")
         version = properties.get("osvers", lookup_version(build))
+
+        model_name: Optional[str] = properties.get("model", None)
+        if model_name:
+            model = lookup_model(model_name)
+        else:
+            model = self._model
 
         mac = properties.get("macAddress", properties.get("deviceid"))
         if mac:
             mac = mac.upper()
 
-        return DeviceInfo(os_type, version, build, lookup_model(model), mac)
+        return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -> Dict[str, str]:
         properties: Dict[str, str] = {}

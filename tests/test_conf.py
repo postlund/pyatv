@@ -29,7 +29,9 @@ AIRPLAY_PROPERTIES = {
 
 class ConfTest(unittest.TestCase):
     def setUp(self):
-        self.config = conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True)
+        self.config = conf.AppleTV(
+            ADDRESS_1, NAME, deep_sleep=True, model=DeviceModel.Gen2
+        )
         self.dmap_service = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
         self.mrp_service = conf.MrpService(
             IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES
@@ -121,7 +123,8 @@ class ConfTest(unittest.TestCase):
         self.assertEqual(self.config.get_service(Protocol.DMAP).credentials, "dummy")
 
     def test_empty_device_info(self):
-        device_info = self.config.device_info
+        config = conf.AppleTV(ADDRESS_1, NAME)
+        device_info = config.device_info
         self.assertEqual(device_info.operating_system, OperatingSystem.Unknown)
         self.assertIsNone(device_info.version)
         self.assertIsNone(device_info.build_number)
@@ -146,7 +149,7 @@ class ConfTest(unittest.TestCase):
         self.assertEqual(device_info.operating_system, OperatingSystem.TvOS)
         self.assertEqual(device_info.version, "13.3.1")
         self.assertEqual(device_info.build_number, "17K795")
-        self.assertEqual(device_info.model, DeviceModel.Unknown)
+        self.assertEqual(device_info.model, DeviceModel.Gen2)
         self.assertEqual(device_info.mac, "FF:EE:DD:CC:BB:AA")
 
     def test_legacy_device_info(self):
