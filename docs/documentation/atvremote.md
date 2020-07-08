@@ -239,6 +239,7 @@ called `commands`, as it will present a list of available commands:
     Device commands:
      - artwork_save - Download artwork and save it to artwork.png
      - cli - Enter commands in a simple CLI
+     - delay - Sleep for a certain amount if milliseconds
      - device_info - Print various information about the device
      - features - Print a list of all features and options
      - push_updates - Listen for push updates
@@ -336,6 +337,13 @@ Artwork with a specific size (width,height):
     $ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1
 
 Using -1 will let the device decide that parameter in order to keep aspect ratio.
+
+Multiple commands can be specified to simplify scripting. There's also a
+`delay` that sleeps a certain amount of milliseconds before next command is
+executed. Here's an example where `select` is pressed, followed by `left` after
+waiting a second:
+
+    $ atvremote --id 00:11:22:33:44:54 select delay=1000 left
 
 If you want additional help for a specific command, use help:
 

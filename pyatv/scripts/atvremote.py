@@ -278,6 +278,11 @@ class DeviceCommands:
         print("Unsupported: Not supported by this device (or by pyatv)")
         return 0
 
+    async def delay(self, delay_time: int):
+        """Sleep for a certain amount if milliseconds."""
+        await asyncio.sleep(float(delay_time) / 1000.0)
+        return 0
+
 
 class PushListener(interface.PushListener):
     """Internal listener for push updates."""
