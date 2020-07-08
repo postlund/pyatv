@@ -75,7 +75,7 @@ from ipaddress import IPv4Address
 from typing import Dict, List, Optional
 
 from pyatv import exceptions
-from pyatv.const import Protocol, OperatingSystem
+from pyatv.const import Protocol, OperatingSystem, DeviceModel
 from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.interface import BaseService, DeviceInfo
 
@@ -89,12 +89,17 @@ class AppleTV:
     &#34;&#34;&#34;
 
     def __init__(
-        self, address: IPv4Address, name: str, deep_sleep: bool = False
+        self,
+        address: IPv4Address,
+        name: str,
+        deep_sleep: bool = False,
+        model: DeviceModel = DeviceModel.Unknown,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
+        self._model = model
         self._services: Dict[Protocol, BaseService] = {}
 
     @property
@@ -111,11 +116,6 @@ class AppleTV:
     def deep_sleep(self) -&gt; bool:
         &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
         return self._deep_sleep
-
-    @deep_sleep.setter
-    def deep_sleep(self, value: bool) -&gt; None:
-        &#34;&#34;&#34;Change device deep sleep mode.&#34;&#34;&#34;
-        self._deep_sleep = value
 
     @property
     def ready(self) -&gt; bool:
@@ -196,14 +196,19 @@ class AppleTV:
             os_type = OperatingSystem.Unknown
 
         build = properties.get(&#34;SystemBuildVersion&#34;)
-        model = properties.get(&#34;model&#34;)
         version = properties.get(&#34;osvers&#34;, lookup_version(build))
+
+        model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+        if model_name:
+            model = lookup_model(model_name)
+        else:
+            model = self._model
 
         mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
         if mac:
             mac = mac.upper()
 
-        return DeviceInfo(os_type, version, build, lookup_model(model), mac)
+        return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Dict[str, str]:
         properties: Dict[str, str] = {}
@@ -333,7 +338,7 @@ class AirPlayService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -354,12 +359,17 @@ AirPlay.</p>
     &#34;&#34;&#34;
 
     def __init__(
-        self, address: IPv4Address, name: str, deep_sleep: bool = False
+        self,
+        address: IPv4Address,
+        name: str,
+        deep_sleep: bool = False,
+        model: DeviceModel = DeviceModel.Unknown,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
+        self._model = model
         self._services: Dict[Protocol, BaseService] = {}
 
     @property
@@ -376,11 +386,6 @@ AirPlay.</p>
     def deep_sleep(self) -&gt; bool:
         &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
         return self._deep_sleep
-
-    @deep_sleep.setter
-    def deep_sleep(self, value: bool) -&gt; None:
-        &#34;&#34;&#34;Change device deep sleep mode.&#34;&#34;&#34;
-        self._deep_sleep = value
 
     @property
     def ready(self) -&gt; bool:
@@ -461,14 +466,19 @@ AirPlay.</p>
             os_type = OperatingSystem.Unknown
 
         build = properties.get(&#34;SystemBuildVersion&#34;)
-        model = properties.get(&#34;model&#34;)
         version = properties.get(&#34;osvers&#34;, lookup_version(build))
+
+        model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+        if model_name:
+            model = lookup_model(model_name)
+        else:
+            model = self._model
 
         mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
         if mac:
             mac = mac.upper()
 
-        return DeviceInfo(os_type, version, build, lookup_model(model), mac)
+        return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Dict[str, str]:
         properties: Dict[str, str] = {}
@@ -560,14 +570,19 @@ def device_info(self) -&gt; DeviceInfo:
         os_type = OperatingSystem.Unknown
 
     build = properties.get(&#34;SystemBuildVersion&#34;)
-    model = properties.get(&#34;model&#34;)
     version = properties.get(&#34;osvers&#34;, lookup_version(build))
+
+    model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+    if model_name:
+        model = lookup_model(model_name)
+    else:
+        model = self._model
 
     mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
     if mac:
         mac = mac.upper()
 
-    return DeviceInfo(os_type, version, build, lookup_model(model), mac)</code></pre>
+    return DeviceInfo(os_type, version, build, model, mac)</code></pre>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span> -> Union[str, NoneType]</code></dt>

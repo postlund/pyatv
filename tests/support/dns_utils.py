@@ -1,4 +1,4 @@
-"""Helper methods for DNS messages."""
+"""Helper methods for DNS message."""
 
 import struct
 from ipaddress import IPv4Address
@@ -82,15 +82,15 @@ def add_service(
 
 
 def assert_service(
-    messages: mdns.DnsMessage,
+    message: mdns.DnsMessage,
     service_type: str,
     service_name: str,
     address: str,
     port: int,
     properties: dict,
 ) -> None:
-    assert messages.type == service_type
-    assert messages.name == service_name
-    assert messages.address == (IPv4Address(address) if address else None)
-    assert messages.port == port
-    assert messages.properties == properties
+    assert message.type == service_type
+    assert message.name == service_name
+    assert message.address == (IPv4Address(address) if address else None)
+    assert message.port == port
+    assert message.properties == properties

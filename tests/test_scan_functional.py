@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pyatv.const import Protocol
+from pyatv.const import Protocol, DeviceModel
 from tests import fake_udns
 
 
@@ -213,6 +213,21 @@ async def test_multicast_scan_device_info(udns_server, multicast_scan):
 
 
 @pytest.mark.asyncio
+async def test_multicast_scan_device_model(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1, model="J105aAP"
+        )
+    )
+
+    atvs = await multicast_scan(protocol=Protocol.MRP)
+    assert len(atvs) == 1
+
+    device_info = atvs[0].device_info
+    assert device_info.model == DeviceModel.Gen4K
+
+
+@pytest.mark.asyncio
 async def test_unicast_scan_no_results(unicast_scan):
     atvs = await unicast_scan()
     assert len(atvs) == 0
@@ -228,7 +243,7 @@ async def test_unicast_missing_port(udns_server, unicast_scan):
 
 @pytest.mark.asyncio
 async def test_unicast_missing_properties(udns_server, unicast_scan):
-    udns_server.add_service(fake_udns.FakeDnsService("dummy", IP_1, 1234, None))
+    udns_server.add_service(fake_udns.FakeDnsService("dummy", IP_1, 1234, None, None))
 
     atvs = await unicast_scan()
     assert len(atvs) == 0
@@ -298,6 +313,21 @@ async def test_unicast_scan_device_info(udns_server, unicast_scan):
 
     device_info = atvs[0].device_info
     assert device_info.mac == AIRPLAY_ID
+
+
+@pytest.mark.asyncio
+async def test_unicast_scan_device_model(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1, model="J105aAP"
+        )
+    )
+
+    atvs = await unicast_scan()
+    assert len(atvs) == 1
+
+    device_info = atvs[0].device_info
+    assert device_info.model == DeviceModel.Gen4K
 
 
 @pytest.mark.asyncio

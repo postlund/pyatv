@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 
 from pyatv import conf, interface
 from pyatv.support import knock, mdns
+from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,21 +46,19 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         """Call when an MDNS response was received."""
         for service in response.services:
             if service.address and service.port != 0:
-                self._service_discovered(service)
+                self._service_discovered(service, response)
 
-                atv = self._found_devices.get(service.address)
-                if atv:
-                    atv.deep_sleep = response.deep_sleep
-
-    def _service_discovered(self, service: mdns.Service) -> None:
+    def _service_discovered(
+        self, service: mdns.Service, response: mdns.Response
+    ) -> None:
         {
             HOMESHARING_SERVICE: self._hs_service,
             DEVICE_SERVICE: self._non_hs_service,
             MEDIAREMOTE_SERVICE: self._mrp_service,
             AIRPLAY_SERVICE: self._airplay_service,
-        }.get(service.type, self._unsupported_service)(service)
+        }.get(service.type, self._unsupported_service)(service, response)
 
-    def _hs_service(self, mdns_service: mdns.Service) -> None:
+    def _hs_service(self, mdns_service: mdns.Service, response: mdns.Response) -> None:
         """Add a new device to discovered list."""
         name = mdns_service.properties.get("Name", "Unknown")
         service = conf.DmapService(
@@ -68,9 +67,11 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             port=mdns_service.port,
             properties=mdns_service.properties,
         )
-        self._handle_service(mdns_service.address, name, service)
+        self._handle_service(mdns_service.address, name, service, response)
 
-    def _non_hs_service(self, mdns_service: mdns.Service) -> None:
+    def _non_hs_service(
+        self, mdns_service: mdns.Service, response: mdns.Response
+    ) -> None:
         """Add a new device without Home Sharing to discovered list."""
         name = mdns_service.properties.get("CtlN", "Unknown")
         service = conf.DmapService(
@@ -79,9 +80,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             port=mdns_service.port,
             properties=mdns_service.properties,
         )
-        self._handle_service(mdns_service.address, name, service)
+        self._handle_service(mdns_service.address, name, service, response)
 
-    def _mrp_service(self, mdns_service: mdns.Service) -> None:
+    def _mrp_service(self, mdns_service: mdns.Service, response: mdns.Response) -> None:
         """Add a new MediaRemoteProtocol device to discovered list."""
         name = mdns_service.properties.get("Name", "Unknown")
         service = conf.MrpService(
@@ -89,25 +90,33 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             mdns_service.port,
             properties=mdns_service.properties,
         )
-        self._handle_service(mdns_service.address, name, service)
+        self._handle_service(mdns_service.address, name, service, response)
 
-    def _airplay_service(self, mdns_service: mdns.Service) -> None:
+    def _airplay_service(
+        self, mdns_service: mdns.Service, response: mdns.Response
+    ) -> None:
         """Add a new AirPlay device to discovered list."""
         service = conf.AirPlayService(
             mdns_service.properties.get("deviceid"),
             mdns_service.port,
             properties=mdns_service.properties,
         )
-        self._handle_service(mdns_service.address, mdns_service.name, service)
+        self._handle_service(mdns_service.address, mdns_service.name, service, response)
 
-    def _unsupported_service(self, mdns_service: mdns.Service) -> None:
+    def _unsupported_service(
+        self, mdns_service: mdns.Service, _: mdns.Response
+    ) -> None:
         """Handle unsupported service."""
         _LOGGER.warning(
             "Discovered unknown device %s (%s)", mdns_service.name, mdns_service.type
         )
 
     def _handle_service(
-        self, address, name: str, service: interface.BaseService
+        self,
+        address,
+        name: str,
+        service: interface.BaseService,
+        response: mdns.Response,
     ) -> None:
         _LOGGER.debug(
             "Auto-discovered %s at %s:%d (%s)",
@@ -117,8 +126,15 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             service.protocol,
         )
 
-        atv = self._found_devices.setdefault(address, conf.AppleTV(address, name))
-        atv.add_service(service)
+        self._found_devices.setdefault(
+            address,
+            conf.AppleTV(
+                address,
+                name,
+                deep_sleep=response.deep_sleep,
+                model=lookup_internal_name(response.model),
+            ),
+        ).add_service(service)
 
 
 class UnicastMdnsScanner(BaseScanner):
@@ -151,7 +167,7 @@ class UnicastMdnsScanner(BaseScanner):
                 self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
             )
         except asyncio.TimeoutError:
-            return mdns.Response([], False)
+            return mdns.Response([], False, None)
         finally:
             if knocker:
                 knocker.cancel()

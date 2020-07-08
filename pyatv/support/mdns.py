@@ -33,6 +33,7 @@ class Response(NamedTuple):
 
     services: List[Service]
     deep_sleep: bool
+    model: Optional[str]  # Comes from _device-info._tcp.local
 
 
 QTYPE_A = 0x0001
@@ -40,6 +41,8 @@ QTYPE_PTR = 0x000C
 QTYPE_TXT = 0x0010
 QTYPE_SRV = 0x0021
 QTYPE_ANY = 0x00FF
+
+DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
 def _decode_properties(properties: Dict[bytes, bytes]) -> Dict[str, str]:
@@ -238,6 +241,13 @@ def create_request(services: List[str]) -> bytes:
     return msg.pack()
 
 
+def _get_model(services: List[Service]) -> Optional[str]:
+    for service in services:
+        if service.type == DEVICE_INFO_SERVICE:
+            return service.properties.get("model")
+    return None
+
+
 def parse_services(message: DnsMessage) -> List[Service]:
     """Parse DNS response into Service objects."""
     table: Dict[str, Dict[int, Union[DnsAnswer, DnsResource]]] = {}
@@ -298,7 +308,10 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
-        return Response(services=parse_services(self.result), deep_sleep=False)
+        services = parse_services(self.result)
+        return Response(
+            services=services, deep_sleep=False, model=_get_model(services),
+        )
 
     def connection_made(self, transport) -> None:
         """Establish connection to host."""
@@ -407,7 +420,9 @@ class MulticastDnsSdClientProtocol(asyncio.Protocol):
             )
         else:
             self.responses[IPv4Address(addr[0])] = Response(
-                services=services, deep_sleep=(addr[0] in self._unicasts)
+                services=services,
+                deep_sleep=(addr[0] in self._unicasts),
+                model=_get_model(services),
             )
 
     def error_received(self, exc) -> None:

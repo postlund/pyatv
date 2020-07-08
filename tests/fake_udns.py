@@ -14,10 +14,12 @@ from tests.support import dns_utils
 
 _LOGGER = logging.getLogger(__name__)
 
-FakeDnsService = namedtuple("FakeDnsService", "name address port properties")
+FakeDnsService = namedtuple("FakeDnsService", "name address port properties model")
 
 
-def mrp_service(service_name, atv_name, identifier, address="127.0.0.1", port=49152):
+def mrp_service(
+    service_name, atv_name, identifier, address="127.0.0.1", port=49152, model=None
+):
     service = FakeDnsService(
         name=service_name,
         address=address,
@@ -26,36 +28,40 @@ def mrp_service(service_name, atv_name, identifier, address="127.0.0.1", port=49
             b"Name": atv_name.encode("utf-8"),
             b"UniqueIdentifier": identifier.encode("utf-8"),
         },
+        model=model,
     )
     return ("_mediaremotetv._tcp.local", service)
 
 
-def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000):
+def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000, model=None):
     service = FakeDnsService(
         name=atv_name,
         address=address,
         port=port,
         properties={b"deviceid": deviceid.encode("utf-8")},
+        model=model,
     )
     return ("_airplay._tcp.local", service)
 
 
-def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1"):
+def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1", model=None):
     service = FakeDnsService(
         name=service_name,
         address=address,
         port=3689,
         properties={b"hG": hsgid.encode("utf-8"), b"Name": atv_name.encode("utf-8")},
+        model=model,
     )
     return ("_appletv-v2._tcp.local", service)
 
 
-def device_service(service_name, atv_name, address="127.0.0.1"):
+def device_service(service_name, atv_name, address="127.0.0.1", model=None):
     service = FakeDnsService(
         name=service_name,
         address=address,
         port=3689,
         properties={b"CtlN": atv_name.encode("utf-8")},
+        model=model,
     )
     return ("_touch-able._tcp.local", service)
 
@@ -118,6 +124,15 @@ def create_response(
             rd = dns_utils.properties(service.properties)
             resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_TXT, rd))
 
+        # Add model if present
+        if service.model:
+            rd = dns_utils.properties({b"model": service.model.encode("utf-8")})
+            resp.resources.append(
+                dns_utils.resource(
+                    service.name + "._device-info._tcp.local", mdns.QTYPE_TXT, rd
+                )
+            )
+
     return resp
 
 
@@ -178,7 +193,9 @@ def stub_multicast(udns_server, loop):
             response = await mdns.unicast(
                 loop, "127.0.0.1", services, port=udns_server.port
             )
-            devices[IPv4Address(host)] = mdns.Response(response.services, sleep_proxy)
+            devices[IPv4Address(host)] = mdns.Response(
+                response.services, sleep_proxy, response.model
+            )
         return devices
 
     try:
