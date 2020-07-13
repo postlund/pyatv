@@ -82,7 +82,7 @@ async def test_zeroconf_service_published(mock_pairing):
     assert len(zeroconf.registered_services) == 1, "no zeroconf service registered"
 
     service = zeroconf.registered_services[0]
-    assert service.properties[b"DvNm"] == REMOTE_NAME, "remote name does not match"
+    assert service.properties["DvNm"] == REMOTE_NAME, "remote name does not match"
 
 
 @pytest.mark.asyncio

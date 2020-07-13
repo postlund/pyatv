@@ -2,14 +2,15 @@
 """Set up a fake device."""
 import os
 import sys
-import socket
 import asyncio
 import logging
 import argparse
+from ipaddress import IPv4Address
 
-from aiozeroconf import Zeroconf, ServiceInfo
+from zeroconf import Zeroconf
 
 from pyatv.const import Protocol
+from pyatv.support import mdns
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 
@@ -43,71 +44,68 @@ async def _alter_playing(usecase):
             logging.exception("Exception in output loop")
 
 
-async def publish_service(zconf, service, name, address, port, props):
-    """Publish a Zeroconf service."""
-    service = ServiceInfo(
-        service,
-        name + "." + service,
-        address=socket.inet_aton(address),
-        port=port,
-        properties=props,
-    )
-    await zconf.register_service(service)
-    _LOGGER.debug("Published zeroconf service: %s", service)
-
-    return service
-
-
-async def publish_mrp_zeroconf(zconf, address, port):
+async def publish_mrp_zeroconf(loop, zconf, address, port):
     """Publish MRP Zeroconf service."""
     props = {
-        b"ModelName": "Apple TV",
-        b"AllowPairing": b"YES",
-        b"macAddress": b"40:cb:c0:12:34:56",
-        b"BluetoothAddress": False,
-        b"Name": DEVICE_NAME.encode(),
-        b"UniqueIdentifier": SERVER_IDENTIFIER.encode(),
-        b"SystemBuildVersion": b"17K499",
-        b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
+        "ModelName": "Apple TV",
+        "AllowPairing": "YES",
+        "macAddress": "40:cb:c0:12:34:56",
+        "BluetoothAddress": False,
+        "Name": DEVICE_NAME,
+        "UniqueIdentifier": SERVER_IDENTIFIER,
+        "SystemBuildVersion": "17K499",
+        "LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER,
     }
-    return await publish_service(
-        zconf, "_mediaremotetv._tcp.local.", DEVICE_NAME, address, port, props
+    return await mdns.publish(
+        loop,
+        mdns.Service(
+            "_mediaremotetv._tcp.local", DEVICE_NAME, IPv4Address(address), port, props
+        ),
+        zconf,
     )
 
 
-async def publish_dmap_zeroconf(zconf, address, port):
+async def publish_dmap_zeroconf(loop, zconf, address, port):
     """Publish DMAP Zeroconf service."""
     props = {
-        b"DFID": b"2",
-        b"PrVs": b"65538",
-        b"hG": HSGID.encode(),
-        b"Name": DEVICE_NAME.encode(),
-        b"txtvers": b"1",
-        b"atSV": b"65541",
-        b"MiTPV": b"196611",
-        b"EiTS": b"1",
-        b"fs": b"2",
-        b"MniT": b"167845888",
+        "DFID": "2",
+        "PrVs": "65538",
+        "hG": HSGID,
+        "Name": DEVICE_NAME,
+        "txtvers": "1",
+        "atSV": "65541",
+        "MiTPV": "196611",
+        "EiTS": "1",
+        "fs": "2",
+        "MniT": "167845888",
     }
-    return await publish_service(
-        zconf, "_appletv-v2._tcp.local.", "fakedev", address, port, props
+    return await mdns.publish(
+        loop,
+        mdns.Service(
+            "_appletv-v2._tcp.local", DEVICE_NAME, IPv4Address(address), port, props
+        ),
+        zconf,
     )
 
 
-async def publish_airplay_zeroconf(zconf, address, port):
+async def publish_airplay_zeroconf(loop, zconf, address, port):
     """Publish AirPlay Zeroconf service."""
     props = {
-        b"deviceid": b"00:01:02:03:04:05",
-        b"model": b"AppleTV3,1",
-        b"pi": b"4EE5AF58-7E5D-465A-935E-82E4DB74385D",
-        b"flags": b"0x44",
-        b"vv": b"2",
-        b"features": b"0x5A7FFFF7,0xE",
-        b"pk": b"3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98",  # noqa
-        b"srcvers": b"220.68",
+        "deviceid": "00:01:02:03:04:05",
+        "model": "AppleTV3,1",
+        "pi": "4EE5AF58-7E5D-465A-935E-82E4DB74385D",
+        "flags": "0x44",
+        "vv": "2",
+        "features": "0x5A7FFFF7,0xE",
+        "pk": "3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98",  # noqa
+        "srcvers": "220.68",
     }
-    return await publish_service(
-        zconf, "_airplay._tcp.local.", DEVICE_NAME, address, port, props
+    return await mdns.publish(
+        loop,
+        mdns.Service(
+            "_airplay._tcp.local", DEVICE_NAME, IPv4Address(address), port, props
+        ),
+        zconf,
     )
 
 
@@ -146,8 +144,8 @@ async def appstart(loop):
     )
 
     tasks = []
-    services = []
-    zconf = Zeroconf(loop)
+    unpublishers = []
+    zconf = Zeroconf()
     fake_atv = FakeAppleTV(loop, test_mode=False)
     if args.mrp:
         _, usecase = fake_atv.add_service(Protocol.MRP)
@@ -167,23 +165,23 @@ async def appstart(loop):
     await fake_atv.start()
 
     if args.mrp:
-        services.append(
+        unpublishers.append(
             await publish_mrp_zeroconf(
-                zconf, args.local_ip, fake_atv.get_port(Protocol.MRP)
+                loop, zconf, args.local_ip, fake_atv.get_port(Protocol.MRP)
             )
         )
 
     if args.dmap:
-        services.append(
+        unpublishers.append(
             await publish_dmap_zeroconf(
-                zconf, args.local_ip, fake_atv.get_port(Protocol.DMAP)
+                loop, zconf, args.local_ip, fake_atv.get_port(Protocol.DMAP)
             )
         )
 
     if args.airplay:
-        services.append(
+        unpublishers.append(
             await publish_airplay_zeroconf(
-                zconf, args.local_ip, fake_atv.get_port(Protocol.AirPlay)
+                loop, zconf, args.local_ip, fake_atv.get_port(Protocol.AirPlay)
             )
         )
 
@@ -195,8 +193,8 @@ async def appstart(loop):
     for task in tasks:
         task.cancel()
 
-    for service in services:
-        await zconf.unregister_service(service)
+    for unpublisher in unpublishers:
+        await unpublisher()
 
     print("Exiting")
 

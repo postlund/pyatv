@@ -82,7 +82,7 @@ class FakeDmapState:
                 continue
 
             # Look for the response matching this remote
-            remote_name = service.properties[b"DvNm"]
+            remote_name = service.properties["DvNm"]
             for remote_name, expected_code in self.pairing_responses.items():
                 if remote_name == remote_name:
                     return await self.perform_pairing(

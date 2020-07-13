@@ -1,12 +1,9 @@
 """Scripts bundled with pyatv."""
 
 import json
-import socket
 import logging
 import argparse
 from ipaddress import ip_address
-
-from aiozeroconf import ServiceInfo
 
 from pyatv import const
 
@@ -50,21 +47,3 @@ class TransformOutput(argparse.Action):
             setattr(namespace, self.dest, json.dumps)
         else:
             raise argparse.ArgumentTypeError("Valid formats are: json")
-
-
-async def publish_service(zconf, service, name, address, port, props):
-    """Publish a custom zeroconf service."""
-    service = ServiceInfo(
-        service,
-        name + "." + service,
-        address=socket.inet_aton(address),
-        port=port,
-        weight=0,
-        priority=0,
-        properties=props,
-    )
-
-    await zconf.register_service(service)
-    _LOGGER.debug("Published zeroconf service: %s", service)
-
-    return service

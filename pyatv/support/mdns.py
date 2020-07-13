@@ -8,6 +8,8 @@ from ipaddress import IPv4Address
 from collections import namedtuple
 from typing import Optional, Dict, List, cast, NamedTuple, Union
 
+from zeroconf import Zeroconf, ServiceInfo
+
 from pyatv.support import exceptions, net, log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -478,3 +480,25 @@ async def multicast(
         return await cast(MulticastDnsSdClientProtocol, protocol).get_response()
     finally:
         transport.close()
+
+
+async def publish(loop: asyncio.AbstractEventLoop, service: Service, zconf: Zeroconf):
+    """Publish an MDNS service on the network."""
+    if service.address is None:
+        raise Exception(f"no address for {service.name}.{service.type}")
+    zsrv = ServiceInfo(
+        f"{service.type}.",
+        f"{service.name}.{service.type}.",
+        addresses=[service.address.packed],
+        port=service.port,
+        properties=service.properties,
+    )
+
+    _LOGGER.debug("Publishing zeroconf service: %s", zsrv)
+    await loop.run_in_executor(None, zconf.register_service, zsrv)
+
+    async def _unregister():
+        _LOGGER.debug("Unregistering service %s", zsrv)
+        await loop.run_in_executor(None, zconf.unregister_service, zsrv)
+
+    return _unregister

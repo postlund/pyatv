@@ -1,6 +1,5 @@
 """Module used for pairing pyatv with a device."""
 
-import socket
 import hashlib
 import logging
 import random
@@ -8,12 +7,13 @@ import ipaddress
 from io import StringIO
 
 from aiohttp import web
-from aiozeroconf import ServiceInfo, Zeroconf
+from zeroconf import Zeroconf
 import netifaces
 
 from pyatv.const import Protocol
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
+from pyatv.support import mdns
 from pyatv.support.net import ClientSessionManager, unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,9 +49,7 @@ class DmapPairingHandler(
         """Initialize a new instance."""
         super().__init__(session_manager, config.get_service(Protocol.DMAP))
         self._loop = loop
-        self._zeroconf = kwargs.get(
-            "zeroconf", Zeroconf(loop, address_family=[netifaces.AF_INET])
-        )
+        self._zeroconf = kwargs.get("zeroconf", Zeroconf())
         self._name = kwargs.get("name", "pyatv")
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pairing", self.handle_request)])
@@ -65,7 +63,7 @@ class DmapPairingHandler(
 
     async def close(self):
         """Call to free allocated resources after pairing."""
-        await self._zeroconf.close()
+        self._zeroconf.close()
         await self.runner.cleanup()
         await super().close()
 
@@ -108,26 +106,25 @@ class DmapPairingHandler(
 
     async def _publish_service(self, address, port):
         props = {
-            b"DvNm": self._name,
-            b"RemV": b"10000",
-            b"DvTy": b"iPod",
-            b"RemN": b"Remote",
-            b"txtvers": b"1",
-            b"Pair": self._pairing_guid,
+            "DvNm": self._name,
+            "RemV": "10000",
+            "DvTy": "iPod",
+            "RemN": "Remote",
+            "txtvers": "1",
+            "Pair": self._pairing_guid,
         }
 
-        service = ServiceInfo(
-            "_touch-remote._tcp.local.",
-            "{0:040d}._touch-remote._tcp.local.".format(int(address)),
-            address=socket.inet_aton(str(address)),
-            port=port,
-            weight=0,
-            priority=0,
-            properties=props,
+        await mdns.publish(
+            self._loop,
+            mdns.Service(
+                "_touch-remote._tcp.local",
+                "{0:040d}".format(int(address)),
+                address,
+                port,
+                props,
+            ),
+            self._zeroconf,
         )
-        await self._zeroconf.register_service(service)
-
-        _LOGGER.debug("Published zeroconf service: %s", service)
 
     async def handle_request(self, request):
         """Respond to request if PIN is correct."""
