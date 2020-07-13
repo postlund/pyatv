@@ -94,6 +94,7 @@ def playback_queue_request(location, width=-1, height=400):
     request.length = 1
     request.artworkWidth = width
     request.artworkHeight = height
+    request.returnContentItemAssetsInUserCompletion = True
     return message
 
 
