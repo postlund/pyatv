@@ -52,7 +52,7 @@ class DmapPairingHandler(
         self._zeroconf = kwargs.get("zeroconf", Zeroconf())
         self._name = kwargs.get("name", "pyatv")
         self.app = web.Application()
-        self.app.router.add_routes([web.get("/pairing", self.handle_request)])
+        self.app.router.add_routes([web.get("/pair", self.handle_request)])
         self.runner = web.AppRunner(self.app)
         self.site = None
         self._pin_code = None

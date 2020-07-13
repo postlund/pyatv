@@ -38,7 +38,7 @@ def pairing_url(zeroconf, pairing_code):
     service = zeroconf.registered_services[0]
     return (
         f"http://127.0.0.1:{service.port}/"
-        + f"pairing?pairingcode={pairing_code}&servicename=test"
+        + f"pair?pairingcode={pairing_code}&servicename=test"
     )
 
 
