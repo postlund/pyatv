@@ -7,7 +7,7 @@ import logging
 import argparse
 from ipaddress import IPv4Address
 
-from aiozeroconf import Zeroconf
+from zeroconf import Zeroconf
 
 from pyatv.conf import MrpService
 from pyatv.mrp.srp import SRPAuthHandler
@@ -15,23 +15,12 @@ from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
-from pyatv.scripts import publish_service
 from pyatv.support import log_binary, net, mdns
 
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Proxy"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
-
-
-def _get_property(response, qtype, prop):
-    for resource in response.resources:
-        if resource.qtype != qtype:
-            continue
-
-        return resource.rd.get(prop)
-
-    raise Exception(f"missing qtype {qtype}")
 
 
 class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
@@ -186,25 +175,31 @@ class RelayConnection(asyncio.Protocol):
         self.connection.transport.write(data)
 
 
-async def publish_mrp_service(zconf, address, port, name):
+async def publish_mrp_service(
+    loop: asyncio.AbstractEventLoop, zconf: Zeroconf, address: str, port: int, name: str
+):
     """Publish zeroconf service for ATV proxy instance."""
-    props = {
-        b"ModelName": "Apple TV",
-        b"AllowPairing": b"YES",
-        b"macAddress": b"40:cb:c0:12:34:56",
-        b"BluetoothAddress": False,
-        b"Name": name.encode(),
-        b"UniqueIdentifier": SERVER_IDENTIFIER.encode(),
-        b"SystemBuildVersion": b"17K499",
-        b"LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER.encode(),
+    properties = {
+        "ModelName": "Apple TV",
+        "AllowPairing": "YES",
+        "macAddress": "40:cb:c0:12:34:56",
+        "BluetoothAddress": "False",
+        "Name": name,
+        "UniqueIdentifier": SERVER_IDENTIFIER,
+        "SystemBuildVersion": "17K499",
+        "LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER,
     }
 
-    return await publish_service(
-        zconf, "_mediaremotetv._tcp.local.", name, address, port, props
+    return await mdns.publish(
+        asyncio.get_event_loop(),
+        mdns.Service(
+            "_mediaremotetv._tcp.local", name, IPv4Address(address), port, properties
+        ),
+        zconf,
     )
 
 
-async def _start_mrp_proxy(loop, args, zconf):
+async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
     def proxy_factory():
         try:
             proxy = MrpAppleTVProxy(loop)
@@ -222,13 +217,12 @@ async def _start_mrp_proxy(loop, args, zconf):
     _LOGGER.debug("Binding to local address %s", args.local_ip)
 
     if not (args.remote_port or args.name):
-        resp = await mdns.request(loop, args.remote_ip, ["_mediaremotetv._tcp.local"])
+        resp = await mdns.unicast(loop, args.remote_ip, ["_mediaremotetv._tcp.local"])
+
         if not args.remote_port:
-            args.remote_port = _get_property(resp, mdns.QTYPE_SRV, "port")
+            args.remote_port = resp.services[0].port
         if not args.name:
-            args.name = (
-                _get_property(resp, mdns.QTYPE_TXT, b"Name").decode("utf-8") + " Proxy"
-            )
+            args.name = resp.services[0].name + " Proxy"
 
     if not args.name:
         args.name = DEVICE_NAME
@@ -238,12 +232,12 @@ async def _start_mrp_proxy(loop, args, zconf):
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started MRP server at port %d", port)
 
-    service = await publish_mrp_service(zconf, args.local_ip, port, args.name)
+    unpublisher = await publish_mrp_service(loop, zconf, args.local_ip, port, args.name)
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
 
-    return service
+    return unpublisher
 
 
 async def _start_relay(loop, args, zconf):
@@ -257,15 +251,19 @@ async def _start_relay(loop, args, zconf):
 
     props = dict({(prop.split("=")[0], prop.split("=")[1]) for prop in args.properties})
 
-    service = await publish_service(
-        zconf, args.service_type, args.name, args.local_ip, port, props
+    unpublisher = await mdns.publish(
+        asyncio.get_event_loop(),
+        mdns.Service(
+            args.service_type, args.name, IPv4Address(args.local_ip), port, props
+        ),
+        zconf,
     )
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
 
     server.close()
-    return service
+    return unpublisher
 
 
 async def appstart(loop):
@@ -301,12 +299,12 @@ async def appstart(loop):
         format="%(asctime)s %(levelname)s: %(message)s",
     )
 
-    zconf = Zeroconf(loop)
+    zconf = Zeroconf()
     if args.command == "mrp":
-        service = await _start_mrp_proxy(loop, args, zconf)
+        unpublisher = await _start_mrp_proxy(loop, args, zconf)
     elif args.command == "relay":
-        service = await _start_relay(loop, args, zconf)
-    await zconf.unregister_service(service)
+        unpublisher = await _start_relay(loop, args, zconf)
+    await unpublisher()
 
     return 0
 

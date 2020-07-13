@@ -63,11 +63,11 @@ To get the work done, `pyatv` requires some other pieces of software, more speci
 
 - python >= 3.6.0
 - aiohttp >= 3.1.0, <5
-- aiozeroconf >= 0.1.8
 - cryptography >= 2.6
 - netifaces >= 0.10.0
 - protobuf >= 3.6.0
 - srptools >= 0.2.0
+- zeroconf==0.28.0
 
 You also need to have OpenSSL compiled with support for ed25519 in order
 to connect to MRP devices.

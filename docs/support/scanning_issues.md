@@ -40,7 +40,7 @@ scanning, that one or more service is missing. This is the reason why that happe
 ## Response filtering
 
 A behavior that has been observed is that the response is indeed received by the host
-(as seen with Wireshark), but it is never forwarded to the python process so `aiozeroconf`
+(as seen with Wireshark), but it is never forwarded to the python process so `zeroconf`
 never receives it. Some filtering happens at some point for some reason. It is still
 unclear if this is a bug in python or not and should be investigated further.
 

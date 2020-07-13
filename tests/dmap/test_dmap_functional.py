@@ -38,13 +38,6 @@ AIRPLAY_STREAM = "http://stream"
 # (extracted form a real device)
 PAIRINGCODE = "690E6FF61E0D7C747654A42AED17047D"
 
-HOMESHARING_SERVICE_1 = zeroconf_stub.homesharing_service(
-    "AAAA", b"Apple TV 1", "10.0.0.1", b"aaaa"
-)
-HOMESHARING_SERVICE_2 = zeroconf_stub.homesharing_service(
-    "BBBB", b"Apple TV 2", "10.0.0.2", b"bbbb"
-)
-
 SKIP_TIME = 10
 
 
