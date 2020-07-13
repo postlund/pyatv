@@ -97,7 +97,7 @@ class FakeDmapState:
         completed.
         """
         server = f"http://127.0.0.1:{port}"
-        url = f"{server}/pairing?pairingcode={expected_code}&servicename=test"
+        url = f"{server}/pair?pairingcode={expected_code}&servicename=test"
         data, _ = await utils.simple_get(url)
 
         # Verify content returned in pairingresponse
