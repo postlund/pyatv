@@ -10,7 +10,19 @@ This page contains details on how to migrate between different versions
 of `pyatv`. Beware that these guides are written according to "best effort"
 and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
-request.
+request
+
+## From 0.6.0 to 0.7.0
+
+### General Changes
+
+* No library changes
+* MRP arguments to atvproxy has been simplified (only credentials and IP to
+  Apple TV must now be provided)
+
+### Deprecations
+
+* None
 
 ## From 0.5.0 to 0.6.0
 

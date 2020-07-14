@@ -1,5 +1,127 @@
 # CHANGES
 
+## 0.7.0 (2020-07-14)
+
+*Changes:*
+
+* Input actions (single/double tap and hold) are now supported
+* Support for aiohttp 4 (only tested with pre-release)
+* Possibility to wait for power state change in turn_on and turn_off
+* TCP keep-alive configured to detect stale connections
+* Implement custom scanning (not using 3rd party zeroconf library)
+* Switch back to zeroconf from aiozeroconf for service publishing
+* Deep sleep detection when scanning
+* Tunnel mode has been added to atvproxy
+* A delay command has been added to atvremote
+* Fix (potentially) for hanging connection after receiving artwork (MRP)
+* Fix bug in device state when app reports invalid playback rate (MRP)
+* Fix broken repeat handling (MRP)
+* Fix broken pairing (DMAP)
+* Fix missing application name (MRP)
+
+*Notes:*
+
+* This release contains re-written scanning logic which hopefully
+  makes scanning more reliable (not 100% foolproof though). This
+  re-write gives support for deep-sleep detection and better device
+  model detection. It is however less tested, so bugs probably still
+  exist. Please write bug reports.
+* TCP keep-alive and timeout timers are now configured. Keep alive
+  messages are sent regularly and the connection will time out (and
+  disconnect) after 20 seconds of no replies.
+
+
+*All changes:*
+
+```
+c7f8166 cq: Minor clean ups
+9758d3d mrp: Potential fix for protocol hangs
+2f2393e dmap: Fix pairing endpoint bug
+8419376 scan: Migrate back to zeroconf from aiozeroconf
+558213a build(deps): bump pytest-xdist from 1.32.0 to 1.33.0
+d1bb536 scan: Get device model from mdns
+cb010bf devinfo: Add lookup for internal names
+e2b95fe gha: Enable codecov again
+11b297b atvremote: Add delay command
+087fc50 device_info: Add some tvOS build numbers
+ef2849b scan: Extract scanners to a support module
+9bcfafd mdns: Rename udns module to mdns
+405ce01 scan: Add support for deep sleep detection
+c1ac7ce udns: Add Response type to unicast and multicast
+100aeee mrp: Update protobuf for language options.
+25d1f4b if: Add support for input actions in protocols
+da4c769 if: Add InputAction for relevant buttons
+16f8e92 build(deps): bump deepdiff from 5.0.0 to 5.0.1
+c81d180 build(deps-dev): bump tox from 3.16.0 to 3.16.1
+ac842cd scan: Handle sleep proxy responses
+8dea1f6 udns: Return service objects
+0128a7e udns: Fix some unicode issues
+c48e979 scan: Add and use parser for MDNS services
+73d3a1b udns: Add support for A records
+83f0a42 udns: Extract test helpers to module
+0f362a0 build(deps): bump pdoc3 from 0.8.1 to 0.8.3
+eb4bcf6 build(deps-dev): bump tox from 3.15.2 to 3.16.0
+575dab6 build(deps): bump pytest-asyncio from 0.12.0 to 0.14.0
+2c6f526 build(deps): bump deepdiff from 4.3.2 to 5.0.0
+0154375 build(deps): bump mypy from 0.781 to 0.782
+0ca534c build(deps): bump mypy from 0.780 to 0.781
+d5b24f2 udns: Cancel re-send loops properly
+1104e7a cq: Fix broken sleep stub
+51bd450 scan: Add more typing
+7c3e1a0 scan: Add explicit bind to multicast scan
+93f1281 scan: Custom scanning implementation
+1ccbc57 net: Add method to get all private addresses
+06c54a1 build(deps): bump mypy-protobuf from 1.22 to 1.23
+7e33682 build(deps): bump pytest-timeout from 1.4.0 to 1.4.1
+127ed5a mrp: Fix repeat state bug
+9e10b1f build(deps): bump pytest-timeout from 1.3.4 to 1.4.0
+885ebfb build(deps): bump codecov from 2.1.5 to 2.1.7
+55efb9f build(deps): bump mypy-protobuf from 1.21 to 1.22
+85d81a5 mrp: Use stringify for TLV8 errors
+4a30354 hap_tlv8: Add stringify method
+72ed37a hap_tlv8: Use enums instead of constants
+8c145bf hap_tlv8: Use integer as key instead of string
+7ddf8c4 hap_tlv8: Convert to pytest
+a26e12c mrp: Move tlv8 to support and rename
+52d6237 build(deps): bump codecov from 2.1.4 to 2.1.5
+5cf2d4f build(deps): bump pytest-cov from 2.9.0 to 2.10.0
+c726511 mrp: Configure TCP keep-alive
+7d848eb mrp: Fix state when playback rate is wrong
+6f0cb81 build(deps): bump flake8 from 3.8.2 to 3.8.3
+cae478a atvproxy: Simplify MRP usage
+64c80b2 docs: Various updates to documentation
+af1322d build(deps-dev): bump tox from 3.15.1 to 3.15.2
+3490e2b build(deps): bump mypy from 0.770 to 0.780
+850e8d0 mrp: Clean up player path handling
+557f418 cq: Exclude __pycache__ from black
+41542a0 gha: Disable codecov as it's broken
+688ec71 docs: Add a logo image and favicon
+2619360 gha: Remove invalid codecov option
+0cb12bd build(deps): bump codecov from 2.1.3 to 2.1.4
+e8da6fc power: Add await_new_state argument
+2134f88 build(deps): bump pytest from 5.4.2 to 5.4.3
+a5cddd1 cq: Support for aiohttp 4
+5458a30 mrp: Maintain last known app name
+eefbe29 Added information regarding playbackRate issue
+f2b5df8 atvproxy: Add tunnel support
+be6270d build(deps): bump mypy-protobuf from 1.20 to 1.21
+a5e01c6 doc: Add black badge to README
+1b86065 build(deps): bump flake8 from 3.8.1 to 3.8.2
+cb6166c cq: Add dependabot config
+7f443bf build(deps): bump pytest-cov from 2.8.1 to 2.9.0
+8316679 build(deps): bump codespell from 1.16.0 to 1.17.1
+ef18612 build(deps): bump codecov from 2.1.1 to 2.1.3
+d9f9767 build(deps): bump flake8 from 3.7.9 to 3.8.1
+3b6e5da build(deps-dev): bump tox from 3.15.0 to 3.15.1
+153e798 build(deps): bump codecov from 2.0.22 to 2.1.1
+fa32dab build(deps): bump pytest from 5.4.1 to 5.4.2
+be953a6 build(deps): bump pytest-asyncio from 0.10.0 to 0.12.0
+6883973 tests: Fix minor pytest incompatibilities
+194e439 build(deps): bump pytest-xdist from 1.31.0 to 1.32.0
+257d152 build(deps-dev): bump tox from 3.14.6 to 3.15.0
+96adea5 cq: Run tests with base versions
+```
+
 ## 0.6.1 (2020-04-28)
 
 *Changes:*
