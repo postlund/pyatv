@@ -4,21 +4,27 @@ on: [pull_request]
 
 jobs:
   build:
+    name: >-
+      ${{ matrix.python-version }}
+      /
+      ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}
     strategy:
-      max-parallel: 8
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        python-version: [3.6, 3.7, 3.8]
-
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9.0-alpha - 3.9.0
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: RC.exe  # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
@@ -36,6 +42,16 @@ jobs:
         }
         Invoke-VSDevEnvironment
         Get-Command rc.exe | Format-Table -AutoSize
+    - name: Install openssl dev (Windows)
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: install openssl --no-progress
+      if: matrix.python-version == '3.9.0-alpha - 3.9.0' && runner.os == 'Windows'
+    - name: Adding openssl to environment (windows)
+      run: |
+        echo '::set-env name=INCLUDE::c:\program files\openssl-win64\include'
+        echo '::set-env name=LIB::c:\program files\openssl-win64\lib'
+      if: matrix.python-version == '3.9.0-alpha - 3.9.0' && runner.os == 'Windows'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade setuptools pip wheel
@@ -52,4 +68,4 @@ jobs:
         file: ./coverage.xml
         flags: unittests
         name: pyatv
-        fail_ci_if_error: true
+        fail_ci_if_error: false
