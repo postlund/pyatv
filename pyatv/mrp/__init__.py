@@ -4,7 +4,7 @@ import math
 import logging
 import asyncio
 import datetime
-from copy import deepcopy
+from copy import copy
 from typing import Dict, List, Optional, Tuple
 
 from pyatv import conf, exceptions
@@ -475,7 +475,7 @@ class MrpMetadata(Metadata):
 
     async def playing(self):
         """Return what is currently playing."""
-        return MrpPlaying(deepcopy(self.psm.playing))
+        return MrpPlaying(copy(self.psm.playing))
 
     @property
     def app(self) -> Optional[App]:
