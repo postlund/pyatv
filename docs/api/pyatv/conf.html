@@ -299,7 +299,7 @@ class AirPlayService(BaseService):
 <dl>
 <dt id="pyatv.conf.AirPlayService"><code class="flex name class">
 <span>class <span class="ident">AirPlayService</span></span>
-<span>(</span><span>identifier: Union[str, NoneType], port: int = 7000, credentials: Union[str, NoneType] = None, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Dict[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
@@ -585,7 +585,7 @@ def device_info(self) -&gt; DeviceInfo:
     return DeviceInfo(os_type, version, build, model, mac)</code></pre>
 </details>
 </dd>
-<dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return the main identifier associated with this device.</p></section>
 <details class="source">
@@ -669,7 +669,7 @@ def services(self) -&gt; List[BaseService]:
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.get_service"><code class="name flex">
-<span>def <span class="ident">get_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> Union[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>, NoneType]</span>
+<span>def <span class="ident">get_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> Optional[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Look up a service based on protocol.</p>
@@ -733,7 +733,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>
-<span>(</span><span>identifier: Union[str, NoneType], credentials: Union[str, NoneType], port: int = 3689, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Optional[str], credentials: Optional[str], port: int = 3689, properties: Optional[Dict[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
@@ -772,7 +772,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.MrpService"><code class="flex name class">
 <span>class <span class="ident">MrpService</span></span>
-<span>(</span><span>identifier: Union[str, NoneType], port: int, credentials: Union[str, NoneType] = None, properties: Union[Dict[str, str], NoneType] = None)</span>
+<span>(</span><span>identifier: Optional[str], port: int, credentials: Optional[str] = None, properties: Optional[Dict[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>

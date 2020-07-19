@@ -1122,7 +1122,7 @@ class AppleTV(ABC, StateProducer):
 <dl>
 <dt id="pyatv.interface.App"><code class="flex name class">
 <span>class <span class="ident">App</span></span>
-<span>(</span><span>name: Union[str, NoneType], identifier: str)</span>
+<span>(</span><span>name: Optional[str], identifier: str)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Information about an app.</p>
@@ -1168,7 +1168,7 @@ def identifier(self) -&gt; str:
     return self._identifier</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.App.name"><code class="name">var <span class="ident">name</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.App.name"><code class="name">var <span class="ident">name</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>User friendly name of app.</p></section>
 <details class="source">
@@ -1476,7 +1476,7 @@ async def connect(self) -&gt; None:
 </dd>
 <dt id="pyatv.interface.BaseService"><code class="flex name class">
 <span>class <span class="ident">BaseService</span></span>
-<span>(</span><span>identifier: Union[str, NoneType], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Union[Dict[str, str], NoneType])</span>
+<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Dict[str, str]])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for protocol services.</p>
@@ -1526,7 +1526,7 @@ async def connect(self) -&gt; None:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.BaseService.identifier"><code class="name">var <span class="ident">identifier</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.BaseService.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return unique identifier associated with this service.</p></section>
 <details class="source">
@@ -1561,7 +1561,7 @@ def identifier(self) -&gt; Optional[str]:
 </dd>
 <dt id="pyatv.interface.DeviceInfo"><code class="flex name class">
 <span>class <span class="ident">DeviceInfo</span></span>
-<span>(</span><span>os: <a title="pyatv.const.OperatingSystem" href="const#pyatv.const.OperatingSystem">OperatingSystem</a>, version: Union[str, NoneType], build_number: Union[str, NoneType], model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a>, mac: Union[str, NoneType])</span>
+<span>(</span><span>os: <a title="pyatv.const.OperatingSystem" href="const#pyatv.const.OperatingSystem">OperatingSystem</a>, version: Optional[str], build_number: Optional[str], model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a>, mac: Optional[str])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>General information about device.</p>
@@ -1635,7 +1635,7 @@ def identifier(self) -&gt; Optional[str]:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.DeviceInfo.build_number"><code class="name">var <span class="ident">build_number</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.DeviceInfo.build_number"><code class="name">var <span class="ident">build_number</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system build number, e.g. 17K795.</p></section>
 <details class="source">
@@ -1648,7 +1648,7 @@ def build_number(self) -&gt; Optional[str]:
     return self._build_number</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.DeviceInfo.mac"><code class="name">var <span class="ident">mac</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.DeviceInfo.mac"><code class="name">var <span class="ident">mac</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Device MAC address.</p></section>
 <details class="source">
@@ -1687,7 +1687,7 @@ def operating_system(self) -&gt; const.OperatingSystem:
     return self._os</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.DeviceInfo.version"><code class="name">var <span class="ident">version</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.DeviceInfo.version"><code class="name">var <span class="ident">version</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system version.</p></section>
 <details class="source">
@@ -1769,7 +1769,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </dd>
 <dt id="pyatv.interface.FeatureInfo"><code class="flex name class">
 <span>class <span class="ident">FeatureInfo</span></span>
-<span>(</span><span>state: <a title="pyatv.const.FeatureState" href="const#pyatv.const.FeatureState">FeatureState</a>, options: Union[Dict[str, object], NoneType] = {})</span>
+<span>(</span><span>state: <a title="pyatv.const.FeatureState" href="const#pyatv.const.FeatureState">FeatureState</a>, options: Optional[Dict[str, object]] = {})</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Feature state and options.</p></section>
@@ -1789,7 +1789,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.FeatureInfo.options"><code class="name">var <span class="ident">options</span> -> Union[Dict[str, object], NoneType]</code></dt>
+<dt id="pyatv.interface.FeatureInfo.options"><code class="name">var <span class="ident">options</span> -> Optional[Dict[str, object]]</code></dt>
 <dd>
 <section class="desc"><p>Alias for field number 1</p></section>
 </dd>
@@ -1991,7 +1991,7 @@ in one of the listed states.</p></section>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.Metadata.app"><code class="name">var <span class="ident">app</span> -> Union[<a title="pyatv.interface.App" href="#pyatv.interface.App">App</a>, NoneType]</code></dt>
+<dt id="pyatv.interface.Metadata.app"><code class="name">var <span class="ident">app</span> -> Optional[<a title="pyatv.interface.App" href="#pyatv.interface.App">App</a>]</code></dt>
 <dd>
 <section class="desc"><p>Return information about current app playing something.</p>
 <p>Do note that this property returns which app is currently playing something and
@@ -2028,7 +2028,7 @@ def artwork_id(self) -&gt; str:
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Metadata.device_id"><code class="name">var <span class="ident">device_id</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.Metadata.device_id"><code class="name">var <span class="ident">device_id</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current device.</p></section>
 <details class="source">
@@ -2045,7 +2045,7 @@ def device_id(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Metadata.artwork"><code class="name flex">
-<span>async def <span class="ident">artwork</span></span>(<span>self, width=512, height=None) -> Union[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>, NoneType]</span>
+<span>async def <span class="ident">artwork</span></span>(<span>self, width=512, height=None) -> Optional[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return artwork for what is currently playing (or None).</p>
@@ -2416,7 +2416,7 @@ def pin(self, pin) -&gt; None:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="pyatv.interface.Playing.album"><code class="name">var <span class="ident">album</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.Playing.album"><code class="name">var <span class="ident">album</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Album of the currently playing song.</p></section>
 <details class="source">
@@ -2431,7 +2431,7 @@ def album(self) -&gt; Optional[str]:
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Artist of the currently playing song.</p></section>
 <details class="source">
@@ -2460,7 +2460,7 @@ def device_state(self) -&gt; const.DeviceState:
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Genre of the currently playing song.</p></section>
 <details class="source">
@@ -2556,7 +2556,7 @@ def shuffle(self) -&gt; const.ShuffleState:
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Union[str, NoneType]</code></dt>
+<dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Title of the current media, e.g. movie or song name.</p></section>
 <details class="source">
