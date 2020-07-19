@@ -83,7 +83,7 @@ async def auto_connect(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="pyatv.helpers.auto_connect"><code class="name flex">
-<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], NoneType], timeout: int = 5, not_found: Callable[[], NoneType] = None, loop: Union[asyncio.events.AbstractEventLoop, NoneType] = None) -> NoneType</span>
+<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], NoneType], timeout: int = 5, not_found: Callable[[], NoneType] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Connect to first discovered device.</p>

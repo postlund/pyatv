@@ -16,6 +16,13 @@
 
   def to_html(text):
     return _to_html(text, module=module, link=link, latex_math=latex_math)
+
+  # Hack to convert Union[x, NoneType] to Optional[x] like in python 3.9
+  def insert_union_types(returns, is_return=True):
+    if "Union" in returns and "NoneType" in returns:
+      returns = returns.replace("Union[", "Optional[")
+      returns = returns.replace(",\N{NBSP}NoneType", "")
+    return (' ->\N{NBSP}' if is_return else '') + returns
 %>
 
 <%def name="ident(name)"><span class="ident">${name}</span></%def>
@@ -99,10 +106,10 @@
   <%def name="show_func(f)">
     <dt id="${f.refname}"><code class="name flex">
         <%
-            params = ', '.join(f.params(annotate=show_type_annotations, link=link))
+            params = ', '.join([insert_union_types(param, is_return=False) for param in f.params(annotate=show_type_annotations, link=link)])
             returns = show_type_annotations and f.return_annotation(link=link) or ''
             if returns:
-                returns = ' ->\N{NBSP}' + returns
+                returns = insert_union_types(returns)
         %>
         <span>${f.funcdef()} ${ident(f.name)}</span>(<span>${params})${returns}</span>
     </code></dt>
@@ -175,7 +182,7 @@
       methods = c.methods(show_inherited_members, sort=sort_identifiers)
       mro = c.mro()
       subclasses = c.subclasses()
-      params = ', '.join(c.params(annotate=show_type_annotations, link=link))
+      params = ', '.join([insert_union_types(param, is_return=False) for param in c.params(annotate=show_type_annotations, link=link)])
       %>
       <dt id="${c.refname}"><code class="flex name class">
           <span>class ${ident(c.name)}</span>
@@ -227,7 +234,7 @@
               <%
                   var_type = show_type_annotations and v.type_annotation(link=link) or ''
                   if var_type:
-                      var_type = ' ->\N{NBSP}' + var_type
+                      var_type = insert_union_types(var_type)
               %>
               <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${var_type}</code></dt>
               <dd>${show_desc(v)}</dd>
