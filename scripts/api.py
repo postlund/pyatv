@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import warnings
+from difflib import unified_diff
 from pathlib import Path
 
 import pdoc
@@ -14,9 +15,6 @@ pdoc.tpl_lookup.directories.insert(0, os.path.join("docs", "pdoc_templates"))
 
 def _filter_func(doc):
     for exclude in [
-        "BaseScanner",
-        "UnicastMdnsScanner",
-        "ZeroconfScanner",
         "airplay",
         "mrp",
         "dmap",
@@ -62,13 +60,23 @@ def generate():
 
 def verify():
     """Verify that API reference is up-to-date."""
+    return_value = 0
     for output_file, html in _api_modules():
         print("Verifying", output_file)
         expected_output = Path(output_file).read_text(encoding="utf-8")
         if html != expected_output:
-            print("File content mismatch - run: api.py generate", file=sys.stderr)
-            return 1
-    return 0
+            print(
+                "File content mismatch - run: api.py generate. Diff is below:",
+                file=sys.stderr,
+            )
+            print(
+                "".join(
+                    unified_diff(expected_output.splitlines(1), html.splitlines(1))
+                ),
+                file=sys.stderr,
+            )
+            return_value = 1
+    return return_value
 
 
 def main():
