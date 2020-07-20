@@ -66,4 +66,7 @@ class CommandError(Exception):
 
 
 class NonLocalSubnetError(Exception):
-    """Thrown when address it not in any local subnet."""
+    """Thrown when address it not in any local subnet.
+
+    DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!
+    """
