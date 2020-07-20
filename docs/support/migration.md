@@ -12,6 +12,20 @@ and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request
 
+## From 0.7.0 to 0.7.1
+
+### General Changes
+
+* Unicast scanning (i.e. passing `hosts` to `pyatv.scan`) will not verify
+  if hosts are on the same network anymore (`NonLocalSubnetError` will not
+  be thrown). Requests will just time out. See [#775](https://github.com/postlund/pyatv/issues/775)
+  for more details.
+
+### Deprecations
+
+* `NonLocalSubnetError` is never thrown and shall not be checked for. It
+  will be removed in 0.9.0.
+
 ## From 0.6.0 to 0.7.0
 
 ### General Changes

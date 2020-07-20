@@ -29,13 +29,6 @@ TEST_SERVICES = dict(
 )
 
 
-@pytest.fixture(autouse=True)
-def stub_local_address():
-    with patch("pyatv.net.get_local_address_reaching") as mock:
-        mock.return_value = IPv4Address("127.0.0.1")
-        yield mock
-
-
 @pytest.fixture
 async def udns_server(event_loop):
     server = fake_udns.FakeUdns(event_loop, TEST_SERVICES)
@@ -115,13 +108,6 @@ def test_qname_with_label():
     ret, rest = mdns.qname_decode(ptr, message)
     assert ret == "label.test"
     assert rest == b"\xAB\xCD"
-
-
-@pytest.mark.asyncio
-async def test_non_local_address(event_loop, stub_local_address):
-    stub_local_address.return_value = None
-    with pytest.raises(exceptions.NonLocalSubnetError):
-        await mdns.unicast(event_loop, "1.2.3.4", [])
 
 
 @pytest.mark.asyncio

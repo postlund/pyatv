@@ -10,7 +10,7 @@ from typing import Optional, Dict, List, cast, NamedTuple, Union
 
 from zeroconf import Zeroconf, ServiceInfo
 
-from pyatv.support import exceptions, net, log_binary
+from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -443,11 +443,6 @@ async def unicast(
     timeout: int = 4,
 ) -> Response:
     """Send request for services to a host."""
-    if not net.get_local_address_reaching(IPv4Address(address)):
-        raise exceptions.NonLocalSubnetError(
-            f"address {address} is not in any local subnet"
-        )
-
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: UnicastDnsSdClientProtocol(services, address, timeout),
         remote_addr=(address, port),

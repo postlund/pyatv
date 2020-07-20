@@ -93,9 +93,7 @@ please see [atvremote](../atvremote/).
 Please note that unicast scanning does not work across different network as the Apple TV will ignore
 packets from a different subnet. This is according to the multicast DNS specification (see chapter 5.5
 in RFC 6762 [here](https://tools.ietf.org/html/rfc6762#section-5.5) in case you are interested) and is
-not something that can be fixed in `pyatv`. To make this more clear, {% include api i="pyatv.scan" %}
-will raise {% include api i="pyatv.exceptions.NonLocalSubnetError" %} if an address that is outside of
-all local subnets is scanned.
+not something that can be fixed in `pyatv`. 
 
 ### Deep Sleep Detection
 
