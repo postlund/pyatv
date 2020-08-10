@@ -76,6 +76,7 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
         except OSError:
             _LOGGER.exception("failed to join")
 
+    _LOGGER.debug("Binding on %s:%d", address or "*", port)
     sock.bind((address or "", port))
     return sock
 
