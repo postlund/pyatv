@@ -432,6 +432,12 @@ async def cli_handler(loop):
     debug.add_argument(
         "--debug", help="print debug information", action="store_true", dest="debug"
     )
+    debug.add_argument(
+        "--mdns-debug",
+        help="print mdns debug data",
+        action="store_true",
+        dest="mdns_debug",
+    )
 
     args = parser.parse_args()
     loglevel = logging.WARNING
@@ -446,6 +452,9 @@ async def cli_handler(loop):
         format="%(asctime)s %(levelname)s: %(message)s",
     )
     logging.getLogger("requests").setLevel(logging.WARNING)
+
+    if args.mdns_debug:
+        logging.getLogger("pyatv.support.mdns").level = logging.TRAFFIC
 
     cmds = retrieve_commands(GlobalCommands)
 

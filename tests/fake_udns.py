@@ -147,10 +147,10 @@ class FakeUdns(asyncio.Protocol):
         self.request_count: int = 0
 
     async def start(self):
-        _LOGGER.debug("Starting fake UDNS server")
         self.server, _ = await self.loop.create_datagram_endpoint(
             lambda: self, local_addr=("127.0.0.1", None)
         )
+        _LOGGER.debug("Starting fake UDNS server at port %d", self.port)
 
     def close(self):
         self.server.close()
