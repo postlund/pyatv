@@ -10,8 +10,8 @@ from unittest.mock import patch
 import pytest
 
 from pyatv import exceptions
-from pyatv.support import mdns
-from tests import fake_udns
+from pyatv.support import mdns, net
+from tests import fake_udns, utils
 from tests.support import dns_utils
 
 
@@ -29,6 +29,21 @@ TEST_SERVICES = dict(
 )
 
 
+@pytest.fixture(autouse=True)
+def mdns_debug():
+    logger = logging.getLogger("pyatv.support.mdns")
+    logger.disabled = False
+    yield
+    logger.disabled = True
+
+
+@pytest.fixture(autouse=True)
+def stub_local_address():
+    with patch("pyatv.net.get_local_address_reaching") as mock:
+        mock.return_value = IPv4Address("127.0.0.1")
+        yield mock
+
+
 @pytest.fixture
 async def udns_server(event_loop):
     server = fake_udns.FakeUdns(event_loop, TEST_SERVICES)
@@ -37,47 +52,54 @@ async def udns_server(event_loop):
     server.close()
 
 
+@pytest.fixture(autouse=True)
+def stub_local_addresses():
+    with patch("pyatv.net.get_private_addresses") as mock:
+        mock.return_value = [IPv4Address("127.0.0.1")]
+        yield
+
+
+# Redirect binding to localhost only
+@pytest.fixture
+def redirect_mcast():
+    real_mcast_socket = net.mcast_socket
+    with patch("pyatv.net.mcast_socket") as mock:
+        mock.side_effect = lambda addr, port=0: real_mcast_socket("127.0.0.1", port)
+        yield
+
+
 # This is a very complex fixture that will hook into the receiver of multicast
 # responses and abort the "waiting" period whenever all responses or a certain amount
 # of requests have been received. Mainly this is for not slowing down tests.
 @pytest.fixture
-async def multicast_fastexit(event_loop, monkeypatch, udns_server):
-    # Interface used to set number of expected responses (1 by default)
-    expected_responses: List[int] = [1, 0]
+async def multicast_fastexit(event_loop, monkeypatch, udns_server, redirect_mcast):
+    clients: List[asyncio.Future] = []
 
-    def _set_expected_responses(response_count: int, request_count: int):
-        expected_responses[0] = response_count
-        expected_responses[1] = request_count
+    # Interface used to set number of expected responses (1 by default)
+    conditions: Dict[str, object] = {"responses": 1, "requests": 0}
 
     # Checks if either response or request count has been fulfilled
     def _check_cond(protocol: mdns.MulticastDnsSdClientProtocol) -> bool:
-        if len(protocol.responses) == expected_responses[0]:
+        if len(protocol.responses) == conditions["responses"]:
             return False
-        if expected_responses[1] == 0:
+        if conditions["requests"] == 0:
             return True
-        return udns_server.request_count < expected_responses[1]
+        return udns_server.request_count < conditions["responses"]
 
-    # Replace create_datagram_endpoint with a method that captures the created
-    # endpoints and use a simple poller to detect if all responses have been received
-    create_endpoint = event_loop.create_datagram_endpoint
+    def _cast(typ, val):
+        if isinstance(val, mdns.MulticastDnsSdClientProtocol):
 
-    async def _create_datagram_endpoint(factory, **kwargs):
-        transport, protocol = await create_endpoint(factory, **kwargs)
+            async def _poll_responses():
+                await utils.until(lambda: not _check_cond(val))
+                val.semaphore.release()
 
-        async def _poll_responses():
-            while _check_cond(protocol):
-                await asyncio.sleep(0.1)
-            protocol.semaphore.release()
+            clients.append(asyncio.ensure_future(_poll_responses()))
+        return val
 
-        asyncio.ensure_future(_poll_responses())
+    monkeypatch.setattr(mdns, "cast", _cast)
 
-        return transport, protocol
-
-    monkeypatch.setattr(
-        event_loop, "create_datagram_endpoint", _create_datagram_endpoint
-    )
-
-    yield _set_expected_responses
+    yield lambda **kwargs: conditions.update(**kwargs)
+    await asyncio.gather(*clients)
 
 
 async def unicast(event_loop, udns_server, service_name, timeout=1):
@@ -131,7 +153,7 @@ async def test_service_has_valid_question():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
-    assert question.qtype == mdns.QTYPE_ANY
+    assert question.qtype == mdns.QTYPE_PTR
     assert question.qclass == 0x8001
 
 
@@ -225,14 +247,14 @@ async def test_unicast_specific_service(event_loop, udns_server):
 
 @pytest.mark.asyncio
 async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit):
-    multicast_fastexit(0, 0)
+    multicast_fastexit(responses=0, requests=0)
 
     await mdns.multicast(event_loop, [], "127.0.0.1", udns_server.port)
 
 
 @pytest.mark.asyncio
 async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fastexit):
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
 
     resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
@@ -247,7 +269,7 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
 
 @pytest.mark.asyncio
 async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fastexit):
-    multicast_fastexit(0, 3)
+    multicast_fastexit(responses=0, requests=3)
     udns_server.sleep_proxy = True
 
     udns_server.services = {
@@ -261,7 +283,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
     )
     assert len(resp) == 0
 
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
     udns_server.services = TEST_SERVICES
 
     resp = await mdns.multicast(
@@ -272,7 +294,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
 
 @pytest.mark.asyncio
 async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit):
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
 
     resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
@@ -281,7 +303,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
     assert not resp[IPv4Address("127.0.0.1")].deep_sleep
 
     udns_server.sleep_proxy = True
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
 
     resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
@@ -292,7 +314,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
 
 @pytest.mark.asyncio
 async def test_multicast_device_model(event_loop, udns_server, multicast_fastexit):
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
 
     resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
@@ -309,7 +331,7 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
             model="dummy",
         ),
     }
-    multicast_fastexit(1, 0)
+    multicast_fastexit(responses=1, requests=0)
 
     resp = await mdns.multicast(
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
