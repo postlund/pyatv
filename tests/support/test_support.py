@@ -80,6 +80,12 @@ def test_log_binary_no_log_if_not_debug(logger):
     logger.isEnabledFor.assert_called_with(logging.DEBUG)
 
 
+def test_log_binary_no_log_if_not_custom_level(logger):
+    logger.isEnabledFor.return_value = False
+    log_binary(logger, "test", level=logging.INFO)
+    logger.isEnabledFor.assert_called_with(logging.INFO)
+
+
 def test_log_binary_log_no_args_if_enabled(logger):
     log_binary(logger, "testing")
     assert _debug_string(logger) == "testing ()"
