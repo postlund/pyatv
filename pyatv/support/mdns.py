@@ -469,14 +469,14 @@ class MulticastDnsSdClientProtocol:
                 transport.sendto(message, target)
             except Exception:  # pylint: disable=bare-except
                 _LOGGER.exception(
-                    "fail to send to %s", transport.get_extra_info("socket")
+                    "fail to send to " + str(transport.get_extra_info("socket"))
                 )
 
     def datagram_received(self, data, addr) -> None:
         """DNS response packet received."""
         log_binary(
             _LOGGER,
-            "Received DNS response from " + str(addr[0]),
+            f"Received DNS response from {addr}",
             level=TRAFFIC_LEVEL,
             Data=data,
         )

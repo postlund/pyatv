@@ -28,9 +28,8 @@ TEST_SERVICES = dict(
 @pytest.fixture(autouse=True)
 def mdns_debug():
     logger = logging.getLogger("pyatv.support.mdns")
-    logger.disabled = False
+    logger.setLevel(mdns.TRAFFIC_LEVEL)
     yield
-    logger.disabled = True
 
 
 @pytest.fixture
@@ -48,12 +47,15 @@ def stub_local_addresses():
         yield
 
 
-# Redirect binding to localhost only
+# Hack-ish fixture to make sure multicast does not listen on any global port,
+# i.e. 5353 since data from other places can leak into the test
 @pytest.fixture(autouse=True)
-def redirect_mcast():
+def redirect_mcast(udns_server):
     real_mcast_socket = net.mcast_socket
     with patch("pyatv.net.mcast_socket") as mock:
-        mock.side_effect = lambda addr, port=0: real_mcast_socket("127.0.0.1", port)
+        mock.side_effect = lambda addr, port=0: real_mcast_socket(
+            addr, port if port == udns_server.port else 0
+        )
         yield
 
 
