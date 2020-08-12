@@ -1,6 +1,7 @@
-"""Methods used to make GET/POST requests."""
+"""Various network utility helpers."""
 
 import socket
+import struct
 import logging
 import platform
 from ipaddress import IPv4Interface, IPv4Address
@@ -52,6 +53,32 @@ def unused_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("127.0.0.1", 0))
         return s.getsockname()[1]
+
+
+def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
+    """Create a multicast capable socket."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, struct.pack("b", 10))
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, True)
+
+    if hasattr(socket, "SO_REUSEPORT"):
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+
+    if address is not None:
+        sock.setsockopt(
+            socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(address)
+        )
+        try:
+            membership = socket.inet_aton("224.0.0.251") + socket.inet_aton(address)
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+        except OSError:
+            _LOGGER.exception("failed to join")
+
+    _LOGGER.debug("Binding on %s:%d", address or "*", port)
+    sock.bind((address or "", port))
+    return sock
 
 
 def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:

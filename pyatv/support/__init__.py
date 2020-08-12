@@ -38,9 +38,9 @@ async def error_handler(func, fallback, *args, **kwargs):
 
 
 # Special log method to avoid hexlify conversion if debug is on
-def log_binary(logger, message, **kwargs):
+def log_binary(logger, message, level=logging.DEBUG, **kwargs):
     """Log binary data if debug is enabled."""
-    if logger.isEnabledFor(logging.DEBUG):
+    if logger.isEnabledFor(level):
         override_length = int(environ.get("PYATV_BINARY_MAX_LINE", 0))
         line_length = override_length or _BINARY_LINE_LENGTH
 
