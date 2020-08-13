@@ -188,7 +188,12 @@ class DmapService(BaseService):
         properties: Optional[Dict[str, str]] = None,
     ) -> None:
         """Initialize a new DmapService."""
-        super().__init__(identifier, Protocol.DMAP, port, properties)
+        super().__init__(
+            identifier.split("_")[0] if identifier else None,
+            Protocol.DMAP,
+            port,
+            properties,
+        )
         self.credentials = credentials
 
 

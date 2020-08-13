@@ -19,7 +19,7 @@ from tests.fake_device import FakeAppleTV
 
 IP_1 = "10.0.0.1"
 IP_2 = "127.0.0.1"
-DMAP_ID = "dmap_id"
+DMAP_ID = "dmapid"
 MRP_ID = "mrp_id"
 AIRPLAY_ID = "AA:BB:CC:DD:EE:FF"
 

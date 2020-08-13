@@ -71,7 +71,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv.app
 
     async def get_connected_device(self, hsgid):
-        self.dmap_service = DmapService("dmap_id", hsgid, port=self.server.port)
+        self.dmap_service = DmapService("dmapid", hsgid, port=self.server.port)
         self.airplay_service = AirPlayService(
             "airplay_id", self.server.port, DEVICE_CREDENTIALS
         )
