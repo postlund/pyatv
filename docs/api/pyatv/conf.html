@@ -252,7 +252,12 @@ class DmapService(BaseService):
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.DMAP, port, properties)
+        super().__init__(
+            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            Protocol.DMAP,
+            port,
+            properties,
+        )
         self.credentials = credentials
 
 
@@ -753,7 +758,12 @@ returned.</p></section>
         properties: Optional[Dict[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.DMAP, port, properties)
+        super().__init__(
+            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            Protocol.DMAP,
+            port,
+            properties,
+        )
         self.credentials = credentials</code></pre>
 </details>
 <h3>Ancestors</h3>
