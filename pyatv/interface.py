@@ -272,7 +272,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(5, "PlayPause", "Toggle between play/pause.")
-    async def play_pause(self) -> None:
+    async def play_pause(self, action: InputAction = InputAction.SingleTap) -> None:
         """Toggle between play and pause."""
         raise exceptions.NotSupportedError()
 

@@ -57,7 +57,7 @@ _KEY_LOOKUP = {
     "stop": (12, 0xB7),
     "next": (12, 0xB5),
     "previous": (12, 0xB6),
-    "select": (1, 0x89),
+    "select": (12, 0x80),
     "menu": (1, 0x86),
     "topmenu": (12, 0x60),
     "home": (12, 0x40),
@@ -65,6 +65,7 @@ _KEY_LOOKUP = {
     "wakeup": (1, 0x83),
     "volume_up": (12, 0xE9),
     "volume_down": (12, 0xEA),
+    "play_pause": (12, 0xCD)
     # 'mic': (12, 0x04),  # Siri
 }  # Dict[str, Tuple[int, int]]
 
@@ -81,6 +82,7 @@ _FEATURES_SUPPORTED = [
     FeatureName.Up,
     FeatureName.TurnOn,
     FeatureName.TurnOff,
+    FeatureName.PlayPause,
     FeatureName.PowerState,
 ]  # type: List[FeatureName]
 
@@ -88,7 +90,6 @@ _FEATURE_COMMAND_MAP = {
     FeatureName.Next: CommandInfo_pb2.NextTrack,
     FeatureName.Pause: CommandInfo_pb2.Pause,
     FeatureName.Play: CommandInfo_pb2.Play,
-    FeatureName.PlayPause: CommandInfo_pb2.TogglePlayPause,
     FeatureName.Previous: CommandInfo_pb2.PreviousTrack,
     FeatureName.Stop: CommandInfo_pb2.Stop,
     FeatureName.SetPosition: CommandInfo_pb2.SeekToPlaybackPosition,
@@ -134,7 +135,7 @@ class MrpRemoteControl(RemoteControl):
 
     async def _press_key(self, key: str, action: InputAction) -> None:
         async def _do_press(keycode: Tuple[int, int], hold: bool):
-            await self.protocol.send_and_receive(
+            await self.protocol.send(
                 messages.send_hid_event(keycode[0], keycode[1], True)
             )
 
@@ -142,7 +143,7 @@ class MrpRemoteControl(RemoteControl):
                 # Hardcoded hold time for one second
                 await asyncio.sleep(1)
 
-            await self.protocol.send_and_receive(
+            await self.protocol.send(
                 messages.send_hid_event(keycode[0], keycode[1], False)
             )
 
@@ -190,22 +191,13 @@ class MrpRemoteControl(RemoteControl):
         """Press key right."""
         await self._press_key("right", action)
 
+    async def play_pause(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key right."""
+        await self._press_key("play_pause", action)
+
     async def play(self) -> None:
         """Press key play."""
         await self._send_command(CommandInfo_pb2.Play)
-
-    async def play_pause(self) -> None:
-        """Toggle between play and pause."""
-        # Cannot use the feature interface here since it emulates the feature state
-        cmd = self.psm.playing.command_info(CommandInfo_pb2.TogglePlayPause)
-        if cmd and cmd.enabled:
-            await self._send_command(CommandInfo_pb2.TogglePlayPause)
-        else:
-            state = self.psm.playing.playback_state
-            if state == ssm.Playing:
-                await self.pause()
-            elif state == ssm.Paused:
-                await self.play()
 
     async def pause(self) -> None:
         """Press key play."""
@@ -521,7 +513,7 @@ class MrpPower(Power):
 
     async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
-        await self.protocol.send_and_receive(messages.wake_device())
+        await self.protocol.send(messages.wake_device())
 
         if await_new_state and self.power_state != PowerState.On:
             await self._waiters.setdefault(PowerState.On, asyncio.Event()).wait()
@@ -625,21 +617,6 @@ class MrpFeatures(Features):
             return FeatureInfo(
                 state=FeatureState.Available if available else FeatureState.Unavailable
             )
-
-        # Special case for PlayPause emulation. Based on the behavior in the Youtube
-        # app, only the "opposite" feature to current state is available. E.g. if
-        # something is playing, then pause will be available but not play. So take that
-        # into consideration here.
-        if feature == FeatureName.PlayPause:
-            playback_state = self.psm.playing.playback_state
-            if playback_state == ssm.Playing and self.in_state(
-                FeatureState.Available, FeatureName.Pause
-            ):
-                return FeatureInfo(state=FeatureState.Available)
-            if playback_state == ssm.Paused and self.in_state(
-                FeatureState.Available, FeatureName.Play
-            ):
-                return FeatureInfo(state=FeatureState.Available)
 
         cmd_id = _FEATURE_COMMAND_MAP.get(feature)
         if cmd_id:

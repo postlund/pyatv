@@ -27,18 +27,7 @@ class PlayerState:
     @property
     def playback_state(self):
         """Playback state of device."""
-        playback_rate = self.metadata_field("playbackRate")
-        if playback_rate is None:
-            return self._playback_state
-
-        if math.isclose(playback_rate, 0.0):
-            # Special case where playback rate is incorrectly set
-            if self._playback_state == SetStateMessage.Paused:
-                return SetStateMessage.Paused
-            return self._playback_state
-        if math.isclose(playback_rate, 1.0):
-            return SetStateMessage.Playing
-        return SetStateMessage.Seeking
+        return self._playback_state
 
     @property
     def metadata(self):
@@ -82,6 +71,8 @@ class PlayerState:
             queue = setstate.playbackQueue
             self.items = deepcopy(queue.contentItems)
             self.location = queue.location
+            if len(self.items) == 0:
+                self._playback_state = None
 
         if setstate.HasField("playerPath"):
             self.player_path = deepcopy(setstate.playerPath)
@@ -126,9 +117,6 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
             self._handle_content_item_update, protobuf.UPDATE_CONTENT_ITEM_MESSAGE
         )
         self.protocol.add_listener(
-            self._handle_set_now_playing_client, protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE
-        )
-        self.protocol.add_listener(
             self._handle_update_client, protobuf.UPDATE_CLIENT_MESSAGE
         )
         self.protocol.add_listener(
@@ -168,10 +156,12 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
 
         self.states[identifier].handle_set_state(setstate)
 
-        # Only trigger callback if current state changed
-        if identifier == self.active:
-            if self.listener:
-                await self.listener.state_updated()
+        if identifier != self.active:
+            self.active = identifier
+            _LOGGER.debug("Active player is now %s", self.active)
+
+        if self.listener:
+            await self.listener.state_updated()
 
     async def _handle_content_item_update(self, message, _):
         item_update = message.inner()
@@ -189,15 +179,6 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
             _LOGGER.warning(
                 "Received ContentItemUpdate for unknown player %s", identifier
             )
-
-    async def _handle_set_now_playing_client(self, message, _):
-        identifier = message.inner().client.bundleIdentifier
-        if identifier != self.active:
-            self.active = identifier
-            _LOGGER.debug("Active player is now %s", self.active)
-
-            if self.listener:
-                await self.listener.state_updated()
 
     async def _handle_update_client(self, message, _):
         update_client = message.inner()
