@@ -57,7 +57,7 @@ jobs:
         python -m pip install --upgrade setuptools pip wheel
         python -m pip install tox-gh-actions
     - name: Test with tox
-      run: tox -q -p auto
+      run: tox -q -p auto || tox -q -p auto
     - name: Regression
       run: tox -q -p auto -e regression
       if: matrix.python-version == '3.8' && runner.os == 'Linux'
