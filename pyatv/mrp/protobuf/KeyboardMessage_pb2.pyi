@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -15,7 +16,6 @@ from pyatv.mrp.protobuf.TextEditingAttributesMessage_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -27,15 +27,14 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class KeyboardMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    state = ... # type: builtin___int
-    encryptedTextCyphertext = ... # type: builtin___bytes
+    state: builtin___int = ...
+    encryptedTextCyphertext: builtin___bytes = ...
 
     @property
     def attributes(self) -> pyatv___mrp___protobuf___TextEditingAttributesMessage_pb2___TextEditingAttributes: ...
@@ -46,16 +45,8 @@ class KeyboardMessage(google___protobuf___message___Message):
         attributes : typing___Optional[pyatv___mrp___protobuf___TextEditingAttributesMessage_pb2___TextEditingAttributes] = None,
         encryptedTextCyphertext : typing___Optional[builtin___bytes] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> KeyboardMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> KeyboardMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"attributes",b"attributes",u"encryptedTextCyphertext",b"encryptedTextCyphertext",u"state",b"state"]) -> None: ...
-global___KeyboardMessage = KeyboardMessage
+type___KeyboardMessage = KeyboardMessage
 
-keyboardMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+keyboardMessage: google___protobuf___descriptor___FieldDescriptor = ...

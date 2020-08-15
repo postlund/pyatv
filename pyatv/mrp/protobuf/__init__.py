@@ -20,6 +20,7 @@ from . import RegisterVoiceInputDeviceMessage_pb2
 from . import RegisterVoiceInputDeviceResponseMessage_pb2
 from . import RemoveClientMessage_pb2
 from . import RemovePlayerMessage_pb2
+from . import SendButtonEventMessage_pb2
 from . import SendCommandMessage_pb2
 from . import SendCommandResultMessage_pb2
 from . import SendHIDEventMessage_pb2
@@ -131,6 +132,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: RegisterVoiceInputDeviceResponseMessage_pb2.registerVoiceInputDeviceResponseMessage,
     ProtocolMessage.REMOVE_CLIENT_MESSAGE: RemoveClientMessage_pb2.removeClientMessage,
     ProtocolMessage.REMOVE_PLAYER_MESSAGE: RemovePlayerMessage_pb2.removePlayerMessage,
+    ProtocolMessage.SEND_BUTTON_EVENT_MESSAGE: SendButtonEventMessage_pb2.sendButtonEventMessage,
     ProtocolMessage.SEND_COMMAND_MESSAGE: SendCommandMessage_pb2.sendCommandMessage,
     ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE: SendCommandResultMessage_pb2.sendCommandResultMessage,
     ProtocolMessage.SEND_HID_EVENT_MESSAGE: SendHIDEventMessage_pb2.sendHIDEventMessage,
@@ -168,6 +170,7 @@ REGISTER_VOICE_INPUT_DEVICE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVIC
 REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE
 REMOVE_CLIENT_MESSAGE = ProtocolMessage.REMOVE_CLIENT_MESSAGE
 REMOVE_PLAYER_MESSAGE = ProtocolMessage.REMOVE_PLAYER_MESSAGE
+SEND_BUTTON_EVENT_MESSAGE = ProtocolMessage.SEND_BUTTON_EVENT_MESSAGE
 SEND_COMMAND_MESSAGE = ProtocolMessage.SEND_COMMAND_MESSAGE
 SEND_COMMAND_RESULT_MESSAGE = ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE
 SEND_HID_EVENT_MESSAGE = ProtocolMessage.SEND_HID_EVENT_MESSAGE

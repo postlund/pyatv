@@ -3,36 +3,21 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
 )
 
-from typing import (
-    Union as typing___Union,
-)
 
-
-builtin___bytes = bytes
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
-
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class WakeDeviceMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> WakeDeviceMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> WakeDeviceMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___WakeDeviceMessage = WakeDeviceMessage
+type___WakeDeviceMessage = WakeDeviceMessage
 
-wakeDeviceMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+wakeDeviceMessage: google___protobuf___descriptor___FieldDescriptor = ...

@@ -4,6 +4,11 @@ from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -35,11 +40,9 @@ from pyatv.mrp.protobuf.SupportedCommands_pb2 import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -52,44 +55,35 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class SetStateMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class PlaybackState(builtin___int):
+    PlaybackStateValue = typing___NewType('PlaybackStateValue', builtin___int)
+    type___PlaybackStateValue = PlaybackStateValue
+    PlaybackState: _PlaybackState
+    class _PlaybackState(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[SetStateMessage.PlaybackStateValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'SetStateMessage.PlaybackState': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['SetStateMessage.PlaybackState']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'SetStateMessage.PlaybackState']]: ...
-        Unknown = typing___cast('SetStateMessage.PlaybackState', 0)
-        Playing = typing___cast('SetStateMessage.PlaybackState', 1)
-        Paused = typing___cast('SetStateMessage.PlaybackState', 2)
-        Stopped = typing___cast('SetStateMessage.PlaybackState', 3)
-        Interrupted = typing___cast('SetStateMessage.PlaybackState', 4)
-        Seeking = typing___cast('SetStateMessage.PlaybackState', 5)
-    Unknown = typing___cast('SetStateMessage.PlaybackState', 0)
-    Playing = typing___cast('SetStateMessage.PlaybackState', 1)
-    Paused = typing___cast('SetStateMessage.PlaybackState', 2)
-    Stopped = typing___cast('SetStateMessage.PlaybackState', 3)
-    Interrupted = typing___cast('SetStateMessage.PlaybackState', 4)
-    Seeking = typing___cast('SetStateMessage.PlaybackState', 5)
-    global___PlaybackState = PlaybackState
+        Unknown = typing___cast(SetStateMessage.PlaybackStateValue, 0)
+        Playing = typing___cast(SetStateMessage.PlaybackStateValue, 1)
+        Paused = typing___cast(SetStateMessage.PlaybackStateValue, 2)
+        Stopped = typing___cast(SetStateMessage.PlaybackStateValue, 3)
+        Interrupted = typing___cast(SetStateMessage.PlaybackStateValue, 4)
+        Seeking = typing___cast(SetStateMessage.PlaybackStateValue, 5)
+    Unknown = typing___cast(SetStateMessage.PlaybackStateValue, 0)
+    Playing = typing___cast(SetStateMessage.PlaybackStateValue, 1)
+    Paused = typing___cast(SetStateMessage.PlaybackStateValue, 2)
+    Stopped = typing___cast(SetStateMessage.PlaybackStateValue, 3)
+    Interrupted = typing___cast(SetStateMessage.PlaybackStateValue, 4)
+    Seeking = typing___cast(SetStateMessage.PlaybackStateValue, 5)
+    type___PlaybackState = PlaybackState
 
-    displayID = ... # type: typing___Text
-    displayName = ... # type: typing___Text
-    playbackState = ... # type: global___SetStateMessage.PlaybackState
-    playbackStateTimestamp = ... # type: builtin___float
+    displayID: typing___Text = ...
+    displayName: typing___Text = ...
+    playbackState: type___SetStateMessage.PlaybackStateValue = ...
+    playbackStateTimestamp: builtin___float = ...
 
     @property
     def nowPlayingInfo(self) -> pyatv___mrp___protobuf___NowPlayingInfo_pb2___NowPlayingInfo: ...
@@ -116,22 +110,14 @@ class SetStateMessage(google___protobuf___message___Message):
         playbackQueue : typing___Optional[pyatv___mrp___protobuf___PlaybackQueue_pb2___PlaybackQueue] = None,
         displayID : typing___Optional[typing___Text] = None,
         displayName : typing___Optional[typing___Text] = None,
-        playbackState : typing___Optional[global___SetStateMessage.PlaybackState] = None,
+        playbackState : typing___Optional[type___SetStateMessage.PlaybackStateValue] = None,
         playbackQueueCapabilities : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueCapabilities_pb2___PlaybackQueueCapabilities] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage] = None,
         playbackStateTimestamp : typing___Optional[builtin___float] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> SetStateMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SetStateMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"displayID",b"displayID",u"displayName",b"displayName",u"nowPlayingInfo",b"nowPlayingInfo",u"playbackQueue",b"playbackQueue",u"playbackQueueCapabilities",b"playbackQueueCapabilities",u"playbackState",b"playbackState",u"playbackStateTimestamp",b"playbackStateTimestamp",u"playerPath",b"playerPath",u"request",b"request",u"supportedCommands",b"supportedCommands"]) -> None: ...
-global___SetStateMessage = SetStateMessage
+type___SetStateMessage = SetStateMessage
 
-setStateMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+setStateMessage: google___protobuf___descriptor___FieldDescriptor = ...

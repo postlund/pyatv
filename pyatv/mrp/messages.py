@@ -1,7 +1,5 @@
 """Helper code for dealing with protobuf messages."""
 
-import binascii
-
 from pyatv import const
 from pyatv.mrp import protobuf
 from pyatv.support import hap_tlv8
@@ -97,36 +95,6 @@ def playback_queue_request(location, width=-1, height=400):
     request.returnContentItemAssetsInUserCompletion = True
     return message
 
-
-def send_hid_event(use_page, usage, down):
-    """Create a new SEND_HID_EVENT_MESSAGE."""
-    message = create(protobuf.SEND_HID_EVENT_MESSAGE)
-    event = message.inner()
-
-    # TODO: This should be generated somehow. I guess it's mach AbsoluteTime
-    # which is tricky to generate. The device does not seem to care much about
-    # the value though, so hardcode something here.
-    abstime = binascii.unhexlify(b"438922cf08020000")
-
-    data = use_page.to_bytes(2, byteorder="big")
-    data += usage.to_bytes(2, byteorder="big")
-    data += (1 if down else 0).to_bytes(2, byteorder="big")
-
-    # This is the format that the device expects. Some day I might take some
-    # time to decode it for real, but this is fine for now.
-    event.hidEventData = (
-        abstime
-        + binascii.unhexlify(
-            b"00000000000000000100000000000000020"
-            + b"00000200000000300000001000000000000"
-        )
-        + data
-        + binascii.unhexlify(b"0000000000000001000000")
-    )
-
-    return message
-
-
 def command(cmd, **kwargs):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_MESSAGE)
@@ -136,6 +104,14 @@ def command(cmd, **kwargs):
         setattr(send_command.options, key, value)
     return message
 
+def send_button(usage_page, usage, button_down):
+    """Send button event."""
+    message = create(protobuf.SEND_BUTTON_EVENT_MESSAGE)
+    send_button = message.inner()
+    send_button.usagePage = usage_page
+    send_button.usage = usage
+    send_button.buttonDown = button_down
+    return message
 
 def command_result(identifier, send_error=protobuf.SendError.NoError):
     """Playback command request."""

@@ -3,10 +3,15 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
     RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -20,11 +25,9 @@ from pyatv.mrp.protobuf.Common_pb2 import (
 
 from typing import (
     Iterable as typing___Iterable,
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -37,159 +40,150 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
 
-class Command(builtin___int):
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
+
+CommandValue = typing___NewType('CommandValue', builtin___int)
+type___CommandValue = CommandValue
+Command: _Command
+class _Command(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[CommandValue]):
     DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-    @classmethod
-    def Name(cls, number: builtin___int) -> builtin___str: ...
-    @classmethod
-    def Value(cls, name: builtin___str) -> 'Command': ...
-    @classmethod
-    def keys(cls) -> typing___List[builtin___str]: ...
-    @classmethod
-    def values(cls) -> typing___List['Command']: ...
-    @classmethod
-    def items(cls) -> typing___List[typing___Tuple[builtin___str, 'Command']]: ...
-    Unknown = typing___cast('Command', 0)
-    Play = typing___cast('Command', 1)
-    Pause = typing___cast('Command', 2)
-    TogglePlayPause = typing___cast('Command', 3)
-    Stop = typing___cast('Command', 4)
-    NextTrack = typing___cast('Command', 5)
-    PreviousTrack = typing___cast('Command', 6)
-    AdvanceShuffleMode = typing___cast('Command', 7)
-    AdvanceRepeatMode = typing___cast('Command', 8)
-    BeginFastForward = typing___cast('Command', 9)
-    EndFastForward = typing___cast('Command', 10)
-    BeginRewind = typing___cast('Command', 11)
-    EndRewind = typing___cast('Command', 12)
-    Rewind15Seconds = typing___cast('Command', 13)
-    FastForward15Seconds = typing___cast('Command', 14)
-    Rewind30Seconds = typing___cast('Command', 15)
-    FastForward30Seconds = typing___cast('Command', 16)
-    SkipForward = typing___cast('Command', 18)
-    SkipBackward = typing___cast('Command', 19)
-    ChangePlaybackRate = typing___cast('Command', 20)
-    RateTrack = typing___cast('Command', 21)
-    LikeTrack = typing___cast('Command', 22)
-    DislikeTrack = typing___cast('Command', 23)
-    BookmarkTrack = typing___cast('Command', 24)
-    SeekToPlaybackPosition = typing___cast('Command', 45)
-    ChangeRepeatMode = typing___cast('Command', 46)
-    ChangeShuffleMode = typing___cast('Command', 47)
-    EnableLanguageOption = typing___cast('Command', 53)
-    DisableLanguageOption = typing___cast('Command', 54)
-    NextChapter = typing___cast('Command', 25)
-    PreviousChapter = typing___cast('Command', 26)
-    NextAlbum = typing___cast('Command', 27)
-    PreviousAlbum = typing___cast('Command', 28)
-    NextPlaylist = typing___cast('Command', 29)
-    PreviousPlaylist = typing___cast('Command', 30)
-    BanTrack = typing___cast('Command', 31)
-    AddTrackToWishList = typing___cast('Command', 32)
-    RemoveTrackFromWishList = typing___cast('Command', 33)
-    NextInContext = typing___cast('Command', 34)
-    PreviousInContext = typing___cast('Command', 35)
-    ResetPlaybackTimeout = typing___cast('Command', 41)
-    SetPlaybackQueue = typing___cast('Command', 48)
-    AddNowPlayingItemToLibrary = typing___cast('Command', 49)
-    CreateRadioStation = typing___cast('Command', 50)
-    AddItemToLibrary = typing___cast('Command', 51)
-    InsertIntoPlaybackQueue = typing___cast('Command', 52)
-    ReorderPlaybackQueue = typing___cast('Command', 55)
-    RemoveFromPlaybackQueue = typing___cast('Command', 56)
-    PlayItemInPlaybackQueue = typing___cast('Command', 57)
-    PrepareForSetQueue = typing___cast('Command', 58)
-    SetPlaybackSession = typing___cast('Command', 59)
-Unknown = typing___cast('Command', 0)
-Play = typing___cast('Command', 1)
-Pause = typing___cast('Command', 2)
-TogglePlayPause = typing___cast('Command', 3)
-Stop = typing___cast('Command', 4)
-NextTrack = typing___cast('Command', 5)
-PreviousTrack = typing___cast('Command', 6)
-AdvanceShuffleMode = typing___cast('Command', 7)
-AdvanceRepeatMode = typing___cast('Command', 8)
-BeginFastForward = typing___cast('Command', 9)
-EndFastForward = typing___cast('Command', 10)
-BeginRewind = typing___cast('Command', 11)
-EndRewind = typing___cast('Command', 12)
-Rewind15Seconds = typing___cast('Command', 13)
-FastForward15Seconds = typing___cast('Command', 14)
-Rewind30Seconds = typing___cast('Command', 15)
-FastForward30Seconds = typing___cast('Command', 16)
-SkipForward = typing___cast('Command', 18)
-SkipBackward = typing___cast('Command', 19)
-ChangePlaybackRate = typing___cast('Command', 20)
-RateTrack = typing___cast('Command', 21)
-LikeTrack = typing___cast('Command', 22)
-DislikeTrack = typing___cast('Command', 23)
-BookmarkTrack = typing___cast('Command', 24)
-SeekToPlaybackPosition = typing___cast('Command', 45)
-ChangeRepeatMode = typing___cast('Command', 46)
-ChangeShuffleMode = typing___cast('Command', 47)
-EnableLanguageOption = typing___cast('Command', 53)
-DisableLanguageOption = typing___cast('Command', 54)
-NextChapter = typing___cast('Command', 25)
-PreviousChapter = typing___cast('Command', 26)
-NextAlbum = typing___cast('Command', 27)
-PreviousAlbum = typing___cast('Command', 28)
-NextPlaylist = typing___cast('Command', 29)
-PreviousPlaylist = typing___cast('Command', 30)
-BanTrack = typing___cast('Command', 31)
-AddTrackToWishList = typing___cast('Command', 32)
-RemoveTrackFromWishList = typing___cast('Command', 33)
-NextInContext = typing___cast('Command', 34)
-PreviousInContext = typing___cast('Command', 35)
-ResetPlaybackTimeout = typing___cast('Command', 41)
-SetPlaybackQueue = typing___cast('Command', 48)
-AddNowPlayingItemToLibrary = typing___cast('Command', 49)
-CreateRadioStation = typing___cast('Command', 50)
-AddItemToLibrary = typing___cast('Command', 51)
-InsertIntoPlaybackQueue = typing___cast('Command', 52)
-ReorderPlaybackQueue = typing___cast('Command', 55)
-RemoveFromPlaybackQueue = typing___cast('Command', 56)
-PlayItemInPlaybackQueue = typing___cast('Command', 57)
-PrepareForSetQueue = typing___cast('Command', 58)
-SetPlaybackSession = typing___cast('Command', 59)
-global___Command = Command
+    Unknown = typing___cast(CommandValue, 0)
+    Play = typing___cast(CommandValue, 1)
+    Pause = typing___cast(CommandValue, 2)
+    TogglePlayPause = typing___cast(CommandValue, 3)
+    Stop = typing___cast(CommandValue, 4)
+    NextTrack = typing___cast(CommandValue, 5)
+    PreviousTrack = typing___cast(CommandValue, 6)
+    AdvanceShuffleMode = typing___cast(CommandValue, 7)
+    AdvanceRepeatMode = typing___cast(CommandValue, 8)
+    BeginFastForward = typing___cast(CommandValue, 9)
+    EndFastForward = typing___cast(CommandValue, 10)
+    BeginRewind = typing___cast(CommandValue, 11)
+    EndRewind = typing___cast(CommandValue, 12)
+    Rewind15Seconds = typing___cast(CommandValue, 13)
+    FastForward15Seconds = typing___cast(CommandValue, 14)
+    Rewind30Seconds = typing___cast(CommandValue, 15)
+    FastForward30Seconds = typing___cast(CommandValue, 16)
+    SkipForward = typing___cast(CommandValue, 18)
+    SkipBackward = typing___cast(CommandValue, 19)
+    ChangePlaybackRate = typing___cast(CommandValue, 20)
+    RateTrack = typing___cast(CommandValue, 21)
+    LikeTrack = typing___cast(CommandValue, 22)
+    DislikeTrack = typing___cast(CommandValue, 23)
+    BookmarkTrack = typing___cast(CommandValue, 24)
+    SeekToPlaybackPosition = typing___cast(CommandValue, 45)
+    ChangeRepeatMode = typing___cast(CommandValue, 46)
+    ChangeShuffleMode = typing___cast(CommandValue, 47)
+    EnableLanguageOption = typing___cast(CommandValue, 53)
+    DisableLanguageOption = typing___cast(CommandValue, 54)
+    NextChapter = typing___cast(CommandValue, 25)
+    PreviousChapter = typing___cast(CommandValue, 26)
+    NextAlbum = typing___cast(CommandValue, 27)
+    PreviousAlbum = typing___cast(CommandValue, 28)
+    NextPlaylist = typing___cast(CommandValue, 29)
+    PreviousPlaylist = typing___cast(CommandValue, 30)
+    BanTrack = typing___cast(CommandValue, 31)
+    AddTrackToWishList = typing___cast(CommandValue, 32)
+    RemoveTrackFromWishList = typing___cast(CommandValue, 33)
+    NextInContext = typing___cast(CommandValue, 34)
+    PreviousInContext = typing___cast(CommandValue, 35)
+    ResetPlaybackTimeout = typing___cast(CommandValue, 41)
+    SetPlaybackQueue = typing___cast(CommandValue, 48)
+    AddNowPlayingItemToLibrary = typing___cast(CommandValue, 49)
+    CreateRadioStation = typing___cast(CommandValue, 50)
+    AddItemToLibrary = typing___cast(CommandValue, 51)
+    InsertIntoPlaybackQueue = typing___cast(CommandValue, 52)
+    ReorderPlaybackQueue = typing___cast(CommandValue, 55)
+    RemoveFromPlaybackQueue = typing___cast(CommandValue, 56)
+    PlayItemInPlaybackQueue = typing___cast(CommandValue, 57)
+    PrepareForSetQueue = typing___cast(CommandValue, 58)
+    SetPlaybackSession = typing___cast(CommandValue, 59)
+Unknown = typing___cast(CommandValue, 0)
+Play = typing___cast(CommandValue, 1)
+Pause = typing___cast(CommandValue, 2)
+TogglePlayPause = typing___cast(CommandValue, 3)
+Stop = typing___cast(CommandValue, 4)
+NextTrack = typing___cast(CommandValue, 5)
+PreviousTrack = typing___cast(CommandValue, 6)
+AdvanceShuffleMode = typing___cast(CommandValue, 7)
+AdvanceRepeatMode = typing___cast(CommandValue, 8)
+BeginFastForward = typing___cast(CommandValue, 9)
+EndFastForward = typing___cast(CommandValue, 10)
+BeginRewind = typing___cast(CommandValue, 11)
+EndRewind = typing___cast(CommandValue, 12)
+Rewind15Seconds = typing___cast(CommandValue, 13)
+FastForward15Seconds = typing___cast(CommandValue, 14)
+Rewind30Seconds = typing___cast(CommandValue, 15)
+FastForward30Seconds = typing___cast(CommandValue, 16)
+SkipForward = typing___cast(CommandValue, 18)
+SkipBackward = typing___cast(CommandValue, 19)
+ChangePlaybackRate = typing___cast(CommandValue, 20)
+RateTrack = typing___cast(CommandValue, 21)
+LikeTrack = typing___cast(CommandValue, 22)
+DislikeTrack = typing___cast(CommandValue, 23)
+BookmarkTrack = typing___cast(CommandValue, 24)
+SeekToPlaybackPosition = typing___cast(CommandValue, 45)
+ChangeRepeatMode = typing___cast(CommandValue, 46)
+ChangeShuffleMode = typing___cast(CommandValue, 47)
+EnableLanguageOption = typing___cast(CommandValue, 53)
+DisableLanguageOption = typing___cast(CommandValue, 54)
+NextChapter = typing___cast(CommandValue, 25)
+PreviousChapter = typing___cast(CommandValue, 26)
+NextAlbum = typing___cast(CommandValue, 27)
+PreviousAlbum = typing___cast(CommandValue, 28)
+NextPlaylist = typing___cast(CommandValue, 29)
+PreviousPlaylist = typing___cast(CommandValue, 30)
+BanTrack = typing___cast(CommandValue, 31)
+AddTrackToWishList = typing___cast(CommandValue, 32)
+RemoveTrackFromWishList = typing___cast(CommandValue, 33)
+NextInContext = typing___cast(CommandValue, 34)
+PreviousInContext = typing___cast(CommandValue, 35)
+ResetPlaybackTimeout = typing___cast(CommandValue, 41)
+SetPlaybackQueue = typing___cast(CommandValue, 48)
+AddNowPlayingItemToLibrary = typing___cast(CommandValue, 49)
+CreateRadioStation = typing___cast(CommandValue, 50)
+AddItemToLibrary = typing___cast(CommandValue, 51)
+InsertIntoPlaybackQueue = typing___cast(CommandValue, 52)
+ReorderPlaybackQueue = typing___cast(CommandValue, 55)
+RemoveFromPlaybackQueue = typing___cast(CommandValue, 56)
+PlayItemInPlaybackQueue = typing___cast(CommandValue, 57)
+PrepareForSetQueue = typing___cast(CommandValue, 58)
+SetPlaybackSession = typing___cast(CommandValue, 59)
+type___Command = Command
 
 class CommandInfo(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    command = ... # type: global___Command
-    enabled = ... # type: builtin___bool
-    active = ... # type: builtin___bool
-    preferredIntervals = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    localizedTitle = ... # type: typing___Text
-    minimumRating = ... # type: builtin___float
-    maximumRating = ... # type: builtin___float
-    supportedRates = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float]
-    localizedShortTitle = ... # type: typing___Text
-    repeatMode = ... # type: pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum
-    shuffleMode = ... # type: pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum
-    presentationStyle = ... # type: builtin___int
-    skipInterval = ... # type: builtin___int
-    numAvailableSkips = ... # type: builtin___int
-    skipFrequency = ... # type: builtin___int
-    canScrub = ... # type: builtin___int
-    supportedPlaybackQueueTypes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    supportedCustomQueueIdentifiers = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    supportedInsertionPositions = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
-    supportsSharedQueue = ... # type: builtin___bool
-    upNextItemCount = ... # type: builtin___int
-    preferredPlaybackRate = ... # type: builtin___float
-    supportedPlaybackSessionTypes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    currentPlaybackSessionTypes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    playbackSessionIdentifier = ... # type: typing___Text
+    command: type___CommandValue = ...
+    enabled: builtin___bool = ...
+    active: builtin___bool = ...
+    preferredIntervals: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float] = ...
+    localizedTitle: typing___Text = ...
+    minimumRating: builtin___float = ...
+    maximumRating: builtin___float = ...
+    supportedRates: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___float] = ...
+    localizedShortTitle: typing___Text = ...
+    repeatMode: pyatv___mrp___protobuf___Common_pb2___RepeatMode.EnumValue = ...
+    shuffleMode: pyatv___mrp___protobuf___Common_pb2___ShuffleMode.EnumValue = ...
+    presentationStyle: builtin___int = ...
+    skipInterval: builtin___int = ...
+    numAvailableSkips: builtin___int = ...
+    skipFrequency: builtin___int = ...
+    canScrub: builtin___int = ...
+    supportedPlaybackQueueTypes: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int] = ...
+    supportedCustomQueueIdentifiers: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    supportedInsertionPositions: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int] = ...
+    supportsSharedQueue: builtin___bool = ...
+    upNextItemCount: builtin___int = ...
+    preferredPlaybackRate: builtin___float = ...
+    supportedPlaybackSessionTypes: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    currentPlaybackSessionTypes: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    playbackSessionIdentifier: typing___Text = ...
 
     def __init__(self,
         *,
-        command : typing___Optional[global___Command] = None,
+        command : typing___Optional[type___CommandValue] = None,
         enabled : typing___Optional[builtin___bool] = None,
         active : typing___Optional[builtin___bool] = None,
         preferredIntervals : typing___Optional[typing___Iterable[builtin___float]] = None,
@@ -198,8 +192,8 @@ class CommandInfo(google___protobuf___message___Message):
         maximumRating : typing___Optional[builtin___float] = None,
         supportedRates : typing___Optional[typing___Iterable[builtin___float]] = None,
         localizedShortTitle : typing___Optional[typing___Text] = None,
-        repeatMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___RepeatMode.Enum] = None,
-        shuffleMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___ShuffleMode.Enum] = None,
+        repeatMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___RepeatMode.EnumValue] = None,
+        shuffleMode : typing___Optional[pyatv___mrp___protobuf___Common_pb2___ShuffleMode.EnumValue] = None,
         presentationStyle : typing___Optional[builtin___int] = None,
         skipInterval : typing___Optional[builtin___int] = None,
         numAvailableSkips : typing___Optional[builtin___int] = None,
@@ -215,14 +209,6 @@ class CommandInfo(google___protobuf___message___Message):
         currentPlaybackSessionTypes : typing___Optional[typing___Iterable[typing___Text]] = None,
         playbackSessionIdentifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> CommandInfo: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> CommandInfo: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"playbackSessionIdentifier",b"playbackSessionIdentifier",u"preferredPlaybackRate",b"preferredPlaybackRate",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportsSharedQueue",b"supportsSharedQueue",u"upNextItemCount",b"upNextItemCount"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"active",b"active",u"canScrub",b"canScrub",u"command",b"command",u"currentPlaybackSessionTypes",b"currentPlaybackSessionTypes",u"enabled",b"enabled",u"localizedShortTitle",b"localizedShortTitle",u"localizedTitle",b"localizedTitle",u"maximumRating",b"maximumRating",u"minimumRating",b"minimumRating",u"numAvailableSkips",b"numAvailableSkips",u"playbackSessionIdentifier",b"playbackSessionIdentifier",u"preferredIntervals",b"preferredIntervals",u"preferredPlaybackRate",b"preferredPlaybackRate",u"presentationStyle",b"presentationStyle",u"repeatMode",b"repeatMode",u"shuffleMode",b"shuffleMode",u"skipFrequency",b"skipFrequency",u"skipInterval",b"skipInterval",u"supportedCustomQueueIdentifiers",b"supportedCustomQueueIdentifiers",u"supportedInsertionPositions",b"supportedInsertionPositions",u"supportedPlaybackQueueTypes",b"supportedPlaybackQueueTypes",u"supportedPlaybackSessionTypes",b"supportedPlaybackSessionTypes",u"supportedRates",b"supportedRates",u"supportsSharedQueue",b"supportsSharedQueue",u"upNextItemCount",b"upNextItemCount"]) -> None: ...
-global___CommandInfo = CommandInfo
+type___CommandInfo = CommandInfo

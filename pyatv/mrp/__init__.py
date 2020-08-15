@@ -49,23 +49,23 @@ _LOGGER = logging.getLogger(__name__)
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
-    # name: [usage_page, usage]
-    "up": (1, 0x8C),
-    "down": (1, 0x8D),
-    "left": (1, 0x8B),
-    "right": (1, 0x8A),
-    "stop": (12, 0xB7),
-    "next": (12, 0xB5),
-    "previous": (12, 0xB6),
-    "select": (12, 0x80),
-    "menu": (1, 0x86),
-    "topmenu": (12, 0x60),
-    "home": (12, 0x40),
-    "suspend": (1, 0x82),
-    "wakeup": (1, 0x83),
-    "volume_up": (12, 0xE9),
-    "volume_down": (12, 0xEA),
-    "play_pause": (12, 0xCD)
+    # name: [usage_page, usage] - usage is in decimal format
+    "up":          (12, 66),
+    "down":        (12, 67),
+    "left":        (12, 68),
+    "right":       (12, 69),
+    "stop":        (12, 183),
+    "next":        (12, 181),
+    "previous":    (12, 182),
+    "select":      (12, 128),
+    "menu":        (1,  134),
+    "topmenu":     (12, 96),
+    "home":        (12, 96),
+    "suspend":     (1,  130),
+    "wakeup":      (1,  131),
+    "volume_up":   (12, 233),
+    "volume_down": (12, 234),
+    "play_pause":  (12, 205)
     # 'mic': (12, 0x04),  # Siri
 }  # Dict[str, Tuple[int, int]]
 
@@ -136,7 +136,7 @@ class MrpRemoteControl(RemoteControl):
     async def _press_key(self, key: str, action: InputAction) -> None:
         async def _do_press(keycode: Tuple[int, int], hold: bool):
             await self.protocol.send(
-                messages.send_hid_event(keycode[0], keycode[1], True)
+                messages.send_button(keycode[0], keycode[1], True)
             )
 
             if hold:
@@ -144,7 +144,7 @@ class MrpRemoteControl(RemoteControl):
                 await asyncio.sleep(1)
 
             await self.protocol.send(
-                messages.send_hid_event(keycode[0], keycode[1], False)
+                messages.send_button(keycode[0], keycode[1], False)
             )
 
         keycode = _KEY_LOOKUP.get(key)

@@ -3,6 +3,11 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -10,11 +15,9 @@ from google.protobuf.message import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,307 +30,275 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class ErrorCode(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[ErrorCode.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'ErrorCode.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['ErrorCode.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ErrorCode.Enum']]: ...
-        NoError = typing___cast('ErrorCode.Enum', 0)
-        UnknownError = typing___cast('ErrorCode.Enum', 1)
-        InvalidOperation = typing___cast('ErrorCode.Enum', 2)
-        OperationNotPermitted = typing___cast('ErrorCode.Enum', 3)
-        ClientDoesNotExist = typing___cast('ErrorCode.Enum', 4)
-        OriginDoesNotExist = typing___cast('ErrorCode.Enum', 5)
-        UnsupportedOperation = typing___cast('ErrorCode.Enum', 6)
-        FailedToSetPickedRoute = typing___cast('ErrorCode.Enum', 7)
-        FailedToRegisterCustomOrigin = typing___cast('ErrorCode.Enum', 8)
-        FailedToRemoveCustomOrigin = typing___cast('ErrorCode.Enum', 9)
-        TheApplicationActivityDoesNotExist = typing___cast('ErrorCode.Enum', 10)
-        TheAppHasNotSetupABrowsableContentEndpoint = typing___cast('ErrorCode.Enum', 11)
-        TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast('ErrorCode.Enum', 12)
-        TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast('ErrorCode.Enum', 13)
-        OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 14)
-        OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 15)
-        RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast('ErrorCode.Enum', 16)
-        TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast('ErrorCode.Enum', 17)
-        VolumeValueIsOutOfRange = typing___cast('ErrorCode.Enum', 18)
-        VolumeIsAlreadyAtTheMaximumValue = typing___cast('ErrorCode.Enum', 19)
-        VolumeIsAlreadyMuted = typing___cast('ErrorCode.Enum', 20)
-        VoiceInputEndpointDoesNotExist = typing___cast('ErrorCode.Enum', 21)
-        TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast('ErrorCode.Enum', 22)
-        EncryptionFailure = typing___cast('ErrorCode.Enum', 23)
-        EndpointDoesNotExist = typing___cast('ErrorCode.Enum', 24)
-        TheClientsApplicationCancelledTheOperation = typing___cast('ErrorCode.Enum', 25)
-        TheOperationTimedOut = typing___cast('ErrorCode.Enum', 26)
-        TheSpecifiedPlayerPathObjectWasInvalid = typing___cast('ErrorCode.Enum', 27)
-        AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast('ErrorCode.Enum', 28)
-        CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast('ErrorCode.Enum', 29)
-        TheSpecifiedContentItemDoesNotExist = typing___cast('ErrorCode.Enum', 30)
-        TheSpecifiedOffsetIsInvalid = typing___cast('ErrorCode.Enum', 31)
-        TheSpecifiedOutputContextIsInvalid = typing___cast('ErrorCode.Enum', 32)
-        OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast('ErrorCode.Enum', 33)
-        TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast('ErrorCode.Enum', 34)
-        CouldNotFindTheSpecifiedNowPlayingClient = typing___cast('ErrorCode.Enum', 35)
-        EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 36)
-        OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 37)
-        CoderMustSupportKeyValueCoding = typing___cast('ErrorCode.Enum', 38)
-        CouldNotFindTheGivenOutputdevice = typing___cast('ErrorCode.Enum', 39)
-        FailedToConnectToRemoteDevice = typing___cast('ErrorCode.Enum', 100)
-        AuthenticationTokenIsInvalid = typing___cast('ErrorCode.Enum', 101)
-        RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast('ErrorCode.Enum', 102)
-        TheDeviceIsNotCurrentlyRecording = typing___cast('ErrorCode.Enum', 103)
-        TheClientHasDisconnected = typing___cast('ErrorCode.Enum', 104)
-        TheServerHasDisconnected = typing___cast('ErrorCode.Enum', 105)
-        TheConnectionHasBeenCancelledByTheClient = typing___cast('ErrorCode.Enum', 106)
-        PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast('ErrorCode.Enum', 107)
-        TheClientsOperatingSystemVersionIsTooOld = typing___cast('ErrorCode.Enum', 108)
-        TheClientsApplicationVersionIsTooOld = typing___cast('ErrorCode.Enum', 109)
-        TheDeviceIsNotPaired = typing___cast('ErrorCode.Enum', 110)
-        ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast('ErrorCode.Enum', 111)
-        ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast('ErrorCode.Enum', 112)
-        TheConnectionTimedout = typing___cast('ErrorCode.Enum', 113)
-        PairingWithThisDeviceIsBlocked = typing___cast('ErrorCode.Enum', 114)
-        TheDeviceIsGoingToSleep = typing___cast('ErrorCode.Enum', 115)
-        ConnectionBlockedByServer = typing___cast('ErrorCode.Enum', 116)
-        MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast('ErrorCode.Enum', 117)
-        OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 200)
-        OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 201)
-        OutputContextModificationRequestedNoTopologyChange = typing___cast('ErrorCode.Enum', 202)
-        OtherUnknownError = typing___cast('ErrorCode.Enum', 299)
-    NoError = typing___cast('ErrorCode.Enum', 0)
-    UnknownError = typing___cast('ErrorCode.Enum', 1)
-    InvalidOperation = typing___cast('ErrorCode.Enum', 2)
-    OperationNotPermitted = typing___cast('ErrorCode.Enum', 3)
-    ClientDoesNotExist = typing___cast('ErrorCode.Enum', 4)
-    OriginDoesNotExist = typing___cast('ErrorCode.Enum', 5)
-    UnsupportedOperation = typing___cast('ErrorCode.Enum', 6)
-    FailedToSetPickedRoute = typing___cast('ErrorCode.Enum', 7)
-    FailedToRegisterCustomOrigin = typing___cast('ErrorCode.Enum', 8)
-    FailedToRemoveCustomOrigin = typing___cast('ErrorCode.Enum', 9)
-    TheApplicationActivityDoesNotExist = typing___cast('ErrorCode.Enum', 10)
-    TheAppHasNotSetupABrowsableContentEndpoint = typing___cast('ErrorCode.Enum', 11)
-    TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast('ErrorCode.Enum', 12)
-    TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast('ErrorCode.Enum', 13)
-    OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 14)
-    OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast('ErrorCode.Enum', 15)
-    RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast('ErrorCode.Enum', 16)
-    TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast('ErrorCode.Enum', 17)
-    VolumeValueIsOutOfRange = typing___cast('ErrorCode.Enum', 18)
-    VolumeIsAlreadyAtTheMaximumValue = typing___cast('ErrorCode.Enum', 19)
-    VolumeIsAlreadyMuted = typing___cast('ErrorCode.Enum', 20)
-    VoiceInputEndpointDoesNotExist = typing___cast('ErrorCode.Enum', 21)
-    TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast('ErrorCode.Enum', 22)
-    EncryptionFailure = typing___cast('ErrorCode.Enum', 23)
-    EndpointDoesNotExist = typing___cast('ErrorCode.Enum', 24)
-    TheClientsApplicationCancelledTheOperation = typing___cast('ErrorCode.Enum', 25)
-    TheOperationTimedOut = typing___cast('ErrorCode.Enum', 26)
-    TheSpecifiedPlayerPathObjectWasInvalid = typing___cast('ErrorCode.Enum', 27)
-    AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast('ErrorCode.Enum', 28)
-    CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast('ErrorCode.Enum', 29)
-    TheSpecifiedContentItemDoesNotExist = typing___cast('ErrorCode.Enum', 30)
-    TheSpecifiedOffsetIsInvalid = typing___cast('ErrorCode.Enum', 31)
-    TheSpecifiedOutputContextIsInvalid = typing___cast('ErrorCode.Enum', 32)
-    OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast('ErrorCode.Enum', 33)
-    TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast('ErrorCode.Enum', 34)
-    CouldNotFindTheSpecifiedNowPlayingClient = typing___cast('ErrorCode.Enum', 35)
-    EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 36)
-    OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast('ErrorCode.Enum', 37)
-    CoderMustSupportKeyValueCoding = typing___cast('ErrorCode.Enum', 38)
-    CouldNotFindTheGivenOutputdevice = typing___cast('ErrorCode.Enum', 39)
-    FailedToConnectToRemoteDevice = typing___cast('ErrorCode.Enum', 100)
-    AuthenticationTokenIsInvalid = typing___cast('ErrorCode.Enum', 101)
-    RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast('ErrorCode.Enum', 102)
-    TheDeviceIsNotCurrentlyRecording = typing___cast('ErrorCode.Enum', 103)
-    TheClientHasDisconnected = typing___cast('ErrorCode.Enum', 104)
-    TheServerHasDisconnected = typing___cast('ErrorCode.Enum', 105)
-    TheConnectionHasBeenCancelledByTheClient = typing___cast('ErrorCode.Enum', 106)
-    PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast('ErrorCode.Enum', 107)
-    TheClientsOperatingSystemVersionIsTooOld = typing___cast('ErrorCode.Enum', 108)
-    TheClientsApplicationVersionIsTooOld = typing___cast('ErrorCode.Enum', 109)
-    TheDeviceIsNotPaired = typing___cast('ErrorCode.Enum', 110)
-    ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast('ErrorCode.Enum', 111)
-    ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast('ErrorCode.Enum', 112)
-    TheConnectionTimedout = typing___cast('ErrorCode.Enum', 113)
-    PairingWithThisDeviceIsBlocked = typing___cast('ErrorCode.Enum', 114)
-    TheDeviceIsGoingToSleep = typing___cast('ErrorCode.Enum', 115)
-    ConnectionBlockedByServer = typing___cast('ErrorCode.Enum', 116)
-    MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast('ErrorCode.Enum', 117)
-    OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 200)
-    OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast('ErrorCode.Enum', 201)
-    OutputContextModificationRequestedNoTopologyChange = typing___cast('ErrorCode.Enum', 202)
-    OtherUnknownError = typing___cast('ErrorCode.Enum', 299)
-    global___Enum = Enum
+        NoError = typing___cast(ErrorCode.EnumValue, 0)
+        UnknownError = typing___cast(ErrorCode.EnumValue, 1)
+        InvalidOperation = typing___cast(ErrorCode.EnumValue, 2)
+        OperationNotPermitted = typing___cast(ErrorCode.EnumValue, 3)
+        ClientDoesNotExist = typing___cast(ErrorCode.EnumValue, 4)
+        OriginDoesNotExist = typing___cast(ErrorCode.EnumValue, 5)
+        UnsupportedOperation = typing___cast(ErrorCode.EnumValue, 6)
+        FailedToSetPickedRoute = typing___cast(ErrorCode.EnumValue, 7)
+        FailedToRegisterCustomOrigin = typing___cast(ErrorCode.EnumValue, 8)
+        FailedToRemoveCustomOrigin = typing___cast(ErrorCode.EnumValue, 9)
+        TheApplicationActivityDoesNotExist = typing___cast(ErrorCode.EnumValue, 10)
+        TheAppHasNotSetupABrowsableContentEndpoint = typing___cast(ErrorCode.EnumValue, 11)
+        TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast(ErrorCode.EnumValue, 12)
+        TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast(ErrorCode.EnumValue, 13)
+        OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast(ErrorCode.EnumValue, 14)
+        OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast(ErrorCode.EnumValue, 15)
+        RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast(ErrorCode.EnumValue, 16)
+        TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast(ErrorCode.EnumValue, 17)
+        VolumeValueIsOutOfRange = typing___cast(ErrorCode.EnumValue, 18)
+        VolumeIsAlreadyAtTheMaximumValue = typing___cast(ErrorCode.EnumValue, 19)
+        VolumeIsAlreadyMuted = typing___cast(ErrorCode.EnumValue, 20)
+        VoiceInputEndpointDoesNotExist = typing___cast(ErrorCode.EnumValue, 21)
+        TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast(ErrorCode.EnumValue, 22)
+        EncryptionFailure = typing___cast(ErrorCode.EnumValue, 23)
+        EndpointDoesNotExist = typing___cast(ErrorCode.EnumValue, 24)
+        TheClientsApplicationCancelledTheOperation = typing___cast(ErrorCode.EnumValue, 25)
+        TheOperationTimedOut = typing___cast(ErrorCode.EnumValue, 26)
+        TheSpecifiedPlayerPathObjectWasInvalid = typing___cast(ErrorCode.EnumValue, 27)
+        AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast(ErrorCode.EnumValue, 28)
+        CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast(ErrorCode.EnumValue, 29)
+        TheSpecifiedContentItemDoesNotExist = typing___cast(ErrorCode.EnumValue, 30)
+        TheSpecifiedOffsetIsInvalid = typing___cast(ErrorCode.EnumValue, 31)
+        TheSpecifiedOutputContextIsInvalid = typing___cast(ErrorCode.EnumValue, 32)
+        OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast(ErrorCode.EnumValue, 33)
+        TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast(ErrorCode.EnumValue, 34)
+        CouldNotFindTheSpecifiedNowPlayingClient = typing___cast(ErrorCode.EnumValue, 35)
+        EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast(ErrorCode.EnumValue, 36)
+        OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast(ErrorCode.EnumValue, 37)
+        CoderMustSupportKeyValueCoding = typing___cast(ErrorCode.EnumValue, 38)
+        CouldNotFindTheGivenOutputdevice = typing___cast(ErrorCode.EnumValue, 39)
+        FailedToConnectToRemoteDevice = typing___cast(ErrorCode.EnumValue, 100)
+        AuthenticationTokenIsInvalid = typing___cast(ErrorCode.EnumValue, 101)
+        RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast(ErrorCode.EnumValue, 102)
+        TheDeviceIsNotCurrentlyRecording = typing___cast(ErrorCode.EnumValue, 103)
+        TheClientHasDisconnected = typing___cast(ErrorCode.EnumValue, 104)
+        TheServerHasDisconnected = typing___cast(ErrorCode.EnumValue, 105)
+        TheConnectionHasBeenCancelledByTheClient = typing___cast(ErrorCode.EnumValue, 106)
+        PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast(ErrorCode.EnumValue, 107)
+        TheClientsOperatingSystemVersionIsTooOld = typing___cast(ErrorCode.EnumValue, 108)
+        TheClientsApplicationVersionIsTooOld = typing___cast(ErrorCode.EnumValue, 109)
+        TheDeviceIsNotPaired = typing___cast(ErrorCode.EnumValue, 110)
+        ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast(ErrorCode.EnumValue, 111)
+        ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast(ErrorCode.EnumValue, 112)
+        TheConnectionTimedout = typing___cast(ErrorCode.EnumValue, 113)
+        PairingWithThisDeviceIsBlocked = typing___cast(ErrorCode.EnumValue, 114)
+        TheDeviceIsGoingToSleep = typing___cast(ErrorCode.EnumValue, 115)
+        ConnectionBlockedByServer = typing___cast(ErrorCode.EnumValue, 116)
+        MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast(ErrorCode.EnumValue, 117)
+        OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast(ErrorCode.EnumValue, 200)
+        OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast(ErrorCode.EnumValue, 201)
+        OutputContextModificationRequestedNoTopologyChange = typing___cast(ErrorCode.EnumValue, 202)
+        OtherUnknownError = typing___cast(ErrorCode.EnumValue, 299)
+    NoError = typing___cast(ErrorCode.EnumValue, 0)
+    UnknownError = typing___cast(ErrorCode.EnumValue, 1)
+    InvalidOperation = typing___cast(ErrorCode.EnumValue, 2)
+    OperationNotPermitted = typing___cast(ErrorCode.EnumValue, 3)
+    ClientDoesNotExist = typing___cast(ErrorCode.EnumValue, 4)
+    OriginDoesNotExist = typing___cast(ErrorCode.EnumValue, 5)
+    UnsupportedOperation = typing___cast(ErrorCode.EnumValue, 6)
+    FailedToSetPickedRoute = typing___cast(ErrorCode.EnumValue, 7)
+    FailedToRegisterCustomOrigin = typing___cast(ErrorCode.EnumValue, 8)
+    FailedToRemoveCustomOrigin = typing___cast(ErrorCode.EnumValue, 9)
+    TheApplicationActivityDoesNotExist = typing___cast(ErrorCode.EnumValue, 10)
+    TheAppHasNotSetupABrowsableContentEndpoint = typing___cast(ErrorCode.EnumValue, 11)
+    TheRequestedBrowsableContentApiIsNotSupportedByTheApplication = typing___cast(ErrorCode.EnumValue, 12)
+    TheNotficationHasNotBeenWhitelistedByTheServer = typing___cast(ErrorCode.EnumValue, 13)
+    OperationRequiresAClientCallbackToHaveBeenRegistered = typing___cast(ErrorCode.EnumValue, 14)
+    OperationRequiresAClientDataSourceToHaveBeenRegistered = typing___cast(ErrorCode.EnumValue, 15)
+    RequestedDataIsOutOfDateAndShouldBeRequestedAgain = typing___cast(ErrorCode.EnumValue, 16)
+    TheDevicesEnforcedVolumeLimitHasBeenExceeded = typing___cast(ErrorCode.EnumValue, 17)
+    VolumeValueIsOutOfRange = typing___cast(ErrorCode.EnumValue, 18)
+    VolumeIsAlreadyAtTheMaximumValue = typing___cast(ErrorCode.EnumValue, 19)
+    VolumeIsAlreadyMuted = typing___cast(ErrorCode.EnumValue, 20)
+    VoiceInputEndpointDoesNotExist = typing___cast(ErrorCode.EnumValue, 21)
+    TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist = typing___cast(ErrorCode.EnumValue, 22)
+    EncryptionFailure = typing___cast(ErrorCode.EnumValue, 23)
+    EndpointDoesNotExist = typing___cast(ErrorCode.EnumValue, 24)
+    TheClientsApplicationCancelledTheOperation = typing___cast(ErrorCode.EnumValue, 25)
+    TheOperationTimedOut = typing___cast(ErrorCode.EnumValue, 26)
+    TheSpecifiedPlayerPathObjectWasInvalid = typing___cast(ErrorCode.EnumValue, 27)
+    AddingOrRemovingDevicesFromTheAvOutputContextHasFailed = typing___cast(ErrorCode.EnumValue, 28)
+    CouldNotFindTheSpecifiedNowPlayingPlayer = typing___cast(ErrorCode.EnumValue, 29)
+    TheSpecifiedContentItemDoesNotExist = typing___cast(ErrorCode.EnumValue, 30)
+    TheSpecifiedOffsetIsInvalid = typing___cast(ErrorCode.EnumValue, 31)
+    TheSpecifiedOutputContextIsInvalid = typing___cast(ErrorCode.EnumValue, 32)
+    OneOrMoreSpecifiedOutputDevicesAreNotGroupable = typing___cast(ErrorCode.EnumValue, 33)
+    TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice = typing___cast(ErrorCode.EnumValue, 34)
+    CouldNotFindTheSpecifiedNowPlayingClient = typing___cast(ErrorCode.EnumValue, 35)
+    EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast(ErrorCode.EnumValue, 36)
+    OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable = typing___cast(ErrorCode.EnumValue, 37)
+    CoderMustSupportKeyValueCoding = typing___cast(ErrorCode.EnumValue, 38)
+    CouldNotFindTheGivenOutputdevice = typing___cast(ErrorCode.EnumValue, 39)
+    FailedToConnectToRemoteDevice = typing___cast(ErrorCode.EnumValue, 100)
+    AuthenticationTokenIsInvalid = typing___cast(ErrorCode.EnumValue, 101)
+    RecordingSessionIsAlreadyInProgressOnThisDevice = typing___cast(ErrorCode.EnumValue, 102)
+    TheDeviceIsNotCurrentlyRecording = typing___cast(ErrorCode.EnumValue, 103)
+    TheClientHasDisconnected = typing___cast(ErrorCode.EnumValue, 104)
+    TheServerHasDisconnected = typing___cast(ErrorCode.EnumValue, 105)
+    TheConnectionHasBeenCancelledByTheClient = typing___cast(ErrorCode.EnumValue, 106)
+    PairingFunctionalityIsLockedDueToSecurityReasons = typing___cast(ErrorCode.EnumValue, 107)
+    TheClientsOperatingSystemVersionIsTooOld = typing___cast(ErrorCode.EnumValue, 108)
+    TheClientsApplicationVersionIsTooOld = typing___cast(ErrorCode.EnumValue, 109)
+    TheDeviceIsNotPaired = typing___cast(ErrorCode.EnumValue, 110)
+    ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured = typing___cast(ErrorCode.EnumValue, 111)
+    ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured = typing___cast(ErrorCode.EnumValue, 112)
+    TheConnectionTimedout = typing___cast(ErrorCode.EnumValue, 113)
+    PairingWithThisDeviceIsBlocked = typing___cast(ErrorCode.EnumValue, 114)
+    TheDeviceIsGoingToSleep = typing___cast(ErrorCode.EnumValue, 115)
+    ConnectionBlockedByServer = typing___cast(ErrorCode.EnumValue, 116)
+    MravendpointWasDeallocatedWhileWaitingForDeviceToConnect = typing___cast(ErrorCode.EnumValue, 117)
+    OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer = typing___cast(ErrorCode.EnumValue, 200)
+    OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer = typing___cast(ErrorCode.EnumValue, 201)
+    OutputContextModificationRequestedNoTopologyChange = typing___cast(ErrorCode.EnumValue, 202)
+    OtherUnknownError = typing___cast(ErrorCode.EnumValue, 299)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ErrorCode: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ErrorCode: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___ErrorCode = ErrorCode
+type___ErrorCode = ErrorCode
 
 class ProtocolMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Type(builtin___int):
+    TypeValue = typing___NewType('TypeValue', builtin___int)
+    type___TypeValue = TypeValue
+    Type: _Type
+    class _Type(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[ProtocolMessage.TypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'ProtocolMessage.Type': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['ProtocolMessage.Type']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ProtocolMessage.Type']]: ...
-        UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
-        SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
-        SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
-        GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
-        SET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 4)
-        SET_ARTWORK_MESSAGE = typing___cast('ProtocolMessage.Type', 5)
-        REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
-        REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
-        SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
-        SEND_HID_REPORT_MESSAGE = typing___cast('ProtocolMessage.Type', 9)
-        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
-        NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
-        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
-        DEVICE_INFO_MESSAGE = typing___cast('ProtocolMessage.Type', 15)
-        CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast('ProtocolMessage.Type', 16)
-        VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast('ProtocolMessage.Type', 17)
-        GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 18)
-        REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 19)
-        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 20)
-        UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 21)
-        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast('ProtocolMessage.Type', 22)
-        KEYBOARD_MESSAGE = typing___cast('ProtocolMessage.Type', 23)
-        GET_KEYBOARD_SESSION_MESSAGE = typing___cast('ProtocolMessage.Type', 24)
-        TEXT_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 25)
-        GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast('ProtocolMessage.Type', 26)
-        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 27)
-        REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 28)
-        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 29)
-        SET_RECORDING_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 30)
-        SEND_VOICE_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 31)
-        PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast('ProtocolMessage.Type', 32)
-        TRANSACTION_MESSAGE = typing___cast('ProtocolMessage.Type', 33)
-        CRYPTO_PAIRING_MESSAGE = typing___cast('ProtocolMessage.Type', 34)
-        GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast('ProtocolMessage.Type', 35)
-        SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
-        DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
-        SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
-        SEND_BUTTON_EVENT = typing___cast('ProtocolMessage.Type', 39)
-        SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
-        WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
-        GENERIC_MESSAGE = typing___cast('ProtocolMessage.Type', 42)
-        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
-        SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
-        SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
-        SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
-        REMOVE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 53)
-        REMOVE_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 54)
-        UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
-        UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
-        VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast('ProtocolMessage.Type', 64)
-        UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
-        SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
-    UNKNOWN_MESSAGE = typing___cast('ProtocolMessage.Type', 0)
-    SEND_COMMAND_MESSAGE = typing___cast('ProtocolMessage.Type', 1)
-    SEND_COMMAND_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 2)
-    GET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 3)
-    SET_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 4)
-    SET_ARTWORK_MESSAGE = typing___cast('ProtocolMessage.Type', 5)
-    REGISTER_HID_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 6)
-    REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast('ProtocolMessage.Type', 7)
-    SEND_HID_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 8)
-    SEND_HID_REPORT_MESSAGE = typing___cast('ProtocolMessage.Type', 9)
-    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 10)
-    NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 11)
-    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast('ProtocolMessage.Type', 12)
-    DEVICE_INFO_MESSAGE = typing___cast('ProtocolMessage.Type', 15)
-    CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast('ProtocolMessage.Type', 16)
-    VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast('ProtocolMessage.Type', 17)
-    GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 18)
-    REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 19)
-    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 20)
-    UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast('ProtocolMessage.Type', 21)
-    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast('ProtocolMessage.Type', 22)
-    KEYBOARD_MESSAGE = typing___cast('ProtocolMessage.Type', 23)
-    GET_KEYBOARD_SESSION_MESSAGE = typing___cast('ProtocolMessage.Type', 24)
-    TEXT_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 25)
-    GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast('ProtocolMessage.Type', 26)
-    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 27)
-    REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 28)
-    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast('ProtocolMessage.Type', 29)
-    SET_RECORDING_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 30)
-    SEND_VOICE_INPUT_MESSAGE = typing___cast('ProtocolMessage.Type', 31)
-    PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast('ProtocolMessage.Type', 32)
-    TRANSACTION_MESSAGE = typing___cast('ProtocolMessage.Type', 33)
-    CRYPTO_PAIRING_MESSAGE = typing___cast('ProtocolMessage.Type', 34)
-    GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast('ProtocolMessage.Type', 35)
-    SET_READY_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 36)
-    DEVICE_INFO_UPDATE_MESSAGE = typing___cast('ProtocolMessage.Type', 37)
-    SET_CONNECTION_STATE_MESSAGE = typing___cast('ProtocolMessage.Type', 38)
-    SEND_BUTTON_EVENT = typing___cast('ProtocolMessage.Type', 39)
-    SET_HILITE_MODE_MESSAGE = typing___cast('ProtocolMessage.Type', 40)
-    WAKE_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 41)
-    GENERIC_MESSAGE = typing___cast('ProtocolMessage.Type', 42)
-    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast('ProtocolMessage.Type', 43)
-    SEND_LYRICS_EVENT = typing___cast('ProtocolMessage.Type', 44)
-    SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 46)
-    SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 47)
-    REMOVE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 53)
-    REMOVE_PLAYER_MESSAGE = typing___cast('ProtocolMessage.Type', 54)
-    UPDATE_CLIENT_MESSAGE = typing___cast('ProtocolMessage.Type', 55)
-    UPDATE_CONTENT_ITEM_MESSAGE = typing___cast('ProtocolMessage.Type', 56)
-    VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast('ProtocolMessage.Type', 64)
-    UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast('ProtocolMessage.Type', 65)
-    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast('ProtocolMessage.Type', 72)
-    global___Type = Type
+        UNKNOWN_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 0)
+        SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 1)
+        SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 2)
+        GET_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 3)
+        SET_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 4)
+        SET_ARTWORK_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 5)
+        REGISTER_HID_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 6)
+        REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 7)
+        SEND_HID_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 8)
+        SEND_HID_REPORT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 9)
+        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 10)
+        NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 11)
+        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 12)
+        DEVICE_INFO_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 15)
+        CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 16)
+        VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 17)
+        GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 18)
+        REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 19)
+        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 20)
+        UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 21)
+        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 22)
+        KEYBOARD_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 23)
+        GET_KEYBOARD_SESSION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 24)
+        TEXT_INPUT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 25)
+        GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 26)
+        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 27)
+        REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 28)
+        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 29)
+        SET_RECORDING_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 30)
+        SEND_VOICE_INPUT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 31)
+        PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 32)
+        TRANSACTION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 33)
+        CRYPTO_PAIRING_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 34)
+        GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 35)
+        SET_READY_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 36)
+        DEVICE_INFO_UPDATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 37)
+        SET_CONNECTION_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 38)
+        SEND_BUTTON_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 39)
+        SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 40)
+        WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 41)
+        GENERIC_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 42)
+        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 43)
+        SEND_LYRICS_EVENT = typing___cast(ProtocolMessage.TypeValue, 44)
+        SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 46)
+        SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
+        REMOVE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 53)
+        REMOVE_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 54)
+        UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 55)
+        UPDATE_CONTENT_ITEM_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 56)
+        VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 64)
+        UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 65)
+        SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 72)
+    UNKNOWN_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 0)
+    SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 1)
+    SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 2)
+    GET_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 3)
+    SET_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 4)
+    SET_ARTWORK_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 5)
+    REGISTER_HID_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 6)
+    REGISTER_HID_DEVICE_RESULT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 7)
+    SEND_HID_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 8)
+    SEND_HID_REPORT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 9)
+    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 10)
+    NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 11)
+    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 12)
+    DEVICE_INFO_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 15)
+    CLIENT_UPDATES_CONFIG_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 16)
+    VOLUME_CONTROL_AVAILABILITY_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 17)
+    GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 18)
+    REGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 19)
+    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 20)
+    UNREGISTER_GAME_CONTROLLER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 21)
+    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 22)
+    KEYBOARD_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 23)
+    GET_KEYBOARD_SESSION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 24)
+    TEXT_INPUT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 25)
+    GET_VOICE_INPUT_DEVICES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 26)
+    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 27)
+    REGISTER_VOICE_INPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 28)
+    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 29)
+    SET_RECORDING_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 30)
+    SEND_VOICE_INPUT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 31)
+    PLAYBACK_QUEUE_REQUEST_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 32)
+    TRANSACTION_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 33)
+    CRYPTO_PAIRING_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 34)
+    GAME_CONTROLLER_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 35)
+    SET_READY_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 36)
+    DEVICE_INFO_UPDATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 37)
+    SET_CONNECTION_STATE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 38)
+    SEND_BUTTON_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 39)
+    SET_HILITE_MODE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 40)
+    WAKE_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 41)
+    GENERIC_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 42)
+    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 43)
+    SEND_LYRICS_EVENT = typing___cast(ProtocolMessage.TypeValue, 44)
+    SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 46)
+    SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
+    REMOVE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 53)
+    REMOVE_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 54)
+    UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 55)
+    UPDATE_CONTENT_ITEM_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 56)
+    VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 64)
+    UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 65)
+    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 72)
+    type___Type = Type
 
-    type = ... # type: global___ProtocolMessage.Type
-    identifier = ... # type: typing___Text
-    authenticationToken = ... # type: typing___Text
-    errorCode = ... # type: global___ErrorCode.Enum
-    timestamp = ... # type: builtin___int
+    type: type___ProtocolMessage.TypeValue = ...
+    identifier: typing___Text = ...
+    authenticationToken: typing___Text = ...
+    errorCode: type___ErrorCode.EnumValue = ...
+    timestamp: builtin___int = ...
 
     def __init__(self,
         *,
-        type : typing___Optional[global___ProtocolMessage.Type] = None,
+        type : typing___Optional[type___ProtocolMessage.TypeValue] = None,
         identifier : typing___Optional[typing___Text] = None,
         authenticationToken : typing___Optional[typing___Text] = None,
-        errorCode : typing___Optional[global___ErrorCode.Enum] = None,
+        errorCode : typing___Optional[type___ErrorCode.EnumValue] = None,
         timestamp : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ProtocolMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ProtocolMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...
-global___ProtocolMessage = ProtocolMessage
+type___ProtocolMessage = ProtocolMessage
