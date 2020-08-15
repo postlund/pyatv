@@ -491,7 +491,7 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-    async def play_pause(self) -&gt; None:
+    async def play_pause(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -2959,7 +2959,7 @@ def stop(self) -&gt; None:
 
     @abstractmethod
     @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-    async def play_pause(self) -&gt; None:
+    async def play_pause(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
@@ -3223,7 +3223,7 @@ async def play(self) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play_pause"><code class="name flex">
-<span>async def <span class="ident">play_pause</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">play_pause</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Toggle between play and pause.</p></section>
@@ -3233,7 +3233,7 @@ async def play(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-async def play_pause(self) -&gt; None:
+async def play_pause(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
