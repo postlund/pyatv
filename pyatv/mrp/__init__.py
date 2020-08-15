@@ -134,7 +134,7 @@ class MrpRemoteControl(RemoteControl):
 
     async def _press_key(self, key: str, action: InputAction) -> None:
         async def _do_press(keycode: Tuple[int, int], hold: bool):
-            await self.protocol.send_and_receive(
+            await self.protocol.send(
                 messages.send_hid_event(keycode[0], keycode[1], True)
             )
 
@@ -142,7 +142,7 @@ class MrpRemoteControl(RemoteControl):
                 # Hardcoded hold time for one second
                 await asyncio.sleep(1)
 
-            await self.protocol.send_and_receive(
+            await self.protocol.send(
                 messages.send_hid_event(keycode[0], keycode[1], False)
             )
 
@@ -521,7 +521,7 @@ class MrpPower(Power):
 
     async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
-        await self.protocol.send_and_receive(messages.wake_device())
+        await self.protocol.send(messages.wake_device())
 
         if await_new_state and self.power_state != PowerState.On:
             await self._waiters.setdefault(PowerState.On, asyncio.Event()).wait()

@@ -246,14 +246,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # Check if power state changes after turn_off command
         await self.atv.power.turn_off()
         await until(lambda: self.atv.power.power_state == PowerState.Off)
-        self.assertEqual(listener.old_state, PowerState.On)
-        self.assertEqual(listener.new_state, PowerState.Off)
+        await until(lambda: listener.old_state == PowerState.On)
+        await until(lambda: listener.new_state == PowerState.Off)
 
         # Check if power state changes after turn_on command
         await self.atv.power.turn_on()
         await until(lambda: self.atv.power.power_state == PowerState.On)
-        self.assertEqual(listener.old_state, PowerState.Off)
-        self.assertEqual(listener.new_state, PowerState.On)
+        await until(lambda: listener.old_state == PowerState.Off)
+        await until(lambda: listener.new_state == PowerState.On)
 
     @unittest_run_loop
     async def test_power_state_acknowledgement(self):
