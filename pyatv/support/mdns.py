@@ -7,7 +7,7 @@ import logging
 import weakref
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import Optional, Dict, List, cast, NamedTuple, Union
+from typing import Optional, Dict, List, cast, NamedTuple
 
 from zeroconf import Zeroconf, ServiceInfo
 
@@ -23,7 +23,6 @@ logging.addLevelName(TRAFFIC_LEVEL, "Traffic")
 
 DnsHeader = namedtuple("DnsHeader", "id flags qdcount ancount nscount arcount")
 DnsQuestion = namedtuple("DnsQuestion", "qname qtype qclass")
-DnsAnswer = namedtuple("DnsAnswer", "qname qtype qclass ttl rd_length rd")
 DnsResource = namedtuple("DnsResource", "qname qtype qclass ttl rd_length rd")
 
 
@@ -45,11 +44,11 @@ class Response(NamedTuple):
     model: Optional[str]  # Comes from _device-info._tcp.local
 
 
-QTYPE_A = 0x0001
-QTYPE_PTR = 0x000C
-QTYPE_TXT = 0x0010
-QTYPE_SRV = 0x0021
-QTYPE_ANY = 0x00FF
+QTYPE_A: int = 0x0001
+QTYPE_PTR: int = 0x000C
+QTYPE_TXT: int = 0x0010
+QTYPE_SRV: int = 0x0021
+QTYPE_ANY: int = 0x00FF
 
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
@@ -165,9 +164,10 @@ class DnsMessage:
         """Initialize a new DnsMessage."""
         self.msg_id = msg_id
         self.flags = flags
-        self.questions = []
-        self.answers = []
-        self.resources = []
+        self.questions: List[DnsQuestion] = []
+        self.answers: List[DnsResource] = []
+        self.authorities: List[DnsResource] = []
+        self.resources: List[DnsResource] = []
 
     def unpack(self, msg):
         """Unpack bytes into a DnsMessage."""
@@ -175,9 +175,6 @@ class DnsMessage:
         header = DnsHeader._make(data)
         self.msg_id = header.id
         self.flags = header.flags
-
-        if header.nscount > 0:
-            raise NotImplementedError("nscount > 0")
 
         # Unpack questions
         for _ in range(header.qdcount):
@@ -187,7 +184,12 @@ class DnsMessage:
         # Unpack answers
         for _ in range(header.ancount):
             ptr, data = unpack_rr(ptr, msg)
-            self.answers.append(DnsAnswer(*data))
+            self.answers.append(DnsResource(*data))
+
+        # Unpack authorities
+        for _ in range(header.nscount):
+            ptr, data = unpack_rr(ptr, msg)
+            self.authorities.append(DnsResource(*data))
 
         # Unpack additional resources
         for _ in range(header.arcount):
@@ -203,7 +205,7 @@ class DnsMessage:
             self.flags,
             len(self.questions),
             len(self.answers),
-            0,
+            len(self.authorities),
             len(self.resources),
         )
 
@@ -223,13 +225,14 @@ class DnsMessage:
             buf += struct.pack(">H", len(data))
             buf += data
 
-        for resource in self.resources:
-            buf += qname_encode(resource.qname)
-            buf += struct.pack(">H", resource.qtype)
-            buf += struct.pack(">H", resource.qclass)
-            buf += struct.pack(">I", resource.ttl)
-            buf += struct.pack(">H", len(resource.rd))
-            buf += resource.rd
+        for section in [self.authorities, self.resources]:
+            for resource in section:
+                buf += qname_encode(resource.qname)
+                buf += struct.pack(">H", resource.qtype)
+                buf += struct.pack(">H", resource.qclass)
+                buf += struct.pack(">I", resource.ttl)
+                buf += struct.pack(">H", len(resource.rd))
+                buf += resource.rd
 
         return buf
 
@@ -237,8 +240,13 @@ class DnsMessage:
         """Return string representation of DnsMessage."""
         return (
             "MsgId=0x{0:04X}\nFlags=0x{1:04X}\nQuestions={2}\n"
-            "Answers={3}\nResources={4}".format(
-                self.msg_id, self.flags, self.questions, self.answers, self.resources
+            "Answers={3}\nAuthorities={4}\nResources={5}".format(
+                self.msg_id,
+                self.flags,
+                self.questions,
+                self.answers,
+                self.authorities,
+                self.resources,
             )
         )
 
@@ -259,7 +267,7 @@ def _get_model(services: List[Service]) -> Optional[str]:
 
 def parse_services(message: DnsMessage) -> List[Service]:
     """Parse DNS response into Service objects."""
-    table: Dict[str, Dict[int, Union[DnsAnswer, DnsResource]]] = {}
+    table: Dict[str, Dict[int, DnsResource]] = {}
     ptrs: Dict[str, str] = {}  # qname -> real name
     results: Dict[str, Service] = {}
 
