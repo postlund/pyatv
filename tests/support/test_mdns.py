@@ -43,24 +43,21 @@ def test_qname_with_label():
     assert rest == b"\xAB\xCD"
 
 
-@pytest.mark.asyncio
-async def test_non_existing_service():
+def test_non_existing_service():
     resp, _ = get_response_for_service("_missing")
     assert len(resp.questions) == 1
     assert len(resp.answers) == 0
     assert len(resp.resources) == 0
 
 
-@pytest.mark.asyncio
-async def test_service_has_expected_responses():
+def test_service_has_expected_responses():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     assert len(resp.questions) == 1
     assert len(resp.answers) == 1
     assert len(resp.resources) == 3
 
 
-@pytest.mark.asyncio
-async def test_service_has_valid_question():
+def test_service_has_valid_question():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
@@ -68,8 +65,7 @@ async def test_service_has_valid_question():
     assert question.qclass == 0x8001
 
 
-@pytest.mark.asyncio
-async def test_service_has_valid_answer():
+def test_service_has_valid_answer():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
@@ -79,8 +75,7 @@ async def test_service_has_valid_answer():
     assert answer.rd == data.name + "." + MEDIAREMOTE_SERVICE
 
 
-@pytest.mark.asyncio
-async def test_service_has_valid_srv_resource():
+def test_service_has_valid_srv_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_SRV)
@@ -96,8 +91,7 @@ async def test_service_has_valid_srv_resource():
     assert rd["target"] == data.name + ".local"
 
 
-@pytest.mark.asyncio
-async def test_service_has_valid_txt_resource():
+def test_service_has_valid_txt_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_TXT)
@@ -112,8 +106,7 @@ async def test_service_has_valid_txt_resource():
         assert rd[k] == v
 
 
-@pytest.mark.asyncio
-async def test_service_has_valid_a_resource():
+def test_service_has_valid_a_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
     srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_A)
@@ -122,6 +115,23 @@ async def test_service_has_valid_a_resource():
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
     assert srv.rd == "127.0.0.1"
+
+
+def test_authority():
+    msg = mdns.DnsMessage()
+    msg.authorities.append(
+        dns_utils.resource("test.local", mdns.QTYPE_A, b"\x01\x02\x03\x04")
+    )
+
+    unpacked = mdns.DnsMessage().unpack(msg.pack())
+    assert len(unpacked.authorities) == 1
+
+    record = unpacked.authorities[0]
+    assert record.qname == "test.local"
+    assert record.qtype == mdns.QTYPE_A
+    assert record.qclass == dns_utils.DEFAULT_QCLASS
+    assert record.ttl == dns_utils.DEFAULT_TTL
+    assert record.rd == "1.2.3.4"
 
 
 def test_parse_empty_service():

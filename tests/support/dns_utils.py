@@ -9,8 +9,8 @@ DEFAULT_QCLASS = 1
 DEFAULT_TTL = 10
 
 
-def answer(qname: str, full_name: str) -> mdns.DnsAnswer:
-    return mdns.DnsAnswer(
+def answer(qname: str, full_name: str) -> mdns.DnsResource:
+    return mdns.DnsResource(
         qname, mdns.QTYPE_PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
     )
 
