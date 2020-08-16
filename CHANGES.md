@@ -1,5 +1,43 @@
 # CHANGES
 
+## 0.7.1 (2020-08-16)
+
+*Changes:*
+
+* Fixed lots of issues with scanning
+* Improved performance for MRP playing information
+* Fixed wrong identifier for DMAP when MDNS name collision exists
+* Support for python 3.9 (beta)
+
+*All changes:*
+
+```
+8cec795 gha: Retry tox if first run fails
+d77c56f build(deps): bump pytest-xdist from 1.34.0 to 2.0.0
+a424f08 build(deps): bump pytest-cov from 2.10.0 to 2.10.1
+bb703ca scan: Fix DMAP identifier when name collides
+2bcafb4 conf: Convert tests to pytest
+91de62f build(deps): bump pytest from 5.4.3 to 6.0.1
+68992d4 mdns: Fixes to make tests more stable
+f64b357 mdns: Extract functional tests
+8d4edf3 mdns: Fix multicast issues
+d30350e support: Add level to log_binary
+3ffa1ff build(deps-dev): bump tox from 3.18.0 to 3.19.0
+ff0ba00 build(deps): bump pytest-xdist from 1.33.0 to 1.34.0
+dfbd428 build(deps): bump deepdiff from 5.0.1 to 5.0.2
+d2d17b3 build(deps-dev): bump tox from 3.17.1 to 3.18.0
+a82d7e1 scan: Remove check if host is on any local subnet
+23accc6 gha: Run tests with python 3.9
+45d08c8 api: Convert Union[x, NoneType] to Optional[x]
+104620c api: Print diff when API docs mismatch
+c173afb Resolve performance slowdown with copying playing data
+14192d9 build(deps): bump codecov from 2.1.7 to 2.1.8
+c05c351 build(deps-dev): bump tox from 3.17.0 to 3.17.1
+63ce14f build(deps): bump pytest-timeout from 1.4.1 to 1.4.2
+71d1f80 build(deps-dev): bump tox from 3.16.1 to 3.17.0
+61289c6 build(deps): bump pdoc3 from 0.8.3 to 0.8.4
+```
+
 ## 0.7.0 (2020-07-14)
 
 *Changes:*
