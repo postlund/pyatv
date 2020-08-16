@@ -177,6 +177,7 @@ def generate_api_docs():
     """Generate API documentation."""
     _LOGGER.info("Generating API documentation")
     api.generate()
+    call("git add docs", show_output=False)
 
 
 def create_tag(version):
