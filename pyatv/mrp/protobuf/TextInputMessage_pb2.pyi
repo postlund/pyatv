@@ -4,6 +4,11 @@ from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -11,11 +16,9 @@ from google.protobuf.message import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -28,58 +31,41 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class TextInputMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class ActionType(builtin___int):
+    ActionTypeValue = typing___NewType('ActionTypeValue', builtin___int)
+    type___ActionTypeValue = ActionTypeValue
+    ActionType: _ActionType
+    class _ActionType(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[TextInputMessage.ActionTypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'TextInputMessage.ActionType': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['TextInputMessage.ActionType']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'TextInputMessage.ActionType']]: ...
-        Unknown = typing___cast('TextInputMessage.ActionType', 0)
-        Insert = typing___cast('TextInputMessage.ActionType', 1)
-        Set = typing___cast('TextInputMessage.ActionType', 2)
-        Delete = typing___cast('TextInputMessage.ActionType', 3)
-        ClearText = typing___cast('TextInputMessage.ActionType', 4)
-    Unknown = typing___cast('TextInputMessage.ActionType', 0)
-    Insert = typing___cast('TextInputMessage.ActionType', 1)
-    Set = typing___cast('TextInputMessage.ActionType', 2)
-    Delete = typing___cast('TextInputMessage.ActionType', 3)
-    ClearText = typing___cast('TextInputMessage.ActionType', 4)
-    global___ActionType = ActionType
+        Unknown = typing___cast(TextInputMessage.ActionTypeValue, 0)
+        Insert = typing___cast(TextInputMessage.ActionTypeValue, 1)
+        Set = typing___cast(TextInputMessage.ActionTypeValue, 2)
+        Delete = typing___cast(TextInputMessage.ActionTypeValue, 3)
+        ClearText = typing___cast(TextInputMessage.ActionTypeValue, 4)
+    Unknown = typing___cast(TextInputMessage.ActionTypeValue, 0)
+    Insert = typing___cast(TextInputMessage.ActionTypeValue, 1)
+    Set = typing___cast(TextInputMessage.ActionTypeValue, 2)
+    Delete = typing___cast(TextInputMessage.ActionTypeValue, 3)
+    ClearText = typing___cast(TextInputMessage.ActionTypeValue, 4)
+    type___ActionType = ActionType
 
-    timestamp = ... # type: builtin___float
-    text = ... # type: typing___Text
-    actionType = ... # type: global___TextInputMessage.ActionType
+    timestamp: builtin___float = ...
+    text: typing___Text = ...
+    actionType: type___TextInputMessage.ActionTypeValue = ...
 
     def __init__(self,
         *,
         timestamp : typing___Optional[builtin___float] = None,
         text : typing___Optional[typing___Text] = None,
-        actionType : typing___Optional[global___TextInputMessage.ActionType] = None,
+        actionType : typing___Optional[type___TextInputMessage.ActionTypeValue] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> TextInputMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TextInputMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> None: ...
-global___TextInputMessage = TextInputMessage
+type___TextInputMessage = TextInputMessage
 
-textInputMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+textInputMessage: google___protobuf___descriptor___FieldDescriptor = ...

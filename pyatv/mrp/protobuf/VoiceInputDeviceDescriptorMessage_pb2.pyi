@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
@@ -19,7 +20,6 @@ from pyatv.mrp.protobuf.AudioFormatSettingsMessage_pb2 import (
 from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -31,10 +31,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class VoiceInputDeviceDescriptor(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -50,14 +49,6 @@ class VoiceInputDeviceDescriptor(google___protobuf___message___Message):
         defaultFormat : typing___Optional[pyatv___mrp___protobuf___AudioFormatSettingsMessage_pb2___AudioFormatSettings] = None,
         supportedFormats : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___AudioFormatSettingsMessage_pb2___AudioFormatSettings]] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> VoiceInputDeviceDescriptor: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VoiceInputDeviceDescriptor: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"defaultFormat",b"defaultFormat"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"defaultFormat",b"defaultFormat",u"supportedFormats",b"supportedFormats"]) -> None: ...
-global___VoiceInputDeviceDescriptor = VoiceInputDeviceDescriptor
+type___VoiceInputDeviceDescriptor = VoiceInputDeviceDescriptor

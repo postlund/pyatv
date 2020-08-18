@@ -135,7 +135,7 @@ class MrpRemoteControl(RemoteControl):
     async def _press_key(self, key: str, action: InputAction) -> None:
         async def _do_press(keycode: Tuple[int, int], hold: bool):
             await self.protocol.send_and_receive(
-                messages.send_hid_event(keycode[0], keycode[1], True)
+                messages.send_button(keycode[0], keycode[1], True)
             )
 
             if hold:
@@ -143,7 +143,7 @@ class MrpRemoteControl(RemoteControl):
                 await asyncio.sleep(1)
 
             await self.protocol.send_and_receive(
-                messages.send_hid_event(keycode[0], keycode[1], False)
+                messages.send_button(keycode[0], keycode[1], False)
             )
 
         keycode = _KEY_LOOKUP.get(key)

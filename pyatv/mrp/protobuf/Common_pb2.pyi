@@ -3,6 +3,11 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -10,238 +15,158 @@ from google.protobuf.message import (
 )
 
 from typing import (
-    List as typing___List,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
+    NewType as typing___NewType,
     cast as typing___cast,
 )
 
 
-builtin___bytes = bytes
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class RepeatMode(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[RepeatMode.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'RepeatMode.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['RepeatMode.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'RepeatMode.Enum']]: ...
-        Unknown = typing___cast('RepeatMode.Enum', 0)
-        Off = typing___cast('RepeatMode.Enum', 1)
-        One = typing___cast('RepeatMode.Enum', 2)
-        All = typing___cast('RepeatMode.Enum', 3)
-    Unknown = typing___cast('RepeatMode.Enum', 0)
-    Off = typing___cast('RepeatMode.Enum', 1)
-    One = typing___cast('RepeatMode.Enum', 2)
-    All = typing___cast('RepeatMode.Enum', 3)
-    global___Enum = Enum
+        Unknown = typing___cast(RepeatMode.EnumValue, 0)
+        Off = typing___cast(RepeatMode.EnumValue, 1)
+        One = typing___cast(RepeatMode.EnumValue, 2)
+        All = typing___cast(RepeatMode.EnumValue, 3)
+    Unknown = typing___cast(RepeatMode.EnumValue, 0)
+    Off = typing___cast(RepeatMode.EnumValue, 1)
+    One = typing___cast(RepeatMode.EnumValue, 2)
+    All = typing___cast(RepeatMode.EnumValue, 3)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> RepeatMode: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RepeatMode: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___RepeatMode = RepeatMode
+type___RepeatMode = RepeatMode
 
 class ShuffleMode(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[ShuffleMode.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'ShuffleMode.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['ShuffleMode.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'ShuffleMode.Enum']]: ...
-        Unknown = typing___cast('ShuffleMode.Enum', 0)
-        Off = typing___cast('ShuffleMode.Enum', 1)
-        Albums = typing___cast('ShuffleMode.Enum', 2)
-        Songs = typing___cast('ShuffleMode.Enum', 3)
-    Unknown = typing___cast('ShuffleMode.Enum', 0)
-    Off = typing___cast('ShuffleMode.Enum', 1)
-    Albums = typing___cast('ShuffleMode.Enum', 2)
-    Songs = typing___cast('ShuffleMode.Enum', 3)
-    global___Enum = Enum
+        Unknown = typing___cast(ShuffleMode.EnumValue, 0)
+        Off = typing___cast(ShuffleMode.EnumValue, 1)
+        Albums = typing___cast(ShuffleMode.EnumValue, 2)
+        Songs = typing___cast(ShuffleMode.EnumValue, 3)
+    Unknown = typing___cast(ShuffleMode.EnumValue, 0)
+    Off = typing___cast(ShuffleMode.EnumValue, 1)
+    Albums = typing___cast(ShuffleMode.EnumValue, 2)
+    Songs = typing___cast(ShuffleMode.EnumValue, 3)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> ShuffleMode: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> ShuffleMode: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___ShuffleMode = ShuffleMode
+type___ShuffleMode = ShuffleMode
 
 class DeviceClass(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[DeviceClass.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'DeviceClass.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['DeviceClass.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'DeviceClass.Enum']]: ...
-        Invalid = typing___cast('DeviceClass.Enum', 0)
-        iPhone = typing___cast('DeviceClass.Enum', 1)
-        iPod = typing___cast('DeviceClass.Enum', 2)
-        iPad = typing___cast('DeviceClass.Enum', 3)
-        AppleTV = typing___cast('DeviceClass.Enum', 4)
-        iFPGA = typing___cast('DeviceClass.Enum', 5)
-        Watch = typing___cast('DeviceClass.Enum', 6)
-        Accessory = typing___cast('DeviceClass.Enum', 7)
-        Bridge = typing___cast('DeviceClass.Enum', 8)
-        Mac = typing___cast('DeviceClass.Enum', 9)
-    Invalid = typing___cast('DeviceClass.Enum', 0)
-    iPhone = typing___cast('DeviceClass.Enum', 1)
-    iPod = typing___cast('DeviceClass.Enum', 2)
-    iPad = typing___cast('DeviceClass.Enum', 3)
-    AppleTV = typing___cast('DeviceClass.Enum', 4)
-    iFPGA = typing___cast('DeviceClass.Enum', 5)
-    Watch = typing___cast('DeviceClass.Enum', 6)
-    Accessory = typing___cast('DeviceClass.Enum', 7)
-    Bridge = typing___cast('DeviceClass.Enum', 8)
-    Mac = typing___cast('DeviceClass.Enum', 9)
-    global___Enum = Enum
+        Invalid = typing___cast(DeviceClass.EnumValue, 0)
+        iPhone = typing___cast(DeviceClass.EnumValue, 1)
+        iPod = typing___cast(DeviceClass.EnumValue, 2)
+        iPad = typing___cast(DeviceClass.EnumValue, 3)
+        AppleTV = typing___cast(DeviceClass.EnumValue, 4)
+        iFPGA = typing___cast(DeviceClass.EnumValue, 5)
+        Watch = typing___cast(DeviceClass.EnumValue, 6)
+        Accessory = typing___cast(DeviceClass.EnumValue, 7)
+        Bridge = typing___cast(DeviceClass.EnumValue, 8)
+        Mac = typing___cast(DeviceClass.EnumValue, 9)
+    Invalid = typing___cast(DeviceClass.EnumValue, 0)
+    iPhone = typing___cast(DeviceClass.EnumValue, 1)
+    iPod = typing___cast(DeviceClass.EnumValue, 2)
+    iPad = typing___cast(DeviceClass.EnumValue, 3)
+    AppleTV = typing___cast(DeviceClass.EnumValue, 4)
+    iFPGA = typing___cast(DeviceClass.EnumValue, 5)
+    Watch = typing___cast(DeviceClass.EnumValue, 6)
+    Accessory = typing___cast(DeviceClass.EnumValue, 7)
+    Bridge = typing___cast(DeviceClass.EnumValue, 8)
+    Mac = typing___cast(DeviceClass.EnumValue, 9)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> DeviceClass: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> DeviceClass: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___DeviceClass = DeviceClass
+type___DeviceClass = DeviceClass
 
 class DeviceType(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[DeviceType.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'DeviceType.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['DeviceType.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'DeviceType.Enum']]: ...
-        Unknown = typing___cast('DeviceType.Enum', 0)
-        AirPlay = typing___cast('DeviceType.Enum', 1)
-        Bluetooth = typing___cast('DeviceType.Enum', 2)
-        CarPlay = typing___cast('DeviceType.Enum', 3)
-        BuiltIn = typing___cast('DeviceType.Enum', 4)
-        Wired = typing___cast('DeviceType.Enum', 5)
-    Unknown = typing___cast('DeviceType.Enum', 0)
-    AirPlay = typing___cast('DeviceType.Enum', 1)
-    Bluetooth = typing___cast('DeviceType.Enum', 2)
-    CarPlay = typing___cast('DeviceType.Enum', 3)
-    BuiltIn = typing___cast('DeviceType.Enum', 4)
-    Wired = typing___cast('DeviceType.Enum', 5)
-    global___Enum = Enum
+        Unknown = typing___cast(DeviceType.EnumValue, 0)
+        AirPlay = typing___cast(DeviceType.EnumValue, 1)
+        Bluetooth = typing___cast(DeviceType.EnumValue, 2)
+        CarPlay = typing___cast(DeviceType.EnumValue, 3)
+        BuiltIn = typing___cast(DeviceType.EnumValue, 4)
+        Wired = typing___cast(DeviceType.EnumValue, 5)
+    Unknown = typing___cast(DeviceType.EnumValue, 0)
+    AirPlay = typing___cast(DeviceType.EnumValue, 1)
+    Bluetooth = typing___cast(DeviceType.EnumValue, 2)
+    CarPlay = typing___cast(DeviceType.EnumValue, 3)
+    BuiltIn = typing___cast(DeviceType.EnumValue, 4)
+    Wired = typing___cast(DeviceType.EnumValue, 5)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> DeviceType: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> DeviceType: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___DeviceType = DeviceType
+type___DeviceType = DeviceType
 
 class DeviceSubType(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Enum(builtin___int):
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[DeviceSubType.EnumValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'DeviceSubType.Enum': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['DeviceSubType.Enum']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'DeviceSubType.Enum']]: ...
-        Default = typing___cast('DeviceSubType.Enum', 0)
-        Speaker = typing___cast('DeviceSubType.Enum', 1)
-        Headphones = typing___cast('DeviceSubType.Enum', 2)
-        Headset = typing___cast('DeviceSubType.Enum', 3)
-        Receiver = typing___cast('DeviceSubType.Enum', 4)
-        LineOut = typing___cast('DeviceSubType.Enum', 5)
-        USB = typing___cast('DeviceSubType.Enum', 6)
-        DisplayPort = typing___cast('DeviceSubType.Enum', 7)
-        HDMI = typing___cast('DeviceSubType.Enum', 8)
-        LowEnergy = typing___cast('DeviceSubType.Enum', 9)
-        SPDIF = typing___cast('DeviceSubType.Enum', 10)
-        TV = typing___cast('DeviceSubType.Enum', 11)
-        HomePod = typing___cast('DeviceSubType.Enum', 12)
-        AppleTV = typing___cast('DeviceSubType.Enum', 13)
-    Default = typing___cast('DeviceSubType.Enum', 0)
-    Speaker = typing___cast('DeviceSubType.Enum', 1)
-    Headphones = typing___cast('DeviceSubType.Enum', 2)
-    Headset = typing___cast('DeviceSubType.Enum', 3)
-    Receiver = typing___cast('DeviceSubType.Enum', 4)
-    LineOut = typing___cast('DeviceSubType.Enum', 5)
-    USB = typing___cast('DeviceSubType.Enum', 6)
-    DisplayPort = typing___cast('DeviceSubType.Enum', 7)
-    HDMI = typing___cast('DeviceSubType.Enum', 8)
-    LowEnergy = typing___cast('DeviceSubType.Enum', 9)
-    SPDIF = typing___cast('DeviceSubType.Enum', 10)
-    TV = typing___cast('DeviceSubType.Enum', 11)
-    HomePod = typing___cast('DeviceSubType.Enum', 12)
-    AppleTV = typing___cast('DeviceSubType.Enum', 13)
-    global___Enum = Enum
+        Default = typing___cast(DeviceSubType.EnumValue, 0)
+        Speaker = typing___cast(DeviceSubType.EnumValue, 1)
+        Headphones = typing___cast(DeviceSubType.EnumValue, 2)
+        Headset = typing___cast(DeviceSubType.EnumValue, 3)
+        Receiver = typing___cast(DeviceSubType.EnumValue, 4)
+        LineOut = typing___cast(DeviceSubType.EnumValue, 5)
+        USB = typing___cast(DeviceSubType.EnumValue, 6)
+        DisplayPort = typing___cast(DeviceSubType.EnumValue, 7)
+        HDMI = typing___cast(DeviceSubType.EnumValue, 8)
+        LowEnergy = typing___cast(DeviceSubType.EnumValue, 9)
+        SPDIF = typing___cast(DeviceSubType.EnumValue, 10)
+        TV = typing___cast(DeviceSubType.EnumValue, 11)
+        HomePod = typing___cast(DeviceSubType.EnumValue, 12)
+        AppleTV = typing___cast(DeviceSubType.EnumValue, 13)
+    Default = typing___cast(DeviceSubType.EnumValue, 0)
+    Speaker = typing___cast(DeviceSubType.EnumValue, 1)
+    Headphones = typing___cast(DeviceSubType.EnumValue, 2)
+    Headset = typing___cast(DeviceSubType.EnumValue, 3)
+    Receiver = typing___cast(DeviceSubType.EnumValue, 4)
+    LineOut = typing___cast(DeviceSubType.EnumValue, 5)
+    USB = typing___cast(DeviceSubType.EnumValue, 6)
+    DisplayPort = typing___cast(DeviceSubType.EnumValue, 7)
+    HDMI = typing___cast(DeviceSubType.EnumValue, 8)
+    LowEnergy = typing___cast(DeviceSubType.EnumValue, 9)
+    SPDIF = typing___cast(DeviceSubType.EnumValue, 10)
+    TV = typing___cast(DeviceSubType.EnumValue, 11)
+    HomePod = typing___cast(DeviceSubType.EnumValue, 12)
+    AppleTV = typing___cast(DeviceSubType.EnumValue, 13)
+    type___Enum = Enum
 
 
     def __init__(self,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> DeviceSubType: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> DeviceSubType: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-global___DeviceSubType = DeviceSubType
+type___DeviceSubType = DeviceSubType

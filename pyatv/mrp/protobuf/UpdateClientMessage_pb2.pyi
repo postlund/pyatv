@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -15,7 +16,6 @@ from pyatv.mrp.protobuf.NowPlayingClient_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -27,10 +27,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class UpdateClientMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -42,16 +41,8 @@ class UpdateClientMessage(google___protobuf___message___Message):
         *,
         client : typing___Optional[pyatv___mrp___protobuf___NowPlayingClient_pb2___NowPlayingClient] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> UpdateClientMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UpdateClientMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"client",b"client"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"client",b"client"]) -> None: ...
-global___UpdateClientMessage = UpdateClientMessage
+type___UpdateClientMessage = UpdateClientMessage
 
-updateClientMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+updateClientMessage: google___protobuf___descriptor___FieldDescriptor = ...

@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -16,7 +17,6 @@ from pyatv.mrp.protobuf.VolumeControlAvailabilityMessage_pb2 import (
 from typing import (
     Optional as typing___Optional,
     Text as typing___Text,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -28,15 +28,14 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class VolumeControlCapabilitiesDidChangeMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    endpointUID = ... # type: typing___Text
-    outputDeviceUID = ... # type: typing___Text
+    endpointUID: typing___Text = ...
+    outputDeviceUID: typing___Text = ...
 
     @property
     def capabilities(self) -> pyatv___mrp___protobuf___VolumeControlAvailabilityMessage_pb2___VolumeControlAvailabilityMessage: ...
@@ -47,16 +46,8 @@ class VolumeControlCapabilitiesDidChangeMessage(google___protobuf___message___Me
         endpointUID : typing___Optional[typing___Text] = None,
         outputDeviceUID : typing___Optional[typing___Text] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> VolumeControlCapabilitiesDidChangeMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VolumeControlCapabilitiesDidChangeMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"capabilities",b"capabilities",u"endpointUID",b"endpointUID",u"outputDeviceUID",b"outputDeviceUID"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"capabilities",b"capabilities",u"endpointUID",b"endpointUID",u"outputDeviceUID",b"outputDeviceUID"]) -> None: ...
-global___VolumeControlCapabilitiesDidChangeMessage = VolumeControlCapabilitiesDidChangeMessage
+type___VolumeControlCapabilitiesDidChangeMessage = VolumeControlCapabilitiesDidChangeMessage
 
-volumeControlCapabilitiesDidChangeMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+volumeControlCapabilitiesDidChangeMessage: google___protobuf___descriptor___FieldDescriptor = ...

@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
@@ -24,7 +25,6 @@ from pyatv.mrp.protobuf.PlayerPath_pb2 import (
 from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -36,10 +36,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class UpdateContentItemMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -55,16 +54,8 @@ class UpdateContentItemMessage(google___protobuf___message___Message):
         contentItems : typing___Optional[typing___Iterable[pyatv___mrp___protobuf___ContentItem_pb2___ContentItem]] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> UpdateContentItemMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> UpdateContentItemMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"playerPath",b"playerPath"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"contentItems",b"contentItems",u"playerPath",b"playerPath"]) -> None: ...
-global___UpdateContentItemMessage = UpdateContentItemMessage
+type___UpdateContentItemMessage = UpdateContentItemMessage
 
-updateContentItemMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+updateContentItemMessage: google___protobuf___descriptor___FieldDescriptor = ...
