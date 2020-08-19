@@ -62,7 +62,7 @@ jobs:
       run: tox -q -p auto -e regression
       if: matrix.python-version == '3.8' && runner.os == 'Linux'
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1.0.10
+      uses: codecov/codecov-action@v1.0.13
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
