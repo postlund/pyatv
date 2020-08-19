@@ -4,7 +4,7 @@ import os
 import asyncio
 import logging
 from ipaddress import IPv4Address
-from typing import List, Dict
+from typing import List, Dict, Optional, Generator
 from abc import ABC, abstractmethod
 
 from pyatv import conf, interface
@@ -29,6 +29,21 @@ ALL_SERVICES: List[str] = [
 # listen on them (more or less). They are used as best-effort when for unicast scanning
 # to try to wake up a device. Both issue #580 and #595 are good references to read.
 KNOCK_PORTS: List[int] = [3689, 7000, 49152, 32498]
+
+
+def get_unique_identifiers(
+    response: mdns.Response,
+) -> Generator[Optional[str], None, None]:
+    """Return (yield) all unique identifiers for a response."""
+    for service in response.services:
+        if service.type == HOMESHARING_SERVICE:
+            yield service.properties.get("hG")
+        elif service.type == DEVICE_SERVICE:
+            yield service.name
+        elif service.type == MEDIAREMOTE_SERVICE:
+            yield service.properties.get("UniqueIdentifier")
+        elif service.type == AIRPLAY_SERVICE:
+            yield service.properties.get("deviceid")
 
 
 class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
@@ -177,14 +192,25 @@ class UnicastMdnsScanner(BaseScanner):
 class MulticastMdnsScanner(BaseScanner):
     """Service discovery based on multicast MDNS."""
 
-    def __init__(self, loop: asyncio.AbstractEventLoop):
+    def __init__(
+        self, loop: asyncio.AbstractEventLoop, identifier: Optional[str] = None
+    ):
         """Initialize a new MulticastMdnsScanner."""
         super().__init__()
         self.loop = loop
+        self.identifier = identifier
 
     async def discover(self, timeout: int):
         """Start discovery of devices and services."""
-        responses = await mdns.multicast(self.loop, ALL_SERVICES, timeout=timeout)
+        responses = await mdns.multicast(
+            self.loop,
+            ALL_SERVICES,
+            timeout=timeout,
+            end_condition=self._end_if_identifier_found if self.identifier else None,
+        )
         for _, response in responses.items():
             self.handle_response(response)
         return self._found_devices
+
+    def _end_if_identifier_found(self, response: mdns.Response):
+        return self.identifier in get_unique_identifiers(response)

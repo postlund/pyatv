@@ -85,7 +85,7 @@ async def scan(
     if hosts:
         scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
     else:
-        scanner = MulticastMdnsScanner(loop)
+        scanner = MulticastMdnsScanner(loop, identifier)
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]
@@ -283,7 +283,7 @@ async def pair(
     if hosts:
         scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
     else:
-        scanner = MulticastMdnsScanner(loop)
+        scanner = MulticastMdnsScanner(loop, identifier)
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]</code></pre>
