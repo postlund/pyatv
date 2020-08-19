@@ -71,11 +71,19 @@ and configure an mDNS repeater (try "mdns repeater" on your favorite search engi
 
 ### <a name="q9"></a>Q9. It is really slow to send commands to the device with atvremote. It takes several seconds, is pyatv really this slow?
 
+From version 0.8.x, scanning for a particular device has been optimized. Normally a scan
+is performed for a specific time and filtering done after that. This has been changed
+so that scanning is aborted once the requested device has been found, making the discovery
+phase a lot shorter.
+
+The information below reflects all versions prior to 0.8.x (although everything except
+for bullet two applies to 0.8.x as well):
+
 It is a common misconception that pyatv is slow because atvremote takes its time.
 The fact is this: *every* time you run atvremote, this happens:
 
 1. pyatv and its dependencies are loaded into memory
-2. A scan is performed with a default timeout of three seconds, i.e. this step *always* takes three seconds
+2. A scan is performed with a default timeout of three seconds
 3. A (TCP) connection is established to the device
 4. Authentication is performed and encryption enabled
 5. Command is executed

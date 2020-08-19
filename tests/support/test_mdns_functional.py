@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from ipaddress import IPv4Address
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -158,6 +158,27 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
     assert first.type == MEDIAREMOTE_SERVICE
     assert first.name == SERVICE_NAME
     assert first.port == 1234
+
+
+@pytest.mark.asyncio
+async def test_multicast_end_condition_met(event_loop, udns_server, multicast_fastexit):
+    multicast_fastexit(responses=4, requests=10)
+
+    actor = MagicMock()
+
+    def _end_cond(response):
+        actor(response)
+        return True
+
+    resp = await mdns.multicast(
+        event_loop,
+        [MEDIAREMOTE_SERVICE],
+        "127.0.0.1",
+        udns_server.port,
+        end_condition=_end_cond,
+    )
+    assert len(resp) == 1
+    actor.assert_called_once_with(resp[IPv4Address("127.0.0.1")])
 
 
 @pytest.mark.asyncio

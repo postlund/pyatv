@@ -7,7 +7,7 @@ import logging
 import weakref
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import Optional, Dict, List, cast, NamedTuple
+from typing import Optional, Dict, List, cast, NamedTuple, Callable
 
 from zeroconf import Zeroconf, ServiceInfo
 
@@ -412,6 +412,7 @@ class MulticastDnsSdClientProtocol:
         services: List[str],
         address: str,
         port: int,
+        end_condition: Optional[Callable[[Response], bool]],
     ) -> None:
         """Initialize a new MulticastDnsSdClientProtocol."""
         self.loop = loop
@@ -419,6 +420,7 @@ class MulticastDnsSdClientProtocol:
         self.message = create_request(services)
         self.address = address
         self.port = port
+        self.end_condition = end_condition or (lambda _: False)
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.responses: Dict[IPv4Address, Response] = {}
         self._unicasts: Dict[IPv4Address, bytes] = {}
@@ -505,11 +507,19 @@ class MulticastDnsSdClientProtocol:
                 qtype=QTYPE_ANY,
             )
         else:
-            self.responses[IPv4Address(addr[0])] = Response(
+            response = Response(
                 services=services,
                 deep_sleep=(addr[0] in self._unicasts),
                 model=_get_model(services),
             )
+
+            if self.end_condition(response):
+                # Matches end condition: replace everything found so far and abort
+                self.responses = {IPv4Address(addr[0]): response}
+                self.semaphore.release()
+                self.close()
+            else:
+                self.responses[IPv4Address(addr[0])] = response
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
@@ -550,9 +560,12 @@ async def multicast(
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
+    end_condition: Optional[Callable[[Response], bool]] = None,
 ) -> Dict[IPv4Address, Response]:
     """Send multicast request for services."""
-    protocol = MulticastDnsSdClientProtocol(loop, services, address, port)
+    protocol = MulticastDnsSdClientProtocol(
+        loop, services, address, port, end_condition
+    )
 
     # Socket listening on 5353 from anywhere
     await protocol.add_socket(net.mcast_socket(None, 5353))
