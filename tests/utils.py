@@ -15,7 +15,7 @@ from aiohttp import ClientSession
 # event queue in order to give other possibility to run.
 async def _fake_sleep(time: float = None, loop=None):
     async def dummy():
-        _fake_sleep._sleep_time += time
+        _fake_sleep._sleep_time.insert(0, time)
 
     await asyncio.ensure_future(dummy())
 
@@ -27,14 +27,18 @@ def stub_sleep(fn=None) -> float:
     # Code for dealing with this should be extracted
     if asyncio.sleep == _fake_sleep:
         if not hasattr(asyncio.sleep, "_sleep_time"):
-            asyncio.sleep._sleep_time = 0.0
-        return asyncio.sleep._sleep_time
+            asyncio.sleep._sleep_time = [0.0]
+        if len(asyncio.sleep._sleep_time) == 1:
+            return asyncio.sleep._sleep_time[0]
+        return asyncio.sleep._sleep_time.pop()
 
     return 0.0
 
 
 def unstub_sleep():
     """Restore original asyncio.sleep method."""
+    if asyncio.sleep == _fake_sleep:
+        asyncio.sleep._sleep_time = [0.0]
     asyncio.sleep = real_sleep
 
 
