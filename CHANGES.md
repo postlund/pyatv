@@ -1,5 +1,27 @@
 # CHANGES
 
+## 0.7.2 (2020-08-24)
+
+*Changes:*
+
+* Handle authority records in MDNS which fixes:
+  `NotImplementedError: nscount > 0`
+* Do not require ACK for some remote control commands
+  to be compatible with tvOS 14 (beta)
+* Abort scanning early when expected device (by identifier)
+  is found
+
+*All changes:*
+
+```
+6a692e0 build(deps): bump pydocstyle from 5.0.2 to 5.1.0
+5627304 build(deps): bump codecov from 2.1.8 to 2.1.9
+7c40bce scan: Abort when device with identifier found
+92ccf6c mrp: Require no ACK for HID messages
+fe4ea4d build(deps): bump zeroconf from 0.28.0 to 0.28.1
+b020b67 mdns: Add support for authority records
+```
+
 ## 0.7.1 (2020-08-16)
 
 *Changes:*
