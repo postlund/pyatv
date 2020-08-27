@@ -91,7 +91,10 @@ class DaapRequester:
         def _login_request():
             url = self._mkurl("login?[AUTH]&hasFP=1", session=False, login_id=True)
             _login_request.log_text = "Login request: " + url
-            return self.http.get_data(url, headers=_DMAP_HEADERS,)
+            return self.http.get_data(
+                url,
+                headers=_DMAP_HEADERS,
+            )
 
         resp = await self._do(_login_request, is_login=True)
         self._session_id = parser.first(resp, "mlog", "mlid")

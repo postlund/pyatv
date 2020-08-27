@@ -358,7 +358,9 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(
-        36, "SkipForward", "Skip forward a time interval.",
+        36,
+        "SkipForward",
+        "Skip forward a time interval.",
     )
     async def skip_forward(self) -> None:
         """Skip forward a time interval.
@@ -748,10 +750,13 @@ class DeviceInfo:
         else:
             output = "Unknown Model"
 
-        output += " " + {
-            OperatingSystem.Legacy: "ATV SW",
-            OperatingSystem.TvOS: "tvOS",
-        }.get(self.operating_system, "Unknown OS")
+        output += (
+            " "
+            + {
+                OperatingSystem.Legacy: "ATV SW",
+                OperatingSystem.TvOS: "tvOS",
+            }.get(self.operating_system, "Unknown OS")
+        )
 
         if self.version:
             output += " " + self.version

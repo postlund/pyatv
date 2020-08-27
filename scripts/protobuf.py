@@ -329,7 +329,10 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d", "--download", action="store_true", help="download protobuf compiler",
+        "-d",
+        "--download",
+        action="store_true",
+        help="download protobuf compiler",
     )
     parser.add_argument(
         "-f",
@@ -345,7 +348,10 @@ def main():
     decode = subparsers.add_parser("decode", help="decode protobuf message(s)")
     decode.add_argument("message", help="message in hex to decode")
     decode.add_argument(
-        "-u", "--unknown-fields", action="store_true", help="include unknown fields",
+        "-u",
+        "--unknown-fields",
+        action="store_true",
+        help="include unknown fields",
     )
     decode.add_argument(
         "-s",
@@ -358,10 +364,18 @@ def main():
     decrypt.add_argument("message", help="message in hex to decrypt")
     decrypt.add_argument("keys", nargs="+", help="keys to decrypt with")
     decrypt.add_argument(
-        "-l", "--nounce-lower", type=int, default=0, help="start value for nounce",
+        "-l",
+        "--nounce-lower",
+        type=int,
+        default=0,
+        help="start value for nounce",
     )
     decrypt.add_argument(
-        "-u", "--nounce-upper", type=int, default=128, help="upper value for nounce",
+        "-u",
+        "--nounce-upper",
+        type=int,
+        default=128,
+        help="upper value for nounce",
     )
 
     args = parser.parse_args()

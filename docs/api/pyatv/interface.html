@@ -577,7 +577,9 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     @feature(
-        36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+        36,
+        &#34;SkipForward&#34;,
+        &#34;Skip forward a time interval.&#34;,
     )
     async def skip_forward(self) -&gt; None:
         &#34;&#34;&#34;Skip forward a time interval.
@@ -967,10 +969,13 @@ class DeviceInfo:
         else:
             output = &#34;Unknown Model&#34;
 
-        output += &#34; &#34; + {
-            OperatingSystem.Legacy: &#34;ATV SW&#34;,
-            OperatingSystem.TvOS: &#34;tvOS&#34;,
-        }.get(self.operating_system, &#34;Unknown OS&#34;)
+        output += (
+            &#34; &#34;
+            + {
+                OperatingSystem.Legacy: &#34;ATV SW&#34;,
+                OperatingSystem.TvOS: &#34;tvOS&#34;,
+            }.get(self.operating_system, &#34;Unknown OS&#34;)
+        )
 
         if self.version:
             output += &#34; &#34; + self.version
@@ -1620,10 +1625,13 @@ def identifier(self) -&gt; Optional[str]:
         else:
             output = &#34;Unknown Model&#34;
 
-        output += &#34; &#34; + {
-            OperatingSystem.Legacy: &#34;ATV SW&#34;,
-            OperatingSystem.TvOS: &#34;tvOS&#34;,
-        }.get(self.operating_system, &#34;Unknown OS&#34;)
+        output += (
+            &#34; &#34;
+            + {
+                OperatingSystem.Legacy: &#34;ATV SW&#34;,
+                OperatingSystem.TvOS: &#34;tvOS&#34;,
+            }.get(self.operating_system, &#34;Unknown OS&#34;)
+        )
 
         if self.version:
             output += &#34; &#34; + self.version
@@ -3045,7 +3053,9 @@ def stop(self) -&gt; None:
 
     @abstractmethod
     @feature(
-        36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+        36,
+        &#34;SkipForward&#34;,
+        &#34;Skip forward a time interval.&#34;,
     )
     async def skip_forward(self) -&gt; None:
         &#34;&#34;&#34;Skip forward a time interval.
@@ -3366,7 +3376,9 @@ async def skip_backward(self) -&gt; None:
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(
-    36, &#34;SkipForward&#34;, &#34;Skip forward a time interval.&#34;,
+    36,
+    &#34;SkipForward&#34;,
+    &#34;Skip forward a time interval.&#34;,
 )
 async def skip_forward(self) -&gt; None:
     &#34;&#34;&#34;Skip forward a time interval.

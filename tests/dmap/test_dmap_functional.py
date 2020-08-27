@@ -264,7 +264,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing()
 
         self.assertFeatures(
-            FeatureState.Unavailable, FeatureName.Shuffle, FeatureName.Repeat,
+            FeatureState.Unavailable,
+            FeatureName.Shuffle,
+            FeatureName.Repeat,
         )
 
         self.usecase.example_music(
@@ -273,7 +275,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="music")
 
         self.assertFeatures(
-            FeatureState.Available, FeatureName.Shuffle, FeatureName.Repeat,
+            FeatureState.Available,
+            FeatureName.Shuffle,
+            FeatureName.Repeat,
         )
 
     @unittest_run_loop

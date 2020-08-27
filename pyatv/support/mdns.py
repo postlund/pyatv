@@ -293,7 +293,11 @@ def parse_services(message: DnsMessage) -> List[Service]:
         address = IPv4Address(target_record.rd) if target_record else None
 
         results[service] = Service(
-            service_type, service_name, address, port, _decode_properties(properties),
+            service_type,
+            service_name,
+            address,
+            port,
+            _decode_properties(properties),
         )
 
     # If there are PTRs to unknown services, create placeholders
@@ -321,13 +325,16 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         """Get respoonse with a maximum timeout."""
         try:
             await asyncio.wait_for(
-                self.semaphore.acquire(), timeout=self.timeout,
+                self.semaphore.acquire(),
+                timeout=self.timeout,
             )
         finally:
             self._finished()
         services = parse_services(self.result)
         return Response(
-            services=services, deep_sleep=False, model=_get_model(services),
+            services=services,
+            deep_sleep=False,
+            model=_get_model(services),
         )
 
     def connection_made(self, transport) -> None:
@@ -432,7 +439,8 @@ class MulticastDnsSdClientProtocol:
         _LOGGER.debug("Adding socket %s", sock)
 
         transport, _ = await self.loop.create_datagram_endpoint(
-            lambda: ReceiveDelegate(self), sock=sock,
+            lambda: ReceiveDelegate(self),
+            sock=sock,
         )
 
         self._transports.append(transport)
