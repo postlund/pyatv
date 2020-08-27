@@ -167,7 +167,7 @@ class NonLocalSubnetError(Exception):
 <dl>
 <dt id="pyatv.exceptions.AuthenticationError"><code class="flex name class">
 <span>class <span class="ident">AuthenticationError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when authentication fails.</p></section>
@@ -186,7 +186,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.BackOffError"><code class="flex name class">
 <span>class <span class="ident">BackOffError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device mandates a backoff period.</p></section>
@@ -205,7 +205,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.CommandError"><code class="flex name class">
 <span>class <span class="ident">CommandError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when a command (e.g. play or pause) failed.</p></section>
@@ -224,7 +224,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.ConnectionFailedError"><code class="flex name class">
 <span>class <span class="ident">ConnectionFailedError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connection fails, e.g. refused or timed out.</p></section>
@@ -243,7 +243,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.DeviceIdMissingError"><code class="flex name class">
 <span>class <span class="ident">DeviceIdMissingError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device id is missing.</p></section>
@@ -262,7 +262,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.InvalidCredentialsError"><code class="flex name class">
 <span>class <span class="ident">InvalidCredentialsError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are invalid.</p></section>
@@ -281,7 +281,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.InvalidDmapDataError"><code class="flex name class">
 <span>class <span class="ident">InvalidDmapDataError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when invalid DMAP data is parsed.</p></section>
@@ -300,7 +300,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.NoAsyncListenerError"><code class="flex name class">
 <span>class <span class="ident">NoAsyncListenerError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when starting AsyncUpdater with no listener.</p></section>
@@ -319,7 +319,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.NoCredentialsError"><code class="flex name class">
 <span>class <span class="ident">NoCredentialsError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are missing.</p></section>
@@ -338,7 +338,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.NoServiceError"><code class="flex name class">
 <span>class <span class="ident">NoServiceError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connecting to a device with no usable service.</p></section>
@@ -357,7 +357,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.NonLocalSubnetError"><code class="flex name class">
 <span>class <span class="ident">NonLocalSubnetError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when address it not in any local subnet.</p>
@@ -380,7 +380,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.NotSupportedError"><code class="flex name class">
 <span>class <span class="ident">NotSupportedError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when trying to perform an action that is not supported.</p></section>
@@ -401,7 +401,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.PairingError"><code class="flex name class">
 <span>class <span class="ident">PairingError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when pairing fails.</p></section>
@@ -420,7 +420,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.PlaybackError"><code class="flex name class">
 <span>class <span class="ident">PlaybackError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when media playback failed.</p></section>
@@ -439,7 +439,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.UnknownMediaKindError"><code class="flex name class">
 <span>class <span class="ident">UnknownMediaKindError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown media kind is found.</p></section>
@@ -458,7 +458,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.UnknownPlayStateError"><code class="flex name class">
 <span>class <span class="ident">UnknownPlayStateError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown play state is found.</p></section>
@@ -477,7 +477,7 @@ class NonLocalSubnetError(Exception):
 </dd>
 <dt id="pyatv.exceptions.UnsupportedProtocolError"><code class="flex name class">
 <span>class <span class="ident">UnsupportedProtocolError</span></span>
-<span>(</span><span>...)</span>
+<span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unsupported protocol was requested.</p></section>
