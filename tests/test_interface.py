@@ -262,7 +262,11 @@ def test_metadata_rest_not_supported():
 
 def test_fields_set():
     dev_info = interface.DeviceInfo(
-        OperatingSystem.TvOS, "1.2.3", "19A123", DeviceModel.Gen4K, "aa:bb:cc:dd:ee:ff",
+        OperatingSystem.TvOS,
+        "1.2.3",
+        "19A123",
+        DeviceModel.Gen4K,
+        "aa:bb:cc:dd:ee:ff",
     )
 
     assert dev_info.operating_system == OperatingSystem.TvOS
@@ -286,7 +290,11 @@ def test_apple_tv_software_str():
 
 def test_tvos_str():
     dev_info = interface.DeviceInfo(
-        OperatingSystem.TvOS, "1.2.3", "19A123", DeviceModel.Gen4K, "aa:bb:cc:dd:ee:ff",
+        OperatingSystem.TvOS,
+        "1.2.3",
+        "19A123",
+        DeviceModel.Gen4K,
+        "aa:bb:cc:dd:ee:ff",
     )
 
     assert str(dev_info) == "4K tvOS 1.2.3 build 19A123"

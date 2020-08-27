@@ -34,7 +34,8 @@ class MrpPairingProcedure:
         await self.protocol.start(skip_initial_messages=True)
 
         msg = messages.crypto_pairing(
-            {TlvValue.Method: b"\x00", TlvValue.SeqNo: b"\x01"}, is_pairing=True,
+            {TlvValue.Method: b"\x00", TlvValue.SeqNo: b"\x01"},
+            is_pairing=True,
         )
         resp = await self.protocol.send_and_receive(msg, generate_identifier=False)
 
