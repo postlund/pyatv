@@ -148,7 +148,7 @@ def tcp_keepalive(sock) -> None:
     _setopt(intvl, 5)
     _setopt(cnt, 4)
 
-    _LOGGER.info("Configured keep-alive on %s (%s)", sock, current_platform)
+    _LOGGER.debug("Configured keep-alive on %s (%s)", sock, current_platform)
 
 
 class HttpSession:
