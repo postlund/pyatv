@@ -347,6 +347,9 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         if self.state.active_player:
             self.state.set_active_player(self.state.active_player)
 
+        if message.identifier is not None:
+            self.send(messages.create(0, identifier=message.identifier))
+
     def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
         # not use them so ignore for now

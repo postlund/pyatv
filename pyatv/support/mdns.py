@@ -581,7 +581,7 @@ async def multicast(
     # One socket per local IP address
     for addr in net.get_private_addresses():
         try:
-            await protocol.add_socket(net.mcast_socket(str(addr)))
+            await protocol.add_socket(net.mcast_socket(str(addr), 5353))
         except Exception:
             _LOGGER.exception(f"failed to add listener for {addr}")
 
