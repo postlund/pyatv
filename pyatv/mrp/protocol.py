@@ -78,7 +78,7 @@ class MrpProtocol:
         await self.send(messages.set_connection_state())
 
         # Subscribe to updates at this stage
-        await self.send(messages.client_updates_config())
+        await self.send_and_receive(messages.client_updates_config())
         await self.send_and_receive(messages.get_keyboard_session())
 
     def stop(self):
@@ -129,7 +129,7 @@ class MrpProtocol:
         # those cases, a "fake" identifier is used that includes the message
         # type instead.
         if generate_identifier:
-            identifier = str(uuid.uuid4())
+            identifier = str(uuid.uuid4()).upper()
             message.identifier = identifier
         else:
             identifier = "type_" + str(message.type)

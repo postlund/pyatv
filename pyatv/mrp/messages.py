@@ -36,7 +36,7 @@ def device_information(name, identifier, update=False):
     info.supportsExtendedMotion = True
     info.supportsSharedQueue = True
     info.supportsSystemPairing = True
-    info.systemBuildVersion = "17B111"
+    info.systemBuildVersion = "18A393"
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
     info.deviceClass = protobuf.DeviceClass.iPhone
@@ -83,6 +83,7 @@ def client_updates_config(artwork=True, now_playing=False, volume=True, keyboard
     config.nowPlayingUpdates = now_playing
     config.volumeUpdates = volume
     config.keyboardUpdates = keyboard
+    config.outputDeviceUpdates = False
     return message
 
 
