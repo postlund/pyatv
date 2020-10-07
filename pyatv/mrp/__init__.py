@@ -528,7 +528,7 @@ class MrpPower(Power):
 
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
-        await self.remote.home_hold()
+        await self.remote.home(InputAction.Hold)
         await self.remote.select()
 
         if await_new_state and self.power_state != PowerState.Off:
