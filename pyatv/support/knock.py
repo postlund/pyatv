@@ -23,8 +23,6 @@ SEND_INTERVAL = 2.0
 # Performs the actual "knock". This can most certainly be done with asyncio code, but
 # works for now.
 def _synch_knock(address: IPv4Address, port: int):
-    _LOGGER.debug("Knocking at port %d on %s", port, address)
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(False)
 
@@ -38,6 +36,7 @@ async def knock(
     address: IPv4Address, ports: List[int], loop: asyncio.AbstractEventLoop
 ):
     """Knock on a set of ports for a given host."""
+    _LOGGER.debug("Knocking at ports %s on %s", ports, address)
     await asyncio.wait(
         [loop.run_in_executor(None, _synch_knock, address, port) for port in ports]
     )
@@ -58,7 +57,10 @@ async def knocker(
 
     async def _repeat():
         for _ in range(no_of_sends):
-            await knock(address, ports, loop)
+            try:
+                await knock(address, ports, loop)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("failed to port knock")
             await asyncio.sleep(SEND_INTERVAL)
 
     return asyncio.ensure_future(_repeat())

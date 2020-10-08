@@ -47,6 +47,16 @@ def stub_local_addresses():
         yield
 
 
+# Requests are normally not sent to localhost, so we need to fake that localhost
+# is not s loopback address
+@pytest.fixture(autouse=True)
+def stub_ip_address():
+    with patch("pyatv.support.mdns.ip_address") as mock:
+        mock.return_value = mock
+        mock.is_loopback = False
+        yield
+
+
 # Hack-ish fixture to make sure multicast does not listen on any global port,
 # i.e. 5353 since data from other places can leak into the test
 @pytest.fixture(autouse=True)
@@ -161,7 +171,9 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
 
 
 @pytest.mark.asyncio
-async def test_multicast_end_condition_met(event_loop, udns_server, multicast_fastexit):
+async def test_multicast_end_condition_met(
+    event_loop, udns_server, multicast_fastexit, stub_ip_address
+):
     multicast_fastexit(responses=4, requests=10)
 
     actor = MagicMock()
