@@ -16,7 +16,9 @@ from pyatv import exceptions
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512
 
-_HAS_PRINT_UNKNOWN = "print_unknown_fields" in inspect.getargspec(MessageToString).args
+_HAS_PRINT_UNKNOWN = (
+    "print_unknown_fields" in inspect.signature(MessageToString).parameters
+)
 
 
 def _shorten(text, length):

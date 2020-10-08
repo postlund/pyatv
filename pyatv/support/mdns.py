@@ -5,7 +5,7 @@ import asyncio
 import struct
 import logging
 import weakref
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, ip_address
 from collections import namedtuple
 from typing import Optional, Dict, List, cast, NamedTuple, Callable
 
@@ -378,7 +378,6 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self._finished()
 
     def _finished(self) -> None:
-        _LOGGER.debug("Cleaning up after UDNS request")
         self.semaphore.release()
         if self._task:
             self._task.cancel()
@@ -390,6 +389,27 @@ class ReceiveDelegate(asyncio.Protocol):
     def __init__(self, delegate) -> None:
         """Initialize a new ReceiveDelegate."""
         self.delegate = weakref.ref(delegate)
+        self.transport = None
+        self.is_loopback = False
+
+    def sendto(self, message, target):
+        """Send message to a target."""
+        if not self.is_loopback:
+            self.transport.sendto(message, target)
+
+    def close(self):
+        """Close underlying socket."""
+        if self.transport:
+            self.transport.close()
+
+    def connection_made(self, transport) -> None:
+        """Establish connection to host."""
+        self.transport = transport
+
+        # Determine if this is a loopback socket (don't send to those)
+        sock = transport.get_extra_info("socket")
+        address, _ = sock.getsockname()
+        self.is_loopback = ip_address(address).is_loopback
 
     def datagram_received(self, data, addr) -> None:
         """Receive data from remote host."""
@@ -408,6 +428,10 @@ class ReceiveDelegate(asyncio.Protocol):
                 delegate.error_received(exc)
             except Exception:  # pylint: disable=no-bare
                 _LOGGER.exception("connection error")
+
+    def __str__(self):
+        """Return string representation of object."""
+        return str(self.transport.get_extra_info("socket"))
 
 
 class MulticastDnsSdClientProtocol:
@@ -432,18 +456,16 @@ class MulticastDnsSdClientProtocol:
         self.responses: Dict[IPv4Address, Response] = {}
         self._unicasts: Dict[IPv4Address, bytes] = {}
         self._task: Optional[asyncio.Future] = None
-        self._transports: List[asyncio.BaseTransport] = []
+        self._receivers: List[asyncio.BaseProtocol] = []
 
     async def add_socket(self, sock: socket.socket):
         """Add a new multicast socket."""
-        _LOGGER.debug("Adding socket %s", sock)
-
-        transport, _ = await self.loop.create_datagram_endpoint(
+        _, protocol = await self.loop.create_datagram_endpoint(
             lambda: ReceiveDelegate(self),
             sock=sock,
         )
 
-        self._transports.append(transport)
+        self._receivers.append(protocol)
 
     async def get_response(self, timeout: int) -> Dict[IPv4Address, Response]:
         """Get respoonse with a maximum timeout."""
@@ -482,13 +504,11 @@ class MulticastDnsSdClientProtocol:
             await asyncio.sleep(1)
 
     def _sendto(self, message, target):
-        for transport in self._transports:
+        for receiver in self._receivers:
             try:
-                transport.sendto(message, target)
+                receiver.sendto(message, target)
             except Exception:  # pylint: disable=bare-except
-                _LOGGER.exception(
-                    "fail to send to " + str(transport.get_extra_info("socket"))
-                )
+                _LOGGER.exception("fail to send to %r", receiver)
 
     def datagram_received(self, data, addr) -> None:
         """DNS response packet received."""
@@ -541,8 +561,8 @@ class MulticastDnsSdClientProtocol:
 
     def close(self):
         """Close resources used by this instance."""
-        for transport in self._transports:
-            transport.close()
+        for receiver in self._receivers:
+            receiver.close()
 
         if self._task:
             self._task.cancel()
