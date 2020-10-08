@@ -1,5 +1,34 @@
 # CHANGES
 
+## 0.7.3 (2020-10-08)
+
+*Changes:*
+
+* Minor hug fixes and clean ups, see all changes
+
+*All changes:*
+
+```
+d2e5a33 mdns: Supress decoding errors
+fb8c621 mrp: Don't use deprecated home_hold internally
+dc52b5a mrp: Ack client updates messages
+925f2b4 mdns: Bind to port 5353 instead of random port
+8e54c64 build(deps): bump flake8 from 3.8.3 to 3.8.4
+f97ad68 build(deps): bump pytest from 6.1.0 to 6.1.1
+08b7229 build(deps): bump pytest from 6.0.2 to 6.1.0
+e4172fa build(deps): bump pytest from 6.0.1 to 6.0.2
+de13ca1 build(deps-dev): bump tox from 3.19.0 to 3.20.0
+319cd5c build(deps): bump pydocstyle from 5.1.0 to 5.1.1
+0108425 build(deps): bump black from 19.10b0 to 20.8b1
+1be9aaa gha: Bump codecov to 1.0.13
+7af56cb build(deps): bump pdoc3 from 0.8.5 to 0.9.1
+3654385 deps: Lower zeroconf requirement to 0.28.0
+954171c net: Change accidental info to debug log
+97e2579 build(deps): bump pdoc3 from 0.8.4 to 0.8.5
+ba7c581 build(deps): bump zeroconf from 0.28.1 to 0.28.2
+8400103 build(deps): bump pytest-xdist from 2.0.0 to 2.1.0
+```
+
 ## 0.7.2 (2020-08-24)
 
 *Changes:*
