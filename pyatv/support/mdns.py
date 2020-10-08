@@ -498,7 +498,13 @@ class MulticastDnsSdClientProtocol:
             level=TRAFFIC_LEVEL,
             Data=data,
         )
-        services = parse_services(DnsMessage().unpack(data))
+
+        # Suppress decode errors for now (but still log)
+        try:
+            services = parse_services(DnsMessage().unpack(data))
+        except UnicodeDecodeError:
+            log_binary(_LOGGER, "Failed to decode message", Msg=data)
+            return
 
         # Ignore responses from other services
         for service in services:
