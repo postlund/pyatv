@@ -1,5 +1,21 @@
 # CHANGES
 
+## 0.7.4 (2020-10-12)
+
+*Changes:*
+
+* PIN code screen for MRP will now disappear after pairing
+* Less and more compact debug logs in mdns and knock
+
+*All changes:*
+
+```
+9f1d1d0 mrp: Verify credentials after pairing
+1d799f2 cq: Minor clean ups and fixes
+061add1 build(deps): bump codecov from 2.1.9 to 2.1.10
+dc31ac9 build(deps-dev): bump tox from 3.20.0 to 3.20.1
+```
+
 ## 0.7.3 (2020-10-08)
 
 *Changes:*
