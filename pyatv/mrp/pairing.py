@@ -5,8 +5,8 @@ import logging
 from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.mrp.auth import MrpPairingProcedure
-from pyatv.mrp.srp import SRPAuthHandler
+from pyatv.mrp.auth import MrpPairingProcedure, MrpPairingVerifier
+from pyatv.mrp.srp import SRPAuthHandler, Credentials
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.connection import MrpConnection
 from pyatv.support import error_handler
@@ -49,13 +49,22 @@ class MrpPairingHandler(PairingHandler):
         if not self.pin_code:
             raise exceptions.PairingError("no pin given")
 
-        self.service.credentials = str(
+        credentials = str(
             await error_handler(
                 self.pairing_procedure.finish_pairing,
                 exceptions.PairingError,
                 self.pin_code,
             )
         )
+
+        _LOGGER.debug("Verifying credentials %s", credentials)
+
+        verifier = MrpPairingVerifier(
+            self.protocol, self.srp, Credentials.parse(credentials)
+        )
+        await error_handler(verifier.verify_credentials, exceptions.PairingError)
+
+        self.service.credentials = credentials
         self._has_paired = True
 
     @property
