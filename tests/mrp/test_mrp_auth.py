@@ -50,6 +50,9 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.assertTrue(self.state.has_paired)
         self.assertIsNotNone(self.service.credentials)
 
+        # Client should verify keys after pairing, needed from tvOS 14
+        self.assertTrue(self.state.has_authenticated)
+
     @unittest_run_loop
     async def test_pairing_with_existing_credentials(self):
         self.service.credentials = CLIENT_CREDENTIALS
@@ -69,6 +72,9 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.assertTrue(self.state.has_paired)
         self.assertIsNotNone(self.service.credentials)
 
+        # Client should verify keys after pairing, needed from tvOS 14
+        self.assertTrue(self.state.has_authenticated)
+
     @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
@@ -85,6 +91,7 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.assertFalse(self.handle.has_paired)
         self.assertFalse(self.state.has_paired)
         self.assertIsNone(self.service.credentials)
+        self.assertFalse(self.state.has_authenticated)
 
     @unittest_run_loop
     async def test_authentication(self):
