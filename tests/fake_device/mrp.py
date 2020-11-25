@@ -133,7 +133,8 @@ def _set_state_message(metadata, identifier):
     client = inner.playerPath.client
     client.processIdentifier = 123
     client.bundleIdentifier = identifier
-    client.displayName = APP_NAME
+    if metadata.app_name:
+        client.displayName = metadata.app_name
     return set_state
 
 
@@ -158,6 +159,7 @@ class PlayingState:
         self.artwork_width = kwargs.get("artwork_width")
         self.artwork_height = kwargs.get("artwork_height")
         self.skip_time = kwargs.get("skip_time")
+        self.app_name = kwargs.get("app_name")
 
 
 class FakeMrpState:
@@ -498,9 +500,9 @@ class FakeMrpUseCases:
         change = PlayingState(**kwargs)
         self.state.item_update(change, PLAYER_IDENTIFIER)
 
-    def change_state(self, **kwargs):
+    def change_state(self, player=PLAYER_IDENTIFIER, **kwargs):
         """Update playing state and set SetStateMessage."""
-        metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
+        metadata = self.state.get_player_state(player)
 
         # Update saved metadata
         for key, value in kwargs.items():
@@ -508,9 +510,9 @@ class FakeMrpUseCases:
 
         self.state.update_state(PLAYER_IDENTIFIER)
 
-    def update_client(self, display_name):
+    def update_client(self, display_name, player=PLAYER_IDENTIFIER):
         """Update playing client with new information."""
-        self.state.update_client(display_name, PLAYER_IDENTIFIER)
+        self.state.update_client(display_name, player)
 
     def nothing_playing(self):
         """Call to put device in idle state."""
@@ -524,7 +526,16 @@ class FakeMrpUseCases:
         kwargs.setdefault("total_time", 123)
         self.video_playing(**kwargs)
 
-    def video_playing(self, paused, title, total_time, position, **kwargs):
+    def video_playing(
+        self,
+        paused,
+        title,
+        total_time,
+        position,
+        player=PLAYER_IDENTIFIER,
+        app_name=APP_NAME,
+        **kwargs
+    ):
         """Call to change what is currently plaing to video."""
         metadata = PlayingState(
             playback_state=ssm.Paused if paused else ssm.Playing,
@@ -532,10 +543,11 @@ class FakeMrpUseCases:
             total_time=total_time,
             position=position,
             media_type=protobuf.ContentItemMetadata.Video,
+            app_name=app_name,
             **kwargs,
         )
-        self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
-        self.state.set_active_player(PLAYER_IDENTIFIER)
+        self.state.set_player_state(player, metadata)
+        self.state.set_active_player(player)
 
     def example_music(self, **kwargs):
         """Play some example music."""
