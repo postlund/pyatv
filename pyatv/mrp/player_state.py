@@ -7,7 +7,7 @@ import weakref
 from copy import deepcopy
 
 from pyatv.mrp import protobuf
-from pyatv.mrp.protobuf import SetStateMessage
+from pyatv.mrp.protobuf import SetStateMessage, PlayerPath
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -84,7 +84,10 @@ class PlayerState:
             self.location = queue.location
 
         if setstate.HasField("playerPath"):
-            self.player_path = deepcopy(setstate.playerPath)
+            if self.player_path is None:
+                self.player_path = deepcopy(setstate.playerPath)
+            else:
+                self.player_path.MergeFrom(setstate.playerPath)
 
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
@@ -101,6 +104,8 @@ class PlayerState:
 
     def handle_update_client(self, msg):
         """Handle client updates."""
+        if self.player_path is None:
+            self.player_path = PlayerPath()
         self.player_path.client.MergeFrom(msg.client)
         _LOGGER.debug(
             "Updated client with name %s", self.player_path.client.displayName
@@ -203,18 +208,13 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         update_client = message.inner()
         identifier = update_client.client.bundleIdentifier
 
-        if identifier in self.states:
-            state = self.states[identifier]
-            state.handle_update_client(update_client)
+        state = self.states.setdefault(identifier, PlayerState())
+        state.handle_update_client(update_client)
 
-            # Only trigger callback if current state changed
-            if identifier == self.active:
-                if self.listener:
-                    await self.listener.state_updated()
-        else:
-            _LOGGER.warning(
-                "Received UpdateClientMessage for unknown player %s", identifier
-            )
+        # Only trigger callback if current state changed
+        if identifier == self.active:
+            if self.listener:
+                await self.listener.state_updated()
 
     async def _volume_control_availability(self, message, _):
         self.volume_controls_available = message.inner().volumeControlAvailable

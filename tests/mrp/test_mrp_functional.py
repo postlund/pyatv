@@ -32,6 +32,8 @@ ARTWORK_ID = "artwork_id1"
 
 DEMO_APP_NAME = "Demo App"
 
+TEST_PLAYER = "com.github.postlund.test"
+
 
 class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def setUpAsync(self):
@@ -419,3 +421,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         playing = await self.playing(title="dummy")
         assert playing.device_state == DeviceState.Playing
+
+    @unittest_run_loop
+    async def test_update_client_before_setstate(self):
+        self.usecase.update_client(APP_NAME, TEST_PLAYER)
+        self.usecase.example_video(title="test", player=TEST_PLAYER, app_name=None)
+
+        await self.playing(title="test")
+        self.assertEqual(self.atv.metadata.app.name, APP_NAME)
+        self.assertEqual(self.atv.metadata.app.identifier, TEST_PLAYER)
