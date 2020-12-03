@@ -2,6 +2,7 @@ include CHANGES.md
 include README.md
 include LICENSE.md
 include CONTRIBUTORS.md
+include base_versions.txt
 graft pyatv
 graft tests
 graft docs
