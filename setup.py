@@ -30,7 +30,7 @@ setup(
     description="Library for controlling an Apple TV",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(exclude=["tests", "tests.*", "examples"]),
     include_package_data=True,
     zip_safe=False,
     platforms="any",
