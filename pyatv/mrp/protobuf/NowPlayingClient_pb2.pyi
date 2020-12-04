@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
@@ -16,7 +17,6 @@ from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -28,20 +28,19 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class NowPlayingClient(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    processIdentifier = ... # type: builtin___int
-    bundleIdentifier = ... # type: typing___Text
-    parentApplicationBundleIdentifier = ... # type: typing___Text
-    processUserIdentifier = ... # type: builtin___int
-    nowPlayingVisibility = ... # type: builtin___int
-    displayName = ... # type: typing___Text
-    bundleIdentifierHierarchys = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
+    processIdentifier: builtin___int = ...
+    bundleIdentifier: typing___Text = ...
+    parentApplicationBundleIdentifier: typing___Text = ...
+    processUserIdentifier: builtin___int = ...
+    nowPlayingVisibility: builtin___int = ...
+    displayName: typing___Text = ...
+    bundleIdentifierHierarchys: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
 
     def __init__(self,
         *,
@@ -53,14 +52,6 @@ class NowPlayingClient(google___protobuf___message___Message):
         displayName : typing___Optional[typing___Text] = None,
         bundleIdentifierHierarchys : typing___Optional[typing___Iterable[typing___Text]] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> NowPlayingClient: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> NowPlayingClient: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"bundleIdentifier",b"bundleIdentifier",u"bundleIdentifierHierarchys",b"bundleIdentifierHierarchys",u"displayName",b"displayName",u"nowPlayingVisibility",b"nowPlayingVisibility",u"parentApplicationBundleIdentifier",b"parentApplicationBundleIdentifier",u"processIdentifier",b"processIdentifier",u"processUserIdentifier",b"processUserIdentifier"]) -> None: ...
-global___NowPlayingClient = NowPlayingClient
+type___NowPlayingClient = NowPlayingClient

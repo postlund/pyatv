@@ -4,6 +4,11 @@ from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -11,10 +16,8 @@ from google.protobuf.message import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,50 +30,33 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class RegisterForGameControllerEventsMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class InputModeFlags(builtin___int):
+    InputModeFlagsValue = typing___NewType('InputModeFlagsValue', builtin___int)
+    type___InputModeFlagsValue = InputModeFlagsValue
+    InputModeFlags: _InputModeFlags
+    class _InputModeFlags(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[RegisterForGameControllerEventsMessage.InputModeFlagsValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'RegisterForGameControllerEventsMessage.InputModeFlags': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['RegisterForGameControllerEventsMessage.InputModeFlags']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'RegisterForGameControllerEventsMessage.InputModeFlags']]: ...
-        Motion = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 1)
-        Buttons = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 2)
-        Digitizer = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 3)
-    Motion = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 1)
-    Buttons = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 2)
-    Digitizer = typing___cast('RegisterForGameControllerEventsMessage.InputModeFlags', 3)
-    global___InputModeFlags = InputModeFlags
+        Motion = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 1)
+        Buttons = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 2)
+        Digitizer = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 3)
+    Motion = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 1)
+    Buttons = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 2)
+    Digitizer = typing___cast(RegisterForGameControllerEventsMessage.InputModeFlagsValue, 3)
+    type___InputModeFlags = InputModeFlags
 
-    inputModeFlags = ... # type: global___RegisterForGameControllerEventsMessage.InputModeFlags
+    inputModeFlags: type___RegisterForGameControllerEventsMessage.InputModeFlagsValue = ...
 
     def __init__(self,
         *,
-        inputModeFlags : typing___Optional[global___RegisterForGameControllerEventsMessage.InputModeFlags] = None,
+        inputModeFlags : typing___Optional[type___RegisterForGameControllerEventsMessage.InputModeFlagsValue] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> RegisterForGameControllerEventsMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RegisterForGameControllerEventsMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"inputModeFlags",b"inputModeFlags"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"inputModeFlags",b"inputModeFlags"]) -> None: ...
-global___RegisterForGameControllerEventsMessage = RegisterForGameControllerEventsMessage
+type___RegisterForGameControllerEventsMessage = RegisterForGameControllerEventsMessage
 
-registerForGameControllerEventsMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+registerForGameControllerEventsMessage: google___protobuf___descriptor___FieldDescriptor = ...
