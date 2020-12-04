@@ -1,2 +1,2 @@
-codespell==1.17.1
+codespell==2.0.0
 pdoc3==0.9.1
