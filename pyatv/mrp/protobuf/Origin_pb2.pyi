@@ -3,6 +3,11 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -14,11 +19,9 @@ from pyatv.mrp.protobuf.DeviceInfoMessage_pb2 import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -31,56 +34,39 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class Origin(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Type(builtin___int):
+    TypeValue = typing___NewType('TypeValue', builtin___int)
+    type___TypeValue = TypeValue
+    Type: _Type
+    class _Type(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[Origin.TypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'Origin.Type': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['Origin.Type']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'Origin.Type']]: ...
-        Unknown = typing___cast('Origin.Type', 0)
-        Local = typing___cast('Origin.Type', 1)
-        Custom = typing___cast('Origin.Type', 2)
-    Unknown = typing___cast('Origin.Type', 0)
-    Local = typing___cast('Origin.Type', 1)
-    Custom = typing___cast('Origin.Type', 2)
-    global___Type = Type
+        Unknown = typing___cast(Origin.TypeValue, 0)
+        Local = typing___cast(Origin.TypeValue, 1)
+        Custom = typing___cast(Origin.TypeValue, 2)
+    Unknown = typing___cast(Origin.TypeValue, 0)
+    Local = typing___cast(Origin.TypeValue, 1)
+    Custom = typing___cast(Origin.TypeValue, 2)
+    type___Type = Type
 
-    type = ... # type: global___Origin.Type
-    displayName = ... # type: typing___Text
-    identifier = ... # type: builtin___int
+    type: type___Origin.TypeValue = ...
+    displayName: typing___Text = ...
+    identifier: builtin___int = ...
 
     @property
     def deviceInfo(self) -> pyatv___mrp___protobuf___DeviceInfoMessage_pb2___DeviceInfoMessage: ...
 
     def __init__(self,
         *,
-        type : typing___Optional[global___Origin.Type] = None,
+        type : typing___Optional[type___Origin.TypeValue] = None,
         displayName : typing___Optional[typing___Text] = None,
         identifier : typing___Optional[builtin___int] = None,
         deviceInfo : typing___Optional[pyatv___mrp___protobuf___DeviceInfoMessage_pb2___DeviceInfoMessage] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> Origin: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> Origin: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"deviceInfo",b"deviceInfo",u"displayName",b"displayName",u"identifier",b"identifier",u"type",b"type"]) -> None: ...
-global___Origin = Origin
+type___Origin = Origin

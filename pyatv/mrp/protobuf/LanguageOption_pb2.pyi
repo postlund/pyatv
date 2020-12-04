@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
@@ -16,7 +17,6 @@ from typing import (
     Iterable as typing___Iterable,
     Optional as typing___Optional,
     Text as typing___Text,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -28,18 +28,17 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class LanguageOption(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    type = ... # type: builtin___int
-    languageTag = ... # type: typing___Text
-    characteristics = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text]
-    displayName = ... # type: typing___Text
-    identifier = ... # type: typing___Text
+    type: builtin___int = ...
+    languageTag: typing___Text = ...
+    characteristics: google___protobuf___internal___containers___RepeatedScalarFieldContainer[typing___Text] = ...
+    displayName: typing___Text = ...
+    identifier: typing___Text = ...
 
     def __init__(self,
         *,
@@ -49,14 +48,6 @@ class LanguageOption(google___protobuf___message___Message):
         displayName : typing___Optional[typing___Text] = None,
         identifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> LanguageOption: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> LanguageOption: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"displayName",b"displayName",u"identifier",b"identifier",u"languageTag",b"languageTag",u"type",b"type"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"characteristics",b"characteristics",u"displayName",b"displayName",u"identifier",b"identifier",u"languageTag",b"languageTag",u"type",b"type"]) -> None: ...
-global___LanguageOption = LanguageOption
+type___LanguageOption = LanguageOption

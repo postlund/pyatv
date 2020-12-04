@@ -3,10 +3,15 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.internal.containers import (
     RepeatedScalarFieldContainer as google___protobuf___internal___containers___RepeatedScalarFieldContainer,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -15,10 +20,8 @@ from google.protobuf.message import (
 
 from typing import (
     Iterable as typing___Iterable,
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -31,126 +34,103 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class TextInputTraits(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class AutocapitalizationType(builtin___int):
+    AutocapitalizationTypeValue = typing___NewType('AutocapitalizationTypeValue', builtin___int)
+    type___AutocapitalizationTypeValue = AutocapitalizationTypeValue
+    AutocapitalizationType: _AutocapitalizationType
+    class _AutocapitalizationType(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[TextInputTraits.AutocapitalizationTypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'TextInputTraits.AutocapitalizationType': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['TextInputTraits.AutocapitalizationType']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'TextInputTraits.AutocapitalizationType']]: ...
-        NONE = typing___cast('TextInputTraits.AutocapitalizationType', 0)
-        WORDS = typing___cast('TextInputTraits.AutocapitalizationType', 1)
-        SENTENCES = typing___cast('TextInputTraits.AutocapitalizationType', 2)
-        CHARACTERS = typing___cast('TextInputTraits.AutocapitalizationType', 3)
-    NONE = typing___cast('TextInputTraits.AutocapitalizationType', 0)
-    WORDS = typing___cast('TextInputTraits.AutocapitalizationType', 1)
-    SENTENCES = typing___cast('TextInputTraits.AutocapitalizationType', 2)
-    CHARACTERS = typing___cast('TextInputTraits.AutocapitalizationType', 3)
-    global___AutocapitalizationType = AutocapitalizationType
+        NONE = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 0)
+        WORDS = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 1)
+        SENTENCES = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 2)
+        CHARACTERS = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 3)
+    NONE = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 0)
+    WORDS = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 1)
+    SENTENCES = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 2)
+    CHARACTERS = typing___cast(TextInputTraits.AutocapitalizationTypeValue, 3)
+    type___AutocapitalizationType = AutocapitalizationType
 
-    class KeyboardType(builtin___int):
+    KeyboardTypeValue = typing___NewType('KeyboardTypeValue', builtin___int)
+    type___KeyboardTypeValue = KeyboardTypeValue
+    KeyboardType: _KeyboardType
+    class _KeyboardType(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[TextInputTraits.KeyboardTypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'TextInputTraits.KeyboardType': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['TextInputTraits.KeyboardType']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'TextInputTraits.KeyboardType']]: ...
-        KEYBOARD_TYPE_DEFAULT = typing___cast('TextInputTraits.KeyboardType', 0)
-        ASCII_CAPABLE = typing___cast('TextInputTraits.KeyboardType', 1)
-        NUMBERS_AND_PUNCTUATION = typing___cast('TextInputTraits.KeyboardType', 2)
-        URL = typing___cast('TextInputTraits.KeyboardType', 3)
-        NUMBER_PAD = typing___cast('TextInputTraits.KeyboardType', 4)
-        PHONE_PAD = typing___cast('TextInputTraits.KeyboardType', 5)
-        NAME_PHONE_PAD = typing___cast('TextInputTraits.KeyboardType', 6)
-        EMAIL_ADDRESS = typing___cast('TextInputTraits.KeyboardType', 7)
-        DECIMAL_PAD = typing___cast('TextInputTraits.KeyboardType', 8)
-        TWITTER = typing___cast('TextInputTraits.KeyboardType', 9)
-        WEB_SEARCH = typing___cast('TextInputTraits.KeyboardType', 10)
-    KEYBOARD_TYPE_DEFAULT = typing___cast('TextInputTraits.KeyboardType', 0)
-    ASCII_CAPABLE = typing___cast('TextInputTraits.KeyboardType', 1)
-    NUMBERS_AND_PUNCTUATION = typing___cast('TextInputTraits.KeyboardType', 2)
-    URL = typing___cast('TextInputTraits.KeyboardType', 3)
-    NUMBER_PAD = typing___cast('TextInputTraits.KeyboardType', 4)
-    PHONE_PAD = typing___cast('TextInputTraits.KeyboardType', 5)
-    NAME_PHONE_PAD = typing___cast('TextInputTraits.KeyboardType', 6)
-    EMAIL_ADDRESS = typing___cast('TextInputTraits.KeyboardType', 7)
-    DECIMAL_PAD = typing___cast('TextInputTraits.KeyboardType', 8)
-    TWITTER = typing___cast('TextInputTraits.KeyboardType', 9)
-    WEB_SEARCH = typing___cast('TextInputTraits.KeyboardType', 10)
-    global___KeyboardType = KeyboardType
+        KEYBOARD_TYPE_DEFAULT = typing___cast(TextInputTraits.KeyboardTypeValue, 0)
+        ASCII_CAPABLE = typing___cast(TextInputTraits.KeyboardTypeValue, 1)
+        NUMBERS_AND_PUNCTUATION = typing___cast(TextInputTraits.KeyboardTypeValue, 2)
+        URL = typing___cast(TextInputTraits.KeyboardTypeValue, 3)
+        NUMBER_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 4)
+        PHONE_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 5)
+        NAME_PHONE_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 6)
+        EMAIL_ADDRESS = typing___cast(TextInputTraits.KeyboardTypeValue, 7)
+        DECIMAL_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 8)
+        TWITTER = typing___cast(TextInputTraits.KeyboardTypeValue, 9)
+        WEB_SEARCH = typing___cast(TextInputTraits.KeyboardTypeValue, 10)
+    KEYBOARD_TYPE_DEFAULT = typing___cast(TextInputTraits.KeyboardTypeValue, 0)
+    ASCII_CAPABLE = typing___cast(TextInputTraits.KeyboardTypeValue, 1)
+    NUMBERS_AND_PUNCTUATION = typing___cast(TextInputTraits.KeyboardTypeValue, 2)
+    URL = typing___cast(TextInputTraits.KeyboardTypeValue, 3)
+    NUMBER_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 4)
+    PHONE_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 5)
+    NAME_PHONE_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 6)
+    EMAIL_ADDRESS = typing___cast(TextInputTraits.KeyboardTypeValue, 7)
+    DECIMAL_PAD = typing___cast(TextInputTraits.KeyboardTypeValue, 8)
+    TWITTER = typing___cast(TextInputTraits.KeyboardTypeValue, 9)
+    WEB_SEARCH = typing___cast(TextInputTraits.KeyboardTypeValue, 10)
+    type___KeyboardType = KeyboardType
 
-    class ReturnKeyType(builtin___int):
+    ReturnKeyTypeValue = typing___NewType('ReturnKeyTypeValue', builtin___int)
+    type___ReturnKeyTypeValue = ReturnKeyTypeValue
+    ReturnKeyType: _ReturnKeyType
+    class _ReturnKeyType(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[TextInputTraits.ReturnKeyTypeValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'TextInputTraits.ReturnKeyType': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['TextInputTraits.ReturnKeyType']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'TextInputTraits.ReturnKeyType']]: ...
-        RETURN_KEY_DEFAULT = typing___cast('TextInputTraits.ReturnKeyType', 0)
-        GO = typing___cast('TextInputTraits.ReturnKeyType', 1)
-        GOOGLE = typing___cast('TextInputTraits.ReturnKeyType', 2)
-        JOIN = typing___cast('TextInputTraits.ReturnKeyType', 3)
-        NEXT = typing___cast('TextInputTraits.ReturnKeyType', 4)
-        ROUTE = typing___cast('TextInputTraits.ReturnKeyType', 5)
-        SEARCH = typing___cast('TextInputTraits.ReturnKeyType', 6)
-        SEND = typing___cast('TextInputTraits.ReturnKeyType', 7)
-        YAHOO = typing___cast('TextInputTraits.ReturnKeyType', 8)
-        DONE = typing___cast('TextInputTraits.ReturnKeyType', 9)
-        EMERGENCY_CALL = typing___cast('TextInputTraits.ReturnKeyType', 10)
-        CONTINUE = typing___cast('TextInputTraits.ReturnKeyType', 11)
-    RETURN_KEY_DEFAULT = typing___cast('TextInputTraits.ReturnKeyType', 0)
-    GO = typing___cast('TextInputTraits.ReturnKeyType', 1)
-    GOOGLE = typing___cast('TextInputTraits.ReturnKeyType', 2)
-    JOIN = typing___cast('TextInputTraits.ReturnKeyType', 3)
-    NEXT = typing___cast('TextInputTraits.ReturnKeyType', 4)
-    ROUTE = typing___cast('TextInputTraits.ReturnKeyType', 5)
-    SEARCH = typing___cast('TextInputTraits.ReturnKeyType', 6)
-    SEND = typing___cast('TextInputTraits.ReturnKeyType', 7)
-    YAHOO = typing___cast('TextInputTraits.ReturnKeyType', 8)
-    DONE = typing___cast('TextInputTraits.ReturnKeyType', 9)
-    EMERGENCY_CALL = typing___cast('TextInputTraits.ReturnKeyType', 10)
-    CONTINUE = typing___cast('TextInputTraits.ReturnKeyType', 11)
-    global___ReturnKeyType = ReturnKeyType
+        RETURN_KEY_DEFAULT = typing___cast(TextInputTraits.ReturnKeyTypeValue, 0)
+        GO = typing___cast(TextInputTraits.ReturnKeyTypeValue, 1)
+        GOOGLE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 2)
+        JOIN = typing___cast(TextInputTraits.ReturnKeyTypeValue, 3)
+        NEXT = typing___cast(TextInputTraits.ReturnKeyTypeValue, 4)
+        ROUTE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 5)
+        SEARCH = typing___cast(TextInputTraits.ReturnKeyTypeValue, 6)
+        SEND = typing___cast(TextInputTraits.ReturnKeyTypeValue, 7)
+        YAHOO = typing___cast(TextInputTraits.ReturnKeyTypeValue, 8)
+        DONE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 9)
+        EMERGENCY_CALL = typing___cast(TextInputTraits.ReturnKeyTypeValue, 10)
+        CONTINUE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 11)
+    RETURN_KEY_DEFAULT = typing___cast(TextInputTraits.ReturnKeyTypeValue, 0)
+    GO = typing___cast(TextInputTraits.ReturnKeyTypeValue, 1)
+    GOOGLE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 2)
+    JOIN = typing___cast(TextInputTraits.ReturnKeyTypeValue, 3)
+    NEXT = typing___cast(TextInputTraits.ReturnKeyTypeValue, 4)
+    ROUTE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 5)
+    SEARCH = typing___cast(TextInputTraits.ReturnKeyTypeValue, 6)
+    SEND = typing___cast(TextInputTraits.ReturnKeyTypeValue, 7)
+    YAHOO = typing___cast(TextInputTraits.ReturnKeyTypeValue, 8)
+    DONE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 9)
+    EMERGENCY_CALL = typing___cast(TextInputTraits.ReturnKeyTypeValue, 10)
+    CONTINUE = typing___cast(TextInputTraits.ReturnKeyTypeValue, 11)
+    type___ReturnKeyType = ReturnKeyType
 
-    autocapitalizationType = ... # type: global___TextInputTraits.AutocapitalizationType
-    keyboardType = ... # type: global___TextInputTraits.KeyboardType
-    returnKeyType = ... # type: global___TextInputTraits.ReturnKeyType
-    autocorrection = ... # type: builtin___bool
-    spellchecking = ... # type: builtin___bool
-    enablesReturnKeyAutomatically = ... # type: builtin___bool
-    secureTextEntry = ... # type: builtin___bool
-    validTextRangeLocation = ... # type: builtin___int
-    validTextRangeLength = ... # type: builtin___int
-    PINEntrySeparatorIndexes = ... # type: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int]
+    autocapitalizationType: type___TextInputTraits.AutocapitalizationTypeValue = ...
+    keyboardType: type___TextInputTraits.KeyboardTypeValue = ...
+    returnKeyType: type___TextInputTraits.ReturnKeyTypeValue = ...
+    autocorrection: builtin___bool = ...
+    spellchecking: builtin___bool = ...
+    enablesReturnKeyAutomatically: builtin___bool = ...
+    secureTextEntry: builtin___bool = ...
+    validTextRangeLocation: builtin___int = ...
+    validTextRangeLength: builtin___int = ...
+    PINEntrySeparatorIndexes: google___protobuf___internal___containers___RepeatedScalarFieldContainer[builtin___int] = ...
 
     def __init__(self,
         *,
-        autocapitalizationType : typing___Optional[global___TextInputTraits.AutocapitalizationType] = None,
-        keyboardType : typing___Optional[global___TextInputTraits.KeyboardType] = None,
-        returnKeyType : typing___Optional[global___TextInputTraits.ReturnKeyType] = None,
+        autocapitalizationType : typing___Optional[type___TextInputTraits.AutocapitalizationTypeValue] = None,
+        keyboardType : typing___Optional[type___TextInputTraits.KeyboardTypeValue] = None,
+        returnKeyType : typing___Optional[type___TextInputTraits.ReturnKeyTypeValue] = None,
         autocorrection : typing___Optional[builtin___bool] = None,
         spellchecking : typing___Optional[builtin___bool] = None,
         enablesReturnKeyAutomatically : typing___Optional[builtin___bool] = None,
@@ -159,14 +139,6 @@ class TextInputTraits(google___protobuf___message___Message):
         validTextRangeLength : typing___Optional[builtin___int] = None,
         PINEntrySeparatorIndexes : typing___Optional[typing___Iterable[builtin___int]] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> TextInputTraits: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TextInputTraits: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"PINEntrySeparatorIndexes",b"PINEntrySeparatorIndexes",u"autocapitalizationType",b"autocapitalizationType",u"autocorrection",b"autocorrection",u"enablesReturnKeyAutomatically",b"enablesReturnKeyAutomatically",u"keyboardType",b"keyboardType",u"returnKeyType",b"returnKeyType",u"secureTextEntry",b"secureTextEntry",u"spellchecking",b"spellchecking",u"validTextRangeLength",b"validTextRangeLength",u"validTextRangeLocation",b"validTextRangeLocation"]) -> None: ...
-global___TextInputTraits = TextInputTraits
+type___TextInputTraits = TextInputTraits

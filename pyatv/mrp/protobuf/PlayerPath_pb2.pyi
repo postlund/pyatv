@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -22,7 +23,6 @@ from pyatv.mrp.protobuf.Origin_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -34,10 +34,9 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class PlayerPath(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
@@ -57,14 +56,6 @@ class PlayerPath(google___protobuf___message___Message):
         client : typing___Optional[pyatv___mrp___protobuf___NowPlayingClient_pb2___NowPlayingClient] = None,
         player : typing___Optional[pyatv___mrp___protobuf___NowPlayingPlayer_pb2___NowPlayingPlayer] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> PlayerPath: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> PlayerPath: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"client",b"client",u"origin",b"origin",u"player",b"player"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"client",b"client",u"origin",b"origin",u"player",b"player"]) -> None: ...
-global___PlayerPath = PlayerPath
+type___PlayerPath = PlayerPath

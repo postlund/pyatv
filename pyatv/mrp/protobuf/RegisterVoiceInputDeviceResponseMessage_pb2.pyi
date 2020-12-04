@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -11,7 +12,6 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -23,31 +23,22 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class RegisterVoiceInputDeviceResponseMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    deviceID = ... # type: builtin___int
-    errorCode = ... # type: builtin___int
+    deviceID: builtin___int = ...
+    errorCode: builtin___int = ...
 
     def __init__(self,
         *,
         deviceID : typing___Optional[builtin___int] = None,
         errorCode : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> RegisterVoiceInputDeviceResponseMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> RegisterVoiceInputDeviceResponseMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"deviceID",b"deviceID",u"errorCode",b"errorCode"]) -> None: ...
-global___RegisterVoiceInputDeviceResponseMessage = RegisterVoiceInputDeviceResponseMessage
+type___RegisterVoiceInputDeviceResponseMessage = RegisterVoiceInputDeviceResponseMessage
 
-registerVoiceInputDeviceResponseMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+registerVoiceInputDeviceResponseMessage: google___protobuf___descriptor___FieldDescriptor = ...
