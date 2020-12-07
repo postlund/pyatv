@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -11,7 +12,6 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -23,31 +23,22 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class VolumeControlAvailabilityMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    volumeControlAvailable = ... # type: builtin___bool
-    volumeCapabilities = ... # type: builtin___int
+    volumeControlAvailable: builtin___bool = ...
+    volumeCapabilities: builtin___int = ...
 
     def __init__(self,
         *,
         volumeControlAvailable : typing___Optional[builtin___bool] = None,
         volumeCapabilities : typing___Optional[builtin___int] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> VolumeControlAvailabilityMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> VolumeControlAvailabilityMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> None: ...
-global___VolumeControlAvailabilityMessage = VolumeControlAvailabilityMessage
+type___VolumeControlAvailabilityMessage = VolumeControlAvailabilityMessage
 
-volumeControlAvailabilityMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+volumeControlAvailabilityMessage: google___protobuf___descriptor___FieldDescriptor = ...

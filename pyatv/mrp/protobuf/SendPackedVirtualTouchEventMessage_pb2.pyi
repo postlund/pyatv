@@ -4,6 +4,11 @@ from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
+)
+
+from google.protobuf.internal.enum_type_wrapper import (
+    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
 )
 
 from google.protobuf.message import (
@@ -11,10 +16,8 @@ from google.protobuf.message import (
 )
 
 from typing import (
-    List as typing___List,
+    NewType as typing___NewType,
     Optional as typing___Optional,
-    Tuple as typing___Tuple,
-    Union as typing___Union,
     cast as typing___cast,
 )
 
@@ -27,54 +30,37 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-builtin___str = str
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class SendPackedVirtualTouchEventMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    class Phase(builtin___int):
+    PhaseValue = typing___NewType('PhaseValue', builtin___int)
+    type___PhaseValue = PhaseValue
+    Phase: _Phase
+    class _Phase(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[SendPackedVirtualTouchEventMessage.PhaseValue]):
         DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        @classmethod
-        def Name(cls, number: builtin___int) -> builtin___str: ...
-        @classmethod
-        def Value(cls, name: builtin___str) -> 'SendPackedVirtualTouchEventMessage.Phase': ...
-        @classmethod
-        def keys(cls) -> typing___List[builtin___str]: ...
-        @classmethod
-        def values(cls) -> typing___List['SendPackedVirtualTouchEventMessage.Phase']: ...
-        @classmethod
-        def items(cls) -> typing___List[typing___Tuple[builtin___str, 'SendPackedVirtualTouchEventMessage.Phase']]: ...
-        Began = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 1)
-        Moved = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 2)
-        Stationary = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 3)
-        Ended = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 4)
-        Cancelled = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 5)
-    Began = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 1)
-    Moved = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 2)
-    Stationary = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 3)
-    Ended = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 4)
-    Cancelled = typing___cast('SendPackedVirtualTouchEventMessage.Phase', 5)
-    global___Phase = Phase
+        Began = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 1)
+        Moved = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 2)
+        Stationary = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 3)
+        Ended = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 4)
+        Cancelled = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 5)
+    Began = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 1)
+    Moved = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 2)
+    Stationary = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 3)
+    Ended = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 4)
+    Cancelled = typing___cast(SendPackedVirtualTouchEventMessage.PhaseValue, 5)
+    type___Phase = Phase
 
-    data = ... # type: builtin___bytes
+    data: builtin___bytes = ...
 
     def __init__(self,
         *,
         data : typing___Optional[builtin___bytes] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> SendPackedVirtualTouchEventMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> SendPackedVirtualTouchEventMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"data",b"data"]) -> None: ...
-global___SendPackedVirtualTouchEventMessage = SendPackedVirtualTouchEventMessage
+type___SendPackedVirtualTouchEventMessage = SendPackedVirtualTouchEventMessage
 
-sendPackedVirtualTouchEventMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+sendPackedVirtualTouchEventMessage: google___protobuf___descriptor___FieldDescriptor = ...

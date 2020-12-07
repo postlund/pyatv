@@ -2,6 +2,7 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -10,7 +11,6 @@ from google.protobuf.message import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -22,16 +22,15 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class PlaybackQueueCapabilities(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    requestByRange = ... # type: builtin___bool
-    requestByIdentifiers = ... # type: builtin___bool
-    requestByRequest = ... # type: builtin___bool
+    requestByRange: builtin___bool = ...
+    requestByIdentifiers: builtin___bool = ...
+    requestByRequest: builtin___bool = ...
 
     def __init__(self,
         *,
@@ -39,14 +38,6 @@ class PlaybackQueueCapabilities(google___protobuf___message___Message):
         requestByIdentifiers : typing___Optional[builtin___bool] = None,
         requestByRequest : typing___Optional[builtin___bool] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> PlaybackQueueCapabilities: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> PlaybackQueueCapabilities: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"requestByIdentifiers",b"requestByIdentifiers",u"requestByRange",b"requestByRange",u"requestByRequest",b"requestByRequest"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"requestByIdentifiers",b"requestByIdentifiers",u"requestByRange",b"requestByRange",u"requestByRequest",b"requestByRequest"]) -> None: ...
-global___PlaybackQueueCapabilities = PlaybackQueueCapabilities
+type___PlaybackQueueCapabilities = PlaybackQueueCapabilities

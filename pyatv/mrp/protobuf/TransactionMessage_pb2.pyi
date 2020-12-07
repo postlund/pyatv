@@ -3,6 +3,7 @@ import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
+    FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
 from google.protobuf.message import (
@@ -19,7 +20,6 @@ from pyatv.mrp.protobuf.TransactionPackets_pb2 import (
 
 from typing import (
     Optional as typing___Optional,
-    Union as typing___Union,
 )
 
 from typing_extensions import (
@@ -31,14 +31,13 @@ builtin___bool = bool
 builtin___bytes = bytes
 builtin___float = float
 builtin___int = int
-if sys.version_info < (3,):
-    builtin___buffer = buffer
-    builtin___unicode = unicode
 
+
+DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class TransactionMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    name = ... # type: builtin___int
+    name: builtin___int = ...
 
     @property
     def packets(self) -> pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets: ...
@@ -52,16 +51,8 @@ class TransactionMessage(google___protobuf___message___Message):
         packets : typing___Optional[pyatv___mrp___protobuf___TransactionPackets_pb2___TransactionPackets] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         ) -> None: ...
-    if sys.version_info >= (3,):
-        @classmethod
-        def FromString(cls, s: builtin___bytes) -> TransactionMessage: ...
-    else:
-        @classmethod
-        def FromString(cls, s: typing___Union[builtin___bytes, builtin___buffer, builtin___unicode]) -> TransactionMessage: ...
-    def MergeFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
-    def CopyFrom(self, other_msg: google___protobuf___message___Message) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets",u"playerPath",b"playerPath"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"name",b"name",u"packets",b"packets",u"playerPath",b"playerPath"]) -> None: ...
-global___TransactionMessage = TransactionMessage
+type___TransactionMessage = TransactionMessage
 
-transactionMessage = ... # type: google___protobuf___descriptor___FieldDescriptor
+transactionMessage: google___protobuf___descriptor___FieldDescriptor = ...

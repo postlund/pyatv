@@ -98,7 +98,7 @@ _FEATURE_COMMAND_MAP = {
     FeatureName.Repeat: CommandInfo_pb2.ChangeRepeatMode,
     FeatureName.SkipForward: CommandInfo_pb2.SkipForward,
     FeatureName.SkipBackward: CommandInfo_pb2.SkipBackward,
-}  # type: Dict[FeatureName, CommandInfo_pb2.Command]
+}
 
 # Features that are considered available if corresponding
 _FIELD_FEATURES = {
