@@ -1,5 +1,26 @@
 # CHANGES
 
+## 0.7.5 (2020-12-08)
+
+*Changes:*
+
+* Revert to use random source port for MDNS
+* Fix "Received UpdateClientMessage for unknown player xxx""
+
+*All changes:*
+
+```
+cd6d53f mdns: Revert binding to port 5353
+a394b52 mrp: Handle UpdateClient before SetState
+a3d46d3 build(deps): bump mypy from 0.782 to 0.790
+c648eaa update MANIFEST.in, add missing file
+162f319 build(deps): bump pytest from 6.1.1 to 6.1.2
+f1a7223 build(deps): bump pdoc3 from 0.9.1 to 0.9.2
+0b97aab build(deps): bump codespell from 1.17.1 to 2.0.0
+795aaa7 Update setup.py, extend exclude mask
+5e27bc7 gha: Fix python 3.9 and use env files
+```
+
 ## 0.7.4 (2020-10-12)
 
 *Changes:*
