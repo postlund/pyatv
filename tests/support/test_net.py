@@ -43,7 +43,6 @@ def mock_server():
     sock.bind(("127.0.0.1", 0))
     sock.listen(1)
     yield sock
-    sock.shutdown(socket.SHUT_RDWR)
     sock.close()
 
 
@@ -52,7 +51,6 @@ def mock_client(mock_server):
     sock = socket.socket()
     sock.connect(mock_server.getsockname())
     yield sock
-    sock.shutdown(socket.SHUT_RDWR)
     sock.close()
 
 
@@ -89,7 +87,6 @@ def test_keepalive(mock_server, mock_client):
     with server2client:
         # No assert, as we're just testing that enabling keepalive works
         tcp_keepalive(mock_client)
-        server2client.shutdown(socket.SHUT_RDWR)
 
 
 # TCP keepalive options to remove one at a time
@@ -113,4 +110,3 @@ def test_keepalive_missing_sockopt(
     with server2client:
         with pytest.raises(NotSupportedError):
             tcp_keepalive(mock_client)
-        server2client.shutdown(socket.SHUT_RDWR)
