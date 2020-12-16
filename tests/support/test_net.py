@@ -39,7 +39,8 @@ def mock_address():
 @pytest.fixture
 def mock_server():
     sock = socket.socket()
-    sock.bind(("127.0.0.127", 0))
+    # 127.0.0.1 *must* be used when testing on macOS
+    sock.bind(("127.0.0.1", 0))
     sock.listen(1)
     yield sock
     sock.shutdown(socket.SHUT_RDWR)
