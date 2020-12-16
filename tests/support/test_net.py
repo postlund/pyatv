@@ -2,6 +2,7 @@
 
 from typing import Dict, List
 from ipaddress import IPv4Address, ip_address
+import platform
 import socket
 from unittest.mock import patch
 
@@ -10,6 +11,12 @@ import netifaces
 
 from pyatv.support.net import get_private_addresses, tcp_keepalive
 from pyatv.exceptions import NotSupportedError
+
+
+skip_darwin = pytest.mark.skipif(
+    platform.system() == "Darwin",
+    reason="not applicable to Darwin",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -91,7 +98,8 @@ def test_keepalive(mock_server, mock_client):
 
 # TCP keepalive options to remove one at a time
 TCP_KEEPALIVE_OPTIONS = [
-    "TCP_KEEPIDLE",
+    # Darwin has a hard-coded value for the equivalent option
+    pytest.param("TCP_KEEPIDLE", marks=skip_darwin),
     "TCP_KEEPINTVL",
     "TCP_KEEPCNT",
 ]

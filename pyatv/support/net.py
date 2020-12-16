@@ -123,7 +123,7 @@ def tcp_keepalive(sock) -> None:
         try:
             option = getattr(socket, option_name)
         except AttributeError:
-            if current_platform == "Darwin":
+            if current_platform == "Darwin" and option_name == "TCP_KEEPIDLE":
                 # TCP_KEEPALIVE will hopefully be available at some point,
                 # (https://bugs.python.org/issue34932) but until then the value is
                 # hardcoded.
