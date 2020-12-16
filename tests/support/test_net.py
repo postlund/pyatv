@@ -4,6 +4,7 @@ from typing import Dict, List
 from ipaddress import IPv4Address, ip_address
 import platform
 import socket
+import sys
 from unittest.mock import patch
 
 import pytest
@@ -104,6 +105,10 @@ def test_localhost(mock_address):
 # Windows 10 1709 (build 16299) is the first version with TCP_KEEPIDLE
 # ref: https://github.com/python/cpython/blob/66d3b589c44fcbcf9afe1e442d9beac3bd8bcd34/Modules/socketmodule.c#L318-L322 # noqa
 @skip_before_win_build(16299)
+# More specifically, TCP_KEEPIDLE and TCP_KEEPINTVL were added in 3.7, while 3.6.5 added
+# TCP_KEEPCNT
+# ref: `socket.SO_*` documentation.
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="keepalive added in 3.7")
 def test_keepalive(mock_server, mock_client):
     """Test that TCP keepalive can be enabled."""
     server2client, client_address = mock_server.accept()
