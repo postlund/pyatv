@@ -19,6 +19,19 @@ skip_darwin = pytest.mark.skipif(
 )
 
 
+def skip_before_win_build(build_number: int):
+    """Mark a test to be skipped if Windows is earlier than the given build."""
+    system = platform.system()
+    version = platform.version()
+    return pytest.mark.skipif(
+        (
+            system == "Windows"
+            and tuple(map(int, version.split("."))) < (10, 0, build_number)
+        ),
+        reason="Windows build number too low",
+    )
+
+
 @pytest.fixture(autouse=True)
 def mock_address():
     addresses: Dict[str, List[str]] = {}
@@ -88,6 +101,9 @@ def test_localhost(mock_address):
     assert get_private_addresses() == [IPv4Address("127.0.0.1")]
 
 
+# Windows 10 1709 (build 16299) is the first version with TCP_KEEPIDLE
+# ref: https://github.com/python/cpython/blob/66d3b589c44fcbcf9afe1e442d9beac3bd8bcd34/Modules/socketmodule.c#L318-L322 # noqa
+@skip_before_win_build(16299)
 def test_keepalive(mock_server, mock_client):
     """Test that TCP keepalive can be enabled."""
     server2client, client_address = mock_server.accept()
@@ -113,7 +129,8 @@ def test_keepalive_missing_sockopt(
     monkeypatch,
 ):
     """Test that missing keepalive options raise `NotSupportedError`."""
-    monkeypatch.delattr(socket, missing_option)
+    # If the option is already missing, don't raise an error (raising=False)
+    monkeypatch.delattr(socket, missing_option, raising=False)
     server2client, client_address = mock_server.accept()
     with server2client:
         with pytest.raises(NotSupportedError):
