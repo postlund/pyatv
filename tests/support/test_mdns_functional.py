@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import typing
 from ipaddress import IPv4Address
 from unittest.mock import MagicMock, patch
 
@@ -74,10 +75,10 @@ def redirect_mcast(udns_server):
 # of requests have been received. Mainly this is for not slowing down tests.
 @pytest.fixture
 async def multicast_fastexit(event_loop, monkeypatch, udns_server):
-    clients: List[asyncio.Future] = []
+    clients: typing.List[asyncio.Future] = []
 
     # Interface used to set number of expected responses (1 by default)
-    conditions: Dict[str, object] = {"responses": 1, "requests": 0}
+    conditions: typing.Dict[str, object] = {"responses": 1, "requests": 0}
 
     # Checks if either response or request count has been fulfilled
     def _check_cond(protocol: mdns.MulticastDnsSdClientProtocol) -> bool:
@@ -97,7 +98,7 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
             clients.append(asyncio.ensure_future(_poll_responses()))
         return val
 
-    monkeypatch.setattr(mdns, "cast", _cast)
+    monkeypatch.setattr(typing, "cast", _cast)
 
     yield lambda **kwargs: conditions.update(**kwargs)
     await asyncio.gather(*clients)

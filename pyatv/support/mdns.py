@@ -7,7 +7,7 @@ import struct
 import logging
 import weakref
 from ipaddress import IPv4Address, ip_address
-from typing import Optional, Dict, List, cast, NamedTuple, Callable
+import typing
 
 from zeroconf import Zeroconf, ServiceInfo
 
@@ -30,7 +30,7 @@ class QueryType(enum.IntEnum):
     ANY = 0xFF
 
 
-class DnsHeader(NamedTuple):
+class DnsHeader(typing.NamedTuple):
     id: int
     flags: int
     qdcount: int
@@ -39,13 +39,13 @@ class DnsHeader(NamedTuple):
     arcount: int
 
 
-class DnsQuestion(NamedTuple):
+class DnsQuestion(typing.NamedTuple):
     qname: bytes
     qtype: QueryType
     qclass: int
 
 
-class DnsResource(NamedTuple):
+class DnsResource(typing.NamedTuple):
     qname: bytes
     qtype: QueryType
     qclass: int
@@ -54,28 +54,28 @@ class DnsResource(NamedTuple):
     rd: int
 
 
-class Service(NamedTuple):
+class Service(typing.NamedTuple):
     """Represent an MDNS service."""
 
     type: str
     name: str
-    address: Optional[IPv4Address]
+    address: typing.Optional[IPv4Address]
     port: int
-    properties: Dict[str, str]
+    properties: typing.Dict[str, str]
 
 
-class Response(NamedTuple):
+class Response(typing.NamedTuple):
     """Represent response to an MDNS request."""
 
-    services: List[Service]
+    services: typing.List[Service]
     deep_sleep: bool
-    model: Optional[str]  # Comes from _device-info._tcp.local
+    model: typing.Optional[str]  # Comes from _device-info._tcp.local
 
 
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
-def _decode_properties(properties: Dict[bytes, bytes]) -> Dict[str, str]:
+def _decode_properties(properties: typing.Dict[bytes, bytes]) -> typing.Dict[str, str]:
     def _decode(value: bytes):
         try:
             # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
@@ -186,10 +186,10 @@ class DnsMessage:
         """Initialize a new DnsMessage."""
         self.msg_id = msg_id
         self.flags = flags
-        self.questions: List[DnsQuestion] = []
-        self.answers: List[DnsResource] = []
-        self.authorities: List[DnsResource] = []
-        self.resources: List[DnsResource] = []
+        self.questions: typing.List[DnsQuestion] = []
+        self.answers: typing.List[DnsResource] = []
+        self.authorities: typing.List[DnsResource] = []
+        self.resources: typing.List[DnsResource] = []
 
     def unpack(self, msg):
         """Unpack bytes into a DnsMessage."""
@@ -273,25 +273,27 @@ class DnsMessage:
         )
 
 
-def create_request(services: List[str], qtype: int = QueryType.PTR) -> bytes:
+def create_request(
+    services: typing.List[str], qtype: QueryType = QueryType.PTR
+) -> bytes:
     """Create a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, qtype, 0x8001) for s in services]
     return msg.pack()
 
 
-def _get_model(services: List[Service]) -> Optional[str]:
+def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
     for service in services:
         if service.type == DEVICE_INFO_SERVICE:
             return service.properties.get("model")
     return None
 
 
-def parse_services(message: DnsMessage) -> List[Service]:
+def parse_services(message: DnsMessage) -> typing.List[Service]:
     """Parse DNS response into Service objects."""
-    table: Dict[str, Dict[int, DnsResource]] = {}
-    ptrs: Dict[str, str] = {}  # qname -> real name
-    results: Dict[str, Service] = {}
+    table: typing.Dict[str, typing.Dict[int, DnsResource]] = {}
+    ptrs: typing.Dict[str, str] = {}  # qname -> real name
+    results: typing.Dict[str, Service] = {}
 
     # Create a global table with all records
     for record in message.answers + message.resources:
@@ -313,7 +315,7 @@ def parse_services(message: DnsMessage) -> List[Service]:
         ) or None
         properties = (QueryType.TXT in device and device[QueryType.TXT].rd) or {}
 
-        target_record = table.get(cast(str, target), {}).get(QueryType.A)
+        target_record = table.get(typing.cast(str, target), {}).get(QueryType.A)
         address = IPv4Address(target_record.rd) if target_record else None
 
         results[service] = Service(
@@ -335,7 +337,7 @@ def parse_services(message: DnsMessage) -> List[Service]:
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
     """Protocol to make unicast requests."""
 
-    def __init__(self, services: List[str], host: str, timeout: int):
+    def __init__(self, services: typing.List[str], host: str, timeout: int):
         """Initialize a new UnicastDnsSdClientProtocol."""
         self.message = create_request(services)
         self.host = host
@@ -343,7 +345,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.transport = None
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.result: DnsMessage = DnsMessage()
-        self._task: Optional[asyncio.Future] = None
+        self._task: typing.Optional[asyncio.Future] = None
 
     async def get_response(self) -> Response:
         """Get respoonse with a maximum timeout."""
@@ -464,10 +466,10 @@ class MulticastDnsSdClientProtocol:
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,
-        services: List[str],
+        services: typing.List[str],
         address: str,
         port: int,
-        end_condition: Optional[Callable[[Response], bool]],
+        end_condition: typing.Optional[typing.Callable[[Response], bool]],
     ) -> None:
         """Initialize a new MulticastDnsSdClientProtocol."""
         self.loop = loop
@@ -477,10 +479,10 @@ class MulticastDnsSdClientProtocol:
         self.port = port
         self.end_condition = end_condition or (lambda _: False)
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
-        self.responses: Dict[IPv4Address, Response] = {}
-        self._unicasts: Dict[IPv4Address, bytes] = {}
-        self._task: Optional[asyncio.Future] = None
-        self._receivers: List[asyncio.BaseProtocol] = []
+        self.responses: typing.Dict[IPv4Address, Response] = {}
+        self._unicasts: typing.Dict[IPv4Address, bytes] = {}
+        self._task: typing.Optional[asyncio.Future] = None
+        self._receivers: typing.List[asyncio.BaseProtocol] = []
 
     async def add_socket(self, sock: socket.socket):
         """Add a new multicast socket."""
@@ -491,7 +493,7 @@ class MulticastDnsSdClientProtocol:
 
         self._receivers.append(protocol)
 
-    async def get_response(self, timeout: int) -> Dict[IPv4Address, Response]:
+    async def get_response(self, timeout: int) -> typing.Dict[IPv4Address, Response]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -596,7 +598,7 @@ class MulticastDnsSdClientProtocol:
 async def unicast(
     loop: asyncio.AbstractEventLoop,
     address: str,
-    services: List[str],
+    services: typing.List[str],
     port: int = 5353,
     timeout: int = 4,
 ) -> Response:
@@ -607,19 +609,19 @@ async def unicast(
     )
 
     try:
-        return await cast(UnicastDnsSdClientProtocol, protocol).get_response()
+        return await typing.cast(UnicastDnsSdClientProtocol, protocol).get_response()
     finally:
         transport.close()
 
 
 async def multicast(
     loop: asyncio.AbstractEventLoop,
-    services: List[str],
+    services: typing.List[str],
     address: str = "224.0.0.251",
     port: int = 5353,
     timeout: int = 4,
-    end_condition: Optional[Callable[[Response], bool]] = None,
-) -> Dict[IPv4Address, Response]:
+    end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
+) -> typing.Dict[IPv4Address, Response]:
     """Send multicast request for services."""
     protocol = MulticastDnsSdClientProtocol(
         loop, services, address, port, end_condition
@@ -635,7 +637,9 @@ async def multicast(
         except Exception:
             _LOGGER.exception(f"failed to add listener for {addr}")
 
-    return await cast(MulticastDnsSdClientProtocol, protocol).get_response(timeout)
+    return await typing.cast(MulticastDnsSdClientProtocol, protocol).get_response(
+        timeout
+    )
 
 
 async def publish(loop: asyncio.AbstractEventLoop, service: Service, zconf: Zeroconf):
