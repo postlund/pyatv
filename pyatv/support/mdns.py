@@ -1,4 +1,5 @@
 """Minimalistic DNS-SD implementation."""
+import enum
 import math
 import socket
 import asyncio
@@ -6,7 +7,6 @@ import struct
 import logging
 import weakref
 from ipaddress import IPv4Address, ip_address
-from collections import namedtuple
 from typing import Optional, Dict, List, cast, NamedTuple, Callable
 
 from zeroconf import Zeroconf, ServiceInfo
@@ -21,9 +21,37 @@ TRAFFIC_LEVEL = logging.DEBUG - 5
 setattr(logging, "TRAFFIC", TRAFFIC_LEVEL)
 logging.addLevelName(TRAFFIC_LEVEL, "Traffic")
 
-DnsHeader = namedtuple("DnsHeader", "id flags qdcount ancount nscount arcount")
-DnsQuestion = namedtuple("DnsQuestion", "qname qtype qclass")
-DnsResource = namedtuple("DnsResource", "qname qtype qclass ttl rd_length rd")
+
+class QueryType(enum.IntEnum):
+    A = 0x01
+    PTR = 0x0C
+    TXT = 0x10
+    SRV = 0x21
+    ANY = 0xFF
+
+
+class DnsHeader(NamedTuple):
+    id: int
+    flags: int
+    qdcount: int
+    ancount: int
+    nscount: int
+    arcount: int
+
+
+class DnsQuestion(NamedTuple):
+    qname: bytes
+    qtype: QueryType
+    qclass: int
+
+
+class DnsResource(NamedTuple):
+    qname: bytes
+    qtype: QueryType
+    qclass: int
+    ttl: int
+    rd_length: int
+    rd: int
 
 
 class Service(NamedTuple):
@@ -43,12 +71,6 @@ class Response(NamedTuple):
     deep_sleep: bool
     model: Optional[str]  # Comes from _device-info._tcp.local
 
-
-QTYPE_A: int = 0x0001
-QTYPE_PTR: int = 0x000C
-QTYPE_TXT: int = 0x0010
-QTYPE_SRV: int = 0x0021
-QTYPE_ANY: int = 0x00FF
 
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
@@ -145,13 +167,13 @@ def unpack_rr(ptr, msg):
     rd_data = ptr[0:rd_length]
     ptr = ptr[rd_length:]
 
-    if qtype == QTYPE_PTR:
+    if qtype == QueryType.PTR:
         rd_data, _ = qname_decode(rd_data, msg)
-    elif qtype == QTYPE_TXT:
+    elif qtype == QueryType.TXT:
         rd_data = parse_txt_dict(rd_data, msg)
-    elif qtype == QTYPE_SRV:
+    elif qtype == QueryType.SRV:
         rd_data = parse_srv_dict(rd_data, msg)
-    elif qtype == QTYPE_A:
+    elif qtype == QueryType.A:
         rd_data = str(IPv4Address(rd_data))
 
     return ptr, data + (rd_data,)
@@ -251,7 +273,7 @@ class DnsMessage:
         )
 
 
-def create_request(services: List[str], qtype: int = QTYPE_PTR) -> bytes:
+def create_request(services: List[str], qtype: int = QueryType.PTR) -> bytes:
     """Create a new DnsMessage requesting specified services."""
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, qtype, 0x8001) for s in services]
@@ -273,7 +295,7 @@ def parse_services(message: DnsMessage) -> List[Service]:
 
     # Create a global table with all records
     for record in message.answers + message.resources:
-        if record.qtype == QTYPE_PTR and record.qname.startswith("_"):
+        if record.qtype == QueryType.PTR and record.qname.startswith("_"):
             ptrs[record.qname] = record.rd
         else:
             table.setdefault(record.qname, {})[record.qtype] = record
@@ -285,11 +307,13 @@ def parse_services(message: DnsMessage) -> List[Service]:
         if not service_type.endswith("_tcp.local"):
             continue
 
-        port = (QTYPE_SRV in device and device[QTYPE_SRV].rd["port"]) or 0
-        target = (QTYPE_SRV in device and device[QTYPE_SRV].rd["target"]) or None
-        properties = (QTYPE_TXT in device and device[QTYPE_TXT].rd) or {}
+        port = (QueryType.SRV in device and device[QueryType.SRV].rd["port"]) or 0
+        target = (
+            QueryType.SRV in device and device[QueryType.SRV].rd["target"]
+        ) or None
+        properties = (QueryType.TXT in device and device[QueryType.TXT].rd) or {}
 
-        target_record = table.get(cast(str, target), {}).get(QTYPE_A)
+        target_record = table.get(cast(str, target), {}).get(QueryType.A)
         address = IPv4Address(target_record.rd) if target_record else None
 
         results[service] = Service(
@@ -538,7 +562,7 @@ class MulticastDnsSdClientProtocol:
         if is_sleep_proxy:
             self._unicasts[addr[0]] = create_request(
                 [service.name + "." + service.type for service in services],
-                qtype=QTYPE_ANY,
+                qtype=QueryType.ANY,
             )
         else:
             response = Response(

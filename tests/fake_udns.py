@@ -110,26 +110,26 @@ def create_response(
         if service.port:
             local_name = mdns.qname_encode(service.name + ".local")
             rd = struct.pack(">3H", 0, 0, service.port) + local_name
-            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_SRV, rd))
+            resp.resources.append(dns_utils.resource(full_name, mdns.QueryType.SRV, rd))
 
         # Add IP address
         if service.address:
             ipaddr = IPv4Address(service.address).packed
             resp.resources.append(
-                dns_utils.resource(service.name + ".local", mdns.QTYPE_A, ipaddr)
+                dns_utils.resource(service.name + ".local", mdns.QueryType.A, ipaddr)
             )
 
         # Add properties
         if service.properties:
             rd = dns_utils.properties(service.properties)
-            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_TXT, rd))
+            resp.resources.append(dns_utils.resource(full_name, mdns.QueryType.TXT, rd))
 
         # Add model if present
         if service.model:
             rd = dns_utils.properties({b"model": service.model.encode("utf-8")})
             resp.resources.append(
                 dns_utils.resource(
-                    service.name + "._device-info._tcp.local", mdns.QTYPE_TXT, rd
+                    service.name + "._device-info._tcp.local", mdns.QueryType.TXT, rd
                 )
             )
 

@@ -61,7 +61,7 @@ def test_service_has_valid_question():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
-    assert question.qtype == mdns.QTYPE_PTR
+    assert question.qtype == mdns.QueryType.PTR
     assert question.qclass == 0x8001
 
 
@@ -69,7 +69,7 @@ def test_service_has_valid_answer():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
-    assert answer.qtype == mdns.QTYPE_PTR
+    assert answer.qtype == mdns.QueryType.PTR
     assert answer.qclass == dns_utils.DEFAULT_QCLASS
     assert answer.ttl == dns_utils.DEFAULT_TTL
     assert answer.rd == data.name + "." + MEDIAREMOTE_SERVICE
@@ -78,9 +78,9 @@ def test_service_has_valid_answer():
 def test_service_has_valid_srv_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_SRV)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == mdns.QTYPE_SRV
+    assert srv.qtype == mdns.QueryType.SRV
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -94,9 +94,9 @@ def test_service_has_valid_srv_resource():
 def test_service_has_valid_txt_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_TXT)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == mdns.QTYPE_TXT
+    assert srv.qtype == mdns.QueryType.TXT
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -109,9 +109,9 @@ def test_service_has_valid_txt_resource():
 def test_service_has_valid_a_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QTYPE_A)
+    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.A)
     assert srv.qname == data.name + ".local"
-    assert srv.qtype == mdns.QTYPE_A
+    assert srv.qtype == mdns.QueryType.A
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
     assert srv.rd == "127.0.0.1"
@@ -120,7 +120,7 @@ def test_service_has_valid_a_resource():
 def test_authority():
     msg = mdns.DnsMessage()
     msg.authorities.append(
-        dns_utils.resource("test.local", mdns.QTYPE_A, b"\x01\x02\x03\x04")
+        dns_utils.resource("test.local", mdns.QueryType.A, b"\x01\x02\x03\x04")
     )
 
     unpacked = mdns.DnsMessage().unpack(msg.pack())
@@ -128,7 +128,7 @@ def test_authority():
 
     record = unpacked.authorities[0]
     assert record.qname == "test.local"
-    assert record.qtype == mdns.QTYPE_A
+    assert record.qtype == mdns.QueryType.A
     assert record.qclass == dns_utils.DEFAULT_QCLASS
     assert record.ttl == dns_utils.DEFAULT_TTL
     assert record.rd == "1.2.3.4"

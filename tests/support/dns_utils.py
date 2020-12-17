@@ -11,7 +11,7 @@ DEFAULT_TTL = 10
 
 def answer(qname: str, full_name: str) -> mdns.DnsResource:
     return mdns.DnsResource(
-        qname, mdns.QTYPE_PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
+        qname, mdns.QueryType.PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
     )
 
 
@@ -47,7 +47,7 @@ def add_service(
 
     if address:
         message.resources.append(
-            resource(service_name + ".local", mdns.QTYPE_A, address)
+            resource(service_name + ".local", mdns.QueryType.A, address)
         )
 
     # Remaining depends on service type
@@ -59,7 +59,7 @@ def add_service(
     message.resources.append(
         resource(
             service_name + "." + service_type,
-            mdns.QTYPE_SRV,
+            mdns.QueryType.SRV,
             {
                 "priority": 0,
                 "weight": 0,
@@ -73,7 +73,7 @@ def add_service(
         message.resources.append(
             resource(
                 service_name + "." + service_type,
-                mdns.QTYPE_TXT,
+                mdns.QueryType.TXT,
                 {k.encode("utf-8"): v.encode("utf-8") for k, v in properties.items()},
             )
         )
