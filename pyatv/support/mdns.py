@@ -1,10 +1,10 @@
 """Minimalistic DNS-SD implementation."""
+import asyncio
 import enum
+import logging
 import math
 import socket
-import asyncio
 import struct
-import logging
 import weakref
 from ipaddress import IPv4Address, ip_address
 import typing
