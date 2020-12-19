@@ -96,13 +96,25 @@ def _decode_properties(properties: typing.Dict[str, bytes]) -> typing.Dict[str, 
 
 
 def qname_encode(name: str) -> bytes:
-    """Encode QNAME without using labels."""
+    """Encode QNAME without using name compression."""
+    encoded = bytearray()
+    for label in name.split("."):
+        encoded_label = label.encode("idna")
+        encoded_length = len(encoded_label)
+        # Length of the encoded label, in bytes, but a maximum of 63
+        # The maximum is 63 as the upper two bits are used as a flag for name
+        # compression.
+        encoded.append(min(encoded_length, 63))
+        # TODO: Should an error be raised if a label is too long?
+        if encoded_length > 63:
+            encoded.extend(encoded_label[:64])
+        else:
+            encoded.extend(encoded_label)
+    # The final component for the root namespace
+    encoded.append(0x0)
+    return encoded
 
-    def _enc_word(word):
-        encoded = word.encode("utf-8")
-        return bytes([len(encoded) & 0xFF]) + encoded
 
-    return b"".join([_enc_word(x) for x in name.split(".")]) + b"\x00"
 
 
 def qname_decode(ptr, message, raw=False):
