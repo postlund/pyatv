@@ -19,10 +19,10 @@ def resource(qname: str, qtype: int, rd) -> mdns.DnsResource:
     return mdns.DnsResource(qname, qtype, DEFAULT_QCLASS, DEFAULT_TTL, len(rd), rd)
 
 
-def properties(properties: Dict[bytes, bytes]) -> bytes:
+def properties(properties: Dict[str, bytes]) -> bytes:
     rd = b""
     for k, v in properties.items():
-        encoded = k + b"=" + v
+        encoded = k.encode("ascii") + b"=" + v
         rd += bytes([len(encoded)]) + encoded
     return rd
 
@@ -40,7 +40,7 @@ def add_service(
     service_name: Optional[str],
     address: Optional[str],
     port: int,
-    properties: dict,
+    properties: Dict[str, bytes],
 ) -> None:
     if service_name is None:
         return message
@@ -74,7 +74,7 @@ def add_service(
             resource(
                 service_name + "." + service_type,
                 mdns.QueryType.TXT,
-                {k.encode("utf-8"): v.encode("utf-8") for k, v in properties.items()},
+                {k: v.encode("utf-8") for k, v in properties.items()},
             )
         )
 
@@ -87,10 +87,10 @@ def assert_service(
     service_name: str,
     address: str,
     port: int,
-    properties: dict,
+    known_properties: Dict[str, bytes],
 ) -> None:
     assert message.type == service_type
     assert message.name == service_name
     assert message.address == (IPv4Address(address) if address else None)
     assert message.port == port
-    assert message.properties == properties
+    assert message.properties == known_properties

@@ -22,36 +22,41 @@ setattr(logging, "TRAFFIC", TRAFFIC_LEVEL)
 logging.addLevelName(TRAFFIC_LEVEL, "Traffic")
 
 
-class QueryType(enum.IntEnum):
-    A = 0x01
-    PTR = 0x0C
-    TXT = 0x10
-    SRV = 0x21
-    ANY = 0xFF
+class CaseInsensitiveDict(dict):
+    """A `dict` where the keys are compared case-insensitively.
 
+    As a consequence of this, the keys *must* be strings.
+    """
 
-class DnsHeader(typing.NamedTuple):
-    id: int
-    flags: int
-    qdcount: int
-    ancount: int
-    nscount: int
-    arcount: int
+    def __getitem__(self, key: str) -> typing.Any:
+        return super().__getitem__(key.lower())
 
+    def __setitem__(self, key: str, value: typing.Any):
+        return super().__setitem__(key.lower(), value)
 
-class DnsQuestion(typing.NamedTuple):
-    qname: bytes
-    qtype: QueryType
-    qclass: int
+    def __delitem__(self, key: str):
+        return super().__delitem__(key.lower())
 
+    def __contains__(self, key: str) -> bool:
+        return super().__contains__(key.lower())
 
-class DnsResource(typing.NamedTuple):
-    qname: bytes
-    qtype: QueryType
-    qclass: int
-    ttl: int
-    rd_length: int
-    rd: int
+    def __eq__(self, other):
+        if isinstance(other, CaseInsensitiveDict):
+            # If it's another CaseInsensitiveDict, super easy
+            return super().__eq__(other)
+        elif isinstance(other, dict):
+            # if it's not, but it is a dict, attempt to lower the keys of the other dict
+            try:
+                lowered_other = {k.lower(): v for k, v in other.items()}
+            except AttributeError:
+                # If the other leys aren't strings, these dicts aren't equal
+                return False
+            return super().__eq__(lowered_other)
+        else:
+            return NotImplemented
+
+    def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Any:
+        return super().get(key.lower(), default)
 
 
 class Service(typing.NamedTuple):
@@ -75,7 +80,7 @@ class Response(typing.NamedTuple):
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
-def _decode_properties(properties: typing.Dict[bytes, bytes]) -> typing.Dict[str, str]:
+def _decode_properties(properties: typing.Dict[str, bytes]) -> typing.Dict[str, str]:
     def _decode(value: bytes):
         try:
             # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
@@ -87,7 +92,7 @@ def _decode_properties(properties: typing.Dict[bytes, bytes]) -> typing.Dict[str
         except Exception:  # pylint: disable=broad-except
             return str(value)
 
-    return {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
+    return CaseInsensitiveDict({k: _decode(v) for k, v in properties.items()})
 
 
 def qname_encode(name: str) -> bytes:
@@ -127,7 +132,7 @@ def qname_decode(ptr, message, raw=False):
 
 def parse_txt_dict(data, msg):
     """Parse DNS TXT record containing a dict."""
-    output = {}
+    output = CaseInsensitiveDict()
     txt, _ = qname_decode(data, msg, raw=True)
     for prop in txt:
         key, value = prop.split(b"=", 1)
@@ -177,6 +182,40 @@ def unpack_rr(ptr, msg):
         rd_data = str(IPv4Address(rd_data))
 
     return ptr, data + (rd_data,)
+
+
+class QueryType(enum.IntEnum):
+    A = 0x01
+    PTR = 0x0C
+    TXT = 0x10
+    SRV = 0x21
+    ANY = 0xFF
+
+
+
+class DnsHeader(typing.NamedTuple):
+    id: int
+    flags: int
+    qdcount: int
+    ancount: int
+    nscount: int
+    arcount: int
+
+
+
+class DnsQuestion(typing.NamedTuple):
+    qname: str
+    qtype: QueryType
+    qclass: int
+
+
+class DnsResource(typing.NamedTuple):
+    qname: str
+    qtype: QueryType
+    qclass: int
+    ttl: int
+    rd_length: int
+    rd: typing.Any
 
 
 class DnsMessage:

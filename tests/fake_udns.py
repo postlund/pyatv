@@ -25,8 +25,8 @@ def mrp_service(
         address=address,
         port=port,
         properties={
-            b"Name": atv_name.encode("utf-8"),
-            b"UniqueIdentifier": identifier.encode("utf-8"),
+            "Name": atv_name.encode("utf-8"),
+            "UniqueIdentifier": identifier.encode("utf-8"),
         },
         model=model,
     )
@@ -38,7 +38,7 @@ def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000, model=No
         name=atv_name,
         address=address,
         port=port,
-        properties={b"deviceid": deviceid.encode("utf-8")},
+        properties={"deviceid": deviceid.encode("utf-8")},
         model=model,
     )
     return ("_airplay._tcp.local", service)
@@ -49,7 +49,7 @@ def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1", mode
         name=service_name,
         address=address,
         port=3689,
-        properties={b"hG": hsgid.encode("utf-8"), b"Name": atv_name.encode("utf-8")},
+        properties={"hG": hsgid.encode("utf-8"), "Name": atv_name.encode("utf-8")},
         model=model,
     )
     return ("_appletv-v2._tcp.local", service)
@@ -60,7 +60,7 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
         name=service_name,
         address=address,
         port=3689,
-        properties={b"CtlN": atv_name.encode("utf-8")},
+        properties={"CtlN": atv_name.encode("utf-8")},
         model=model,
     )
     return ("_touch-able._tcp.local", service)
@@ -126,7 +126,7 @@ def create_response(
 
         # Add model if present
         if service.model:
-            rd = dns_utils.properties({b"model": service.model.encode("utf-8")})
+            rd = dns_utils.properties({"model": service.model.encode("utf-8")})
             resp.resources.append(
                 dns_utils.resource(
                     service.name + "._device-info._tcp.local", mdns.QueryType.TXT, rd
