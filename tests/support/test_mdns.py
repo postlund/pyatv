@@ -1,6 +1,7 @@
 """Unit tests pyatv.support.mdns."""
 
 import asyncio
+import io
 import logging
 from typing import Tuple
 from ipaddress import IPv4Address
@@ -37,10 +38,11 @@ def get_response_for_service(
 def test_qname_with_label():
     # This should resolve to "label.test" when reading from \x05
     message = b"aaaa" + b"\x04test\x00" + b"\x05label\xC0\x04\xAB\xCD"
-    ptr = message[10:]
-    ret, rest = mdns.qname_decode(ptr, message)
-    assert ret == "label.test"
-    assert rest == b"\xAB\xCD"
+    with io.BytesIO(message) as buffer:
+        buffer.seek(10)
+        name = mdns.parse_domain_name(buffer)
+        assert name == "label.test"
+        assert buffer.tell() == len(message) - 2
 
 
 def test_non_existing_service():

@@ -1,6 +1,7 @@
 """Minimalistic DNS-SD implementation."""
 import asyncio
 import enum
+import io
 import logging
 import math
 import socket
@@ -115,85 +116,101 @@ def qname_encode(name: str) -> bytes:
     return encoded
 
 
+def parse_string(buffer: typing.BinaryIO) -> bytes:
+    """Unpack a DNS character string.
+
+    These are simply a single length byte, followed by up to that many bytes of data.
+
+    This is distinct from "domain-name" encoding; use `parse_domain_name` for that.
+    """
+    length_data = buffer.read(1)
+    chunk_length = struct.unpack(">B", length_data)[0]
+    # chunk_length = struct.unpack(">B", buffer.read(1))[0]
+    return buffer.read(chunk_length)
 
 
-def qname_decode(ptr, message, raw=False):
-    """Read a QNAME from pointer and respect labels."""
+def parse_domain_name(buffer: typing.BinaryIO) -> str:
+    """Unpack a domain name, handling any name compression encountered.
 
-    def _rec(name):
-        ret = []
-        while name and name[0] > 0:
-            length = int(name[0])
-            if (length & 0xC0) == 0xC0:
-                offset = (length & 0x03) << 8 | int(name[1])
-                comps, _ = _rec(message[offset:])
-                ret += comps
-                name = name[1:]
-                break
+    Basically, each component of a domain name (called a "label") is prefixed with a
+    length followed by the IDNA encoded label. The final component has a zero length
+    with a null label for the DNS root. The tricky part is that labels are limited to 63
+    bytes, and the upper two bits of the length are used as a flag for "name
+    compression". For full details, see RFC1035, sections 3.1 and 4.1.4.
 
-            ret.append(name[1 : 1 + length])
-            name = name[length + 1 :]
+    This is distinct from "character-string" encoding; use `parse_string` for that.
+    """
+    labels = []
+    compression_offset = None
+    while buffer:
+        length = struct.unpack(">B", buffer.read(1))[0]
+        if length == 0:
+            break
+        # The two high bits of the length are a flag for DNS name compression
+        length_flags = (length & 0xC0) >> 6
+        # The 10 and 01 flags are reserved
+        assert length_flags in (0, 0b11)
+        if length_flags == 0b11:
+            # Mask off the upper two bits, then concatenate the next byte from the
+            # stream to get the offset.
+            high_bits: int = length & 0x3F
+            new_offset_data = bytearray(buffer.read(1))
+            new_offset_data.insert(0, high_bits)
+            new_offset = struct.unpack(">H", new_offset_data)[0]
+            # I think it's technically possible to have multiple levels of name
+            # compression, so make sure we don't lose the original place we need to go
+            # back to.
+            if compression_offset is None:
+                compression_offset = buffer.tell()
+            buffer.seek(new_offset)
+        elif length_flags == 0:
+            label = buffer.read(length)
+            labels.append(label)
+    if compression_offset is not None:
+        buffer.seek(compression_offset)
+    return ".".join(label.decode("idna") for label in labels)
 
-        return ret, name
 
-    name_components, rest = _rec(ptr)
-    if raw:
-        return name_components, rest[1:]
-    return ".".join([x.decode("utf-8") for x in name_components]), rest[1:]
-
-
-def parse_txt_dict(data, msg):
-    """Parse DNS TXT record containing a dict."""
+def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> typing.Dict[str, bytes]:
+    """Parse DNS TXT records containing a dict."""
     output = CaseInsensitiveDict()
-    txt, _ = qname_decode(data, msg, raw=True)
-    for prop in txt:
-        key, value = prop.split(b"=", 1)
-        output[key] = value
+    stop_position = buffer.tell() + length
+    while buffer.tell() < stop_position:
+        chunk = parse_string(buffer)
+        if b"=" not in chunk:
+            decoded_chunk = chunk.decode("ascii")
+            # missing "=" means its a boolean attribute
+            output[decoded_chunk] = True
+        else:
+            key, value = chunk.split(b"=", 1)
+            if not key:
+                # Missing keys are skipped
+                continue
+            try:
+                # Keys are explicitly ASCII only
+                decoded_key = key.decode("ascii")
+            except UnicodeDecodeError:
+                _LOGGER.debug("Non-ASCII DNS-SD key encountered: %s", key)
+                continue
+            # Compared to the keys (ASCII strings), values are opaque binary blobs
+            output[decoded_key] = value
     return output
 
 
-def parse_srv_dict(data, msg):
+def parse_srv_dict(buffer: typing.BinaryIO):
     """Parse DNS SRV record."""
-    priority, weight, port = struct.unpack(">HHH", data[0:6])
+    srv_struct = struct.Struct(">3H")
+    priority, weight, port = srv_struct.unpack(buffer.read(srv_struct.size))
+    # Name compression isn't allowed by the RFC, but let's accept it anyways
+    target = parse_domain_name(buffer)
+    # TODO: Should there be a check for target == ".", for marking services that
+    # (according to the RFC), "the service is decidedly not available at this domain."
     return {
         "priority": priority,
         "weight": weight,
         "port": port,
-        "target": qname_decode(data[6:], msg)[0],
+        "target": target,
     }
-
-
-def subunpack(ptr, fmt):
-    """Unpack raw data from pointer and move pointer forward."""
-    unpack_size = struct.calcsize(fmt)
-    data = struct.unpack(fmt, ptr[0:unpack_size])
-    return ptr[unpack_size:], data
-
-
-def dns_unpack(ptr, msg, fmt):
-    """Unoack a generic DNS record."""
-    qname, ptr = qname_decode(ptr, msg)
-    ptr, data = subunpack(ptr, fmt)
-    return ptr, (qname,) + data
-
-
-def unpack_rr(ptr, msg):
-    """Unpack DNS resource record."""
-    ptr, data = dns_unpack(ptr, msg, ">2HIH")
-    _, qtype, _, _, rd_length = data
-    rd_data = ptr[0:rd_length]
-    ptr = ptr[rd_length:]
-
-    if qtype == QueryType.PTR:
-        rd_data, _ = qname_decode(rd_data, msg)
-    elif qtype == QueryType.TXT:
-        rd_data = parse_txt_dict(rd_data, msg)
-    elif qtype == QueryType.SRV:
-        rd_data = parse_srv_dict(rd_data, msg)
-    elif qtype == QueryType.A:
-        rd_data = str(IPv4Address(rd_data))
-
-    return ptr, data + (rd_data,)
 
 
 class QueryType(enum.IntEnum):
@@ -203,9 +220,34 @@ class QueryType(enum.IntEnum):
     SRV = 0x21
     ANY = 0xFF
 
+    def parse_rdata(self, buffer: typing.BinaryIO, length: int) -> typing.Any:
+        """Parse the RDATA from DNS resource record according to the type of the record.
+
+        If the record type isn't specifically handled, the raw binary data is returned.
+        """
+        if self is self.A:
+            if length != 4:
+                raise ValueError(
+                    f"An A record must have exactly 4 bytes of data (not {length})"
+                )
+            return str(IPv4Address(buffer.read(length)))
+        elif self is self.PTR:
+            return parse_domain_name(buffer)
+        elif self is self.TXT:
+            return parse_txt_dict(buffer, length)
+        elif self is self.SRV:
+            return parse_srv_dict(buffer)
+        else:
+            return buffer.read(length)
+
+
+# TODO: eventually move this in as a class attribute of DnsHeader
+dns_header_struct = struct.Struct(">6H")
 
 
 class DnsHeader(typing.NamedTuple):
+    """Represents the header to a DNS message."""
+
     id: int
     flags: int
     qdcount: int
@@ -213,21 +255,89 @@ class DnsHeader(typing.NamedTuple):
     nscount: int
     arcount: int
 
+    @classmethod
+    # Py3.7 allows the quotes to be removes as long as `annotations` is imported from
+    # __future__. Py3.10 makes the behavior default.
+    def unpack_read(cls, buffer: typing.BinaryIO) -> "DnsHeader":
+        """Create a `DnsHeader` from a data stream.
+
+        Only as much data as is needed to create the header is read from the stream,
+        leaving it prepped to start parsing questions or resource records immediately
+        afterwards.
+        """
+        data = buffer.read(dns_header_struct.size)
+        return cls._make(dns_header_struct.unpack(data))
+
+    def pack(self) -> bytes:
+        """Generate the packed DNS header data."""
+        return dns_header_struct.pack(
+            self.id, self.flags, self.qdcount, self.ancount, self.nscount, self.arcount
+        )
+
+
+# TODO: eventually move this in as a class attribute of DnsQuestion
+dns_question_struct = struct.Struct(">2H")
 
 
 class DnsQuestion(typing.NamedTuple):
+    """Represents a DNS query."""
+
     qname: str
     qtype: QueryType
     qclass: int
 
+    @classmethod
+    def unpack_read(cls, buffer: typing.BinaryIO) -> "DnsQuestion":
+        """Create a `DnsQuestion` from a data stream.
+
+        The entire question data is read from the stream, leaving it ready to parse
+        further questions form it, or to parse resource records out of it (depending on
+        the DNS message structure).
+        """
+        qname = parse_domain_name(buffer)
+        trailing_data = buffer.read(dns_question_struct.size)
+        unpacked_trailing = dns_question_struct.unpack(trailing_data)
+        return cls(qname, *unpacked_trailing)
+
+    def pack(self) -> bytes:
+        """Encode the question data as needed for a DNS query or response."""
+        data = bytearray(qname_encode(self.qname))
+        data.extend(dns_question_struct.pack(self.qtype, self.qclass))
+        return data
+
+
+# TODO: eventually move this in as a class attribute of DnsResource
+dns_resource_struct = struct.Struct(">2HIH")
+
 
 class DnsResource(typing.NamedTuple):
+    """Represents a DNS resource record."""
+
     qname: str
     qtype: QueryType
     qclass: int
     ttl: int
     rd_length: int
     rd: typing.Any
+
+    @classmethod
+    def unpack_read(cls, buffer: typing.BinaryIO) -> "DnsResource":
+        """Create a `DnsResource` from data in a data stream.
+
+        All data from a resource record is consumed, leaving the stream ready to be used
+        in another call to this method (as needed).
+        """
+        qname = parse_domain_name(buffer)
+        trailing_data = buffer.read(dns_resource_struct.size)
+        qtype, qclass, ttl, rd_length = dns_resource_struct.unpack(trailing_data)
+        before_rd = buffer.tell()
+        if qtype in QueryType.__members__.values():
+            qtype = QueryType(qtype)
+            rd = qtype.parse_rdata(buffer, rd_length)
+        else:
+            rd = buffer.read(rd_length)
+        assert buffer.tell() == before_rd + rd_length
+        return cls(qname, qtype, qclass, ttl, rd_length, rd)
 
 
 class DnsMessage:
@@ -242,32 +352,33 @@ class DnsMessage:
         self.authorities: typing.List[DnsResource] = []
         self.resources: typing.List[DnsResource] = []
 
-    def unpack(self, msg):
+    def unpack(self, msg: bytes):
         """Unpack bytes into a DnsMessage."""
-        ptr, data = subunpack(msg, ">6H")
-        header = DnsHeader._make(data)
+        buffer = io.BytesIO(msg)
+
+        header = DnsHeader.unpack_read(buffer)
         self.msg_id = header.id
         self.flags = header.flags
 
         # Unpack questions
-        for _ in range(header.qdcount):
-            ptr, data = dns_unpack(ptr, msg, ">2H")
-            self.questions.append(DnsQuestion(*data))
+        self.questions.extend(
+            DnsQuestion.unpack_read(buffer) for _ in range((header.qdcount))
+        )
 
         # Unpack answers
-        for _ in range(header.ancount):
-            ptr, data = unpack_rr(ptr, msg)
-            self.answers.append(DnsResource(*data))
+        self.answers.extend(
+            DnsResource.unpack_read(buffer) for _ in range((header.ancount))
+        )
 
         # Unpack authorities
-        for _ in range(header.nscount):
-            ptr, data = unpack_rr(ptr, msg)
-            self.authorities.append(DnsResource(*data))
+        self.authorities.extend(
+            DnsResource.unpack_read(buffer) for _ in range((header.nscount))
+        )
 
         # Unpack additional resources
-        for _ in range(header.arcount):
-            ptr, data = unpack_rr(ptr, msg)
-            self.resources.append(DnsResource(*data))
+        self.resources.extend(
+            DnsResource.unpack_read(buffer) for _ in range((header.arcount))
+        )
 
         return self
 
