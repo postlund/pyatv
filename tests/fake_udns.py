@@ -5,7 +5,7 @@ from unittest.mock import patch
 from contextlib import contextmanager
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union, cast
 
 from pyatv.support import mdns
 
@@ -18,8 +18,13 @@ FakeDnsService = namedtuple("FakeDnsService", "name address port properties mode
 
 
 def mrp_service(
-    service_name, atv_name, identifier, address="127.0.0.1", port=49152, model=None
-):
+    service_name: str,
+    atv_name: str,
+    identifier: str,
+    address="127.0.0.1",
+    port: int = 49152,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
         address=address,
@@ -33,7 +38,13 @@ def mrp_service(
     return ("_mediaremotetv._tcp.local", service)
 
 
-def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000, model=None):
+def airplay_service(
+    atv_name: str,
+    deviceid: str,
+    address="127.0.0.1",
+    port: int = 7000,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=atv_name,
         address=address,
@@ -44,7 +55,13 @@ def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000, model=No
     return ("_airplay._tcp.local", service)
 
 
-def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1", model=None):
+def homesharing_service(
+    service_name: str,
+    atv_name: str,
+    hsgid: str,
+    address="127.0.0.1",
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
         address=address,
@@ -67,11 +84,16 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
 
 
 def _lookup_service(
-    question: mdns.DnsQuestion, services: Dict[str, FakeDnsService]
-) -> Tuple[Optional[FakeDnsService], Optional[str]]:
+    question: mdns.DnsQuestion,
+    services: Dict[str, FakeDnsService],
+) -> Union[Tuple[None, None], Tuple[FakeDnsService, str]]:
+    """Given a DNS query and the registered fake services, find a matching service."""
     if question.qname.startswith("_"):
         service = services.get(question.qname)
-        return service, service.name + "." + question.qname if service else None
+        if service is not None:
+            return service, service.name + "." + question.qname
+        else:
+            return None, None
 
     service_name, _, service_type = question.qname.partition(".")
     for name, service in services.items():
@@ -97,6 +119,9 @@ def create_response(
         service, full_name = _lookup_service(question, services)
         if service is None or (ip_filter and service.address != ip_filter):
             continue
+        # For typing purposes, because service is not None, then full_name is not None
+        # either.
+        full_name = cast(str, full_name)
 
         # Add answer
         if full_name:
@@ -155,7 +180,7 @@ class FakeUdns(asyncio.Protocol):
     def close(self):
         self.server.close()
 
-    def add_service(self, service):
+    def add_service(self, service: Tuple[str, FakeDnsService]):
         self.services[service[0]] = service[1]
 
     @property

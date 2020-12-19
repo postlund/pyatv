@@ -2,7 +2,7 @@
 
 import struct
 from ipaddress import IPv4Address
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from pyatv.support import mdns
 
 DEFAULT_QCLASS = 1
@@ -15,7 +15,7 @@ def answer(qname: str, full_name: str) -> mdns.DnsResource:
     )
 
 
-def resource(qname: str, qtype: int, rd) -> mdns.DnsResource:
+def resource(qname: str, qtype: mdns.QueryType, rd) -> mdns.DnsResource:
     return mdns.DnsResource(qname, qtype, DEFAULT_QCLASS, DEFAULT_TTL, len(rd), rd)
 
 
@@ -27,7 +27,9 @@ def properties(properties: Dict[str, bytes]) -> bytes:
     return rd
 
 
-def get_qtype(messages: mdns.DnsMessage, qtype: int) -> Optional[mdns.DnsResource]:
+def get_qtype(
+    messages: List[mdns.DnsResource], qtype: int
+) -> Optional[mdns.DnsResource]:
     for message in messages:
         if message.qtype == qtype:
             return message
@@ -82,7 +84,7 @@ def add_service(
 
 
 def assert_service(
-    message: mdns.DnsMessage,
+    message: mdns.Service,
     service_type: str,
     service_name: str,
     address: str,

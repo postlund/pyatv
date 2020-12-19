@@ -1,5 +1,6 @@
 """Scanning tests with fake mDNS responder.."""
 
+import typing
 import pyatv
 from ipaddress import ip_address
 
@@ -51,6 +52,11 @@ async def udns_server(event_loop, stub_knock_server):
     server.close()
 
 
+#: A type alias for the [multi,uni]cast_scan fixtures.
+# There isn't a way to type-hint optional arguments, so instead we leave it unspecified.
+Scanner = typing.Callable[..., typing.Awaitable[typing.List[pyatv.conf.AppleTV]]]
+
+
 @pytest.fixture
 async def multicast_scan(event_loop, udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None):
@@ -73,13 +79,16 @@ async def unicast_scan(event_loop, udns_server):
 
 
 @pytest.mark.asyncio
-async def test_multicast_scan_no_device_found(multicast_scan):
+async def test_multicast_scan_no_device_found(multicast_scan: Scanner):
     atvs = await multicast_scan()
     assert len(atvs) == 0
 
 
 @pytest.mark.asyncio
-async def test_multicast_scan(udns_server, multicast_scan):
+async def test_multicast_scan(
+    udns_server: fake_udns.FakeUdns,
+    multicast_scan: Scanner,
+):
     udns_server.add_service(
         fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, address=IP_1)
     )
