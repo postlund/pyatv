@@ -30,18 +30,26 @@ class CaseInsensitiveDict(dict):
     """
 
     def __getitem__(self, key: str) -> typing.Any:
+        """Get a value referenced by a string key, compared case-insensitively."""
         return super().__getitem__(key.lower())
 
     def __setitem__(self, key: str, value: typing.Any):
+        """Set a value referenced by a string key, compared case-insensitively."""
         return super().__setitem__(key.lower(), value)
 
     def __delitem__(self, key: str):
+        """Delete a value referenced by a string key, compared case-insensitively."""
         return super().__delitem__(key.lower())
 
-    def __contains__(self, key: str) -> bool:
-        return super().__contains__(key.lower())
+    def __contains__(self, key) -> bool:
+        """Check if a key is present in the dictionary, compared case-insensitively."""
+        try:
+            return super().__contains__(key.lower())
+        except AttributeError:
+            return NotImplemented
 
     def __eq__(self, other):
+        """Comparetwo dictionaries, with keys compared case-insensitively."""
         if isinstance(other, CaseInsensitiveDict):
             # If it's another CaseInsensitiveDict, super easy
             return super().__eq__(other)
@@ -57,6 +65,7 @@ class CaseInsensitiveDict(dict):
             return NotImplemented
 
     def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Any:
+        """Get a value referenced by a string key, compared case-insensitively."""
         return super().get(key.lower(), default)
 
 
@@ -172,7 +181,7 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
 
 
 def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> typing.Dict[str, bytes]:
-    """Parse DNS TXT records containing a dict."""
+    """Parse DNS-SD TXT records into a `dict`."""
     output = CaseInsensitiveDict()
     stop_position = buffer.tell() + length
     while buffer.tell() < stop_position:
@@ -214,6 +223,8 @@ def parse_srv_dict(buffer: typing.BinaryIO):
 
 
 class QueryType(enum.IntEnum):
+    """A DNS type ID."""
+
     A = 0x01
     PTR = 0x0C
     TXT = 0x10
