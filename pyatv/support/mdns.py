@@ -105,6 +105,12 @@ def _decode_properties(properties: typing.Dict[str, bytes]) -> typing.Dict[str, 
     return CaseInsensitiveDict({k: _decode(v) for k, v in properties.items()})
 
 
+def unpack_stream(fmt: str, buffer: typing.BinaryIO) -> typing.Tuple:
+    """Unpack a tuple from a binary stream, much like `struct.unpack`."""
+    size = struct.calcsize(fmt)
+    return struct.unpack(fmt, buffer.read(size))
+
+
 def qname_encode(name: str) -> bytes:
     """Encode QNAME without using name compression."""
     encoded = bytearray()
@@ -132,9 +138,7 @@ def parse_string(buffer: typing.BinaryIO) -> bytes:
 
     This is distinct from "domain-name" encoding; use `parse_domain_name` for that.
     """
-    length_data = buffer.read(1)
-    chunk_length = struct.unpack(">B", length_data)[0]
-    # chunk_length = struct.unpack(">B", buffer.read(1))[0]
+    chunk_length = unpack_stream(">B", buffer)[0]
     return buffer.read(chunk_length)
 
 
@@ -152,7 +156,7 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
     labels = []
     compression_offset = None
     while buffer:
-        length = struct.unpack(">B", buffer.read(1))[0]
+        length = unpack_stream(">B", buffer)[0]
         if length == 0:
             break
         # The two high bits of the length are a flag for DNS name compression
@@ -208,8 +212,7 @@ def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> typing.Dict[str, byt
 
 def parse_srv_dict(buffer: typing.BinaryIO):
     """Parse DNS SRV record."""
-    srv_struct = struct.Struct(">3H")
-    priority, weight, port = srv_struct.unpack(buffer.read(srv_struct.size))
+    priority, weight, port = unpack_stream(">3H", buffer)
     # Name compression isn't allowed by the RFC, but let's accept it anyways
     target = parse_domain_name(buffer)
     # TODO: Should there be a check for target == ".", for marking services that
@@ -252,10 +255,6 @@ class QueryType(enum.IntEnum):
             return buffer.read(length)
 
 
-# TODO: eventually move this in as a class attribute of DnsHeader
-dns_header_struct = struct.Struct(">6H")
-
-
 class DnsHeader(typing.NamedTuple):
     """Represents the header to a DNS message."""
 
@@ -276,18 +275,11 @@ class DnsHeader(typing.NamedTuple):
         leaving it prepped to start parsing questions or resource records immediately
         afterwards.
         """
-        data = buffer.read(dns_header_struct.size)
-        return cls._make(dns_header_struct.unpack(data))
+        return cls._make(unpack_stream(">6H", buffer))
 
     def pack(self) -> bytes:
         """Generate the packed DNS header data."""
-        return dns_header_struct.pack(
-            self.id, self.flags, self.qdcount, self.ancount, self.nscount, self.arcount
-        )
-
-
-# TODO: eventually move this in as a class attribute of DnsQuestion
-dns_question_struct = struct.Struct(">2H")
+        return struct.pack(">6H", *self)  # pylint: disable=not-an-iterable
 
 
 class DnsQuestion(typing.NamedTuple):
@@ -306,19 +298,13 @@ class DnsQuestion(typing.NamedTuple):
         the DNS message structure).
         """
         qname = parse_domain_name(buffer)
-        trailing_data = buffer.read(dns_question_struct.size)
-        unpacked_trailing = dns_question_struct.unpack(trailing_data)
-        return cls(qname, *unpacked_trailing)
+        return cls(qname, *unpack_stream(">2H", buffer))
 
     def pack(self) -> bytes:
         """Encode the question data as needed for a DNS query or response."""
         data = bytearray(qname_encode(self.qname))
-        data.extend(dns_question_struct.pack(self.qtype, self.qclass))
+        data.extend(struct.pack(">2H", *self))  # pylint: disable=not-an-iterable
         return data
-
-
-# TODO: eventually move this in as a class attribute of DnsResource
-dns_resource_struct = struct.Struct(">2HIH")
 
 
 class DnsResource(typing.NamedTuple):
@@ -339,8 +325,7 @@ class DnsResource(typing.NamedTuple):
         in another call to this method (as needed).
         """
         qname = parse_domain_name(buffer)
-        trailing_data = buffer.read(dns_resource_struct.size)
-        qtype, qclass, ttl, rd_length = dns_resource_struct.unpack(trailing_data)
+        qtype, qclass, ttl, rd_length = unpack_stream(">2HIH", buffer)
         before_rd = buffer.tell()
         if qtype in QueryType.__members__.values():
             qtype = QueryType(qtype)
