@@ -7,7 +7,7 @@ from ipaddress import IPv4Address
 from collections import namedtuple
 from typing import List, Dict, Optional, Tuple, Union, cast
 
-from pyatv.support import mdns
+from pyatv.support import dns, mdns
 
 from tests.support import dns_utils
 
@@ -84,7 +84,7 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
 
 
 def _lookup_service(
-    question: mdns.DnsQuestion,
+    question: dns.DnsQuestion,
     services: Dict[str, FakeDnsService],
 ) -> Union[Tuple[None, None], Tuple[FakeDnsService, str]]:
     """Given a DNS query and the registered fake services, find a matching service."""
@@ -109,9 +109,9 @@ def create_response(
     ip_filter: Optional[str] = None,
     sleep_proxy: bool = False,
 ):
-    msg = mdns.DnsMessage().unpack(request)
+    msg = dns.DnsMessage().unpack(request)
 
-    resp = mdns.DnsMessage()
+    resp = dns.DnsMessage()
     resp.flags = 0x0840
     resp.questions = msg.questions
 
@@ -133,28 +133,28 @@ def create_response(
 
         # Add service (SRV) resource
         if service.port:
-            local_name = mdns.qname_encode(service.name + ".local")
+            local_name = dns.qname_encode(service.name + ".local")
             rd = struct.pack(">3H", 0, 0, service.port) + local_name
-            resp.resources.append(dns_utils.resource(full_name, mdns.QueryType.SRV, rd))
+            resp.resources.append(dns_utils.resource(full_name, dns.QueryType.SRV, rd))
 
         # Add IP address
         if service.address:
             ipaddr = IPv4Address(service.address).packed
             resp.resources.append(
-                dns_utils.resource(service.name + ".local", mdns.QueryType.A, ipaddr)
+                dns_utils.resource(service.name + ".local", dns.QueryType.A, ipaddr)
             )
 
         # Add properties
         if service.properties:
             rd = dns_utils.properties(service.properties)
-            resp.resources.append(dns_utils.resource(full_name, mdns.QueryType.TXT, rd))
+            resp.resources.append(dns_utils.resource(full_name, dns.QueryType.TXT, rd))
 
         # Add model if present
         if service.model:
             rd = dns_utils.properties({"model": service.model.encode("utf-8")})
             resp.resources.append(
                 dns_utils.resource(
-                    service.name + "._device-info._tcp.local", mdns.QueryType.TXT, rd
+                    service.name + "._device-info._tcp.local", dns.QueryType.TXT, rd
                 )
             )
 
@@ -191,7 +191,7 @@ class FakeUdns(asyncio.Protocol):
         self.transport = transport
 
     def datagram_received(self, data: bytes, addr):
-        msg = mdns.DnsMessage().unpack(data)
+        msg = dns.DnsMessage().unpack(data)
         _LOGGER.debug("Received DNS request %s: %s", addr, msg)
 
         if self.skip_count > 0:

@@ -3,12 +3,12 @@
 import asyncio
 import io
 import logging
-from typing import Tuple
+from typing import Tuple, Optional
 from ipaddress import IPv4Address
 
 import pytest
 
-from pyatv.support import mdns, net
+from pyatv.support import dns, mdns, net
 from tests import fake_udns
 from tests.support import dns_utils
 
@@ -29,10 +29,10 @@ TEST_SERVICES = dict(
 
 def get_response_for_service(
     service: str,
-) -> Tuple[mdns.DnsMessage, fake_udns.FakeDnsService]:
+) -> Tuple[dns.DnsMessage, Optional[fake_udns.FakeDnsService]]:
     req = mdns.create_request([service])
     resp = fake_udns.create_response(req, TEST_SERVICES)
-    return mdns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
+    return dns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
 
 
 def test_qname_with_label():
@@ -40,7 +40,7 @@ def test_qname_with_label():
     message = b"aaaa" + b"\x04test\x00" + b"\x05label\xC0\x04\xAB\xCD"
     with io.BytesIO(message) as buffer:
         buffer.seek(10)
-        name = mdns.parse_domain_name(buffer)
+        name = dns.parse_domain_name(buffer)
         assert name == "label.test"
         assert buffer.tell() == len(message) - 2
 
@@ -63,7 +63,7 @@ def test_service_has_valid_question():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
     question = resp.questions[0]
     assert question.qname == MEDIAREMOTE_SERVICE
-    assert question.qtype == mdns.QueryType.PTR
+    assert question.qtype == dns.QueryType.PTR
     assert question.qclass == 0x8001
 
 
@@ -71,7 +71,7 @@ def test_service_has_valid_answer():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
     answer = resp.answers[0]
     assert answer.qname == MEDIAREMOTE_SERVICE
-    assert answer.qtype == mdns.QueryType.PTR
+    assert answer.qtype == dns.QueryType.PTR
     assert answer.qclass == dns_utils.DEFAULT_QCLASS
     assert answer.ttl == dns_utils.DEFAULT_TTL
     assert answer.rd == data.name + "." + MEDIAREMOTE_SERVICE
@@ -80,9 +80,9 @@ def test_service_has_valid_answer():
 def test_service_has_valid_srv_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.SRV)
+    srv = dns_utils.get_qtype(resp.resources, dns.QueryType.SRV)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == mdns.QueryType.SRV
+    assert srv.qtype == dns.QueryType.SRV
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -96,9 +96,9 @@ def test_service_has_valid_srv_resource():
 def test_service_has_valid_txt_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.TXT)
+    srv = dns_utils.get_qtype(resp.resources, dns.QueryType.TXT)
     assert srv.qname == data.name + "." + MEDIAREMOTE_SERVICE
-    assert srv.qtype == mdns.QueryType.TXT
+    assert srv.qtype == dns.QueryType.TXT
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
 
@@ -111,38 +111,38 @@ def test_service_has_valid_txt_resource():
 def test_service_has_valid_a_resource():
     resp, data = get_response_for_service(MEDIAREMOTE_SERVICE)
 
-    srv = dns_utils.get_qtype(resp.resources, mdns.QueryType.A)
+    srv = dns_utils.get_qtype(resp.resources, dns.QueryType.A)
     assert srv.qname == data.name + ".local"
-    assert srv.qtype == mdns.QueryType.A
+    assert srv.qtype == dns.QueryType.A
     assert srv.qclass == dns_utils.DEFAULT_QCLASS
     assert srv.ttl == dns_utils.DEFAULT_TTL
     assert srv.rd == "127.0.0.1"
 
 
 def test_authority():
-    msg = mdns.DnsMessage()
+    msg = dns.DnsMessage()
     msg.authorities.append(
-        dns_utils.resource("test.local", mdns.QueryType.A, b"\x01\x02\x03\x04")
+        dns_utils.resource("test.local", dns.QueryType.A, b"\x01\x02\x03\x04")
     )
 
-    unpacked = mdns.DnsMessage().unpack(msg.pack())
+    unpacked = dns.DnsMessage().unpack(msg.pack())
     assert len(unpacked.authorities) == 1
 
     record = unpacked.authorities[0]
     assert record.qname == "test.local"
-    assert record.qtype == mdns.QueryType.A
+    assert record.qtype == dns.QueryType.A
     assert record.qclass == dns_utils.DEFAULT_QCLASS
     assert record.ttl == dns_utils.DEFAULT_TTL
     assert record.rd == "1.2.3.4"
 
 
 def test_parse_empty_service():
-    assert mdns.parse_services(mdns.DnsMessage()) == []
+    assert mdns.parse_services(dns.DnsMessage()) == []
 
 
 def test_parse_no_service_type():
     service_params = (None, "service", None, 0, {})
-    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
     assert len(parsed) == 0
@@ -150,7 +150,7 @@ def test_parse_no_service_type():
 
 def test_parse_no_service_name():
     service_params = ("_abc._tcp.local", None, None, 0, {})
-    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
     assert len(parsed) == 0
@@ -158,7 +158,7 @@ def test_parse_no_service_name():
 
 def test_parse_with_name_and_type():
     service_params = ("_abc._tcp.local", "service", None, 0, {})
-    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
     assert len(parsed) == 1
@@ -167,7 +167,7 @@ def test_parse_with_name_and_type():
 
 def test_parse_with_port_and_address():
     service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
-    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
     assert len(parsed) == 1
@@ -176,7 +176,7 @@ def test_parse_with_port_and_address():
 
 def test_parse_single_service():
     service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
-    message = dns_utils.add_service(mdns.DnsMessage(), *service_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
     assert len(parsed) == 1
@@ -192,7 +192,7 @@ def test_parse_double_service():
         456,
         {"fizz": "buzz"},
     )
-    message = dns_utils.add_service(mdns.DnsMessage(), *service1_params)
+    message = dns_utils.add_service(dns.DnsMessage(), *service1_params)
     message = dns_utils.add_service(message, *service2_params)
 
     parsed = mdns.parse_services(message)

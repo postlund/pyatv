@@ -3,7 +3,7 @@
 import struct
 from ipaddress import IPv4Address
 from typing import Optional, Dict, List
-from pyatv.support import mdns
+from pyatv.support import dns, mdns
 
 DEFAULT_QCLASS = 1
 DEFAULT_TTL = 10
