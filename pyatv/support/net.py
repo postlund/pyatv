@@ -105,23 +105,6 @@ def get_private_addresses() -> List[IPv4Address]:
 # Reference: https://stackoverflow.com/a/14855726
 def tcp_keepalive(sock) -> None:
     """Configure keep-alive on a socket."""
-
-    def _setopt(option, value):
-        try:
-            if isinstance(option, str):
-                if hasattr(socket, option):
-                    option = getattr(socket, option)
-                else:
-                    raise exceptions.NotSupportedError(
-                        f"Option {option} is not supported"
-                    )
-
-            sock.setsockopt(socket.IPPROTO_TCP, option, value)
-        except OSError as ex:
-            raise exceptions.NotSupportedError(
-                f"Unable to set {option} on {sock}: {ex}"
-            )
-
     current_platform = platform.system()
 
     if not hasattr(socket, "SO_KEEPALIVE"):
@@ -129,24 +112,33 @@ def tcp_keepalive(sock) -> None:
 
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-    # Look up options depending on operating system
-    optnames = {
-        # https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/bsd/netinet/tcp.h#L206  # noqa
-        "Darwin": (0x10, 0x101, 0x102),
-        "Linux": ("TCP_KEEPIDLE", "TCP_KEEPINTVL", "TCP_KEEPCNT"),
-        "Windows": ("TCP_KEEPIDLE", "TCP_KEEPINTVL", "TCP_KEEPCNT"),
-    }.get(current_platform, None)
-
-    if optnames is None:
-        raise exceptions.NotSupportedError(
-            f"{current_platform} does not support keep-alive"
-        )
-
     # Default values are 1s idle time, 5s interval and 4 fails
-    idle, intvl, cnt = optnames
-    _setopt(idle, 1)
-    _setopt(intvl, 5)
-    _setopt(cnt, 4)
+    keepalive_options = {
+        "TCP_KEEPIDLE": 1,
+        "TCP_KEEPINTVL": 5,
+        "TCP_KEEPCNT": 4,
+    }
+
+    for option_name, value in keepalive_options.items():
+        try:
+            option = getattr(socket, option_name)
+        except AttributeError:
+            if current_platform == "Darwin" and option_name == "TCP_KEEPIDLE":
+                # TCP_KEEPALIVE will hopefully be available at some point,
+                # (https://bugs.python.org/issue34932) but until then the value is
+                # hardcoded.
+                # https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/bsd/netinet/tcp.h#L206  # noqa
+                option = 0x10
+            else:
+                raise exceptions.NotSupportedError(
+                    f"Option {option_name} is not supported"
+                )
+        try:
+            sock.setsockopt(socket.IPPROTO_TCP, option, value)
+        except OSError as ex:
+            raise exceptions.NotSupportedError(
+                f"Unable to set {option_name} ({option:#x}) on {sock}: {ex}"
+            )
 
     _LOGGER.debug("Configured keep-alive on %s (%s)", sock, current_platform)
 
