@@ -35,16 +35,6 @@ def get_response_for_service(
     return dns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
 
 
-def test_qname_with_label():
-    # This should resolve to "label.test" when reading from \x05
-    message = b"aaaa" + b"\x04test\x00" + b"\x05label\xC0\x04\xAB\xCD"
-    with io.BytesIO(message) as buffer:
-        buffer.seek(10)
-        name = dns.parse_domain_name(buffer)
-        assert name == "label.test"
-        assert buffer.tell() == len(message) - 2
-
-
 def test_non_existing_service():
     resp, _ = get_response_for_service("_missing")
     assert len(resp.questions) == 1

@@ -21,20 +21,26 @@ def unpack_stream(fmt: str, buffer: typing.BinaryIO) -> typing.Tuple:
 def qname_encode(name: str) -> bytes:
     """Encode QNAME without using name compression."""
     encoded = bytearray()
-    for label in name.split("."):
+    labels = name.split(".")
+    # Ensure there's an empty label for the root domain
+    if labels[-1] != "":
+        labels.append("")
+    for label in labels:
         encoded_label = label.encode("idna")
         encoded_length = len(encoded_label)
         # Length of the encoded label, in bytes, but a maximum of 63
         # The maximum is 63 as the upper two bits are used as a flag for name
         # compression.
         encoded.append(min(encoded_length, 63))
+        if encoded_length == 0:
+            # If we've reached an empty label, assume this is the last component.
+            # Empty labels (two periods right after each other) isn't legal anyways.
+            break
         # TODO: Should an error be raised if a label is too long?
         if encoded_length > 63:
             encoded.extend(encoded_label[:64])
         else:
             encoded.extend(encoded_label)
-    # The final component for the root namespace
-    encoded.append(0x0)
     return encoded
 
 
