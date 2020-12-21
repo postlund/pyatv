@@ -29,7 +29,7 @@ class Service(typing.NamedTuple):
     name: str
     address: typing.Optional[IPv4Address]
     port: int
-    properties: typing.Dict[str, str]
+    properties: typing.Mapping[str, str]
 
 
 class Response(typing.NamedTuple):

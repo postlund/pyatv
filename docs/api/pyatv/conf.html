@@ -72,7 +72,7 @@ For a configuration to be usable (&#34;ready&#34;) it must have either a `DMAP` 
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 &#34;&#34;&#34;
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional
+from typing import Dict, Mapping, List, Optional
 
 from pyatv import exceptions
 from pyatv.const import Protocol, OperatingSystem, DeviceModel
@@ -210,7 +210,7 @@ class AppleTV:
 
         return DeviceInfo(os_type, version, build, model, mac)
 
-    def _all_properties(self) -&gt; Dict[str, str]:
+    def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
@@ -249,7 +249,7 @@ class DmapService(BaseService):
         identifier: Optional[str],
         credentials: Optional[str],
         port: int = 3689,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
@@ -270,7 +270,7 @@ class MrpService(BaseService):
         identifier: Optional[str],
         port: int,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.MRP, port, properties)
@@ -286,7 +286,7 @@ class AirPlayService(BaseService):
         identifier: Optional[str],
         port: int = 7000,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.AirPlay, port, properties)
@@ -304,7 +304,7 @@ class AirPlayService(BaseService):
 <dl>
 <dt id="pyatv.conf.AirPlayService"><code class="flex name class">
 <span>class <span class="ident">AirPlayService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Dict[str, str]] = None)</span>
+<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
@@ -321,7 +321,7 @@ class AirPlayService(BaseService):
         identifier: Optional[str],
         port: int = 7000,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.AirPlay, port, properties)
@@ -485,7 +485,7 @@ AirPlay.</p>
 
         return DeviceInfo(os_type, version, build, model, mac)
 
-    def _all_properties(self) -&gt; Dict[str, str]:
+    def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
@@ -738,7 +738,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>
-<span>(</span><span>identifier: Optional[str], credentials: Optional[str], port: int = 3689, properties: Optional[Dict[str, str]] = None)</span>
+<span>(</span><span>identifier: Optional[str], credentials: Optional[str], port: int = 3689, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
@@ -755,7 +755,7 @@ returned.</p></section>
         identifier: Optional[str],
         credentials: Optional[str],
         port: int = 3689,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
@@ -782,7 +782,7 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.MrpService"><code class="flex name class">
 <span>class <span class="ident">MrpService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int, credentials: Optional[str] = None, properties: Optional[Dict[str, str]] = None)</span>
+<span>(</span><span>identifier: Optional[str], port: int, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
@@ -799,7 +799,7 @@ returned.</p></section>
         identifier: Optional[str],
         port: int,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.MRP, port, properties)

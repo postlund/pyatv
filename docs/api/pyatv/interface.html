@@ -229,6 +229,8 @@ import hashlib
 from typing import (
     Any,
     Dict,
+    Mapping,
+    MutableMapping,
     Optional,
     NamedTuple,
     Callable,
@@ -379,14 +381,14 @@ class BaseService:
         identifier: Optional[str],
         protocol: Protocol,
         port: int,
-        properties: Optional[Dict[str, str]],
+        properties: Optional[Mapping[str, str]],
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new BaseService.&#34;&#34;&#34;
         self.__identifier = identifier
         self.protocol = protocol
         self.port = port
         self.credentials: Optional[str] = None
-        self.properties = properties or {}
+        self.properties: MutableMapping[str, str] = dict(properties or {})
 
     @property
     def identifier(self) -&gt; Optional[str]:
@@ -1481,7 +1483,7 @@ async def connect(self) -&gt; None:
 </dd>
 <dt id="pyatv.interface.BaseService"><code class="flex name class">
 <span>class <span class="ident">BaseService</span></span>
-<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Dict[str, str]])</span>
+<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for protocol services.</p>
@@ -1498,14 +1500,14 @@ async def connect(self) -&gt; None:
         identifier: Optional[str],
         protocol: Protocol,
         port: int,
-        properties: Optional[Dict[str, str]],
+        properties: Optional[Mapping[str, str]],
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new BaseService.&#34;&#34;&#34;
         self.__identifier = identifier
         self.protocol = protocol
         self.port = port
         self.credentials: Optional[str] = None
-        self.properties = properties or {}
+        self.properties: MutableMapping[str, str] = dict(properties or {})
 
     @property
     def identifier(self) -&gt; Optional[str]:
