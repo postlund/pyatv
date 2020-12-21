@@ -97,16 +97,16 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
     return ".".join(label.decode("idna") for label in labels)
 
 
-def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> typing.Dict[str, bytes]:
+def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> CaseInsensitiveDict[bytes]:
     """Parse DNS-SD TXT records into a `dict`."""
-    output = CaseInsensitiveDict()
+    output: CaseInsensitiveDict[bytes] = CaseInsensitiveDict()
     stop_position = buffer.tell() + length
     while buffer.tell() < stop_position:
         chunk = parse_string(buffer)
         if b"=" not in chunk:
             decoded_chunk = chunk.decode("ascii")
-            # missing "=" means its a boolean attribute
-            output[decoded_chunk] = True
+            # missing "=" means it's just present with no value.
+            output[decoded_chunk] = b""
         else:
             key, value = chunk.split(b"=", 1)
             if not key:

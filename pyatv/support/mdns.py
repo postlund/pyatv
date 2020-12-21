@@ -43,7 +43,9 @@ class Response(typing.NamedTuple):
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
-def _decode_properties(properties: typing.Dict[str, bytes]) -> typing.Dict[str, str]:
+def _decode_properties(
+    properties: typing.Mapping[str, bytes],
+) -> CaseInsensitiveDict[str]:
     def _decode(value: bytes):
         try:
             # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding

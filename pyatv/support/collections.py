@@ -1,24 +1,64 @@
 """Collections for pyatv."""
+import collections.abc
 import typing
 
 
-class CaseInsensitiveDict(dict):
-    """A `dict` where the keys are compared case-insensitively.
+T = typing.TypeVar("T")
+
+
+class CaseInsensitiveDict(typing.MutableMapping[str, T]):
+    """A mapping where the keys are compared case-insensitively.
 
     As a consequence of this, the keys *must* be strings.
     """
 
-    def __getitem__(self, key: str) -> typing.Any:
-        """Get a value referenced by a string key, compared case-insensitively."""
-        return super().__getitem__(key.lower())
+    _data: typing.Dict[str, T]
 
-    def __setitem__(self, key: str, value: typing.Any):
+    @staticmethod
+    def _lower_key(key_value: typing.Tuple[str, T]) -> typing.Tuple[str, T]:
+        key, value = key_value
+        return key.lower(), value
+
+    def __init__(
+        self,
+        mapping_or_iterable: typing.Union[
+            typing.Mapping[str, T], typing.Iterable[typing.Tuple[str, T]], None
+        ] = None,
+        **kwargs
+    ):
+        """Create a `CaseInensitiveDict`. It takes the same arguments as `dict`."""
+        self._data = dict()
+        if isinstance(mapping_or_iterable, collections.abc.Mapping):
+            self._data.update(map(self._lower_key, mapping_or_iterable.items()))
+        elif isinstance(mapping_or_iterable, collections.abc.Iterable):
+            self._data.update(
+                # It doesn't look like mypy goes deep enough to check this properly, (it
+                # thinks the argument to the callable should be a sequence of objects,
+                # not an iterable of tuples) so casting it is.
+                map(
+                    typing.cast(
+                        typing.Callable[
+                            [typing.Sequence[object]], typing.Tuple[str, T]
+                        ],
+                        self._lower_key,
+                    ),
+                    mapping_or_iterable,
+                )
+            )
+        if kwargs:
+            self._data.update(map(self._lower_key, kwargs.items()))
+
+    def __getitem__(self, key: str) -> T:
+        """Get a value referenced by a string key, compared case-insensitively."""
+        return self._data[key.lower()]
+
+    def __setitem__(self, key: str, value: T):
         """Set a value referenced by a string key, compared case-insensitively."""
-        return super().__setitem__(key.lower(), value)
+        self._data[key.lower()] = value
 
     def __delitem__(self, key: str):
         """Delete a value referenced by a string key, compared case-insensitively."""
-        return super().__delitem__(key.lower())
+        del self._data[key.lower()]
 
     def __contains__(self, key) -> bool:
         """Check if a key is present in the dictionary, compared case-insensitively."""
@@ -27,22 +67,29 @@ class CaseInsensitiveDict(dict):
         except AttributeError:
             return NotImplemented
 
+    def __len__(self) -> int:
+        """Get the number of keys (and values) present in the mapping."""
+        return len(self._data)
+
+    def __iter__(self) -> typing.Iterator[str]:
+        """Return an iterator over the mapping keys."""
+        return iter(self._data)
+
     def __eq__(self, other):
         """Comparetwo dictionaries, with keys compared case-insensitively."""
         if isinstance(other, CaseInsensitiveDict):
             # If it's another CaseInsensitiveDict, super easy
-            return super().__eq__(other)
-        elif isinstance(other, dict):
+            return self._data == other._data
+        elif isinstance(other, collections.abc.Mapping):
             # if it's not, but it is a dict, attempt to lower the keys of the other dict
-            try:
-                lowered_other = {k.lower(): v for k, v in other.items()}
-            except AttributeError:
-                # If the other leys aren't strings, these dicts aren't equal
-                return False
-            return super().__eq__(lowered_other)
+            for other_key, other_value in other.items():
+                try:
+                    lowered_key = other_key.lower()
+                except AttributeError:
+                    # If the other keys aren't strings, these dicts aren't equal
+                    return False
+                if other_value != self[lowered_key]:
+                    return False
+            return True
         else:
             return NotImplemented
-
-    def get(self, key: str, default: typing.Optional[typing.Any] = None) -> typing.Any:
-        """Get a value referenced by a string key, compared case-insensitively."""
-        return super().get(key.lower(), default)
