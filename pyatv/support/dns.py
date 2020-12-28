@@ -39,8 +39,16 @@ def qname_encode(name: str) -> bytes:
             # If we've reached an empty label, assume this is the last component.
             # Empty labels (two periods right after each other) isn't legal anyways.
             break
-        # TODO: Should an error be raised if a label is too long?
         if encoded_length > 63:
+            _LOGGER.warning(
+                (
+                    "A label (%s) isn being truncated (to %s) in the DNS name '%s' "
+                    "as it is over 63 bytes long."
+                ),
+                label,
+                label[:64],
+                name,
+            )
             encoded.extend(encoded_label[:64])
         else:
             encoded.extend(encoded_label)
