@@ -13,7 +13,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def unpack_stream(fmt: str, buffer: typing.BinaryIO) -> typing.Tuple:
-    """Unpack a tuple from a binary stream, much like `struct.unpack`."""
+    """Unpack data from a binary stream according to the given format string.
+
+    This is basically `struct.unpack`, but for binary streams.
+    """
     size = struct.calcsize(fmt)
     return struct.unpack(fmt, buffer.read(size))
 
