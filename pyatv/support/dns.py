@@ -227,7 +227,9 @@ class DnsQuestion(typing.NamedTuple):
     def pack(self) -> bytes:
         """Encode the question data as needed for a DNS query or response."""
         data = bytearray(qname_encode(self.qname))
-        data.extend(struct.pack(">2H", *self))  # pylint: disable=not-an-iterable
+        data.extend(
+            struct.pack(">2H", *self[1:])
+        )  # pylint: disable=unsubscriptable-object
         return data
 
 
@@ -313,12 +315,12 @@ class DnsMessage:
             len(self.resources),
         )
 
-        buf = struct.pack(">6H", *header)
+        buf = bytearray()
+
+        buf.extend(header.pack())
 
         for question in self.questions:
-            buf += qname_encode(question.qname)
-            buf += struct.pack(">H", question.qtype)
-            buf += struct.pack(">H", question.qclass)
+            buf.extend(question.pack())
 
         for answer in self.answers:
             data = qname_encode(answer.rd)
