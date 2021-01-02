@@ -8,7 +8,7 @@ For a configuration to be usable ("ready") it must have either a `DMAP` or `MRP`
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 """
 from ipaddress import IPv4Address
-from typing import Dict, List, Optional
+from typing import Dict, Mapping, List, Optional
 
 from pyatv import exceptions
 from pyatv.const import Protocol, OperatingSystem, DeviceModel
@@ -146,7 +146,7 @@ class AppleTV:
 
         return DeviceInfo(os_type, version, build, model, mac)
 
-    def _all_properties(self) -> Dict[str, str]:
+    def _all_properties(self) -> Mapping[str, str]:
         properties: Dict[str, str] = {}
         for service in self.services:
             properties.update(service.properties)
@@ -185,7 +185,7 @@ class DmapService(BaseService):
         identifier: Optional[str],
         credentials: Optional[str],
         port: int = 3689,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new DmapService."""
         super().__init__(
@@ -206,7 +206,7 @@ class MrpService(BaseService):
         identifier: Optional[str],
         port: int,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new MrpService."""
         super().__init__(identifier, Protocol.MRP, port, properties)
@@ -222,7 +222,7 @@ class AirPlayService(BaseService):
         identifier: Optional[str],
         port: int = 7000,
         credentials: Optional[str] = None,
-        properties: Optional[Dict[str, str]] = None,
+        properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new AirPlayService."""
         super().__init__(identifier, Protocol.AirPlay, port, properties)

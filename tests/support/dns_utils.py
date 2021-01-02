@@ -2,8 +2,8 @@
 
 import struct
 from ipaddress import IPv4Address
-from typing import Optional, Dict
-from pyatv.support import mdns
+from typing import Optional, Dict, List
+from pyatv.support import dns, mdns
 
 DEFAULT_QCLASS = 1
 DEFAULT_TTL = 10
@@ -11,23 +11,25 @@ DEFAULT_TTL = 10
 
 def answer(qname: str, full_name: str) -> mdns.DnsResource:
     return mdns.DnsResource(
-        qname, mdns.QTYPE_PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
+        qname, mdns.QueryType.PTR, DEFAULT_QCLASS, DEFAULT_TTL, 0, full_name
     )
 
 
-def resource(qname: str, qtype: int, rd) -> mdns.DnsResource:
+def resource(qname: str, qtype: mdns.QueryType, rd) -> mdns.DnsResource:
     return mdns.DnsResource(qname, qtype, DEFAULT_QCLASS, DEFAULT_TTL, len(rd), rd)
 
 
-def properties(properties: Dict[bytes, bytes]) -> bytes:
+def properties(properties: Dict[str, bytes]) -> bytes:
     rd = b""
     for k, v in properties.items():
-        encoded = k + b"=" + v
+        encoded = k.encode("ascii") + b"=" + v
         rd += bytes([len(encoded)]) + encoded
     return rd
 
 
-def get_qtype(messages: mdns.DnsMessage, qtype: int) -> Optional[mdns.DnsResource]:
+def get_qtype(
+    messages: List[mdns.DnsResource], qtype: int
+) -> Optional[mdns.DnsResource]:
     for message in messages:
         if message.qtype == qtype:
             return message
@@ -40,14 +42,14 @@ def add_service(
     service_name: Optional[str],
     address: Optional[str],
     port: int,
-    properties: dict,
+    properties: Dict[str, bytes],
 ) -> None:
     if service_name is None:
         return message
 
     if address:
         message.resources.append(
-            resource(service_name + ".local", mdns.QTYPE_A, address)
+            resource(service_name + ".local", mdns.QueryType.A, address)
         )
 
     # Remaining depends on service type
@@ -59,7 +61,7 @@ def add_service(
     message.resources.append(
         resource(
             service_name + "." + service_type,
-            mdns.QTYPE_SRV,
+            mdns.QueryType.SRV,
             {
                 "priority": 0,
                 "weight": 0,
@@ -73,8 +75,8 @@ def add_service(
         message.resources.append(
             resource(
                 service_name + "." + service_type,
-                mdns.QTYPE_TXT,
-                {k.encode("utf-8"): v.encode("utf-8") for k, v in properties.items()},
+                mdns.QueryType.TXT,
+                {k: v.encode("utf-8") for k, v in properties.items()},
             )
         )
 
@@ -82,15 +84,15 @@ def add_service(
 
 
 def assert_service(
-    message: mdns.DnsMessage,
+    message: mdns.Service,
     service_type: str,
     service_name: str,
     address: str,
     port: int,
-    properties: dict,
+    known_properties: Dict[str, bytes],
 ) -> None:
     assert message.type == service_type
     assert message.name == service_name
     assert message.address == (IPv4Address(address) if address else None)
     assert message.port == port
-    assert message.properties == properties
+    assert message.properties == known_properties
