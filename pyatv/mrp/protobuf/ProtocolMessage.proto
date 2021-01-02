@@ -71,7 +71,9 @@ message ErrorCode {
 }
 
 message ProtocolMessage {
-  extensions 6 to max;
+  extensions 6 to 77;
+  extensions 79 to 84;
+  extensions 86 to max;
 
   enum Type {
     UNKNOWN_MESSAGE = 0;
@@ -118,7 +120,7 @@ message ProtocolMessage {
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = 43;
     SEND_LYRICS_EVENT = 44;
     SET_NOW_PLAYING_CLIENT_MESSAGE = 46;
-    SET_NOT_PLAYING_PLAYER_MESSAGE = 47;
+    SET_NOW_PLAYING_PLAYER_MESSAGE = 47;
     REMOVE_CLIENT_MESSAGE = 53;
     REMOVE_PLAYER_MESSAGE = 54;
     UPDATE_CLIENT_MESSAGE = 55;
@@ -126,6 +128,13 @@ message ProtocolMessage {
     VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = 64;
     UPDATE_OUTPUT_DEVICE_MESSAGE = 65;
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = 72;
+    SET_DISCOVERY_MODE_MESSAGE = 101;
+    UPDATE_END_POINTS_MESSAGE = 102;
+    REMOVE_ENDPOINTS_MESSAGE = 103;
+    PLAYER_CLIENT_PROPERTIES_MESSAGE = 104;
+    ORIGIN_CLIENT_PROPERTIES_MESSAGE = 105;
+    AUDIO_FADE_MESSAGE = 106;
+    AUDIO_FADE_RESPONSE_MESSAGE = 107;
   }
 
   optional Type type = 1; // Identifies which underlying message is filled in.
@@ -133,4 +142,6 @@ message ProtocolMessage {
   optional string authenticationToken = 3;
   optional ErrorCode.Enum errorCode = 4;
   optional uint64 timestamp = 5;
+  optional string errorDescription = 78;
+  optional string uniqueIdentifier = 85;
 }

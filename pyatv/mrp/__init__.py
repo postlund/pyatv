@@ -25,7 +25,7 @@ from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.protobuf import CommandInfo_pb2
-from pyatv.mrp.protobuf.SetStateMessage_pb2 import SetStateMessage as ssm
+from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.player_state import PlayerStateManager
 from pyatv.interface import (
     AppleTV,
@@ -202,9 +202,9 @@ class MrpRemoteControl(RemoteControl):
             await self._send_command(CommandInfo_pb2.TogglePlayPause)
         else:
             state = self.psm.playing.playback_state
-            if state == ssm.Playing:
+            if state == PlaybackState.Playing:
                 await self.pause()
-            elif state == ssm.Paused:
+            elif state == PlaybackState.Paused:
                 await self.play()
 
     async def pause(self) -> None:
@@ -325,11 +325,11 @@ class MrpPlaying(Playing):
         """Device state, e.g. playing or paused."""
         return {
             None: DeviceState.Idle,
-            ssm.Playing: DeviceState.Playing,
-            ssm.Paused: DeviceState.Paused,
-            ssm.Stopped: DeviceState.Stopped,
-            ssm.Interrupted: DeviceState.Loading,
-            ssm.Seeking: DeviceState.Seeking,
+            PlaybackState.Playing: DeviceState.Playing,
+            PlaybackState.Paused: DeviceState.Paused,
+            PlaybackState.Stopped: DeviceState.Stopped,
+            PlaybackState.Interrupted: DeviceState.Loading,
+            PlaybackState.Seeking: DeviceState.Seeking,
         }.get(self._state.playback_state, DeviceState.Paused)
 
     @property
@@ -632,11 +632,11 @@ class MrpFeatures(Features):
         # into consideration here.
         if feature == FeatureName.PlayPause:
             playback_state = self.psm.playing.playback_state
-            if playback_state == ssm.Playing and self.in_state(
+            if playback_state == PlaybackState.Playing and self.in_state(
                 FeatureState.Available, FeatureName.Pause
             ):
                 return FeatureInfo(state=FeatureState.Available)
-            if playback_state == ssm.Paused and self.in_state(
+            if playback_state == PlaybackState.Paused and self.in_state(
                 FeatureState.Available, FeatureName.Play
             ):
                 return FeatureInfo(state=FeatureState.Available)

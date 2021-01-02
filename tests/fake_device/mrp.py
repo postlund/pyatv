@@ -9,8 +9,8 @@ from typing import Dict, Tuple, Optional
 from pyatv import const
 from pyatv.support import log_protobuf
 from pyatv.mrp import chacha20, messages, protobuf, variant
+from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
-from pyatv.mrp.protobuf import SetStateMessage as ssm
 from pyatv.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.mrp.server_auth import MrpServerAuth
 
@@ -538,7 +538,7 @@ class FakeMrpUseCases:
     ):
         """Call to change what is currently plaing to video."""
         metadata = PlayingState(
-            playback_state=ssm.Paused if paused else ssm.Playing,
+            playback_state=PlaybackState.Paused if paused else PlaybackState.Playing,
             title=title,
             total_time=total_time,
             position=position,
@@ -565,7 +565,7 @@ class FakeMrpUseCases:
     ):
         """Call to change what is currently plaing to music."""
         metadata = PlayingState(
-            playback_state=ssm.Paused if paused else ssm.Playing,
+            playback_state=PlaybackState.Paused if paused else PlaybackState.Playing,
             artist=artist,
             album=album,
             title=title,
@@ -580,6 +580,6 @@ class FakeMrpUseCases:
 
     def media_is_loading(self):
         """Call to put device in a loading state."""
-        metadata = PlayingState(playback_state=ssm.Interrupted)
+        metadata = PlayingState(playback_state=PlaybackState.Interrupted)
         self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.state.set_active_player(PLAYER_IDENTIFIER)

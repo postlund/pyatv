@@ -7,7 +7,7 @@ import weakref
 from copy import deepcopy
 
 from pyatv.mrp import protobuf
-from pyatv.mrp.protobuf import SetStateMessage, PlayerPath
+from pyatv.mrp.protobuf import PlaybackState, PlayerPath
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,12 +33,12 @@ class PlayerState:
 
         if math.isclose(playback_rate, 0.0):
             # Special case where playback rate is incorrectly set
-            if self._playback_state == SetStateMessage.Paused:
-                return SetStateMessage.Paused
+            if self._playback_state == PlaybackState.Paused:
+                return PlaybackState.Paused
             return self._playback_state
         if math.isclose(playback_rate, 1.0):
-            return SetStateMessage.Playing
-        return SetStateMessage.Seeking
+            return PlaybackState.Playing
+        return PlaybackState.Seeking
 
     @property
     def metadata(self):

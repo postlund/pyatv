@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"<\n\nRepeatMode\".\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\x07\n\x03One\x10\x02\x12\x07\n\x03\x41ll\x10\x03\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\xca\x01\n\rDeviceSubType\"\xb8\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r'
+  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"<\n\nRepeatMode\".\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\x07\n\x03One\x10\x02\x12\x07\n\x03\x41ll\x10\x03\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\xca\x01\n\rDeviceSubType\"\xb8\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r\"h\n\rPlaybackState\"W\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05'
 )
 
 
@@ -245,6 +245,44 @@ _DEVICESUBTYPE_ENUM = _descriptor.EnumDescriptor(
 )
 _sym_db.RegisterEnumDescriptor(_DEVICESUBTYPE_ENUM)
 
+_PLAYBACKSTATE_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='PlaybackState.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Playing', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Paused', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Stopped', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Interrupted', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Seeking', index=5, number=5,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=627,
+  serialized_end=714,
+)
+_sym_db.RegisterEnumDescriptor(_PLAYBACKSTATE_ENUM)
+
 
 _REPEATMODE = _descriptor.Descriptor(
   name='RepeatMode',
@@ -370,16 +408,43 @@ _DEVICESUBTYPE = _descriptor.Descriptor(
   serialized_end=608,
 )
 
+
+_PLAYBACKSTATE = _descriptor.Descriptor(
+  name='PlaybackState',
+  full_name='PlaybackState',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _PLAYBACKSTATE_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=610,
+  serialized_end=714,
+)
+
 _REPEATMODE_ENUM.containing_type = _REPEATMODE
 _SHUFFLEMODE_ENUM.containing_type = _SHUFFLEMODE
 _DEVICECLASS_ENUM.containing_type = _DEVICECLASS
 _DEVICETYPE_ENUM.containing_type = _DEVICETYPE
 _DEVICESUBTYPE_ENUM.containing_type = _DEVICESUBTYPE
+_PLAYBACKSTATE_ENUM.containing_type = _PLAYBACKSTATE
 DESCRIPTOR.message_types_by_name['RepeatMode'] = _REPEATMODE
 DESCRIPTOR.message_types_by_name['ShuffleMode'] = _SHUFFLEMODE
 DESCRIPTOR.message_types_by_name['DeviceClass'] = _DEVICECLASS
 DESCRIPTOR.message_types_by_name['DeviceType'] = _DEVICETYPE
 DESCRIPTOR.message_types_by_name['DeviceSubType'] = _DEVICESUBTYPE
+DESCRIPTOR.message_types_by_name['PlaybackState'] = _PLAYBACKSTATE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 RepeatMode = _reflection.GeneratedProtocolMessageType('RepeatMode', (_message.Message,), {
@@ -416,6 +481,13 @@ DeviceSubType = _reflection.GeneratedProtocolMessageType('DeviceSubType', (_mess
   # @@protoc_insertion_point(class_scope:DeviceSubType)
   })
 _sym_db.RegisterMessage(DeviceSubType)
+
+PlaybackState = _reflection.GeneratedProtocolMessageType('PlaybackState', (_message.Message,), {
+  'DESCRIPTOR' : _PLAYBACKSTATE,
+  '__module__' : 'pyatv.mrp.protobuf.Common_pb2'
+  # @@protoc_insertion_point(class_scope:PlaybackState)
+  })
+_sym_db.RegisterMessage(PlaybackState)
 
 
 # @@protoc_insertion_point(module_scope)

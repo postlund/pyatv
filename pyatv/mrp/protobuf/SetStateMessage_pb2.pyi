@@ -2,17 +2,16 @@
 import sys
 from google.protobuf.descriptor import (
     Descriptor as google___protobuf___descriptor___Descriptor,
-    EnumDescriptor as google___protobuf___descriptor___EnumDescriptor,
     FieldDescriptor as google___protobuf___descriptor___FieldDescriptor,
     FileDescriptor as google___protobuf___descriptor___FileDescriptor,
 )
 
-from google.protobuf.internal.enum_type_wrapper import (
-    _EnumTypeWrapper as google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper,
-)
-
 from google.protobuf.message import (
     Message as google___protobuf___message___Message,
+)
+
+from pyatv.mrp.protobuf.Common_pb2 import (
+    PlaybackState as pyatv___mrp___protobuf___Common_pb2___PlaybackState,
 )
 
 from pyatv.mrp.protobuf.NowPlayingInfo_pb2 import (
@@ -40,10 +39,8 @@ from pyatv.mrp.protobuf.SupportedCommands_pb2 import (
 )
 
 from typing import (
-    NewType as typing___NewType,
     Optional as typing___Optional,
     Text as typing___Text,
-    cast as typing___cast,
 )
 
 from typing_extensions import (
@@ -61,28 +58,9 @@ DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
 class SetStateMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    PlaybackStateValue = typing___NewType('PlaybackStateValue', builtin___int)
-    type___PlaybackStateValue = PlaybackStateValue
-    PlaybackState: _PlaybackState
-    class _PlaybackState(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[SetStateMessage.PlaybackStateValue]):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        Unknown = typing___cast(SetStateMessage.PlaybackStateValue, 0)
-        Playing = typing___cast(SetStateMessage.PlaybackStateValue, 1)
-        Paused = typing___cast(SetStateMessage.PlaybackStateValue, 2)
-        Stopped = typing___cast(SetStateMessage.PlaybackStateValue, 3)
-        Interrupted = typing___cast(SetStateMessage.PlaybackStateValue, 4)
-        Seeking = typing___cast(SetStateMessage.PlaybackStateValue, 5)
-    Unknown = typing___cast(SetStateMessage.PlaybackStateValue, 0)
-    Playing = typing___cast(SetStateMessage.PlaybackStateValue, 1)
-    Paused = typing___cast(SetStateMessage.PlaybackStateValue, 2)
-    Stopped = typing___cast(SetStateMessage.PlaybackStateValue, 3)
-    Interrupted = typing___cast(SetStateMessage.PlaybackStateValue, 4)
-    Seeking = typing___cast(SetStateMessage.PlaybackStateValue, 5)
-    type___PlaybackState = PlaybackState
-
     displayID: typing___Text = ...
     displayName: typing___Text = ...
-    playbackState: type___SetStateMessage.PlaybackStateValue = ...
+    playbackState: pyatv___mrp___protobuf___Common_pb2___PlaybackState.EnumValue = ...
     playbackStateTimestamp: builtin___float = ...
 
     @property
@@ -110,7 +88,7 @@ class SetStateMessage(google___protobuf___message___Message):
         playbackQueue : typing___Optional[pyatv___mrp___protobuf___PlaybackQueue_pb2___PlaybackQueue] = None,
         displayID : typing___Optional[typing___Text] = None,
         displayName : typing___Optional[typing___Text] = None,
-        playbackState : typing___Optional[type___SetStateMessage.PlaybackStateValue] = None,
+        playbackState : typing___Optional[pyatv___mrp___protobuf___Common_pb2___PlaybackState.EnumValue] = None,
         playbackQueueCapabilities : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueCapabilities_pb2___PlaybackQueueCapabilities] = None,
         playerPath : typing___Optional[pyatv___mrp___protobuf___PlayerPath_pb2___PlayerPath] = None,
         request : typing___Optional[pyatv___mrp___protobuf___PlaybackQueueRequestMessage_pb2___PlaybackQueueRequestMessage] = None,

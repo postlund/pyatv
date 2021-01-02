@@ -62,3 +62,14 @@ message DeviceSubType {
     AppleTV = 13;
   }
 }
+
+message PlaybackState {
+  enum Enum {
+    Unknown = 0;
+    Playing = 1;
+    Paused = 2;
+    Stopped = 3;
+    Interrupted = 4;
+    Seeking = 5;
+  }
+}
