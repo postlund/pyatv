@@ -10,6 +10,8 @@ import hashlib
 from typing import (
     Any,
     Dict,
+    Mapping,
+    MutableMapping,
     Optional,
     NamedTuple,
     Callable,
@@ -160,14 +162,14 @@ class BaseService:
         identifier: Optional[str],
         protocol: Protocol,
         port: int,
-        properties: Optional[Dict[str, str]],
+        properties: Optional[Mapping[str, str]],
     ) -> None:
         """Initialize a new BaseService."""
         self.__identifier = identifier
         self.protocol = protocol
         self.port = port
         self.credentials: Optional[str] = None
-        self.properties = properties or {}
+        self.properties: MutableMapping[str, str] = dict(properties or {})
 
     @property
     def identifier(self) -> Optional[str]:
