@@ -5,9 +5,9 @@ from unittest.mock import patch
 from contextlib import contextmanager
 from ipaddress import IPv4Address
 from collections import namedtuple
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union, cast
 
-from pyatv.support import mdns
+from pyatv.support import dns, mdns
 
 from tests.support import dns_utils
 
@@ -18,38 +18,55 @@ FakeDnsService = namedtuple("FakeDnsService", "name address port properties mode
 
 
 def mrp_service(
-    service_name, atv_name, identifier, address="127.0.0.1", port=49152, model=None
-):
+    service_name: str,
+    atv_name: str,
+    identifier: str,
+    address="127.0.0.1",
+    port: int = 49152,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
         address=address,
         port=port,
         properties={
-            b"Name": atv_name.encode("utf-8"),
-            b"UniqueIdentifier": identifier.encode("utf-8"),
+            "Name": atv_name.encode("utf-8"),
+            "UniqueIdentifier": identifier.encode("utf-8"),
         },
         model=model,
     )
     return ("_mediaremotetv._tcp.local", service)
 
 
-def airplay_service(atv_name, deviceid, address="127.0.0.1", port=7000, model=None):
+def airplay_service(
+    atv_name: str,
+    deviceid: str,
+    address="127.0.0.1",
+    port: int = 7000,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=atv_name,
         address=address,
         port=port,
-        properties={b"deviceid": deviceid.encode("utf-8")},
+        properties={"deviceid": deviceid.encode("utf-8")},
         model=model,
     )
     return ("_airplay._tcp.local", service)
 
 
-def homesharing_service(service_name, atv_name, hsgid, address="127.0.0.1", model=None):
+def homesharing_service(
+    service_name: str,
+    atv_name: str,
+    hsgid: str,
+    address="127.0.0.1",
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
         address=address,
         port=3689,
-        properties={b"hG": hsgid.encode("utf-8"), b"Name": atv_name.encode("utf-8")},
+        properties={"hG": hsgid.encode("utf-8"), "Name": atv_name.encode("utf-8")},
         model=model,
     )
     return ("_appletv-v2._tcp.local", service)
@@ -60,18 +77,23 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
         name=service_name,
         address=address,
         port=3689,
-        properties={b"CtlN": atv_name.encode("utf-8")},
+        properties={"CtlN": atv_name.encode("utf-8")},
         model=model,
     )
     return ("_touch-able._tcp.local", service)
 
 
 def _lookup_service(
-    question: mdns.DnsQuestion, services: Dict[str, FakeDnsService]
-) -> Tuple[Optional[FakeDnsService], Optional[str]]:
+    question: dns.DnsQuestion,
+    services: Dict[str, FakeDnsService],
+) -> Union[Tuple[None, None], Tuple[FakeDnsService, str]]:
+    """Given a DNS query and the registered fake services, find a matching service."""
     if question.qname.startswith("_"):
         service = services.get(question.qname)
-        return service, service.name + "." + question.qname if service else None
+        if service is not None:
+            return service, service.name + "." + question.qname
+        else:
+            return None, None
 
     service_name, _, service_type = question.qname.partition(".")
     for name, service in services.items():
@@ -87,9 +109,9 @@ def create_response(
     ip_filter: Optional[str] = None,
     sleep_proxy: bool = False,
 ):
-    msg = mdns.DnsMessage().unpack(request)
+    msg = dns.DnsMessage().unpack(request)
 
-    resp = mdns.DnsMessage()
+    resp = dns.DnsMessage()
     resp.flags = 0x0840
     resp.questions = msg.questions
 
@@ -97,6 +119,9 @@ def create_response(
         service, full_name = _lookup_service(question, services)
         if service is None or (ip_filter and service.address != ip_filter):
             continue
+        # For typing purposes, because service is not None, then full_name is not None
+        # either.
+        full_name = cast(str, full_name)
 
         # Add answer
         if full_name:
@@ -108,28 +133,28 @@ def create_response(
 
         # Add service (SRV) resource
         if service.port:
-            local_name = mdns.qname_encode(service.name + ".local")
+            local_name = dns.qname_encode(service.name + ".local")
             rd = struct.pack(">3H", 0, 0, service.port) + local_name
-            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_SRV, rd))
+            resp.resources.append(dns_utils.resource(full_name, dns.QueryType.SRV, rd))
 
         # Add IP address
         if service.address:
             ipaddr = IPv4Address(service.address).packed
             resp.resources.append(
-                dns_utils.resource(service.name + ".local", mdns.QTYPE_A, ipaddr)
+                dns_utils.resource(service.name + ".local", dns.QueryType.A, ipaddr)
             )
 
         # Add properties
         if service.properties:
             rd = dns_utils.properties(service.properties)
-            resp.resources.append(dns_utils.resource(full_name, mdns.QTYPE_TXT, rd))
+            resp.resources.append(dns_utils.resource(full_name, dns.QueryType.TXT, rd))
 
         # Add model if present
         if service.model:
-            rd = dns_utils.properties({b"model": service.model.encode("utf-8")})
+            rd = dns_utils.properties({"model": service.model.encode("utf-8")})
             resp.resources.append(
                 dns_utils.resource(
-                    service.name + "._device-info._tcp.local", mdns.QTYPE_TXT, rd
+                    service.name + "._device-info._tcp.local", dns.QueryType.TXT, rd
                 )
             )
 
@@ -155,7 +180,7 @@ class FakeUdns(asyncio.Protocol):
     def close(self):
         self.server.close()
 
-    def add_service(self, service):
+    def add_service(self, service: Tuple[str, FakeDnsService]):
         self.services[service[0]] = service[1]
 
     @property
@@ -166,7 +191,7 @@ class FakeUdns(asyncio.Protocol):
         self.transport = transport
 
     def datagram_received(self, data: bytes, addr):
-        msg = mdns.DnsMessage().unpack(data)
+        msg = dns.DnsMessage().unpack(data)
         _LOGGER.debug("Received DNS request %s: %s", addr, msg)
 
         if self.skip_count > 0:

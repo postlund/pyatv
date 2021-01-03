@@ -223,7 +223,7 @@ class ProtocolMessage(google___protobuf___message___Message):
         SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 43)
         SEND_LYRICS_EVENT = typing___cast(ProtocolMessage.TypeValue, 44)
         SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 46)
-        SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
+        SET_NOW_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
         REMOVE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 53)
         REMOVE_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 54)
         UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 55)
@@ -231,6 +231,13 @@ class ProtocolMessage(google___protobuf___message___Message):
         VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 64)
         UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 65)
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 72)
+        SET_DISCOVERY_MODE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 101)
+        UPDATE_END_POINTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 102)
+        REMOVE_ENDPOINTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 103)
+        PLAYER_CLIENT_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 104)
+        ORIGIN_CLIENT_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 105)
+        AUDIO_FADE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 106)
+        AUDIO_FADE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 107)
     UNKNOWN_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 0)
     SEND_COMMAND_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 1)
     SEND_COMMAND_RESULT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 2)
@@ -275,7 +282,7 @@ class ProtocolMessage(google___protobuf___message___Message):
     SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 43)
     SEND_LYRICS_EVENT = typing___cast(ProtocolMessage.TypeValue, 44)
     SET_NOW_PLAYING_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 46)
-    SET_NOT_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
+    SET_NOW_PLAYING_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 47)
     REMOVE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 53)
     REMOVE_PLAYER_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 54)
     UPDATE_CLIENT_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 55)
@@ -283,6 +290,13 @@ class ProtocolMessage(google___protobuf___message___Message):
     VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 64)
     UPDATE_OUTPUT_DEVICE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 65)
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 72)
+    SET_DISCOVERY_MODE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 101)
+    UPDATE_END_POINTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 102)
+    REMOVE_ENDPOINTS_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 103)
+    PLAYER_CLIENT_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 104)
+    ORIGIN_CLIENT_PROPERTIES_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 105)
+    AUDIO_FADE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 106)
+    AUDIO_FADE_RESPONSE_MESSAGE = typing___cast(ProtocolMessage.TypeValue, 107)
     type___Type = Type
 
     type: type___ProtocolMessage.TypeValue = ...
@@ -290,6 +304,8 @@ class ProtocolMessage(google___protobuf___message___Message):
     authenticationToken: typing___Text = ...
     errorCode: type___ErrorCode.EnumValue = ...
     timestamp: builtin___int = ...
+    errorDescription: typing___Text = ...
+    uniqueIdentifier: typing___Text = ...
 
     def __init__(self,
         *,
@@ -298,7 +314,9 @@ class ProtocolMessage(google___protobuf___message___Message):
         authenticationToken : typing___Optional[typing___Text] = None,
         errorCode : typing___Optional[type___ErrorCode.EnumValue] = None,
         timestamp : typing___Optional[builtin___int] = None,
+        errorDescription : typing___Optional[typing___Text] = None,
+        uniqueIdentifier : typing___Optional[typing___Text] = None,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> builtin___bool: ...
-    def ClearField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"errorDescription",b"errorDescription",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtin___bool: ...
+    def ClearField(self, field_name: typing_extensions___Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"errorDescription",b"errorDescription",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
 type___ProtocolMessage = ProtocolMessage
