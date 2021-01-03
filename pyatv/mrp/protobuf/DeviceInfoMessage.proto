@@ -41,4 +41,9 @@ message DeviceInfoMessage {
   optional string enderDefaultGroupUID = 32;
   repeated string airplayReceivers = 33;
   optional string linkAgent = 34;
+  optional string clusterID = 35;
+  optional string clusterLeaderID = 36;
+  optional uint32 clusterType = 37;
+  optional bool isClusterAware = 38;
+  optional string modelID = 39;
 }

@@ -170,3 +170,29 @@ class DeviceSubType(google___protobuf___message___Message):
     def __init__(self,
         ) -> None: ...
 type___DeviceSubType = DeviceSubType
+
+class PlaybackState(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[PlaybackState.EnumValue]):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        Unknown = typing___cast(PlaybackState.EnumValue, 0)
+        Playing = typing___cast(PlaybackState.EnumValue, 1)
+        Paused = typing___cast(PlaybackState.EnumValue, 2)
+        Stopped = typing___cast(PlaybackState.EnumValue, 3)
+        Interrupted = typing___cast(PlaybackState.EnumValue, 4)
+        Seeking = typing___cast(PlaybackState.EnumValue, 5)
+    Unknown = typing___cast(PlaybackState.EnumValue, 0)
+    Playing = typing___cast(PlaybackState.EnumValue, 1)
+    Paused = typing___cast(PlaybackState.EnumValue, 2)
+    Stopped = typing___cast(PlaybackState.EnumValue, 3)
+    Interrupted = typing___cast(PlaybackState.EnumValue, 4)
+    Seeking = typing___cast(PlaybackState.EnumValue, 5)
+    type___Enum = Enum
+
+
+    def __init__(self,
+        ) -> None: ...
+type___PlaybackState = PlaybackState
