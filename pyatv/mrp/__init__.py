@@ -480,11 +480,9 @@ class MrpMetadata(Metadata):
     @property
     def app(self) -> Optional[App]:
         """Return information about running app."""
-        player_path = self.psm.playing.player_path
-        if player_path and player_path.client:
-            return App(
-                player_path.client.displayName, player_path.client.bundleIdentifier
-            )
+        client = self.psm.client
+        if client:
+            return App(client.display_name, client.bundle_identifier)
         return None
 
 
@@ -583,6 +581,7 @@ class MrpPushUpdater(PushUpdater):
             return
 
         self.psm.listener = self
+        asyncio.ensure_future(self.state_updated(), loop=self.loop)
 
     def stop(self):
         """No longer forward updates to listener."""
@@ -649,8 +648,7 @@ class MrpFeatures(Features):
             return FeatureInfo(state=FeatureState.Unavailable)
 
         if feature == FeatureName.App:
-            player_path = self.psm.playing.player_path
-            if player_path and player_path.client:
+            if self.psm.client:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
@@ -687,7 +685,7 @@ class MrpAppleTV(AppleTV):
         )
         self._srp = SRPAuthHandler()
         self._protocol = MrpProtocol(self._connection, self._srp, self._mrp_service)
-        self._psm = PlayerStateManager(self._protocol, loop)
+        self._psm = PlayerStateManager(self._protocol)
 
         self._mrp_remote = MrpRemoteControl(loop, self._psm, self._protocol)
         self._mrp_metadata = MrpMetadata(self._protocol, self._psm, config.identifier)
