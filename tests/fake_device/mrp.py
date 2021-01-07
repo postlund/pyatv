@@ -548,16 +548,17 @@ class FakeMrpUseCases:
         **kwargs
     ):
         """Call to change what is currently plaing to video."""
-        metadata = PlayingState(
-            playback_state=PlaybackState.Paused if paused else PlaybackState.Playing,
-            title=title,
-            total_time=total_time,
-            position=position,
-            media_type=protobuf.ContentItemMetadata.Video,
-            app_name=app_name,
-            **kwargs,
-        )
-        self.state.set_player_state(player, metadata)
+        fields = {
+            "playback_state": PlaybackState.Paused if paused else PlaybackState.Playing,
+            "playback_rate": 0.0 if paused else 1.0,
+            "title": title,
+            "total_time": total_time,
+            "position": position,
+            "media_type": protobuf.ContentItemMetadata.Video,
+            "app_name": app_name,
+        }
+        fields.update(kwargs)
+        self.state.set_player_state(player, PlayingState(**fields))
         self.state.set_active_player(player)
 
     def example_music(self, **kwargs):
@@ -575,18 +576,19 @@ class FakeMrpUseCases:
         self, paused, artist, album, title, genre, total_time, position, **kwargs
     ):
         """Call to change what is currently plaing to music."""
-        metadata = PlayingState(
-            playback_state=PlaybackState.Paused if paused else PlaybackState.Playing,
-            artist=artist,
-            album=album,
-            title=title,
-            genre=genre,
-            total_time=total_time,
-            position=position,
-            media_type=protobuf.ContentItemMetadata.Music,
-            **kwargs,
-        )
-        self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
+        fields = {
+            "playback_state": PlaybackState.Paused if paused else PlaybackState.Playing,
+            "playback_rate": 0.0 if paused else 1.0,
+            "artist": artist,
+            "album": album,
+            "title": title,
+            "genre": genre,
+            "total_time": total_time,
+            "position": position,
+            "media_type": protobuf.ContentItemMetadata.Music,
+        }
+        fields.update(kwargs)
+        self.state.set_player_state(PLAYER_IDENTIFIER, PlayingState(**fields))
         self.state.set_active_player(PLAYER_IDENTIFIER)
 
     def media_is_loading(self):

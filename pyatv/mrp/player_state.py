@@ -38,15 +38,28 @@ class PlayerState:
     @property
     def playback_state(self):
         """Playback state of device."""
+        # if playback state has not been received, assume player is not playing
+        # anything (i.e. idle)
+        if self._playback_state is None:
+            return None
+
+        # If player is considered paused, no content is playing
+        if self._playback_state == pb.PlaybackState.Paused:
+            # ...unless something is in the queue...
+            if self.metadata is not None:
+                return pb.PlaybackState.Paused
+            return None
+
+        # All other states than playing (and paused) should pass through
+        if self._playback_state != pb.PlaybackState.Playing:
+            return self._playback_state
+
         playback_rate = self.metadata_field("playbackRate")
         if playback_rate is None:
             return self._playback_state
 
         if math.isclose(playback_rate, 0.0):
-            # Special case where playback rate is incorrectly set
-            if self._playback_state == pb.PlaybackState.Paused:
-                return pb.PlaybackState.Paused
-            return self._playback_state
+            return pb.PlaybackState.Paused
         if math.isclose(playback_rate, 1.0):
             return pb.PlaybackState.Playing
         return pb.PlaybackState.Seeking
