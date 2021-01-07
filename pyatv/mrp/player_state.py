@@ -1,13 +1,12 @@
 """Module responsible for keeping track of media player states."""
 
 import math
-import asyncio
 import logging
 import weakref
 from copy import deepcopy
+from typing import Dict, Optional, List
 
-from pyatv.mrp import protobuf
-from pyatv.mrp.protobuf import PlaybackState, PlayerPath
+from pyatv.mrp import protobuf as pb
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,13 +15,25 @@ _LOGGER = logging.getLogger(__name__)
 class PlayerState:
     """Represent what is currently playing on a device."""
 
-    def __init__(self):
+    def __init__(self, player: pb.NowPlayingPlayer):
         """Initialize a new PlayerState instance."""
         self._playback_state = None
-        self.supported_commands = []
-        self.items = []
-        self.location = 0
-        self.player_path = None
+        self.supported_commands: List[pb.CommandInfo] = []
+        self.items: List[pb.ContentItem] = []
+        self.location: int = 0
+
+        self.identifier: Optional[str] = player.identifier
+        self.display_name: Optional[str] = None
+        self.update(player)
+
+    @property
+    def is_valid(self):
+        """Return if player has a valid identifier."""
+        return self.identifier is not None and self.identifier != ""
+
+    def update(self, player: pb.NowPlayingPlayer):
+        """Update player metadata."""
+        self.display_name = player.displayName or self.display_name
 
     @property
     def playback_state(self):
@@ -33,12 +44,12 @@ class PlayerState:
 
         if math.isclose(playback_rate, 0.0):
             # Special case where playback rate is incorrectly set
-            if self._playback_state == PlaybackState.Paused:
-                return PlaybackState.Paused
+            if self._playback_state == pb.PlaybackState.Paused:
+                return pb.PlaybackState.Paused
             return self._playback_state
         if math.isclose(playback_rate, 1.0):
-            return PlaybackState.Playing
-        return PlaybackState.Seeking
+            return pb.PlaybackState.Playing
+        return pb.PlaybackState.Seeking
 
     @property
     def metadata(self):
@@ -77,17 +88,10 @@ class PlayerState:
             self.supported_commands = deepcopy(
                 setstate.supportedCommands.supportedCommands
             )
-
         if setstate.HasField("playbackQueue"):
             queue = setstate.playbackQueue
             self.items = deepcopy(queue.contentItems)
             self.location = queue.location
-
-        if setstate.HasField("playerPath"):
-            if self.player_path is None:
-                self.player_path = deepcopy(setstate.playerPath)
-            else:
-                self.player_path.MergeFrom(setstate.playerPath)
 
     def handle_content_item_update(self, item_update):
         """Update current state with new data from ContentItemUpdate."""
@@ -102,44 +106,68 @@ class PlayerState:
                     # likely not what is expected)!
                     existing.metadata.MergeFrom(updated_item.metadata)
 
-    def handle_update_client(self, msg):
-        """Handle client updates."""
-        if self.player_path is None:
-            self.player_path = PlayerPath()
-        self.player_path.client.MergeFrom(msg.client)
-        _LOGGER.debug(
-            "Updated client with name %s", self.player_path.client.displayName
-        )
+    def __eq__(self, other):
+        """Compare if instance is equal to other instance."""
+        return other and self.identifier == other.identifier
 
 
-class PlayerStateManager:  # pylint: disable=too-few-public-methods
+class Client:
+    """Represent an MRP media player client."""
+
+    def __init__(self, client: pb.NowPlayingClient):
+        """Initialize a new Client instance."""
+        self.bundle_identifier: str = client.bundleIdentifier
+        self.display_name: Optional[str] = None
+        self.players: Dict[str, PlayerState] = {}
+        self.update(client)
+
+    def update(self, client: pb.NowPlayingClient):
+        """Update client metadata."""
+        self.display_name = client.displayName or self.display_name
+
+
+class PlayerStateManager:
     """Manage state of all media players."""
 
-    def __init__(self, protocol, loop):
+    def __init__(self, protocol):
         """Initialize a new PlayerStateManager instance."""
         self.protocol = protocol
-        self.loop = loop
-        self.states = {}
-        self.active = None
         self.volume_controls_available = None
+        self._active_client = None
+        self._active_player = None
+        self._clients: Dict[str, Client] = {}
         self._listener = None
         self._add_listeners()
 
-    def _add_listeners(self):
-        self.protocol.add_listener(self._handle_set_state, protobuf.SET_STATE_MESSAGE)
-        self.protocol.add_listener(
-            self._handle_content_item_update, protobuf.UPDATE_CONTENT_ITEM_MESSAGE
-        )
-        self.protocol.add_listener(
-            self._handle_set_now_playing_client, protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE
-        )
-        self.protocol.add_listener(
-            self._handle_update_client, protobuf.UPDATE_CLIENT_MESSAGE
-        )
-        self.protocol.add_listener(
-            self._volume_control_availability,
-            protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE,
-        )
+    def _add_listeners(self) -> None:
+        listeners = {
+            pb.SET_STATE_MESSAGE: self._handle_set_state,
+            pb.UPDATE_CONTENT_ITEM_MESSAGE: self._handle_content_item_update,
+            pb.SET_NOW_PLAYING_CLIENT_MESSAGE: self._handle_set_now_playing_client,
+            pb.SET_NOW_PLAYING_PLAYER_MESSAGE: self._handle_set_now_playing_player,
+            pb.UPDATE_CLIENT_MESSAGE: self._handle_update_client,
+            pb.REMOVE_CLIENT_MESSAGE: self._handle_remove_client,
+            pb.REMOVE_PLAYER_MESSAGE: self._handle_remove_player,
+            pb.VOLUME_CONTROL_AVAILABILITY_MESSAGE: self._volume_control_availability,
+        }
+        for message, handler in listeners.items():
+            self.protocol.add_listener(handler, message)
+
+    def get_client(self, client: pb.NowPlayingClient) -> Client:
+        """Return client based on player path."""
+        bundle = client.bundleIdentifier
+        if bundle not in self._clients:
+            self._clients[bundle] = Client(client)
+        return self._clients[bundle]
+
+    def get_player(self, player_path: pb.PlayerPath) -> PlayerState:
+        """Return player based on a player path."""
+        client = self.get_client(player_path.client)
+
+        player_id = player_path.player.identifier
+        if player_id not in client.players:
+            client.players[player_id] = PlayerState(player_path.player)
+        return client.players[player_id]
 
     @property
     def listener(self):
@@ -153,68 +181,101 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
         """Change current listener."""
         if new_listener is not None:
             self._listener = weakref.ref(new_listener)
-            asyncio.ensure_future(self.listener.state_updated(), loop=self.loop)
         else:
             self._listener = None
 
     @property
+    def client(self) -> Optional[Client]:
+        """Return currently active client."""
+        return self._active_client
+
+    @property
     def playing(self):
         """Player state for active media player."""
-        if self.active:
-            return self.states[self.active]
-        return PlayerState()
+        if self._active_player:
+            return self._active_player
+        if self._active_client:
+            default_player = self._active_client.players.get(
+                "MediaRemote-DefaultPlayer"
+            )
+            if default_player:
+                return default_player
+        return PlayerState(pb.NowPlayingPlayer())
 
     async def _handle_set_state(self, message, _):
         setstate = message.inner()
-        identifier = setstate.playerPath.client.bundleIdentifier
 
-        if identifier not in self.states:
-            self.states[identifier] = PlayerState()
+        player = self.get_player(setstate.playerPath)
+        player.handle_set_state(setstate)
 
-        self.states[identifier].handle_set_state(setstate)
-
-        # Only trigger callback if current state changed
-        if identifier == self.active:
-            if self.listener:
-                await self.listener.state_updated()
+        await self._state_updated(player=player)
 
     async def _handle_content_item_update(self, message, _):
         item_update = message.inner()
-        identifier = item_update.playerPath.client.bundleIdentifier
 
-        if identifier in self.states:
-            state = self.states[identifier]
-            state.handle_content_item_update(item_update)
+        player = self.get_player(item_update.playerPath)
+        player.handle_content_item_update(item_update)
 
-            # Only trigger callback if current state changed
-            if identifier == self.active:
-                if self.listener:
-                    await self.listener.state_updated()
-        else:
-            _LOGGER.warning(
-                "Received ContentItemUpdate for unknown player %s", identifier
-            )
+        await self._state_updated(player=player)
 
     async def _handle_set_now_playing_client(self, message, _):
-        identifier = message.inner().client.bundleIdentifier
-        if identifier != self.active:
-            self.active = identifier
-            _LOGGER.debug("Active player is now %s", self.active)
+        self._active_client = self.get_client(message.inner().client)
 
-            if self.listener:
-                await self.listener.state_updated()
+        _LOGGER.debug("Active client is now %s", self._active_client.bundle_identifier)
+
+        await self._state_updated()
+
+    async def _handle_set_now_playing_player(self, message, _):
+        self._active_player = self.get_player(message.inner().playerPath)
+
+        if self._active_player.is_valid:
+            _LOGGER.debug(
+                "Active player is now %s (%s)",
+                self._active_player.identifier,
+                self._active_player.display_name,
+            )
+        else:
+            _LOGGER.debug("Active player no longer set")
+
+        await self._state_updated()
+
+    async def _handle_remove_client(self, message, _):
+        client_to_remove = message.inner().client
+
+        if client_to_remove.bundleIdentifier in self._clients:
+            client = self._clients[client_to_remove.bundleIdentifier]
+            del self._clients[client_to_remove.bundleIdentifier]
+
+            if client == self._active_client:
+                self._active_client = None
+                await self._state_updated()
+
+    async def _handle_remove_player(self, message, _):
+        player_to_remove = message.inner().playerPath
+
+        player = self.get_player(player_to_remove)
+        if player.is_valid:
+            client = self.get_client(player_to_remove.client)
+            del client.players[player.identifier]
+
+            removed = False
+            if player == self._active_player:
+                self._active_player = None
+                removed = True
+            if client == self._active_client:
+                self._active_client = None
+                removed = True
+
+            if removed:
+                await self._state_updated()
 
     async def _handle_update_client(self, message, _):
         update_client = message.inner()
-        identifier = update_client.client.bundleIdentifier
 
-        state = self.states.setdefault(identifier, PlayerState())
-        state.handle_update_client(update_client)
+        client = self.get_client(update_client.client)
+        client.update(update_client.client)
 
-        # Only trigger callback if current state changed
-        if identifier == self.active:
-            if self.listener:
-                await self.listener.state_updated()
+        await self._state_updated(client=client)
 
     async def _volume_control_availability(self, message, _):
         self.volume_controls_available = message.inner().volumeControlAvailable
@@ -222,5 +283,13 @@ class PlayerStateManager:  # pylint: disable=too-few-public-methods
             "Volume control availability is now %s", self.volume_controls_available
         )
 
-        if self.listener:
-            await self.listener.state_updated()
+        await self._state_updated()
+
+    async def _state_updated(self, client=None, player=None):
+        is_active_client = client == self.client
+        is_active_player = player == self.playing
+        is_always = client is None and player is None
+
+        if is_active_client or is_active_player or is_always:
+            if self.listener:
+                await self.listener.state_updated()

@@ -65,6 +65,9 @@ APP_NAME = "Test app"
 DEVICE_NAME = "Fake MRP ATV"
 PLAYER_IDENTIFIER = "com.github.postlund.pyatv"
 
+DEFAULT_PLAYER_ID = "MediaRemote-DefaultPlayer"
+DEFAULT_PLAYER_NAME = "Default Player"
+
 
 def _fill_item(item, metadata):
     if metadata.identifier:
@@ -135,6 +138,10 @@ def _set_state_message(metadata, identifier):
     client.bundleIdentifier = identifier
     if metadata.app_name:
         client.displayName = metadata.app_name
+
+    player = inner.playerPath.player
+    player.identifier = DEFAULT_PLAYER_ID
+    player.displayName = DEFAULT_PLAYER_NAME
     return set_state
 
 
@@ -215,6 +222,10 @@ class FakeMrpState:
         client = inner.playerPath.client
         client.processIdentifier = 123
         client.bundleIdentifier = identifier
+
+        player = inner.playerPath.player
+        player.identifier = DEFAULT_PLAYER_ID
+        player.displayName = DEFAULT_PLAYER_NAME
 
         state = self.get_player_state(identifier)
         for var, value in vars(metadata).items():
