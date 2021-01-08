@@ -399,8 +399,22 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
 
+# TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
     """Base class for retrieving what is currently playing."""
+
+    _PROPERTIES = [
+        "media_type",
+        "device_state",
+        "title",
+        "artist",
+        "album",
+        "genre",
+        "total_time",
+        "position",
+        "shuffle",
+        "repeat",
+    ]
 
     def __str__(self) -> str:
         """Convert this playing object to a readable string."""
@@ -445,6 +459,15 @@ class Playing(ABC):
 
         return "\n".join(output)
 
+    def __eq__(self, other):
+        """Compare if two objects are equal."""
+        if isinstance(other, Playing):
+            for prop in self._PROPERTIES:
+                if getattr(self, prop) != getattr(other, prop):
+                    return False
+            return True
+        return False
+
     @property
     def hash(self) -> str:
         """Create a unique hash for what is currently playing.
@@ -461,69 +484,69 @@ class Playing(ABC):
     @abstractmethod
     def media_type(self) -> const.MediaType:
         """Type of media is currently playing, e.g. video, music."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def device_state(self) -> const.DeviceState:
         """Device state, e.g. playing or paused."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(22, "Title", "Title of playing media.")
     def title(self) -> Optional[str]:
         """Title of the current media, e.g. movie or song name."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(23, "Artist", "Artist of playing song.")
     def artist(self) -> Optional[str]:
         """Artist of the currently playing song."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(24, "Album", "Album from playing artist.")
     def album(self) -> Optional[str]:
         """Album of the currently playing song."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(25, "Genre", "Genre of playing song.")
     def genre(self) -> Optional[str]:
         """Genre of the currently playing song."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(26, "TotalTime", "Total length of playing media (seconds).")
     def total_time(self) -> int:
         """Total play time in seconds."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(27, "Position", "Current play time position.")
     def position(self) -> int:
         """Position in the playing media (seconds)."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(28, "Shuffle", "Shuffle stat.e")
     def shuffle(self) -> const.ShuffleState:
         """If shuffle is enabled or not."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(29, "Repeat", "Repeat state.")
     def repeat(self) -> const.RepeatState:
         """Repeat mode."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
 
 class App:

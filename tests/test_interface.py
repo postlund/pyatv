@@ -17,6 +17,22 @@ from pyatv.const import (
 )
 
 
+# Contains two valid values for each property that are tested
+# against each other
+eq_test_cases = [
+    ("media_type", MediaType.Video, MediaType.Music),
+    ("device_state", DeviceState.Idle, DeviceState.Playing),
+    ("title", "foo", "bar"),
+    ("artist", "abra", "kadabra"),
+    ("album", "banana", "apple"),
+    ("genre", "cat", "mouse"),
+    ("total_time", 210, 2000),
+    ("position", 555, 888),
+    ("shuffle", ShuffleState.Albums, ShuffleState.Songs),
+    ("repeat", RepeatState.Track, RepeatState.All),
+]
+
+
 class TestClass:
 
     variable = 1234
@@ -237,6 +253,26 @@ def test_playing_generate_same_hash():
         "80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade"
         == playing2.hash
     )
+
+
+def test_playing_eq_ensure_member_count():
+    # Fail if a propery is added or removed to interface, just as a reminder to
+    # update equality comparison
+    assert len(PlayingDummy().__dict__) == 10
+
+
+@pytest.mark.parametrize(
+    "prop,value1,value2",
+    [pytest.param(*data, id=data[0]) for data in eq_test_cases],
+)
+def test_playing_field_equality(prop, value1, value2):
+    playing1 = PlayingDummy(**{prop: value1})
+    playing2 = PlayingDummy(**{prop: value2})
+    playing3 = PlayingDummy(**{prop: value2})
+
+    assert playing1 == playing1
+    assert playing1 != playing2
+    assert playing2 == playing3
 
 
 # METADATA
