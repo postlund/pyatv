@@ -4,6 +4,7 @@ This module contains all the interfaces that represents a generic Apple TV devic
 all its features.
 """
 
+import asyncio
 import re
 import inspect
 import hashlib
@@ -639,11 +640,16 @@ class PushUpdater(ABC, StateProducer):
     Listener interface: `pyatv.interface.PushListener`
     """
 
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        """Initialize a new PushUpdater."""
+        self.loop = loop
+        self._previous_state: Optional[Playing] = None
+
     @property
     @abstractmethod
     def active(self) -> bool:
         """Return if push updater has been started."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -> None:
@@ -651,12 +657,19 @@ class PushUpdater(ABC, StateProducer):
 
         If an error occurs, start must be called again.
         """
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def stop(self) -> None:
         """No longer forward updates to listener."""
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
+
+    def post_update(self, playing: Playing) -> None:
+        """Post an update to listener."""
+        if playing != self._previous_state:
+            self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+        self._previous_state = playing
 
 
 class Stream(ABC):  # pylint: disable=too-few-public-methods

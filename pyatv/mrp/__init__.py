@@ -560,8 +560,7 @@ class MrpPushUpdater(PushUpdater):
 
     def __init__(self, loop, metadata, psm):
         """Initialize a new MrpPushUpdater instance."""
-        super().__init__()
-        self.loop = loop
+        super().__init__(loop)
         self.metadata = metadata
         self.psm = psm
 
@@ -591,7 +590,7 @@ class MrpPushUpdater(PushUpdater):
         """State was updated for active player."""
         try:
             playstatus = await self.metadata.playing()
-            self.loop.call_soon(self.listener.playstatus_update, self, playstatus)
+            self.post_update(playstatus)
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.debug("Playstatus error occurred: %s", ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)

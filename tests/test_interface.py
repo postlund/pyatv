@@ -1,7 +1,8 @@
 """Unit tests for pyatv.interface."""
+from unittest.mock import ANY, MagicMock
 
 import pytest
-from typing import Dict
+from typing import Dict, Optional
 
 from pyatv import convert, exceptions, interface
 from pyatv.interface import FeatureInfo
@@ -171,6 +172,23 @@ class FeaturesDummy(interface.Features):
         return FeatureInfo(state=state)
 
 
+class PushUpdaterDummy(interface.PushUpdater):
+    def active(self) -> bool:
+        """Return if push updater has been started."""
+        raise exceptions.NotSupportedError()
+
+    def start(self, initial_delay: int = 0) -> None:
+        """Begin to listen to updates.
+
+        If an error occurs, start must be called again.
+        """
+        raise exceptions.NotSupportedError()
+
+    def stop(self) -> None:
+        """No longer forward updates to listener."""
+        raise exceptions.NotSupportedError()
+
+
 @pytest.fixture
 def methods():
     yield interface.retrieve_commands(TestClass)
@@ -256,7 +274,7 @@ def test_playing_generate_same_hash():
 
 
 def test_playing_eq_ensure_member_count():
-    # Fail if a propery is added or removed to interface, just as a reminder to
+    # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
     assert len(PlayingDummy().__dict__) == 10
 
@@ -398,3 +416,23 @@ def test_app_properties():
 def test_app_str():
     app = interface.App("name", "id")
     assert "App: name (id)" == str(app)
+
+
+# PUSH UPDATER
+
+
+@pytest.mark.parametrize("updates", [1, 2, 3])
+def test_post_ignore_duplicate_update(event_loop, updates):
+    listener = MagicMock()
+    playing = PlayingDummy()
+
+    async def _post_updates(repeats: int):
+        updater = PushUpdaterDummy(event_loop)
+        updater.listener = listener
+        for _ in range(repeats):
+            updater.post_update(playing)
+
+    event_loop.run_until_complete(_post_updates(updates))
+
+    assert listener.playstatus_update.call_count == 1
+    listener.playstatus_update.assert_called_once_with(ANY, playing)
