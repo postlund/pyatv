@@ -155,6 +155,7 @@ link_group: api
 <h4><code><a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.PushUpdater.active" href="#pyatv.interface.PushUpdater.active">active</a></code></li>
+<li><code><a title="pyatv.interface.PushUpdater.post_update" href="#pyatv.interface.PushUpdater.post_update">post_update</a></code></li>
 <li><code><a title="pyatv.interface.PushUpdater.start" href="#pyatv.interface.PushUpdater.start">start</a></code></li>
 <li><code><a title="pyatv.interface.PushUpdater.stop" href="#pyatv.interface.PushUpdater.stop">stop</a></code></li>
 </ul>
@@ -223,6 +224,7 @@ This module contains all the interfaces that represents a generic Apple TV devic
 all its features.
 &#34;&#34;&#34;
 
+import asyncio
 import re
 import inspect
 import hashlib
@@ -618,8 +620,22 @@ class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
         raise exceptions.NotSupportedError()
 
 
+# TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
     &#34;&#34;&#34;Base class for retrieving what is currently playing.&#34;&#34;&#34;
+
+    _PROPERTIES = [
+        &#34;media_type&#34;,
+        &#34;device_state&#34;,
+        &#34;title&#34;,
+        &#34;artist&#34;,
+        &#34;album&#34;,
+        &#34;genre&#34;,
+        &#34;total_time&#34;,
+        &#34;position&#34;,
+        &#34;shuffle&#34;,
+        &#34;repeat&#34;,
+    ]
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
@@ -664,6 +680,15 @@ class Playing(ABC):
 
         return &#34;\n&#34;.join(output)
 
+    def __eq__(self, other):
+        &#34;&#34;&#34;Compare if two objects are equal.&#34;&#34;&#34;
+        if isinstance(other, Playing):
+            for prop in self._PROPERTIES:
+                if getattr(self, prop) != getattr(other, prop):
+                    return False
+            return True
+        return False
+
     @property
     def hash(self) -&gt; str:
         &#34;&#34;&#34;Create a unique hash for what is currently playing.
@@ -680,69 +705,69 @@ class Playing(ABC):
     @abstractmethod
     def media_type(self) -&gt; const.MediaType:
         &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def device_state(self) -&gt; const.DeviceState:
         &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
     def total_time(self) -&gt; int:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
     def position(self) -&gt; int:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
     def shuffle(self) -&gt; const.ShuffleState:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
     def repeat(self) -&gt; const.RepeatState:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
 
 class App:
@@ -835,11 +860,16 @@ class PushUpdater(ABC, StateProducer):
     Listener interface: `pyatv.interface.PushListener`
     &#34;&#34;&#34;
 
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
+        self.loop = loop
+        self._previous_state: Optional[Playing] = None
+
     @property
     @abstractmethod
     def active(self) -&gt; bool:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
@@ -847,12 +877,19 @@ class PushUpdater(ABC, StateProducer):
 
         If an error occurs, start must be called again.
         &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def stop(self) -&gt; None:
         &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
+
+    def post_update(self, playing: Playing) -&gt; None:
+        &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
+        if playing != self._previous_state:
+            self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+        self._previous_state = playing
 
 
 class Stream(ABC):  # pylint: disable=too-few-public-methods
@@ -2292,6 +2329,19 @@ def pin(self, pin) -&gt; None:
 <pre><code class="python">class Playing(ABC):
     &#34;&#34;&#34;Base class for retrieving what is currently playing.&#34;&#34;&#34;
 
+    _PROPERTIES = [
+        &#34;media_type&#34;,
+        &#34;device_state&#34;,
+        &#34;title&#34;,
+        &#34;artist&#34;,
+        &#34;album&#34;,
+        &#34;genre&#34;,
+        &#34;total_time&#34;,
+        &#34;position&#34;,
+        &#34;shuffle&#34;,
+        &#34;repeat&#34;,
+    ]
+
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
         output = []
@@ -2335,6 +2385,15 @@ def pin(self, pin) -&gt; None:
 
         return &#34;\n&#34;.join(output)
 
+    def __eq__(self, other):
+        &#34;&#34;&#34;Compare if two objects are equal.&#34;&#34;&#34;
+        if isinstance(other, Playing):
+            for prop in self._PROPERTIES:
+                if getattr(self, prop) != getattr(other, prop):
+                    return False
+            return True
+        return False
+
     @property
     def hash(self) -&gt; str:
         &#34;&#34;&#34;Create a unique hash for what is currently playing.
@@ -2351,69 +2410,69 @@ def pin(self, pin) -&gt; None:
     @abstractmethod
     def media_type(self) -&gt; const.MediaType:
         &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property
     @abstractmethod
     def device_state(self) -&gt; const.DeviceState:
         &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
     def total_time(self) -&gt; int:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
     def position(self) -&gt; int:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
     def shuffle(self) -&gt; const.ShuffleState:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @property  # type: ignore
     @abstractmethod
     @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
     def repeat(self) -&gt; const.RepeatState:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
+        raise NotImplementedError</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -2438,7 +2497,7 @@ def pin(self, pin) -&gt; None:
 @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
 def album(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Optional[str]</code></dt>
@@ -2453,7 +2512,7 @@ def album(self) -&gt; Optional[str]:
 @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
 def artist(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.device_state"><code class="name">var <span class="ident">device_state</span> -> <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a></code></dt>
@@ -2467,7 +2526,7 @@ def artist(self) -&gt; Optional[str]:
 @abstractmethod
 def device_state(self) -&gt; const.DeviceState:
     &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Optional[str]</code></dt>
@@ -2482,7 +2541,7 @@ def device_state(self) -&gt; const.DeviceState:
 @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
 def genre(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.hash"><code class="name">var <span class="ident">hash</span> -> str</code></dt>
@@ -2518,7 +2577,7 @@ def hash(self) -&gt; str:
 @abstractmethod
 def media_type(self) -&gt; const.MediaType:
     &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.position"><code class="name">var <span class="ident">position</span> -> int</code></dt>
@@ -2533,7 +2592,7 @@ def media_type(self) -&gt; const.MediaType:
 @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
 def position(self) -&gt; int:
     &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.repeat"><code class="name">var <span class="ident">repeat</span> -> <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a></code></dt>
@@ -2548,7 +2607,7 @@ def position(self) -&gt; int:
 @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
 def repeat(self) -&gt; const.RepeatState:
     &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.shuffle"><code class="name">var <span class="ident">shuffle</span> -> <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a></code></dt>
@@ -2563,7 +2622,7 @@ def repeat(self) -&gt; const.RepeatState:
 @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
 def shuffle(self) -&gt; const.ShuffleState:
     &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Optional[str]</code></dt>
@@ -2578,7 +2637,7 @@ def shuffle(self) -&gt; const.ShuffleState:
 @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
 def title(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.total_time"><code class="name">var <span class="ident">total_time</span> -> int</code></dt>
@@ -2593,7 +2652,7 @@ def title(self) -&gt; Optional[str]:
 @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
 def total_time(self) -&gt; int:
     &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 </dl>
@@ -2817,11 +2876,12 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 </dd>
 <dt id="pyatv.interface.PushUpdater"><code class="flex name class">
 <span>class <span class="ident">PushUpdater</span></span>
+<span>(</span><span>loop: asyncio.events.AbstractEventLoop)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for push/async updates from an Apple TV.</p>
 <p>Listener interface: <code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></p>
-<p>Initialize a new StateProducer instance.</p></section>
+<p>Initialize a new PushUpdater.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2832,11 +2892,16 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
     Listener interface: `pyatv.interface.PushListener`
     &#34;&#34;&#34;
 
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
+        self.loop = loop
+        self._previous_state: Optional[Playing] = None
+
     @property
     @abstractmethod
     def active(self) -&gt; bool:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
@@ -2844,12 +2909,19 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 
         If an error occurs, start must be called again.
         &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
+        raise NotImplementedError
 
     @abstractmethod
     def stop(self) -&gt; None:
         &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
+        raise NotImplementedError
+
+    def post_update(self, playing: Playing) -&gt; None:
+        &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
+        if playing != self._previous_state:
+            self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+        self._previous_state = playing</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -2874,12 +2946,29 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 @abstractmethod
 def active(self) -&gt; bool:
     &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="pyatv.interface.PushUpdater.post_update"><code class="name flex">
+<span>def <span class="ident">post_update</span></span>(<span>self, playing: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Post an update to listener.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def post_update(self, playing: Playing) -&gt; None:
+    &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
+    if playing != self._previous_state:
+        self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+    self._previous_state = playing</code></pre>
+</details>
+</dd>
 <dt id="pyatv.interface.PushUpdater.start"><code class="name flex">
 <span>def <span class="ident">start</span></span>(<span>self, initial_delay: int = 0) -> NoneType</span>
 </code></dt>
@@ -2896,7 +2985,7 @@ def start(self, initial_delay: int = 0) -&gt; None:
 
     If an error occurs, start must be called again.
     &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.PushUpdater.stop"><code class="name flex">
@@ -2911,7 +3000,7 @@ def start(self, initial_delay: int = 0) -&gt; None:
 <pre><code class="python">@abstractmethod
 def stop(self) -&gt; None:
     &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 </dl>
