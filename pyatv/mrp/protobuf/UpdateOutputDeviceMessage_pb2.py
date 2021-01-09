@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=b'\n2pyatv/mrp/protobuf/UpdateOutputDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\x1fpyatv/mrp/protobuf/Common.proto\"U\n\x18\x41VOutputDeviceSourceInfo\x12\x19\n\x11routingContextUID\x18\x01 \x01(\t\x12\x1e\n\x16multipleBuiltInDevices\x18\x02 \x01(\x08\"\xbd\t\n\x18\x41VOutputDeviceDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x18\n\x10uniqueIdentifier\x18\x02 \x01(\t\x12\x0f\n\x07groupID\x18\x03 \x01(\t\x12\x0f\n\x07modelID\x18\x04 \x01(\t\x12\x12\n\nmacAddress\x18\x05 \x01(\x0c\x12\x1d\n\x15\x63\x61nAccessRemoteAssets\x18\x06 \x01(\x08\x12\x1c\n\x14isRemoteControllable\x18\x07 \x01(\x08\x12\x15\n\risGroupLeader\x18\x08 \x01(\x08\x12\x13\n\x0bisGroupable\x18\t \x01(\x08\x12$\n\ndeviceType\x18\n \x01(\x0e\x32\x10.DeviceType.Enum\x12*\n\rdeviceSubType\x18\x0b \x01(\x0e\x32\x13.DeviceSubType.Enum\x12\x1d\n\x15modelSpecificInfoData\x18\x0c \x01(\x0c\x12\x14\n\x0c\x62\x61tteryLevel\x18\r \x01(\x02\x12\x15\n\risLocalDevice\x18\x0e \x01(\x08\x12\x1e\n\x16supportsExternalScreen\x18\x0f \x01(\x08\x12\x1d\n\x15requiresAuthorization\x18\x10 \x01(\x08\x12(\n shouldForceRemoteControlabillity\x18\x11 \x01(\x08\x12-\n\nsourceInfo\x18\x12 \x01(\x0b\x32\x19.AVOutputDeviceSourceInfo\x12\x19\n\x11isDeviceGroupable\x18\x13 \x01(\x08\x12$\n\x1c\x63\x61nRelayCommunicationChannel\x18\x14 \x01(\x08\x12\x17\n\x0flogicalDeviceID\x18\x15 \x01(\t\x12\x1a\n\x12isProxyGroupPlayer\x18\x16 \x01(\x08\x12\x17\n\x0f\x66irmwareVersion\x18\x17 \x01(\t\x12\x0e\n\x06volume\x18\x18 \x01(\x02\x12 \n\x18isVolumeControlAvailable\x18\x19 \x01(\x08\x12\x1b\n\x13\x63\x61nAccessAppleMusic\x18\x1a \x01(\x08\x12#\n\x1b\x63\x61nAccessiCloudMusicLibrary\x18\x1b \x01(\x08\x12 \n\x18groupContainsGroupLeader\x18\x1c \x01(\x08\x12\x1f\n\x17supportsBufferedAirPlay\x18\x1d \x01(\x08\x12\x31\n)canPlayEncryptedProgressiveDownloadAssets\x18\x1e \x01(\x08\x12\"\n\x1a\x61nFetchMediaDataFromSender\x18\x1f \x01(\x08\x12\x46\n>resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets\x18  \x01(\x08\x12&\n\x1eisAirPlayReceiverSessionActive\x18! \x01(\x08\x12\x1d\n\x15parentGroupIdentifier\x18\" \x01(\t\x12-\n%parentGroupContainsDiscoverableLeader\x18# \x01(\x08\x12\x18\n\x10isAddedToHomeKit\x18$ \x01(\x08\x12\x1a\n\x12volumeCapabilities\x18% \x01(\x05\x12\x13\n\x0b\x62luetoothID\x18& \x01(\t\"M\n\x19UpdateOutputDeviceMessage\x12\x30\n\routputDevices\x18\x01 \x03(\x0b\x32\x19.AVOutputDeviceDescriptor:O\n\x19updateOutputDeviceMessage\x12\x10.ProtocolMessage\x18\x45 \x01(\x0b\x32\x1a.UpdateOutputDeviceMessage'
+  serialized_pb=b'\n2pyatv/mrp/protobuf/UpdateOutputDeviceMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\x1a\x1fpyatv/mrp/protobuf/Common.proto\"U\n\x18\x41VOutputDeviceSourceInfo\x12\x19\n\x11routingContextUID\x18\x01 \x01(\t\x12\x1e\n\x16multipleBuiltInDevices\x18\x02 \x01(\x08\"\xbd\t\n\x18\x41VOutputDeviceDescriptor\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x18\n\x10uniqueIdentifier\x18\x02 \x01(\t\x12\x0f\n\x07groupID\x18\x03 \x01(\t\x12\x0f\n\x07modelID\x18\x04 \x01(\t\x12\x12\n\nmacAddress\x18\x05 \x01(\x0c\x12\x1d\n\x15\x63\x61nAccessRemoteAssets\x18\x06 \x01(\x08\x12\x1c\n\x14isRemoteControllable\x18\x07 \x01(\x08\x12\x15\n\risGroupLeader\x18\x08 \x01(\x08\x12\x13\n\x0bisGroupable\x18\t \x01(\x08\x12$\n\ndeviceType\x18\n \x01(\x0e\x32\x10.DeviceType.Enum\x12*\n\rdeviceSubType\x18\x0b \x01(\x0e\x32\x13.DeviceSubType.Enum\x12\x1d\n\x15modelSpecificInfoData\x18\x0c \x01(\x0c\x12\x14\n\x0c\x62\x61tteryLevel\x18\r \x01(\x02\x12\x15\n\risLocalDevice\x18\x0e \x01(\x08\x12\x1e\n\x16supportsExternalScreen\x18\x0f \x01(\x08\x12\x1d\n\x15requiresAuthorization\x18\x10 \x01(\x08\x12(\n shouldForceRemoteControlabillity\x18\x11 \x01(\x08\x12-\n\nsourceInfo\x18\x12 \x01(\x0b\x32\x19.AVOutputDeviceSourceInfo\x12\x19\n\x11isDeviceGroupable\x18\x13 \x01(\x08\x12$\n\x1c\x63\x61nRelayCommunicationChannel\x18\x14 \x01(\x08\x12\x17\n\x0flogicalDeviceID\x18\x15 \x01(\t\x12\x1a\n\x12isProxyGroupPlayer\x18\x16 \x01(\x08\x12\x17\n\x0f\x66irmwareVersion\x18\x17 \x01(\t\x12\x0e\n\x06volume\x18\x18 \x01(\x02\x12 \n\x18isVolumeControlAvailable\x18\x19 \x01(\x08\x12\x1b\n\x13\x63\x61nAccessAppleMusic\x18\x1a \x01(\x08\x12#\n\x1b\x63\x61nAccessiCloudMusicLibrary\x18\x1b \x01(\x08\x12 \n\x18groupContainsGroupLeader\x18\x1c \x01(\x08\x12\x1f\n\x17supportsBufferedAirPlay\x18\x1d \x01(\x08\x12\x31\n)canPlayEncryptedProgressiveDownloadAssets\x18\x1e \x01(\x08\x12\"\n\x1a\x61nFetchMediaDataFromSender\x18\x1f \x01(\x08\x12\x46\n>resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets\x18  \x01(\x08\x12&\n\x1eisAirPlayReceiverSessionActive\x18! \x01(\x08\x12\x1d\n\x15parentGroupIdentifier\x18\" \x01(\t\x12-\n%parentGroupContainsDiscoverableLeader\x18# \x01(\x08\x12\x18\n\x10isAddedToHomeKit\x18$ \x01(\x08\x12\x1a\n\x12volumeCapabilities\x18% \x01(\x05\x12\x13\n\x0b\x62luetoothID\x18& \x01(\t\"\xa0\x01\n\x19UpdateOutputDeviceMessage\x12\x30\n\routputDevices\x18\x01 \x03(\x0b\x32\x19.AVOutputDeviceDescriptor\x12\x13\n\x0b\x65ndpointUID\x18\x02 \x01(\t\x12<\n\x19\x63lusterAwareOutputDevices\x18\x03 \x03(\x0b\x32\x19.AVOutputDeviceDescriptor:O\n\x19updateOutputDeviceMessage\x12\x10.ProtocolMessage\x18\x45 \x01(\x0b\x32\x1a.UpdateOutputDeviceMessage'
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_mrp_dot_protobuf_dot_Common__pb2.DESCRIPTOR,])
 
@@ -377,6 +377,20 @@ _UPDATEOUTPUTDEVICEMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='endpointUID', full_name='UpdateOutputDeviceMessage.endpointUID', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='clusterAwareOutputDevices', full_name='UpdateOutputDeviceMessage.clusterAwareOutputDevices', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -389,14 +403,15 @@ _UPDATEOUTPUTDEVICEMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1432,
-  serialized_end=1509,
+  serialized_start=1433,
+  serialized_end=1593,
 )
 
 _AVOUTPUTDEVICEDESCRIPTOR.fields_by_name['deviceType'].enum_type = pyatv_dot_mrp_dot_protobuf_dot_Common__pb2._DEVICETYPE_ENUM
 _AVOUTPUTDEVICEDESCRIPTOR.fields_by_name['deviceSubType'].enum_type = pyatv_dot_mrp_dot_protobuf_dot_Common__pb2._DEVICESUBTYPE_ENUM
 _AVOUTPUTDEVICEDESCRIPTOR.fields_by_name['sourceInfo'].message_type = _AVOUTPUTDEVICESOURCEINFO
 _UPDATEOUTPUTDEVICEMESSAGE.fields_by_name['outputDevices'].message_type = _AVOUTPUTDEVICEDESCRIPTOR
+_UPDATEOUTPUTDEVICEMESSAGE.fields_by_name['clusterAwareOutputDevices'].message_type = _AVOUTPUTDEVICEDESCRIPTOR
 DESCRIPTOR.message_types_by_name['AVOutputDeviceSourceInfo'] = _AVOUTPUTDEVICESOURCEINFO
 DESCRIPTOR.message_types_by_name['AVOutputDeviceDescriptor'] = _AVOUTPUTDEVICEDESCRIPTOR
 DESCRIPTOR.message_types_by_name['UpdateOutputDeviceMessage'] = _UPDATEOUTPUTDEVICEMESSAGE

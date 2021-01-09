@@ -56,4 +56,6 @@ message AVOutputDeviceDescriptor {
 
 message UpdateOutputDeviceMessage {
   repeated AVOutputDeviceDescriptor outputDevices = 1;
+  optional string endpointUID = 2;
+  repeated AVOutputDeviceDescriptor clusterAwareOutputDevices = 3;
 }
