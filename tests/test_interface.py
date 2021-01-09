@@ -1,7 +1,8 @@
 """Unit tests for pyatv.interface."""
+from unittest.mock import ANY, MagicMock
 
 import pytest
-from typing import Dict
+from typing import Dict, Optional
 
 from pyatv import convert, exceptions, interface
 from pyatv.interface import FeatureInfo
@@ -15,6 +16,22 @@ from pyatv.const import (
     FeatureState,
     FeatureName,
 )
+
+
+# Contains two valid values for each property that are tested
+# against each other
+eq_test_cases = [
+    ("media_type", MediaType.Video, MediaType.Music),
+    ("device_state", DeviceState.Idle, DeviceState.Playing),
+    ("title", "foo", "bar"),
+    ("artist", "abra", "kadabra"),
+    ("album", "banana", "apple"),
+    ("genre", "cat", "mouse"),
+    ("total_time", 210, 2000),
+    ("position", 555, 888),
+    ("shuffle", ShuffleState.Albums, ShuffleState.Songs),
+    ("repeat", RepeatState.Track, RepeatState.All),
+]
 
 
 class TestClass:
@@ -155,6 +172,23 @@ class FeaturesDummy(interface.Features):
         return FeatureInfo(state=state)
 
 
+class PushUpdaterDummy(interface.PushUpdater):
+    def active(self) -> bool:
+        """Return if push updater has been started."""
+        raise exceptions.NotSupportedError()
+
+    def start(self, initial_delay: int = 0) -> None:
+        """Begin to listen to updates.
+
+        If an error occurs, start must be called again.
+        """
+        raise exceptions.NotSupportedError()
+
+    def stop(self) -> None:
+        """No longer forward updates to listener."""
+        raise exceptions.NotSupportedError()
+
+
 @pytest.fixture
 def methods():
     yield interface.retrieve_commands(TestClass)
@@ -237,6 +271,26 @@ def test_playing_generate_same_hash():
         "80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade"
         == playing2.hash
     )
+
+
+def test_playing_eq_ensure_member_count():
+    # Fail if a property is added or removed to interface, just as a reminder to
+    # update equality comparison
+    assert len(PlayingDummy().__dict__) == 10
+
+
+@pytest.mark.parametrize(
+    "prop,value1,value2",
+    [pytest.param(*data, id=data[0]) for data in eq_test_cases],
+)
+def test_playing_field_equality(prop, value1, value2):
+    playing1 = PlayingDummy(**{prop: value1})
+    playing2 = PlayingDummy(**{prop: value2})
+    playing3 = PlayingDummy(**{prop: value2})
+
+    assert playing1 == playing1
+    assert playing1 != playing2
+    assert playing2 == playing3
 
 
 # METADATA
@@ -362,3 +416,23 @@ def test_app_properties():
 def test_app_str():
     app = interface.App("name", "id")
     assert "App: name (id)" == str(app)
+
+
+# PUSH UPDATER
+
+
+@pytest.mark.parametrize("updates", [1, 2, 3])
+def test_post_ignore_duplicate_update(event_loop, updates):
+    listener = MagicMock()
+    playing = PlayingDummy()
+
+    async def _post_updates(repeats: int):
+        updater = PushUpdaterDummy(event_loop)
+        updater.listener = listener
+        for _ in range(repeats):
+            updater.post_update(playing)
+
+    event_loop.run_until_complete(_post_updates(updates))
+
+    assert listener.playstatus_update.call_count == 1
+    listener.playstatus_update.assert_called_once_with(ANY, playing)

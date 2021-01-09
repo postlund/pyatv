@@ -465,8 +465,7 @@ class DmapPushUpdater(PushUpdater):
 
     def __init__(self, loop, apple_tv, listener):
         """Initialize a new DmapPushUpdater instance."""
-        super().__init__()
-        self._loop = loop
+        super().__init__(loop)
         self._atv = apple_tv
         self._listener = weakref.ref(listener)
         self._future = None
@@ -494,7 +493,7 @@ class DmapPushUpdater(PushUpdater):
         # Delay before restarting after an error
         self._initial_delay = initial_delay
 
-        self._future = asyncio.ensure_future(self._poller(), loop=self._loop)
+        self._future = asyncio.ensure_future(self._poller(), loop=self.loop)
 
     def stop(self):
         """No longer forward updates to listener."""
@@ -509,14 +508,14 @@ class DmapPushUpdater(PushUpdater):
             # Sleep some time before waiting for updates
             if not first_call and self._initial_delay > 0:
                 _LOGGER.debug("Initial delay set to %d", self._initial_delay)
-                await asyncio.sleep(self._initial_delay, loop=self._loop)
+                await asyncio.sleep(self._initial_delay, loop=self.loop)
                 first_call = False
 
             try:
                 _LOGGER.debug("Waiting for playstatus updates")
                 playstatus = await self._atv.playstatus(use_revision=True, timeout=0)
 
-                self._loop.call_soon(self.listener.playstatus_update, self, playstatus)
+                self.post_update(playstatus)
             except asyncio.CancelledError:
                 break
 
@@ -524,7 +523,7 @@ class DmapPushUpdater(PushUpdater):
                 _LOGGER.exception("A communication error happened")
                 listener = self._listener()
                 if listener:
-                    self._loop.call_soon(listener.listener.connection_lost, ex)
+                    self.loop.call_soon(listener.listener.connection_lost, ex)
 
                 break
 
@@ -532,7 +531,7 @@ class DmapPushUpdater(PushUpdater):
             # exceptions to keep the API.
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug("Playstatus error occurred: %s", ex)
-                self._loop.call_soon(self.listener.playstatus_error, self, ex)
+                self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
         self._future = None
 
