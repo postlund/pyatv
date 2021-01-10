@@ -110,6 +110,8 @@ _FIELD_FEATURES = {
     FeatureName.Position: "elapsedTimeTimestamp",
 }  # type: Dict[FeatureName, str]
 
+DELAY_BETWEEN_COMMANDS = 0.1
+
 
 def _cocoa_to_timestamp(time):
     delta = datetime.datetime(2001, 1, 1) - datetime.datetime(1970, 1, 1)
@@ -527,6 +529,7 @@ class MrpPower(Power):
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         await self.remote.home(InputAction.Hold)
+        await asyncio.sleep(DELAY_BETWEEN_COMMANDS)
         await self.remote.select()
 
         if await_new_state and self.power_state != PowerState.Off:

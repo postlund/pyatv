@@ -1,5 +1,6 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import math
 import logging
 from ipaddress import IPv4Address
 from aiohttp.test_utils import unittest_run_loop
@@ -19,7 +20,7 @@ from pyatv.conf import AirPlayService, MrpService, AppleTV
 from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
-from tests.utils import until, faketime
+from tests.utils import until, faketime, stub_sleep
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.mrp import APP_NAME, PLAYER_IDENTIFIER
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
@@ -247,6 +248,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         # Check if power state changes after turn_off command
         await self.atv.power.turn_off()
+        assert math.isclose(stub_sleep(), 0.1)
         await until(lambda: self.atv.power.power_state == PowerState.Off)
         await until(lambda: listener.old_state == PowerState.On)
         await until(lambda: listener.new_state == PowerState.Off)
