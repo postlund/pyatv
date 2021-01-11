@@ -433,3 +433,28 @@ async def test_volume_control_availability(psm, protocol, listener):
 
     assert listener.call_count == 2
     assert not psm.volume_controls_available
+
+
+@pytest.mark.asyncio
+async def test_set_default_supported_commands(psm, protocol, listener):
+    msg = messages.create(pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
+    supported_commands = msg.inner().supportedCommands.supportedCommands
+    command = supported_commands.add()
+    command.command = pb.CommandInfo_pb2.Play
+    msg.inner().playerPath.client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
+
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    client = msg.inner().client
+    client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
+
+    # Default commands are set on client, so any player belonging to that client
+    # should have the supported command
+    player_path = pb.PlayerPath()
+    player_path.client.bundleIdentifier = CLIENT_ID_1
+    player_path.player.identifier = PLAYER_ID_1
+    player = psm.get_player(player_path)
+
+    assert player.command_info(pb.CommandInfo_pb2.Play)
+    assert listener.call_count == 2

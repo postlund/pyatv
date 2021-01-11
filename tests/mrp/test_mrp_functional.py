@@ -425,3 +425,13 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="test")
         self.assertEqual(self.atv.metadata.app.name, APP_NAME)
         self.assertEqual(self.atv.metadata.app.identifier, TEST_PLAYER)
+
+    @unittest_run_loop
+    async def test_set_default_commands(self):
+        self.usecase.default_supported_commands(
+            [CommandInfo_pb2.Play, CommandInfo_pb2.Pause]
+        )
+        self.usecase.example_video()
+
+        await self.playing(title="dummy")
+        self.assertFeatures(FeatureState.Available, FeatureName.Play, FeatureName.Pause)

@@ -3,6 +3,7 @@
 import math
 import logging
 import weakref
+from itertools import chain
 from copy import deepcopy
 from typing import Dict, Optional, List
 
@@ -15,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 class PlayerState:
     """Represent what is currently playing on a device."""
 
-    def __init__(self, player: pb.NowPlayingPlayer):
+    def __init__(self, parent, player: pb.NowPlayingPlayer):
         """Initialize a new PlayerState instance."""
         self._playback_state = None
         self.supported_commands: List[pb.CommandInfo] = []
@@ -24,6 +25,7 @@ class PlayerState:
 
         self.identifier: Optional[str] = player.identifier
         self.display_name: Optional[str] = None
+        self.parent = parent
         self.update(player)
 
     @property
@@ -87,7 +89,7 @@ class PlayerState:
 
     def command_info(self, command):
         """Return supported command info."""
-        for cmd in self.supported_commands:
+        for cmd in chain(self.supported_commands, self.parent.supported_commands):
             if cmd.command == command:
                 return cmd
         return None
@@ -132,7 +134,14 @@ class Client:
         self.bundle_identifier: str = client.bundleIdentifier
         self.display_name: Optional[str] = None
         self.players: Dict[str, PlayerState] = {}
+        self.supported_commands: List[pb.CommandInfo] = []
         self.update(client)
+
+    def handle_set_default_supported_commands(self, supported_commands):
+        """Update default supported commands for client."""
+        self.supported_commands = deepcopy(
+            supported_commands.supportedCommands.supportedCommands
+        )
 
     def update(self, client: pb.NowPlayingClient):
         """Update client metadata."""
@@ -161,6 +170,7 @@ class PlayerStateManager:
             pb.UPDATE_CLIENT_MESSAGE: self._handle_update_client,
             pb.REMOVE_CLIENT_MESSAGE: self._handle_remove_client,
             pb.REMOVE_PLAYER_MESSAGE: self._handle_remove_player,
+            pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: self._handle_set_default_supported_commands,  # noqa
             pb.VOLUME_CONTROL_AVAILABILITY_MESSAGE: self._volume_control_availability,
         }
         for message, handler in listeners.items():
@@ -179,7 +189,7 @@ class PlayerStateManager:
 
         player_id = player_path.player.identifier
         if player_id not in client.players:
-            client.players[player_id] = PlayerState(player_path.player)
+            client.players[player_id] = PlayerState(client, player_path.player)
         return client.players[player_id]
 
     @property
@@ -213,7 +223,7 @@ class PlayerStateManager:
             )
             if default_player:
                 return default_player
-        return PlayerState(pb.NowPlayingPlayer())
+        return PlayerState(Client(pb.NowPlayingClient()), pb.NowPlayingPlayer())
 
     async def _handle_set_state(self, message, _):
         setstate = message.inner()
@@ -270,6 +280,7 @@ class PlayerStateManager:
         if player.is_valid:
             client = self.get_client(player_to_remove.client)
             del client.players[player.identifier]
+            player.parent = None
 
             removed = False
             if player == self._active_player:
@@ -281,6 +292,14 @@ class PlayerStateManager:
 
             if removed:
                 await self._state_updated()
+
+    async def _handle_set_default_supported_commands(self, message, _):
+        supported_commands = message.inner()
+
+        client = self.get_client(supported_commands.playerPath.client)
+        client.handle_set_default_supported_commands(supported_commands)
+
+        await self._state_updated()
 
     async def _handle_update_client(self, message, _):
         update_client = message.inner()
