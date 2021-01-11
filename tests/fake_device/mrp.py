@@ -247,6 +247,16 @@ class FakeMrpState:
         msg.inner().volumeControlAvailable = available
         self._send(msg)
 
+    def default_supported_commands(self, commands):
+        msg = messages.create(protobuf.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
+        supported_commands = msg.inner().supportedCommands.supportedCommands
+        for command in commands:
+            item = supported_commands.add()
+            item.command = command
+            item.enabled = True
+        msg.inner().playerPath.client.bundleIdentifier = PLAYER_IDENTIFIER
+        self._send(msg)
+
 
 class FakeMrpServiceFactory:
     def __init__(self, state, app, loop):
@@ -596,3 +606,7 @@ class FakeMrpUseCases:
         metadata = PlayingState(playback_state=PlaybackState.Interrupted)
         self.state.set_player_state(PLAYER_IDENTIFIER, metadata)
         self.state.set_active_player(PLAYER_IDENTIFIER)
+
+    def default_supported_commands(self, commands):
+        """Call to set default supported commands."""
+        self.state.default_supported_commands(commands)
