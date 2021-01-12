@@ -7,12 +7,81 @@ import pytest
 from pyatv.support import dns
 
 
+@pytest.mark.parametrize(
+    "name,expected",
+    (
+        ("_http._tcp.local", (None, "_http._tcp", "local")),
+        ("foo._http._tcp.local", ("foo", "_http._tcp", "local")),
+        ("foo.bar._http._tcp.local", ("foo.bar", "_http._tcp", "local")),
+    ),
+    ids=("ptr", "no_dot", "with_dot"),
+)
+def test_happy_service_instance_names(name, expected):
+    assert dns.ServiceInstanceName.split_name(name) == expected
+
+
+@pytest.mark.parametrize(
+    "name",
+    (
+        "_http.local",
+        "._tcp.local",
+        "_http.foo._tcp.local",
+        "_tcp._http.local",
+    ),
+    ids=("no_proto", "no_service", "split", "reversed"),
+)
+def test_sad_service_instance_names(name):
+    with pytest.raises(ValueError):
+        dns.ServiceInstanceName.split_name(name)
+
+
 # mapping is test_id: tuple(name, expected_raw)
 encode_domain_names = {
     "root": (".", b"\x00"),
-    "example.com": (".", b"\x00"),
-    # Taken straight from Wikipedia's IDNA page
-    "idna": ("Bücher.example", b"\x0Dxn--bcher-kva\x07example\x00"),
+    "empty": ("", b"\x00"),
+    "example.com": ("example.com", b"\x07example\x03com\x00"),
+    "example.com_list": (["example", "com"], b"\x07example\x03com\x00"),
+    "unicode": ("Bücher.example", b"\x07B\xc3\xbccher\x07example\x00"),
+    "dotted_instance": (
+        "Dot.Within._http._tcp.example.local",
+        b"\x0aDot.Within\x05_http\x04_tcp\x07example\x05local\x00",
+    ),
+    "dotted_instance_list": (
+        ["Dot.Within", "_http", "_tcp", "example", "local"],
+        b"\x0aDot.Within\x05_http\x04_tcp\x07example\x05local\x00",
+    ),
+    "truncated_ascii": (
+        (
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ".test"
+        ),
+        (
+            b"\x3fabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
+            b"\x04test"
+            b"\x00"
+        ),
+    ),
+    "truncated_unicode": (
+        (
+            # The 'a' is at the beginning to force the codepoints to be split at 63
+            # bytes. The next line is also at the right length to be below 88 characters
+            # even if each kana is counted as a double-width character. Additionally,
+            # this sequence is NF*D* normalized, not NFC (which is what is used for
+            # Net-Unicode).
+            "aがあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめも"
+            ".test"
+        ),
+        (
+            b"\x3d"
+            b"a\xe3\x81\x8c\xe3\x81\x82\xe3\x81\x84\xe3\x81\x86\xe3\x81\x88\xe3\x81\x8a"
+            b"\xe3\x81\x8b\xe3\x81\x8d\xe3\x81\x8f\xe3\x81\x91\xe3\x81\x93\xe3\x81\x95"
+            b"\xe3\x81\x97\xe3\x81\x99\xe3\x81\x9b\xe3\x81\x9d\xe3\x81\x9f\xe3\x81\xa1"
+            b"\xe3\x81\xa4\xe3\x81\xa6"
+            b"\x04test"
+            b"\x00"
+        ),
+    ),
 }
 
 
@@ -38,8 +107,27 @@ decode_domain_names = {
         "foo.label.test",
         -2,
     ),
-    # Again, take straight from the Internationalized Domain name Wikipedia page
+    # Taken straight from the Internationalized Domain name Wikipedia page
     "idna": (b"\x0Dxn--bcher-kva\x07example\x00", 0, "bücher.example", None),
+    # Taken from issue #919. Apple puts a non-breaking space between "Apple" and "TV".
+    "nbsp": (
+        b"\x10Apple\xc2\xa0TV (4167)\x05local\x00",
+        0,
+        "Apple\xa0TV (4167).local",
+        None,
+    ),
+    # This is a doozy of a test case; it's covering a couple different areas of Unicode,
+    # as well as exercising that DNS-SD allows dots in instance names.
+    "unicode": (
+        (
+            b"\x1d\xe5\xb1\x85\xe9\x96\x93 Apple\xc2\xa0TV. En Espa\xc3\xb1ol"
+            b"\x05local"
+            b"\x00"
+        ),
+        0,
+        "居間 Apple TV. En Español.local",
+        None,
+    ),
 }
 
 
