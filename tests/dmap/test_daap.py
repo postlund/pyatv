@@ -1,6 +1,6 @@
-"""Unit tests for pyatv.convert."""
+"""Unit tests for pyatv.dmap.daap."""
 
-import unittest
+import pytest
 
 from pyatv import exceptions
 from pyatv.dmap.daap import media_kind, playstate, ms_to_s
@@ -48,73 +48,84 @@ PLAY_STATE_FORWARD = 5
 PLAY_STATE_BACKWARD = 6
 
 
-class ConvertTest(unittest.TestCase):
+# MEDIA KIND TESTS
 
-    # MEDIA KIND TESTS
 
-    def test_unknown_media_kind(self):
-        self.assertEqual(MediaType.Unknown, media_kind(MEDIA_KIND_UNKNOWN))
-        self.assertEqual(MediaType.Unknown, media_kind(MEDIA_KIND_UNKNOWN2))
+def test_unknown_media_kind():
+    assert MediaType.Unknown == media_kind(MEDIA_KIND_UNKNOWN)
+    assert MediaType.Unknown == media_kind(MEDIA_KIND_UNKNOWN2)
 
-    def test_video_media_kinds(self):
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MOVIE))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MUSICVIDEO))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_MUSICVIDEO2))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_VIDEOPASS))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_HOMEVIDEO))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_FUTUREVIDEO))
-        self.assertEqual(MediaType.Video, media_kind(MEDIA_KIND_ITUNESU))
 
-    def test_music_media_kinds(self):
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_SONG))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_PODCAST))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_PODCAST2))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_COACHEDAUDIO))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_RINGTONE))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_VOICEMEMO))
-        self.assertEqual(MediaType.Music, media_kind(MEDIA_KIND_ALERTTONE))
+def test_video_media_kinds():
+    assert MediaType.Video == media_kind(MEDIA_KIND_MOVIE)
+    assert MediaType.Video == media_kind(MEDIA_KIND_MUSICVIDEO)
+    assert MediaType.Video == media_kind(MEDIA_KIND_MUSICVIDEO2)
+    assert MediaType.Video == media_kind(MEDIA_KIND_VIDEOPASS)
+    assert MediaType.Video == media_kind(MEDIA_KIND_HOMEVIDEO)
+    assert MediaType.Video == media_kind(MEDIA_KIND_FUTUREVIDEO)
+    assert MediaType.Video == media_kind(MEDIA_KIND_ITUNESU)
 
-    def test_tv_kinds(self):
-        self.assertEqual(MediaType.TV, media_kind(MEDIA_KIND_TVSHOW))
-        self.assertEqual(MediaType.TV, media_kind(MEDIA_KIND_TVSHOW2))
 
-    def test_unknown_media_kind_throws(self):
-        with self.assertRaises(exceptions.UnknownMediaKindError):
-            media_kind(99999)
+def test_music_media_kinds():
+    assert MediaType.Music == media_kind(MEDIA_KIND_SONG)
+    assert MediaType.Music == media_kind(MEDIA_KIND_PODCAST)
+    assert MediaType.Music == media_kind(MEDIA_KIND_PODCAST2)
+    assert MediaType.Music == media_kind(MEDIA_KIND_COACHEDAUDIO)
+    assert MediaType.Music == media_kind(MEDIA_KIND_RINGTONE)
+    assert MediaType.Music == media_kind(MEDIA_KIND_VOICEMEMO)
+    assert MediaType.Music == media_kind(MEDIA_KIND_ALERTTONE)
 
-    # PLAYSTATE TESTS
 
-    def test_device_state_no_media(self):
-        # This test should not really be here as "None" is in reality not a
-        # valid value. But it is supported nonetheless because that makes
-        # usage nicer. None means that the field is not included in a
-        # server response, which matches the behavior of dmap.first.
-        self.assertEqual(DeviceState.Idle, playstate(None))
+def test_tv_kinds():
+    assert MediaType.TV == media_kind(MEDIA_KIND_TVSHOW)
+    assert MediaType.TV == media_kind(MEDIA_KIND_TVSHOW2)
 
-    def test_regular_playstates(self):
-        self.assertEqual(DeviceState.Idle, playstate(PLAY_STATE_IDLE))
-        self.assertEqual(DeviceState.Loading, playstate(PLAY_STATE_LOADING))
-        self.assertEqual(DeviceState.Stopped, playstate(PLAY_STATE_STOPPED))
-        self.assertEqual(DeviceState.Paused, playstate(PLAY_STATE_PAUSED))
-        self.assertEqual(DeviceState.Playing, playstate(PLAY_STATE_PLAYING))
-        self.assertEqual(DeviceState.Seeking, playstate(PLAY_STATE_FORWARD))
-        self.assertEqual(DeviceState.Seeking, playstate(PLAY_STATE_BACKWARD))
 
-    def test_unknown_playstate_throws(self):
-        with self.assertRaises(exceptions.UnknownPlayStateError):
-            playstate(99999)
+def test_unknown_media_kind_throws():
+    with pytest.raises(exceptions.UnknownMediaKindError):
+        media_kind(99999)
 
-    # TIME TESTS
 
-    def test_no_time_returns_zero(self):
-        self.assertEqual(0, ms_to_s(None))
+# PLAYSTATE TESTS
 
-    def test_time_in_seconds(self):
-        self.assertEqual(0, ms_to_s(400))
-        self.assertEqual(1, ms_to_s(501))
-        self.assertEqual(36, ms_to_s(36000))
 
-    def test_invalid_time(self):
-        # Sometimes really large times are reported during buffering, this test
-        # handles those special cases.
-        self.assertEqual(0, ms_to_s(2 ** 32 - 1))
+def test_device_state_no_media():
+    # This test should not really be here as "None" is in reality not a
+    # valid value. But it is supported nonetheless because that makes
+    # usage nicer. None means that the field is not included in a
+    # server response, which matches the behavior of dmap.first.
+    assert DeviceState.Idle == playstate(None)
+
+
+def test_regular_playstates():
+    assert DeviceState.Idle == playstate(PLAY_STATE_IDLE)
+    assert DeviceState.Loading == playstate(PLAY_STATE_LOADING)
+    assert DeviceState.Stopped == playstate(PLAY_STATE_STOPPED)
+    assert DeviceState.Paused == playstate(PLAY_STATE_PAUSED)
+    assert DeviceState.Playing == playstate(PLAY_STATE_PLAYING)
+    assert DeviceState.Seeking == playstate(PLAY_STATE_FORWARD)
+    assert DeviceState.Seeking == playstate(PLAY_STATE_BACKWARD)
+
+
+def test_unknown_playstate_throws():
+    with pytest.raises(exceptions.UnknownPlayStateError):
+        playstate(99999)
+
+
+# TIME TESTS
+
+
+def test_no_time_returns_zero():
+    assert 0 == ms_to_s(None)
+
+
+def test_time_in_seconds():
+    assert 0 == ms_to_s(400)
+    assert 1 == ms_to_s(501)
+    assert 36 == ms_to_s(36000)
+
+
+def test_invalid_time():
+    # Sometimes really large times are reported during buffering == this test
+    # handles those special cases.
+    assert 0 == ms_to_s(2 ** 32 - 1)
