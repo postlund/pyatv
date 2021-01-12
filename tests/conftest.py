@@ -42,6 +42,24 @@ def stub_sleep_fixture():
     unstub_sleep()
 
 
+# The heartbeat loop uses sleep between each heartbeat, which causes a hogging
+# loop in tests since sleep is stubbed. So always stub heartbeats in functional
+# tests and rely on unit tests (which can enable heartbeats via the use_heartbeats
+# marker in pytest).
+@pytest.fixture(autouse=True)
+def stub_heartbeat_loop(request):
+    if "use_heartbeat" not in request.keywords:
+
+        async def _stub_heartbeat_loop(protocol):
+            pass
+
+        with patch("pyatv.mrp.protocol.heartbeat_loop") as mock_heartbeat:
+            mock_heartbeat.side_effect = _stub_heartbeat_loop
+            yield
+    else:
+        yield
+
+
 @pytest.fixture
 async def knock_server(event_loop):
     servers = []

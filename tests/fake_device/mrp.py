@@ -181,6 +181,7 @@ class FakeMrpState:
         self.active_player = None
         self.powered_on = True
         self.has_authenticated = False
+        self.heartbeat_count = 0
 
     def _send(self, msg):
         for client in self.clients:
@@ -454,6 +455,12 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             state.position -= int(inner.options.skipInterval)
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Skip backwards %d", inner.options.skipInterval)
+        elif inner.command == cmd.Unknown:
+            # This special case is used by pyatv for heartbeats
+            self.state.heartbeat_count += 1
+            _LOGGER.debug(
+                "Received heartbeat (total count: %d)", self.state.heartbeat_count
+            )
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
             self.send(
