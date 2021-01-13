@@ -49,6 +49,7 @@ class MrpConnection(
         """Device connection was dropped."""
         _LOGGER.debug(self._log_str + "Disconnected from device: %s", exc)
         self._transport = None
+        self.listener.stop()
 
         if self.atv:
             if exc is None:

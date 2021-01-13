@@ -7,14 +7,39 @@ import logging
 from collections import namedtuple
 
 from pyatv import exceptions
-from pyatv.mrp import messages
+from pyatv.mrp import messages, protobuf
 from pyatv.mrp.auth import MrpPairingVerifier
 from pyatv.mrp.srp import Credentials
 
 _LOGGER = logging.getLogger(__name__)
 
+HEARTBEAT_INTERVAL = 30
+
 Listener = namedtuple("Listener", "func data")
 OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
+
+
+async def heartbeat_loop(protocol):
+    """Periodically send heartbeat messages to device."""
+    _LOGGER.debug("Starting heartbeat loop")
+    count = 0
+    message = messages.create(protobuf.ProtocolMessage.SEND_COMMAND_MESSAGE)
+    while True:
+        try:
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+
+            _LOGGER.debug("Sending periodic heartbeat %d", count)
+            await protocol.send_and_receive(message)
+            _LOGGER.debug("Got heartbeat %d", count)
+        except asyncio.CancelledError:
+            break
+        except Exception:
+            _LOGGER.exception(f"heartbeat {count} failed")
+            protocol.connection.close()
+            break
+        else:
+            count += 1
+    _LOGGER.debug("Stopping heartbeat loop at %d", count)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -36,6 +61,7 @@ class MrpProtocol:
         self.srp = srp
         self.service = service
         self.device_info = None
+        self._heartbeat_task = None
         self._outstanding = {}
         self._listeners = {}
         self._initial_message_sent = False
@@ -81,6 +107,8 @@ class MrpProtocol:
         await self.send_and_receive(messages.client_updates_config())
         await self.send_and_receive(messages.get_keyboard_session())
 
+        self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
+
     def stop(self):
         """Disconnect from device."""
         if self._outstanding:
@@ -88,6 +116,9 @@ class MrpProtocol:
                 "There were %d outstanding requests", len(self._outstanding)
             )
 
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+            self._heartbeat_task = None
         self._initial_message_sent = False
         self._outstanding = {}
         self.connection.close()

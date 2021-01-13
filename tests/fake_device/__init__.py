@@ -1,4 +1,6 @@
 """Representation of a fake device supporting multiple protocol."""
+from typing import Dict
+from collections import namedtuple
 
 from aiohttp import web
 
@@ -19,10 +21,12 @@ FACTORIES = {
     Protocol.MRP: (FakeMrpServiceFactory, FakeMrpState, FakeMrpUseCases),
 }
 
+FakeService = namedtuple("FakeService", "service state factory")
+
 
 class FakeAppleTV:
     def __init__(self, loop, test_mode=True) -> None:
-        self.services = {}  # Protocol > (service, state, usecase)
+        self.services: Dict[Protocol, FakeService] = {}
         self.app = web.Application() if test_mode else None
         self.loop = loop
         self.test_mode = test_mode
@@ -38,7 +42,7 @@ class FakeAppleTV:
             return
 
         for service in self.services.values():
-            await service[0].start(not self.test_mode)
+            await service.service.start(not self.test_mode)
 
         self._has_started = True
 
@@ -56,9 +60,12 @@ class FakeAppleTV:
             state, self.app if self.test_mode else web.Application(), self.loop
         )
         usecase = usecase_factory(state)
-        self.services[protocol] = (service, state, usecase)
+        self.services[protocol] = FakeService(service, state, usecase)
         return state, usecase
 
     # Disclaimer: When running in "test mode", only MRP is supported here!
     def get_port(self, protocol: Protocol) -> int:
-        return self.services[protocol][0].port
+        return self.services[protocol].service.port
+
+    def get_state(self, protocol: Protocol):
+        return self.services[protocol].state
