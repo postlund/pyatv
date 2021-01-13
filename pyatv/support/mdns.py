@@ -11,7 +11,13 @@ from zeroconf import Zeroconf, ServiceInfo
 
 from pyatv.support import log_binary, net
 from pyatv.support.collections import CaseInsensitiveDict
-from pyatv.support.dns import DnsMessage, DnsQuestion, DnsResource, QueryType
+from pyatv.support.dns import (
+    DnsMessage,
+    DnsQuestion,
+    DnsResource,
+    QueryType,
+    ServiceInstanceName,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,9 +97,9 @@ def parse_services(message: DnsMessage) -> typing.List[Service]:
 
     # Build services
     for service, device in table.items():
-        service_name, _, service_type = service.partition(".")
-
-        if not service_type.endswith("_tcp.local"):
+        try:
+            service_name = ServiceInstanceName.split_name(service)
+        except ValueError:
             continue
 
         port = (QueryType.SRV in device and device[QueryType.SRV].rd["port"]) or 0
@@ -106,8 +112,8 @@ def parse_services(message: DnsMessage) -> typing.List[Service]:
         address = IPv4Address(target_record.rd) if target_record else None
 
         results[service] = Service(
-            service_type,
-            service_name,
+            service_name.ptr_name,
+            typing.cast(str, service_name.instance),
             address,
             port,
             _decode_properties(properties),
