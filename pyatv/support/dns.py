@@ -1,10 +1,12 @@
 """Processing functions for raw DNS messages."""
+import collections.abc
 import enum
 import io
 import logging
 import struct
 import typing
 from ipaddress import IPv4Address
+import unicodedata
 
 from pyatv.support.collections import CaseInsensitiveDict
 
@@ -21,35 +23,112 @@ def unpack_stream(fmt: str, buffer: typing.BinaryIO) -> typing.Tuple:
     return struct.unpack(fmt, buffer.read(size))
 
 
-def qname_encode(name: str) -> bytes:
-    """Encode QNAME without using name compression."""
+class ServiceInstanceName(typing.NamedTuple):
+    """Represents either a service or service instance name in the DNS.
+
+    The special thing this class can do is (attempt) to handle periods in the instance
+    name correctly.
+    """
+
+    instance: typing.Optional[str]
+    service: str
+    domain: str = "local"
+
+    def __str__(self):
+        """Join all components together with periods."""
+        return ".".join(typing.cast(typing.Iterable[str], filter(None, self)))
+
+    @classmethod
+    def split_name(cls, name: str) -> "ServiceInstanceName":
+        """Split a name into instance (optional), service, and domain parts.
+
+        If the name given isn't a service name or service instance name, this method
+        raise a `ValueError`.
+        """
+        labels = name.split(".")
+        if len(labels) < 2:
+            raise ValueError("There must be at least three labels in a service name")
+        for index in range(len(labels) - 1):
+            label, next_label = labels[index : index + 2]
+            if label.startswith("_") and next_label.lower() in ("_tcp", "_udp"):
+                return cls(
+                    ".".join(labels[0:index]) or None,
+                    label + "." + next_label,
+                    ".".join(labels[index + 2 :]),
+                )
+        raise ValueError(
+            f"'{name}' is not a service domain, nor a service instance name"
+        )
+
+    @property
+    def ptr_name(self):
+        """Return just the service name, like the name for a PTR record."""
+        return ".".join((self.service, self.domain))
+
+
+def qname_encode(name: typing.Union[str, typing.Sequence[str]]) -> bytes:
+    """Encode QNAME without using name compression.
+
+    Labels (each component of a domain name) are encoded using UTF-8, as that is what
+    the Apple TV has been observed to use for all domain names.
+
+    This function can take either a single string, with each label separated by dots, or
+    a sequence of strings, and each element of the sequence is treated as a single
+    label. A null (empty) label is added for the root domain if it is not already
+    present for both types of arguments.
+    """
     encoded = bytearray()
-    labels = name.split(".")
-    # Ensure there's an empty label for the root domain
-    if labels[-1] != "":
+    labels: typing.List[str]
+    if isinstance(name, collections.abc.Sequence) and not isinstance(name, str):
+        # Copy the sequence so we can make changes to it
+        labels = list(name) or []
+    else:
+        # Try to parse it as a service instance name, so we can handle the instance
+        # label having dots in it.
+        try:
+            srv_name = ServiceInstanceName.split_name(name)
+        except ValueError:
+            labels = typing.cast(str, name).split(".")
+        else:
+            labels = []
+            if srv_name.instance:
+                labels.append(srv_name.instance)
+            # the ptr_name just has the instance name dropped off
+            labels.extend(srv_name.ptr_name.split("."))
+    # Ensure there's always an empty label for the root domain
+    if not labels or labels[-1] != "":
         labels.append("")
-    for label in labels:
-        encoded_label = label.encode("idna")
+    # DNS-SD uses UTF-8 for names, not IDNA. Apple extends this to basically all places
+    # where names are used (except for A/AAAA records, which are transliterated!).
+    encoding = "utf-8"
+    # Normalize all labels using NFC, as specified in RFC 6763, section 4.1.3
+    normalized_labels = (unicodedata.normalize("NFC", label) for label in labels)
+    for label in normalized_labels:
+        encoded_label = label.encode(encoding)
         encoded_length = len(encoded_label)
-        # Length of the encoded label, in bytes, but a maximum of 63
-        # The maximum is 63 as the upper two bits are used as a flag for name
-        # compression.
-        encoded.append(min(encoded_length, 63))
-        if encoded_length == 0:
-            # If we've reached an empty label, assume this is the last component.
-            # Empty labels (two periods right after each other) isn't legal anyways.
-            break
-        if encoded_length > 63:
+        # When truncating the label, we can't just stop at 63 bytes as that might be
+        # splitting a multi-byte Unicode codepoint.
+        truncated = False
+        while encoded_length > 63:
+            truncated = True
+            truncated_label = encoded_label.decode(encoding)[:-1]
+            encoded_label = truncated_label.encode(encoding)
+            encoded_length = len(encoded_label)
+        if truncated:
             _LOGGER.warning(
                 (
-                    "A label (%s) isn being truncated (to %s) in the DNS name '%s' "
+                    "A label (%s) is being truncated (to %s) in the DNS name '%s' "
                     "as it is over 63 bytes long."
                 ),
                 label,
-                label[:64],
+                encoded_label.decode(encoding),
                 name,
             )
-            encoded.extend(encoded_label[:64])
+        encoded.append(encoded_length)
+        if encoded_length == 0:
+            # If we've reached an empty label, assume this is the last component.
+            # Empty labels (two periods right after each other) aren't legal anyways.
+            break
         else:
             encoded.extend(encoded_label)
     return encoded
@@ -70,10 +149,14 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
     """Unpack a domain name, handling any name compression encountered.
 
     Basically, each component of a domain name (called a "label") is prefixed with a
-    length followed by the IDNA encoded label. The final component has a zero length
+    length followed by the encoded label. The final component has a zero length
     with a null label for the DNS root. The tricky part is that labels are limited to 63
     bytes, and the upper two bits of the length are used as a flag for "name
-    compression". For full details, see RFC1035, sections 3.1 and 4.1.4.
+    compression". For full details, see RFC 1035, sections 3.1 and 4.1.4.
+
+    If labels start with the "ASCII Compatible Encoding" prefix ("xn--"), they are
+    decoded with IDNA. Otherwise each label is decoded as UTF-8, as that is what is used
+    for DNS-SD and Apple doesn't seem to use IDNA anywhere in their mDNS/DNS-SD stack.
 
     This is distinct from "character-string" encoding; use `parse_string` for that.
     """
@@ -102,10 +185,14 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
             buffer.seek(new_offset)
         elif length_flags == 0:
             label = buffer.read(length)
-            labels.append(label)
+            if label[:4] == b"xn--":
+                decoded_label = label.decode("idna")
+            else:
+                decoded_label = label.decode("utf-8")
+            labels.append(decoded_label)
     if compression_offset is not None:
         buffer.seek(compression_offset)
-    return ".".join(label.decode("idna") for label in labels)
+    return ".".join(labels)
 
 
 def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> CaseInsensitiveDict[bytes]:
