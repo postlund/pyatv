@@ -1,6 +1,6 @@
 """Unit tests for cache."""
 
-import unittest
+import pytest
 
 from pyatv.support.cache import Cache
 
@@ -12,74 +12,84 @@ DATA2 = 456
 DATA3 = 789
 
 
-class CacheTest(unittest.TestCase):
-    def setUp(self):
-        self.cache = Cache(limit=2)
+@pytest.fixture
+def cache():
+    yield Cache(limit=2)
 
-    def test_cache_is_empty(self):
-        self.assertTrue(self.cache.empty())
 
-    def test_put_get_item(self):
-        self.cache.put(ID1, DATA1)
-        self.assertEqual(self.cache.get(ID1), DATA1)
+def test_cache_is_empty(cache):
+    assert cache.empty()
 
-    def test_put_get_multiple(self):
-        self.cache.put(ID1, DATA1)
-        self.cache.put(ID2, DATA2)
 
-        self.assertEqual(self.cache.get(ID1), DATA1)
-        self.assertEqual(self.cache.get(ID2), DATA2)
+def test_put_get_item(cache):
+    cache.put(ID1, DATA1)
+    assert cache.get(ID1) == DATA1
 
-    def test_cache_not_empty(self):
-        self.cache.put(ID1, DATA1)
-        self.assertFalse(self.cache.empty())
 
-    def test_cache_has_item(self):
-        self.cache.put(ID1, DATA1)
+def test_put_get_multiple(cache):
+    cache.put(ID1, DATA1)
+    cache.put(ID2, DATA2)
 
-        self.assertTrue(ID1 in self.cache)
-        self.assertFalse(ID2 in self.cache)
+    assert cache.get(ID1) == DATA1
+    assert cache.get(ID2) == DATA2
 
-    def test_cache_size(self):
-        self.assertEqual(len(self.cache), 0)
-        self.cache.put(ID1, DATA1)
-        self.assertEqual(len(self.cache), 1)
 
-    def test_put_same_identifier_replaces_data(self):
-        self.cache.put(ID1, DATA1)
-        self.cache.put(ID1, DATA2)
-        self.assertEqual(self.cache.get(ID1), DATA2)
-        self.assertEqual(len(self.cache), 1)
+def test_cache_not_empty(cache):
+    cache.put(ID1, DATA1)
+    assert not cache.empty()
 
-    def test_put_removes_oldest(self):
-        self.cache.put(ID1, DATA1)
-        self.cache.put(ID2, DATA2)
-        self.cache.put(ID3, DATA3)
 
-        self.assertEqual(len(self.cache), 2)
-        self.assertNotIn(ID1, self.cache)
-        self.assertIn(ID2, self.cache)
-        self.assertIn(ID3, self.cache)
+def test_cache_has_item(cache):
+    cache.put(ID1, DATA1)
 
-    def test_get_makes_data_newer(self):
-        self.cache.put(ID1, DATA1)
-        self.cache.put(ID2, DATA2)
-        self.cache.get(ID1)
-        self.cache.put(ID3, DATA3)
+    assert ID1 in cache
+    assert ID2 not in cache
 
-        self.assertEqual(len(self.cache), 2)
-        self.assertIn(ID1, self.cache)
-        self.assertNotIn(ID2, self.cache)
-        self.assertIn(ID3, self.cache)
 
-    def test_get_latest_identifier(self):
-        self.assertEqual(self.cache.latest(), None)
+def test_cache_size(cache):
+    assert len(cache) == 0
+    cache.put(ID1, DATA1)
+    assert len(cache) == 1
 
-        self.cache.put(ID1, DATA1)
-        self.assertEqual(self.cache.latest(), ID1)
 
-        self.cache.put(ID2, DATA2)
-        self.assertEqual(self.cache.latest(), ID2)
+def test_put_same_identifier_replaces_data(cache):
+    cache.put(ID1, DATA1)
+    cache.put(ID1, DATA2)
+    assert cache.get(ID1) == DATA2
+    assert len(cache) == 1
 
-        self.cache.get(ID1)
-        self.assertEqual(self.cache.latest(), ID1)
+
+def test_put_removes_oldest(cache):
+    cache.put(ID1, DATA1)
+    cache.put(ID2, DATA2)
+    cache.put(ID3, DATA3)
+
+    assert len(cache) == 2
+    assert ID1 not in cache
+    assert ID2 in cache
+    assert ID3 in cache
+
+
+def test_get_makes_data_newer(cache):
+    cache.put(ID1, DATA1)
+    cache.put(ID2, DATA2)
+    cache.get(ID1)
+    cache.put(ID3, DATA3)
+
+    assert len(cache) == 2
+    assert ID1 in cache
+    assert ID2 not in cache
+    assert ID3 in cache
+
+
+def test_get_latest_identifier(cache):
+    assert cache.latest() is None
+
+    cache.put(ID1, DATA1)
+    assert cache.latest() == ID1
+
+    cache.put(ID2, DATA2)
+    assert cache.latest() == ID2
+
+    cache.get(ID1)
+    assert cache.latest() == ID1
