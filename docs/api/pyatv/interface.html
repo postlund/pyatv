@@ -635,7 +635,35 @@ class Playing(ABC):
         &#34;position&#34;,
         &#34;shuffle&#34;,
         &#34;repeat&#34;,
+        &#34;hash&#34;,
     ]
+
+    def __init__(
+        self,
+        media_type: const.MediaType = const.MediaType.Unknown,
+        device_state: const.DeviceState = const.DeviceState.Idle,
+        title: Optional[str] = None,
+        artist: Optional[str] = None,
+        album: Optional[str] = None,
+        genre: Optional[str] = None,
+        total_time: Optional[int] = None,
+        position: Optional[int] = None,
+        shuffle: Optional[const.ShuffleState] = None,
+        repeat: Optional[const.RepeatState] = None,
+        hash: Optional[str] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
+        self._media_type = media_type
+        self._device_state = device_state
+        self._title = title
+        self._artist = artist
+        self._album = album
+        self._genre = genre
+        self._total_time = total_time
+        self._position = position
+        self._shuffle = shuffle
+        self._repeat = repeat
+        self._hash = hash
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
@@ -696,78 +724,71 @@ class Playing(ABC):
         The hash is based on title, artist, album and total time. It should
         always be the same for the same content, but it is not guaranteed.
         &#34;&#34;&#34;
+        if self._hash:
+            return self._hash
+
         base = &#34;{0}{1}{2}{3}&#34;.format(
             self.title, self.artist, self.album, self.total_time
         )
         return hashlib.sha256(base.encode(&#34;utf-8&#34;)).hexdigest()
 
     @property
-    @abstractmethod
     def media_type(self) -&gt; const.MediaType:
         &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._media_type
 
     @property
-    @abstractmethod
     def device_state(self) -&gt; const.DeviceState:
         &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._device_state
 
     @property  # type: ignore
-    @abstractmethod
     @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._title
 
     @property  # type: ignore
-    @abstractmethod
     @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._artist
 
     @property  # type: ignore
-    @abstractmethod
     @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._album
 
     @property  # type: ignore
-    @abstractmethod
     @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._genre
 
     @property  # type: ignore
-    @abstractmethod
     @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-    def total_time(self) -&gt; int:
+    def total_time(self) -&gt; Optional[int]:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._total_time
 
     @property  # type: ignore
-    @abstractmethod
     @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-    def position(self) -&gt; int:
+    def position(self) -&gt; Optional[int]:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._position
 
     @property  # type: ignore
-    @abstractmethod
-    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
-    def shuffle(self) -&gt; const.ShuffleState:
+    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
+    def shuffle(self) -&gt; Optional[const.ShuffleState]:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._shuffle
 
     @property  # type: ignore
-    @abstractmethod
     @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-    def repeat(self) -&gt; const.RepeatState:
+    def repeat(self) -&gt; Optional[const.RepeatState]:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._repeat
 
 
 class App:
@@ -2319,9 +2340,11 @@ def pin(self, pin) -&gt; None:
 </dd>
 <dt id="pyatv.interface.Playing"><code class="flex name class">
 <span>class <span class="ident">Playing</span></span>
+<span>(</span><span>media_type: <a title="pyatv.const.MediaType" href="const#pyatv.const.MediaType">MediaType</a> = MediaType.Unknown, device_state: <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a> = DeviceState.Idle, title: Optional[str] = None, artist: Optional[str] = None, album: Optional[str] = None, genre: Optional[str] = None, total_time: Optional[int] = None, position: Optional[int] = None, shuffle: Optional[<a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>] = None, repeat: Optional[<a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>] = None, hash: Optional[str] = None)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Base class for retrieving what is currently playing.</p></section>
+<section class="desc"><p>Base class for retrieving what is currently playing.</p>
+<p>Initialize a new Playing instance.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2340,7 +2363,35 @@ def pin(self, pin) -&gt; None:
         &#34;position&#34;,
         &#34;shuffle&#34;,
         &#34;repeat&#34;,
+        &#34;hash&#34;,
     ]
+
+    def __init__(
+        self,
+        media_type: const.MediaType = const.MediaType.Unknown,
+        device_state: const.DeviceState = const.DeviceState.Idle,
+        title: Optional[str] = None,
+        artist: Optional[str] = None,
+        album: Optional[str] = None,
+        genre: Optional[str] = None,
+        total_time: Optional[int] = None,
+        position: Optional[int] = None,
+        shuffle: Optional[const.ShuffleState] = None,
+        repeat: Optional[const.RepeatState] = None,
+        hash: Optional[str] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
+        self._media_type = media_type
+        self._device_state = device_state
+        self._title = title
+        self._artist = artist
+        self._album = album
+        self._genre = genre
+        self._total_time = total_time
+        self._position = position
+        self._shuffle = shuffle
+        self._repeat = repeat
+        self._hash = hash
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
@@ -2401,87 +2452,75 @@ def pin(self, pin) -&gt; None:
         The hash is based on title, artist, album and total time. It should
         always be the same for the same content, but it is not guaranteed.
         &#34;&#34;&#34;
+        if self._hash:
+            return self._hash
+
         base = &#34;{0}{1}{2}{3}&#34;.format(
             self.title, self.artist, self.album, self.total_time
         )
         return hashlib.sha256(base.encode(&#34;utf-8&#34;)).hexdigest()
 
     @property
-    @abstractmethod
     def media_type(self) -&gt; const.MediaType:
         &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._media_type
 
     @property
-    @abstractmethod
     def device_state(self) -&gt; const.DeviceState:
         &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._device_state
 
     @property  # type: ignore
-    @abstractmethod
     @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
     def title(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._title
 
     @property  # type: ignore
-    @abstractmethod
     @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
     def artist(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._artist
 
     @property  # type: ignore
-    @abstractmethod
     @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
     def album(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._album
 
     @property  # type: ignore
-    @abstractmethod
     @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
     def genre(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._genre
 
     @property  # type: ignore
-    @abstractmethod
     @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-    def total_time(self) -&gt; int:
+    def total_time(self) -&gt; Optional[int]:
         &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._total_time
 
     @property  # type: ignore
-    @abstractmethod
     @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-    def position(self) -&gt; int:
+    def position(self) -&gt; Optional[int]:
         &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._position
 
     @property  # type: ignore
-    @abstractmethod
-    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
-    def shuffle(self) -&gt; const.ShuffleState:
+    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
+    def shuffle(self) -&gt; Optional[const.ShuffleState]:
         &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        raise NotImplementedError
+        return self._shuffle
 
     @property  # type: ignore
-    @abstractmethod
     @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-    def repeat(self) -&gt; const.RepeatState:
+    def repeat(self) -&gt; Optional[const.RepeatState]:
         &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        raise NotImplementedError</code></pre>
+        return self._repeat</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
-</ul>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li>pyatv.dmap.DmapPlaying</li>
-<li>pyatv.mrp.MrpPlaying</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2493,11 +2532,10 @@ def pin(self, pin) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
 def album(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._album</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Optional[str]</code></dt>
@@ -2508,11 +2546,10 @@ def album(self) -&gt; Optional[str]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
 def artist(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._artist</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.device_state"><code class="name">var <span class="ident">device_state</span> -> <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a></code></dt>
@@ -2523,10 +2560,9 @@ def artist(self) -&gt; Optional[str]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-@abstractmethod
 def device_state(self) -&gt; const.DeviceState:
     &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._device_state</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Optional[str]</code></dt>
@@ -2537,11 +2573,10 @@ def device_state(self) -&gt; const.DeviceState:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
 def genre(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._genre</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.hash"><code class="name">var <span class="ident">hash</span> -> str</code></dt>
@@ -2560,6 +2595,9 @@ def hash(self) -&gt; str:
     The hash is based on title, artist, album and total time. It should
     always be the same for the same content, but it is not guaranteed.
     &#34;&#34;&#34;
+    if self._hash:
+        return self._hash
+
     base = &#34;{0}{1}{2}{3}&#34;.format(
         self.title, self.artist, self.album, self.total_time
     )
@@ -2574,13 +2612,12 @@ def hash(self) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-@abstractmethod
 def media_type(self) -&gt; const.MediaType:
     &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._media_type</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.position"><code class="name">var <span class="ident">position</span> -> int</code></dt>
+<dt id="pyatv.interface.Playing.position"><code class="name">var <span class="ident">position</span> -> Optional[int]</code></dt>
 <dd>
 <section class="desc"><p>Position in the playing media (seconds).</p></section>
 <details class="source">
@@ -2588,14 +2625,13 @@ def media_type(self) -&gt; const.MediaType:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-def position(self) -&gt; int:
+def position(self) -&gt; Optional[int]:
     &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._position</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.repeat"><code class="name">var <span class="ident">repeat</span> -> <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a></code></dt>
+<dt id="pyatv.interface.Playing.repeat"><code class="name">var <span class="ident">repeat</span> -> Optional[<a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>]</code></dt>
 <dd>
 <section class="desc"><p>Repeat mode.</p></section>
 <details class="source">
@@ -2603,14 +2639,13 @@ def position(self) -&gt; int:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-def repeat(self) -&gt; const.RepeatState:
+def repeat(self) -&gt; Optional[const.RepeatState]:
     &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._repeat</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.shuffle"><code class="name">var <span class="ident">shuffle</span> -> <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a></code></dt>
+<dt id="pyatv.interface.Playing.shuffle"><code class="name">var <span class="ident">shuffle</span> -> Optional[<a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>]</code></dt>
 <dd>
 <section class="desc"><p>If shuffle is enabled or not.</p></section>
 <details class="source">
@@ -2618,11 +2653,10 @@ def repeat(self) -&gt; const.RepeatState:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
-@feature(28, &#34;Shuffle&#34;, &#34;Shuffle stat.e&#34;)
-def shuffle(self) -&gt; const.ShuffleState:
+@feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
+def shuffle(self) -&gt; Optional[const.ShuffleState]:
     &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._shuffle</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Optional[str]</code></dt>
@@ -2633,14 +2667,13 @@ def shuffle(self) -&gt; const.ShuffleState:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
 def title(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._title</code></pre>
 </details>
 </dd>
-<dt id="pyatv.interface.Playing.total_time"><code class="name">var <span class="ident">total_time</span> -> int</code></dt>
+<dt id="pyatv.interface.Playing.total_time"><code class="name">var <span class="ident">total_time</span> -> Optional[int]</code></dt>
 <dd>
 <section class="desc"><p>Total play time in seconds.</p></section>
 <details class="source">
@@ -2648,11 +2681,10 @@ def title(self) -&gt; Optional[str]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-def total_time(self) -&gt; int:
+def total_time(self) -&gt; Optional[int]:
     &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
+    return self._total_time</code></pre>
 </details>
 </dd>
 </dl>

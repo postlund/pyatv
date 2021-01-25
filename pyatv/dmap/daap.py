@@ -4,6 +4,7 @@ import re
 import logging
 
 from copy import copy
+from typing import Optional
 
 
 from pyatv import exceptions
@@ -42,7 +43,7 @@ def media_kind(kind):
     raise exceptions.UnknownMediaKindError("Unknown media kind: " + str(kind))
 
 
-def playstate(state):
+def playstate(state: Optional[int]) -> DeviceState:
     """Convert iTunes playstate to API representation."""
     # pylint: disable=too-many-return-statements
     if state == 0 or state is None:

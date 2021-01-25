@@ -13,6 +13,7 @@ from pyatv.support.cache import Cache
 from pyatv.const import (
     Protocol,
     MediaType,
+    DeviceState,
     RepeatState,
     ShuffleState,
     PowerState,
@@ -90,6 +91,94 @@ _FIELD_FEATURES = {
 }  # type: Dict[FeatureName, tuple]
 
 
+def build_playing_instance(playstatus) -> Playing:
+    """Build a Playing instance from play state."""
+
+    def _get_time_in_seconds(tag) -> int:
+        time = parser.first(playstatus, "cmst", tag)
+        return daap.ms_to_s(time)
+
+    def media_type() -> MediaType:
+        """Type of media is currently playing, e.g. video, music."""
+        state = parser.first(playstatus, "cmst", "caps")
+        if not state:
+            return MediaType.Unknown
+
+        mediakind = parser.first(playstatus, "cmst", "cmmk")
+        if mediakind is not None:
+            return daap.media_kind(mediakind)
+
+        # Fallback: if artist or album exists we assume music (not present
+        # for video)
+        if artist() or album():
+            return MediaType.Music
+
+        return MediaType.Video
+
+    def device_state() -> DeviceState:
+        """Device state, e.g. playing or paused."""
+        state = parser.first(playstatus, "cmst", "caps")
+        return daap.playstate(state)
+
+    def title() -> Optional[str]:
+        """Title of the current media, e.g. movie or song name."""
+        return parser.first(playstatus, "cmst", "cann")
+
+    def artist() -> Optional[str]:
+        """Arist of the currently playing song."""
+        return parser.first(playstatus, "cmst", "cana")
+
+    def album() -> Optional[str]:
+        """Album of the currently playing song."""
+        return parser.first(playstatus, "cmst", "canl")
+
+    def genre() -> Optional[str]:
+        """Genre of the currently playing song."""
+        return parser.first(playstatus, "cmst", "cang")
+
+    def total_time() -> Optional[int]:
+        """Total play time in seconds."""
+        return _get_time_in_seconds("cast")
+
+    def position() -> Optional[int]:
+        """Position in the playing media (seconds)."""
+        total = total_time()
+        remaining_time = _get_time_in_seconds("cant")
+        if not total or not remaining_time:
+            return None
+        return total - remaining_time
+
+    def shuffle() -> Optional[ShuffleState]:
+        """If shuffle is enabled or not."""
+        state = parser.first(playstatus, "cmst", "cash")
+        if state is None or state == 0:
+            return ShuffleState.Off
+
+        # DMAP does not support the "albums" state and will always report
+        # "songs" if shuffle is active
+        return ShuffleState.Songs
+
+    def repeat() -> Optional[RepeatState]:
+        """Repeat mode."""
+        state = parser.first(playstatus, "cmst", "carp")
+        if state is None:
+            return RepeatState.Off
+        return RepeatState(state)
+
+    return Playing(
+        media_type=media_type(),
+        device_state=device_state(),
+        title=title(),
+        artist=artist(),
+        album=album(),
+        genre=genre(),
+        total_time=total_time(),
+        position=position(),
+        shuffle=shuffle(),
+        repeat=repeat(),
+    )
+
+
 class BaseDmapAppleTV:
     """Common protocol logic used to interact with an Apple TV."""
 
@@ -97,6 +186,7 @@ class BaseDmapAppleTV:
         """Initialize a new Apple TV base implementation."""
         self.daap = requester
         self.playstatus_revision = 0
+        self.latest_playstatus = None
         self.latest_playing = None
         self.latest_hash = None
 
@@ -111,7 +201,8 @@ class BaseDmapAppleTV:
         cmd_url = _PSU_CMD.format(self.playstatus_revision if use_revision else 0)
         resp = await self.daap.get(cmd_url, timeout=timeout)
         self.playstatus_revision = parser.first(resp, "cmst", "cmsr")
-        self.latest_playing = DmapPlaying(resp)
+        self.latest_playstatus = resp
+        self.latest_playing = build_playing_instance(resp)
         self.latest_hash = self.latest_playing.hash
         return self.latest_playing
 
@@ -306,92 +397,6 @@ class DmapRemoteControl(RemoteControl):
         await self.apple_tv.set_property("dacp.repeatstate", repeat_state.value)
 
 
-class DmapPlaying(Playing):
-    """Implementation of API for retrieving what is playing."""
-
-    def __init__(self, playstatus):
-        """Initialize playing instance."""
-        super().__init__()
-        self.playstatus = playstatus
-
-    @property
-    def media_type(self):
-        """Type of media is currently playing, e.g. video, music."""
-        state = parser.first(self.playstatus, "cmst", "caps")
-        if not state:
-            return MediaType.Unknown
-
-        mediakind = parser.first(self.playstatus, "cmst", "cmmk")
-        if mediakind is not None:
-            return daap.media_kind(mediakind)
-
-        # Fallback: if artist or album exists we assume music (not present
-        # for video)
-        if self.artist or self.album:
-            return MediaType.Music
-
-        return MediaType.Video
-
-    @property
-    def device_state(self):
-        """Device state, e.g. playing or paused."""
-        state = parser.first(self.playstatus, "cmst", "caps")
-        return daap.playstate(state)
-
-    @property
-    def title(self):
-        """Title of the current media, e.g. movie or song name."""
-        return parser.first(self.playstatus, "cmst", "cann")
-
-    @property
-    def artist(self):
-        """Arist of the currently playing song."""
-        return parser.first(self.playstatus, "cmst", "cana")
-
-    @property
-    def album(self):
-        """Album of the currently playing song."""
-        return parser.first(self.playstatus, "cmst", "canl")
-
-    @property
-    def genre(self):
-        """Genre of the currently playing song."""
-        return parser.first(self.playstatus, "cmst", "cang")
-
-    @property
-    def total_time(self):
-        """Total play time in seconds."""
-        return self._get_time_in_seconds("cast")
-
-    @property
-    def position(self):
-        """Position in the playing media (seconds)."""
-        return self.total_time - self._get_time_in_seconds("cant")
-
-    @property
-    def shuffle(self):
-        """If shuffle is enabled or not."""
-        state = parser.first(self.playstatus, "cmst", "cash")
-        if state is None or state == 0:
-            return ShuffleState.Off
-
-        # DMAP does not support the "albums" state and will always report
-        # "songs" if shuffle is active
-        return ShuffleState.Songs
-
-    @property
-    def repeat(self):
-        """Repeat mode."""
-        state = parser.first(self.playstatus, "cmst", "carp")
-        if state is None:
-            return RepeatState.Off
-        return RepeatState(state)
-
-    def _get_time_in_seconds(self, tag):
-        time = parser.first(self.playstatus, "cmst", tag)
-        return daap.ms_to_s(time)
-
-
 class DmapMetadata(Metadata):
     """Implementation of API for retrieving metadata from an Apple TV."""
 
@@ -563,8 +568,8 @@ class DmapFeatures(Features):
         return FeatureInfo(state=FeatureState.Unsupported)
 
     def _is_available(self, field: tuple, expected_value=None) -> FeatureState:
-        if self.apple_tv.latest_playing:
-            value = parser.first(self.apple_tv.latest_playing.playstatus, *field)
+        if self.apple_tv.latest_playstatus:
+            value = parser.first(self.apple_tv.latest_playstatus, *field)
             if value is not None:
                 if not expected_value or expected_value == value:
                     return FeatureState.Available
