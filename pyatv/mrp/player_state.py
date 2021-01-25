@@ -8,9 +8,11 @@ from copy import deepcopy
 from typing import Dict, Optional, List
 
 from pyatv.mrp import protobuf as pb
-
+from pyatv.mrp.protocol import MrpProtocol
 
 _LOGGER = logging.getLogger(__name__)
+
+DEFAULT_PLAYER_ID = "MediaRemote-DefaultPlayer"
 
 
 class PlayerState:
@@ -129,21 +131,50 @@ class PlayerState:
 class Client:
     """Represent an MRP media player client."""
 
-    def __init__(self, client: pb.NowPlayingClient):
+    def __init__(self, client: pb.NowPlayingClient) -> None:
         """Initialize a new Client instance."""
         self.bundle_identifier: str = client.bundleIdentifier
         self.display_name: Optional[str] = None
+        self._active_player: Optional[PlayerState] = None
         self.players: Dict[str, PlayerState] = {}
         self.supported_commands: List[pb.CommandInfo] = []
         self.update(client)
 
-    def handle_set_default_supported_commands(self, supported_commands):
+    @property
+    def active_player(self) -> PlayerState:
+        """Return currently active player."""
+        if self._active_player is None:
+            if DEFAULT_PLAYER_ID in self.players:
+                return self.players[DEFAULT_PLAYER_ID]
+            return PlayerState(self, pb.NowPlayingPlayer())
+        return self._active_player
+
+    def get_player(self, player: pb.NowPlayingPlayer) -> PlayerState:
+        """Get state for a player."""
+        if player.identifier not in self.players:
+            self.players[player.identifier] = PlayerState(self, player)
+        return self.players[player.identifier]
+
+    def handle_set_default_supported_commands(self, supported_commands) -> None:
         """Update default supported commands for client."""
         self.supported_commands = deepcopy(
             supported_commands.supportedCommands.supportedCommands
         )
 
-    def update(self, client: pb.NowPlayingClient):
+    def handle_set_now_playing_player(self, player: pb.NowPlayingPlayer) -> None:
+        """Handle change of now playing player."""
+        self._active_player = self.get_player(player)
+
+        if self.active_player.is_valid:
+            _LOGGER.debug(
+                "Active player is now %s (%s)",
+                self.active_player.identifier,
+                self.active_player.display_name,
+            )
+        else:
+            _LOGGER.debug("Active player no longer set")
+
+    def update(self, client: pb.NowPlayingClient) -> None:
         """Update client metadata."""
         self.display_name = client.displayName or self.display_name
 
@@ -151,12 +182,11 @@ class Client:
 class PlayerStateManager:
     """Manage state of all media players."""
 
-    def __init__(self, protocol):
+    def __init__(self, protocol: MrpProtocol):
         """Initialize a new PlayerStateManager instance."""
         self.protocol = protocol
         self.volume_controls_available = None
         self._active_client = None
-        self._active_player = None
         self._clients: Dict[str, Client] = {}
         self._listener = None
         self._add_listeners()
@@ -185,12 +215,7 @@ class PlayerStateManager:
 
     def get_player(self, player_path: pb.PlayerPath) -> PlayerState:
         """Return player based on a player path."""
-        client = self.get_client(player_path.client)
-
-        player_id = player_path.player.identifier
-        if player_id not in client.players:
-            client.players[player_id] = PlayerState(client, player_path.player)
-        return client.players[player_id]
+        return self.get_client(player_path.client).get_player(player_path.player)
 
     @property
     def listener(self):
@@ -213,16 +238,10 @@ class PlayerStateManager:
         return self._active_client
 
     @property
-    def playing(self):
+    def playing(self) -> PlayerState:
         """Player state for active media player."""
-        if self._active_player:
-            return self._active_player
         if self._active_client:
-            default_player = self._active_client.players.get(
-                "MediaRemote-DefaultPlayer"
-            )
-            if default_player:
-                return default_player
+            return self._active_client.active_player
         return PlayerState(Client(pb.NowPlayingClient()), pb.NowPlayingPlayer())
 
     async def _handle_set_state(self, message, _):
@@ -249,18 +268,12 @@ class PlayerStateManager:
         await self._state_updated()
 
     async def _handle_set_now_playing_player(self, message, _):
-        self._active_player = self.get_player(message.inner().playerPath)
+        set_now_playing = message.inner()
 
-        if self._active_player.is_valid:
-            _LOGGER.debug(
-                "Active player is now %s (%s)",
-                self._active_player.identifier,
-                self._active_player.display_name,
-            )
-        else:
-            _LOGGER.debug("Active player no longer set")
+        client = self.get_client(set_now_playing.playerPath.client)
+        client.handle_set_now_playing_player(set_now_playing.playerPath.player)
 
-        await self._state_updated()
+        await self._state_updated(client=client)
 
     async def _handle_remove_client(self, message, _):
         client_to_remove = message.inner().client
@@ -282,16 +295,9 @@ class PlayerStateManager:
             del client.players[player.identifier]
             player.parent = None
 
-            removed = False
-            if player == self._active_player:
-                self._active_player = None
-                removed = True
-            if client == self._active_client:
-                self._active_client = None
-                removed = True
-
-            if removed:
-                await self._state_updated()
+            if player == client.active_player:
+                client._active_player = None
+                await self._state_updated(client=client)
 
     async def _handle_set_default_supported_commands(self, message, _):
         supported_commands = message.inner()
