@@ -14,6 +14,8 @@ CLIENT_ID_2 = "client_id_2"
 PLAYER_ID_1 = "player_id_1"
 PLAYER_NAME_1 = "player_name_1"
 
+DEFAULT_PLAYER = "MediaRemote-DefaultPlayer"
+
 
 def set_path(
     message,
@@ -252,11 +254,27 @@ async def test_set_now_playing_client(psm, protocol, listener):
 
 
 @pytest.mark.asyncio
-async def test_set_now_playing_player(psm, protocol, listener):
+async def test_set_now_playing_player_when_no_client(psm, protocol, listener):
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
     await protocol.inject(msg)
 
-    assert listener.call_count == 1
+    assert listener.call_count == 0
+
+    assert not psm.playing.identifier
+    assert not psm.playing.display_name
+
+
+@pytest.mark.asyncio
+async def test_set_now_playing_player_for_active_client(psm, protocol, listener):
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    client = msg.inner().client
+    client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
+
+    msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol.inject(msg)
+
+    assert listener.call_count == 2
 
     assert psm.playing.identifier == PLAYER_ID_1
     assert psm.playing.display_name == PLAYER_NAME_1
@@ -268,7 +286,7 @@ async def test_default_player_when_only_client_set(psm, protocol, listener):
     await protocol.inject(msg)
     msg = set_path(
         messages.create(pb.SET_STATE_MESSAGE),
-        player_id="MediaRemote-DefaultPlayer",
+        player_id=DEFAULT_PLAYER,
         player_name="Default Name",
     )
     await protocol.inject(msg)
@@ -278,7 +296,7 @@ async def test_default_player_when_only_client_set(psm, protocol, listener):
     client.bundleIdentifier = CLIENT_ID_1
     await protocol.inject(msg)
 
-    assert psm.playing.identifier == "MediaRemote-DefaultPlayer"
+    assert psm.playing.identifier == DEFAULT_PLAYER
     assert psm.playing.display_name == "Default Name"
 
 
@@ -289,14 +307,21 @@ async def test_set_state_calls_active_listener(psm, protocol, listener):
 
     assert listener.call_count == 1
 
-    now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(now_playing)
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    client = msg.inner().client
+    client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
 
     assert listener.call_count == 2
 
-    await protocol.inject(set_state)
+    now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol.inject(now_playing)
 
     assert listener.call_count == 3
+
+    await protocol.inject(set_state)
+
+    assert listener.call_count == 4
 
 
 @pytest.mark.asyncio
@@ -312,14 +337,21 @@ async def test_content_item_update_calls_active_listener(psm, protocol, listener
 
     assert listener.call_count == 2
 
-    now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(now_playing)
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    client = msg.inner().client
+    client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
 
     assert listener.call_count == 3
 
-    await protocol.inject(update_item)
+    now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol.inject(now_playing)
 
     assert listener.call_count == 4
+
+    await protocol.inject(update_item)
+
+    assert listener.call_count == 5
 
 
 @pytest.mark.asyncio
@@ -388,6 +420,11 @@ async def test_remove_active_player(psm, protocol, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
 
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    client = msg.inner().client
+    client.bundleIdentifier = CLIENT_ID_1
+    await protocol.inject(msg)
+
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
     await protocol.inject(msg)
 
@@ -396,12 +433,12 @@ async def test_remove_active_player(psm, protocol, listener):
     remove = set_path(messages.create(pb.REMOVE_PLAYER_MESSAGE))
     await protocol.inject(remove)
 
-    assert listener.call_count == 3
+    assert listener.call_count == 4
     assert not psm.playing.is_valid
 
 
-async def test_remove_client_if_belongs_to_active_player(psm, protocol, listener):
-    msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
+async def test_remove_active_player_reverts_to_default(psm, protocol, listener):
+    msg = set_path(messages.create(pb.SET_STATE_MESSAGE), player_id=DEFAULT_PLAYER)
     await protocol.inject(msg)
 
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
@@ -412,11 +449,14 @@ async def test_remove_client_if_belongs_to_active_player(psm, protocol, listener
     client.bundleIdentifier = CLIENT_ID_1
     await protocol.inject(msg)
 
+    assert listener.call_count == 2
+    assert psm.playing.identifier == PLAYER_ID_1
+
     remove = set_path(messages.create(pb.REMOVE_PLAYER_MESSAGE))
     await protocol.inject(remove)
 
-    assert psm.client is None
-    assert listener.call_count == 4
+    assert listener.call_count == 3
+    assert psm.playing.identifier == DEFAULT_PLAYER
 
 
 @pytest.mark.asyncio
