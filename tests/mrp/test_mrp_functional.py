@@ -435,3 +435,13 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         await self.playing(title="dummy")
         self.assertFeatures(FeatureState.Available, FeatureName.Play, FeatureName.Pause)
+
+    @unittest_run_loop
+    async def test_playing_immutable_update_content_item(self):
+        self.usecase.example_video(position=1)
+        playing = await self.playing(title="dummy")
+
+        self.usecase.change_metadata(position=100)
+        await self.playing(position=100)
+
+        self.assertEqual(playing.position, 1)

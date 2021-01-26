@@ -415,7 +415,35 @@ class Playing(ABC):
         "position",
         "shuffle",
         "repeat",
+        "hash",
     ]
+
+    def __init__(
+        self,
+        media_type: const.MediaType = const.MediaType.Unknown,
+        device_state: const.DeviceState = const.DeviceState.Idle,
+        title: Optional[str] = None,
+        artist: Optional[str] = None,
+        album: Optional[str] = None,
+        genre: Optional[str] = None,
+        total_time: Optional[int] = None,
+        position: Optional[int] = None,
+        shuffle: Optional[const.ShuffleState] = None,
+        repeat: Optional[const.RepeatState] = None,
+        hash: Optional[str] = None,
+    ) -> None:
+        """Initialize a new Playing instance."""
+        self._media_type = media_type
+        self._device_state = device_state
+        self._title = title
+        self._artist = artist
+        self._album = album
+        self._genre = genre
+        self._total_time = total_time
+        self._position = position
+        self._shuffle = shuffle
+        self._repeat = repeat
+        self._hash = hash
 
     def __str__(self) -> str:
         """Convert this playing object to a readable string."""
@@ -476,78 +504,71 @@ class Playing(ABC):
         The hash is based on title, artist, album and total time. It should
         always be the same for the same content, but it is not guaranteed.
         """
+        if self._hash:
+            return self._hash
+
         base = "{0}{1}{2}{3}".format(
             self.title, self.artist, self.album, self.total_time
         )
         return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
     @property
-    @abstractmethod
     def media_type(self) -> const.MediaType:
         """Type of media is currently playing, e.g. video, music."""
-        raise NotImplementedError
+        return self._media_type
 
     @property
-    @abstractmethod
     def device_state(self) -> const.DeviceState:
         """Device state, e.g. playing or paused."""
-        raise NotImplementedError
+        return self._device_state
 
     @property  # type: ignore
-    @abstractmethod
     @feature(22, "Title", "Title of playing media.")
     def title(self) -> Optional[str]:
         """Title of the current media, e.g. movie or song name."""
-        raise NotImplementedError
+        return self._title
 
     @property  # type: ignore
-    @abstractmethod
     @feature(23, "Artist", "Artist of playing song.")
     def artist(self) -> Optional[str]:
         """Artist of the currently playing song."""
-        raise NotImplementedError
+        return self._artist
 
     @property  # type: ignore
-    @abstractmethod
     @feature(24, "Album", "Album from playing artist.")
     def album(self) -> Optional[str]:
         """Album of the currently playing song."""
-        raise NotImplementedError
+        return self._album
 
     @property  # type: ignore
-    @abstractmethod
     @feature(25, "Genre", "Genre of playing song.")
     def genre(self) -> Optional[str]:
         """Genre of the currently playing song."""
-        raise NotImplementedError
+        return self._genre
 
     @property  # type: ignore
-    @abstractmethod
     @feature(26, "TotalTime", "Total length of playing media (seconds).")
-    def total_time(self) -> int:
+    def total_time(self) -> Optional[int]:
         """Total play time in seconds."""
-        raise NotImplementedError
+        return self._total_time
 
     @property  # type: ignore
-    @abstractmethod
     @feature(27, "Position", "Current play time position.")
-    def position(self) -> int:
+    def position(self) -> Optional[int]:
         """Position in the playing media (seconds)."""
-        raise NotImplementedError
+        return self._position
 
     @property  # type: ignore
-    @abstractmethod
-    @feature(28, "Shuffle", "Shuffle stat.e")
-    def shuffle(self) -> const.ShuffleState:
+    @feature(28, "Shuffle", "Shuffle state.")
+    def shuffle(self) -> Optional[const.ShuffleState]:
         """If shuffle is enabled or not."""
-        raise NotImplementedError
+        return self._shuffle
 
     @property  # type: ignore
-    @abstractmethod
     @feature(29, "Repeat", "Repeat state.")
-    def repeat(self) -> const.RepeatState:
+    def repeat(self) -> Optional[const.RepeatState]:
         """Repeat mode."""
-        raise NotImplementedError
+        return self._repeat
 
 
 class App:
