@@ -5,7 +5,7 @@ import pytest
 from typing import Dict, Optional
 
 from pyatv import convert, exceptions, interface
-from pyatv.interface import FeatureInfo
+from pyatv.interface import FeatureInfo, Playing
 from pyatv.const import (
     MediaType,
     DeviceState,
@@ -31,6 +31,7 @@ eq_test_cases = [
     ("position", 555, 888),
     ("shuffle", ShuffleState.Albums, ShuffleState.Songs),
     ("repeat", RepeatState.Track, RepeatState.All),
+    ("hash", "hash1", "hash2"),
 ]
 
 
@@ -62,82 +63,6 @@ class TestClass:
     def _private_method_ignored(self):
         """Not parsed."""
         pass
-
-
-class PlayingDummy(interface.Playing):
-    def __init__(
-        self,
-        media_type=MediaType.Video,
-        device_state=DeviceState.Playing,
-        title=None,
-        artist=None,
-        album=None,
-        genre=None,
-        total_time=None,
-        position=None,
-        shuffle=ShuffleState.Songs,
-        repeat=RepeatState.Track,
-    ):
-        self._media_type = media_type
-        self._device_state = device_state
-        self._title = title
-        self._artist = artist
-        self._album = album
-        self._genre = genre
-        self._total_time = total_time
-        self._position = position
-        self._shuffle = shuffle
-        self._repeat = repeat
-
-    @property
-    def media_type(self):
-        """What type of media is currently playing, e.g. video, music."""
-        return self._media_type
-
-    @property
-    def device_state(self):
-        """Current device state, e.g. playing or paused."""
-        return self._device_state
-
-    @property
-    def title(self):
-        """Title of the current media, e.g. movie or song name."""
-        return self._title
-
-    @property
-    def artist(self):
-        """Artist of the currently playing song."""
-        return self._artist
-
-    @property
-    def album(self):
-        """Album of the currently playing song."""
-        return self._album
-
-    @property
-    def genre(self):
-        """Genre of the currently playing song."""
-        return self._genre
-
-    @property
-    def total_time(self):
-        """Total play time in seconds."""
-        return self._total_time
-
-    @property
-    def position(self):
-        """Current position in the playing media (seconds)."""
-        return self._position
-
-    @property
-    def shuffle(self):
-        """If shuffle is enabled or not."""
-        return self._shuffle
-
-    @property
-    def repeat(self):
-        """Current repeat mode."""
-        return self._repeat
 
 
 class MetadataDummy(interface.Metadata):
@@ -220,16 +145,14 @@ def test_try_to_be_smart_with_abbreviations(methods):
 
 
 def test_playing_media_type_and_playstate():
-    out = str(PlayingDummy())
+    out = str(Playing(media_type=MediaType.Video, device_state=DeviceState.Playing))
     assert convert.media_type_str(MediaType.Video) in out
     assert convert.device_state_str(DeviceState.Playing) in out
 
 
 def test_playing_title_artist_album_genre():
     out = str(
-        PlayingDummy(
-            title="mytitle", artist="myartist", album="myalbum", genre="mygenre"
-        )
+        Playing(title="mytitle", artist="myartist", album="myalbum", genre="mygenre")
     )
     assert "mytitle" in out
     assert "myartist" in out
@@ -238,34 +161,32 @@ def test_playing_title_artist_album_genre():
 
 
 def test_playing_only_position():
-    assert "1234" in str(PlayingDummy(position=1234))
+    assert "1234" in str(Playing(position=1234))
 
 
 def test_playing_only_total_time():
-    assert "5678" in str(PlayingDummy(total_time=5678))
+    assert "5678" in str(Playing(total_time=5678))
 
 
 def test_playing_both_position_and_total_time():
-    out = str(PlayingDummy(position=1234, total_time=5678))
+    out = str(Playing(position=1234, total_time=5678))
     assert "1234/5678" in out
 
 
 def test_playing_shuffle_and_repeat():
-    out = str(PlayingDummy())
+    out = str(Playing(shuffle=ShuffleState.Songs, repeat=RepeatState.Track))
     assert "Shuffle: Songs" in out
     assert "Repeat: Track" in out
 
 
 def test_playing_generate_same_hash():
-    playing = PlayingDummy(
-        title="title", artist="artist", album="album", total_time=123
-    )
+    playing = Playing(title="title", artist="artist", album="album", total_time=123)
     assert (
         "538df531d1715629fdd87affd0c5957bcbf54cd89180778071e6535b7df4e22c"
         == playing.hash
     )
 
-    playing2 = PlayingDummy(title="dummy", artist="test", album="none", total_time=321)
+    playing2 = Playing(title="dummy", artist="test", album="none", total_time=321)
 
     assert (
         "80045c05d18382f33a5369fd5cdfc6ae42c3eb418125f638d7a31ab173b01ade"
@@ -273,10 +194,15 @@ def test_playing_generate_same_hash():
     )
 
 
+def test_playing_custom_hash():
+    playing = Playing(hash="dummy")
+    assert playing.hash == "dummy"
+
+
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(PlayingDummy().__dict__) == 10
+    assert len(Playing().__dict__) == 11
 
 
 @pytest.mark.parametrize(
@@ -284,13 +210,22 @@ def test_playing_eq_ensure_member_count():
     [pytest.param(*data, id=data[0]) for data in eq_test_cases],
 )
 def test_playing_field_equality(prop, value1, value2):
-    playing1 = PlayingDummy(**{prop: value1})
-    playing2 = PlayingDummy(**{prop: value2})
-    playing3 = PlayingDummy(**{prop: value2})
+    playing1 = Playing(**{prop: value1})
+    playing2 = Playing(**{prop: value2})
+    playing3 = Playing(**{prop: value2})
 
     assert playing1 == playing1
     assert playing1 != playing2
     assert playing2 == playing3
+
+
+@pytest.mark.parametrize(
+    "prop,value1,value2",
+    [pytest.param(*data, id=data[0]) for data in eq_test_cases],
+)
+def test_playing_init_field_values(prop, value1, value2):
+    playing = Playing(**{prop: value1})
+    assert getattr(playing, prop) == value1
 
 
 # METADATA
@@ -424,7 +359,7 @@ def test_app_str():
 @pytest.mark.parametrize("updates", [1, 2, 3])
 def test_post_ignore_duplicate_update(event_loop, updates):
     listener = MagicMock()
-    playing = PlayingDummy()
+    playing = Playing()
 
     async def _post_updates(repeats: int):
         updater = PushUpdaterDummy(event_loop)

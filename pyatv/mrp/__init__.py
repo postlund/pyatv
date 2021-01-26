@@ -4,7 +4,6 @@ import math
 import logging
 import asyncio
 import datetime
-from copy import copy
 from typing import Dict, List, Optional, Tuple
 
 from pyatv import conf, exceptions
@@ -24,9 +23,9 @@ from pyatv.mrp import messages, protobuf
 from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp.protobuf import CommandInfo_pb2
-from pyatv.mrp.protobuf import PlaybackState
-from pyatv.mrp.player_state import PlayerStateManager
+from pyatv.mrp.protobuf import CommandInfo_pb2, PlaybackState
+from pyatv.mrp.protobuf import ContentItemMetadata as cim
+from pyatv.mrp.player_state import PlayerStateManager, PlayerState
 from pyatv.interface import (
     AppleTV,
     DeviceInfo,
@@ -117,6 +116,114 @@ def _cocoa_to_timestamp(time):
     delta = datetime.datetime(2001, 1, 1) - datetime.datetime(1970, 1, 1)
     time_seconds = (datetime.timedelta(seconds=time) + delta).total_seconds()
     return datetime.datetime.fromtimestamp(time_seconds)
+
+
+def build_playing_instance(state: PlayerState) -> Playing:
+    """Build a Playing instance from play state."""
+
+    def media_type() -> MediaType:
+        """Type of media is currently playing, e.g. video, music."""
+        if state.metadata:
+            media_type = state.metadata.mediaType
+            if media_type == cim.Audio:
+                return MediaType.Music
+            if media_type == cim.Video:
+                return MediaType.Video
+
+        return MediaType.Unknown
+
+    def device_state() -> DeviceState:
+        """Device state, e.g. playing or paused."""
+        return {
+            None: DeviceState.Idle,
+            PlaybackState.Playing: DeviceState.Playing,
+            PlaybackState.Paused: DeviceState.Paused,
+            PlaybackState.Stopped: DeviceState.Stopped,
+            PlaybackState.Interrupted: DeviceState.Loading,
+            PlaybackState.Seeking: DeviceState.Seeking,
+        }.get(state.playback_state, DeviceState.Paused)
+
+    def title() -> Optional[str]:
+        """Title of the current media, e.g. movie or song name."""
+        return state.metadata_field("title")
+
+    def artist() -> Optional[str]:
+        """Artist of the currently playing song."""
+        return state.metadata_field("trackArtistName")
+
+    def album() -> Optional[str]:
+        """Album of the currently playing song."""
+        return state.metadata_field("albumName")
+
+    def genre() -> Optional[str]:
+        """Genre of the currently playing song."""
+        return state.metadata_field("genre")
+
+    def total_time() -> Optional[int]:
+        """Total play time in seconds."""
+        duration = state.metadata_field("duration")
+        if duration is None or math.isnan(duration):
+            return None
+        return int(duration)
+
+    def position() -> Optional[int]:
+        """Position in the playing media (seconds)."""
+        elapsed_timestamp = state.metadata_field("elapsedTimeTimestamp")
+
+        # If we don't have reference time, we can't do anything
+        if not elapsed_timestamp:
+            return None
+
+        elapsed_time: int = state.metadata_field("elapsedTime") or 0
+        diff = (
+            datetime.datetime.now() - _cocoa_to_timestamp(elapsed_timestamp)
+        ).total_seconds()
+
+        if device_state() == DeviceState.Playing:
+            return int(elapsed_time + diff)
+        return int(elapsed_time)
+
+    def shuffle() -> ShuffleState:
+        """If shuffle is enabled or not."""
+        info = state.command_info(CommandInfo_pb2.ChangeShuffleMode)
+        if info is None:
+            return ShuffleState.Off
+        if info.shuffleMode == protobuf.ShuffleMode.Off:
+            return ShuffleState.Off
+        if info.shuffleMode == protobuf.ShuffleMode.Albums:
+            return ShuffleState.Albums
+
+        return ShuffleState.Songs
+
+    def repeat() -> RepeatState:
+        """Repeat mode."""
+        info = state.command_info(CommandInfo_pb2.ChangeRepeatMode)
+        if info is None:
+            return RepeatState.Off
+        if info.repeatMode == protobuf.RepeatMode.One:
+            return RepeatState.Track
+        if info.repeatMode == protobuf.RepeatMode.All:
+            return RepeatState.All
+
+        return RepeatState.Off
+
+    def hash() -> str:
+        """Create a unique hash for what is currently playing."""
+        return state.item_identifier
+
+    return Playing(
+        media_type=media_type(),
+        device_state=device_state(),
+        title=title(),
+        artist=artist(),
+        album=album(),
+        genre=genre(),
+        total_time=total_time(),
+        position=position(),
+        shuffle=shuffle(),
+        repeat=repeat(),
+        hash=hash(),
+    )
 
 
 # pylint: disable=too-many-public-methods
@@ -302,116 +409,6 @@ class MrpRemoteControl(RemoteControl):
         await self.protocol.send_and_receive(messages.repeat(repeat_state))
 
 
-class MrpPlaying(Playing):
-    """Implementation of API for retrieving what is playing."""
-
-    def __init__(self, state):
-        """Initialize a new MrpPlaying."""
-        self._state = state
-
-    @property
-    def media_type(self):
-        """Type of media is currently playing, e.g. video, music."""
-        if self._state.metadata:
-            media_type = self._state.metadata.mediaType
-            cim = protobuf.ContentItemMetadata
-            if media_type == cim.Audio:
-                return MediaType.Music
-            if media_type == cim.Video:
-                return MediaType.Video
-
-        return MediaType.Unknown
-
-    @property
-    def device_state(self):
-        """Device state, e.g. playing or paused."""
-        return {
-            None: DeviceState.Idle,
-            PlaybackState.Playing: DeviceState.Playing,
-            PlaybackState.Paused: DeviceState.Paused,
-            PlaybackState.Stopped: DeviceState.Stopped,
-            PlaybackState.Interrupted: DeviceState.Loading,
-            PlaybackState.Seeking: DeviceState.Seeking,
-        }.get(self._state.playback_state, DeviceState.Paused)
-
-    @property
-    def title(self):
-        """Title of the current media, e.g. movie or song name."""
-        return self._state.metadata_field("title")
-
-    @property
-    def artist(self):
-        """Artist of the currently playing song."""
-        return self._state.metadata_field("trackArtistName")
-
-    @property
-    def album(self):
-        """Album of the currently playing song."""
-        return self._state.metadata_field("albumName")
-
-    @property
-    def genre(self):
-        """Genre of the currently playing song."""
-        return self._state.metadata_field("genre")
-
-    @property
-    def total_time(self):
-        """Total play time in seconds."""
-        duration = self._state.metadata_field("duration")
-        if duration is None or math.isnan(duration):
-            return None
-        return int(duration)
-
-    @property
-    def position(self):
-        """Position in the playing media (seconds)."""
-        elapsed_timestamp = self._state.metadata_field("elapsedTimeTimestamp")
-
-        # If we don't have reference time, we can't do anything
-        if not elapsed_timestamp:
-            return None
-
-        elapsed_time = self._state.metadata_field("elapsedTime") or 0
-        diff = (
-            datetime.datetime.now() - _cocoa_to_timestamp(elapsed_timestamp)
-        ).total_seconds()
-
-        if self.device_state == DeviceState.Playing:
-            return int(elapsed_time + diff)
-        return int(elapsed_time)
-
-    @property
-    def shuffle(self):
-        """If shuffle is enabled or not."""
-        info = self._state.command_info(CommandInfo_pb2.ChangeShuffleMode)
-        if info is None:
-            return ShuffleState.Off
-        if info.shuffleMode == protobuf.ShuffleMode.Off:
-            return ShuffleState.Off
-        if info.shuffleMode == protobuf.ShuffleMode.Albums:
-            return ShuffleState.Albums
-
-        return ShuffleState.Songs
-
-    @property
-    def repeat(self):
-        """Repeat mode."""
-        info = self._state.command_info(CommandInfo_pb2.ChangeRepeatMode)
-        if info is None:
-            return RepeatState.Off
-        if info.repeatMode == protobuf.RepeatMode.One:
-            return RepeatState.Track
-        if info.repeatMode == protobuf.RepeatMode.All:
-            return RepeatState.All
-
-        return RepeatState.Off
-
-    @property
-    def hash(self):
-        """Create a unique hash for what is currently playing."""
-        return self._state.item_identifier or super().hash
-
-
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
@@ -475,9 +472,9 @@ class MrpMetadata(Metadata):
             return self.psm.playing.item_identifier
         return None
 
-    async def playing(self):
+    async def playing(self) -> Playing:
         """Return what is currently playing."""
-        return MrpPlaying(copy(self.psm.playing))
+        return build_playing_instance(self.psm.playing)
 
     @property
     def app(self) -> Optional[App]:
