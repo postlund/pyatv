@@ -12,6 +12,8 @@ from . import ClientUpdatesConfigMessage_pb2
 from . import CryptoPairingMessage_pb2
 from . import DeviceInfoMessage_pb2
 from . import GetKeyboardSessionMessage_pb2
+from . import GetVolumeMessage_pb2
+from . import GetVolumeResultMessage_pb2
 from . import KeyboardMessage_pb2
 from . import NotificationMessage_pb2
 from . import OriginClientPropertiesMessage_pb2
@@ -39,6 +41,7 @@ from . import SetNowPlayingClientMessage_pb2
 from . import SetNowPlayingPlayerMessage_pb2
 from . import SetRecordingStateMessage_pb2
 from . import SetStateMessage_pb2
+from . import SetVolumeMessage_pb2
 from . import TextInputMessage_pb2
 from . import TransactionMessage_pb2
 from . import UpdateClientMessage_pb2
@@ -67,6 +70,8 @@ from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
+from .GetVolumeMessage_pb2 import GetVolumeMessage
+from .GetVolumeResultMessage_pb2 import GetVolumeResultMessage
 from .KeyboardMessage_pb2 import KeyboardMessage
 from .LanguageOption_pb2 import LanguageOption
 from .NotificationMessage_pb2 import NotificationMessage
@@ -110,6 +115,7 @@ from .SetNowPlayingClientMessage_pb2 import SetNowPlayingClientMessage
 from .SetNowPlayingPlayerMessage_pb2 import SetNowPlayingPlayerMessage
 from .SetRecordingStateMessage_pb2 import SetRecordingStateMessage
 from .SetStateMessage_pb2 import SetStateMessage
+from .SetVolumeMessage_pb2 import SetVolumeMessage
 from .SupportedCommands_pb2 import SupportedCommands
 from .TextEditingAttributesMessage_pb2 import TextEditingAttributes
 from .TextInputMessage_pb2 import TextInputMessage
@@ -140,6 +146,8 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.DEVICE_INFO_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE: GetKeyboardSessionMessage_pb2.getKeyboardSessionMessage,
+    ProtocolMessage.GET_VOLUME_MESSAGE: GetVolumeMessage_pb2.getVolumeMessage,
+    ProtocolMessage.GET_VOLUME_RESULT_MESSAGE: GetVolumeResultMessage_pb2.getVolumeResultMessage,
     ProtocolMessage.KEYBOARD_MESSAGE: KeyboardMessage_pb2.keyboardMessage,
     ProtocolMessage.NOTIFICATION_MESSAGE: NotificationMessage_pb2.notificationMessage,
     ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE: OriginClientPropertiesMessage_pb2.originClientPropertiesMessage,
@@ -167,6 +175,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.SET_NOW_PLAYING_PLAYER_MESSAGE: SetNowPlayingPlayerMessage_pb2.setNowPlayingPlayerMessage,
     ProtocolMessage.SET_RECORDING_STATE_MESSAGE: SetRecordingStateMessage_pb2.setRecordingStateMessage,
     ProtocolMessage.SET_STATE_MESSAGE: SetStateMessage_pb2.setStateMessage,
+    ProtocolMessage.SET_VOLUME_MESSAGE: SetVolumeMessage_pb2.setVolumeMessage,
     ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
     ProtocolMessage.UPDATE_CLIENT_MESSAGE: UpdateClientMessage_pb2.updateClientMessage,
@@ -185,6 +194,8 @@ CRYPTO_PAIRING_MESSAGE = ProtocolMessage.CRYPTO_PAIRING_MESSAGE
 DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 DEVICE_INFO_UPDATE_MESSAGE = ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE
 GET_KEYBOARD_SESSION_MESSAGE = ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE
+GET_VOLUME_MESSAGE = ProtocolMessage.GET_VOLUME_MESSAGE
+GET_VOLUME_RESULT_MESSAGE = ProtocolMessage.GET_VOLUME_RESULT_MESSAGE
 KEYBOARD_MESSAGE = ProtocolMessage.KEYBOARD_MESSAGE
 NOTIFICATION_MESSAGE = ProtocolMessage.NOTIFICATION_MESSAGE
 ORIGIN_CLIENT_PROPERTIES_MESSAGE = ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE
@@ -212,6 +223,7 @@ SET_NOW_PLAYING_CLIENT_MESSAGE = ProtocolMessage.SET_NOW_PLAYING_CLIENT_MESSAGE
 SET_NOW_PLAYING_PLAYER_MESSAGE = ProtocolMessage.SET_NOW_PLAYING_PLAYER_MESSAGE
 SET_RECORDING_STATE_MESSAGE = ProtocolMessage.SET_RECORDING_STATE_MESSAGE
 SET_STATE_MESSAGE = ProtocolMessage.SET_STATE_MESSAGE
+SET_VOLUME_MESSAGE = ProtocolMessage.SET_VOLUME_MESSAGE
 TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
 UPDATE_CLIENT_MESSAGE = ProtocolMessage.UPDATE_CLIENT_MESSAGE
