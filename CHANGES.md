@@ -1,5 +1,63 @@
 # CHANGES
 
+## 0.7.6 (2021-01-29)
+
+*Changes:*
+
+* DNS parsing has been re-written which should be more stable
+  and handle more use cases
+* TCP keep-alive has been added to more platforms, FreeBSD being one of them
+* Player management has been totally re-written for MRP, so hopefully
+  play state should be more accurate now
+* A delay has been added to turn\_off (MRP), so it should work again
+* A heartbeat loop has been added that sends a "heartbeat" to the device
+  every 30s to detect connection problems
+* Protobuf definitions have been further lifted to match later tvOS versions
+
+*Notes:*
+
+* Fixed a bug where Playing instancess were not immutable
+* Push updates are only issued when something in the Playing instance changed.
+  Previously, unrelated changes to the device could trigger push updates with
+  the same content in Playing.
+
+*All changes:*
+
+```
+0994733 build(deps-dev): bump tox from 3.21.2 to 3.21.3 (#946)
+8e0fc01 mrp: Add some protobuf messages for volume (#947)
+5752ae3 mrp: Fix handling of active client (#944)
+7e3bcf5 if: Convert Playing to data class (#943)
+2b8fb74 build(deps): bump pytest from 6.2.1 to 6.2.2
+607d78c build(deps): bump mypy from 0.790 to 0.800
+a77c453 build(deps-dev): bump tox from 3.21.1 to 3.21.2
+393efbd build(deps): bump pytest-cov from 2.11.0 to 2.11.1
+6bb284f build(deps): bump pytest-cov from 2.10.1 to 2.11.0
+3c488b2 build(deps): bump deepdiff from 5.2.1 to 5.2.2
+cc41f33 mrp: Add support for heartbeats (#925)
+aec7362 mrp: Add support for heartbeats (#926)
+9af7609 dns: Use UTF-8 for names, and (attempt) to handle dots in names (#927)
+b527506 build(deps-dev): bump tox from 3.21.0 to 3.21.1
+fdf843f mrp: Support default supported commands (#924)
+f0f7eaf mrp: Add delay in turn_off between commands (#923)
+df56149 mrp: Add fields to UpdateOutputDevice (#921)
+280de0f Do not post duplicate push updates (#920)
+f9f7238 build(deps-dev): bump tox from 3.20.1 to 3.21.0
+aed9028 mrp: Fix a few playback state edge cases (#916)
+e176ce7 mrp: Improve client and player handling (#915)
+3ca2b0f support: Add new tvOS versions to list (#913)
+ccfa5eb mrp: Major updates to protobuf messages (#912)
+3eb9d3a Improve DNS message parsing for mDNS (#899)
+c524244 build(deps): bump deepdiff from 5.0.2 to 5.2.1
+87a159e build(deps): bump typed-ast from 1.4.1 to 1.4.2
+e61fb47 Slightly refine protobuf and srptools base requirements (#902)
+b2e80b3 net: Use TCP keepalive on more platforms (#897)
+03e4438 build(deps): bump codecov from 2.1.10 to 2.1.11
+f3dd0af build(deps): bump pytest from 6.2.0 to 6.2.1
+5f3383b build(deps): bump pytest-xdist from 2.1.0 to 2.2.0
+5ccb23f build(deps): bump pytest from 6.1.2 to 6.2.0
+```
+
 ## 0.7.5 (2020-12-08)
 
 *Changes:*
