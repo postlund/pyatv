@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Script converting pyatv logs to HTML."""
 
+import os
 import re
 import sys
 import logging
@@ -96,7 +97,7 @@ def generate_log_page(stream, output):
 def main():
     """Script starts here."""
 
-    def _markdown_parser():
+    def _markdown_parser(stream):
         """Look for markup start and end in input.
 
         This will look for input between tags looking like this:
@@ -106,7 +107,7 @@ def main():
         ```
         """
         found = False
-        for line in sys.stdin:
+        for line in stream:
             if line.startswith("```log"):
                 found = True
             elif line.startswith("```"):
@@ -117,15 +118,34 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="log file")
     parser.add_argument("-o", "--output", default=None, help="output file")
+    parser.add_argument(
+        "-f",
+        "--format",
+        default="plain",
+        choices=["plain", "markdown"],
+        help="input format",
+    )
+    parser.add_argument(
+        "-e",
+        "--env",
+        default=False,
+        action="store_true",
+        help="read from environment variable",
+    )
     args = parser.parse_args()
 
-    if args.file == "-":
-        generate_log_page(sys.stdin, args.output)
-    elif args.file == "...":
-        generate_log_page(_markdown_parser(), args.output)
+    def _generate_log(log):
+        generate_log_page(
+            _markdown_parser(log) if args.format == "markdown" else log, args.output
+        )
+
+    if args.env:
+        _generate_log(os.environ[args.file].splitlines())
+    elif args.file == "-":
+        _generate_log(sys.stdin)
     else:
         with open(args.file) as stream:
-            generate_log_page(stream, args.output)
+            _generate_log(stream)
 
 
 if __name__ == "__main__":
