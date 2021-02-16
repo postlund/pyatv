@@ -20,20 +20,21 @@ jobs:
     - name: Generate HTML output
       id: genout
       env:
-        CONTENT_COMMENT: ${{ github.event.comment.body }}
-        CONTENT_ISSUE: ${{ github.event.issue.body }}
+        ISSUE_BODY: ${{ toJson(github.event.issue.body) }}
         COMMENT_NUMBER: ${{ github.event.comment.id }}
+        COMMENT_BODY: ${{ toJson(github.event.comment.body) }}
       run: |
         if [ "$GITHUB_EVENT_NAME" = "issue_comment" ]; then
-            var=CONTENT_COMMENT
+            echo $COMMENT_BODY > raw
             source="comment #${COMMENT_NUMBER}"
         else
-            var=CONTENT_ISSUE
+            echo $ISSUE_BODY > raw
             source="issue description"
         fi
 
+        python -c 'import json; print(json.load(open("raw")))' > body
         base_name=$(uuidgen)
-        python scripts/log2html.py --output ${base_name}.html --format markdown --env $var
+        python scripts/log2html.py --output ${base_name}.html --format markdown body
         echo "logfile=${base_name}.html" >> $GITHUB_ENV
         echo "source=${source}" >> $GITHUB_ENV
     - name: Check if log exists
