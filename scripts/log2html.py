@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import json
 import logging
 import argparse
 
@@ -32,18 +33,44 @@ HTML_TEMPLATE = """<head>
       overflow-x: auto;
     }}
   </style>
+  <script>
+    var content = {content};
+
+    function createEntry(entry) {{
+      var outer = document.createElement("div");
+      outer.className = "box_log";
+
+      var details = document.createElement("details");
+      outer.appendChild(details);
+
+      var summary = document.createElement("summary");
+      summary.innerText = entry[0] + " " + entry[2];
+      details.appendChild(summary);
+
+      var desc = document.createElement("pre");
+      details.appendChild(desc);
+
+      details.addEventListener("toggle", event => {{
+        if (details.open) {{
+          desc.innerText = entry[3];
+
+        }}
+      }});
+
+      return outer;
+    }}
+
+    window.onload = function loadData() {{
+      for (const entry of content) {{
+        document.getElementById("entries").appendChild(createEntry(entry));
+      }}
+    }}
+  </script>
+
 </head>
 <body>
-  {logs}
+  <div id="entries" />
 </body>
-"""
-
-LOG_TEMPLATE = """    <div class="box_log">
-    <details>
-        <summary>{summary}</summary>
-        <pre>{details}</pre>
-    </details>
-    </div>
 """
 
 
@@ -73,20 +100,13 @@ def parse_logs(stream):
 
 def generate_log_page(stream, output):
     """Generate HTML output for log output."""
-    logs = []
-    for logpoint in parse_logs(stream):
-        date = logpoint[0]
-        first_line = logpoint[2]
-        content = logpoint[3]
-
-        summary = date + " " + first_line[first_line.find(" ") :]
-        logs.append(LOG_TEMPLATE.format(summary=summary, details=content))
+    logs = list(parse_logs(stream))
 
     if not logs:
         _LOGGER.warning("No log points found, not generating output")
         return
 
-    page = HTML_TEMPLATE.format(logs="\n".join(logs))
+    page = HTML_TEMPLATE.format(content=json.dumps(logs))
     if not output:
         print(page)
     else:
