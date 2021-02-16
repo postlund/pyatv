@@ -18,8 +18,8 @@ HTML_TEMPLATE = """<head>
   <title>pyatv log</title>
   <style type="text/css" media="screen">
     .box_log {{
-      margin: 5px;
-      padding: 5px;
+      margin: 3px;
+      padding: 2px;
       border-color: #aaaaaa;
       border-radius: 5px;
       border-style: dotted;
@@ -33,8 +33,11 @@ HTML_TEMPLATE = """<head>
       overflow-x: auto;
     }}
   </style>
+
   <script>
     var content = {content};
+    var text_filter = null;
+    var level_checkboxes = [];
 
     function createEntry(entry) {{
       var outer = document.createElement("div");
@@ -60,15 +63,73 @@ HTML_TEMPLATE = """<head>
       return outer;
     }}
 
-    window.onload = function loadData() {{
-      for (const entry of content) {{
-        document.getElementById("entries").appendChild(createEntry(entry));
+    function populate() {{
+      entries = document.getElementById("entries")
+      entries.innerHTML = "";
+
+      active_levels = new Set();
+      for (const checkbox of level_checkboxes) {{
+        if (checkbox.checked) {{
+          active_levels.add(checkbox.value);
+        }}
       }}
+
+      match_regexp = new RegExp(text_filter, "i");
+      for (const entry of content) {{
+        if ((text_filter == null || match_regexp.test(entry[3])) &&
+            active_levels.has(entry[1])) {{
+          entries.appendChild(createEntry(entry));
+        }}
+      }}
+    }}
+
+    function filterText() {{
+      text_filter = document.getElementById("filter").value;
+      populate();
+    }}
+
+    window.onload = function loadData() {{
+      var log_levels = new Set();
+
+      for (const entry of content) {{
+        log_levels.add(entry[1]);
+      }}
+
+      for (const level of log_levels) {{
+        var outer = document.createElement("div");
+        outer.style = "display: inline";
+
+        var filter_box = document.createElement("input");
+        filter_box.type = "checkbox";
+        filter_box.value = level;
+        filter_box.id = "LEVEL_" + level;
+        filter_box.value = level;
+        filter_box.checked = true;
+        filter_box.addEventListener('change', (event) => {{
+          populate();
+        }});
+
+        outer.appendChild(filter_box);
+        level_checkboxes.push(filter_box);
+
+        var label = document.createElement("label");
+        label.innerText = level;
+        label.for = "LEVEL_" + level;
+        outer.appendChild(label);
+
+        document.getElementById("filters").appendChild(outer);
+      }}
+
+      populate();
     }}
   </script>
 
 </head>
 <body>
+  <div id="filters" style="display: inline">
+    <input type="text" id="filter" onkeyup="filterText()"
+           placeholder="Filter regexp..." />
+  </div>
   <div id="entries" />
 </body>
 """
