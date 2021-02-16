@@ -10,7 +10,16 @@ import argparse
 
 _LOGGER = logging.getLogger(__name__)
 
-LOG_LINE_RE = r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) ([A-Z]+):(.*)"
+# Used by atvremote, atvscript, etc.
+LOG_LINE_RE = (
+    r"^(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>[A-Z]+):(?P<content>.*)"
+)
+
+# Used by Home Assistant
+HA_LOG_LINE_RE = (
+    r"^(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>[A-Z]+) \([^)]*\) "
+    r"\[(pyatv|homeassistant.components.apple_tv)[^]]*\] (?P<content>.*)"
+)
 
 HTML_TEMPLATE = """<head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -137,13 +146,21 @@ HTML_TEMPLATE = """<head>
 
 def parse_logs(stream):
     """Parse lines in a log and return entries."""
+
+    def _match_log_patterns(line):
+        for pattern in [LOG_LINE_RE, HA_LOG_LINE_RE]:
+            match = re.match(pattern, line)
+            if match:
+                return match
+        return None
+
     current_date = None
     currenf_level = None
     current_first_line = None
     current_content = ""
 
     for line in stream:
-        match = re.match(LOG_LINE_RE, line)
+        match = _match_log_patterns(line)
         if not match:
             current_content += line
             continue
@@ -151,7 +168,9 @@ def parse_logs(stream):
         if current_date:
             yield current_date, currenf_level, current_first_line, current_content
 
-        current_date, currenf_level, current_content = match.groups()
+        current_date = match.group("date")
+        currenf_level = match.group("level")
+        current_content = match.group("content")
         current_first_line = current_content
         current_content += "\n"
 
