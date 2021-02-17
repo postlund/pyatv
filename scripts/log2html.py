@@ -97,7 +97,7 @@ HTML_TEMPLATE = """<head>
       populate();
     }}
 
-    window.onload = function loadData() {{
+    function loadData() {{
       var log_levels = new Set();
 
       for (const entry of content) {{
@@ -131,6 +131,14 @@ HTML_TEMPLATE = """<head>
 
       populate();
     }}
+
+    // onload does not seem to work nicely with htmlpreview, so this is a workaround
+    var checkExist = setInterval(function() {{
+      if (document.getElementById("entries")) {{
+        loadData();
+        clearInterval(checkExist);
+      }}
+    }}, 100);
   </script>
 
 </head>
