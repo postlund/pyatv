@@ -11,6 +11,7 @@ from . import AudioFadeResponseMessage_pb2
 from . import ClientUpdatesConfigMessage_pb2
 from . import CryptoPairingMessage_pb2
 from . import DeviceInfoMessage_pb2
+from . import GenericMessage_pb2
 from . import GetKeyboardSessionMessage_pb2
 from . import GetVolumeMessage_pb2
 from . import GetVolumeResultMessage_pb2
@@ -69,6 +70,7 @@ from .ContentItem_pb2 import ContentItem
 from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
+from .GenericMessage_pb2 import GenericMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
 from .GetVolumeMessage_pb2 import GetVolumeMessage
 from .GetVolumeResultMessage_pb2 import GetVolumeResultMessage
@@ -145,6 +147,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.CRYPTO_PAIRING_MESSAGE: CryptoPairingMessage_pb2.cryptoPairingMessage,
     ProtocolMessage.DEVICE_INFO_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
+    ProtocolMessage.GENERIC_MESSAGE: GenericMessage_pb2.genericMessage,
     ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE: GetKeyboardSessionMessage_pb2.getKeyboardSessionMessage,
     ProtocolMessage.GET_VOLUME_MESSAGE: GetVolumeMessage_pb2.getVolumeMessage,
     ProtocolMessage.GET_VOLUME_RESULT_MESSAGE: GetVolumeResultMessage_pb2.getVolumeResultMessage,
@@ -193,6 +196,7 @@ CLIENT_UPDATES_CONFIG_MESSAGE = ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE
 CRYPTO_PAIRING_MESSAGE = ProtocolMessage.CRYPTO_PAIRING_MESSAGE
 DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 DEVICE_INFO_UPDATE_MESSAGE = ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE
+GENERIC_MESSAGE = ProtocolMessage.GENERIC_MESSAGE
 GET_KEYBOARD_SESSION_MESSAGE = ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE
 GET_VOLUME_MESSAGE = ProtocolMessage.GET_VOLUME_MESSAGE
 GET_VOLUME_RESULT_MESSAGE = ProtocolMessage.GET_VOLUME_RESULT_MESSAGE
