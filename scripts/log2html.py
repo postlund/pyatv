@@ -49,6 +49,7 @@ HTML_TEMPLATE = """<head>
     var level_checkboxes = [];
 
     function createEntry(entry) {{
+      var show_date = document.getElementById("show_date").checked;
       var outer = document.createElement("div");
       outer.className = "box_log";
 
@@ -56,7 +57,7 @@ HTML_TEMPLATE = """<head>
       outer.appendChild(details);
 
       var summary = document.createElement("summary");
-      summary.innerText = entry[0] + " " + entry[2];
+      summary.innerText = (show_date ? entry[0] + " " : "") + entry[2];
       details.appendChild(summary);
 
       var desc = document.createElement("pre");
@@ -146,6 +147,10 @@ HTML_TEMPLATE = """<head>
   <div id="filters" style="display: inline">
     <input type="text" id="filter" onkeyup="filterText()"
            placeholder="Filter regexp..." />
+    <div>
+      <input type="checkbox" id="show_date" onclick="populate()" checked />
+      <label for="show_date">Show date</label>
+    </div>
   </div>
   <div id="entries" />
 </body>
