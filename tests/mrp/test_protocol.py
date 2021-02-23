@@ -1,13 +1,20 @@
 """Unittests for pyatv.mrp.protocol."""
+from unittest.mock import MagicMock
+
 import pytest
 
 from pyatv.conf import MrpService
 from pyatv.const import Protocol
 from pyatv.mrp.connection import MrpConnection
-from pyatv.mrp.protocol import MrpProtocol
+from pyatv.mrp.protocol import (
+    HEARTBEAT_INTERVAL,
+    HEARTBEAT_RETRIES,
+    MrpProtocol,
+    heartbeat_loop,
+)
 from pyatv.mrp.srp import SRPAuthHandler
 
-from tests.utils import until, stub_sleep
+from tests.utils import until, total_sleep_time
 from tests.fake_device import FakeAppleTV
 
 
@@ -37,3 +44,15 @@ async def test_heartbeat_loop(mrp_atv, mrp_protocol):
 
     mrp_state = mrp_atv.get_state(Protocol.MRP)
     await until(lambda: mrp_state.heartbeat_count >= 3)
+
+
+@pytest.mark.asyncio
+async def test_heartbeat_fail_closes_connection(stub_sleep):
+    protocol = MagicMock()
+    protocol.send_and_receive.side_effect = Exception()
+
+    await heartbeat_loop(protocol)
+    assert protocol.send_and_receive.call_count == 1 + HEARTBEAT_RETRIES
+    assert total_sleep_time() == HEARTBEAT_INTERVAL
+
+    protocol.connection.close.assert_called_once()

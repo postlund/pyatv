@@ -14,6 +14,7 @@ from pyatv.mrp.srp import Credentials
 _LOGGER = logging.getLogger(__name__)
 
 HEARTBEAT_INTERVAL = 30
+HEARTBEAT_RETRIES = 1  # One regular attempt + retries
 
 Listener = namedtuple("Listener", "func data")
 OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
@@ -23,10 +24,14 @@ async def heartbeat_loop(protocol):
     """Periodically send heartbeat messages to device."""
     _LOGGER.debug("Starting heartbeat loop")
     count = 0
+    attempts = 0
     message = messages.create(protobuf.ProtocolMessage.SEND_COMMAND_MESSAGE)
     while True:
         try:
-            await asyncio.sleep(HEARTBEAT_INTERVAL)
+            # Re-attempts are made with no initial delay to more quickly
+            # recover a failed heartbeat (if possible)
+            if attempts == 0:
+                await asyncio.sleep(HEARTBEAT_INTERVAL)
 
             _LOGGER.debug("Sending periodic heartbeat %d", count)
             await protocol.send_and_receive(message)
@@ -34,11 +39,18 @@ async def heartbeat_loop(protocol):
         except asyncio.CancelledError:
             break
         except Exception:
-            _LOGGER.exception(f"heartbeat {count} failed")
-            protocol.connection.close()
-            break
+            attempts += 1
+            if attempts > HEARTBEAT_RETRIES:
+                _LOGGER.error(f"heartbeat {count} failed after {attempts} tries")
+                protocol.connection.close()
+                break
+            else:
+                _LOGGER.debug(f"heartbeat {count} failed")
         else:
+            attempts = 0
+        finally:
             count += 1
+
     _LOGGER.debug("Stopping heartbeat loop at %d", count)
 
 
