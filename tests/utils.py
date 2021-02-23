@@ -16,6 +16,7 @@ from aiohttp import ClientSession
 async def _fake_sleep(time: float = None, loop=None):
     async def dummy():
         _fake_sleep._sleep_time.insert(0, time)
+        _fake_sleep._total_sleep += time
 
     await asyncio.ensure_future(dummy())
 
@@ -28,6 +29,7 @@ def stub_sleep(fn=None) -> float:
     if asyncio.sleep == _fake_sleep:
         if not hasattr(asyncio.sleep, "_sleep_time"):
             asyncio.sleep._sleep_time = [0.0]
+            asyncio.sleep._total_sleep = 0.0
         if len(asyncio.sleep._sleep_time) == 1:
             return asyncio.sleep._sleep_time[0]
         return asyncio.sleep._sleep_time.pop()
@@ -35,11 +37,19 @@ def stub_sleep(fn=None) -> float:
     return 0.0
 
 
-def unstub_sleep():
+def unstub_sleep() -> None:
     """Restore original asyncio.sleep method."""
     if asyncio.sleep == _fake_sleep:
         asyncio.sleep._sleep_time = [0.0]
+        asyncio.sleep._total_sleep = 0.0
     asyncio.sleep = real_sleep
+
+
+def total_sleep_time() -> float:
+    """Return total amount of fake time slept."""
+    if asyncio.sleep == _fake_sleep:
+        return _fake_sleep._total_sleep
+    return 0.0
 
 
 async def simple_get(url):
