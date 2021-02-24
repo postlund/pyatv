@@ -50,13 +50,13 @@ class AirPlayPairingHandler(PairingHandler):
         """If a successful pairing has been performed."""
         return self._has_paired
 
-    def begin(self):
+    async def begin(self):
         """Start pairing process."""
         _LOGGER.debug(
             "Starting AirPlay pairing with credentials %s", self.auth_data.credentials
         )
-        self.pairing_complete = False
-        return error_handler(
+        self._has_paired = False
+        return await error_handler(
             self.authenticator.start_authentication, exceptions.PairingError
         )
 

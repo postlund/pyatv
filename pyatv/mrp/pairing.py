@@ -38,9 +38,9 @@ class MrpPairingHandler(PairingHandler):
         """If a successful pairing has been performed."""
         return self._has_paired
 
-    def begin(self):
+    async def begin(self):
         """Start pairing process."""
-        return error_handler(
+        return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError
         )
 

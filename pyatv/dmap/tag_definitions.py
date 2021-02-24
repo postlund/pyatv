@@ -13,7 +13,6 @@ def _read_unknown(data, start, length):
 
 
 # These are the tags that we know about so far
-# pylint: disable=bad-whitespace
 _TAGS = {
     "aeFP": DmapTag(read_uint, "com.apple.itunes.req-fplay"),
     "aeSV": DmapTag(read_uint, "com.apple.itunes.music-sharing-version"),

@@ -207,7 +207,7 @@ def build_playing_instance(state: PlayerState) -> Playing:
 
         return RepeatState.Off
 
-    def hash() -> str:
+    def item_hash() -> str:
         """Create a unique hash for what is currently playing."""
         return state.item_identifier
 
@@ -222,7 +222,7 @@ def build_playing_instance(state: PlayerState) -> Playing:
         position=position(),
         shuffle=shuffle(),
         repeat=repeat(),
-        hash=hash(),
+        hash=item_hash(),
     )
 
 
@@ -604,20 +604,22 @@ class MrpFeatures(Features):
         self.config = config
         self.psm = psm
 
-    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+    def get_feature(  # pylint: disable=too-many-return-statements,too-many-branches
+        self, feature_name: FeatureName
+    ) -> FeatureInfo:
         """Return current state of a feature."""
-        if feature in _FEATURES_SUPPORTED:
+        if feature_name in _FEATURES_SUPPORTED:
             return FeatureInfo(state=FeatureState.Available)
-        if feature == FeatureName.Artwork:
+        if feature_name == FeatureName.Artwork:
             metadata = self.psm.playing.metadata
             if metadata and metadata.artworkAvailable:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
-        if feature == FeatureName.PlayUrl:
+        if feature_name == FeatureName.PlayUrl:
             if self.config.get_service(Protocol.AirPlay) is not None:
                 return FeatureInfo(state=FeatureState.Available)
 
-        field_name = _FIELD_FEATURES.get(feature)
+        field_name = _FIELD_FEATURES.get(feature_name)
         if field_name:
             available = self.psm.playing.metadata_field(field_name) is not None
             return FeatureInfo(
@@ -628,7 +630,7 @@ class MrpFeatures(Features):
         # app, only the "opposite" feature to current state is available. E.g. if
         # something is playing, then pause will be available but not play. So take that
         # into consideration here.
-        if feature == FeatureName.PlayPause:
+        if feature_name == FeatureName.PlayPause:
             playback_state = self.psm.playing.playback_state
             if playback_state == PlaybackState.Playing and self.in_state(
                 FeatureState.Available, FeatureName.Pause
@@ -639,19 +641,19 @@ class MrpFeatures(Features):
             ):
                 return FeatureInfo(state=FeatureState.Available)
 
-        cmd_id = _FEATURE_COMMAND_MAP.get(feature)
+        cmd_id = _FEATURE_COMMAND_MAP.get(feature_name)
         if cmd_id:
             cmd = self.psm.playing.command_info(cmd_id)
             if cmd and cmd.enabled:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
-        if feature == FeatureName.App:
+        if feature_name == FeatureName.App:
             if self.psm.client:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
-        if feature in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
+        if feature_name in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
             if self.psm.volume_controls_available:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)

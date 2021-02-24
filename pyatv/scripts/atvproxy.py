@@ -191,7 +191,7 @@ async def publish_mrp_service(
     }
 
     return await mdns.publish(
-        asyncio.get_event_loop(),
+        loop,
         mdns.Service(
             "_mediaremotetv._tcp.local", name, IPv4Address(address), port, properties
         ),
@@ -241,7 +241,7 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
 
 
 async def _start_relay(loop, args, zconf):
-    transport, protocol = await loop.create_connection(
+    _, protocol = await loop.create_connection(
         lambda: RemoteConnection(loop), args.remote_ip, args.remote_port
     )
 

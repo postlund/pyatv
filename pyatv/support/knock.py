@@ -23,13 +23,13 @@ SEND_INTERVAL = 2.0
 # Performs the actual "knock". This can most certainly be done with asyncio code, but
 # works for now.
 def _synch_knock(address: IPv4Address, port: int):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.setblocking(False)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setblocking(False)
 
     socket_address = (str(address), port)
-    s.connect_ex(socket_address)
-    select.select([s], [s], [s], 0.1)
-    s.close()
+    sock.connect_ex(socket_address)
+    select.select([sock], [sock], [sock], 0.1)
+    sock.close()
 
 
 async def knock(

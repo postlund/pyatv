@@ -2,14 +2,42 @@
 reports=no
 extension-pkg-whitelist=netifaces
 
+[BASIC]
+good-names=
+  ex,
+  rd,
+  f,
+  i,
+  T
+
+[FORMAT]
+max-line-length=88
+
 [TYPECHECK]
 ignore=protobuf
-ignored-classes=ProtocolMessage,SetConnectionStateMessage,SetStateMessage,ContentItemMetadata,CommandInfo
+ignored-classes=
+  ProtocolMessage,
+  SetConnectionStateMessage,
+  SetStateMessage,
+  ContentItemMetadata,
+  CommandInfo,
+  PlaybackState,
+  ShuffleMode,
+  RepeatMode,
+  HandlerReturnStatus,
+  SendError,
+  DeviceClass
 
 disable=
+  broad-except,
   locally-disabled,
   duplicate-code,
-  fixme
+  fixme,
+  unused-argument,
+  too-few-public-methods,
+  too-many-public-methods,
+  too-many-arguments,
+  too-many-instance-attributes
 
 [EXCEPTIONS]
 overgeneral-exceptions=Exception

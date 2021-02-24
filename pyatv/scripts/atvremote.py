@@ -454,7 +454,10 @@ async def cli_handler(loop):
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     if args.mdns_debug:
-        logging.getLogger("pyatv.support.mdns").level = logging.TRAFFIC
+        # logging.TRAFFIC is set in runtime by support.mdns
+        logging.getLogger(
+            "pyatv.support.mdns"
+        ).level = logging.TRAFFIC  # pylint: disable=no-member
 
     cmds = retrieve_commands(GlobalCommands)
 

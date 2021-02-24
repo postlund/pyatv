@@ -33,7 +33,10 @@ class VerifyScanHosts(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         """Split hosts and save as array."""
         ip_split = values.split(",")
-        [ip_address(ip) for ip in ip_split]
+
+        # Simple verification that IP addresses has correct format
+        [ip_address(ip) for ip in ip_split]  # pylint: disable=expression-not-assigned
+
         setattr(namespace, self.dest, ip_split)
 
 
