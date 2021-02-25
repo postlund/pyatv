@@ -7,6 +7,7 @@ import sys
 import json
 import logging
 import argparse
+from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -144,6 +145,11 @@ HTML_TEMPLATE = """<head>
 
 </head>
 <body>
+  <h1>pyatv log2html</h1>
+  <div>
+    Generated at {time}<br />
+    Command: {command}
+  </div>
   <div id="filters" style="display: inline">
     <input type="text" id="filter" onkeyup="filterText()"
            placeholder="Filter regexp..." />
@@ -199,7 +205,9 @@ def generate_log_page(stream, output):
         _LOGGER.warning("No log points found, not generating output")
         return
 
-    page = HTML_TEMPLATE.format(content=json.dumps(logs))
+    page = HTML_TEMPLATE.format(
+        content=json.dumps(logs), time=datetime.now(), command=" ".join(sys.argv)
+    )
     if not output:
         print(page)
     else:
