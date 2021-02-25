@@ -43,7 +43,8 @@ setup(
         "console_scripts": [
             "atvremote = pyatv.scripts.atvremote:main",
             "atvproxy = pyatv.scripts.atvproxy:main",
-            "atvscript = pyatv.scripts.atvscript:main"
+            "atvscript = pyatv.scripts.atvscript:main",
+            "atvlog = pyatv.scripts.atvlog:main",
         ]
     },
     classifiers=[
