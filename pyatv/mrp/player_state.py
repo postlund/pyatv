@@ -40,7 +40,7 @@ class PlayerState:
         self.display_name = player.displayName or self.display_name
 
     @property
-    def playback_state(self):
+    def playback_state(self):  # pylint: disable=too-many-return-statements
         """Playback state of device."""
         # if playback state has not been received, assume player is not playing
         # anything (i.e. idle)
@@ -149,6 +149,11 @@ class Client:
             return PlayerState(self, pb.NowPlayingPlayer())
         return self._active_player
 
+    @active_player.setter
+    def active_player(self, other: Optional[PlayerState]):
+        """Change active player for client."""
+        self._active_player = other
+
     def get_player(self, player: pb.NowPlayingPlayer) -> PlayerState:
         """Get state for a player."""
         if player.identifier not in self.players:
@@ -163,7 +168,7 @@ class Client:
 
     def handle_set_now_playing_player(self, player: pb.NowPlayingPlayer) -> None:
         """Handle change of now playing player."""
-        self._active_player = self.get_player(player)
+        self.active_player = self.get_player(player)
 
         if self.active_player.is_valid:
             _LOGGER.debug(
@@ -200,7 +205,7 @@ class PlayerStateManager:
             pb.UPDATE_CLIENT_MESSAGE: self._handle_update_client,
             pb.REMOVE_CLIENT_MESSAGE: self._handle_remove_client,
             pb.REMOVE_PLAYER_MESSAGE: self._handle_remove_player,
-            pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: self._handle_set_default_supported_commands,  # noqa
+            pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: self._handle_set_default_supported_commands,  # pylint: disable=line-too-long # noqa
             pb.VOLUME_CONTROL_AVAILABILITY_MESSAGE: self._volume_control_availability,
         }
         for message, handler in listeners.items():
@@ -296,7 +301,7 @@ class PlayerStateManager:
             player.parent = None
 
             if player == client.active_player:
-                client._active_player = None
+                client.active_player = None
                 await self._state_updated(client=client)
 
     async def _handle_set_default_supported_commands(self, message, _):

@@ -549,19 +549,21 @@ class DmapFeatures(Features):
         self.config = config
         self.apple_tv = apple_tv
 
-    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+    def get_feature(  # pylint: disable=too-many-return-statements
+        self, feature_name: FeatureName
+    ) -> FeatureInfo:
         """Return current state of a feature."""
-        if feature in _AVAILABLE_FEATURES:
+        if feature_name in _AVAILABLE_FEATURES:
             return FeatureInfo(state=FeatureState.Available)
-        if feature in _UNKNOWN_FEATURES:
+        if feature_name in _UNKNOWN_FEATURES:
             return FeatureInfo(state=FeatureState.Unknown)
-        if feature in _FIELD_FEATURES:
-            return FeatureInfo(state=self._is_available(_FIELD_FEATURES[feature]))
-        if feature == FeatureName.VolumeUp:
+        if feature_name in _FIELD_FEATURES:
+            return FeatureInfo(state=self._is_available(_FIELD_FEATURES[feature_name]))
+        if feature_name == FeatureName.VolumeUp:
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
-        if feature == FeatureName.VolumeDown:
+        if feature_name == FeatureName.VolumeDown:
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
-        if feature == FeatureName.PlayUrl:
+        if feature_name == FeatureName.PlayUrl:
             if self.config.get_service(Protocol.AirPlay) is not None:
                 return FeatureInfo(state=FeatureState.Available)
 

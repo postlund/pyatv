@@ -52,8 +52,8 @@ def generate():
     """Generate API reference."""
     for output_file, html in _api_modules():
         print("Generating", output_file)
-        with open(output_file, "wb") as fh:
-            fh.write(html.encode("utf-8"))
+        with open(output_file, "wb") as f:
+            f.write(html.encode("utf-8"))
 
     return 0
 
@@ -94,7 +94,7 @@ def main():
 
     if args.command == "generate":
         return generate()
-    elif args.command == "verify":
+    if args.command == "verify":
         return verify()
 
     return 1

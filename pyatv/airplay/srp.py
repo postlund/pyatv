@@ -80,6 +80,7 @@ class SRPAuthHandler:
         """Initialize a new SRPAuthHandler."""
         self.seed = None
         self.session = None
+        self._public_bytes = None
         self._auth_private = None
         self._auth_public = None
         self._verify_private = None

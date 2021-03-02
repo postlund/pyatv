@@ -106,8 +106,8 @@ def update_version(version):
             "(" + component + "_VERSION =).*", '\\1 "' + split[i] + '"', output
         )
 
-    with open("pyatv/const.py", "w") as wh:
-        wh.write(output)
+    with open("pyatv/const.py", "w") as f:
+        f.write(output)
 
 
 def generate_outputs():
@@ -133,13 +133,13 @@ def insert_changes(version):
         _LOGGER.info("Getting all changes since %s", commit_sha)
         all_changes = call("git log --oneline {0}..HEAD", commit_sha)
 
-        with open("CHANGES.md", "w") as fw:
-            fw.write(
+        with open("CHANGES.md", "w") as f:
+            f.write(
                 CHANGES_TEMPLATE.format(
                     version=version_str, all_changes=all_changes.rstrip()
                 )
             )
-            fw.write("\n".join(changes[2:]))
+            f.write("\n".join(changes[2:]))
 
 
 def verify_changes(version):
