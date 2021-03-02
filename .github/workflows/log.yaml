@@ -17,9 +17,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Install pygithub
+    - name: Install python packages
       run: |
         pip install pygithub
+        python setup.py develop
     - uses: jannekem/run-python-script-action@v1
       with:
         fail-on-error: false
@@ -49,7 +50,7 @@ jobs:
         fi
 
         if [ -e "body" ]; then
-            python scripts/log2html.py --output ${base_name}.html --format markdown body
+            atvlog --output ${base_name}.html --format markdown body
         fi
     - name: Check if log exists
       id: check_files

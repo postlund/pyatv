@@ -7,6 +7,7 @@ import sys
 import json
 import logging
 import argparse
+from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +46,6 @@ HTML_TEMPLATE = """<head>
 
   <script>
     var content = {content};
-    var text_filter = null;
     var level_checkboxes = [];
 
     function createEntry(entry) {{
@@ -74,6 +74,9 @@ HTML_TEMPLATE = """<head>
     }}
 
     function populate() {{
+      include_filter = document.getElementById("include_filter").value;
+      exclude_filter = document.getElementById("exclude_filter").value;
+
       entries = document.getElementById("entries")
       entries.innerHTML = "";
 
@@ -84,18 +87,18 @@ HTML_TEMPLATE = """<head>
         }}
       }}
 
-      match_regexp = new RegExp(text_filter, "i");
+      include_regexp = new RegExp(include_filter, "i");
+      exclude_regexp = new RegExp(exclude_filter, "i");
       for (const entry of content) {{
-        if ((text_filter == null || match_regexp.test(entry[3])) &&
+        if (exclude_filter && exclude_regexp.test(entry[3])) {{
+          continue;
+        }}
+
+        if ((include_filter == null || include_regexp.test(entry[3])) &&
             active_levels.has(entry[1])) {{
           entries.appendChild(createEntry(entry));
         }}
       }}
-    }}
-
-    function filterText() {{
-      text_filter = document.getElementById("filter").value;
-      populate();
     }}
 
     function loadData() {{
@@ -144,9 +147,22 @@ HTML_TEMPLATE = """<head>
 
 </head>
 <body>
+  <h1>pyatv log2html</h1>
+  <div>
+    Generated at {time}<br />
+    Command: {command}
+  </div>
   <div id="filters" style="display: inline">
-    <input type="text" id="filter" onkeyup="filterText()"
-           placeholder="Filter regexp..." />
+    <div>
+      <label for="include_filter">Include</label>
+      <input type="text" id="include_filter" onkeyup="populate()"
+             placeholder="Include regexp..." />
+    </div>
+    <div>
+      <label for="exclude_filter">Exclude</label>
+      <input type="text" id="exclude_filter" onkeyup="populate()"
+             placeholder="Exclude regexp..." />
+    </div>
     <div>
       <input type="checkbox" id="show_date" onclick="populate()" checked />
       <label for="show_date">Show date</label>
@@ -199,7 +215,9 @@ def generate_log_page(stream, output):
         _LOGGER.warning("No log points found, not generating output")
         return
 
-    page = HTML_TEMPLATE.format(content=json.dumps(logs))
+    page = HTML_TEMPLATE.format(
+        content=json.dumps(logs), time=datetime.now(), command=" ".join(sys.argv)
+    )
     if not output:
         print(page)
     else:

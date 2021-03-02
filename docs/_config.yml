@@ -43,6 +43,8 @@ page_links:
       title: atvproxy
     - link: /documentation/atvscript/
       title: atvscript
+    - link: /documentation/atvlog/
+      title: atvlog
   development:
     - link: /development/
       title: Start
