@@ -9,6 +9,9 @@ assignees: ''
 
 **Describe the bug**
 
+```log
+If you are attaching a log, replace this text with the log (it will ensure proper formatting). Otherwise remove this section.
+```
 **To Reproduce**
 
 **Expected behavior**
