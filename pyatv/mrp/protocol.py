@@ -25,7 +25,7 @@ async def heartbeat_loop(protocol):
     _LOGGER.debug("Starting heartbeat loop")
     count = 0
     attempts = 0
-    message = messages.create(protobuf.ProtocolMessage.SEND_COMMAND_MESSAGE)
+    message = messages.create(protobuf.GENERIC_MESSAGE)
     while True:
         try:
             # Re-attempts are made with no initial delay to more quickly

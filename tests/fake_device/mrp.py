@@ -455,12 +455,6 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             state.position -= int(inner.options.skipInterval)
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Skip backwards %d", inner.options.skipInterval)
-        elif inner.command == cmd.Unknown:
-            # This special case is used by pyatv for heartbeats
-            self.state.heartbeat_count += 1
-            _LOGGER.debug(
-                "Received heartbeat (total count: %d)", self.state.heartbeat_count
-            )
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
             self.send(
@@ -491,6 +485,18 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         self.send(messages.command_result(message.identifier))
         self.state.powered_on = True
         self._send_device_info(update=True)
+
+    def handle_generic(self, message, inner):
+        # Generic message is used by pyatv for heartbeats
+        self.state.heartbeat_count += 1
+        _LOGGER.debug(
+            "Received heartbeat (total count: %d)", self.state.heartbeat_count
+        )
+        self.send(
+            messages.create(
+                protobuf.ProtocolMessage.UNKNOWN_MESSAGE, identifier=message.identifier
+            )
+        )
 
 
 class FakeMrpUseCases:
