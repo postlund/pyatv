@@ -21,6 +21,7 @@ class MrpConnection(
 
     def __init__(self, host, port, loop, atv=None):
         """Initialize a new MrpConnection."""
+        super().__init__()
         self.host = str(host)
         self.port = port
         self.atv = atv
@@ -43,11 +44,11 @@ class MrpConnection(
         dstaddr, dstport = sock.getpeername()
         srcaddr, srcport = sock.getsockname()
         self._log_str = f"{srcaddr}:{srcport}<->{dstaddr}:{dstport} "
-        _LOGGER.debug(self._log_str + "Connection established")
+        _LOGGER.debug("%s Connection established", self._log_str)
 
     def connection_lost(self, exc):
         """Device connection was dropped."""
-        _LOGGER.debug(self._log_str + "Disconnected from device: %s", exc)
+        _LOGGER.debug("%s Disconnected from device: %s", self._log_str, exc)
         self._transport = None
         self.listener.stop()
 
@@ -59,7 +60,7 @@ class MrpConnection(
 
     def eof_received(self):
         """Device sent EOF (no more data)."""
-        _LOGGER.debug(self._log_str + "Received EOF from server")
+        _LOGGER.debug("%s Received EOF from server", self._log_str)
         if self._transport.can_write_eof():
             self._transport.write_eof()
         self._transport.close()
@@ -79,7 +80,7 @@ class MrpConnection(
 
     def close(self):
         """Close connection to device."""
-        _LOGGER.debug(self._log_str + "Closing connection")
+        _LOGGER.debug("%s Closing connection", self._log_str)
         if self._transport:
             self._transport.close()
         self._transport = None
@@ -120,7 +121,8 @@ class MrpConnection(
             length, raw = read_variant(self._buffer)
             if len(raw) < length:
                 _LOGGER.debug(
-                    self._log_str + "Require %d bytes but only %d in buffer",
+                    "%s Require %d bytes but only %d in buffer",
+                    self._log_str,
                     length,
                     len(raw),
                 )
@@ -132,7 +134,7 @@ class MrpConnection(
             try:
                 self._handle_message(data)
             except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception(self._log_str + "Failed to handle message")
+                _LOGGER.exception("%s Failed to handle message", self._log_str)
 
     def _handle_message(self, data):
         if self._chacha:

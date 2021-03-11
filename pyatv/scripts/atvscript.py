@@ -102,19 +102,19 @@ async def wait_for_input(loop, abort_sem):
 def output(success: bool, error=None, exception=None, values=None):
     """Produce output in intermediate format before conversion."""
     now = datetime.datetime.now(datetime.timezone.utc).astimezone().isoformat()
-    output = {"result": "success" if success else "failure", "datetime": str(now)}
+    result = {"result": "success" if success else "failure", "datetime": str(now)}
     if error:
-        output["error"] = error
+        result["error"] = error
     if exception:
-        output["exception"] = str(exception)
-        output["stacktrace"] = "".join(
+        result["exception"] = str(exception)
+        result["stacktrace"] = "".join(
             traceback.format_exception(
                 type(exception), exception, exception.__traceback__
             )
         )
     if values:
-        output.update(**values)
-    return output
+        result.update(**values)
+    return result
 
 
 def output_playing(playing: Playing, app: App):
@@ -126,7 +126,7 @@ def output_playing(playing: Playing, app: App):
         return field if field else None
 
     commands = retrieve_commands(Playing)
-    values = {k: _convert(getattr(playing, k)) for k in commands.keys()}
+    values = {k: _convert(getattr(playing, k)) for k in commands}
     if app:
         values["app"] = app.name
         values["app_id"] = app.identifier
@@ -218,8 +218,7 @@ async def _run_command(atv, args, abort_sem, loop):
         await wait_for_input(loop, abort_sem)
         return output(True, values={"push_updates": "finished"})
 
-    rc = retrieve_commands(RemoteControl)
-    if args.command in rc:
+    if args.command in retrieve_commands(RemoteControl):
         await getattr(atv.remote_control, args.command)()
         return output(True, values={"command": args.command})
 
@@ -292,7 +291,7 @@ async def appstart(loop):
             datefmt="%Y-%m-%d %H:%M:%S",
         )
 
-    def _handle_exception(loop, context):
+    def _handle_exception(_, context):
         kwargs = {"error": context["message"]}
         if "exception" in context:
             kwargs["exception"] = context["exception"]

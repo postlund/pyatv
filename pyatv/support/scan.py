@@ -118,9 +118,8 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, mdns_service.name, service, response)
 
-    def _unsupported_service(
-        self, mdns_service: mdns.Service, _: mdns.Response
-    ) -> None:
+    @staticmethod
+    def _unsupported_service(mdns_service: mdns.Service, _: mdns.Response) -> None:
         """Handle unsupported service."""
         _LOGGER.warning(
             "Discovered unknown device %s (%s)", mdns_service.name, mdns_service.type

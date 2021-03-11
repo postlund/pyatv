@@ -14,7 +14,9 @@ from pyatv.support import mdns
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 
-from tests.fake_device import FakeAppleTV  # noqa
+from tests.fake_device import (  #  pylint: disable=wrong-import-position  # noqa
+    FakeAppleTV,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ async def _alter_playing(usecase):
             await asyncio.sleep(3)
         except asyncio.CancelledError:
             break
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logging.exception("Exception in output loop")
 
 
@@ -97,7 +99,7 @@ async def publish_airplay_zeroconf(loop, zconf, address, port):
         "flags": "0x44",
         "vv": "2",
         "features": "0x5A7FFFF7,0xE",
-        "pk": "3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98",  # noqa
+        "pk": "3853c0e2ce3844727ca0cb1b86a3e3875e66924d2648d8f8caf71f8118793d98",  # pylint: disable=line-too-long # noqa
         "srcvers": "220.68",
     }
     return await mdns.publish(

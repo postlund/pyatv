@@ -7,12 +7,13 @@ import glob
 import stat
 import difflib
 import zipfile
-import requests
 import binascii
 import argparse
 import subprocess
 from io import BytesIO
 from collections import namedtuple
+
+import requests
 
 import cryptography
 from google.protobuf.text_format import MessageToString
@@ -62,22 +63,22 @@ MessageInfo = namedtuple("MessageInfo", ["module", "title", "accessor", "const"]
 
 
 def _protobuf_url():
-    BASE_URL = (
+    base_url = (
         "https://github.com/protocolbuffers/protobuf/"
         + "releases/download/v{version}/protoc-{version}-{platform}.zip"
     )
-    PLATFORMS = {
+    platforms = {
         "linux": "linux-x86_64",
         "darwin": "osx-x86_64",
         "win32": "win64",
     }
 
-    platform = PLATFORMS.get(sys.platform)
+    platform = platforms.get(sys.platform)
     if not platform:
         print("Unsupported platform: " + sys.platform, file=sys.stderr)
         sys.exit(1)
 
-    return BASE_URL.format(version=PROTOBUF_VERSION, platform=platform)
+    return base_url.format(version=PROTOBUF_VERSION, platform=platform)
 
 
 def _download_protoc(force=False):
@@ -101,8 +102,8 @@ def _download_protoc(force=False):
         print(protoc_path(), "was not downloaded correctly", file=sys.stderr)
         sys.exit(1)
 
-    st = os.stat(protoc_path())
-    os.chmod(protoc_path(), st.st_mode | stat.S_IEXEC)
+    file_stat = os.stat(protoc_path())
+    os.chmod(protoc_path(), file_stat.st_mode | stat.S_IEXEC)
 
 
 def _verify_protoc_version():
@@ -111,6 +112,7 @@ def _verify_protoc_version():
             [protoc_path(), "--version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            check=False,
         )
         installed_version = ret.stdout.decode("utf-8").split(" ")[1].rstrip()
         if installed_version != PROTOBUF_VERSION:
@@ -150,9 +152,9 @@ def extract_message_info():
             if stripped == "enum Type {":
                 types_found = True
                 continue
-            elif types_found and stripped == "}":
+            if types_found and stripped == "}":
                 break
-            elif not types_found:
+            if not types_found:
                 continue
 
             constant = stripped.split(" ")[0]
@@ -226,12 +228,13 @@ def update_auto_generated_code():
     proto_files = glob.glob(os.path.join(BASE_PATH, "*.proto"))
     subprocess.run(
         [protoc_path(), "--proto_path=.", "--python_out=.", "--mypy_out=."]
-        + proto_files
+        + proto_files,
+        check=False,
     )
 
     module_code = generate_module_code()
-    with open(os.path.join(BASE_PATH, "__init__.py"), "w") as fh:
-        fh.write(module_code)
+    with open(os.path.join(BASE_PATH, "__init__.py"), "w") as f:
+        f.write(module_code)
 
     return 0
 
@@ -240,8 +243,8 @@ def verify_generated_code():
     """Verify that generated code is up-to-date."""
     generated_code = generate_module_code().splitlines(True)
 
-    with open(os.path.join(BASE_PATH, "__init__.py"), "r") as fh:
-        actual = fh.readlines()
+    with open(os.path.join(BASE_PATH, "__init__.py"), "r") as f:
+        actual = f.readlines()
 
         diff = list(
             difflib.unified_diff(
@@ -262,17 +265,29 @@ def verify_generated_code():
 
 
 def _print_single_message(data, unknown_fields):
-    from pyatv.mrp.protobuf import ProtocolMessage
+    # Import here to allow other parts of script, e.g. message generation to run
+    # without having pyatv installed
+    from pyatv.mrp.protobuf import (  # pylint: disable=import-outside-toplevel
+        ProtocolMessage,
+    )
 
     parsed = ProtocolMessage()
     parsed.ParseFromString(data)
-    output = MessageToString(parsed, print_unknown_fields=unknown_fields)
+
+    # The print_unknown_fields is only available in newer versions of protobuf
+    # (from 3.8 or so). This script is generally only run with newer versions than
+    # that, so we can disable pylint here.
+    output = MessageToString(  # pylint: disable=unexpected-keyword-arg
+        parsed, print_unknown_fields=unknown_fields
+    )
     print(output)
 
 
 def decode_and_print_message(args):
     """Decode and print protobuf messages."""
-    from pyatv.mrp import variant
+    # Import here to allow other parts of script, e.g. message generation to run
+    # without having pyatv installed
+    from pyatv.mrp import variant  # pylint: disable=import-outside-toplevel
 
     buf = binascii.unhexlify(args.message)
     if not args.stream:
@@ -321,7 +336,7 @@ def decrypt_and_print_message(args):
     return 1
 
 
-def main():
+def main():  # pylint: disable=too-many-return-statements
     """Script starts here."""
     if not os.path.exists(".git"):
         print("Run this script from repo root", file=sys.stderr)
@@ -388,14 +403,14 @@ def main():
             _download_protoc(args.force)
         _verify_protoc_version()
         return update_auto_generated_code()
-    elif args.command == "verify":
+    if args.command == "verify":
         if args.download:
             _download_protoc(args.force)
         _verify_protoc_version()
         return verify_generated_code()
-    elif args.command == "decode":
+    if args.command == "decode":
         return decode_and_print_message(args)
-    elif args.command == "decrypt":
+    if args.command == "decrypt":
         return decrypt_and_print_message(args)
 
     return 1

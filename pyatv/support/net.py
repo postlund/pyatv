@@ -50,9 +50,9 @@ async def create_session(
 
 def unused_port() -> int:
     """Return a port that is unused on the current host."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
 
 
 def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
@@ -64,7 +64,12 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
     sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, True)
 
     if hasattr(socket, "SO_REUSEPORT"):
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        # FIXME: On windows, SO_REUSEPORT is not available and pylint is still not able
+        # to detect that it has been checked with hasattr above:
+        # https://github.com/PyCQA/pylint/issues/801
+        sock.setsockopt(
+            socket.SOL_SOCKET, socket.SO_REUSEPORT, 1  # pylint: disable=no-member
+        )
 
     if address is not None:
         sock.setsockopt(
@@ -122,17 +127,18 @@ def tcp_keepalive(sock) -> None:
     for option_name, value in keepalive_options.items():
         try:
             option = getattr(socket, option_name)
-        except AttributeError:
+        except AttributeError as ex:
             if current_platform == "Darwin" and option_name == "TCP_KEEPIDLE":
                 # TCP_KEEPALIVE will hopefully be available at some point,
                 # (https://bugs.python.org/issue34932) but until then the value is
                 # hardcoded.
-                # https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/bsd/netinet/tcp.h#L206  # noqa
+                # https://github.com/apple/darwin-xnu/blob/
+                #   0a798f6738bc1db01281fc08ae024145e84df927/bsd/netinet/tcp.h#L206
                 option = 0x10
             else:
                 raise exceptions.NotSupportedError(
                     f"Option {option_name} is not supported"
-                )
+                ) from ex
         try:
             sock.setsockopt(socket.IPPROTO_TCP, option, value)
         except OSError as ex:

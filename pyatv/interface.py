@@ -239,7 +239,7 @@ class PairingHandler(ABC):
         raise exceptions.NotSupportedError()
 
 
-class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
+class RemoteControl(ABC):
     """Base class for API used to control an Apple TV."""
 
     # pylint: disable=invalid-name
@@ -430,7 +430,7 @@ class Playing(ABC):
         position: Optional[int] = None,
         shuffle: Optional[const.ShuffleState] = None,
         repeat: Optional[const.RepeatState] = None,
-        hash: Optional[str] = None,
+        hash: Optional[str] = None,  # pylint: disable=redefined-builtin
     ) -> None:
         """Initialize a new Playing instance."""
         self._media_type = media_type
@@ -663,6 +663,7 @@ class PushUpdater(ABC, StateProducer):
 
     def __init__(self, loop: asyncio.AbstractEventLoop):
         """Initialize a new PushUpdater."""
+        super().__init__()
         self.loop = loop
         self._previous_state: Optional[Playing] = None
 
@@ -769,7 +770,7 @@ class DeviceInfo:
         build_number: Optional[str],
         model: const.DeviceModel,
         mac: Optional[str],
-    ) -> None:  # pylint: disable=too-many-arguments  # noqa
+    ) -> None:
         """Initialize a new DeviceInfo instance."""
         self._os = os
         self._version = version
@@ -830,7 +831,7 @@ class Features(ABC):
     """Base class for supported feature functionality."""
 
     @abstractmethod
-    def get_feature(self, feature: FeatureName) -> FeatureInfo:
+    def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
         raise NotImplementedError()
 
@@ -838,9 +839,9 @@ class Features(ABC):
         """Return state of all features."""
         features = {}  # type: Dict[FeatureName, FeatureInfo]
         for name in FeatureName:
-            feature = self.get_feature(name)
-            if feature.state != FeatureState.Unsupported or include_unsupported:
-                features[name] = feature
+            info = self.get_feature(name)
+            if info.state != FeatureState.Unsupported or include_unsupported:
+                features[name] = info
         return features
 
     def in_state(
@@ -855,9 +856,9 @@ class Features(ABC):
         in one of the listed states.
         """
         for name in feature_names:
-            feature = self.get_feature(name)
+            info = self.get_feature(name)
             expected_states = states if isinstance(states, list) else [states]
-            if feature.state not in expected_states:
+            if info.state not in expected_states:
                 return False
         return True
 

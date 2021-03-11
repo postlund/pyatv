@@ -17,7 +17,8 @@ ENUM_VALUE_TEMPLATE = """    {name} = {index}
 
 def main():
     """Script starts here."""
-    features = interface._ALL_FEATURES
+    # This is an internal script that is allowed to peek into internals
+    features = interface._ALL_FEATURES  # pylint: disable=protected-access
     enum_values = "\n".join(
         ENUM_VALUE_TEMPLATE.format(name=tmp[0], index=index, doc=tmp[1])
         for index, tmp in features.items()

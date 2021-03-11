@@ -41,11 +41,10 @@ async def heartbeat_loop(protocol):
         except Exception:
             attempts += 1
             if attempts > HEARTBEAT_RETRIES:
-                _LOGGER.error(f"heartbeat {count} failed after {attempts} tries")
+                _LOGGER.error("heartbeat %d failed after %d tries", count, attempts)
                 protocol.connection.close()
                 break
-            else:
-                _LOGGER.debug(f"heartbeat {count} failed")
+            _LOGGER.debug("heartbeat %d failed", count)
         else:
             attempts = 0
         finally:

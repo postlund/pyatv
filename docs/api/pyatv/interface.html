@@ -459,7 +459,7 @@ class PairingHandler(ABC):
         raise exceptions.NotSupportedError()
 
 
-class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
+class RemoteControl(ABC):
     &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
 
     # pylint: disable=invalid-name
@@ -650,7 +650,7 @@ class Playing(ABC):
         position: Optional[int] = None,
         shuffle: Optional[const.ShuffleState] = None,
         repeat: Optional[const.RepeatState] = None,
-        hash: Optional[str] = None,
+        hash: Optional[str] = None,  # pylint: disable=redefined-builtin
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
         self._media_type = media_type
@@ -883,6 +883,7 @@ class PushUpdater(ABC, StateProducer):
 
     def __init__(self, loop: asyncio.AbstractEventLoop):
         &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
+        super().__init__()
         self.loop = loop
         self._previous_state: Optional[Playing] = None
 
@@ -989,7 +990,7 @@ class DeviceInfo:
         build_number: Optional[str],
         model: const.DeviceModel,
         mac: Optional[str],
-    ) -&gt; None:  # pylint: disable=too-many-arguments  # noqa
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DeviceInfo instance.&#34;&#34;&#34;
         self._os = os
         self._version = version
@@ -1050,7 +1051,7 @@ class Features(ABC):
     &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
 
     @abstractmethod
-    def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
+    def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
         &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
         raise NotImplementedError()
 
@@ -1058,9 +1059,9 @@ class Features(ABC):
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
         features = {}  # type: Dict[FeatureName, FeatureInfo]
         for name in FeatureName:
-            feature = self.get_feature(name)
-            if feature.state != FeatureState.Unsupported or include_unsupported:
-                features[name] = feature
+            info = self.get_feature(name)
+            if info.state != FeatureState.Unsupported or include_unsupported:
+                features[name] = info
         return features
 
     def in_state(
@@ -1075,9 +1076,9 @@ class Features(ABC):
         in one of the listed states.
         &#34;&#34;&#34;
         for name in feature_names:
-            feature = self.get_feature(name)
+            info = self.get_feature(name)
             expected_states = states if isinstance(states, list) else [states]
-            if feature.state not in expected_states:
+            if info.state not in expected_states:
                 return False
         return True
 
@@ -1645,7 +1646,7 @@ def identifier(self) -&gt; Optional[str]:
         build_number: Optional[str],
         model: const.DeviceModel,
         mac: Optional[str],
-    ) -&gt; None:  # pylint: disable=too-many-arguments  # noqa
+    ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DeviceInfo instance.&#34;&#34;&#34;
         self._os = os
         self._version = version
@@ -1880,7 +1881,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
     &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
 
     @abstractmethod
-    def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
+    def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
         &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
         raise NotImplementedError()
 
@@ -1888,9 +1889,9 @@ def connection_lost(self, exception: Exception) -&gt; None:
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
         features = {}  # type: Dict[FeatureName, FeatureInfo]
         for name in FeatureName:
-            feature = self.get_feature(name)
-            if feature.state != FeatureState.Unsupported or include_unsupported:
-                features[name] = feature
+            info = self.get_feature(name)
+            if info.state != FeatureState.Unsupported or include_unsupported:
+                features[name] = info
         return features
 
     def in_state(
@@ -1905,9 +1906,9 @@ def connection_lost(self, exception: Exception) -&gt; None:
         in one of the listed states.
         &#34;&#34;&#34;
         for name in feature_names:
-            feature = self.get_feature(name)
+            info = self.get_feature(name)
             expected_states = states if isinstance(states, list) else [states]
-            if feature.state not in expected_states:
+            if info.state not in expected_states:
                 return False
         return True</code></pre>
 </details>
@@ -1935,14 +1936,14 @@ def connection_lost(self, exception: Exception) -&gt; None:
     &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
     features = {}  # type: Dict[FeatureName, FeatureInfo]
     for name in FeatureName:
-        feature = self.get_feature(name)
-        if feature.state != FeatureState.Unsupported or include_unsupported:
-            features[name] = feature
+        info = self.get_feature(name)
+        if info.state != FeatureState.Unsupported or include_unsupported:
+            features[name] = info
     return features</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.Features.get_feature"><code class="name flex">
-<span>def <span class="ident">get_feature</span></span>(<span>self, feature: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>) -> <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></span>
+<span>def <span class="ident">get_feature</span></span>(<span>self, feature_name: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>) -> <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return current state of a feature.</p></section>
@@ -1951,7 +1952,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def get_feature(self, feature: FeatureName) -&gt; FeatureInfo:
+def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
     &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
     raise NotImplementedError()</code></pre>
 </details>
@@ -1980,9 +1981,9 @@ in one of the listed states.</p></section>
     in one of the listed states.
     &#34;&#34;&#34;
     for name in feature_names:
-        feature = self.get_feature(name)
+        info = self.get_feature(name)
         expected_states = states if isinstance(states, list) else [states]
-        if feature.state not in expected_states:
+        if info.state not in expected_states:
             return False
     return True</code></pre>
 </details>
@@ -2378,7 +2379,7 @@ def pin(self, pin) -&gt; None:
         position: Optional[int] = None,
         shuffle: Optional[const.ShuffleState] = None,
         repeat: Optional[const.RepeatState] = None,
-        hash: Optional[str] = None,
+        hash: Optional[str] = None,  # pylint: disable=redefined-builtin
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
         self._media_type = media_type
@@ -2926,6 +2927,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 
     def __init__(self, loop: asyncio.AbstractEventLoop):
         &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
+        super().__init__()
         self.loop = loop
         self._previous_state: Optional[Playing] = None
 
@@ -3054,7 +3056,7 @@ def stop(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RemoteControl(ABC):  # pylint: disable=too-many-public-methods
+<pre><code class="python">class RemoteControl(ABC):
     &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
 
     # pylint: disable=invalid-name

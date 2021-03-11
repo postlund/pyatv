@@ -102,11 +102,9 @@ def parse_services(message: DnsMessage) -> typing.List[Service]:
         except ValueError:
             continue
 
-        port = (QueryType.SRV in device and device[QueryType.SRV].rd["port"]) or 0
-        target = (
-            QueryType.SRV in device and device[QueryType.SRV].rd["target"]
-        ) or None
-        properties = (QueryType.TXT in device and device[QueryType.TXT].rd) or {}
+        port = device[QueryType.SRV].rd["port"] if QueryType.SRV in device else 0
+        target = device[QueryType.SRV].rd["target"] if QueryType.SRV in device else None
+        properties = device[QueryType.TXT].rd if QueryType.TXT in device else {}
 
         target_record = table.get(typing.cast(str, target), {}).get(QueryType.A)
         address = IPv4Address(target_record.rd) if target_record else None
@@ -253,10 +251,10 @@ class ReceiveDelegate(asyncio.Protocol):
         return str(self.transport.get_extra_info("socket"))
 
 
-class MulticastDnsSdClientProtocol:
+class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attributes
     """Protocol to make multicast requests."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         loop: asyncio.AbstractEventLoop,
         services: typing.List[str],
@@ -374,7 +372,8 @@ class MulticastDnsSdClientProtocol:
             else:
                 self.responses[IPv4Address(addr[0])] = response
 
-    def error_received(self, exc) -> None:
+    @staticmethod
+    def error_received(exc) -> None:
         """Error received during communication."""
         _LOGGER.debug("Error during MDNS lookup: %s", exc)
 
@@ -407,7 +406,7 @@ async def unicast(
         transport.close()
 
 
-async def multicast(
+async def multicast(  # pylint: disable=too-many-arguments
     loop: asyncio.AbstractEventLoop,
     services: typing.List[str],
     address: str = "224.0.0.251",
@@ -428,7 +427,7 @@ async def multicast(
         try:
             await protocol.add_socket(net.mcast_socket(str(addr)))
         except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception(f"failed to add listener for {addr}")
+            _LOGGER.exception("failed to add listener for %s", addr)
 
     return await typing.cast(MulticastDnsSdClientProtocol, protocol).get_response(
         timeout

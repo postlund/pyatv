@@ -6,7 +6,9 @@ import typing
 T = typing.TypeVar("T")
 
 
-class CaseInsensitiveDict(typing.MutableMapping[str, T]):
+class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
+    typing.MutableMapping[str, T]
+):
     """A mapping where the keys are compared case-insensitively.
 
     As a consequence of this, the keys *must* be strings.
@@ -75,12 +77,12 @@ class CaseInsensitiveDict(typing.MutableMapping[str, T]):
         """Return an iterator over the mapping keys."""
         return iter(self._data)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Comparetwo dictionaries, with keys compared case-insensitively."""
         if isinstance(other, CaseInsensitiveDict):
             # If it's another CaseInsensitiveDict, super easy
             return self._data == other._data
-        elif isinstance(other, collections.abc.Mapping):
+        if isinstance(other, collections.abc.Mapping):
             # if it's not, but it is a dict, attempt to lower the keys of the other dict
             for other_key, other_value in other.items():
                 try:
@@ -91,5 +93,4 @@ class CaseInsensitiveDict(typing.MutableMapping[str, T]):
                 if other_value != self[lowered_key]:
                     return False
             return True
-        else:
-            return NotImplemented
+        raise NotImplementedError

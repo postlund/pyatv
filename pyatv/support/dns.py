@@ -129,8 +129,7 @@ def qname_encode(name: typing.Union[str, typing.Sequence[str]]) -> bytes:
             # If we've reached an empty label, assume this is the last component.
             # Empty labels (two periods right after each other) aren't legal anyways.
             break
-        else:
-            encoded.extend(encoded_label)
+        encoded.extend(encoded_label)
     return encoded
 
 
@@ -256,14 +255,13 @@ class QueryType(enum.IntEnum):
                     f"An A record must have exactly 4 bytes of data (not {length})"
                 )
             return str(IPv4Address(buffer.read(length)))
-        elif self is self.PTR:
+        if self is self.PTR:
             return parse_domain_name(buffer)
-        elif self is self.TXT:
+        if self is self.TXT:
             return parse_txt_dict(buffer, length)
-        elif self is self.SRV:
+        if self is self.SRV:
             return parse_srv_dict(buffer)
-        else:
-            return buffer.read(length)
+        return buffer.read(length)
 
 
 class DnsHeader(typing.NamedTuple):
@@ -315,8 +313,8 @@ class DnsQuestion(typing.NamedTuple):
         """Encode the question data as needed for a DNS query or response."""
         data = bytearray(qname_encode(self.qname))
         data.extend(
-            struct.pack(">2H", *self[1:])
-        )  # pylint: disable=unsubscriptable-object
+            struct.pack(">2H", *self[1:])  # pylint: disable=unsubscriptable-object
+        )
         return data
 
 
