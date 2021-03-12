@@ -1,5 +1,43 @@
 # CHANGES
 
+## 0.7.7 (2021-03-12)
+
+*Changes:*
+
+* Fix bug where apps would appear to crash on tvOS 14.5 (beta)
+* Add a retry to heartbeat loop
+* Add new script that parses logs: atvlog
+
+*All changes:*
+
+```
+60df163 mrp: Use GenericMessage for heartbeats (#975)
+8df084f support: Convert knock to use asyncio (#988)
+14196da gh: Add example to attach log to a bug report (#984)
+dbe734c build(deps-dev): bump tox from 3.22.0 to 3.23.0
+1e1922e cq: Run pylint from tox (#979)
+7464cb7 atvlog: Rename log2html and bundle it (#982)
+34d2f53 log2html: Add separate include and exclude filters (#981)
+0a6fa5e log2html: Add generation date and command (#980)
+7184717 mrp: Add retry to heartbeats (#978)
+b0eaaef log2html: Allow toggling of showing date (#974)
+adda918 build(deps): bump mypy from 0.800 to 0.812
+fa8b05d gha: Save log for log2html using pygithub (#972)
+7584a2c log2html: Fix broken log entry loading (#971)
+090ba35 build(deps): bump deepdiff from 5.2.2 to 5.2.3 (#969)
+ce3fecd gha: Store issue/comment body as file for log2html (#970)
+1ee2691 log2html: Support Home Assistant log format (#967)
+b9dcadc log2html: Add text and log level filtering (#966)
+49b17f9 log2html: Render log entries with javascript (#965)
+5935d50 build(deps-dev): bump tox from 3.21.4 to 3.22.0
+aa9b2cf gha: Generate html logs for logs in issues (#962)
+aa2aa18 log2html: Support environment variable as input (#961)
+dd91239 log2html: New script converting logs to HTML pages (#960)
+659031e build(deps): bump pytest-xdist from 2.2.0 to 2.2.1
+46aae2f build(deps-dev): bump tox from 3.21.3 to 3.21.4
+49aab09 build(deps): bump mypy-protobuf from 1.23 to 1.24
+```
+
 ## 0.7.6 (2021-01-29)
 
 *Changes:*
