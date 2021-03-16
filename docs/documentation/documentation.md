@@ -65,7 +65,7 @@ To get the work done, `pyatv` requires some other pieces of software, more speci
 - aiohttp >= 3.1.0, <5
 - cryptography >= 2.6
 - netifaces >= 0.10.0
-- protobuf >= 3.6.0
+- protobuf >= 3.12.0
 - srptools >= 0.2.0
 - zeroconf==0.28.0
 
