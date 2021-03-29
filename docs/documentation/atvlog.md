@@ -36,6 +36,18 @@ Filtering can be performed on the following attributes:
 * Log levels
 * Date can be stripped for more compact log
 
+## Serving output via web server
+
+It is possible to serve the generated log output via a built in web server using flag `-w`:
+
+```shell
+$ atvlog -w pyatv.log
+Press ENTER to quit
+```
+
+Then visit `http://<ip>:8008` to see the log. The port number can be changed
+with `-p xxxx`.
+
 ## Examples
 
 ```shell
