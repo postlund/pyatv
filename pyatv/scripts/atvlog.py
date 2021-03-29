@@ -5,9 +5,12 @@ import os
 import re
 import sys
 import json
+import asyncio
 import logging
 import argparse
 from datetime import datetime
+
+from aiohttp import web, web_request
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -207,25 +210,34 @@ def parse_logs(stream):
         yield current_date, currenf_level, current_first_line, current_content
 
 
-def generate_log_page(stream, output):
+def generate_log_page(stream):
     """Generate HTML output for log output."""
     logs = list(parse_logs(stream))
 
     if not logs:
         _LOGGER.warning("No log points found, not generating output")
-        return
+        return None
 
-    page = HTML_TEMPLATE.format(
+    return HTML_TEMPLATE.format(
         content=json.dumps(logs), time=datetime.now(), command=" ".join(sys.argv)
     )
-    if not output:
-        print(page)
-    else:
-        with open(output, "w") as out:
-            out.write(page)
 
 
-def main():
+async def serve_page(page: str, port: int) -> None:
+    """Serve log output from an internal web server."""
+
+    async def handler(request: web_request.BaseRequest) -> web.StreamResponse:
+        return web.Response(text=page, content_type="text/html")
+
+    server = web.Server(handler)
+    loop = asyncio.get_event_loop()
+    await loop.create_server(server, "0.0.0.0", port)
+
+    print("Press ENTER to quit")
+    await loop.run_in_executor(None, sys.stdin.readline)
+
+
+async def appstart():
     """Script starts here."""
 
     def _markdown_parser(stream):
@@ -263,21 +275,45 @@ def main():
         action="store_true",
         help="read from environment variable",
     )
+    parser.add_argument(
+        "-w",
+        "--web-server",
+        default=False,
+        action="store_true",
+        help="serve output as web page",
+    )
+    parser.add_argument("-p", "--port", default=8008, type=int, help="web server port")
     args = parser.parse_args()
 
-    def _generate_log(log):
-        generate_log_page(
-            _markdown_parser(log) if args.format == "markdown" else log, args.output
+    async def _generate_log(log):
+        page = generate_log_page(
+            _markdown_parser(log) if args.format == "markdown" else log
         )
 
+        if args.web_server:
+            await serve_page(page, args.port)
+        elif args.output:
+            with open(args.output, "w") as out:
+                out.write(page)
+        else:
+            print(page)
+
     if args.env:
-        _generate_log(os.environ[args.file].splitlines())
+        await _generate_log(os.environ[args.file].splitlines())
     elif args.file == "-":
-        _generate_log(sys.stdin)
+        await _generate_log(sys.stdin)
     else:
         with open(args.file) as stream:
-            _generate_log(stream)
+            await _generate_log(stream)
+
+    return 0
+
+
+def main():
+    """Application start here."""
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(appstart())
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
