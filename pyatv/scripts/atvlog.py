@@ -290,6 +290,10 @@ async def appstart():
             _markdown_parser(log) if args.format == "markdown" else log
         )
 
+        if not page:
+            print("No page generated (missing log points)", file=sys.stderr)
+            return 1
+
         if args.web_server:
             await serve_page(page, args.port)
         elif args.output:

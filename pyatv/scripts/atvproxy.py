@@ -47,6 +47,12 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         self.connection.listener = self
         self._process_buffer()
 
+    def stop(self):
+        """Stop the proxy instance."""
+        if self.transport:
+            self.transport.close()
+            self.transport = None
+
     def connection_made(self, transport):
         """Client did connect to proxy."""
         self.transport = transport
