@@ -77,7 +77,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
                 f"{feature} has wrong state",
             )
 
-    async def waitForButtonPress(self, button: str, action: Optional[InputAction]):
+    async def wait_for_button_press(self, button: str, action: Optional[InputAction]):
         await until(lambda: self.state.last_button_pressed == button)
         await until(lambda: self.state.last_button_action == action)
 
@@ -166,57 +166,57 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_button_up(self):
         await self.atv.remote_control.up()
-        await self.waitForButtonPress("up", InputAction.SingleTap)
+        await self.wait_for_button_press("up", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_down(self):
         await self.atv.remote_control.down()
-        await self.waitForButtonPress("down", InputAction.SingleTap)
+        await self.wait_for_button_press("down", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_left(self):
         await self.atv.remote_control.left()
-        await self.waitForButtonPress("left", InputAction.SingleTap)
+        await self.wait_for_button_press("left", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_right(self):
         await self.atv.remote_control.right()
-        await self.waitForButtonPress("right", InputAction.SingleTap)
+        await self.wait_for_button_press("right", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_select(self):
         await self.atv.remote_control.select()
-        await self.waitForButtonPress("select", InputAction.SingleTap)
+        await self.wait_for_button_press("select", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_menu(self):
         await self.atv.remote_control.menu()
-        await self.waitForButtonPress("menu", InputAction.SingleTap)
+        await self.wait_for_button_press("menu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_play(self):
         await self.atv.remote_control.play()
-        await self.waitForButtonPress("play", None)
+        await self.wait_for_button_press("play", None)
 
     @unittest_run_loop
     async def test_button_pause(self):
         await self.atv.remote_control.pause()
-        await self.waitForButtonPress("pause", None)
+        await self.wait_for_button_press("pause", None)
 
     @unittest_run_loop
     async def test_button_stop(self):
         await self.atv.remote_control.stop()
-        await self.waitForButtonPress("stop", None)
+        await self.wait_for_button_press("stop", None)
 
     @unittest_run_loop
     async def test_button_next(self):
         await self.atv.remote_control.next()
-        await self.waitForButtonPress("nextitem", None)
+        await self.wait_for_button_press("nextitem", None)
 
     @unittest_run_loop
     async def test_button_previous(self):
         await self.atv.remote_control.previous()
-        await self.waitForButtonPress("previtem", None)
+        await self.wait_for_button_press("previtem", None)
 
     @unittest_run_loop
     async def test_button_volume_up(self):

@@ -158,7 +158,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
-        await self.waitForButtonPress("topmenu", InputAction.SingleTap)
+        await self.wait_for_button_press("topmenu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_play_pause(self):
