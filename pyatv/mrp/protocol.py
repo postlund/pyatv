@@ -76,6 +76,8 @@ class MrpProtocol:
         self._outstanding = {}
         self._listeners = {}
         self._initial_message_sent = False
+        self._connection_pending = False
+        self._stopped = False
 
     def add_listener(self, listener, message_type, data=None):
         """Add a listener that will receice incoming messages."""
@@ -84,12 +86,32 @@ class MrpProtocol:
 
         self._listeners[message_type].append(Listener(listener, data))
 
-    async def start(self, skip_initial_messages=False):
+    async def start(self, skip_initial_messages=False, restart=True):
         """Connect to device and listen to incoming messages."""
+        if restart:
+            self._stopped = False
+        elif self._stopped:
+            _LOGGER.debug("Ignoring start while stopped")
+            return
+
         if self.connection.connected:
             return
 
+        # Clean up previous connection
+        self.stop(forever=False)
+
+        if self._connection_pending:
+            # Connection being started elsewhere
+            _LOGGER.debug("Waiting for pending connection to become available")
+            while not self.connection.connected:
+                await asyncio.sleep(0.1)
+            return
+
+        # No connection, starting one
+        self._connection_pending = True
+        _LOGGER.debug("Starting connection")
         await self.connection.connect()
+        self._connection_pending = False
 
         # In case credentials have been given externally (i.e. not by pairing
         # with a device), then use that client id
@@ -120,7 +142,7 @@ class MrpProtocol:
 
         self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
 
-    def stop(self):
+    def stop(self, forever=True):
         """Disconnect from device."""
         if self._outstanding:
             _LOGGER.warning(
@@ -133,10 +155,12 @@ class MrpProtocol:
         self._initial_message_sent = False
         self._outstanding = {}
         self.connection.close()
+        if forever:
+            self._stopped = True
 
     async def _connect_and_encrypt(self):
         if not self.connection.connected:
-            await self.start()
+            await self.start(restart=False)
 
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
