@@ -12,4 +12,4 @@ pytest-xdist==2.2.1
 pydocstyle==6.0.0
 mypy==0.812
 mypy-protobuf==1.24
-typed-ast==1.4.2
+typed-ast==1.4.3
