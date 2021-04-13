@@ -70,3 +70,7 @@ class NonLocalSubnetError(Exception):
 
     DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!
     """
+
+
+class InvalidStateError(Exception):
+    """Thrown when trying to perform an action not possible in the current state."""

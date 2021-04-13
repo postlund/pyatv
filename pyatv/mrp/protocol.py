@@ -5,6 +5,7 @@ import uuid
 import logging
 
 from collections import namedtuple
+from enum import Enum
 
 from pyatv import exceptions
 from pyatv.mrp import messages, protobuf
@@ -18,6 +19,25 @@ HEARTBEAT_RETRIES = 1  # One regular attempt + retries
 
 Listener = namedtuple("Listener", "func data")
 OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
+
+
+class ProtocolState(Enum):
+    """Protocol internal state."""
+
+    NOT_CONNECTED = 0
+    """Protocol state is not connected."""
+
+    CONNECTING = 1
+    """Protocol state is connecting."""
+
+    CONNECTED = 2
+    """Protocol state is connected."""
+
+    READY = 3
+    """Protocol state is ready."""
+
+    STOPPED = 4
+    """Protocol state is stopped."""
 
 
 async def heartbeat_loop(protocol):
@@ -75,7 +95,7 @@ class MrpProtocol:
         self._heartbeat_task = None
         self._outstanding = {}
         self._listeners = {}
-        self._initial_message_sent = False
+        self._state = ProtocolState.NOT_CONNECTED
 
     def add_listener(self, listener, message_type, data=None):
         """Add a listener that will receice incoming messages."""
@@ -86,39 +106,52 @@ class MrpProtocol:
 
     async def start(self, skip_initial_messages=False):
         """Connect to device and listen to incoming messages."""
-        if self.connection.connected:
-            return
+        if self._state != ProtocolState.NOT_CONNECTED:
+            raise exceptions.InvalidStateError(self._state.name)
 
-        await self.connection.connect()
+        self._state = ProtocolState.CONNECTING
 
-        # In case credentials have been given externally (i.e. not by pairing
-        # with a device), then use that client id
-        if self.service.credentials:
-            self.srp.pairing_id = Credentials.parse(self.service.credentials).client_id
+        try:
+            await self.connection.connect()
 
-        # The first message must always be DEVICE_INFORMATION, otherwise the
-        # device will not respond with anything
-        msg = messages.device_information("pyatv", self.srp.pairing_id.decode())
+            self._state = ProtocolState.CONNECTED
 
-        self.device_info = await self.send_and_receive(msg)
-        self._initial_message_sent = True
+            # In case credentials have been given externally (i.e. not by pairing
+            # with a device), then use that client id
+            if self.service.credentials:
+                self.srp.pairing_id = Credentials.parse(
+                    self.service.credentials
+                ).client_id
 
-        # This is a hack to support re-use of a protocol object in
-        # proxy (will be removed/refactored later)
-        if skip_initial_messages:
-            return
+            # The first message must always be DEVICE_INFORMATION, otherwise the
+            # device will not respond with anything
+            msg = messages.device_information("pyatv", self.srp.pairing_id.decode())
 
-        await self._connect_and_encrypt()
+            self.device_info = await self.send_and_receive(msg)
 
-        # This should be the first message sent after encryption has
-        # been enabled
-        await self.send(messages.set_connection_state())
+            # This is a hack to support re-use of a protocol object in
+            # proxy (will be removed/refactored later)
+            if skip_initial_messages:
+                return
 
-        # Subscribe to updates at this stage
-        await self.send_and_receive(messages.client_updates_config())
-        await self.send_and_receive(messages.get_keyboard_session())
+            await self._enable_encryption()
 
-        self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
+            # This should be the first message sent after encryption has
+            # been enabled
+            await self.send(messages.set_connection_state())
+
+            # Subscribe to updates at this stage
+            await self.send_and_receive(messages.client_updates_config())
+            await self.send_and_receive(messages.get_keyboard_session())
+
+            self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
+        except Exception:
+            # Something went wrong, let's do cleanup
+            self.stop()
+            raise
+        else:
+            # We're now ready
+            self._state = ProtocolState.READY
 
     def stop(self):
         """Disconnect from device."""
@@ -130,19 +163,14 @@ class MrpProtocol:
         if self._heartbeat_task is not None:
             self._heartbeat_task.cancel()
             self._heartbeat_task = None
-        self._initial_message_sent = False
         self._outstanding = {}
         self.connection.close()
+        self._state = ProtocolState.STOPPED
 
-    async def _connect_and_encrypt(self):
-        if not self.connection.connected:
-            await self.start()
-
+    async def _enable_encryption(self):
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
-        if self.service.credentials and self._initial_message_sent:
-            self._initial_message_sent = False
-
+        if self.service.credentials:
             # Verify credentials and generate keys
             credentials = Credentials.parse(self.service.credentials)
             pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
@@ -156,12 +184,21 @@ class MrpProtocol:
 
     async def send(self, message):
         """Send a message and expect no response."""
-        await self._connect_and_encrypt()
+        if self._state not in [
+            ProtocolState.CONNECTED,
+            ProtocolState.READY,
+        ]:
+            raise exceptions.InvalidStateError(self._state.name)
+
         self.connection.send(message)
 
     async def send_and_receive(self, message, generate_identifier=True, timeout=5):
         """Send a message and wait for a response."""
-        await self._connect_and_encrypt()
+        if self._state not in [
+            ProtocolState.CONNECTED,
+            ProtocolState.READY,
+        ]:
+            raise exceptions.InvalidStateError(self._state.name)
 
         # Some messages will respond with the same identifier as used in the
         # corresponding request. Others will not and one example is the crypto
