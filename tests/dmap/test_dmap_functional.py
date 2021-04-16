@@ -1,6 +1,7 @@
 """Functional tests using the API with a fake DMAP Apple TV."""
 
 import asyncio
+import logging
 import ipaddress
 
 from aiohttp.test_utils import unittest_run_loop
@@ -23,6 +24,8 @@ from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests import zeroconf_stub, common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
 from tests.utils import until
+
+_LOGGER = logging.getLogger(__name__)
 
 HSGID = "12345678-6789-1111-2222-012345678911"
 PAIRING_GUID = "0x0000000000000001"
@@ -158,7 +161,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
-        await self.waitForButtonPress("topmenu", InputAction.SingleTap)
+        await self.wait_for_button_press("topmenu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_play_pause(self):
@@ -294,3 +297,38 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.skip_backward()
         metadata = await self.playing()
         self.assertEqual(metadata.position, prev_position - SKIP_TIME)
+
+    @unittest_run_loop
+    async def test_reset_revision_if_push_updates_fail(self):
+        """Test that revision is reset when an error occurs during push update.
+
+        This test sets up video as playing with revision 0. When the push updater starts,
+        that video is returned to the listener. After that, the next update is fetched
+        with revision 1. Since no media is configured for that revision, an error occurs
+        where new video is configured for revision 0 again (now with "title2" as title),
+        which is fetched and returned to the listener.
+        """
+
+        class PushListener:
+            def __init__(self):
+                self.playing = None
+
+            def playstatus_update(self, updater, playstatus):
+                _LOGGER.debug("Got playstatus: %s", playstatus)
+                self.playing = playstatus
+
+            @staticmethod
+            def playstatus_error(updater, exception):
+                _LOGGER.warning("Got error: %s", exception)
+
+                # Set new content for revision 0 as an error should reset revision
+                self.usecase.example_video(title="video2", revision=0)
+
+        self.usecase.example_video(title="video1", revision=0)
+
+        listener = PushListener()
+        self.atv.push_updater.listener = listener
+        self.atv.push_updater.start()
+
+        await until(lambda: listener.playing and listener.playing.title == "video2")
+        self.assertEqual(listener.playing.title, "video2")

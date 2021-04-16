@@ -66,66 +66,66 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_button_up_actions(self):
         await self.atv.remote_control.up(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("up", InputAction.DoubleTap)
+        await self.wait_for_button_press("up", InputAction.DoubleTap)
 
         await self.atv.remote_control.up(action=InputAction.Hold)
-        await self.waitForButtonPress("up", InputAction.Hold)
+        await self.wait_for_button_press("up", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_down_actions(self):
         await self.atv.remote_control.down(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("down", InputAction.DoubleTap)
+        await self.wait_for_button_press("down", InputAction.DoubleTap)
 
         await self.atv.remote_control.down(action=InputAction.Hold)
-        await self.waitForButtonPress("down", InputAction.Hold)
+        await self.wait_for_button_press("down", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_left_actions(self):
         await self.atv.remote_control.left(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("left", InputAction.DoubleTap)
+        await self.wait_for_button_press("left", InputAction.DoubleTap)
 
         await self.atv.remote_control.left(action=InputAction.Hold)
-        await self.waitForButtonPress("left", InputAction.Hold)
+        await self.wait_for_button_press("left", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_right_actions(self):
         await self.atv.remote_control.right(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("right", InputAction.DoubleTap)
+        await self.wait_for_button_press("right", InputAction.DoubleTap)
 
         await self.atv.remote_control.right(action=InputAction.Hold)
-        await self.waitForButtonPress("right", InputAction.Hold)
+        await self.wait_for_button_press("right", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
-        await self.waitForButtonPress("top_menu", InputAction.SingleTap)
+        await self.wait_for_button_press("top_menu", InputAction.SingleTap)
 
     @unittest_run_loop
     async def test_button_home(self):
         await self.atv.remote_control.home()
-        await self.waitForButtonPress("home", InputAction.SingleTap)
+        await self.wait_for_button_press("home", InputAction.SingleTap)
 
         await self.atv.remote_control.home(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("home", InputAction.DoubleTap)
+        await self.wait_for_button_press("home", InputAction.DoubleTap)
 
         await self.atv.remote_control.home(action=InputAction.Hold)
-        await self.waitForButtonPress("home", InputAction.Hold)
+        await self.wait_for_button_press("home", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_select_actions(self):
         await self.atv.remote_control.select(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("select", InputAction.DoubleTap)
+        await self.wait_for_button_press("select", InputAction.DoubleTap)
 
         await self.atv.remote_control.select(action=InputAction.Hold)
-        await self.waitForButtonPress("select", InputAction.Hold)
+        await self.wait_for_button_press("select", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_menu_actions(self):
         await self.atv.remote_control.menu(action=InputAction.DoubleTap)
-        await self.waitForButtonPress("menu", InputAction.DoubleTap)
+        await self.wait_for_button_press("menu", InputAction.DoubleTap)
 
         await self.atv.remote_control.menu(action=InputAction.Hold)
-        await self.waitForButtonPress("menu", InputAction.Hold)
+        await self.wait_for_button_press("menu", InputAction.Hold)
 
     @unittest_run_loop
     async def test_button_suspend(self):

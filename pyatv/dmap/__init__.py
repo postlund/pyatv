@@ -536,6 +536,7 @@ class DmapPushUpdater(PushUpdater):
             # exceptions to keep the API.
             except Exception as ex:  # pylint: disable=broad-except
                 _LOGGER.debug("Playstatus error occurred: %s", ex)
+                self._atv.playstatus_revision = 0
                 self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
         self._future = None

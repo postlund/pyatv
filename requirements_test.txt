@@ -1,7 +1,7 @@
 black==20.8b1
 codecov==2.1.11
 deepdiff==5.2.3
-flake8==3.9.0
+flake8==3.9.1
 pylint==2.7.4
 pytest==6.2.3
 pytest-asyncio==0.14.0
@@ -12,4 +12,4 @@ pytest-xdist==2.2.1
 pydocstyle==6.0.0
 mypy==0.812
 mypy-protobuf==1.24
-typed-ast==1.4.2
+typed-ast==1.4.3
