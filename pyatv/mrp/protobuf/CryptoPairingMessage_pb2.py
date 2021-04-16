@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n-pyatv/mrp/protobuf/CryptoPairingMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"|\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x02(\x0c\x12\x0e\n\x06status\x18\x02 \x02(\x05\x12\x12\n\nisRetrying\x18\x03 \x02(\x08\x12\x1c\n\x14isUsingSystemPairing\x18\x04 \x02(\x08\x12\r\n\x05state\x18\x05 \x02(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage'
+  serialized_pb=b'\n-pyatv/mrp/protobuf/CryptoPairingMessage.proto\x1a(pyatv/mrp/protobuf/ProtocolMessage.proto\"|\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x01(\x0c\x12\x0e\n\x06status\x18\x02 \x01(\x05\x12\x12\n\nisRetrying\x18\x03 \x01(\x08\x12\x1c\n\x14isUsingSystemPairing\x18\x04 \x01(\x08\x12\r\n\x05state\x18\x05 \x01(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage'
   ,
   dependencies=[pyatv_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -45,35 +45,35 @@ _CRYPTOPAIRINGMESSAGE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='pairingData', full_name='CryptoPairingMessage.pairingData', index=0,
-      number=1, type=12, cpp_type=9, label=2,
+      number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='status', full_name='CryptoPairingMessage.status', index=1,
-      number=2, type=5, cpp_type=1, label=2,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='isRetrying', full_name='CryptoPairingMessage.isRetrying', index=2,
-      number=3, type=8, cpp_type=7, label=2,
+      number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='isUsingSystemPairing', full_name='CryptoPairingMessage.isUsingSystemPairing', index=3,
-      number=4, type=8, cpp_type=7, label=2,
+      number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='state', full_name='CryptoPairingMessage.state', index=4,
-      number=5, type=5, cpp_type=1, label=2,
+      number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
