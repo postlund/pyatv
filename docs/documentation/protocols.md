@@ -420,7 +420,7 @@ frame. The following frame types are currently known:
 
 The length field determines the size of the following payload in bytes (stored as
 big endian). So far only responses with frame type `E_OPACK` has been seen. The payload
-in these frames are encoded with OPACK (described below), which should also be these
+in these frames are encoded with OPACK (described below), which should also be the
 case for `U_OPACK` and `P_OPACK`.
 
 ## OPACK
@@ -428,10 +428,10 @@ case for `U_OPACK` and `P_OPACK`.
 OPACK is an Apple internal serialization format found in the CoreUtils private framework.
 It can serialize basic data types, like integers, strings, lists and dictionaries
 in an efficient way. In some instances (like booleans and small numbers), a single
-byte is sufficient. In other cases dynamic length fields are used to encode data size.
+byte is sufficient. In other cases dynamic length fields are used to encode data size. Data is encoded using little endian where applicable and unless stated otherwise.
 
 Most parts of this format has been reverse engineered, but it's not complete or
-verified to be correct. If any discrepancies are found, please report them.
+verified to be correct. If any discrepancies are found, please report them or open a PR.
 
 An object is encoded or decoded according to this table:
 
@@ -439,13 +439,15 @@ An object is encoded or decoded according to this table:
 | ----- | ------------ | ---------------------- |
 | 0x01 | true | 0x01 = True
 | 0x02 | false | 0x02 = False
+| 0x03 | termination | 0xEF4163416403 = {"a": "b"} (See [Endless Collections](#endless-collections))
 | 0x04 | null | 0x04 = None
-| 0x06 | absolute time | 0x062471BB36 = 2020-05-17 18:34:30
+| 0x05 | UUID4 (16 bytes) | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
+| 0x06 | absolute mach time | 0x0000000000000000 = ?
 | 0x08-0x2F | 0-39 (decimal) | 0x17 = 15 (decimal)
-| 0x30 | int32 1 byte length | 0x300120 = 32 (decimal)
-| 0x31 | int32 2 byte length | 0x31010020 = 32 (decimal)
-| 0x32 | int32 3 byte length | 0x3201000020 = 32 (decimal)
-| 0x33 | int32 4 byte length | 0x330100000020 = 32 (decimal)
+| 0x30 | int32 1 byte length | 0x3020 = 32 (decimal)
+| 0x31 | int32 2 byte length | 0x310020 = 32 (decimal)
+| 0x32 | int32 4 byte length | 0x3200000020 = 32 (decimal)
+| 0x33 | int32 8 byte length | 0x330000000000000020 = 32 (decimal)
 | 0x35 | float32 | 0x35xxxxxxxx = xxxxxxxx (signed, single precision)
 | 0x36 | float64 | 0x36xxxxxxxxxxxxxxxx = xxxxxxxxxxxxxxxx (signed, double precision)
 | 0x40-0x60 | string (0-32 chars) | 0x43666F6F = "foo"
@@ -454,12 +456,75 @@ An object is encoded or decoded according to this table:
 | 0x63 | string 3 byte length | 0x62030000666F6F = "foo"
 | 0x64 | string 4 byte length | 0x6303000000666F6F = "foo"
 | 0x70-0x90 | raw bytes (0-32 bytes) | 0x72AABB = b"\xAA\xBB"
+| 0xA0-0xBF | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
 | 0x91 | data 1 byte length | 0x9102AABB = b"\xAA\xBB"
 | 0x92 | data 2 byte length | 0x920200AABB = b"\xAA\xBB"
 | 0x93 | data 3 byte length | 0x93020000AABB = b"\xAA\xBB"
 | 0x94 | data 4 byte length | 0x9402000000AABB = b"\xAA\xBB"
 | 0xDv | array with *v* elements | 0xD2016103666F6F = [True, "foo"]
 | 0xEv | dictionary with *v* entries | 0xE16103666F6F0x17 = {"foo": 15}
+
+### Endless Collections
+
+Dictionaries and lists supports up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
+dictionary with three elements. It is however possible to represent both lists and dictionaries with an endless amount of items
+using `F` as count, i.e. `0xDF` and `0xEF`. A byte with value `0x03` indicates end of a list or dictionary.
+
+A simple example with just one element, e.g. ["a"] looks like this:
+
+```raw
+0xDF416103
+```
+
+Decoded form:
+
+```raw
+DF    : Endless list
+41 61 : "a"
+03    : Terminates previous list (or dict)
+```
+
+### Pointers
+
+To save space, a *pointer* can be used to refer to an already defined object. A pointer is an index referring to the object order in the
+byte stream, i.e. if three strings are concatenated, index 0 would refer to the first string, index 1 to the second and so on. Lists and
+dictionary bytes are ignored as well as other types represented by a single byte (e.g. a bool) as no space would be saved by a pointer.
+
+The index table can be constructed by appending every new decoded object (excluding ignored types) to list. When a pointer byte is found,
+subtract `0xA0` and use the obtained value as index in the list.
+
+Here is a simple example to illustrate:
+
+```yaml
+{
+  "a": False,
+  "b": "test",
+  "c": "test
+}
+```
+
+The above data structure would serialize to:
+
+```raw
+E3416102416244746573744163A2
+```
+
+Break down of the data:
+
+```raw
+E3          : Dictionary with three items
+41 61       : "a"
+02          : False
+41 62       : "b"
+44 74657374 : "test"
+41 63       : "c"
+A2          : Pointer, index=2
+
+```
+
+As single byte objects are ignored, the constructed index list looks
+like `[a, b, test, c]`. Index 2 translates to `"test"` and  `0xA2` is simply
+replaced by that value.
 
 ## Authentication
 

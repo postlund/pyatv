@@ -3,7 +3,10 @@
 TODO: Add integration tests using pack and unpack together.
 """
 import pytest
+from uuid import UUID
 from datetime import datetime
+
+from deepdiff import DeepDiff
 
 from pyatv.companion.opack import pack, unpack
 
@@ -22,6 +25,13 @@ def test_pack_none():
     assert pack(None) == b"\x04"
 
 
+def test_pack_uuid():
+    assert (
+        pack(UUID("{12345678-1234-5678-1234-567812345678}"))
+        == b"\x05\x124Vx\x124Vx\x124Vx\x124Vx"
+    )
+
+
 def test_pack_absolute_time():
     with pytest.raises(NotImplementedError):
         pack(datetime.now())
@@ -36,12 +46,12 @@ def test_pack_small_integers():
 def test_pack_larger_integers():
     assert pack(0x28) == b"\x30\x28"
     assert pack(0x1FF) == b"\x31\xFF\x01"
-    assert pack(0x1FFFF) == b"\x32\xFF\xFF\x01"
-    assert pack(0x1FFFFFF) == b"\x33\xFF\xFF\xFF\x01"
+    assert pack(0x1FFFFFF) == b"\x32\xFF\xFF\xFF\x01"
+    assert pack(0x1FFFFFFFFFFFFFF) == b"\x33\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"
 
 
 def test_pack_float64():
-    assert pack(1.23) == b"\x3f\xf3\xae\x14\x7a\xe1\x47\xae"
+    assert pack(1.0) == b"\x36\x00\x00\x00\x00\x00\x00\xF0\x3F"
 
 
 def test_pack_short_strings():
@@ -72,10 +82,32 @@ def test_pack_array():
     assert pack([[True]]) == b"\xd1\xd1\x01"
 
 
+def test_pack_endless_array():
+    assert pack(15 * ["a"]) == b"\xDF\x41\x61" + 14 * b"\xa0" + b"\x03"
+
+
 def test_pack_dict():
     assert pack({}) == b"\xe0"
     assert pack({"a": 12, False: None}) == b"\xe2\x41\x61\x14\x02\x04"
     assert pack({True: {"a": 2}}) == b"\xe1\x01\xe1\x41\x61\x0a"
+
+
+def test_pack_endless_dict():
+    assert pack(dict((chr(x), chr(x + 1)) for x in range(97, 127, 2))) == (
+        b"\xEF" + b"\x41" + b"\x41".join(bytes([x]) for x in range(97, 127)) + b"\x03"
+    )
+
+
+def test_pack_ptr():
+    assert pack(["a", "a"]) == b"\xD2\x41\x61\xA0"
+    assert (
+        pack(["foo", "bar", "foo", "bar"])
+        == b"\xD4\x43\x66\x6F\x6F\x43\x62\x61\x72\xA0\xA1"
+    )
+    assert (
+        pack({"a": "b", "c": {"d": "a"}, "d": True})
+        == b"\xE3\x41\x61\x41\x62\x41\x63\xE1\x41\x64\xA0\xA3\x01"
+    )
 
 
 def test_unpack_unsupported_type():
@@ -92,9 +124,16 @@ def test_unpack_none():
     assert unpack(b"\x04") == (None, b"")
 
 
+def test_unpack_uuid():
+    assert unpack(b"\x05\x124Vx\x124Vx\x124Vx\x124Vx") == (
+        UUID("{12345678-1234-5678-1234-567812345678}"),
+        b"",
+    )
+
+
 def test_unpack_absolute_time():
-    with pytest.raises(NotImplementedError):
-        unpack(b"\x06")  # TODO: Should be 8 byte payload for timestamp?
+    # TODO: This is not implemented, it only parses the time stamp as an integer
+    assert unpack(b"\x06\x01\x00\x00\x00\x00\x00\x00\x00") == (1, b"")
 
 
 def test_unpack_small_integers():
@@ -111,11 +150,11 @@ def test_unpack_larger_integers():
 
 
 def test_pack_unfloat32():
-    assert unpack(b"\x35\x3f\xa0\x00\x00") == (1.25, b"")
+    assert unpack(b"\x35\x00\x00\x80\x3f") == (1.0, b"")
 
 
 def test_unpack_float64():
-    assert unpack(b"\x36\x3f\xf3\xae\x14\x7a\xe1\x47\xae") == (1.23, b"")
+    assert unpack(b"\x36\x00\x00\x00\x00\x00\x00\xF0\x3F") == (1.0, b"")
 
 
 def test_unpack_short_strings():
@@ -146,7 +185,72 @@ def test_unpack_array():
     assert unpack(b"\xd1\xd1\x01") == ([[True]], b"")
 
 
+def test_unpack_endless_array():
+    list1 = b"\xDF\x41\x61" + 15 * b"\xa0" + b"\x03"
+    list2 = b"\xDF\x41\x62" + 15 * b"\xa1" + b"\x03"
+    assert unpack(list1) == (16 * ["a"], b"")
+    assert unpack(b"\xD2" + list1 + list2) == ([16 * ["a"], 16 * ["b"]], b"")
+
+
 def test_unpack_dict():
     assert unpack(b"\xe0") == ({}, b"")
     assert unpack(b"\xe2\x41\x61\x14\x02\x04") == ({"a": 12, False: None}, b"")
     assert unpack(b"\xe1\x01\xe1\x41\x61\x0a") == ({True: {"a": 2}}, b"")
+
+
+def test_unpack_endless_dict():
+    assert unpack(
+        b"\xEF" + b"\x41" + b"\x41".join(bytes([x]) for x in range(97, 127)) + b"\x03"
+    ) == (dict((chr(x), chr(x + 1)) for x in range(97, 127, 2)), b"")
+
+
+def test_unpack_ptr():
+    assert unpack(b"\xD2\x41\x61\xA0") == (["a", "a"], b"")
+    assert unpack(b"\xD4\x43\x66\x6F\x6F\x43\x62\x61\x72\xA0\xA1") == (
+        ["foo", "bar", "foo", "bar"],
+        b"",
+    )
+    assert unpack(b"\xE3\x41\x61\x41\x62\x41\x63\xE1\x41\x64\xA0\xA3\x01") == (
+        {"a": "b", "c": {"d": "a"}, "d": True},
+        b"",
+    )
+
+
+def test_golden():
+    data = {
+        "_i": "_systemInfo",
+        "_x": 1254122577,
+        "_btHP": False,
+        "_c": {
+            "_pubID": "AA:BB:CC:DD:EE:FF",
+            "_sv": "230.1",
+            "_bf": 0,
+            "_siriInfo": {
+                "collectorElectionVersion": 1.0,
+                "deviceCapabilities": {"seymourEnabled": 1, "voiceTriggerEnabled": 2},
+                "sharedDataProtoBuf": 512 * b"\x08",
+            },
+            "_stA": [
+                "com.apple.LiveAudio",
+                "com.apple.siri.wakeup",
+                "com.apple.Seymour",
+                "com.apple.announce",
+                "com.apple.coreduet.sync",
+                "com.apple.SeymourSession",
+            ],
+            "_i": "6c62fca18b11",
+            "_clFl": 128,
+            "_idsID": "44E14ABC-DDDD-4188-B661-11BAAAF6ECDE",
+            "_hkUID": [UUID("17ed160a-81f8-4488-962c-6b1a83eb0081")],
+            "_dC": "1",
+            "_sf": 256,
+            "model": "iPhone10,6",
+            "name": "iPhone",
+        },
+        "_t": 2,
+    }
+
+    packed = pack(data)
+    unpacked = unpack(packed)
+
+    assert DeepDiff(unpacked, data, ignore_order=True)
