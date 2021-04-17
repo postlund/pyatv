@@ -1,31 +1,35 @@
 """Implementation of the Companion protocol."""
 
-import asyncio
 import logging
 
 from pyatv import exceptions
+from pyatv.companion import opack
 from pyatv.companion.auth import CompanionPairingVerifier
-from pyatv.companion.srp import Credentials
+from pyatv.companion.connection import CompanionConnection, FrameType
+from pyatv.companion.srp import Credentials, SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
+
+DEFAULT_TIMEOUT = 5  # Seconds
 
 
 class CompanionProtocol:
     """Protocol logic related to Companion."""
 
-    def __init__(self, connection, srp, service):
+    def __init__(self, connection: CompanionConnection, srp: SRPAuthHandler, service):
         """Initialize a new CompanionProtocol."""
         self.connection = connection
-        self.connection.listener = self
         self.srp = srp
         self.service = service
-        self.has_verified = False  # TODO: Hack
+        self._chacha = None
+        self._is_started = False
 
-    async def start(self, skip_initial_messages=False):
+    async def start(self):
         """Connect to device and listen to incoming messages."""
-        if self.connection.connected:
-            return
+        if self._is_started:
+            raise Exception("already started")  # TODO: other exception
 
+        self._is_started = True
         await self.connection.connect()
 
         if self.service.credentials:
@@ -33,19 +37,14 @@ class CompanionProtocol:
 
         _LOGGER.debug("Companion credentials: %s", self.service.credentials)
 
-        await self._connect_and_encrypt()
+        await self._setup_encryption()
 
     def stop(self):
         """Disconnect from device."""
         self.connection.close()
 
-    async def _connect_and_encrypt(self):
-        if not self.connection.connected:
-            await self.start()
-
-        # Verify credentials and generate keys
-        if self.service.credentials and not self.has_verified:
-            self.has_verified = True
+    async def _setup_encryption(self):
+        if self.service.credentials:
             credentials = Credentials.parse(self.service.credentials)
             pair_verifier = CompanionPairingVerifier(self, self.srp, credentials)
 
@@ -56,8 +55,14 @@ class CompanionProtocol:
             except Exception as ex:
                 raise exceptions.AuthenticationError(str(ex)) from ex
 
-    async def send_and_receive(self, message, timeout=5):
-        """Send a message and wait for a response."""
-        await self._connect_and_encrypt()
-        self.connection.send(message)
-        return await self.connection.read()
+    async def exchange_opack(
+        self, frame_type: FrameType, data: object, timeout=DEFAULT_TIMEOUT
+    ) -> object:
+        """Send data as OPACK and decode result as OPACK."""
+        _LOGGER.debug("Send OPACK: %s", data)
+        _, payload = await self.connection.exchange(
+            frame_type, opack.pack(data), timeout
+        )
+        unpacked_object, _ = opack.unpack(payload)
+        _LOGGER.debug("Receive OPACK: %s", unpacked_object)
+        return unpacked_object

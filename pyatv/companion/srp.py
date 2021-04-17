@@ -26,7 +26,9 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 
 from pyatv import exceptions
+from pyatv.companion import opack
 from pyatv.support import log_binary, hap_tlv8
+from pyatv.support.hap_tlv8 import TlvValue
 from pyatv.mrp import chacha20
 
 _LOGGER = logging.getLogger(__name__)
@@ -115,10 +117,10 @@ class SRPAuthHandler:
         )
         return self._auth_public, self._public_bytes
 
-    def verify1(self, credentials, session_pub_key, encrypted):
+    def verify1(self, credentials, server_pub_key, encrypted):
         """First verification step."""
         self._shared = self._verify_private.exchange(
-            X25519PublicKey.from_public_bytes(session_pub_key)
+            X25519PublicKey.from_public_bytes(server_pub_key)
         )
 
         session_key = hkdf_expand(
@@ -130,13 +132,13 @@ class SRPAuthHandler:
             chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
         )
 
-        identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
-        signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
+        identifier = decrypted_tlv[TlvValue.Identifier]
+        signature = decrypted_tlv[TlvValue.Signature]
 
         if identifier != credentials.atv_id:
             raise exceptions.AuthenticationError("incorrect device response")
 
-        info = session_pub_key + bytes(identifier) + self._public_bytes
+        info = server_pub_key + bytes(identifier) + self._public_bytes
         ltpk = Ed25519PublicKey.from_public_bytes(bytes(credentials.ltpk))
 
         try:
@@ -144,7 +146,7 @@ class SRPAuthHandler:
         except InvalidSignature as ex:
             raise exceptions.AuthenticationError("signature error") from ex
 
-        device_info = self._public_bytes + credentials.client_id + session_pub_key
+        device_info = self._public_bytes + credentials.client_id + server_pub_key
 
         device_signature = Ed25519PrivateKey.from_private_bytes(credentials.ltsk).sign(
             device_info
@@ -152,8 +154,8 @@ class SRPAuthHandler:
 
         tlv = hap_tlv8.write_tlv(
             {
-                hap_tlv8.TLV_IDENTIFIER: credentials.client_id,
-                hap_tlv8.TLV_SIGNATURE: device_signature,
+                TlvValue.Identifier: credentials.client_id,
+                TlvValue.Signature: device_signature,
             }
         )
 
@@ -164,13 +166,9 @@ class SRPAuthHandler:
 
         The derived keys (output, input) are returned here.
         """
-        output_key = hkdf_expand(
-            "IdentityProofClient-Salt", "IdentityProofClient-Info", self._shared
-        )
+        output_key = hkdf_expand("", "ClientEncrypt-main", self._shared)
 
-        input_key = hkdf_expand(
-            "IdentityProofClient-Salt", "IdentityProofClient-Info", self._shared
-        )
+        input_key = hkdf_expand("", "ServerEncrypt-main", self._shared)
 
         log_binary(_LOGGER, "Keys", Output=output_key, Input=input_key)
         return output_key, input_key
@@ -219,11 +217,22 @@ class SRPAuthHandler:
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
+        # TODO: Dummy data: what to set? needed at all?
+        other = {
+            "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
+            "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
+            "model": "AppleTV6,2",
+            "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
+            "name": "Living Room",
+            "mac": b"@\xc4\xff\x8f\xb1\x99",
+        }
+
         tlv = hap_tlv8.write_tlv(
             {
-                hap_tlv8.TLV_IDENTIFIER: self.pairing_id,
-                hap_tlv8.TLV_PUBLIC_KEY: self._auth_public,
-                hap_tlv8.TLV_SIGNATURE: device_signature,
+                TlvValue.Identifier: self.pairing_id,
+                TlvValue.PublicKey: self._auth_public,
+                TlvValue.Signature: device_signature,
+                17: opack.pack(other),
             }
         )
 
@@ -243,9 +252,9 @@ class SRPAuthHandler:
         decrypted_tlv = hap_tlv8.read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
-        atv_identifier = decrypted_tlv[hap_tlv8.TLV_IDENTIFIER]
-        atv_signature = decrypted_tlv[hap_tlv8.TLV_SIGNATURE]
-        atv_pub_key = decrypted_tlv[hap_tlv8.TLV_PUBLIC_KEY]
+        atv_identifier = decrypted_tlv[TlvValue.Identifier]
+        atv_signature = decrypted_tlv[TlvValue.Signature]
+        atv_pub_key = decrypted_tlv[TlvValue.PublicKey]
         log_binary(
             _LOGGER,
             "Device",
