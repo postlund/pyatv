@@ -449,7 +449,7 @@ async def cli_handler(loop):
     logging.basicConfig(
         level=loglevel,
         datefmt="%Y-%m-%d %H:%M:%S",
-        format="%(asctime)s %(levelname)s: %(message)s",
+        format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
     )
     logging.getLogger("requests").setLevel(logging.WARNING)
 
