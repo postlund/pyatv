@@ -302,7 +302,7 @@ async def appstart(loop):
         level=logging.DEBUG,
         stream=sys.stdout,
         datefmt="%Y-%m-%d %H:%M:%S",
-        format="%(asctime)s %(levelname)s: %(message)s",
+        format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
     )
 
     zconf = Zeroconf()
