@@ -150,6 +150,6 @@ class CompanionPairingVerifier:
 
     def encryption_keys(self) -> Tuple[str, str]:
         """Return derived encryption keys."""
-        if self._output_key is None or self._input_key:
+        if self._output_key is None or self._input_key is None:
             raise exceptions.NoCredentialsError("verification has not succeeded")
         return self._output_key, self._input_key

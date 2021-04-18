@@ -6,11 +6,17 @@ import asyncio
 import logging
 import argparse
 from ipaddress import IPv4Address
+from typing import Optional
 
 from zeroconf import Zeroconf
 
-from pyatv.conf import MrpService
-from pyatv.mrp.srp import SRPAuthHandler
+from pyatv.conf import CompanionService, MrpService
+from pyatv.companion.connection import CompanionConnection
+from pyatv.companion import opack
+from pyatv.companion.protocol import CompanionProtocol, FrameType
+from pyatv.companion.server_auth import CompanionServerAuth
+from pyatv.companion.srp import SRPAuthHandler as CompanionAuthHandler
+from pyatv.mrp.srp import SRPAuthHandler as MRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import chacha20, protobuf, variant
@@ -21,6 +27,13 @@ _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Proxy"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
+
+COMPANION_AUTH_FRAMES = [
+    FrameType.PS_Start,
+    FrameType.PS_Next,
+    FrameType.PV_Start,
+    FrameType.PV_Next,
+]
 
 
 class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
@@ -40,7 +53,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
             self.connection,
-            SRPAuthHandler(),
+            MRPAuthHandler(),
             MrpService(None, port, credentials=credentials),
         )
         await protocol.start(skip_initial_messages=True)
@@ -126,6 +139,124 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
 
+class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
+    """Implementation of a fake Companion device."""
+
+    def __init__(
+        self, loop: asyncio.AbstractEventLoop, address: str, port: int, credentials: str
+    ) -> None:
+        """Initialize a new instance of CompanionAppleTVProxy."""
+        super().__init__(self, DEVICE_NAME)
+        self.loop = loop
+        self.buffer: bytes = b""
+        self.transport = None
+        self.chacha: Optional[chacha20.Chacha20Cipher] = None
+        self.connection: Optional[CompanionConnection] = CompanionConnection(
+            self.loop, address, port
+        )
+        self.protocol: CompanionProtocol = CompanionProtocol(
+            self.connection,
+            CompanionAuthHandler(),
+            CompanionService(port, credentials=credentials),
+        )
+        self._receive_event: asyncio.Event = asyncio.Event()
+        self._receive_task: Optional[asyncio.Task] = None
+
+    async def start(self) -> None:
+        """Start the proxy instance."""
+        await self.protocol.start()
+        self._receive_task = asyncio.ensure_future(self._process_task())
+        self._receive_event.set()
+
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        """Enable encryption with the specified keys."""
+        self.chacha = chacha20.Chacha20Cipher(output_key, input_key, nonce_length=12)
+
+    async def _process_task(self) -> None:
+        while True:
+            _LOGGER.debug("Waiting for data from client")
+            await self._receive_event.wait()
+            await self._process_buffer()
+
+    async def _process_buffer(self) -> None:
+        _LOGGER.debug("Process buffer (size: %d)", len(self.buffer))
+
+        payload_length = 4 + int.from_bytes(self.buffer[1:4], byteorder="big")
+        if len(self.buffer) < payload_length:
+            _LOGGER.debug(
+                "Expected %d bytes, have %d (waiting for more)",
+                payload_length,
+                len(self.buffer),
+            )
+            self._receive_event.clear()
+            return
+
+        frame_type = FrameType(self.buffer[0])
+        data = self.buffer[4:payload_length]
+        self.buffer = self.buffer[payload_length:]
+
+        if frame_type in COMPANION_AUTH_FRAMES:
+            try:
+                self.handle_auth_frame(frame_type, opack.unpack(data)[0])
+            except Exception:
+                _LOGGER.exception("failed to handle auth frame")
+        else:
+            try:
+                resp = await self.send_to_atv(frame_type, data)
+                self.send_to_client(frame_type, resp)
+            except Exception:
+                _LOGGER.exception("data exchange failed")
+
+        self._receive_event.clear()
+
+    def connection_made(self, transport):
+        """Client did connect to proxy."""
+        _LOGGER.debug("Client connected to Companion proxy")
+        self.transport = transport
+
+    def connection_lost(self, exc):
+        """Handle that connection was lost to client."""
+        _LOGGER.debug("Connection lost to client device: %s", exc)
+        if self._receive_task is not None:
+            self._receive_task.cancel()
+
+    def data_received(self, data):
+        """Message received from client (iOS)."""
+        log_binary(_LOGGER, "Data from client", Data=data)
+        self.buffer += data
+        if self.connection.connected:
+            self._receive_event.set()
+
+    async def send_to_atv(self, frame_type: FrameType, data: bytes):
+        """Send data to remote device (ATV)."""
+        log_binary(_LOGGER, f">>(ENCRYPTED) FrameType={frame_type}", Message=data)
+
+        if self.chacha:
+            header = bytes([frame_type.value]) + len(data).to_bytes(3, byteorder="big")
+            data = self.chacha.decrypt(data, aad=header)
+            log_binary(_LOGGER, "<<(DECRYPTED)", Message=data)
+
+        unpacked = opack.unpack(data)[0]
+        return await self.protocol.exchange_opack(frame_type, unpacked)
+
+    def send_to_client(self, frame_type: FrameType, data: object) -> None:
+        """Send data to client device (iOS)."""
+        if not self.transport:
+            _LOGGER.error("Tried to send to client, but not connected")
+            return
+
+        payload = opack.pack(data)
+
+        payload_length = len(payload) + (16 if self.chacha else 0)
+        header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
+
+        if self.chacha:
+            payload = self.chacha.encrypt(payload, aad=header)
+            log_binary(_LOGGER, ">> Send", Header=header, Encrypted=payload)
+
+        self.transport.write(header + payload)
+
+
 class RemoteConnection(asyncio.Protocol):
     """Connection to host of interest."""
 
@@ -181,10 +312,8 @@ class RelayConnection(asyncio.Protocol):
         self.connection.transport.write(data)
 
 
-async def publish_mrp_service(
-    loop: asyncio.AbstractEventLoop, zconf: Zeroconf, address: str, port: int, name: str
-):
-    """Publish zeroconf service for ATV proxy instance."""
+async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: str):
+    """Publish zeroconf service for ATV MRP proxy instance."""
     properties = {
         "ModelName": "Apple TV",
         "AllowPairing": "YES",
@@ -197,9 +326,36 @@ async def publish_mrp_service(
     }
 
     return await mdns.publish(
-        loop,
+        asyncio.get_event_loop(),
         mdns.Service(
             "_mediaremotetv._tcp.local", name, IPv4Address(address), port, properties
+        ),
+        zconf,
+    )
+
+
+async def publish_companion_service(zconf: Zeroconf, address: str, port: int):
+    """Publish zeroconf service for ATV Companion proxy instance."""
+    properties = {
+        "rpMac": "1",
+        "rpHA": "9948cfb6da55",
+        "rpHN": "88f979f04023",
+        "rpVr": "230.1",
+        "rpMd": "AppleTV6,2",
+        "rpFl": "0x36782",
+        "rpAD": "657c1b9d3484",
+        "rpHI": "91756a18d8e5",
+        "rpBA": "9D:19:F9:74:65:EA",
+    }
+
+    return await mdns.publish(
+        asyncio.get_event_loop(),
+        mdns.Service(
+            "_companion-link._tcp.local",
+            DEVICE_NAME,
+            IPv4Address(address),
+            port,
+            properties,
         ),
         zconf,
     )
@@ -238,7 +394,44 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started MRP server at port %d", port)
 
-    unpublisher = await publish_mrp_service(loop, zconf, args.local_ip, port, args.name)
+    unpublisher = await publish_mrp_service(zconf, args.local_ip, port, args.name)
+
+    print("Press ENTER to quit")
+    await loop.run_in_executor(None, sys.stdin.readline)
+
+    return unpublisher
+
+
+async def _start_companion_proxy(loop, args, zconf):
+    def proxy_factory():
+        try:
+            proxy = CompanionAppleTVProxy(
+                loop, args.remote_ip, args.remote_port, args.credentials
+            )
+            asyncio.ensure_future(
+                proxy.start(),
+                loop=loop,
+            )
+        except Exception:
+            _LOGGER.exception("failed to start proxy")
+        return proxy
+
+    if args.local_ip is None:
+        args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
+
+    _LOGGER.debug("Binding to local address %s", args.local_ip)
+
+    if not args.remote_port:
+        resp = await mdns.unicast(loop, args.remote_ip, ["_companion-link._tcp.local"])
+
+        if not args.remote_port:
+            args.remote_port = resp.services[0].port
+
+    server = await loop.create_server(proxy_factory, "0.0.0.0")
+    port = server.sockets[0].getsockname()[1]
+    _LOGGER.info("Started Companion server at port %d", port)
+
+    unpublisher = await publish_companion_service(zconf, args.local_ip, port)
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
@@ -284,6 +477,12 @@ async def appstart(loop):
     mrp.add_argument("--local-ip", default=None, help="local IP address")
     mrp.add_argument("--remote_port", default=None, help="MRP port")
 
+    companion = subparsers.add_parser("companion", help="Companion proxy")
+    companion.add_argument("credentials", help="Companion credentials")
+    companion.add_argument("remote_ip", help="Apple TV IP address")
+    companion.add_argument("--local_ip", help="local IP address")
+    companion.add_argument("--remote_port", help="Companion port")
+
     relay = subparsers.add_parser("relay", help="Relay traffic to host")
     relay.add_argument("local_ip", help="local IP address")
     relay.add_argument("remote_ip", help="Remote host")
@@ -308,6 +507,8 @@ async def appstart(loop):
     zconf = Zeroconf()
     if args.command == "mrp":
         unpublisher = await _start_mrp_proxy(loop, args, zconf)
+    elif args.command == "companion":
+        unpublisher = await _start_companion_proxy(loop, args, zconf)
     elif args.command == "relay":
         unpublisher = await _start_relay(loop, args, zconf)
     await unpublisher()

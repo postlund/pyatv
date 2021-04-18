@@ -117,7 +117,9 @@ class CompanionConnection(asyncio.Protocol):
 
         _, frame_type, data, _ = self._queue[0]
 
-        log_binary(_LOGGER, ">> Send data", Data=data)
+        log_binary(
+            _LOGGER, ">> Send data", FrameType=bytes([frame_type.value]), Data=data
+        )
 
         payload_length = len(data) + (AUTH_TAG_LENGTH if self._chacha else 0)
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
