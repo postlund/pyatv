@@ -15,13 +15,12 @@ from pyatv.companion.connection import CompanionConnection
 from pyatv.companion import opack
 from pyatv.companion.protocol import CompanionProtocol, FrameType
 from pyatv.companion.server_auth import CompanionServerAuth
-from pyatv.companion.srp import SRPAuthHandler as CompanionAuthHandler
-from pyatv.mrp.srp import SRPAuthHandler as MRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp import protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
 from pyatv.support import chacha20, log_binary, net, mdns
+from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         self.connection = MrpConnection(address, port, self.loop)
         protocol = MrpProtocol(
             self.connection,
-            MRPAuthHandler(),
+            SRPAuthHandler(),
             MrpService(None, port, credentials=credentials),
         )
         await protocol.start(skip_initial_messages=True)
@@ -156,7 +155,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         )
         self.protocol: CompanionProtocol = CompanionProtocol(
             self.connection,
-            CompanionAuthHandler(),
+            SRPAuthHandler(),
             CompanionService(port, credentials=credentials),
         )
         self._receive_event: asyncio.Event = asyncio.Event()

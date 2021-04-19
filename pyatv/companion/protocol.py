@@ -6,7 +6,7 @@ from pyatv import exceptions
 from pyatv.companion import opack
 from pyatv.companion.auth import CompanionPairingVerifier
 from pyatv.companion.connection import CompanionConnection, FrameType
-from pyatv.companion.srp import Credentials, SRPAuthHandler
+from pyatv.support.hap_srp import Credentials, SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 

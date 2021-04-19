@@ -14,8 +14,8 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 
 from pyatv.mrp import messages, protobuf
-from pyatv.mrp.srp import hkdf_expand
 from pyatv.support import chacha20, log_binary
+from pyatv.support.hap_srp import hkdf_expand
 from pyatv.support.hap_tlv8 import TlvValue, ErrorCode, read_tlv, write_tlv
 
 _LOGGER = logging.getLogger(__name__)

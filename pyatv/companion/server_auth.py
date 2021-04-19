@@ -16,10 +16,10 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PublicKey,
 )
 
-from pyatv.companion.srp import hkdf_expand
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
 from pyatv.support import chacha20, log_binary, hap_tlv8
+from pyatv.support.hap_srp import hkdf_expand
 from pyatv.support.hap_tlv8 import TlvValue
 
 

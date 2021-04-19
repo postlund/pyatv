@@ -3,12 +3,17 @@ import logging
 from typing import Tuple
 
 from pyatv import exceptions
-from pyatv.companion.srp import Credentials, SRPAuthHandler
+from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
 from pyatv.support import log_binary, hap_tlv8
+from pyatv.support.hap_srp import Credentials, SRPAuthHandler
 from pyatv.support.hap_tlv8 import TlvValue
 
 _LOGGER = logging.getLogger(__name__)
+
+SRP_SALT = ""
+SRP_OUTPUT_INFO = "ClientEncrypt-main"
+SRP_INPUT_INFO = "ServerEncrypt-main"
 
 
 class CompanionPairingProcedure:
@@ -76,7 +81,19 @@ class CompanionPairingProcedure:
         atv_proof = pairing_data[TlvValue.Proof]
         log_binary(_LOGGER, "Device", Proof=atv_proof)
 
-        encrypted_data = self.srp.step3()
+        # TODO: Dummy data: what to set? needed at all?
+        additional_data = {
+            "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
+            "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
+            "model": "AppleTV6,2",
+            "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
+            "name": "Living Room",
+            "mac": b"@\xc4\xff\x8f\xb1\x99",
+        }
+
+        encrypted_data = self.srp.step3(
+            additional_data={17: opack.pack(additional_data)}
+        )
 
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Next,
@@ -146,7 +163,9 @@ class CompanionPairingVerifier:
 
         # TODO: check status code
 
-        self._output_key, self._input_key = self.srp.verify2()
+        self._output_key, self._input_key = self.srp.verify2(
+            SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
+        )
 
     def encryption_keys(self) -> Tuple[str, str]:
         """Return derived encryption keys."""

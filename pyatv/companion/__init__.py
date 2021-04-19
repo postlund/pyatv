@@ -9,7 +9,7 @@ from pyatv.conf import AppleTV
 
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
-from pyatv.companion.srp import SRPAuthHandler
+from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 

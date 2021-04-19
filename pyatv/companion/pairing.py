@@ -11,8 +11,8 @@ from pyatv.interface import PairingHandler
 from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.auth import CompanionPairingProcedure
 from pyatv.companion.protocol import CompanionProtocol
-from pyatv.companion.srp import SRPAuthHandler
 from pyatv.support import error_handler
+from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 
