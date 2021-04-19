@@ -7,8 +7,8 @@ from datetime import datetime
 from typing import Dict, Tuple, Optional
 
 from pyatv import const
-from pyatv.support import log_protobuf
-from pyatv.mrp import chacha20, messages, protobuf, variant
+from pyatv.support import chacha20, log_protobuf
+from pyatv.mrp import messages, protobuf, variant
 from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SendCommandResultMessage as scr

@@ -22,8 +22,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 
 from pyatv import exceptions
-from pyatv.support import log_binary, hap_tlv8
-from pyatv.mrp import chacha20
+from pyatv.support import chacha20, log_binary, hap_tlv8
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -6,8 +6,7 @@ from collections import deque
 from typing import Optional, Tuple
 
 from pyatv import exceptions
-from pyatv.mrp import chacha20
-from pyatv.support import log_binary
+from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)
 

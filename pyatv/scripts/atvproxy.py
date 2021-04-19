@@ -19,9 +19,9 @@ from pyatv.companion.srp import SRPAuthHandler as CompanionAuthHandler
 from pyatv.mrp.srp import SRPAuthHandler as MRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.mrp import chacha20, protobuf, variant
+from pyatv.mrp import protobuf, variant
 from pyatv.mrp.server_auth import MrpServerAuth, SERVER_IDENTIFIER
-from pyatv.support import log_binary, net, mdns
+from pyatv.support import chacha20, log_binary, net, mdns
 
 _LOGGER = logging.getLogger(__name__)
 
