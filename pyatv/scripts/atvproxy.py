@@ -39,40 +39,41 @@ COMPANION_AUTH_FRAMES = [
 class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
-    def __init__(self, loop):
+    def __init__(self, loop, address, port, credentials):
         """Initialize a new instance of ProxyMrpAppleTV."""
         super().__init__(DEVICE_NAME)
         self.loop = loop
         self.buffer = b""
         self.transport = None
         self.chacha = None
-        self.connection = None
-
-    async def start(self, address, port, credentials):
-        """Start the proxy instance."""
         self.connection = MrpConnection(address, port, self.loop)
-        protocol = MrpProtocol(
+        self.protocol = MrpProtocol(
             self.connection,
             SRPAuthHandler(),
             MrpService(None, port, credentials=credentials),
         )
-        await protocol.start(skip_initial_messages=True)
+
+    async def start(self):
+        """Start the proxy instance."""
+        await self.protocol.start(skip_initial_messages=True)
         self.connection.listener = self
         self._process_buffer()
-
-    def stop(self):
-        """Stop the proxy instance."""
-        if self.transport:
-            self.transport.close()
-            self.transport = None
 
     def connection_made(self, transport):
         """Client did connect to proxy."""
         self.transport = transport
 
+    def connection_lost(self, exc):
+        """Handle that connection was lost to client."""
+        _LOGGER.debug("Connection lost to client device: %s", exc)
+        if self.transport:
+            self.transport.close()
+            self.transport = None
+        self.protocol.stop()
+
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
-        self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
+        self.chacha = chacha20.Chacha20Cipher(output_key, input_key)
 
     def send_to_client(self, message: ProtobufMessage):
         """Send protobuf message to client."""
@@ -364,9 +365,11 @@ async def publish_companion_service(zconf: Zeroconf, address: str, port: int):
 async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
     def proxy_factory():
         try:
-            proxy = MrpAppleTVProxy(loop)
+            proxy = MrpAppleTVProxy(
+                loop, args.remote_ip, args.remote_port, args.credentials
+            )
             asyncio.ensure_future(
-                proxy.start(args.remote_ip, args.remote_port, args.credentials),
+                proxy.start(),
                 loop=loop,
             )
         except Exception:
