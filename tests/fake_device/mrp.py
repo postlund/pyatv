@@ -175,7 +175,7 @@ class FakeMrpState:
     def __init__(self):
         """State of a fake MRP device."""
         self.clients = []
-        self.outstanding_keypresses: Dict[Tuple[int, int], flot] = {}
+        self.outstanding_keypresses: Dict[Tuple[int, int], float] = {}
         self.last_button_pressed: Optional[str] = None
         self.last_button_action: Optional[const.InputAction] = None
         self.connection_state = None
@@ -207,7 +207,7 @@ class FakeMrpState:
 
     def set_active_player(self, identifier):
         if identifier is not None and identifier not in self.states:
-            raise Exception("invalid player: %s", identifier)
+            raise Exception(f"invalid player: {identifier}")
 
         self.active_player = identifier
         now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
@@ -274,6 +274,7 @@ class FakeMrpServiceFactory:
                 return FakeMrpService(self.state, self.app, self.loop)
             except Exception:
                 _LOGGER.exception("failed to create server")
+                raise
 
         coro = self.loop.create_server(_server_factory, "0.0.0.0")
         self.server = await self.loop.create_task(coro)
@@ -359,7 +360,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.debug("Received %s message", name)
                 getattr(self, "handle_" + name)(parsed, parsed.inner())
             except AttributeError:
-                _LOGGER.exception("No message handler for " + str(parsed))
+                _LOGGER.exception("No message handler for %s", parsed)
             except Exception:
                 _LOGGER.exception("Error while dispatching message")
 

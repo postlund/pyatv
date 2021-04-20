@@ -121,7 +121,7 @@ class CompanionPairingVerifier:
     """Verify credentials and derive new encryption keys."""
 
     def __init__(self, protocol, srp: SRPAuthHandler, credentials: Credentials) -> None:
-        """Initialize a new MrpPairingVerifier."""
+        """Initialize a new CompanionPairingVerifier."""
         self.protocol = protocol
         self.srp = srp
         self.credentials = credentials
@@ -152,7 +152,7 @@ class CompanionPairingVerifier:
 
         encrypted_data = self.srp.verify1(self.credentials, server_pub_key, encrypted)
 
-        resp = await self.protocol.exchange_opack(
+        await self.protocol.exchange_opack(
             FrameType.PV_Next,
             {
                 "_pd": hap_tlv8.write_tlv(

@@ -129,10 +129,6 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, mdns_service.name, service, response)
 
-        # name = service_name.replace("." + COMPANION_SERVICE, "")
-        # service = conf.CompanionService(port, properties=properties)
-        # self._handle_service(address, name, service)
-
     @staticmethod
     def _unsupported_service(mdns_service: mdns.Service, _: mdns.Response) -> None:
         """Handle unsupported service."""

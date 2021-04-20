@@ -59,6 +59,13 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         self.connection.listener = self
         self._process_buffer()
 
+    def stop(self):
+        """Stop the proxy instance."""
+        if self.transport:
+            self.transport.close()
+            self.transport = None
+        self.protocol.stop()
+
     def connection_made(self, transport):
         """Client did connect to proxy."""
         self.transport = transport
@@ -66,10 +73,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
     def connection_lost(self, exc):
         """Handle that connection was lost to client."""
         _LOGGER.debug("Connection lost to client device: %s", exc)
-        if self.transport:
-            self.transport.close()
-            self.transport = None
-        self.protocol.stop()
+        self.stop()
 
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
@@ -374,7 +378,9 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
             )
         except Exception:
             _LOGGER.exception("failed to start proxy")
-        return proxy
+            raise
+        else:
+            return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
@@ -417,7 +423,9 @@ async def _start_companion_proxy(loop, args, zconf):
             )
         except Exception:
             _LOGGER.exception("failed to start proxy")
-        return proxy
+            raise
+        else:
+            return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))

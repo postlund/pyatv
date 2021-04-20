@@ -1,4 +1,4 @@
-"""Implementation of TLV8 used by MRP/HomeKit pairing process.
+"""Implementation of TLV8 used by HomeKit pairing process.
 
 Note that this implementation only supports one level of value, i.e. no dicts
 in dicts.
