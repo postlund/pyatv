@@ -16,14 +16,13 @@ class TransformProtocol(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Match protocol string and save correct version."""
-        if values == "mrp":
-            setattr(namespace, self.dest, const.Protocol.MRP)
-        elif values == "dmap":
-            setattr(namespace, self.dest, const.Protocol.DMAP)
-        elif values == "airplay":
-            setattr(namespace, self.dest, const.Protocol.AirPlay)
+        protocols = {proto.name.lower(): proto for proto in const.Protocol}
+        if values in protocols:
+            setattr(namespace, self.dest, protocols[values])
         else:
-            raise argparse.ArgumentTypeError("Valid protocols are: mrp, dmap, airplay")
+            raise argparse.ArgumentTypeError(
+                "Valid protocols are: " + ", ".join(protocols.keys())
+            )
 
 
 # pylint: disable=too-few-public-methods

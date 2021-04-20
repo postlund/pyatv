@@ -35,9 +35,7 @@ is length of the data, so key and length are not included in this size.
 
 A TLV looks like this:
 
-    +---------------+------------------+--------------------+
-    | Key (4 bytes) | Length (4 bytes) | Data (Length bytes |
-    +---------------+------------------+--------------------+
+| Key (4 bytes) | Length (4 bytes) | Data (Length bytes |
 
 Multiple TLVs are usually embedded in one DMAP data stream and TLVs may also
 be nested, to form a tree:
@@ -355,6 +353,535 @@ This is currently TBD, but you can can the code under `pyatv/mrp`.
 
 In order to not duplicate information, please read more about the protocol
 [here](https://github.com/jeanregisser/mediaremotetv-protocol).
+
+# Companion Link
+
+The Companion Link protocol is yet another protocol used to communicate between Apple
+devices. Its full purpose is not yet fully understood, so what is written here are
+mostly speculations and guesses. If you feel that something is wrong or have more details,
+please let me know.
+
+Main driver for reverse engineering this protocol was to be able to launch apps in the
+same way as the Shortcuts app, which was introduced in iOS 13. In iOS 13 Apple also
+decided to switch from MRP to Companion Link in the remote widget found in action center.
+Adding server-side support for Companion Link to the proxy would be a nice feature.
+Guesses are that Continuity and Handoff are also built on top of this protocol, but that
+is so far just speculations.
+
+## Service Discovery
+
+Like with  most Apple services, Zeroconf is used for service discovery. More precisely,
+`_companion-link._tcp.local.` is the used service type. Here's a list of the properties
+included in this service and typical values:
+
+| Property | Example Value | Meaning |
+| -------- | ------------- | ------- |
+| rpHA | 45efecc5211 | Something related to HomeKit?
+| rpHN | 86d44e4f11ff | Discovery Nounce
+| rpVr | 195.2 | Likely protocol version
+| rpMd | AppleTV6,2 | Device model name
+| rpFl | 0x36782 | Some status flags (or supported features)
+| rpAD | cc5011ae31ee | Bonjour Auth Tag
+| rpHI | ffb855e34e31 | Something else related to HomeKit
+| rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address
+
+Most values (except for rpVr, rpMd and rpFl) change every now and then (rotating encryption
+scheme), likely for privacy reasons. It is still not known how these values are to be used.
+
+## Binary Format
+
+The binary format is quite simple as it only consists of a message type, payload length
+and the actual payload:
+
+| Frame Type (1 byte) | Length (3 bytes) | Payload |
+
+Since the message type is called "frame type", one message will be referred to as a
+frame. The following frame types are currently known:
+
+| Id   | Name | Note |
+| ---- | ---- | ---- |
+| 0x00 | Unknown |
+| 0x01 | NoOp |
+| 0x03 | PS\_Start | Pair-Setup initial measage
+| 0x04 | PS\_Next | Pair-Setup following messages
+| 0x05 | PV\_Start | Pair-Verify initial message
+| 0x06 | PV\_Next | Pair-Verify following measages
+| 0x07 | U_OPACK |
+| 0x08 | E_OPACK | This is used when launching apps
+| 0x09 | P_OPACK |
+| 0x0A | PA\_Req |
+| 0x0B | PA\_Rsp |
+| 0x10 | SessionStartRequest |
+| 0x11 | SessionStartResponse |
+| 0x12 | SessionData |
+| 0x20 | FamilyIdentityRequest |
+| 0x21 | FamilyIdentityResponse |
+| 0x22 | FamilyIdentityUpdate |
+
+The length field determines the size of the following payload in bytes (stored as
+big endian). So far only responses with frame type `E_OPACK` has been seen. The payload
+in these frames are encoded with OPACK (described below), which should also be the
+case for `U_OPACK` and `P_OPACK`.
+
+## OPACK
+
+OPACK is an Apple internal serialization format found in the CoreUtils private framework.
+It can serialize basic data types, like integers, strings, lists and dictionaries
+in an efficient way. In some instances (like booleans and small numbers), a single
+byte is sufficient. In other cases dynamic length fields are used to encode data size. Data is encoded using little endian where applicable and unless stated otherwise.
+
+Most parts of this format has been reverse engineered, but it's not complete or
+verified to be correct. If any discrepancies are found, please report them or open a PR.
+
+An object is encoded or decoded according to this table:
+
+| Bytes | Kind of Data | Example (python-esque) |
+| ----- | ------------ | ---------------------- |
+| 0x01 | true | 0x01 = True
+| 0x02 | false | 0x02 = False
+| 0x03 | termination | 0xEF4163416403 = {"a": "b"} (See [Endless Collections](#endless-collections))
+| 0x04 | null | 0x04 = None
+| 0x05 | UUID4 (16 bytes) | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
+| 0x06 | absolute mach time | 0x0000000000000000 = ?
+| 0x08-0x2F | 0-39 (decimal) | 0x17 = 15 (decimal)
+| 0x30 | int32 1 byte length | 0x3020 = 32 (decimal)
+| 0x31 | int32 2 byte length | 0x310020 = 32 (decimal)
+| 0x32 | int32 4 byte length | 0x3200000020 = 32 (decimal)
+| 0x33 | int32 8 byte length | 0x330000000000000020 = 32 (decimal)
+| 0x35 | float32 | 0x35xxxxxxxx = xxxxxxxx (signed, single precision)
+| 0x36 | float64 | 0x36xxxxxxxxxxxxxxxx = xxxxxxxxxxxxxxxx (signed, double precision)
+| 0x40-0x60 | string (0-32 chars) | 0x43666F6F = "foo"
+| 0x61 | string 1 byte length | 0x6103666F6F = "foo"
+| 0x62 | string 2 byte length | 0x620300666F6F = "foo"
+| 0x63 | string 3 byte length | 0x62030000666F6F = "foo"
+| 0x64 | string 4 byte length | 0x6303000000666F6F = "foo"
+| 0x70-0x90 | raw bytes (0-32 bytes) | 0x72AABB = b"\xAA\xBB"
+| 0xA0-0xBF | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
+| 0x91 | data 1 byte length | 0x9102AABB = b"\xAA\xBB"
+| 0x92 | data 2 byte length | 0x920200AABB = b"\xAA\xBB"
+| 0x93 | data 3 byte length | 0x93020000AABB = b"\xAA\xBB"
+| 0x94 | data 4 byte length | 0x9402000000AABB = b"\xAA\xBB"
+| 0xDv | array with *v* elements | 0xD2016103666F6F = [True, "foo"]
+| 0xEv | dictionary with *v* entries | 0xE16103666F6F0x17 = {"foo": 15}
+
+### Endless Collections
+
+Dictionaries and lists supports up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
+dictionary with three elements. It is however possible to represent both lists and dictionaries with an endless amount of items
+using `F` as count, i.e. `0xDF` and `0xEF`. A byte with value `0x03` indicates end of a list or dictionary.
+
+A simple example with just one element, e.g. ["a"] looks like this:
+
+```raw
+0xDF416103
+```
+
+Decoded form:
+
+```raw
+DF    : Endless list
+41 61 : "a"
+03    : Terminates previous list (or dict)
+```
+
+### Pointers
+
+To save space, a *pointer* can be used to refer to an already defined object. A pointer is an index referring to the object order in the
+byte stream, i.e. if three strings are placed in a list, index 0 would refer to the first string, index 1 to the second and so on. Lists and
+dictionary bytes are ignored as well as other types represented by a single byte (e.g. a bool) as no space would be saved by a pointer.
+
+The index table can be constructed by appending every new decoded object (excluding ignored types) to list. When a pointer byte is found,
+subtract `0xA0` and use the obtained value as index in the list.
+
+Here is a simple example to illustrate:
+
+```yaml
+{
+  "a": False,
+  "b": "test",
+  "c": "test
+}
+```
+
+The above data structure would serialize to:
+
+```raw
+E3416102416244746573744163A2
+```
+
+Break down of the data:
+
+```raw
+E3          : Dictionary with three items
+41 61       : "a"
+02          : False
+41 62       : "b"
+44 74657374 : "test"
+41 63       : "c"
+A2          : Pointer, index=2
+
+```
+
+As single byte objects are ignored, the constructed index list looks
+like `[a, b, test, c]`. Index 2 translates to `"test"` and  `0xA2` is simply
+replaced by that value.
+
+### Reference Decoding
+To play around with various OPACK input, this example application can be used (only on macOS):
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <Foundation/NSJSONSerialization.h>
+
+CFMutableDataRef OPACKEncoderCreateData(NSObject *obj, int32_t flags, int32_t *error);
+NSObject* OPACKDecodeBytes(const void *ptr, size_t length, int32_t flags, int32_t *error);
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSError *e = nil;
+        NSFileHandle *stdInFh = [NSFileHandle fileHandleWithStandardInput];
+        NSData *stdin = [stdInFh readDataToEndOfFile];
+
+        int decode_error = 0;
+        NSObject *decoded = OPACKDecodeBytes([stdin bytes], [stdin length], 0, &decode_error);
+        if (decode_error) {
+            NSLog(@"Failed to decode: %d", decode_error);
+            return -1;
+        }
+
+        NSLog(@"Decoded: %@", decoded);
+    }
+    return 0;
+}
+```
+
+Compile with:
+```shell
+xcrun clang -fobjc-arc -fmodules -mmacosx-version-min=10.6 -F /System/Library/PrivateFrameworks/ -framework CoreUtils decode.m -o decode
+```
+
+Then pass hex data to it like this:
+
+```shell
+$ echo E3416102416244746573744163A2 | xxd -r -p | ./decode
+2021-04-19 21:14:57.243 decode[59438:2193666] decoded: {
+    a = 0;
+    b = test;
+    c = test;
+}
+```
+
+This excellent example comes straight from [fabianfreyer/opack-tools](https://github.com/fabianfreyer/opack-tools).
+
+## Authentication
+
+Devices are paired and data encrypted according to HAP (HomeKit). You can refer to that specification
+for further details (available [here](https://developer.apple.com/homekit/specification/),
+but requires an Apple ID).
+
+Messages will be presented in hex and a decoded format, based on the implementation in
+`pyatv`. So beware that it will be somewhat python-inspired.
+
+### Pairing
+
+The pairing sequence is initiated by the client sending a frame with type `PA_Start`. The following messages always use `PA_Next` as frame type. A typical flow looks like this (details below):
+
+<code class="diagram">
+sequenceDiagram
+    autonumber
+    Client->>ATV: M1: Pair-Setup Start (0x03)
+    Note over Client,ATV: _pd: Method=0x00, State=M1<br/>_pwTy: 1 (PIN Code)
+    ATV->>Client: M2: Pair-Setup Next (0x04)
+    Note over ATV,Client: _pd: State=M2, Salt, Pubkey, 0x1B (Unknown)
+    Note over Client,ATV: PIN Code is displayed on screen
+    Client->>ATV: M3: Pair-Setup Next (0x04)
+    Note over Client,ATV: _pd: State=M3, Pubkey, Proof<br/>_pwTy: 1 (PIN Code)
+    ATV->>Client: M4: Pair-Setup Next (0x04)
+    Note over ATV,Client: _pd: State=M4, Proof
+    Client->>ATV: M5: Pair-Setup Next (0x04)
+    Note over Client,ATV: _pd: State=M5, Encrypted Data<br/>_pwTy: 1 (PIN Code)
+    ATV->>Client: M6: Pair-Setup Next (0x04)
+    Note over ATV,Client: _pd: State=M6, Encrypted Data
+</code>
+
+The content of each frame is OPACK data containing a dictionary. The `_pd` key (*pairing data*) is TLV8 data according to HAP and should be decoded according to that specification. Next follows more details for each message.
+
+#### Client -> ATV: M1: Pair-Setup Start (0x03)
+A client initiates a pairing request by sending a `PS_Start` message (M1).
+
+Example data:
+```raw
+Hex:
+03000013e2435f706476000100060101455f7077547909
+
+Decoded:
+frame_type=<FrameType.PS_Start: 3>, length=19, data={'_pd': {0: b'\x00', 6: b'\x01'}, '_pwTy': 1}
+```
+
+#### ATV -> Client: M2: Pair-Setup Next (0x04)
+When the ATV receives a `PS_Start` (M1), it will respond with `PS_Next` (M2) containing its public key (0x03) and salt (0x02). At this stage, a PIN code is displayed on screen which the client needs to generate a proof (0x04) sent in M3.
+
+Example data:
+```raw
+Hex:
+040001a4e1435f7064929c0106010202102558953b4496aecea0a367bafb29e98503ff6c33b53ca685062f6b8953f303bc30a01f0edeb64ed0cffaf570cc1b3aa9de5a7482d854671a8f72a9f72e3b5cbc60631499e292b4d749d9f0f69d47de657e63517753e342fbddea38d99cd69794847487accecd07993fabc60dcda50a25850c37357f1962c7eef91042381d951d9897030e57e7b12823c24ee183cc901e41d4f2dbf9de1e673574aedfaeaa86a5c37eaeccba1e112e3f650aa69389ac73c00dd405bbf0e7b204167974cf77295a1acde14a437f58fa9555de4b00b3d88e82ee375042ae54b7473303aa5a7091cd88f5e4a1fb63c2d80005f743e2484d4a1636509356f295dab6726410670ae2b514f68300c92643960e79963223b4809e69038194fab97b932b168a7962f3db8be188a418e25506c04c50aab80c2b42dfc108cedc7c5f0a9cbe23c9d34417a7840ec321071d32ca113a0fa2c7bbe3660efe21129eb407143e89a6ff5e655ae9c95dd735cb4130aadf46943653af001a4a981d32b12bf04f06dd85788c8e8401e5f4b544a72ddf8e58193f5873d9cfcdd3415393101b0101
+
+Decoded:
+frame_type=<FrameType.PS_Next: 4>, length=420, data={'_pd': {6: b'\x02', 2: b'%X\x95;D\x96\xae\xce\xa0\xa3g\xba\xfb)\xe9\x85', 3: b'l3\xb5<\xa6\x85\x06/k\x89S\xf3\x03\xbc0\xa0\x1f\x0e\xde\xb6N\xd0\xcf\xfa\xf5p\xcc\x1b:\xa9\xdeZt\x82\xd8Tg\x1a\x8fr\xa9\xf7.;\\\xbc`c\x14\x99\xe2\x92\xb4\xd7I\xd9\xf0\xf6\x9dG\xdee~cQwS\xe3B\xfb\xdd\xea8\xd9\x9c\xd6\x97\x94\x84t\x87\xac\xce\xcd\x07\x99?\xab\xc6\r\xcd\xa5\n%\x85\x0c75\x7f\x19b\xc7\xee\xf9\x10B8\x1d\x95\x1d\x98\x97\x03\x0eW\xe7\xb1(#\xc2N\xe1\x83\xcc\x90\x1eA\xd4\xf2\xdb\xf9\xde\x1eg5t\xae\xdf\xae\xaa\x86\xa5\xc3~\xae\xcc\xba\x1e\x11.?e\n\xa6\x93\x89\xacs\xc0\r\xd4\x05\xbb\xf0\xe7\xb2\x04\x16yt\xcfw)Z\x1a\xcd\xe1JC\x7fX\xfa\x95U\xdeK\x00\xb3\xd8\x8e\x82\xee7PB\xaeT\xb7G3\x03\xaaZp\x91\xcd\x88\xf5\xe4\xa1\xfbc\xc2\xd8\x00\x05\xf7C\xe2HMJ\x166P\x93V\xf2\x95\xda\xb6rd\x10g\n\xe2\xb5\x14\xf6\x83\x00\xc9&C\x96\x0ey\x962#\xb4\x80\x9ei\x94\xfa\xb9{\x93+\x16\x8ayb\xf3\xdb\x8b\xe1\x88\xa4\x18\xe2U\x06\xc0LP\xaa\xb8\x0c+B\xdf\xc1\x08\xce\xdc|_\n\x9c\xbe#\xc9\xd3D\x17\xa7\x84\x0e\xc3!\x07\x1d2\xca\x11:\x0f\xa2\xc7\xbb\xe3f\x0e\xfe!\x12\x9e\xb4\x07\x14>\x89\xa6\xff^eZ\xe9\xc9]\xd75\xcbA0\xaa\xdfF\x946S\xaf\x00\x1aJ\x98\x1d2\xb1+\xf0O\x06\xdd\x85x\x8c\x8e\x84\x01\xe5\xf4\xb5D\xa7-\xdf\x8eX\x19?Xs\xd9\xcf\xcd\xd3AS\x93\x10', 27: b'\x01'}}
+```
+
+#### Client -> ATV: M3: Pair-Setup Next (0x04)
+The client uses the PIN code to generate a proof (0x04) and sends it together with its public key in M3.
+
+Example data:
+```raw
+Hex:
+040001d8e2435f706492c90106010303ff992fcaa1f49bc6563e84fe283b34ba5efcf82b561dafdfcfa8dbffaa0e85fad1715b451586319cf3ec90b4961e8f793bfed6da9ab5a9b5c0fc11cb109ac91c0601801f1b150197198c44d1db67a1a0347c44db40bea50762089ea6a18896c2e161a6e80a2241e67ee8ac2cdf94c8899b09cccb310a681db44029248131dbc21ccfbdffae63d1c46e9a9ce77f309db673535dd8873100d917ee5fe13ac9a5490036cb4611ffacd0bb5389cf72aa2fbdd07227a98e83085bddd5851f459b0321a19a793ab03b5a972a0444f5a4c1e079666101b8699a9cd296d716bd87be2fcc81af4333267897ce74d4f072d8846c9d133270bae8b51bb15d0a856f06642ac903817497b588839a8ce1b4c89470cb8f5aaa647ac4387e08068c2074d42e89172bc3604a9140bba7e10404c2fecde3c02456a401c31f46ca35bf3a607e771987540607034793f42bce0685dffab35e6ff6871d9d85b3eee86d0b4069c90f024010659035a9b29adb3d6be996181eb088eb10e2706bccbc85900fca338533a891894c3c0440e4be1e32d5ba274436f38c40bc1ebbd3697b3de27e3a0908b73d7a81cdb196cdde02ed84140bae66b1149c57c62680a7d92ca503fd1a70e2d0a138800dc85324455f7077547909
+
+Decoded:
+frame_type=<FrameType.PS_Next: 4>, length=472, data={'_pd': {6: b'\x03', 3: b'\x99/\xca\xa1\xf4\x9b\xc6V>\x84\xfe(;4\xba^\xfc\xf8+V\x1d\xaf\xdf\xcf\xa8\xdb\xff\xaa\x0e\x85\xfa\xd1q[E\x15\x861\x9c\xf3\xec\x90\xb4\x96\x1e\x8fy;\xfe\xd6\xda\x9a\xb5\xa9\xb5\xc0\xfc\x11\xcb\x10\x9a\xc9\x1c\x06\x01\x80\x1f\x1b\x15\x01\x97\x19\x8cD\xd1\xdbg\xa1\xa04|D\xdb@\xbe\xa5\x07b\x08\x9e\xa6\xa1\x88\x96\xc2\xe1a\xa6\xe8\n"A\xe6~\xe8\xac,\xdf\x94\xc8\x89\x9b\t\xcc\xcb1\nh\x1d\xb4@)$\x811\xdb\xc2\x1c\xcf\xbd\xff\xaec\xd1\xc4n\x9a\x9c\xe7\x7f0\x9d\xb6sS]\xd8\x871\x00\xd9\x17\xee_\xe1:\xc9\xa5I\x006\xcbF\x11\xff\xac\xd0\xbbS\x89\xcfr\xaa/\xbd\xd0r\'\xa9\x8e\x83\x08[\xdd\xd5\x85\x1fE\x9b\x03!\xa1\x9ay:\xb0;Z\x97*\x04D\xf5\xa4\xc1\xe0yfa\x01\xb8i\x9a\x9c\xd2\x96\xd7\x16\xbd\x87\xbe/\xcc\x81\xafC3&x\x97\xcet\xd4\xf0r\xd8\x84l\x9d\x132p\xba\xe8\xb5\x1b\xb1]\n\x85o\x06d*\xc9t\x97\xb5\x88\x83\x9a\x8c\xe1\xb4\xc8\x94p\xcb\x8fZ\xaadz\xc48~\x08\x06\x8c t\xd4.\x89\x17+\xc3`J\x91@\xbb\xa7\xe1\x04\x04\xc2\xfe\xcd\xe3\xc0$V\xa4\x01\xc3\x1fF\xca5\xbf:`~w\x19\x87T\x06\x07\x03G\x93\xf4+\xce\x06\x85\xdf\xfa\xb3^o\xf6\x87\x1d\x9d\x85\xb3\xee\xe8m\x0b@i\xc9\x0f\x02@\x10e\x905\xa9\xb2\x9a\xdb=k\xe9\x96\x18\x1e\xb0\x88\xeb\x10\xe2pk\xcc\xbc\x85\x90\x0f\xca3\x853\xa8\x91\x89L<', 4: b"\xe4\xbe\x1e2\xd5\xba'D6\xf3\x8c@\xbc\x1e\xbb\xd3i{=\xe2~:\t\x08\xb7=z\x81\xcd\xb1\x96\xcd\xde\x02\xed\x84\x14\x0b\xaef\xb1\x14\x9cW\xc6&\x80\xa7\xd9,\xa5\x03\xfd\x1ap\xe2\xd0\xa18\x80\r\xc8S$"}, '_pwTy': 1}
+```
+
+#### ATV -> Client: M4: Pair-Setup Next (0x04)
+The ATV also generates a proof (0x04) and sends it back to the client in M4.
+
+Example data:
+```raw
+Hex:
+0400004ce1435f7064914506010404402598bf58f5e3f944b63df0c1e389f59b2dff2a97e2e25d86013a1a9e18c2c69ec1960d9ca2020c1a22b656d2fbb96d390df65604f94bef0ba8cc37bbcc2eca11
+
+Decoded:
+frame_type=<FrameType.PS_Next: 4>, length=76, data={'_pd': {6: b'\x04', 4: b'%\x98\xbfX\xf5\xe3\xf9D\xb6=\xf0\xc1\xe3\x89\xf5\x9b-\xff*\x97\xe2\xe2]\x86\x01:\x1a\x9e\x18\xc2\xc6\x9e\xc1\x96\r\x9c\xa2\x02\x0c\x1a"\xb6V\xd2\xfb\xb9m9\r\xf6V\x04\xf9K\xef\x0b\xa8\xcc7\xbb\xcc.\xca\x11'}}
+```
+
+#### Client -> ATV: M5: Pair-Setup Next (0x04)
+At this stage, both devices should have proved themselves to one another. The client will
+create a certain payload and encrypt it with a session key and send it in M5 to the ATV.
+
+The content of encrypted data is TLV8 encoded and contains an identifier (0x01), the clients
+public key (0x03) and a signature (0x0A) according to HAP. It also contains an additional
+item with data specific to the Companion protocol. It uses tag 17 and the content is encoded
+with OPACK. An example of the payload looks like this (illustrative values):
+
+```python
+{
+  "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
+  "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
+  "model": "iPhone10,6",
+  "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
+  "name": "Pierres iPhone",
+  "mac": b"@\xc4\xff\x8f\xb1\x99"
+}
+```
+
+Example data:
+```
+Hex:
+040000ade2435f7064919f060105059af10dc2be3a537a73d7a89dd5d6a3114a6c9adbaf46a2b3a389b33381cf470de62d837f44da190266cfd4eb5c8f42350e2d4dec03e9354384be770e8f17fbf726cb21049589b912fdb88ba416dde56e033fd077e64c272f5cca2fd4c42d9143a9811f8897a81f5847fdc14f78e1bfba06005d3dc243e0ecb5af734348d7099ec1b252c64a04e04f1d146a90ad49da95f6a38e6d2755b41bc2d1b6455f7077547909
+
+Decoded:
+frame_type=<FrameType.PS_Next: 4>, length=2782, data={'_pd': {6: b'\x05', 5: b"\xf1\r\xc2\xbe:Szs\xd7\xa8\x9d\xd5\xd6\xa3\x11Jl\x9a\xdb\xafF\xa2\xb3\xa3\x89\xb33\x81\xcfG\r\xe6-\x83\x7fD\xda\x19\x02f\xcf\xd4\xeb\\\x8fB5\x0e-M\xec\x03\xe95C\x84\xbew\x0e\x8f\x17\xfb\xf7&\xcb!\x04\x95\x89\xb9\x12\xfd\xb8\x8b\xa4\x16\xdd\xe5n\x03?\xd0w\xe6L'/\\\xca/\xd4\xc4-\x91C\xa9\x81\x1f\x88\x97\xa8\x1fXG\xfd\xc1Ox\xe1\xbf\xba\x06\x00]=\xc2C\xe0\xec\xb5\xafsCH\xd7\t\x9e\xc1\xb2R\xc6J\x04\xe0O\x1d\x14j\x90\xadI\xda\x95\xf6\xa3\x8em'U\xb4\x1b\xc2\xd1\xb6"}, '_pwTy': 1}
+```
+
+#### ATV -> Client: M6: Pair-Setup Next (0x04)
+The concept here is the same as M5 (same kind of encrypted data).
+
+Example data:
+```raw
+Hex:
+0400012fe1435f706492270105ff8efc56bf0641a0fa53f00ae8da07a4ec5e929f5ec697e8692c8e833f175ecae4e381a8ced11097c76152031374926558cc8e64a0330097a241e76580c69d5d5a5017da1c393cee663be525ac1cc47229e491b3c1834a0d32ffc121d78e2d65bbc0efb5858615f49d6d43457a7c827f5c15bfc8a9da1f75839d24dbc8ddbbf2b658d3ded2848d9e1b92e8a7f4dd09f7f81b2108cf85be3910bfbb2045043d3cf3aa9619b63ba923acdae14e3cbc5a9b16c83b9a4e33e3d88d1af6c4154973ffaa8ca08a48f964056413a62551ff4628329c3bc836dfc14873b597f223ff4c4b6e17cc062cd66b34c475b3e272ecf47a8866457eb462fb2116f9134d443369540521dcaaed3b1a4622fec7806be71d4739a8f46327e8f41cc148f23a437dafb56575c3060106
+
+Decoded:
+frame_type=<FrameType.PS_Next: 4>, length=303, data={'_pd': {5: b'\x8e\xfcV\xbf\x06A\xa0\xfaS\xf0\n\xe8\xda\x07\xa4\xec^\x92\x9f^\xc6\x97\xe8i,\x8e\x83?\x17^\xca\xe4\xe3\x81\xa8\xce\xd1\x10\x97\xc7aR\x03\x13t\x92eX\xcc\x8ed\xa03\x00\x97\xa2A\xe7e\x80\xc6\x9d]ZP\x17\xda\x1c9<\xeef;\xe5%\xac\x1c\xc4r)\xe4\x91\xb3\xc1\x83J\r2\xff\xc1!\xd7\x8e-e\xbb\xc0\xef\xb5\x85\x86\x15\xf4\x9dmCEz|\x82\x7f\\\x15\xbf\xc8\xa9\xda\x1fu\x83\x9d$\xdb\xc8\xdd\xbb\xf2\xb6X\xd3\xde\xd2\x84\x8d\x9e\x1b\x92\xe8\xa7\xf4\xdd\t\xf7\xf8\x1b!\x08\xcf\x85\xbe9\x10\xbf\xbb E\x04=<\xf3\xaa\x96\x19\xb6;\xa9#\xac\xda\xe1N<\xbcZ\x9b\x16\xc8;\x9aN3\xe3\xd8\x8d\x1a\xf6\xc4\x15Is\xff\xaa\x8c\xa0\x8aH\xf9d\x05d\x13\xa6%Q\xffF(2\x9c;\xc86\xdf\xc1Hs\xb5\x97\xf2#\xffLKn\x17\xcc\x06,\xd6k4\xc4u\xb3\xe2r\xec\xf4z\x88fE~\xb4b\xfb!\x16\xf9\x13MD3iT\xdc\xaa\xed;\x1aF"\xfe\xc7\x80k\xe7\x1dG9\xa8\xf4c\'\xe8\xf4\x1c\xc1H\xf2:C}\xaf\xb5eu\xc3', 6: b'\x06'}})
+```
+
+### Verification
+
+The verifcation sequence is initiated by the client by sending a frame with type `PV_Start`. The following messages always use `PV_Next` as frame type. A typical flow looks like this (details below):
+
+<code class="diagram">
+sequenceDiagram
+    autonumber
+    Client->>ATV: M1: Pair-Verify Start (0x04)
+    Note over Client,ATV: _pd: State=M1, Pubkey
+    ATV->>Client: M2: Pair-Verify Next (0x05)
+    Note over ATV,Client: _pd: State=M2, Pubkey, EncryptedData
+    Client->>ATV: M3: Pair-Verify Next (0x05)
+    Note over Client,ATV: _pd: State=M3, EncryptedData
+    ATV->>Client: M4: Pair-Verify Next (0x05)
+    Note over ATV,Client: _pd: State=M4
+</code>
+
+#### Client -> ATV: M1: Pair-Verify Start (0x05)
+A client initiates a verification request by sending a `PV_Start` message (M1) containing
+a public key for the new session.
+
+Example data:
+```raw
+Hex:
+05000033E2435F7064912506010103206665D845056F6D32584C8D213EB2E8B365F569084D5006268FDD9B818028FB23455F617554790C
+
+Decoded:
+frame_type=<FrameType.PV_Start: 5>, length=51, data={'_pd': b'\x06\x01\x01\x03 fe\xd8E\x05om2XL\x8d!>\xb2\xe8\xb3e\xf5i\x08MP\x06&\x8f\xdd\x9b\x81\x80(\xfb#', '_auTy': 4}
+```
+
+#### ATV -> Client: M2: Pair-Verify Next (0x06)
+When the Apple TV receives `M1`, it will respond with its session public key as well as
+encrypted data used by the client to perform client verification in `M2`.
+
+Example data:
+```raw
+Hex:
+060000a6e1435f7064919f0578b5ecac3ecc240c38ac4c46c6b532bec01ffbb24390c45c19eabf5742bb0ad231983b8f7b42ae849494159e1240784c7d90edcf93fbe341bb3a36c66689a7cd690fbe5f0d7bcef2475c3510fb97da70452c61cf92af9e81d1549e28d56092720db5dce884c7739edaa0558c90078a286ae64d388215293b2e0601020320452357b145e149d20d91cd11f29475be78659279c67d4f9a1f04e0d56542de6b
+
+Decoded:
+frame_type=<FrameType.PV_Next: 6>, length=166, data={'_pd': b'\x05x\xb5\xec\xac>\xcc$\x0c8\xacLF\xc6\xb52\xbe\xc0\x1f\xfb\xb2C\x90\xc4\\\x19\xea\xbfWB\xbb\n\xd21\x98;\x8f{B\xae\x84\x94\x94\x15\x9e\x12@xL}\x90\xed\xcf\x93\xfb\xe3A\xbb:6\xc6f\x89\xa7\xcdi\x0f\xbe_\r{\xce\xf2G\\5\x10\xfb\x97\xdapE,a\xcf\x92\xaf\x9e\x81\xd1T\x9e(\xd5`\x92r\r\xb5\xdc\xe8\x84\xc7s\x9e\xda\xa0U\x8c\x90\x07\x8a(j\xe6M8\x82\x15);.\x06\x01\x02\x03 E#W\xb1E\xe1I\xd2\r\x91\xcd\x11\xf2\x94u\xbexe\x92y\xc6}O\x9a\x1f\x04\xe0\xd5eB\xdek'}
+```
+
+#### Client -> ATV: M3: Pair-Verify Next (0x06)
+The client verifies the identity of the Apple TV based on the encrypted data and responds with
+corresponding data in `M3` back to the Apple TV.
+
+Example data:
+```raw
+Hex:
+06000084E1435F7064917D06010305786A89ECD933472C940493C34A6AD36E936B6AB49741390864E9EFCF029BCB0EFC599EA61E5FD5A55BA6D274D6DF0F1AB6ADCB9520DAC43645E8B757175E1BBF6F032D611918B8E18639703CFACD2FB2A330745EC09DD7F91235E2AA17A58D08C5E7FB52ADE66B170627C3490F517882C833E85127087C4D1A
+
+Decoded:
+frame_type=<FrameType.PV_Next: 6>, length=132, data={'_pd': b"\x06\x01\x03\x05xj\x89\xec\xd93G,\x94\x04\x93\xc3Jj\xd3n\x93kj\xb4\x97A9\x08d\xe9\xef\xcf\x02\x9b\xcb\x0e\xfcY\x9e\xa6\x1e_\xd5\xa5[\xa6\xd2t\xd6\xdf\x0f\x1a\xb6\xad\xcb\x95 \xda\xc46E\xe8\xb7W\x17^\x1b\xbfo\x03-a\x19\x18\xb8\xe1\x869p<\xfa\xcd/\xb2\xa30t^\xc0\x9d\xd7\xf9\x125\xe2\xaa\x17\xa5\x8d\x08\xc5\xe7\xfbR\xad\xe6k\x17\x06'\xc3I\x0fQx\x82\xc83\xe8Q'\x08|M\x1a"}
+```
+
+#### ATV -> Client: M4: Pair-Verify Next (0x06)
+If the client is verified properly, `M4` is sent back without an error code.
+
+Example data:
+```raw
+Hex:
+Data=06000009e1435f706473060104
+
+Decoded:
+frame_type=<FrameType.PV_Next: 6>, length=9, data={'_pd': b'\x06\x01\x04'}
+```
+
+### Encryption
+
+After verification has finished, all following messages are encrypted using the derived shared
+key. Chacha20Poly1305 is used for encryption (just like HAP) with the following attributes:
+
+* Salt: *empty string*
+* Info: `ServerEncrypt-main` for decrypting (incoming), `ClientEncrypt-main` for encrypting (outgoing)
+
+Sequence number (starting from zero) is used as nonce, incremented by one for each sent or
+received message and encoded as little endian (12 bytes). Individual counters are used for each
+direction.
+
+### E_OPACK
+
+Several types of data can be carried over the Companion protocol, but the one called `E_OPACK`
+seems to be the one of interest for `pyatv`. It carries information for both the Apple TV remote
+widget in Action Center as well as the Shortcuts app. So far, not much is known about the format
+used by `E_PACK`, but what is known is documented here.
+
+Lets start with a typical message (most data obfuscated or left out):
+
+```raw
+"Send OPACK":{
+   "_i":"_systemInfo",
+   "_x":1499315511,
+   "_btHP":false,
+   "_c":{
+      "_pubID":"11:89:AA:A7:C9:F2",
+      "_sv":"230.1",
+      "_bf":0,
+      "_siriInfo":{
+         "collectorElectionVersion":1.0,
+         "deviceCapabilities":{
+            "seymourEnabled":1,
+            "voiceTriggerEnabled":2
+         },
+         "sharedDataProtoBuf":"..."
+      },
+      "_stA":[
+         "com.apple.LiveAudio",
+         "com.apple.siri.wakeup",
+         "com.apple.Seymour",
+         "com.apple.announce",
+         "com.apple.coreduet.sync",
+         "com.apple.SeymourSession"
+      ],
+      "_sigHKU":"",
+      "_clFl":128,
+      "_idsID":"5EFE874C-9681-4BFE-BB7B-E9B90776730A",
+      "_hkUID":[
+         "0ADF154C-A2D6-4641-90F0-F4F851A52111"
+      ],
+      "_dC":"1",
+      "_sigRP":"...",
+      "_sf":256,
+      "model":"iPhone10,6",
+      "name":"Pierres iPhone",
+      "_idHKU":"F9E5990A-F2A6-4E6D-A340-6D40BFF6BF87"
+   },
+   "_t":2
+}
+```
+
+There's a lot of information stuffed in there, but the main elements are these ones:
+
+| **Tag** | **Name** | **Description** |
+| _i | ID | Identifier for the message request or event, e.g. `_systemInfo` or `_launchApp`. |
+| _c | Content | Additional data/arguments passed to whatever is specified in `_i`. |
+| _t | Type | Type of message: 1=event, 2=request, 3=response |
+| _x | XID | Some kind of identifier, maybe related to XPC? Still unknown. |
+
+Most messages seems to include the tags above. Here are a few other tags seen as well:
+
+| **Tag** | **Name** | **Description** |
+| _em | Error message | In case of error, e.g. `No request handler` if no handler exists for `_i` (i.e. invalid value for `_i`).
+| _ec | Error code | In case of error, e.g. 58822 |
+| _ed | Error domain | In case of error, e.g. RPErrorDomain |
+
+#### Launch Application (_launchApp)
+
+```javascript
+// Request
+{'_i': '_launchApp', '_x': 123, '_t': '2', '_c': {'_bundleID': 'com.netflix.Netflix'}}
+
+// Response
+{'_c': {}, '_t': 3, '_x': 123}
+```
+
+#### Fetch Application List (FetchLaunchableApplicationsEvent)
+
+```javascript
+// Request
+{'_i': 'FetchLaunchableApplicationsEvent', '_x': 123, '_t': '2', '_c': {}}
+
+// Response
+{'_c': {'com.apple.podcasts': 'Podcaster', 'com.apple.TVMovies': 'Filmer', 'com.apple.TVWatchList': 'TV', 'com.apple.TVPhotos': 'Bilder', 'com.apple.TVAppStore': 'App\xa0Store', 'se.cmore.CMore2': 'C More', 'com.apple.Arcade': 'Arcade', 'com.apple.TVSearch': 'Sök', 'emby.media.emby-tvos': 'Emby', 'se.tv4.tv4play': 'TV4 Play', 'com.apple.TVHomeSharing': 'Datorer', 'com.google.ios.youtube': 'YouTube', 'se.svtplay.mobil': 'SVT Play', 'com.plexapp.plex': 'Plex', 'com.MTGx.ViaFree.se': 'Viafree', 'com.apple.TVSettings': 'Inställningar', 'com.apple.appleevents': 'Apple Events', 'com.kanal5.play': 'discovery+', 'com.netflix.Netflix': 'Netflix', 'se.harbourfront.viasatondemand': 'Viaplay', 'com.apple.TVMusic': 'Musik'}, '_t': 3, '_x': 123}
+```
+
+#### Sleep and Wake
+
+Put device to sleep:
+
+```javascript
+// Request
+{'_i': '_hidC', '_x': 123, '_t': '2', '_c': {'_hBtS': 2, '_hidC': 12}}
+
+// Response
+{'_c': {}, '_t': 3, '_x': 123}
+```
+
+Wake it up:
+
+```javascript
+// Request
+{'_i': '_hidC', '_x': 123, '_t': '2', '_c': {'_hBtS': 2, '_hidC': 13}}
+
+// Response
+{'_c': {}, '_t': 3, '_x': 123}
+```
 
 # AirPlay
 

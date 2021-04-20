@@ -1,4 +1,4 @@
-"""MRP server authentication code."""
+"""Companion+ server authentication code."""
 
 import logging
 import hashlib
@@ -8,30 +8,25 @@ from collections import namedtuple
 
 from srptools import SRPContext, SRPServerSession, constants
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+)
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
 )
-from google.protobuf.message import Message as ProtobufMessage
 
-from pyatv.mrp import messages, protobuf
-from pyatv.support import chacha20, log_binary
+from pyatv.companion import opack
+from pyatv.companion.connection import FrameType
+from pyatv.support import chacha20, log_binary, hap_tlv8
 from pyatv.support.hap_srp import hkdf_expand
-from pyatv.support.hap_tlv8 import TlvValue, ErrorCode, read_tlv, write_tlv
+from pyatv.support.hap_tlv8 import TlvValue
+
 
 _LOGGER = logging.getLogger(__name__)
 
 PIN_CODE = 1111
-CLIENT_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A69"
-CLIENT_CREDENTIALS = (
-    "e734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306d"
-    + "f2f01b5636b58:3c99faa5484bb424bcb5da34cbf5dec6e755139c3674e39abc4ae8"
-    + "9032c87900:35443739374644332d333533382d343237452d413437422d413332464"
-    + "336434633413639:31393966303461372d613536642d343932312d616139392d6165"
-    + "64653932323964393833"
-)
-SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A69"
+SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 PRIVATE_KEY = 32 * b"\xAA"
 
 ServerKeys = namedtuple("ServerKeys", "sign auth auth_pub verify verify_pub")
@@ -83,58 +78,29 @@ def new_server_session(keys, pin):
     return session, salt
 
 
-class MrpServerAuth(ABC):
-    """Server-side implementation of MRP authentication."""
+class CompanionServerAuth(ABC):
+    """Server-side implementation of Companion authentication."""
 
     def __init__(self, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE):
-        """Initialize a new instance if MrpServerAuth."""
+        """Initialize a new instance if CompanionServerAuth."""
         self.device_name = device_name
         self.unique_id = unique_id.encode()
         self.input_key = None
         self.output_key = None
-        self.has_paired = False
         self.keys = generate_keys(PRIVATE_KEY)
         self.session, self.salt = new_server_session(self.keys, str(PIN_CODE))
 
-    def handle_device_info(self, message, _):
-        """Handle received device information message."""
-        _LOGGER.debug("Received device info message")
+    def handle_auth_frame(self, frame_type, data):
+        """Handle incoming auth message."""
+        _LOGGER.debug("Received auth frame: type=%s, data=%s", frame_type, data)
+        pairing_data = hap_tlv8.read_tlv(data["_pd"])
+        seqno = int.from_bytes(pairing_data[TlvValue.SeqNo], byteorder="little")
 
-        # TODO: Consolidate this better with messages.device_information(...)
-        resp = messages.create(
-            protobuf.DEVICE_INFO_MESSAGE, identifier=message.identifier
+        suffix = (
+            "verify"
+            if frame_type in [FrameType.PV_Start, FrameType.PV_Next]
+            else "setup"
         )
-        resp.inner().uniqueIdentifier = self.unique_id
-        resp.inner().name = self.device_name
-        resp.inner().localizedModelName = self.device_name
-        resp.inner().systemBuildVersion = "17K449"
-        resp.inner().applicationBundleIdentifier = "com.apple.mediaremoted"
-        resp.inner().protocolVersion = 1
-        resp.inner().lastSupportedMessageType = 77
-        resp.inner().supportsSystemPairing = True
-        resp.inner().allowsPairing = True
-        resp.inner().systemMediaApplication = "com.apple.TVMusic"
-        resp.inner().supportsACL = True
-        resp.inner().supportsSharedQueue = True
-        resp.inner().supportsExtendedMotion = True
-        resp.inner().sharedQueueVersion = 2
-        resp.inner().deviceClass = 4
-        self.send_to_client(resp)
-
-    def handle_crypto_pairing(self, message, inner):
-        """Handle incoming crypto pairing message."""
-        _LOGGER.debug("Received crypto pairing message")
-        pairing_data = read_tlv(inner.pairingData)
-        seqno = pairing_data[TlvValue.SeqNo][0]
-
-        # Work-around for now to support "tries" to auth before pairing
-        if seqno == 1:
-            if TlvValue.PublicKey in pairing_data:
-                self.has_paired = True
-            elif TlvValue.Method in pairing_data:
-                self.has_paired = False
-
-        suffix = "verify" if self.has_paired else "setup"
         method = "_m{0}_{1}".format(seqno, suffix)
         getattr(self, method)(pairing_data)
 
@@ -155,14 +121,14 @@ class MrpServerAuth(ABC):
         info = server_pub_key + self.unique_id + client_pub_key
         signature = self.keys.sign.sign(info)
 
-        tlv = write_tlv(
+        tlv = hap_tlv8.write_tlv(
             {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
 
-        msg = messages.crypto_pairing(
+        tlv = hap_tlv8.write_tlv(
             {
                 TlvValue.SeqNo: b"\x02",
                 TlvValue.PublicKey: server_pub_key,
@@ -170,53 +136,46 @@ class MrpServerAuth(ABC):
             }
         )
 
-        self.output_key = hkdf_expand(
-            "MediaRemote-Salt", "MediaRemote-Write-Encryption-Key", shared_key
-        )
-
-        self.input_key = hkdf_expand(
-            "MediaRemote-Salt", "MediaRemote-Read-Encryption-Key", shared_key
-        )
+        self.output_key = hkdf_expand("", "ServerEncrypt-main", shared_key)
+        self.input_key = hkdf_expand("", "ClientEncrypt-main", shared_key)
 
         log_binary(_LOGGER, "Keys", Output=self.output_key, Input=self.input_key)
-        self.send_to_client(msg)
+
+        self.send_to_client(FrameType.PV_Next, {"_pd": tlv})
 
     def _m3_verify(self, pairing_data):
-        self.send_to_client(messages.crypto_pairing({TlvValue.SeqNo: b"\x04"}))
-        self.enable_encryption(self.input_key, self.output_key)
+        self.send_to_client(
+            FrameType.PV_Next, {"_pd": hap_tlv8.write_tlv({TlvValue.SeqNo: b"\x04"})}
+        )
+        self.enable_encryption(self.output_key, self.input_key)
 
     def _m1_setup(self, pairing_data):
-        msg = messages.crypto_pairing(
+        tlv = hap_tlv8.write_tlv(
             {
+                TlvValue.SeqNo: b"\x02",
                 TlvValue.Salt: binascii.unhexlify(self.salt),
                 TlvValue.PublicKey: binascii.unhexlify(self.session.public),
-                TlvValue.SeqNo: b"\x02",
+                27: b"\x01",
             }
         )
-
-        self.send_to_client(msg)
+        self.send_to_client(FrameType.PS_Next, {"_pd": tlv, "_pwTy": 1})
 
     def _m3_setup(self, pairing_data):
         pubkey = binascii.hexlify(pairing_data[TlvValue.PublicKey]).decode()
         self.session.process(pubkey, self.salt)
 
-        proof = binascii.unhexlify(self.session.key_proof_hash)
         if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
-
-            msg = messages.crypto_pairing(
-                {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
-            )
+            proof = binascii.unhexlify(self.session.key_proof_hash)
+            tlv = {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
         else:
-            msg = messages.crypto_pairing(
-                {
-                    TlvValue.Error: bytes([ErrorCode.Authentication]),
-                    TlvValue.SeqNo: b"\x04",
-                }
-            )
+            tlv = {
+                TlvValue.Error: bytes([hap_tlv8.ErrorCode.Authentication]),
+                TlvValue.SeqNo: b"\x04",
+            }
 
-        self.send_to_client(msg)
+        self.send_to_client(FrameType.PS_Next, {"_pd": hap_tlv8.write_tlv(tlv)})
 
-    def _m5_setup(self, _):
+    def _m5_setup(self, pairing_data):
         session_key = hkdf_expand(
             "Pair-Setup-Encrypt-Salt",
             "Pair-Setup-Encrypt-Info",
@@ -229,29 +188,45 @@ class MrpServerAuth(ABC):
             binascii.unhexlify(self.session.key),
         )
 
+        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        decrypted_tlv_bytes = chacha.decrypt(
+            pairing_data[TlvValue.EncryptedData], nounce="PS-Msg05".encode()
+        )
+
+        _LOGGER.debug("MSG5 EncryptedData=%s", hap_tlv8.read_tlv(decrypted_tlv_bytes))
+
+        other = {
+            "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
+            "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
+            "model": "AppleTV6,2",
+            "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
+            "name": "Living Room",
+            "mac": b"@\xc4\xff\x8f\xb1\x99",
+        }
+
         device_info = acc_device_x + self.unique_id + self.keys.auth_pub
         signature = self.keys.sign.sign(device_info)
 
-        tlv = write_tlv(
-            {
-                TlvValue.Identifier: self.unique_id,
-                TlvValue.PublicKey: self.keys.auth_pub,
-                TlvValue.Signature: signature,
-            }
-        )
+        tlv = {
+            TlvValue.Identifier: self.unique_id,
+            TlvValue.PublicKey: self.keys.auth_pub,
+            TlvValue.Signature: signature,
+            17: opack.pack(other),
+        }
+
+        tlv = hap_tlv8.write_tlv(tlv)
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
 
-        msg = messages.crypto_pairing(
+        tlv = hap_tlv8.write_tlv(
             {TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted}
         )
-        self.has_paired = True
 
-        self.send_to_client(msg)
+        self.send_to_client(FrameType.PS_Next, {"_pd": tlv})
 
     @abstractmethod
-    def send_to_client(self, message: ProtobufMessage) -> None:
+    def send_to_client(self, frame_type: FrameType, data: object) -> None:
         """Send data to client device (iOS)."""
 
     @abstractmethod

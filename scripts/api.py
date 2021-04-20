@@ -16,6 +16,7 @@ pdoc.tpl_lookup.directories.insert(0, os.path.join("docs", "pdoc_templates"))
 def _filter_func(doc):
     for exclude in [
         "airplay",
+        "companion",
         "mrp",
         "dmap",
         "support",

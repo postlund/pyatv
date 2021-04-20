@@ -294,7 +294,6 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             pass
         finally:
             self.close()
-
         return self.responses
 
     async def _resend_loop(self, timeout):

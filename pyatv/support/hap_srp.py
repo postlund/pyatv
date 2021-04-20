@@ -1,4 +1,4 @@
-"""Prototype code for MRP."""
+"""SRP implementation for HAP."""
 
 import os
 import uuid
@@ -22,15 +22,15 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 
 from pyatv import exceptions
-from pyatv.support import log_binary, hap_tlv8
-from pyatv.mrp import chacha20
+from pyatv.support import chacha20, log_binary, hap_tlv8
+from pyatv.support.hap_tlv8 import TlvValue
 
 _LOGGER = logging.getLogger(__name__)
 
 
 # pylint: disable=too-few-public-methods
 class Credentials:
-    """Identifiers and encryption keys used by MRP."""
+    """Identifiers and encryption keys used by HAP."""
 
     def __init__(self, ltpk, ltsk, atv_id, client_id):
         """Initialize a new Credentials."""
@@ -126,8 +126,8 @@ class SRPAuthHandler:
             chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
         )
 
-        identifier = decrypted_tlv[hap_tlv8.TlvValue.Identifier]
-        signature = decrypted_tlv[hap_tlv8.TlvValue.Signature]
+        identifier = decrypted_tlv[TlvValue.Identifier]
+        signature = decrypted_tlv[TlvValue.Signature]
 
         if identifier != credentials.atv_id:
             raise exceptions.AuthenticationError("incorrect device response")
@@ -148,26 +148,20 @@ class SRPAuthHandler:
 
         tlv = hap_tlv8.write_tlv(
             {
-                hap_tlv8.TlvValue.Identifier: credentials.client_id,
-                hap_tlv8.TlvValue.Signature: device_signature,
+                TlvValue.Identifier: credentials.client_id,
+                TlvValue.Signature: device_signature,
             }
         )
 
         return chacha.encrypt(tlv, nounce="PV-Msg03".encode())
 
-    def verify2(self):
+    def verify2(self, salt, output_info, input_info):
         """Last verification step.
 
         The derived keys (output, input) are returned here.
         """
-        output_key = hkdf_expand(
-            "MediaRemote-Salt", "MediaRemote-Write-Encryption-Key", self._shared
-        )
-
-        input_key = hkdf_expand(
-            "MediaRemote-Salt", "MediaRemote-Read-Encryption-Key", self._shared
-        )
-
+        output_key = hkdf_expand(salt, output_info, self._shared)
+        input_key = hkdf_expand(salt, input_info, self._shared)
         log_binary(_LOGGER, "Keys", Output=output_key, Input=input_key)
         return output_key, input_key
 
@@ -198,7 +192,7 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Client", Public=pub_key, Proof=proof)
         return pub_key, proof
 
-    def step3(self):
+    def step3(self, additional_data=None):
         """Third pairing step."""
         ios_device_x = hkdf_expand(
             "Pair-Setup-Controller-Sign-Salt",
@@ -215,16 +209,19 @@ class SRPAuthHandler:
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
-        tlv = hap_tlv8.write_tlv(
-            {
-                hap_tlv8.TlvValue.Identifier: self.pairing_id,
-                hap_tlv8.TlvValue.PublicKey: self._auth_public,
-                hap_tlv8.TlvValue.Signature: device_signature,
-            }
-        )
+        tlv = {
+            TlvValue.Identifier: self.pairing_id,
+            TlvValue.PublicKey: self._auth_public,
+            TlvValue.Signature: device_signature,
+        }
+
+        if additional_data:
+            tlv.update(additional_data)
 
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        encrypted_data = chacha.encrypt(tlv, nounce="PS-Msg05".encode())
+        encrypted_data = chacha.encrypt(
+            hap_tlv8.write_tlv(tlv), nounce="PS-Msg05".encode()
+        )
         log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
@@ -239,9 +236,9 @@ class SRPAuthHandler:
         decrypted_tlv = hap_tlv8.read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
-        atv_identifier = decrypted_tlv[hap_tlv8.TlvValue.Identifier]
-        atv_signature = decrypted_tlv[hap_tlv8.TlvValue.Signature]
-        atv_pub_key = decrypted_tlv[hap_tlv8.TlvValue.PublicKey]
+        atv_identifier = decrypted_tlv[TlvValue.Identifier]
+        atv_signature = decrypted_tlv[TlvValue.Signature]
+        atv_pub_key = decrypted_tlv[TlvValue.PublicKey]
         log_binary(
             _LOGGER,
             "Device",

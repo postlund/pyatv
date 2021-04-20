@@ -9,6 +9,10 @@ from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
 
+SRP_SALT = "MediaRemote-Salt"
+SRP_OUTPUT_INFO = "MediaRemote-Write-Encryption-Key"
+SRP_INPUT_INFO = "MediaRemote-Read-Encryption-Key"
+
 
 def _get_pairing_data(resp):
     tlv = read_tlv(resp.inner().pairingData)
@@ -107,7 +111,9 @@ class MrpPairingVerifier:
 
         # TODO: check status code
 
-        self._output_key, self._input_key = self.srp.verify2()
+        self._output_key, self._input_key = self.srp.verify2(
+            SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
+        )
 
     def encryption_keys(self):
         """Return derived encryption keys."""

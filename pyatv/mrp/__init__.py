@@ -20,7 +20,6 @@ from pyatv.const import (
 )
 from pyatv.support.cache import Cache
 from pyatv.mrp import messages, protobuf
-from pyatv.mrp.srp import SRPAuthHandler
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.protobuf import CommandInfo_pb2, PlaybackState
@@ -42,6 +41,7 @@ from pyatv.interface import (
 )
 from pyatv.support import deprecated
 from pyatv.support.net import ClientSessionManager
+from pyatv.support.hap_srp import SRPAuthHandler
 
 
 _LOGGER = logging.getLogger(__name__)

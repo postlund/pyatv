@@ -227,3 +227,18 @@ class AirPlayService(BaseService):
         """Initialize a new AirPlayService."""
         super().__init__(identifier, Protocol.AirPlay, port, properties)
         self.credentials = credentials
+
+
+# pylint: disable=too-few-public-methods
+class CompanionService(BaseService):
+    """Representation of a Companion link service."""
+
+    def __init__(
+        self,
+        port: int,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -> None:
+        """Initialize a new CompaniomService."""
+        super().__init__(None, Protocol.Companion, port, properties)
+        self.credentials = credentials

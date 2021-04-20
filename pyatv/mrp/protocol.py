@@ -10,7 +10,7 @@ from enum import Enum
 from pyatv import exceptions
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.auth import MrpPairingVerifier
-from pyatv.mrp.srp import Credentials
+from pyatv.support.hap_srp import Credentials
 
 _LOGGER = logging.getLogger(__name__)
 

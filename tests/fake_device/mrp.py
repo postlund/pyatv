@@ -6,9 +6,11 @@ import struct
 from datetime import datetime
 from typing import Dict, Tuple, Optional
 
+from google.protobuf.message import Message as ProtobufMessage
+
 from pyatv import const
-from pyatv.support import log_protobuf
-from pyatv.mrp import chacha20, messages, protobuf, variant
+from pyatv.support import chacha20, log_protobuf
+from pyatv.mrp import messages, protobuf, variant
 from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.mrp.protobuf import SendCommandResultMessage as scr
@@ -173,7 +175,7 @@ class FakeMrpState:
     def __init__(self):
         """State of a fake MRP device."""
         self.clients = []
-        self.outstanding_keypresses = {}  # Dict[Tuple[int, int], flot]
+        self.outstanding_keypresses: Dict[Tuple[int, int], float] = {}
         self.last_button_pressed: Optional[str] = None
         self.last_button_action: Optional[const.InputAction] = None
         self.connection_state = None
@@ -185,7 +187,7 @@ class FakeMrpState:
 
     def _send(self, msg):
         for client in self.clients:
-            client.send(msg)
+            client.send_to_client(msg)
 
     # This is a hack for now (if anyone has paired, OK...)
     @property
@@ -205,7 +207,7 @@ class FakeMrpState:
 
     def set_active_player(self, identifier):
         if identifier is not None and identifier not in self.states:
-            raise Exception("invalid player: %s", identifier)
+            raise Exception(f"invalid player: {identifier}")
 
         self.active_player = identifier
         now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
@@ -267,9 +269,14 @@ class FakeMrpServiceFactory:
         self.server = None
 
     async def start(self, start_web_server: bool):
-        coro = self.loop.create_server(
-            lambda: FakeMrpService(self.state, self.app, self.loop), "0.0.0.0"
-        )
+        def _server_factory():
+            try:
+                return FakeMrpService(self.state, self.app, self.loop)
+            except Exception:
+                _LOGGER.exception("failed to create server")
+                raise
+
+        coro = self.loop.create_server(_server_factory, "0.0.0.0")
         self.server = await self.loop.create_task(coro)
         _LOGGER.info("Started MRP server at port %d", self.port)
 
@@ -286,7 +293,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
     """Implementation of a fake MRP Apple TV."""
 
     def __init__(self, state, app, loop):
-        MrpServerAuth.__init__(self, self, DEVICE_NAME)
+        super().__init__(DEVICE_NAME)
         self.state = state
         self.state.clients.append(self)
         self.app = app
@@ -305,12 +312,12 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         self.transport = None
         self.state.clients.remove(self)
 
-    def enable_encryption(self, input_key, output_key):
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
-        self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
+        self.chacha = chacha20.Chacha20Cipher(output_key, input_key)
         self.state.has_authenticated = True
 
-    def send(self, message):
+    def send_to_client(self, message: ProtobufMessage) -> None:
         if not self.transport:
             return
 
@@ -327,9 +334,10 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         if identifier:
             resp.identifier = identifier
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
-        self.send(resp)
+        self.send_to_client(resp)
 
     def data_received(self, data):
+        _LOGGER.error("error: %s", data)
         self.buffer += data
 
         while self.buffer:
@@ -352,7 +360,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.debug("Received %s message", name)
                 getattr(self, "handle_" + name)(parsed, parsed.inner())
             except AttributeError:
-                _LOGGER.exception("No message handler for " + str(parsed))
+                _LOGGER.exception("No message handler for %s", parsed)
             except Exception:
                 _LOGGER.exception("Error while dispatching message")
 
@@ -365,19 +373,19 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
     def handle_client_updates_config(self, message, inner):
         for identifier, metadata in self.state.states.items():
-            self.send(_set_state_message(metadata, identifier))
+            self.send_to_client(_set_state_message(metadata, identifier))
 
         # Trigger sending of SetNowPlayingClientMessage
         if self.state.active_player:
             self.state.set_active_player(self.state.active_player)
 
         if message.identifier is not None:
-            self.send(messages.create(0, identifier=message.identifier))
+            self.send_to_client(messages.create(0, identifier=message.identifier))
 
     def handle_get_keyboard_session(self, message, inner):
         # This message has a lot more fields, but pyatv currently
         # not use them so ignore for now
-        self.send(
+        self.send_to_client(
             messages.create(protobuf.KEYBOARD_MESSAGE, identifier=message.identifier)
         )
 
@@ -391,7 +399,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
         if down_press == 1:
             outstanding[(use_page, usage)] = stub_sleep()
-            self.send(messages.create(0, identifier=message.identifier))
+            self.send_to_client(messages.create(0, identifier=message.identifier))
         elif down_press == 0:
             if (use_page, usage) in outstanding:
                 pressed_key = _KEY_LOOKUP.get((use_page, usage))
@@ -415,7 +423,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 self.state.last_button_pressed = pressed_key
                 del outstanding[(use_page, usage)]
                 _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
-                self.send(messages.create(0, identifier=message.identifier))
+                self.send_to_client(messages.create(0, identifier=message.identifier))
             else:
                 _LOGGER.error("Missing key down for %d,%d", use_page, usage)
         else:
@@ -457,7 +465,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             _LOGGER.debug("Skip backwards %d", inner.options.skipInterval)
         else:
             _LOGGER.warning("Unhandled button press: %s", message.inner().command)
-            self.send(
+            self.send_to_client(
                 messages.command_result(
                     message.identifier, send_error=protobuf.SendError.NoCommandHandlers
                 )
@@ -465,7 +473,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             return
 
         self.state.last_button_action = None
-        self.send(messages.command_result(message.identifier))
+        self.send_to_client(messages.command_result(message.identifier))
 
     def handle_playback_queue_request(self, message, inner):
         state = self.state.get_player_state(self.state.active_player)
@@ -479,10 +487,10 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         item.artworkData = self.state.states[self.state.active_player].artwork
         item.artworkDataWidth = state.artwork_width or 456
         item.artworkDataHeight = state.artwork_height or 789
-        self.send(setstate)
+        self.send_to_client(setstate)
 
     def handle_wake_device(self, message, inner):
-        self.send(messages.command_result(message.identifier))
+        self.send_to_client(messages.command_result(message.identifier))
         self.state.powered_on = True
         self._send_device_info(update=True)
 
@@ -492,7 +500,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         _LOGGER.debug(
             "Received heartbeat (total count: %d)", self.state.heartbeat_count
         )
-        self.send(
+        self.send_to_client(
             messages.create(
                 protobuf.ProtocolMessage.UNKNOWN_MESSAGE, identifier=message.identifier
             )

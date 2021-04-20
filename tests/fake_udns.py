@@ -83,6 +83,22 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
     return ("_touch-able._tcp.local", service)
 
 
+def companion_service(
+    service_name: str,
+    address: str = "127.0.0.1",
+    port: int = 0,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
+    service = FakeDnsService(
+        name=service_name,
+        address=address,
+        port=port,
+        properties={"rpHA": "33efedd528a".encode("utf-8")},
+        model=model,
+    )
+    return ("_companion-link._tcp.local", service)
+
+
 def _lookup_service(
     question: dns.DnsQuestion,
     services: Dict[str, FakeDnsService],

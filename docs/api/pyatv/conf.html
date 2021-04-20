@@ -38,6 +38,9 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.conf.CompanionService" href="#pyatv.conf.CompanionService">CompanionService</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.conf.DmapService" href="#pyatv.conf.DmapService">DmapService</a></code></h4>
 </li>
 <li>
@@ -290,6 +293,21 @@ class AirPlayService(BaseService):
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.AirPlay, port, properties)
+        self.credentials = credentials
+
+
+# pylint: disable=too-few-public-methods
+class CompanionService(BaseService):
+    &#34;&#34;&#34;Representation of a Companion link service.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        port: int,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new CompaniomService.&#34;&#34;&#34;
+        super().__init__(None, Protocol.Companion, port, properties)
         self.credentials = credentials</code></pre>
 </details>
 </section>
@@ -735,6 +753,44 @@ returned.</p></section>
 </details>
 </dd>
 </dl>
+</dd>
+<dt id="pyatv.conf.CompanionService"><code class="flex name class">
+<span>class <span class="ident">CompanionService</span></span>
+<span>(</span><span>port: int, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Representation of a Companion link service.</p>
+<p>Initialize a new CompaniomService.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CompanionService(BaseService):
+    &#34;&#34;&#34;Representation of a Companion link service.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        port: int,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new CompaniomService.&#34;&#34;&#34;
+        super().__init__(None, Protocol.Companion, port, properties)
+        self.credentials = credentials</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.BaseService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>

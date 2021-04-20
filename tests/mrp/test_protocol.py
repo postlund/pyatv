@@ -12,7 +12,7 @@ from pyatv.mrp.protocol import (
     MrpProtocol,
     heartbeat_loop,
 )
-from pyatv.mrp.srp import SRPAuthHandler
+from pyatv.support.hap_srp import SRPAuthHandler
 
 from tests.utils import until, total_sleep_time
 from tests.fake_device import FakeAppleTV
