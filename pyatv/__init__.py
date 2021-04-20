@@ -10,6 +10,7 @@ import aiohttp
 from pyatv import conf, exceptions, interface
 from pyatv.airplay import AirPlayStreamAPI
 from pyatv.const import Protocol
+from pyatv.companion import CompanionAPI, CompanionApps
 from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
@@ -73,7 +74,11 @@ async def connect(
     # AirPlay stream API is the same for both DMAP and MRP
     airplay = AirPlayStreamAPI(config, loop)
 
-    atv = implementation(loop, await net.create_session(session), config, airplay)
+    # Apps is also shared for DMAP and MRP
+    companion_api = CompanionAPI(config, loop)
+    apps = CompanionApps(companion_api)
+
+    atv = implementation(loop, await net.create_session(session), config, airplay, apps)
     await atv.connect()
     return atv
 

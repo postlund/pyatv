@@ -28,45 +28,49 @@ In case you have developed for pyatv 0.3.x before, there's a short migration gui
 
 # Features
 
-Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = Apple TV 4 and later):
+Here is the feature list by protocol (DMAP = devices not running tvOS, MRP and Companiom = Apple TV 4 and later):
 
-| **Feature**                                                     | **DMAP** | **MRP**   | **Links** |
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | [Concept](documentation/concepts/#scanning), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | [Concept](documentation/concepts/#device-metadata), [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Push updates                                                    | Yes      | Yes       | [Concept](documentation/concepts/#metadata-and-push-updates), [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Remote control pairing                                          | Yes      | Yes       | [Concept](documentation/concepts/#pairing), [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| List supported features                                         | Yes**    | Yes       | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| AirPlay stream URL (including local files)                      | Yes      | Yes       | [Doc](development/airplay), {% include api i="interface.Stream" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- |--------- | --------- | --------- |
-| Different input actions (tap, double tap, hold)                 | No       | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- |--------- | --------- | --------- |
-| Fetch artwork                                                   | Yes      | Yes       | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| App used for playback                                           | No       | Yes       | [Doc](development/metadata/#active-app), {% include api i="interface.App" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Media type and play state                                       | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Change media position                                           | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata.set_position" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Shuffle and repeat                                              | Yes      | Yes       | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Volume Controls                                                 | Yes      | Yes       | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Power management                                                | No       | Yes       | [Doc](development/power_management), {% include api i="interface.Power" %}
-| --------------------------------------------------------------- | -------- | --------- | --------- |
-| Deep Sleep Detection                                            | Yes***   | Yes***    | [Concept](documentation/concepts/#deep-sleep-detection), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| **Feature**                                                     | **DMAP** | **MRP**   | **Companion** | **Links** |
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | Yes           | [Concept](documentation/concepts/#scanning), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | No            | [Concept](documentation/concepts/#device-metadata), [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Push updates                                                    | Yes      | Yes       | No            | [Concept](documentation/concepts/#metadata-and-push-updates), [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Remote control pairing                                          | Yes      | Yes       | Yes           | [Concept](documentation/concepts/#pairing), [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| List supported features                                         | Yes**    | Yes       | No            | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| AirPlay stream URL (including local files)                      | Yes      | Yes       | No            | [Doc](development/airplay), {% include api i="interface.Stream" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- |--------- | --------- | ------------- | --------- |
+| Different input actions (tap, double tap, hold)                 | No       | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- |--------- | --------- | ------------- | --------- |
+| Fetch artwork                                                   | Yes      | Yes       | No            | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| App used for playback                                           | No       | Yes       | No            | [Doc](development/metadata/#active-app), {% include api i="interface.App" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Media type and play state                                       | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Change media position                                           | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata.set_position" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Shuffle and repeat                                              | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Volume Controls                                                 | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Power management                                                | No       | Yes       | No            | [Doc](development/power_management), {% include api i="interface.Power" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Deep Sleep Detection                                            | Yes***   | Yes***    | No            | [Concept](documentation/concepts/#deep-sleep-detection), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| Launch application                                              | No       | No        | Yes           | [Doc](development/apps), {% include api i="interface.Apps" %}
+| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
+| List installed apps                                             | No       | No        | Yes           | [Doc](development/apps), {% include api i="interface.Apps" %}
 
 *\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*
 
@@ -75,8 +79,8 @@ Here is the feature list by protocol (DMAP = devices not running tvOS, MRP = App
 *\*\*\* Experimental feature (not fully tested)*
 
 There are also few utility scripts bundled with `pyatv` that makes it easy to try the library
-out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy) and
-[atvscript](documentation/atvscript).
+out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy),
+[atvscript](documentation/atvscript) and [atvscript](documentation/atvlog).
 
 # Who is making this?
 

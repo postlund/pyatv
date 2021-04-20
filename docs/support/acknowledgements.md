@@ -38,21 +38,29 @@ documentation.
 This is a complete list of everyone that has contributed code to
 the project: thank you!
 
-```
-Alexey <alexey.www@gmail.com>
-Colin <12702068+ckeehan@users.noreply.github.com>
-Colin <ckeehan@me.com>
-Erik Hendrix <hendrix_erik@hotmail.com>
-John Lian <jlian@users.noreply.github.com>
-Michael Carroll <mrc@apple.com>
-Pierre Ståhl <pierre.staahl@gmail.com>
-Pierrick Rouxel <pierrick.rouxel@me.com>
-Robbie Trencheny <me@robbiet.us>
-Rob Nee <robnee@hotmail.com>
-stickpin <630000+stickpin@users.noreply.github.com>
-Sylvain CECCHETTO <cecchetto.sylvain@me.com>
+```raw
+acheronfail <acheronfail at gmail.com>
+Alexey <alexey.www at gmail.com>
+Andreas Billmeier <b at edevau.net>
+Colin <12702068+ckeehan at users.noreply.github.com>
+Colin <ckeehan at me.com>
+Dennis Frommknecht <dfrommi at users.noreply.github.com>
+Doug Hoffman <doug+github at hoff.mn>
+Erik Hendrix <hendrix_erik at hotmail.com>
+J. Nick Koston <nick at koston.org>
+John Lian <jlian at users.noreply.github.com>
+KibosJ <29429479+KibosJ at users.noreply.github.com>
+Lucas Christian <lucas at lucasec.com>
+Michael Carroll <mrc at apple.com>
+Pierre Ståhl <pierre.staahl at gmail.com>
+Pierrick Rouxel <pierrick.rouxel at me.com>
+Robbie Trencheny <me at robbiet.us>
+Rob Nee <robnee at hotmail.com>
+stickpin <630000+stickpin at users.noreply.github.com>
+Sylvain CECCHETTO <cecchetto.sylvain at me.com>
+Will Ross <paxswill at paxswill.com>
 ```
 
 *The list is manuallt updated, so if you are missing feel to send a
 PR. The list is generated with:
-`git log --format="%aN <%aE>" | sort | uniq | egrep -v "dependabot"`*
+`git log --format="%aN <%aE>" | sort | uniq | egrep -v "dependabot" |  sed -s 's/@/ at /'`*

@@ -1,6 +1,7 @@
 """Implementation of the Companion protocol."""
 
 import logging
+from typing import Dict
 
 from pyatv import exceptions
 from pyatv.companion import opack
@@ -56,8 +57,8 @@ class CompanionProtocol:
                 raise exceptions.AuthenticationError(str(ex)) from ex
 
     async def exchange_opack(
-        self, frame_type: FrameType, data: object, timeout=DEFAULT_TIMEOUT
-    ) -> object:
+        self, frame_type: FrameType, data: object, timeout: int = DEFAULT_TIMEOUT
+    ) -> Dict[str, object]:
         """Send data as OPACK and decode result as OPACK."""
         _LOGGER.debug("Send OPACK: %s", data)
         _, payload = await self.connection.exchange(
@@ -65,4 +66,9 @@ class CompanionProtocol:
         )
         unpacked_object, _ = opack.unpack(payload)
         _LOGGER.debug("Receive OPACK: %s", unpacked_object)
+
+        # TODO: Better exceptions
+        if not isinstance(unpacked_object, dict):
+            raise Exception(f"received unexpected type: {type(unpacked_object)}")
+
         return unpacked_object

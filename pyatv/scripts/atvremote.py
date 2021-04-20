@@ -17,8 +17,6 @@ from pyatv.conf import (
     CompanionService,
 )
 from pyatv.const import Protocol, ShuffleState, RepeatState, InputAction
-from pyatv.dmap import tag_definitions
-from pyatv.dmap.parser import pprint
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts
 
@@ -82,6 +80,7 @@ class GlobalCommands:
         _print_commands("AirPlay", interface.Stream)
         _print_commands("Device Info", interface.DeviceInfo)
         _print_commands("Device", DeviceCommands)
+        _print_commands("Apps", interface.Apps)
         _print_commands("Global", self.__class__)
 
         return 0
@@ -99,6 +98,7 @@ class GlobalCommands:
             interface.Playing,
             interface.Stream,
             interface.DeviceInfo,
+            interface.Apps,
             self.__class__,
             DeviceCommands,
         ]
@@ -605,6 +605,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     playing = retrieve_commands(interface.Playing)
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
+    apps = retrieve_commands(interface.Apps)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -631,6 +632,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in device_info:
         return await _exec_command(atv.device_info, cmd, True, *cmd_args)
+
+    if cmd in apps:
+        return await _exec_command(atv.apps, cmd, True, *cmd_args)
 
     logging.error("Unknown command: %s", cmd)
     return 1
@@ -666,7 +670,7 @@ def _pretty_print(data):
     if isinstance(data, bytes):
         print(binascii.hexlify(data))
     elif isinstance(data, list):
-        print(pprint(data, tag_definitions.lookup_tag))
+        print(", ".join([str(item) for item in data]))
     else:
         print(data)
 

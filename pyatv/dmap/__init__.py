@@ -36,6 +36,7 @@ from pyatv.interface import (
     Power,
     Features,
     FeatureInfo,
+    Apps,
 )
 from pyatv.support import deprecated
 from pyatv.support.net import ClientSessionManager
@@ -567,6 +568,9 @@ class DmapFeatures(Features):
         if feature_name == FeatureName.PlayUrl:
             if self.config.get_service(Protocol.AirPlay) is not None:
                 return FeatureInfo(state=FeatureState.Available)
+        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
+            if self.config.get_service(Protocol.Companion) is not None:
+                return FeatureInfo(state=FeatureState.Available)
 
         return FeatureInfo(state=FeatureState.Unsupported)
 
@@ -590,6 +594,7 @@ class DmapAppleTV(AppleTV):
         session_manager: ClientSessionManager,
         config: conf.AppleTV,
         airplay: Stream,
+        apps: Apps,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
@@ -609,6 +614,7 @@ class DmapAppleTV(AppleTV):
         self._dmap_power = DmapPower()
         self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
         self._dmap_features = DmapFeatures(config, self._apple_tv)
+        self._dmap_apps = apps
         self._airplay = airplay
 
     async def connect(self) -> None:
@@ -664,3 +670,8 @@ class DmapAppleTV(AppleTV):
     def features(self) -> Features:
         """Return features interface."""
         return self._dmap_features
+
+    @property
+    def apps(self) -> Apps:
+        """Return apps interface."""
+        return self._dmap_apps
