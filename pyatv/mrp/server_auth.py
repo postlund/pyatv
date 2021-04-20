@@ -3,6 +3,7 @@
 import logging
 import hashlib
 import binascii
+from abc import ABC, abstractmethod
 from collections import namedtuple
 
 from srptools import SRPContext, SRPServerSession, constants
@@ -12,6 +13,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
 )
+from google.protobuf.message import Message as ProtobufMessage
 
 from pyatv.mrp import messages, protobuf
 from pyatv.support import chacha20, log_binary
@@ -81,14 +83,11 @@ def new_server_session(keys, pin):
     return session, salt
 
 
-class MrpServerAuth:
+class MrpServerAuth(ABC):
     """Server-side implementation of MRP authentication."""
 
-    def __init__(
-        self, delegate, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE
-    ):
+    def __init__(self, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE):
         """Initialize a new instance if MrpServerAuth."""
-        self.delegate = delegate
         self.device_name = device_name
         self.unique_id = unique_id.encode()
         self.input_key = None
@@ -120,7 +119,7 @@ class MrpServerAuth:
         resp.inner().supportsExtendedMotion = True
         resp.inner().sharedQueueVersion = 2
         resp.inner().deviceClass = 4
-        self.delegate.send(resp)
+        self.send_to_client(resp)
 
     def handle_crypto_pairing(self, message, inner):
         """Handle incoming crypto pairing message."""
@@ -135,11 +134,11 @@ class MrpServerAuth:
             elif TlvValue.Method in pairing_data:
                 self.has_paired = False
 
-        suffix = "paired" if self.has_paired else "pairing"
-        method = "_seqno{0}_{1}".format(seqno, suffix)
+        suffix = "verify" if self.has_paired else "setup"
+        method = "_m{0}_{1}".format(seqno, suffix)
         getattr(self, method)(pairing_data)
 
-    def _seqno1_paired(self, pairing_data):
+    def _m1_verify(self, pairing_data):
         server_pub_key = self.keys.verify_pub.public_bytes(
             encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
         )
@@ -180,9 +179,13 @@ class MrpServerAuth:
         )
 
         log_binary(_LOGGER, "Keys", Output=self.output_key, Input=self.input_key)
-        self.delegate.send(msg)
+        self.send_to_client(msg)
 
-    def _seqno1_pairing(self, pairing_data):
+    def _m3_verify(self, pairing_data):
+        self.send_to_client(messages.crypto_pairing({TlvValue.SeqNo: b"\x04"}))
+        self.enable_encryption(self.input_key, self.output_key)
+
+    def _m1_setup(self, pairing_data):
         msg = messages.crypto_pairing(
             {
                 TlvValue.Salt: binascii.unhexlify(self.salt),
@@ -191,13 +194,9 @@ class MrpServerAuth:
             }
         )
 
-        self.delegate.send(msg)
+        self.send_to_client(msg)
 
-    def _seqno3_paired(self, pairing_data):
-        self.delegate.send(messages.crypto_pairing({TlvValue.SeqNo: b"\x04"}))
-        self.delegate.enable_encryption(self.input_key, self.output_key)
-
-    def _seqno3_pairing(self, pairing_data):
+    def _m3_setup(self, pairing_data):
         pubkey = binascii.hexlify(pairing_data[TlvValue.PublicKey]).decode()
         self.session.process(pubkey, self.salt)
 
@@ -215,9 +214,9 @@ class MrpServerAuth:
                 }
             )
 
-        self.delegate.send(msg)
+        self.send_to_client(msg)
 
-    def _seqno5_pairing(self, _):
+    def _m5_setup(self, _):
         session_key = hkdf_expand(
             "Pair-Setup-Encrypt-Salt",
             "Pair-Setup-Encrypt-Info",
@@ -249,4 +248,12 @@ class MrpServerAuth:
         )
         self.has_paired = True
 
-        self.delegate.send(msg)
+        self.send_to_client(msg)
+
+    @abstractmethod
+    def send_to_client(self, message: ProtobufMessage) -> None:
+        """Send data to client device (iOS)."""
+
+    @abstractmethod
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        """Enable encryption with the specified keys."""

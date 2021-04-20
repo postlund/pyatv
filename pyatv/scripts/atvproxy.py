@@ -9,6 +9,7 @@ from ipaddress import IPv4Address
 from typing import Optional
 
 from zeroconf import Zeroconf
+from google.protobuf.message import Message as ProtobufMessage
 
 from pyatv.conf import CompanionService, MrpService
 from pyatv.companion.connection import CompanionConnection
@@ -40,7 +41,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
 
     def __init__(self, loop):
         """Initialize a new instance of ProxyMrpAppleTV."""
-        super().__init__(self, DEVICE_NAME)
+        super().__init__(DEVICE_NAME)
         self.loop = loop
         self.buffer = b""
         self.transport = None
@@ -69,11 +70,11 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         """Client did connect to proxy."""
         self.transport = transport
 
-    def enable_encryption(self, input_key, output_key):
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
         self.chacha = chacha20.Chacha20Cipher(input_key, output_key)
 
-    def send(self, message):
+    def send_to_client(self, message: ProtobufMessage):
         """Send protobuf message to client."""
         data = message.SerializeToString()
         _LOGGER.info("<<(DECRYPTED): %s", message)
@@ -145,7 +146,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         self, loop: asyncio.AbstractEventLoop, address: str, port: int, credentials: str
     ) -> None:
         """Initialize a new instance of CompanionAppleTVProxy."""
-        super().__init__(self, DEVICE_NAME)
+        super().__init__(DEVICE_NAME)
         self.loop = loop
         self.buffer: bytes = b""
         self.transport = None
@@ -159,7 +160,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             CompanionService(port, credentials=credentials),
         )
         self._receive_event: asyncio.Event = asyncio.Event()
-        self._receive_task: Optional[asyncio.Task] = None
+        self._receive_task: Optional[asyncio.Future] = None
 
     async def start(self) -> None:
         """Start the proxy instance."""

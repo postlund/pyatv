@@ -81,11 +81,8 @@ def new_server_session(keys, pin):
 class CompanionServerAuth(ABC):
     """Server-side implementation of Companion authentication."""
 
-    def __init__(
-        self, delegate, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE
-    ):
+    def __init__(self, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE):
         """Initialize a new instance if MrpServerAuth."""
-        self.delegate = delegate
         self.device_name = device_name
         self.unique_id = unique_id.encode()
         self.input_key = None
