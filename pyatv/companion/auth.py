@@ -1,19 +1,36 @@
 """Device pairing and derivation of encryption keys."""
 import logging
-from typing import Tuple
+from typing import Dict, Tuple
 
 from pyatv import exceptions
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
 from pyatv.support import log_binary, hap_tlv8
 from pyatv.support.hap_srp import Credentials, SRPAuthHandler
-from pyatv.support.hap_tlv8 import TlvValue
+from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
 
 SRP_SALT = ""
 SRP_OUTPUT_INFO = "ClientEncrypt-main"
 SRP_INPUT_INFO = "ServerEncrypt-main"
+
+PAIRING_DATA_KEY = "_pd"
+
+
+def _get_pairing_data(message: Dict[str, object]):
+    pairing_data = message.get(PAIRING_DATA_KEY)
+    if not pairing_data:
+        raise exceptions.AuthenticationError("no pairing data in message")
+
+    if not isinstance(pairing_data, bytes):
+        raise Exception(f"pairing data has unexpected type: {type(pairing_data)}")
+
+    tlv = read_tlv(pairing_data)
+    if TlvValue.Error in tlv:
+        raise exceptions.AuthenticationError(stringify(tlv))
+
+    return tlv
 
 
 class CompanionPairingProcedure:
@@ -34,17 +51,14 @@ class CompanionPairingProcedure:
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Start,
             {
-                "_pd": hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
                     {TlvValue.Method: b"\x00", TlvValue.SeqNo: b"\x01"}
                 ),
                 "_pwTy": 1,
             },
         )
 
-        if not isinstance(resp, dict):
-            raise Exception(f"expected dict, got {type(resp)}")
-
-        pairing_data = hap_tlv8.read_tlv(resp["_pd"])
+        pairing_data = _get_pairing_data(resp)
         self._atv_salt = pairing_data[TlvValue.Salt]
         self._atv_pub_key = pairing_data[TlvValue.PublicKey]
         log_binary(
@@ -63,7 +77,7 @@ class CompanionPairingProcedure:
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Next,
             {
-                "_pd": hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
                     {
                         TlvValue.SeqNo: b"\x03",
                         TlvValue.PublicKey: pub_key,
@@ -74,10 +88,7 @@ class CompanionPairingProcedure:
             },
         )
 
-        if not isinstance(resp, dict):
-            raise Exception(f"expected dict, got {type(resp)}")
-
-        pairing_data = hap_tlv8.read_tlv(resp["_pd"])
+        pairing_data = _get_pairing_data(resp)
         atv_proof = pairing_data[TlvValue.Proof]
         log_binary(_LOGGER, "Device", Proof=atv_proof)
 
@@ -98,7 +109,7 @@ class CompanionPairingProcedure:
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Next,
             {
-                "_pd": hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
                     {
                         TlvValue.SeqNo: b"\x05",
                         TlvValue.EncryptedData: encrypted_data,
@@ -108,10 +119,7 @@ class CompanionPairingProcedure:
             },
         )
 
-        if not isinstance(resp, dict):
-            raise Exception(f"expected dict, got {type(resp)}")
-
-        pairing_data = hap_tlv8.read_tlv(resp["_pd"])
+        pairing_data = _get_pairing_data(resp)
         encrypted_data = pairing_data[TlvValue.EncryptedData]
 
         return self.srp.step4(encrypted_data)
@@ -135,17 +143,14 @@ class CompanionPairingVerifier:
         resp = await self.protocol.exchange_opack(
             FrameType.PV_Start,
             {
-                "_pd": hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
                     {TlvValue.SeqNo: b"\x01", TlvValue.PublicKey: public_key}
                 ),
                 "_auTy": 4,
             },
         )
 
-        if not isinstance(resp, dict):
-            raise Exception(f"expected dict, got {type(resp)}")
-
-        pairing_data = hap_tlv8.read_tlv(resp["_pd"])
+        pairing_data = _get_pairing_data(resp)
         server_pub_key = pairing_data[TlvValue.PublicKey]
         encrypted = pairing_data[TlvValue.EncryptedData]
         log_binary(_LOGGER, "Device", Public=self.credentials.ltpk, Encrypted=encrypted)
@@ -155,7 +160,7 @@ class CompanionPairingVerifier:
         await self.protocol.exchange_opack(
             FrameType.PV_Next,
             {
-                "_pd": hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
                     {TlvValue.SeqNo: b"\x03", TlvValue.EncryptedData: encrypted_data}
                 ),
             },
