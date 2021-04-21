@@ -5,7 +5,7 @@ import pytest
 from typing import Dict, Optional
 
 from pyatv import convert, exceptions, interface
-from pyatv.interface import FeatureInfo, Playing
+from pyatv.interface import FeatureInfo, Playing, App
 from pyatv.const import (
     MediaType,
     DeviceState,
@@ -351,6 +351,15 @@ def test_app_properties():
 def test_app_str():
     app = interface.App("name", "id")
     assert "App: name (id)" == str(app)
+
+
+def test_app_equality():
+    assert App(None, None) == App(None, None)
+    assert App("test", None) != App(None, None)
+    assert App("test", None) == App("test", None)
+    assert App(None, "test") != App(None, None)
+    assert App(None, "test") == App(None, "test")
+    assert App("test", "test2") == App("test", "test2")
 
 
 # PUSH UPDATER
