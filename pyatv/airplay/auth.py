@@ -1,10 +1,10 @@
 """API for performing and verifying device authentication."""
 
 import binascii
-import plistlib
-import logging
-
 from copy import copy
+import logging
+import plistlib
+
 from pyatv.exceptions import AuthenticationError
 
 _LOGGER = logging.getLogger(__name__)

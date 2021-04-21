@@ -1,7 +1,8 @@
 """Simple example that scans for devices and connects to first one found."""
 
-import sys
 import asyncio
+import sys
+
 import pyatv
 
 LOOP = asyncio.get_event_loop()

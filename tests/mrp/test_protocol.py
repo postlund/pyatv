@@ -14,8 +14,8 @@ from pyatv.mrp.protocol import (
 )
 from pyatv.support.hap_srp import SRPAuthHandler
 
-from tests.utils import until, total_sleep_time
 from tests.fake_device import FakeAppleTV
+from tests.utils import total_sleep_time, until
 
 
 @pytest.fixture

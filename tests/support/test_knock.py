@@ -2,10 +2,11 @@
 
 import asyncio
 from ipaddress import ip_address
+
 import pytest
 
-from pyatv.support.net import unused_port
 from pyatv.support.knock import knock, knocker
+from pyatv.support.net import unused_port
 
 from tests.fake_knock import create_knock_server
 from tests.utils import until

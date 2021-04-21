@@ -1,6 +1,6 @@
 """Simple web server for serving a file to stream via AirPlay."""
-import pathlib
 import logging
+import pathlib
 
 from aiohttp import web
 from aiohttp.web import middleware

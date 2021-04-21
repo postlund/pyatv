@@ -3,8 +3,8 @@
 import pytest
 
 from pyatv import exceptions
-from pyatv.dmap.daap import media_kind, playstate, ms_to_s
-from pyatv.const import MediaType, DeviceState
+from pyatv.const import DeviceState, MediaType
+from pyatv.dmap.daap import media_kind, ms_to_s, playstate
 
 # These are extracted from iTunes, see for instance:
 # http://www.blooming.no/wp-content/uploads/2013/03/ITLibMediaItem.h

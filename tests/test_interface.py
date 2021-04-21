@@ -1,22 +1,21 @@
 """Unit tests for pyatv.interface."""
+from typing import Dict, Optional
 from unittest.mock import ANY, MagicMock
 
 import pytest
-from typing import Dict, Optional
 
 from pyatv import convert, exceptions, interface
-from pyatv.interface import FeatureInfo, Playing, App
 from pyatv.const import (
-    MediaType,
+    DeviceModel,
     DeviceState,
+    FeatureName,
+    FeatureState,
+    MediaType,
+    OperatingSystem,
     RepeatState,
     ShuffleState,
-    OperatingSystem,
-    DeviceModel,
-    FeatureState,
-    FeatureName,
 )
-
+from pyatv.interface import App, FeatureInfo, Playing
 
 # Contains two valid values for each property that are tested
 # against each other

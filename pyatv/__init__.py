@@ -9,16 +9,16 @@ import aiohttp
 
 from pyatv import conf, exceptions, interface
 from pyatv.airplay import AirPlayStreamAPI
-from pyatv.const import Protocol
+from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.companion import CompanionAPI, CompanionApps
 from pyatv.companion.pairing import CompanionPairingHandler
+from pyatv.const import Protocol
 from pyatv.dmap import DmapAppleTV
 from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import MrpAppleTV
 from pyatv.mrp.pairing import MrpPairingHandler
-from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.support import net
-from pyatv.support.scan import BaseScanner, UnicastMdnsScanner, MulticastMdnsScanner
+from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 
 
 async def scan(

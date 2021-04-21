@@ -2,16 +2,16 @@
 
 import asyncio
 import io
-import logging
-from typing import Tuple, Optional
 from ipaddress import IPv4Address
+import logging
+from typing import Optional, Tuple
 
 import pytest
 
 from pyatv.support import dns, mdns, net
+
 from tests import fake_udns
 from tests.support import dns_utils
-
 
 SERVICE_NAME = "Kitchen"
 MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local"

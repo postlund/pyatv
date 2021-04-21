@@ -2,14 +2,13 @@
 import collections.abc
 import enum
 import io
+from ipaddress import IPv4Address
 import logging
 import struct
 import typing
-from ipaddress import IPv4Address
 import unicodedata
 
 from pyatv.support.collections import CaseInsensitiveDict
-
 
 _LOGGER = logging.getLogger(__name__)
 

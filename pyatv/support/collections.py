@@ -2,7 +2,6 @@
 import collections.abc
 import typing
 
-
 T = typing.TypeVar("T")
 
 

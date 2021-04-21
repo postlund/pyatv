@@ -3,7 +3,6 @@
 
 from enum import Enum
 
-
 MAJOR_VERSION = "0"
 MINOR_VERSION = "7"
 PATCH_VERSION = "7"

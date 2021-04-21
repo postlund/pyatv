@@ -6,12 +6,11 @@ sleep proxy. Such a device will automatically be woken up in case any of its ser
 are accessed, something this module will try to emulate.
 """
 
-import math
 import asyncio
-import logging
-
-from typing import List
 from ipaddress import IPv4Address
+import logging
+import math
+from typing import List
 
 _LOGGER = logging.getLogger(__name__)
 

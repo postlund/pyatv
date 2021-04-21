@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 from pyatv import exceptions
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
-from pyatv.support import log_binary, hap_tlv8
+from pyatv.support import hap_tlv8, log_binary
 from pyatv.support.hap_srp import Credentials, SRPAuthHandler
 from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 

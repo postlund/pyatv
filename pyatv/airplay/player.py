@@ -1,12 +1,11 @@
 """Play media on a device by sending an URL."""
 
-import logging
 import asyncio
+import logging
 import plistlib
 from uuid import uuid4
 
 from pyatv import exceptions
-
 
 _LOGGER = logging.getLogger(__name__)
 

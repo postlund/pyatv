@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Set up a fake device."""
+import argparse
+import asyncio
+from ipaddress import IPv4Address
+import logging
 import os
 import sys
-import asyncio
-import logging
-import argparse
-from ipaddress import IPv4Address
 
 from zeroconf import Zeroconf
 
@@ -14,7 +14,7 @@ from pyatv.support import mdns
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 
-from tests.fake_device import (  #  pylint: disable=wrong-import-position  # noqa
+from tests.fake_device import (  # pylint: disable=wrong-import-position  # noqa
     FakeAppleTV,
 )
 

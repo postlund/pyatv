@@ -1,11 +1,10 @@
 """Simple example showing of pairing."""
 
-import sys
 import asyncio
+import sys
 
-from pyatv import scan, pair
+from pyatv import pair, scan
 from pyatv.const import Protocol
-
 
 LOOP = asyncio.get_event_loop()
 

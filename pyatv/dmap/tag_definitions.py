@@ -1,8 +1,9 @@
 """Definitions of DMAP tags used by various applications."""
 
 import logging
+
 from .parser import DmapTag
-from .tags import read_bool, read_bytes, read_uint, read_str, read_ignore, read_bplist
+from .tags import read_bool, read_bplist, read_bytes, read_ignore, read_str, read_uint
 
 _LOGGER = logging.getLogger(__name__)
 

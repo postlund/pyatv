@@ -1,9 +1,9 @@
 """A fake AirPlay device."""
 
-import plistlib
 import binascii
-import logging
 from collections import namedtuple
+import logging
+import plistlib
 
 from aiohttp import web
 

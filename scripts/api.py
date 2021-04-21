@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Simple tool to generate API reference documentation."""
-import sys
-import os
 import argparse
-import warnings
 from difflib import unified_diff
+import os
 from pathlib import Path
+import sys
+import warnings
 
 import pdoc
 

@@ -3,11 +3,12 @@
 import json
 import logging
 
-from deepdiff import DeepDiff
 from aiohttp.test_utils import unittest_run_loop
+from deepdiff import DeepDiff
 
 from pyatv.const import Protocol
-from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, ScriptTest
+
+from tests.scripts.script_env import DMAP_ID, IP_1, IP_2, MRP_ID, ScriptTest
 
 _LOGGER = logging.getLogger(__name__)
 HASH = "ca496c14642c78af6dd4250191fe175f6dafd72b4c33bcbab43c454aae051da1"

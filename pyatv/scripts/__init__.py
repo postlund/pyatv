@@ -1,9 +1,9 @@
 """Scripts bundled with pyatv."""
 
-import json
-import logging
 import argparse
 from ipaddress import ip_address
+import json
+import logging
 
 from pyatv import const
 

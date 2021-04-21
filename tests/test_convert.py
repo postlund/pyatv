@@ -1,7 +1,7 @@
 """Unit tests for pyatv.convert."""
 
 from pyatv import convert
-from pyatv.const import Protocol, MediaType, DeviceState, RepeatState, ShuffleState
+from pyatv.const import DeviceState, MediaType, Protocol, RepeatState, ShuffleState
 
 
 def test_media_type_to_string():

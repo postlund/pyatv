@@ -2,11 +2,11 @@
 
 TODO: Add integration tests using pack and unpack together.
 """
-import pytest
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from deepdiff import DeepDiff
+import pytest
 
 from pyatv.companion.opack import pack, unpack
 

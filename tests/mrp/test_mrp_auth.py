@@ -6,9 +6,10 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
+from pyatv.conf import AppleTV, MrpService
 from pyatv.const import Protocol
-from pyatv.conf import MrpService, AppleTV
-from pyatv.mrp.server_auth import PIN_CODE, CLIENT_IDENTIFIER, CLIENT_CREDENTIALS
+from pyatv.mrp.server_auth import CLIENT_CREDENTIALS, CLIENT_IDENTIFIER, PIN_CODE
+
 from tests.fake_device import FakeAppleTV
 
 

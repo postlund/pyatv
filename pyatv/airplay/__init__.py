@@ -1,22 +1,21 @@
 """Implementation of external API for AirPlay."""
 
+import asyncio
+import binascii
+import logging
 import os
 import re
-import asyncio
-import logging
-import binascii
 
 from aiohttp import ClientSession
 
 from pyatv import exceptions
+from pyatv.airplay.auth import AuthenticationVerifier
+from pyatv.airplay.player import AirPlayPlayer
+from pyatv.airplay.server import StaticFileWebServer
+from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.interface import Stream
 from pyatv.support import net
-
-from pyatv.airplay.player import AirPlayPlayer
-from pyatv.airplay.srp import SRPAuthHandler
-from pyatv.airplay.auth import AuthenticationVerifier
-from pyatv.airplay.server import StaticFileWebServer
 
 _LOGGER = logging.getLogger(__name__)
 

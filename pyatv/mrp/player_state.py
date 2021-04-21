@@ -1,11 +1,11 @@
 """Module responsible for keeping track of media player states."""
 
-import math
-import logging
-import weakref
-from itertools import chain
 from copy import deepcopy
-from typing import Dict, Optional, List
+from itertools import chain
+import logging
+import math
+from typing import Dict, List, Optional
+import weakref
 
 from pyatv.mrp import protobuf as pb
 from pyatv.mrp.protocol import MrpProtocol

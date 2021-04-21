@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Script converting pyatv logs to HTML."""
 
+import argparse
+import asyncio
+from datetime import datetime
+import json
+import logging
 import os
 import re
 import sys
-import json
-import asyncio
-import logging
-import argparse
-from datetime import datetime
 
 from aiohttp import web, web_request
 

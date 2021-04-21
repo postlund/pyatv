@@ -1,14 +1,15 @@
 """Unit tests for pyatv.support.hap_tlv8."""
 
 from collections import OrderedDict
+
 from pyatv.support.hap_tlv8 import (
-    TlvValue,
     ErrorCode,
     Method,
     State,
+    TlvValue,
     read_tlv,
-    write_tlv,
     stringify,
+    write_tlv,
 )
 
 SINGLE_KEY_IN = {10: b"123"}

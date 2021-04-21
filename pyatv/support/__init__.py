@@ -1,16 +1,15 @@
 """Support functions used in library."""
 
 import asyncio
-import logging
 import binascii
-import warnings
 import functools
+import logging
 from os import environ
+import warnings
 
 from google.protobuf.text_format import MessageToString
 
 from pyatv import exceptions
-
 
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512

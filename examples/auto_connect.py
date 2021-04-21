@@ -1,6 +1,7 @@
 """Simple example that connects to a device with autodiscover."""
 
 import asyncio
+
 from pyatv import helpers
 
 

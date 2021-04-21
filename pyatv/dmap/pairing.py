@@ -1,14 +1,14 @@
 """Module used for pairing pyatv with a device."""
 
 import hashlib
+from io import StringIO
+import ipaddress
 import logging
 import random
-import ipaddress
-from io import StringIO
 
 from aiohttp import web
-from zeroconf import Zeroconf
 import netifaces
+from zeroconf import Zeroconf
 
 from pyatv.const import Protocol
 from pyatv.dmap import tags

@@ -4,14 +4,13 @@ import pytest
 
 from pyatv.support.mdns import Response, Service
 from pyatv.support.scan import (
-    HOMESHARING_SERVICE,
-    DEVICE_SERVICE,
-    MEDIAREMOTE_SERVICE,
     AIRPLAY_SERVICE,
     COMPANION_SERVICE,
+    DEVICE_SERVICE,
+    HOMESHARING_SERVICE,
+    MEDIAREMOTE_SERVICE,
     get_unique_identifiers,
 )
-
 
 HS = Service(HOMESHARING_SERVICE, "name", None, 0, {"hG": "hs_id"})
 DEVICE = Service(DEVICE_SERVICE, "dev_id", None, 0, {})

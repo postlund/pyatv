@@ -1,16 +1,15 @@
 import asyncio
-import logging
-import struct
-from unittest.mock import patch
+from collections import namedtuple
 from contextlib import contextmanager
 from ipaddress import IPv4Address
-from collections import namedtuple
-from typing import List, Dict, Optional, Tuple, Union, cast
+import logging
+import struct
+from typing import Dict, List, Optional, Tuple, Union, cast
+from unittest.mock import patch
 
 from pyatv.support import dns, mdns
 
 from tests.support import dns_utils
-
 
 _LOGGER = logging.getLogger(__name__)
 

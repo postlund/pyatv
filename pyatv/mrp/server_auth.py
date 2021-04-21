@@ -1,12 +1,11 @@
 """MRP server authentication code."""
 
-import logging
-import hashlib
-import binascii
 from abc import ABC, abstractmethod
+import binascii
 from collections import namedtuple
+import hashlib
+import logging
 
-from srptools import SRPContext, SRPServerSession, constants
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
@@ -14,11 +13,12 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PublicKey,
 )
 from google.protobuf.message import Message as ProtobufMessage
+from srptools import SRPContext, SRPServerSession, constants
 
 from pyatv.mrp import messages, protobuf
 from pyatv.support import chacha20, log_binary
 from pyatv.support.hap_srp import hkdf_expand
-from pyatv.support.hap_tlv8 import TlvValue, ErrorCode, read_tlv, write_tlv
+from pyatv.support.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
 
 _LOGGER = logging.getLogger(__name__)
 

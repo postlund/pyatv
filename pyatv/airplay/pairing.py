@@ -1,14 +1,14 @@
 """Device pairing and derivation of encryption keys."""
 
-import logging
 import binascii
 from collections import namedtuple
+import logging
 
 from pyatv import exceptions
+from pyatv.airplay.auth import DeviceAuthenticator
+from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.airplay.srp import SRPAuthHandler, new_credentials
-from pyatv.airplay.auth import DeviceAuthenticator
 from pyatv.support import error_handler, net
 
 _LOGGER = logging.getLogger(__name__)

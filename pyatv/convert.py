@@ -1,6 +1,6 @@
 """Various types of extraction and conversion functions."""
 
-from pyatv.const import Protocol, MediaType, DeviceState, RepeatState, ShuffleState
+from pyatv.const import DeviceState, MediaType, Protocol, RepeatState, ShuffleState
 
 
 def device_state_str(state: DeviceState) -> str:

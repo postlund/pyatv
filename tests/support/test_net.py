@@ -1,18 +1,17 @@
 """Unit tests for the net support module."""
 
-from typing import Dict, List
 from ipaddress import IPv4Address, ip_address
 import platform
 import socket
 import sys
+from typing import Dict, List
 from unittest.mock import patch
 
-import pytest
 import netifaces
+import pytest
 
-from pyatv.support.net import get_private_addresses, tcp_keepalive
 from pyatv.exceptions import NotSupportedError
-
+from pyatv.support.net import get_private_addresses, tcp_keepalive
 
 skip_darwin = pytest.mark.skipif(
     platform.system() == "Darwin",
