@@ -9,6 +9,7 @@ import typing
 
 from zeroconf import Zeroconf, ServiceInfo
 
+from pyatv import exceptions
 from pyatv.support import log_binary, net
 from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.dns import (
@@ -436,7 +437,9 @@ async def multicast(  # pylint: disable=too-many-arguments
 async def publish(loop: asyncio.AbstractEventLoop, service: Service, zconf: Zeroconf):
     """Publish an MDNS service on the network."""
     if service.address is None:
-        raise Exception(f"no address for {service.name}.{service.type}")
+        raise exceptions.InvalidConfigError(
+            f"no address for {service.name}.{service.type}"
+        )
     zsrv = ServiceInfo(
         f"{service.type}.",
         f"{service.name}.{service.type}.",

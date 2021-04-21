@@ -10,7 +10,7 @@ def read_variant(variant):
         cnt += 1
         if not data & 0x80:
             return result, variant[cnt:]
-    raise Exception("invalid variant")
+    raise ValueError("invalid variant")
 
 
 def write_variant(number):

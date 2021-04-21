@@ -64,6 +64,8 @@ page_links:
       title: Listeners
     - link: /development/airplay/
       title: AirPlay
+    - link: /development/apps/
+      title: Apps
     - link: /development/examples/
       title: Examples
   support:

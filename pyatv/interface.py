@@ -594,6 +594,22 @@ class App:
         return f"App: {self.name} ({self.identifier})"
 
 
+class Apps(ABC):
+    """Base class for app handling."""
+
+    @abstractmethod
+    @feature(38, "AppList", "List of launchable apps.")
+    async def app_list(self) -> List[App]:
+        """Fetch a list of apps that can be launched."""
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    @feature(39, "LaunchApp", "Launch an app.")
+    async def launch_app(self, bundle_id: str) -> None:
+        """Launch an app based on bundle ID."""
+        raise exceptions.NotSupportedError()
+
+
 class Metadata(ABC):
     """Base class for retrieving metadata from an Apple TV."""
 
@@ -928,4 +944,10 @@ class AppleTV(ABC, StateProducer):
     @abstractmethod
     def features(self) -> Features:
         """Return features interface."""
+        raise exceptions.NotSupportedError()
+
+    @property
+    @abstractmethod
+    def apps(self) -> Apps:
+        """Return apps interface."""
         raise exceptions.NotSupportedError()

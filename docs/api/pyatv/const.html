@@ -43,12 +43,14 @@ link_group: api
 <ul class="two-column">
 <li><code><a title="pyatv.const.FeatureName.Album" href="#pyatv.const.FeatureName.Album">Album</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.App" href="#pyatv.const.FeatureName.App">App</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.AppList" href="#pyatv.const.FeatureName.AppList">AppList</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Artist" href="#pyatv.const.FeatureName.Artist">Artist</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Artwork" href="#pyatv.const.FeatureName.Artwork">Artwork</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Down" href="#pyatv.const.FeatureName.Down">Down</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Genre" href="#pyatv.const.FeatureName.Genre">Genre</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Home" href="#pyatv.const.FeatureName.Home">Home</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.HomeHold" href="#pyatv.const.FeatureName.HomeHold">HomeHold</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.LaunchApp" href="#pyatv.const.FeatureName.LaunchApp">LaunchApp</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Left" href="#pyatv.const.FeatureName.Left">Left</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Menu" href="#pyatv.const.FeatureName.Menu">Menu</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Next" href="#pyatv.const.FeatureName.Next">Next</a></code></li>
@@ -386,7 +388,7 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Home/TV button.&#34;&#34;&#34;
 
     HomeHold = 15
-    &#34;&#34;&#34;Long-press home button.&#34;&#34;&#34;
+    &#34;&#34;&#34;Long-press home button (deprecated: use RemoteControl.home).&#34;&#34;&#34;
 
     TopMenu = 16
     &#34;&#34;&#34;Go to main menu.&#34;&#34;&#34;
@@ -431,10 +433,16 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Current play time position.&#34;&#34;&#34;
 
     Shuffle = 28
-    &#34;&#34;&#34;Shuffle stat.e&#34;&#34;&#34;
+    &#34;&#34;&#34;Shuffle state.&#34;&#34;&#34;
 
     Repeat = 29
     &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
+
+    AppList = 38
+    &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
+
+    LaunchApp = 39
+    &#34;&#34;&#34;Launch an app.&#34;&#34;&#34;
 
     Artwork = 30
     &#34;&#34;&#34;Playing media artwork.&#34;&#34;&#34;
@@ -642,7 +650,7 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Home/TV button.&#34;&#34;&#34;
 
     HomeHold = 15
-    &#34;&#34;&#34;Long-press home button.&#34;&#34;&#34;
+    &#34;&#34;&#34;Long-press home button (deprecated: use RemoteControl.home).&#34;&#34;&#34;
 
     TopMenu = 16
     &#34;&#34;&#34;Go to main menu.&#34;&#34;&#34;
@@ -687,10 +695,16 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Current play time position.&#34;&#34;&#34;
 
     Shuffle = 28
-    &#34;&#34;&#34;Shuffle stat.e&#34;&#34;&#34;
+    &#34;&#34;&#34;Shuffle state.&#34;&#34;&#34;
 
     Repeat = 29
     &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
+
+    AppList = 38
+    &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
+
+    LaunchApp = 39
+    &#34;&#34;&#34;Launch an app.&#34;&#34;&#34;
 
     Artwork = 30
     &#34;&#34;&#34;Playing media artwork.&#34;&#34;&#34;
@@ -724,6 +738,10 @@ class FeatureName(Enum):
 <dd>
 <section class="desc"><p>App playing media.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.AppList"><code class="name">var <span class="ident">AppList</span></code></dt>
+<dd>
+<section class="desc"><p>List of launchable apps.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.Artist"><code class="name">var <span class="ident">Artist</span></code></dt>
 <dd>
 <section class="desc"><p>Artist of playing song.</p></section>
@@ -746,7 +764,11 @@ class FeatureName(Enum):
 </dd>
 <dt id="pyatv.const.FeatureName.HomeHold"><code class="name">var <span class="ident">HomeHold</span></code></dt>
 <dd>
-<section class="desc"><p>Long-press home button.</p></section>
+<section class="desc"><p>Long-press home button (deprecated: use RemoteControl.home).</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.LaunchApp"><code class="name">var <span class="ident">LaunchApp</span></code></dt>
+<dd>
+<section class="desc"><p>Launch an app.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.Left"><code class="name">var <span class="ident">Left</span></code></dt>
 <dd>
@@ -814,7 +836,7 @@ class FeatureName(Enum):
 </dd>
 <dt id="pyatv.const.FeatureName.Shuffle"><code class="name">var <span class="ident">Shuffle</span></code></dt>
 <dd>
-<section class="desc"><p>Shuffle stat.e</p></section>
+<section class="desc"><p>Shuffle state.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.SkipBackward"><code class="name">var <span class="ident">SkipBackward</span></code></dt>
 <dd>

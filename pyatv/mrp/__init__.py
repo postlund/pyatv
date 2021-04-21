@@ -38,6 +38,7 @@ from pyatv.interface import (
     Power,
     Features,
     FeatureInfo,
+    Apps,
 )
 from pyatv.support import deprecated
 from pyatv.support.net import ClientSessionManager
@@ -618,6 +619,10 @@ class MrpFeatures(Features):
         if feature_name == FeatureName.PlayUrl:
             if self.config.get_service(Protocol.AirPlay) is not None:
                 return FeatureInfo(state=FeatureState.Available)
+        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
+            print(self.config)
+            if self.config.get_service(Protocol.Companion) is not None:
+                return FeatureInfo(state=FeatureState.Available)
 
         field_name = _FIELD_FEATURES.get(feature_name)
         if field_name:
@@ -672,6 +677,7 @@ class MrpAppleTV(AppleTV):
         session_manager: ClientSessionManager,
         config: conf.AppleTV,
         airplay: Stream,
+        apps: Apps,
     ) -> None:
         """Initialize a new Apple TV."""
         super().__init__()
@@ -693,6 +699,7 @@ class MrpAppleTV(AppleTV):
         self._mrp_power = MrpPower(loop, self._protocol, self._mrp_remote)
         self._mrp_push_updater = MrpPushUpdater(loop, self._mrp_metadata, self._psm)
         self._mrp_features = MrpFeatures(self._config, self._psm)
+        self._mrp_apps = apps
         self._airplay = airplay
 
     async def connect(self) -> None:
@@ -748,3 +755,8 @@ class MrpAppleTV(AppleTV):
     def features(self) -> Features:
         """Return features interface."""
         return self._mrp_features
+
+    @property
+    def apps(self) -> Apps:
+        """Return apps interface."""
+        return self._mrp_apps

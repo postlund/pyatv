@@ -12,7 +12,7 @@ This information is exposed via the interface {% include api i="interface.Device
 
 ## Using the Device Information API
 
-After connecting to a device, youget device info via  {% include api i="interface.AppleTV.device_info" %}:
+After connecting to a device, you get device info via {% include api i="interface.AppleTV.device_info" %}:
 
 ```python
 atv = await pyatv.connect(config, ...)

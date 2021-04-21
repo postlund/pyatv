@@ -222,7 +222,7 @@ class FeatureName(Enum):
     """Home/TV button."""
 
     HomeHold = 15
-    """Long-press home button."""
+    """Long-press home button (deprecated: use RemoteControl.home)."""
 
     TopMenu = 16
     """Go to main menu."""
@@ -267,10 +267,16 @@ class FeatureName(Enum):
     """Current play time position."""
 
     Shuffle = 28
-    """Shuffle stat.e"""
+    """Shuffle state."""
 
     Repeat = 29
     """Repeat state."""
+
+    AppList = 38
+    """List of launchable apps."""
+
+    LaunchApp = 39
+    """Launch an app."""
 
     Artwork = 30
     """Playing media artwork."""

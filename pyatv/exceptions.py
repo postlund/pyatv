@@ -74,3 +74,16 @@ class NonLocalSubnetError(Exception):
 
 class InvalidStateError(Exception):
     """Thrown when trying to perform an action not possible in the current state."""
+
+
+class ProtocolError(Exception):
+    """Thrown when a generic protocol error occurs.
+
+    Generic protocol errors includes for instance missing fields, incorrect or
+    unexpected types, etc. Any error that can happen when communicating with a device
+    that is not covered by another exception is covered by this exception.
+    """
+
+
+class InvalidConfigError(Exception):
+    """Thrown when something is wrong or missing in the config."""
