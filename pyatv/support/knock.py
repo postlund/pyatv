@@ -18,9 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 SEND_INTERVAL = 2.0
 
 
-# Performs the actual "knock". This can most certainly be done with asyncio code, but
-# works for now.
-async def _synch_knock(address: IPv4Address, port: int):
+async def _async_knock(address: IPv4Address, port: int):
     try:
         _, writer = await asyncio.open_connection(str(address), port)
     except OSError:
@@ -35,7 +33,10 @@ async def knock(
 ):
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    await asyncio.wait([_synch_knock(address, port) for port in ports])
+    try:
+        await asyncio.wait([_async_knock(address, port) for port in ports])
+    except asyncio.CancelledError:
+        pass
 
 
 async def knocker(
