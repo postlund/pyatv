@@ -131,7 +131,7 @@ class CompanionConnection(asyncio.Protocol):
 
     def connection_made(self, transport):
         """Handle that connection was eatablished."""
-        _LOGGER.debug("Connected to companion device")
+        _LOGGER.debug("Connected to companion device %s:%d", self.host, self.port)
         self.transport = transport
 
     def data_received(self, data):

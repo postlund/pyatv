@@ -111,7 +111,29 @@ async def publish_airplay_zeroconf(loop, zconf, address, port):
     )
 
 
-async def appstart(loop):
+async def publish_companion_zeroconf(loop, zconf, address, port):
+    """Publish Companion Zeroconf service."""
+    props = {
+        "rpMac": "1",
+        "rpHA": "9948cfb6da55",
+        "rpHN": "88f979f04023",
+        "rpVr": "230.1",
+        "rpMd": "AppleTV6,2",
+        "rpFl": "0x36782",
+        "rpAD": "657c1b9d3484",
+        "rpHI": "91756a18d8e5",
+        "rpBA": "9D:19:F9:74:65:EA",
+    }
+    return await mdns.publish(
+        loop,
+        mdns.Service(
+            "_companion-link._tcp.local", DEVICE_NAME, IPv4Address(address), port, props
+        ),
+        zconf,
+    )
+
+
+async def appstart(loop):  # pylint: disable=too-many-branches
     """Script starts here."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-ip", default="127.0.0.1", help="local IP address")
@@ -132,9 +154,15 @@ async def appstart(loop):
     protocols.add_argument(
         "--airplay", default=False, action="store_true", help="enable AirPlay protocol"
     )
+    protocols.add_argument(
+        "--companion",
+        default=False,
+        action="store_true",
+        help="enable Companion protocol",
+    )
     args = parser.parse_args()
 
-    if not (args.mrp or args.dmap or args.airplay):
+    if not (args.mrp or args.dmap or args.airplay or args.companion):
         parser.error("no protocol enabled (see --help)")
 
     level = logging.DEBUG if args.debug else logging.WARNING
@@ -162,7 +190,10 @@ async def appstart(loop):
             tasks.append(asyncio.ensure_future(_alter_playing(usecase)))
 
     if args.airplay:
-        _, usecase = fake_atv.add_service(Protocol.AirPlay)
+        fake_atv.add_service(Protocol.AirPlay)
+
+    if args.companion:
+        fake_atv.add_service(Protocol.Companion)
 
     await fake_atv.start()
 
@@ -184,6 +215,13 @@ async def appstart(loop):
         unpublishers.append(
             await publish_airplay_zeroconf(
                 loop, zconf, args.local_ip, fake_atv.get_port(Protocol.AirPlay)
+            )
+        )
+
+    if args.companion:
+        unpublishers.append(
+            await publish_companion_zeroconf(
+                loop, zconf, args.local_ip, fake_atv.get_port(Protocol.Companion)
             )
         )
 

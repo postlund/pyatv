@@ -13,12 +13,22 @@ from tests.fake_device.airplay import (
 )
 from tests.fake_device.dmap import FakeDmapService, FakeDmapUseCases, FakeDmapState
 from tests.fake_device.mrp import FakeMrpServiceFactory, FakeMrpUseCases, FakeMrpState
+from tests.fake_device.companion import (
+    FakeCompanionServiceFactory,
+    FakeCompanionUseCases,
+    FakeCompanionState,
+)
 
 
 FACTORIES = {
     Protocol.AirPlay: (FakeAirPlayService, FakeAirPlayState, FakeAirPlayUseCases),
     Protocol.DMAP: (FakeDmapService, FakeDmapState, FakeDmapUseCases),
     Protocol.MRP: (FakeMrpServiceFactory, FakeMrpState, FakeMrpUseCases),
+    Protocol.Companion: (
+        FakeCompanionServiceFactory,
+        FakeCompanionState,
+        FakeCompanionUseCases,
+    ),
 }
 
 FakeService = namedtuple("FakeService", "service state factory")
@@ -63,7 +73,7 @@ class FakeAppleTV:
         self.services[protocol] = FakeService(service, state, usecase)
         return state, usecase
 
-    # Disclaimer: When running in "test mode", only MRP is supported here!
+    # Disclaimer: When running in "test mode", only MRP and Companion is supported here!
     def get_port(self, protocol: Protocol) -> int:
         return self.services[protocol].service.port
 

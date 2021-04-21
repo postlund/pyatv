@@ -821,6 +821,12 @@ class App:
         &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
         return f&#34;App: {self.name} ({self.identifier})&#34;
 
+    def __eq__(self, other) -&gt; bool:
+        &#34;&#34;&#34;Return self==other.&#34;&#34;&#34;
+        if isinstance(other, App):
+            return self.name == other.name and self.identifier == other.identifier
+        return False
+
 
 class Apps(ABC):
     &#34;&#34;&#34;Base class for app handling.&#34;&#34;&#34;
@@ -1247,7 +1253,13 @@ class AppleTV(ABC, StateProducer):
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
-        return f&#34;App: {self.name} ({self.identifier})&#34;</code></pre>
+        return f&#34;App: {self.name} ({self.identifier})&#34;
+
+    def __eq__(self, other) -&gt; bool:
+        &#34;&#34;&#34;Return self==other.&#34;&#34;&#34;
+        if isinstance(other, App):
+            return self.name == other.name and self.identifier == other.identifier
+        return False</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>

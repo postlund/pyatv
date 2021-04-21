@@ -593,6 +593,12 @@ class App:
         """Convert app info to readable string."""
         return f"App: {self.name} ({self.identifier})"
 
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, App):
+            return self.name == other.name and self.identifier == other.identifier
+        return False
+
 
 class Apps(ABC):
     """Base class for app handling."""

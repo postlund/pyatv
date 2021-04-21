@@ -337,7 +337,6 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         self.send_to_client(resp)
 
     def data_received(self, data):
-        _LOGGER.error("error: %s", data)
         self.buffer += data
 
         while self.buffer:
