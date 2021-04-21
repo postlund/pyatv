@@ -2,17 +2,30 @@
 
 import logging
 import asyncio
-from typing import Optional, List, Dict, cast
+from typing import List, Dict, cast
 
+from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import Protocol
 from pyatv.interface import Apps, App
-
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def _connect(loop, config: AppleTV) -> CompanionProtocol:
+    """Connect to the device."""
+    service = config.get_service(Protocol.Companion)
+    if service is None:
+        raise exceptions.NoCredentialsError("No Companion credentials loaded")
+
+    _LOGGER.debug("Connect to Companion from API")
+    connection = CompanionConnection(loop, str(config.address), service.port)
+    protocol = CompanionProtocol(connection, SRPAuthHandler(), service)
+    await protocol.start()
+    return protocol
 
 
 # TODO: Maybe move to separate file?
@@ -28,36 +41,16 @@ class CompanionAPI:
         """Initialize a new CompanionAPI instance."""
         self.config = config
         self.loop = loop
-        self.service = self.config.get_service(Protocol.Companion)
-        self._protocol: Optional[CompanionProtocol] = None
-
-    def close(self):
-        """Close and free resources."""
-        if self._protocol:
-            self._protocol.stop()
-            self._protocol = None
-
-    async def _connect(self):
-        """Connect to the device."""
-        _LOGGER.debug("Connect to Companion from API")
-        connection = CompanionConnection(
-            self.loop, self.config.address, self.service.port
-        )
-        self._protocol = CompanionProtocol(connection, SRPAuthHandler(), self.service)
-        await self._protocol.start()
 
     async def _send_command(
         self, identifier: str, content: Dict[str, object]
     ) -> Dict[str, object]:
-        """Launch an app n the remote device."""
+        """Send a command to the device and return response."""
+        protocol = None
         try:
-            if self._protocol is None:
-                await self._connect()
+            protocol = await _connect(self.loop, self.config)
 
-            if self._protocol is None:
-                raise Exception("failed to connect")  # TODO: Better exception
-
-            resp = await self._protocol.exchange_opack(
+            resp = await protocol.exchange_opack(
                 FrameType.E_OPACK,
                 {
                     "_i": identifier,
@@ -67,17 +60,16 @@ class CompanionAPI:
                 },
             )
         except Exception as ex:
-            # TODO: Better exception
-            raise Exception(f"command {identifier} failed") from ex
+            raise exceptions.ProtocolError(f"Command {identifier} failed") from ex
         else:
             # Check if an error was present and throw exception if that's the case
             if "_em" in resp:
-                # TODO: Better exception
-                raise Exception(f"command {identifier} failed: {resp['_em']}")
+                raise exceptions.ProtocolError(
+                    f"Command {identifier} failed: {resp['_em']}"
+                )
         finally:
-            if self._protocol:
-                self._protocol.stop()
-                self._protocol = None
+            if protocol:
+                protocol.stop()
 
         return resp
 
@@ -101,7 +93,7 @@ class CompanionApps(Apps):
         """Fetch a list of apps that can be launched."""
         app_list = await self.api.app_list()
         if "_c" not in app_list:
-            raise Exception("missing content in response")  # TODO: Better exception
+            raise exceptions.ProtocolError("missing content in response")
 
         content = cast(dict, app_list["_c"])
         return [App(name, bundle_id) for bundle_id, name in content.items()]

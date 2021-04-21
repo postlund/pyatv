@@ -24,7 +24,9 @@ def _get_pairing_data(message: Dict[str, object]):
         raise exceptions.AuthenticationError("no pairing data in message")
 
     if not isinstance(pairing_data, bytes):
-        raise Exception(f"pairing data has unexpected type: {type(pairing_data)}")
+        raise exceptions.ProtocolError(
+            f"Pairing data has unexpected type: {type(pairing_data)}"
+        )
 
     tlv = read_tlv(pairing_data)
     if TlvValue.Error in tlv:

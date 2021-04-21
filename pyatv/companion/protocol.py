@@ -28,7 +28,7 @@ class CompanionProtocol:
     async def start(self):
         """Connect to device and listen to incoming messages."""
         if self._is_started:
-            raise Exception("already started")  # TODO: other exception
+            raise exceptions.ProtocolError("Already started")
 
         self._is_started = True
         await self.connection.connect()
@@ -67,8 +67,9 @@ class CompanionProtocol:
         unpacked_object, _ = opack.unpack(payload)
         _LOGGER.debug("Receive OPACK: %s", unpacked_object)
 
-        # TODO: Better exceptions
         if not isinstance(unpacked_object, dict):
-            raise Exception(f"received unexpected type: {type(unpacked_object)}")
+            raise exceptions.ProtocolError(
+                f"Received unexpected type: {type(unpacked_object)}"
+            )
 
         return unpacked_object

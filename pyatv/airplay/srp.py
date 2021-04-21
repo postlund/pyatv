@@ -30,7 +30,7 @@ def hash_sha512(*indata):
         elif isinstance(data, bytes):
             hasher.update(data)
         else:
-            raise Exception("invalid input data: " + str(data))
+            raise TypeError(f"Invalid input data: {data}")
     return hasher.digest()
 
 
