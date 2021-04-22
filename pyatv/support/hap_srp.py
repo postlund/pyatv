@@ -1,17 +1,14 @@
 """SRP implementation for HAP."""
 
-import os
-import uuid
 import binascii
 import hashlib
 import logging
-
-from srptools import SRPContext, SRPClientSession, constants
+import os
+import uuid
 
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
@@ -20,9 +17,11 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
 )
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from srptools import SRPClientSession, SRPContext, constants
 
 from pyatv import exceptions
-from pyatv.support import chacha20, log_binary, hap_tlv8
+from pyatv.support import chacha20, hap_tlv8, log_binary
 from pyatv.support.hap_tlv8 import TlvValue
 
 _LOGGER = logging.getLogger(__name__)

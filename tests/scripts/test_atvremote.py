@@ -4,8 +4,9 @@ from aiohttp.test_utils import unittest_run_loop
 
 from pyatv.const import Protocol
 from pyatv.mrp.server_auth import CLIENT_CREDENTIALS
-from tests.fake_device.airplay import DEVICE_PIN, DEVICE_CREDENTIALS
-from tests.scripts.script_env import IP_1, IP_2, DMAP_ID, MRP_ID, AIRPLAY_ID, ScriptTest
+
+from tests.fake_device.airplay import DEVICE_CREDENTIALS, DEVICE_PIN
+from tests.scripts.script_env import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID, ScriptTest
 
 
 class AtvremoteTest(ScriptTest):

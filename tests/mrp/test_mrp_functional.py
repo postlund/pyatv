@@ -1,29 +1,30 @@
 """Functional tests using the API with a fake Apple TV."""
 
-import math
-import logging
 from ipaddress import IPv4Address
+import logging
+import math
+
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
+from pyatv.conf import AirPlayService, AppleTV, MrpService
 from pyatv.const import (
-    Protocol,
     DeviceState,
-    ShuffleState,
-    PowerState,
-    OperatingSystem,
-    FeatureState,
     FeatureName,
+    FeatureState,
     InputAction,
+    OperatingSystem,
+    PowerState,
+    Protocol,
+    ShuffleState,
 )
-from pyatv.conf import AirPlayService, MrpService, AppleTV
 from pyatv.mrp.protobuf import CommandInfo_pb2
 
 from tests import common_functional_tests
-from tests.utils import until, faketime, stub_sleep
 from tests.fake_device import FakeAppleTV
-from tests.fake_device.mrp import APP_NAME, PLAYER_IDENTIFIER
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
+from tests.fake_device.mrp import APP_NAME, PLAYER_IDENTIFIER
+from tests.utils import faketime, stub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
 

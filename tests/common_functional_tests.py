@@ -9,19 +9,19 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions, interface
+from pyatv.conf import AirPlayService, AppleTV
 from pyatv.const import (
-    Protocol,
-    MediaType,
     DeviceState,
-    RepeatState,
-    ShuffleState,
     FeatureName,
     FeatureState,
     InputAction,
+    MediaType,
+    Protocol,
+    RepeatState,
+    ShuffleState,
 )
-from pyatv.conf import AppleTV, AirPlayService
-from tests.utils import stub_sleep, unstub_sleep, until, faketime
 
+from tests.utils import faketime, stub_sleep, unstub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
 

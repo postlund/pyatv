@@ -5,15 +5,16 @@ from unittest.mock import patch
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from pyatv import pair, exceptions
-from pyatv.const import Protocol
+from pyatv import exceptions, pair
 from pyatv.conf import AirPlayService, AppleTV
+from pyatv.const import Protocol
+
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import (
-    DEVICE_CREDENTIALS,
-    DEVICE_PIN,
-    DEVICE_IDENTIFIER,
     DEVICE_AUTH_KEY,
+    DEVICE_CREDENTIALS,
+    DEVICE_IDENTIFIER,
+    DEVICE_PIN,
 )
 
 

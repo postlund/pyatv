@@ -1,10 +1,11 @@
 """Unit tests for pyatv.dmap.parser."""
 
-import pytest
 import plistlib
 
+import pytest
+
 from pyatv import exceptions
-from pyatv.dmap import tags, parser
+from pyatv.dmap import parser, tags
 
 TEST_TAGS = {
     "uuu8": parser.DmapTag(tags.read_uint, "uint8"),

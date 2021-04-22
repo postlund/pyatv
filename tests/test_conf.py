@@ -3,7 +3,7 @@
 import pytest
 
 from pyatv import conf, exceptions
-from pyatv.const import Protocol, OperatingSystem, DeviceModel
+from pyatv.const import DeviceModel, OperatingSystem, Protocol
 
 ADDRESS_1 = "127.0.0.1"
 ADDRESS_2 = "192.168.0.1"

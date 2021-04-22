@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-import pytest
 import netifaces
+import pytest
 
 from pyatv.support.net import unused_port
 

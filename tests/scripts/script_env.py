@@ -1,21 +1,19 @@
 """Simulated environment for functional script testing."""
 
-import sys
-from importlib import import_module
-
 from contextlib import contextmanager
+from importlib import import_module
 from io import StringIO
-
+import sys
 from unittest.mock import patch
 
 from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
 from pyatv.const import Protocol
-from tests import fake_udns
-from tests.utils import stub_sleep, unstub_sleep, faketime
-from tests.fake_device import FakeAppleTV
 
+from tests import fake_udns
+from tests.fake_device import FakeAppleTV
+from tests.utils import faketime, stub_sleep, unstub_sleep
 
 IP_1 = "10.0.0.1"
 IP_2 = "127.0.0.1"

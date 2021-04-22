@@ -1,8 +1,8 @@
 """Connection abstraction for Companion protocol."""
 import asyncio
-import logging
-from enum import Enum
 from collections import deque
+from enum import Enum
+import logging
 from typing import Optional, Tuple
 
 from pyatv import exceptions

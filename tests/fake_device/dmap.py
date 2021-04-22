@@ -1,15 +1,15 @@
 """Fake DMAP Apple TV device for tests."""
 
-import math
-import logging
-
 from collections import namedtuple
+import logging
+import math
 
 from aiohttp import web
 
-from pyatv.const import ShuffleState, RepeatState, InputAction
-from pyatv.dmap import parser, tags, tag_definitions
+from pyatv.const import InputAction, RepeatState, ShuffleState
+from pyatv.dmap import parser, tag_definitions, tags
 from pyatv.support.net import unused_port
+
 from tests import utils
 
 _LOGGER = logging.getLogger(__name__)

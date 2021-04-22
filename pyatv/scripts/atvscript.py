@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """Tool modelled to be used for scripting."""
 
-import sys
-import json
-import asyncio
-import logging
 import argparse
+import asyncio
 import datetime
-import traceback
 from enum import Enum
+import json
+import logging
+import sys
+import traceback
 
 from pyatv import connect, const, scan
 from pyatv.const import Protocol
 from pyatv.interface import (
     App,
-    Playing,
-    RemoteControl,
-    PushListener,
-    PowerListener,
     DeviceListener,
+    Playing,
+    PowerListener,
+    PushListener,
+    RemoteControl,
     retrieve_commands,
 )
-from pyatv.scripts import TransformProtocol, VerifyScanHosts, TransformOutput
+from pyatv.scripts import TransformOutput, TransformProtocol, VerifyScanHosts
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -6,11 +6,11 @@ from pyatv import exceptions
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.mrp.auth import MrpPairingProcedure, MrpPairingVerifier
-from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.connection import MrpConnection
+from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
+from pyatv.support.hap_srp import Credentials, SRPAuthHandler
 from pyatv.support.net import ClientSessionManager
-from pyatv.support.hap_srp import SRPAuthHandler, Credentials
 
 _LOGGER = logging.getLogger(__name__)
 

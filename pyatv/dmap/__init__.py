@@ -1,46 +1,44 @@
 """Implementation of the DMAP protocol used by ATV 1, 2 and 3."""
 
-import logging
 import asyncio
-import weakref
+import logging
 from typing import Dict, List, Optional
+import weakref
 
 from aiohttp.client_exceptions import ClientError
 
 from pyatv import conf, exceptions
-from pyatv.support import net
-from pyatv.support.cache import Cache
 from pyatv.const import (
-    Protocol,
-    MediaType,
     DeviceState,
+    FeatureName,
+    FeatureState,
+    InputAction,
+    MediaType,
+    PowerState,
+    Protocol,
     RepeatState,
     ShuffleState,
-    PowerState,
-    FeatureState,
-    FeatureName,
-    InputAction,
 )
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.interface import (
-    AppleTV,
-    DeviceInfo,
-    Stream,
-    RemoteControl,
     App,
+    AppleTV,
+    Apps,
+    ArtworkInfo,
+    DeviceInfo,
+    FeatureInfo,
+    Features,
     Metadata,
     Playing,
-    PushUpdater,
-    ArtworkInfo,
     Power,
-    Features,
-    FeatureInfo,
-    Apps,
+    PushUpdater,
+    RemoteControl,
+    Stream,
 )
-from pyatv.support import deprecated
+from pyatv.support import deprecated, net
+from pyatv.support.cache import Cache
 from pyatv.support.net import ClientSessionManager
-
 
 _LOGGER = logging.getLogger(__name__)
 

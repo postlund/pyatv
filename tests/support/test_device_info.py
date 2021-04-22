@@ -1,7 +1,7 @@
 """Unit tests for device_info."""
 
 from pyatv.const import DeviceModel
-from pyatv.support.device_info import lookup_model, lookup_internal_name, lookup_version
+from pyatv.support.device_info import lookup_internal_name, lookup_model, lookup_version
 
 
 def test_lookup_existing_model():

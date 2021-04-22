@@ -1,16 +1,15 @@
 """Methods used to GET/POST data from/to an Apple TV."""
 
-import re
-import logging
-
 from copy import copy
+import logging
+import re
 from typing import Optional
 
-
 from pyatv import exceptions
-from pyatv.const import MediaType, DeviceState
+from pyatv.const import DeviceState, MediaType
 from pyatv.dmap import parser
 from pyatv.support import log_binary
+
 from .tag_definitions import lookup_tag
 
 _LOGGER = logging.getLogger(__name__)

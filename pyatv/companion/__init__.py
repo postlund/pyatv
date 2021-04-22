@@ -1,15 +1,15 @@
 """PoC code for Companion protocol."""
 
-import logging
 import asyncio
-from typing import List, Dict, cast
+import logging
+from typing import Dict, List, cast
 
 from pyatv import exceptions
-from pyatv.conf import AppleTV
-from pyatv.const import Protocol
-from pyatv.interface import Apps, App
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
+from pyatv.conf import AppleTV
+from pyatv.const import Protocol
+from pyatv.interface import App, Apps
 from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)

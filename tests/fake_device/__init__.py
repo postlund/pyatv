@@ -1,6 +1,6 @@
 """Representation of a fake device supporting multiple protocol."""
-from typing import Dict
 from collections import namedtuple
+from typing import Dict
 
 from aiohttp import web
 
@@ -8,17 +8,16 @@ from pyatv.const import Protocol
 
 from tests.fake_device.airplay import (
     FakeAirPlayService,
-    FakeAirPlayUseCases,
     FakeAirPlayState,
+    FakeAirPlayUseCases,
 )
-from tests.fake_device.dmap import FakeDmapService, FakeDmapUseCases, FakeDmapState
-from tests.fake_device.mrp import FakeMrpServiceFactory, FakeMrpUseCases, FakeMrpState
 from tests.fake_device.companion import (
     FakeCompanionServiceFactory,
-    FakeCompanionUseCases,
     FakeCompanionState,
+    FakeCompanionUseCases,
 )
-
+from tests.fake_device.dmap import FakeDmapService, FakeDmapState, FakeDmapUseCases
+from tests.fake_device.mrp import FakeMrpServiceFactory, FakeMrpState, FakeMrpUseCases
 
 FACTORIES = {
     Protocol.AirPlay: (FakeAirPlayService, FakeAirPlayState, FakeAirPlayUseCases),

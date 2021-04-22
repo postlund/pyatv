@@ -1,11 +1,11 @@
 """Implementation of device scanning routines."""
 
-import os
-import asyncio
-import logging
-from ipaddress import IPv4Address
-from typing import List, Dict, Optional, Generator
 from abc import ABC, abstractmethod
+import asyncio
+from ipaddress import IPv4Address
+import logging
+import os
+from typing import Dict, Generator, List, Optional
 
 from pyatv import conf, interface
 from pyatv.support import knock, mdns

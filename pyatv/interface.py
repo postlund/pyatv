@@ -4,35 +4,34 @@ This module contains all the interfaces that represents a generic Apple TV devic
 all its features.
 """
 
+from abc import ABC, abstractmethod
 import asyncio
-import re
-import inspect
 import hashlib
+import inspect
+import re
 from typing import (
     Any,
+    Callable,
     Dict,
+    List,
     Mapping,
     MutableMapping,
-    Optional,
     NamedTuple,
-    Callable,
-    TypeVar,
+    Optional,
     Tuple,
+    TypeVar,
     Union,
-    List,
 )
 import weakref
 
-from abc import ABC, abstractmethod
-
 from pyatv import const, convert, exceptions
 from pyatv.const import (
-    Protocol,
-    OperatingSystem,
     DeviceModel,
-    FeatureState,
     FeatureName,
+    FeatureState,
     InputAction,
+    OperatingSystem,
+    Protocol,
 )
 from pyatv.support import net
 

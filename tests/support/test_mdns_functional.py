@@ -1,16 +1,16 @@
 """Functional tests pyatv.support.mdns."""
 
 import asyncio
+from ipaddress import IPv4Address
 import logging
 import typing
-from ipaddress import IPv4Address
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from pyatv.support import mdns, net
-from tests import fake_udns, utils
 
+from tests import fake_udns, utils
 
 SERVICE_NAME = "Kitchen"
 MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local"

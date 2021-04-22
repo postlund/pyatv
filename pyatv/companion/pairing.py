@@ -6,11 +6,11 @@ from typing import Optional
 from aiohttp import ClientSession
 
 from pyatv import exceptions
+from pyatv.companion.auth import CompanionPairingProcedure
+from pyatv.companion.connection import CompanionConnection
+from pyatv.companion.protocol import CompanionProtocol
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.companion.connection import CompanionConnection
-from pyatv.companion.auth import CompanionPairingProcedure
-from pyatv.companion.protocol import CompanionProtocol
 from pyatv.support import error_handler
 from pyatv.support.hap_srp import SRPAuthHandler
 

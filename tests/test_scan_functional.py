@@ -1,16 +1,15 @@
 """Scanning tests with fake mDNS responder.."""
 
-import typing
-import pyatv
 from ipaddress import ip_address
-
+import typing
 from unittest.mock import patch
 
 import pytest
 
-from pyatv.const import Protocol, DeviceModel
-from tests import fake_udns
+import pyatv
+from pyatv.const import DeviceModel, Protocol
 
+from tests import fake_udns
 
 IP_1 = "10.0.0.1"
 IP_2 = "10.0.0.2"

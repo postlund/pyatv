@@ -1,8 +1,9 @@
 """Helper methods for DNS message."""
 
-import struct
 from ipaddress import IPv4Address
-from typing import Optional, Dict, List
+import struct
+from typing import Dict, List, Optional
+
 from pyatv.support import dns, mdns
 
 DEFAULT_QCLASS = 1

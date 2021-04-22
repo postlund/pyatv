@@ -1,14 +1,14 @@
 """Various network utility helpers."""
 
-import socket
-import struct
+from ipaddress import IPv4Address, IPv4Interface
 import logging
 import platform
-from ipaddress import IPv4Interface, IPv4Address
-from typing import Optional, List
+import socket
+import struct
+from typing import List, Optional
 
-import netifaces
 from aiohttp import ClientSession
+import netifaces
 
 from pyatv import exceptions
 from pyatv.support import log_binary

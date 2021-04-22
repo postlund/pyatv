@@ -1,22 +1,22 @@
 """CLI application for discovering and controlling Apple TVs."""
 
-import sys
+import argparse
+import asyncio
+import binascii
 import inspect
 import logging
-import binascii
-import asyncio
-import argparse
+import sys
 import traceback
 
-from pyatv import const, exceptions, interface, scan, connect, pair
+from pyatv import connect, const, exceptions, interface, pair, scan
 from pyatv.conf import (
+    AirPlayService,
     AppleTV,
+    CompanionService,
     DmapService,
     MrpService,
-    AirPlayService,
-    CompanionService,
 )
-from pyatv.const import Protocol, ShuffleState, RepeatState, InputAction
+from pyatv.const import InputAction, Protocol, RepeatState, ShuffleState
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts
 

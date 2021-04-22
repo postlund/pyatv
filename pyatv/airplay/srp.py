@@ -1,22 +1,22 @@
 """Implementation of SRP used by AirPlay device authtentication."""
 
-import os
-import hashlib
 import binascii
+import hashlib
 import logging
+import os
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.x25519 import (
     X25519PrivateKey,
     X25519PublicKey,
 )
-from srptools import SRPContext, SRPClientSession, constants
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from srptools import SRPClientSession, SRPContext, constants
 
+from pyatv.exceptions import AuthenticationError, NoCredentialsError
 from pyatv.support import log_binary
-from pyatv.exceptions import NoCredentialsError, AuthenticationError
 
 _LOGGER = logging.getLogger(__name__)
 

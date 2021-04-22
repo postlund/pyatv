@@ -5,18 +5,14 @@ import binascii
 from aiohttp import ClientSession
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from pyatv.const import Protocol
 from pyatv.airplay import srp
-from pyatv.airplay.auth import DeviceAuthenticator, AuthenticationVerifier
+from pyatv.airplay.auth import AuthenticationVerifier, DeviceAuthenticator
+from pyatv.const import Protocol
 from pyatv.exceptions import AuthenticationError
 from pyatv.support.net import HttpSession
-from tests.fake_device import FakeAppleTV
-from tests.fake_device.airplay import (
-    DEVICE_IDENTIFIER,
-    DEVICE_AUTH_KEY,
-    DEVICE_PIN,
-)
 
+from tests.fake_device import FakeAppleTV
+from tests.fake_device.airplay import DEVICE_AUTH_KEY, DEVICE_IDENTIFIER, DEVICE_PIN
 
 INVALID_AUTH_KEY = binascii.unhexlify("0" * 64)
 

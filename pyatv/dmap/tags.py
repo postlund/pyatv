@@ -1,7 +1,7 @@
 """Util functions for extracting and constructing DMAP data."""
 
-import plistlib
 import binascii
+import plistlib
 
 
 def read_str(data, start, length):

@@ -1,12 +1,11 @@
 """Various helper methods used by test cases."""
 
-import time
 import asyncio
-import inspect
-
+from asyncio import sleep as real_sleep
 from datetime import datetime
 from importlib import import_module
-from asyncio import sleep as real_sleep
+import inspect
+import time
 
 from aiohttp import ClientSession
 

@@ -1,15 +1,15 @@
 """Test suit for pairing process with Apple TV."""
 
 import ipaddress
+from unittest.mock import MagicMock
 
 import pytest
-from unittest.mock import MagicMock
 
 from pyatv import conf
 from pyatv.dmap import pairing, parser, tag_definitions
 from pyatv.support import net
-from tests import zeroconf_stub, utils
 
+from tests import utils, zeroconf_stub
 
 REMOTE_NAME = "pyatv remote"
 

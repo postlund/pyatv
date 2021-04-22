@@ -4,11 +4,11 @@ from aiohttp import ClientSession
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from pyatv import exceptions, net
-from pyatv.const import Protocol
 from pyatv.airplay import player
+from pyatv.const import Protocol
+
 from tests.fake_device import FakeAppleTV
 from tests.utils import stub_sleep, unstub_sleep
-
 
 STREAM = "http://airplaystream"
 START_POSITION = 0.8

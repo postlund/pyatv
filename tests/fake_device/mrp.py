@@ -1,20 +1,20 @@
 """Fake MRP Apple TV for tests."""
 
 import asyncio
+from datetime import datetime
 import logging
 import struct
-from datetime import datetime
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple
 
 from google.protobuf.message import Message as ProtobufMessage
 
 from pyatv import const
-from pyatv.support import chacha20, log_protobuf
 from pyatv.mrp import messages, protobuf, variant
-from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
+from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.mrp.server_auth import MrpServerAuth
+from pyatv.support import chacha20, log_protobuf
 
 from tests.utils import stub_sleep
 

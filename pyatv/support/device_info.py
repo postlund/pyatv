@@ -1,10 +1,9 @@
 """Lookup methods for device data."""
 
 import re
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from pyatv.const import DeviceModel
-
 
 _MODEL_LIST: Dict[str, DeviceModel] = {
     "AppleTV2,1": DeviceModel.Gen2,

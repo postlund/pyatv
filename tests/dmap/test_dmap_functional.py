@@ -1,28 +1,29 @@
 """Functional tests using the API with a fake DMAP Apple TV."""
 
 import asyncio
-import logging
 import ipaddress
+import logging
 
 from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
-from pyatv.conf import AirPlayService, DmapService, AppleTV
+from pyatv.conf import AirPlayService, AppleTV, DmapService
 from pyatv.const import (
-    Protocol,
-    ShuffleState,
-    RepeatState,
-    PowerState,
-    OperatingSystem,
-    FeatureState,
     FeatureName,
+    FeatureState,
     InputAction,
+    OperatingSystem,
+    PowerState,
+    Protocol,
+    RepeatState,
+    ShuffleState,
 )
 from pyatv.dmap import pairing
+
+from tests import common_functional_tests, zeroconf_stub
+from tests.common_functional_tests import DummyDeviceListener
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
-from tests import zeroconf_stub, common_functional_tests
-from tests.common_functional_tests import DummyDeviceListener
 from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)

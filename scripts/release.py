@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Helper script to make a release."""
 
-import re
-import os
-import sys
+import argparse
+from datetime import datetime
 import glob
 import logging
-import argparse
-import subprocess
+import os
 from pathlib import Path
-from datetime import datetime
-from packaging.version import Version, InvalidVersion
+import re
+import subprocess
+import sys
 
 import api
+from packaging.version import InvalidVersion, Version
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,15 +1,15 @@
 """Unit tests for pyatv.support."""
 
-import os
 import asyncio
 import logging
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from pyatv import exceptions
-from pyatv.support import error_handler, log_binary, log_protobuf
 from pyatv.mrp.protobuf import ProtocolMessage
+from pyatv.support import error_handler, log_binary, log_protobuf
 
 
 class DummyException(Exception):

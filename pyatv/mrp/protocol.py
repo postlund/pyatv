@@ -1,11 +1,10 @@
 """Implementation of the MRP protocol."""
 
 import asyncio
-import uuid
-import logging
-
 from collections import namedtuple
 from enum import Enum
+import logging
+import uuid
 
 from pyatv import exceptions
 from pyatv.mrp import messages, protobuf

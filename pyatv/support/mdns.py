@@ -1,13 +1,13 @@
 """Minimalistic DNS-SD implementation."""
 import asyncio
+from ipaddress import IPv4Address, ip_address
 import logging
 import math
 import socket
-import weakref
-from ipaddress import IPv4Address, ip_address
 import typing
+import weakref
 
-from zeroconf import Zeroconf, ServiceInfo
+from zeroconf import ServiceInfo, Zeroconf
 
 from pyatv import exceptions
 from pyatv.support import log_binary, net

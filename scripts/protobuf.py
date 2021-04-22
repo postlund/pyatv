@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 """Simple tool to work with protobuf in pyatv."""
 
-import os
-import sys
-import glob
-import stat
-import difflib
-import zipfile
-import binascii
 import argparse
-import subprocess
-from io import BytesIO
+import binascii
 from collections import namedtuple
-
-import requests
+import difflib
+import glob
+from io import BytesIO
+import os
+import stat
+import subprocess
+import sys
+import zipfile
 
 import cryptography
-from google.protobuf.text_format import MessageToString
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
-
+from google.protobuf.text_format import MessageToString
+import requests
 
 PROTOBUF_VERSION = "3.15.6"
 

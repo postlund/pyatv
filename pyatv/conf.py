@@ -8,12 +8,12 @@ For a configuration to be usable ("ready") it must have either a `DMAP` or `MRP`
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 """
 from ipaddress import IPv4Address
-from typing import Dict, Mapping, List, Optional
+from typing import Dict, List, Mapping, Optional
 
 from pyatv import exceptions
-from pyatv.const import Protocol, OperatingSystem, DeviceModel
-from pyatv.support.device_info import lookup_model, lookup_version
+from pyatv.const import DeviceModel, OperatingSystem, Protocol
 from pyatv.interface import BaseService, DeviceInfo
+from pyatv.support.device_info import lookup_model, lookup_version
 
 
 class AppleTV:

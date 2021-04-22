@@ -4,11 +4,12 @@ Notes:
  * Absolute time (0x06) is not implemented (can unpack as integer, not pack)
  * Likely other cases missing
 """
+from datetime import datetime
+
 # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
 import struct
-from uuid import UUID
-from datetime import datetime
 from typing import Tuple
+from uuid import UUID
 
 
 def pack(data: object) -> bytes:

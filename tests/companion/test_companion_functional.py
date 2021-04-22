@@ -1,19 +1,19 @@
 """Functional tests using the API with a fake Apple TV."""
 
-import logging
 from ipaddress import IPv4Address
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+import logging
 
+from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from deepdiff import DeepDiff
 
 import pyatv
-from pyatv.const import Protocol
-from pyatv.conf import CompanionService, MrpService, AppleTV
 from pyatv.companion.server_auth import CLIENT_CREDENTIALS
+from pyatv.conf import AppleTV, CompanionService, MrpService
+from pyatv.const import Protocol
 from pyatv.interface import App
 
-from tests.utils import until, faketime, stub_sleep
 from tests.fake_device import FakeAppleTV
+from tests.utils import faketime, stub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
 
