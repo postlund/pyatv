@@ -37,8 +37,8 @@ python setup.py develop
 echo "-> Installing protobuf-setuptools..."
 pip install protobuf-setuptools
 
-echo "-> Installing test dependencies..."
-pip install -r requirements_test.txt
+echo "-> Installing dependencies..."
+pip install --upgrade -r requirements_test.txt -r requirements_docs.txt
 pip install tox
 
 if [[ $GITPOD_INSTANCE_ID ]]; then
