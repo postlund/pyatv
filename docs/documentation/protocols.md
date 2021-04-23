@@ -773,7 +773,9 @@ key. Chacha20Poly1305 is used for encryption (just like HAP) with the following 
 
 Sequence number (starting from zero) is used as nonce, incremented by one for each sent or
 received message and encoded as little endian (12 bytes). Individual counters are used for each
-direction.
+direction. AAD should be set to the frame header. Do note that encrypting data will add a 16 byte
+authentication tag at the end, increasing the size by 16 bytes. The AAD for three bytes of data
+with `E_OPACK` as frame type would yield `0x08000013` as AAD for both encryption and decryption.
 
 ### E_OPACK
 
