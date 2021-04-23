@@ -169,6 +169,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.metadata.artwork_id, "some_id")
 
     @unittest_run_loop
+    async def test_metadata_artwork_erroneously_available(self):
+        self.usecase.example_video()
+
+        # Metadata suggests that artwork is available but no artwork is available
+        # when requested by client
+        self.usecase.change_artwork(None, ARTWORK_MIMETYPE, ARTWORK_ID)
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertIsNone(artwork)
+
+    @unittest_run_loop
     async def test_metadata_artwork_width_and_height(self):
         self.usecase.example_video()
         self.usecase.change_artwork(

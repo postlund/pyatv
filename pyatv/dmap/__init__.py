@@ -205,7 +205,9 @@ class BaseDmapAppleTV:
         self.latest_hash = self.latest_playing.hash
         return self.latest_playing
 
-    async def artwork(self, width, height) -> Optional[ArtworkInfo]:
+    async def artwork(
+        self, width: Optional[int], height: Optional[int]
+    ) -> Optional[ArtworkInfo]:
         """Return artwork for what is currently playing (or None)."""
         url = _ARTWORK_CMD.format(width=width or 0, height=height or 0)
         art = await self.daap.get(url, daap_data=False)
@@ -405,7 +407,9 @@ class DmapMetadata(Metadata):
         self.apple_tv = apple_tv
         self.artwork_cache = Cache(limit=4)
 
-    async def artwork(self, width=512, height=None) -> Optional[ArtworkInfo]:
+    async def artwork(
+        self, width: Optional[int] = 512, height: Optional[int] = None
+    ) -> Optional[ArtworkInfo]:
         """Return artwork for what is currently playing (or None).
 
         The parameters "width" and "height" makes it possible to request artwork of a
