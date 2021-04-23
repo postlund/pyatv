@@ -480,12 +480,15 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         setstate = messages.create(
             protobuf.SET_STATE_MESSAGE, identifier=message.identifier
         )
-        queue = setstate.inner().playbackQueue
-        queue.location = 0
-        item = queue.contentItems.add()
-        item.artworkData = self.state.states[self.state.active_player].artwork
-        item.artworkDataWidth = state.artwork_width or 456
-        item.artworkDataHeight = state.artwork_height or 789
+
+        artwork_data = self.state.states[self.state.active_player].artwork
+        if artwork_data:
+            queue = setstate.inner().playbackQueue
+            queue.location = 0
+            item = queue.contentItems.add()
+            item.artworkData = artwork_data
+            item.artworkDataWidth = state.artwork_width or 456
+            item.artworkDataHeight = state.artwork_height or 789
         self.send_to_client(setstate)
 
     def handle_wake_device(self, message, inner):

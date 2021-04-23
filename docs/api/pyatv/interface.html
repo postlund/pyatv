@@ -857,7 +857,9 @@ class Metadata(ABC):
 
     @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+    async def artwork(
+        self, width: Optional[int] = 512, height: Optional[int] = None
+    ) -&gt; Optional[ArtworkInfo]:
         &#34;&#34;&#34;Return artwork for what is currently playing (or None).
 
         The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
@@ -2145,7 +2147,9 @@ in one of the listed states.</p></section>
 
     @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+    async def artwork(
+        self, width: Optional[int] = 512, height: Optional[int] = None
+    ) -&gt; Optional[ArtworkInfo]:
         &#34;&#34;&#34;Return artwork for what is currently playing (or None).
 
         The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
@@ -2244,7 +2248,7 @@ def device_id(self) -&gt; Optional[str]:
 <h3>Methods</h3>
 <dl>
 <dt id="pyatv.interface.Metadata.artwork"><code class="name flex">
-<span>async def <span class="ident">artwork</span></span>(<span>self, width=512, height=None) -> Optional[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>]</span>
+<span>async def <span class="ident">artwork</span></span>(<span>self, width: Optional[int] = 512, height: Optional[int] = None) -> Optional[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>]</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return artwork for what is currently playing (or None).</p>
@@ -2259,7 +2263,9 @@ aspect ratio.</p></section>
 </summary>
 <pre><code class="python">@abstractmethod
 @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-async def artwork(self, width=512, height=None) -&gt; Optional[ArtworkInfo]:
+async def artwork(
+    self, width: Optional[int] = 512, height: Optional[int] = None
+) -&gt; Optional[ArtworkInfo]:
     &#34;&#34;&#34;Return artwork for what is currently playing (or None).
 
     The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
