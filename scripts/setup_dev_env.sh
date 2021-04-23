@@ -41,12 +41,14 @@ echo "-> Installing test dependencies..."
 pip install -r requirements_test.txt
 pip install tox
 
+if [[ $GITPOD_INSTANCE_ID ]]; then
+  echo "> Re-installing netifaces in GitPod due to bug"
+  pip uninstall -y netifaces
+  pip install netifaces
+fi
+
 echo "-> Running tests as verification..."
 python setup.py test
-
-echo "-> Generating documentation..."
-./scripts/build_docs.sh build
-
 
 cat <<EOF
 ==================================================
@@ -60,19 +62,22 @@ To run tests, run any of:
   python setup.py test
   pytest tests/test_conf.py  # Single test
 
+Test everything with tox:
+
+  tox -p auto
+
 To re-generate protobuf messages:
 
-  ./scripts/build_proto.sh
-  ./scripts/autogen_protobuf_extensions.py > pyatv/mrp/protobuf/__init__.py
+  ./scripts/protobuf.py --download generate
 
 The CLI application can be used, e.g. run:
 
   atvremote --debug commands
-  atvremote --developer --debug playing
+  atvremote --debug playing
 
 To preview documentation in docs, run:
 
-  ./scripts/build_docs.sh serve
+  ./scripts/build_docs.sh
 
 and navigate to http://127.0.0.1:4000
 
