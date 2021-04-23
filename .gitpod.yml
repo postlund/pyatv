@@ -1,7 +1,9 @@
 image: gitpod/workspace-full
 tasks:
+  - name: Documentation
+    command: ./scripts/build_docs.sh
   - name: Development
-    init: ./scripts/setup_dev_env.sh
+    init: ./scripts/setup_dev_env.sh && source bin/activate; tox -p auto
     command: source bin/activate
 
 ports:
@@ -12,3 +14,8 @@ ports:
 vscode:
   extensions:
     - ms-python.python
+
+github:
+  prebuilds:
+    addBadge: true
+    addComment: true

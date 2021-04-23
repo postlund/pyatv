@@ -18,6 +18,12 @@ upon asyncio and supports most of the commands that the regular Apple Remote app
 
 All the documentation you need is available at **[pyatv.dev](https://pyatv.dev)**.
 
+# Develop pyatv
+
+Want to help out with `pyatv`? Press the button below to get a fully prepared development environment and get started right away!
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/postlund/pyatv)
+
 # Shortcuts to the good stuff
 
 To save you some time, here are some shortcuts:
