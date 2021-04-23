@@ -1,9 +1,8 @@
 image: gitpod/workspace-full
 tasks:
-  - init: ./scripts/setup_dev_env.sh
+  - name: Development
+    init: ./scripts/setup_dev_env.sh
     command: source bin/activate
-    prebuild: tox -p auto
-  - command: ./scripts/build_docs.sh serve
 
 ports:
   - port: 4000 # Used for documentation
