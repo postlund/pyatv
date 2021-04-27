@@ -1321,7 +1321,7 @@ def name(self) -&gt; Optional[str]:
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.support.facade.RelayAppleTV</li>
+<li>pyatv.support.facade.FacadeAppleTV</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -1512,7 +1512,7 @@ async def connect(self) -&gt; None:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.companion.CompanionApps</li>
-<li>pyatv.support.facade.RelayApps</li>
+<li>pyatv.support.facade.FacadeApps</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -1968,7 +1968,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <li>pyatv.companion.CompanionFeatures</li>
 <li>pyatv.dmap.DmapFeatures</li>
 <li>pyatv.mrp.MrpFeatures</li>
-<li>pyatv.support.facade.RelayFeatures</li>
+<li>pyatv.support.facade.FacadeFeatures</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -2093,7 +2093,7 @@ in one of the listed states.</p></section>
 <ul class="hlist">
 <li>pyatv.dmap.DmapMetadata</li>
 <li>pyatv.mrp.MrpMetadata</li>
-<li>pyatv.support.facade.RelayMetadata</li>
+<li>pyatv.support.facade.FacadeMetadata</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2767,7 +2767,7 @@ def total_time(self) -&gt; Optional[int]:
 <ul class="hlist">
 <li>pyatv.dmap.DmapPower</li>
 <li>pyatv.mrp.MrpPower</li>
-<li>pyatv.support.facade.RelayPower</li>
+<li>pyatv.support.facade.FacadePower</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2854,7 +2854,7 @@ async def turn_on(self, await_new_state: bool = False) -&gt; None:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.scripts.atvscript.PowerPrinter</li>
-<li>pyatv.support.facade.RelayPower</li>
+<li>pyatv.support.facade.FacadePower</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -3227,7 +3227,7 @@ def stop(self) -&gt; None:
 <ul class="hlist">
 <li>pyatv.dmap.DmapRemoteControl</li>
 <li>pyatv.mrp.MrpRemoteControl</li>
-<li>pyatv.support.facade.RelayRemoteControl</li>
+<li>pyatv.support.facade.FacadeRemoteControl</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -3688,7 +3688,7 @@ def listener(self):
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.airplay.AirPlayStream</li>
-<li>pyatv.support.facade.RelayStream</li>
+<li>pyatv.support.facade.FacadeStream</li>
 </ul>
 <h3>Methods</h3>
 <dl>

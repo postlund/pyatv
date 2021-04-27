@@ -6,13 +6,13 @@ import pytest
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import FeatureInfo, Features, FeatureState
-from pyatv.support.facade import RelayAppleTV, SetupData
+from pyatv.support.facade import FacadeAppleTV, SetupData
 
 
 @pytest.fixture
 def facade_dummy(session_manager):
     conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
-    facade = RelayAppleTV(conf, session_manager)
+    facade = FacadeAppleTV(conf, session_manager)
     yield facade
 
 

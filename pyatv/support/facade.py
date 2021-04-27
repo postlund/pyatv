@@ -46,11 +46,11 @@ SetupMethod = Callable[
 ]
 
 
-class RelayRemoteControl(Relayer, interface.RemoteControl):
-    """Base class for API used to control an Apple TV."""
+class FacadeRemoteControl(Relayer, interface.RemoteControl):
+    """Facade implementation for API used to control an Apple TV."""
 
     def __init__(self):
-        """Initialize a new RelayRemoteControl instance."""
+        """Initialize a new FacadeRemoteControl instance."""
         super().__init__(interface.RemoteControl, DEFAULT_PRIORITIES)
 
     # pylint: disable=invalid-name
@@ -157,11 +157,11 @@ class RelayRemoteControl(Relayer, interface.RemoteControl):
         return await self.relay("set_repeat")(repeat_state=repeat_state)
 
 
-class RelayMetadata(Relayer, interface.Metadata):
-    """Base class for retrieving metadata from an Apple TV."""
+class FacadeMetadata(Relayer, interface.Metadata):
+    """Facade implementation for retrieving metadata from an Apple TV."""
 
     def __init__(self):
-        """Initialize a new RelayMetadata instance."""
+        """Initialize a new FacadeMetadata instance."""
         super().__init__(interface.Metadata, DEFAULT_PRIORITIES)
 
     @property
@@ -200,15 +200,15 @@ class RelayMetadata(Relayer, interface.Metadata):
         return self.relay("app")
 
 
-class RelayFeatures(Relayer, interface.Features):
-    """Relay class for supported feature functionality.
+class FacadeFeatures(Relayer, interface.Features):
+    """Facade implementation for supported feature functionality.
 
     This class holds a map from feature name to an instance handling that feature name.
     It is optimized for look up speed rather than memory usage.
     """
 
     def __init__(self) -> None:
-        """Initialize a new RelayFeatures instance."""
+        """Initialize a new FacadeFeatures instance."""
         super().__init__(interface.Features, DEFAULT_PRIORITIES)
         self._feature_map: Dict[FeatureName, Tuple[Protocol, interface.Features]] = {}
 
@@ -237,8 +237,8 @@ class RelayFeatures(Relayer, interface.Features):
         return DEFAULT_PRIORITIES.index(first) < DEFAULT_PRIORITIES.index(second)
 
 
-class RelayPower(Relayer, interface.Power, interface.PowerListener):
-    """Base class for retrieving power state from an Apple TV.
+class FacadePower(Relayer, interface.Power, interface.PowerListener):
+    """Facade implementation for retrieving power state from an Apple TV.
 
     Listener interface: `pyatv.interfaces.PowerListener`
     """
@@ -272,11 +272,11 @@ class RelayPower(Relayer, interface.Power, interface.PowerListener):
         await self.relay("turn_off")(await_new_state=await_new_state)
 
 
-class RelayStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-methods
-    """Base class for stream functionality."""
+class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-methods
+    """Facade implementation for stream functionality."""
 
     def __init__(self):
-        """Initialize a new RelayStream instance."""
+        """Initialize a new FacadeStream instance."""
         super().__init__(interface.Stream, DEFAULT_PRIORITIES)
 
     def close(self) -> None:
@@ -288,11 +288,11 @@ class RelayStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-
         await self.relay("play_url")(url, **kwargs)
 
 
-class RelayApps(Relayer, interface.Apps):
-    """Base class for app handling."""
+class FacadeApps(Relayer, interface.Apps):
+    """Facade implementation for app handling."""
 
     def __init__(self):
-        """Initialize a new RelayStream instance."""
+        """Initialize a new FacadeApps instance."""
         super().__init__(interface.Apps, DEFAULT_PRIORITIES)
 
     async def app_list(self) -> List[interface.App]:
@@ -304,29 +304,26 @@ class RelayApps(Relayer, interface.Apps):
         await self.relay("launch_app")(bundle_id)
 
 
-class RelayAppleTV(interface.AppleTV):
-    """Base class representing an Apple TV.
-
-    Listener interface: `pyatv.interfaces.DeviceListener`
-    """
+class FacadeAppleTV(interface.AppleTV):
+    """Facade implementation of the external interface."""
 
     def __init__(self, config: conf.AppleTV, session_manager: net.ClientSessionManager):
-        """Initialize a new AppleTV."""
+        """Initialize a new FacadeAppleTV instance."""
         super().__init__()
         self._config = config
         self._session_manager = session_manager
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
-        self._features = RelayFeatures()
+        self._features = FacadeFeatures()
         self.interfaces = {
             interface.Features: self._features,
-            interface.RemoteControl: RelayRemoteControl(),
-            interface.Metadata: RelayMetadata(),
-            interface.Power: RelayPower(),
+            interface.RemoteControl: FacadeRemoteControl(),
+            interface.Metadata: FacadeMetadata(),
+            interface.Power: FacadePower(),
             interface.PushUpdater: Relayer(
                 interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
             ),
-            interface.Stream: RelayStream(),
-            interface.Apps: RelayApps(),
+            interface.Stream: FacadeStream(),
+            interface.Apps: FacadeApps(),
         }
 
     def add_protocol(self, protocol: Protocol, setup_data: SetupData):

@@ -18,7 +18,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.support import net
-from pyatv.support.facade import RelayAppleTV, SetupMethod
+from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 
 _PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
@@ -74,7 +74,7 @@ async def connect(
         raise exceptions.DeviceIdMissingError("no device identifier")
 
     session_manager = await net.create_session(session)
-    atv = RelayAppleTV(config, session_manager)
+    atv = FacadeAppleTV(config, session_manager)
 
     for service in config.services:
         setup_method = _PROTOCOL_IMPLEMENTATIONS.get(service.protocol)
