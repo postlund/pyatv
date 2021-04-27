@@ -570,12 +570,6 @@ class DmapFeatures(Features):
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
         if feature_name == FeatureName.VolumeDown:
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
-        if feature_name == FeatureName.PlayUrl:
-            if self.config.get_service(Protocol.AirPlay) is not None:
-                return FeatureInfo(state=FeatureState.Available)
-        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
-            if self.config.get_service(Protocol.Companion) is not None:
-                return FeatureInfo(state=FeatureState.Available)
 
         return FeatureInfo(state=FeatureState.Unsupported)
 

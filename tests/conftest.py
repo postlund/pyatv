@@ -10,6 +10,10 @@ from tests.fake_knock import create_knock_server
 from tests.utils import stub_sleep, unstub_sleep
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "use_heartbeat: enable MRP heart beata")
+
+
 @pytest.fixture(autouse=True)
 def stub_netifaces():
     methods = {

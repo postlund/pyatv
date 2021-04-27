@@ -87,7 +87,7 @@ async def connect(
     try:
         await atv.connect()
     except Exception:
-        session_manager.close()
+        await session_manager.close()
         raise
     else:
         return atv
@@ -115,6 +115,6 @@ async def pair(
     }.get(protocol)
 
     if handler is None:
-        raise exceptions.UnsupportedProtocolError(str(protocol))
+        raise RuntimeError("missing implementation for {protocol}")
 
     return handler(config, await net.create_session(session), loop, **kwargs)

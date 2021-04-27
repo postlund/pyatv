@@ -128,6 +128,8 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         self.assertEqual(self.airplay_state.last_airplay_url, EXAMPLE_STREAM)
 
+        self.atv.stream.close()
+
     @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
         self.conf.get_service(Protocol.AirPlay).credentials = None

@@ -32,7 +32,7 @@ class SetupDataGenerator:
         return self.connect, self.close, self.features
 
 
-class TestFeatures(Features):
+class DummyFeatures(Features):
     def __init__(self, feature_name, feature_state=FeatureState.Available):
         self.feature_name = feature_name
         self.feature_state = feature_state
@@ -47,10 +47,10 @@ class TestFeatures(Features):
 
 def test_features_multi_instances(facade_dummy):
     mrp_sdg = SetupDataGenerator(FeatureName.Pause)
-    mrp_features = TestFeatures(FeatureName.Pause)
+    mrp_features = DummyFeatures(FeatureName.Pause)
 
     dmap_sdg = SetupDataGenerator(FeatureName.Play)
-    dmap_features = TestFeatures(FeatureName.Play)
+    dmap_features = DummyFeatures(FeatureName.Play)
 
     facade_dummy.interfaces[Features].register(mrp_features, Protocol.MRP)
     facade_dummy.interfaces[Features].register(dmap_features, Protocol.DMAP)
@@ -79,8 +79,8 @@ def test_features_multi_instances(facade_dummy):
 
 def test_features_feature_overlap_uses_priority(facade_dummy):
     sdg = SetupDataGenerator(FeatureName.Pause)
-    mrp_features = TestFeatures(FeatureName.Pause, FeatureState.Unavailable)
-    dmap_features = TestFeatures(FeatureName.Pause)
+    mrp_features = DummyFeatures(FeatureName.Pause, FeatureState.Unavailable)
+    dmap_features = DummyFeatures(FeatureName.Pause)
 
     facade_dummy.interfaces[Features].register(mrp_features, Protocol.MRP)
     facade_dummy.interfaces[Features].register(dmap_features, Protocol.DMAP)

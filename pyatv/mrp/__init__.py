@@ -624,13 +624,6 @@ class MrpFeatures(Features):
             if metadata and metadata.artworkAvailable:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
-        if feature_name == FeatureName.PlayUrl:
-            if self.config.get_service(Protocol.AirPlay) is not None:
-                return FeatureInfo(state=FeatureState.Available)
-        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
-            print(self.config)
-            if self.config.get_service(Protocol.Companion) is not None:
-                return FeatureInfo(state=FeatureState.Available)
 
         field_name = _FIELD_FEATURES.get(feature_name)
         if field_name:

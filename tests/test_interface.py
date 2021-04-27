@@ -333,6 +333,7 @@ def test_app_str():
 
 
 def test_app_equality():
+    assert App(None, None) != "test"
     assert App(None, None) == App(None, None)
     assert App("test", None) != App(None, None)
     assert App("test", None) == App("test", None)

@@ -215,16 +215,14 @@ class FacadeFeatures(Relayer, interface.Features):
     def add_mapping(self, protocol: Protocol, features: Set[FeatureName]) -> None:
         """Add mapping from protocol to features handled by that protocol."""
         instance = cast(interface.Features, self.get(protocol))
-        if not instance:
-            return
-
-        for feature in features:
-            # Add feature to map if missing OR replace if this protocol has higher
-            # priority than previous mapping
-            if feature not in self._feature_map or self._has_higher_priority(
-                protocol, self._feature_map[feature][0]
-            ):
-                self._feature_map[feature] = (protocol, instance)
+        if instance:
+            for feature in features:
+                # Add feature to map if missing OR replace if this protocol has higher
+                # priority than previous mapping
+                if feature not in self._feature_map or self._has_higher_priority(
+                    protocol, self._feature_map[feature][0]
+                ):
+                    self._feature_map[feature] = (protocol, instance)
 
     def get_feature(self, feature_name: FeatureName) -> interface.FeatureInfo:
         """Return current state of a feature."""
