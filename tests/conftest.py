@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import netifaces
 import pytest
 
-from pyatv.support.net import unused_port
+from pyatv.support.net import create_session, unused_port
 
 from tests.fake_knock import create_knock_server
 from tests.utils import stub_sleep, unstub_sleep
@@ -58,6 +58,13 @@ def stub_heartbeat_loop(request):
             yield
     else:
         yield
+
+
+@pytest.fixture
+def session_manager():
+    session_manager = create_session()
+    yield session_manager
+    session_manager.close()
 
 
 @pytest.fixture

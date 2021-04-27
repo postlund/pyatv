@@ -147,3 +147,15 @@ def test_main_instance_missing_instance_for_priority():
     relayer = Relayer(BaseClass, [Protocol.MRP])
     with pytest.raises(exceptions.NotSupportedError):
         relayer.main_instance
+
+
+def test_get_instance_of_type():
+    instance1 = SubClass1()
+    instance2 = SubClass2()
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay])
+    relayer.register(instance1, Protocol.MRP)
+    relayer.register(instance2, Protocol.DMAP)
+
+    assert relayer.get(Protocol.MRP) == instance1
+    assert relayer.get(Protocol.DMAP) == instance2
+    assert relayer.get(Protocol.AirPlay) is None

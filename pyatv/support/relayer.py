@@ -27,7 +27,7 @@ relayer.register(CompanionMetadata())
 relayer.register(AirPlayMetadata())
 artwork = await relayer.relay("artwork")(width=640)
 """
-from typing import Dict, List, Type, TypeVar
+from typing import Dict, List, Optional, Type, TypeVar
 
 from pyatv import exceptions
 from pyatv.const import Protocol
@@ -60,6 +60,10 @@ class Relayer:
             raise RuntimeError(f"{protocol} not in priority list")
 
         self._interfaces[protocol] = instance
+
+    def get(self, protocol: Protocol) -> Optional[T]:
+        """Return instance for protocol if available."""
+        return self._interfaces.get(protocol)
 
     def relay(self, target: str, priority: List[Protocol] = None):
         """Return method (or property value) of target instance based on priority."""

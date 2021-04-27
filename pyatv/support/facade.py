@@ -12,10 +12,10 @@ https://github.com/python/mypy/issues/5374
 """
 import asyncio
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
 
 from pyatv import conf, const, interface, net
-from pyatv.const import FeatureName, InputAction, Protocol
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ PUBLIC_INTERFACES = [
 ]
 
 # TODO: These should be moved somewhere and shared with protocol implementations
-SetupHandlers = Tuple[Callable[[], Awaitable[None]], Callable[[], None]]
+SetupData = Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
 SetupMethod = Callable[
     [
         asyncio.AbstractEventLoop,
@@ -42,7 +42,7 @@ SetupMethod = Callable[
         interface.StateProducer,
         net.ClientSessionManager,
     ],
-    SetupHandlers,
+    SetupData,
 ]
 
 
@@ -201,15 +201,40 @@ class RelayMetadata(Relayer, interface.Metadata):
 
 
 class RelayFeatures(Relayer, interface.Features):
-    """Relay class for supported feature functionality."""
+    """Relay class for supported feature functionality.
 
-    def __init__(self):
+    This class holds a map from feature name to an instance handling that feature name.
+    It is optimized for look up speed rather than memory usage.
+    """
+
+    def __init__(self) -> None:
         """Initialize a new RelayFeatures instance."""
         super().__init__(interface.Features, DEFAULT_PRIORITIES)
+        self._feature_map: Dict[FeatureName, Tuple[Protocol, interface.Features]] = {}
+
+    def add_mapping(self, protocol: Protocol, features: Set[FeatureName]) -> None:
+        """Add mapping from protocol to features handled by that protocol."""
+        instance = cast(interface.Features, self.get(protocol))
+        if not instance:
+            return
+
+        for feature in features:
+            # Add feature to map if missing OR replace if this protocol has higher
+            # priority than previous mapping
+            if feature not in self._feature_map or self._has_higher_priority(
+                protocol, self._feature_map[feature][0]
+            ):
+                self._feature_map[feature] = (protocol, instance)
 
     def get_feature(self, feature_name: FeatureName) -> interface.FeatureInfo:
         """Return current state of a feature."""
-        return self.relay("get_feature")(feature_name)
+        if feature_name in self._feature_map:
+            return self._feature_map[feature_name][1].get_feature(feature_name)
+        return interface.FeatureInfo(FeatureState.Unsupported)
+
+    @staticmethod
+    def _has_higher_priority(first: Protocol, second: Protocol) -> bool:
+        return DEFAULT_PRIORITIES.index(first) < DEFAULT_PRIORITIES.index(second)
 
 
 class RelayPower(Relayer, interface.Power, interface.PowerListener):
@@ -290,9 +315,10 @@ class RelayAppleTV(interface.AppleTV):
         super().__init__()
         self._config = config
         self._session_manager = session_manager
-        self._protocol_handlers: Dict[Protocol, SetupHandlers] = {}
+        self._protocol_handlers: Dict[Protocol, SetupData] = {}
+        self._features = RelayFeatures()
         self.interfaces = {
-            interface.Features: RelayFeatures(),
+            interface.Features: self._features,
             interface.RemoteControl: RelayRemoteControl(),
             interface.Metadata: RelayMetadata(),
             interface.Power: RelayPower(),
@@ -303,21 +329,22 @@ class RelayAppleTV(interface.AppleTV):
             interface.Apps: RelayApps(),
         }
 
-    def add_protocol(self, protocol: Protocol, protocol_handlers):
+    def add_protocol(self, protocol: Protocol, setup_data: SetupData):
         """Add a new protocol to the relay."""
-        self._protocol_handlers[protocol] = protocol_handlers
+        self._protocol_handlers[protocol] = setup_data
+        self._features.add_mapping(protocol, setup_data[2])
 
     async def connect(self) -> None:
         """Initiate connection to device."""
         # TODO: Parallelize with asyncio.gather? Needs to handle cancling
         # of ongoing tasks in case of error.
-        for protocol_connect, _ in self._protocol_handlers.values():
+        for protocol_connect, _, _ in self._protocol_handlers.values():
             await protocol_connect()
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
         asyncio.ensure_future(self._session_manager.close())
-        for _, protocol_close in self._protocol_handlers.values():
+        for _, protocol_close, _ in self._protocol_handlers.values():
             protocol_close()
 
     @property

@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.const import (
@@ -67,7 +67,7 @@ _KEY_LOOKUP = {
 }  # Dict[str, Tuple[int, int]]
 
 
-_FEATURES_SUPPORTED = [
+_FEATURES_SUPPORTED: List[FeatureName] = [
     FeatureName.Down,
     FeatureName.Home,
     FeatureName.HomeHold,
@@ -80,7 +80,7 @@ _FEATURES_SUPPORTED = [
     FeatureName.TurnOn,
     FeatureName.TurnOff,
     FeatureName.PowerState,
-]  # type: List[FeatureName]
+]
 
 _FEATURE_COMMAND_MAP = {
     FeatureName.Next: CommandInfo_pb2.NextTrack,
@@ -99,14 +99,14 @@ _FEATURE_COMMAND_MAP = {
 }
 
 # Features that are considered available if corresponding
-_FIELD_FEATURES = {
+_FIELD_FEATURES: Dict[FeatureName, str] = {
     FeatureName.Title: "title",
     FeatureName.Artist: "trackArtistName",
     FeatureName.Album: "albumName",
     FeatureName.Genre: "genre",
     FeatureName.TotalTime: "duration",
     FeatureName.Position: "elapsedTimeTimestamp",
-}  # type: Dict[FeatureName, str]
+}
 
 DELAY_BETWEEN_COMMANDS = 0.1
 
@@ -674,13 +674,13 @@ class MrpFeatures(Features):
         return FeatureInfo(state=FeatureState.Unsupported)
 
 
-def setup(
+def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None]]:
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
     """Set up a new MRP service."""
     service = config.get_service(Protocol.MRP)
     assert service is not None
@@ -710,4 +710,17 @@ def setup(
         push_updater.stop()
         protocol.stop()
 
-    return _connect, _close
+    # Features managed by this protocol
+    features = set(
+        [
+            FeatureName.Artwork,
+            FeatureName.VolumeDown,
+            FeatureName.VolumeUp,
+            FeatureName.App,
+        ]
+    )
+    features.update(_FEATURES_SUPPORTED)
+    features.update(_FEATURE_COMMAND_MAP.keys())
+    features.update(_FIELD_FEATURES.keys())
+
+    return _connect, _close, features

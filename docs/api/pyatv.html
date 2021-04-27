@@ -122,8 +122,8 @@ async def connect(
         if not setup_method:
             raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
 
-        handlers = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        atv.add_protocol(service.protocol, handlers)
+        setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
+        atv.add_protocol(service.protocol, setup_data)
 
     try:
         await atv.connect()
@@ -225,8 +225,8 @@ async def pair(
         if not setup_method:
             raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
 
-        handlers = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        atv.add_protocol(service.protocol, handlers)
+        setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
+        atv.add_protocol(service.protocol, setup_data)
 
     try:
         await atv.connect()
