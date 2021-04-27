@@ -99,7 +99,10 @@ class NoServiceError(Exception):
 
 
 class UnsupportedProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.&#34;&#34;&#34;
+    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.
+
+    DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!
+    &#34;&#34;&#34;
 
 
 class ConnectionFailedError(Exception):
@@ -571,13 +574,17 @@ that is not covered by another exception is covered by this exception.</p></sect
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Thrown when an unsupported protocol was requested.</p></section>
+<section class="desc"><p>Thrown when an unsupported protocol was requested.</p>
+<p>DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UnsupportedProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.
+
+    DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!
+    &#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

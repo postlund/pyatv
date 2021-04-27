@@ -2,15 +2,17 @@
 
 import asyncio
 import logging
-from typing import Dict, List, cast
+from typing import Any, Awaitable, Callable, Dict, List, Tuple, cast
 
-from pyatv import exceptions
+from pyatv import conf, exceptions
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import Protocol
-from pyatv.interface import App, Apps
+from pyatv.interface import App, Apps, StateProducer
 from pyatv.support.hap_srp import SRPAuthHandler
+from pyatv.support.net import ClientSessionManager
+from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,3 +103,27 @@ class CompanionApps(Apps):
     async def launch_app(self, bundle_id: str) -> None:
         """Launch an app based on bundle ID."""
         await self.api.launch_app(bundle_id)
+
+
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None]]:
+    """Set up a new Companion service."""
+    service = config.get_service(Protocol.Companion)
+    assert service is not None
+
+    api = CompanionAPI(config, loop)
+
+    interfaces[Apps].register(CompanionApps(api), Protocol.Companion)
+
+    async def _connect() -> None:
+        pass
+
+    def _close() -> None:
+        pass
+
+    return _connect, _close

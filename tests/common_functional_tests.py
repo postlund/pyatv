@@ -9,7 +9,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions, interface
-from pyatv.conf import AirPlayService, AppleTV
+from pyatv.conf import AirPlayService, AppleTV, CompanionService
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -84,16 +84,16 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
+        conf.add_service(CompanionService(1234))
 
         with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect(conf, self.loop)
 
     @unittest_run_loop
-    async def test_connect_invalid_protocol(self):
+    async def test_connect_no_service(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
-        conf.add_service(AirPlayService("airplay_id"))
 
-        with self.assertRaises(exceptions.UnsupportedProtocolError):
+        with self.assertRaises(exceptions.NoServiceError):
             await pyatv.connect(conf, self.loop, protocol=Protocol.AirPlay)
 
     @unittest_run_loop

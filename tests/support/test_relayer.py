@@ -145,4 +145,5 @@ def test_main_instance():
 
 def test_main_instance_missing_instance_for_priority():
     relayer = Relayer(BaseClass, [Protocol.MRP])
-    assert relayer.main_instance == None
+    with pytest.raises(exceptions.NotSupportedError):
+        relayer.main_instance

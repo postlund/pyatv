@@ -466,101 +466,85 @@ class PairingHandler(ABC):
         raise exceptions.NotSupportedError()
 
 
-class RemoteControl(ABC):
+class RemoteControl:
     &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
 
     # pylint: disable=invalid-name
-    @abstractmethod
     @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
     async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
     async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
     async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
     async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
     async def play(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
     async def play_pause(self) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
     async def pause(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
     async def stop(self) -&gt; None:
         &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
     async def next(self) -&gt; None:
         &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
     async def previous(self) -&gt; None:
         &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
     async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
     async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
     async def volume_up(self) -&gt; None:
         &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
     async def volume_down(self) -&gt; None:
         &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
     async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
     )
@@ -568,25 +552,21 @@ class RemoteControl(ABC):
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
     async def top_menu(self) -&gt; None:
         &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
     async def suspend(self) -&gt; None:
         &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
     async def wakeup(self) -&gt; None:
         &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         36,
         &#34;SkipForward&#34;,
@@ -599,7 +579,6 @@ class RemoteControl(ABC):
         &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
     async def skip_backward(self) -&gt; None:
         &#34;&#34;&#34;Skip backwards a time interval.
@@ -608,19 +587,16 @@ class RemoteControl(ABC):
         &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
     async def set_position(self, pos: int) -&gt; None:
         &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
     async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
         &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
     async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
         &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
@@ -827,35 +803,28 @@ class App:
         return False
 
 
-class Apps(ABC):
+class Apps:
     &#34;&#34;&#34;Base class for app handling.&#34;&#34;&#34;
 
-    @abstractmethod
     @feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
     async def app_list(self) -&gt; List[App]:
         &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
     async def launch_app(self, bundle_id: str) -&gt; None:
         &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
 
-class Metadata(ABC):
+class Metadata:
     &#34;&#34;&#34;Base class for retrieving metadata from an Apple TV.&#34;&#34;&#34;
-
-    def __init__(self, identifier: str) -&gt; None:
-        &#34;&#34;&#34;Initialize a new instance of Metadata.&#34;&#34;&#34;
-        self._identifier = identifier
 
     @property
     def device_id(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-        return self._identifier
+        raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
     async def artwork(
         self, width: Optional[int] = 512, height: Optional[int] = None
@@ -871,18 +840,15 @@ class Metadata(ABC):
         raise exceptions.NotSupportedError()
 
     @property
-    @abstractmethod
     def artwork_id(self) -&gt; str:
         &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     async def playing(self) -&gt; Playing:
         &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
-    @abstractmethod
     @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
     def app(self) -&gt; Optional[App]:
         &#34;&#34;&#34;Return information about current app playing something.
@@ -945,15 +911,13 @@ class PushUpdater(ABC, StateProducer):
         self._previous_state = playing
 
 
-class Stream(ABC):  # pylint: disable=too-few-public-methods
+class Stream:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
 
-    @abstractmethod
-    def close(self) -&gt; None:
+    def close(self) -&gt; None:  # pylint: disable=no-self-use
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     async def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
@@ -985,26 +949,23 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
         raise NotImplementedError()
 
 
-class Power(ABC, StateProducer):
+class Power(StateProducer):
     &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
 
     Listener interface: `pyatv.interfaces.PowerListener`
     &#34;&#34;&#34;
 
     @property  # type: ignore
-    @abstractmethod
     @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
     def power_state(self) -&gt; const.PowerState:
         &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
     async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
     async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
@@ -1078,10 +1039,9 @@ class DeviceInfo:
         return output
 
 
-class Features(ABC):
+class Features:
     &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
 
-    @abstractmethod
     def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
         &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
         raise NotImplementedError()
@@ -1126,66 +1086,55 @@ class AppleTV(ABC, StateProducer):
 
         No need to call it yourself, it&#39;s done automatically.
         &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def close(self) -&gt; None:
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def service(self) -&gt; BaseService:
         &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def remote_control(self) -&gt; RemoteControl:
         &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def metadata(self) -&gt; Metadata:
         &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def push_updater(self) -&gt; PushUpdater:
         &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def stream(self) -&gt; Stream:
         &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def power(self) -&gt; Power:
         &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def features(self) -&gt; Features:
         &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -1315,66 +1264,55 @@ def name(self) -&gt; Optional[str]:
 
         No need to call it yourself, it&#39;s done automatically.
         &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def close(self) -&gt; None:
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def service(self) -&gt; BaseService:
         &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def remote_control(self) -&gt; RemoteControl:
         &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def metadata(self) -&gt; Metadata:
         &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def push_updater(self) -&gt; PushUpdater:
         &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def stream(self) -&gt; Stream:
         &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def power(self) -&gt; Power:
         &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def features(self) -&gt; Features:
         &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1383,8 +1321,7 @@ def name(self) -&gt; Optional[str]:
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.dmap.DmapAppleTV</li>
-<li>pyatv.mrp.MrpAppleTV</li>
+<li>pyatv.support.facade.RelayAppleTV</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -1398,8 +1335,7 @@ def name(self) -&gt; Optional[str]:
 <pre><code class="python">@property
 @abstractmethod
 def apps(self) -&gt; Apps:
-    &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
@@ -1412,8 +1348,7 @@ def apps(self) -&gt; Apps:
 <pre><code class="python">@property
 @abstractmethod
 def device_info(self) -&gt; DeviceInfo:
-    &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.features"><code class="name">var <span class="ident">features</span> -> <a title="pyatv.interface.Features" href="#pyatv.interface.Features">Features</a></code></dt>
@@ -1426,8 +1361,7 @@ def device_info(self) -&gt; DeviceInfo:
 <pre><code class="python">@property
 @abstractmethod
 def features(self) -&gt; Features:
-    &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.metadata"><code class="name">var <span class="ident">metadata</span> -> <a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></dt>
@@ -1440,8 +1374,7 @@ def features(self) -&gt; Features:
 <pre><code class="python">@property
 @abstractmethod
 def metadata(self) -&gt; Metadata:
-    &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.power"><code class="name">var <span class="ident">power</span> -> <a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></dt>
@@ -1454,8 +1387,7 @@ def metadata(self) -&gt; Metadata:
 <pre><code class="python">@property
 @abstractmethod
 def power(self) -&gt; Power:
-    &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.push_updater"><code class="name">var <span class="ident">push_updater</span> -> <a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></dt>
@@ -1468,8 +1400,7 @@ def power(self) -&gt; Power:
 <pre><code class="python">@property
 @abstractmethod
 def push_updater(self) -&gt; PushUpdater:
-    &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.remote_control"><code class="name">var <span class="ident">remote_control</span> -> <a title="pyatv.interface.RemoteControl" href="#pyatv.interface.RemoteControl">RemoteControl</a></code></dt>
@@ -1482,8 +1413,7 @@ def push_updater(self) -&gt; PushUpdater:
 <pre><code class="python">@property
 @abstractmethod
 def remote_control(self) -&gt; RemoteControl:
-    &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.service"><code class="name">var <span class="ident">service</span> -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></dt>
@@ -1496,8 +1426,7 @@ def remote_control(self) -&gt; RemoteControl:
 <pre><code class="python">@property
 @abstractmethod
 def service(self) -&gt; BaseService:
-    &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.stream"><code class="name">var <span class="ident">stream</span> -> <a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></dt>
@@ -1510,8 +1439,7 @@ def service(self) -&gt; BaseService:
 <pre><code class="python">@property
 @abstractmethod
 def stream(self) -&gt; Stream:
-    &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 </dl>
@@ -1528,8 +1456,7 @@ def stream(self) -&gt; Stream:
 </summary>
 <pre><code class="python">@abstractmethod
 def close(self) -&gt; None:
-    &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.connect"><code class="name flex">
@@ -1547,8 +1474,7 @@ async def connect(self) -&gt; None:
     &#34;&#34;&#34;Initiate connection to device.
 
     No need to call it yourself, it&#39;s done automatically.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
+    &#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 </dl>
@@ -1570,28 +1496,23 @@ async def connect(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Apps(ABC):
+<pre><code class="python">class Apps:
     &#34;&#34;&#34;Base class for app handling.&#34;&#34;&#34;
 
-    @abstractmethod
     @feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
     async def app_list(self) -&gt; List[App]:
         &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
     async def launch_app(self, bundle_id: str) -&gt; None:
         &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.companion.CompanionApps</li>
+<li>pyatv.support.facade.RelayApps</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -1604,8 +1525,7 @@ async def connect(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
+<pre><code class="python">@feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
 async def app_list(self) -&gt; List[App]:
     &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -1620,8 +1540,7 @@ async def app_list(self) -&gt; List[App]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
+<pre><code class="python">@feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
 async def launch_app(self, bundle_id: str) -&gt; None:
     &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2009,10 +1928,9 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Features(ABC):
+<pre><code class="python">class Features:
     &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
 
-    @abstractmethod
     def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
         &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
         raise NotImplementedError()
@@ -2044,14 +1962,11 @@ def connection_lost(self, exception: Exception) -&gt; None:
                 return False
         return True</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapFeatures</li>
 <li>pyatv.mrp.MrpFeatures</li>
+<li>pyatv.support.facade.RelayFeatures</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -2083,8 +1998,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
+<pre><code class="python">def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
     &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
     raise NotImplementedError()</code></pre>
 </details>
@@ -2124,28 +2038,21 @@ in one of the listed states.</p></section>
 </dd>
 <dt id="pyatv.interface.Metadata"><code class="flex name class">
 <span>class <span class="ident">Metadata</span></span>
-<span>(</span><span>identifier: str)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Base class for retrieving metadata from an Apple TV.</p>
-<p>Initialize a new instance of Metadata.</p></section>
+<section class="desc"><p>Base class for retrieving metadata from an Apple TV.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Metadata(ABC):
+<pre><code class="python">class Metadata:
     &#34;&#34;&#34;Base class for retrieving metadata from an Apple TV.&#34;&#34;&#34;
-
-    def __init__(self, identifier: str) -&gt; None:
-        &#34;&#34;&#34;Initialize a new instance of Metadata.&#34;&#34;&#34;
-        self._identifier = identifier
 
     @property
     def device_id(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-        return self._identifier
+        raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
     async def artwork(
         self, width: Optional[int] = 512, height: Optional[int] = None
@@ -2161,18 +2068,15 @@ in one of the listed states.</p></section>
         raise exceptions.NotSupportedError()
 
     @property
-    @abstractmethod
     def artwork_id(self) -&gt; str:
         &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     async def playing(self) -&gt; Playing:
         &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
-    @abstractmethod
     @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
     def app(self) -&gt; Optional[App]:
         &#34;&#34;&#34;Return information about current app playing something.
@@ -2183,14 +2087,11 @@ in one of the listed states.</p></section>
         &#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapMetadata</li>
 <li>pyatv.mrp.MrpMetadata</li>
+<li>pyatv.support.facade.RelayMetadata</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2205,7 +2106,6 @@ feature will be unavailable.</p></section>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
 def app(self) -&gt; Optional[App]:
     &#34;&#34;&#34;Return information about current app playing something.
@@ -2225,7 +2125,6 @@ def app(self) -&gt; Optional[App]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-@abstractmethod
 def artwork_id(self) -&gt; str:
     &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2241,7 +2140,7 @@ def artwork_id(self) -&gt; str:
 <pre><code class="python">@property
 def device_id(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-    return self._identifier</code></pre>
+    raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
 </dl>
@@ -2261,8 +2160,7 @@ aspect ratio.</p></section>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
+<pre><code class="python">@feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
 async def artwork(
     self, width: Optional[int] = 512, height: Optional[int] = None
 ) -&gt; Optional[ArtworkInfo]:
@@ -2286,8 +2184,7 @@ async def artwork(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-async def playing(self) -&gt; Playing:
+<pre><code class="python">async def playing(self) -&gt; Playing:
     &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -2838,26 +2735,23 @@ def total_time(self) -&gt; Optional[int]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Power(ABC, StateProducer):
+<pre><code class="python">class Power(StateProducer):
     &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
 
     Listener interface: `pyatv.interfaces.PowerListener`
     &#34;&#34;&#34;
 
     @property  # type: ignore
-    @abstractmethod
     @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
     def power_state(self) -&gt; const.PowerState:
         &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
     async def turn_on(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
     async def turn_off(self, await_new_state: bool = False) -&gt; None:
         &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
@@ -2865,13 +2759,13 @@ def total_time(self) -&gt; Optional[int]:
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>abc.ABC</li>
 <li><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapPower</li>
 <li>pyatv.mrp.MrpPower</li>
+<li>pyatv.support.facade.RelayPower</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2883,7 +2777,6 @@ def total_time(self) -&gt; Optional[int]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property  # type: ignore
-@abstractmethod
 @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
 def power_state(self) -&gt; const.PowerState:
     &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
@@ -2902,8 +2795,7 @@ def power_state(self) -&gt; const.PowerState:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
+<pre><code class="python">@feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
 async def turn_off(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2918,8 +2810,7 @@ async def turn_off(self, await_new_state: bool = False) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
+<pre><code class="python">@feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
 async def turn_on(self, await_new_state: bool = False) -&gt; None:
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -2961,6 +2852,7 @@ async def turn_on(self, await_new_state: bool = False) -&gt; None:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.scripts.atvscript.PowerPrinter</li>
+<li>pyatv.support.facade.RelayPower</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -3193,101 +3085,85 @@ def stop(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class RemoteControl(ABC):
+<pre><code class="python">class RemoteControl:
     &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
 
     # pylint: disable=invalid-name
-    @abstractmethod
     @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
     async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
     async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
     async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
     async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
     async def play(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
     async def play_pause(self) -&gt; None:
         &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
     async def pause(self) -&gt; None:
         &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
     async def stop(self) -&gt; None:
         &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
     async def next(self) -&gt; None:
         &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
     async def previous(self) -&gt; None:
         &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
     async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
     async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
     async def volume_up(self) -&gt; None:
         &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
     async def volume_down(self) -&gt; None:
         &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
     async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
         &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
     )
@@ -3295,25 +3171,21 @@ def stop(self) -&gt; None:
         &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
     async def top_menu(self) -&gt; None:
         &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
     async def suspend(self) -&gt; None:
         &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
     async def wakeup(self) -&gt; None:
         &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         36,
         &#34;SkipForward&#34;,
@@ -3326,7 +3198,6 @@ def stop(self) -&gt; None:
         &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
     async def skip_backward(self) -&gt; None:
         &#34;&#34;&#34;Skip backwards a time interval.
@@ -3335,32 +3206,26 @@ def stop(self) -&gt; None:
         &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
     async def set_position(self, pos: int) -&gt; None:
         &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
     async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
         &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
     async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
         &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapRemoteControl</li>
 <li>pyatv.mrp.MrpRemoteControl</li>
+<li>pyatv.support.facade.RelayRemoteControl</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -3373,8 +3238,7 @@ def stop(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
+<pre><code class="python">@feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
 async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3389,8 +3253,7 @@ async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
+<pre><code class="python">@feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
 async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3405,8 +3268,7 @@ async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(
+<pre><code class="python">@feature(
     15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
 )
 async def home_hold(self) -&gt; None:
@@ -3423,8 +3285,7 @@ async def home_hold(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
+<pre><code class="python">@feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
 async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3439,8 +3300,7 @@ async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
+<pre><code class="python">@feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
 async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3455,8 +3315,7 @@ async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
+<pre><code class="python">@feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
 async def next(self) -&gt; None:
     &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3471,8 +3330,7 @@ async def next(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
+<pre><code class="python">@feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
 async def pause(self) -&gt; None:
     &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3487,8 +3345,7 @@ async def pause(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
+<pre><code class="python">@feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
 async def play(self) -&gt; None:
     &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3503,8 +3360,7 @@ async def play(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
+<pre><code class="python">@feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
 async def play_pause(self) -&gt; None:
     &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3519,8 +3375,7 @@ async def play_pause(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
+<pre><code class="python">@feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
 async def previous(self) -&gt; None:
     &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3535,8 +3390,7 @@ async def previous(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
+<pre><code class="python">@feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
 async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3551,8 +3405,7 @@ async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
+<pre><code class="python">@feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
 async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3567,8 +3420,7 @@ async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
+<pre><code class="python">@feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
 async def set_position(self, pos: int) -&gt; None:
     &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3583,8 +3435,7 @@ async def set_position(self, pos: int) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
+<pre><code class="python">@feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
 async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
     &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3599,8 +3450,7 @@ async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
+<pre><code class="python">@feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
 async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
     &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3616,8 +3466,7 @@ async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
+<pre><code class="python">@feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
 async def skip_backward(self) -&gt; None:
     &#34;&#34;&#34;Skip backwards a time interval.
 
@@ -3636,8 +3485,7 @@ async def skip_backward(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(
+<pre><code class="python">@feature(
     36,
     &#34;SkipForward&#34;,
     &#34;Skip forward a time interval.&#34;,
@@ -3659,8 +3507,7 @@ async def skip_forward(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
+<pre><code class="python">@feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
 async def stop(self) -&gt; None:
     &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3675,8 +3522,7 @@ async def stop(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
+<pre><code class="python">@feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
 async def suspend(self) -&gt; None:
     &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3691,8 +3537,7 @@ async def suspend(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
+<pre><code class="python">@feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
 async def top_menu(self) -&gt; None:
     &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3707,8 +3552,7 @@ async def top_menu(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
+<pre><code class="python">@feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
 async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
     &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3723,8 +3567,7 @@ async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
+<pre><code class="python">@feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
 async def volume_down(self) -&gt; None:
     &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3739,8 +3582,7 @@ async def volume_down(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
+<pre><code class="python">@feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
 async def volume_up(self) -&gt; None:
     &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3755,8 +3597,7 @@ async def volume_up(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
+<pre><code class="python">@feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
 async def wakeup(self) -&gt; None:
     &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
@@ -3830,27 +3671,22 @@ def listener(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Stream(ABC):  # pylint: disable=too-few-public-methods
+<pre><code class="python">class Stream:  # pylint: disable=too-few-public-methods
     &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
 
-    @abstractmethod
-    def close(self) -&gt; None:
+    def close(self) -&gt; None:  # pylint: disable=no-self-use
         &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     async def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>abc.ABC</li>
-</ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.airplay.AirPlayStreamAPI</li>
+<li>pyatv.airplay.AirPlayStream</li>
+<li>pyatv.support.facade.RelayStream</li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -3863,8 +3699,7 @@ def listener(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-def close(self) -&gt; None:
+<pre><code class="python">def close(self) -&gt; None:  # pylint: disable=no-self-use
     &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
@@ -3878,8 +3713,7 @@ def close(self) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
-@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
+<pre><code class="python">@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
 async def play_url(self, url: str, **kwargs) -&gt; None:
     &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>

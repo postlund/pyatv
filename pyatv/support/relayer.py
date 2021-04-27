@@ -13,7 +13,7 @@ If all of these protocols were available, the general priority order would likel
 MrpMetadata, DmapMetadata, AirPlayMetadata, CompanionMetadata (the last two currently
 does not support metadata). So the relayer would first and foremost call a method in
 MrpMetadata, then DmapMetadata if no implementation exists, and so on. If no instance
-provides an implementation, an `exceptions.NotSupportedError` is thrown.
+provides an implementation, an `exceptions.NotSupportedError` is raised.
 
 A code example:
 
@@ -27,7 +27,7 @@ relayer.register(CompanionMetadata())
 relayer.register(AirPlayMetadata())
 artwork = await relayer.relay("artwork")(width=640)
 """
-from typing import Dict, List, Optional, Type, TypeVar
+from typing import Dict, List, Type, TypeVar
 
 from pyatv import exceptions
 from pyatv.const import Protocol
@@ -47,12 +47,12 @@ class Relayer:
         self._interfaces: Dict[Protocol, T] = {}
 
     @property
-    def main_instance(self) -> Optional[T]:
-        """Return instance based on priority."""
+    def main_instance(self) -> T:
+        """Return main instance based on priority."""
         for priority in self._priorities:
             if priority in self._interfaces:
                 return self._interfaces[priority]
-        return None
+        raise exceptions.NotSupportedError()
 
     def register(self, instance: T, protocol: Protocol) -> None:
         """Register a new instance for an interface."""
@@ -61,7 +61,7 @@ class Relayer:
 
         self._interfaces[protocol] = instance
 
-    def relay(self, target: str, priority: List[Protocol] = []):
+    def relay(self, target: str, priority: List[Protocol] = None):
         """Return method (or property value) of target instance based on priority."""
         instance = self._find_instance(target, priority or self._priorities)
         return getattr(instance, target)

@@ -5,22 +5,25 @@ import binascii
 import logging
 import os
 import re
+from typing import Any, Awaitable, Callable, Dict, Tuple
 
 from aiohttp import ClientSession
 
-from pyatv import exceptions
+from pyatv import conf, exceptions
 from pyatv.airplay.auth import AuthenticationVerifier
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.server import StaticFileWebServer
 from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.const import Protocol
-from pyatv.interface import Stream
+from pyatv.interface import StateProducer, Stream
 from pyatv.support import net
+from pyatv.support.net import ClientSessionManager
+from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
+class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
     def __init__(self, config, loop: asyncio.AbstractEventLoop) -> None:
@@ -102,3 +105,28 @@ class AirPlayStreamAPI(Stream):  # pylint: disable=too-few-public-methods
             await session_manager.close()
             if server:
                 await server.close()
+
+
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None]]:
+    """Set up a new AirPlay service."""
+    service = config.get_service(Protocol.AirPlay)
+    assert service is not None
+
+    # TODO: Split up in connect/protocol and Stream implementation
+    stream = AirPlayStream(config, loop)
+
+    interfaces[Stream].register(stream, Protocol.AirPlay)
+
+    async def _connect() -> None:
+        pass
+
+    def _close() -> None:
+        stream.close()
+
+    return _connect, _close
