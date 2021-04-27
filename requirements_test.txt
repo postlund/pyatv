@@ -3,7 +3,7 @@ codecov==2.1.11
 deepdiff==5.3.0
 flake8==3.9.1
 isort==5.8.0
-pylint==2.7.4
+pylint==2.8.2
 pytest==6.2.3
 pytest-asyncio==0.15.1
 pytest-cov==2.11.1

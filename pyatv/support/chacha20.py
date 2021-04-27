@@ -1,8 +1,6 @@
 """Transparent encryption layer using Chacha20_Pooly1305."""
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-from pyatv import exceptions
-
 NONCE_LENGTH = 12
 
 
@@ -42,8 +40,5 @@ class Chacha20Cipher:
             nounce = b"\x00" * (NONCE_LENGTH - len(nounce)) + nounce
 
         decrypted = self._enc_in.decrypt(nounce, data, aad)
-
-        if not decrypted:
-            raise exceptions.AuthenticationError("data decrypt failed")
 
         return bytes(decrypted)
