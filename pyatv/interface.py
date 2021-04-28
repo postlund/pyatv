@@ -238,101 +238,85 @@ class PairingHandler(ABC):
         raise exceptions.NotSupportedError()
 
 
-class RemoteControl(ABC):
+class RemoteControl:
     """Base class for API used to control an Apple TV."""
 
     # pylint: disable=invalid-name
-    @abstractmethod
     @feature(0, "Up", "Up button on remote.")
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(1, "Down", "Down button on remote.")
     async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(2, "Left", "Left button on remote.")
     async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(3, "Right", "Right button on remote.")
     async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(4, "Play", "Start playing media.")
     async def play(self) -> None:
         """Press key play."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(5, "PlayPause", "Toggle between play/pause.")
     async def play_pause(self) -> None:
         """Toggle between play and pause."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(6, "Pause", "Pause playing media.")
     async def pause(self) -> None:
         """Press key play."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(7, "Stop", "Stop playing media.")
     async def stop(self) -> None:
         """Press key stop."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(8, "Next", "Change to next item.")
     async def next(self) -> None:
         """Press key next."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(9, "Previous", "Change to previous item.")
     async def previous(self) -> None:
         """Press key previous."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(10, "Select", "Select current option.")
     async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(11, "Menu", "Go back to previous menu.")
     async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(12, "VolumeUp", "Increase volume.")
     async def volume_up(self) -> None:
         """Press key volume up."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(13, "VolumeDown", "Decrease volume.")
     async def volume_down(self) -> None:
         """Press key volume down."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(14, "Home", "Home/TV button.")
     async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         15, "HomeHold", "Long-press home button (deprecated: use RemoteControl.home)."
     )
@@ -340,25 +324,21 @@ class RemoteControl(ABC):
         """Hold key home."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(16, "TopMenu", "Go to main menu.")
     async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(17, "Suspend", "Suspend device (deprecated; use Power.turn_off).")
     async def suspend(self) -> None:
         """Suspend the device."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(18, "WakeUp", "Wake up device (deprecated; use Power.turn_on).")
     async def wakeup(self) -> None:
         """Wake up the device."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(
         36,
         "SkipForward",
@@ -371,7 +351,6 @@ class RemoteControl(ABC):
         """
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(37, "SkipBackward", "Skip backwards a time interval.")
     async def skip_backward(self) -> None:
         """Skip backwards a time interval.
@@ -380,19 +359,16 @@ class RemoteControl(ABC):
         """
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(19, "SetPosition", "Seek to position.")
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(20, "SetShuffle", "Change shuffle state.")
     async def set_shuffle(self, shuffle_state: const.ShuffleState) -> None:
         """Change shuffle mode to on or off."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(21, "SetRepeat", "Change repeat state.")
     async def set_repeat(self, repeat_state: const.RepeatState) -> None:
         """Change repeat state."""
@@ -599,35 +575,28 @@ class App:
         return False
 
 
-class Apps(ABC):
+class Apps:
     """Base class for app handling."""
 
-    @abstractmethod
     @feature(38, "AppList", "List of launchable apps.")
     async def app_list(self) -> List[App]:
         """Fetch a list of apps that can be launched."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(39, "LaunchApp", "Launch an app.")
     async def launch_app(self, bundle_id: str) -> None:
         """Launch an app based on bundle ID."""
         raise exceptions.NotSupportedError()
 
 
-class Metadata(ABC):
+class Metadata:
     """Base class for retrieving metadata from an Apple TV."""
-
-    def __init__(self, identifier: str) -> None:
-        """Initialize a new instance of Metadata."""
-        self._identifier = identifier
 
     @property
     def device_id(self) -> Optional[str]:
         """Return a unique identifier for current device."""
-        return self._identifier
+        raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(30, "Artwork", "Playing media artwork.")
     async def artwork(
         self, width: Optional[int] = 512, height: Optional[int] = None
@@ -643,18 +612,15 @@ class Metadata(ABC):
         raise exceptions.NotSupportedError()
 
     @property
-    @abstractmethod
     def artwork_id(self) -> str:
         """Return a unique identifier for current artwork."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     async def playing(self) -> Playing:
         """Return what is currently playing."""
         raise exceptions.NotSupportedError()
 
     @property  # type: ignore
-    @abstractmethod
     @feature(35, "App", "App playing media.")
     def app(self) -> Optional[App]:
         """Return information about current app playing something.
@@ -717,15 +683,13 @@ class PushUpdater(ABC, StateProducer):
         self._previous_state = playing
 
 
-class Stream(ABC):  # pylint: disable=too-few-public-methods
+class Stream:  # pylint: disable=too-few-public-methods
     """Base class for stream functionality."""
 
-    @abstractmethod
-    def close(self) -> None:
+    def close(self) -> None:  # pylint: disable=no-self-use
         """Close connection and release allocated resources."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(31, "PlayUrl", "Stream a URL on device.")
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
@@ -757,26 +721,23 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
         raise NotImplementedError()
 
 
-class Power(ABC, StateProducer):
+class Power(StateProducer):
     """Base class for retrieving power state from an Apple TV.
 
     Listener interface: `pyatv.interfaces.PowerListener`
     """
 
     @property  # type: ignore
-    @abstractmethod
     @feature(32, "PowerState", "Current device power state.")
     def power_state(self) -> const.PowerState:
         """Return device power state."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(33, "TurnOn", "Turn device on.")
     async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         raise exceptions.NotSupportedError()
 
-    @abstractmethod
     @feature(34, "TurnOff", "Turn off device.")
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
@@ -850,10 +811,9 @@ class DeviceInfo:
         return output
 
 
-class Features(ABC):
+class Features:
     """Base class for supported feature functionality."""
 
-    @abstractmethod
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
         raise NotImplementedError()
@@ -898,63 +858,52 @@ class AppleTV(ABC, StateProducer):
 
         No need to call it yourself, it's done automatically.
         """
-        raise exceptions.NotSupportedError()
 
     @abstractmethod
     def close(self) -> None:
         """Close connection and release allocated resources."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def device_info(self) -> DeviceInfo:
         """Return API for device information."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def service(self) -> BaseService:
         """Return service used to connect to the Apple TV."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def remote_control(self) -> RemoteControl:
         """Return API for controlling the Apple TV."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def metadata(self) -> Metadata:
         """Return API for retrieving metadata from the Apple TV."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def push_updater(self) -> PushUpdater:
         """Return API for handling push update from the Apple TV."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def stream(self) -> Stream:
         """Return API for streaming media."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def power(self) -> Power:
         """Return API for power management."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def features(self) -> Features:
         """Return features interface."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def apps(self) -> Apps:
         """Return apps interface."""
-        raise exceptions.NotSupportedError()

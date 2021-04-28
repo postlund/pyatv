@@ -2,15 +2,17 @@
 
 import asyncio
 import logging
-from typing import Dict, List, cast
+from typing import Any, Awaitable, Callable, Dict, List, Set, Tuple, cast
 
-from pyatv import exceptions
+from pyatv import conf, exceptions
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
-from pyatv.const import Protocol
-from pyatv.interface import App, Apps
+from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.interface import App, Apps, FeatureInfo, Features, StateProducer
 from pyatv.support.hap_srp import SRPAuthHandler
+from pyatv.support.net import ClientSessionManager
+from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,6 +84,25 @@ class CompanionAPI:
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
 
+class CompanionFeatures(Features):
+    """Implementation of supported feature functionality."""
+
+    def __init__(self, service: conf.CompanionService) -> None:
+        """Initialize a new CompanionFeatures instance."""
+        self.service = service
+
+    def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
+        """Return current state of a feature."""
+        # Credentials are needed, so cannot be available without them
+        if self.service.credentials is not None:
+            # Just assume these are available for now if the protocol is configured,
+            # we don't have any way to verify it anyways.
+            if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
+                return FeatureInfo(FeatureState.Available)
+
+        return FeatureInfo(FeatureState.Unavailable)
+
+
 class CompanionApps(Apps):
     """Implementation of API for app handling."""
 
@@ -101,3 +122,30 @@ class CompanionApps(Apps):
     async def launch_app(self, bundle_id: str) -> None:
         """Launch an app based on bundle ID."""
         await self.api.launch_app(bundle_id)
+
+
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+    """Set up a new Companion service."""
+    service = config.get_service(Protocol.Companion)
+    assert service is not None
+
+    api = CompanionAPI(config, loop)
+
+    interfaces[Apps].register(CompanionApps(api), Protocol.Companion)
+    interfaces[Features].register(
+        CompanionFeatures(cast(conf.CompanionService, service)), Protocol.Companion
+    )
+
+    async def _connect() -> None:
+        pass
+
+    def _close() -> None:
+        pass
+
+    return _connect, _close, set([FeatureName.AppList, FeatureName.LaunchApp])

@@ -15,7 +15,7 @@ A feature can at any given time be considered to be in one of the following stat
 | State | Meaning |
 | ----- | ------- |
 | Unknown | The feature is supported by the device but it is not possible to determine if it is available or not, i.e. if it can be used *now*. All devices for instance supports `Pause`, but it is only possible to pause if something is playing.
-| Unsupported | The feature is not supported by the device at all, e.g. Siri is unsupported on Apple TV 3.
+| Unsupported | The feature is not supported by the device at all, e.g. Siri is unsupported on Apple TV 3 *or* none of the configured protocols support this feature.
 | Unavailable | The feature is supported but currently not possible to use, e.g. skip to next track is only possible if a song is playing.
 | Available | The feature is supported and available now, e.g. `Pause` is possible because something is playing.
 

@@ -10,7 +10,7 @@ import pyatv
 from pyatv.companion.server_auth import CLIENT_CREDENTIALS
 from pyatv.conf import AppleTV, CompanionService, MrpService
 from pyatv.const import Protocol
-from pyatv.interface import App
+from pyatv.interface import App, FeatureName, FeatureState
 
 from tests.fake_device import FakeAppleTV
 from tests.utils import faketime, stub_sleep, until
@@ -69,3 +69,14 @@ class CompanionFunctionalTest(AioHTTPTestCase):
 
         expected_apps = [App(TEST_APP_NAME, TEST_APP), App(TEST_APP_NAME2, TEST_APP2)]
         assert not DeepDiff(expected_apps, apps)
+
+    @unittest_run_loop
+    async def test_features(self):
+        assert (
+            self.atv.features.get_feature(FeatureName.LaunchApp).state
+            == FeatureState.Available
+        )
+        assert (
+            self.atv.features.get_feature(FeatureName.AppList).state
+            == FeatureState.Available
+        )
