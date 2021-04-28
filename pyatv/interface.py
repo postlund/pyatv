@@ -391,6 +391,9 @@ class Playing(ABC):
         "shuffle",
         "repeat",
         "hash",
+        "series_name",
+        "season_number",
+        "episode_number",
     ]
 
     def __init__(
@@ -406,6 +409,9 @@ class Playing(ABC):
         shuffle: Optional[const.ShuffleState] = None,
         repeat: Optional[const.RepeatState] = None,
         hash: Optional[str] = None,  # pylint: disable=redefined-builtin
+        series_name: Optional[str] = None,
+        season_number: Optional[int] = None,
+        episode_number: Optional[int] = None,
     ) -> None:
         """Initialize a new Playing instance."""
         self._media_type = media_type
@@ -419,28 +425,36 @@ class Playing(ABC):
         self._shuffle = shuffle
         self._repeat = repeat
         self._hash = hash
+        self._series_name = series_name
+        self._season_number = season_number
+        self._episode_number = episode_number
 
     def __str__(self) -> str:
         """Convert this playing object to a readable string."""
         output = []
-        output.append(
-            "  Media type: {0}".format(convert.media_type_str(self.media_type))
-        )
-        output.append(
-            "Device state: {0}".format(convert.device_state_str(self.device_state))
-        )
+        output.append(f"  Media type: {convert.media_type_str(self.media_type)}")
+        output.append(f"Device state: {convert.device_state_str(self.device_state)}")
 
         if self.title is not None:
-            output.append("       Title: {0}".format(self.title))
+            output.append(f"       Title: {self.title}")
 
         if self.artist is not None:
-            output.append("      Artist: {0}".format(self.artist))
+            output.append(f"      Artist: {self.artist}")
 
         if self.album is not None:
-            output.append("       Album: {0}".format(self.album))
+            output.append(f"       Album: {self.album}")
 
         if self.genre is not None:
-            output.append("       Genre: {0}".format(self.genre))
+            output.append(f"       Genre: {self.genre}")
+
+        if self.series_name is not None:
+            output.append(f" Series Name: {self.series_name}")
+
+        if self.season_number is not None:
+            output.append(f"      Season: {self.season_number}")
+
+        if self.episode_number is not None:
+            output.append(f"     Episode: {self.episode_number}")
 
         position = self.position
         total_time = self.total_time
@@ -451,15 +465,15 @@ class Playing(ABC):
                 )
             )
         elif position is not None and position != 0:
-            output.append("    Position: {0}s".format(position))
+            output.append(f"    Position: {position}s")
         elif total_time is not None and position != 0:
-            output.append("  Total time: {0}s".format(total_time))
+            output.append(f"  Total time: {total_time}s")
 
         if self.repeat is not None:
-            output.append("      Repeat: {0}".format(convert.repeat_str(self.repeat)))
+            output.append(f"      Repeat: {convert.repeat_str(self.repeat)}")
 
         if self.shuffle is not None:
-            output.append("     Shuffle: {0}".format(convert.shuffle_str(self.shuffle)))
+            output.append(f"     Shuffle: {convert.shuffle_str(self.shuffle)}")
 
         return "\n".join(output)
 
@@ -544,6 +558,24 @@ class Playing(ABC):
     def repeat(self) -> Optional[const.RepeatState]:
         """Repeat mode."""
         return self._repeat
+
+    @property  # type: ignore
+    @feature(40, "SeriesName", "Title of TV series.")
+    def series_name(self) -> Optional[str]:
+        """Title of TV series."""
+        return self._series_name
+
+    @property  # type: ignore
+    @feature(41, "SeasonNumber", "Season number of TV series.")
+    def season_number(self) -> Optional[int]:
+        """Season number of TV series."""
+        return self._season_number
+
+    @property  # type: ignore
+    @feature(42, "EpisodeNumber", "Episode number of TV series.")
+    def episode_number(self) -> Optional[int]:
+        """Episode number of TV series."""
+        return self._episode_number
 
 
 class App:
