@@ -64,25 +64,6 @@ class TestClass:
         pass
 
 
-class MetadataDummy(interface.Metadata):
-    def artwork(self):
-        """Return artwork for what is currently playing (or None)."""
-        raise exceptions.NotSupportedError()
-
-    def artwork_id(self):
-        """Return a unique identifier for current artwork."""
-        raise exceptions.NotSupportedError()
-
-    def playing(self):
-        """Return what is currently playing."""
-        raise exceptions.NotSupportedError()
-
-    @property
-    def app(self):
-        """Return information about running app."""
-        raise exceptions.NotSupportedError()
-
-
 class FeaturesDummy(interface.Features):
     def __init__(self, feature_map: Dict[FeatureName, FeatureState]):
         self.feature_map = feature_map
@@ -230,19 +211,18 @@ def test_playing_init_field_values(prop, value1, value2):
 # METADATA
 
 
-def test_metadata_device_id():
-    assert MetadataDummy("dummy").device_id == "dummy"
-
-
-def test_metadata_rest_not_supported():
-    metadata = MetadataDummy("dummy")
+@pytest.mark.asyncio
+async def test_metadata_rest_not_supported():
+    metadata = interface.Metadata()
 
     with pytest.raises(exceptions.NotSupportedError):
-        metadata.artwork()
+        metadata.device_id
+    with pytest.raises(exceptions.NotSupportedError):
+        await metadata.artwork()
     with pytest.raises(exceptions.NotSupportedError):
         metadata.artwork_id()
     with pytest.raises(exceptions.NotSupportedError):
-        metadata.playing()
+        await metadata.playing()
 
 
 # DEVICE INFO
@@ -353,6 +333,7 @@ def test_app_str():
 
 
 def test_app_equality():
+    assert App(None, None) != "test"
     assert App(None, None) == App(None, None)
     assert App("test", None) != App(None, None)
     assert App("test", None) == App("test", None)
@@ -379,3 +360,10 @@ def test_post_ignore_duplicate_update(event_loop, updates):
 
     assert listener.playstatus_update.call_count == 1
     listener.playstatus_update.assert_called_once_with(ANY, playing)
+
+
+# REMOTE CONTROL
+
+# @pytest.mark.asyncio
+# async def test_remote_control_not_supported():
+#    with pytest.raises(exceptions.NotSupportedError):

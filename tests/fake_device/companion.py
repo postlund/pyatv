@@ -26,6 +26,7 @@ class FakeCompanionState:
         """State of a fake Companion device."""
         self.active_app: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
+        self.has_paired = False
 
 
 class FakeCompanionServiceFactory:
@@ -76,6 +77,10 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
         self.chacha = chacha20.Chacha20Cipher(output_key, input_key, nonce_length=12)
+
+    def has_paired(self):
+        """Call when a client has paired."""
+        self.state.has_paired = True
 
     def send_to_client(self, frame_type: FrameType, data: object) -> None:
         data = opack.pack(data)

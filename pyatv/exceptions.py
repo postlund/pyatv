@@ -6,7 +6,10 @@ class NoServiceError(Exception):
 
 
 class UnsupportedProtocolError(Exception):
-    """Thrown when an unsupported protocol was requested."""
+    """Thrown when an unsupported protocol was requested.
+
+    DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!
+    """
 
 
 class ConnectionFailedError(Exception):

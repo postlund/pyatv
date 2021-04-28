@@ -229,6 +229,7 @@ class CompanionServerAuth(ABC):
         )
 
         self.send_to_client(FrameType.PS_Next, {"_pd": tlv})
+        self.has_paired()
 
     @abstractmethod
     def send_to_client(self, frame_type: FrameType, data: object) -> None:
@@ -237,3 +238,7 @@ class CompanionServerAuth(ABC):
     @abstractmethod
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with the specified keys."""
+
+    @staticmethod
+    def has_paired():
+        """Call when a client has paired."""

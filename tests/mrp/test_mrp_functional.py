@@ -7,6 +7,7 @@ import math
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
+from pyatv import exceptions
 from pyatv.conf import AirPlayService, AppleTV, MrpService
 from pyatv.const import (
     DeviceState,
@@ -110,6 +111,11 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.wait_for_button_press("home", InputAction.DoubleTap)
 
         await self.atv.remote_control.home(action=InputAction.Hold)
+        await self.wait_for_button_press("home", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_home_hold(self):
+        await self.atv.remote_control.home_hold()
         await self.wait_for_button_press("home", InputAction.Hold)
 
     @unittest_run_loop
