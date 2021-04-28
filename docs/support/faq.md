@@ -6,7 +6,7 @@ link_group: support
 ---
 # FAQ
 
-This page tries to answer some common questions.
+This page tries to answer some common questions. Known issues are at the end of the page.
 
 ## General Questions
 
@@ -145,9 +145,27 @@ Or a warning if not supported:
 Most versions of macOS and Linux should work with no problems. For Windows, you need at
 least Windows 10 build 1709.
 
-## <a name="apps"></a>Apps (tvOS)
+## <a name="known-issues"></a>Known Issues
 
-Some apps behave in unexpected ways that are out of control of this library, i.e. nothing can be done in `pyatv` to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
+Some apps behave in unexpected ways that are out of control of this library (including general things in tvOS), i.e. nothing can be done in `pyatv` to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
+
+### Idle state during previews
+
+The deveice generally moves to {% include api i="const.DeviceState.Idle" %} when playing trailers or "what's next"
+sequences. For now, there's no known solution to circumvent this. This might change in the
+future, so a solution should be re-evaluate every now and then.
+
+Reported in these issues: <a href="https://github.com/postlund/pyatv/issues/994">#994</a>
+
+### Power state is not updated when using external speaker (e.g. HomePod)
+
+The power state is derived from the number of connected output devices (as there seems to be no
+"real" power state). This however fails when using an external spekar for audio, e.g. a HomePod,
+as the connection seems to remain active even when putting the Apple TV to sleep. So it is not
+possible to detect if a device is sleeping or nog in these cases. No solution or workaround is
+known so far.
+
+Reported in these issues: <a href="https://github.com/postlund/pyatv/issues/958">#958</a>
 
 ### Netflix (com.netflix.Netflix)
 

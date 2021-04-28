@@ -37,33 +37,40 @@ builtin___int = int
 
 DESCRIPTOR: google___protobuf___descriptor___FileDescriptor = ...
 
+class ActionType(google___protobuf___message___Message):
+    DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
+    EnumValue = typing___NewType('EnumValue', builtin___int)
+    type___EnumValue = EnumValue
+    Enum: _Enum
+    class _Enum(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[ActionType.EnumValue]):
+        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
+        Unknown = typing___cast(ActionType.EnumValue, 0)
+        Insert = typing___cast(ActionType.EnumValue, 1)
+        Set = typing___cast(ActionType.EnumValue, 2)
+        Delete = typing___cast(ActionType.EnumValue, 3)
+        ClearAction = typing___cast(ActionType.EnumValue, 4)
+    Unknown = typing___cast(ActionType.EnumValue, 0)
+    Insert = typing___cast(ActionType.EnumValue, 1)
+    Set = typing___cast(ActionType.EnumValue, 2)
+    Delete = typing___cast(ActionType.EnumValue, 3)
+    ClearAction = typing___cast(ActionType.EnumValue, 4)
+
+
+    def __init__(self,
+        ) -> None: ...
+type___ActionType = ActionType
+
 class TextInputMessage(google___protobuf___message___Message):
     DESCRIPTOR: google___protobuf___descriptor___Descriptor = ...
-    ActionTypeValue = typing___NewType('ActionTypeValue', builtin___int)
-    type___ActionTypeValue = ActionTypeValue
-    ActionType: _ActionType
-    class _ActionType(google___protobuf___internal___enum_type_wrapper____EnumTypeWrapper[TextInputMessage.ActionTypeValue]):
-        DESCRIPTOR: google___protobuf___descriptor___EnumDescriptor = ...
-        Unknown = typing___cast(TextInputMessage.ActionTypeValue, 0)
-        Insert = typing___cast(TextInputMessage.ActionTypeValue, 1)
-        Set = typing___cast(TextInputMessage.ActionTypeValue, 2)
-        Delete = typing___cast(TextInputMessage.ActionTypeValue, 3)
-        ClearText = typing___cast(TextInputMessage.ActionTypeValue, 4)
-    Unknown = typing___cast(TextInputMessage.ActionTypeValue, 0)
-    Insert = typing___cast(TextInputMessage.ActionTypeValue, 1)
-    Set = typing___cast(TextInputMessage.ActionTypeValue, 2)
-    Delete = typing___cast(TextInputMessage.ActionTypeValue, 3)
-    ClearText = typing___cast(TextInputMessage.ActionTypeValue, 4)
-
     timestamp: builtin___float = ...
     text: typing___Text = ...
-    actionType: type___TextInputMessage.ActionTypeValue = ...
+    actionType: type___ActionType.EnumValue = ...
 
     def __init__(self,
         *,
         timestamp : typing___Optional[builtin___float] = None,
         text : typing___Optional[typing___Text] = None,
-        actionType : typing___Optional[type___TextInputMessage.ActionTypeValue] = None,
+        actionType : typing___Optional[type___ActionType.EnumValue] = None,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> builtin___bool: ...
     def ClearField(self, field_name: typing_extensions___Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> None: ...
