@@ -31,6 +31,9 @@ eq_test_cases = [
     ("shuffle", ShuffleState.Albums, ShuffleState.Songs),
     ("repeat", RepeatState.Track, RepeatState.All),
     ("hash", "hash1", "hash2"),
+    ("series_name", "show1", "show2"),
+    ("season_number", 1, 20),
+    ("episode_number", 13, 24),
 ]
 
 
@@ -130,14 +133,25 @@ def test_playing_media_type_and_playstate():
     assert convert.device_state_str(DeviceState.Playing) in out
 
 
-def test_playing_title_artist_album_genre():
+def test_playing_basic_fields():
     out = str(
-        Playing(title="mytitle", artist="myartist", album="myalbum", genre="mygenre")
+        Playing(
+            title="mytitle",
+            artist="myartist",
+            album="myalbum",
+            genre="mygenre",
+            series_name="myseries",
+            season_number=1245,
+            episode_number=2468,
+        )
     )
     assert "mytitle" in out
     assert "myartist" in out
     assert "myalbum" in out
     assert "mygenre" in out
+    assert "myseries" in out
+    assert "1245" in out
+    assert "2468" in out
 
 
 def test_playing_only_position():
@@ -182,7 +196,7 @@ def test_playing_custom_hash():
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(Playing().__dict__) == 11
+    assert len(Playing().__dict__) == 14
 
 
 @pytest.mark.parametrize(
