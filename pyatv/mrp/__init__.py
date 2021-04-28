@@ -210,6 +210,18 @@ def build_playing_instance(state: PlayerState) -> Playing:
         """Create a unique hash for what is currently playing."""
         return state.item_identifier
 
+    def series_name() -> str:
+        """Series name."""
+        return state.metadata_field("seriesName")
+
+    def season_number() -> int:
+        """Season number."""
+        return state.metadata_field("seasonNumber")
+
+    def episode_number() -> int:
+        """Episode number."""
+        return state.metadata_field("episodeNumber")
+
     return Playing(
         media_type=media_type(),
         device_state=device_state(),
@@ -222,6 +234,9 @@ def build_playing_instance(state: PlayerState) -> Playing:
         shuffle=shuffle(),
         repeat=repeat(),
         hash=item_hash(),
+        series_name=series_name(),
+        season_number=season_number(),
+        episode_number=episode_number(),
     )
 
 

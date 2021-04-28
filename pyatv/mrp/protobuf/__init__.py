@@ -13,6 +13,7 @@ from . import CryptoPairingMessage_pb2
 from . import DeviceInfoMessage_pb2
 from . import GenericMessage_pb2
 from . import GetKeyboardSessionMessage_pb2
+from . import GetRemoteTextInputSessionMessage_pb2
 from . import GetVolumeMessage_pb2
 from . import GetVolumeResultMessage_pb2
 from . import KeyboardMessage_pb2
@@ -25,6 +26,7 @@ from . import RegisterHIDDeviceMessage_pb2
 from . import RegisterHIDDeviceResultMessage_pb2
 from . import RegisterVoiceInputDeviceMessage_pb2
 from . import RegisterVoiceInputDeviceResponseMessage_pb2
+from . import RemoteTextInputMessage_pb2
 from . import RemoveClientMessage_pb2
 from . import RemoveEndpointsMessage_pb2
 from . import RemovePlayerMessage_pb2
@@ -72,9 +74,15 @@ from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
 from .GenericMessage_pb2 import GenericMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
+from .GetRemoteTextInputSessionMessage_pb2 import GetRemoteTextInputSessionMessage
 from .GetVolumeMessage_pb2 import GetVolumeMessage
 from .GetVolumeResultMessage_pb2 import GetVolumeResultMessage
+from .KeyboardMessage_pb2 import AutocapitalizationType
 from .KeyboardMessage_pb2 import KeyboardMessage
+from .KeyboardMessage_pb2 import KeyboardType
+from .KeyboardMessage_pb2 import ReturnKeyType
+from .KeyboardMessage_pb2 import TextEditingAttributes
+from .KeyboardMessage_pb2 import TextInputTraits
 from .LanguageOption_pb2 import LanguageOption
 from .NotificationMessage_pb2 import NotificationMessage
 from .NowPlayingClient_pb2 import NowPlayingClient
@@ -93,6 +101,7 @@ from .RegisterHIDDeviceMessage_pb2 import RegisterHIDDeviceMessage
 from .RegisterHIDDeviceResultMessage_pb2 import RegisterHIDDeviceResultMessage
 from .RegisterVoiceInputDeviceMessage_pb2 import RegisterVoiceInputDeviceMessage
 from .RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDeviceResponseMessage
+from .RemoteTextInputMessage_pb2 import RemoteTextInputMessage
 from .RemoveClientMessage_pb2 import RemoveClientMessage
 from .RemoveEndpointsMessage_pb2 import RemoveEndpointsMessage
 from .RemovePlayerMessage_pb2 import RemovePlayerMessage
@@ -119,9 +128,8 @@ from .SetRecordingStateMessage_pb2 import SetRecordingStateMessage
 from .SetStateMessage_pb2 import SetStateMessage
 from .SetVolumeMessage_pb2 import SetVolumeMessage
 from .SupportedCommands_pb2 import SupportedCommands
-from .TextEditingAttributesMessage_pb2 import TextEditingAttributes
+from .TextInputMessage_pb2 import ActionType
 from .TextInputMessage_pb2 import TextInputMessage
-from .TextInputTraitsMessage_pb2 import TextInputTraits
 from .TransactionKey_pb2 import TransactionKey
 from .TransactionMessage_pb2 import TransactionMessage
 from .TransactionPacket_pb2 import TransactionPacket
@@ -149,6 +157,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.GENERIC_MESSAGE: GenericMessage_pb2.genericMessage,
     ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE: GetKeyboardSessionMessage_pb2.getKeyboardSessionMessage,
+    ProtocolMessage.GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: GetRemoteTextInputSessionMessage_pb2.getRemoteTextInputSessionMessage,
     ProtocolMessage.GET_VOLUME_MESSAGE: GetVolumeMessage_pb2.getVolumeMessage,
     ProtocolMessage.GET_VOLUME_RESULT_MESSAGE: GetVolumeResultMessage_pb2.getVolumeResultMessage,
     ProtocolMessage.KEYBOARD_MESSAGE: KeyboardMessage_pb2.keyboardMessage,
@@ -161,6 +170,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE: RegisterHIDDeviceResultMessage_pb2.registerHIDDeviceResultMessage,
     ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_MESSAGE: RegisterVoiceInputDeviceMessage_pb2.registerVoiceInputDeviceMessage,
     ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: RegisterVoiceInputDeviceResponseMessage_pb2.registerVoiceInputDeviceResponseMessage,
+    ProtocolMessage.REMOTE_TEXT_INPUT_MESSAGE: RemoteTextInputMessage_pb2.remoteTextInputMessage,
     ProtocolMessage.REMOVE_CLIENT_MESSAGE: RemoveClientMessage_pb2.removeClientMessage,
     ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE: RemoveEndpointsMessage_pb2.removeEndpointsMessage,
     ProtocolMessage.REMOVE_PLAYER_MESSAGE: RemovePlayerMessage_pb2.removePlayerMessage,
@@ -198,6 +208,7 @@ DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 DEVICE_INFO_UPDATE_MESSAGE = ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE
 GENERIC_MESSAGE = ProtocolMessage.GENERIC_MESSAGE
 GET_KEYBOARD_SESSION_MESSAGE = ProtocolMessage.GET_KEYBOARD_SESSION_MESSAGE
+GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE = ProtocolMessage.GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE
 GET_VOLUME_MESSAGE = ProtocolMessage.GET_VOLUME_MESSAGE
 GET_VOLUME_RESULT_MESSAGE = ProtocolMessage.GET_VOLUME_RESULT_MESSAGE
 KEYBOARD_MESSAGE = ProtocolMessage.KEYBOARD_MESSAGE
@@ -210,6 +221,7 @@ REGISTER_HID_DEVICE_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_MESSAGE
 REGISTER_HID_DEVICE_RESULT_MESSAGE = ProtocolMessage.REGISTER_HID_DEVICE_RESULT_MESSAGE
 REGISTER_VOICE_INPUT_DEVICE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_MESSAGE
 REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = ProtocolMessage.REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE
+REMOTE_TEXT_INPUT_MESSAGE = ProtocolMessage.REMOTE_TEXT_INPUT_MESSAGE
 REMOVE_CLIENT_MESSAGE = ProtocolMessage.REMOVE_CLIENT_MESSAGE
 REMOVE_ENDPOINTS_MESSAGE = ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE
 REMOVE_PLAYER_MESSAGE = ProtocolMessage.REMOVE_PLAYER_MESSAGE
