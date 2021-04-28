@@ -6,15 +6,18 @@ extend ProtocolMessage {
   optional TextInputMessage textInputMessage = 30;
 }
 
-message TextInputMessage {
-  enum ActionType {
+message ActionType {
+  enum Enum {
     Unknown = 0;
     Insert = 1;
     Set = 2;
     Delete = 3;
-    ClearText = 4; // "Clear" collides with base measage and makes mypy sad
+    ClearAction = 4;  // "Clear" clashes with something, making mypy unhappy 
   }
+}
+
+message TextInputMessage {
   optional double timestamp = 1;
   optional string text = 2;
-  optional ActionType actionType = 3;
+  optional ActionType.Enum actionType = 3;
 }
