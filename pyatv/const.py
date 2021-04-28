@@ -271,6 +271,15 @@ class FeatureName(Enum):
     Repeat = 29
     """Repeat state."""
 
+    SeriesName = 40
+    """Title of TV series."""
+
+    SeasonNumber = 41
+    """Season number of TV series."""
+
+    EpisodeNumber = 42
+    """Episode number of TV series."""
+
     AppList = 38
     """List of launchable apps."""
 

@@ -80,6 +80,9 @@ class AtvscriptTest(ScriptTest):
                 "repeat": "off",
                 "app": None,
                 "app_id": None,
+                "series_name": None,
+                "season_number": None,
+                "episode_number": None,
             }
         )
         self.exit(0)
