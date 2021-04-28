@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.const import (
@@ -20,10 +20,7 @@ from pyatv.const import (
 )
 from pyatv.interface import (
     App,
-    AppleTV,
-    Apps,
     ArtworkInfo,
-    DeviceInfo,
     FeatureInfo,
     Features,
     Metadata,
@@ -31,7 +28,7 @@ from pyatv.interface import (
     Power,
     PushUpdater,
     RemoteControl,
-    Stream,
+    StateProducer,
 )
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.connection import MrpConnection
@@ -44,6 +41,7 @@ from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.net import ClientSessionManager
+from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +67,7 @@ _KEY_LOOKUP = {
 }  # Dict[str, Tuple[int, int]]
 
 
-_FEATURES_SUPPORTED = [
+_FEATURES_SUPPORTED: List[FeatureName] = [
     FeatureName.Down,
     FeatureName.Home,
     FeatureName.HomeHold,
@@ -82,7 +80,7 @@ _FEATURES_SUPPORTED = [
     FeatureName.TurnOn,
     FeatureName.TurnOff,
     FeatureName.PowerState,
-]  # type: List[FeatureName]
+]
 
 _FEATURE_COMMAND_MAP = {
     FeatureName.Next: CommandInfo_pb2.NextTrack,
@@ -101,14 +99,14 @@ _FEATURE_COMMAND_MAP = {
 }
 
 # Features that are considered available if corresponding
-_FIELD_FEATURES = {
+_FIELD_FEATURES: Dict[FeatureName, str] = {
     FeatureName.Title: "title",
     FeatureName.Artist: "trackArtistName",
     FeatureName.Album: "albumName",
     FeatureName.Genre: "genre",
     FeatureName.TotalTime: "duration",
     FeatureName.Position: "elapsedTimeTimestamp",
-}  # type: Dict[FeatureName, str]
+}
 
 DELAY_BETWEEN_COMMANDS = 0.1
 
@@ -415,10 +413,15 @@ class MrpMetadata(Metadata):
 
     def __init__(self, protocol, psm, identifier):
         """Initialize a new MrpPlaying."""
-        super().__init__(identifier)
         self.protocol = protocol
         self.psm = psm
+        self.identifier = identifier
         self.artwork_cache = Cache(limit=4)
+
+    @property
+    def device_id(self) -> Optional[str]:
+        """Return a unique identifier for current device."""
+        return self.identifier
 
     async def artwork(
         self, width: Optional[int] = 512, height: Optional[int] = None
@@ -621,13 +624,6 @@ class MrpFeatures(Features):
             if metadata and metadata.artworkAvailable:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
-        if feature_name == FeatureName.PlayUrl:
-            if self.config.get_service(Protocol.AirPlay) is not None:
-                return FeatureInfo(state=FeatureState.Available)
-        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
-            print(self.config)
-            if self.config.get_service(Protocol.Companion) is not None:
-                return FeatureInfo(state=FeatureState.Available)
 
         field_name = _FIELD_FEATURES.get(feature_name)
         if field_name:
@@ -671,97 +667,53 @@ class MrpFeatures(Features):
         return FeatureInfo(state=FeatureState.Unsupported)
 
 
-class MrpAppleTV(AppleTV):
-    """Implementation of API support for Apple TV."""
+def setup(  # pylint: disable=too-many-locals
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+    """Set up a new MRP service."""
+    service = config.get_service(Protocol.MRP)
+    assert service is not None
 
-    # This is a container class so it's OK with many attributes
-    # pylint: disable=too-many-instance-attributes
-    def __init__(
-        self,
-        loop: asyncio.AbstractEventLoop,
-        session_manager: ClientSessionManager,
-        config: conf.AppleTV,
-        airplay: Stream,
-        apps: Apps,
-    ) -> None:
-        """Initialize a new Apple TV."""
-        super().__init__()
+    connection = MrpConnection(config.address, service.port, loop, atv=device_listener)
+    protocol = MrpProtocol(connection, SRPAuthHandler(), service)
+    psm = PlayerStateManager(protocol)
 
-        self._session_manager = session_manager
-        self._config = config
-        self._mrp_service = config.get_service(Protocol.MRP)
-        assert self._mrp_service is not None
+    remote_control = MrpRemoteControl(loop, psm, protocol)
+    metadata = MrpMetadata(protocol, psm, config.identifier)
+    push_updater = MrpPushUpdater(loop, metadata, psm)
+    power = MrpPower(loop, protocol, remote_control)
 
-        self._connection = MrpConnection(
-            config.address, self._mrp_service.port, loop, atv=self
-        )
-        self._srp = SRPAuthHandler()
-        self._protocol = MrpProtocol(self._connection, self._srp, self._mrp_service)
-        self._psm = PlayerStateManager(self._protocol)
+    interfaces[RemoteControl].register(remote_control, Protocol.MRP)
+    interfaces[Metadata].register(metadata, Protocol.MRP)
+    interfaces[Power].register(power, Protocol.MRP)
+    interfaces[PushUpdater].register(push_updater, Protocol.MRP)
+    interfaces[Features].register(MrpFeatures(config, psm), Protocol.MRP)
 
-        self._mrp_remote = MrpRemoteControl(loop, self._psm, self._protocol)
-        self._mrp_metadata = MrpMetadata(self._protocol, self._psm, config.identifier)
-        self._mrp_power = MrpPower(loop, self._protocol, self._mrp_remote)
-        self._mrp_push_updater = MrpPushUpdater(loop, self._mrp_metadata, self._psm)
-        self._mrp_features = MrpFeatures(self._config, self._psm)
-        self._mrp_apps = apps
-        self._airplay = airplay
+    # Forward power events to the facade instance
+    power.listener = interfaces[Power]
 
-    async def connect(self) -> None:
-        """Initiate connection to device.
+    async def _connect() -> None:
+        await protocol.start()
 
-        No need to call it yourself, it's done automatically.
-        """
-        await self._protocol.start()
+    def _close() -> None:
+        push_updater.stop()
+        protocol.stop()
 
-    def close(self) -> None:
-        """Close connection and release allocated resources."""
-        asyncio.ensure_future(self._session_manager.close())
-        self._airplay.close()
-        self.push_updater.stop()
-        self._protocol.stop()
+    # Features managed by this protocol
+    features = set(
+        [
+            FeatureName.Artwork,
+            FeatureName.VolumeDown,
+            FeatureName.VolumeUp,
+            FeatureName.App,
+        ]
+    )
+    features.update(_FEATURES_SUPPORTED)
+    features.update(_FEATURE_COMMAND_MAP.keys())
+    features.update(_FIELD_FEATURES.keys())
 
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return API for device information."""
-        return self._config.device_info
-
-    @property
-    def service(self):
-        """Return service used to connect to the Apple TV."""
-        return self._mrp_service
-
-    @property
-    def remote_control(self) -> RemoteControl:
-        """Return API for controlling the Apple TV."""
-        return self._mrp_remote
-
-    @property
-    def metadata(self) -> Metadata:
-        """Return API for retrieving metadata from Apple TV."""
-        return self._mrp_metadata
-
-    @property
-    def push_updater(self) -> PushUpdater:
-        """Return API for handling push update from the Apple TV."""
-        return self._mrp_push_updater
-
-    @property
-    def stream(self) -> Stream:
-        """Return API for streaming media."""
-        return self._airplay
-
-    @property
-    def power(self) -> Power:
-        """Return API for streaming media."""
-        return self._mrp_power
-
-    @property
-    def features(self) -> Features:
-        """Return features interface."""
-        return self._mrp_features
-
-    @property
-    def apps(self) -> Apps:
-        """Return apps interface."""
-        return self._mrp_apps
+    return _connect, _close, features

@@ -124,3 +124,14 @@ Depending on hardware model and software, various features might be supported or
 instance only supported by devices running tvOS. Certain actions might not be possible to perform
 due to the device state, e.g. pressing "pause" is not possible unless something is playing. In `pyatv`,
 it's possible to obtain information about the availability of features using {% include api i="interface.Features" %}.
+
+## Protocol Relaying
+
+The concept of *protocol relaying* is an internal mechanism of `pyatv`, it is however
+worth knowing the basics of it. `pyatv` provides a uniform API towards the
+developer, removing the need to worry about underlying protocols (other than
+credentials): it is automatically handled "under the hood". The relaying mechanism
+allows multiple protocols to be active and will automatically "relay" interface
+calls to the most suitable protocol. If two protocols implement the same
+feature, the best of the two will be used. One protocol might also implement parts
+of an interface, leaving the reminder to another protocol.
