@@ -1,0 +1,47 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  reviewers:
+  - postlund
+  assignees:
+  - postlund
+  labels:
+  - dependencies
+  ignore:
+  - dependency-name: aiohttp
+    versions:
+    - "> 3.1.0"
+  - dependency-name: cryptography
+    versions:
+    - "> 2.6"
+  - dependency-name: netifaces
+    versions:
+    - "> 0.10.0"
+  - dependency-name: protobuf
+    versions:
+    - "> 3.6.0"
+  - dependency-name: srptools
+    versions:
+    - "> 0.2.0"
+  - dependency-name: zeroconf
+    versions:
+    - "> 0.28.2"
+  - dependency-name: pylint
+    versions:
+    - 2.7.3
+    - 2.8.0
+    - 2.8.1
+  - dependency-name: pytest-asyncio
+    versions:
+    - 0.15.0
+  - dependency-name: mypy-protobuf
+    versions:
+    - "2.0"
+    - "2.1"
+    - "2.2"
+    - "2.3"
