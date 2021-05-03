@@ -3,6 +3,7 @@
 import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
+import logging
 from typing import Dict, List
 
 import aiohttp
@@ -21,6 +22,8 @@ from pyatv.raop import setup as raop_setup
 from pyatv.support import net
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
+
+_LOGGER = logging.getLogger(__name__)
 
 _PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
     Protocol.MRP: mrp_setup,
@@ -84,7 +87,9 @@ async def connect(
             raise RuntimeError("missing implementation for protocol {service.protocol}")
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        atv.add_protocol(service.protocol, setup_data)
+        if setup_data:
+            _LOGGER.debug("Not adding protocol %s", service.protocol)
+            atv.add_protocol(service.protocol, setup_data)
 
     try:
         await atv.connect()
@@ -105,9 +110,7 @@ async def pair(
     """Pair a protocol for an Apple TV."""
     service = config.get_service(protocol)
     if not service:
-        raise exceptions.NoServiceError(
-            "no service available for protocol " + str(protocol)
-        )
+        raise exceptions.NoServiceError(f"no service available for {protocol}")
 
     handler = {
         Protocol.DMAP: DmapPairingHandler,
@@ -117,6 +120,6 @@ async def pair(
     }.get(protocol)
 
     if handler is None:
-        raise RuntimeError("missing implementation for {protocol}")
+        raise RuntimeError(f"missing implementation for {protocol}")
 
     return handler(config, await net.create_session(session), loop, **kwargs)

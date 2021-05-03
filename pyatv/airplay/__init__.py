@@ -5,7 +5,7 @@ import binascii
 import logging
 import os
 import re
-from typing import Any, Awaitable, Callable, Dict, Set, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from aiohttp import ClientSession
 
@@ -128,7 +128,9 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new AirPlay service."""
     service = config.get_service(Protocol.AirPlay)
     assert service is not None

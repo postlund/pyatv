@@ -688,7 +688,9 @@ def setup(  # pylint: disable=too-many-locals
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new MRP service."""
     service = config.get_service(Protocol.MRP)
     assert service is not None
