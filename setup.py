@@ -38,7 +38,7 @@ setup(
     test_suite="tests",
     keywords=["apple", "tv"],
     setup_requires=["pytest-runner"],
-    tests_require=["tox==3.23.0", "pytest==6.2.4", "pytest-xdist==2.2.1"],
+    tests_require=["tox==3.23.1", "pytest==6.2.4", "pytest-xdist==2.2.1"],
     entry_points={
         "console_scripts": [
             "atvremote = pyatv.scripts.atvremote:main",
