@@ -141,12 +141,10 @@ class GlobalCommands:
         options = {}
 
         # Inject user provided credentials
-        apple_tv.set_credentials(const.Protocol.AirPlay, self.args.airplay_credentials)
-        apple_tv.set_credentials(const.Protocol.DMAP, self.args.dmap_credentials)
-        apple_tv.set_credentials(const.Protocol.MRP, self.args.mrp_credentials)
-        apple_tv.set_credentials(
-            const.Protocol.Companion, self.args.companion_credentials
-        )
+        for proto in Protocol:
+            apple_tv.set_credentials(
+                proto, getattr(self.args, f"{proto.name.lower()}_credentials")
+            )
 
         # Protocol specific options
         if self.args.protocol == const.Protocol.DMAP:
@@ -411,30 +409,13 @@ async def cli_handler(loop):
     )
 
     creds = parser.add_argument_group("credentials")
-    creds.add_argument(
-        "--dmap-credentials",
-        help="DMAP credentials to device",
-        dest="dmap_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--mrp-credentials",
-        help="MRP credentials to device",
-        dest="mrp_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--airplay-credentials",
-        help="credentials for airplay",
-        dest="airplay_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--companion-credentials",
-        help="credentials for companion link",
-        dest="companion_credentials",
-        default=None,
-    )
+    for prot in Protocol:
+        creds.add_argument(
+            f"--{prot.name.lower()}-credentials",
+            help=f"credentials for {prot.name}",
+            dest=f"{prot.name.lower()}_credentials",
+            default=None,
+        )
 
     debug = parser.add_argument_group("debugging")
     debug.add_argument(
@@ -498,7 +479,7 @@ def _print_found_apple_tvs(atvs, outstream):
     print("Scan Results", file=outstream)
     print("=" * 40, file=outstream)
     for apple_tv in atvs:
-        print("{0}\n".format(apple_tv), file=outstream)
+        print(f"{apple_tv}\n", file=outstream)
 
 
 async def _autodiscover_device(args, loop):
@@ -514,10 +495,8 @@ async def _autodiscover_device(args, loop):
             value = service.credentials or getattr(args, field)
             service.credentials = value
 
-    _set_credentials(Protocol.DMAP, "dmap_credentials")
-    _set_credentials(Protocol.MRP, "mrp_credentials")
-    _set_credentials(Protocol.AirPlay, "airplay_credentials")
-    _set_credentials(Protocol.Companion, "companion_credentials")
+    for proto in Protocol:
+        _set_credentials(proto, f"{proto.name.lower()}_credentials")
 
     logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
