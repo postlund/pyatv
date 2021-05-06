@@ -728,6 +728,14 @@ class Stream:  # pylint: disable=too-few-public-methods
         """Play media from an URL on the device."""
         raise exceptions.NotSupportedError()
 
+    @feature(44, "StreamFile", "Stream local file to device.")
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
+        raise exceptions.NotSupportedError()
+
 
 class DeviceListener(ABC):
     """Listener interface for generic device updates."""

@@ -20,7 +20,13 @@ from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_PRIORITIES = [Protocol.MRP, Protocol.DMAP, Protocol.Companion, Protocol.AirPlay]
+DEFAULT_PRIORITIES = [
+    Protocol.MRP,
+    Protocol.DMAP,
+    Protocol.Companion,
+    Protocol.AirPlay,
+    Protocol.RAOP,
+]
 
 PUBLIC_INTERFACES = [
     interface.RemoteControl,
@@ -292,6 +298,13 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
         await self.relay("play_url")(url, **kwargs)
+
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
+        await self.relay("stream_file")(filename, **kwargs)
 
 
 class FacadeApps(Relayer, interface.Apps):

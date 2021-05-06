@@ -51,4 +51,5 @@ def protocol_str(protocol: Protocol) -> str:
         Protocol.DMAP: "DMAP",
         Protocol.AirPlay: "AirPlay",
         Protocol.Companion: "Companion",
+        Protocol.RAOP: "RAOP",
     }.get(protocol, "Unknown")

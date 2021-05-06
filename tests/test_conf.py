@@ -11,9 +11,11 @@ NAME = "Alice"
 PORT_1 = 1234
 PORT_2 = 5678
 PORT_3 = 1111
+PORT_4 = 5555
 IDENTIFIER_1 = "id1"
 IDENTIFIER_2 = "id2"
 IDENTIFIER_3 = "id3"
+IDENTIFIER_4 = "id4"
 CREDENTIALS_1 = "cred1"
 
 MRP_PROPERTIES = {
@@ -27,12 +29,18 @@ AIRPLAY_PROPERTIES = {
     "osvers": "8.0.0",
 }
 
+RAOP_PROPERTIES = {
+    "am": "AudioAccessory5,1",
+    "ov": "14.5",
+}
+
 DMAP_SERVICE = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
 MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES)
 AIRPLAY_SERVICE = conf.AirPlayService(
     IDENTIFIER_3, PORT_1, properties=AIRPLAY_PROPERTIES
 )
 COMPANION_SERVICE = conf.CompanionService(PORT_3)
+RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4, properties=RAOP_PROPERTIES)
 
 
 @pytest.fixture
@@ -58,21 +66,27 @@ def test_add_services_and_get(config):
     config.add_service(MRP_SERVICE)
     config.add_service(AIRPLAY_SERVICE)
     config.add_service(COMPANION_SERVICE)
+    config.add_service(RAOP_SERVICE)
 
     services = config.services
-    assert len(services), 3
+    assert len(services), 4
 
     assert DMAP_SERVICE in services
     assert MRP_SERVICE in services
     assert AIRPLAY_SERVICE in services
+    assert COMPANION_SERVICE in services
 
     assert config.get_service(Protocol.DMAP) == DMAP_SERVICE
     assert config.get_service(Protocol.MRP) == MRP_SERVICE
     assert config.get_service(Protocol.AirPlay) == AIRPLAY_SERVICE
+    assert config.get_service(Protocol.RAOP) == RAOP_SERVICE
 
 
 def test_identifier_order(config):
     assert config.identifier is None
+
+    config.add_service(RAOP_SERVICE)
+    assert config.identifier == IDENTIFIER_4
 
     config.add_service(DMAP_SERVICE)
     assert config.identifier == IDENTIFIER_1
@@ -97,13 +111,19 @@ def test_main_service_no_service(config):
         config.main_service()
 
 
-def test_main_service_airplay_no_service(config):
-    config.add_service(AIRPLAY_SERVICE)
+def test_main_service_companion_no_service(config):
+    config.add_service(COMPANION_SERVICE)
     with pytest.raises(exceptions.NoServiceError):
         config.main_service()
 
 
 def test_main_service_get_service(config):
+    config.add_service(RAOP_SERVICE)
+    assert config.main_service() == RAOP_SERVICE
+
+    config.add_service(AIRPLAY_SERVICE)
+    assert config.main_service() == AIRPLAY_SERVICE
+
     config.add_service(DMAP_SERVICE)
     assert config.main_service() == DMAP_SERVICE
 
@@ -174,24 +194,33 @@ def test_legacy_device_info(config):
     assert device_info.mac == "AA:BB:CC:DD:EE:FF"
 
 
-def test_ready_dmap(config):
+# Mainly to test devices which are pure AirPlay devices/speakers
+def test_raop_device_info(config):
+    config.add_service(RAOP_SERVICE)
+
+    device_info = config.device_info
+    assert device_info.operating_system == OperatingSystem.TvOS
+    assert device_info.version == "14.5"
+    assert device_info.build_number is None
+    assert device_info.model == DeviceModel.HomePodMini
+    assert not device_info.mac
+
+
+@pytest.mark.parametrize(
+    "service,expected",
+    [
+        (DMAP_SERVICE, True),
+        (MRP_SERVICE, True),
+        (AIRPLAY_SERVICE, True),
+        (COMPANION_SERVICE, False),
+        (RAOP_SERVICE, True),
+    ],
+)
+def test_ready(config, service, expected):
     assert not config.ready
 
-    config.add_service(AIRPLAY_SERVICE)
-    assert not config.ready
-
-    config.add_service(DMAP_SERVICE)
-    assert config.ready
-
-
-def test_ready_mrp(config):
-    assert not config.ready
-
-    config.add_service(AIRPLAY_SERVICE)
-    assert not config.ready
-
-    config.add_service(MRP_SERVICE)
-    assert config.ready
+    config.add_service(service)
+    assert config.ready == expected
 
 
 # Name collisions on the network results in _X being added to the identifier,

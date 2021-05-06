@@ -17,6 +17,7 @@ from pyatv.dmap import setup as dmap_setup
 from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
+from pyatv.raop import setup as raop_setup
 from pyatv.support import net
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
@@ -26,6 +27,7 @@ _PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
     Protocol.DMAP: dmap_setup,
     Protocol.AirPlay: airplay_setup,
     Protocol.Companion: companion_setup,
+    Protocol.RAOP: raop_setup,
 }
 
 
