@@ -292,6 +292,9 @@ class FeatureName(Enum):
     App = 35
     """App playing media."""
 
+    PushUpdates = 43
+    """Push updates are supported."""
+
     PlayUrl = 31
     """Stream a URL on device."""
 

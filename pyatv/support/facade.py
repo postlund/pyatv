@@ -207,9 +207,10 @@ class FacadeFeatures(Relayer, interface.Features):
     It is optimized for look up speed rather than memory usage.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, push_updater_relay: Relayer) -> None:
         """Initialize a new FacadeFeatures instance."""
         super().__init__(interface.Features, DEFAULT_PRIORITIES)
+        self._push_updater_relay = push_updater_relay
         self._feature_map: Dict[FeatureName, Tuple[Protocol, interface.Features]] = {}
 
     def add_mapping(self, protocol: Protocol, features: Set[FeatureName]) -> None:
@@ -226,6 +227,13 @@ class FacadeFeatures(Relayer, interface.Features):
 
     def get_feature(self, feature_name: FeatureName) -> interface.FeatureInfo:
         """Return current state of a feature."""
+        if feature_name == FeatureName.PushUpdates:
+            # Multiple protocols can register a push updater implementation, but only
+            # one of them will ever be used (i.e. relaying is not done on method
+            # level). So if at least one push updater is available, then we can return
+            # "Available" here.
+            if self._push_updater_relay.count >= 1:
+                return interface.FeatureInfo(FeatureState.Available)
         if feature_name in self._feature_map:
             return self._feature_map[feature_name][1].get_feature(feature_name)
         return interface.FeatureInfo(FeatureState.Unsupported)
@@ -311,15 +319,16 @@ class FacadeAppleTV(interface.AppleTV):
         self._config = config
         self._session_manager = session_manager
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
-        self._features = FacadeFeatures()
+        self._push_updates = Relayer(
+            interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
+        )
+        self._features = FacadeFeatures(self._push_updates)
         self.interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
             interface.Power: FacadePower(),
-            interface.PushUpdater: Relayer(
-                interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
-            ),
+            interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(),
             interface.Apps: FacadeApps(),
         }

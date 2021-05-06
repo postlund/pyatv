@@ -925,6 +925,7 @@ class PushUpdater(ABC, StateProducer):
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise NotImplementedError
 
+    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
         &#34;&#34;&#34;Begin to listen to updates.
@@ -3077,6 +3078,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise NotImplementedError
 
+    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
         &#34;&#34;&#34;Begin to listen to updates.
@@ -3153,7 +3155,8 @@ def active(self) -&gt; bool:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
+<pre><code class="python">@feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
+@abstractmethod
 def start(self, initial_delay: int = 0) -&gt; None:
     &#34;&#34;&#34;Begin to listen to updates.
 
