@@ -4,9 +4,12 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, Dict, Set, Tuple, cast
 
-from pyatv import conf, exceptions
+from pyatv import conf
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import FeatureInfo, Features, StateProducer, Stream
+from pyatv.raop.miniaudio import MiniaudioWrapper
+from pyatv.raop.raop import RaopClient
+from pyatv.raop.rtsp import RtspContext, RtspSession
 from pyatv.support.net import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
@@ -41,7 +44,21 @@ class RaopStream(Stream):
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        raise exceptions.NotSupportedError()
+        loop = asyncio.get_running_loop()
+
+        audio_file = MiniaudioWrapper(filename)
+
+        context = RtspContext()
+        _, session = await loop.create_connection(
+            lambda: RtspSession(context), self.address, self.service.port
+        )
+
+        client = RaopClient(cast(RtspSession, session), context)
+        try:
+            await client.initialize()
+            await client.send_audio(audio_file)
+        finally:
+            client.close()
 
 
 def setup(
