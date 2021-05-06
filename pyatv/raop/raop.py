@@ -10,6 +10,7 @@ from bitarray import bitarray
 from pyatv.raop import timing
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
 from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspContext, RtspSession
+from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +68,15 @@ class ControlClient(asyncio.Protocol):
                 current_sec,
                 current_frac,
                 self.context.rtptime,
+            )
+
+            log_binary(
+                _LOGGER,
+                "Sending sync packet",
+                SyncPacket=packet,
+                Sec=current_sec,
+                Frac=current_frac,
+                RtpTime=self.context.rtptime,
             )
 
             first_packet = False
@@ -295,12 +305,19 @@ class RaopClient:
             self.context.bytes_per_channel * 8,
         )
 
-    async def _stream_data(self, wave_file: wave.Wave_read, transport):
+    # TODO: This method is very much PoC and needs some care
+    async def _stream_data(  # pylint: disable=too-many-locals
+        self, wave_file: wave.Wave_read, transport
+    ):
         first_packet = True
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
         packet_interval = 1 / packets_per_second
 
-        stream_start = time()
+        # For logging of send time
+        frames_sent = 0
+        packet_time = time()
+
+        stream_start = packet_time
         while True:
             start_time = time()
             frames = wave_file.readframes(FRAMES_PER_PACKET)
@@ -329,15 +346,28 @@ class RaopClient:
 
             if not transport.is_closing():
                 transport.sendto(header + audio.tobytes())
+                frames_sent += FRAMES_PER_PACKET
             else:
                 _LOGGER.warning("Connection closed while streaming audio")
                 break
+
+            # Log how long it took to send sample_rate amount of frames (should be
+            # one second)
+            if frames_sent >= self.context.sample_rate:
+                end_time = time()
+                _LOGGER.debug(
+                    "Sent %d packets in %fs",
+                    self.context.sample_rate,
+                    end_time - packet_time,
+                )
+                packet_time = end_time
+                frames_sent = 0
 
             # Assuming processing isn't exceeding packet interval (i.e. we are
             # processing packets to slow), we should sleep for a while
             processing_time = time() - start_time
             if processing_time < packet_interval:
-                await asyncio.sleep(packet_interval - processing_time)
+                await asyncio.sleep(packet_interval - processing_time * 2)
             else:
                 _LOGGER.warning(
                     "Too slow to keep up for seqno %d (%f > %f)",
