@@ -174,9 +174,8 @@ async def _autodiscover_device(args, loop):
             value = service.credentials or getattr(args, field)
             service.credentials = value
 
-    _set_credentials(Protocol.DMAP, "dmap_credentials")
-    _set_credentials(Protocol.MRP, "mrp_credentials")
-    _set_credentials(Protocol.AirPlay, "airplay_credentials")
+    for proto in Protocol:
+        _set_credentials(proto, f"{proto.name.lower()}_credentials")
 
     return apple_tv
 
@@ -260,24 +259,13 @@ async def appstart(loop):
     )
 
     creds = parser.add_argument_group("credentials")
-    creds.add_argument(
-        "--dmap-credentials",
-        help="DMAP credentials to device",
-        dest="dmap_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--mrp-credentials",
-        help="MRP credentials to device",
-        dest="mrp_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--airplay-credentials",
-        help="credentials for airplay",
-        dest="airplay_credentials",
-        default=None,
-    )
+    for prot in Protocol:
+        creds.add_argument(
+            f"--{prot.name.lower()}-credentials",
+            help=f"credentials for {prot.name}",
+            dest=f"{prot.name.lower()}_credentials",
+            default=None,
+        )
 
     args = parser.parse_args()
     abort_sem = asyncio.Semaphore(0)
