@@ -1,7 +1,7 @@
 """Support for RAOP (AirPlay v1)."""
 import asyncio
 import logging
-from time import time
+from time import time, time_ns
 from typing import List, Mapping, Optional, Tuple
 import wave
 
@@ -13,6 +13,9 @@ from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspContext, RtspSession
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
+
+# When being late, compensate by sending at most these many packets to catch up
+MAX_PACKETS_COMPENSATE = 3
 
 
 class ControlClient(asyncio.Protocol):
@@ -309,59 +312,66 @@ class RaopClient:
     async def _stream_data(  # pylint: disable=too-many-locals
         self, wave_file: wave.Wave_read, transport
     ):
-        first_packet = True
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
         packet_interval = 1 / packets_per_second
 
         # For logging of send time
-        frames_sent = 0
-        packet_time = time()
+        interval_frames_sent = 0
+        interval_time = time()
 
-        stream_start = packet_time
+        stream_start_ns = time_ns()
+        total_frames_sent = 0
+
         while True:
             start_time = time()
-            frames = wave_file.readframes(FRAMES_PER_PACKET)
-            if not frames:
+
+            num_sent = self._send_packet(wave_file, total_frames_sent == 0, transport)
+            if num_sent == 0:
                 break
 
-            header = AudioPacketHeader.encode(
-                0x80,
-                0xE0 if first_packet else 0x60,
-                self.context.rtpseq,
-                self.context.rtptime,
-                self.context.session_id,
+            interval_frames_sent += num_sent
+            total_frames_sent += num_sent
+
+            # Number of frames expected to have been sent up until now
+            expected_total_frames = int(
+                (time_ns() - stream_start_ns) / (10 ** 9 / self.context.sample_rate)
             )
 
-            # ALAC frame with raw data. Not so pretty but will work for now until a
-            # proper ALAC encoder is added.
-            audio = bitarray("00" + str(self.context.channels - 1) + 19 * "0" + "1")
-            for i in range(0, len(frames), 2):
-                audio.frombytes(bytes([frames[i + 1], frames[i]]))
+            # Number of frames we are late (positive number)
+            sent_diff = expected_total_frames - total_frames_sent
 
-            first_packet = False
-            self.context.rtpseq = (self.context.rtpseq + 1) % (2 ** 16)
-            self.context.head_ts += int(
-                len(frames) / (self.context.channels * self.context.bytes_per_channel)
-            )
-
-            if not transport.is_closing():
-                transport.sendto(header + audio.tobytes())
-                frames_sent += FRAMES_PER_PACKET
-            else:
-                _LOGGER.warning("Connection closed while streaming audio")
-                break
+            # If we are late, send some additional frames with hopes of catching up
+            if sent_diff >= FRAMES_PER_PACKET:
+                max_packets = min(
+                    int(sent_diff / FRAMES_PER_PACKET), MAX_PACKETS_COMPENSATE
+                )
+                _LOGGER.debug(
+                    "Compensating with %d packets (current frames: %d, expected: %d)",
+                    max_packets,
+                    total_frames_sent,
+                    expected_total_frames,
+                )
+                num_sent, has_more_packets = self._send_number_of_packets(
+                    wave_file, transport, max_packets
+                )
+                interval_frames_sent += num_sent
+                total_frames_sent += num_sent
+                if not has_more_packets:
+                    break
 
             # Log how long it took to send sample_rate amount of frames (should be
-            # one second)
-            if frames_sent >= self.context.sample_rate:
+            # one second).
+            if interval_frames_sent >= self.context.sample_rate:
                 end_time = time()
                 _LOGGER.debug(
-                    "Sent %d packets in %fs",
+                    "Sent %d packets in %fs (current frames: %d, expected: %d)",
                     self.context.sample_rate,
-                    end_time - packet_time,
+                    end_time - interval_time,
+                    total_frames_sent,
+                    expected_total_frames,
                 )
-                packet_time = end_time
-                frames_sent = 0
+                interval_time = end_time
+                interval_frames_sent = 0
 
             # Assuming processing isn't exceeding packet interval (i.e. we are
             # processing packets to slow), we should sleep for a while
@@ -376,5 +386,53 @@ class RaopClient:
                     packet_interval,
                 )
 
-        _LOGGER.debug("Audio finished sending in %fs", time() - stream_start)
+        _LOGGER.debug(
+            "Audio finished sending in %fs", (time_ns() - stream_start_ns) / 10 ** 9
+        )
         await asyncio.sleep(self.context.latency / self.context.sample_rate)
+
+    def _send_packet(
+        self, wave_file: wave.Wave_read, first_packet: bool, transport
+    ) -> int:
+        frames = wave_file.readframes(FRAMES_PER_PACKET)
+        if not frames:
+            return 0
+
+        header = AudioPacketHeader.encode(
+            0x80,
+            0xE0 if first_packet else 0x60,
+            self.context.rtpseq,
+            self.context.rtptime,
+            self.context.session_id,
+        )
+
+        # ALAC frame with raw data. Not so pretty but will work for now until a
+        # proper ALAC encoder is added.
+        audio = bitarray("00" + str(self.context.channels - 1) + 19 * "0" + "1")
+        for i in range(0, len(frames), 2):
+            audio.frombytes(bytes([frames[i + 1], frames[i]]))
+
+        self.context.rtpseq = (self.context.rtpseq + 1) % (2 ** 16)
+        self.context.head_ts += int(
+            len(frames) / (self.context.channels * self.context.bytes_per_channel)
+        )
+
+        if transport.is_closing():
+            _LOGGER.warning("Connection closed while streaming audio")
+            return 0
+
+        transport.sendto(header + audio.tobytes())
+        return int(
+            len(frames) / (self.context.channels * self.context.bytes_per_channel)
+        )
+
+    def _send_number_of_packets(
+        self, wave_file: wave.Wave_read, transport, count: int
+    ) -> Tuple[int, bool]:
+        total_packets = 0
+        for _ in range(count):
+            sent = self._send_packet(wave_file, False, transport)
+            total_packets += sent
+            if sent == 0:
+                return total_packets, False
+        return total_packets, True
