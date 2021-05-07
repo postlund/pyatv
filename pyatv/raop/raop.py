@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from time import time, time_ns
-from typing import List, Mapping, Optional, Tuple
+from typing import List, Mapping, Optional, Tuple, NamedTuple
 import wave
 
 from bitarray import bitarray
@@ -16,6 +16,16 @@ _LOGGER = logging.getLogger(__name__)
 
 # When being late, compensate by sending at most these many packets to catch up
 MAX_PACKETS_COMPENSATE = 3
+
+KEEP_ALIVE_INTERVAL = 25  # Seconds
+
+
+class Metadata(NamedTuple):
+    """Stream metadata."""
+
+    title: str
+    artist: str
+    album: str
 
 
 class ControlClient(asyncio.Protocol):
@@ -212,6 +222,10 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
+        self.metadata = Metadata(
+            title="Streaming with pyatv", artist="pyatv", album="RAOP"
+        )
+        self._keep_alive_task: Optional[asyncio.Future] = None
 
     def close(self):
         """Close session and free up resources."""
@@ -220,6 +234,23 @@ class RaopClient:
             self.control_client.close()
         if self.timing_client:
             self.timing_client.close()
+        if self._keep_alive_task:
+            self._keep_alive_task.cancel()
+
+    async def _send_keep_alive(self):
+        _LOGGER.debug("Starting keep-alive task")
+
+        while True:
+            await asyncio.sleep(KEEP_ALIVE_INTERVAL)
+
+            _LOGGER.debug("Sending keep-alive metadata")
+            await self.rtsp.set_metadata(
+                self.context.rtpseq,
+                self.context.rtptime,
+                self.metadata.title,
+                self.metadata.album,
+                self.metadata.artist,
+            )
 
     async def initialize(self):
         """Initialize the session."""
@@ -265,7 +296,11 @@ class RaopClient:
             f"{rtptime}/{rtptime}/{rtptime+3*self.context.sample_rate}",
         )
         await self.rtsp.set_metadata(
-            self.context.rtpseq, self.context.rtptime, "item", "album", "artist"
+            self.context.rtpseq,
+            self.context.rtptime,
+            self.metadata.title,
+            self.metadata.album,
+            self.metadata.artist,
         )
 
     async def send_audio(self, wave_file):
@@ -290,10 +325,16 @@ class RaopClient:
             # Start sending sync packets
             self.control_client.start(self.rtsp.remote_ip)
 
+            # Start keep-alive task to ensure connection is not closed by remote device
+            self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+
             await self._stream_data(wave_file, transport)
         finally:
             if transport:
                 transport.close()
+            if self._keep_alive_task:
+                self._keep_alive_task.cancel()
+                self._keep_alive_task = None
             self.control_client.stop()
 
     def _update_context(self, wave_file: wave.Wave_read) -> None:
