@@ -1,7 +1,7 @@
 black==21.5b0
 codecov==2.1.11
 deepdiff==5.5.0
-flake8==3.9.1
+flake8==3.9.2
 isort==5.8.0
 pylint==2.7.4
 pytest==6.2.4
