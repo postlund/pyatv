@@ -34,8 +34,11 @@ class RaopFeatures(Features):
 class RaopStream(Stream):
     """Implementation of stream functionality."""
 
-    def __init__(self, address: str, service: conf.RaopService) -> None:
+    def __init__(
+        self, address: str, service: conf.RaopService, loop: asyncio.AbstractEventLoop
+    ) -> None:
         """Initialize a new RaopStream instance."""
+        self.loop = loop
         self.address = address
         self.service = service
 
@@ -44,12 +47,10 @@ class RaopStream(Stream):
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        loop = asyncio.get_running_loop()
-
         audio_file = MiniaudioWrapper(filename)
 
         context = RtspContext()
-        _, session = await loop.create_connection(
+        _, session = await self.loop.create_connection(
             lambda: RtspSession(context), self.address, self.service.port
         )
 
@@ -74,7 +75,9 @@ def setup(
 
     service = cast(conf.RaopService, service)
 
-    interfaces[Stream].register(RaopStream(str(config.address), service), Protocol.RAOP)
+    interfaces[Stream].register(
+        RaopStream(str(config.address), service, loop), Protocol.RAOP
+    )
     interfaces[Features].register(RaopFeatures(service), Protocol.RAOP)
 
     async def _connect() -> None:

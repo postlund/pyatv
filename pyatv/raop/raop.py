@@ -35,7 +35,7 @@ class ControlClient(asyncio.Protocol):
         """Initialize a new ControlClient."""
         self.transport = None
         self.context = context
-        self.task: Optional[asyncio.Task] = None
+        self.task: Optional[asyncio.Future] = None
 
     def close(self):
         """Close control client."""
@@ -52,7 +52,7 @@ class ControlClient(asyncio.Protocol):
         """Start sending periodic sync messages."""
         _LOGGER.debug("Starting periodic sync task")
 
-        async def _handler():
+        async def _sync_handler():
             try:
                 await self._sync_task((addr, self.context.control_port))
             except Exception:
@@ -63,7 +63,7 @@ class ControlClient(asyncio.Protocol):
         if self.task:
             raise RuntimeError("already running")
 
-        self.task = asyncio.create_task(_handler())
+        self.task = asyncio.ensure_future(_sync_handler())
 
     async def _sync_task(self, dest: Tuple[str, int]):
         if self.transport is None:
