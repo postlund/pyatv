@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from time import time, time_ns
-from typing import List, Mapping, Optional, Tuple, NamedTuple
+from typing import List, Mapping, NamedTuple, Optional, Tuple
 import wave
 
 from bitarray import bitarray
@@ -285,8 +285,6 @@ class RaopClient:
             self.context.server_port,
         )
 
-        await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
-
         # TODO: Should not be set here and allow custom values
         await self.rtsp.set_parameter("volume", "-20")
 
@@ -302,6 +300,8 @@ class RaopClient:
             self.metadata.album,
             self.metadata.artist,
         )
+
+        await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
 
     async def send_audio(self, wave_file):
         """Send an audio stream to the device."""
@@ -349,70 +349,50 @@ class RaopClient:
             self.context.bytes_per_channel * 8,
         )
 
-    # TODO: This method is very much PoC and needs some care
-    async def _stream_data(  # pylint: disable=too-many-locals
-        self, wave_file: wave.Wave_read, transport
-    ):
+    async def _stream_data(self, wave_file: wave.Wave_read, transport):
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
         packet_interval = 1 / packets_per_second
 
-        # For logging of send time
-        interval_frames_sent = 0
-        interval_time = time()
-
-        stream_start_ns = time_ns()
-        total_frames_sent = 0
+        stats = Statistics(self.context.sample_rate)
 
         while True:
             start_time = time()
 
-            num_sent = self._send_packet(wave_file, total_frames_sent == 0, transport)
+            num_sent = self._send_packet(wave_file, stats.total_frames == 0, transport)
             if num_sent == 0:
                 break
 
-            interval_frames_sent += num_sent
-            total_frames_sent += num_sent
-
-            # Number of frames expected to have been sent up until now
-            expected_total_frames = int(
-                (time_ns() - stream_start_ns) / (10 ** 9 / self.context.sample_rate)
-            )
-
-            # Number of frames we are late (positive number)
-            sent_diff = expected_total_frames - total_frames_sent
+            stats.tick(num_sent)
+            frames_behind = stats.frames_behind
 
             # If we are late, send some additional frames with hopes of catching up
-            if sent_diff >= FRAMES_PER_PACKET:
+            if frames_behind >= FRAMES_PER_PACKET:
                 max_packets = min(
-                    int(sent_diff / FRAMES_PER_PACKET), MAX_PACKETS_COMPENSATE
+                    int(frames_behind / FRAMES_PER_PACKET), MAX_PACKETS_COMPENSATE
                 )
                 _LOGGER.debug(
-                    "Compensating with %d packets (current frames: %d, expected: %d)",
+                    "Compensating with %d packets (%d frames behind)",
                     max_packets,
-                    total_frames_sent,
-                    expected_total_frames,
+                    frames_behind,
                 )
                 num_sent, has_more_packets = self._send_number_of_packets(
                     wave_file, transport, max_packets
                 )
-                interval_frames_sent += num_sent
-                total_frames_sent += num_sent
+                stats.tick(num_sent)
                 if not has_more_packets:
                     break
 
             # Log how long it took to send sample_rate amount of frames (should be
             # one second).
-            if interval_frames_sent >= self.context.sample_rate:
-                end_time = time()
+            if stats.interval_completed:
+                interval_frames, interval_time = stats.new_interval()
                 _LOGGER.debug(
-                    "Sent %d packets in %fs (current frames: %d, expected: %d)",
-                    self.context.sample_rate,
-                    end_time - interval_time,
-                    total_frames_sent,
-                    expected_total_frames,
+                    "Sent %d frames in %fs (current frames: %d, expected: %d)",
+                    interval_frames,
+                    interval_time,
+                    stats.total_frames,
+                    stats.expected_frame_count,
                 )
-                interval_time = end_time
-                interval_frames_sent = 0
 
             # Assuming processing isn't exceeding packet interval (i.e. we are
             # processing packets to slow), we should sleep for a while
@@ -428,7 +408,7 @@ class RaopClient:
                 )
 
         _LOGGER.debug(
-            "Audio finished sending in %fs", (time_ns() - stream_start_ns) / 10 ** 9
+            "Audio finished sending in %fs", (time_ns() - stats.start_time_ns) / 10 ** 9
         )
         await asyncio.sleep(self.context.latency / self.context.sample_rate)
 
@@ -470,10 +450,61 @@ class RaopClient:
     def _send_number_of_packets(
         self, wave_file: wave.Wave_read, transport, count: int
     ) -> Tuple[int, bool]:
-        total_packets = 0
+        """Send a specific number of packets.
+
+        Return total number of sent frames and if more frames are available.
+        """
+        total_frames = 0
         for _ in range(count):
             sent = self._send_packet(wave_file, False, transport)
-            total_packets += sent
+            total_frames += sent
             if sent == 0:
-                return total_packets, False
-        return total_packets, True
+                return total_frames, False
+        return total_frames, True
+
+
+class Statistics:
+    """Maintains statistics of frames during a streaming session."""
+
+    def __init__(self, sample_rate: int):
+        """Initialize a new Statistics instance."""
+        self.sample_rate: int = sample_rate
+        self.start_time_ns: int = time_ns()
+        self.interval_time: float = time()
+        self.total_frames: int = 0
+        self.interval_frames: int = 0
+
+    @property
+    def expected_frame_count(self) -> int:
+        """Number of frames expected to be sent at current time."""
+        return int((time_ns() - self.start_time_ns) / (10 ** 9 / self.sample_rate))
+
+    @property
+    def frames_behind(self) -> int:
+        """Number of frames behind until being in sync."""
+        return self.expected_frame_count - self.total_frames
+
+    @property
+    def interval_completed(self) -> bool:
+        """Return if an interval has completed.
+
+        An interval has completed when sample_rate amount of frames
+        has been sent since previous interval start.
+        """
+        return self.interval_frames >= self.sample_rate
+
+    def tick(self, sent_frames: int):
+        """Add newly sent frames to statistics."""
+        self.total_frames += sent_frames
+        self.interval_frames += sent_frames
+
+    def new_interval(self) -> Tuple[float, int]:
+        """Start measuring a new time interval."""
+        end_time = time()
+        diff = end_time - self.interval_time
+        self.interval_time = end_time
+
+        frames = self.interval_frames
+        self.interval_frames = 0
+
+        return diff, frames
