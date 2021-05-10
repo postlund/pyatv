@@ -376,14 +376,14 @@ included in this service and typical values:
 
 | Property | Example Value | Meaning |
 | -------- | ------------- | ------- |
-| rpHA | 45efecc5211 | Something related to HomeKit?
-| rpHN | 86d44e4f11ff | Discovery Nounce
+| rpHA | 45efecc5211 | HomeKit AuthTag
+| rpHN | 86d44e4f11ff | Discovery Nonce
 | rpVr | 195.2 | Likely protocol version
 | rpMd | AppleTV6,2 | Device model name
 | rpFl | 0x36782 | Some status flags (or supported features)
 | rpAD | cc5011ae31ee | Bonjour Auth Tag
-| rpHI | ffb855e34e31 | Something else related to HomeKit
-| rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address
+| rpHI | ffb855e34e31 | HomeKit rotating ID
+| rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address (can rotate)
 
 Most values (except for rpVr, rpMd and rpFl) change every now and then (rotating encryption
 scheme), likely for privacy reasons. It is still not known how these values are to be used.
@@ -437,17 +437,20 @@ An object is encoded or decoded according to this table:
 
 | Bytes | Kind of Data | Example (python-esque) |
 | ----- | ------------ | ---------------------- |
+| 0x00 | Invalid | Reserved
 | 0x01 | true | 0x01 = True
 | 0x02 | false | 0x02 = False
 | 0x03 | termination | 0xEF4163416403 = {"a": "b"} (See [Endless Collections](#endless-collections))
 | 0x04 | null | 0x04 = None
-| 0x05 | UUID4 (16 bytes) | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
-| 0x06 | absolute mach time | 0x0000000000000000 = ?
+| 0x05 | UUID4 (16 bytes) big-endian | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
+| 0x06 | absolute mach time little-endian | 0x0000000000000000 = ?
+| 0x07 | -1 (decimal) | 0x07 = -1 (decimal)
 | 0x08-0x2F | 0-39 (decimal) | 0x17 = 15 (decimal)
 | 0x30 | int32 1 byte length | 0x3020 = 32 (decimal)
 | 0x31 | int32 2 byte length | 0x310020 = 32 (decimal)
 | 0x32 | int32 4 byte length | 0x3200000020 = 32 (decimal)
 | 0x33 | int32 8 byte length | 0x330000000000000020 = 32 (decimal)
+| 0x34 | int32 16 byte length | 
 | 0x35 | float32 | 0x35xxxxxxxx = xxxxxxxx (signed, single precision)
 | 0x36 | float64 | 0x36xxxxxxxxxxxxxxxx = xxxxxxxxxxxxxxxx (signed, double precision)
 | 0x40-0x60 | string (0-32 chars) | 0x43666F6F = "foo"
@@ -455,20 +458,25 @@ An object is encoded or decoded according to this table:
 | 0x62 | string 2 byte length | 0x620300666F6F = "foo"
 | 0x63 | string 3 byte length | 0x62030000666F6F = "foo"
 | 0x64 | string 4 byte length | 0x6303000000666F6F = "foo"
+| 0x6F | null terminated string | 0x6F666F6F00 = "foo"
 | 0x70-0x90 | raw bytes (0-32 bytes) | 0x72AABB = b"\xAA\xBB"
 | 0xA0-0xBF | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
 | 0x91 | data 1 byte length | 0x9102AABB = b"\xAA\xBB"
 | 0x92 | data 2 byte length | 0x920200AABB = b"\xAA\xBB"
 | 0x93 | data 3 byte length | 0x93020000AABB = b"\xAA\xBB"
 | 0x94 | data 4 byte length | 0x9402000000AABB = b"\xAA\xBB"
+| 0xC1 | UID 1 bytes length | 0xC102 = 2
+| 0xC2 | UID 2 bytes length | 0xC20002 = 2
+| 0xC2 | UID 3 bytes length | 0xC3000002 = 2
+| 0xC4 | UID 4 bytes length | 0xC400000003 = 2
 | 0xDv | array with *v* elements | 0xD2016103666F6F = [True, "foo"]
 | 0xEv | dictionary with *v* entries | 0xE16103666F6F0x17 = {"foo": 15}
 
 ### Endless Collections
 
 Dictionaries and lists supports up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
-dictionary with three elements. It is however possible to represent both lists and dictionaries with an endless amount of items
-using `F` as count, i.e. `0xDF` and `0xEF`. A byte with value `0x03` indicates end of a list or dictionary.
+dictionary with three elements. It is however possible to represent lists, dictionaries and data objects with an endless amount of items
+using `F` as count, i.e. `0xDF`, `0xEF` or `0x9F`. A byte with value `0x03` indicates end of a list, dictionary or data object.
 
 A simple example with just one element, e.g. ["a"] looks like this:
 
