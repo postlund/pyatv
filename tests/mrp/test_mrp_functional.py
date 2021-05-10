@@ -7,12 +7,14 @@ import math
 from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
+from pyatv import exceptions
 from pyatv.conf import AirPlayService, AppleTV, MrpService
 from pyatv.const import (
     DeviceState,
     FeatureName,
     FeatureState,
     InputAction,
+    MediaType,
     OperatingSystem,
     PowerState,
     Protocol,
@@ -110,6 +112,11 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.wait_for_button_press("home", InputAction.DoubleTap)
 
         await self.atv.remote_control.home(action=InputAction.Hold)
+        await self.wait_for_button_press("home", InputAction.Hold)
+
+    @unittest_run_loop
+    async def test_button_home_hold(self):
+        await self.atv.remote_control.home_hold()
         await self.wait_for_button_press("home", InputAction.Hold)
 
     @unittest_run_loop
@@ -459,3 +466,24 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(position=100)
 
         self.assertEqual(playing.position, 1)
+
+    @unittest_run_loop
+    async def test_metadata_tv_playing(self):
+        self.usecase.tv_playing(
+            paused=False,
+            series_name="tv",
+            total_time=40,
+            position=10,
+            season_number=12,
+            episode_number=4,
+        )
+
+        with faketime("pyatv", 0):
+            playing = await self.playing(series_name="tv")
+            self.assertEqual(playing.media_type, MediaType.Video)
+            self.assertEqual(playing.device_state, DeviceState.Playing)
+            self.assertEqual(playing.series_name, "tv")
+            self.assertEqual(playing.total_time, 40)
+            self.assertEqual(playing.position, 10)
+            self.assertEqual(playing.season_number, 12)
+            self.assertEqual(playing.episode_number, 4)

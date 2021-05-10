@@ -3,22 +3,30 @@
 import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
-from typing import List
+from typing import Dict, List
 
 import aiohttp
 
 from pyatv import conf, exceptions, interface
-from pyatv.airplay import AirPlayStreamAPI
+from pyatv.airplay import setup as airplay_setup
 from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.companion import CompanionAPI, CompanionApps
+from pyatv.companion import setup as companion_setup
 from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.const import Protocol
-from pyatv.dmap import DmapAppleTV
+from pyatv.dmap import setup as dmap_setup
 from pyatv.dmap.pairing import DmapPairingHandler
-from pyatv.mrp import MrpAppleTV
+from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.support import net
+from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
+
+_PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
+    Protocol.MRP: mrp_setup,
+    Protocol.DMAP: dmap_setup,
+    Protocol.AirPlay: airplay_setup,
+    Protocol.Companion: companion_setup,
+}
 
 
 async def scan(
@@ -59,28 +67,30 @@ async def connect(
     session: aiohttp.ClientSession = None,
 ) -> interface.AppleTV:
     """Connect to a device based on a configuration."""
+    if not config.services:
+        raise exceptions.NoServiceError("no service to connect to")
+
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
-    service = config.main_service(protocol=protocol)
+    session_manager = await net.create_session(session)
+    atv = FacadeAppleTV(config, session_manager)
 
-    implementation = {Protocol.DMAP: DmapAppleTV, Protocol.MRP: MrpAppleTV}.get(
-        service.protocol
-    )
+    for service in config.services:
+        setup_method = _PROTOCOL_IMPLEMENTATIONS.get(service.protocol)
+        if not setup_method:
+            raise RuntimeError("missing implementation for protocol {service.protocol}")
 
-    if not implementation:
-        raise exceptions.UnsupportedProtocolError(str(service.protocol))
+        setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
+        atv.add_protocol(service.protocol, setup_data)
 
-    # AirPlay stream API is the same for both DMAP and MRP
-    airplay = AirPlayStreamAPI(config, loop)
-
-    # Apps is also shared for DMAP and MRP
-    companion_api = CompanionAPI(config, loop)
-    apps = CompanionApps(companion_api)
-
-    atv = implementation(loop, await net.create_session(session), config, airplay, apps)
-    await atv.connect()
-    return atv
+    try:
+        await atv.connect()
+    except Exception:
+        await session_manager.close()
+        raise
+    else:
+        return atv
 
 
 async def pair(
@@ -105,6 +115,6 @@ async def pair(
     }.get(protocol)
 
     if handler is None:
-        raise exceptions.UnsupportedProtocolError(str(protocol))
+        raise RuntimeError("missing implementation for {protocol}")
 
     return handler(config, await net.create_session(session), loop, **kwargs)

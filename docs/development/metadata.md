@@ -34,6 +34,13 @@ playing = await atv.metadata.playing()
 You can easily extract fields like title, album or media type. See
 {% include api i="interface.Playing" %}.
 
+Support by protocol (assuming app sets metadata correctly):
+
+* MRP: All fields
+* DMAP: All except {% include api i="interface.Playing.series_name" %},
+  {% include api i="interface.Playing.season_number" %} and {% include api i="interface.Playing.episode_number" %}
+* AirPlay and Companion: None
+
 ## Artwork
 
 To retrieve the artwork, use the asynchronous artwork method:

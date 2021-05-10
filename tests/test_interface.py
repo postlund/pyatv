@@ -31,6 +31,9 @@ eq_test_cases = [
     ("shuffle", ShuffleState.Albums, ShuffleState.Songs),
     ("repeat", RepeatState.Track, RepeatState.All),
     ("hash", "hash1", "hash2"),
+    ("series_name", "show1", "show2"),
+    ("season_number", 1, 20),
+    ("episode_number", 13, 24),
 ]
 
 
@@ -62,25 +65,6 @@ class TestClass:
     def _private_method_ignored(self):
         """Not parsed."""
         pass
-
-
-class MetadataDummy(interface.Metadata):
-    def artwork(self):
-        """Return artwork for what is currently playing (or None)."""
-        raise exceptions.NotSupportedError()
-
-    def artwork_id(self):
-        """Return a unique identifier for current artwork."""
-        raise exceptions.NotSupportedError()
-
-    def playing(self):
-        """Return what is currently playing."""
-        raise exceptions.NotSupportedError()
-
-    @property
-    def app(self):
-        """Return information about running app."""
-        raise exceptions.NotSupportedError()
 
 
 class FeaturesDummy(interface.Features):
@@ -149,14 +133,25 @@ def test_playing_media_type_and_playstate():
     assert convert.device_state_str(DeviceState.Playing) in out
 
 
-def test_playing_title_artist_album_genre():
+def test_playing_basic_fields():
     out = str(
-        Playing(title="mytitle", artist="myartist", album="myalbum", genre="mygenre")
+        Playing(
+            title="mytitle",
+            artist="myartist",
+            album="myalbum",
+            genre="mygenre",
+            series_name="myseries",
+            season_number=1245,
+            episode_number=2468,
+        )
     )
     assert "mytitle" in out
     assert "myartist" in out
     assert "myalbum" in out
     assert "mygenre" in out
+    assert "myseries" in out
+    assert "1245" in out
+    assert "2468" in out
 
 
 def test_playing_only_position():
@@ -201,7 +196,7 @@ def test_playing_custom_hash():
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(Playing().__dict__) == 11
+    assert len(Playing().__dict__) == 14
 
 
 @pytest.mark.parametrize(
@@ -230,19 +225,18 @@ def test_playing_init_field_values(prop, value1, value2):
 # METADATA
 
 
-def test_metadata_device_id():
-    assert MetadataDummy("dummy").device_id == "dummy"
-
-
-def test_metadata_rest_not_supported():
-    metadata = MetadataDummy("dummy")
+@pytest.mark.asyncio
+async def test_metadata_rest_not_supported():
+    metadata = interface.Metadata()
 
     with pytest.raises(exceptions.NotSupportedError):
-        metadata.artwork()
+        metadata.device_id
+    with pytest.raises(exceptions.NotSupportedError):
+        await metadata.artwork()
     with pytest.raises(exceptions.NotSupportedError):
         metadata.artwork_id()
     with pytest.raises(exceptions.NotSupportedError):
-        metadata.playing()
+        await metadata.playing()
 
 
 # DEVICE INFO
@@ -353,6 +347,7 @@ def test_app_str():
 
 
 def test_app_equality():
+    assert App(None, None) != "test"
     assert App(None, None) == App(None, None)
     assert App("test", None) != App(None, None)
     assert App("test", None) == App("test", None)
@@ -379,3 +374,10 @@ def test_post_ignore_duplicate_update(event_loop, updates):
 
     assert listener.playstatus_update.call_count == 1
     listener.playstatus_update.assert_called_once_with(ANY, playing)
+
+
+# REMOTE CONTROL
+
+# @pytest.mark.asyncio
+# async def test_remote_control_not_supported():
+#    with pytest.raises(exceptions.NotSupportedError):

@@ -871,23 +871,19 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 {'_c': {'com.apple.podcasts': 'Podcaster', 'com.apple.TVMovies': 'Filmer', 'com.apple.TVWatchList': 'TV', 'com.apple.TVPhotos': 'Bilder', 'com.apple.TVAppStore': 'App\xa0Store', 'se.cmore.CMore2': 'C More', 'com.apple.Arcade': 'Arcade', 'com.apple.TVSearch': 'Sök', 'emby.media.emby-tvos': 'Emby', 'se.tv4.tv4play': 'TV4 Play', 'com.apple.TVHomeSharing': 'Datorer', 'com.google.ios.youtube': 'YouTube', 'se.svtplay.mobil': 'SVT Play', 'com.plexapp.plex': 'Plex', 'com.MTGx.ViaFree.se': 'Viafree', 'com.apple.TVSettings': 'Inställningar', 'com.apple.appleevents': 'Apple Events', 'com.kanal5.play': 'discovery+', 'com.netflix.Netflix': 'Netflix', 'se.harbourfront.viasatondemand': 'Viaplay', 'com.apple.TVMusic': 'Musik'}, '_t': 3, '_x': 123}
 ```
 
-#### Sleep and Wake
+#### Buttons/Commands
 
-Put device to sleep:
+Identifier shall be set to *_hidC* and content (*_c*) to the following:
+
+| **Tag** | **Name** | **Value** |
+| _hBtS | Button state | 1=Down/pressed, 2=Up/released |
+| _hidC | Command | 1=Up<br/>2=Down<br/>3=Left<br/>4=Right<br/>5=Menu<br/>6=Select<br/>7=Home<br/>8=Volume up<br/>9=Volume down<br/>10=Siri<br/>11=Screensaver<br/>12=Sleep<br/>13=Wake<br/>14=PlayPause<br/>15=Channel Increment<br/>16=Channel Decrement<br/>17=Guide<br/>18=Page Up<br/>19=Page Down
+
+Example: Put device to sleep:
 
 ```javascript
 // Request
 {'_i': '_hidC', '_x': 123, '_t': '2', '_c': {'_hBtS': 2, '_hidC': 12}}
-
-// Response
-{'_c': {}, '_t': 3, '_x': 123}
-```
-
-Wake it up:
-
-```javascript
-// Request
-{'_i': '_hidC', '_x': 123, '_t': '2', '_c': {'_hBtS': 2, '_hidC': 13}}
 
 // Response
 {'_c': {}, '_t': 3, '_x': 123}

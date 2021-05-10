@@ -47,6 +47,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Artist" href="#pyatv.const.FeatureName.Artist">Artist</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Artwork" href="#pyatv.const.FeatureName.Artwork">Artwork</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Down" href="#pyatv.const.FeatureName.Down">Down</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.EpisodeNumber" href="#pyatv.const.FeatureName.EpisodeNumber">EpisodeNumber</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Genre" href="#pyatv.const.FeatureName.Genre">Genre</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Home" href="#pyatv.const.FeatureName.Home">Home</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.HomeHold" href="#pyatv.const.FeatureName.HomeHold">HomeHold</a></code></li>
@@ -63,7 +64,9 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Previous" href="#pyatv.const.FeatureName.Previous">Previous</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Repeat" href="#pyatv.const.FeatureName.Repeat">Repeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Right" href="#pyatv.const.FeatureName.Right">Right</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SeasonNumber" href="#pyatv.const.FeatureName.SeasonNumber">SeasonNumber</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Select" href="#pyatv.const.FeatureName.Select">Select</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SeriesName" href="#pyatv.const.FeatureName.SeriesName">SeriesName</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetPosition" href="#pyatv.const.FeatureName.SetPosition">SetPosition</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetRepeat" href="#pyatv.const.FeatureName.SetRepeat">SetRepeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetShuffle" href="#pyatv.const.FeatureName.SetShuffle">SetShuffle</a></code></li>
@@ -437,6 +440,15 @@ class FeatureName(Enum):
     Repeat = 29
     &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
 
+    SeriesName = 40
+    &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
+
+    SeasonNumber = 41
+    &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
+
+    EpisodeNumber = 42
+    &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
+
     AppList = 38
     &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
 
@@ -699,6 +711,15 @@ class FeatureName(Enum):
     Repeat = 29
     &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
 
+    SeriesName = 40
+    &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
+
+    SeasonNumber = 41
+    &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
+
+    EpisodeNumber = 42
+    &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
+
     AppList = 38
     &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
 
@@ -752,6 +773,10 @@ class FeatureName(Enum):
 <dt id="pyatv.const.FeatureName.Down"><code class="name">var <span class="ident">Down</span></code></dt>
 <dd>
 <section class="desc"><p>Down button on remote.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.EpisodeNumber"><code class="name">var <span class="ident">EpisodeNumber</span></code></dt>
+<dd>
+<section class="desc"><p>Episode number of TV series.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.Genre"><code class="name">var <span class="ident">Genre</span></code></dt>
 <dd>
@@ -817,9 +842,17 @@ class FeatureName(Enum):
 <dd>
 <section class="desc"><p>Right button on remote.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.SeasonNumber"><code class="name">var <span class="ident">SeasonNumber</span></code></dt>
+<dd>
+<section class="desc"><p>Season number of TV series.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.Select"><code class="name">var <span class="ident">Select</span></code></dt>
 <dd>
 <section class="desc"><p>Select current option.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SeriesName"><code class="name">var <span class="ident">SeriesName</span></code></dt>
+<dd>
+<section class="desc"><p>Title of TV series.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.SetPosition"><code class="name">var <span class="ident">SetPosition</span></code></dt>
 <dd>

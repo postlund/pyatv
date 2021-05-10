@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -23,10 +23,7 @@ from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.interface import (
     App,
-    AppleTV,
-    Apps,
     ArtworkInfo,
-    DeviceInfo,
     FeatureInfo,
     Features,
     Metadata,
@@ -34,11 +31,12 @@ from pyatv.interface import (
     Power,
     PushUpdater,
     RemoteControl,
-    Stream,
+    StateProducer,
 )
 from pyatv.support import deprecated, net
 from pyatv.support.cache import Cache
 from pyatv.support.net import ClientSessionManager
+from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -403,9 +401,14 @@ class DmapMetadata(Metadata):
 
     def __init__(self, identifier, apple_tv):
         """Initialize metadata instance."""
-        super().__init__(identifier)
+        self.identifier = identifier
         self.apple_tv = apple_tv
         self.artwork_cache = Cache(limit=4)
+
+    @property
+    def device_id(self) -> Optional[str]:
+        """Return a unique identifier for current device."""
+        return self.identifier
 
     async def artwork(
         self, width: Optional[int] = 512, height: Optional[int] = None
@@ -567,12 +570,6 @@ class DmapFeatures(Features):
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
         if feature_name == FeatureName.VolumeDown:
             return FeatureInfo(state=self._is_available(("cmst", "cavc"), True))
-        if feature_name == FeatureName.PlayUrl:
-            if self.config.get_service(Protocol.AirPlay) is not None:
-                return FeatureInfo(state=FeatureState.Available)
-        if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
-            if self.config.get_service(Protocol.Companion) is not None:
-                return FeatureInfo(state=FeatureState.Available)
 
         return FeatureInfo(state=FeatureState.Unsupported)
 
@@ -585,95 +582,43 @@ class DmapFeatures(Features):
         return FeatureState.Unavailable
 
 
-class DmapAppleTV(AppleTV):
-    """Implementation of API support for Apple TV."""
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+    """Set up a new DMAP service."""
+    service = config.get_service(Protocol.DMAP)
+    assert service is not None
 
-    # This is a container class so it's OK with many attributes
-    # pylint: disable=too-many-instance-attributes
-    def __init__(
-        self,
-        loop,
-        session_manager: ClientSessionManager,
-        config: conf.AppleTV,
-        airplay: Stream,
-        apps: Apps,
-    ) -> None:
-        """Initialize a new Apple TV."""
-        super().__init__()
-        self._session_manager = session_manager
-        self._config = config
-        self._dmap_service = config.get_service(Protocol.DMAP)
-        assert self._dmap_service is not None
-        daap_http = net.HttpSession(
-            session_manager.session,
-            f"http://{config.address}:{self._dmap_service.port}/",
-        )
-        self._requester = DaapRequester(daap_http, self._dmap_service.credentials)
+    daap_http = net.HttpSession(
+        session_manager.session,
+        f"http://{config.address}:{service.port}/",
+    )
+    requester = DaapRequester(daap_http, service.credentials)
+    apple_tv = BaseDmapAppleTV(requester)
+    push_updater = DmapPushUpdater(loop, apple_tv, device_listener)
+    metadata = DmapMetadata(config.identifier, apple_tv)
 
-        self._apple_tv = BaseDmapAppleTV(self._requester)
-        self._dmap_remote = DmapRemoteControl(self._apple_tv)
-        self._dmap_metadata = DmapMetadata(config.identifier, self._apple_tv)
-        self._dmap_power = DmapPower()
-        self._dmap_push_updater = DmapPushUpdater(loop, self._apple_tv, self)
-        self._dmap_features = DmapFeatures(config, self._apple_tv)
-        self._dmap_apps = apps
-        self._airplay = airplay
+    interfaces[RemoteControl].register(DmapRemoteControl(apple_tv), Protocol.DMAP)
+    interfaces[Metadata].register(metadata, Protocol.DMAP)
+    interfaces[Power].register(DmapPower(), Protocol.DMAP)
+    interfaces[PushUpdater].register(push_updater, Protocol.DMAP)
+    interfaces[Features].register(DmapFeatures(config, apple_tv), Protocol.DMAP)
 
-    async def connect(self) -> None:
-        """Initiate connection to device.
+    async def _connect() -> None:
+        await requester.login()
 
-        No need to call it yourself, it's done automatically.
-        """
-        await self._requester.login()
+    def _close() -> None:
+        push_updater.stop()
+        device_listener.listener.connection_closed()
 
-    def close(self) -> None:
-        """Close connection and release allocated resources."""
-        asyncio.ensure_future(self._session_manager.close())
-        self._airplay.close()
-        self.push_updater.stop()
-        self.listener.connection_closed()
+    # Features managed by this protocol
+    features = set([FeatureName.VolumeDown, FeatureName.VolumeUp])
+    features.update(_AVAILABLE_FEATURES)
+    features.update(_UNKNOWN_FEATURES)
+    features.update(_FIELD_FEATURES.keys())
 
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return API for device information."""
-        return self._config.device_info
-
-    @property
-    def service(self):
-        """Return service used to connect to the Apple TV.."""
-        return self._dmap_service
-
-    @property
-    def remote_control(self) -> RemoteControl:
-        """Return API for controlling the Apple TV."""
-        return self._dmap_remote
-
-    @property
-    def metadata(self) -> Metadata:
-        """Return API for retrieving metadata from Apple TV."""
-        return self._dmap_metadata
-
-    @property
-    def push_updater(self) -> PushUpdater:
-        """Return API for handling push update from the Apple TV."""
-        return self._dmap_push_updater
-
-    @property
-    def stream(self) -> Stream:
-        """Return API for streaming media."""
-        return self._airplay
-
-    @property
-    def power(self) -> Power:
-        """Return API for streaming media."""
-        return self._dmap_power
-
-    @property
-    def features(self) -> Features:
-        """Return features interface."""
-        return self._dmap_features
-
-    @property
-    def apps(self) -> Apps:
-        """Return apps interface."""
-        return self._dmap_apps
+    return _connect, _close, features

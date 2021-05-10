@@ -98,6 +98,12 @@ def _fill_item(item, metadata):
         md.artworkMIMEType = metadata.artwork_mimetype
         if metadata.artwork_identifier:
             md.artworkIdentifier = metadata.artwork_identifier
+    if metadata.series_name:
+        md.seriesName = metadata.series_name
+    if metadata.season_number:
+        md.seasonNumber = metadata.season_number
+    if metadata.episode_number:
+        md.episodeNumber = metadata.episode_number
 
 
 def _set_state_message(metadata, identifier):
@@ -153,11 +159,14 @@ class PlayingState:
         self.identifier = kwargs.get("identifier")
         self.playback_state = kwargs.get("playback_state")
         self.title = kwargs.get("title")
+        self.series_name = kwargs.get("series_name")
         self.artist = kwargs.get("artist")
         self.album = kwargs.get("album")
         self.genre = kwargs.get("genre")
         self.total_time = kwargs.get("total_time")
         self.position = kwargs.get("position")
+        self.season_number = kwargs.get("season_number")
+        self.episode_number = kwargs.get("episode_number")
         self.repeat = kwargs.get("repeat")
         self.shuffle = kwargs.get("shuffle")
         self.media_type = kwargs.get("media_type")
@@ -619,6 +628,40 @@ class FakeMrpUseCases:
             "total_time": total_time,
             "position": position,
             "media_type": protobuf.ContentItemMetadata.Music,
+        }
+        fields.update(kwargs)
+        self.state.set_player_state(PLAYER_IDENTIFIER, PlayingState(**fields))
+        self.state.set_active_player(PLAYER_IDENTIFIER)
+
+    def example_tv(self, **kwargs):
+        kwargs.setdefault("paused", False)
+        kwargs.setdefault("series_name", "tvshow")
+        kwargs.setdefault("total_time", 123)
+        kwargs.setdefault("position", 5)
+        kwargs.setdefault("season_number", 12)
+        kwargs.setdefault("episode_number", 3)
+        self.tv_playing(**kwargs)
+
+    def tv_playing(
+        self,
+        paused,
+        series_name,
+        total_time,
+        position,
+        season_number,
+        episode_number,
+        **kwargs
+    ):
+        """Call to change what is currently playing to TV."""
+        fields = {
+            "playback_state": PlaybackState.Paused if paused else PlaybackState.Playing,
+            "playback_rate": 0.0 if paused else 1.0,
+            "series_name": series_name,
+            "total_time": total_time,
+            "position": position,
+            "season_number": season_number,
+            "episode_number": episode_number,
+            "media_type": protobuf.ContentItemMetadata.Video,
         }
         fields.update(kwargs)
         self.state.set_player_state(PLAYER_IDENTIFIER, PlayingState(**fields))

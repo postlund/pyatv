@@ -25,6 +25,7 @@ To find devices, use the `scan` command:
      - 01234567-89AB-CDEF-0123-4567890ABCDE
      - 00:11:22:33:44:55
     Services:
+     - Protocol: Companion, Port: 49153, Credentials: None
      - Protocol: MRP, Port: 49152, Credentials: None
      - Protocol: AirPlay, Port: 7000, Credentials: None
 
@@ -174,81 +175,89 @@ Or check the current power state:
 Several commands are supported by the library. Easiest is just to use the command
 called `commands`, as it will present a list of available commands:
 
-    $ atvremote --id 00:11:22:33:44:54 commands
+    $ atvremote commands
     Remote control commands:
-     - down - Press key down
-     - home - Press key home
-     - home_hold - Hold key home
-     - left - Press key left
-     - menu - Press key menu
-     - next - Press key next
-     - pause - Press key play
-     - play - Press key play
-     - play_pause - Toggle between play and pause
-     - previous - Press key previous
-     - right - Press key right
-     - select - Press key select
-     - set_position - Seek in the current playing media
-     - set_repeat - Change repeat state
-     - set_shuffle - Change shuffle mode to on or off
-     - skip_backward - Skip backwards a time interval
-     - skip_forward - Skip forward a time interval
-     - stop - Press key stop
-     - suspend - Suspend the device
-     - top_menu - Go to main menu (long press menu)
-     - up - Press key up
-     - volume_down - Press key volume down
-     - volume_up - Press key volume up
-     - wakeup - Wake up the device
+    - down - Press key down
+    - home - Press key home
+    - home_hold - Hold key home
+    - left - Press key left
+    - menu - Press key menu
+    - next - Press key next
+    - pause - Press key play
+    - play - Press key play
+    - play_pause - Toggle between play and pause
+    - previous - Press key previous
+    - right - Press key right
+    - select - Press key select
+    - set_position - Seek in the current playing media
+    - set_repeat - Change repeat state
+    - set_shuffle - Change shuffle mode to on or off
+    - skip_backward - Skip backwards a time interval
+    - skip_forward - Skip forward a time interval
+    - stop - Press key stop
+    - suspend - Suspend the device
+    - top_menu - Go to main menu (long press menu)
+    - up - Press key up
+    - volume_down - Press key volume down
+    - volume_up - Press key volume up
+    - wakeup - Wake up the device
 
     Metadata commands:
-     - app - Return information about current app playing something
-     - artwork - Return artwork for what is currently playing (or None)
-     - artwork_id - Return a unique identifier for current artwork
-     - device_id - Return a unique identifier for current device
-     - playing - Return what is currently playing
+    - app - Return information about current app playing something
+    - artwork - Return artwork for what is currently playing (or None)
+    - artwork_id - Return a unique identifier for current artwork
+    - device_id - Return a unique identifier for current device
+    - playing - Return what is currently playing
 
     Power commands:
-     - power_state - Return device power state
-     - turn_off - Turn device off
-     - turn_on - Turn device on
+    - power_state - Return device power state
+    - turn_off - Turn device off
+    - turn_on - Turn device on
 
     Playing commands:
-     - album - Album of the currently playing song
-     - artist - Artist of the currently playing song
-     - device_state - Device state, e.g. playing or paused
-     - genre - Genre of the currently playing song
-     - hash - Create a unique hash for what is currently playing
-     - media_type - Type of media is currently playing, e.g. video, music
-     - position - Position in the playing media (seconds)
-     - repeat - Repeat mode
-     - shuffle - If shuffle is enabled or not
-     - title - Title of the current media, e.g. movie or song name
-     - total_time - Total play time in seconds
+    - album - Album of the currently playing song
+    - artist - Artist of the currently playing song
+    - device_state - Device state, e.g. playing or paused
+    - episode_number - Episode number of TV series
+    - genre - Genre of the currently playing song
+    - hash - Create a unique hash for what is currently playing
+    - media_type - Type of media is currently playing, e.g. video, music
+    - position - Position in the playing media (seconds)
+    - repeat - Repeat mode
+    - season_number - Season number of TV series
+    - series_name - Title of TV series
+    - shuffle - If shuffle is enabled or not
+    - title - Title of the current media, e.g. movie or song name
+    - total_time - Total play time in seconds
 
     AirPlay commands:
-     - play_url - Play media from an URL on the device
+    - close - Close connection and release allocated resources
+    - play_url - Play media from an URL on the device
 
     Device Info commands:
-     - build_number - Operating system build number, e.g
-     - mac - Device MAC address
-     - model - Hardware model name, e.g
-     - operating_system - Operating system running on device
-     - version - Operating system version
+    - build_number - Operating system build number, e.g
+    - mac - Device MAC address
+    - model - Hardware model name, e.g
+    - operating_system - Operating system running on device
+    - version - Operating system version
 
     Device commands:
-     - artwork_save - Download artwork and save it to artwork.png
-     - cli - Enter commands in a simple CLI
-     - delay - Sleep for a certain amount if milliseconds
-     - device_info - Print various information about the device
-     - features - Print a list of all features and options
-     - push_updates - Listen for push updates
+    - artwork_save - Download artwork and save it to artwork.png
+    - cli - Enter commands in a simple CLI
+    - delay - Sleep for a certain amount if milliseconds
+    - device_info - Print various information about the device
+    - features - Print a list of all features and options
+    - push_updates - Listen for push updates
+
+    Apps commands:
+    - app_list - Fetch a list of apps that can be launched
+    - launch_app - Launch an app based on bundle ID
 
     Global commands:
-     - commands - Print a list with available commands
-     - help - Print help text for a command
-     - pair - Pair pyatv as a remote control with an Apple TV
-     - scan - Scan for Apple TVs on the network
+    - commands - Print a list with available commands
+    - help - Print help text for a command
+    - pair - Pair pyatv as a remote control with an Apple TV
+    - scan - Scan for Apple TVs on the network
 
 You can for instance get what is currently playing with `playing`:
 
