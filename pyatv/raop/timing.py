@@ -1,12 +1,18 @@
 """Methods for working with time and synchronization in RAOP."""
 
-from time import time_ns
+from time import monotonic
 from typing import Tuple
+
+
+# TODO: Replace with time.monotonic_ns when python 3.6 is dropped
+def monotonic_ns():
+    """Return a monotonic time in nanoseconds."""
+    return int(monotonic() * 10 ** 9)
 
 
 def ntp_now() -> int:
     """Return current time in NTP format."""
-    now_us = time_ns() / 1000
+    now_us = monotonic_ns() / 1000
     seconds = int(now_us / 1000000)
     frac = int(now_us - seconds * 1000000)
     return (seconds + 0x83AA7E80) << 32 | (int((frac << 32) / 1000000))
