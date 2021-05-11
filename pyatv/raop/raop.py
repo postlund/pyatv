@@ -2,13 +2,19 @@
 import asyncio
 import logging
 from time import monotonic
-from typing import List, Mapping, NamedTuple, Optional, Tuple
+from typing import List, Mapping, NamedTuple, Optional, Tuple, cast
 import wave
 
 from bitarray import bitarray
 
+from pyatv import exceptions
 from pyatv.raop import timing
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
+from pyatv.raop.parsers import (
+    EncryptionType,
+    get_audio_properties,
+    get_encryption_types,
+)
 from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspContext, RtspSession
 from pyatv.support import log_binary
 
@@ -252,20 +258,45 @@ class RaopClient:
                 self.metadata.artist,
             )
 
-    async def initialize(self):
+    async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
-        loop = asyncio.get_event_loop()
-        (_, self.control_client) = await loop.create_datagram_endpoint(
+        # Misplaced check that unencrypted data is supported
+        encryption_types = get_encryption_types(properties)
+        if EncryptionType.Unencrypted not in encryption_types:
+            raise exceptions.NotSupportedError(
+                f"no supported encryption types in {str(encryption_types)}"
+            )
+
+        self._update_output_properties(properties)
+
+        (_, control_client) = await self.loop.create_datagram_endpoint(
             lambda: ControlClient(self.context), local_addr=(self.rtsp.local_ip, 0)
         )
-        (_, self.timing_client) = await loop.create_datagram_endpoint(
+        (_, timing_client) = await self.loop.create_datagram_endpoint(
             TimingClient, local_addr=(self.rtsp.local_ip, 0)
         )
+
+        self.control_client = cast(ControlClient, control_client)
+        self.timing_client = cast(TimingClient, timing_client)
 
         _LOGGER.debug(
             "Local ports: control=%d, timing=%d",
             self.control_client.port,
             self.timing_client.port,
+        )
+
+    def _update_output_properties(self, properties: Mapping[str, str]) -> None:
+        (
+            self.context.sample_rate,
+            self.context.channels,
+            self.context.bytes_per_channel,
+        ) = get_audio_properties(properties)
+        self.context.reset()
+        _LOGGER.debug(
+            "Update play settings to %d/%d/%dbit",
+            self.context.sample_rate,
+            self.context.channels,
+            self.context.bytes_per_channel * 8,
         )
 
     async def _setup_session(self):
@@ -310,9 +341,6 @@ class RaopClient:
 
         transport = None
         try:
-            # Update sample rate, channel count, etc. from stream
-            self._update_context(wave_file)
-
             # Set up the streaming session
             await self._setup_session()
 
@@ -336,18 +364,6 @@ class RaopClient:
                 self._keep_alive_task.cancel()
                 self._keep_alive_task = None
             self.control_client.stop()
-
-    def _update_context(self, wave_file: wave.Wave_read) -> None:
-        self.context.sample_rate = wave_file.getframerate()
-        self.context.channels = wave_file.getnchannels()
-        self.context.bytes_per_channel = wave_file.getsampwidth()
-        self.context.reset()
-        _LOGGER.debug(
-            "Update play settings to %d/%d/%dbit",
-            self.context.sample_rate,
-            self.context.channels,
-            self.context.bytes_per_channel * 8,
-        )
 
     async def _stream_data(self, wave_file: wave.Wave_read, transport):
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET

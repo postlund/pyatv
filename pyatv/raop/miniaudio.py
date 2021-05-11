@@ -6,6 +6,21 @@ wrapper, any file type supported by miniaudio can be played by the RAOP
 implementation in pyatv.
 """
 import miniaudio
+from miniaudio import SampleFormat
+
+from pyatv.exceptions import NotSupportedError
+
+
+def _int2sf(sample_size: int) -> SampleFormat:
+    if sample_size == 1:
+        return SampleFormat.UNSIGNED8
+    if sample_size == 2:
+        return SampleFormat.SIGNED16
+    if sample_size == 3:
+        return SampleFormat.SIGNED24
+    if sample_size == 4:
+        return SampleFormat.SIGNED32
+    raise NotSupportedError(f"unsupported sample size: {sample_size}")
 
 
 class MiniaudioWrapper:
@@ -14,9 +29,16 @@ class MiniaudioWrapper:
     Only the parts needed by pyatv (in Wave_read) are implemented!
     """
 
-    def __init__(self, filename) -> None:
+    def __init__(
+        self, filename: str, sample_rate: int, channels: int, sample_size: int
+    ) -> None:
         """Initialize a new MiniaudioWrapper instance."""
-        self.src = miniaudio.decode_file(filename)
+        self.src = miniaudio.decode_file(
+            filename,
+            output_format=_int2sf(sample_size),
+            nchannels=channels,
+            sample_rate=sample_rate,
+        )
         self.samples = self.src.samples.tobytes()
         self.pos = 0
 
