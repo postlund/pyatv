@@ -73,6 +73,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.SetPosition" href="#pyatv.const.FeatureName.SetPosition">SetPosition</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetRepeat" href="#pyatv.const.FeatureName.SetRepeat">SetRepeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetShuffle" href="#pyatv.const.FeatureName.SetShuffle">SetShuffle</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SetVolume" href="#pyatv.const.FeatureName.SetVolume">SetVolume</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Shuffle" href="#pyatv.const.FeatureName.Shuffle">Shuffle</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SkipBackward" href="#pyatv.const.FeatureName.SkipBackward">SkipBackward</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SkipForward" href="#pyatv.const.FeatureName.SkipForward">SkipForward</a></code></li>
@@ -85,6 +86,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.TurnOff" href="#pyatv.const.FeatureName.TurnOff">TurnOff</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TurnOn" href="#pyatv.const.FeatureName.TurnOn">TurnOn</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Up" href="#pyatv.const.FeatureName.Up">Up</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.Volume" href="#pyatv.const.FeatureName.Volume">Volume</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.VolumeDown" href="#pyatv.const.FeatureName.VolumeDown">VolumeDown</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.VolumeUp" href="#pyatv.const.FeatureName.VolumeUp">VolumeUp</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.WakeUp" href="#pyatv.const.FeatureName.WakeUp">WakeUp</a></code></li>
@@ -491,7 +493,13 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
 
     TurnOff = 34
-    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;
+
+    Volume = 45
+    &#34;&#34;&#34;Current volume level.&#34;&#34;&#34;
+
+    SetVolume = 46
+    &#34;&#34;&#34;Set volume level.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -782,7 +790,13 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
 
     TurnOff = 34
-    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;
+
+    Volume = 45
+    &#34;&#34;&#34;Current volume level.&#34;&#34;&#34;
+
+    SetVolume = 46
+    &#34;&#34;&#34;Set volume level.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -910,6 +924,10 @@ class FeatureName(Enum):
 <dd>
 <section class="desc"><p>Change shuffle state.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.SetVolume"><code class="name">var <span class="ident">SetVolume</span></code></dt>
+<dd>
+<section class="desc"><p>Set volume level.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.Shuffle"><code class="name">var <span class="ident">Shuffle</span></code></dt>
 <dd>
 <section class="desc"><p>Shuffle state.</p></section>
@@ -957,6 +975,10 @@ class FeatureName(Enum):
 <dt id="pyatv.const.FeatureName.Up"><code class="name">var <span class="ident">Up</span></code></dt>
 <dd>
 <section class="desc"><p>Up button on remote.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Volume"><code class="name">var <span class="ident">Volume</span></code></dt>
+<dd>
+<section class="desc"><p>Current volume level.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.VolumeDown"><code class="name">var <span class="ident">VolumeDown</span></code></dt>
 <dd>
