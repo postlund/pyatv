@@ -47,8 +47,6 @@ class RaopStream(Stream):
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        audio_file = MiniaudioWrapper(filename)
-
         context = RtspContext()
         _, session = await self.loop.create_connection(
             lambda: RtspSession(context), self.address, self.service.port
@@ -56,7 +54,17 @@ class RaopStream(Stream):
 
         client = RaopClient(cast(RtspSession, session), context)
         try:
-            await client.initialize()
+            await client.initialize(self.service.properties)
+
+            # After initialize has been called, all the audio properties will be
+            # initialized and can be used in the miniaudio wrapper
+            audio_file = MiniaudioWrapper(
+                filename,
+                context.sample_rate,
+                context.channels,
+                context.bytes_per_channel,
+            )
+
             await client.send_audio(audio_file)
         finally:
             client.close()
