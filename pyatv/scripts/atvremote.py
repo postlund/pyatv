@@ -107,6 +107,7 @@ class GlobalCommands:
             interface.Stream,
             interface.DeviceInfo,
             interface.Apps,
+            interface.Audio,
             self.__class__,
             DeviceCommands,
         ]
@@ -607,6 +608,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
     apps = retrieve_commands(interface.Apps)
+    audio = retrieve_commands(interface.Audio)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -636,6 +638,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
+
+    if cmd in audio:
+        return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
     logging.error("Unknown command: %s", cmd)
     return 1

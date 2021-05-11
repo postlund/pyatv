@@ -33,6 +33,7 @@ link_group: api
 <h4><code><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.interface.AppleTV.apps" href="#pyatv.interface.AppleTV.apps">apps</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.audio" href="#pyatv.interface.AppleTV.audio">audio</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.close" href="#pyatv.interface.AppleTV.close">close</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.connect" href="#pyatv.interface.AppleTV.connect">connect</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.device_info" href="#pyatv.interface.AppleTV.device_info">device_info</a></code></li>
@@ -59,6 +60,13 @@ link_group: api
 <li><code><a title="pyatv.interface.ArtworkInfo.height" href="#pyatv.interface.ArtworkInfo.height">height</a></code></li>
 <li><code><a title="pyatv.interface.ArtworkInfo.mimetype" href="#pyatv.interface.ArtworkInfo.mimetype">mimetype</a></code></li>
 <li><code><a title="pyatv.interface.ArtworkInfo.width" href="#pyatv.interface.ArtworkInfo.width">width</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Audio.set_volume" href="#pyatv.interface.Audio.set_volume">set_volume</a></code></li>
+<li><code><a title="pyatv.interface.Audio.volume" href="#pyatv.interface.Audio.volume">volume</a></code></li>
 </ul>
 </li>
 <li>
@@ -1093,7 +1101,7 @@ class Features:
 
     def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -1117,6 +1125,21 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
+
+
+class Audio:
+    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+
+    @property  # type: ignore
+    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+    def volume(self) -&gt; float:
+        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+    async def set_volume(self, level: float) -&gt; None:
+        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
 
 
 class AppleTV(ABC, StateProducer):
@@ -1179,7 +1202,12 @@ class AppleTV(ABC, StateProducer):
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
+
+    @property
+    @abstractmethod
+    def audio(self) -&gt; Audio:
+        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -1357,7 +1385,12 @@ def name(self) -&gt; Optional[str]:
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
+
+    @property
+    @abstractmethod
+    def audio(self) -&gt; Audio:
+        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1381,6 +1414,19 @@ def name(self) -&gt; Optional[str]:
 @abstractmethod
 def apps(self) -&gt; Apps:
     &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.AppleTV.audio"><code class="name">var <span class="ident">audio</span> -> <a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></dt>
+<dd>
+<section class="desc"><p>Return audio interface.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+@abstractmethod
+def audio(self) -&gt; Audio:
+    &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
@@ -1632,6 +1678,69 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <dt id="pyatv.interface.ArtworkInfo.width"><code class="name">var <span class="ident">width</span> -> int</code></dt>
 <dd>
 <section class="desc"><p>Alias for field number 2</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.interface.Audio"><code class="flex name class">
+<span>class <span class="ident">Audio</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Base class for audio functionality.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Audio:
+    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+
+    @property  # type: ignore
+    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+    def volume(self) -&gt; float:
+        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+    async def set_volume(self, level: float) -&gt; None:
+        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li>pyatv.support.facade.FacadeAudio</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.Audio.volume"><code class="name">var <span class="ident">volume</span> -> float</code></dt>
+<dd>
+<section class="desc"><p>Return current volume level.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property  # type: ignore
+@feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+def volume(self) -&gt; float:
+    &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyatv.interface.Audio.set_volume"><code class="name flex">
+<span>async def <span class="ident">set_volume</span></span>(<span>self, level: float) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Change current volume level.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+async def set_volume(self, level: float) -&gt; None:
+    &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -1983,7 +2092,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 
     def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -2030,7 +2139,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </summary>
 <pre><code class="python">def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
     &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-    features = {}  # type: Dict[FeatureName, FeatureInfo]
+    features: Dict[FeatureName, FeatureInfo] = {}
     for name in FeatureName:
         info = self.get_feature(name)
         if info.state != FeatureState.Unsupported or include_unsupported:

@@ -66,6 +66,8 @@ page_links:
       title: AirPlay
     - link: /development/apps/
       title: Apps
+    - link: /development/audio/
+      title: Audio
     - link: /development/examples/
       title: Examples
   support:

@@ -318,3 +318,9 @@ class FeatureName(Enum):
 
     TurnOff = 34
     """Turn off device."""
+
+    Volume = 45
+    """Current volume level."""
+
+    SetVolume = 46
+    """Set volume level."""

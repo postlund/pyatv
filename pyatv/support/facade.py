@@ -323,6 +323,23 @@ class FacadeApps(Relayer, interface.Apps):
         await self.relay("launch_app")(bundle_id)
 
 
+class FacadeAudio(Relayer, interface.Audio):
+    """Facade implementation for audio functionality."""
+
+    def __init__(self):
+        """Initialize a new FacadeAudio instance."""
+        super().__init__(interface.Audio, DEFAULT_PRIORITIES)
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level."""
+        return self.relay("volume")
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        await self.relay("set_volume")(level)
+
+
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
@@ -344,6 +361,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(),
             interface.Apps: FacadeApps(),
+            interface.Audio: FacadeAudio(),
         }
 
     def add_protocol(self, protocol: Protocol, setup_data: SetupData):
@@ -413,3 +431,8 @@ class FacadeAppleTV(interface.AppleTV):
     def apps(self) -> interface.Apps:
         """Return apps interface."""
         return cast(interface.Apps, self.interfaces[interface.Apps])
+
+    @property
+    def audio(self) -> interface.Audio:
+        """Return audio interface."""
+        return cast(interface.Audio, self.interfaces[interface.Audio])

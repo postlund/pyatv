@@ -861,7 +861,7 @@ class Features:
 
     def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
         """Return state of all features."""
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -885,6 +885,21 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
+
+
+class Audio:
+    """Base class for audio functionality."""
+
+    @property  # type: ignore
+    @feature(45, "Volume", "Current volume level.")
+    def volume(self) -> float:
+        """Return current volume level."""
+        raise exceptions.NotSupportedError()
+
+    @feature(46, "SetVolume", "Set volume level.")
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        raise exceptions.NotSupportedError()
 
 
 class AppleTV(ABC, StateProducer):
@@ -948,3 +963,8 @@ class AppleTV(ABC, StateProducer):
     @abstractmethod
     def apps(self) -> Apps:
         """Return apps interface."""
+
+    @property
+    @abstractmethod
+    def audio(self) -> Audio:
+        """Return audio interface."""
