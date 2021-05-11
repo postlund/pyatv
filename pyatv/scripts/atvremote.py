@@ -15,6 +15,7 @@ from pyatv.conf import (
     CompanionService,
     DmapService,
     MrpService,
+    RaopService,
 )
 from pyatv.const import (
     FeatureName,
@@ -531,6 +532,10 @@ def _manual_device(args):
     if args.companion_credentials:
         config.add_service(
             CompanionService(args.port, credentials=args.companion_credentials)
+        )
+    if args.raop_credentials or args.protocol == const.Protocol.RAOP:
+        config.add_service(
+            RaopService(args.id, args.port, credentials=args.raop_credentials)
         )
     return config
 

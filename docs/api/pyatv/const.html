@@ -19,11 +19,13 @@ link_group: api
 <ul>
 <li>
 <h4><code><a title="pyatv.const.DeviceModel" href="#pyatv.const.DeviceModel">DeviceModel</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="pyatv.const.DeviceModel.Gen2" href="#pyatv.const.DeviceModel.Gen2">Gen2</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen3" href="#pyatv.const.DeviceModel.Gen3">Gen3</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen4" href="#pyatv.const.DeviceModel.Gen4">Gen4</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen4K" href="#pyatv.const.DeviceModel.Gen4K">Gen4K</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.HomePod" href="#pyatv.const.DeviceModel.HomePod">HomePod</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.HomePodMini" href="#pyatv.const.DeviceModel.HomePodMini">HomePodMini</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Unknown" href="#pyatv.const.DeviceModel.Unknown">Unknown</a></code></li>
 </ul>
 </li>
@@ -75,6 +77,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.SkipBackward" href="#pyatv.const.FeatureName.SkipBackward">SkipBackward</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SkipForward" href="#pyatv.const.FeatureName.SkipForward">SkipForward</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Stop" href="#pyatv.const.FeatureName.Stop">Stop</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.StreamFile" href="#pyatv.const.FeatureName.StreamFile">StreamFile</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Suspend" href="#pyatv.const.FeatureName.Suspend">Suspend</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Title" href="#pyatv.const.FeatureName.Title">Title</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TopMenu" href="#pyatv.const.FeatureName.TopMenu">TopMenu</a></code></li>
@@ -136,6 +139,7 @@ link_group: api
 <li><code><a title="pyatv.const.Protocol.Companion" href="#pyatv.const.Protocol.Companion">Companion</a></code></li>
 <li><code><a title="pyatv.const.Protocol.DMAP" href="#pyatv.const.Protocol.DMAP">DMAP</a></code></li>
 <li><code><a title="pyatv.const.Protocol.MRP" href="#pyatv.const.Protocol.MRP">MRP</a></code></li>
+<li><code><a title="pyatv.const.Protocol.RAOP" href="#pyatv.const.Protocol.RAOP">RAOP</a></code></li>
 </ul>
 </li>
 <li>
@@ -194,6 +198,9 @@ class Protocol(Enum):
 
     Companion = 4
     &#34;&#34;&#34;Protocol constant representing Companion link.&#34;&#34;&#34;
+
+    RAOP = 5
+    &#34;&#34;&#34;Protocol constant representing RAOP.&#34;&#34;&#34;
 
 
 class MediaType(Enum):
@@ -307,6 +314,12 @@ class DeviceModel(Enum):
 
     Gen4K = 4
     &#34;&#34;&#34;Device model is Apple TV 4K.&#34;&#34;&#34;
+
+    HomePod = 5
+    &#34;&#34;&#34;Device model is HomePod (first generation).&#34;&#34;&#34;
+
+    HomePodMini = 6
+    &#34;&#34;&#34;Device model is HomePod Mini (first generation).&#34;&#34;&#34;
 
 
 class InputAction(Enum):
@@ -468,6 +481,9 @@ class FeatureName(Enum):
     PlayUrl = 31
     &#34;&#34;&#34;Stream a URL on device.&#34;&#34;&#34;
 
+    StreamFile = 44
+    &#34;&#34;&#34;Stream local file to device.&#34;&#34;&#34;
+
     PowerState = 32
     &#34;&#34;&#34;Current device power state.&#34;&#34;&#34;
 
@@ -513,7 +529,13 @@ class FeatureName(Enum):
     &#34;&#34;&#34;Device model is fourth generation (Apple TV 4).&#34;&#34;&#34;
 
     Gen4K = 4
-    &#34;&#34;&#34;Device model is Apple TV 4K.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Device model is Apple TV 4K.&#34;&#34;&#34;
+
+    HomePod = 5
+    &#34;&#34;&#34;Device model is HomePod (first generation).&#34;&#34;&#34;
+
+    HomePodMini = 6
+    &#34;&#34;&#34;Device model is HomePod Mini (first generation).&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -536,6 +558,14 @@ class FeatureName(Enum):
 <dt id="pyatv.const.DeviceModel.Gen4K"><code class="name">var <span class="ident">Gen4K</span></code></dt>
 <dd>
 <section class="desc"><p>Device model is Apple TV 4K.</p></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.HomePod"><code class="name">var <span class="ident">HomePod</span></code></dt>
+<dd>
+<section class="desc"><p>Device model is HomePod (first generation).</p></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.HomePodMini"><code class="name">var <span class="ident">HomePodMini</span></code></dt>
+<dd>
+<section class="desc"><p>Device model is HomePod Mini (first generation).</p></section>
 </dd>
 <dt id="pyatv.const.DeviceModel.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
 <dd>
@@ -742,6 +772,9 @@ class FeatureName(Enum):
     PlayUrl = 31
     &#34;&#34;&#34;Stream a URL on device.&#34;&#34;&#34;
 
+    StreamFile = 44
+    &#34;&#34;&#34;Stream local file to device.&#34;&#34;&#34;
+
     PowerState = 32
     &#34;&#34;&#34;Current device power state.&#34;&#34;&#34;
 
@@ -892,6 +925,10 @@ class FeatureName(Enum):
 <dt id="pyatv.const.FeatureName.Stop"><code class="name">var <span class="ident">Stop</span></code></dt>
 <dd>
 <section class="desc"><p>Stop playing media.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.StreamFile"><code class="name">var <span class="ident">StreamFile</span></code></dt>
+<dd>
+<section class="desc"><p>Stream local file to device.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.Suspend"><code class="name">var <span class="ident">Suspend</span></code></dt>
 <dd>
@@ -1193,7 +1230,10 @@ is Apple TV Software (pre-tvOS).</p></section>
     &#34;&#34;&#34;Protocol constant representing AirPlay.&#34;&#34;&#34;
 
     Companion = 4
-    &#34;&#34;&#34;Protocol constant representing Companion link.&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;Protocol constant representing Companion link.&#34;&#34;&#34;
+
+    RAOP = 5
+    &#34;&#34;&#34;Protocol constant representing RAOP.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1216,6 +1256,10 @@ is Apple TV Software (pre-tvOS).</p></section>
 <dt id="pyatv.const.Protocol.MRP"><code class="name">var <span class="ident">MRP</span></code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing MRP.</p></section>
+</dd>
+<dt id="pyatv.const.Protocol.RAOP"><code class="name">var <span class="ident">RAOP</span></code></dt>
+<dd>
+<section class="desc"><p>Protocol constant representing RAOP.</p></section>
 </dd>
 </dl>
 </dd>

@@ -98,6 +98,23 @@ def companion_service(
     return ("_companion-link._tcp.local", service)
 
 
+def raop_service(
+    name: str,
+    identifier: str,
+    address: str = "127.0.0.1",
+    port: int = 0,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
+    service = FakeDnsService(
+        name=identifier + "@" + name,
+        address=address,
+        port=port,
+        properties={},
+        model=model,
+    )
+    return ("_raop._tcp.local", service)
+
+
 def _lookup_service(
     question: dns.DnsQuestion,
     services: Dict[str, FakeDnsService],
@@ -134,6 +151,7 @@ def create_response(
         service, full_name = _lookup_service(question, services)
         if service is None or (ip_filter and service.address != ip_filter):
             continue
+
         # For typing purposes, because service is not None, then full_name is not None
         # either.
         full_name = cast(str, full_name)

@@ -211,6 +211,7 @@ link_group: api
 <ul class="">
 <li><code><a title="pyatv.interface.Stream.close" href="#pyatv.interface.Stream.close">close</a></code></li>
 <li><code><a title="pyatv.interface.Stream.play_url" href="#pyatv.interface.Stream.play_url">play_url</a></code></li>
+<li><code><a title="pyatv.interface.Stream.stream_file" href="#pyatv.interface.Stream.stream_file">stream_file</a></code></li>
 </ul>
 </li>
 </ul>
@@ -959,6 +960,14 @@ class Stream:  # pylint: disable=too-few-public-methods
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
+    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+        &#34;&#34;&#34;Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        &#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
 
 class DeviceListener(ABC):
     &#34;&#34;&#34;Listener interface for generic device updates.&#34;&#34;&#34;
@@ -1676,6 +1685,7 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <li><a title="pyatv.conf.CompanionService" href="conf#pyatv.conf.CompanionService">CompanionService</a></li>
 <li><a title="pyatv.conf.DmapService" href="conf#pyatv.conf.DmapService">DmapService</a></li>
 <li><a title="pyatv.conf.MrpService" href="conf#pyatv.conf.MrpService">MrpService</a></li>
+<li><a title="pyatv.conf.RaopService" href="conf#pyatv.conf.RaopService">RaopService</a></li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -2004,6 +2014,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <li>pyatv.companion.CompanionFeatures</li>
 <li>pyatv.dmap.DmapFeatures</li>
 <li>pyatv.mrp.MrpFeatures</li>
+<li>pyatv.raop.RaopFeatures</li>
 <li>pyatv.support.facade.FacadeFeatures</li>
 </ul>
 <h3>Methods</h3>
@@ -3795,11 +3806,20 @@ def listener(self):
     @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     async def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+        &#34;&#34;&#34;Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.airplay.AirPlayStream</li>
+<li>pyatv.raop.RaopStream</li>
 <li>pyatv.support.facade.FacadeStream</li>
 </ul>
 <h3>Methods</h3>
@@ -3830,6 +3850,25 @@ def listener(self):
 <pre><code class="python">@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
 async def play_url(self, url: str, **kwargs) -&gt; None:
     &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.Stream.stream_file"><code class="name flex">
+<span>async def <span class="ident">stream_file</span></span>(<span>self, filename: str, **kwargs) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Stream local file to device.</p>
+<p>INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+async def stream_file(self, filename: str, **kwargs) -&gt; None:
+    &#34;&#34;&#34;Stream local file to device.
+
+    INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+    &#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>
