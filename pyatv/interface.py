@@ -694,6 +694,7 @@ class PushUpdater(ABC, StateProducer):
         """Return if push updater has been started."""
         raise NotImplementedError
 
+    @feature(43, "PushUpdates", "Push updates are supported.")
     @abstractmethod
     def start(self, initial_delay: int = 0) -> None:
         """Begin to listen to updates.

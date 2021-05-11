@@ -3,9 +3,10 @@ from ipaddress import IPv4Address
 
 import pytest
 
+from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
-from pyatv.interface import FeatureInfo, Features, FeatureState
+from pyatv.interface import FeatureInfo, Features, FeatureState, PushUpdater
 from pyatv.support.facade import FacadeAppleTV, SetupData
 
 
@@ -43,6 +44,21 @@ class DummyFeatures(Features):
             if feature_name == self.feature_name
             else FeatureState.Unsupported
         )
+
+
+class DummyPushUpdater(PushUpdater):
+    def __init__(self, loop):
+        super().__init__(loop)
+
+    @property
+    def active(self) -> bool:
+        return False
+
+    def start(self, initial_delay: int = 0) -> None:
+        raise exceptions.NotSupportedError
+
+    def stop(self) -> None:
+        raise exceptions.NotSupportedError
 
 
 def test_features_multi_instances(facade_dummy):
@@ -91,4 +107,22 @@ def test_features_feature_overlap_uses_priority(facade_dummy):
     assert (
         facade_dummy.features.get_feature(FeatureName.Pause).state
         == FeatureState.Unavailable
+    )
+
+
+def test_features_push_updates(facade_dummy, event_loop):
+    sdg = SetupDataGenerator(FeatureName.PushUpdates)
+    push_updater = DummyPushUpdater(event_loop)
+
+    assert (
+        facade_dummy.features.get_feature(FeatureName.PushUpdates).state
+        == FeatureState.Unsupported
+    )
+
+    facade_dummy.interfaces[PushUpdater].register(push_updater, Protocol.MRP)
+    facade_dummy.add_protocol(Protocol.MRP, sdg.get_setup_data())
+
+    assert (
+        facade_dummy.features.get_feature(FeatureName.PushUpdates).state
+        == FeatureState.Available
     )

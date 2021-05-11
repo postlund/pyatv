@@ -16,7 +16,14 @@ from pyatv.conf import (
     DmapService,
     MrpService,
 )
-from pyatv.const import InputAction, Protocol, RepeatState, ShuffleState
+from pyatv.const import (
+    FeatureName,
+    FeatureState,
+    InputAction,
+    Protocol,
+    RepeatState,
+    ShuffleState,
+)
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts
 
@@ -247,6 +254,12 @@ class DeviceCommands:
 
     async def push_updates(self):
         """Listen for push updates."""
+        if not self.atv.features.in_state(
+            FeatureState.Available, FeatureName.PushUpdates
+        ):
+            print("Push updates are not supported (no protocol supports it)")
+            return 1
+
         print("Press ENTER to stop")
 
         self.atv.push_updater.start()
@@ -562,7 +575,11 @@ async def _handle_commands(args, config, loop):
     push_listener = PushListener()
     atv = await connect(config, loop, protocol=args.protocol)
     atv.listener = device_listener
-    atv.push_updater.listener = push_listener
+
+    if atv.features.in_state(FeatureState.Available, FeatureName.PushUpdates):
+        atv.push_updater.listener = push_listener
+    else:
+        print("NOTE: Push updates are not supported in this configuration")
 
     try:
         for cmd in args.command:
