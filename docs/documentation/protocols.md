@@ -891,12 +891,306 @@ Example: Put device to sleep:
 
 # AirPlay
 
-Currently, `pyatv` only supports playing a video (or audio) by providing a URL.
-Since tvOS 10.2, device authentication ("pairing") was enforced and that process
-is supported since a while back.
+The AirPlay protocol suite is used to stream media from a sender to a receiver. Two protocols
+are used: AirTunes and "AirPlay". The former is used for audio streaming and is based on
+*Real-Time Streaming Protocol*. The latter adds video and image capabilities to the stack,
+allowing video streaming, screen mirroring and image sharing.
 
-More information will be added here later
+There's quite a history behind the AirPlay stack and I haven't fully grasped it yet. But I
+*think* it looks something like this:
+
+<code class="diagram">
+graph LR
+    AT[AirTunes, 2004] --> AT2(AirTunes v2, 2010)
+    AT2 --> APS1
+    AP1[AirPlay, 2010] --> APS1
+    APS1[AirPlay v1, 2010] --> APS2
+    APS2[AirPlay v2, 2018]
+</code>
+
+AirTunes is usually announced as *Remote Audio Output Protocol*, e.g. when looking at Zeroconf
+services. That's also what it will be referred to here.
+
+As the AirPlay protocol is covered a lot elsewhere, I will update here when I'm bored. Please
+refer to the references for more details on the protocol.
+
+## Service Discovery
+
+AirPlay uses two services, one for audio and one for video. They are described here.
+
+### RAOP
+
+| **Property** | **Example value** | **Meaning** |
+| ------------ | ----------------- | ----------- |
+| et           | 0,4               | Encryption type: 0=unencrypted, 1=RSA (AirPort Express), 3=FairPlay, 4=MFiSAP, 5=FairPlay SAPv2.5
+| da           | true              | ?
+| ss           | 16                | Audio sample size in bits
+| am           | AppleTV6,2        | Device model
+| tp           | TCP,UDP           | Transport protocol
+| pw           | false             | Password protected
+| fv           | s8927.1096.0      | Some kind of firmware version? (non-Apple)
+| txtvers      | 1                 | TXT record version 1
+| vn           | 65537             | ?
+| md           | 0,1,2             | Supported metadata: 0=text, 1=artwork, 2=progress
+| vs           | 103.2             | Server version
+| sv           | false             | ?
+| ch           | 2                 | Number of audio channels
+| sr           | 44100             | Audio sample rate
+| cn           | 0,1               | Audio codecs: 0=PCM, 1=AppleLossless (ALAC), 2=AAC, 3=AAC ELD
+| ov           | 8.4.4             | Operating system version? (seen on ATV 3)
+| pk           | 38fd7e...         | Public key
+
+### AirPlay
+
+| **Property** | **Example value**     | **Meaning** |
+| ------------ | --------------------- | ----------- |
+| features     | 0x4A7FDFD5,0x3C155FDE | Features supported by device, see [here](https://openairplay.github.io/airplay-spec/features.html)
+| igl | 1 | Is Group Leader
+| model | AppleTV6,2 | Model name
+| osvers | 14.5 | Operating system version
+| pi | UUID4 | Group ID
+| vv | 2 | ?
+| srcvers | 540.31.41 | AirPlay version
+| psi | UUID4 | Public AirPlay Pairing Identifier
+| gid | UUID4 | Group UUID
+| pk  | UUID4 | Public key
+| acl | 0 | Access Control Level
+| deviceid | AA:BB:CC:DD:EE:FF | Device identifier, typically MAC address
+| protovers | Protocol version
+| fex | 1d9/St5fFTw | ?
+| gcgl | 1 | Group Contains Group Leader
+| flags | 0x244 | Status flags, see [here](https://openairplay.github.io/airplay-spec/status_flags.html)
+| btaddr | AA:BB:CC:DD:EE:FF | Bluetooth address
+
+## RAOP
+
+This section covers the audio streaming part of AirPlay, i.e. AirTunes/RAOP. TBD
+
+### RTSP
+
+Streaming sessions are set up using the RTSP protocol. This section covers the basics of how
+that is done.
+
+#### OPTIONS
+
+Ask receiver what methods it supports.
+
+**Sender -> Receiver:**
+```raw
+OPTIONS * RTSP/1.0
+CSeq: 0
+nUser-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:10 GMT
+Content-Length: 0
+Public: ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET, PUT
+Server: AirTunes/540.31.41
+CSeq: 0
+```
+
+#### ANNOUNCE
+
+Tell the receiver about properties for an upcoming stream.
+
+**Sender -> Receiver:**
+```raw
+ANNOUNCE rtsp://10.0.10.254/4018537194 RTSP/1.0
+CSeq: 0
+User-Agent: AirPlay/540.31
+DACP-ID: 9D881F7AED72DB4A
+Active-Remote: 3630929274
+Client-Instance: 9D881F7AED72DB4A
+Content-Type: application/sdp
+Content-Length: 179
+
+v=0
+o=iTunes 4018537194 0 IN IP4 10.0.10.254
+s=iTunes
+c=IN IP4 10.0.10.84
+t=0 0
+m=audio 0 RTP/AVP 96
+a=rtpmap:96 AppleLossless
+a=fmtp:96 352 0 16 40 10 14 2 255 0 0 44100
+```
+
+Some observations (might not be true):
+
+* ID in `o=` property (`4018537194`) seems to match what is used for rtsp endpoint (`rtsp://xxx/4018537194`)
+* Address in `o=` corresponds to IP address of the sender
+* Address in `c=` is address of the receiver
+* Configuration for ALAC is used here. Format for `fmtp` is `a=fmtp:96 <frames per packet> 0 <sample size> 40 10 14 <channels> 255 0 0 <sample rate>` (other values are unknown)
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:25:54 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 0
+```
+
+#### SETUP
+
+Request initialization of a session (but does not start it). Sets up three different UDP channels:
+
+| Channel | Description |
+| ------- | ----------- |
+| server  | audio
+| control | sync and retransmission of lost frames
+| timing  | sync of common master clock
+
+**Sender -> Receiver:**
+```raw
+SETUP rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 2
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Transport: RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;control_port=55433;timing_port=55081
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Transport: RTP/AVP/UDP;unicast;mode=record;server_port=55801;control_port=50367;timing_port=0
+Session: 1
+Audio-Jack-Status: connected
+Server: AirTunes/540.31.41
+CSeq: 2
+```
+
+#### SETPEERS
+
+Unknown
+
+#### RECORD
+
+Request to start the stream at a particular point. Initially, a randomized sequence (16bit) number and start time (32bit) is included in `RTP-Info`.
+
+**Sender -> Receiver:**
+```raw
+RECORD rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 6
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Range: npt=0-
+Session: 1
+RTP-Info: seq=15432;rtptime=66150
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 07:35:11 GMT
+Content-Length: 0
+Audio-Latency: 3035
+Server: AirTunes/540.31.41
+CSeq: 6
+```
+
+#### FLUSH
+
+Stops the streaming, e.g. pause what is playing.
+
+**Sender -> Receiver:**
+```raw
+FLUSH rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 7
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 7
+```
+
+#### TEARDOWN
+
+End the RTSP session.
+
+**Sender -> Receiver:**
+```raw
+TEARDOWN rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 8
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:19 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 8
+```
+
+#### SET_PARAMETER
+
+Change a parameter, e.g. metadata or progress, on the receiver.
+
+**Sender -> Receiver:**
+```raw
+SET_PARAMETER rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 3
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Content-Type: text/parameters
+Content-Length: 11
+
+volume: -20
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 3
+```
+
+## AirPlay
+
+This section deals with "video part" of AirPlay. TBD
 
 ## References
 
+[RAOP-Player](https://github.com/philippe44/RAOP-Player)
+
+[owntone-server](https://github.com/owntone/owntone-server)
+
+[Unofficial AirPlay Specification](https://openairplay.github.io/airplay-spec/introduction.html)
+
+[AirPlay 2 Internals](https://emanuelecozzi.net/docs/airplay2)
+
+[Using raw in ALAC frames (Stackoverflow)](https://stackoverflow.com/questions/34584522/airplay-protocol-how-to-use-raw-pcm-instead-of-alac)
+
 [Unofficial AirPlay Protocol Specification](https://nto.github.io/AirPlay.html)
+
+[AirTunes v2](https://git.zx2c4.com/Airtunes2/about/)
+
+[AirPlayAuth](https://github.com/funtax/AirPlayAuth)
