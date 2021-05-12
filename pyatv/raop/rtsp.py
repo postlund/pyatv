@@ -8,6 +8,7 @@ from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.dmap import tags
 from pyatv.raop import timing
+from pyatv.raop.metadata import Metadata
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -223,18 +224,16 @@ class RtspSession(asyncio.Protocol):
         self,
         rtpseq: int,
         rtptime: int,
-        title: Optional[str],
-        album: Optional[str],
-        artist: Optional[str],
+        metadata: Metadata,
     ) -> RtspResponse:
         """Change metadata for what is playing."""
         payload = b""
-        if title:
-            payload += tags.string_tag("minm", title)
-        if album:
-            payload += tags.string_tag("asal", album)
-        if artist:
-            payload += tags.string_tag("asar", artist)
+        if metadata.title:
+            payload += tags.string_tag("minm", metadata.title)
+        if metadata.album:
+            payload += tags.string_tag("asal", metadata.album)
+        if metadata.artist:
+            payload += tags.string_tag("asar", metadata.artist)
 
         return await self.send_and_receive(
             "SET_PARAMETER",
