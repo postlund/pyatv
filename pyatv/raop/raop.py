@@ -2,13 +2,14 @@
 import asyncio
 import logging
 from time import monotonic
-from typing import List, Mapping, NamedTuple, Optional, Tuple, cast
+from typing import List, Mapping, Optional, Tuple, cast
 import wave
 
 from bitarray import bitarray
 
 from pyatv import exceptions
 from pyatv.raop import timing
+from pyatv.raop.metadata import EMPTY_METADATA, Metadata
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
 from pyatv.raop.parsers import (
     EncryptionType,
@@ -25,13 +26,8 @@ MAX_PACKETS_COMPENSATE = 3
 
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
-
-class Metadata(NamedTuple):
-    """Stream metadata."""
-
-    title: str
-    artist: str
-    album: str
+# Metadata used when no metadata is present
+MISSING_METADATA = Metadata(title="Streaming with pyatv", artist="pyatv", album="RAOP")
 
 
 class ControlClient(asyncio.Protocol):
@@ -228,10 +224,15 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
-        self.metadata = Metadata(
-            title="Streaming with pyatv", artist="pyatv", album="RAOP"
-        )
+        self._metadata: Metadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
+
+    @property
+    def metadata(self) -> Metadata:
+        """Return active metadata."""
+        if self._metadata == EMPTY_METADATA:
+            return MISSING_METADATA
+        return self._metadata
 
     def close(self):
         """Close session and free up resources."""
@@ -253,9 +254,7 @@ class RaopClient:
             await self.rtsp.set_metadata(
                 self.context.rtpseq,
                 self.context.rtptime,
-                self.metadata.title,
-                self.metadata.album,
-                self.metadata.artist,
+                self.metadata,
             )
 
     async def initialize(self, properties: Mapping[str, str]):
@@ -324,17 +323,10 @@ class RaopClient:
             "progress",
             f"{rtptime}/{rtptime}/{rtptime+3*self.context.sample_rate}",
         )
-        await self.rtsp.set_metadata(
-            self.context.rtpseq,
-            self.context.rtptime,
-            self.metadata.title,
-            self.metadata.album,
-            self.metadata.artist,
-        )
 
         await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
 
-    async def send_audio(self, wave_file):
+    async def send_audio(self, wave_file, metadata: Metadata = EMPTY_METADATA):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
             raise Exception("not initialized")  # TODO: better exception
@@ -353,10 +345,18 @@ class RaopClient:
             # Start sending sync packets
             self.control_client.start(self.rtsp.remote_ip)
 
+            self._metadata = metadata
+            _LOGGER.debug("Playing with metadata: %s", self.metadata)
+            await self.rtsp.set_metadata(
+                self.context.rtpseq, self.context.rtptime, self.metadata
+            )
+
             # Start keep-alive task to ensure connection is not closed by remote device
             self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
             await self._stream_data(wave_file, transport)
+        except Exception as ex:
+            raise exceptions.ProtocolError("an error occurred during streaming") from ex
         finally:
             if transport:
                 transport.close()

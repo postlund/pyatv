@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Callable, Dict, Set, Tuple, cast
 from pyatv import conf
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import FeatureInfo, Features, StateProducer, Stream
+from pyatv.raop.metadata import EMPTY_METADATA, Metadata, get_metadata
 from pyatv.raop.miniaudio import MiniaudioWrapper
 from pyatv.raop.raop import RaopClient
 from pyatv.raop.rtsp import RtspContext, RtspSession
@@ -65,7 +66,14 @@ class RaopStream(Stream):
                 context.bytes_per_channel,
             )
 
-            await client.send_audio(audio_file)
+            # Try to load metadata and pass it along if it succeeds
+            metadata: Metadata = EMPTY_METADATA
+            try:
+                metadata = get_metadata(filename)
+            except Exception as ex:
+                _LOGGER.warning("Failed to extract metadata from %s: %s", filename, ex)
+
+            await client.send_audio(audio_file, metadata)
         finally:
             client.close()
 

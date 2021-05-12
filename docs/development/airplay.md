@@ -71,7 +71,8 @@ await stream.stream_file("sample.mp3")
 ```
 
 Files in MP3, wav, FLAC and ogg format are supported and will be automatically converted
-to a format the receiving device supports.
+to a format the receiving device supports. Metadata is also extracted from files
+of these types and sent to the receiver.
 
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much `pyatv` can do anything about.
