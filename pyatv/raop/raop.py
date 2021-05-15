@@ -1,9 +1,11 @@
 """Support for RAOP (AirPlay v1)."""
+from abc import ABC, abstractmethod
 import asyncio
 import logging
 from time import monotonic
-from typing import List, Mapping, Optional, Tuple, cast
+from typing import Any, List, Mapping, Optional, Tuple, cast
 import wave
+import weakref
 
 from bitarray import bitarray
 
@@ -216,6 +218,18 @@ def parse_transport(transport: str) -> Tuple[List[str], Mapping[str, str]]:
     return params, options
 
 
+class RaopListener(ABC):
+    """Listener interface for RAOP state changes."""
+
+    @abstractmethod
+    def playing(self, metadata: AudioMetadata) -> None:
+        """Media started playing with metadata."""
+
+    @abstractmethod
+    def stopped(self) -> None:
+        """Media stopped playing."""
+
+
 class RaopClient:
     """Simple RAOP client to stream audio."""
 
@@ -228,6 +242,22 @@ class RaopClient:
         self.timing_client: Optional[TimingClient] = None
         self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
+        self._listener: Optional[weakref.ReferenceType[Any]] = None
+
+    @property
+    def listener(self):
+        """Return current listener."""
+        if self._listener is None:
+            return None
+        return self._listener()
+
+    @listener.setter
+    def listener(self, new_listener):
+        """Change current listener."""
+        if new_listener is not None:
+            self._listener = weakref.ref(new_listener)
+        else:
+            self._listener = None
 
     @property
     def metadata(self) -> AudioMetadata:
@@ -356,6 +386,10 @@ class RaopClient:
             # Start keep-alive task to ensure connection is not closed by remote device
             self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
+            listener = self.listener
+            if listener:
+                listener.playing(self.metadata)
+
             await self._stream_data(wave_file, transport)
         except Exception as ex:
             raise exceptions.ProtocolError("an error occurred during streaming") from ex
@@ -366,6 +400,10 @@ class RaopClient:
                 self._keep_alive_task.cancel()
                 self._keep_alive_task = None
             self.control_client.stop()
+
+            listener = self.listener
+            if listener:
+                listener.stopped()
 
     async def _stream_data(self, wave_file: wave.Wave_read, transport):
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET

@@ -13,6 +13,8 @@ files:
     description: Generic example demonstrating the pairing API.
   - name: scan_and_connect.py
     description: Scans for devices, picks the first one and connects to it.
+  - name: stream.py
+    description: Stream audio file to an AirPlay/RAOP receiver.
 ---
 # Examples
 
