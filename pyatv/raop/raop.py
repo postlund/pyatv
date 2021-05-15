@@ -403,7 +403,7 @@ class RaopClient:
             # Log how long it took to send sample_rate amount of frames (should be
             # one second).
             if stats.interval_completed:
-                interval_frames, interval_time = stats.new_interval()
+                interval_time, interval_frames = stats.new_interval()
                 _LOGGER.debug(
                     "Sent %d frames in %fs (current frames: %d, expected: %d)",
                     interval_frames,
