@@ -9,7 +9,7 @@ from bitarray import bitarray
 
 from pyatv import exceptions
 from pyatv.raop import timing
-from pyatv.raop.metadata import EMPTY_METADATA, Metadata
+from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
 from pyatv.raop.parsers import (
     EncryptionType,
@@ -27,7 +27,9 @@ MAX_PACKETS_COMPENSATE = 3
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
 # Metadata used when no metadata is present
-MISSING_METADATA = Metadata(title="Streaming with pyatv", artist="pyatv", album="RAOP")
+MISSING_METADATA = AudioMetadata(
+    title="Streaming with pyatv", artist="pyatv", album="RAOP"
+)
 
 
 class ControlClient(asyncio.Protocol):
@@ -224,11 +226,11 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
-        self._metadata: Metadata = EMPTY_METADATA
+        self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
 
     @property
-    def metadata(self) -> Metadata:
+    def metadata(self) -> AudioMetadata:
         """Return active metadata."""
         if self._metadata == EMPTY_METADATA:
             return MISSING_METADATA
@@ -326,7 +328,7 @@ class RaopClient:
 
         await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
 
-    async def send_audio(self, wave_file, metadata: Metadata = EMPTY_METADATA):
+    async def send_audio(self, wave_file, metadata: AudioMetadata = EMPTY_METADATA):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
             raise Exception("not initialized")  # TODO: better exception
