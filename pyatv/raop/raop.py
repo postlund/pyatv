@@ -1,15 +1,17 @@
 """Support for RAOP (AirPlay v1)."""
+from abc import ABC, abstractmethod
 import asyncio
 import logging
 from time import monotonic
-from typing import List, Mapping, Optional, Tuple, cast
+from typing import Any, List, Mapping, Optional, Tuple, cast
 import wave
+import weakref
 
 from bitarray import bitarray
 
 from pyatv import exceptions
 from pyatv.raop import timing
-from pyatv.raop.metadata import EMPTY_METADATA, Metadata
+from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
 from pyatv.raop.parsers import (
     EncryptionType,
@@ -27,7 +29,9 @@ MAX_PACKETS_COMPENSATE = 3
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
 # Metadata used when no metadata is present
-MISSING_METADATA = Metadata(title="Streaming with pyatv", artist="pyatv", album="RAOP")
+MISSING_METADATA = AudioMetadata(
+    title="Streaming with pyatv", artist="pyatv", album="RAOP"
+)
 
 
 class ControlClient(asyncio.Protocol):
@@ -214,6 +218,18 @@ def parse_transport(transport: str) -> Tuple[List[str], Mapping[str, str]]:
     return params, options
 
 
+class RaopListener(ABC):
+    """Listener interface for RAOP state changes."""
+
+    @abstractmethod
+    def playing(self, metadata: AudioMetadata) -> None:
+        """Media started playing with metadata."""
+
+    @abstractmethod
+    def stopped(self) -> None:
+        """Media stopped playing."""
+
+
 class RaopClient:
     """Simple RAOP client to stream audio."""
 
@@ -224,11 +240,27 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
-        self._metadata: Metadata = EMPTY_METADATA
+        self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
+        self._listener: Optional[weakref.ReferenceType[Any]] = None
 
     @property
-    def metadata(self) -> Metadata:
+    def listener(self):
+        """Return current listener."""
+        if self._listener is None:
+            return None
+        return self._listener()
+
+    @listener.setter
+    def listener(self, new_listener):
+        """Change current listener."""
+        if new_listener is not None:
+            self._listener = weakref.ref(new_listener)
+        else:
+            self._listener = None
+
+    @property
+    def metadata(self) -> AudioMetadata:
         """Return active metadata."""
         if self._metadata == EMPTY_METADATA:
             return MISSING_METADATA
@@ -326,7 +358,7 @@ class RaopClient:
 
         await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
 
-    async def send_audio(self, wave_file, metadata: Metadata = EMPTY_METADATA):
+    async def send_audio(self, wave_file, metadata: AudioMetadata = EMPTY_METADATA):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
             raise Exception("not initialized")  # TODO: better exception
@@ -354,6 +386,10 @@ class RaopClient:
             # Start keep-alive task to ensure connection is not closed by remote device
             self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
+            listener = self.listener
+            if listener:
+                listener.playing(self.metadata)
+
             await self._stream_data(wave_file, transport)
         except Exception as ex:
             raise exceptions.ProtocolError("an error occurred during streaming") from ex
@@ -364,6 +400,10 @@ class RaopClient:
                 self._keep_alive_task.cancel()
                 self._keep_alive_task = None
             self.control_client.stop()
+
+            listener = self.listener
+            if listener:
+                listener.stopped()
 
     async def _stream_data(self, wave_file: wave.Wave_read, transport):
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
@@ -401,7 +441,7 @@ class RaopClient:
             # Log how long it took to send sample_rate amount of frames (should be
             # one second).
             if stats.interval_completed:
-                interval_frames, interval_time = stats.new_interval()
+                interval_time, interval_frames = stats.new_interval()
                 _LOGGER.debug(
                     "Sent %d frames in %fs (current frames: %d, expected: %d)",
                     interval_frames,

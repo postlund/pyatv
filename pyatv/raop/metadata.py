@@ -4,7 +4,7 @@ from typing import NamedTuple, Optional
 from audio_metadata import load
 
 
-class Metadata(NamedTuple):
+class AudioMetadata(NamedTuple):
     """Audio metadata."""
 
     title: Optional[str]
@@ -12,10 +12,10 @@ class Metadata(NamedTuple):
     album: Optional[str]
 
 
-EMPTY_METADATA = Metadata(None, None, None)
+EMPTY_METADATA = AudioMetadata(None, None, None)
 
 
-def get_metadata(filename: str) -> Metadata:
+def get_metadata(filename: str) -> AudioMetadata:
     """Extract metadata from a file and return it."""
     in_file = load(filename)
 
@@ -28,7 +28,7 @@ def get_metadata(filename: str) -> Metadata:
     artist = in_file.tags.get("artist")
     album = in_file.tags.get("album")
 
-    return Metadata(
+    return AudioMetadata(
         ", ".join(title) if title else None,
         ", ".join(artist) if artist else None,
         ", ".join(album) if album else None,
