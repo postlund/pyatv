@@ -8,7 +8,7 @@ from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.dmap import tags
 from pyatv.raop import timing
-from pyatv.raop.metadata import Metadata
+from pyatv.raop.metadata import AudioMetadata
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -224,7 +224,7 @@ class RtspSession(asyncio.Protocol):
         self,
         rtpseq: int,
         rtptime: int,
-        metadata: Metadata,
+        metadata: AudioMetadata,
     ) -> RtspResponse:
         """Change metadata for what is playing."""
         payload = b""
