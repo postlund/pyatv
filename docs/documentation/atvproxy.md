@@ -4,6 +4,12 @@ title: atvproxy
 permalink: /documentation/atvproxy/
 link_group: documentation
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
+
 # atvproxy
 
 The `atvproxy` is a helper script used to intercept traffic by doing versions

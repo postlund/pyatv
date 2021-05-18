@@ -1,0 +1,14 @@
+.center_box {
+  margin: 0 auto;
+  display: table;
+  border: 1px solid #606c71;
+  background: #f3f6fa;
+  padding: 1em 3em 1em 3em;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center
+}
+
+.center_box p {
+    margin: 0px
+}
