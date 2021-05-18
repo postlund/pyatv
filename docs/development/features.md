@@ -19,7 +19,7 @@ A feature can at any given time be considered to be in one of the following stat
 | Unavailable | The feature is supported but currently not possible to use, e.g. skip to next track is only possible if a song is playing.
 | Available | The feature is supported and available now, e.g. `Pause` is possible because something is playing.
 
-Because of technical reasons, the state of some features are not possible to determine, so `pyatv` will make an educated guess. If something seems strange, please write an [issue](https://github.com/postlund/pyatv/issues/new?assignees=&labels=bug&template=bug_report.md&title=) about it. Make sure you include full debug logs, otherwise it will be hard to troubleshoot.
+Because of technical reasons, the state of some features are not possible to determine, so pyatv will make an educated guess. If something seems strange, please write an [issue](https://github.com/postlund/pyatv/issues/new?assignees=&labels=bug&template=bug_report.md&title=) about it. Make sure you include full debug logs, otherwise it will be hard to troubleshoot.
 
 ## Using the Features API
 

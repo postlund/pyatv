@@ -6,7 +6,7 @@ link_group: development
 ---
 # Device Information
 
-`pyatv` can extract various information about a device, e.g. which
+pyatv can extract various information about a device, e.g. which
 operating system (and version) it runs or its hardware model (3, 4K, etc.).
 This information is exposed via the interface {% include api i="interface.DeviceInfo" %}.
 

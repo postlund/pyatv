@@ -8,6 +8,8 @@ link_group: development
 
 Protocols supporting volume controls can be controlled via the audio interface.
 
+**No protocol currently implement this interface!**
+
 ## Using the Audio API
 
 After connecting to a device, you get the apps interface via {% include api i="interface.AppleTV.audio" %}:
