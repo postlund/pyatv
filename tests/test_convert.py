@@ -53,6 +53,7 @@ def test_protocol_str():
     assert "DMAP" == convert.protocol_str(Protocol.DMAP)
     assert "AirPlay" == convert.protocol_str(Protocol.AirPlay)
     assert "Companion" == convert.protocol_str(Protocol.Companion)
+    assert "RAOP" == convert.protocol_str(Protocol.RAOP)
 
 
 def test_unknown_protocol_str():

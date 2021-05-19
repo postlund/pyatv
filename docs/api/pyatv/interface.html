@@ -33,6 +33,7 @@ link_group: api
 <h4><code><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.interface.AppleTV.apps" href="#pyatv.interface.AppleTV.apps">apps</a></code></li>
+<li><code><a title="pyatv.interface.AppleTV.audio" href="#pyatv.interface.AppleTV.audio">audio</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.close" href="#pyatv.interface.AppleTV.close">close</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.connect" href="#pyatv.interface.AppleTV.connect">connect</a></code></li>
 <li><code><a title="pyatv.interface.AppleTV.device_info" href="#pyatv.interface.AppleTV.device_info">device_info</a></code></li>
@@ -59,6 +60,13 @@ link_group: api
 <li><code><a title="pyatv.interface.ArtworkInfo.height" href="#pyatv.interface.ArtworkInfo.height">height</a></code></li>
 <li><code><a title="pyatv.interface.ArtworkInfo.mimetype" href="#pyatv.interface.ArtworkInfo.mimetype">mimetype</a></code></li>
 <li><code><a title="pyatv.interface.ArtworkInfo.width" href="#pyatv.interface.ArtworkInfo.width">width</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.Audio.set_volume" href="#pyatv.interface.Audio.set_volume">set_volume</a></code></li>
+<li><code><a title="pyatv.interface.Audio.volume" href="#pyatv.interface.Audio.volume">volume</a></code></li>
 </ul>
 </li>
 <li>
@@ -211,6 +219,7 @@ link_group: api
 <ul class="">
 <li><code><a title="pyatv.interface.Stream.close" href="#pyatv.interface.Stream.close">close</a></code></li>
 <li><code><a title="pyatv.interface.Stream.play_url" href="#pyatv.interface.Stream.play_url">play_url</a></code></li>
+<li><code><a title="pyatv.interface.Stream.stream_file" href="#pyatv.interface.Stream.stream_file">stream_file</a></code></li>
 </ul>
 </li>
 </ul>
@@ -925,6 +934,7 @@ class PushUpdater(ABC, StateProducer):
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise NotImplementedError
 
+    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
         &#34;&#34;&#34;Begin to listen to updates.
@@ -956,6 +966,14 @@ class Stream:  # pylint: disable=too-few-public-methods
     @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     async def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+        &#34;&#34;&#34;Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()
 
 
@@ -1083,7 +1101,7 @@ class Features:
 
     def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -1107,6 +1125,21 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
+
+
+class Audio:
+    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+
+    @property  # type: ignore
+    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+    def volume(self) -&gt; float:
+        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+    async def set_volume(self, level: float) -&gt; None:
+        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
 
 
 class AppleTV(ABC, StateProducer):
@@ -1169,7 +1202,12 @@ class AppleTV(ABC, StateProducer):
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
+
+    @property
+    @abstractmethod
+    def audio(self) -&gt; Audio:
+        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -1347,7 +1385,12 @@ def name(self) -&gt; Optional[str]:
     @property
     @abstractmethod
     def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
+
+    @property
+    @abstractmethod
+    def audio(self) -&gt; Audio:
+        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1371,6 +1414,19 @@ def name(self) -&gt; Optional[str]:
 @abstractmethod
 def apps(self) -&gt; Apps:
     &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.AppleTV.audio"><code class="name">var <span class="ident">audio</span> -> <a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></dt>
+<dd>
+<section class="desc"><p>Return audio interface.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+@abstractmethod
+def audio(self) -&gt; Audio:
+    &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
 <dt id="pyatv.interface.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
@@ -1625,6 +1681,69 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 </dd>
 </dl>
 </dd>
+<dt id="pyatv.interface.Audio"><code class="flex name class">
+<span>class <span class="ident">Audio</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Base class for audio functionality.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Audio:
+    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+
+    @property  # type: ignore
+    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+    def volume(self) -&gt; float:
+        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+    async def set_volume(self, level: float) -&gt; None:
+        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li>pyatv.support.facade.FacadeAudio</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.Audio.volume"><code class="name">var <span class="ident">volume</span> -> float</code></dt>
+<dd>
+<section class="desc"><p>Return current volume level.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property  # type: ignore
+@feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
+def volume(self) -&gt; float:
+    &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyatv.interface.Audio.set_volume"><code class="name flex">
+<span>async def <span class="ident">set_volume</span></span>(<span>self, level: float) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Change current volume level.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
+async def set_volume(self, level: float) -&gt; None:
+    &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="pyatv.interface.BaseService"><code class="flex name class">
 <span>class <span class="ident">BaseService</span></span>
 <span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]])</span>
@@ -1675,6 +1794,7 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <li><a title="pyatv.conf.CompanionService" href="conf#pyatv.conf.CompanionService">CompanionService</a></li>
 <li><a title="pyatv.conf.DmapService" href="conf#pyatv.conf.DmapService">DmapService</a></li>
 <li><a title="pyatv.conf.MrpService" href="conf#pyatv.conf.MrpService">MrpService</a></li>
+<li><a title="pyatv.conf.RaopService" href="conf#pyatv.conf.RaopService">RaopService</a></li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -1972,7 +2092,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 
     def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
         &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -2003,6 +2123,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 <li>pyatv.companion.CompanionFeatures</li>
 <li>pyatv.dmap.DmapFeatures</li>
 <li>pyatv.mrp.MrpFeatures</li>
+<li>pyatv.raop.RaopFeatures</li>
 <li>pyatv.support.facade.FacadeFeatures</li>
 </ul>
 <h3>Methods</h3>
@@ -2018,7 +2139,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </summary>
 <pre><code class="python">def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
     &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-    features = {}  # type: Dict[FeatureName, FeatureInfo]
+    features: Dict[FeatureName, FeatureInfo] = {}
     for name in FeatureName:
         info = self.get_feature(name)
         if info.state != FeatureState.Unsupported or include_unsupported:
@@ -2128,6 +2249,7 @@ in one of the listed states.</p></section>
 <ul class="hlist">
 <li>pyatv.dmap.DmapMetadata</li>
 <li>pyatv.mrp.MrpMetadata</li>
+<li>pyatv.raop.RaopMetadata</li>
 <li>pyatv.support.facade.FacadeMetadata</li>
 </ul>
 <h3>Instance variables</h3>
@@ -3077,6 +3199,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
         &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
         raise NotImplementedError
 
+    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
     @abstractmethod
     def start(self, initial_delay: int = 0) -&gt; None:
         &#34;&#34;&#34;Begin to listen to updates.
@@ -3106,6 +3229,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 <ul class="hlist">
 <li>pyatv.dmap.DmapPushUpdater</li>
 <li>pyatv.mrp.MrpPushUpdater</li>
+<li>pyatv.raop.RaopPushUpdater</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -3153,7 +3277,8 @@ def active(self) -&gt; bool:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@abstractmethod
+<pre><code class="python">@feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
+@abstractmethod
 def start(self, initial_delay: int = 0) -&gt; None:
     &#34;&#34;&#34;Begin to listen to updates.
 
@@ -3792,11 +3917,20 @@ def listener(self):
     @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
     async def play_url(self, url: str, **kwargs) -&gt; None:
         &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
+        raise exceptions.NotSupportedError()
+
+    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+        &#34;&#34;&#34;Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        &#34;&#34;&#34;
         raise exceptions.NotSupportedError()</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.airplay.AirPlayStream</li>
+<li>pyatv.raop.RaopStream</li>
 <li>pyatv.support.facade.FacadeStream</li>
 </ul>
 <h3>Methods</h3>
@@ -3827,6 +3961,25 @@ def listener(self):
 <pre><code class="python">@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
 async def play_url(self, url: str, **kwargs) -&gt; None:
     &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
+    raise exceptions.NotSupportedError()</code></pre>
+</details>
+</dd>
+<dt id="pyatv.interface.Stream.stream_file"><code class="name flex">
+<span>async def <span class="ident">stream_file</span></span>(<span>self, filename: str, **kwargs) -> NoneType</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Stream local file to device.</p>
+<p>INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
+async def stream_file(self, filename: str, **kwargs) -&gt; None:
+    &#34;&#34;&#34;Stream local file to device.
+
+    INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+    &#34;&#34;&#34;
     raise exceptions.NotSupportedError()</code></pre>
 </details>
 </dd>

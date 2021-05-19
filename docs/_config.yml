@@ -1,13 +1,17 @@
 title: pyatv
 email: pierre.staahl@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  a python client library for the Apple TV
+  a client library for Apple TV and AirPlay devices
 url: "https://pyatv.dev"
 baseurl: /
 twitter_username: postlund
 github_username:  postlund
 
 markdown: kramdown
+kramdown:
+  parse_block_html: true
+  parse_span_html: true
+  html_to_native: true
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-feed
@@ -33,6 +37,8 @@ page_links:
   documentation:
     - link: /documentation/
       title: Start
+    - link: /documentation/supported_features/
+      title: Supported Features
     - link: /documentation/concepts/
       title: Concepts
     - link: /documentation/protocols/
@@ -66,6 +72,10 @@ page_links:
       title: AirPlay
     - link: /development/apps/
       title: Apps
+    - link: /development/audio/
+      title: Audio
+    - link: /development/logging/
+      title: Logging
     - link: /development/examples/
       title: Examples
   support:

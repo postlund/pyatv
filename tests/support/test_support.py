@@ -115,6 +115,12 @@ def test_log_binary_log_limit_output(logger):
     assert len(_debug_string(logger)) == 1036
 
 
+def test_log_binary_non_bytes_as_string(logger):
+    log_binary(logger, "msg", a=b"\x01", b=123, c="test")
+
+    assert _debug_string(logger) == "msg (a=01, b=123, c=test)"
+
+
 def test_protobuf_no_log_if_not_debug(logger, message):
     logger.isEnabledFor.return_value = False
     log_protobuf(logger, "test", message)

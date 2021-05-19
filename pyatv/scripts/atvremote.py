@@ -15,8 +15,16 @@ from pyatv.conf import (
     CompanionService,
     DmapService,
     MrpService,
+    RaopService,
 )
-from pyatv.const import InputAction, Protocol, RepeatState, ShuffleState
+from pyatv.const import (
+    FeatureName,
+    FeatureState,
+    InputAction,
+    Protocol,
+    RepeatState,
+    ShuffleState,
+)
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts
 
@@ -99,6 +107,7 @@ class GlobalCommands:
             interface.Stream,
             interface.DeviceInfo,
             interface.Apps,
+            interface.Audio,
             self.__class__,
             DeviceCommands,
         ]
@@ -141,12 +150,10 @@ class GlobalCommands:
         options = {}
 
         # Inject user provided credentials
-        apple_tv.set_credentials(const.Protocol.AirPlay, self.args.airplay_credentials)
-        apple_tv.set_credentials(const.Protocol.DMAP, self.args.dmap_credentials)
-        apple_tv.set_credentials(const.Protocol.MRP, self.args.mrp_credentials)
-        apple_tv.set_credentials(
-            const.Protocol.Companion, self.args.companion_credentials
-        )
+        for proto in Protocol:
+            apple_tv.set_credentials(
+                proto, getattr(self.args, f"{proto.name.lower()}_credentials")
+            )
 
         # Protocol specific options
         if self.args.protocol == const.Protocol.DMAP:
@@ -249,6 +256,12 @@ class DeviceCommands:
 
     async def push_updates(self):
         """Listen for push updates."""
+        if not self.atv.features.in_state(
+            FeatureState.Available, FeatureName.PushUpdates
+        ):
+            print("Push updates are not supported (no protocol supports it)")
+            return 1
+
         print("Press ENTER to stop")
 
         self.atv.push_updater.start()
@@ -411,30 +424,13 @@ async def cli_handler(loop):
     )
 
     creds = parser.add_argument_group("credentials")
-    creds.add_argument(
-        "--dmap-credentials",
-        help="DMAP credentials to device",
-        dest="dmap_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--mrp-credentials",
-        help="MRP credentials to device",
-        dest="mrp_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--airplay-credentials",
-        help="credentials for airplay",
-        dest="airplay_credentials",
-        default=None,
-    )
-    creds.add_argument(
-        "--companion-credentials",
-        help="credentials for companion link",
-        dest="companion_credentials",
-        default=None,
-    )
+    for prot in Protocol:
+        creds.add_argument(
+            f"--{prot.name.lower()}-credentials",
+            help=f"credentials for {prot.name}",
+            dest=f"{prot.name.lower()}_credentials",
+            default=None,
+        )
 
     debug = parser.add_argument_group("debugging")
     debug.add_argument(
@@ -498,7 +494,7 @@ def _print_found_apple_tvs(atvs, outstream):
     print("Scan Results", file=outstream)
     print("=" * 40, file=outstream)
     for apple_tv in atvs:
-        print("{0}\n".format(apple_tv), file=outstream)
+        print(f"{apple_tv}\n", file=outstream)
 
 
 async def _autodiscover_device(args, loop):
@@ -514,10 +510,8 @@ async def _autodiscover_device(args, loop):
             value = service.credentials or getattr(args, field)
             service.credentials = value
 
-    _set_credentials(Protocol.DMAP, "dmap_credentials")
-    _set_credentials(Protocol.MRP, "mrp_credentials")
-    _set_credentials(Protocol.AirPlay, "airplay_credentials")
-    _set_credentials(Protocol.Companion, "companion_credentials")
+    for proto in Protocol:
+        _set_credentials(proto, f"{proto.name.lower()}_credentials")
 
     logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
@@ -539,6 +533,10 @@ def _manual_device(args):
     if args.companion_credentials:
         config.add_service(
             CompanionService(args.port, credentials=args.companion_credentials)
+        )
+    if args.raop_credentials or args.protocol == const.Protocol.RAOP:
+        config.add_service(
+            RaopService(args.id, args.port, credentials=args.raop_credentials)
         )
     return config
 
@@ -583,7 +581,11 @@ async def _handle_commands(args, config, loop):
     push_listener = PushListener()
     atv = await connect(config, loop, protocol=args.protocol)
     atv.listener = device_listener
-    atv.push_updater.listener = push_listener
+
+    if atv.features.in_state(FeatureState.Available, FeatureName.PushUpdates):
+        atv.push_updater.listener = push_listener
+    else:
+        print("NOTE: Push updates are not supported in this configuration")
 
     try:
         for cmd in args.command:
@@ -606,6 +608,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
     apps = retrieve_commands(interface.Apps)
+    audio = retrieve_commands(interface.Audio)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -635,6 +638,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
+
+    if cmd in audio:
+        return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
     logging.error("Unknown command: %s", cmd)
     return 1

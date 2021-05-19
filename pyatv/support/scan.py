@@ -17,7 +17,8 @@ HOMESHARING_SERVICE: str = "_appletv-v2._tcp.local"
 DEVICE_SERVICE: str = "_touch-able._tcp.local"
 MEDIAREMOTE_SERVICE: str = "_mediaremotetv._tcp.local"
 AIRPLAY_SERVICE: str = "_airplay._tcp.local"
-COMPANION_SERVICE = "_companion-link._tcp.local"
+COMPANION_SERVICE: str = "_companion-link._tcp.local"
+RAOP_SERVICE: str = "_raop._tcp.local"
 
 ALL_SERVICES: List[str] = [
     HOMESHARING_SERVICE,
@@ -25,6 +26,7 @@ ALL_SERVICES: List[str] = [
     MEDIAREMOTE_SERVICE,
     AIRPLAY_SERVICE,
     COMPANION_SERVICE,
+    RAOP_SERVICE,
 ]
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
@@ -46,6 +48,8 @@ def get_unique_identifiers(
             yield service.properties.get("UniqueIdentifier")
         elif service.type == AIRPLAY_SERVICE:
             yield service.properties.get("deviceid")
+        elif service.type == RAOP_SERVICE:
+            yield service.name.split("@")[0]
 
 
 class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
@@ -74,6 +78,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             MEDIAREMOTE_SERVICE: self._mrp_service,
             AIRPLAY_SERVICE: self._airplay_service,
             COMPANION_SERVICE: self._companion_service,
+            RAOP_SERVICE: self._raop_service,
         }.get(service.type, self._unsupported_service)(service, response)
 
     def _hs_service(self, mdns_service: mdns.Service, response: mdns.Response) -> None:
@@ -128,6 +133,16 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             properties=mdns_service.properties,
         )
         self._handle_service(mdns_service.address, mdns_service.name, service, response)
+
+    def _raop_service(self, mdns_service: mdns.Service, response: mdns.Response):
+        """Add a new RAOP device to discovered list."""
+        identifier, name = mdns_service.name.split("@", maxsplit=1)
+        service = conf.RaopService(
+            identifier,
+            mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, name, service, response)
 
     @staticmethod
     def _unsupported_service(mdns_service: mdns.Service, _: mdns.Response) -> None:

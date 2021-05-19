@@ -17,12 +17,12 @@ IP_3 = "10.0.0.3"
 IP_LOCALHOST = "127.0.0.1"
 
 HSGID = "hsgid"
-
 MRP_ID_1 = "mrp_id_1"
-
 AIRPLAY_ID = "AA:BB:CC:DD:EE:FF"
+RAOP_ID = "AABBCCDDEEFF"
 
 COMPANION_PORT = 1234
+RAOP_PORT = 4567
 
 DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
 
@@ -212,7 +212,23 @@ async def test_multicast_scan_airplay_device(udns_server, multicast_scan):
     )
 
     atvs = await multicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV"
+    assert atvs[0].identifier == AIRPLAY_ID
+    assert atvs[0].address == ip_address(IP_1)
+
+
+@pytest.mark.asyncio
+async def test_multicast_scan_raop_device(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.raop_service("Apple TV", RAOP_ID, IP_1, RAOP_PORT)
+    )
+
+    atvs = await multicast_scan()
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV"
+    assert atvs[0].identifier == RAOP_ID
+    assert atvs[0].address == ip_address(IP_1)
 
 
 @pytest.mark.asyncio
@@ -311,11 +327,36 @@ async def test_unicast_scan_mrp(udns_server, unicast_scan):
 @pytest.mark.asyncio
 async def test_unicast_scan_airplay(udns_server, unicast_scan):
     udns_server.add_service(
-        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+        fake_udns.airplay_service(
+            "Apple TV AirPlay", AIRPLAY_ID, address=IP_1, port=7000
+        )
     )
 
     atvs = await unicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0],
+        "Apple TV AirPlay",
+        ip_address(IP_1),
+        AIRPLAY_ID,
+        Protocol.AirPlay,
+        7000,
+    )
+
+
+@pytest.mark.asyncio
+async def test_unicast_scan_raop(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.raop_service("Apple TV", RAOP_ID, address=IP_1, port=RAOP_PORT)
+    )
+
+    atvs = await unicast_scan()
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0], "Apple TV", ip_address(IP_1), RAOP_ID, Protocol.RAOP, RAOP_PORT
+    )
 
 
 @pytest.mark.asyncio

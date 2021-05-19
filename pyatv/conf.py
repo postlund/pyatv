@@ -56,14 +56,19 @@ class AppleTV:
     @property
     def ready(self) -> bool:
         """Return if configuration is ready, i.e. has a main service."""
-        has_dmap = Protocol.DMAP in self._services
-        has_mrp = Protocol.MRP in self._services
-        return has_dmap or has_mrp
+        ready_protocols = set(list(Protocol))
+
+        # Companion has no unique identifier so it's the only protocol that can't be
+        # used independently for now
+        ready_protocols.remove(Protocol.Companion)
+
+        intersection = ready_protocols.intersection(self._services.keys())
+        return len(intersection) > 0
 
     @property
     def identifier(self) -> Optional[str]:
         """Return the main identifier associated with this device."""
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
+        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
             service = self._services.get(prot)
             if service:
                 return service.identifier
@@ -98,10 +103,12 @@ class AppleTV:
         """Return all supported services."""
         return list(self._services.values())
 
-    def main_service(self, protocol: Protocol = None) -> BaseService:
+    def main_service(self, protocol: Optional[Protocol] = None) -> BaseService:
         """Return suggested service used to establish connection."""
         protocols = (
-            [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
+            [protocol]
+            if protocol is not None
+            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
         )
 
         for prot in protocols:
@@ -124,21 +131,28 @@ class AppleTV:
         """Return general device information."""
         properties = self._all_properties()
 
-        if Protocol.MRP in self._services:
+        build: Optional[str] = properties.get("SystemBuildVersion")
+        version = properties.get("ov")
+        if not version:
+            version = properties.get("osvers", lookup_version(build))
+
+        model_name: Optional[str] = properties.get("model", properties.get("am"))
+        if model_name:
+            model = lookup_model(model_name)
+        else:
+            model = self._model
+
+        # MRP devices run tvOS (as far as we know now) as well as HomePods for
+        # some reason
+        if Protocol.MRP in self._services or model in [
+            DeviceModel.HomePod,
+            DeviceModel.HomePodMini,
+        ]:
             os_type = OperatingSystem.TvOS
         elif Protocol.DMAP in self._services:
             os_type = OperatingSystem.Legacy
         else:
             os_type = OperatingSystem.Unknown
-
-        build = properties.get("SystemBuildVersion")
-        version = properties.get("osvers", lookup_version(build))
-
-        model_name: Optional[str] = properties.get("model", None)
-        if model_name:
-            model = lookup_model(model_name)
-        else:
-            model = self._model
 
         mac = properties.get("macAddress", properties.get("deviceid"))
         if mac:
@@ -241,4 +255,20 @@ class CompanionService(BaseService):
     ) -> None:
         """Initialize a new CompaniomService."""
         super().__init__(None, Protocol.Companion, port, properties)
+        self.credentials = credentials
+
+
+# pylint: disable=too-few-public-methods
+class RaopService(BaseService):
+    """Representation of an RAOP service."""
+
+    def __init__(
+        self,
+        identifier: Optional[str],
+        port: int = 7000,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -> None:
+        """Initialize a new RaopService."""
+        super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials

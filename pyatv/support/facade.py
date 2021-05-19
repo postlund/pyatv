@@ -20,7 +20,13 @@ from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_PRIORITIES = [Protocol.MRP, Protocol.DMAP, Protocol.Companion, Protocol.AirPlay]
+DEFAULT_PRIORITIES = [
+    Protocol.MRP,
+    Protocol.DMAP,
+    Protocol.Companion,
+    Protocol.AirPlay,
+    Protocol.RAOP,
+]
 
 PUBLIC_INTERFACES = [
     interface.RemoteControl,
@@ -207,9 +213,10 @@ class FacadeFeatures(Relayer, interface.Features):
     It is optimized for look up speed rather than memory usage.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, push_updater_relay: Relayer) -> None:
         """Initialize a new FacadeFeatures instance."""
         super().__init__(interface.Features, DEFAULT_PRIORITIES)
+        self._push_updater_relay = push_updater_relay
         self._feature_map: Dict[FeatureName, Tuple[Protocol, interface.Features]] = {}
 
     def add_mapping(self, protocol: Protocol, features: Set[FeatureName]) -> None:
@@ -226,6 +233,13 @@ class FacadeFeatures(Relayer, interface.Features):
 
     def get_feature(self, feature_name: FeatureName) -> interface.FeatureInfo:
         """Return current state of a feature."""
+        if feature_name == FeatureName.PushUpdates:
+            # Multiple protocols can register a push updater implementation, but only
+            # one of them will ever be used (i.e. relaying is not done on method
+            # level). So if at least one push updater is available, then we can return
+            # "Available" here.
+            if self._push_updater_relay.count >= 1:
+                return interface.FeatureInfo(FeatureState.Available)
         if feature_name in self._feature_map:
             return self._feature_map[feature_name][1].get_feature(feature_name)
         return interface.FeatureInfo(FeatureState.Unsupported)
@@ -285,6 +299,13 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         """Play media from an URL on the device."""
         await self.relay("play_url")(url, **kwargs)
 
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
+        await self.relay("stream_file")(filename, **kwargs)
+
 
 class FacadeApps(Relayer, interface.Apps):
     """Facade implementation for app handling."""
@@ -302,6 +323,23 @@ class FacadeApps(Relayer, interface.Apps):
         await self.relay("launch_app")(bundle_id)
 
 
+class FacadeAudio(Relayer, interface.Audio):
+    """Facade implementation for audio functionality."""
+
+    def __init__(self):
+        """Initialize a new FacadeAudio instance."""
+        super().__init__(interface.Audio, DEFAULT_PRIORITIES)
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level."""
+        return self.relay("volume")
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        await self.relay("set_volume")(level)
+
+
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
@@ -311,17 +349,19 @@ class FacadeAppleTV(interface.AppleTV):
         self._config = config
         self._session_manager = session_manager
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
-        self._features = FacadeFeatures()
+        self._push_updates = Relayer(
+            interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
+        )
+        self._features = FacadeFeatures(self._push_updates)
         self.interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
             interface.Power: FacadePower(),
-            interface.PushUpdater: Relayer(
-                interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
-            ),
+            interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(),
             interface.Apps: FacadeApps(),
+            interface.Audio: FacadeAudio(),
         }
 
     def add_protocol(self, protocol: Protocol, setup_data: SetupData):
@@ -391,3 +431,8 @@ class FacadeAppleTV(interface.AppleTV):
     def apps(self) -> interface.Apps:
         """Return apps interface."""
         return cast(interface.Apps, self.interfaces[interface.Apps])
+
+    @property
+    def audio(self) -> interface.Audio:
+        """Return audio interface."""
+        return cast(interface.Audio, self.interfaces[interface.Audio])

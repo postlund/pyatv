@@ -1,0 +1,14 @@
+{%- assign numbers = include.no | split: "," -%}
+{%- assign output = Nil -%}
+{%- for number in numbers -%}
+  {%- capture link -%}
+    <a href="https://github.com/postlund/pyatv/issues/{{ number }}">#{{ number }}</a>
+  {%- endcapture -%}
+
+  {%- if output == Nil -%}
+    {%- assign output = link -%}
+  {%- else -%}
+    {%- assign output = output | append: ", " | append: link -%}
+  {%- endif -%}
+{%- endfor -%}
+[{{ output }}]

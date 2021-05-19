@@ -25,6 +25,9 @@ class Protocol(Enum):
     Companion = 4
     """Protocol constant representing Companion link."""
 
+    RAOP = 5
+    """Protocol constant representing RAOP."""
+
 
 class MediaType(Enum):
     """All supported media types."""
@@ -137,6 +140,12 @@ class DeviceModel(Enum):
 
     Gen4K = 4
     """Device model is Apple TV 4K."""
+
+    HomePod = 5
+    """Device model is HomePod (first generation)."""
+
+    HomePodMini = 6
+    """Device model is HomePod Mini (first generation)."""
 
 
 class InputAction(Enum):
@@ -292,8 +301,14 @@ class FeatureName(Enum):
     App = 35
     """App playing media."""
 
+    PushUpdates = 43
+    """Push updates are supported."""
+
     PlayUrl = 31
     """Stream a URL on device."""
+
+    StreamFile = 44
+    """Stream local file to device."""
 
     PowerState = 32
     """Current device power state."""
@@ -303,3 +318,9 @@ class FeatureName(Enum):
 
     TurnOff = 34
     """Turn off device."""
+
+    Volume = 45
+    """Current volume level."""
+
+    SetVolume = 46
+    """Set volume level."""

@@ -694,6 +694,7 @@ class PushUpdater(ABC, StateProducer):
         """Return if push updater has been started."""
         raise NotImplementedError
 
+    @feature(43, "PushUpdates", "Push updates are supported.")
     @abstractmethod
     def start(self, initial_delay: int = 0) -> None:
         """Begin to listen to updates.
@@ -725,6 +726,14 @@ class Stream:  # pylint: disable=too-few-public-methods
     @feature(31, "PlayUrl", "Stream a URL on device.")
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
+        raise exceptions.NotSupportedError()
+
+    @feature(44, "StreamFile", "Stream local file to device.")
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
         raise exceptions.NotSupportedError()
 
 
@@ -852,7 +861,7 @@ class Features:
 
     def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
         """Return state of all features."""
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -876,6 +885,21 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
+
+
+class Audio:
+    """Base class for audio functionality."""
+
+    @property  # type: ignore
+    @feature(45, "Volume", "Current volume level.")
+    def volume(self) -> float:
+        """Return current volume level."""
+        raise exceptions.NotSupportedError()
+
+    @feature(46, "SetVolume", "Set volume level.")
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        raise exceptions.NotSupportedError()
 
 
 class AppleTV(ABC, StateProducer):
@@ -939,3 +963,8 @@ class AppleTV(ABC, StateProducer):
     @abstractmethod
     def apps(self) -> Apps:
         """Return apps interface."""
+
+    @property
+    @abstractmethod
+    def audio(self) -> Audio:
+        """Return audio interface."""
