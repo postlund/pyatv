@@ -4,6 +4,12 @@ title: atvscript
 permalink: /documentation/atvscript/
 link_group: documentation
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
+
 # atvscript
 
 This script has been created specifically for scripting purposes or for integration
@@ -14,7 +20,7 @@ easy to parse, e.g. JSON. It is simple to add support for additional formats if 
 Extending and improving this script will mostly be left to the community. If you want
 a new feature, feel free to send a PR!
 
-## General Output Format
+# General Output Format
 
 Output is always in the form of a dictionary (be it JSON, YAML or something else) with
 the following keys pre-defined keys:
@@ -31,7 +37,7 @@ the following keys pre-defined keys:
 additional keys not mentioned here are part of the command response.
 
 
-## Specifying Device and Credentials
+# Specifying Device and Credentials
 
 Currently `atvscript` supports device discovery using regular scanning and unicast
 scanning, with identifier as filter. The arguments are identical to [atvremote](/documentation/atvremote):
@@ -48,12 +54,12 @@ When using unicast scanning, i.e. specifying IP address via `-s`, it is not need
 specify `--id` as the script will pick the first available device it finds. This can
 only be the requested device.
 
-## Command Reference
+# Command Reference
 
 This section documents the supported commands. JSON output has been prettified for some
 commands to make them easier to read. One command response is *always* printed per line.
 
-### Scanning
+## Scanning
 
 It is possible to scan for devices with the `scan` command:
 
@@ -136,7 +142,7 @@ $ atvscript -s 10.0.10.81 scan
 }
 ```
 
-### What is Playing
+## What is Playing
 
 To get what is playing:
 
@@ -163,7 +169,7 @@ $ atvscript -s 10.0.10.81 playing
 
 Some of the fields, like `media_type` and `device_state` uses the names from their corresponding enum, but in lower case. Check out {% include api i="const.DeviceState" %} for instance to find valid values for `device_state`.
 
-### Remote Control
+## Remote Control
 
 All buttons in {% include api i="interface.RemoteControl" %} are supported by `atvscript`
 except for the ones beginning with `set_`:
@@ -173,7 +179,7 @@ $ atvscript -s 10.0.10.81 menu
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "command": "menu"}
 ```
 
-### Push and Power Updates
+## Push and Power Updates
 
 Push and power updates are printed to the terminal as they happen:
 
@@ -191,7 +197,7 @@ Current power state is always printed as the first update.
 
 When pressing ENTER, the script will exit (as seen on the last line).
 
-### Connection Status
+## Connection Status
 
 Listening to push updates is a long-lived process and the connection might be closed at some point, e.g.
 due to device reboot or network issues. If this happens, `connection` will be set to `closed`:

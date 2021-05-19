@@ -4,12 +4,18 @@ title: Protocols
 permalink: /documentation/protocols/
 link_group: documentation
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
+
 # Protocols
 
-If you want to extend `pyatv`, a basic understanding of the used protocols helps a lot. This
+If you want to extend pyatv, a basic understanding of the used protocols helps a lot. This
 page aims to give a summary of the protocols and how they work (to the extent we know, since
 they are reverse engineered). Focus are on the parts the are relevant and implemented in
-`pyatv`.
+pyatv.
 
 # Digital Media Access Protocol (DMAP)
 
@@ -55,7 +61,7 @@ contains other TLVs) or not. It cannot easily be seen on the data itself.
 A container usually has more resemblance to an array than a dictionary
 since multiple TLVs with the same key often occurs.
 
-All tags currently known by `pyatv` is defined in `pyatv.dmap.tag_definitions`.
+All tags currently known by pyatv is defined in `pyatv.dmap.tag_definitions`.
 
 ## Decoding Example
 
@@ -153,7 +159,7 @@ The device will respond with an error (503?) if the authentication fails.
 
 ## Supported Requests
 
-This list is only covers the requests performed by `pyatv` and is thus not
+This list is only covers the requests performed by pyatv and is thus not
 complete.
 
 ### server-info
@@ -588,7 +594,7 @@ for further details (available [here](https://developer.apple.com/homekit/specif
 but requires an Apple ID).
 
 Messages will be presented in hex and a decoded format, based on the implementation in
-`pyatv`. So beware that it will be somewhat python-inspired.
+pyatv. So beware that it will be somewhat python-inspired.
 
 ### Pairing
 
@@ -788,7 +794,7 @@ with `E_OPACK` as frame type would yield `0x08000013` as AAD for both encryption
 ### E_OPACK
 
 Several types of data can be carried over the Companion protocol, but the one called `E_OPACK`
-seems to be the one of interest for `pyatv`. It carries information for both the Apple TV remote
+seems to be the one of interest for pyatv. It carries information for both the Apple TV remote
 widget in Action Center as well as the Shortcuts app. So far, not much is known about the format
 used by `E_PACK`, but what is known is documented here.
 

@@ -61,8 +61,35 @@
           {% if p != site.page_links[page.link_group].last %}| {% endif %}
         {% endfor %}
       </div>
+
       {{ content }}
 
+      {% if site.page_links contains page.link_group %}
+        {% assign prev = Nil %}
+        {% assign curr = Nil %}
+        {% assign next = Nil %}
+        {% assign links = site.page_links[page.link_group] %}
+
+        {% for p in links %}
+          {% assign prev = curr %}
+          {% assign curr = p %}
+          {% if p["link"] == page.permalink %}
+            {% assign next = links[forloop.index] %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+
+        <div style="font-weight: bold; padding-top: 2em">
+        {% if prev == Nil %}
+          <a href="{{ next['link'] }}">{{ next["title"] }} &rarr;</a>
+        {% elsif next == Nil %}
+          <a href="{{ prev['link'] }}">&larr; {{ prev["title"] }}</a>
+        {% else %}
+          <a href="{{ prev['link'] }}">&larr; {{ prev["title"] }}</a> | 
+          <a href="{{ next['link'] }}">{{ next["title"] }} &rarr;</a>
+        {% endif %}
+        </div>
+      {% endif %}
       <footer class="site-footer">
         {% if page.path contains ".md" %}
           <a href="{{ site.github.repository_url }}/edit/master/docs/{{ page.path }}">[Edit this page]</a>

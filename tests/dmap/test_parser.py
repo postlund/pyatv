@@ -28,6 +28,10 @@ def lookup_tag(name):
     return TEST_TAGS[name]
 
 
+def test_empty_data():
+    assert parser.parse(b"", lookup_tag) == []
+
+
 def test_parse_uint_of_various_lengths():
     in_data = (
         tags.uint8_tag("uuu8", 12)

@@ -28,7 +28,7 @@ class AirPlayPlayerTest(AioHTTPTestCase):
         http = net.HttpSession(
             self.session, "http://127.0.0.1:{0}/".format(self.server.port)
         )
-        self.player = player.AirPlayPlayer(self.loop, http)
+        self.player = player.AirPlayPlayer(http)
 
     async def tearDownAsync(self):
         unstub_sleep()

@@ -36,7 +36,7 @@ def power_state(self) -> const.PowerState:
 ## Waiting for State Change
 
 It is possible to pass `await_new_state` set to `True` when turning on
-or off a device to have `pyatv` wait for a state change. E.g. calling
+or off a device to have pyatv wait for a state change. E.g. calling
 {% include api i="interface.Power.turn_off" %} will block until the device
 has powered off:
 

@@ -69,6 +69,14 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         self.assertIsNotNone(self.service.credentials)
 
     @unittest_run_loop
+    async def test_pairing_no_pin(self):
+        self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
+
+        await self.handle.begin()
+        with self.assertRaises(exceptions.PairingError):
+            await self.handle.finish()
+
+    @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
 
