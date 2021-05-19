@@ -42,10 +42,9 @@ class AirPlayFeatures(Features):
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, config) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
-        self.loop = loop
         self.service = self.config.get_service(Protocol.AirPlay)
         self.identifier = None
         self.credentials = self._get_credentials()
@@ -77,7 +76,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         http = net.HttpSession(
             session, f"http://{self.config.address}:{self.service.port}/"
         )
-        player = AirPlayPlayer(self.loop, http)
+        player = AirPlayPlayer(http)
 
         # If credentials have been loaded, do device verification first
         if self.credentials:
@@ -135,7 +134,7 @@ def setup(
     assert service is not None
 
     # TODO: Split up in connect/protocol and Stream implementation
-    stream = AirPlayStream(config, loop)
+    stream = AirPlayStream(config)
 
     interfaces[Features].register(
         AirPlayFeatures(cast(conf.AirPlayService, service)), Protocol.AirPlay

@@ -519,7 +519,7 @@ class DmapPushUpdater(PushUpdater):
             # Sleep some time before waiting for updates
             if not first_call and self._initial_delay > 0:
                 _LOGGER.debug("Initial delay set to %d", self._initial_delay)
-                await asyncio.sleep(self._initial_delay, loop=self.loop)
+                await asyncio.sleep(self._initial_delay)
                 first_call = False
 
             try:

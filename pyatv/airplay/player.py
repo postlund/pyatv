@@ -21,9 +21,8 @@ HEADERS = {
 class AirPlayPlayer:
     """This class helps with playing media from an URL."""
 
-    def __init__(self, loop, http):
+    def __init__(self, http):
         """Initialize a new AirPlay instance."""
-        self.loop = loop
         self.http = http
 
     async def play_url(self, url, position=0):
@@ -52,7 +51,7 @@ class AirPlayPlayer:
                 _LOGGER.debug(
                     "Failed to stream %s, retry %d of %d", url, retry, PLAY_RETRIES
                 )
-                await asyncio.sleep(1.0, loop=self.loop)
+                await asyncio.sleep(1.0)
                 continue
 
             # TODO: Should be more fine-grained
@@ -93,4 +92,4 @@ class AirPlayPlayer:
                 _LOGGER.debug("media playback ended")
                 break
 
-            await asyncio.sleep(1, loop=self.loop)
+            await asyncio.sleep(1)
