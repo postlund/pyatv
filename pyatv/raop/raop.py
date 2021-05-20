@@ -399,17 +399,6 @@ class RaopClient:
             self.context.server_port,
         )
 
-        # TODO: Should not be set here and allow custom values
-        await self.rtsp.set_parameter("volume", "-20")
-
-        rtptime = self.context.rtptime
-        await self.rtsp.set_parameter(
-            "progress",
-            f"{rtptime}/{rtptime}/{rtptime+3*self.context.sample_rate}",
-        )
-
-        await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
-
     async def send_audio(self, wave_file, metadata: AudioMetadata = EMPTY_METADATA):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
@@ -429,6 +418,16 @@ class RaopClient:
             # Start sending sync packets
             self.control_client.start(self.rtsp.remote_ip)
 
+            # Send progress if supported by receiver
+            if MetadataType.Progress in self._metadata_types:
+                start = self.context.start_ts
+                now = self.context.rtptime
+                end = (
+                    self.context.start_ts
+                    + wave_file.getduration() * self.context.sample_rate
+                )
+                await self.rtsp.set_parameter("progress", f"{start}/{now}/{end}")
+
             # Apply text metadata if it is supported
             self._metadata = metadata
             if MetadataType.Text in self._metadata_types:
@@ -436,6 +435,9 @@ class RaopClient:
                 await self.rtsp.set_metadata(
                     self.context.rtpseq, self.context.rtptime, self.metadata
                 )
+
+            # Set a decent volume (range is [-30.0, 0] and -144 is muted)
+            await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
             # but only if "text" metadata is supported
@@ -445,6 +447,9 @@ class RaopClient:
             listener = self.listener
             if listener:
                 listener.playing(self.metadata)
+
+            # Start playback
+            await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
 
             await self._stream_data(wave_file, transport)
         except (  # pylint: disable=try-except-raise
