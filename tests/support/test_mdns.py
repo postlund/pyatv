@@ -226,3 +226,17 @@ def test_parse_ignore_link_local_address():
     parsed = mdns.parse_services(message)
     assert len(parsed) == 1
     assert parsed[0].address is None
+
+
+# Note: This is an unwanted side-effect of using CaseInsensitiveDict. It's very
+# unlikely that two properties will ever exist, only differ in case and is because of
+# that not a big problem. But a test should exist for it to make sure we don't break
+# anything in the future.
+def test_parse_properties_converts_keys_to_lower_case():
+    service_params = ("_abc._tcp.local", "service", [], 0, {"FOO": "bar", "Bar": "FOO"})
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert parsed[0].properties["foo"] == "bar"
+    assert parsed[0].properties["Bar"] == "FOO"
