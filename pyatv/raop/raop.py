@@ -11,8 +11,14 @@ from bitarray import bitarray
 
 from pyatv import exceptions
 from pyatv.raop import timing
+from pyatv.raop.fifo import PacketFifo
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
-from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
+from pyatv.raop.packets import (
+    AudioPacketHeader,
+    RetransmitReqeust,
+    SyncPacket,
+    TimingPacket,
+)
 from pyatv.raop.parsers import (
     EncryptionType,
     MetadataType,
@@ -28,6 +34,9 @@ _LOGGER = logging.getLogger(__name__)
 # When being late, compensate by sending at most these many packets to catch up
 MAX_PACKETS_COMPENSATE = 3
 
+# We should store this many packets in case retransmission is requested
+PACKET_BACKLOG_SIZE = 1000
+
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
 # Metadata used when no metadata is present
@@ -41,10 +50,11 @@ SUPPORTED_ENCRYPTIONS = EncryptionType.Unencrypted | EncryptionType.MFiSAP
 class ControlClient(asyncio.Protocol):
     """Control client responsible for e.g. sync packets."""
 
-    def __init__(self, context: RtspContext):
+    def __init__(self, context: RtspContext, packet_backlog: PacketFifo):
         """Initialize a new ControlClient."""
         self.transport = None
         self.context = context
+        self.packet_backlog = packet_backlog
         self.task: Optional[asyncio.Future] = None
 
     def close(self):
@@ -118,10 +128,31 @@ class ControlClient(asyncio.Protocol):
         """Handle that connection succeeded."""
         self.transport = transport
 
-    @staticmethod
-    def datagram_received(data, addr):
+    def datagram_received(self, data, addr):
         """Handle incoming control data."""
-        _LOGGER.debug("Received control data from %s: %s", addr, data)
+        actual_type = data[1] & 0x7F  # Remove marker bit
+
+        if actual_type == 0x55:
+            self._retransmit_lost_packets(RetransmitReqeust.decode(data), addr)
+        else:
+            _LOGGER.debug("Received unhandled control data from %s: %s", addr, data)
+
+    def _retransmit_lost_packets(self, request: RetransmitReqeust, addr):
+        _LOGGER.debug("%s from %s", request, addr)
+
+        for i in range(request.lost_packets):
+            if request.lost_seqno + i in self.packet_backlog:
+                packet = self.packet_backlog[request.lost_seqno + i]
+
+                # Very "low level" here just because it's simple and avoids
+                # unnecessary conversions
+                original_seqno = packet[2:4]
+                resp = b"\x80\xD6" + original_seqno + packet
+
+                if self.transport:
+                    self.transport.sendto(resp, addr)
+            else:
+                _LOGGER.debug("Packet %d not in backlog", request.lost_seqno + 1)
 
     @staticmethod
     def error_received(exc):
@@ -244,6 +275,7 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
+        self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
         self._encryption_types: EncryptionType = EncryptionType.Unknown
         self._metadata_types: MetadataType = MetadataType.NotSupported
         self._metadata: AudioMetadata = EMPTY_METADATA
@@ -316,7 +348,8 @@ class RaopClient:
         self._update_output_properties(properties)
 
         (_, control_client) = await self.loop.create_datagram_endpoint(
-            lambda: ControlClient(self.context), local_addr=(self.rtsp.local_ip, 0)
+            lambda: ControlClient(self.context, self._packet_backlog),
+            local_addr=(self.rtsp.local_ip, 0),
         )
         (_, timing_client) = await self.loop.create_datagram_endpoint(
             TimingClient, local_addr=(self.rtsp.local_ip, 0)
@@ -422,6 +455,7 @@ class RaopClient:
         except Exception as ex:
             raise exceptions.ProtocolError("an error occurred during streaming") from ex
         finally:
+            self._packet_backlog.clear()  # Don't keep old packets around (big!)
             if transport:
                 transport.close()
             if self._keep_alive_task:
@@ -518,16 +552,21 @@ class RaopClient:
         for i in range(0, len(frames), 2):
             audio.frombytes(bytes([frames[i + 1], frames[i]]))
 
+        if transport.is_closing():
+            _LOGGER.warning("Connection closed while streaming audio")
+            return 0
+
+        packet = header + audio.tobytes()
+
+        # Add packet to backlog before sending
+        self._packet_backlog[self.context.rtpseq] = packet
+        transport.sendto(packet)
+
         self.context.rtpseq = (self.context.rtpseq + 1) % (2 ** 16)
         self.context.head_ts += int(
             len(frames) / (self.context.channels * self.context.bytes_per_channel)
         )
 
-        if transport.is_closing():
-            _LOGGER.warning("Connection closed while streaming audio")
-            return 0
-
-        transport.sendto(header + audio.tobytes())
         return int(
             len(frames) / (self.context.channels * self.context.bytes_per_channel)
         )

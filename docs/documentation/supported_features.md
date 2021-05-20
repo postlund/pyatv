@@ -196,7 +196,6 @@ AirTunes).
 * Devices requiring HAP pairing, e.g. Apple TV 4+, are not supported {% include issue no="1078" %}
 * Track length is hardcoded to 3s for now
 * Remote control commands does not work, e.g. play or pause {% include issue no="1068" %}
-* Retransmission of lost packets is not supported {% include issue no="1079" %}
 
 ### Verified Devices
 
