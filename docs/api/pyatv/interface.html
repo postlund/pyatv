@@ -1070,16 +1070,16 @@ class DeviceInfo:
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert device info to readable string.&#34;&#34;&#34;
-        if self.model != DeviceModel.Unknown:
-            output = self.model.name.replace(&#34;Gen&#34;, &#34;&#34;)
-        else:
-            output = &#34;Unknown Model&#34;
+        output = (
+            self.model.name if self.model != DeviceModel.Unknown else &#34;Unknown Model&#34;
+        )
 
         output += (
             &#34; &#34;
             + {
                 OperatingSystem.Legacy: &#34;ATV SW&#34;,
                 OperatingSystem.TvOS: &#34;tvOS&#34;,
+                OperatingSystem.AirPortOS: &#34;AirPortOS&#34;,
             }.get(self.operating_system, &#34;Unknown OS&#34;)
         )
 
@@ -1887,16 +1887,16 @@ def identifier(self) -&gt; Optional[str]:
 
     def __str__(self) -&gt; str:
         &#34;&#34;&#34;Convert device info to readable string.&#34;&#34;&#34;
-        if self.model != DeviceModel.Unknown:
-            output = self.model.name.replace(&#34;Gen&#34;, &#34;&#34;)
-        else:
-            output = &#34;Unknown Model&#34;
+        output = (
+            self.model.name if self.model != DeviceModel.Unknown else &#34;Unknown Model&#34;
+        )
 
         output += (
             &#34; &#34;
             + {
                 OperatingSystem.Legacy: &#34;ATV SW&#34;,
                 OperatingSystem.TvOS: &#34;tvOS&#34;,
+                OperatingSystem.AirPortOS: &#34;AirPortOS&#34;,
             }.get(self.operating_system, &#34;Unknown OS&#34;)
         )
 
