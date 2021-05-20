@@ -8,7 +8,7 @@ For a configuration to be usable ("ready") it must have either a `DMAP` or `MRP`
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 """
 from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, List, Mapping, Optional, Tuple, cast
 
 from pyatv import exceptions
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
@@ -30,6 +30,7 @@ class AppleTV:
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
+        properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new AppleTV."""
         self._address = address
@@ -37,6 +38,7 @@ class AppleTV:
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
+        self._properties: Mapping[str, str] = properties or {}
 
     @property
     def address(self) -> IPv4Address:
@@ -126,6 +128,8 @@ class AppleTV:
             return True
         return False
 
+    # TODO: The extraction should be generialized and moved somewhere else. It is
+    # very hard to test rght now.
     @property
     def device_info(self) -> DeviceInfo:
         """Return general device information."""
@@ -160,10 +164,24 @@ class AppleTV:
         if mac:
             mac = mac.upper()
 
+        # The waMA property comes from the _airport._tcp.local service, announced by
+        # AirPort Expresses (used by the admin tool). It contains various information,
+        # for instance MAC address and software version.
+        wama = properties.get("wama")
+        if wama:
+            props: Mapping[str, str] = dict(
+                cast(Tuple[str, str], prop.split("=", maxsplit=1))
+                for prop in ("macaddress=" + wama).split(",")
+            )
+            if not mac:
+                mac = props["macaddress"].replace("-", ":").upper()
+            version = props.get("syVs")
+
         return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -> Mapping[str, str]:
         properties: Dict[str, str] = {}
+        properties.update(self._properties)
         for service in self.services:
             properties.update(service.properties)
         return properties

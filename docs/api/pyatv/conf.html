@@ -78,7 +78,7 @@ For a configuration to be usable (&#34;ready&#34;) it must have either a `DMAP` 
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 &#34;&#34;&#34;
 from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, List, Mapping, Optional, Tuple, cast
 
 from pyatv import exceptions
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
@@ -100,6 +100,7 @@ class AppleTV:
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
@@ -107,6 +108,7 @@ class AppleTV:
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
+        self._properties: Mapping[str, str] = properties or {}
 
     @property
     def address(self) -&gt; IPv4Address:
@@ -196,6 +198,8 @@ class AppleTV:
             return True
         return False
 
+    # TODO: The extraction should be generialized and moved somewhere else. It is
+    # very hard to test rght now.
     @property
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
@@ -230,10 +234,24 @@ class AppleTV:
         if mac:
             mac = mac.upper()
 
+        # The waMA property comes from the _airport._tcp.local service, announced by
+        # AirPort Expresses (used by the admin tool). It contains various information,
+        # for instance MAC address and software version.
+        wama = properties.get(&#34;wama&#34;)
+        if wama:
+            props: Mapping[str, str] = dict(
+                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+            )
+            if not mac:
+                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+            version = props.get(&#34;syVs&#34;)
+
         return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
+        properties.update(self._properties)
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -396,7 +414,7 @@ class RaopService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -422,6 +440,7 @@ AirPlay.</p>
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
@@ -429,6 +448,7 @@ AirPlay.</p>
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
+        self._properties: Mapping[str, str] = properties or {}
 
     @property
     def address(self) -&gt; IPv4Address:
@@ -518,6 +538,8 @@ AirPlay.</p>
             return True
         return False
 
+    # TODO: The extraction should be generialized and moved somewhere else. It is
+    # very hard to test rght now.
     @property
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
@@ -552,10 +574,24 @@ AirPlay.</p>
         if mac:
             mac = mac.upper()
 
+        # The waMA property comes from the _airport._tcp.local service, announced by
+        # AirPort Expresses (used by the admin tool). It contains various information,
+        # for instance MAC address and software version.
+        wama = properties.get(&#34;wama&#34;)
+        if wama:
+            props: Mapping[str, str] = dict(
+                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+            )
+            if not mac:
+                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+            version = props.get(&#34;syVs&#34;)
+
         return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
+        properties.update(self._properties)
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -664,6 +700,19 @@ def device_info(self) -&gt; DeviceInfo:
     mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
     if mac:
         mac = mac.upper()
+
+    # The waMA property comes from the _airport._tcp.local service, announced by
+    # AirPort Expresses (used by the admin tool). It contains various information,
+    # for instance MAC address and software version.
+    wama = properties.get(&#34;wama&#34;)
+    if wama:
+        props: Mapping[str, str] = dict(
+            cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+            for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+        )
+        if not mac:
+            mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+        version = props.get(&#34;syVs&#34;)
 
     return DeviceInfo(os_type, version, build, model, mac)</code></pre>
 </details>

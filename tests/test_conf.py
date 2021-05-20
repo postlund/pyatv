@@ -222,6 +222,24 @@ def test_airport_express_info(config):
     assert device_info.mac is None
 
 
+def test_airport_express_extra_properties():
+    extra_properties = {
+        # MAC, raMA=2.4GHz MAC, raM2=5GHz MAC
+        "wama": "AA-AA-AA-AA-AA-AA,raMA=BB-BB-BB-BB-BB-BB,raM2=CC-CC-CC-CC-CC-CC,"
+        + "raNm=MySsid,raCh=11,rCh2=112,raSt=1,raNA=0,syFl=0x80C,syAP=115,syVs=7.8.1,"
+        + "srcv=78100.3,bjSd=2"
+    }
+    config = conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True, properties=extra_properties)
+    config.add_service(AIRPORT_SERVICE)
+
+    device_info = config.device_info
+    assert device_info.operating_system == OperatingSystem.AirPortOS
+    assert device_info.version == "7.8.1"
+    assert device_info.build_number is None
+    assert device_info.model == DeviceModel.AirPortExpressGen2
+    assert device_info.mac == "AA:AA:AA:AA:AA:AA"
+
+
 @pytest.mark.parametrize(
     "service,expected",
     [
