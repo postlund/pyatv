@@ -21,7 +21,7 @@ DEVICE_INFO_SERVICE = "_device-info._tcp._local"
 TEST_SERVICES = dict(
     [
         fake_udns.mrp_service(
-            SERVICE_NAME, SERVICE_NAME, "mrp_id", address="127.0.0.1", port=1234
+            SERVICE_NAME, SERVICE_NAME, "mrp_id", addresses=["127.0.0.1"], port=1234
         ),
     ]
 )
@@ -131,7 +131,7 @@ def test_parse_empty_service():
 
 
 def test_parse_no_service_type():
-    service_params = (None, "service", None, 0, {})
+    service_params = (None, "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -139,7 +139,7 @@ def test_parse_no_service_type():
 
 
 def test_parse_no_service_name():
-    service_params = ("_abc._tcp.local", None, None, 0, {})
+    service_params = ("_abc._tcp.local", None, [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -147,7 +147,7 @@ def test_parse_no_service_name():
 
 
 def test_parse_with_name_and_type():
-    service_params = ("_abc._tcp.local", "service", None, 0, {})
+    service_params = ("_abc._tcp.local", "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -156,7 +156,7 @@ def test_parse_with_name_and_type():
 
 
 def test_parse_with_port_and_address():
-    service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
+    service_params = ("_abc._tcp.local", "service", ["10.0.0.1"], 123, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -165,7 +165,7 @@ def test_parse_with_port_and_address():
 
 
 def test_parse_single_service():
-    service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
+    service_params = ("_abc._tcp.local", "service", ["10.0.10.1"], 123, {"foo": "bar"})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -174,11 +174,17 @@ def test_parse_single_service():
 
 
 def test_parse_double_service():
-    service1_params = ("_abc._tcp.local", "service1", "10.0.10.1", 123, {"foo": "bar"})
+    service1_params = (
+        "_abc._tcp.local",
+        "service1",
+        ["10.0.10.1"],
+        123,
+        {"foo": "bar"},
+    )
     service2_params = (
         "_def._tcp.local",
         "service2",
-        "10.0.10.2",
+        ["10.0.10.2"],
         456,
         {"fizz": "buzz"},
     )

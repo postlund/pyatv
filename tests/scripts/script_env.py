@@ -55,7 +55,9 @@ class ScriptTest(AioHTTPTestCase):
         airplay_port = self.server.port
 
         self.fake_udns.add_service(
-            fake_udns.homesharing_service(DMAP_ID, "Apple TV 1", "aaaa", address=IP_1)
+            fake_udns.homesharing_service(
+                DMAP_ID, "Apple TV 1", "aaaa", addresses=[IP_1]
+            )
         )
 
         self.fake_udns.add_service(
@@ -63,13 +65,13 @@ class ScriptTest(AioHTTPTestCase):
                 "DDDD",
                 "Apple TV 2",
                 MRP_ID,
-                address=IP_2,
+                addresses=[IP_2],
                 port=self.fake_atv.get_port(Protocol.MRP),
             )
         )
         self.fake_udns.add_service(
             fake_udns.airplay_service(
-                "Apple TV 2", AIRPLAY_ID, address=IP_2, port=airplay_port
+                "Apple TV 2", AIRPLAY_ID, addresses=[IP_2], port=airplay_port
             )
         )
 
