@@ -192,8 +192,24 @@ AirTunes).
 
 * Metadata and push updates only reflect what pyatv is currently playing as there
   seems to not be possible to get current play state from an AirPlay receiver
-* Devices requiring password, pairing or any kind of encryption are not supported,
-  e.g. Apple TV 4+ or AirPort Express {% include issue no="1077,1078" %}
+* Devices requiring password are not supported
+* Devices requiring HAP pairing, e.g. Apple TV 4+, are not supported {% include issue no="1078" %}
 * Track length is hardcoded to 3s for now
 * Remote control commands does not work, e.g. play or pause {% include issue no="1068" %}
 * Retransmission of lost packets is not supported {% include issue no="1079" %}
+
+### Verified Devices
+
+Audio streaming has been verified to work with these devices:
+
+* Apple TV 3 (v8.4.4)
+* HomePod Mini (v14.5)
+* AirPort Express (v7.8.1)
+* Yamaha RX-V773 (v1.98)
+
+The following 3rd party software receivers have also been verified to work:
+
+* [shairport-sync](https://github.com/mikebrady/shairport-sync) (v3.3.8)
+
+If you have verified another device or receiver, please update the list by pressing
+*Edit this page* below and opening a pull request.

@@ -15,8 +15,10 @@ from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.raop.packets import AudioPacketHeader, SyncPacket, TimingPacket
 from pyatv.raop.parsers import (
     EncryptionType,
+    MetadataType,
     get_audio_properties,
     get_encryption_types,
+    get_metadata_types,
 )
 from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspContext, RtspSession
 from pyatv.support import log_binary
@@ -32,6 +34,8 @@ KEEP_ALIVE_INTERVAL = 25  # Seconds
 MISSING_METADATA = AudioMetadata(
     title="Streaming with pyatv", artist="pyatv", album="RAOP"
 )
+
+SUPPORTED_ENCRYPTIONS = EncryptionType.Unencrypted | EncryptionType.MFiSAP
 
 
 class ControlClient(asyncio.Protocol):
@@ -240,6 +244,8 @@ class RaopClient:
         self.context: RtspContext = context
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
+        self._encryption_types: EncryptionType = EncryptionType.Unknown
+        self._metadata_types: MetadataType = MetadataType.NotSupported
         self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
         self._listener: Optional[weakref.ReferenceType[Any]] = None
@@ -291,11 +297,20 @@ class RaopClient:
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
+        self._encryption_types = get_encryption_types(properties)
+        self._metadata_types = get_metadata_types(properties)
+
+        _LOGGER.debug(
+            "Initializing RTSP with encryption=%s, metadata=%s",
+            self._encryption_types,
+            self._metadata_types,
+        )
+
         # Misplaced check that unencrypted data is supported
-        encryption_types = get_encryption_types(properties)
-        if EncryptionType.Unencrypted not in encryption_types:
+        intersection = self._encryption_types & SUPPORTED_ENCRYPTIONS
+        if not intersection or intersection == EncryptionType.Unknown:
             raise exceptions.NotSupportedError(
-                f"no supported encryption types in {str(encryption_types)}"
+                f"no supported encryption types in {str(self._encryption_types)}"
             )
 
         self._update_output_properties(properties)
@@ -331,6 +346,10 @@ class RaopClient:
         )
 
     async def _setup_session(self):
+        # Do auth-setup if MFiSAP encryption is supported by receiver
+        if EncryptionType.MFiSAP in self._encryption_types:
+            await self.rtsp.auth_setup()
+
         await self.rtsp.announce()
 
         resp = await self.rtsp.setup(self.control_client.port, self.timing_client.port)
@@ -377,14 +396,18 @@ class RaopClient:
             # Start sending sync packets
             self.control_client.start(self.rtsp.remote_ip)
 
+            # Apply text metadata if it is supported
             self._metadata = metadata
-            _LOGGER.debug("Playing with metadata: %s", self.metadata)
-            await self.rtsp.set_metadata(
-                self.context.rtpseq, self.context.rtptime, self.metadata
-            )
+            if MetadataType.Text in self._metadata_types:
+                _LOGGER.debug("Playing with metadata: %s", self.metadata)
+                await self.rtsp.set_metadata(
+                    self.context.rtpseq, self.context.rtptime, self.metadata
+                )
 
             # Start keep-alive task to ensure connection is not closed by remote device
-            self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+            # but only if "text" metadata is supported
+            if MetadataType.Text in self._metadata_types:
+                self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
             listener = self.listener
             if listener:

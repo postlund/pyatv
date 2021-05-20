@@ -23,6 +23,15 @@ class EncryptionType(IntFlag):
     FairPlaySAPv25 = 16
 
 
+class MetadataType(IntFlag):
+    """Metadata types supported by receiver."""
+
+    NotSupported = 0
+    Text = 1
+    Artwork = 2
+    Progress = 4
+
+
 # pylint: enable=invalid-name
 
 
@@ -43,9 +52,9 @@ def get_encryption_types(properties: Mapping[str, str]) -> EncryptionType:
 
     Input format from zeroconf is a comma separated list:
 
-        0,1,3
+        et=0,1,3
 
-    Each number represents one encryption type.
+    0=unencrypted, 1=RSA, 3=FairPlay, 4=MFiSAP, 5=FairPlay SAPv2.5
     """
     output = EncryptionType.Unknown
     try:
@@ -62,4 +71,28 @@ def get_encryption_types(properties: Mapping[str, str]) -> EncryptionType:
                 4: EncryptionType.MFiSAP,
                 5: EncryptionType.FairPlaySAPv25,
             }.get(enc_type, EncryptionType.Unknown)
+    return output
+
+
+def get_metadata_types(properties: Mapping[str, str]) -> MetadataType:
+    """Return metadata types supported by receiver.
+
+    Input format from zeroconf is comma separated list:
+
+        md=0,1,2
+
+    0=text, 1=artwork, 2=progress
+    """
+    output = MetadataType.NotSupported
+    try:
+        md_types = [int(x) for x in properties["md"].split(",")]
+    except (KeyError, ValueError):
+        return output
+    else:
+        for md_type in md_types:
+            output |= {
+                0: MetadataType.Text,
+                1: MetadataType.Artwork,
+                2: MetadataType.Progress,
+            }.get(md_type, MetadataType.NotSupported)
     return output
