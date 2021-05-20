@@ -830,16 +830,16 @@ class DeviceInfo:
 
     def __str__(self) -> str:
         """Convert device info to readable string."""
-        if self.model != DeviceModel.Unknown:
-            output = self.model.name.replace("Gen", "")
-        else:
-            output = "Unknown Model"
+        output = (
+            self.model.name if self.model != DeviceModel.Unknown else "Unknown Model"
+        )
 
         output += (
             " "
             + {
                 OperatingSystem.Legacy: "ATV SW",
                 OperatingSystem.TvOS: "tvOS",
+                OperatingSystem.AirPortOS: "AirPortOS",
             }.get(self.operating_system, "Unknown OS")
         )
 

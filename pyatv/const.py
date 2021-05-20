@@ -122,30 +122,50 @@ class OperatingSystem(Enum):
     TvOS = 2
     """Operating system is tvOS."""
 
+    AirPortOS = 3
+    """Operating system is AirPortOS.
+
+    This OS is used by AirPort Express devices. It is not an official name but made up
+    in pyatv as no official name has been found.
+    """
+
 
 class DeviceModel(Enum):
-    """Hardware device model."""
+    """Hardware device model.
+
+    Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
+    future.
+    """
 
     Unknown = 0
     """Device model is unknown."""
 
     Gen2 = 1
-    """Device model is second generation (Apple TV 2)."""
+    """Device model is second generation Apple TV (Apple TV 2)."""
 
     Gen3 = 2
-    """Device model is third generation (Apple TV 3)."""
+    """Device model is third generation Apple TV (Apple TV 3)."""
 
     Gen4 = 3
-    """Device model is fourth generation (Apple TV 4)."""
+    """Device model is fourth generation Apple TV (Apple TV 4)."""
 
     Gen4K = 4
-    """Device model is Apple TV 4K."""
+    """Device model is fifth generation Apple TV (Apple TV 4K)."""
 
     HomePod = 5
     """Device model is HomePod (first generation)."""
 
     HomePodMini = 6
     """Device model is HomePod Mini (first generation)."""
+
+    AirPortExpress = 7
+    """Device model is AirPort Express (first generation)."""
+
+    AirPortExpressGen2 = 8
+    """Device model is AirPort Express (second generation)."""
+
+    AppleTV4KGen2 = 9
+    """Device model is sixth generation Apple TV (Apple TV 4K gen 2)."""
 
 
 class InputAction(Enum):
