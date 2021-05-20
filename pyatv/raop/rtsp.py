@@ -6,6 +6,7 @@ import re
 from socket import socket
 from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
+from pyatv import exceptions
 from pyatv.dmap import tags
 from pyatv.raop import timing
 from pyatv.raop.metadata import AudioMetadata
@@ -292,4 +293,12 @@ class RtspSession(asyncio.Protocol):
             del self.requests[cseq]
 
         _LOGGER.debug("Got RTSP response to %d: %s:", cseq, response)
-        return response
+
+        # Positive response
+        if 200 <= response.code < 300:
+            return response
+
+        if response.code in [401, 403]:
+            raise exceptions.AuthenticationError("not authenticated")
+
+        raise exceptions.ProtocolError(f"RTSP method {method} failed")
