@@ -195,3 +195,34 @@ def test_parse_double_service():
     assert len(parsed) == 2
     dns_utils.assert_service(parsed[0], *service1_params)
     dns_utils.assert_service(parsed[1], *service2_params)
+
+
+def test_parse_pick_one_available_address():
+    addresses = ["10.0.10.1", "10.0.10.2"]
+    service_params = (
+        "_abc._tcp.local",
+        "service",
+        addresses,
+        123,
+        {"foo": "bar"},
+    )
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert str(parsed[0].address) in addresses
+
+
+def test_parse_ignore_link_local_address():
+    service_params = (
+        "_abc._tcp.local",
+        "service",
+        ["169.254.1.1"],
+        123,
+        {"foo": "bar"},
+    )
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert parsed[0].address is None
