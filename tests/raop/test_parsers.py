@@ -5,8 +5,10 @@ import pytest
 from pyatv.exceptions import ProtocolError
 from pyatv.raop.parsers import (
     EncryptionType,
+    MetadataType,
     get_audio_properties,
     get_encryption_types,
+    get_metadata_types,
 )
 
 
@@ -19,7 +21,7 @@ from pyatv.raop.parsers import (
         ({"ss": "32"}, 44100, 2, 4),
     ],
 )
-def test_parse_properties(properties, expected_sr, expected_ch, expected_ss):
+def test_parse_audio_properties(properties, expected_sr, expected_ch, expected_ss):
     sample_rate, channels, sample_size = get_audio_properties(properties)
     assert sample_rate == expected_sr
     assert channels == expected_ch
@@ -27,7 +29,7 @@ def test_parse_properties(properties, expected_sr, expected_ch, expected_ss):
 
 
 @pytest.mark.parametrize("properties", [{"sr": "abc"}, {"ch": "cde"}, {"ss": "fgh"}])
-def test_parse_invalid_property_raises(properties):
+def test_parse_invalid_audio_property_raises(properties):
     with pytest.raises(ProtocolError):
         get_audio_properties(properties)
 
@@ -64,3 +66,19 @@ def test_parse_encryption_include_unknown_type():
         get_encryption_types({"et": "0,1000"})
         == EncryptionType.Unknown | EncryptionType.Unencrypted
     )
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        ({}, MetadataType.NotSupported),
+        ({"md": "0"}, MetadataType.Text),
+        ({"md": "1"}, MetadataType.Artwork),
+        (
+            {"md": "0,1,2"},
+            MetadataType.Text | MetadataType.Artwork | MetadataType.Progress,
+        ),
+    ],
+)
+def test_parse_metadata_types(properties, expected):
+    assert get_metadata_types(properties) == expected

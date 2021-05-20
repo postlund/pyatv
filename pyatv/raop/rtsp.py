@@ -4,7 +4,7 @@ import logging
 from random import randrange
 import re
 from socket import socket
-from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
+from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
 
 from pyatv import exceptions
 from pyatv.dmap import tags
@@ -26,6 +26,20 @@ ANNOUNCE_PAYLOAD = (
     + "a=rtpmap:96 AppleLossless\r\n"
     + f"a=fmtp:96 {FRAMES_PER_PACKET} 0 "
     + "{bits_per_channel} 40 10 14 {channels} 255 0 0 {sample_rate}\r\n"
+)
+
+# Used to signal that traffic is to be unencrypted
+AUTH_SETUP_UNENCRYPTED = b"\x01"
+
+# Just a static Curve25519 public key used to satisfy the auth-setup step for devices
+# requiring that (e.g. AirPort Express). We never verify anything. Source:
+# https://github.com/owntone/owntone-server/blob/
+# c1db4d914f5cd8e7dbe6c1b6478d68a4c14824af/src/outputs/raop.c#L276
+CURVE25519_PUB_KEY = (
+    b"\x59\x02\xed\xe9\x0d\x4e\xf2\xbd"
+    b"\x4c\xb6\x8a\x63\x30\x03\x82\x07"
+    b"\xa9\x4d\xbd\x50\xd8\xaa\x46\x5b"
+    b"\x5d\x8c\x01\x2a\x0c\x7e\x1d\x4e"
 )
 
 
@@ -79,16 +93,16 @@ class RtspResponse(NamedTuple):
     code: int
     message: str
     headers: Mapping[str, str]
-    body: str
+    body: Union[str, bytes]
 
 
-def parse_response(response: str) -> Tuple[RtspResponse, str]:
+def parse_response(response: bytes) -> Tuple[Optional[RtspResponse], bytes]:
     """Parse RTSP response."""
     try:
-        header_str, body = response.split("\r\n\r\n", maxsplit=1)
+        header_str, body = response.split(b"\r\n\r\n", maxsplit=1)
     except ValueError as ex:
         raise ValueError("missing end lines") from ex
-    headers = header_str.split("\r\n")
+    headers = header_str.decode("utf-8").split("\r\n")
 
     match = re.match(r"RTSP/1.0 (\d+) (.+)", headers[0])
     if not match:
@@ -103,11 +117,18 @@ def parse_response(response: str) -> Tuple[RtspResponse, str]:
             resp_headers[key] = value
 
     content_length = int(resp_headers.get("Content-Length", 0))
-    if body and len(body) < content_length:
-        raise ValueError("too short body")
+    if len(body or []) < content_length:
+        return None, response
+
+    response_body: Union[str, bytes] = body[0:content_length]
+
+    # Assume body is text unless content type is application/octet-stream
+    if resp_headers.get("Content-Type") != "application/octet-stream":
+        # We know it's bytes here
+        response_body = cast(bytes, response_body).decode("utf-8")
 
     return (
-        RtspResponse(int(code), message, resp_headers, body[0:content_length]),
+        RtspResponse(int(code), message, resp_headers, response_body),
         body[content_length:],
     )
 
@@ -121,6 +142,7 @@ class RtspSession(asyncio.Protocol):
         self.transport = None
         self.requests: Dict[int, Tuple[asyncio.Semaphore, RtspResponse]] = {}
         self.cseq = 0
+        self.buffer = b""
 
     @property
     def local_ip(self) -> str:
@@ -157,9 +179,13 @@ class RtspSession(asyncio.Protocol):
     def data_received(self, data: bytes) -> None:
         """Handle incoming RTSP data."""
         _LOGGER.debug("Received: %s", data)
-        rest = data.decode("utf-8")
-        while rest != "":
-            parsed, rest = parse_response(rest)
+        self.buffer += data
+        while self.buffer:
+            parsed, self.buffer = parse_response(self.buffer)
+            if parsed is None:
+                _LOGGER.debug("Not enough data to decode message")
+                break
+
             if "CSeq" in parsed.headers:
                 cseq = int(parsed.headers["CSeq"])
                 if cseq in self.requests:
@@ -175,6 +201,18 @@ class RtspSession(asyncio.Protocol):
     def connection_lost(self, exc) -> None:
         """Handle that connection was lost."""
         _LOGGER.debug("RTSP Connection closed")
+
+    async def auth_setup(self) -> RtspResponse:
+        """Send auth-setup message."""
+        # Payload to say that we want to proceed unencrypted
+        body = AUTH_SETUP_UNENCRYPTED + CURVE25519_PUB_KEY
+
+        return await self.send_and_receive(
+            "POST",
+            uri="/auth-setup",
+            content_type="application/octet-stream",
+            body=body,
+        )
 
     async def announce(self) -> RtspResponse:
         """Send ANNOUNCE message."""
@@ -249,6 +287,7 @@ class RtspSession(asyncio.Protocol):
     async def send_and_receive(
         self,
         method: str,
+        uri: Optional[str] = None,
         content_type: Optional[str] = None,
         headers: Mapping[str, object] = None,
         body: Union[str, bytes] = None,
@@ -260,7 +299,7 @@ class RtspSession(asyncio.Protocol):
         if isinstance(body, str):
             body = body.encode("utf-8")
 
-        msg = f"{method} {self.uri} RTSP/1.0"
+        msg = f"{method} {uri or self.uri} RTSP/1.0"
         msg += f"\r\nCSeq: {cseq}"
         msg += f"\r\nUser-Agent: {USER_AGENT}"
         msg += f"\r\nDACP-ID: {self.context.dacp_id}"
