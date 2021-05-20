@@ -267,7 +267,7 @@ def test_apple_tv_software_str():
         "aa:bb:cc:dd:ee:ff",
     )
 
-    assert str(dev_info) == "3 ATV SW 2.2.3 build 13D333"
+    assert str(dev_info) == "Gen3 ATV SW 2.2.3 build 13D333"
 
 
 def test_tvos_str():
@@ -279,7 +279,7 @@ def test_tvos_str():
         "aa:bb:cc:dd:ee:ff",
     )
 
-    assert str(dev_info) == "4K tvOS 1.2.3 build 19A123"
+    assert str(dev_info) == "Gen4K tvOS 1.2.3 build 19A123"
 
 
 def test_unknown_str():

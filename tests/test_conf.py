@@ -34,6 +34,10 @@ RAOP_PROPERTIES = {
     "ov": "14.5",
 }
 
+AIRPORT_PROPERTIES = {
+    "am": "AirPort10,115",
+}
+
 DMAP_SERVICE = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
 MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES)
 AIRPLAY_SERVICE = conf.AirPlayService(
@@ -41,6 +45,7 @@ AIRPLAY_SERVICE = conf.AirPlayService(
 )
 COMPANION_SERVICE = conf.CompanionService(PORT_3)
 RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4, properties=RAOP_PROPERTIES)
+AIRPORT_SERVICE = conf.RaopService(IDENTIFIER_1, PORT_1, properties=AIRPORT_PROPERTIES)
 
 
 @pytest.fixture
@@ -203,7 +208,18 @@ def test_raop_device_info(config):
     assert device_info.version == "14.5"
     assert device_info.build_number is None
     assert device_info.model == DeviceModel.HomePodMini
-    assert not device_info.mac
+    assert device_info.mac is None
+
+
+def test_airport_express_info(config):
+    config.add_service(AIRPORT_SERVICE)
+
+    device_info = config.device_info
+    assert device_info.operating_system == OperatingSystem.AirPortOS
+    assert device_info.version is None
+    assert device_info.build_number is None
+    assert device_info.model == DeviceModel.AirPortExpressGen2
+    assert device_info.mac is None
 
 
 @pytest.mark.parametrize(

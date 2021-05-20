@@ -151,6 +151,8 @@ class AppleTV:
             os_type = OperatingSystem.TvOS
         elif Protocol.DMAP in self._services:
             os_type = OperatingSystem.Legacy
+        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+            os_type = OperatingSystem.AirPortOS
         else:
             os_type = OperatingSystem.Unknown
 
