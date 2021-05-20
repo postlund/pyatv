@@ -19,13 +19,13 @@ IDENTIFIER_4 = "id4"
 CREDENTIALS_1 = "cred1"
 
 MRP_PROPERTIES = {
-    "SystemBuildVersion": "17K795",
-    "macAddress": "ff:ee:dd:cc:bb:aa",
+    "systembuildversion": "17K795",
+    "macaddress": "ff:ee:dd:cc:bb:aa",
 }
 
 AIRPLAY_PROPERTIES = {
     "model": "AppleTV6,2",
-    "deviceid": "aa:bb:cc:dd:ee:ff",
+    "deviceid": "ff:ee:dd:cc:bb:aa",
     "osvers": "8.0.0",
 }
 
@@ -191,7 +191,7 @@ def test_legacy_device_info(config):
     assert device_info.version == "8.0.0"
     assert device_info.build_number is None
     assert device_info.model == DeviceModel.Gen4K
-    assert device_info.mac == "AA:BB:CC:DD:EE:FF"
+    assert device_info.mac == "FF:EE:DD:CC:BB:AA"
 
 
 # Mainly to test devices which are pure AirPlay devices/speakers

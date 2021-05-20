@@ -131,7 +131,7 @@ class AppleTV:
         """Return general device information."""
         properties = self._all_properties()
 
-        build: Optional[str] = properties.get("SystemBuildVersion")
+        build: Optional[str] = properties.get("systembuildversion")
         version = properties.get("ov")
         if not version:
             version = properties.get("osvers", lookup_version(build))
@@ -154,7 +154,7 @@ class AppleTV:
         else:
             os_type = OperatingSystem.Unknown
 
-        mac = properties.get("macAddress", properties.get("deviceid"))
+        mac = properties.get("macaddress", properties.get("deviceid"))
         if mac:
             mac = mac.upper()
 
