@@ -414,6 +414,11 @@ class RaopClient:
                 listener.playing(self.metadata)
 
             await self._stream_data(wave_file, transport)
+        except (  # pylint: disable=try-except-raise
+            exceptions.ProtocolError,
+            exceptions.AuthenticationError,
+        ):
+            raise  # Re-raise internal exceptions to maintain a proper stack trace
         except Exception as ex:
             raise exceptions.ProtocolError("an error occurred during streaming") from ex
         finally:
