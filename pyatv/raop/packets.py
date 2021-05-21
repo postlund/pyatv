@@ -55,3 +55,7 @@ AudioPacketHeader = RtpHeader.extend(
     timestamp="I",
     ssrc="I",
 )
+
+RetransmitReqeust = RtpHeader.extend(
+    "RetransmitPacket", lost_seqno="H", lost_packets="H"
+)
