@@ -63,3 +63,7 @@ class MiniaudioWrapper:
     def getsampwidth(self) -> int:
         """Return number of bytes per sample."""
         return self.src.sample_width
+
+    def getduration(self) -> int:
+        """Return duration in seconds."""
+        return round(self.src.duration)
