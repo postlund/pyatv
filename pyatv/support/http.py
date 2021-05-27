@@ -4,6 +4,7 @@ from collections import deque
 import logging
 from queue import Queue
 import re
+from socket import socket
 from typing import Mapping, NamedTuple, Optional, Tuple, Union, cast
 
 from pyatv import const, exceptions
@@ -75,6 +76,21 @@ class HttpConnection(asyncio.Protocol):
         self._responses: Queue = Queue()
         self._buffer = b""
 
+    @property
+    def local_ip(self) -> str:
+        """Return IP address of local interface."""
+        return self._get_socket().getsockname()[0]
+
+    @property
+    def remote_ip(self) -> str:
+        """Return IP address of remote instance."""
+        return self._get_socket().getpeername()[0]
+
+    def _get_socket(self) -> socket:
+        if self.transport is None:
+            raise RuntimeError("not connected to remote")
+        return self.transport.get_extra_info("socket")
+
     def close(self) -> None:
         """Close HTTP connection."""
         if self.transport:
@@ -85,6 +101,7 @@ class HttpConnection(asyncio.Protocol):
     def connection_made(self, transport) -> None:
         """Handle that a connection has been made."""
         self.transport = transport
+        _LOGGER.debug("Connected to %s", self.remote_ip)
 
     def data_received(self, data: bytes) -> None:
         """Handle incoming HTTP data."""

@@ -2,7 +2,6 @@
 import asyncio
 import logging
 from random import randrange
-from socket import socket
 from typing import Dict, Mapping, Optional, Tuple, Union
 
 from pyatv.dmap import tags
@@ -86,35 +85,21 @@ class RtspContext:
         return self.head_ts - (self.start_ts - self.latency)
 
 
-class RtspSession(HttpConnection):
+class RtspSession:
     """Representation of an RTSP session."""
 
-    def __init__(self, context: RtspContext) -> None:
+    def __init__(self, connection: HttpConnection, context: RtspContext) -> None:
         """Initialize a new RtspSession."""
         super().__init__()
+        self.connection = connection
         self.context = context
         self.requests: Dict[int, Tuple[asyncio.Event, Optional[HttpResponse]]] = {}
         self.cseq = 0
 
     @property
-    def local_ip(self) -> str:
-        """Return IP address of local interface."""
-        return self._get_socket().getsockname()[0]
-
-    @property
-    def remote_ip(self) -> str:
-        """Return IP address of remote instance."""
-        return self._get_socket().getpeername()[0]
-
-    def _get_socket(self) -> socket:
-        if self.transport is None:
-            raise RuntimeError("not connected to remote")
-        return self.transport.get_extra_info("socket")
-
-    @property
     def uri(self) -> str:
         """Return URI used for session requests."""
-        return f"rtsp://{self.local_ip}/{self.context.session_id}"
+        return f"rtsp://{self.connection.local_ip}/{self.context.session_id}"
 
     @staticmethod
     def error_received(exc) -> None:
@@ -137,8 +122,8 @@ class RtspSession(HttpConnection):
         """Send ANNOUNCE message."""
         body = ANNOUNCE_PAYLOAD.format(
             session_id=self.context.session_id,
-            local_ip=self.local_ip,
-            remote_ip=self.remote_ip,
+            local_ip=self.connection.local_ip,
+            remote_ip=self.connection.remote_ip,
             bits_per_channel=8 * self.context.bytes_per_channel,
             channels=self.context.channels,
             sample_rate=self.context.sample_rate,
@@ -226,7 +211,7 @@ class RtspSession(HttpConnection):
 
         # Map an asyncio Event to current CSeq and make the request
         self.requests[cseq] = (asyncio.Event(), None)
-        resp = await self.send_and_receive(
+        resp = await self.connection.send_and_receive(
             method,
             uri or self.uri,
             protocol="RTSP/1.0",

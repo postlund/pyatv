@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from pyatv.support.http import HttpConnection
 from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from pyatv import conf, const, exceptions
@@ -146,10 +147,11 @@ class RaopStream(Stream):
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
         context = RtspContext()
-        _, session = await self.loop.create_connection(
-            lambda: RtspSession(context), self.address, self.service.port
+        _, connection = await self.loop.create_connection(
+            HttpConnection, self.address, self.service.port
         )
 
+        session = RtspSession(connection, context)
         client = RaopClient(cast(RtspSession, session), context)
         try:
             client.listener = self.listener
@@ -173,7 +175,7 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
-            client.close()
+            connection.close()
 
 
 def setup(
