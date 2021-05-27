@@ -57,10 +57,14 @@ async def test_pairing_exception_no_pin(airplay_conf):
         await perform_pairing(airplay_conf, None)
 
 
-@patch("os.urandom")
-async def test_pairing_with_device_new_credentials(rand_func, airplay_conf):
-    rand_func.side_effect = predetermined_key
-    await perform_pairing(airplay_conf)
+async def test_pairing_with_device_new_credentials(airplay_conf):
+    # Using patch as decorator does not seem to work with python < 3.8, but can be
+    # worked around using asynctest. This is however the only async test using patch
+    # for now, so lets use a context manager and introduce asynctest when needed.
+    # Source: https://github.com/pytest-dev/pytest-asyncio/issues/130
+    with patch("pyatv.airplay.srp.urandom") as rand_func:
+        rand_func.side_effect = predetermined_key
+        await perform_pairing(airplay_conf)
 
 
 async def test_pairing_with_device_existing_credentials(airplay_conf):

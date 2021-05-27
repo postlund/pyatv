@@ -3,7 +3,7 @@
 import binascii
 import hashlib
 import logging
-import os
+from os import urandom
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -80,7 +80,7 @@ class LegacyCredentials:
 
 def new_credentials() -> LegacyCredentials:
     """Generate a new identifier and seed for authentication."""
-    return LegacyCredentials(os.urandom(8), os.urandom(32))
+    return LegacyCredentials(urandom(8), urandom(32))
 
 
 class AtvSRPContext(SRPContext):
