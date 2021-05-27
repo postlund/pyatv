@@ -588,7 +588,9 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new DMAP service."""
     service = config.get_service(Protocol.DMAP)
     assert service is not None

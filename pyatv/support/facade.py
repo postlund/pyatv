@@ -14,7 +14,7 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
 
-from pyatv import conf, const, interface, net
+from pyatv import conf, const, exceptions, interface, net
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.support.relayer import Relayer
 
@@ -48,7 +48,7 @@ SetupMethod = Callable[
         interface.StateProducer,
         net.ClientSessionManager,
     ],
-    SetupData,
+    Optional[SetupData],
 ]
 
 
@@ -255,6 +255,15 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
     Listener interface: `pyatv.interfaces.PowerListener`
     """
 
+    # Generally favor Companion as it implements power better than MRP
+    OVERRIDE_PRIORITIES = [
+        Protocol.Companion,
+        Protocol.MRP,
+        Protocol.DMAP,
+        Protocol.AirPlay,
+        Protocol.RAOP,
+    ]
+
     def __init__(self):
         """Initialize a new FacadePower instance."""
         # This is border line, maybe need another structure to support this
@@ -277,11 +286,15 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
 
     async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
-        await self.relay("turn_on")(await_new_state=await_new_state)
+        await self.relay("turn_on", priority=self.OVERRIDE_PRIORITIES)(
+            await_new_state=await_new_state
+        )
 
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
-        await self.relay("turn_off")(await_new_state=await_new_state)
+        await self.relay("turn_off", priority=self.OVERRIDE_PRIORITIES)(
+            await_new_state=await_new_state
+        )
 
 
 class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-methods
@@ -371,6 +384,9 @@ class FacadeAppleTV(interface.AppleTV):
 
     async def connect(self) -> None:
         """Initiate connection to device."""
+        if not self._protocol_handlers:
+            raise exceptions.NoServiceError("no service to connect to")
+
         # TODO: Parallelize with asyncio.gather? Needs to handle cancling
         # of ongoing tasks in case of error.
         for protocol_connect, _, _ in self._protocol_handlers.values():

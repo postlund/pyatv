@@ -286,6 +286,7 @@ class RemoteConnection(asyncio.Protocol):
     def data_received(self, data):
         """Receive data from host."""
         log_binary(_LOGGER, "Data from remote", Data=data)
+        print(data)
         self.callback.transport.write(data)
 
 
@@ -314,6 +315,7 @@ class RelayConnection(asyncio.Protocol):
     def data_received(self, data):
         """Receive data from host."""
         log_binary(_LOGGER, "Data from client", Data=data)
+        print(data)
         self.connection.transport.write(data)
 
 

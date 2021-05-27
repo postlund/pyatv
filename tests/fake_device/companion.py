@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Dict, Optional
 
-from pyatv.companion import opack
+from pyatv.companion import HidCommand, opack
 from pyatv.companion.connection import FrameType
 from pyatv.companion.server_auth import CompanionServerAuth
 from pyatv.support import chacha20, log_binary
@@ -26,7 +26,8 @@ class FakeCompanionState:
         """State of a fake Companion device."""
         self.active_app: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
-        self.has_paired = False
+        self.has_paired: bool = False
+        self.powered_on: bool = True
 
 
 class FakeCompanionServiceFactory:
@@ -131,25 +132,39 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         except Exception:
             _LOGGER.exception("failed to handle incoming data")
 
-    def handle__launchapp(self, message):
-        content = message["_c"]
-        self.state.active_app = content["_bundleID"]
-
-        self.send_to_client(
-            FrameType.E_OPACK,
-            {"_i": message["_i"], "_x": message["_x"], "_t": 3, "_c": {}},
-        )
-
-    def handle_fetchlaunchableapplicationsevent(self, message):
+    def send_response(self, request, content):
         self.send_to_client(
             FrameType.E_OPACK,
             {
-                "_i": message["_i"],
-                "_x": message["_x"],
+                "_i": request["_i"],
+                "_x": request["_x"],
                 "_t": 3,
-                "_c": self.state.installed_apps,
+                "_c": content,
             },
         )
+
+    def handle__launchapp(self, message):
+        self.state.active_app = message["_c"]["_bundleID"]
+        self.send_response(message, {})
+
+    def handle_fetchlaunchableapplicationsevent(self, message):
+        self.send_response(message, self.state.installed_apps)
+
+    def handle__hidc(self, message):
+        button_state = message["_c"]["_hBtS"]
+        button_code = HidCommand(message["_c"]["_hidC"])
+
+        if button_state == 2 and button_code == HidCommand.Sleep:
+            _LOGGER.debug("Putting device to sleep")
+            self.state.powered_on = False
+        elif button_state and button_code == HidCommand.Wake:
+            _LOGGER.debug("Waking up device")
+            self.state.powered_on = True
+        else:
+            _LOGGER.warning("Unhandled command: %d %d", button_state, button_code)
+            return  # Would be good to send error message here
+
+        self.send_response(message, {})
 
 
 class FakeCompanionUseCases:
