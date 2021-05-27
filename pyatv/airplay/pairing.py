@@ -10,8 +10,8 @@ from pyatv.airplay.auth import DeviceAuthenticator
 from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.support import error_handler, net
-from pyatv.support.http import HttpConnection, http_connect
+from pyatv.support import error_handler
+from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class AirPlayPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
     def __init__(
-        self, config: conf.AppleTV, session_manager: net.ClientSessionManager, _
+        self, config: conf.AppleTV, session_manager: ClientSessionManager, _
     ) -> None:
         """Initialize a new MrpPairingHandler."""
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))

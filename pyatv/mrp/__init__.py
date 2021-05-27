@@ -40,7 +40,7 @@ from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.hap_srp import SRPAuthHandler
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)

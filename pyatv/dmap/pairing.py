@@ -14,7 +14,8 @@ from pyatv.const import Protocol
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
 from pyatv.support import mdns
-from pyatv.support.net import ClientSessionManager, unused_port
+from pyatv.support.http import ClientSessionManager
+from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 

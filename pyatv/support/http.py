@@ -8,7 +8,7 @@ import re
 from socket import socket
 from typing import Mapping, NamedTuple, Optional, Tuple, Union, cast
 
-from aiohttp import web
+from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 
 from pyatv import const, exceptions
@@ -100,6 +100,25 @@ def parse_message(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
         ),
         body[content_length:],
     )
+
+
+class ClientSessionManager:
+    """Manages an aiohttp ClientSession instance."""
+
+    def __init__(self, session: ClientSession, should_close: bool) -> None:
+        """Initialize a new ClientSessionManager."""
+        self._session = session
+        self._should_close = should_close
+
+    @property
+    def session(self) -> ClientSession:
+        """Return client session."""
+        return self._session
+
+    async def close(self) -> None:
+        """Close session."""
+        if self._should_close:
+            await self.session.close()
 
 
 class HttpConnection(asyncio.Protocol):
@@ -279,3 +298,10 @@ async def http_connect(address: str, port: int) -> HttpConnection:
     loop = asyncio.get_event_loop()
     _, connection = await loop.create_connection(HttpConnection, address, port)
     return cast(HttpConnection, connection)
+
+
+async def create_session(
+    session: Optional[ClientSession] = None,
+) -> ClientSessionManager:
+    """Create aiohttp ClientSession manged by pyatv."""
+    return ClientSessionManager(session or ClientSession(), session is None)

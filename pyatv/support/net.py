@@ -22,32 +22,6 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 25.0  # Seconds
 
 
-class ClientSessionManager:
-    """Manages an aiohttp ClientSession instance."""
-
-    def __init__(self, session: ClientSession, should_close: bool) -> None:
-        """Initialize a new ClientSessionManager."""
-        self._session = session
-        self._should_close = should_close
-
-    @property
-    def session(self) -> ClientSession:
-        """Return client session."""
-        return self._session
-
-    async def close(self) -> None:
-        """Close session."""
-        if self._should_close:
-            await self.session.close()
-
-
-async def create_session(
-    session: Optional[ClientSession] = None,
-) -> ClientSessionManager:
-    """Create aiohttp ClientSession manged by pyatv."""
-    return ClientSessionManager(session or ClientSession(), session is None)
-
-
 def unused_port() -> int:
     """Return a port that is unused on the current host."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
