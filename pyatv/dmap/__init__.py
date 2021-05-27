@@ -33,9 +33,9 @@ from pyatv.interface import (
     RemoteControl,
     StateProducer,
 )
-from pyatv.support import deprecated, net
+from pyatv.support import deprecated
 from pyatv.support.cache import Cache
-from pyatv.support.http import ClientSessionManager
+from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -595,7 +595,7 @@ def setup(
     service = config.get_service(Protocol.DMAP)
     assert service is not None
 
-    daap_http = net.HttpSession(
+    daap_http = HttpSession(
         session_manager.session,
         f"http://{config.address}:{service.port}/",
     )
