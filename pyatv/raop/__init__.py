@@ -5,6 +5,7 @@ import logging
 from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from pyatv import conf, const, exceptions
+from pyatv.airplay.srp import LegacyCredentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import (
     FeatureInfo,
@@ -148,9 +149,16 @@ class RaopStream(Stream):
         connection = await http_connect(self.address, self.service.port)
         context = RtspContext()
         session = RtspSession(connection, context)
-        client = RaopClient(
-            cast(RtspSession, session), context, self.service.credentials
+
+        # For now, we hi-jack credentials from AirPlay (even though they are passed via
+        # the RAOP service) and use the same verification procedure as AirPlay, since
+        # it's the same in practice.
+        credentials = (
+            LegacyCredentials.parse(self.service.credentials)
+            if self.service.credentials
+            else None
         )
+        client = RaopClient(cast(RtspSession, session), context, credentials)
         try:
             client.listener = self.listener
             await client.initialize(self.service.properties)

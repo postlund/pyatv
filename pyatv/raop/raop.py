@@ -10,6 +10,8 @@ import weakref
 from bitarray import bitarray
 
 from pyatv import exceptions
+from pyatv.airplay.auth import AirPlayPairingVerifier
+from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.raop import timing
 from pyatv.raop.fifo import PacketFifo
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
@@ -269,13 +271,16 @@ class RaopClient:
     """Simple RAOP client to stream audio."""
 
     def __init__(
-        self, rtsp: RtspSession, context: RtspContext, credentials: Optional[str]
+        self,
+        rtsp: RtspSession,
+        context: RtspContext,
+        credentials: Optional[LegacyCredentials],
     ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
-        self.credentials: Optional[str] = credentials
+        self.credentials: Optional[LegacyCredentials] = credentials
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -385,6 +390,12 @@ class RaopClient:
         # Do auth-setup if MFiSAP encryption is supported by receiver
         if EncryptionType.MFiSAP in self._encryption_types:
             await self.rtsp.auth_setup()
+        elif self.credentials:
+            _LOGGER.debug("Verifying connection with credentials %s", self.credentials)
+            srp = SRPAuthHandler(self.credentials)
+            srp.initialize()
+            verifier = AirPlayPairingVerifier(self.rtsp.connection, srp)
+            await verifier.verify_authed()
 
         await self.rtsp.announce()
 
