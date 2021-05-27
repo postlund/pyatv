@@ -2,14 +2,14 @@
 import asyncio
 import logging
 from random import randrange
-import re
 from socket import socket
-from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
+from typing import Dict, Mapping, Optional, Tuple, Union
 
 from pyatv import exceptions
 from pyatv.dmap import tags
 from pyatv.raop import timing
 from pyatv.raop.metadata import AudioMetadata
+from pyatv.support.http import HttpResponse, parse_message
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,52 +87,6 @@ class RtspContext:
         return self.head_ts - (self.start_ts - self.latency)
 
 
-class RtspResponse(NamedTuple):
-    """RTSP response message."""
-
-    code: int
-    message: str
-    headers: Mapping[str, str]
-    body: Union[str, bytes]
-
-
-def parse_response(response: bytes) -> Tuple[Optional[RtspResponse], bytes]:
-    """Parse RTSP response."""
-    try:
-        header_str, body = response.split(b"\r\n\r\n", maxsplit=1)
-    except ValueError as ex:
-        raise ValueError("missing end lines") from ex
-    headers = header_str.decode("utf-8").split("\r\n")
-
-    match = re.match(r"RTSP/1.0 (\d+) (.+)", headers[0])
-    if not match:
-        raise ValueError(f"bad first line: {headers[0]}")
-
-    code, message = match.groups()
-    resp_headers = {}
-
-    for line in headers[1:]:
-        if line:
-            key, value = line.split(": ")
-            resp_headers[key] = value
-
-    content_length = int(resp_headers.get("Content-Length", 0))
-    if len(body or []) < content_length:
-        return None, response
-
-    response_body: Union[str, bytes] = body[0:content_length]
-
-    # Assume body is text unless content type is application/octet-stream
-    if resp_headers.get("Content-Type") != "application/octet-stream":
-        # We know it's bytes here
-        response_body = cast(bytes, response_body).decode("utf-8")
-
-    return (
-        RtspResponse(int(code), message, resp_headers, response_body),
-        body[content_length:],
-    )
-
-
 class RtspSession(asyncio.Protocol):
     """Representation of an RTSP session."""
 
@@ -140,7 +94,7 @@ class RtspSession(asyncio.Protocol):
         """Initialize a new RtspSession."""
         self.context = context
         self.transport = None
-        self.requests: Dict[int, Tuple[asyncio.Semaphore, RtspResponse]] = {}
+        self.requests: Dict[int, Tuple[asyncio.Semaphore, HttpResponse]] = {}
         self.cseq = 0
         self.buffer = b""
 
@@ -181,7 +135,7 @@ class RtspSession(asyncio.Protocol):
         _LOGGER.debug("Received: %s", data)
         self.buffer += data
         while self.buffer:
-            parsed, self.buffer = parse_response(self.buffer)
+            parsed, self.buffer = parse_message(self.buffer)
             if parsed is None:
                 _LOGGER.debug("Not enough data to decode message")
                 break
@@ -202,7 +156,7 @@ class RtspSession(asyncio.Protocol):
         """Handle that connection was lost."""
         _LOGGER.debug("RTSP Connection closed")
 
-    async def auth_setup(self) -> RtspResponse:
+    async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
         # Payload to say that we want to proceed unencrypted
         body = AUTH_SETUP_UNENCRYPTED + CURVE25519_PUB_KEY
@@ -214,7 +168,7 @@ class RtspSession(asyncio.Protocol):
             body=body,
         )
 
-    async def announce(self) -> RtspResponse:
+    async def announce(self) -> HttpResponse:
         """Send ANNOUNCE message."""
         body = ANNOUNCE_PAYLOAD.format(
             session_id=self.context.session_id,
@@ -230,7 +184,7 @@ class RtspSession(asyncio.Protocol):
             body=body,
         )
 
-    async def setup(self, control_port: int, timing_port: int) -> RtspResponse:
+    async def setup(self, control_port: int, timing_port: int) -> HttpResponse:
         """Send SETUP message."""
         return await self.send_and_receive(
             "SETUP",
@@ -240,7 +194,7 @@ class RtspSession(asyncio.Protocol):
             },
         )
 
-    async def record(self, rtpseq: int, rtptime: int) -> RtspResponse:
+    async def record(self, rtpseq: int, rtptime: int) -> HttpResponse:
         """Send RECORD message."""
         return await self.send_and_receive(
             "RECORD",
@@ -251,7 +205,7 @@ class RtspSession(asyncio.Protocol):
             },
         )
 
-    async def set_parameter(self, parameter: str, value: str) -> RtspResponse:
+    async def set_parameter(self, parameter: str, value: str) -> HttpResponse:
         """Send SET_PARAMETER message."""
         return await self.send_and_receive(
             "SET_PARAMETER",
@@ -264,7 +218,7 @@ class RtspSession(asyncio.Protocol):
         rtpseq: int,
         rtptime: int,
         metadata: AudioMetadata,
-    ) -> RtspResponse:
+    ) -> HttpResponse:
         """Change metadata for what is playing."""
         payload = b""
         if metadata.title:
@@ -291,7 +245,7 @@ class RtspSession(asyncio.Protocol):
         content_type: Optional[str] = None,
         headers: Mapping[str, object] = None,
         body: Union[str, bytes] = None,
-    ) -> RtspResponse:
+    ) -> HttpResponse:
         """Send a RTSP message and return response."""
         cseq = self.cseq
         self.cseq += 1
