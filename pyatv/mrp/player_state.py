@@ -1,6 +1,5 @@
 """Module responsible for keeping track of media player states."""
 
-from copy import deepcopy
 from itertools import chain
 import logging
 import math
@@ -102,12 +101,11 @@ class PlayerState:
             self._playback_state = setstate.playbackState
 
         if setstate.HasField("supportedCommands"):
-            self.supported_commands = deepcopy(
-                setstate.supportedCommands.supportedCommands
-            )
+            self.supported_commands = setstate.supportedCommands.supportedCommands
+
         if setstate.HasField("playbackQueue"):
             queue = setstate.playbackQueue
-            self.items = deepcopy(queue.contentItems)
+            self.items = queue.contentItems
             self.location = queue.location
 
     def handle_content_item_update(self, item_update):
@@ -162,9 +160,7 @@ class Client:
 
     def handle_set_default_supported_commands(self, supported_commands) -> None:
         """Update default supported commands for client."""
-        self.supported_commands = deepcopy(
-            supported_commands.supportedCommands.supportedCommands
-        )
+        self.supported_commands = supported_commands.supportedCommands.supportedCommands
 
     def handle_set_now_playing_player(self, player: pb.NowPlayingPlayer) -> None:
         """Handle change of now playing player."""
