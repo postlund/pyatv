@@ -4,10 +4,13 @@ import binascii
 from collections import namedtuple
 import logging
 import plistlib
+from typing import Optional
 
 from aiohttp import web
 
 from pyatv.support.net import unused_port
+
+from tests.utils import simple_get
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +51,7 @@ class FakeAirPlayState:
         self.last_airplay_url = None
         self.last_airplay_start = None
         self.last_airplay_uuid = None
+        self.last_airplay_content: Optional[bytes] = None
         self.play_count = 0
         self.injected_play_fails = 0
 
@@ -99,6 +103,13 @@ class FakeAirPlayService:
         self.state.last_airplay_url = parsed["Content-Location"]
         self.state.last_airplay_start = parsed["Start-Position"]
         self.state.last_airplay_uuid = parsed["X-Apple-Session-ID"]
+
+        # Simulate that fake device streams if URL is localhost
+        if self.state.last_airplay_url.startswith("http://127.0.0.1"):
+            _LOGGER.debug("Retrieving file from %s", self.state.last_airplay_url)
+            self.state.last_airplay_content, _ = await simple_get(
+                self.state.last_airplay_url
+            )
 
         return web.Response(status=200)
 
