@@ -432,9 +432,10 @@ class PairingHandler(ABC):
     &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
 
     def __init__(
-        self, session_manager: net.ClientSessionManager, service: BaseService
+        self, session_manager: net.ClientSessionManager, service: Optional[BaseService]
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
+        assert service is not None
         self.session_manager = session_manager
         self._service = service
 
@@ -2352,7 +2353,7 @@ async def artwork(
 </dd>
 <dt id="pyatv.interface.PairingHandler"><code class="flex name class">
 <span>class <span class="ident">PairingHandler</span></span>
-<span>(</span><span>session_manager: pyatv.support.net.ClientSessionManager, service: <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>)</span>
+<span>(</span><span>session_manager: pyatv.support.net.ClientSessionManager, service: Optional[<a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for API used to pair with an Apple TV.</p>
@@ -2365,9 +2366,10 @@ async def artwork(
     &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
 
     def __init__(
-        self, session_manager: net.ClientSessionManager, service: BaseService
+        self, session_manager: net.ClientSessionManager, service: Optional[BaseService]
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
+        assert service is not None
         self.session_manager = session_manager
         self._service = service
 
