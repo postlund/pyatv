@@ -2,12 +2,17 @@
 import asyncio
 from collections import deque
 import logging
+import pathlib
 from queue import Queue
 import re
 from socket import socket
 from typing import Mapping, NamedTuple, Optional, Tuple, Union, cast
 
+from aiohttp import web
+from aiohttp.web import middleware
+
 from pyatv import const, exceptions
+from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -225,6 +230,48 @@ class HttpConnection(asyncio.Protocol):
             f"{protocol} method {method} failed with code "
             f"{response.code}: {response.message}"
         )
+
+
+class StaticFileWebServer:
+    """Web server serving only a single file."""
+
+    def __init__(self, file_to_serve: str, address: str, port: Optional[int] = None):
+        """Initialize a new StaticFileWebServer."""
+        self.path = pathlib.Path(file_to_serve)
+        self.app = web.Application(middlewares=[self._middleware])
+        self.app.router.add_static("/", self.path.parent, show_index=False)
+        self.runner = web.AppRunner(self.app)
+        self.site = None
+        self._address = address  # Local address to bind to
+        self._port = port
+
+    async def start(self) -> None:
+        """Start the web server."""
+        if not self._port:
+            self._port = unused_port()
+
+        _LOGGER.debug("Starting AirPlay file server on port %d", self._port)
+        await self.runner.setup()
+        self.site = web.TCPSite(self.runner, str(self._address), self._port)
+        await self.site.start()  # type: ignore
+
+    async def close(self) -> None:
+        """Stop the web server and free resources."""
+        _LOGGER.debug("Closing local AirPlay web server")
+        await self.runner.cleanup()
+
+    @property
+    def file_address(self) -> str:
+        """Address to the file being served."""
+        return f"http://{self._address}:{self._port}/{self.path.name}"
+
+    # This middleware makes sure only the specified file is accessible. This is needed
+    # since aiohttp only supports serving an entire directory.
+    @middleware
+    async def _middleware(self, request, handler):
+        if request.rel_url.path == f"/{self.path.name}":
+            return await handler(request)
+        return web.Response(body="Permission denied", status=401)
 
 
 async def http_connect(address: str, port: int) -> HttpConnection:
