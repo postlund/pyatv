@@ -10,12 +10,11 @@ from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import AuthenticationVerifier
 from pyatv.airplay.player import AirPlayPlayer
-from pyatv.airplay.server import StaticFileWebServer
 from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import FeatureInfo, Features, FeatureState, StateProducer, Stream
 from pyatv.support import net
-from pyatv.support.http import HttpConnection, http_connect
+from pyatv.support.http import HttpConnection, StaticFileWebServer, http_connect
 from pyatv.support.net import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
@@ -97,7 +96,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         if os.path.exists(url):
             _LOGGER.debug("URL %s is a local file, setting up web server", url)
             server_address = net.get_local_address_reaching(self.config.address)
-            server = StaticFileWebServer(url, server_address)
+            server = StaticFileWebServer(url, str(server_address))
             await server.start()
             url = server.file_address
 
