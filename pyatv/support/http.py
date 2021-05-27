@@ -1,6 +1,16 @@
 """Module for working with HTTP requests."""
+import asyncio
+from collections import deque
+import logging
+from queue import Queue
 import re
 from typing import Mapping, NamedTuple, Optional, Tuple, Union, cast
+
+from pyatv import const, exceptions
+
+_LOGGER = logging.getLogger(__name__)
+
+USER_AGENT = f"pyatv/{const.__version__}"
 
 
 class HttpResponse(NamedTuple):
@@ -53,3 +63,114 @@ def parse_message(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
         ),
         body[content_length:],
     )
+
+
+class HttpConnection(asyncio.Protocol):
+    """Representation of a HTTP connection."""
+
+    def __init__(self) -> None:
+        """Initialize a new ."""
+        self.transport = None
+        self._requests: deque = deque()
+        self._responses: Queue = Queue()
+        self._buffer = b""
+
+    def close(self) -> None:
+        """Close HTTP connection."""
+        if self.transport:
+            transport = self.transport
+            self.transport = None
+            transport.close()
+
+    def connection_made(self, transport) -> None:
+        """Handle that a connection has been made."""
+        self.transport = transport
+
+    def data_received(self, data: bytes) -> None:
+        """Handle incoming HTTP data."""
+        _LOGGER.debug("Received: %s", data)
+        self._buffer += data
+        while self._buffer:
+            # Try to parse a complete response
+            parsed, self._buffer = parse_message(self._buffer)
+            if parsed is None:
+                _LOGGER.debug("Not enough data to decode message")
+                break
+
+            # Dispatch message to first receiver
+            self._responses.put(parsed)
+            event = self._requests.pop()
+            if event:
+                event.set()
+            else:
+                _LOGGER.warning("Got response without having a request")
+
+    @staticmethod
+    def error_received(exc) -> None:
+        """Handle a connection error."""
+        _LOGGER.error("Error received: %s", exc)
+
+    def connection_lost(self, exc) -> None:
+        """Handle that connection was lost."""
+        _LOGGER.debug("Connection closed")
+
+    async def send_and_receive(
+        self,
+        method: str,
+        uri: str,
+        protocol: str = "HTTP/1.0",
+        user_agent: str = USER_AGENT,
+        content_type: Optional[str] = None,
+        headers: Mapping[str, object] = None,
+        body: Union[str, bytes] = None,
+    ) -> HttpResponse:
+        """Send a HTTP message and return response."""
+        if isinstance(body, str):
+            body = body.encode("utf-8")
+
+        msg = f"{method} {uri} {protocol}"
+        msg += f"\r\nUser-Agent: {user_agent}"
+        if content_type:
+            msg += f"\r\nContent-Type: {content_type}"
+        if body:
+            msg += f"\r\nContent-Length: {len(body) if body else 0}"
+
+        for key, value in (headers or {}).items():
+            msg += f"\r\n{key}: {value}"
+        msg += 2 * "\r\n"
+
+        output = msg.encode("utf-8")
+        if body:
+            output += body
+
+        _LOGGER.debug("Sending %s message: %s", protocol, output)
+        if not self.transport:
+            raise RuntimeError("not connected to remote")
+
+        self.transport.write(output)
+
+        event = asyncio.Event()
+        self._requests.appendleft(event)
+        try:
+            await asyncio.wait_for(event.wait(), timeout=4)
+            response = cast(HttpResponse, self._responses.get())
+        except asyncio.TimeoutError as ex:
+            raise TimeoutError(f"no response to {method} {uri} ({protocol})") from ex
+        finally:
+            # If request failed and event is still in request queue, remove it
+            if self._requests and self._requests[-1] == event:
+                self._requests.pop()
+
+        _LOGGER.debug("Got %s response: %s:", response.protocol, response)
+
+        # Positive response
+        if 200 <= response.code < 300:
+            return response
+
+        if response.code in [401, 403]:
+            raise exceptions.AuthenticationError("not authenticated")
+
+        raise exceptions.ProtocolError(
+            f"{protocol} method {method} failed with code "
+            f"{response.code}: {response.message}"
+        )
