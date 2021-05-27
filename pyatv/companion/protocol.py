@@ -8,7 +8,7 @@ from pyatv.companion import opack
 from pyatv.companion.auth import CompanionPairingVerifier
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.conf import CompanionService
-from pyatv.support.hap_srp import Credentials, SRPAuthHandler
+from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +40,9 @@ class CompanionProtocol:
         await self.connection.connect()
 
         if self.service.credentials:
-            self.srp.pairing_id = Credentials.parse(self.service.credentials).client_id
+            self.srp.pairing_id = HapCredentials.parse(
+                self.service.credentials
+            ).client_id
 
         _LOGGER.debug("Companion credentials: %s", self.service.credentials)
 
@@ -52,7 +54,7 @@ class CompanionProtocol:
 
     async def _setup_encryption(self):
         if self.service.credentials:
-            credentials = Credentials.parse(self.service.credentials)
+            credentials = HapCredentials.parse(self.service.credentials)
             pair_verifier = CompanionPairingVerifier(self, self.srp, credentials)
 
             try:

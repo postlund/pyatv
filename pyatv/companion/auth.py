@@ -6,7 +6,7 @@ from pyatv import exceptions
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
 from pyatv.support import hap_tlv8, log_binary
-from pyatv.support.hap_srp import Credentials, SRPAuthHandler
+from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
 from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class CompanionPairingProcedure:
             PubKey=self._atv_pub_key,
         )
 
-    async def finish_pairing(self, pin: int) -> Credentials:
+    async def finish_pairing(self, pin: int) -> HapCredentials:
         """Finish pairing process."""
         self.srp.step1(pin)
 
@@ -130,7 +130,9 @@ class CompanionPairingProcedure:
 class CompanionPairingVerifier:
     """Verify credentials and derive new encryption keys."""
 
-    def __init__(self, protocol, srp: SRPAuthHandler, credentials: Credentials) -> None:
+    def __init__(
+        self, protocol, srp: SRPAuthHandler, credentials: HapCredentials
+    ) -> None:
         """Initialize a new CompanionPairingVerifier."""
         self.protocol = protocol
         self.srp = srp

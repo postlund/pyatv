@@ -28,18 +28,20 @@ _LOGGER = logging.getLogger(__name__)
 
 
 # pylint: disable=too-few-public-methods
-class Credentials:
+class HapCredentials:
     """Identifiers and encryption keys used by HAP."""
 
-    def __init__(self, ltpk, ltsk, atv_id, client_id):
+    def __init__(
+        self, ltpk: bytes, ltsk: bytes, atv_id: bytes, client_id: bytes
+    ) -> None:
         """Initialize a new Credentials."""
-        self.ltpk = ltpk
-        self.ltsk = ltsk
-        self.atv_id = atv_id
-        self.client_id = client_id
+        self.ltpk: bytes = ltpk
+        self.ltsk: bytes = ltsk
+        self.atv_id: bytes = atv_id
+        self.client_id: bytes = client_id
 
     @classmethod
-    def parse(cls, detail_string):
+    def parse(cls, detail_string) -> "HapCredentials":
         """Parse a string represention of Credentials."""
         split = detail_string.split(":")
         if len(split) != 4:
@@ -51,15 +53,17 @@ class Credentials:
         ltsk = binascii.unhexlify(split[1])
         atv_id = binascii.unhexlify(split[2])
         client_id = binascii.unhexlify(split[3])
-        return Credentials(ltpk, ltsk, atv_id, client_id)
+        return HapCredentials(ltpk, ltsk, atv_id, client_id)
 
     def __str__(self):
         """Return a string representation of credentials."""
-        return "{0}:{1}:{2}:{3}".format(
-            binascii.hexlify(self.ltpk).decode("utf-8"),
-            binascii.hexlify(self.ltsk).decode("utf-8"),
-            binascii.hexlify(self.atv_id).decode("utf-8"),
-            binascii.hexlify(self.client_id).decode("utf-8"),
+        return ":".join(
+            [
+                binascii.hexlify(self.ltpk).decode("utf-8"),
+                binascii.hexlify(self.ltsk).decode("utf-8"),
+                binascii.hexlify(self.atv_id).decode("utf-8"),
+                binascii.hexlify(self.client_id).decode("utf-8"),
+            ]
         )
 
 
@@ -248,6 +252,6 @@ class SRPAuthHandler:
 
         # TODO: verify signature here
 
-        return Credentials(
+        return HapCredentials(
             atv_pub_key, self._auth_private, atv_identifier, self.pairing_id
         )
