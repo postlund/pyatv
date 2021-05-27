@@ -1,20 +1,51 @@
 """PoC code for Companion protocol."""
 
 import asyncio
+from enum import Enum
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Set, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, Protocol
-from pyatv.interface import App, Apps, FeatureInfo, Features, StateProducer
+from pyatv.interface import App, Apps, FeatureInfo, Features, Power, StateProducer
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.net import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
+
+
+# pylint: disable=invalid-name
+
+
+class HidCommand(Enum):
+    """HID command constants."""
+
+    Up = 1
+    Down = 2
+    Left = 3
+    Right = 4
+    Menu = 5
+    Select = 6
+    Home = 7
+    VolumeUp = 8
+    VolumeDown = 9
+    Siri = 10
+    Screensaver = 11
+    Sleep = 12
+    Wake = 13
+    PlayPause = 14
+    ChannelIncrement = 15
+    ChannelDecrement = 16
+    Guide = 17
+    PageUp = 18
+    PageDown = 19
+
+
+# pylint: enable=invalid-name
 
 
 async def _connect(loop, config: AppleTV) -> CompanionProtocol:
@@ -83,12 +114,26 @@ class CompanionAPI:
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
+    async def sleep(self):
+        """Put device to sleep."""
+        await self._hid_command(False, HidCommand.Sleep)
+
+    async def wake(self):
+        """Wake up sleeping device."""
+        await self._hid_command(False, HidCommand.Wake)
+
+    async def _hid_command(self, down: bool, command: HidCommand) -> None:
+        await self._send_command(
+            "_hidC", {"_hBtS": 1 if down else 2, "_hidC": command.value}
+        )
+
 
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
     def __init__(self, service: conf.CompanionService) -> None:
         """Initialize a new CompanionFeatures instance."""
+        super().__init__()
         self.service = service
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
@@ -97,7 +142,12 @@ class CompanionFeatures(Features):
         if self.service.credentials is not None:
             # Just assume these are available for now if the protocol is configured,
             # we don't have any way to verify it anyways.
-            if feature_name in [FeatureName.AppList, FeatureName.LaunchApp]:
+            if feature_name in [
+                FeatureName.AppList,
+                FeatureName.LaunchApp,
+                FeatureName.TurnOn,
+                FeatureName.TurnOff,
+            ]:
                 return FeatureInfo(FeatureState.Available)
 
         return FeatureInfo(FeatureState.Unavailable)
@@ -108,6 +158,7 @@ class CompanionApps(Apps):
 
     def __init__(self, api: CompanionAPI):
         """Initialize a new instance of CompanionApps."""
+        super().__init__()
         self.api = api
 
     async def app_list(self) -> List[App]:
@@ -124,16 +175,45 @@ class CompanionApps(Apps):
         await self.api.launch_app(bundle_id)
 
 
+class CompanionPower(Power):
+    """Implementation of power management API."""
+
+    def __init__(self, api: CompanionAPI):
+        """Initialize a new instance of CompanionPower."""
+        super().__init__()
+        self.api = api
+
+    async def turn_on(self, await_new_state: bool = False) -> None:
+        """Turn device on."""
+        # TODO: add support for this
+        if await_new_state:
+            raise NotImplementedError("not supported by Companion yet")
+        await self.api.wake()
+
+    async def turn_off(self, await_new_state: bool = False) -> None:
+        """Turn device off."""
+        # TODO: add support for this
+        if await_new_state:
+            raise NotImplementedError("not supported by Companion yet")
+        await self.api.sleep()
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new Companion service."""
     service = config.get_service(Protocol.Companion)
     assert service is not None
+
+    # Companion doesn't work without credentials, so don't setup if none exists
+    if not service.credentials:
+        return None
 
     api = CompanionAPI(config, loop)
 
@@ -141,6 +221,7 @@ def setup(
     interfaces[Features].register(
         CompanionFeatures(cast(conf.CompanionService, service)), Protocol.Companion
     )
+    interfaces[Power].register(CompanionPower(api), Protocol.Companion)
 
     async def _connect() -> None:
         pass
@@ -148,4 +229,15 @@ def setup(
     def _close() -> None:
         pass
 
-    return _connect, _close, set([FeatureName.AppList, FeatureName.LaunchApp])
+    return (
+        _connect,
+        _close,
+        set(
+            [
+                FeatureName.AppList,
+                FeatureName.LaunchApp,
+                FeatureName.TurnOn,
+                FeatureName.TurnOff,
+            ]
+        ),
+    )
