@@ -9,7 +9,7 @@ import uuid
 from pyatv import exceptions
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.auth import MrpPairingVerifier
-from pyatv.support.hap_srp import Credentials
+from pyatv.support.hap_srp import HapCredentials
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -118,7 +118,7 @@ class MrpProtocol:
             # In case credentials have been given externally (i.e. not by pairing
             # with a device), then use that client id
             if self.service.credentials:
-                self.srp.pairing_id = Credentials.parse(
+                self.srp.pairing_id = HapCredentials.parse(
                     self.service.credentials
                 ).client_id
 
@@ -171,7 +171,7 @@ class MrpProtocol:
         # after DEVICE_INFORMATION has been sent
         if self.service.credentials:
             # Verify credentials and generate keys
-            credentials = Credentials.parse(self.service.credentials)
+            credentials = HapCredentials.parse(self.service.credentials)
             pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
 
             try:

@@ -9,7 +9,7 @@ from pyatv.mrp.auth import MrpPairingProcedure, MrpPairingVerifier
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
-from pyatv.support.hap_srp import Credentials, SRPAuthHandler
+from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ class MrpPairingHandler(PairingHandler):
         _LOGGER.debug("Verifying credentials %s", credentials)
 
         verifier = MrpPairingVerifier(
-            self.protocol, self.srp, Credentials.parse(credentials)
+            self.protocol, self.srp, HapCredentials.parse(credentials)
         )
         await error_handler(verifier.verify_credentials, exceptions.PairingError)
 
