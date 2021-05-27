@@ -268,11 +268,14 @@ class RaopListener(ABC):
 class RaopClient:
     """Simple RAOP client to stream audio."""
 
-    def __init__(self, rtsp: RtspSession, context: RtspContext):
+    def __init__(
+        self, rtsp: RtspSession, context: RtspContext, credentials: Optional[str]
+    ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
+        self.credentials: Optional[str] = credentials
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)

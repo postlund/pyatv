@@ -148,7 +148,9 @@ class RaopStream(Stream):
         connection = await http_connect(self.address, self.service.port)
         context = RtspContext()
         session = RtspSession(connection, context)
-        client = RaopClient(cast(RtspSession, session), context)
+        client = RaopClient(
+            cast(RtspSession, session), context, self.service.credentials
+        )
         try:
             client.listener = self.listener
             await client.initialize(self.service.properties)

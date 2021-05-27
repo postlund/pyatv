@@ -1,16 +1,14 @@
 """Implementation of external API for AirPlay."""
 
 import asyncio
-import binascii
 import logging
 import os
-import re
 from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth import AuthenticationVerifier
+from pyatv.airplay.auth import AirPlayPairingVerifier
 from pyatv.airplay.player import AirPlayPlayer
-from pyatv.airplay.srp import SRPAuthHandler
+from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import FeatureInfo, Features, FeatureState, StateProducer, Stream
 from pyatv.support import net
@@ -48,7 +46,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
         self.service = self.config.get_service(Protocol.AirPlay)
-        self.credentials: Optional[str] = self._get_credentials()
+        self.credentials: Optional[LegacyCredentials] = self._get_credentials()
         self._play_task: Optional[asyncio.Future] = None
 
     def close(self) -> None:
@@ -58,29 +56,23 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
             self._play_task.cancel()
             self._play_task = None
 
-    def _get_credentials(self) -> Optional[str]:
+    def _get_credentials(self) -> Optional[LegacyCredentials]:
         if not self.service or self.service.credentials is None:
             _LOGGER.debug("No AirPlay credentials loaded")
             return None
 
-        if not re.match(r"[0-9A-Fa-f]{16}:[0-9A-Fa-f]{64}", self.service.credentials):
-            raise exceptions.InvalidCredentialsError(
-                f"invalid credentials: {self.service.credentials}"
-            )
-
-        split = self.service.credentials.split(":")
-        _LOGGER.debug("Loaded AirPlay credentials: %s", self.service.credentials)
-
-        return split[1]
+        credentials = LegacyCredentials.parse(self.service.credentials)
+        _LOGGER.debug("Loaded AirPlay credentials: %s", credentials)
+        return credentials
 
     async def _player(self, connection: HttpConnection) -> AirPlayPlayer:
         player = AirPlayPlayer(connection)
 
         # If credentials have been loaded, do device verification first
         if self.credentials:
-            srp = SRPAuthHandler()
-            srp.initialize(binascii.unhexlify(self.credentials))
-            verifier = AuthenticationVerifier(connection, srp)
+            srp = SRPAuthHandler(self.credentials)
+            srp.initialize()
+            verifier = AirPlayPairingVerifier(connection, srp)
             await verifier.verify_authed()
 
         return player

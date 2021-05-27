@@ -1,21 +1,18 @@
 """Device pairing and derivation of encryption keys."""
 
 import binascii
-from collections import namedtuple
 import logging
 from typing import Optional
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth import DeviceAuthenticator
-from pyatv.airplay.srp import SRPAuthHandler, new_credentials
+from pyatv.airplay.auth import AirPlayPairingProcedure
+from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
 _LOGGER = logging.getLogger(__name__)
-
-AuthData = namedtuple("AuthData", "identifier seed credentials")
 
 
 class AirPlayPairingHandler(PairingHandler):
@@ -28,21 +25,16 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
-        self.authenticator: Optional[DeviceAuthenticator] = None
-        self.auth_data = self._setup_credentials()
+        self.pairing_procedure: Optional[AirPlayPairingProcedure] = None
+        self.credentials: LegacyCredentials = self._setup_credentials()
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False
 
-    def _setup_credentials(self) -> AuthData:
-        credentials = self.service.credentials
-
+    def _setup_credentials(self) -> LegacyCredentials:
         # If service has credentials, use those. Otherwise generate new.
-        if credentials is None:
-            identifier, seed = new_credentials()
-            credentials = f"{identifier}:{seed.decode().upper()}"
-        else:
-            identifier, seed = credentials.split(":", maxsplit=1)
-        return AuthData(identifier, seed, credentials)
+        if self.service.credentials is None:
+            return new_credentials()
+        return LegacyCredentials.parse(self.service.credentials)
 
     @property
     def has_paired(self) -> bool:
@@ -57,36 +49,34 @@ class AirPlayPairingHandler(PairingHandler):
 
     async def begin(self) -> None:
         """Start pairing process."""
-        _LOGGER.debug(
-            "Starting AirPlay pairing with credentials %s", self.auth_data.credentials
-        )
+        _LOGGER.debug("Starting AirPlay pairing with credentials %s", self.credentials)
 
-        srp: SRPAuthHandler = SRPAuthHandler()
-        srp.initialize(binascii.unhexlify(self.auth_data.seed))
+        srp: SRPAuthHandler = SRPAuthHandler(self.credentials)
+        srp.initialize()
 
         self.http = await http_connect(self.address, self.service.port)
-        self.authenticator = DeviceAuthenticator(self.http, srp)
+        self.pairing_procedure = AirPlayPairingProcedure(self.http, srp)
 
         self._has_paired = False
         return await error_handler(
-            self.authenticator.start_authentication, exceptions.PairingError
+            self.pairing_procedure.start_pairing, exceptions.PairingError
         )
 
     async def finish(self) -> None:
         """Stop pairing process."""
-        if not self.authenticator:
+        if not self.pairing_procedure:
             raise exceptions.PairingError("pairing was not started")
         if not self.pin_code:
             raise exceptions.PairingError("no pin given")
 
-        await error_handler(
-            self.authenticator.finish_authentication,
-            exceptions.PairingError,
-            self.auth_data.identifier,
-            self.pin_code,
+        self.service.credentials = str(
+            await error_handler(
+                self.pairing_procedure.finish_pairing,
+                exceptions.PairingError,
+                binascii.hexlify(self.credentials.identifier).decode("ascii").upper(),
+                self.pin_code,
+            )
         )
-
-        self.service.credentials = self.auth_data.credentials
         self._has_paired = True
 
     def pin(self, pin: int) -> None:
