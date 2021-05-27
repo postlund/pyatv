@@ -349,10 +349,10 @@ class RaopClient:
 
         (_, control_client) = await self.loop.create_datagram_endpoint(
             lambda: ControlClient(self.context, self._packet_backlog),
-            local_addr=(self.rtsp.local_ip, 0),
+            local_addr=(self.rtsp.connection.local_ip, 0),
         )
         (_, timing_client) = await self.loop.create_datagram_endpoint(
-            TimingClient, local_addr=(self.rtsp.local_ip, 0)
+            TimingClient, local_addr=(self.rtsp.connection.local_ip, 0)
         )
 
         self.control_client = cast(ControlClient, control_client)
@@ -412,11 +412,11 @@ class RaopClient:
             # Create a socket used for writing audio packets (ugly)
             transport, _ = await self.loop.create_datagram_endpoint(
                 AudioProtocol,
-                remote_addr=(self.rtsp.remote_ip, self.context.server_port),
+                remote_addr=(self.rtsp.connection.remote_ip, self.context.server_port),
             )
 
             # Start sending sync packets
-            self.control_client.start(self.rtsp.remote_ip)
+            self.control_client.start(self.rtsp.connection.remote_ip)
 
             # Send progress if supported by receiver
             if MetadataType.Progress in self._metadata_types:
