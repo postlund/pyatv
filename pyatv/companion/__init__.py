@@ -17,7 +17,7 @@ from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import App, Apps, FeatureInfo, Features, Power, StateProducer
 from pyatv.support.hap_srp import SRPAuthHandler
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)

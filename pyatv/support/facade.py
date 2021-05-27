@@ -14,8 +14,9 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
 
-from pyatv import conf, const, exceptions, interface, net
+from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ SetupMethod = Callable[
         conf.AppleTV,
         Dict[Any, Relayer],
         interface.StateProducer,
-        net.ClientSessionManager,
+        ClientSessionManager,
     ],
     Optional[SetupData],
 ]
@@ -356,7 +357,7 @@ class FacadeAudio(Relayer, interface.Audio):
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
-    def __init__(self, config: conf.AppleTV, session_manager: net.ClientSessionManager):
+    def __init__(self, config: conf.AppleTV, session_manager: ClientSessionManager):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__()
         self._config = config

@@ -14,8 +14,12 @@ from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import FeatureInfo, Features, FeatureState, StateProducer, Stream
 from pyatv.support import net
-from pyatv.support.http import HttpConnection, StaticFileWebServer, http_connect
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import (
+    ClientSessionManager,
+    HttpConnection,
+    StaticFileWebServer,
+    http_connect,
+)
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)

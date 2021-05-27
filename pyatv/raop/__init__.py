@@ -19,8 +19,7 @@ from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.miniaudio import MiniaudioWrapper
 from pyatv.raop.raop import RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
-from pyatv.support.http import http_connect
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager, http_connect
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
 from pyatv.support.hap_srp import Credentials, SRPAuthHandler
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 

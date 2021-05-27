@@ -1,16 +1,12 @@
 """Functional tests for Airplay."""
 import math
 
-from aiohttp import ClientSession
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 import pytest
 
-from pyatv import exceptions, net
+from pyatv import exceptions
 from pyatv.airplay import player
-from pyatv.const import Protocol
 
-from tests.fake_device import FakeAppleTV
-from tests.utils import _fake_sleep, stub_sleep, total_sleep_time, unstub_sleep
+from tests.utils import total_sleep_time
 
 STREAM = "http://airplaystream"
 START_POSITION = 0.8
