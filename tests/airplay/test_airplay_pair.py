@@ -1,21 +1,22 @@
 """Functional pairing tests using the API with a fake AirPlay Apple TV."""
 
+import asyncio
 import binascii
 from unittest.mock import patch
 
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+import pytest
 
 from pyatv import exceptions, pair
-from pyatv.conf import AirPlayService, AppleTV
 from pyatv.const import Protocol
 
-from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import (
     DEVICE_AUTH_KEY,
     DEVICE_CREDENTIALS,
     DEVICE_IDENTIFIER,
     DEVICE_PIN,
 )
+
+pytestmark = pytest.mark.asyncio
 
 
 def predetermined_key(num):
@@ -25,58 +26,43 @@ def predetermined_key(num):
     return binascii.unhexlify(DEVICE_AUTH_KEY)
 
 
-class PairFunctionalTest(AioHTTPTestCase):
-    def setUp(self):
-        AioHTTPTestCase.setUp(self)
-        self.pairing = None
+@pytest.fixture(autouse=True)
+def require_auth(airplay_usecase):
+    airplay_usecase.airplay_require_authentication()
 
-        self.service = AirPlayService("airplay_id", port=self.server.port)
-        self.conf = AppleTV("127.0.0.1", "Apple TV")
-        self.conf.add_service(self.service)
 
-    async def tearDownAsync(self):
-        await self.pairing.close()
-        await super().tearDownAsync()
+async def perform_pairing(conf, pin=DEVICE_PIN):
+    pairing = await pair(conf, Protocol.AirPlay, asyncio.get_event_loop())
 
-    async def get_application(self, loop=None):
-        self.fake_atv = FakeAppleTV(self.loop)
-        _, self.usecase = self.fake_atv.add_service(Protocol.AirPlay)
-        return self.fake_atv.app
+    assert pairing.device_provides_pin
 
-    async def do_pairing(self, pin=DEVICE_PIN):
-        self.usecase.airplay_require_authentication()
+    await pairing.begin()
+    if pin:
+        pairing.pin(pin)
 
-        self.pairing = await pair(self.conf, Protocol.AirPlay, self.loop)
+    assert not pairing.has_paired
 
-        self.assertTrue(self.pairing.device_provides_pin)
+    await pairing.finish()
+    assert pairing.has_paired
+    assert conf.get_service(Protocol.AirPlay).credentials == DEVICE_CREDENTIALS
 
-        await self.pairing.begin()
-        if pin:
-            self.pairing.pin(pin)
 
-        self.assertFalse(self.pairing.has_paired)
+async def test_pairing_exception_invalid_pin(airplay_conf):
+    with pytest.raises(exceptions.PairingError):
+        await perform_pairing(airplay_conf, 9999)
 
-        await self.pairing.finish()
-        self.assertTrue(self.pairing.has_paired)
-        self.assertEqual(self.service.credentials, DEVICE_CREDENTIALS)
 
-    @unittest_run_loop
-    async def test_pairing_exception_invalid_pin(self):
-        with self.assertRaises(exceptions.PairingError):
-            await self.do_pairing(9999)
+async def test_pairing_exception_no_pin(airplay_conf):
+    with pytest.raises(exceptions.PairingError):
+        await perform_pairing(airplay_conf, None)
 
-    @unittest_run_loop
-    async def test_pairing_exception_no_pin(self):
-        with self.assertRaises(exceptions.PairingError):
-            await self.do_pairing(None)
 
-    @patch("os.urandom")
-    @unittest_run_loop
-    async def test_pairing_with_device_new_credentials(self, rand_func):
-        rand_func.side_effect = predetermined_key
-        await self.do_pairing()
+@patch("os.urandom")
+async def test_pairing_with_device_new_credentials(rand_func, airplay_conf):
+    rand_func.side_effect = predetermined_key
+    await perform_pairing(airplay_conf)
 
-    @unittest_run_loop
-    async def test_pairing_with_device_existing_credentials(self):
-        self.conf.get_service(Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
-        await self.do_pairing()
+
+async def test_pairing_with_device_existing_credentials(airplay_conf):
+    airplay_conf.get_service(Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
+    await perform_pairing(airplay_conf)

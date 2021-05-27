@@ -192,9 +192,10 @@ class PairingHandler(ABC):
     """Base class for API used to pair with an Apple TV."""
 
     def __init__(
-        self, session_manager: net.ClientSessionManager, service: BaseService
+        self, session_manager: net.ClientSessionManager, service: Optional[BaseService]
     ) -> None:
         """Initialize a new instance of PairingHandler."""
+        assert service is not None
         self.session_manager = session_manager
         self._service = service
 

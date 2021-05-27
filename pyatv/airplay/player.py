@@ -6,6 +6,7 @@ import plistlib
 from uuid import uuid4
 
 from pyatv import exceptions
+from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,11 +22,11 @@ HEADERS = {
 class AirPlayPlayer:
     """This class helps with playing media from an URL."""
 
-    def __init__(self, http):
+    def __init__(self, http: HttpConnection) -> None:
         """Initialize a new AirPlay instance."""
         self.http = http
 
-    async def play_url(self, url, position=0):
+    async def play_url(self, url: str, position: float = 0) -> None:
         """Play media from an URL on the device."""
         body = {
             "Content-Location": url,
@@ -38,15 +39,16 @@ class AirPlayPlayer:
             _LOGGER.debug("Starting to play %s", url)
 
             # pylint: disable=no-member
-            _, status = await self.http.post_data(
-                "play",
+            resp = await self.http.post(
+                "/play",
                 headers=HEADERS,
-                data=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
+                body=plistlib.dumps(body, fmt=plistlib.FMT_BINARY),
+                allow_error=True,
             )
 
             # Sometimes AirPlay fails with "Internal Server Error", we
             # apply a "lets try again"-approach to that
-            if status == 500:
+            if resp.code == 500:
                 retry += 1
                 _LOGGER.debug(
                     "Failed to stream %s, retry %d of %d", url, retry, PLAY_RETRIES
@@ -55,8 +57,8 @@ class AirPlayPlayer:
                 continue
 
             # TODO: Should be more fine-grained
-            if 400 <= status < 600:
-                raise exceptions.AuthenticationError("Status code: " + str(status))
+            if 400 <= resp.code < 600:
+                raise exceptions.AuthenticationError(f"status code: {resp.code}")
 
             await self._wait_for_media_to_end()
             return
@@ -65,19 +67,23 @@ class AirPlayPlayer:
 
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)
-    async def _wait_for_media_to_end(self):
-        attempts = WAIT_RETRIES
-        video_started = False
+    async def _wait_for_media_to_end(self) -> None:
+        attempts: int = WAIT_RETRIES
+        video_started: bool = False
 
         while True:
-            data, status = await self.http.get_data("playback-info")
+            resp = await self.http.get("/playback-info")
+            _LOGGER.debug("Playback-info: %s", resp)
 
-            if status == 403:
-                raise exceptions.NoCredentialsError("device authentication required")
-
-            _LOGGER.debug("Playback-info (%d): %s", status, data)
-
-            parsed = plistlib.loads(data)
+            if resp.body:
+                parsed = plistlib.loads(
+                    resp.body.encode("utf-8")
+                    if isinstance(resp.body, str)
+                    else resp.body
+                )
+            else:
+                parsed = {}
+                _LOGGER.debug("Got playback-info response without content")
 
             # duration is only available if something is playing
             if "duration" in parsed:

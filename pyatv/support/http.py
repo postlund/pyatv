@@ -14,6 +14,37 @@ _LOGGER = logging.getLogger(__name__)
 USER_AGENT = f"pyatv/{const.__version__}"
 
 
+def _format_message(
+    method: str,
+    uri: str,
+    protocol: str = "HTTP/1.1",
+    user_agent: str = USER_AGENT,
+    content_type: Optional[str] = None,
+    headers: Optional[Mapping[str, object]] = None,
+    body: Optional[Union[str, bytes]] = None,
+) -> bytes:
+    if isinstance(body, str):
+        body = body.encode("utf-8")
+
+    msg = f"{method} {uri} {protocol}"
+    if "User-Agent" not in (headers or {}):
+        msg += f"\r\nUser-Agent: {user_agent}"
+    if content_type:
+        msg += f"\r\nContent-Type: {content_type}"
+    if body:
+        msg += f"\r\nContent-Length: {len(body) if body else 0}"
+
+    for key, value in (headers or {}).items():
+        msg += f"\r\n{key}: {value}"
+    msg += 2 * "\r\n"
+
+    output = msg.encode("utf-8")
+    if body:
+        output += body
+
+    return output
+
+
 class HttpResponse(NamedTuple):
     """Generic HTTP response message."""
 
@@ -54,7 +85,7 @@ def parse_message(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     response_body: Union[str, bytes] = body[0:content_length]
 
     # Assume body is text unless content type is application/octet-stream
-    if resp_headers.get("Content-Type") != "application/octet-stream":
+    if not resp_headers.get("Content-Type", "").startswith("application"):
         # We know it's bytes here
         response_body = cast(bytes, response_body).decode("utf-8")
 
@@ -131,34 +162,37 @@ class HttpConnection(asyncio.Protocol):
         """Handle that connection was lost."""
         _LOGGER.debug("Connection closed")
 
+    async def get(self, path: str) -> HttpResponse:
+        """Make a GET request and return response."""
+        return await self.send_and_receive("GET", path)
+
+    async def post(
+        self,
+        path: str,
+        headers: Optional[Mapping[str, object]] = None,
+        body: Optional[Union[str, bytes]] = None,
+        allow_error: bool = False,
+    ) -> HttpResponse:
+        """Make a POST request and return response."""
+        return await self.send_and_receive(
+            "POST", path, headers=headers, body=body, allow_error=allow_error
+        )
+
     async def send_and_receive(
         self,
         method: str,
         uri: str,
-        protocol: str = "HTTP/1.0",
+        protocol: str = "HTTP/1.1",
         user_agent: str = USER_AGENT,
         content_type: Optional[str] = None,
-        headers: Mapping[str, object] = None,
-        body: Union[str, bytes] = None,
+        headers: Optional[Mapping[str, object]] = None,
+        body: Optional[Union[str, bytes]] = None,
+        allow_error: bool = False,
     ) -> HttpResponse:
         """Send a HTTP message and return response."""
-        if isinstance(body, str):
-            body = body.encode("utf-8")
-
-        msg = f"{method} {uri} {protocol}"
-        msg += f"\r\nUser-Agent: {user_agent}"
-        if content_type:
-            msg += f"\r\nContent-Type: {content_type}"
-        if body:
-            msg += f"\r\nContent-Length: {len(body) if body else 0}"
-
-        for key, value in (headers or {}).items():
-            msg += f"\r\n{key}: {value}"
-        msg += 2 * "\r\n"
-
-        output = msg.encode("utf-8")
-        if body:
-            output += body
+        output = _format_message(
+            method, uri, protocol, user_agent, content_type, headers, body
+        )
 
         _LOGGER.debug("Sending %s message: %s", protocol, output)
         if not self.transport:
@@ -180,14 +214,21 @@ class HttpConnection(asyncio.Protocol):
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
 
-        # Positive response
-        if 200 <= response.code < 300:
-            return response
-
         if response.code in [401, 403]:
             raise exceptions.AuthenticationError("not authenticated")
+
+        # Positive response
+        if 200 <= response.code < 300 or allow_error:
+            return response
 
         raise exceptions.ProtocolError(
             f"{protocol} method {method} failed with code "
             f"{response.code}: {response.message}"
         )
+
+
+async def http_connect(address: str, port: int) -> HttpConnection:
+    """Open connection to a remote host."""
+    loop = asyncio.get_event_loop()
+    _, connection = await loop.create_connection(HttpConnection, address, port)
+    return cast(HttpConnection, connection)

@@ -73,10 +73,10 @@ def test_parse_sequent_messages():
     assert rest == b""
 
 
-def test_parse_raw_body():
+def test_parse_application_type_as_bytes():
     resp, rest = parse_message(
         b"HTTP/1.0 200 OK\r\nContent-Length: 4\r\n"
-        + b"Content-Type: application/octet-stream\r\n\r\nbodyextra"
+        + b"Content-Type: application/something\r\n\r\nbodyextra"
     )
     assert resp.body == b"body"
     assert rest == b"extra"
