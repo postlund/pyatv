@@ -188,6 +188,10 @@ class RtspSession:
             body=tags.container_tag("mlit", payload),
         )
 
+    async def feedback(self) -> HttpResponse:
+        """Send SET_PARAMETER message."""
+        return await self.exchange("POST", uri="/feedback")
+
     async def exchange(
         self,
         method: str,

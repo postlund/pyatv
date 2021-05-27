@@ -329,11 +329,7 @@ class RaopClient:
             await asyncio.sleep(KEEP_ALIVE_INTERVAL)
 
             _LOGGER.debug("Sending keep-alive metadata")
-            await self.rtsp.set_metadata(
-                self.context.rtpseq,
-                self.context.rtptime,
-                self.metadata,
-            )
+            await self.rtsp.feedback()
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
@@ -454,9 +450,7 @@ class RaopClient:
             await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
-            # but only if "text" metadata is supported
-            if MetadataType.Text in self._metadata_types:
-                self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+            self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
             listener = self.listener
             if listener:
