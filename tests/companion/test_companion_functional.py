@@ -15,7 +15,7 @@ from pyatv.const import Protocol
 from pyatv.interface import App, FeatureName, FeatureState
 
 from tests.fake_device import FakeAppleTV
-from tests.utils import faketime, stub_sleep, until
+from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -100,3 +100,11 @@ class CompanionFunctionalTest(AioHTTPTestCase):
 
         await self.atv.power.turn_on()
         assert self.state.powered_on
+
+    @unittest_run_loop
+    async def test_session_start(self):
+        # All commands should trigger a session start, so just use one and verify
+        assert self.state.sid == 0
+        await self.atv.power.turn_off()
+        assert self.state.sid != 0
+        assert self.state.service_type == "com.apple.tvremoteservices"

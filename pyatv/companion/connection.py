@@ -1,4 +1,5 @@
 """Connection abstraction for Companion protocol."""
+from abc import ABC
 import asyncio
 from collections import deque
 from enum import Enum
@@ -40,14 +41,28 @@ class FrameType(Enum):
 #  pylint: enable=invalid-name
 
 
+class CompanionConnectionListener(ABC):
+    """Listener interface for a Companion connection."""
+
+    def disconnected(self) -> None:
+        """Disconnect from companion device."""
+
+
 class CompanionConnection(asyncio.Protocol):
     """Remote connection to a Companion device."""
 
-    def __init__(self, loop: asyncio.AbstractEventLoop, host: str, port: int) -> None:
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        host: str,
+        port: int,
+        listener: Optional[CompanionConnectionListener] = None,
+    ) -> None:
         """Initialize a new CompanionConnection instance."""
         self.loop = loop
         self.host = str(host)
         self.port = port
+        self.listener: Optional[CompanionConnectionListener] = listener
         self.transport = None
         self._buffer: bytes = b""
         self._chacha: Optional[chacha20.Chacha20Cipher] = None
@@ -167,3 +182,6 @@ class CompanionConnection(asyncio.Protocol):
         """Handle that connection was lost from companion."""
         _LOGGER.debug("Connection lost to remote device: %s", exc)
         self.transport = None
+        if self.listener:
+            self.listener.disconnected()
+            self.listener = None

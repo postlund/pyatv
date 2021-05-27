@@ -849,6 +849,7 @@ There's a lot of information stuffed in there, but the main elements are these o
 | _c | Content | Additional data/arguments passed to whatever is specified in `_i`. |
 | _t | Type | Type of message: 1=event, 2=request, 3=response |
 | _x | XID | Some kind of identifier, maybe related to XPC? Still unknown. |
+| _sid | Session ID | Identifier used by sessions. |
 
 Most messages seems to include the tags above. Here are a few other tags seen as well:
 
@@ -856,6 +857,94 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 | _em | Error message | In case of error, e.g. `No request handler` if no handler exists for `_i` (i.e. invalid value for `_i`).
 | _ec | Error code | In case of error, e.g. 58822 |
 | _ed | Error domain | In case of error, e.g. RPErrorDomain |
+
+#### Sessions (_sessionStart, _sessionStop)
+
+When a client connects, it can establish a new session by sending `_sessionStart`. It
+includes a 32 bit session id called `_sid` (assumed to be randomized by the client) and a
+service type called `_srvT` (endpoint the client wants to talk to):
+
+```javascript
+{
+    '_i': '_sessionStart',
+    '_x': 123,
+    '_t': '2',
+    '_c': {
+        '_srvT': 'com.apple.tvremoteservices',
+        'sid': 123456
+    }
+}
+```
+
+The server will respond with a remote `_sid` upon success:
+
+```javascript
+{
+    '_c': {
+        '_sid': 1443773422
+    },
+    '_t': 3,
+    '_x': 123
+}
+```
+
+A final 64 bit session id is then created by shifting up the received `_sid` 32 bits
+and OR'ing it with the randomized `_sid`:
+
+```python
+(1443773422 << 32) | 123456 = 6200959630324130368 = 0x560E3BEE0001E240
+```
+
+This identifier is then used in further requests where `_sid` is required, e.g. when stopping
+the session:
+
+```javascript
+// Request
+{
+    '_i': '_sessionStop',
+    '_x': 123,
+    '_t': '2',
+    '_c': {
+        '_sid': 6200959630324130368
+    }
+}
+
+// Response
+{
+    '_c': {},
+    '_t': 3,
+    '_x': 123
+}
+```
+
+Combining both endpoint session ids into a single identifier is likely for convenience
+reasons.
+
+Some commands will not work until a session has been started. One example is `_launchApp`,
+which won't work after the Apple TV has been restarted until the app list has been requested
+by for instance the shortcuts app. The theory is that the `rapportd` process (implementing
+the Companion protocol) acts like a proxy between clients and processes on the system.
+When a client wants to call a function (e.g. `_launchApp`) handled by another process,
+`_sessionStart` will make sure that function is available to call by setting up a session
+to the process handling the function and relaying messages back and forth:
+
+<code class="diagram">
+sequenceDiagram
+    Client->>rapportd: _startSession: {_srvT=com.apple.tvremoteservices, _sid=123456}
+    rect rgb(0, 0, 255, 0.1)
+      Note over rapportd,tvremoteservices: Only if no previous session?
+      rapportd->>tvremoteservices: Start new session
+      tvremoteservices->>rapportd: {_sid: 1443773422}
+    end
+    rapportd->>Client: {_sid: 1443773422}
+    note over Client, rapportd: Interaction
+    Client->>rapportd: _stopSession: {_sid=6200959630324130368}
+    rapportd->>Client: {}
+</code>
+
+Once a command has been called, it will be cached making it possible to call it without
+sending `_sessionStart` again. This is probably why `_launchApp` keeps working after
+requesting the list from Shortcuts (as it will set up a new session).
 
 #### Launch Application (_launchApp)
 
@@ -877,7 +966,7 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 {'_c': {'com.apple.podcasts': 'Podcaster', 'com.apple.TVMovies': 'Filmer', 'com.apple.TVWatchList': 'TV', 'com.apple.TVPhotos': 'Bilder', 'com.apple.TVAppStore': 'App\xa0Store', 'se.cmore.CMore2': 'C More', 'com.apple.Arcade': 'Arcade', 'com.apple.TVSearch': 'Sök', 'emby.media.emby-tvos': 'Emby', 'se.tv4.tv4play': 'TV4 Play', 'com.apple.TVHomeSharing': 'Datorer', 'com.google.ios.youtube': 'YouTube', 'se.svtplay.mobil': 'SVT Play', 'com.plexapp.plex': 'Plex', 'com.MTGx.ViaFree.se': 'Viafree', 'com.apple.TVSettings': 'Inställningar', 'com.apple.appleevents': 'Apple Events', 'com.kanal5.play': 'discovery+', 'com.netflix.Netflix': 'Netflix', 'se.harbourfront.viasatondemand': 'Viaplay', 'com.apple.TVMusic': 'Musik'}, '_t': 3, '_x': 123}
 ```
 
-#### Buttons/Commands
+#### Buttons/Commands (_hidC)
 
 Identifier shall be set to *_hidC* and content (*_c*) to the following:
 

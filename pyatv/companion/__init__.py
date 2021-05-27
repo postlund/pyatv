@@ -3,10 +3,15 @@
 import asyncio
 from enum import Enum
 import logging
+from random import randint
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.companion.connection import CompanionConnection, FrameType
+from pyatv.companion.connection import (
+    CompanionConnection,
+    CompanionConnectionListener,
+    FrameType,
+)
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, Protocol
@@ -48,42 +53,61 @@ class HidCommand(Enum):
 # pylint: enable=invalid-name
 
 
-async def _connect(loop, config: AppleTV) -> CompanionProtocol:
-    """Connect to the device."""
-    service = config.get_service(Protocol.Companion)
-    if service is None:
-        raise exceptions.NoCredentialsError("No Companion credentials loaded")
-
-    _LOGGER.debug("Connect to Companion from API")
-    connection = CompanionConnection(loop, str(config.address), service.port)
-    protocol = CompanionProtocol(connection, SRPAuthHandler(), service)
-    await protocol.start()
-    return protocol
-
-
 # TODO: Maybe move to separate file?
-class CompanionAPI:
-    """Implementation of Companion API.
-
-    This class implements a simple one-shot request based API. It will connect and
-    disconnect for every request. Mainly as a workaround for not knowing how to keep
-    a connection open at all time (as the remote device disconnects after a while).
-    """
+class CompanionAPI(CompanionConnectionListener):
+    """Implementation of Companion API."""
 
     def __init__(self, config: AppleTV, loop: asyncio.AbstractEventLoop):
         """Initialize a new CompanionAPI instance."""
         self.config = config
         self.loop = loop
+        self._connection: Optional[CompanionConnection] = None
+        self._protocol: Optional[CompanionProtocol] = None
+        self.sid: int = 0
+
+    async def disconnect(self):
+        """Disconnect from companion device."""
+        # TODO: Should send _sessionStop
+        if self._protocol:
+            self._protocol.stop()
+
+    async def _connect(self):
+        if self._protocol:
+            return
+
+        service = self.config.get_service(Protocol.Companion)
+        if service is None:
+            raise exceptions.NoCredentialsError("No Companion credentials loaded")
+
+        _LOGGER.debug("Connect to Companion from API")
+        connection = CompanionConnection(
+            self.loop, str(self.config.address), service.port, self
+        )
+
+        protocol = CompanionProtocol(connection, SRPAuthHandler(), service)
+        await protocol.start()
+
+        self._connection = connection
+        self._protocol = protocol
+
+        await self._session_start()
+
+    def disconnected(self) -> None:
+        """Call back when disconnected from companion device."""
+        _LOGGER.debug("API got disconnected from Companion device")
+        self._connection = None
+        self._protocol = None
 
     async def _send_command(
         self, identifier: str, content: Dict[str, object]
     ) -> Dict[str, object]:
         """Send a command to the device and return response."""
-        protocol = None
-        try:
-            protocol = await _connect(self.loop, self.config)
+        await self._connect()
+        if self._protocol is None:
+            raise RuntimeError("not connected to companion")
 
-            resp = await protocol.exchange_opack(
+        try:
+            resp = await self._protocol.exchange_opack(
                 FrameType.E_OPACK,
                 {
                     "_i": identifier,
@@ -100,11 +124,18 @@ class CompanionAPI:
                 raise exceptions.ProtocolError(
                     f"Command {identifier} failed: {resp['_em']}"
                 )
-        finally:
-            if protocol:
-                protocol.stop()
 
         return resp
+
+    async def _session_start(self):
+        local_sid = randint(0, 2 ** 32 - 1)
+        resp = await self._send_command(
+            "_sessionStart", {"_srvT": "com.apple.tvremoteservices", "_sid": local_sid}
+        )
+
+        remote_sid = resp["_c"]["_sid"]
+        self.sid = (remote_sid << 32) | local_sid
+        _LOGGER.debug("Started session with SID 0x%X", self.sid)
 
     async def launch_app(self, bundle_identifier: str) -> None:
         """Launch an app on the remote device."""

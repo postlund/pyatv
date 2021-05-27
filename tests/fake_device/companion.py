@@ -28,6 +28,8 @@ class FakeCompanionState:
         self.installed_apps: Dict[str, str] = {}
         self.has_paired: bool = False
         self.powered_on: bool = True
+        self.sid: int = 0
+        self.service_type: Optional[str] = None
 
 
 class FakeCompanionServiceFactory:
@@ -165,6 +167,11 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             return  # Would be good to send error message here
 
         self.send_response(message, {})
+
+    def handle__sessionstart(self, message):
+        self.state.sid = message["_c"]["_sid"]
+        self.state.service_type = message["_c"]["_srvT"]
+        self.send_response(message, {"_sid": 5555})
 
 
 class FakeCompanionUseCases:
