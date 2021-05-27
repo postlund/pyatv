@@ -164,6 +164,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
         )
         self.assertEqual(self.airplay_state.last_airplay_start, 0)
         self.assertIsNotNone(self.airplay_state.last_airplay_uuid)
+        self.assertEqual(self.airplay_state.last_airplay_content, b"a file for testing")
 
     @unittest_run_loop
     async def test_button_up(self):
