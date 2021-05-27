@@ -12,11 +12,17 @@ from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 
 from pyatv import const, exceptions
+from pyatv.support import log_binary
 from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
 USER_AGENT = f"pyatv/{const.__version__}"
+
+# This timeout is rather long and that is for a reason. If a device is sleeping, it
+# automatically wakes up when a service is requested from it. Up to 20 seconds or so
+# have been seen. So to deal with that, keep this high.
+DEFAULT_TIMEOUT = 25.0  # Seconds
 
 
 def _format_message(
@@ -119,6 +125,81 @@ class ClientSessionManager:
         """Close session."""
         if self._should_close:
             await self.session.close()
+
+
+class HttpSession:
+    """This class simplifies GET/POST requests."""
+
+    def __init__(self, client_session: ClientSession, base_url: str) -> None:
+        """Initialize a new HttpSession."""
+        self._session = client_session
+        self.base_url = base_url
+
+    async def get_data(
+        self,
+        path: str,
+        headers: Mapping[str, object] = None,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> Tuple[bytes, int]:
+        """Perform a GET request."""
+        url = self.base_url + path
+        _LOGGER.debug("GET URL: %s", url)
+        resp = None
+        try:
+            resp = await self._session.get(url, headers=headers, timeout=timeout)
+            _LOGGER.debug(
+                "Response: status=%d, headers=[%s]", resp.status, resp.headers
+            )
+            if resp.content_length is not None:
+                resp_data = await resp.read()
+                log_binary(_LOGGER, "<< GET", Data=resp_data)
+            else:
+                resp_data = None
+            return resp_data, resp.status
+        except Exception:
+            if resp is not None:
+                resp.close()
+            raise
+        finally:
+            if resp is not None:
+                await resp.release()
+
+    async def post_data(
+        self,
+        path: str,
+        data: bytes = None,
+        headers: Mapping[str, object] = None,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> Tuple[bytes, int]:
+        """Perform a POST request."""
+        url = self.base_url + path
+        _LOGGER.debug("POST URL: %s", url)
+        log_binary(_LOGGER, ">> POST", Data=data)
+
+        resp = None
+        try:
+            resp = await self._session.post(
+                url,
+                headers=headers,
+                data=data,
+                timeout=timeout,
+            )
+            _LOGGER.debug(
+                "Response: status=%d, headers=[%s]", resp.status, resp.headers
+            )
+            if resp.content_length is not None:
+                resp_data = await resp.read()
+                log_binary(_LOGGER, "<< POST", Data=resp_data)
+            else:
+                resp_data = None
+            return resp_data, resp.status
+        except Exception as ex:
+            if resp is not None:
+                resp.close()
+            raise ex
+        finally:
+            if resp is not None:
+                await resp.release()
 
 
 class HttpConnection(asyncio.Protocol):
