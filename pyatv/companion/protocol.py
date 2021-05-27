@@ -7,6 +7,7 @@ from pyatv import exceptions
 from pyatv.companion import opack
 from pyatv.companion.auth import CompanionPairingVerifier
 from pyatv.companion.connection import CompanionConnection, FrameType
+from pyatv.conf import CompanionService
 from pyatv.support.hap_srp import Credentials, SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
@@ -17,7 +18,12 @@ DEFAULT_TIMEOUT = 5  # Seconds
 class CompanionProtocol:
     """Protocol logic related to Companion."""
 
-    def __init__(self, connection: CompanionConnection, srp: SRPAuthHandler, service):
+    def __init__(
+        self,
+        connection: CompanionConnection,
+        srp: SRPAuthHandler,
+        service: CompanionService,
+    ):
         """Initialize a new CompanionProtocol."""
         self.connection = connection
         self.srp = srp
