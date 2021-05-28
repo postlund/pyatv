@@ -90,14 +90,21 @@ def parse_message(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     protocol, version, code, message = match.groups()
     resp_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
 
-    content_length = int(resp_headers.get("Content-Length", 0))
+    # TODO: pylint on python 3.6 does not seem to find CaseInsensitiveDict.get, but
+    # other versions seems to work fine. Remove this ignore when python 3.6 is dropped.
+    content_length = int(
+        resp_headers.get("Content-Length", 0)  # pylint: disable=no-member
+    )
     if len(body or []) < content_length:
         return None, response
 
     response_body: Union[str, bytes] = body[0:content_length]
 
     # Assume body is text unless content type is application/octet-stream
-    if not resp_headers.get("Content-Type", "").startswith("application"):
+    # TODO: Remove pylint disable when python 3.6 is dropped
+    if not resp_headers.get("Content-Type", "").startswith(  # pylint: disable=no-member
+        "application"
+    ):
         # We know it's bytes here
         response_body = cast(bytes, response_body).decode("utf-8")
 
