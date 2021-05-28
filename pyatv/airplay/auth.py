@@ -45,7 +45,7 @@ class AirPlayPairingProcedure:
         self.srp.step1(username, password)
         resp = await self._send_plist(method="pin", user=username)
         resp = plistlib.loads(
-            resp.body if isinstance(resp.body, bytes) else resp.body.encode("uft-8")
+            resp.body if isinstance(resp.body, bytes) else resp.body.encode("utf-8")
         )
         if not isinstance(resp, dict):
             raise exceptions.ProtocolError(f"exoected dict, got {type(resp)}")
