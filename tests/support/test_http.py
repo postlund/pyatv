@@ -87,3 +87,12 @@ def test_parse_arbitrary_protocol_header():
 
     assert resp.protocol == "FOO"
     assert resp.version == "3.14"
+
+
+def test_parse_ignore_header_case():
+    resp, rest = parse_message(
+        b"HTTP/1.0 200 OK\r\nCONTENT-lEnGtH: 4\r\n"
+        + b"content-TYPE: application/something\r\n\r\nbodyextra"
+    )
+    assert resp.body == b"body"
+    assert rest == b"extra"
