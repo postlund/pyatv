@@ -30,7 +30,7 @@ FACTORIES = {
     ),
 }
 
-FakeService = namedtuple("FakeService", "service state factory")
+FakeService = namedtuple("FakeService", "service state usecase")
 
 
 class FakeAppleTV:
@@ -78,3 +78,6 @@ class FakeAppleTV:
 
     def get_state(self, protocol: Protocol):
         return self.services[protocol].state
+
+    def get_usecase(self, protocol: Protocol):
+        return self.services[protocol].usecase

@@ -19,7 +19,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.raop import setup as raop_setup
-from pyatv.support import net
+from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 
@@ -78,7 +78,7 @@ async def connect(
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
-    session_manager = await net.create_session(session)
+    session_manager = await http.create_session(session)
     atv = FacadeAppleTV(config, session_manager)
 
     for service in config.services:
@@ -122,4 +122,4 @@ async def pair(
     if handler is None:
         raise RuntimeError(f"missing implementation for {protocol}")
 
-    return handler(config, await net.create_session(session), loop, **kwargs)
+    return handler(config, await http.create_session(session), loop, **kwargs)

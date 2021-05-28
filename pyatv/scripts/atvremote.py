@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import binascii
 import inspect
+from ipaddress import IPv4Address
 import logging
 import sys
 import traceback
@@ -143,15 +144,18 @@ class GlobalCommands:
             logging.error("No protocol specified")
             return 1
 
-        apple_tv = await _scan_for_device(self.args, self.args.scan_timeout, self.loop)
-        if not apple_tv:
+        if self.args.manual:
+            conf = _manual_device(self.args)
+        else:
+            conf = await _scan_for_device(self.args, self.args.scan_timeout, self.loop)
+        if not conf:
             return 2
 
         options = {}
 
         # Inject user provided credentials
         for proto in Protocol:
-            apple_tv.set_credentials(
+            conf.set_credentials(
                 proto, getattr(self.args, f"{proto.name.lower()}_credentials")
             )
 
@@ -164,7 +168,7 @@ class GlobalCommands:
                 }
             )
 
-        pairing = await pair(apple_tv, self.args.protocol, self.loop, **options)
+        pairing = await pair(conf, self.args.protocol, self.loop, **options)
 
         try:
             await self._perform_pairing(pairing)
@@ -519,18 +523,18 @@ async def _autodiscover_device(args, loop):
 
 
 def _manual_device(args):
-    config = AppleTV(args.address, args.name)
+    config = AppleTV(IPv4Address(args.address), args.name)
     if args.dmap_credentials or args.protocol == const.Protocol.DMAP:
         config.add_service(DmapService(args.id, args.dmap_credentials, port=args.port))
     if args.mrp_credentials or args.protocol == const.Protocol.MRP:
         config.add_service(
             MrpService(args.id, args.port, credentials=args.mrp_credentials)
         )
-    if args.airplay_credentials:
+    if args.airplay_credentials or args.protocol == const.Protocol.AirPlay:
         config.add_service(
             AirPlayService(args.id, credentials=args.airplay_credentials)
         )
-    if args.companion_credentials:
+    if args.companion_credentials or args.protocol == const.Protocol.Companion:
         config.add_service(
             CompanionService(args.port, credentials=args.companion_credentials)
         )

@@ -43,7 +43,7 @@ async def udns_server(event_loop):
 
 @pytest.fixture(autouse=True)
 def stub_local_addresses():
-    with patch("pyatv.net.get_private_addresses") as mock:
+    with patch("pyatv.support.net.get_private_addresses") as mock:
         mock.return_value = [IPv4Address("127.0.0.1")]
         yield
 
@@ -63,7 +63,7 @@ def stub_ip_address():
 @pytest.fixture(autouse=True)
 def redirect_mcast(udns_server):
     real_mcast_socket = net.mcast_socket
-    with patch("pyatv.net.mcast_socket") as mock:
+    with patch("pyatv.support.net.mcast_socket") as mock:
         mock.side_effect = lambda addr, port=0: real_mcast_socket(
             addr, port if port == udns_server.port else 0
         )

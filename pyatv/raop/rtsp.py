@@ -2,14 +2,12 @@
 import asyncio
 import logging
 from random import randrange
-import re
-from socket import socket
-from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
+from typing import Dict, Mapping, Optional, Tuple, Union
 
-from pyatv import exceptions
 from pyatv.dmap import tags
 from pyatv.raop import timing
 from pyatv.raop.metadata import AudioMetadata
+from pyatv.support.http import HttpConnection, HttpResponse
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,152 +85,58 @@ class RtspContext:
         return self.head_ts - (self.start_ts - self.latency)
 
 
-class RtspResponse(NamedTuple):
-    """RTSP response message."""
-
-    code: int
-    message: str
-    headers: Mapping[str, str]
-    body: Union[str, bytes]
-
-
-def parse_response(response: bytes) -> Tuple[Optional[RtspResponse], bytes]:
-    """Parse RTSP response."""
-    try:
-        header_str, body = response.split(b"\r\n\r\n", maxsplit=1)
-    except ValueError as ex:
-        raise ValueError("missing end lines") from ex
-    headers = header_str.decode("utf-8").split("\r\n")
-
-    match = re.match(r"RTSP/1.0 (\d+) (.+)", headers[0])
-    if not match:
-        raise ValueError(f"bad first line: {headers[0]}")
-
-    code, message = match.groups()
-    resp_headers = {}
-
-    for line in headers[1:]:
-        if line:
-            key, value = line.split(": ")
-            resp_headers[key] = value
-
-    content_length = int(resp_headers.get("Content-Length", 0))
-    if len(body or []) < content_length:
-        return None, response
-
-    response_body: Union[str, bytes] = body[0:content_length]
-
-    # Assume body is text unless content type is application/octet-stream
-    if resp_headers.get("Content-Type") != "application/octet-stream":
-        # We know it's bytes here
-        response_body = cast(bytes, response_body).decode("utf-8")
-
-    return (
-        RtspResponse(int(code), message, resp_headers, response_body),
-        body[content_length:],
-    )
-
-
-class RtspSession(asyncio.Protocol):
+class RtspSession:
     """Representation of an RTSP session."""
 
-    def __init__(self, context: RtspContext) -> None:
+    def __init__(self, connection: HttpConnection, context: RtspContext) -> None:
         """Initialize a new RtspSession."""
+        super().__init__()
+        self.connection = connection
         self.context = context
-        self.transport = None
-        self.requests: Dict[int, Tuple[asyncio.Semaphore, RtspResponse]] = {}
+        self.requests: Dict[int, Tuple[asyncio.Event, Optional[HttpResponse]]] = {}
         self.cseq = 0
-        self.buffer = b""
-
-    @property
-    def local_ip(self) -> str:
-        """Return IP address of local interface."""
-        return self._get_socket().getsockname()[0]
-
-    @property
-    def remote_ip(self) -> str:
-        """Return IP address of remote instance."""
-        return self._get_socket().getpeername()[0]
-
-    def _get_socket(self) -> socket:
-        if self.transport is None:
-            raise RuntimeError("not connected to remote")
-        return self.transport.get_extra_info("socket")
 
     @property
     def uri(self) -> str:
         """Return URI used for session requests."""
-        return f"rtsp://{self.local_ip}/{self.context.session_id}"
-
-    def close(self) -> None:
-        """Close RTSP session."""
-        if self.transport:
-            transport = self.transport
-            self.transport = None
-            transport.close()
-
-    def connection_made(self, transport) -> None:
-        """Handle that connection succeeded."""
-        self.transport = transport
-        _LOGGER.debug("RTSP connected to %s", self.remote_ip)
-
-    def data_received(self, data: bytes) -> None:
-        """Handle incoming RTSP data."""
-        _LOGGER.debug("Received: %s", data)
-        self.buffer += data
-        while self.buffer:
-            parsed, self.buffer = parse_response(self.buffer)
-            if parsed is None:
-                _LOGGER.debug("Not enough data to decode message")
-                break
-
-            if "CSeq" in parsed.headers:
-                cseq = int(parsed.headers["CSeq"])
-                if cseq in self.requests:
-                    semaphore, _ = self.requests[cseq]
-                    self.requests[cseq] = (semaphore, parsed)
-                    semaphore.release()
+        return f"rtsp://{self.connection.local_ip}/{self.context.session_id}"
 
     @staticmethod
     def error_received(exc) -> None:
         """Handle a connection error."""
         _LOGGER.error("Error received: %s", exc)
 
-    def connection_lost(self, exc) -> None:
-        """Handle that connection was lost."""
-        _LOGGER.debug("RTSP Connection closed")
-
-    async def auth_setup(self) -> RtspResponse:
+    async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
         # Payload to say that we want to proceed unencrypted
         body = AUTH_SETUP_UNENCRYPTED + CURVE25519_PUB_KEY
 
-        return await self.send_and_receive(
+        return await self.exchange(
             "POST",
-            uri="/auth-setup",
+            "/auth-setup",
             content_type="application/octet-stream",
             body=body,
         )
 
-    async def announce(self) -> RtspResponse:
+    async def announce(self) -> HttpResponse:
         """Send ANNOUNCE message."""
         body = ANNOUNCE_PAYLOAD.format(
             session_id=self.context.session_id,
-            local_ip=self.local_ip,
-            remote_ip=self.remote_ip,
+            local_ip=self.connection.local_ip,
+            remote_ip=self.connection.remote_ip,
             bits_per_channel=8 * self.context.bytes_per_channel,
             channels=self.context.channels,
             sample_rate=self.context.sample_rate,
         )
-        return await self.send_and_receive(
+        return await self.exchange(
             "ANNOUNCE",
             content_type="application/sdp",
             body=body,
         )
 
-    async def setup(self, control_port: int, timing_port: int) -> RtspResponse:
+    async def setup(self, control_port: int, timing_port: int) -> HttpResponse:
         """Send SETUP message."""
-        return await self.send_and_receive(
+        return await self.exchange(
             "SETUP",
             headers={
                 "Transport": "RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;"
@@ -240,9 +144,9 @@ class RtspSession(asyncio.Protocol):
             },
         )
 
-    async def record(self, rtpseq: int, rtptime: int) -> RtspResponse:
+    async def record(self, rtpseq: int, rtptime: int) -> HttpResponse:
         """Send RECORD message."""
-        return await self.send_and_receive(
+        return await self.exchange(
             "RECORD",
             headers={
                 "Range": "npt=0-",
@@ -251,9 +155,9 @@ class RtspSession(asyncio.Protocol):
             },
         )
 
-    async def set_parameter(self, parameter: str, value: str) -> RtspResponse:
+    async def set_parameter(self, parameter: str, value: str) -> HttpResponse:
         """Send SET_PARAMETER message."""
-        return await self.send_and_receive(
+        return await self.exchange(
             "SET_PARAMETER",
             content_type="text/parameters",
             body=f"{parameter}: {value}",
@@ -264,7 +168,7 @@ class RtspSession(asyncio.Protocol):
         rtpseq: int,
         rtptime: int,
         metadata: AudioMetadata,
-    ) -> RtspResponse:
+    ) -> HttpResponse:
         """Change metadata for what is playing."""
         payload = b""
         if metadata.title:
@@ -274,7 +178,7 @@ class RtspSession(asyncio.Protocol):
         if metadata.artist:
             payload += tags.string_tag("asar", metadata.artist)
 
-        return await self.send_and_receive(
+        return await self.exchange(
             "SET_PARAMETER",
             content_type="application/x-dmap-tagged",
             headers={
@@ -284,60 +188,66 @@ class RtspSession(asyncio.Protocol):
             body=tags.container_tag("mlit", payload),
         )
 
-    async def send_and_receive(
+    async def feedback(self) -> HttpResponse:
+        """Send SET_PARAMETER message."""
+        return await self.exchange("POST", uri="/feedback")
+
+    async def exchange(
         self,
         method: str,
         uri: Optional[str] = None,
         content_type: Optional[str] = None,
         headers: Mapping[str, object] = None,
         body: Union[str, bytes] = None,
-    ) -> RtspResponse:
+    ) -> HttpResponse:
         """Send a RTSP message and return response."""
         cseq = self.cseq
         self.cseq += 1
 
-        if isinstance(body, str):
-            body = body.encode("utf-8")
+        hdrs = {
+            "CSeq": cseq,
+            "DACP-ID": self.context.dacp_id,
+            "Active-Remote": self.context.active_remote,
+            "Client-Instance": self.context.dacp_id,
+        }
+        if headers:
+            hdrs.update(headers)
 
-        msg = f"{method} {uri or self.uri} RTSP/1.0"
-        msg += f"\r\nCSeq: {cseq}"
-        msg += f"\r\nUser-Agent: {USER_AGENT}"
-        msg += f"\r\nDACP-ID: {self.context.dacp_id}"
-        msg += f"\r\nActive-Remote: {self.context.active_remote}"
-        msg += f"\r\nClient-Instance: {self.context.dacp_id}"
-        if content_type:
-            msg += f"\r\nContent-Type: {content_type}"
+        # Map an asyncio Event to current CSeq and make the request
+        self.requests[cseq] = (asyncio.Event(), None)
+        resp = await self.connection.send_and_receive(
+            method,
+            uri or self.uri,
+            protocol="RTSP/1.0",
+            user_agent=USER_AGENT,
+            content_type=content_type,
+            headers=hdrs,
+            body=body,
+        )
 
-        if body:
-            msg += f"\r\nContent-Length: {len(body) if body else 0}"
-        for key, value in (headers or {}).items():
-            msg += f"\r\n{key}: {value}"
-        msg += 2 * "\r\n"
+        # The response most likely contains a CSeq and it is also very likely to be
+        # the one we expect, but it could be for someone else. So set the correct event
+        # and save response.
+        resp_cseq = int(resp.headers.get("CSeq", "-1"))
+        if resp_cseq in self.requests:
+            # Insert response for correct CSeq and activate event
+            event, _ = self.requests[resp_cseq]
+            self.requests[resp_cseq] = (event, resp)
+            event.set()
 
-        output = msg.encode("utf-8")
-        if body:
-            output += body
-
-        _LOGGER.debug("Sending RTSP message: %s", output)
-        if self.transport:
-            self.transport.write(output)
-        else:
-            raise RuntimeError("not connected to remote")
-
-        self.requests[cseq] = (asyncio.Semaphore(value=0), None)
+        # Wait for response to the CSeq we expect
         try:
-            await asyncio.wait_for(self.requests[cseq][0].acquire(), 4)
+            await asyncio.wait_for(self.requests[cseq][0].wait(), 4)
             response = self.requests[cseq][1]
+        except asyncio.TimeoutError as ex:
+            raise TimeoutError(
+                f"no response to CSeq {cseq} ({uri or self.uri})"
+            ) from ex
         finally:
             del self.requests[cseq]
 
-        _LOGGER.debug("Got RTSP response to %d: %s:", cseq, response)
+        # Programming error: forgot to store response before activating event
+        if response is None:
+            raise RuntimeError(f"no response was saved for {cseq}")
 
-        # Positive response
-        if 200 <= response.code < 300:
-            return response
-
-        if response.code in [401, 403]:
-            raise exceptions.AuthenticationError("not authenticated")
-
-        raise exceptions.ProtocolError(f"RTSP method {method} failed")
+        return response

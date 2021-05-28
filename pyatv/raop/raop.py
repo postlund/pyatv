@@ -10,6 +10,8 @@ import weakref
 from bitarray import bitarray
 
 from pyatv import exceptions
+from pyatv.airplay.auth import AirPlayPairingVerifier
+from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.raop import timing
 from pyatv.raop.fifo import PacketFifo
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
@@ -268,11 +270,17 @@ class RaopListener(ABC):
 class RaopClient:
     """Simple RAOP client to stream audio."""
 
-    def __init__(self, rtsp: RtspSession, context: RtspContext):
+    def __init__(
+        self,
+        rtsp: RtspSession,
+        context: RtspContext,
+        credentials: Optional[LegacyCredentials],
+    ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
+        self.credentials: Optional[LegacyCredentials] = credentials
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -321,11 +329,7 @@ class RaopClient:
             await asyncio.sleep(KEEP_ALIVE_INTERVAL)
 
             _LOGGER.debug("Sending keep-alive metadata")
-            await self.rtsp.set_metadata(
-                self.context.rtpseq,
-                self.context.rtptime,
-                self.metadata,
-            )
+            await self.rtsp.feedback()
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
@@ -349,10 +353,10 @@ class RaopClient:
 
         (_, control_client) = await self.loop.create_datagram_endpoint(
             lambda: ControlClient(self.context, self._packet_backlog),
-            local_addr=(self.rtsp.local_ip, 0),
+            local_addr=(self.rtsp.connection.local_ip, 0),
         )
         (_, timing_client) = await self.loop.create_datagram_endpoint(
-            TimingClient, local_addr=(self.rtsp.local_ip, 0)
+            TimingClient, local_addr=(self.rtsp.connection.local_ip, 0)
         )
 
         self.control_client = cast(ControlClient, control_client)
@@ -382,6 +386,12 @@ class RaopClient:
         # Do auth-setup if MFiSAP encryption is supported by receiver
         if EncryptionType.MFiSAP in self._encryption_types:
             await self.rtsp.auth_setup()
+        elif self.credentials:
+            _LOGGER.debug("Verifying connection with credentials %s", self.credentials)
+            srp = SRPAuthHandler(self.credentials)
+            srp.initialize()
+            verifier = AirPlayPairingVerifier(self.rtsp.connection, srp)
+            await verifier.verify_authed()
 
         await self.rtsp.announce()
 
@@ -412,11 +422,11 @@ class RaopClient:
             # Create a socket used for writing audio packets (ugly)
             transport, _ = await self.loop.create_datagram_endpoint(
                 AudioProtocol,
-                remote_addr=(self.rtsp.remote_ip, self.context.server_port),
+                remote_addr=(self.rtsp.connection.remote_ip, self.context.server_port),
             )
 
             # Start sending sync packets
-            self.control_client.start(self.rtsp.remote_ip)
+            self.control_client.start(self.rtsp.connection.remote_ip)
 
             # Send progress if supported by receiver
             if MetadataType.Progress in self._metadata_types:
@@ -440,9 +450,7 @@ class RaopClient:
             await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
-            # but only if "text" metadata is supported
-            if MetadataType.Text in self._metadata_types:
-                self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+            self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
 
             listener = self.listener
             if listener:

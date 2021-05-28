@@ -4,10 +4,13 @@ import binascii
 from collections import namedtuple
 import logging
 import plistlib
+from typing import Optional
 
 from aiohttp import web
 
 from pyatv.support.net import unused_port
+
+from tests.utils import simple_get
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +51,7 @@ class FakeAirPlayState:
         self.last_airplay_url = None
         self.last_airplay_start = None
         self.last_airplay_uuid = None
+        self.last_airplay_content: Optional[bytes] = None
         self.play_count = 0
         self.injected_play_fails = 0
 
@@ -79,7 +83,6 @@ class FakeAirPlayService:
 
     async def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
-
         self.state.play_count += 1
 
         if self.state.always_auth_fail or not self.state.has_authenticated:
@@ -101,6 +104,13 @@ class FakeAirPlayService:
         self.state.last_airplay_start = parsed["Start-Position"]
         self.state.last_airplay_uuid = parsed["X-Apple-Session-ID"]
 
+        # Simulate that fake device streams if URL is localhost
+        if self.state.last_airplay_url.startswith("http://127.0.0.1"):
+            _LOGGER.debug("Retrieving file from %s", self.state.last_airplay_url)
+            self.state.last_airplay_content, _ = await simple_get(
+                self.state.last_airplay_url
+            )
+
         return web.Response(status=200)
 
     async def handle_airplay_playback_info(self, request):
@@ -109,8 +119,14 @@ class FakeAirPlayService:
             response = self.state.airplay_responses.pop()
         else:
             plist = dict(readyToPlay=False, uuid=123)
-            response = AirPlayPlaybackResponse(200, plistlib.dumps(plist))
-        return web.Response(body=response.content, status=response.code)
+            response = AirPlayPlaybackResponse(
+                200, plistlib.dumps(plist).encode("utf-8")
+            )
+        return web.Response(
+            body=response.content,
+            status=response.code,
+            content_type="text/x-apple-plist+xml",
+        )
 
     # TODO: Extract device auth code to separate module and make it more
     # general. This is a dumb implementation that verifies hard coded values,
@@ -138,7 +154,7 @@ class FakeAirPlayService:
                 body=binascii.unhexlify(_DEVICE_AUTH_STEP3_RESP), status=200
             )
 
-        return web.Response(status=503)
+        return web.Response(status=403)
 
     async def handle_airplay_pair_verify(self, request):
         """Handle verification of AirPlay device authentication."""
@@ -153,7 +169,7 @@ class FakeAirPlayService:
             self.state.has_authenticated = True
             return web.Response(body=_DEVICE_VERIFY_STEP2_RESP, status=200)
 
-        return web.Response(body=b"", status=503)
+        return web.Response(body=b"", status=403)
 
 
 class FakeAirPlayUseCases:

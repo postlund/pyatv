@@ -6,6 +6,7 @@ from datetime import datetime
 from importlib import import_module
 import inspect
 import time
+from typing import Tuple
 
 from aiohttp import ClientSession
 
@@ -51,7 +52,7 @@ def total_sleep_time() -> float:
     return 0.0
 
 
-async def simple_get(url):
+async def simple_get(url: str) -> Tuple[bytes, int]:
     """Perform a GET-request to a specified URL."""
     async with ClientSession() as session:
         async with session.get(url) as response:

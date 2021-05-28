@@ -7,7 +7,7 @@ import pytest
 
 from pyatv import conf
 from pyatv.dmap import pairing, parser, tag_definitions
-from pyatv.support import net
+from pyatv.support import http
 
 from tests import utils, zeroconf_stub
 
@@ -64,7 +64,7 @@ async def mock_pairing(event_loop):
             options["name"] = name
 
         obj.pairing = pairing.DmapPairingHandler(
-            config, await net.create_session(), event_loop, **options
+            config, await http.create_session(), event_loop, **options
         )
         await obj.pairing.begin()
         obj.pairing.pin(pin_code)

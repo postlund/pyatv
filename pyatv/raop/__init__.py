@@ -5,6 +5,7 @@ import logging
 from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from pyatv import conf, const, exceptions
+from pyatv.airplay.srp import LegacyCredentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import (
     FeatureInfo,
@@ -19,7 +20,7 @@ from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.miniaudio import MiniaudioWrapper
 from pyatv.raop.raop import RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager, http_connect
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -145,12 +146,19 @@ class RaopStream(Stream):
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
+        connection = await http_connect(self.address, self.service.port)
         context = RtspContext()
-        _, session = await self.loop.create_connection(
-            lambda: RtspSession(context), self.address, self.service.port
-        )
+        session = RtspSession(connection, context)
 
-        client = RaopClient(cast(RtspSession, session), context)
+        # For now, we hi-jack credentials from AirPlay (even though they are passed via
+        # the RAOP service) and use the same verification procedure as AirPlay, since
+        # it's the same in practice.
+        credentials = (
+            LegacyCredentials.parse(self.service.credentials)
+            if self.service.credentials
+            else None
+        )
+        client = RaopClient(cast(RtspSession, session), context, credentials)
         try:
             client.listener = self.listener
             await client.initialize(self.service.properties)
@@ -173,7 +181,7 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
-            client.close()
+            connection.close()
 
 
 def setup(

@@ -3,7 +3,7 @@
 import binascii
 import hashlib
 import logging
-import os
+from os import urandom
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from srptools import SRPClientSession, SRPContext, constants
 
-from pyatv.exceptions import AuthenticationError, NoCredentialsError
+from pyatv.exceptions import AuthenticationError, InvalidCredentialsError
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,16 +48,39 @@ def aes_encrypt(mode, aes_key, aes_iv, *data):
     return result, None if not hasattr(encryptor, "tag") else encryptor.tag
 
 
-def new_credentials():
-    """Generate a new identifier and seed for authentication.
+# pylint: disable=too-few-public-methods
+class LegacyCredentials:
+    """Identifiers and encryption keys used by legacy authentication."""
 
-    Use the returned values in the following way:
-    * The identifier shall be passed as username to SRPAuthHandler.step1
-    * Seed shall be passed to SRPAuthHandler constructor
-    """
-    identifier = binascii.b2a_hex(os.urandom(8)).decode().upper()
-    seed = binascii.b2a_hex(os.urandom(32))  # Corresponds to private key
-    return identifier, seed
+    def __init__(self, identifier: bytes, seed: bytes) -> None:
+        """Initialize a new LegacyCredentials."""
+        self.identifier: bytes = identifier
+        self.seed: bytes = seed
+
+    @classmethod
+    def parse(cls, detail_string) -> "LegacyCredentials":
+        """Parse a string represention of LegacyCredentials."""
+        split = detail_string.split(":")
+        if len(split) != 2:
+            raise InvalidCredentialsError("invalid credentials: " + detail_string)
+
+        identifier = binascii.unhexlify(split[0])
+        seed = binascii.unhexlify(split[1])
+        return LegacyCredentials(identifier, seed)
+
+    def __str__(self):
+        """Return a string representation of credentials."""
+        return ":".join(
+            [
+                binascii.hexlify(self.identifier).decode("utf-8"),
+                binascii.hexlify(self.seed).decode("utf-8"),
+            ]
+        ).upper()
+
+
+def new_credentials() -> LegacyCredentials:
+    """Generate a new identifier and seed for authentication."""
+    return LegacyCredentials(urandom(8), urandom(32))
 
 
 class AtvSRPContext(SRPContext):
@@ -76,9 +99,9 @@ class AtvSRPContext(SRPContext):
 class SRPAuthHandler:
     """Handle SRP data and crypto routines for auth and verification."""
 
-    def __init__(self):
+    def __init__(self, credentials: LegacyCredentials):
         """Initialize a new SRPAuthHandler."""
-        self.seed = None
+        self.credentials: LegacyCredentials = credentials
         self.session = None
         self._public_bytes = None
         self._auth_private = None
@@ -86,14 +109,9 @@ class SRPAuthHandler:
         self._verify_private = None
         self._verify_public = None
 
-    def initialize(self, seed=None):
-        """Initialize handler operation.
-
-        This method will generate new encryption keys and must be called prior
-        to doing authentication or verification.
-        """
-        self.seed = seed or os.urandom(32)  # Generate new seed if not provided
-        signing_key = Ed25519PrivateKey.from_private_bytes(self.seed)
+    def initialize(self):
+        """Initialize handler operation."""
+        signing_key = Ed25519PrivateKey.from_private_bytes(self.credentials.seed)
         verifying_key = signing_key.public_key()
         self._auth_private = signing_key.private_bytes(
             encoding=serialization.Encoding.Raw,
@@ -112,8 +130,9 @@ class SRPAuthHandler:
 
     def verify1(self):
         """First device verification step."""
-        self._check_initialized()
-        self._verify_private = X25519PrivateKey.from_private_bytes(self.seed)
+        self._verify_private = X25519PrivateKey.from_private_bytes(
+            self.credentials.seed
+        )
         self._verify_public = self._verify_private.public_key()
         verify_private_bytes = self._verify_private.private_bytes(
             encoding=serialization.Encoding.Raw,
@@ -134,7 +153,6 @@ class SRPAuthHandler:
 
     def verify2(self, atv_public_key, data):
         """Last device verification step."""
-        self._check_initialized()
         log_binary(_LOGGER, "Verify", PublicSecret=atv_public_key, Data=data)
 
         # Generate a shared secret key
@@ -159,7 +177,6 @@ class SRPAuthHandler:
 
     def step1(self, username, password):
         """First authentication step."""
-        self._check_initialized()
         context = AtvSRPContext(
             str(username),
             str(password),
@@ -172,7 +189,6 @@ class SRPAuthHandler:
 
     def step2(self, pub_key, salt):
         """Second authentication step."""
-        self._check_initialized()
         pk_str = binascii.hexlify(pub_key).decode()
         salt = binascii.hexlify(salt).decode()
         client_session_key, _, _ = self.session.process(pk_str, salt)
@@ -191,7 +207,6 @@ class SRPAuthHandler:
 
     def step3(self):
         """Last authentication step."""
-        self._check_initialized()
         session_key = binascii.unhexlify(self.session.key)
 
         aes_key = hash_sha512("Pair-Setup-AES-Key", session_key)[0:16]
@@ -205,7 +220,3 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Pair-Setup EPK+Tag", EPK=epk, Tag=tag)
 
         return epk, tag
-
-    def _check_initialized(self):
-        if not self.seed:
-            raise NoCredentialsError("no credentials available")
