@@ -13,6 +13,7 @@ from aiohttp.web import middleware
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
+from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ def parse_message(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
         raise ValueError(f"bad first line: {headers[0]}")
 
     protocol, version, code, message = match.groups()
-    resp_headers = dict(_key_value(line) for line in headers[1:] if line)
+    resp_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
 
     content_length = int(resp_headers.get("Content-Length", 0))
     if len(body or []) < content_length:
