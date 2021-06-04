@@ -1,4 +1,5 @@
 """Convenience methods for extracting metadata from an audio file."""
+import asyncio
 from typing import NamedTuple, Optional
 
 from audio_metadata import load
@@ -15,9 +16,10 @@ class AudioMetadata(NamedTuple):
 EMPTY_METADATA = AudioMetadata(None, None, None)
 
 
-def get_metadata(filename: str) -> AudioMetadata:
+async def get_metadata(filename: str) -> AudioMetadata:
     """Extract metadata from a file and return it."""
-    in_file = load(filename)
+    loop = asyncio.get_event_loop()
+    in_file = await loop.run_in_executor(None, load, filename)
 
     # If no metadata, return something that can be easily compared with
     if not in_file.tags:
