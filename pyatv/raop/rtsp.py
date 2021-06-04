@@ -188,9 +188,9 @@ class RtspSession:
             body=tags.container_tag("mlit", payload),
         )
 
-    async def feedback(self) -> HttpResponse:
+    async def feedback(self, allow_error=False) -> HttpResponse:
         """Send SET_PARAMETER message."""
-        return await self.exchange("POST", uri="/feedback")
+        return await self.exchange("POST", uri="/feedback", allow_error=allow_error)
 
     async def exchange(
         self,
@@ -199,6 +199,7 @@ class RtspSession:
         content_type: Optional[str] = None,
         headers: Mapping[str, object] = None,
         body: Union[str, bytes] = None,
+        allow_error: bool = False,
     ) -> HttpResponse:
         """Send a RTSP message and return response."""
         cseq = self.cseq
@@ -223,6 +224,7 @@ class RtspSession:
             content_type=content_type,
             headers=hdrs,
             body=body,
+            allow_error=allow_error,
         )
 
         # The response most likely contains a CSeq and it is also very likely to be

@@ -327,8 +327,11 @@ class RaopClient:
         while True:
             await asyncio.sleep(KEEP_ALIVE_INTERVAL)
 
-            _LOGGER.debug("Sending keep-alive metadata")
-            await self.rtsp.feedback()
+            try:
+                _LOGGER.debug("Sending keep-alive feedback")
+                await self.rtsp.feedback()
+            except exceptions.ProtocolError:
+                _LOGGER.exception("feedbackfailed")
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
@@ -409,7 +412,9 @@ class RaopClient:
             self.context.server_port,
         )
 
-    async def send_audio(self, wave_file, metadata: AudioMetadata = EMPTY_METADATA):
+    async def send_audio(  # pylint: disable=too-many-branches
+        self, wave_file, metadata: AudioMetadata = EMPTY_METADATA
+    ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
             raise Exception("not initialized")  # TODO: better exception
@@ -450,7 +455,11 @@ class RaopClient:
             await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
-            self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+            feedback = await self.rtsp.feedback(allow_error=True)
+            if feedback.code == 200:
+                self._keep_alive_task = asyncio.ensure_future(self._send_keep_alive())
+            else:
+                _LOGGER.debug("Keep-alive not supported, not starting task")
 
             listener = self.listener
             if listener:

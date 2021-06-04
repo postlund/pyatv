@@ -39,6 +39,8 @@ class FakeRaopState:
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
         self.auth_setup_performed: bool = False
         self.supports_retransmissions: bool = True
+        self.supports_feedback: bool = True
+        self.feedback_packets_received: int = 0
         self.sync_packets_received: int = 0
         self.drop_packets: int = 0
         self.control_port: int = 0
@@ -310,6 +312,16 @@ class FakeRaopService(HttpSimpleRouter):
     def handle_feedback(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming feedback request."""
         _LOGGER.debug("Received feedback: %s", request)
+        self.state.feedback_packets_received += 1
+        if not self.state.supports_feedback:
+            return HttpResponse(
+                "RTSP",
+                "1.0",
+                501,
+                "Not implemented",
+                {"CSeq": request.headers["CSeq"]},
+                b"",
+            )
         return HttpResponse(
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
@@ -348,3 +360,7 @@ class FakeRaopUseCases:
     def drop_n_packets(self, packets: int) -> None:
         """Make fake device drop packets and trigger retransmission (if supported)."""
         self.state.drop_packets = packets
+
+    def feedback_enabled(self, enabled: bool) -> None:
+        """Enable or disable support for /feedback endpoint."""
+        self.state.supports_feedback = enabled
