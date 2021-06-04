@@ -165,7 +165,7 @@ class RaopStream(Stream):
 
             # After initialize has been called, all the audio properties will be
             # initialized and can be used in the miniaudio wrapper
-            audio_file = MiniaudioWrapper(
+            audio_file = await MiniaudioWrapper.open(
                 filename,
                 context.sample_rate,
                 context.channels,
