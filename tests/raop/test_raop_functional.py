@@ -209,3 +209,19 @@ async def test_sync_packets(raop_client, raop_state):
     # TODO: This test doesn't really test anything, just makes sure that sync packets
     # are received. Expand this test in the future.
     await until(lambda: raop_state.sync_packets_received > 5)
+
+
+@pytest.mark.parametrize(
+    "raop_properties,feedback_supported", [({"et": "0"}, True), ({"et": "0"}, False)]
+)
+async def test_send_feedback(raop_client, raop_usecase, raop_state, feedback_supported):
+    raop_usecase.feedback_enabled(feedback_supported)
+
+    await raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
+
+    # One request is sent to see if feedback is supported, then additional requests are
+    # only sent if actually supported
+    if feedback_supported:
+        assert raop_state.feedback_packets_received > 1
+    else:
+        assert raop_state.feedback_packets_received == 1
