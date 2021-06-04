@@ -175,7 +175,7 @@ class RaopStream(Stream):
             # Try to load metadata and pass it along if it succeeds
             metadata: AudioMetadata = EMPTY_METADATA
             try:
-                metadata = get_metadata(filename)
+                metadata = await get_metadata(filename)
             except Exception as ex:
                 _LOGGER.warning("Failed to extract metadata from %s: %s", filename, ex)
 
