@@ -88,9 +88,10 @@ async def connect(
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
         if setup_data:
-            _LOGGER.debug("Not adding protocol %s", service.protocol)
+            _LOGGER.debug("Adding protocol %s", service.protocol)
             atv.add_protocol(service.protocol, setup_data)
-
+        else:
+            _LOGGER.debug("Not adding protocol: %s", service.protocol)
     try:
         await atv.connect()
     except Exception:
