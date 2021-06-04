@@ -5,6 +5,8 @@ from asyncio import sleep as real_sleep
 from datetime import datetime
 from importlib import import_module
 import inspect
+import os
+from pathlib import Path
 import time
 from typing import Tuple
 
@@ -127,3 +129,11 @@ def faketime(module_name, *times):
             return getattr(datetime, attr)
 
     return FakeDatetime(list(times))
+
+
+def test_file(filename: str) -> str:
+    """Return absolute path to a test file in the data directory."""
+    abs_path = str(Path(__file__).parent.joinpath("data", filename))
+    if not os.path.exists(abs_path):
+        raise FileNotFoundError(f"test file does not exist: {filename}")
+    return abs_path

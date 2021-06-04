@@ -129,9 +129,10 @@ async def connect(
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
         if setup_data:
-            _LOGGER.debug(&#34;Not adding protocol %s&#34;, service.protocol)
+            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
             atv.add_protocol(service.protocol, setup_data)
-
+        else:
+            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
     try:
         await atv.connect()
     except Exception:
@@ -232,9 +233,10 @@ async def pair(
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
         if setup_data:
-            _LOGGER.debug(&#34;Not adding protocol %s&#34;, service.protocol)
+            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
             atv.add_protocol(service.protocol, setup_data)
-
+        else:
+            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
     try:
         await atv.connect()
     except Exception:

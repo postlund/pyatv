@@ -6,7 +6,6 @@ import logging
 import pathlib
 from queue import Queue
 import re
-from socket import socket
 from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
 
 from aiohttp import ClientSession, web
@@ -151,7 +150,7 @@ def parse_request(request: bytes) -> Tuple[Optional[HttpRequest], bytes]:
 
     # <method> <path> <protocol>/<version>
     # E.g. GET / HTTP/1.1
-    match = re.match(r"([A-Z]+) ([^ ]+) ([^/]+)/([0-9.]+)", first_line)
+    match = re.match(r"([A-Z_]+) ([^ ]+) ([^/]+)/([0-9.]+)", first_line)
     if not match:
         raise ValueError(f"bad first line: {first_line}")
 
@@ -262,7 +261,9 @@ class HttpConnection(asyncio.Protocol):
 
     def __init__(self) -> None:
         """Initialize a new ."""
-        self.transport = None
+        self.transport: Optional[asyncio.Transport] = None
+        self._local_ip: Optional[str] = None
+        self._remote_ip: Optional[str] = None
         self._requests: deque = deque()
         self._responses: Queue = Queue()
         self._buffer = b""
@@ -270,17 +271,16 @@ class HttpConnection(asyncio.Protocol):
     @property
     def local_ip(self) -> str:
         """Return IP address of local interface."""
-        return self._get_socket().getsockname()[0]
+        if self._local_ip is None:
+            raise RuntimeError("not connected")
+        return self._local_ip
 
     @property
     def remote_ip(self) -> str:
         """Return IP address of remote instance."""
-        return self._get_socket().getpeername()[0]
-
-    def _get_socket(self) -> socket:
-        if self.transport is None:
-            raise RuntimeError("not connected to remote")
-        return self.transport.get_extra_info("socket")
+        if self._remote_ip is None:
+            raise RuntimeError("not connected")
+        return self._remote_ip
 
     def close(self) -> None:
         """Close HTTP connection."""
@@ -289,9 +289,12 @@ class HttpConnection(asyncio.Protocol):
             self.transport = None
             transport.close()
 
-    def connection_made(self, transport) -> None:
+    def connection_made(self, transport: asyncio.BaseTransport) -> None:
         """Handle that a connection has been made."""
-        self.transport = transport
+        self.transport = cast(asyncio.Transport, transport)
+        sock = self.transport.get_extra_info("socket")
+        self._local_ip = sock.getsockname()[0]
+        self._remote_ip = sock.getpeername()[0]
         _LOGGER.debug("Connected to %s", self.remote_ip)
 
     def data_received(self, data: bytes) -> None:
@@ -527,7 +530,7 @@ async def http_server(
 ) -> Tuple[asyncio.AbstractServer, int]:
     """Set up a new basic HTTP server."""
     loop = asyncio.get_event_loop()
-    server = await loop.create_server(server_factory, address, port, start_serving=True)
+    server = await loop.create_server(server_factory, address, port)
     if server.sockets is None:
         raise RuntimeError("failed to set up http server")
     return server, server.sockets[0].getsockname()[1]

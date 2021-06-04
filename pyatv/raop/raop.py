@@ -351,12 +351,13 @@ class RaopClient:
 
         self._update_output_properties(properties)
 
+        local_addr = (self.rtsp.connection.local_ip, 0)
         (_, control_client) = await self.loop.create_datagram_endpoint(
             lambda: ControlClient(self.context, self._packet_backlog),
-            local_addr=(self.rtsp.connection.local_ip, 0),
+            local_addr=local_addr,
         )
         (_, timing_client) = await self.loop.create_datagram_endpoint(
-            TimingClient, local_addr=(self.rtsp.connection.local_ip, 0)
+            TimingClient, local_addr=local_addr
         )
 
         self.control_client = cast(ControlClient, control_client)

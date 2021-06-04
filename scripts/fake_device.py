@@ -133,7 +133,31 @@ async def publish_companion_zeroconf(loop, zconf, address, port):
     )
 
 
-async def appstart(loop):  # pylint: disable=too-many-branches
+async def publish_raop_zeroconf(loop, zconf, address, port):
+    """Publish RAOP Zeroconf service."""
+    props = {
+        "et": "0",
+        "ss": "16",
+        "am": "AppleTV6,2",
+        "md": "0,1,2",
+        "ch": "2",
+        "sr": "44100",
+        "cn": "1",
+    }
+    return await mdns.publish(
+        loop,
+        mdns.Service(
+            "_raop._tcp.local",
+            f"AA:BB:CC:DD:EE:FF@{DEVICE_NAME}",
+            IPv4Address(address),
+            port,
+            props,
+        ),
+        zconf,
+    )
+
+
+async def appstart(loop):  # pylint: disable=too-many-branches,too-many-statements
     """Script starts here."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-ip", default="127.0.0.1", help="local IP address")
@@ -160,9 +184,15 @@ async def appstart(loop):  # pylint: disable=too-many-branches
         action="store_true",
         help="enable Companion protocol",
     )
+    protocols.add_argument(
+        "--raop",
+        default=False,
+        action="store_true",
+        help="enable RAOP protocol",
+    )
     args = parser.parse_args()
 
-    if not (args.mrp or args.dmap or args.airplay or args.companion):
+    if not (args.mrp or args.dmap or args.airplay or args.companion or args.raop):
         parser.error("no protocol enabled (see --help)")
 
     level = logging.DEBUG if args.debug else logging.WARNING
@@ -195,6 +225,9 @@ async def appstart(loop):  # pylint: disable=too-many-branches
     if args.companion:
         fake_atv.add_service(Protocol.Companion)
 
+    if args.raop:
+        fake_atv.add_service(Protocol.RAOP)
+
     await fake_atv.start()
 
     if args.mrp:
@@ -222,6 +255,13 @@ async def appstart(loop):  # pylint: disable=too-many-branches
         unpublishers.append(
             await publish_companion_zeroconf(
                 loop, zconf, args.local_ip, fake_atv.get_port(Protocol.Companion)
+            )
+        )
+
+    if args.raop:
+        unpublishers.append(
+            await publish_raop_zeroconf(
+                loop, zconf, args.local_ip, fake_atv.get_port(Protocol.RAOP)
             )
         )
 

@@ -137,6 +137,11 @@ def test_parse_request_arbitrary_protocol_header():
     assert req.version == "3.14"
 
 
+def test_parse_request_method_with_underscore():
+    req, _ = parse_request(b"SOME_METHOD /test FOO/3.14\r\n\r\n")
+    assert req.method == "SOME_METHOD"
+
+
 # BASIC HTTP SERVER
 
 
