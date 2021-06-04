@@ -181,6 +181,8 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
+            if client:
+                client.close()
             connection.close()
 
 

@@ -131,7 +131,7 @@ def faketime(module_name, *times):
     return FakeDatetime(list(times))
 
 
-def test_file(filename: str) -> str:
+def data_path(filename: str) -> str:
     """Return absolute path to a test file in the data directory."""
     abs_path = str(Path(__file__).parent.joinpath("data", filename))
     if not os.path.exists(abs_path):

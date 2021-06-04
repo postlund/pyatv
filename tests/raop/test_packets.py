@@ -18,6 +18,12 @@ def test_decode_message():
     assert decoded.b == 0x123
 
 
+def test_decode_with_excessive_data():
+    decoded = Foo.decode(b"\x17\x02\x34\x11\x22\x33", allow_excessive=True)
+    assert decoded.a == b"\x17"
+    assert decoded.b == 0x234
+
+
 def test_extend_encode():
     assert Bar.encode(b"\x77", 0x67, 0xAABBCCDD) == b"\x77\x00\x67\xAA\xBB\xCC\xDD"
 
