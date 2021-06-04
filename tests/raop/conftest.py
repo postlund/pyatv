@@ -1,11 +1,14 @@
 """Shared test code for RAOP test cases."""
+from typing import cast
+
 import pytest
 
 from pyatv import connect
 from pyatv.conf import AppleTV, RaopService
 from pyatv.const import Protocol
 
-from tests.fake_device import FakeAppleTV
+from tests.fake_device import FakeAppleTV, raop
+from tests.fake_device.raop import FakeRaopUseCases
 
 
 @pytest.fixture(name="raop_device")
@@ -17,10 +20,20 @@ async def raop_device_fixture(event_loop):
     await fake_atv.stop()
 
 
+@pytest.fixture(name="raop_state")
+async def raop_state_fixture(raop_device):
+    yield raop_device.get_state(Protocol.RAOP)
+
+
+@pytest.fixture(name="raop_usecase")
+async def raop_usecase_fixture(raop_device) -> FakeRaopUseCases:
+    yield cast(FakeRaopUseCases, raop_device.get_usecase(Protocol.RAOP))
+
+
 @pytest.fixture(name="raop_conf")
-def raop_conf_fixture(raop_device):
+def raop_conf_fixture(raop_device, raop_properties):
     service = RaopService(
-        "raop_id", port=raop_device.get_port(Protocol.RAOP), properties={"et": "0"}
+        "raop_id", port=raop_device.get_port(Protocol.RAOP), properties=raop_properties
     )
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)

@@ -10,9 +10,13 @@ def defmsg(name: str, **kwargs):
 
     class _MessageType:
         @staticmethod
-        def decode(data: bytes):
+        def decode(data: bytes, allow_excessive=False):
             """Decode binary data as message."""
-            return msg_type._make(struct.unpack(fmt, data))
+            return msg_type._make(
+                struct.unpack(
+                    fmt, data if not allow_excessive else data[0 : struct.calcsize(fmt)]
+                )
+            )
 
         @staticmethod
         def encode(*args) -> bytes:

@@ -314,7 +314,6 @@ class RaopClient:
 
     def close(self):
         """Close session and free up resources."""
-        self.rtsp.close()
         if self.control_client:
             self.control_client.close()
         if self.timing_client:

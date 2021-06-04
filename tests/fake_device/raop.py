@@ -1,8 +1,15 @@
 """Fake RAOP device for tests."""
 import asyncio
 import logging
-from typing import Optional, cast
+from types import SimpleNamespace
+from typing import Dict, Optional, cast
 
+from bitarray import bitarray
+
+from pyatv.dmap import parser
+from pyatv.dmap.tag_definitions import lookup_tag
+from pyatv.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
+from pyatv.raop.raop import parse_transport
 from pyatv.support.http import (
     BasicHttpServer,
     HttpRequest,
@@ -14,12 +21,49 @@ from pyatv.support.http import (
 _LOGGER = logging.getLogger(__name__)
 
 
+def alac_decode(data: bytes) -> bytes:
+    """Decode an ALAC frame and return raw audio data."""
+    buffer = bitarray()
+    buffer.frombytes(data)
+
+    # Audio starts 23 bits in and last bit must be removed to keep byte alignment,
+    # otherwise an additional \x00 will be present at the end
+    return buffer[23:-1].tobytes()
+
+
+class FakeRaopState:
+    """Internal state for RAOP service."""
+
+    def __init__(self):
+        self.metadata = SimpleNamespace(title=None, artist=None, album=None)
+        self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
+        self.auth_setup_performed: bool = False
+        self.supports_retransmissions: bool = True
+        self.sync_packets_received: int = 0
+        self.drop_packets: int = 0
+        self.control_port: int = 0
+        self.remote_address: Optional[str] = None
+
+    @property
+    def raw_audio(self) -> bytes:
+        if not self.audio_packets:
+            return b""
+
+        # Sort received packets according to sequence number and join audio data
+        # together. If a sequence number is missing, the gap will not be filled with
+        # anything.
+        sorted_packets = sorted(self.audio_packets.items())
+        raw_audio = b"".join(audio for _, audio in sorted_packets)
+        return raw_audio
+
+
 class AudioReceiver(asyncio.Protocol):
     """Protocol used to receive audio packets."""
 
-    def __init__(self):
+    def __init__(self, state: FakeRaopState):
         """Initialize a new AudioReceiver instance."""
         self.transport = None
+        self.state: FakeRaopState = state
 
     def close(self):
         """Close audio receiver."""
@@ -36,9 +80,45 @@ class AudioReceiver(asyncio.Protocol):
         """Handle that connection succeeded."""
         self.transport = transport
 
-    def datagram_received(self, data, addr):
+    def datagram_received(self, data: bytes, addr):
         """Handle incoming data."""
-        # _LOGGER.debug("Received audio packet: %s", data)
+        _LOGGER.debug("Received audio packet from %s: %s...", addr, data[0:32])
+
+        header = RtpHeader.decode(data, allow_excessive=True)
+        packet_type = header.type & 0x7F  # Remove marker bit
+
+        if packet_type == 0x60:  # Normal packet
+            # Drop packet if requested (only for normal packets)
+            if self.state.drop_packets > 0:
+                _LOGGER.debug(
+                    "Dropping packet (%d) %d", header.seqno, self.state.drop_packets
+                )
+                self.state.drop_packets -= 1
+
+                if self.state.supports_retransmissions:
+                    _LOGGER.debug("Requesting to retransmit seqno %d", header.seqno)
+                    self._request_retransmit(
+                        data, (self.state.remote_address, self.state.control_port)
+                    )
+            else:
+                self.state.audio_packets[header.seqno] = alac_decode(data[12:])
+        elif packet_type == 0x56:  # Retransmission
+            original_packet = data[4:]  # Remove retransmission header
+            self.state.audio_packets[header.seqno] = alac_decode(original_packet[12:])
+        else:
+            _LOGGER.debug("Unhandled packet type: %d", packet_type)
+
+    def _request_retransmit(self, data: bytes, addr) -> None:
+        header = RtpHeader.decode(data, allow_excessive=True)
+        packet = RetransmitReqeust.encode(
+            0x80,  # Header
+            0x55 | 0x80,  # 0x55 = retransmit, 0x80 = marker bit
+            0,  # Sequence number in RTP header not used(?)
+            header.seqno,  # Sequence number of missing packet
+            1,  # Ask for one packet
+        )
+        self.transport.sendto(packet, addr)
+        _LOGGER.debug("Sent %s to %s", packet, addr)
 
     def error_received(self, exc) -> None:
         """Handle a connection error."""
@@ -89,9 +169,10 @@ class TimingServer(asyncio.Protocol):
 class ControlServer(asyncio.Protocol):
     """Protocol used for control channel."""
 
-    def __init__(self):
+    def __init__(self, state: FakeRaopState):
         """Initialize a new ControlServer instance."""
         self.transport = None
+        self.state: FakeRaopState = state
 
     def close(self):
         """Close control channel."""
@@ -111,6 +192,9 @@ class ControlServer(asyncio.Protocol):
     def datagram_received(self, data, addr):
         """Handle incoming data."""
         _LOGGER.debug("Received control packet: %s", data)
+        # TODO: Only decoding now, should verify some stuff as well
+        SyncPacket.decode(data)
+        self.state.sync_packets_received += 1
 
     def error_received(self, exc) -> None:
         """Handle a connection error."""
@@ -120,13 +204,6 @@ class ControlServer(asyncio.Protocol):
     def connection_lost(self, exc):
         """Handle that connection was lost."""
         _LOGGER.debug("Control channel lost connection (%s)", exc)
-
-
-class FakeRaopState:
-    """Internal state for RAOP service."""
-
-    def __init__(self):
-        pass
 
 
 class FakeRaopService(HttpSimpleRouter):
@@ -147,13 +224,15 @@ class FakeRaopService(HttpSimpleRouter):
         self.add_route("SET_PARAMETER", "rtsp://*", self.handle_set_parameter)
         self.add_route("POST", "/feedback", self.handle_feedback)
         self.add_route("RECORD", "rtsp://*", self.handle_record)
+        self.add_route("POST", "/auth-setup", self.handle_auth_setup)
 
     async def start(self, start_web_server: bool):
+        """Start the fake RAOP service."""
         self.server, self.port = await http_server(lambda: BasicHttpServer(self))
 
         local_addr = ("127.0.0.1", 0)
         (_, audio_receiver) = await self.loop.create_datagram_endpoint(
-            AudioReceiver,
+            lambda: AudioReceiver(self.state),
             local_addr=local_addr,
         )
         (_, timing_server) = await self.loop.create_datagram_endpoint(
@@ -161,7 +240,7 @@ class FakeRaopService(HttpSimpleRouter):
             local_addr=local_addr,
         )
         (_, control_server) = await self.loop.create_datagram_endpoint(
-            ControlServer,
+            lambda: ControlServer(self.state),
             local_addr=local_addr,
         )
 
@@ -177,6 +256,7 @@ class FakeRaopService(HttpSimpleRouter):
         )
 
     async def cleanup(self):
+        """Clean up resources used by fake RAOP service."""
         if self.server:
             self.server.close()
         if self._audio_receiver:
@@ -189,6 +269,11 @@ class FakeRaopService(HttpSimpleRouter):
     def handle_announce(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming ANNOUNCE request."""
         _LOGGER.debug("Received ANNOUNCE: %s", request)
+        for line in request.body.decode("utf-8").split("\r\n"):
+            if line.startswith("o="):
+                self.state.remote_address = line.split()[-1]
+                break
+
         return HttpResponse(
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
@@ -196,6 +281,8 @@ class FakeRaopService(HttpSimpleRouter):
     def handle_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SETUP request."""
         _LOGGER.debug("Received SETUP: %s", request)
+        _, options = parse_transport(request.headers["Transport"])
+        self.state.control_port = int(options["control_port"])
         headers = {
             "Transport": (
                 "RTP/AVP/UDP;unicast;mode=record;"
@@ -211,6 +298,11 @@ class FakeRaopService(HttpSimpleRouter):
     def handle_set_parameter(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SET_PARAMETER request."""
         _LOGGER.debug("Received SET_PARAMETER: %s", request)
+        if request.headers["Content-Type"] == "application/x-dmap-tagged":
+            tags = parser.parse(request.body, lookup_tag)
+            self.state.metadata.title = parser.first(tags, "mlit", "minm")
+            self.state.metadata.artist = parser.first(tags, "mlit", "asar")
+            self.state.metadata.album = parser.first(tags, "mlit", "asal")
         return HttpResponse(
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
@@ -229,6 +321,18 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    def handle_auth_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
+        _LOGGER.debug("Received auth-setup: %s", request)
+        # Just check if decent sized payload is there
+        if len(request.body) == 1 + 32:  # auth type + public key
+            self.state.auth_setup_performed = True
+            return HttpResponse(
+                "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
+            )
+        return HttpResponse(
+            "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
+        )
+
 
 class FakeRaopUseCases:
     """Wrapper for altering behavior of a FakeRaopService instance."""
@@ -236,3 +340,11 @@ class FakeRaopUseCases:
     def __init__(self, state):
         """Initialize a new FakeRaopUseCases instance."""
         self.state = state
+
+    def retransmissions_enabled(self, enabled: bool) -> None:
+        """Enable or disable retransmissions."""
+        self.state.supports_retransmissions = enabled
+
+    def drop_n_packets(self, packets: int) -> None:
+        """Make fake device drop packets and trigger retransmission (if supported)."""
+        self.state.drop_packets = packets

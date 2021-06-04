@@ -18,6 +18,8 @@ _TAGS = {
     "aeFP": DmapTag(read_uint, "com.apple.itunes.req-fplay"),
     "aeSV": DmapTag(read_uint, "com.apple.itunes.music-sharing-version"),
     "apro": DmapTag(read_uint, "daap.protocolversion"),
+    "asal": DmapTag(read_str, "daap.songalbum"),
+    "asar": DmapTag(read_str, "daap.songartist"),
     "asgr": DmapTag(read_uint, "com.apple.itunes.gapless-resy"),
     "ated": DmapTag(read_bool, "daap.supportsextradata"),
     "caar": DmapTag(read_uint, "dacp.albumrepeat"),
