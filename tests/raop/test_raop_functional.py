@@ -106,6 +106,11 @@ async def test_stream_retransmission(
 
     await raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
 
+    # For stability reasons: wait for all packets to be received as it might take a few
+    # extra runs for the event loop to catch up
+    packets_to_receive = 3 if enable_retransmission else 1
+    await until(lambda: len(raop_state.audio_packets) == packets_to_receive)
+
     # If retransmissions are enabled, then we should always receive all packets in
     # the end (within reasons). If retransmissions are not enabled, then we should
     # start comparing the received audio stream after the amount of audio packets
