@@ -193,8 +193,6 @@ AirTunes).
 * Metadata and push updates only reflect what pyatv is currently playing as there
   seems to not be possible to get current play state from an AirPlay receiver
 * Devices requiring password are not supported
-* Devices requiring HAP pairing, e.g. Apple TV 4+, are not supported {% include issue no="1078" %}
-* Track length is hardcoded to 3s for now
 * Remote control commands does not work, e.g. play or pause {% include issue no="1068" %}
 
 ### Verified Devices

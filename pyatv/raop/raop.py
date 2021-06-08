@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import logging
 from time import monotonic
-from typing import Any, List, Mapping, Optional, Tuple, cast
+from typing import Any, List, Mapping, NamedTuple, Optional, Tuple, cast
 import wave
 import weakref
 
@@ -47,6 +47,13 @@ MISSING_METADATA = AudioMetadata(
 )
 
 SUPPORTED_ENCRYPTIONS = EncryptionType.Unencrypted | EncryptionType.MFiSAP
+
+
+class PlaybackInfo(NamedTuple):
+    """Information for what is currently playing."""
+
+    metadata: AudioMetadata
+    position: float
 
 
 class ControlClient(asyncio.Protocol):
@@ -260,7 +267,7 @@ class RaopListener(ABC):
     """Listener interface for RAOP state changes."""
 
     @abstractmethod
-    def playing(self, metadata: AudioMetadata) -> None:
+    def playing(self, playback_info: PlaybackInfo) -> None:
         """Media started playing with metadata."""
 
     @abstractmethod
@@ -307,11 +314,12 @@ class RaopClient:
             self._listener = None
 
     @property
-    def metadata(self) -> AudioMetadata:
-        """Return active metadata."""
-        if self._metadata == EMPTY_METADATA:
-            return MISSING_METADATA
-        return self._metadata
+    def playback_info(self) -> PlaybackInfo:
+        """Return current playback information."""
+        metadata = (
+            MISSING_METADATA if self._metadata == EMPTY_METADATA else self._metadata
+        )
+        return PlaybackInfo(metadata, self.context.position)
 
     def close(self):
         """Close session and free up resources."""
@@ -451,9 +459,11 @@ class RaopClient:
             # Apply text metadata if it is supported
             self._metadata = metadata
             if MetadataType.Text in self._metadata_types:
-                _LOGGER.debug("Playing with metadata: %s", self.metadata)
+                _LOGGER.debug("Playing with metadata: %s", self.playback_info.metadata)
                 await self.rtsp.set_metadata(
-                    self.context.rtpseq, self.context.rtptime, self.metadata
+                    self.context.rtpseq,
+                    self.context.rtptime,
+                    self.playback_info.metadata,
                 )
 
             # Set a decent volume (range is [-30.0, 0] and -144 is muted)
@@ -468,7 +478,7 @@ class RaopClient:
 
             listener = self.listener
             if listener:
-                listener.playing(self.metadata)
+                listener.playing(self.playback_info)
 
             # Start playback
             await self.rtsp.record(self.context.rtpseq, self.context.rtptime)

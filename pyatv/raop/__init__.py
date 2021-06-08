@@ -18,7 +18,7 @@ from pyatv.interface import (
 )
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.miniaudio import MiniaudioWrapper
-from pyatv.raop.raop import RaopClient, RaopListener
+from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
 from pyatv.support.http import ClientSessionManager, http_connect
 from pyatv.support.relayer import Relayer
@@ -69,7 +69,7 @@ class RaopStateManager:
 
     def __init__(self) -> None:
         """Initialize a new RaopStateManager instance."""
-        self.metadata: Optional[AudioMetadata] = None
+        self.playback_info: Optional[PlaybackInfo] = None
 
 
 class RaopMetadata(Metadata):
@@ -81,12 +81,12 @@ class RaopMetadata(Metadata):
 
     async def playing(self) -> Playing:
         """Return what is currently playing."""
-        if self._state_manager.metadata is None:
+        if self._state_manager.playback_info is None:
             return Playing(
                 device_state=const.DeviceState.Idle, media_type=const.MediaType.Unknown
             )
 
-        metadata = self._state_manager.metadata
+        metadata = self._state_manager.playback_info.metadata
         total_time = int(metadata.duration) if metadata.duration else None
         return Playing(
             device_state=const.DeviceState.Playing,
@@ -94,7 +94,7 @@ class RaopMetadata(Metadata):
             title=metadata.title,
             artist=metadata.artist,
             album=metadata.album,
-            position=0,
+            position=int(self._state_manager.playback_info.position),
             total_time=total_time,
         )
 
@@ -111,7 +111,10 @@ class RaopFeatures(Features):
         if feature_name == FeatureName.StreamFile:
             return FeatureInfo(FeatureState.Available)
 
-        metadata = self.state_manager.metadata or EMPTY_METADATA
+        metadata = EMPTY_METADATA
+        if self.state_manager.playback_info:
+            metadata = self.state_manager.playback_info.metadata
+
         if feature_name == FeatureName.Title:
             return self._availability(metadata.title)
         if feature_name == FeatureName.Artist:
@@ -211,14 +214,14 @@ def setup(
     class RaopStateListener(RaopListener):
         """Listener for RAOP state changes."""
 
-        def playing(self, metadata: AudioMetadata) -> None:
+        def playing(self, playback_info: PlaybackInfo) -> None:
             """Media started playing with metadata."""
-            state_manager.metadata = metadata
+            state_manager.playback_info = playback_info
             self._trigger()
 
         def stopped(self) -> None:
             """Media stopped playing."""
-            state_manager.metadata = None
+            state_manager.playback_info = None
             self._trigger()
 
         @staticmethod
