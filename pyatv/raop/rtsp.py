@@ -84,6 +84,12 @@ class RtspContext:
         """Current RTP time with latency."""
         return self.head_ts - (self.start_ts - self.latency)
 
+    @property
+    def position(self) -> float:
+        """Current position in stream (seconds with fraction)."""
+        # Do not consider latency here (so do not use rtptime)
+        return timing.ts2ms(self.head_ts - self.start_ts, self.sample_rate) / 1000.0
+
 
 class RtspSession:
     """Representation of an RTSP session."""

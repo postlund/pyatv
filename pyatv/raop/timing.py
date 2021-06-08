@@ -1,4 +1,8 @@
-"""Methods for working with time and synchronization in RAOP."""
+"""Methods for working with time and synchronization in RAOP.
+
+The timing routines in this module is based on the excellent work of RAOP-Player:
+https://github.com/philippe44/RAOP-Player
+"""
 
 from time import monotonic
 from typing import Tuple
@@ -31,3 +35,13 @@ def ntp2ts(ntp: int, rate: int) -> int:
 def ts2ntp(timestamp: int, rate: int) -> int:
     """Convert timestamp into NTP time."""
     return int(int(timestamp << 16) / rate) << 16
+
+
+def ntp2ms(ntp: int) -> int:
+    """Convert NTP time to milliseconds."""
+    return ((ntp >> 10) * 1000) >> 22
+
+
+def ts2ms(timestamp: int, rate: int) -> int:
+    """Convert timestamp to milliseconds."""
+    return ntp2ms(ts2ntp(timestamp, rate))
