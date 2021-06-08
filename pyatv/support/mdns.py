@@ -162,6 +162,11 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
+        if self._task:
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
         services = parse_services(self.result)
         return Response(
             services=services,
@@ -309,6 +314,12 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             pass
         finally:
             self.close()
+            if self._task:
+                try:
+                    await self._task
+                except asyncio.CancelledError:
+                    pass
+                self._task = None
         return self.responses
 
     async def _resend_loop(self, timeout):
@@ -395,10 +406,8 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
         """Close resources used by this instance."""
         for receiver in self._receivers:
             receiver.close()
-
         if self._task:
             self._task.cancel()
-            self._task = None
 
 
 async def unicast(

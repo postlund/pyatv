@@ -246,6 +246,16 @@ class MrpProtocol:
             self._dispatch(message)
 
     def _dispatch(self, message):
+        async def _call_listener(func):
+            # Make sure to catch any exceptions caused by the listener so we don't get
+            # unfished tasks laying around
+            try:
+                await func
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                _LOGGER.exception("error during dispatch")
+
         for listener in self._listeners.get(message.type, []):
             _LOGGER.debug(
                 "Dispatching message with type %d (%s) to %s",
@@ -253,4 +263,4 @@ class MrpProtocol:
                 type(message.inner()).__name__,
                 listener,
             )
-            asyncio.ensure_future(listener.func(message, listener.data))
+            asyncio.ensure_future(_call_listener(listener.func(message, listener.data)))

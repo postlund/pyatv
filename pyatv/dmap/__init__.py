@@ -516,13 +516,13 @@ class DmapPushUpdater(PushUpdater):
         first_call = True
 
         while True:
-            # Sleep some time before waiting for updates
-            if not first_call and self._initial_delay > 0:
-                _LOGGER.debug("Initial delay set to %d", self._initial_delay)
-                await asyncio.sleep(self._initial_delay)
-                first_call = False
-
             try:
+                # Sleep some time before waiting for updates
+                if not first_call and self._initial_delay > 0:
+                    _LOGGER.debug("Initial delay set to %d", self._initial_delay)
+                    await asyncio.sleep(self._initial_delay)
+                    first_call = False
+
                 _LOGGER.debug("Waiting for playstatus updates")
                 playstatus = await self._atv.playstatus(use_revision=True, timeout=0)
 
