@@ -24,6 +24,30 @@ _LOGGER = logging.getLogger(__name__)
 FRAMES_PER_PACKET = 352
 
 METADATA_FIELDS = [FeatureName.Title, FeatureName.Artist, FeatureName.Album]
+PROGRESS_FIELDS = [FeatureName.Position, FeatureName.TotalTime]
+
+
+@pytest.fixture(name="playing_listener")
+async def playing_listener_fixture(raop_client):
+    class PlayingListener(PushListener):
+        def __init__(self):
+            """Initialize a new PlayingListener instance."""
+            self.updates: List[Playing] = []
+            self.all_features: Dict[FeatureName, FeatureInfo] = {}
+
+        def playstatus_update(self, updater, playstatus: Playing) -> None:
+            """Inform about changes to what is currently playing."""
+            self.updates.append(playstatus)
+            if playstatus.device_state == DeviceState.Playing:
+                self.all_features = raop_client.features.all_features()
+
+        def playstatus_error(self, updater, exception: Exception) -> None:
+            """Inform about an error when updating play status."""
+
+    listener = PlayingListener()
+    raop_client.push_updater.listener = listener
+    raop_client.push_updater.start()
+    yield listener
 
 
 def audio_matches(
@@ -124,63 +148,55 @@ async def test_stream_retransmission(
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0"})])
-async def test_push_updates(raop_client):
-    class TestListener(PushListener):
-        def __init__(self):
-            """Initialize a new TestListener instance."""
-            self.updates: List[Playing] = []
-
-        def playstatus_update(self, updater, playstatus: Playing) -> None:
-            """Inform about changes to what is currently playing."""
-            self.updates.append(playstatus)
-
-        def playstatus_error(self, updater, exception: Exception) -> None:
-            """Inform about an error when updating play status."""
-
-    listener = TestListener()
-    raop_client.push_updater.listener = listener
-    raop_client.push_updater.start()
-
+async def test_push_updates(raop_client, playing_listener):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
     # Initial idle + audio playing + back to idle
-    await until(lambda: len(listener.updates) == 3)
+    await until(lambda: len(playing_listener.updates) == 3)
 
-    idle = listener.updates[0]
+    idle = playing_listener.updates[0]
     assert idle.device_state == DeviceState.Idle
     assert idle.media_type == MediaType.Unknown
 
-    playing = listener.updates[1]
+    playing = playing_listener.updates[1]
     assert playing.device_state == DeviceState.Playing
     assert playing.media_type == MediaType.Music
     assert playing.artist == "postlund"
     assert playing.title == "pyatv"
     assert playing.album == "raop"
 
-    idle = listener.updates[2]
+    idle = playing_listener.updates[2]
     assert idle.device_state == DeviceState.Idle
     assert idle.media_type == MediaType.Unknown
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0"})])
-async def test_metadata_features(raop_client):
-    class FeatureListener(PushListener):
-        def __init__(self):
-            """Initialize a new FeatureListener instance."""
-            self.all_features: Dict[FeatureName, FeatureInfo] = {}
+async def test_push_updates_progress(raop_client, playing_listener):
+    assert_features_in_state(
+        raop_client.features.all_features(),
+        PROGRESS_FIELDS,
+        FeatureState.Unavailable,
+    )
 
-        def playstatus_update(self, updater, playstatus: Playing) -> None:
-            """Inform about changes to what is currently playing."""
-            if playstatus.device_state == DeviceState.Playing:
-                self.all_features = raop_client.features.all_features()
+    await raop_client.stream.stream_file(data_path("static_3sec.ogg"))
 
-        def playstatus_error(self, updater, exception: Exception) -> None:
-            """Inform about an error when updating play status."""
+    # Initial idle + audio playing + back to idle
+    await until(lambda: len(playing_listener.updates) == 3)
 
-    listener = FeatureListener()
-    raop_client.push_updater.listener = listener
-    raop_client.push_updater.start()
+    playing = playing_listener.updates[1]
+    assert playing.device_state == DeviceState.Playing
+    assert playing.position == 0
+    assert playing.total_time == 3
 
+    assert_features_in_state(
+        playing_listener.all_features,
+        PROGRESS_FIELDS,
+        FeatureState.Available,
+    )
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_metadata_features(raop_client, playing_listener):
     # All features should be unavailable when nothing is playing
     assert_features_in_state(
         raop_client.features.all_features(),
@@ -197,11 +213,11 @@ async def test_metadata_features(raop_client):
 
     # Use a listener to catch when something starts playing and save that as it's
     # too late to verify when stream_file returns (idle state will be reported).
-    await until(lambda: listener.all_features)
+    await until(lambda: playing_listener.all_features)
 
     # When playing, everything should be available
     assert_features_in_state(
-        listener.all_features,
+        playing_listener.all_features,
         METADATA_FIELDS,
         FeatureState.Available,
     )

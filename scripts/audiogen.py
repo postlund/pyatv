@@ -42,7 +42,10 @@ def write_new_wave_file(filename: str, args) -> None:
         wfile.setsampwidth(args.sample_width)
         wfile.setframerate(args.sample_rate)
         for frame_number in range(args.frame_count):
-            frame = args.channels * args.sample_width * bytes([frame_number & 0xFF])
+            if args.static:
+                frame = args.channels * args.sample_width * b"\x00"
+            else:
+                frame = args.channels * args.sample_width * bytes([frame_number & 0xFF])
             wfile.writeframes(frame)
         # pylint: enable=no-member
 
@@ -68,6 +71,13 @@ def main():
     )
     parser.add_argument(
         "-r", "--sample-rate", type=int, default=44100, help="sample rate"
+    )
+    parser.add_argument(
+        "-s",
+        "--static",
+        default=False,
+        action="store_true",
+        help="use just zeroes as content",
     )
     parser.add_argument(
         "-o",

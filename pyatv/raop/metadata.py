@@ -11,9 +11,10 @@ class AudioMetadata(NamedTuple):
     title: Optional[str]
     artist: Optional[str]
     album: Optional[str]
+    duration: Optional[float]
 
 
-EMPTY_METADATA = AudioMetadata(None, None, None)
+EMPTY_METADATA = AudioMetadata(None, None, None, None)
 
 
 async def get_metadata(filename: str) -> AudioMetadata:
@@ -25,6 +26,8 @@ async def get_metadata(filename: str) -> AudioMetadata:
     if not in_file.tags:
         return EMPTY_METADATA
 
+    duration = in_file.streaminfo.get("duration")
+
     # All tags are always lists, so need to be joined into a string
     title = in_file.tags.get("title")
     artist = in_file.tags.get("artist")
@@ -34,4 +37,5 @@ async def get_metadata(filename: str) -> AudioMetadata:
         ", ".join(title) if title else None,
         ", ".join(artist) if artist else None,
         ", ".join(album) if album else None,
+        duration,
     )
