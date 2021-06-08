@@ -43,7 +43,7 @@ KEEP_ALIVE_INTERVAL = 25  # Seconds
 
 # Metadata used when no metadata is present
 MISSING_METADATA = AudioMetadata(
-    title="Streaming with pyatv", artist="pyatv", album="RAOP"
+    title="Streaming with pyatv", artist="pyatv", album="RAOP", duration=0.0
 )
 
 SUPPORTED_ENCRYPTIONS = EncryptionType.Unencrypted | EncryptionType.MFiSAP

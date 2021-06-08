@@ -87,12 +87,15 @@ class RaopMetadata(Metadata):
             )
 
         metadata = self._state_manager.metadata
+        total_time = int(metadata.duration) if metadata.duration else None
         return Playing(
             device_state=const.DeviceState.Playing,
             media_type=const.MediaType.Music,
             title=metadata.title,
             artist=metadata.artist,
             album=metadata.album,
+            position=0,
+            total_time=total_time,
         )
 
 
@@ -115,6 +118,8 @@ class RaopFeatures(Features):
             return self._availability(metadata.artist)
         if feature_name == FeatureName.Album:
             return self._availability(metadata.album)
+        if feature_name in [FeatureName.Position, FeatureName.TotalTime]:
+            return self._availability(metadata.duration)
 
         return FeatureInfo(FeatureState.Unavailable)
 
@@ -249,6 +254,8 @@ def setup(
                 FeatureName.Artist,
                 FeatureName.Album,
                 FeatureName.Title,
+                FeatureName.Position,
+                FeatureName.TotalTime,
             ]
         ),
     )

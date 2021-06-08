@@ -12,3 +12,8 @@ Audio, 10 frames (=20 samples):
 Audio, 352 * 3 frames = 3 packets (=1056 samples):
 
   python ../../scripts/audiogen.py -n 1056 -o audio_3_packets.wav
+
+Audio, 8 seconds static (no sound), ogg for compression:
+
+  python ../../scripts/audiogen.py -n 132300 -s -o static_3sec.wav
+  ffmpeg -i static_3sec.wav static_3sec.ogg
