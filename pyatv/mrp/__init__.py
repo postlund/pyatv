@@ -615,6 +615,8 @@ class MrpPushUpdater(PushUpdater):
         try:
             playstatus = await self.metadata.playing()
             self.post_update(playstatus)
+        except asyncio.CancelledError:
+            pass
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.debug("Playstatus error occurred: %s", ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)

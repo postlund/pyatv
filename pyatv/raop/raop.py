@@ -77,10 +77,11 @@ class ControlClient(asyncio.Protocol):
         async def _sync_handler():
             try:
                 await self._sync_task((addr, self.context.control_port))
+            except asyncio.CancelledError:
+                pass
             except Exception:
                 _LOGGER.exception("control task failure")
-            finally:
-                _LOGGER.debug("Periodic sync task ended")
+            _LOGGER.debug("Periodic sync task ended")
 
         if self.task:
             raise RuntimeError("already running")
@@ -325,13 +326,17 @@ class RaopClient:
         _LOGGER.debug("Starting keep-alive task")
 
         while True:
-            await asyncio.sleep(KEEP_ALIVE_INTERVAL)
-
             try:
+                await asyncio.sleep(KEEP_ALIVE_INTERVAL)
+
                 _LOGGER.debug("Sending keep-alive feedback")
                 await self.rtsp.feedback()
+            except asyncio.CancelledError:
+                break
             except exceptions.ProtocolError:
-                _LOGGER.exception("feedbackfailed")
+                _LOGGER.exception("feedback failed")
+
+        _LOGGER.debug("Feedback task finished")
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""

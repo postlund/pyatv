@@ -180,8 +180,13 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
     async def _process_task(self) -> None:
         while True:
             _LOGGER.debug("Waiting for data from client")
-            await self._receive_event.wait()
-            await self._process_buffer()
+            try:
+                await self._receive_event.wait()
+                await self._process_buffer()
+            except asyncio.CancelledError:
+                break
+            except Exception:
+                _LOGGER.exception("error processing incoming messages")
 
     async def _process_buffer(self) -> None:
         _LOGGER.debug("Process buffer (size: %d)", len(self.buffer))
