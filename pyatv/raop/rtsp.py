@@ -70,6 +70,8 @@ class RtspContext:
         self.dacp_id: str = f"{randrange(2 ** 64):X}"
         self.active_remote: int = randrange(2 ** 32)
 
+        self.volume: Optional[float] = None
+
     def reset(self) -> None:
         """Reset seasion.
 

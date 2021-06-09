@@ -6,12 +6,14 @@ TODO: Things to improve:
 * Improve sync tests
 """
 
+import asyncio
 import logging
 import math
 from typing import Dict, List
 
 import pytest
 
+from pyatv import raop
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType
 from pyatv.interface import FeatureInfo, Playing, PushListener
 
@@ -26,7 +28,12 @@ FRAMES_PER_PACKET = 352
 
 METADATA_FIELDS = [FeatureName.Title, FeatureName.Artist, FeatureName.Album]
 PROGRESS_FIELDS = [FeatureName.Position, FeatureName.TotalTime]
-VOLUME_FIELDS = [FeatureName.SetVolume, FeatureName.Volume]
+VOLUME_FIELDS = [
+    FeatureName.SetVolume,
+    FeatureName.Volume,
+    FeatureName.VolumeUp,
+    FeatureName.VolumeDown,
+]
 
 
 @pytest.fixture(name="playing_listener")
@@ -36,12 +43,14 @@ async def playing_listener_fixture(raop_client):
             """Initialize a new PlayingListener instance."""
             self.updates: List[Playing] = []
             self.all_features: Dict[FeatureName, FeatureInfo] = {}
+            self.playing_event = asyncio.Event()
 
         def playstatus_update(self, updater, playstatus: Playing) -> None:
             """Inform about changes to what is currently playing."""
             self.updates.append(playstatus)
             if playstatus.device_state == DeviceState.Playing:
                 self.all_features = raop_client.features.all_features()
+                self.playing_event.set()
 
         def playstatus_error(self, updater, exception: Exception) -> None:
             """Inform about an error when updating play status."""
@@ -297,7 +306,53 @@ async def test_use_default_volume_from_device(
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_set_volume_during_playback(raop_client, raop_state, playing_listener):
+    # Set maximum volume as initial volume
+    await raop_client.audio.set_volume(100.0)
+
+    # Start playback in the background
+    future = asyncio.ensure_future(
+        raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
+    )
+
+    # Wait for device to move to playing state and verify volume
+    await playing_listener.playing_event.wait()
+    assert math.isclose(raop_state.volume, -0.0)
+
+    # Change volume, which we now know will happen during playback
+    await raop_client.audio.set_volume(50.0)
+    assert math.isclose(raop_state.volume, -15.0)
+
+    await future
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
 async def test_volume_features(raop_client):
     assert_features_in_state(
         raop_client.features.all_features(), VOLUME_FIELDS, FeatureState.Available
     )
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_volume_up_volume_down(raop_client):
+    # Only test on the client as other tests should confirm that it is set correctly
+    # on the receiver
+    await raop_client.audio.set_volume(95.0)
+
+    # Increase by 5% if volume_up is called
+    await raop_client.remote_control.volume_up()
+    assert math.isclose(raop_client.audio.volume, 100.0)
+
+    # Stop at max level without any error
+    await raop_client.remote_control.volume_up()
+    assert math.isclose(raop_client.audio.volume, 100.0)
+
+    await raop_client.audio.set_volume(5.0)
+
+    # Decrease by 5% if volume_down is called
+    await raop_client.remote_control.volume_down()
+    assert math.isclose(raop_client.audio.volume, 0.0)
+
+    # Stop at min level without any error
+    await raop_client.remote_control.volume_down()
+    assert math.isclose(raop_client.audio.volume, 0.0)

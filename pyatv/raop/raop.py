@@ -282,13 +282,12 @@ class RaopClient:
         self,
         rtsp: RtspSession,
         context: RtspContext,
-        credentials: Optional[LegacyCredentials],
     ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
-        self.credentials: Optional[LegacyCredentials] = credentials
+        self.credentials: Optional[LegacyCredentials] = None
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -436,6 +435,11 @@ class RaopClient:
             self.context.timing_port,
             self.context.server_port,
         )
+
+    async def set_volume(self, volume: float) -> None:
+        """Change volume on the receiver."""
+        await self.rtsp.set_parameter("volume", str(volume))
+        self.context.volume = volume
 
     async def send_audio(  # pylint: disable=too-many-branches
         self, wave_file, metadata: AudioMetadata = EMPTY_METADATA
