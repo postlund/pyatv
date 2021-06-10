@@ -347,11 +347,17 @@ class FacadeAudio(Relayer, interface.Audio):
     @property
     def volume(self) -> float:
         """Return current volume level."""
-        return self.relay("volume")
+        volume = self.relay("volume")
+        if 0.0 <= volume <= 100.0:
+            return volume
+        raise exceptions.ProtocolError(f"volume {volume} is out of range")
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
-        await self.relay("set_volume")(level)
+        if 0.0 <= level <= 100.0:
+            await self.relay("set_volume")(level)
+        else:
+            raise exceptions.ProtocolError(f"volume {level} is out of range")
 
 
 class FacadeAppleTV(interface.AppleTV):
