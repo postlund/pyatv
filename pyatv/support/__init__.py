@@ -85,3 +85,16 @@ def deprecated(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def map_range(
+    value: float, in_min: float, in_max: float, out_min: float, out_max: float
+) -> float:
+    """Map a value in one range to another."""
+    if in_max - in_min <= 0.0:
+        raise ValueError("invalid input range")
+    if out_max - out_min <= 0.0:
+        raise ValueError("invalid output range")
+    if value < in_min or value > in_max:
+        raise ValueError("input value out of range")
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
