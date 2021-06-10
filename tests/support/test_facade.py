@@ -7,7 +7,14 @@ import pytest
 from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
-from pyatv.interface import FeatureInfo, Features, FeatureState, Power, PushUpdater
+from pyatv.interface import (
+    Audio,
+    FeatureInfo,
+    Features,
+    FeatureState,
+    Power,
+    PushUpdater,
+)
 from pyatv.support.facade import FacadeAppleTV, SetupData
 
 
@@ -72,6 +79,18 @@ class DummyPower(Power):
 
     async def turn_off(self, await_new_state: bool = False) -> None:
         self.turn_off_called = True
+
+
+class DummyAudio(Audio):
+    def __init__(self, volume: float) -> None:
+        self._volume = volume
+
+    @property
+    def volume(self) -> float:
+        return self._volume
+
+    async def set_volume(self, level: float) -> None:
+        self._volume = volume
 
 
 @pytest.fixture(name="register_interface")
@@ -151,3 +170,19 @@ async def test_power_prefer_companion(feature, func, facade_dummy, register_inte
 
     assert not getattr(power_mrp, f"{func}_called")
     assert getattr(power_comp, f"{func}_called")
+
+
+@pytest.mark.parametrize("volume", [-0.1, 100.1])
+async def test_audio_get_volume_out_of_range(facade_dummy, register_interface, volume):
+    register_interface(FeatureName.Volume, DummyAudio(volume), Protocol.RAOP)
+
+    with pytest.raises(exceptions.ProtocolError):
+        facade_dummy.audio.volume
+
+
+@pytest.mark.parametrize("volume", [-0.1, 100.1])
+async def test_audio_set_volume_out_of_range(facade_dummy, register_interface, volume):
+    register_interface(FeatureName.Volume, DummyAudio(volume), Protocol.RAOP)
+
+    with pytest.raises(exceptions.ProtocolError):
+        await facade_dummy.audio.set_volume(volume)
