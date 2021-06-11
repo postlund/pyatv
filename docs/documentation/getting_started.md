@@ -1,8 +1,8 @@
 ---
 layout: template
 title: Getting Started
-permalink: /getting-started/
-link_group: getting-started
+permalink: /documentation/getting-started/
+link_group: documentation
 ---
 # :raising_hand: Table of Contents
 {:.no_toc}
