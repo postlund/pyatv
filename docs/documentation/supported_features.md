@@ -37,7 +37,7 @@ This is the general feature list provided by the external interface.
 | --------------------------------------------------------------- | --------- |
 | List supported features                                         | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
 | --------------------------------------------------------------- | --------- |
-| AirPlay stream URL (including local files)                      | [Doc](development/airplay), {% include api i="interface.Stream" %}
+| AirPlay stream URL (including local files)                      | [Doc](development/stream), {% include api i="interface.Stream" %}
 | --------------------------------------------------------------- | --------- |
 | Playback controls (play, pause, next, stop, etc.)               | [Doc](development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
@@ -118,6 +118,8 @@ app and power related functions.
 
 * Pairing is supported as long as target device can show a PIN code, e.g. Apple TV but not HomePod or a Mac
 * All features in the app interface ({% include api i="interface.Apps" %})
+* Turn on/off device ({% include api i="interface.Power.turn_on" %},
+  {% include api i="interface.Power.turn_off" %})
 
 ### Limitations and notes
 
@@ -173,7 +175,8 @@ as new ones, like notion of apps and game pad controls.
 ### Limitations and notes
 
 * Power management is not very robust (relies on navigating and pressing buttons).
-  The Companion protocol will provide better support for this in the future.
+  The Companion protocol provides better support and it is recommended to set up both
+  concurrently for best experience.
 
 ## RAOP
 

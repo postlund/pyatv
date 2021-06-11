@@ -45,7 +45,7 @@ To get going, install with `pip`:
   <p style="margin: 0px">:tada: <a href="https://pypi.org/project/pyatv">pip install pyatv :tada:</a></p>
 </div>
 
-Head over to [Getting started](getting-started) to see what you can do!
+Head over to [Getting started](documentation/getting-started) to see what you can do!
 
 As pyatv is a library, it is mainly aimed for developers creating applications that can interact
 with Apple TVs. However, pyatv ships with a few powerful command lines tools you can use to

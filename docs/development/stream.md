@@ -1,12 +1,13 @@
 ---
 layout: template
-title: AirPlay
-permalink: /development/airplay/
+title: Stream
+permalink: /development/stream/
 link_group: development
 ---
-# AirPlay
+# Stream
 
-The AirPlay suite consists of two protocols:
+It is possible to stream audio and video to a device via the stream interface using
+AirPlay. The AirPlay suite consists of two protocols:
 
 * AirTunes/RAOP - Used for real time streaming of audio
 * "AirPlay - Everything else (video, images and screen mirroring)
