@@ -387,7 +387,7 @@ class FakeRaopService(HttpSimpleRouter):
         """Handle incoming info request."""
         info = {}
         if self.state.initial_audio_level_supported:
-            info["initialVolume"] = INITIAL_VOLUME
+            info["initialVolume"] = self.state.volume
         return HttpResponse(
             "RTSP",
             "1.0",

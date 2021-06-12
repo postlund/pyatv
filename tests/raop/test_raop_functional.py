@@ -373,3 +373,22 @@ async def test_only_allow_one_stream_at_the_time(raop_client):
     result.remove(None)  # Should be one None for success and one exception
     assert len(result) == 1
     assert isinstance(result[0], exceptions.InvalidStateError)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_muted_volume_from_receiver(raop_client, raop_state, raop_usecase):
+    raop_usecase.initial_audio_level_supported(True)
+    raop_state.volume = -144.0
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    assert math.isclose(raop_client.audio.volume, 0.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_mute_volume_from_client(raop_client, raop_state):
+    await raop_client.audio.set_volume(0.0)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    assert math.isclose(raop_state.volume, -144.0)

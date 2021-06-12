@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import math
 from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
 
 from pyatv import conf, const, exceptions
@@ -28,7 +29,12 @@ from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
-INITIAL_VOLUME = 33.0
+INITIAL_VOLUME = 33.0  # Percent
+
+DBFS_MIN = -30.0
+DBFS_MAX = 0.0
+PERCENTAGE_MIN = 0.0
+PERCENTAGE_MAX = 100.0
 
 
 class RaopPushUpdater(PushUpdater):
@@ -212,17 +218,30 @@ class RaopAudio(Audio):
     def volume(self) -> float:
         """Return current volume level."""
         vol = self.playback_manager.context.volume
-        if vol is not None:
-            # Map dBFS to percentage
-            return map_range(vol, -30.0, 0.0, 0.0, 100.0)
-        return INITIAL_VOLUME
+        if vol is None:
+            return INITIAL_VOLUME
+
+        # AirPlay uses -144.0 as "muted", but we treat everything below -30.0 as
+        # muted to be a bit defensive
+        if vol < DBFS_MIN:
+            return PERCENTAGE_MIN
+
+        # Map dBFS to percentage
+        return map_range(vol, DBFS_MIN, DBFS_MAX, PERCENTAGE_MIN, PERCENTAGE_MAX)
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
         raop = self.playback_manager.raop
 
-        # Map percentage to dBFS
-        remapped = map_range(level, 0.0, 100.0, -30.0, 0.0)
+        # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
+        if math.isclose(level, 0.0):
+            remapped = -144.0
+        else:
+            # Map percentage to dBFS
+            remapped = map_range(
+                level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX
+            )
+
         if raop:
             await raop.set_volume(remapped)
         else:
