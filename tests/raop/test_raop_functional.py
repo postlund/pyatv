@@ -13,7 +13,7 @@ from typing import Dict, List
 
 import pytest
 
-from pyatv import raop
+from pyatv import exceptions, raop
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType
 from pyatv.interface import FeatureInfo, Playing, PushListener
 
@@ -356,3 +356,20 @@ async def test_volume_up_volume_down(raop_client):
     # Stop at min level without any error
     await raop_client.remote_control.volume_down()
     assert math.isclose(raop_client.audio.volume, 0.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_only_allow_one_stream_at_the_time(raop_client):
+    # This is not pretty, but the idea is to start two concurrent streaming tasks, wait
+    # for them to finish and verify that one of them raised an exception. This is to
+    # avoid making any assumptions regarding in which order they are scheduled on the
+    # event loop.
+    result = await asyncio.gather(
+        raop_client.stream.stream_file(data_path("audio_3_packets.wav")),
+        raop_client.stream.stream_file(data_path("only_metadata.wav")),
+        return_exceptions=True,
+    )
+
+    result.remove(None)  # Should be one None for success and one exception
+    assert len(result) == 1
+    assert isinstance(result[0], exceptions.InvalidStateError)
