@@ -393,6 +393,9 @@ class RaopClient:
         self._info.update(await self.rtsp.info())
         _LOGGER.debug("Updated info parameters to: %s", self.info)
 
+        # Set up the streaming session
+        await self._setup_session()
+
     def _update_output_properties(self, properties: Mapping[str, str]) -> None:
         (
             self.context.sample_rate,
@@ -443,9 +446,6 @@ class RaopClient:
 
         transport = None
         try:
-            # Set up the streaming session
-            await self._setup_session()
-
             # Create a socket used for writing audio packets (ugly)
             transport, _ = await self.loop.create_datagram_endpoint(
                 AudioProtocol,
