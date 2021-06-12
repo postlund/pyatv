@@ -185,15 +185,18 @@ AirTunes).
 * Stream files with {% include api i="interface.Stream.stream_file" %}
 * Metadata is read from file and sent to receiver (artist, album and title)
 * Supports WAV, MP3, FLAG and OGG as file format (also for metadata)
-* Metadata
+* Metadata (device state, media type, title, artist, album, position, total_time)
 * Push Updates
+* Volume controls (volume level, set_volume, volume_up, volume_down)
+* One stream can be played at the time (second call raises {% include api i="exceptions.InvalidStateError" %})
 
 ### Limitations and notes
 
 * Metadata and push updates only reflect what pyatv is currently playing as there
   seems to not be possible to get current play state from an AirPlay receiver
 * Devices requiring password are not supported
-* Remote control commands does not work, e.g. play or pause {% include issue no="1068" %}
+* Remote control commands does not work (except for volume_up and volume_down),
+  e.g. play or pause {% include issue no="1068" %}
 
 ### Verified Devices
 
