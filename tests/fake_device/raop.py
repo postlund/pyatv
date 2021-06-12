@@ -1,5 +1,6 @@
 """Fake RAOP device for tests."""
 import asyncio
+from functools import wraps
 import logging
 import plistlib
 from types import SimpleNamespace
@@ -22,6 +23,18 @@ from pyatv.support.http import (
 _LOGGER = logging.getLogger(__name__)
 
 INITIAL_VOLUME = -15.0
+
+
+def requires_auth(method):
+    @wraps(method)
+    def _impl(self, request: HttpRequest, *args, **kwargs):
+        if self.state.auth_required and not self.state.auth_setup_performed:
+            return HttpResponse(
+                "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
+            )
+        return method(self, request, *args, **kwargs)
+
+    return _impl
 
 
 def alac_decode(data: bytes) -> bytes:
@@ -275,6 +288,7 @@ class FakeRaopService(HttpSimpleRouter):
         if self._control_server:
             self._control_server.close()
 
+    @requires_auth
     def handle_announce(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming ANNOUNCE request."""
         _LOGGER.debug("Received ANNOUNCE: %s", request)
@@ -287,6 +301,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SETUP request."""
         _LOGGER.debug("Received SETUP: %s", request)
@@ -304,6 +319,7 @@ class FakeRaopService(HttpSimpleRouter):
         }
         return HttpResponse("RTSP", "1.0", 200, "OK", headers, b"")
 
+    @requires_auth
     def handle_set_parameter(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SET_PARAMETER request."""
         _LOGGER.debug("Received SET_PARAMETER: %s", request)
@@ -328,6 +344,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_feedback(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming feedback request."""
         _LOGGER.debug("Received feedback: %s", request)
@@ -345,6 +362,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_record(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming RECORD request."""
         _LOGGER.debug("Received RECORD: %s", request)
