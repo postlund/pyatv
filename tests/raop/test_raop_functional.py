@@ -7,7 +7,8 @@ TODO: Things to improve:
 """
 
 import logging
-from typing import Dict, List, Tuple
+import math
+from typing import Dict, List
 
 import pytest
 
@@ -25,6 +26,7 @@ FRAMES_PER_PACKET = 352
 
 METADATA_FIELDS = [FeatureName.Title, FeatureName.Artist, FeatureName.Album]
 PROGRESS_FIELDS = [FeatureName.Position, FeatureName.TotalTime]
+VOLUME_FIELDS = [FeatureName.SetVolume, FeatureName.Volume]
 
 
 @pytest.fixture(name="playing_listener")
@@ -246,3 +248,54 @@ async def test_send_feedback(raop_client, raop_usecase, raop_state, feedback_sup
         assert raop_state.feedback_packets_received > 1
     else:
         assert raop_state.feedback_packets_received == 1
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_set_volume_prior_to_streaming(raop_client, raop_state):
+    # Initial client sound level
+    assert math.isclose(raop_client.audio.volume, 33.0)
+
+    await raop_client.audio.set_volume(60)
+    assert math.isclose(raop_client.audio.volume, 60)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+    assert math.isclose(raop_state.volume, -12.0)
+
+
+@pytest.mark.parametrize(
+    "raop_properties,initial_level_supported,sender_expected,receiver_expected",
+    [
+        # Device supports default level: use that
+        ({"et": "0"}, True, 50.0, -15.0),
+        # Device does NOT support default level: use pyatv default
+        ({"et": "0"}, False, 33.0, -20.1),
+    ],
+)
+async def test_use_default_volume_from_device(
+    raop_client,
+    raop_state,
+    raop_usecase,
+    initial_level_supported,
+    sender_expected,
+    receiver_expected,
+):
+    raop_usecase.initial_audio_level_supported(initial_level_supported)
+
+    # Prior to streaming, we don't know the volume of the receiver so return default level
+    assert math.isclose(raop_client.audio.volume, 33.0)
+
+    # Default level on remote device
+    assert math.isclose(raop_state.volume, -15.0)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    # Level on the client and receiver should match now
+    assert math.isclose(raop_state.volume, receiver_expected)
+    assert math.isclose(raop_client.audio.volume, sender_expected)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_volume_features(raop_client):
+    assert_features_in_state(
+        raop_client.features.all_features(), VOLUME_FIELDS, FeatureState.Available
+    )

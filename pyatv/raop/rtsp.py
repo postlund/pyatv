@@ -1,6 +1,7 @@
 """Implementation of the RTSP protocol."""
 import asyncio
 import logging
+import plistlib
 from random import randrange
 from typing import Dict, Mapping, Optional, Tuple, Union
 
@@ -111,6 +112,16 @@ class RtspSession:
     def error_received(exc) -> None:
         """Handle a connection error."""
         _LOGGER.error("Error received: %s", exc)
+
+    async def info(self) -> Dict[str, object]:
+        """Return device information."""
+        device_info = await self.exchange("GET", "/info")
+        body = (
+            device_info.body
+            if isinstance(device_info.body, bytes)
+            else device_info.body.encode("utf-8")
+        )
+        return plistlib.loads(body)
 
     async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
