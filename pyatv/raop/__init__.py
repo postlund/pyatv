@@ -75,8 +75,9 @@ class RaopPlaybackManager:
     def __init__(self, address: str, port: int) -> None:
         """Initialize a new RaopPlaybackManager instance."""
         self.playback_info: Optional[PlaybackInfo] = None
-        self._address = address
-        self._port = port
+        self._is_acquired: bool = False
+        self._address: str = address
+        self._port: int = port
         self._context: RtspContext = RtspContext()
         self._connection: Optional[HttpConnection] = None
         self._rtsp: Optional[RtspSession] = None
@@ -91,6 +92,13 @@ class RaopPlaybackManager:
     def raop(self) -> Optional[RaopClient]:
         """Return RAOP client if a session is active."""
         return self._raop
+
+    def acquire(self) -> None:
+        """Acquire playback manager for playback."""
+        if self._is_acquired:
+            raise exceptions.InvalidStateError("already streaming to device")
+
+        self._is_acquired = True
 
     async def setup(self) -> Tuple[RaopClient, RtspSession, RtspContext]:
         """Set up a session or return active if it exists."""
@@ -112,6 +120,7 @@ class RaopPlaybackManager:
         self._context.reset()
         self._rtsp = None
         self._connection = None
+        self._is_acquired = False
 
 
 class RaopMetadata(Metadata):
@@ -243,6 +252,8 @@ class RaopStream(Stream):
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
+        self.playback_manager.acquire()
+
         # For now, we hi-jack credentials from AirPlay (even though they are passed via
         # the RAOP service) and use the same verification procedure as AirPlay, since
         # it's the same in practice.
@@ -251,9 +262,10 @@ class RaopStream(Stream):
             if self.service.credentials
             else None
         )
-        client, _, context = await self.playback_manager.setup()
-        client.credentials = credentials
         try:
+            client, _, context = await self.playback_manager.setup()
+            client.credentials = credentials
+
             client.listener = self.listener
             await client.initialize(self.service.properties)
 
