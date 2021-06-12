@@ -392,3 +392,11 @@ async def test_mute_volume_from_client(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
     assert math.isclose(raop_state.volume, -144.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
+    raop_usecase.supports_info(False)
+
+    # Should just not crash with an error if endpoint is not supported
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))

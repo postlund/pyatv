@@ -117,7 +117,13 @@ class RtspSession:
 
     async def info(self) -> Dict[str, object]:
         """Return device information."""
-        device_info = await self.exchange("GET", "/info")
+        device_info = await self.exchange("GET", "/info", allow_error=True)
+
+        # If not supported, just return an empty dict
+        if device_info.code != 200:
+            _LOGGER.debug("Device does not support /info")
+            return {}
+
         body = (
             device_info.body
             if isinstance(device_info.body, bytes)
