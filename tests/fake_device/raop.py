@@ -64,6 +64,7 @@ class FakeRaopState:
         self.remote_address: Optional[str] = None
         self.volume: float = INITIAL_VOLUME
         self.initial_audio_level_supported: bool = False
+        self.info_supported: bool = True
 
     @property
     def raw_audio(self) -> bytes:
@@ -385,6 +386,17 @@ class FakeRaopService(HttpSimpleRouter):
 
     def handle_info(self, request: HttpRequest) -> Optional[HttpRequest]:
         """Handle incoming info request."""
+        if not self.state.info_supported:
+            return HttpResponse(
+                "RTSP",
+                "1.0",
+                400,
+                "Bad Request",
+                {
+                    "CSeq": request.headers["CSeq"],
+                },
+                b"",
+            )
         info = {}
         if self.state.initial_audio_level_supported:
             info["initialVolume"] = self.state.volume
@@ -427,3 +439,7 @@ class FakeRaopUseCases:
     def require_auth(self, is_required: bool) -> None:
         """Enable or disable requirement to perform authentication."""
         self.state.auth_required = is_required
+
+    def supports_info(self, is_supported: bool) -> None:
+        """State if /info is supported or not."""
+        self.state.info_supported = is_supported
