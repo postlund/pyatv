@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import logging
 from time import monotonic
-from typing import Any, List, Mapping, NamedTuple, Optional, Tuple, cast
+from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 import wave
 import weakref
 
@@ -297,6 +297,7 @@ class RaopClient:
         self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
         self._listener: Optional[weakref.ReferenceType[Any]] = None
+        self._info: Dict[str, object] = {}
 
     @property
     def listener(self):
@@ -320,6 +321,11 @@ class RaopClient:
             MISSING_METADATA if self._metadata == EMPTY_METADATA else self._metadata
         )
         return PlaybackInfo(metadata, self.context.position)
+
+    @property
+    def info(self) -> Dict[str, object]:
+        """Return value mappings for server /info values."""
+        return self._info
 
     def close(self):
         """Close session and free up resources."""
@@ -383,6 +389,9 @@ class RaopClient:
             self.control_client.port,
             self.timing_client.port,
         )
+
+        self._info.update(await self.rtsp.info())
+        _LOGGER.debug("Updated info parameters to: %s", self.info)
 
     def _update_output_properties(self, properties: Mapping[str, str]) -> None:
         (
@@ -465,9 +474,6 @@ class RaopClient:
                     self.context.rtptime,
                     self.playback_info.metadata,
                 )
-
-            # Set a decent volume (range is [-30.0, 0] and -144 is muted)
-            await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
             feedback = await self.rtsp.feedback(allow_error=True)

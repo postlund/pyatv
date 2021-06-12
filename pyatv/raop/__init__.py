@@ -8,6 +8,7 @@ from pyatv import conf, const, exceptions
 from pyatv.airplay.srp import LegacyCredentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import (
+    Audio,
     FeatureInfo,
     Features,
     Metadata,
@@ -20,10 +21,13 @@ from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.miniaudio import MiniaudioWrapper
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
+from pyatv.support import map_range
 from pyatv.support.http import ClientSessionManager, http_connect
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
+
+INITIAL_VOLUME = 33.0
 
 
 class RaopPushUpdater(PushUpdater):
@@ -124,6 +128,10 @@ class RaopFeatures(Features):
         if feature_name in [FeatureName.Position, FeatureName.TotalTime]:
             return self._availability(metadata.duration)
 
+        # As far as known, volume controls are always supported
+        if feature_name in [FeatureName.SetVolume, FeatureName.Volume, FeatureName]:
+            return FeatureInfo(FeatureState.Available)
+
         return FeatureInfo(FeatureState.Unavailable)
 
     @staticmethod
@@ -131,6 +139,28 @@ class RaopFeatures(Features):
         return FeatureInfo(
             FeatureState.Available if value else FeatureState.Unavailable
         )
+
+
+class RaopAudio(Audio):
+    """Implementation of audio functionality."""
+
+    def __init__(self):
+        """Initialize a new RaopAudio instance."""
+        self._volume: Optional[float] = None
+
+    @property
+    def has_changed_volume(self) -> bool:
+        """Return whether volume has changed from default or not."""
+        return self._volume is not None
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level."""
+        return self._volume or INITIAL_VOLUME
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        self._volume = level
 
 
 class RaopStream(Stream):
@@ -141,13 +171,13 @@ class RaopStream(Stream):
         address: str,
         service: conf.RaopService,
         listener: RaopListener,
-        loop: asyncio.AbstractEventLoop,
+        audio: RaopAudio,
     ) -> None:
         """Initialize a new RaopStream instance."""
-        self.loop = loop
         self.address = address
         self.service = service
         self.listener = listener
+        self.audio = audio
 
     async def stream_file(self, filename: str, **kwargs) -> None:
         """Stream local file to device.
@@ -186,6 +216,22 @@ class RaopStream(Stream):
                 metadata = await get_metadata(filename)
             except Exception as ex:
                 _LOGGER.warning("Failed to extract metadata from %s: %s", filename, ex)
+
+            # If the user didn't change volume level prior to streaming, try to extract
+            # volume level from device (if supported). Otherwise set the default level
+            # in pyatv.
+            if not self.audio.has_changed_volume and "initialVolume" in client.info:
+                initial_volume = client.info["initialVolume"]
+                if not isinstance(initial_volume, float):
+                    raise exceptions.ProtocolError(
+                        f"initial volume {initial_volume} has "
+                        "incorrect type {type(initial_volume)}",
+                    )
+                remapped = map_range(initial_volume, -30.0, 0.0, 0.0, 100.0)
+                await self.audio.set_volume(remapped)
+            else:
+                remapped = map_range(self.audio.volume, 0.0, 100.0, -30.0, 0.0)
+                await session.set_parameter("volume", str(remapped))
 
             await client.send_audio(audio_file, metadata)
         finally:
@@ -233,13 +279,16 @@ def setup(
     service = cast(conf.RaopService, service)
 
     raop_listener = RaopStateListener()
+    raop_audio = RaopAudio()
 
     interfaces[Stream].register(
-        RaopStream(str(config.address), service, raop_listener, loop), Protocol.RAOP
+        RaopStream(str(config.address), service, raop_listener, raop_audio),
+        Protocol.RAOP,
     )
     interfaces[Features].register(RaopFeatures(state_manager), Protocol.RAOP)
     interfaces[PushUpdater].register(push_updater, Protocol.RAOP)
     interfaces[Metadata].register(metadata, Protocol.RAOP)
+    interfaces[Audio].register(raop_audio, Protocol.RAOP)
 
     async def _connect() -> None:
         pass
@@ -259,6 +308,8 @@ def setup(
                 FeatureName.Title,
                 FeatureName.Position,
                 FeatureName.TotalTime,
+                FeatureName.SetVolume,
+                FeatureName.Volume,
             ]
         ),
     )
