@@ -253,14 +253,14 @@ class RaopStream(Stream):
 
     def __init__(
         self,
-        address: str,
+        config: conf.AppleTV,
         service: conf.RaopService,
         listener: RaopListener,
         audio: RaopAudio,
         playback_manager: RaopPlaybackManager,
     ) -> None:
         """Initialize a new RaopStream instance."""
-        self.address = address
+        self.config = config
         self.service = service
         self.listener = listener
         self.audio = audio
@@ -272,18 +272,9 @@ class RaopStream(Stream):
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
         self.playback_manager.acquire()
-
-        # For now, we hi-jack credentials from AirPlay (even though they are passed via
-        # the RAOP service) and use the same verification procedure as AirPlay, since
-        # it's the same in practice.
-        credentials = (
-            LegacyCredentials.parse(self.service.credentials)
-            if self.service.credentials
-            else None
-        )
         try:
             client, _, context = await self.playback_manager.setup()
-            client.credentials = credentials
+            client.credentials = self._get_credentials()
 
             client.listener = self.listener
             await client.initialize(self.service.properties)
@@ -321,6 +312,21 @@ class RaopStream(Stream):
             await client.send_audio(audio_file, metadata)
         finally:
             await self.playback_manager.teardown()
+
+    def _get_credentials(self) -> Optional[LegacyCredentials]:
+        credentials: Optional[str] = None
+
+        # First and foremost use RAOP credentials, otherwise fall back to AirPlay
+        # if available
+        if self.service.credentials:
+            credentials = self.service.credentials
+        else:
+            service = self.config.get_service(Protocol.AirPlay)
+            if service:
+                airplay_service = cast(conf.AirPlayService, service)
+                credentials = airplay_service.credentials
+
+        return LegacyCredentials.parse(credentials) if credentials else None
 
 
 class RaopRemoteControl(RemoteControl):
@@ -381,9 +387,7 @@ def setup(
     raop_audio = RaopAudio(playback_manager)
 
     interfaces[Stream].register(
-        RaopStream(
-            str(config.address), service, raop_listener, raop_audio, playback_manager
-        ),
+        RaopStream(config, service, raop_listener, raop_audio, playback_manager),
         Protocol.RAOP,
     )
     interfaces[Features].register(RaopFeatures(playback_manager), Protocol.RAOP)
