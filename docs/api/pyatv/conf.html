@@ -293,7 +293,7 @@ class DmapService(BaseService):
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
-            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            identifier,
             Protocol.DMAP,
             port,
             properties,
@@ -931,7 +931,7 @@ returned.</p></section>
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
-            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            identifier,
             Protocol.DMAP,
             port,
             properties,
