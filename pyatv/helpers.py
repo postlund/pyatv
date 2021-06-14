@@ -1,9 +1,15 @@
 """Various helper methods."""
 
 import asyncio
-from typing import Callable, Optional
+from typing import Callable, Mapping, Optional
 
 import pyatv
+
+HOMESHARING_SERVICE: str = "_appletv-v2._tcp.local"
+DEVICE_SERVICE: str = "_touch-able._tcp.local"
+MEDIAREMOTE_SERVICE: str = "_mediaremotetv._tcp.local"
+AIRPLAY_SERVICE: str = "_airplay._tcp.local"
+RAOP_SERVICE: str = "_raop._tcp.local"
 
 
 async def auto_connect(
@@ -39,3 +45,27 @@ async def auto_connect(
 
     loop = loop or asyncio.get_event_loop()
     await _handle(loop)
+
+
+def get_unique_id(
+    service_type: str, service_name: str, properties: Mapping[str, str]
+) -> Optional[str]:
+    """Return unique identifier from a Zeroconf service.
+
+    `service_type` is the Zeroconf service type (e.g. *_mediaremotetv._tcp.local*),
+    `service_name` name of the service (e.g. *Office* or *Living Room*) and
+    `properties` all key-value properties belonging to the service.
+
+    The unique identifier is returned if available, otherwise `None` is returned.
+    """
+    if service_type == HOMESHARING_SERVICE:
+        return properties.get("hG")
+    if service_type == DEVICE_SERVICE:
+        return service_name.split("_")[0]
+    if service_type == MEDIAREMOTE_SERVICE:
+        return properties.get("UniqueIdentifier")
+    if service_type == AIRPLAY_SERVICE:
+        return properties.get("deviceid")
+    if service_type == RAOP_SERVICE:
+        return service_name.split("@")[0]
+    return None

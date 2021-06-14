@@ -67,3 +67,19 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
 
     assert obj.found == mock_device
     mock_device.close.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "service_type,service_name,properties,expected_id",
+    [
+        ("_unknown._tcp.local", "name", {}, None),
+        ("_appletv-v2._tcp.local", "name", {"hG": "test"}, "test"),
+        ("_touch-able._tcp.local", "name", {}, "name"),
+        ("_touch-able._tcp.local", "name_duplicate", {}, "name"),
+        ("_mediaremotetv._tcp.local", "name", {"UniqueIdentifier": "test"}, "test"),
+        ("_airplay._tcp.local", "name", {"deviceid": "test"}, "test"),
+        ("_raop._tcp.local", "abcd@name", {}, "abcd"),
+    ],
+)
+def test_get_unique_id_(service_type, service_name, properties, expected_id):
+    assert helpers.get_unique_id(service_type, service_name, properties) == expected_id

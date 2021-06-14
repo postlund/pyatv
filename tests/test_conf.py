@@ -257,13 +257,6 @@ def test_ready(config, service, expected):
     assert config.ready == expected
 
 
-# Name collisions on the network results in _X being added to the identifier,
-# which should be stripped
-def test_dmap_identifier_strip():
-    service = conf.DmapService("abcd_2", "dummy")
-    assert service.identifier == "abcd"
-
-
 # This test is a bit strange and couples to protocol specific services,
 # but it's mainly to exercise string as that is important. Might refactor
 # this in the future.

@@ -8,6 +8,7 @@ import os
 from typing import Dict, Generator, List, Mapping, Optional
 
 from pyatv import conf, interface
+from pyatv.helpers import get_unique_id
 from pyatv.support import knock, mdns
 from pyatv.support.device_info import lookup_internal_name
 
@@ -54,16 +55,9 @@ def get_unique_identifiers(
 ) -> Generator[Optional[str], None, None]:
     """Return (yield) all unique identifiers for a response."""
     for service in response.services:
-        if service.type == HOMESHARING_SERVICE:
-            yield service.properties.get("hG")
-        elif service.type == DEVICE_SERVICE:
-            yield service.name
-        elif service.type == MEDIAREMOTE_SERVICE:
-            yield service.properties.get("UniqueIdentifier")
-        elif service.type == AIRPLAY_SERVICE:
-            yield service.properties.get("deviceid")
-        elif service.type == RAOP_SERVICE:
-            yield service.name.split("@")[0]
+        unique_id = get_unique_id(service.type, service.name, service.properties)
+        if unique_id:
+            yield unique_id
 
 
 class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
