@@ -297,6 +297,7 @@ class RaopClient:
         self._keep_alive_task: Optional[asyncio.Future] = None
         self._listener: Optional[weakref.ReferenceType[Any]] = None
         self._info: Dict[str, object] = {}
+        self._properties: Mapping[str, str] = {}
 
     @property
     def listener(self):
@@ -353,6 +354,7 @@ class RaopClient:
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
+        self._properties = properties
         self._encryption_types = get_encryption_types(properties)
         self._metadata_types = get_metadata_types(properties)
 
@@ -410,8 +412,7 @@ class RaopClient:
         )
 
     async def _setup_session(self):
-        # Do auth-setup if MFiSAP encryption is supported by receiver
-        if EncryptionType.MFiSAP in self._encryption_types:
+        if self._requires_auth_setup:
             await self.rtsp.auth_setup()
         elif self.credentials:
             _LOGGER.debug("Verifying connection with credentials %s", self.credentials)
@@ -434,6 +435,18 @@ class RaopClient:
             self.context.control_port,
             self.context.timing_port,
             self.context.server_port,
+        )
+
+    @property
+    def _requires_auth_setup(self):
+        # Do auth-setup if MFiSAP encryption is supported by receiver. Also,
+        # at least for now, only do this for AirPort Express as some receivers
+        # won't play audio if setup process isn't finished:
+        # https://github.com/postlund/pyatv/issues/1134
+        model_name = self._properties.get("am", "")
+        return (
+            EncryptionType.MFiSAP in self._encryption_types
+            and model_name.startswith("AirPort")
         )
 
     async def set_volume(self, volume: float) -> None:
