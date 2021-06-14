@@ -889,7 +889,10 @@ class Features:
 
 
 class Audio:
-    """Base class for audio functionality."""
+    """Base class for audio functionality.
+
+    Volume level is managed in percent where 0 is muted and 100 is max volume.
+    """
 
     @property  # type: ignore
     @feature(45, "Volume", "Current volume level.")

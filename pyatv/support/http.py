@@ -438,9 +438,15 @@ class BasicHttpServer(asyncio.Protocol):
         """Handle incoming HTTP request."""
         _LOGGER.debug("Received: %s", data)
 
+        # Process all requests in packet
+        while data:
+            data = self._parse_and_send_next(data)
+
+    def _parse_and_send_next(self, data: bytes):
         resp: Optional[HttpResponse] = None
+        rest: bytes = b""
         try:
-            request, _ = parse_request(data)
+            request, rest = parse_request(data)
 
             # TODO: If no request could be parsed, then there's not enough data.
             # Segmented requests (over several IP packets) are currently not
@@ -472,6 +478,8 @@ class BasicHttpServer(asyncio.Protocol):
 
         if self.transport:
             self.transport.write(response.encode("utf-8") + b"\r\n" + body)
+
+        return rest
 
 
 class StaticFileWebServer:

@@ -1,6 +1,8 @@
 """Fake RAOP device for tests."""
 import asyncio
+from functools import wraps
 import logging
+import plistlib
 from types import SimpleNamespace
 from typing import Dict, Optional, cast
 
@@ -20,6 +22,20 @@ from pyatv.support.http import (
 
 _LOGGER = logging.getLogger(__name__)
 
+INITIAL_VOLUME = -15.0
+
+
+def requires_auth(method):
+    @wraps(method)
+    def _impl(self, request: HttpRequest, *args, **kwargs):
+        if self.state.auth_required and not self.state.auth_setup_performed:
+            return HttpResponse(
+                "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
+            )
+        return method(self, request, *args, **kwargs)
+
+    return _impl
+
 
 def alac_decode(data: bytes) -> bytes:
     """Decode an ALAC frame and return raw audio data."""
@@ -37,6 +53,7 @@ class FakeRaopState:
     def __init__(self):
         self.metadata = SimpleNamespace(title=None, artist=None, album=None)
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
+        self.auth_required: bool = False
         self.auth_setup_performed: bool = False
         self.supports_retransmissions: bool = True
         self.supports_feedback: bool = True
@@ -45,6 +62,9 @@ class FakeRaopState:
         self.drop_packets: int = 0
         self.control_port: int = 0
         self.remote_address: Optional[str] = None
+        self.volume: float = INITIAL_VOLUME
+        self.initial_audio_level_supported: bool = False
+        self.info_supported: bool = True
 
     @property
     def raw_audio(self) -> bytes:
@@ -227,6 +247,7 @@ class FakeRaopService(HttpSimpleRouter):
         self.add_route("POST", "/feedback", self.handle_feedback)
         self.add_route("RECORD", "rtsp://*", self.handle_record)
         self.add_route("POST", "/auth-setup", self.handle_auth_setup)
+        self.add_route("GET", "/info", self.handle_info)
 
     async def start(self, start_web_server: bool):
         """Start the fake RAOP service."""
@@ -268,6 +289,7 @@ class FakeRaopService(HttpSimpleRouter):
         if self._control_server:
             self._control_server.close()
 
+    @requires_auth
     def handle_announce(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming ANNOUNCE request."""
         _LOGGER.debug("Received ANNOUNCE: %s", request)
@@ -280,6 +302,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SETUP request."""
         _LOGGER.debug("Received SETUP: %s", request)
@@ -297,6 +320,7 @@ class FakeRaopService(HttpSimpleRouter):
         }
         return HttpResponse("RTSP", "1.0", 200, "OK", headers, b"")
 
+    @requires_auth
     def handle_set_parameter(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SET_PARAMETER request."""
         _LOGGER.debug("Received SET_PARAMETER: %s", request)
@@ -305,10 +329,23 @@ class FakeRaopService(HttpSimpleRouter):
             self.state.metadata.title = parser.first(tags, "mlit", "minm")
             self.state.metadata.artist = parser.first(tags, "mlit", "asar")
             self.state.metadata.album = parser.first(tags, "mlit", "asal")
+        elif request.body.startswith("volume:"):
+            self.state.volume = float(request.body.split(" ", maxsplit=1)[1])
+            _LOGGER.debug("Changing volume to %f", self.state.volume)
+        else:
+            return HttpResponse(
+                "RTSP",
+                "1.0",
+                501,
+                "Not implemented",
+                {"CSeq": request.headers["CSeq"]},
+                b"",
+            )
         return HttpResponse(
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_feedback(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming feedback request."""
         _LOGGER.debug("Received feedback: %s", request)
@@ -326,6 +363,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
     def handle_record(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming RECORD request."""
         _LOGGER.debug("Received RECORD: %s", request)
@@ -334,6 +372,7 @@ class FakeRaopService(HttpSimpleRouter):
         )
 
     def handle_auth_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
+        """Handle incoming auth-setup request."""
         _LOGGER.debug("Received auth-setup: %s", request)
         # Just check if decent sized payload is there
         if len(request.body) == 1 + 32:  # auth type + public key
@@ -343,6 +382,34 @@ class FakeRaopService(HttpSimpleRouter):
             )
         return HttpResponse(
             "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
+        )
+
+    def handle_info(self, request: HttpRequest) -> Optional[HttpRequest]:
+        """Handle incoming info request."""
+        if not self.state.info_supported:
+            return HttpResponse(
+                "RTSP",
+                "1.0",
+                400,
+                "Bad Request",
+                {
+                    "CSeq": request.headers["CSeq"],
+                },
+                b"",
+            )
+        info = {}
+        if self.state.initial_audio_level_supported:
+            info["initialVolume"] = self.state.volume
+        return HttpResponse(
+            "RTSP",
+            "1.0",
+            200,
+            "OK",
+            {
+                "CSeq": request.headers["CSeq"],
+                "content-type": "application/x-apple-binary-plist",
+            },
+            plistlib.dumps(info),
         )
 
 
@@ -364,3 +431,15 @@ class FakeRaopUseCases:
     def feedback_enabled(self, enabled: bool) -> None:
         """Enable or disable support for /feedback endpoint."""
         self.state.supports_feedback = enabled
+
+    def initial_audio_level_supported(self, supported: bool) -> None:
+        """Initial audio level reported in info from device."""
+        self.state.initial_audio_level_supported = supported
+
+    def require_auth(self, is_required: bool) -> None:
+        """Enable or disable requirement to perform authentication."""
+        self.state.auth_required = is_required
+
+    def supports_info(self, is_supported: bool) -> None:
+        """State if /info is supported or not."""
+        self.state.info_supported = is_supported

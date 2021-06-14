@@ -6,11 +6,14 @@ TODO: Things to improve:
 * Improve sync tests
 """
 
+import asyncio
 import logging
-from typing import Dict, List, Tuple
+import math
+from typing import Dict, List
 
 import pytest
 
+from pyatv import exceptions, raop
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType
 from pyatv.interface import FeatureInfo, Playing, PushListener
 
@@ -25,6 +28,12 @@ FRAMES_PER_PACKET = 352
 
 METADATA_FIELDS = [FeatureName.Title, FeatureName.Artist, FeatureName.Album]
 PROGRESS_FIELDS = [FeatureName.Position, FeatureName.TotalTime]
+VOLUME_FIELDS = [
+    FeatureName.SetVolume,
+    FeatureName.Volume,
+    FeatureName.VolumeUp,
+    FeatureName.VolumeDown,
+]
 
 
 @pytest.fixture(name="playing_listener")
@@ -34,12 +43,14 @@ async def playing_listener_fixture(raop_client):
             """Initialize a new PlayingListener instance."""
             self.updates: List[Playing] = []
             self.all_features: Dict[FeatureName, FeatureInfo] = {}
+            self.playing_event = asyncio.Event()
 
         def playstatus_update(self, updater, playstatus: Playing) -> None:
             """Inform about changes to what is currently playing."""
             self.updates.append(playstatus)
             if playstatus.device_state == DeviceState.Playing:
                 self.all_features = raop_client.features.all_features()
+                self.playing_event.set()
 
         def playstatus_error(self, updater, exception: Exception) -> None:
             """Inform about an error when updating play status."""
@@ -111,7 +122,9 @@ async def test_stream_complete_file(raop_client, raop_state):
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "4"})])
-async def test_stream_complete_legacy_auth(raop_client, raop_state):
+async def test_stream_complete_legacy_auth(raop_client, raop_state, raop_usecase):
+    raop_usecase.require_auth(True)
+
     await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
 
     assert raop_state.auth_setup_performed
@@ -246,3 +259,144 @@ async def test_send_feedback(raop_client, raop_usecase, raop_state, feedback_sup
         assert raop_state.feedback_packets_received > 1
     else:
         assert raop_state.feedback_packets_received == 1
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_set_volume_prior_to_streaming(raop_client, raop_state):
+    # Initial client sound level
+    assert math.isclose(raop_client.audio.volume, 33.0)
+
+    await raop_client.audio.set_volume(60)
+    assert math.isclose(raop_client.audio.volume, 60)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+    assert math.isclose(raop_state.volume, -12.0)
+
+
+@pytest.mark.parametrize(
+    "raop_properties,initial_level_supported,sender_expected,receiver_expected",
+    [
+        # Device supports default level: use that
+        ({"et": "0"}, True, 50.0, -15.0),
+        # Device does NOT support default level: use pyatv default
+        ({"et": "0"}, False, 33.0, -20.1),
+    ],
+)
+async def test_use_default_volume_from_device(
+    raop_client,
+    raop_state,
+    raop_usecase,
+    initial_level_supported,
+    sender_expected,
+    receiver_expected,
+):
+    raop_usecase.initial_audio_level_supported(initial_level_supported)
+
+    # Prior to streaming, we don't know the volume of the receiver so return default level
+    assert math.isclose(raop_client.audio.volume, 33.0)
+
+    # Default level on remote device
+    assert math.isclose(raop_state.volume, -15.0)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    # Level on the client and receiver should match now
+    assert math.isclose(raop_state.volume, receiver_expected)
+    assert math.isclose(raop_client.audio.volume, sender_expected)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_set_volume_during_playback(raop_client, raop_state, playing_listener):
+    # Set maximum volume as initial volume
+    await raop_client.audio.set_volume(100.0)
+
+    # Start playback in the background
+    future = asyncio.ensure_future(
+        raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
+    )
+
+    # Wait for device to move to playing state and verify volume
+    await playing_listener.playing_event.wait()
+    assert math.isclose(raop_state.volume, -0.0)
+
+    # Change volume, which we now know will happen during playback
+    await raop_client.audio.set_volume(50.0)
+    assert math.isclose(raop_state.volume, -15.0)
+
+    await future
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_volume_features(raop_client):
+    assert_features_in_state(
+        raop_client.features.all_features(), VOLUME_FIELDS, FeatureState.Available
+    )
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_volume_up_volume_down(raop_client):
+    # Only test on the client as other tests should confirm that it is set correctly
+    # on the receiver
+    await raop_client.audio.set_volume(95.0)
+
+    # Increase by 5% if volume_up is called
+    await raop_client.remote_control.volume_up()
+    assert math.isclose(raop_client.audio.volume, 100.0)
+
+    # Stop at max level without any error
+    await raop_client.remote_control.volume_up()
+    assert math.isclose(raop_client.audio.volume, 100.0)
+
+    await raop_client.audio.set_volume(5.0)
+
+    # Decrease by 5% if volume_down is called
+    await raop_client.remote_control.volume_down()
+    assert math.isclose(raop_client.audio.volume, 0.0)
+
+    # Stop at min level without any error
+    await raop_client.remote_control.volume_down()
+    assert math.isclose(raop_client.audio.volume, 0.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_only_allow_one_stream_at_the_time(raop_client):
+    # This is not pretty, but the idea is to start two concurrent streaming tasks, wait
+    # for them to finish and verify that one of them raised an exception. This is to
+    # avoid making any assumptions regarding in which order they are scheduled on the
+    # event loop.
+    result = await asyncio.gather(
+        raop_client.stream.stream_file(data_path("audio_3_packets.wav")),
+        raop_client.stream.stream_file(data_path("only_metadata.wav")),
+        return_exceptions=True,
+    )
+
+    result.remove(None)  # Should be one None for success and one exception
+    assert len(result) == 1
+    assert isinstance(result[0], exceptions.InvalidStateError)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_muted_volume_from_receiver(raop_client, raop_state, raop_usecase):
+    raop_usecase.initial_audio_level_supported(True)
+    raop_state.volume = -144.0
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    assert math.isclose(raop_client.audio.volume, 0.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_mute_volume_from_client(raop_client, raop_state):
+    await raop_client.audio.set_volume(0.0)
+
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+    assert math.isclose(raop_state.volume, -144.0)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
+    raop_usecase.supports_info(False)
+
+    # Should just not crash with an error if endpoint is not supported
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))

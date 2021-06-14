@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import logging
 from time import monotonic
-from typing import Any, List, Mapping, NamedTuple, Optional, Tuple, cast
+from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 import wave
 import weakref
 
@@ -282,13 +282,12 @@ class RaopClient:
         self,
         rtsp: RtspSession,
         context: RtspContext,
-        credentials: Optional[LegacyCredentials],
     ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
-        self.credentials: Optional[LegacyCredentials] = credentials
+        self.credentials: Optional[LegacyCredentials] = None
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -297,6 +296,7 @@ class RaopClient:
         self._metadata: AudioMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
         self._listener: Optional[weakref.ReferenceType[Any]] = None
+        self._info: Dict[str, object] = {}
 
     @property
     def listener(self):
@@ -320,6 +320,11 @@ class RaopClient:
             MISSING_METADATA if self._metadata == EMPTY_METADATA else self._metadata
         )
         return PlaybackInfo(metadata, self.context.position)
+
+    @property
+    def info(self) -> Dict[str, object]:
+        """Return value mappings for server /info values."""
+        return self._info
 
     def close(self):
         """Close session and free up resources."""
@@ -384,6 +389,12 @@ class RaopClient:
             self.timing_client.port,
         )
 
+        self._info.update(await self.rtsp.info())
+        _LOGGER.debug("Updated info parameters to: %s", self.info)
+
+        # Set up the streaming session
+        await self._setup_session()
+
     def _update_output_properties(self, properties: Mapping[str, str]) -> None:
         (
             self.context.sample_rate,
@@ -425,6 +436,11 @@ class RaopClient:
             self.context.server_port,
         )
 
+    async def set_volume(self, volume: float) -> None:
+        """Change volume on the receiver."""
+        await self.rtsp.set_parameter("volume", str(volume))
+        self.context.volume = volume
+
     async def send_audio(  # pylint: disable=too-many-branches
         self, wave_file, metadata: AudioMetadata = EMPTY_METADATA
     ):
@@ -434,9 +450,6 @@ class RaopClient:
 
         transport = None
         try:
-            # Set up the streaming session
-            await self._setup_session()
-
             # Create a socket used for writing audio packets (ugly)
             transport, _ = await self.loop.create_datagram_endpoint(
                 AudioProtocol,
@@ -465,9 +478,6 @@ class RaopClient:
                     self.context.rtptime,
                     self.playback_info.metadata,
                 )
-
-            # Set a decent volume (range is [-30.0, 0] and -144 is muted)
-            await self.rtsp.set_parameter("volume", "-20")
 
             # Start keep-alive task to ensure connection is not closed by remote device
             feedback = await self.rtsp.feedback(allow_error=True)

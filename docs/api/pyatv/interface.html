@@ -1129,7 +1129,10 @@ class Features:
 
 
 class Audio:
-    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Base class for audio functionality.
+
+    Volume level is managed in percent where 0 is muted and 100 is max volume.
+    &#34;&#34;&#34;
 
     @property  # type: ignore
     @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
@@ -1686,13 +1689,17 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <span>class <span class="ident">Audio</span></span>
 </code></dt>
 <dd>
-<section class="desc"><p>Base class for audio functionality.</p></section>
+<section class="desc"><p>Base class for audio functionality.</p>
+<p>Volume level is managed in percent where 0 is muted and 100 is max volume.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Audio:
-    &#34;&#34;&#34;Base class for audio functionality.&#34;&#34;&#34;
+    &#34;&#34;&#34;Base class for audio functionality.
+
+    Volume level is managed in percent where 0 is muted and 100 is max volume.
+    &#34;&#34;&#34;
 
     @property  # type: ignore
     @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
@@ -1707,6 +1714,7 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li>pyatv.raop.RaopAudio</li>
 <li>pyatv.support.facade.FacadeAudio</li>
 </ul>
 <h3>Instance variables</h3>
@@ -3464,6 +3472,7 @@ def stop(self) -&gt; None:
 <ul class="hlist">
 <li>pyatv.dmap.DmapRemoteControl</li>
 <li>pyatv.mrp.MrpRemoteControl</li>
+<li>pyatv.raop.RaopRemoteControl</li>
 <li>pyatv.support.facade.FacadeRemoteControl</li>
 </ul>
 <h3>Methods</h3>
