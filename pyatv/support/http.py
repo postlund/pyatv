@@ -208,7 +208,7 @@ class HttpSession:
                 resp_data = await resp.read()
                 log_binary(_LOGGER, "<< GET", Data=resp_data)
             else:
-                resp_data = None
+                resp_data = b""
             return resp_data, resp.status
         except Exception:
             if resp is not None:
@@ -245,7 +245,7 @@ class HttpSession:
                 resp_data = await resp.read()
                 log_binary(_LOGGER, "<< POST", Data=resp_data)
             else:
-                resp_data = None
+                resp_data = b""
             return resp_data, resp.status
         except Exception as ex:
             if resp is not None:
@@ -491,7 +491,7 @@ class StaticFileWebServer:
         self.app = web.Application(middlewares=[self._middleware])
         self.app.router.add_static("/", self.path.parent, show_index=False)
         self.runner = web.AppRunner(self.app)
-        self.site = None
+        self.site: Optional[web.TCPSite] = None
         self._address = address  # Local address to bind to
         self._port = port
 

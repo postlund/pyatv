@@ -16,3 +16,13 @@ forced_separate = [
     "tests",
     "scripts",
 ]
+
+[[tool.mypy.overrides]]
+module = [
+    "miniaudio",
+    "audio_metadata",
+    "netifaces",
+    "srptools",
+    "bitarray",
+]
+ignore_missing_imports = true
