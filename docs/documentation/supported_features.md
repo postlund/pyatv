@@ -192,6 +192,9 @@ AirTunes).
 * Push Updates
 * Volume controls (volume level, set_volume, volume_up, volume_down)
 * One stream can be played at the time (second call raises {% include api i="exceptions.InvalidStateError" %})
+* If the device requires pairing, e.g. Apple TV 4 or later, the same pairing
+  procedure and credentials as AirPlay is to be used. If AirPlay credentials
+  are present, they will be used if no RAOP credentials are given.
 
 ### Limitations and notes
 
