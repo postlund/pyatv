@@ -468,7 +468,7 @@ async def publish(loop: asyncio.AbstractEventLoop, service: Service, zconf: Zero
         f"{service.name}.{service.type}.",
         addresses=[service.address.packed],
         port=service.port,
-        properties=service.properties,
+        properties=dict(service.properties),
     )
 
     _LOGGER.debug("Publishing zeroconf service: %s", zsrv)

@@ -3,8 +3,6 @@ import asyncio
 import logging
 from typing import Optional, cast
 
-from aiohttp import ClientSession
-
 from pyatv import exceptions
 from pyatv.companion.auth import CompanionPairingProcedure
 from pyatv.companion.connection import CompanionConnection
@@ -14,6 +12,7 @@ from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
 from pyatv.support.hap_srp import SRPAuthHandler
+from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +20,9 @@ _LOGGER = logging.getLogger(__name__)
 class CompanionPairingHandler(PairingHandler):
     """Pairing handler used to pair the Companion link protocol."""
 
-    def __init__(self, config, session: ClientSession, loop: asyncio.AbstractEventLoop):
+    def __init__(
+        self, config, session: ClientSessionManager, loop: asyncio.AbstractEventLoop
+    ):
         """Initialize a new CompanionPairingHandler."""
         super().__init__(session, config.get_service(Protocol.Companion))
         self.connection = CompanionConnection(

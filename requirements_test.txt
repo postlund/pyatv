@@ -15,3 +15,4 @@ pydocstyle==6.1.1
 mypy==0.902
 mypy-protobuf==1.24
 typed-ast==1.4.3
+types-protobuf==0.1.12
