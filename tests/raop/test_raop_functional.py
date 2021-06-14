@@ -121,13 +121,18 @@ async def test_stream_complete_file(raop_client, raop_state):
     assert audio_matches(raop_state.raw_audio, frames=10)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "4"})])
-async def test_stream_complete_legacy_auth(raop_client, raop_state, raop_usecase):
-    raop_usecase.require_auth(True)
+@pytest.mark.parametrize(
+    "raop_properties,require_auth",
+    [({"et": "4"}, False), ({"et": "4", "am": "AirPort10,115"}, True)],
+)
+async def test_stream_complete_legacy_auth(
+    raop_client, raop_state, raop_usecase, require_auth
+):
+    raop_usecase.require_auth(require_auth)
 
     await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
 
-    assert raop_state.auth_setup_performed
+    assert raop_state.auth_setup_performed == require_auth
     assert audio_matches(raop_state.raw_audio, frames=10)
 
 
