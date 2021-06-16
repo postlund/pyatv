@@ -149,4 +149,5 @@ You can find this example under `examples/scan_and_connect.py`
 
 It is recommended that you read the [Documentation](../documentation/) section to get
 a better grasp of how pyatv works. Then continue with [Development](../development)
-once you are ready to write some code.
+once you are ready to write some code. Next is however a tutorial
+you can follow if you want to try out creating a simple application!
