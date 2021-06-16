@@ -13,7 +13,7 @@ from pyatv.support.scan import (
     get_unique_identifiers,
 )
 
-HS = Service(HOMESHARING_SERVICE, "name", None, 0, {"hG": "hs_id"})
+HS = Service(HOMESHARING_SERVICE, "hsname", None, 0, {"hG": "hs_id"})
 DEVICE = Service(DEVICE_SERVICE, "devid", None, 0, {})
 MRP = Service(MEDIAREMOTE_SERVICE, "name", None, 0, {"UniqueIdentifier": "mrp_id"})
 AIRPLAY = Service(AIRPLAY_SERVICE, "name", None, 0, {"deviceid": "airplay_id"})
@@ -35,7 +35,7 @@ def test_unique_identifier_home_sharing(response):
 
     identifiers = list(get_unique_identifiers(response))
     assert len(identifiers) == 1
-    assert "hs_id" in identifiers
+    assert "hsname" in identifiers
 
 
 def test_unique_identifier_device(response):
@@ -80,7 +80,7 @@ def test_unique_identifier_multiple(response):
 
     identifiers = list(get_unique_identifiers(response))
     assert len(identifiers) == 5
-    assert "hs_id" in identifiers
+    assert "hsname" in identifiers
     assert "devid" in identifiers
     assert "mrp_id" in identifiers
     assert "airplay_id" in identifiers

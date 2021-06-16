@@ -93,16 +93,14 @@ def get_unique_id(
 
     The unique identifier is returned if available, otherwise `None` is returned.
     &#34;&#34;&#34;
-    if service_type == HOMESHARING_SERVICE:
-        return properties.get(&#34;hG&#34;)
-    if service_type == DEVICE_SERVICE:
+    if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
         return service_name.split(&#34;_&#34;)[0]
     if service_type == MEDIAREMOTE_SERVICE:
         return properties.get(&#34;UniqueIdentifier&#34;)
     if service_type == AIRPLAY_SERVICE:
         return properties.get(&#34;deviceid&#34;)
     if service_type == RAOP_SERVICE:
-        return service_name.split(&#34;@&#34;)[0]
+        return service_name.split(&#34;@&#34;, maxsplit=1)[0]
     return None</code></pre>
 </details>
 </section>
@@ -186,16 +184,14 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 
     The unique identifier is returned if available, otherwise `None` is returned.
     &#34;&#34;&#34;
-    if service_type == HOMESHARING_SERVICE:
-        return properties.get(&#34;hG&#34;)
-    if service_type == DEVICE_SERVICE:
+    if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
         return service_name.split(&#34;_&#34;)[0]
     if service_type == MEDIAREMOTE_SERVICE:
         return properties.get(&#34;UniqueIdentifier&#34;)
     if service_type == AIRPLAY_SERVICE:
         return properties.get(&#34;deviceid&#34;)
     if service_type == RAOP_SERVICE:
-        return service_name.split(&#34;@&#34;)[0]
+        return service_name.split(&#34;@&#34;, maxsplit=1)[0]
     return None</code></pre>
 </details>
 </dd>

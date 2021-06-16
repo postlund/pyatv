@@ -96,7 +96,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         """Add a new device to discovered list."""
         name = mdns_service.properties.get("Name", "Unknown")
         service = conf.DmapService(
-            mdns_service.name,
+            get_unique_id(
+                mdns_service.type, mdns_service.name, mdns_service.properties
+            ),
             mdns_service.properties.get("hG"),
             port=mdns_service.port,
             properties=mdns_service.properties,
@@ -109,7 +111,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         """Add a new device without Home Sharing to discovered list."""
         name = mdns_service.properties.get("CtlN", "Unknown")
         service = conf.DmapService(
-            mdns_service.name,
+            get_unique_id(
+                mdns_service.type, mdns_service.name, mdns_service.properties
+            ),
             None,
             port=mdns_service.port,
             properties=mdns_service.properties,
@@ -120,7 +124,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         """Add a new MediaRemoteProtocol device to discovered list."""
         name = mdns_service.properties.get("Name", "Unknown")
         service = conf.MrpService(
-            mdns_service.properties.get("UniqueIdentifier"),
+            get_unique_id(
+                mdns_service.type, mdns_service.name, mdns_service.properties
+            ),
             mdns_service.port,
             properties=mdns_service.properties,
         )
@@ -131,7 +137,9 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
     ) -> None:
         """Add a new AirPlay device to discovered list."""
         service = conf.AirPlayService(
-            mdns_service.properties.get("deviceid"),
+            get_unique_id(
+                mdns_service.type, mdns_service.name, mdns_service.properties
+            ),
             mdns_service.port,
             properties=mdns_service.properties,
         )
@@ -147,9 +155,11 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
 
     def _raop_service(self, mdns_service: mdns.Service, response: mdns.Response):
         """Add a new RAOP device to discovered list."""
-        identifier, name = mdns_service.name.split("@", maxsplit=1)
+        _, name = mdns_service.name.split("@", maxsplit=1)
         service = conf.RaopService(
-            identifier,
+            get_unique_id(
+                mdns_service.type, mdns_service.name, mdns_service.properties
+            ),
             mdns_service.port,
             properties=mdns_service.properties,
         )

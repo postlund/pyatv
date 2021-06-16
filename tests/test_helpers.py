@@ -73,11 +73,13 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
     "service_type,service_name,properties,expected_id",
     [
         ("_unknown._tcp.local", "name", {}, None),
-        ("_appletv-v2._tcp.local", "name", {"hG": "test"}, "test"),
+        ("_appletv-v2._tcp.local", "name", {}, "name"),
+        ("_appletv-v2._tcp.local", "name_duplicate", {}, "name"),
         ("_touch-able._tcp.local", "name", {}, "name"),
         ("_touch-able._tcp.local", "name_duplicate", {}, "name"),
         ("_mediaremotetv._tcp.local", "name", {"UniqueIdentifier": "test"}, "test"),
         ("_airplay._tcp.local", "name", {"deviceid": "test"}, "test"),
+        ("_raop._tcp.local", "abcd@name", {}, "abcd"),
         ("_raop._tcp.local", "abcd@name", {}, "abcd"),
     ],
 )
