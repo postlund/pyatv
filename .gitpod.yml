@@ -1,5 +1,6 @@
 image: gitpod/workspace-full
 tasks:
+  - before: "echo 'export PIP_USER=no' >> ~/.bashrc && export PIP_USER=no"
   - name: Documentation
     command: ./scripts/build_docs.sh
   - name: Development
