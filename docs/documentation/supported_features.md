@@ -206,7 +206,7 @@ AirTunes).
 * Devices requiring password are not supported
 * Remote control commands does not work (except for volume_up and volume_down),
   e.g. play or pause {% include issue no="1068" %}
-  * Does not implement support for {% include api i="interface.DeviceListener" %} and will
+* Does not implement support for {% include api i="interface.DeviceListener" %} and will
   *not* trigger `connection_lost` or `connection_closed` when used stand-alone.
 
 ### Verified Devices

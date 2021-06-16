@@ -28,6 +28,7 @@ request
 * {% include pypi package="audio-metadata" %}, {% include pypi package="bitarray" %}
   and {% include pypi package="miniaudio" %} are new dependencies in this
   release (used by RAOP).
+* At least version 3.14 of {% include pypi package="protobuf" %} is now required.
 ## Deprecations
 
 * Passing `protocol` to {% include api i="pyatv.connect" %} is no longer

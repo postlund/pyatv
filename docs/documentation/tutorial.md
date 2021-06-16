@@ -30,7 +30,7 @@ Small steps is key, so the tutorial will be divded into the following sections:
 3. Connect to a device
 4. Remote control commands
 5. Retrieve current play state
-6. Closing c connection
+6. Closing a connection
 7. Some bonuses...
 
 The complete source code will be listed several times along the way. If you're unsure
