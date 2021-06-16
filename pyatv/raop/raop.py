@@ -367,9 +367,7 @@ class RaopClient:
         # Misplaced check that unencrypted data is supported
         intersection = self._encryption_types & SUPPORTED_ENCRYPTIONS
         if not intersection or intersection == EncryptionType.Unknown:
-            raise exceptions.NotSupportedError(
-                f"no supported encryption types in {str(self._encryption_types)}"
-            )
+            _LOGGER.debug("No supported encryption type, continuing anyway")
 
         self._update_output_properties(properties)
 
