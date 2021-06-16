@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from google.protobuf.text_format import MessageToString
 import requests
 
-PROTOBUF_VERSION = "3.15.6"
+PROTOBUF_VERSION = "3.17.3"
 
 # New messages re-using inner message of another type
 REUSED_MESSAGES = {"DEVICE_INFO_MESSAGE": "DEVICE_INFO_UPDATE_MESSAGE"}

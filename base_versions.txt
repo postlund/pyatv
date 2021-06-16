@@ -4,6 +4,6 @@ bitarray==2.1.2
 cryptography==2.6
 miniaudio==1.44
 netifaces==0.10.0
-protobuf==3.12.0,<4
+protobuf==3.14.0,<4
 srptools==0.2.0
 zeroconf==0.28.2
