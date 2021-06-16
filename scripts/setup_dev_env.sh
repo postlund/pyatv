@@ -1,13 +1,16 @@
 #!/bin/bash
 
-PYTHON="python3.8 python3.7 python3.6"
+# Set in GitPod which breaks installation in venv
+unset PIP_USER
+
+VERSIONS="3.9 3.8 3.7 3.6"
 
 found_version=
-for p in $PYTHON
+for p in $VERSIONS
 do
-    which $p 2>&1 > /dev/null
+    which python${p} 2>&1 > /dev/null
     if [ $? -eq 0 ]; then
-        found_version=$p
+        found_version=python${p}
         break
     fi
 done
