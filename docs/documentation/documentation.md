@@ -90,7 +90,8 @@ are needed as well. An updated list is available
 [here](https://github.com/postlund/pyatv/blob/master/base_versions.txt).
 
 You also need to have OpenSSL compiled with support for ed25519 in order
-to connect to MRP devices.
+to connect to MRP devices. More details is
+[here](../support/faq/#i-get-an-error-about-ed25519-is-not-supported-how-can-i-fix-that).
 
 # Milestones
 
