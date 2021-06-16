@@ -58,14 +58,12 @@ def get_unique_id(
 
     The unique identifier is returned if available, otherwise `None` is returned.
     """
-    if service_type == HOMESHARING_SERVICE:
-        return properties.get("hG")
-    if service_type == DEVICE_SERVICE:
+    if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
         return service_name.split("_")[0]
     if service_type == MEDIAREMOTE_SERVICE:
         return properties.get("UniqueIdentifier")
     if service_type == AIRPLAY_SERVICE:
         return properties.get("deviceid")
     if service_type == RAOP_SERVICE:
-        return service_name.split("@")[0]
+        return service_name.split("@", maxsplit=1)[0]
     return None
