@@ -33,6 +33,12 @@ Every library needs an API reference. I use pdoc3 for that due to its
 flexibility. With some tweaks it integrates neatly with the rest of the
 documentation.
 
+**[miniaudio](https://github.com/mackron/miniaudio) / [pyminiaudio](https://github.com/irmen/pyminiaudio)**
+
+Excellent minimalistic library for decoding and working with audio files! Supports
+most relevant audio formats and operating systems. This library is vital
+for audio streaming in RAOP (used via the python library).
+
 ## Contributors
 
 This is a complete list of everyone that has contributed code to
@@ -47,6 +53,7 @@ Colin <ckeehan at me.com>
 Dennis Frommknecht <dfrommi at users.noreply.github.com>
 Doug Hoffman <doug+github at hoff.mn>
 Erik Hendrix <hendrix_erik at hotmail.com>
+jdsnape <joel at sna.pe>
 J. Nick Koston <nick at koston.org>
 John Lian <jlian at users.noreply.github.com>
 KibosJ <29429479+KibosJ at users.noreply.github.com>

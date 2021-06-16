@@ -44,6 +44,7 @@ link_group: api
 import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
+import logging
 from typing import Dict, List
 
 import aiohttp
@@ -58,15 +59,19 @@ from pyatv.dmap import setup as dmap_setup
 from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
-from pyatv.support import net
+from pyatv.raop import setup as raop_setup
+from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
+
+_LOGGER = logging.getLogger(__name__)
 
 _PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
     Protocol.MRP: mrp_setup,
     Protocol.DMAP: dmap_setup,
     Protocol.AirPlay: airplay_setup,
     Protocol.Companion: companion_setup,
+    Protocol.RAOP: raop_setup,
 }
 
 
@@ -114,7 +119,7 @@ async def connect(
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
 
-    session_manager = await net.create_session(session)
+    session_manager = await http.create_session(session)
     atv = FacadeAppleTV(config, session_manager)
 
     for service in config.services:
@@ -123,8 +128,11 @@ async def connect(
             raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        atv.add_protocol(service.protocol, setup_data)
-
+        if setup_data:
+            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
+            atv.add_protocol(service.protocol, setup_data)
+        else:
+            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
     try:
         await atv.connect()
     except Exception:
@@ -144,9 +152,7 @@ async def pair(
     &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
     service = config.get_service(protocol)
     if not service:
-        raise exceptions.NoServiceError(
-            &#34;no service available for protocol &#34; + str(protocol)
-        )
+        raise exceptions.NoServiceError(f&#34;no service available for {protocol}&#34;)
 
     handler = {
         Protocol.DMAP: DmapPairingHandler,
@@ -156,9 +162,9 @@ async def pair(
     }.get(protocol)
 
     if handler is None:
-        raise RuntimeError(&#34;missing implementation for {protocol}&#34;)
+        raise RuntimeError(f&#34;missing implementation for {protocol}&#34;)
 
-    return handler(config, await net.create_session(session), loop, **kwargs)</code></pre>
+    return handler(config, await http.create_session(session), loop, **kwargs)</code></pre>
 </details>
 </section>
 <section>
@@ -217,7 +223,7 @@ async def pair(
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
 
-    session_manager = await net.create_session(session)
+    session_manager = await http.create_session(session)
     atv = FacadeAppleTV(config, session_manager)
 
     for service in config.services:
@@ -226,8 +232,11 @@ async def pair(
             raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
 
         setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        atv.add_protocol(service.protocol, setup_data)
-
+        if setup_data:
+            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
+            atv.add_protocol(service.protocol, setup_data)
+        else:
+            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
     try:
         await atv.connect()
     except Exception:
@@ -256,9 +265,7 @@ async def pair(
     &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
     service = config.get_service(protocol)
     if not service:
-        raise exceptions.NoServiceError(
-            &#34;no service available for protocol &#34; + str(protocol)
-        )
+        raise exceptions.NoServiceError(f&#34;no service available for {protocol}&#34;)
 
     handler = {
         Protocol.DMAP: DmapPairingHandler,
@@ -268,9 +275,9 @@ async def pair(
     }.get(protocol)
 
     if handler is None:
-        raise RuntimeError(&#34;missing implementation for {protocol}&#34;)
+        raise RuntimeError(f&#34;missing implementation for {protocol}&#34;)
 
-    return handler(config, await net.create_session(session), loop, **kwargs)</code></pre>
+    return handler(config, await http.create_session(session), loop, **kwargs)</code></pre>
 </details>
 </dd>
 <dt id="pyatv.scan"><code class="name flex">

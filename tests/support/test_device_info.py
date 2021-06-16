@@ -8,6 +8,10 @@ def test_lookup_existing_model():
     assert lookup_model("AppleTV6,2") == DeviceModel.Gen4K
 
 
+def test_lookup_homepod():
+    assert lookup_model("AudioAccessory5,1") == DeviceModel.HomePodMini
+
+
 def test_lookup_missing_model():
     assert lookup_model("bad_model") == DeviceModel.Unknown
 

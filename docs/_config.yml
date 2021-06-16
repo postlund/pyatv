@@ -1,13 +1,17 @@
 title: pyatv
 email: pierre.staahl@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  a python client library for the Apple TV
+  a client library for Apple TV and AirPlay devices
 url: "https://pyatv.dev"
 baseurl: /
 twitter_username: postlund
 github_username:  postlund
 
 markdown: kramdown
+kramdown:
+  parse_block_html: true
+  parse_span_html: true
+  html_to_native: true
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-feed
@@ -18,14 +22,14 @@ pyatv_version: "pyatv"
 top_pages:
   - link: /
     title: Main Page
-  - link: /getting-started/
-    title: Getting Started
   - link: /documentation/
     title: Documentation
   - link: /development/
     title: Development
   - link: /api/
     title: API Reference
+  - link: /internals/
+    title: Internals
   - link: /support/
     title: Support
 
@@ -33,6 +37,10 @@ page_links:
   documentation:
     - link: /documentation/
       title: Start
+    - link: /documentation/getting-started/
+      title: Getting Started
+    - link: /documentation/supported_features/
+      title: Supported Features
     - link: /documentation/concepts/
       title: Concepts
     - link: /documentation/protocols/
@@ -62,12 +70,31 @@ page_links:
       title: Metadata
     - link: /development/listeners/
       title: Listeners
-    - link: /development/airplay/
-      title: AirPlay
+    - link: /development/stream/
+      title: Stream
     - link: /development/apps/
       title: Apps
+    - link: /development/audio/
+      title: Audio
+    - link: /development/logging/
+      title: Logging
     - link: /development/examples/
       title: Examples
+  internals:
+    - link: /internals/
+      title: Start
+    - link: /internals/design
+      title: Design
+    - link: /internals/interfaces
+      title: Interfaces
+    - link: /internals/testing
+      title: Testing
+    - link: /internals/documentation
+      title: Documentation
+    - link: /internals/submit-pr
+      title: Submit a PR
+    - link: /internals/tools
+      title: Tools
   support:
     - link: /support/
       title: Start

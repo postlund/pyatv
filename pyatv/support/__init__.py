@@ -19,6 +19,14 @@ def _shorten(text, length):
     return text if len(text) < length else text[: length - 3] + "..."
 
 
+def _log_value(value):
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return binascii.hexlify(bytearray(value or b"")).decode()
+    return str(value)
+
+
 async def error_handler(func, fallback, *args, **kwargs):
     """Call a function and re-map exceptions to match pyatv interface."""
     try:
@@ -41,9 +49,7 @@ def log_binary(logger, message, level=logging.DEBUG, **kwargs):
         line_length = override_length or _BINARY_LINE_LENGTH
 
         output = (
-            "{0}={1}".format(
-                k, _shorten(binascii.hexlify(bytearray(v or b"")).decode(), line_length)
-            )
+            f"{k}={_shorten(_log_value(v), line_length)}"
             for k, v in sorted(kwargs.items())
         )
 
@@ -79,3 +85,16 @@ def deprecated(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def map_range(
+    value: float, in_min: float, in_max: float, out_min: float, out_max: float
+) -> float:
+    """Map a value in one range to another."""
+    if in_max - in_min <= 0.0:
+        raise ValueError("invalid input range")
+    if out_max - out_min <= 0.0:
+        raise ValueError("invalid output range")
+    if value < in_min or value > in_max:
+        raise ValueError("input value out of range")
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min

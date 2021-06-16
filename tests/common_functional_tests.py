@@ -21,7 +21,7 @@ from pyatv.const import (
     ShuffleState,
 )
 
-from tests.utils import faketime, stub_sleep, unstub_sleep, until
+from tests.utils import data_path, faketime, stub_sleep, unstub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,8 +32,6 @@ ARTWORK_WIDTH = 512
 ARTWORK_HEIGHT = 512
 ARTWORK_ID = "artwork_id1"
 EXAMPLE_STREAM = "http://stream"
-
-LOCAL_FILE = str(Path(__file__).parent.joinpath("airplay", "testfile.txt"))
 
 
 async def poll(fn, **kwargs):
@@ -157,13 +155,14 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.airplay_usecase.airplay_playback_playing()
         self.airplay_usecase.airplay_playback_idle()
 
-        await self.atv.stream.play_url(LOCAL_FILE)
+        await self.atv.stream.play_url(data_path("testfile.txt"))
 
         self.assertRegex(
             self.airplay_state.last_airplay_url, r"http://127.0.0.1:[0-9]+/testfile.txt"
         )
         self.assertEqual(self.airplay_state.last_airplay_start, 0)
         self.assertIsNotNone(self.airplay_state.last_airplay_uuid)
+        self.assertEqual(self.airplay_state.last_airplay_content, b"a file for testing")
 
     @unittest_run_loop
     async def test_button_up(self):

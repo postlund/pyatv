@@ -20,7 +20,7 @@ SEND_INTERVAL = 2.0
 async def _async_knock(address: IPv4Address, port: int):
     try:
         _, writer = await asyncio.open_connection(str(address), port)
-    except OSError:
+    except (OSError, asyncio.CancelledError):
         pass
     else:
         await asyncio.sleep(0.1)
@@ -32,10 +32,7 @@ async def knock(
 ):
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    try:
-        await asyncio.wait([_async_knock(address, port) for port in ports])
-    except asyncio.CancelledError:
-        pass
+    await asyncio.wait([_async_knock(address, port) for port in ports])
 
 
 async def knocker(
@@ -55,8 +52,10 @@ async def knocker(
         for _ in range(no_of_sends):
             try:
                 await knock(address, ports, loop)
+                await asyncio.sleep(SEND_INTERVAL)
+            except asyncio.CancelledError:
+                break
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("failed to port knock")
-            await asyncio.sleep(SEND_INTERVAL)
 
     return asyncio.ensure_future(_repeat())

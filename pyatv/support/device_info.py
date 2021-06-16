@@ -6,11 +6,17 @@ from typing import Dict, Optional
 from pyatv.const import DeviceModel
 
 _MODEL_LIST: Dict[str, DeviceModel] = {
+    "AirPort4,107": DeviceModel.AirPortExpress,
+    "AirPort10,115": DeviceModel.AirPortExpressGen2,
     "AppleTV2,1": DeviceModel.Gen2,
     "AppleTV3,1": DeviceModel.Gen3,
     "AppleTV3,2": DeviceModel.Gen3,
     "AppleTV5,3": DeviceModel.Gen4,
     "AppleTV6,2": DeviceModel.Gen4K,
+    "AppleTV11,1": DeviceModel.AppleTV4KGen2,
+    "AudioAccessory1,1": DeviceModel.HomePod,
+    "AudioAccessory1,2": DeviceModel.HomePod,
+    "AudioAccessory5,1": DeviceModel.HomePodMini,
 }
 
 
@@ -20,9 +26,10 @@ _INTERNAL_NAME_LIST: Dict[str, DeviceModel] = {
     "J33IAP": DeviceModel.Gen3,
     "J42dAP": DeviceModel.Gen4,
     "J105aAP": DeviceModel.Gen4K,
+    "J305AP": DeviceModel.AppleTV4KGen2,
 }
 
-# Incomplete list here!
+# Incomplete list here! Only Apple TV version numbers for now.
 _VERSION_LIST: Dict[str, str] = {
     "17J586": "13.0",
     "17K82": "13.2",

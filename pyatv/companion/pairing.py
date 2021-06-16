@@ -1,18 +1,18 @@
 """Device pairing and derivation of encryption keys."""
 import asyncio
 import logging
-from typing import Optional
-
-from aiohttp import ClientSession
+from typing import Optional, cast
 
 from pyatv import exceptions
 from pyatv.companion.auth import CompanionPairingProcedure
 from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.protocol import CompanionProtocol
+from pyatv.conf import CompanionService
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
 from pyatv.support.hap_srp import SRPAuthHandler
+from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,12 +20,18 @@ _LOGGER = logging.getLogger(__name__)
 class CompanionPairingHandler(PairingHandler):
     """Pairing handler used to pair the Companion link protocol."""
 
-    def __init__(self, config, session: ClientSession, loop: asyncio.AbstractEventLoop):
+    def __init__(
+        self, config, session: ClientSessionManager, loop: asyncio.AbstractEventLoop
+    ):
         """Initialize a new CompanionPairingHandler."""
         super().__init__(session, config.get_service(Protocol.Companion))
-        self.connection = CompanionConnection(loop, config.address, self.service.port)
+        self.connection = CompanionConnection(
+            loop, config.address, self.service.port, None
+        )
         self.srp = SRPAuthHandler()
-        self.protocol = CompanionProtocol(self.connection, self.srp, self.service)
+        self.protocol = CompanionProtocol(
+            self.connection, self.srp, cast(CompanionService, self.service)
+        )
         self.pairing_procedure = CompanionPairingProcedure(self.protocol, self.srp)
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False

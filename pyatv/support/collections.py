@@ -93,3 +93,11 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
                     return False
             return True
         raise NotImplementedError
+
+    def __str__(self) -> str:
+        """Return string representation of instance."""
+        return str(self._data)
+
+    def __repr__(self) -> str:
+        """Return representation of instance."""
+        return repr(self._data)

@@ -1,6 +1,6 @@
 [tool.black]
 target-version = ["py35", "py36", "py37", "py38"]
-exclude = '(protobuf/(__init__|.*_pb2).py)|__pycache__'
+extend-exclude = '(protobuf/(__init__|.*_pb2).py)|__pycache__'
 include = '(pyatv|tests|examples|scripts).*\.py'
 
 [tool.isort]
@@ -16,3 +16,13 @@ forced_separate = [
     "tests",
     "scripts",
 ]
+
+[[tool.mypy.overrides]]
+module = [
+    "miniaudio",
+    "audio_metadata",
+    "netifaces",
+    "srptools",
+    "bitarray",
+]
+ignore_missing_imports = true

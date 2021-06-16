@@ -5,15 +5,17 @@ import logging
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from deepdiff import DeepDiff
+import pytest
 
 import pyatv
+from pyatv import exceptions
 from pyatv.companion.server_auth import CLIENT_CREDENTIALS
 from pyatv.conf import AppleTV, CompanionService, MrpService
 from pyatv.const import Protocol
 from pyatv.interface import App, FeatureName, FeatureState
 
 from tests.fake_device import FakeAppleTV
-from tests.utils import faketime, stub_sleep, until
+from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,6 +54,14 @@ class CompanionFunctionalTest(AioHTTPTestCase):
         return await pyatv.connect(self.conf, loop=self.loop)
 
     @unittest_run_loop
+    async def test_connect_only_companion(self):
+        conf = AppleTV(IPv4Address("127.0.0.1"), "Test device")
+        conf.add_service(CompanionService(self.fake_atv.get_port(Protocol.Companion)))
+
+        with pytest.raises(exceptions.DeviceIdMissingError):
+            await pyatv.connect(conf, loop=self.loop)
+
+    @unittest_run_loop
     async def test_launch_app(self):
         await self.atv.apps.launch_app(TEST_APP)
         await until(lambda: self.state.active_app == TEST_APP)
@@ -80,3 +90,21 @@ class CompanionFunctionalTest(AioHTTPTestCase):
             self.atv.features.get_feature(FeatureName.AppList).state
             == FeatureState.Available
         )
+
+    @unittest_run_loop
+    async def test_power_functions(self):
+        assert self.state.powered_on
+
+        await self.atv.power.turn_off()
+        assert not self.state.powered_on
+
+        await self.atv.power.turn_on()
+        assert self.state.powered_on
+
+    @unittest_run_loop
+    async def test_session_start(self):
+        # All commands should trigger a session start, so just use one and verify
+        assert self.state.sid == 0
+        await self.atv.power.turn_off()
+        assert self.state.sid != 0
+        assert self.state.service_type == "com.apple.tvremoteservices"

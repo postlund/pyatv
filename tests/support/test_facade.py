@@ -1,16 +1,25 @@
 """Unit tests for pyatv.support.facade."""
+import inspect
 from ipaddress import IPv4Address
 
 import pytest
 
+from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
-from pyatv.interface import FeatureInfo, Features, FeatureState
+from pyatv.interface import (
+    Audio,
+    FeatureInfo,
+    Features,
+    FeatureState,
+    Power,
+    PushUpdater,
+)
 from pyatv.support.facade import FacadeAppleTV, SetupData
 
 
-@pytest.fixture
-def facade_dummy(session_manager):
+@pytest.fixture(name="facade_dummy")
+def facade_dummy_fixture(session_manager):
     conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
     facade = FacadeAppleTV(conf, session_manager)
     yield facade
@@ -45,50 +54,135 @@ class DummyFeatures(Features):
         )
 
 
-def test_features_multi_instances(facade_dummy):
-    mrp_sdg = SetupDataGenerator(FeatureName.Pause)
-    mrp_features = DummyFeatures(FeatureName.Pause)
+class DummyPushUpdater(PushUpdater):
+    def __init__(self, loop):
+        super().__init__(loop)
 
-    dmap_sdg = SetupDataGenerator(FeatureName.Play)
-    dmap_features = DummyFeatures(FeatureName.Play)
+    @property
+    def active(self) -> bool:
+        return False
 
-    facade_dummy.interfaces[Features].register(mrp_features, Protocol.MRP)
-    facade_dummy.interfaces[Features].register(dmap_features, Protocol.DMAP)
+    def start(self, initial_delay: int = 0) -> None:
+        raise exceptions.NotSupportedError
 
-    facade_dummy.add_protocol(Protocol.MRP, mrp_sdg.get_setup_data())
-    facade_dummy.add_protocol(Protocol.DMAP, dmap_sdg.get_setup_data())
+    def stop(self) -> None:
+        raise exceptions.NotSupportedError
+
+
+class DummyPower(Power):
+    def __init__(self) -> None:
+        self.turn_on_called = False
+        self.turn_off_called = False
+
+    async def turn_on(self, await_new_state: bool = False) -> None:
+        self.turn_on_called = True
+
+    async def turn_off(self, await_new_state: bool = False) -> None:
+        self.turn_off_called = True
+
+
+class DummyAudio(Audio):
+    def __init__(self, volume: float) -> None:
+        self._volume = volume
+
+    @property
+    def volume(self) -> float:
+        return self._volume
+
+    async def set_volume(self, level: float) -> None:
+        self._volume = volume
+
+
+@pytest.fixture(name="register_interface")
+def register_interface_fixture(facade_dummy):
+    def _register_func(feature: FeatureName, instance, protocol: Protocol):
+        interface = inspect.getmro(type(instance))[1]
+        sdg = SetupDataGenerator(feature)
+        facade_dummy.interfaces[interface].register(instance, protocol)
+        facade_dummy.add_protocol(protocol, sdg.get_setup_data())
+        return instance
+
+    yield _register_func
+
+
+@pytest.mark.asyncio
+async def test_connect_with_no_protocol(facade_dummy):
+    with pytest.raises(exceptions.NoServiceError):
+        await facade_dummy.connect()
+
+
+def test_features_multi_instances(facade_dummy, register_interface):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
+    )
+
+    feat = facade_dummy.features
 
     # State from MRP
-    assert (
-        facade_dummy.features.get_feature(FeatureName.Pause).state
-        == FeatureState.Available
-    )
+    assert feat.get_feature(FeatureName.Pause).state == FeatureState.Available
 
     # State from DMAP
-    assert (
-        facade_dummy.features.get_feature(FeatureName.Play).state
-        == FeatureState.Available
-    )
+    assert feat.get_feature(FeatureName.Play).state == FeatureState.Available
 
     # Default state with no instance
-    assert (
-        facade_dummy.features.get_feature(FeatureName.PlayUrl).state
-        == FeatureState.Unsupported
+    assert feat.get_feature(FeatureName.PlayUrl).state == FeatureState.Unsupported
+
+
+def test_features_feature_overlap_uses_priority(facade_dummy, register_interface):
+    # Pause available for DMAP but not MRP -> pause is unavailable because MRP prio
+    register_interface(
+        FeatureName.Pause,
+        DummyFeatures(FeatureName.Pause, FeatureState.Unavailable),
+        Protocol.MRP,
     )
-
-
-def test_features_feature_overlap_uses_priority(facade_dummy):
-    sdg = SetupDataGenerator(FeatureName.Pause)
-    mrp_features = DummyFeatures(FeatureName.Pause, FeatureState.Unavailable)
-    dmap_features = DummyFeatures(FeatureName.Pause)
-
-    facade_dummy.interfaces[Features].register(mrp_features, Protocol.MRP)
-    facade_dummy.interfaces[Features].register(dmap_features, Protocol.DMAP)
-
-    facade_dummy.add_protocol(Protocol.MRP, sdg.get_setup_data())
-    facade_dummy.add_protocol(Protocol.DMAP, sdg.get_setup_data())
+    register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.DMAP
+    )
 
     assert (
         facade_dummy.features.get_feature(FeatureName.Pause).state
         == FeatureState.Unavailable
     )
+
+
+def test_features_push_updates(facade_dummy, event_loop, register_interface):
+    feat = facade_dummy.features
+
+    assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Unsupported
+
+    register_interface(
+        FeatureName.PushUpdates, DummyPushUpdater(event_loop), Protocol.MRP
+    )
+
+    assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Available
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
+)
+async def test_power_prefer_companion(feature, func, facade_dummy, register_interface):
+    power_mrp = register_interface(feature, DummyPower(), Protocol.MRP)
+    power_comp = register_interface(feature, DummyPower(), Protocol.Companion)
+
+    await getattr(facade_dummy.power, func)()
+
+    assert not getattr(power_mrp, f"{func}_called")
+    assert getattr(power_comp, f"{func}_called")
+
+
+@pytest.mark.parametrize("volume", [-0.1, 100.1])
+async def test_audio_get_volume_out_of_range(facade_dummy, register_interface, volume):
+    register_interface(FeatureName.Volume, DummyAudio(volume), Protocol.RAOP)
+
+    with pytest.raises(exceptions.ProtocolError):
+        facade_dummy.audio.volume
+
+
+@pytest.mark.parametrize("volume", [-0.1, 100.1])
+async def test_audio_set_volume_out_of_range(facade_dummy, register_interface, volume):
+    register_interface(FeatureName.Volume, DummyAudio(volume), Protocol.RAOP)
+
+    with pytest.raises(exceptions.ProtocolError):
+        await facade_dummy.audio.set_volume(volume)

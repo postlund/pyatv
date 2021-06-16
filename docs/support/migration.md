@@ -4,55 +4,60 @@ title: Migration
 permalink: /support/migration/
 link_group: support
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
 # Migration
 
 This page contains details on how to migrate between different versions
-of `pyatv`. Beware that these guides are written according to "best effort"
+of pyatv. Beware that these guides are written according to "best effort"
 and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request
 
-## From 0.7.0 to 0.7.1
+# From 0.7.0 to 0.7.1
 
-### General Changes
+## General Changes
 
 * Unicast scanning (i.e. passing `hosts` to `pyatv.scan`) will not verify
   if hosts are on the same network anymore (`NonLocalSubnetError` will not
-  be thrown). Requests will just time out. See [#775](https://github.com/postlund/pyatv/issues/775)
+  be thrown). Requests will just time out. See {% include issue no="775" %}
   for more details.
 
-### Deprecations
+## Deprecations
 
 * `NonLocalSubnetError` is never thrown and shall not be checked for. It
   will be removed in 0.9.0.
 
-## From 0.6.0 to 0.7.0
+# From 0.6.0 to 0.7.0
 
-### General Changes
+## General Changes
 
 * No library changes
 * MRP arguments to atvproxy has been simplified (only credentials and IP to
   Apple TV must now be provided)
 
-### Deprecations
+## Deprecations
 
 * None
 
-## From 0.5.0 to 0.6.0
+# From 0.5.0 to 0.6.0
 
-### General Changes
+## General Changes
 
   * {% include api i="interface.AppleTV.close" %} has been changed to a
     regular function instead of a coroutine.
   * All listeners are now stored as weak references
 
-## From 0.4.0 to 0.5.0
+# From 0.4.0 to 0.5.0
 
-### General Changes
+## General Changes
 
 * None
 
-### Deprecations
+## Deprecations
 
 * Python 3.6 or later is now required
 * `suspend` and `wakeup` in {% include api i="interface.RemoteControl" %}
@@ -62,9 +67,9 @@ request
   [example](https://github.com/postlund/pyatv/blob/master/examples/auto_connect.py)
   has been updated.
 
-## From 0.3.x to 0.4.0
+# From 0.3.x to 0.4.0
 
-### General Changes
+## General Changes
 
 * Device configuration has moved from `AppleTVDevice` to `conf.AppleTV`
 * `pyatv.connect_to_apple_tv` has been renamed to `pyatv.connect`
@@ -74,7 +79,7 @@ request
 * `play_state` has been renamed to `device_state`
 * AirPlay interface has been renamed from `AppleTV.airplay` to `AppleTV.stream`
 
-### Deprecations
+## Deprecations
 
 * Arguments `abort_on_found` and `only_home_sharing` have been removed from `pyatv.scan`
 * The `Metadata.artwork_url` method has been deprecated and has no

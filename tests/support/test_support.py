@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import math
 import os
 from unittest.mock import MagicMock, patch
 
@@ -9,7 +10,7 @@ import pytest
 
 from pyatv import exceptions
 from pyatv.mrp.protobuf import ProtocolMessage
-from pyatv.support import error_handler, log_binary, log_protobuf
+from pyatv.support import error_handler, log_binary, log_protobuf, map_range
 
 
 class DummyException(Exception):
@@ -115,6 +116,12 @@ def test_log_binary_log_limit_output(logger):
     assert len(_debug_string(logger)) == 1036
 
 
+def test_log_binary_non_bytes_as_string(logger):
+    log_binary(logger, "msg", a=b"\x01", b=123, c="test")
+
+    assert _debug_string(logger) == "msg (a=01, b=123, c=test)"
+
+
 def test_protobuf_no_log_if_not_debug(logger, message):
     logger.isEnabledFor.return_value = False
     log_protobuf(logger, "test", message)
@@ -136,3 +143,29 @@ def test_protobuf_log_limit_message_max_length(logger, message):
 def test_protobuf_log_with_length_override(logger, message):
     log_protobuf(logger, "text", message)
     assert _debug_string(logger) == "text: id..."
+
+
+def test_map_range():
+    assert math.isclose(map_range(1.0, 0.0, 25.0, 0.0, 100.0), 4.0)
+
+
+@pytest.mark.parametrize(
+    "in_min,in_max,out_min,out_max",
+    [
+        # Bad in-ranges
+        (0.0, 0.0, 0.0, 1.0),
+        (1.0, 0.0, 0.0, 1.0),
+        # Bad out-ranges
+        (0.0, 1.0, 0.0, 0.0),
+        (0.0, 1.0, 1.0, 0.0),
+    ],
+)
+def test_map_range_bad_ranges(in_min, in_max, out_min, out_max):
+    with pytest.raises(ValueError):
+        map_range(1, in_min, in_max, out_min, out_max)
+
+
+@pytest.mark.parametrize("value", [-1.0, 11.0])
+def test_map_range_bad_input_values(value):
+    with pytest.raises(ValueError):
+        map_range(value, 0.0, 10.0, 20.0, 30.0)

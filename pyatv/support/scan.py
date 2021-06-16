@@ -5,9 +5,10 @@ import asyncio
 from ipaddress import IPv4Address
 import logging
 import os
-from typing import Dict, Generator, List, Optional
+from typing import Dict, Generator, List, Mapping, Optional
 
 from pyatv import conf, interface
+from pyatv.helpers import get_unique_id
 from pyatv.support import knock, mdns
 from pyatv.support.device_info import lookup_internal_name
 
@@ -17,15 +18,22 @@ HOMESHARING_SERVICE: str = "_appletv-v2._tcp.local"
 DEVICE_SERVICE: str = "_touch-able._tcp.local"
 MEDIAREMOTE_SERVICE: str = "_mediaremotetv._tcp.local"
 AIRPLAY_SERVICE: str = "_airplay._tcp.local"
-COMPANION_SERVICE = "_companion-link._tcp.local"
+COMPANION_SERVICE: str = "_companion-link._tcp.local"
+RAOP_SERVICE: str = "_raop._tcp.local"
+AIRPORT_ADMIN_SERVICE: str = "_airport._tcp.local"
 
+# These corresponds to services mapped to a protocol
 ALL_SERVICES: List[str] = [
     HOMESHARING_SERVICE,
     DEVICE_SERVICE,
     MEDIAREMOTE_SERVICE,
     AIRPLAY_SERVICE,
     COMPANION_SERVICE,
+    RAOP_SERVICE,
 ]
+
+# Services that does not map to a protocol but provides additional metadata
+EXTRA_SERVICES: List[str] = [AIRPORT_ADMIN_SERVICE]
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
@@ -33,19 +41,23 @@ ALL_SERVICES: List[str] = [
 KNOCK_PORTS: List[int] = [3689, 7000, 49152, 32498]
 
 
+def _get_service_properties(
+    services: List[mdns.Service], service_type
+) -> Mapping[str, str]:
+    for service in services:
+        if service.type == service_type:
+            return service.properties
+    return {}
+
+
 def get_unique_identifiers(
     response: mdns.Response,
 ) -> Generator[Optional[str], None, None]:
     """Return (yield) all unique identifiers for a response."""
     for service in response.services:
-        if service.type == HOMESHARING_SERVICE:
-            yield service.properties.get("hG")
-        elif service.type == DEVICE_SERVICE:
-            yield service.name
-        elif service.type == MEDIAREMOTE_SERVICE:
-            yield service.properties.get("UniqueIdentifier")
-        elif service.type == AIRPLAY_SERVICE:
-            yield service.properties.get("deviceid")
+        unique_id = get_unique_id(service.type, service.name, service.properties)
+        if unique_id:
+            yield unique_id
 
 
 class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
@@ -74,6 +86,7 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             MEDIAREMOTE_SERVICE: self._mrp_service,
             AIRPLAY_SERVICE: self._airplay_service,
             COMPANION_SERVICE: self._companion_service,
+            RAOP_SERVICE: self._raop_service,
         }.get(service.type, self._unsupported_service)(service, response)
 
     def _hs_service(self, mdns_service: mdns.Service, response: mdns.Response) -> None:
@@ -129,12 +142,25 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         )
         self._handle_service(mdns_service.address, mdns_service.name, service, response)
 
+    def _raop_service(self, mdns_service: mdns.Service, response: mdns.Response):
+        """Add a new RAOP device to discovered list."""
+        identifier, name = mdns_service.name.split("@", maxsplit=1)
+        service = conf.RaopService(
+            identifier,
+            mdns_service.port,
+            properties=mdns_service.properties,
+        )
+        self._handle_service(mdns_service.address, name, service, response)
+
     @staticmethod
     def _unsupported_service(mdns_service: mdns.Service, _: mdns.Response) -> None:
         """Handle unsupported service."""
-        _LOGGER.warning(
-            "Discovered unknown device %s (%s)", mdns_service.name, mdns_service.type
-        )
+        if mdns_service.type not in EXTRA_SERVICES:
+            _LOGGER.warning(
+                "Discovered unknown device %s (%s)",
+                mdns_service.name,
+                mdns_service.type,
+            )
 
     def _handle_service(
         self,
@@ -151,15 +177,23 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
             service.protocol,
         )
 
-        self._found_devices.setdefault(
-            address,
-            conf.AppleTV(
+        if address not in self._found_devices:
+            # Extract properties from extra services that might be of interest
+            extra_properties: Dict[str, str] = {}
+            for extra_service in EXTRA_SERVICES:
+                extra_properties.update(
+                    _get_service_properties(response.services, extra_service)
+                )
+
+            self._found_devices[address] = conf.AppleTV(
                 address,
                 name,
                 deep_sleep=response.deep_sleep,
                 model=lookup_internal_name(response.model),
-            ),
-        ).add_service(service)
+                properties=extra_properties,
+            )
+
+        self._found_devices[address].add_service(service)
 
 
 class UnicastMdnsScanner(BaseScanner):
@@ -189,7 +223,11 @@ class UnicastMdnsScanner(BaseScanner):
         try:
             knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
             response = await mdns.unicast(
-                self.loop, str(host), ALL_SERVICES, port=port, timeout=timeout
+                self.loop,
+                str(host),
+                ALL_SERVICES + EXTRA_SERVICES,
+                port=port,
+                timeout=timeout,
             )
         except asyncio.TimeoutError:
             return mdns.Response([], False, None)
@@ -214,7 +252,7 @@ class MulticastMdnsScanner(BaseScanner):
         """Start discovery of devices and services."""
         responses = await mdns.multicast(
             self.loop,
-            ALL_SERVICES,
+            ALL_SERVICES + EXTRA_SERVICES,
             timeout=timeout,
             end_condition=self._end_if_identifier_found if self.identifier else None,
         )

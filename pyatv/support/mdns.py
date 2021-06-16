@@ -83,9 +83,15 @@ def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
     return None
 
 
-def parse_services(message: DnsMessage) -> typing.List[Service]:
+def _first_rd(qtype: QueryType, entries: typing.Dict[int, typing.List[DnsResource]]):
+    return entries[qtype][0].rd if qtype in entries else None
+
+
+def parse_services(  # pylint: disable=too-many-locals
+    message: DnsMessage,
+) -> typing.List[Service]:
     """Parse DNS response into Service objects."""
-    table: typing.Dict[str, typing.Dict[int, DnsResource]] = {}
+    table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
     ptrs: typing.Dict[str, str] = {}  # qname -> real name
     results: typing.Dict[str, Service] = {}
 
@@ -94,7 +100,10 @@ def parse_services(message: DnsMessage) -> typing.List[Service]:
         if record.qtype == QueryType.PTR and record.qname.startswith("_"):
             ptrs[record.qname] = record.rd
         else:
-            table.setdefault(record.qname, {})[record.qtype] = record
+            entry = table.setdefault(record.qname, {})
+            if record.qtype not in entry:
+                entry[record.qtype] = []
+            entry[record.qtype].append(record)
 
     # Build services
     for service, device in table.items():
@@ -103,19 +112,24 @@ def parse_services(message: DnsMessage) -> typing.List[Service]:
         except ValueError:
             continue
 
-        port = device[QueryType.SRV].rd["port"] if QueryType.SRV in device else 0
-        target = device[QueryType.SRV].rd["target"] if QueryType.SRV in device else None
-        properties = device[QueryType.TXT].rd if QueryType.TXT in device else {}
+        srv_rd = _first_rd(QueryType.SRV, device)
+        target = srv_rd["target"] if srv_rd else None
 
-        target_record = table.get(typing.cast(str, target), {}).get(QueryType.A)
-        address = IPv4Address(target_record.rd) if target_record else None
+        target_records = table.get(typing.cast(str, target), {}).get(QueryType.A, [])
+        address = None
+
+        # Pick one address that is not link-local
+        for addr in [IPv4Address(record.rd) for record in target_records]:
+            if not addr.is_link_local:
+                address = addr
+                break
 
         results[service] = Service(
             service_name.ptr_name,
             typing.cast(str, service_name.instance),
             address,
-            port,
-            _decode_properties(properties),
+            srv_rd["port"] if srv_rd else 0,
+            _decode_properties(_first_rd(QueryType.TXT, device) or {}),
         )
 
     # If there are PTRs to unknown services, create placeholders
@@ -148,6 +162,11 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             )
         finally:
             self._finished()
+        if self._task:
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
         services = parse_services(self.result)
         return Response(
             services=services,
@@ -295,6 +314,12 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             pass
         finally:
             self.close()
+            if self._task:
+                try:
+                    await self._task
+                except asyncio.CancelledError:
+                    pass
+                self._task = None
         return self.responses
 
     async def _resend_loop(self, timeout):
@@ -381,10 +406,8 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
         """Close resources used by this instance."""
         for receiver in self._receivers:
             receiver.close()
-
         if self._task:
             self._task.cancel()
-            self._task = None
 
 
 async def unicast(
@@ -445,7 +468,7 @@ async def publish(loop: asyncio.AbstractEventLoop, service: Service, zconf: Zero
         f"{service.name}.{service.type}.",
         addresses=[service.address.packed],
         port=service.port,
-        properties=service.properties,
+        properties=dict(service.properties),
     )
 
     _LOGGER.debug("Publishing zeroconf service: %s", zsrv)

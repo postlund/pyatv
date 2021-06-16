@@ -33,7 +33,7 @@ from pyatv.const import (
     OperatingSystem,
     Protocol,
 )
-from pyatv.support import net
+from pyatv.support.http import ClientSessionManager
 
 __pdoc__ = {}
 __pdoc__["feature"] = False
@@ -192,9 +192,10 @@ class PairingHandler(ABC):
     """Base class for API used to pair with an Apple TV."""
 
     def __init__(
-        self, session_manager: net.ClientSessionManager, service: BaseService
+        self, session_manager: ClientSessionManager, service: Optional[BaseService]
     ) -> None:
         """Initialize a new instance of PairingHandler."""
+        assert service is not None
         self.session_manager = session_manager
         self._service = service
 
@@ -694,6 +695,7 @@ class PushUpdater(ABC, StateProducer):
         """Return if push updater has been started."""
         raise NotImplementedError
 
+    @feature(43, "PushUpdates", "Push updates are supported.")
     @abstractmethod
     def start(self, initial_delay: int = 0) -> None:
         """Begin to listen to updates.
@@ -725,6 +727,14 @@ class Stream:  # pylint: disable=too-few-public-methods
     @feature(31, "PlayUrl", "Stream a URL on device.")
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
+        raise exceptions.NotSupportedError()
+
+    @feature(44, "StreamFile", "Stream local file to device.")
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
         raise exceptions.NotSupportedError()
 
 
@@ -821,16 +831,16 @@ class DeviceInfo:
 
     def __str__(self) -> str:
         """Convert device info to readable string."""
-        if self.model != DeviceModel.Unknown:
-            output = self.model.name.replace("Gen", "")
-        else:
-            output = "Unknown Model"
+        output = (
+            self.model.name if self.model != DeviceModel.Unknown else "Unknown Model"
+        )
 
         output += (
             " "
             + {
                 OperatingSystem.Legacy: "ATV SW",
                 OperatingSystem.TvOS: "tvOS",
+                OperatingSystem.AirPortOS: "AirPortOS",
             }.get(self.operating_system, "Unknown OS")
         )
 
@@ -852,7 +862,7 @@ class Features:
 
     def all_features(self, include_unsupported=False) -> Dict[FeatureName, FeatureInfo]:
         """Return state of all features."""
-        features = {}  # type: Dict[FeatureName, FeatureInfo]
+        features: Dict[FeatureName, FeatureInfo] = {}
         for name in FeatureName:
             info = self.get_feature(name)
             if info.state != FeatureState.Unsupported or include_unsupported:
@@ -876,6 +886,24 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
+
+
+class Audio:
+    """Base class for audio functionality.
+
+    Volume level is managed in percent where 0 is muted and 100 is max volume.
+    """
+
+    @property  # type: ignore
+    @feature(45, "Volume", "Current volume level.")
+    def volume(self) -> float:
+        """Return current volume level."""
+        raise exceptions.NotSupportedError()
+
+    @feature(46, "SetVolume", "Set volume level.")
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        raise exceptions.NotSupportedError()
 
 
 class AppleTV(ABC, StateProducer):
@@ -939,3 +967,8 @@ class AppleTV(ABC, StateProducer):
     @abstractmethod
     def apps(self) -> Apps:
         """Return apps interface."""
+
+    @property
+    @abstractmethod
+    def audio(self) -> Audio:
+        """Return audio interface."""

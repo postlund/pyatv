@@ -1,5 +1,5 @@
-A python client library for the Apple TV
-========================================
+A client library for Apple TV and AirPlay devices
+=================================================
 
 <img src="docs/assets/img/logo.svg?raw=true" width="150">
 
@@ -13,8 +13,9 @@ A python client library for the Apple TV
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This is a python3 library for controlling and querying information from an Apple TV. It is built
-upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
+This is an asyncio python library for interacting with Apple TV and AirPlay devices. It mainly
+targets Apple TVs, but also support audio streaming via AirPlay to receivers like the HomePod
+as well.
 
 All the documentation you need is available at **[pyatv.dev](https://pyatv.dev)**.
 

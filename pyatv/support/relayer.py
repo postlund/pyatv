@@ -47,6 +47,11 @@ class Relayer:
         self._interfaces: Dict[Protocol, T] = {}
 
     @property
+    def count(self):
+        """Return number of registered instances."""
+        return len(self._interfaces)
+
+    @property
     def main_instance(self) -> T:
         """Return main instance based on priority."""
         for priority in self._priorities:

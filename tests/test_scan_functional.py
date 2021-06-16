@@ -17,12 +17,12 @@ IP_3 = "10.0.0.3"
 IP_LOCALHOST = "127.0.0.1"
 
 HSGID = "hsgid"
-
 MRP_ID_1 = "mrp_id_1"
-
 AIRPLAY_ID = "AA:BB:CC:DD:EE:FF"
+RAOP_ID = "AABBCCDDEEFF"
 
 COMPANION_PORT = 1234
+RAOP_PORT = 4567
 
 DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
 
@@ -91,17 +91,17 @@ async def test_multicast_scan(
     multicast_scan: Scanner,
 ):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, addresses=[IP_1])
     )
     udns_server.add_service(
-        fake_udns.homesharing_service("abcd", "Apple TV HS 2", HSGID, address=IP_2)
+        fake_udns.homesharing_service("abcd", "Apple TV HS 2", HSGID, addresses=[IP_2])
     )
     udns_server.add_service(
-        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+        fake_udns.device_service("efgh", "Apple TV Device", addresses=[IP_3])
     )
     udns_server.add_service(
         fake_udns.companion_service(
-            "Companion Device", address=IP_3, port=COMPANION_PORT
+            "Companion Device", addresses=[IP_3], port=COMPANION_PORT
         )
     )
 
@@ -127,7 +127,7 @@ async def test_multicast_scan(
 @pytest.mark.asyncio
 async def test_multicast_scan_no_home_sharing(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+        fake_udns.device_service("efgh", "Apple TV Device", addresses=[IP_3])
     )
 
     atvs = await multicast_scan()
@@ -141,10 +141,12 @@ async def test_multicast_scan_no_home_sharing(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_home_sharing_merge(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+        fake_udns.device_service("efgh", "Apple TV Device", addresses=[IP_3])
     )
     udns_server.add_service(
-        fake_udns.homesharing_service("efgh", "Apple TV Device", HSGID, address=IP_3)
+        fake_udns.homesharing_service(
+            "efgh", "Apple TV Device", HSGID, addresses=[IP_3]
+        )
     )
 
     atvs = await multicast_scan()
@@ -158,10 +160,12 @@ async def test_multicast_scan_home_sharing_merge(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_mrp(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1]
+        )
     )
     udns_server.add_service(
-        fake_udns.device_service("efgh", "Apple TV Device", address=IP_3)
+        fake_udns.device_service("efgh", "Apple TV Device", addresses=[IP_3])
     )
 
     atvs = await multicast_scan(protocol=Protocol.MRP)
@@ -176,10 +180,12 @@ async def test_multicast_scan_mrp(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_mrp_with_companion(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1]
+        )
     )
     udns_server.add_service(
-        fake_udns.companion_service("Companion", IP_1, COMPANION_PORT)
+        fake_udns.companion_service("Companion", addresses=[IP_1], port=COMPANION_PORT)
     )
 
     atvs = await multicast_scan(protocol=Protocol.MRP)
@@ -198,7 +204,7 @@ async def test_multicast_scan_mrp_with_companion(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_companion_device(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.companion_service("Companion", IP_1, COMPANION_PORT)
+        fake_udns.companion_service("Companion", addresses=[IP_1], port=COMPANION_PORT)
     )
 
     atvs = await multicast_scan()
@@ -208,20 +214,40 @@ async def test_multicast_scan_companion_device(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_airplay_device(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, addresses=[IP_1])
     )
 
     atvs = await multicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV"
+    assert atvs[0].identifier == AIRPLAY_ID
+    assert atvs[0].address == ip_address(IP_1)
+
+
+@pytest.mark.asyncio
+async def test_multicast_scan_raop_device(udns_server, multicast_scan):
+    udns_server.add_service(
+        fake_udns.raop_service("Apple TV", RAOP_ID, addresses=[IP_1], port=RAOP_PORT)
+    )
+
+    atvs = await multicast_scan()
+    assert len(atvs) == 1
+    assert atvs[0].name == "Apple TV"
+    assert atvs[0].identifier == RAOP_ID
+    assert atvs[0].address == ip_address(IP_1)
 
 
 @pytest.mark.asyncio
 async def test_multicast_scan_for_particular_device(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1]
+        )
     )
     udns_server.add_service(
-        fake_udns.homesharing_service("efgh", "Apple TV Device", HSGID, address=IP_3)
+        fake_udns.homesharing_service(
+            "efgh", "Apple TV Device", HSGID, addresses=[IP_3]
+        )
     )
 
     atvs = await multicast_scan(identifier="efgh")
@@ -235,7 +261,9 @@ async def test_multicast_scan_deep_sleeping_device(udns_server, multicast_scan):
     udns_server.sleep_proxy = True
 
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1]
+        )
     )
 
     atvs = await multicast_scan()
@@ -246,10 +274,12 @@ async def test_multicast_scan_deep_sleeping_device(udns_server, multicast_scan):
 @pytest.mark.asyncio
 async def test_multicast_scan_device_info(udns_server, multicast_scan):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service(
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1]
+        )
     )
     udns_server.add_service(
-        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, addresses=[IP_1])
     )
 
     atvs = await multicast_scan(protocol=Protocol.MRP)
@@ -263,7 +293,7 @@ async def test_multicast_scan_device_info(udns_server, multicast_scan):
 async def test_multicast_scan_device_model(udns_server, multicast_scan):
     udns_server.add_service(
         fake_udns.mrp_service(
-            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1, model="J105aAP"
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1], model="J105aAP"
         )
     )
 
@@ -311,11 +341,36 @@ async def test_unicast_scan_mrp(udns_server, unicast_scan):
 @pytest.mark.asyncio
 async def test_unicast_scan_airplay(udns_server, unicast_scan):
     udns_server.add_service(
-        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+        fake_udns.airplay_service(
+            "Apple TV AirPlay", AIRPLAY_ID, addresses=[IP_1], port=7000
+        )
     )
 
     atvs = await unicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0],
+        "Apple TV AirPlay",
+        ip_address(IP_1),
+        AIRPLAY_ID,
+        Protocol.AirPlay,
+        7000,
+    )
+
+
+@pytest.mark.asyncio
+async def test_unicast_scan_raop(udns_server, unicast_scan):
+    udns_server.add_service(
+        fake_udns.raop_service("Apple TV", RAOP_ID, addresses=[IP_1], port=RAOP_PORT)
+    )
+
+    atvs = await unicast_scan()
+    assert len(atvs) == 1
+
+    assert_device(
+        atvs[0], "Apple TV", ip_address(IP_1), RAOP_ID, Protocol.RAOP, RAOP_PORT
+    )
 
 
 @pytest.mark.asyncio
@@ -331,7 +386,7 @@ async def test_unicast_scan_comapnion(udns_server, unicast_scan):
 @pytest.mark.asyncio
 async def test_unicast_scan_homesharing(udns_server, unicast_scan):
     udns_server.add_service(
-        fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID, address=IP_3)
+        fake_udns.homesharing_service("abcd", "Apple TV HS", HSGID, addresses=[IP_3])
     )
 
     atvs = await unicast_scan()
@@ -351,7 +406,7 @@ async def test_unicast_scan_homesharing(udns_server, unicast_scan):
 @pytest.mark.asyncio
 async def test_unicast_scan_no_homesharing(udns_server, unicast_scan):
     udns_server.add_service(
-        fake_udns.device_service("Apple TV", "Apple TV Device", address=IP_2)
+        fake_udns.device_service("Apple TV", "Apple TV Device", addresses=[IP_2])
     )
 
     atvs = await unicast_scan()
@@ -370,10 +425,10 @@ async def test_unicast_scan_no_homesharing(udns_server, unicast_scan):
 @pytest.mark.asyncio
 async def test_unicast_scan_device_info(udns_server, unicast_scan):
     udns_server.add_service(
-        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, address=IP_1)
+        fake_udns.mrp_service("Apple TV", "Apple TV MRP", MRP_ID_1, addresses=[IP_1])
     )
     udns_server.add_service(
-        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, address=IP_1)
+        fake_udns.airplay_service("Apple TV", AIRPLAY_ID, addresses=[IP_1])
     )
 
     atvs = await unicast_scan()
@@ -387,7 +442,7 @@ async def test_unicast_scan_device_info(udns_server, unicast_scan):
 async def test_unicast_scan_device_model(udns_server, unicast_scan):
     udns_server.add_service(
         fake_udns.mrp_service(
-            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, address=IP_1, model="J105aAP"
+            "Apple TV 1", "Apple TV MRP 1", MRP_ID_1, addresses=[IP_1], model="J105aAP"
         )
     )
 

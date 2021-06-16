@@ -20,7 +20,7 @@ DEVICE_INFO_SERVICE = "_device-info._tcp._local"
 TEST_SERVICES = dict(
     [
         fake_udns.mrp_service(
-            SERVICE_NAME, SERVICE_NAME, "mrp_id", address="127.0.0.1", port=1234
+            SERVICE_NAME, SERVICE_NAME, "mrp_id", addresses=["127.0.0.1"], port=1234
         ),
     ]
 )
@@ -43,7 +43,7 @@ async def udns_server(event_loop):
 
 @pytest.fixture(autouse=True)
 def stub_local_addresses():
-    with patch("pyatv.net.get_private_addresses") as mock:
+    with patch("pyatv.support.net.get_private_addresses") as mock:
         mock.return_value = [IPv4Address("127.0.0.1")]
         yield
 
@@ -63,7 +63,7 @@ def stub_ip_address():
 @pytest.fixture(autouse=True)
 def redirect_mcast(udns_server):
     real_mcast_socket = net.mcast_socket
-    with patch("pyatv.net.mcast_socket") as mock:
+    with patch("pyatv.support.net.mcast_socket") as mock:
         mock.side_effect = lambda addr, port=0: real_mcast_socket(
             addr, port if port == udns_server.port else 0
         )
@@ -201,7 +201,7 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
 
     udns_server.services = {
         MEDIAREMOTE_SERVICE: fake_udns.FakeDnsService(
-            name=SERVICE_NAME, address=None, port=0, properties={}, model=None
+            name=SERVICE_NAME, addresses=[], port=0, properties={}, model=None
         ),
     }
 
@@ -252,7 +252,7 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
     udns_server.services = {
         MEDIAREMOTE_SERVICE: fake_udns.FakeDnsService(
             name=SERVICE_NAME,
-            address="127.0.0.1",
+            addresses=["127.0.0.1"],
             port=1234,
             properties={},
             model="dummy",

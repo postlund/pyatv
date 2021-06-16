@@ -1,0 +1,423 @@
+"""Support for audio streaming using Remote Audio Output Protocol (RAOP)."""
+
+import asyncio
+import logging
+import math
+from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
+
+from pyatv import conf, const, exceptions
+from pyatv.airplay.srp import LegacyCredentials
+from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.interface import (
+    Audio,
+    FeatureInfo,
+    Features,
+    Metadata,
+    Playing,
+    PushUpdater,
+    RemoteControl,
+    StateProducer,
+    Stream,
+)
+from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
+from pyatv.raop.miniaudio import MiniaudioWrapper
+from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
+from pyatv.raop.rtsp import RtspContext, RtspSession
+from pyatv.support import map_range
+from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
+from pyatv.support.relayer import Relayer
+
+_LOGGER = logging.getLogger(__name__)
+
+INITIAL_VOLUME = 33.0  # Percent
+
+DBFS_MIN = -30.0
+DBFS_MAX = 0.0
+PERCENTAGE_MIN = 0.0
+PERCENTAGE_MAX = 100.0
+
+
+class RaopPushUpdater(PushUpdater):
+    """Implementation of push update support for RAOP."""
+
+    def __init__(self, metadata: Metadata, loop: asyncio.AbstractEventLoop):
+        """Initialize a new RaopPushUpdater instance."""
+        super().__init__(loop)
+        self._activated = False
+        self.metadata = metadata
+
+    @property
+    def active(self) -> bool:
+        """Return if push updater has been started."""
+        return self._activated
+
+    def start(self, initial_delay: int = 0) -> None:
+        """Begin to listen to updates.
+
+        If an error occurs, start must be called again.
+        """
+        if self.listener is None:
+            raise exceptions.NoAsyncListenerError()
+
+        self._activated = True
+        asyncio.ensure_future(self.state_updated(), loop=self.loop)
+
+    def stop(self) -> None:
+        """No longer forward updates to listener."""
+        self._activated = False
+
+    async def state_updated(self):
+        """State was updated, call listener."""
+        try:
+            playing = await self.metadata.playing()
+            self.post_update(playing)
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.debug("Playstatus error occurred: %s", ex)
+
+
+class RaopPlaybackManager:
+    """Manage current play state for RAOP."""
+
+    def __init__(self, address: str, port: int) -> None:
+        """Initialize a new RaopPlaybackManager instance."""
+        self.playback_info: Optional[PlaybackInfo] = None
+        self._is_acquired: bool = False
+        self._address: str = address
+        self._port: int = port
+        self._context: RtspContext = RtspContext()
+        self._connection: Optional[HttpConnection] = None
+        self._rtsp: Optional[RtspSession] = None
+        self._raop: Optional[RaopClient] = None
+
+    @property
+    def context(self) -> RtspContext:
+        """Return RTSP context if a session is active."""
+        return self._context
+
+    @property
+    def raop(self) -> Optional[RaopClient]:
+        """Return RAOP client if a session is active."""
+        return self._raop
+
+    def acquire(self) -> None:
+        """Acquire playback manager for playback."""
+        if self._is_acquired:
+            raise exceptions.InvalidStateError("already streaming to device")
+
+        self._is_acquired = True
+
+    async def setup(self) -> Tuple[RaopClient, RtspSession, RtspContext]:
+        """Set up a session or return active if it exists."""
+        if self._raop and self._rtsp and self._context:
+            return self._raop, self._rtsp, self._context
+
+        self._connection = await http_connect(self._address, self._port)
+        self._rtsp = RtspSession(self._connection, self._context)
+        self._raop = RaopClient(self._rtsp, self._context)
+        return self._raop, self._rtsp, self._context
+
+    async def teardown(self) -> None:
+        """Tear down and disconnect current session."""
+        if self._raop:
+            self._raop.close()
+        if self._connection:
+            self._connection = None
+        self._raop = None
+        self._context.reset()
+        self._rtsp = None
+        self._connection = None
+        self._is_acquired = False
+
+
+class RaopMetadata(Metadata):
+    """Implementation of metadata interface for RAOP."""
+
+    def __init__(self, playback_manager: RaopPlaybackManager) -> None:
+        """Initialize a new RaopMetadata instance."""
+        self._playback_manager = playback_manager
+
+    async def playing(self) -> Playing:
+        """Return what is currently playing."""
+        if self._playback_manager.playback_info is None:
+            return Playing(
+                device_state=const.DeviceState.Idle, media_type=const.MediaType.Unknown
+            )
+
+        metadata = self._playback_manager.playback_info.metadata
+        total_time = int(metadata.duration) if metadata.duration else None
+        return Playing(
+            device_state=const.DeviceState.Playing,
+            media_type=const.MediaType.Music,
+            title=metadata.title,
+            artist=metadata.artist,
+            album=metadata.album,
+            position=int(self._playback_manager.playback_info.position),
+            total_time=total_time,
+        )
+
+
+class RaopFeatures(Features):
+    """Implementation of supported feature functionality."""
+
+    def __init__(self, playback_manager: RaopPlaybackManager) -> None:
+        """Initialize a new RaopFeatures instance."""
+        self.playback_manager = playback_manager
+
+    def get_feature(  # pylint: disable=too-many-return-statements
+        self, feature_name: FeatureName
+    ) -> FeatureInfo:
+        """Return current state of a feature."""
+        if feature_name == FeatureName.StreamFile:
+            return FeatureInfo(FeatureState.Available)
+
+        metadata = EMPTY_METADATA
+        if self.playback_manager.playback_info:
+            metadata = self.playback_manager.playback_info.metadata
+
+        if feature_name == FeatureName.Title:
+            return self._availability(metadata.title)
+        if feature_name == FeatureName.Artist:
+            return self._availability(metadata.artist)
+        if feature_name == FeatureName.Album:
+            return self._availability(metadata.album)
+        if feature_name in [FeatureName.Position, FeatureName.TotalTime]:
+            return self._availability(metadata.duration)
+
+        # As far as known, volume controls are always supported
+        if feature_name in [
+            FeatureName.SetVolume,
+            FeatureName.Volume,
+            FeatureName,
+            FeatureName.VolumeDown,
+            FeatureName.VolumeUp,
+        ]:
+            return FeatureInfo(FeatureState.Available)
+
+        return FeatureInfo(FeatureState.Unavailable)
+
+    @staticmethod
+    def _availability(value):
+        return FeatureInfo(
+            FeatureState.Available if value else FeatureState.Unavailable
+        )
+
+
+class RaopAudio(Audio):
+    """Implementation of audio functionality."""
+
+    def __init__(self, playback_manager: RaopPlaybackManager):
+        """Initialize a new RaopAudio instance."""
+        self.playback_manager = playback_manager
+
+    @property
+    def has_changed_volume(self) -> bool:
+        """Return whether volume has changed from default or not."""
+        return self.playback_manager.context.volume is not None
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level."""
+        vol = self.playback_manager.context.volume
+        if vol is None:
+            return INITIAL_VOLUME
+
+        # AirPlay uses -144.0 as "muted", but we treat everything below -30.0 as
+        # muted to be a bit defensive
+        if vol < DBFS_MIN:
+            return PERCENTAGE_MIN
+
+        # Map dBFS to percentage
+        return map_range(vol, DBFS_MIN, DBFS_MAX, PERCENTAGE_MIN, PERCENTAGE_MAX)
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        raop = self.playback_manager.raop
+
+        # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
+        if math.isclose(level, 0.0):
+            remapped = -144.0
+        else:
+            # Map percentage to dBFS
+            remapped = map_range(
+                level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX
+            )
+
+        if raop:
+            await raop.set_volume(remapped)
+        else:
+            self.playback_manager.context.volume = remapped
+
+
+class RaopStream(Stream):
+    """Implementation of stream functionality."""
+
+    def __init__(
+        self,
+        config: conf.AppleTV,
+        service: conf.RaopService,
+        listener: RaopListener,
+        audio: RaopAudio,
+        playback_manager: RaopPlaybackManager,
+    ) -> None:
+        """Initialize a new RaopStream instance."""
+        self.config = config
+        self.service = service
+        self.listener = listener
+        self.audio = audio
+        self.playback_manager = playback_manager
+
+    async def stream_file(self, filename: str, **kwargs) -> None:
+        """Stream local file to device.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
+        self.playback_manager.acquire()
+        try:
+            client, _, context = await self.playback_manager.setup()
+            client.credentials = self._get_credentials()
+
+            client.listener = self.listener
+            await client.initialize(self.service.properties)
+
+            # After initialize has been called, all the audio properties will be
+            # initialized and can be used in the miniaudio wrapper
+            audio_file = await MiniaudioWrapper.open(
+                filename,
+                context.sample_rate,
+                context.channels,
+                context.bytes_per_channel,
+            )
+
+            # Try to load metadata and pass it along if it succeeds
+            metadata: AudioMetadata = EMPTY_METADATA
+            try:
+                metadata = await get_metadata(filename)
+            except Exception as ex:
+                _LOGGER.warning("Failed to extract metadata from %s: %s", filename, ex)
+
+            # If the user didn't change volume level prior to streaming, try to extract
+            # volume level from device (if supported). Otherwise set the default level
+            # in pyatv.
+            if not self.audio.has_changed_volume and "initialVolume" in client.info:
+                initial_volume = client.info["initialVolume"]
+                if not isinstance(initial_volume, float):
+                    raise exceptions.ProtocolError(
+                        f"initial volume {initial_volume} has "
+                        "incorrect type {type(initial_volume)}",
+                    )
+                context.volume = initial_volume
+            else:
+                await self.audio.set_volume(self.audio.volume)
+
+            await client.send_audio(audio_file, metadata)
+        finally:
+            await self.playback_manager.teardown()
+
+    def _get_credentials(self) -> Optional[LegacyCredentials]:
+        credentials: Optional[str] = None
+
+        # First and foremost use RAOP credentials, otherwise fall back to AirPlay
+        # if available
+        if self.service.credentials:
+            credentials = self.service.credentials
+        else:
+            service = self.config.get_service(Protocol.AirPlay)
+            if service:
+                airplay_service = cast(conf.AirPlayService, service)
+                credentials = airplay_service.credentials
+
+        return LegacyCredentials.parse(credentials) if credentials else None
+
+
+class RaopRemoteControl(RemoteControl):
+    """Implementation of remote control functionality."""
+
+    def __init__(self, audio: RaopAudio):
+        """Initialize a new RaopRemoteControl instance."""
+        self.audio = audio
+
+    async def volume_up(self) -> None:
+        """Press key volume up."""
+        await self.audio.set_volume(min(self.audio.volume + 5.0, 100.0))
+
+    async def volume_down(self) -> None:
+        """Press key volume down."""
+        await self.audio.set_volume(max(self.audio.volume - 5.0, 0.0))
+
+
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
+    """Set up a new RAOP service."""
+    service = config.get_service(Protocol.RAOP)
+    assert service is not None
+
+    playback_manager = RaopPlaybackManager(str(config.address), service.port)
+    metadata = RaopMetadata(playback_manager)
+    push_updater = RaopPushUpdater(metadata, loop)
+
+    class RaopStateListener(RaopListener):
+        """Listener for RAOP state changes."""
+
+        def playing(self, playback_info: PlaybackInfo) -> None:
+            """Media started playing with metadata."""
+            playback_manager.playback_info = playback_info
+            self._trigger()
+
+        def stopped(self) -> None:
+            """Media stopped playing."""
+            playback_manager.playback_info = None
+            self._trigger()
+
+        @staticmethod
+        def _trigger():
+            """Trigger push update."""
+            if push_updater.active:
+                asyncio.ensure_future(push_updater.state_updated(), loop=loop)
+
+    service = cast(conf.RaopService, service)
+
+    raop_listener = RaopStateListener()
+    raop_audio = RaopAudio(playback_manager)
+
+    interfaces[Stream].register(
+        RaopStream(config, service, raop_listener, raop_audio, playback_manager),
+        Protocol.RAOP,
+    )
+    interfaces[Features].register(RaopFeatures(playback_manager), Protocol.RAOP)
+    interfaces[PushUpdater].register(push_updater, Protocol.RAOP)
+    interfaces[Metadata].register(metadata, Protocol.RAOP)
+    interfaces[Audio].register(raop_audio, Protocol.RAOP)
+    interfaces[RemoteControl].register(RaopRemoteControl(raop_audio), Protocol.RAOP)
+
+    async def _connect() -> None:
+        pass
+
+    def _close() -> None:
+        pass
+
+    return (
+        _connect,
+        _close,
+        set(
+            [
+                FeatureName.StreamFile,
+                FeatureName.PushUpdates,
+                FeatureName.Artist,
+                FeatureName.Album,
+                FeatureName.Title,
+                FeatureName.Position,
+                FeatureName.TotalTime,
+                FeatureName.SetVolume,
+                FeatureName.Volume,
+                FeatureName.VolumeUp,
+                FeatureName.VolumeDown,
+            ]
+        ),
+    )

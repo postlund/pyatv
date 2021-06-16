@@ -41,14 +41,14 @@ def add_service(
     message: mdns.DnsMessage,
     service_type: Optional[str],
     service_name: Optional[str],
-    address: Optional[str],
+    addresses: List[str],
     port: int,
     properties: Dict[str, bytes],
 ) -> None:
     if service_name is None:
         return message
 
-    if address:
+    for address in addresses:
         message.resources.append(
             resource(service_name + ".local", mdns.QueryType.A, address)
         )
@@ -88,12 +88,14 @@ def assert_service(
     message: mdns.Service,
     service_type: str,
     service_name: str,
-    address: str,
+    addresses: List[str],
     port: int,
     known_properties: Dict[str, bytes],
 ) -> None:
     assert message.type == service_type
     assert message.name == service_name
-    assert message.address == (IPv4Address(address) if address else None)
+
+    # Assume first address (if multiple) is expected
+    assert message.address == (IPv4Address(addresses[0]) if addresses else None)
     assert message.port == port
     assert message.properties == known_properties

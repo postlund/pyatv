@@ -5,7 +5,10 @@ from asyncio import sleep as real_sleep
 from datetime import datetime
 from importlib import import_module
 import inspect
+import os
+from pathlib import Path
 import time
+from typing import Tuple
 
 from aiohttp import ClientSession
 
@@ -51,7 +54,7 @@ def total_sleep_time() -> float:
     return 0.0
 
 
-async def simple_get(url):
+async def simple_get(url: str) -> Tuple[bytes, int]:
     """Perform a GET-request to a specified URL."""
     async with ClientSession() as session:
         async with session.get(url) as response:
@@ -126,3 +129,11 @@ def faketime(module_name, *times):
             return getattr(datetime, attr)
 
     return FakeDatetime(list(times))
+
+
+def data_path(filename: str) -> str:
+    """Return absolute path to a test file in the data directory."""
+    abs_path = str(Path(__file__).parent.joinpath("data", filename))
+    if not os.path.exists(abs_path):
+        raise FileNotFoundError(f"test file does not exist: {filename}")
+    return abs_path

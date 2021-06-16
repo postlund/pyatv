@@ -18,6 +18,7 @@ from tests.fake_device.companion import (
 )
 from tests.fake_device.dmap import FakeDmapService, FakeDmapState, FakeDmapUseCases
 from tests.fake_device.mrp import FakeMrpServiceFactory, FakeMrpState, FakeMrpUseCases
+from tests.fake_device.raop import FakeRaopService, FakeRaopState, FakeRaopUseCases
 
 FACTORIES = {
     Protocol.AirPlay: (FakeAirPlayService, FakeAirPlayState, FakeAirPlayUseCases),
@@ -28,9 +29,10 @@ FACTORIES = {
         FakeCompanionState,
         FakeCompanionUseCases,
     ),
+    Protocol.RAOP: (FakeRaopService, FakeRaopState, FakeRaopUseCases),
 }
 
-FakeService = namedtuple("FakeService", "service state factory")
+FakeService = namedtuple("FakeService", "service state usecase")
 
 
 class FakeAppleTV:
@@ -78,3 +80,6 @@ class FakeAppleTV:
 
     def get_state(self, protocol: Protocol):
         return self.services[protocol].state
+
+    def get_usecase(self, protocol: Protocol):
+        return self.services[protocol].usecase

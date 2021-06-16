@@ -4,12 +4,18 @@ title: Protocols
 permalink: /documentation/protocols/
 link_group: documentation
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
+
 # Protocols
 
-If you want to extend `pyatv`, a basic understanding of the used protocols helps a lot. This
+If you want to extend pyatv, a basic understanding of the used protocols helps a lot. This
 page aims to give a summary of the protocols and how they work (to the extent we know, since
 they are reverse engineered). Focus are on the parts the are relevant and implemented in
-`pyatv`.
+pyatv.
 
 # Digital Media Access Protocol (DMAP)
 
@@ -55,7 +61,7 @@ contains other TLVs) or not. It cannot easily be seen on the data itself.
 A container usually has more resemblance to an array than a dictionary
 since multiple TLVs with the same key often occurs.
 
-All tags currently known by `pyatv` is defined in `pyatv.dmap.tag_definitions`.
+All tags currently known by pyatv is defined in `pyatv.dmap.tag_definitions`.
 
 ## Decoding Example
 
@@ -153,7 +159,7 @@ The device will respond with an error (503?) if the authentication fails.
 
 ## Supported Requests
 
-This list is only covers the requests performed by `pyatv` and is thus not
+This list is only covers the requests performed by pyatv and is thus not
 complete.
 
 ### server-info
@@ -376,14 +382,14 @@ included in this service and typical values:
 
 | Property | Example Value | Meaning |
 | -------- | ------------- | ------- |
-| rpHA | 45efecc5211 | Something related to HomeKit?
-| rpHN | 86d44e4f11ff | Discovery Nounce
+| rpHA | 45efecc5211 | HomeKit AuthTag
+| rpHN | 86d44e4f11ff | Discovery Nonce
 | rpVr | 195.2 | Likely protocol version
 | rpMd | AppleTV6,2 | Device model name
 | rpFl | 0x36782 | Some status flags (or supported features)
 | rpAD | cc5011ae31ee | Bonjour Auth Tag
-| rpHI | ffb855e34e31 | Something else related to HomeKit
-| rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address
+| rpHI | ffb855e34e31 | HomeKit rotating ID
+| rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address (can rotate)
 
 Most values (except for rpVr, rpMd and rpFl) change every now and then (rotating encryption
 scheme), likely for privacy reasons. It is still not known how these values are to be used.
@@ -437,17 +443,20 @@ An object is encoded or decoded according to this table:
 
 | Bytes | Kind of Data | Example (python-esque) |
 | ----- | ------------ | ---------------------- |
+| 0x00 | Invalid | Reserved
 | 0x01 | true | 0x01 = True
 | 0x02 | false | 0x02 = False
 | 0x03 | termination | 0xEF4163416403 = {"a": "b"} (See [Endless Collections](#endless-collections))
 | 0x04 | null | 0x04 = None
-| 0x05 | UUID4 (16 bytes) | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
-| 0x06 | absolute mach time | 0x0000000000000000 = ?
+| 0x05 | UUID4 (16 bytes) big-endian | 0x0512345678123456781234567812345678 = 12345678-1234-5678-1234-567812345678
+| 0x06 | absolute mach time little-endian | 0x0000000000000000 = ?
+| 0x07 | -1 (decimal) | 0x07 = -1 (decimal)
 | 0x08-0x2F | 0-39 (decimal) | 0x17 = 15 (decimal)
 | 0x30 | int32 1 byte length | 0x3020 = 32 (decimal)
 | 0x31 | int32 2 byte length | 0x310020 = 32 (decimal)
 | 0x32 | int32 4 byte length | 0x3200000020 = 32 (decimal)
 | 0x33 | int32 8 byte length | 0x330000000000000020 = 32 (decimal)
+| 0x34 | int32 16 byte length | 
 | 0x35 | float32 | 0x35xxxxxxxx = xxxxxxxx (signed, single precision)
 | 0x36 | float64 | 0x36xxxxxxxxxxxxxxxx = xxxxxxxxxxxxxxxx (signed, double precision)
 | 0x40-0x60 | string (0-32 chars) | 0x43666F6F = "foo"
@@ -455,20 +464,25 @@ An object is encoded or decoded according to this table:
 | 0x62 | string 2 byte length | 0x620300666F6F = "foo"
 | 0x63 | string 3 byte length | 0x62030000666F6F = "foo"
 | 0x64 | string 4 byte length | 0x6303000000666F6F = "foo"
+| 0x6F | null terminated string | 0x6F666F6F00 = "foo"
 | 0x70-0x90 | raw bytes (0-32 bytes) | 0x72AABB = b"\xAA\xBB"
 | 0xA0-0xBF | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
 | 0x91 | data 1 byte length | 0x9102AABB = b"\xAA\xBB"
 | 0x92 | data 2 byte length | 0x920200AABB = b"\xAA\xBB"
 | 0x93 | data 3 byte length | 0x93020000AABB = b"\xAA\xBB"
 | 0x94 | data 4 byte length | 0x9402000000AABB = b"\xAA\xBB"
+| 0xC1 | UID 1 bytes length | 0xC102 = 2
+| 0xC2 | UID 2 bytes length | 0xC20002 = 2
+| 0xC2 | UID 3 bytes length | 0xC3000002 = 2
+| 0xC4 | UID 4 bytes length | 0xC400000003 = 2
 | 0xDv | array with *v* elements | 0xD2016103666F6F = [True, "foo"]
 | 0xEv | dictionary with *v* entries | 0xE16103666F6F0x17 = {"foo": 15}
 
 ### Endless Collections
 
 Dictionaries and lists supports up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
-dictionary with three elements. It is however possible to represent both lists and dictionaries with an endless amount of items
-using `F` as count, i.e. `0xDF` and `0xEF`. A byte with value `0x03` indicates end of a list or dictionary.
+dictionary with three elements. It is however possible to represent lists, dictionaries and data objects with an endless amount of items
+using `F` as count, i.e. `0xDF`, `0xEF` or `0x9F`. A byte with value `0x03` indicates end of a list, dictionary or data object.
 
 A simple example with just one element, e.g. ["a"] looks like this:
 
@@ -580,7 +594,7 @@ for further details (available [here](https://developer.apple.com/homekit/specif
 but requires an Apple ID).
 
 Messages will be presented in hex and a decoded format, based on the implementation in
-`pyatv`. So beware that it will be somewhat python-inspired.
+pyatv. So beware that it will be somewhat python-inspired.
 
 ### Pairing
 
@@ -780,7 +794,7 @@ with `E_OPACK` as frame type would yield `0x08000013` as AAD for both encryption
 ### E_OPACK
 
 Several types of data can be carried over the Companion protocol, but the one called `E_OPACK`
-seems to be the one of interest for `pyatv`. It carries information for both the Apple TV remote
+seems to be the one of interest for pyatv. It carries information for both the Apple TV remote
 widget in Action Center as well as the Shortcuts app. So far, not much is known about the format
 used by `E_PACK`, but what is known is documented here.
 
@@ -835,6 +849,7 @@ There's a lot of information stuffed in there, but the main elements are these o
 | _c | Content | Additional data/arguments passed to whatever is specified in `_i`. |
 | _t | Type | Type of message: 1=event, 2=request, 3=response |
 | _x | XID | Some kind of identifier, maybe related to XPC? Still unknown. |
+| _sid | Session ID | Identifier used by sessions. |
 
 Most messages seems to include the tags above. Here are a few other tags seen as well:
 
@@ -842,6 +857,94 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 | _em | Error message | In case of error, e.g. `No request handler` if no handler exists for `_i` (i.e. invalid value for `_i`).
 | _ec | Error code | In case of error, e.g. 58822 |
 | _ed | Error domain | In case of error, e.g. RPErrorDomain |
+
+#### Sessions (_sessionStart, _sessionStop)
+
+When a client connects, it can establish a new session by sending `_sessionStart`. It
+includes a 32 bit session id called `_sid` (assumed to be randomized by the client) and a
+service type called `_srvT` (endpoint the client wants to talk to):
+
+```javascript
+{
+    '_i': '_sessionStart',
+    '_x': 123,
+    '_t': '2',
+    '_c': {
+        '_srvT': 'com.apple.tvremoteservices',
+        'sid': 123456
+    }
+}
+```
+
+The server will respond with a remote `_sid` upon success:
+
+```javascript
+{
+    '_c': {
+        '_sid': 1443773422
+    },
+    '_t': 3,
+    '_x': 123
+}
+```
+
+A final 64 bit session id is then created by shifting up the received `_sid` 32 bits
+and OR'ing it with the randomized `_sid`:
+
+```python
+(1443773422 << 32) | 123456 = 6200959630324130368 = 0x560E3BEE0001E240
+```
+
+This identifier is then used in further requests where `_sid` is required, e.g. when stopping
+the session:
+
+```javascript
+// Request
+{
+    '_i': '_sessionStop',
+    '_x': 123,
+    '_t': '2',
+    '_c': {
+        '_sid': 6200959630324130368
+    }
+}
+
+// Response
+{
+    '_c': {},
+    '_t': 3,
+    '_x': 123
+}
+```
+
+Combining both endpoint session ids into a single identifier is likely for convenience
+reasons.
+
+Some commands will not work until a session has been started. One example is `_launchApp`,
+which won't work after the Apple TV has been restarted until the app list has been requested
+by for instance the shortcuts app. The theory is that the `rapportd` process (implementing
+the Companion protocol) acts like a proxy between clients and processes on the system.
+When a client wants to call a function (e.g. `_launchApp`) handled by another process,
+`_sessionStart` will make sure that function is available to call by setting up a session
+to the process handling the function and relaying messages back and forth:
+
+<code class="diagram">
+sequenceDiagram
+    Client->>rapportd: _startSession: {_srvT=com.apple.tvremoteservices, _sid=123456}
+    rect rgb(0, 0, 255, 0.1)
+      Note over rapportd,tvremoteservices: Only if no previous session?
+      rapportd->>tvremoteservices: Start new session
+      tvremoteservices->>rapportd: {_sid: 1443773422}
+    end
+    rapportd->>Client: {_sid: 1443773422}
+    note over Client, rapportd: Interaction
+    Client->>rapportd: _stopSession: {_sid=6200959630324130368}
+    rapportd->>Client: {}
+</code>
+
+Once a command has been called, it will be cached making it possible to call it without
+sending `_sessionStart` again. This is probably why `_launchApp` keeps working after
+requesting the list from Shortcuts (as it will set up a new session).
 
 #### Launch Application (_launchApp)
 
@@ -863,7 +966,7 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 {'_c': {'com.apple.podcasts': 'Podcaster', 'com.apple.TVMovies': 'Filmer', 'com.apple.TVWatchList': 'TV', 'com.apple.TVPhotos': 'Bilder', 'com.apple.TVAppStore': 'App\xa0Store', 'se.cmore.CMore2': 'C More', 'com.apple.Arcade': 'Arcade', 'com.apple.TVSearch': 'Sök', 'emby.media.emby-tvos': 'Emby', 'se.tv4.tv4play': 'TV4 Play', 'com.apple.TVHomeSharing': 'Datorer', 'com.google.ios.youtube': 'YouTube', 'se.svtplay.mobil': 'SVT Play', 'com.plexapp.plex': 'Plex', 'com.MTGx.ViaFree.se': 'Viafree', 'com.apple.TVSettings': 'Inställningar', 'com.apple.appleevents': 'Apple Events', 'com.kanal5.play': 'discovery+', 'com.netflix.Netflix': 'Netflix', 'se.harbourfront.viasatondemand': 'Viaplay', 'com.apple.TVMusic': 'Musik'}, '_t': 3, '_x': 123}
 ```
 
-#### Buttons/Commands
+#### Buttons/Commands (_hidC)
 
 Identifier shall be set to *_hidC* and content (*_c*) to the following:
 
@@ -883,12 +986,347 @@ Example: Put device to sleep:
 
 # AirPlay
 
-Currently, `pyatv` only supports playing a video (or audio) by providing a URL.
-Since tvOS 10.2, device authentication ("pairing") was enforced and that process
-is supported since a while back.
+The AirPlay protocol suite is used to stream media from a sender to a receiver. Two protocols
+are used: AirTunes and "AirPlay". The former is used for audio streaming and is based on
+*Real-Time Streaming Protocol*. The latter adds video and image capabilities to the stack,
+allowing video streaming, screen mirroring and image sharing.
 
-More information will be added here later
+There's quite a history behind the AirPlay stack and I haven't fully grasped it yet. But I
+*think* it looks something like this:
+
+<code class="diagram">
+graph LR
+    AT[AirTunes, 2004] --> AT2(AirTunes v2, 2010)
+    AT2 --> APS1
+    AP1[AirPlay, 2010] --> APS1
+    APS1[AirPlay v1, 2010] --> APS2
+    APS2[AirPlay v2, 2018]
+</code>
+
+AirTunes is usually announced as *Remote Audio Output Protocol*, e.g. when looking at Zeroconf
+services. That's also what it will be referred to here.
+
+As the AirPlay protocol is covered a lot elsewhere, I will update here when I'm bored. Please
+refer to the references for more details on the protocol.
+
+## Service Discovery
+
+AirPlay uses two services, one for audio and one for video. They are described here.
+
+### RAOP
+
+| **Property** | **Example value** | **Meaning** |
+| ------------ | ----------------- | ----------- |
+| et           | 0,4               | Encryption type: 0=unencrypted, 1=RSA (AirPort Express), 3=FairPlay, 4=MFiSAP, 5=FairPlay SAPv2.5
+| da           | true              | ?
+| ss           | 16                | Audio sample size in bits
+| am           | AppleTV6,2        | Device model
+| tp           | TCP,UDP           | Transport protocol
+| pw           | false             | Password protected
+| fv           | s8927.1096.0      | Some kind of firmware version? (non-Apple)
+| txtvers      | 1                 | TXT record version 1
+| vn           | 65537             | ?
+| md           | 0,1,2             | Supported metadata: 0=text, 1=artwork, 2=progress
+| vs           | 103.2             | Server version
+| sv           | false             | ?
+| ch           | 2                 | Number of audio channels
+| sr           | 44100             | Audio sample rate
+| cn           | 0,1               | Audio codecs: 0=PCM, 1=AppleLossless (ALAC), 2=AAC, 3=AAC ELD
+| ov           | 8.4.4             | Operating system version? (seen on ATV 3)
+| pk           | 38fd7e...         | Public key
+
+### AirPlay
+
+| **Property** | **Example value**     | **Meaning** |
+| ------------ | --------------------- | ----------- |
+| features     | 0x4A7FDFD5,0x3C155FDE | Features supported by device, see [here](https://openairplay.github.io/airplay-spec/features.html)
+| igl | 1 | Is Group Leader
+| model | AppleTV6,2 | Model name
+| osvers | 14.5 | Operating system version
+| pi | UUID4 | Group ID
+| vv | 2 | ?
+| srcvers | 540.31.41 | AirPlay version
+| psi | UUID4 | Public AirPlay Pairing Identifier
+| gid | UUID4 | Group UUID
+| pk  | UUID4 | Public key
+| acl | 0 | Access Control Level
+| deviceid | AA:BB:CC:DD:EE:FF | Device identifier, typically MAC address
+| protovers | Protocol version
+| fex | 1d9/St5fFTw | ?
+| gcgl | 1 | Group Contains Group Leader
+| flags | 0x244 | Status flags, see [here](https://openairplay.github.io/airplay-spec/status_flags.html)
+| btaddr | AA:BB:CC:DD:EE:FF | Bluetooth address
+
+## RAOP
+
+This section covers the audio streaming part of AirPlay, i.e. AirTunes/RAOP. TBD
+
+### RTSP
+
+Streaming sessions are set up using the RTSP protocol. This section covers the basics of how
+that is done.
+
+#### OPTIONS
+
+Ask receiver what methods it supports.
+
+**Sender -> Receiver:**
+```raw
+OPTIONS * RTSP/1.0
+CSeq: 0
+nUser-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:10 GMT
+Content-Length: 0
+Public: ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET, PUT
+Server: AirTunes/540.31.41
+CSeq: 0
+```
+
+#### ANNOUNCE
+
+Tell the receiver about properties for an upcoming stream.
+
+**Sender -> Receiver:**
+```raw
+ANNOUNCE rtsp://10.0.10.254/4018537194 RTSP/1.0
+CSeq: 0
+User-Agent: AirPlay/540.31
+DACP-ID: 9D881F7AED72DB4A
+Active-Remote: 3630929274
+Client-Instance: 9D881F7AED72DB4A
+Content-Type: application/sdp
+Content-Length: 179
+
+v=0
+o=iTunes 4018537194 0 IN IP4 10.0.10.254
+s=iTunes
+c=IN IP4 10.0.10.84
+t=0 0
+m=audio 0 RTP/AVP 96
+a=rtpmap:96 AppleLossless
+a=fmtp:96 352 0 16 40 10 14 2 255 0 0 44100
+```
+
+Some observations (might not be true):
+
+* ID in `o=` property (`4018537194`) seems to match what is used for rtsp endpoint (`rtsp://xxx/4018537194`)
+* Address in `o=` corresponds to IP address of the sender
+* Address in `c=` is address of the receiver
+* Configuration for ALAC is used here. Format for `fmtp` is `a=fmtp:96 <frames per packet> 0 <sample size> 40 10 14 <channels> 255 0 0 <sample rate>` (other values are unknown)
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:25:54 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 0
+```
+
+#### SETUP
+
+Request initialization of a session (but does not start it). Sets up three different UDP channels:
+
+| Channel | Description |
+| ------- | ----------- |
+| server  | audio
+| control | sync and retransmission of lost frames
+| timing  | sync of common master clock
+
+**Sender -> Receiver:**
+```raw
+SETUP rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 2
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Transport: RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;control_port=55433;timing_port=55081
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Transport: RTP/AVP/UDP;unicast;mode=record;server_port=55801;control_port=50367;timing_port=0
+Session: 1
+Audio-Jack-Status: connected
+Server: AirTunes/540.31.41
+CSeq: 2
+```
+
+#### SETPEERS
+
+Unknown
+
+#### RECORD
+
+Request to start the stream at a particular point. Initially, a randomized sequence (16bit) number and start time (32bit) is included in `RTP-Info`.
+
+**Sender -> Receiver:**
+```raw
+RECORD rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 6
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Range: npt=0-
+Session: 1
+RTP-Info: seq=15432;rtptime=66150
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 07:35:11 GMT
+Content-Length: 0
+Audio-Latency: 3035
+Server: AirTunes/540.31.41
+CSeq: 6
+```
+
+#### FLUSH
+
+Stops the streaming, e.g. pause what is playing.
+
+**Sender -> Receiver:**
+```raw
+FLUSH rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 7
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 7
+```
+
+#### TEARDOWN
+
+End the RTSP session.
+
+**Sender -> Receiver:**
+```raw
+TEARDOWN rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 8
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:19 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 8
+```
+
+#### SET_PARAMETER
+
+Change a parameter, e.g. metadata or progress, on the receiver.
+
+**Sender -> Receiver:**
+```raw
+SET_PARAMETER rtsp://10.0.10.254/1085946124 RTSP/1.0
+CSeq: 3
+User-Agent: AirPlay/540.31
+DACP-ID: A851074254310A45
+Active-Remote: 4019753970
+Client-Instance: A851074254310A45
+Content-Type: text/parameters
+Content-Length: 11
+
+volume: -20
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Tue, 11 May 2021 17:35:11 GMT
+Content-Length: 0
+Server: AirTunes/540.31.41
+CSeq: 3
+```
+
+## AirPlay
+
+This section deals with "video part" of AirPlay. TBD
+
+### Commands
+
+#### /auth-setup
+
+Devices supporting MFi authentication (e.g. has `et=4`) might require an authentication step
+initiated by `/auth-setup`. This is always the case for AirPlay 2. More details
+[here](https://openairplay.github.io/airplay-spec/audio/rtsp_requests/post_auth_setup.html).
+
+*TODO: document more*
+
+The request consists of one byte encryption type (0x01: unencrypted,
+0x02: MFi-SAP-encrypted AES key) and 32 bytes Curve25519 public key. Normally this step is used
+to verify MFi authenticity, but no further action needs to be taken (i.e. just send request
+and ignore response) for devices requiring this step. Implementation in `pyatv` has been stolen
+from owntone [here](https://github.com/owntone/owntone-server/blob/c1db4d914f5cd8e7dbe6c1b6478d68a4c14824af/src/outputs/raop.c#L1568).
+
+**Sender -> Receiver:**
+```raw
+POST /auth-setup RTSP/1.0
+CSeq: 0
+User-Agent: AirPlay/540.31
+DACP-ID: BFAA2A9155BD093C
+Active-Remote: 347218209
+Client-Instance: BFAA2A9155BD093C
+Content-Type: application/octet-stream
+Content-Length: 33
+
+015902ede90d4ef2bd4cb68a6330038207a94dbd50d8aa465b5d8c012a0c7e1d4e27
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Content-Length: 1076
+Content-Type: application/octet-stream
+Server: AirTunes/366.0
+CSeq: 0
+
+97a02c0d0a31486316de944d8404f4e01f93b05dde4543cc022a5727e8a352330000038c3082038806092a864886f70d010702a0820379308203750201013100300b06092a864886f70d010701a082035d3082035930820241a003020102020f1212aa121127aa00aa8023aa238776300d06092a864886f70d0101050500308183310b300906035504061302555331133011060355040a130a4170706c6520496e632e31263024060355040b131d4170706c652043657274696669636174696f6e20417574686f72697479313730350603550403132e4170706c652069506f64204163636573736f726965732043657274696669636174696f6e20417574686f72697479301e170d3132313132373138323135305a170d3230313132373138323135305a3070310b300906035504061302555331133011060355040a0c0a4170706c6520496e632e311f301d060355040b0c164170706c652069506f64204163636573736f72696573312b302906035504030c224950415f31323132414131323131323741413030414138303233414132333837373630819f300d06092a864886f70d010101050003818d003081890281810097e302c45e7b6f387dd390201b0dd902b19dc30d72a93a8b9f1313c6108e90ee93daff24177526736e4f1f58a2c2382cf4b7f7359bb1b1a3a7595850d489f335557a48653d96e9407ccc05eba6c867716e446b31d2bdc9c5122af4c213e7d7f0635b74e323094483a900bd3f93ce8833785b2fd14d88fb2dd4c581e1189b38250203010001a360305e301d0603551d0e04160414d74ea8b90475ee5140d2be7d2f9258931c7543cb300c0603551d130101ff04023000301f0603551d23041830168014ff4b1a439af51996ab18002b61c9ee409d8ec704300e0603551d0f0101ff0404030203b8300d06092a864886f70d0101050500038201010012e8b29b1e1b81e7a14b6435b92a9c58f0a28e6bcb645edd223969b77a70dda3ddc280562f53cb87e3ccd5fea213ccc9c2a4f005c3aa4447b84a895df649f74e9f6612d6cc69eeb7561706fa718f5e1d80b0554affe911c6fa3f99ca06bcf4debf03b64449bde16058392c830be55ae33273d24eecaf0f4aef6f6c46bed87192e2773e5ae092098b32563a532164df5eecd3fc299c8b267cf555b516b02a013920242f4162e6cb5d8d555356d3999c989860ed8c4ea2a0f34af4bcc74b864a07c6d952115dd28b0cc5d8bc780567dcaafc721e678391a048b00cf8664d5c0ad1949b57165a7c98144480ac0510a1887e27821d966b14478c901f6c7548f8563e310000000080121b14309c641bc593196f886c633d19986c11ca9cb4be2fdad1f2ec1427eeb8da23aaeaf7a713f2b8e05a6942db364e3dd408d5a1eeb1525baadc5ccb46614dadef1bfa565c65f46a54f576802209faa39ac442ac7cd43995be833f7794d0517fd93218e86c0228b30b036d3055476114d926de2875bed7cef4970492df58a3
+```
 
 ## References
 
+[RAOP-Player](https://github.com/philippe44/RAOP-Player)
+
+[owntone-server](https://github.com/owntone/owntone-server)
+
+[Unofficial AirPlay Specification](https://openairplay.github.io/airplay-spec/introduction.html)
+
+[AirPlay 2 Internals](https://emanuelecozzi.net/docs/airplay2)
+
+[Using raw in ALAC frames (Stackoverflow)](https://stackoverflow.com/questions/34584522/airplay-protocol-how-to-use-raw-pcm-instead-of-alac)
+
 [Unofficial AirPlay Protocol Specification](https://nto.github.io/AirPlay.html)
+
+[AirTunes v2](https://git.zx2c4.com/Airtunes2/about/)
+
+[AirPlayAuth](https://github.com/funtax/AirPlayAuth)

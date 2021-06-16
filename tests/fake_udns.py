@@ -2,9 +2,10 @@ import asyncio
 from collections import namedtuple
 from contextlib import contextmanager
 from ipaddress import IPv4Address
+from itertools import chain
 import logging
 import struct
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Mapping, NamedTuple, Optional, Tuple, Union, cast
 from unittest.mock import patch
 
 from pyatv.support import dns, mdns
@@ -13,20 +14,28 @@ from tests.support import dns_utils
 
 _LOGGER = logging.getLogger(__name__)
 
-FakeDnsService = namedtuple("FakeDnsService", "name address port properties model")
+
+class FakeDnsService(NamedTuple):
+    """Representation of fake DNS service."""
+
+    name: str
+    addresses: List[str]
+    port: int
+    properties: Mapping[str, str]
+    model: Optional[str]
 
 
 def mrp_service(
     service_name: str,
     atv_name: str,
     identifier: str,
-    address="127.0.0.1",
+    addresses: List[str] = ["127.0.0.1"],
     port: int = 49152,
     model: Optional[str] = None,
 ) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
-        address=address,
+        addresses=addresses,
         port=port,
         properties={
             "Name": atv_name.encode("utf-8"),
@@ -40,13 +49,13 @@ def mrp_service(
 def airplay_service(
     atv_name: str,
     deviceid: str,
-    address="127.0.0.1",
+    addresses: List[str] = ["127.0.0.1"],
     port: int = 7000,
     model: Optional[str] = None,
 ) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=atv_name,
-        address=address,
+        addresses=addresses,
         port=port,
         properties={"deviceid": deviceid.encode("utf-8")},
         model=model,
@@ -58,12 +67,12 @@ def homesharing_service(
     service_name: str,
     atv_name: str,
     hsgid: str,
-    address="127.0.0.1",
+    addresses: List[str] = ["127.0.0.1"],
     model: Optional[str] = None,
 ) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
-        address=address,
+        addresses=addresses,
         port=3689,
         properties={"hG": hsgid.encode("utf-8"), "Name": atv_name.encode("utf-8")},
         model=model,
@@ -71,10 +80,15 @@ def homesharing_service(
     return ("_appletv-v2._tcp.local", service)
 
 
-def device_service(service_name, atv_name, address="127.0.0.1", model=None):
+def device_service(
+    service_name: str,
+    atv_name: str,
+    addresses: List[str] = ["127.0.0.1"],
+    model: Optional[str] = None,
+):
     service = FakeDnsService(
         name=service_name,
-        address=address,
+        addresses=addresses,
         port=3689,
         properties={"CtlN": atv_name.encode("utf-8")},
         model=model,
@@ -84,18 +98,35 @@ def device_service(service_name, atv_name, address="127.0.0.1", model=None):
 
 def companion_service(
     service_name: str,
-    address: str = "127.0.0.1",
+    addresses: List[str] = ["127.0.0.1"],
     port: int = 0,
     model: Optional[str] = None,
 ) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
-        address=address,
+        addresses=addresses,
         port=port,
         properties={"rpHA": "33efedd528a".encode("utf-8")},
         model=model,
     )
     return ("_companion-link._tcp.local", service)
+
+
+def raop_service(
+    name: str,
+    identifier: str,
+    addresses: List[str] = ["127.0.0.1"],
+    port: int = 0,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
+    service = FakeDnsService(
+        name=identifier + "@" + name,
+        addresses=addresses,
+        port=port,
+        properties={},
+        model=model,
+    )
+    return ("_raop._tcp.local", service)
 
 
 def _lookup_service(
@@ -132,8 +163,9 @@ def create_response(
 
     for question in resp.questions:
         service, full_name = _lookup_service(question, services)
-        if service is None or (ip_filter and service.address != ip_filter):
+        if service is None or (ip_filter and ip_filter not in service.addresses):
             continue
+
         # For typing purposes, because service is not None, then full_name is not None
         # either.
         full_name = cast(str, full_name)
@@ -152,9 +184,9 @@ def create_response(
             rd = struct.pack(">3H", 0, 0, service.port) + local_name
             resp.resources.append(dns_utils.resource(full_name, dns.QueryType.SRV, rd))
 
-        # Add IP address
-        if service.address:
-            ipaddr = IPv4Address(service.address).packed
+        # Add IP address(es)
+        for address in service.addresses:
+            ipaddr = IPv4Address(address).packed
             resp.resources.append(
                 dns_utils.resource(service.name + ".local", dns.QueryType.A, ipaddr)
             )
@@ -224,7 +256,10 @@ def stub_multicast(udns_server, loop):
     patcher = patch("pyatv.support.mdns.multicast")
 
     async def _multicast(loop, services, **kwargs):
-        hosts = set(service.address for service in udns_server.services.values())
+        # Flatten list of lists of addresses: [["1.2.3.4"], ["2.2.2.2"]] -> ["1.2.3.4", "2.2.2.2"]
+        hosts = set(
+            chain(*[service.addresses for service in udns_server.services.values()])
+        )
         devices = {}
         sleep_proxy = udns_server.sleep_proxy
         udns_server.sleep_proxy = False

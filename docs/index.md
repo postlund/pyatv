@@ -2,87 +2,77 @@
 layout: template
 title: pyatv
 ---
-# Main Page
+# :tv: Main Page
 
-This is a python 3.6 (or later) library for controlling and querying information from an Apple TV. It is built
-upon asyncio and supports most of the commands that the regular Apple Remote app does and more!
+This is an asyncio python library for interacting with Apple TV and AirPlay devices. It mainly
+targets Apple TVs, but also support audio streaming via AirPlay to receivers like the HomePod
+as well.
 
-To install, use `pip`:
+![Tests](https://github.com/postlund/pyatv/workflows/Tests/badge.svg)
+[![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/postlund/pyatv)
+[![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-    pip install {{ site.pyatv_version }}
+# :satisfied: Features
 
-This library is licensed under the MIT license.
+Here is a short summary of supported features:
 
-# Where to start?
+* Automatic device discovery with Zeroconf
+* Device information, e.g. hardware model and operating system version
+* Currently playing metadata, artwork and push updates
+* Remote, navigation and volume control commands
+* Basic support for streaming video and audio with AirPlay
+* Listing installed apps, launching apps and currently playing app
+* Power management, e.g. turn on or off
+
+A complete list of supported features and limitations is available
+[here](documentation/supported_features).
+
+There are also few utility scripts bundled with pyatv that makes it easy to try the library
+out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy),
+[atvscript](documentation/atvscript) and [atvlog](documentation/atvlog).
+
+# :eyes: Where to start?
+
+To get going, install with `pip`:
+
+<div class="center_box" style="margin-bottom: 2em">
+  <p style="margin: 0px">:tada: <a href="https://pypi.org/project/pyatv">pip install pyatv :tada:</a></p>
+</div>
+
+Head over to [Getting started](documentation/getting-started) to see what you can do!
 
 As pyatv is a library, it is mainly aimed for developers creating applications that can interact
-with Apple TVs. However, pyatv ships with a powerful command line application that is useful for
-normal users as well.
-
-So, head over to [Getting started](getting-started) to get going!
+with Apple TVs. However, pyatv ships with a few powerful command lines tools you can use to
+try the library without writing any code.
 
 If you need help or have questions, check out the [Support](support) page instead.
 
-In case you have developed for pyatv 0.3.x before, there's a short migration guide
-[here](support/migration) that will help you port your code to 0.4.x or later.
+In case you are upgrading from an earlier version of pyatv, make sure to check out the migration
+guide [here](support/migration) that will help you port your existing code.
 
-# Features
+# :trophy: Who uses pyatv?
 
-Here is the feature list by protocol (DMAP = devices not running tvOS, MRP and Companiom = Apple TV 4 and later):
+Here are a few projects known to use pyatv:
 
-| **Feature**                                                     | **DMAP** | **MRP**   | **Companion** | **Links** |
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Automatic discovery of devices (zeroconf/Bonjour)               | Yes      | Yes       | Yes           | [Concept](documentation/concepts/#scanning), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Device Metadata (e.g. operating system and version)             | Yes*     | Yes*      | No            | [Concept](documentation/concepts/#device-metadata), [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Push updates                                                    | Yes      | Yes       | No            | [Concept](documentation/concepts/#metadata-and-push-updates), [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Remote control pairing                                          | Yes      | Yes       | Yes           | [Concept](documentation/concepts/#pairing), [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| List supported features                                         | Yes**    | Yes       | No            | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| AirPlay stream URL (including local files)                      | Yes      | Yes       | No            | [Doc](development/airplay), {% include api i="interface.Stream" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Playback controls (play, pause, next, stop, etc.)               | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Navigation controls (select, menu, top_menu, arrow keys)        | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- |--------- | --------- | ------------- | --------- |
-| Different input actions (tap, double tap, hold)                 | No       | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- |--------- | --------- | ------------- | --------- |
-| Fetch artwork                                                   | Yes      | Yes       | No            | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Currently playing (e.g. title, artist, album, total time, etc.) | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| App used for playback                                           | No       | Yes       | No            | [Doc](development/metadata/#active-app), {% include api i="interface.App" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Media type and play state                                       | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Change media position                                           | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata.set_position" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Shuffle and repeat                                              | Yes      | Yes       | No            | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Volume Controls                                                 | Yes      | Yes       | No            | [Doc](development/control), {% include api i="interface.RemoteControl" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Power management                                                | No       | Yes       | No            | [Doc](development/power_management), {% include api i="interface.Power" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Deep Sleep Detection                                            | Yes***   | Yes***    | No            | [Concept](documentation/concepts/#deep-sleep-detection), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| Launch application                                              | No       | No        | Yes           | [Doc](development/apps), {% include api i="interface.Apps" %}
-| --------------------------------------------------------------- | -------- | --------- | ------------- | --------- |
-| List installed apps                                             | No       | No        | Yes           | [Doc](development/apps), {% include api i="interface.Apps" %}
+* [Home Assistant](https://home-assistant.io) - The Apple TV integration is powered by pyatv
 
-*\* Some restrictions apply, see section "Device Metadata" [here](documentation/concepts/#device-metadata) page.*
+If you are maintaining a project using pyatv, feel free to add it to the list (open a PR
+or [issue](https://github.com/postlund/pyatv/issues/new?assignees=&labels=question,documentation&template=question-or-idea.md&title=Add+my+pyatv+project+to+list&assignees=postlund)).
+You don't need to provide a URL if you don't want, just a short description of the use case
+is fine too!
 
-*\*\* Limited support due to restrictions in protocol.*
+# :office: License
 
-*\*\*\* Experimental feature (not fully tested)*
+This library is licensed under the
+[MIT license](https://github.com/postlund/pyatv/blob/master/LICENSE.md).
 
-There are also few utility scripts bundled with `pyatv` that makes it easy to try the library
-out. Check out [atvremote](documentation/atvremote), [atvproxy](documentation/atvproxy),
-[atvscript](documentation/atvscript) and [atvscript](documentation/atvlog).
-
-# Who is making this?
+# :person_with_blond_hair: Who is making this?
 
 I, Pierre Ståhl, is the lead developer and maintainer of this library. It is a hobby
 project that I put a few hours in every now and then to maintain. If you find it useful,

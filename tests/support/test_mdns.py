@@ -21,7 +21,7 @@ DEVICE_INFO_SERVICE = "_device-info._tcp._local"
 TEST_SERVICES = dict(
     [
         fake_udns.mrp_service(
-            SERVICE_NAME, SERVICE_NAME, "mrp_id", address="127.0.0.1", port=1234
+            SERVICE_NAME, SERVICE_NAME, "mrp_id", addresses=["127.0.0.1"], port=1234
         ),
     ]
 )
@@ -131,7 +131,7 @@ def test_parse_empty_service():
 
 
 def test_parse_no_service_type():
-    service_params = (None, "service", None, 0, {})
+    service_params = (None, "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -139,7 +139,7 @@ def test_parse_no_service_type():
 
 
 def test_parse_no_service_name():
-    service_params = ("_abc._tcp.local", None, None, 0, {})
+    service_params = ("_abc._tcp.local", None, [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -147,7 +147,7 @@ def test_parse_no_service_name():
 
 
 def test_parse_with_name_and_type():
-    service_params = ("_abc._tcp.local", "service", None, 0, {})
+    service_params = ("_abc._tcp.local", "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -156,7 +156,7 @@ def test_parse_with_name_and_type():
 
 
 def test_parse_with_port_and_address():
-    service_params = ("_abc._tcp.local", "service", "10.0.0.1", 123, {})
+    service_params = ("_abc._tcp.local", "service", ["10.0.0.1"], 123, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -165,7 +165,7 @@ def test_parse_with_port_and_address():
 
 
 def test_parse_single_service():
-    service_params = ("_abc._tcp.local", "service", "10.0.10.1", 123, {"foo": "bar"})
+    service_params = ("_abc._tcp.local", "service", ["10.0.10.1"], 123, {"foo": "bar"})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
     parsed = mdns.parse_services(message)
@@ -174,11 +174,17 @@ def test_parse_single_service():
 
 
 def test_parse_double_service():
-    service1_params = ("_abc._tcp.local", "service1", "10.0.10.1", 123, {"foo": "bar"})
+    service1_params = (
+        "_abc._tcp.local",
+        "service1",
+        ["10.0.10.1"],
+        123,
+        {"foo": "bar"},
+    )
     service2_params = (
         "_def._tcp.local",
         "service2",
-        "10.0.10.2",
+        ["10.0.10.2"],
         456,
         {"fizz": "buzz"},
     )
@@ -189,3 +195,48 @@ def test_parse_double_service():
     assert len(parsed) == 2
     dns_utils.assert_service(parsed[0], *service1_params)
     dns_utils.assert_service(parsed[1], *service2_params)
+
+
+def test_parse_pick_one_available_address():
+    addresses = ["10.0.10.1", "10.0.10.2"]
+    service_params = (
+        "_abc._tcp.local",
+        "service",
+        addresses,
+        123,
+        {"foo": "bar"},
+    )
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert str(parsed[0].address) in addresses
+
+
+def test_parse_ignore_link_local_address():
+    service_params = (
+        "_abc._tcp.local",
+        "service",
+        ["169.254.1.1"],
+        123,
+        {"foo": "bar"},
+    )
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert parsed[0].address is None
+
+
+# Note: This is an unwanted side-effect of using CaseInsensitiveDict. It's very
+# unlikely that two properties will ever exist, only differ in case and is because of
+# that not a big problem. But a test should exist for it to make sure we don't break
+# anything in the future.
+def test_parse_properties_converts_keys_to_lower_case():
+    service_params = ("_abc._tcp.local", "service", [], 0, {"FOO": "bar", "Bar": "FOO"})
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parsed = mdns.parse_services(message)
+    assert len(parsed) == 1
+    assert parsed[0].properties["foo"] == "bar"
+    assert parsed[0].properties["Bar"] == "FOO"

@@ -17,10 +17,11 @@ def _filter_func(doc):
     for exclude in [
         "airplay",
         "companion",
-        "mrp",
         "dmap",
-        "support",
+        "mrp",
+        "raop",
         "scripts",
+        "support",
     ]:
         if doc.refname.startswith("pyatv." + exclude):
             return False

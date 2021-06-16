@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import binascii
 import inspect
+from ipaddress import IPv4Address
 import logging
 import sys
 import traceback
@@ -15,8 +16,16 @@ from pyatv.conf import (
     CompanionService,
     DmapService,
     MrpService,
+    RaopService,
 )
-from pyatv.const import InputAction, Protocol, RepeatState, ShuffleState
+from pyatv.const import (
+    FeatureName,
+    FeatureState,
+    InputAction,
+    Protocol,
+    RepeatState,
+    ShuffleState,
+)
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts
 
@@ -99,6 +108,7 @@ class GlobalCommands:
             interface.Stream,
             interface.DeviceInfo,
             interface.Apps,
+            interface.Audio,
             self.__class__,
             DeviceCommands,
         ]
@@ -134,15 +144,18 @@ class GlobalCommands:
             logging.error("No protocol specified")
             return 1
 
-        apple_tv = await _scan_for_device(self.args, self.args.scan_timeout, self.loop)
-        if not apple_tv:
+        if self.args.manual:
+            conf = _manual_device(self.args)
+        else:
+            conf = await _scan_for_device(self.args, self.args.scan_timeout, self.loop)
+        if not conf:
             return 2
 
         options = {}
 
         # Inject user provided credentials
         for proto in Protocol:
-            apple_tv.set_credentials(
+            conf.set_credentials(
                 proto, getattr(self.args, f"{proto.name.lower()}_credentials")
             )
 
@@ -155,7 +168,7 @@ class GlobalCommands:
                 }
             )
 
-        pairing = await pair(apple_tv, self.args.protocol, self.loop, **options)
+        pairing = await pair(conf, self.args.protocol, self.loop, **options)
 
         try:
             await self._perform_pairing(pairing)
@@ -247,6 +260,12 @@ class DeviceCommands:
 
     async def push_updates(self):
         """Listen for push updates."""
+        if not self.atv.features.in_state(
+            FeatureState.Available, FeatureName.PushUpdates
+        ):
+            print("Push updates are not supported (no protocol supports it)")
+            return 1
+
         print("Press ENTER to stop")
 
         self.atv.push_updater.start()
@@ -504,20 +523,24 @@ async def _autodiscover_device(args, loop):
 
 
 def _manual_device(args):
-    config = AppleTV(args.address, args.name)
+    config = AppleTV(IPv4Address(args.address), args.name)
     if args.dmap_credentials or args.protocol == const.Protocol.DMAP:
         config.add_service(DmapService(args.id, args.dmap_credentials, port=args.port))
     if args.mrp_credentials or args.protocol == const.Protocol.MRP:
         config.add_service(
             MrpService(args.id, args.port, credentials=args.mrp_credentials)
         )
-    if args.airplay_credentials:
+    if args.airplay_credentials or args.protocol == const.Protocol.AirPlay:
         config.add_service(
             AirPlayService(args.id, credentials=args.airplay_credentials)
         )
-    if args.companion_credentials:
+    if args.companion_credentials or args.protocol == const.Protocol.Companion:
         config.add_service(
             CompanionService(args.port, credentials=args.companion_credentials)
+        )
+    if args.raop_credentials or args.protocol == const.Protocol.RAOP:
+        config.add_service(
+            RaopService(args.id, args.port, credentials=args.raop_credentials)
         )
     return config
 
@@ -562,7 +585,11 @@ async def _handle_commands(args, config, loop):
     push_listener = PushListener()
     atv = await connect(config, loop, protocol=args.protocol)
     atv.listener = device_listener
-    atv.push_updater.listener = push_listener
+
+    if atv.features.in_state(FeatureState.Available, FeatureName.PushUpdates):
+        atv.push_updater.listener = push_listener
+    else:
+        print("NOTE: Push updates are not supported in this configuration")
 
     try:
         for cmd in args.command:
@@ -585,6 +612,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
     apps = retrieve_commands(interface.Apps)
+    audio = retrieve_commands(interface.Audio)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -614,6 +642,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
+
+    if cmd in audio:
+        return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
     logging.error("Unknown command: %s", cmd)
     return 1

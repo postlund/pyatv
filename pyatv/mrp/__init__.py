@@ -40,7 +40,7 @@ from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.hap_srp import SRPAuthHandler
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -615,6 +615,8 @@ class MrpPushUpdater(PushUpdater):
         try:
             playstatus = await self.metadata.playing()
             self.post_update(playstatus)
+        except asyncio.CancelledError:
+            pass
         except Exception as ex:  # pylint: disable=broad-except
             _LOGGER.debug("Playstatus error occurred: %s", ex)
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
@@ -688,7 +690,9 @@ def setup(  # pylint: disable=too-many-locals
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new MRP service."""
     service = config.get_service(Protocol.MRP)
     assert service is not None

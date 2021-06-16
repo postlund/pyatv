@@ -46,6 +46,9 @@ link_group: api
 <li>
 <h4><code><a title="pyatv.conf.MrpService" href="#pyatv.conf.MrpService">MrpService</a></code></h4>
 </li>
+<li>
+<h4><code><a title="pyatv.conf.RaopService" href="#pyatv.conf.RaopService">RaopService</a></code></h4>
+</li>
 </ul>
 </li>
 </ul>
@@ -75,7 +78,7 @@ For a configuration to be usable (&#34;ready&#34;) it must have either a `DMAP` 
 configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 &#34;&#34;&#34;
 from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, List, Mapping, Optional, Tuple, cast
 
 from pyatv import exceptions
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
@@ -97,6 +100,7 @@ class AppleTV:
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
@@ -104,6 +108,7 @@ class AppleTV:
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
+        self._properties: Mapping[str, str] = properties or {}
 
     @property
     def address(self) -&gt; IPv4Address:
@@ -123,14 +128,19 @@ class AppleTV:
     @property
     def ready(self) -&gt; bool:
         &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-        has_dmap = Protocol.DMAP in self._services
-        has_mrp = Protocol.MRP in self._services
-        return has_dmap or has_mrp
+        ready_protocols = set(list(Protocol))
+
+        # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
+        # used independently for now
+        ready_protocols.remove(Protocol.Companion)
+
+        intersection = ready_protocols.intersection(self._services.keys())
+        return len(intersection) &gt; 0
 
     @property
     def identifier(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
+        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
             service = self._services.get(prot)
             if service:
                 return service.identifier
@@ -165,10 +175,12 @@ class AppleTV:
         &#34;&#34;&#34;Return all supported services.&#34;&#34;&#34;
         return list(self._services.values())
 
-    def main_service(self, protocol: Protocol = None) -&gt; BaseService:
+    def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
         &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
         protocols = (
-            [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
+            [protocol]
+            if protocol is not None
+            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
         )
 
         for prot in protocols:
@@ -186,35 +198,60 @@ class AppleTV:
             return True
         return False
 
+    # TODO: The extraction should be generialized and moved somewhere else. It is
+    # very hard to test rght now.
     @property
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
         properties = self._all_properties()
 
-        if Protocol.MRP in self._services:
-            os_type = OperatingSystem.TvOS
-        elif Protocol.DMAP in self._services:
-            os_type = OperatingSystem.Legacy
-        else:
-            os_type = OperatingSystem.Unknown
+        build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
+        version = properties.get(&#34;ov&#34;)
+        if not version:
+            version = properties.get(&#34;osvers&#34;, lookup_version(build))
 
-        build = properties.get(&#34;SystemBuildVersion&#34;)
-        version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-        model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+        model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
         if model_name:
             model = lookup_model(model_name)
         else:
             model = self._model
 
-        mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
+        # MRP devices run tvOS (as far as we know now) as well as HomePods for
+        # some reason
+        if Protocol.MRP in self._services or model in [
+            DeviceModel.HomePod,
+            DeviceModel.HomePodMini,
+        ]:
+            os_type = OperatingSystem.TvOS
+        elif Protocol.DMAP in self._services:
+            os_type = OperatingSystem.Legacy
+        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+            os_type = OperatingSystem.AirPortOS
+        else:
+            os_type = OperatingSystem.Unknown
+
+        mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
         if mac:
             mac = mac.upper()
+
+        # The waMA property comes from the _airport._tcp.local service, announced by
+        # AirPort Expresses (used by the admin tool). It contains various information,
+        # for instance MAC address and software version.
+        wama = properties.get(&#34;wama&#34;)
+        if wama:
+            props: Mapping[str, str] = dict(
+                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+            )
+            if not mac:
+                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+            version = props.get(&#34;syVs&#34;)
 
         return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
+        properties.update(self._properties)
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -256,7 +293,7 @@ class DmapService(BaseService):
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
-            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            identifier,
             Protocol.DMAP,
             port,
             properties,
@@ -308,6 +345,22 @@ class CompanionService(BaseService):
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new CompaniomService.&#34;&#34;&#34;
         super().__init__(None, Protocol.Companion, port, properties)
+        self.credentials = credentials
+
+
+# pylint: disable=too-few-public-methods
+class RaopService(BaseService):
+    &#34;&#34;&#34;Representation of an RAOP service.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        identifier: Optional[str],
+        port: int = 7000,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new RaopService.&#34;&#34;&#34;
+        super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials</code></pre>
 </details>
 </section>
@@ -361,7 +414,7 @@ class CompanionService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -387,6 +440,7 @@ AirPlay.</p>
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
+        properties: Optional[Mapping[str, str]] = None,
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
         self._address = address
@@ -394,6 +448,7 @@ AirPlay.</p>
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
+        self._properties: Mapping[str, str] = properties or {}
 
     @property
     def address(self) -&gt; IPv4Address:
@@ -413,14 +468,19 @@ AirPlay.</p>
     @property
     def ready(self) -&gt; bool:
         &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-        has_dmap = Protocol.DMAP in self._services
-        has_mrp = Protocol.MRP in self._services
-        return has_dmap or has_mrp
+        ready_protocols = set(list(Protocol))
+
+        # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
+        # used independently for now
+        ready_protocols.remove(Protocol.Companion)
+
+        intersection = ready_protocols.intersection(self._services.keys())
+        return len(intersection) &gt; 0
 
     @property
     def identifier(self) -&gt; Optional[str]:
         &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
+        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
             service = self._services.get(prot)
             if service:
                 return service.identifier
@@ -455,10 +515,12 @@ AirPlay.</p>
         &#34;&#34;&#34;Return all supported services.&#34;&#34;&#34;
         return list(self._services.values())
 
-    def main_service(self, protocol: Protocol = None) -&gt; BaseService:
+    def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
         &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
         protocols = (
-            [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
+            [protocol]
+            if protocol is not None
+            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
         )
 
         for prot in protocols:
@@ -476,35 +538,60 @@ AirPlay.</p>
             return True
         return False
 
+    # TODO: The extraction should be generialized and moved somewhere else. It is
+    # very hard to test rght now.
     @property
     def device_info(self) -&gt; DeviceInfo:
         &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
         properties = self._all_properties()
 
-        if Protocol.MRP in self._services:
-            os_type = OperatingSystem.TvOS
-        elif Protocol.DMAP in self._services:
-            os_type = OperatingSystem.Legacy
-        else:
-            os_type = OperatingSystem.Unknown
+        build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
+        version = properties.get(&#34;ov&#34;)
+        if not version:
+            version = properties.get(&#34;osvers&#34;, lookup_version(build))
 
-        build = properties.get(&#34;SystemBuildVersion&#34;)
-        version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-        model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+        model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
         if model_name:
             model = lookup_model(model_name)
         else:
             model = self._model
 
-        mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
+        # MRP devices run tvOS (as far as we know now) as well as HomePods for
+        # some reason
+        if Protocol.MRP in self._services or model in [
+            DeviceModel.HomePod,
+            DeviceModel.HomePodMini,
+        ]:
+            os_type = OperatingSystem.TvOS
+        elif Protocol.DMAP in self._services:
+            os_type = OperatingSystem.Legacy
+        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+            os_type = OperatingSystem.AirPortOS
+        else:
+            os_type = OperatingSystem.Unknown
+
+        mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
         if mac:
             mac = mac.upper()
+
+        # The waMA property comes from the _airport._tcp.local service, announced by
+        # AirPort Expresses (used by the admin tool). It contains various information,
+        # for instance MAC address and software version.
+        wama = properties.get(&#34;wama&#34;)
+        if wama:
+            props: Mapping[str, str] = dict(
+                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+            )
+            if not mac:
+                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+            version = props.get(&#34;syVs&#34;)
 
         return DeviceInfo(os_type, version, build, model, mac)
 
     def _all_properties(self) -&gt; Mapping[str, str]:
         properties: Dict[str, str] = {}
+        properties.update(self._properties)
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -585,25 +672,47 @@ def device_info(self) -&gt; DeviceInfo:
     &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
     properties = self._all_properties()
 
-    if Protocol.MRP in self._services:
-        os_type = OperatingSystem.TvOS
-    elif Protocol.DMAP in self._services:
-        os_type = OperatingSystem.Legacy
-    else:
-        os_type = OperatingSystem.Unknown
+    build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
+    version = properties.get(&#34;ov&#34;)
+    if not version:
+        version = properties.get(&#34;osvers&#34;, lookup_version(build))
 
-    build = properties.get(&#34;SystemBuildVersion&#34;)
-    version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-    model_name: Optional[str] = properties.get(&#34;model&#34;, None)
+    model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
     if model_name:
         model = lookup_model(model_name)
     else:
         model = self._model
 
-    mac = properties.get(&#34;macAddress&#34;, properties.get(&#34;deviceid&#34;))
+    # MRP devices run tvOS (as far as we know now) as well as HomePods for
+    # some reason
+    if Protocol.MRP in self._services or model in [
+        DeviceModel.HomePod,
+        DeviceModel.HomePodMini,
+    ]:
+        os_type = OperatingSystem.TvOS
+    elif Protocol.DMAP in self._services:
+        os_type = OperatingSystem.Legacy
+    elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+        os_type = OperatingSystem.AirPortOS
+    else:
+        os_type = OperatingSystem.Unknown
+
+    mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
     if mac:
         mac = mac.upper()
+
+    # The waMA property comes from the _airport._tcp.local service, announced by
+    # AirPort Expresses (used by the admin tool). It contains various information,
+    # for instance MAC address and software version.
+    wama = properties.get(&#34;wama&#34;)
+    if wama:
+        props: Mapping[str, str] = dict(
+            cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
+            for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
+        )
+        if not mac:
+            mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
+        version = props.get(&#34;syVs&#34;)
 
     return DeviceInfo(os_type, version, build, model, mac)</code></pre>
 </details>
@@ -618,7 +727,7 @@ def device_info(self) -&gt; DeviceInfo:
 <pre><code class="python">@property
 def identifier(self) -&gt; Optional[str]:
     &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-    for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay]:
+    for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
         service = self._services.get(prot)
         if service:
             return service.identifier
@@ -648,9 +757,14 @@ def name(self) -&gt; str:
 <pre><code class="python">@property
 def ready(self) -&gt; bool:
     &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-    has_dmap = Protocol.DMAP in self._services
-    has_mrp = Protocol.MRP in self._services
-    return has_dmap or has_mrp</code></pre>
+    ready_protocols = set(list(Protocol))
+
+    # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
+    # used independently for now
+    ready_protocols.remove(Protocol.Companion)
+
+    intersection = ready_protocols.intersection(self._services.keys())
+    return len(intersection) &gt; 0</code></pre>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.services"><code class="name">var <span class="ident">services</span> -> List[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]</code></dt>
@@ -712,7 +826,7 @@ returned.</p></section>
 </details>
 </dd>
 <dt id="pyatv.conf.AppleTV.main_service"><code class="name flex">
-<span>def <span class="ident">main_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None) -> <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></span>
+<span>def <span class="ident">main_service</span></span>(<span>self, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>] = None) -> <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></span>
 </code></dt>
 <dd>
 <section class="desc"><p>Return suggested service used to establish connection.</p></section>
@@ -720,10 +834,12 @@ returned.</p></section>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def main_service(self, protocol: Protocol = None) -&gt; BaseService:
+<pre><code class="python">def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
     &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
     protocols = (
-        [protocol] if protocol is not None else [Protocol.MRP, Protocol.DMAP]
+        [protocol]
+        if protocol is not None
+        else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
     )
 
     for prot in protocols:
@@ -815,7 +931,7 @@ returned.</p></section>
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
         super().__init__(
-            identifier.split(&#34;_&#34;)[0] if identifier else None,
+            identifier,
             Protocol.DMAP,
             port,
             properties,
@@ -859,6 +975,45 @@ returned.</p></section>
     ) -&gt; None:
         &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
         super().__init__(identifier, Protocol.MRP, port, properties)
+        self.credentials = credentials</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.BaseService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="pyatv.conf.RaopService"><code class="flex name class">
+<span>class <span class="ident">RaopService</span></span>
+<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Representation of an RAOP service.</p>
+<p>Initialize a new RaopService.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RaopService(BaseService):
+    &#34;&#34;&#34;Representation of an RAOP service.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        identifier: Optional[str],
+        port: int = 7000,
+        credentials: Optional[str] = None,
+        properties: Optional[Mapping[str, str]] = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Initialize a new RaopService.&#34;&#34;&#34;
+        super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials</code></pre>
 </details>
 <h3>Ancestors</h3>

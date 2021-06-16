@@ -33,9 +33,9 @@ from pyatv.interface import (
     RemoteControl,
     StateProducer,
 )
-from pyatv.support import deprecated, net
+from pyatv.support import deprecated
 from pyatv.support.cache import Cache
-from pyatv.support.net import ClientSessionManager
+from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
@@ -516,13 +516,13 @@ class DmapPushUpdater(PushUpdater):
         first_call = True
 
         while True:
-            # Sleep some time before waiting for updates
-            if not first_call and self._initial_delay > 0:
-                _LOGGER.debug("Initial delay set to %d", self._initial_delay)
-                await asyncio.sleep(self._initial_delay, loop=self.loop)
-                first_call = False
-
             try:
+                # Sleep some time before waiting for updates
+                if not first_call and self._initial_delay > 0:
+                    _LOGGER.debug("Initial delay set to %d", self._initial_delay)
+                    await asyncio.sleep(self._initial_delay)
+                    first_call = False
+
                 _LOGGER.debug("Waiting for playstatus updates")
                 playstatus = await self._atv.playstatus(use_revision=True, timeout=0)
 
@@ -588,12 +588,14 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]:
+) -> Optional[
+    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+]:
     """Set up a new DMAP service."""
     service = config.get_service(Protocol.DMAP)
     assert service is not None
 
-    daap_http = net.HttpSession(
+    daap_http = HttpSession(
         session_manager.session,
         f"http://{config.address}:{service.port}/",
     )
