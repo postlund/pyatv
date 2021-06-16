@@ -19,6 +19,16 @@ as well.
 
 All the documentation you need is available at **[pyatv.dev](https://pyatv.dev)**.
 
+# What can it do?
+
+Some examples include:
+
+* Remote control commands
+* Metadata retrieval with push updates
+* Stream files via AirPlay
+* List and launch installed apps
+
+...and lots more! A complete list is available [here](https://pyatv.dev/documentation/supported_features/).
 # Develop pyatv
 
 Want to help out with `pyatv`? Press the button below to get a fully prepared development environment and get started right away!
