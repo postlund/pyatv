@@ -45,3 +45,6 @@ updates:
     - "2.1"
     - "2.2"
     - "2.3"
+  - dependency-name: bitarray
+    versions:
+    - "> 2.1.2"
