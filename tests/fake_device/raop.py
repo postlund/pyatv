@@ -65,6 +65,7 @@ class FakeRaopState:
         self.volume: float = INITIAL_VOLUME
         self.initial_audio_level_supported: bool = False
         self.info_supported: bool = True
+        self.teardown_called: bool = False
 
     @property
     def raw_audio(self) -> bytes:
@@ -248,6 +249,7 @@ class FakeRaopService(HttpSimpleRouter):
         self.add_route("RECORD", "rtsp://*", self.handle_record)
         self.add_route("POST", "/auth-setup", self.handle_auth_setup)
         self.add_route("GET", "/info", self.handle_info)
+        self.add_route("TEARDOWN", "rtsp://*", self.handle_teardown)
 
     async def start(self, start_web_server: bool):
         """Start the fake RAOP service."""
@@ -384,7 +386,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
         )
 
-    def handle_info(self, request: HttpRequest) -> Optional[HttpRequest]:
+    def handle_info(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming info request."""
         if not self.state.info_supported:
             return HttpResponse(
@@ -410,6 +412,13 @@ class FakeRaopService(HttpSimpleRouter):
                 "content-type": "application/x-apple-binary-plist",
             },
             plistlib.dumps(info),
+        )
+
+    def handle_teardown(self, request: HttpRequest) -> Optional[HttpResponse]:
+        """Handle incoming TEARDOWN request."""
+        self.state.teardown_called = True
+        return HttpResponse(
+            "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
 

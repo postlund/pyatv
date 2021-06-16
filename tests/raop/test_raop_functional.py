@@ -405,3 +405,9 @@ async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
 
     # Should just not crash with an error if endpoint is not supported
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_teardown_called_after_playback(raop_client, raop_state):
+    await raop_client.stream.stream_file(data_path("only_metadata.wav"))
+    assert raop_state.teardown_called
