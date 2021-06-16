@@ -39,6 +39,8 @@ page_links:
       title: Start
     - link: /documentation/getting-started/
       title: Getting Started
+    - link: /documentation/tutorial/
+      title: Tutorial
     - link: /documentation/supported_features/
       title: Supported Features
     - link: /documentation/concepts/
