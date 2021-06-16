@@ -75,7 +75,10 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         """Call when an MDNS response was received."""
         for service in response.services:
             if service.address and service.port != 0:
-                self._service_discovered(service, response)
+                try:
+                    self._service_discovered(service, response)
+                except Exception:
+                    _LOGGER.warning("Failed to parse service: %s", service)
 
     def _service_discovered(
         self, service: mdns.Service, response: mdns.Response
