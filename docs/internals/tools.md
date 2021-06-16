@@ -279,6 +279,10 @@ Pairing seems to have succeeded, yey!
 You may now use these credentials: 75FBEEC773CFC563:8F06696F2542D70DF59286C761695C485F815BE3D152849E1361282D46AB1493
 ```
 
+### RAOP
+
+Streaming files and most other feature should work to some extent. Encryption is not supported.
+
 ## State Support
 
 Partial support for maintaining device state is implemented, but not for everything. Here is a simple example:

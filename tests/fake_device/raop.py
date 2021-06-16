@@ -253,9 +253,11 @@ class FakeRaopService(HttpSimpleRouter):
 
     async def start(self, start_web_server: bool):
         """Start the fake RAOP service."""
-        self.server, self.port = await http_server(lambda: BasicHttpServer(self))
+        self.server, self.port = await http_server(
+            lambda: BasicHttpServer(self), address="0.0.0.0"
+        )
 
-        local_addr = ("127.0.0.1", 0)
+        local_addr = ("0.0.0.0", 0)
         (_, audio_receiver) = await self.loop.create_datagram_endpoint(
             lambda: AudioReceiver(self.state),
             local_addr=local_addr,

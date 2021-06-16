@@ -139,7 +139,7 @@ async def publish_raop_zeroconf(loop, zconf, address, port):
         "et": "0",
         "ss": "16",
         "am": "AppleTV6,2",
-        "md": "0,1,2",
+        "md": "0",
         "ch": "2",
         "sr": "44100",
         "cn": "1",
