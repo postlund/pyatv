@@ -517,6 +517,10 @@ class RaopClient:
         finally:
             self._packet_backlog.clear()  # Don't keep old packets around (big!)
             if transport:
+                # TODO: Teardown should not be done here. In fact, nothing should be
+                # closed here since the connection should be re-usable for streaming
+                # more audio files. Refactor when support for that is added.
+                await self.rtsp.teardown()
                 transport.close()
             if self._keep_alive_task:
                 self._keep_alive_task.cancel()

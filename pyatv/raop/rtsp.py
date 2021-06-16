@@ -217,6 +217,12 @@ class RtspSession:
         """Send SET_PARAMETER message."""
         return await self.exchange("POST", uri="/feedback", allow_error=allow_error)
 
+    async def teardown(self, allow_error=False) -> HttpResponse:
+        """Send TEARDOWN message."""
+        return await self.exchange(
+            "TEARDOWN", headers={"Session": self.context.rtsp_session}
+        )
+
     async def exchange(
         self,
         method: str,
