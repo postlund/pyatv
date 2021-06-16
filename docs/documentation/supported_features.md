@@ -108,6 +108,8 @@ screen mirroring and image sharing.
 ### Limitations and notes
 
 * Very limited support for this protocol so far. More features will be added in the future.
+* Does not implement support for {% include api i="interface.DeviceListener" %} and will
+  *not* trigger `connection_lost` or `connection_closed` when used stand-alone.
 
 ## Companion
 
@@ -125,7 +127,8 @@ app and power related functions.
 
 * Early stage of development - not many features supported
 * No persistent connection at the moment, so events are not supported
-* Will support power commands (turn on/off) and remote control commands in the future
+* Does not implement support for {% include api i="interface.DeviceListener" %} and will
+  *not* trigger `connection_lost` or `connection_closed` when used stand-alone.
 
 ## DMAP
 
@@ -203,6 +206,8 @@ AirTunes).
 * Devices requiring password are not supported
 * Remote control commands does not work (except for volume_up and volume_down),
   e.g. play or pause {% include issue no="1068" %}
+  * Does not implement support for {% include api i="interface.DeviceListener" %} and will
+  *not* trigger `connection_lost` or `connection_closed` when used stand-alone.
 
 ### Verified Devices
 
