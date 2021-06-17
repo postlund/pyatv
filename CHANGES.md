@@ -1,14 +1,244 @@
 # CHANGES
 
+## 0.8.0 Freddy (2021-06-17)
+
+Here comes a new release, filled to the brim with new stuff! First and foremost, it
+introduces support for not one but *two* new protocols: Companion and RAOP. The
+Companion protocol is used to list and launch apps installed on an Apple TV as well
+improving power management support. RAOP adds support for proper audio streaming
+to AirPlay receivers. Both protocols are still early in development and may contains a
+few bugs (yeah...). You will likely see new features added to these over time.
+
+A big new change in this release, that isn't really noticeable at first, is a new layer
+that relays calls between public interface methods and underlying protocols. What does
+this mean then? Well, we have the public interfaces (Metadata, RemoteControl. etc.)
+and the protocols implementing them (DMAP, MRP, RAOP, etc). Prior to this release,
+DMAP and MRP would fully implement all of the interfaces (with a minor exception of
+Stream) and there was a requirement to configure one of them. From now on however,
+there's no such restriction as it's possible to connect to any number of protocols.
+The Feature interface tells us what is actually supported. The new layer (internally
+called *facade*) will automatically figure out which of the available protocol has the
+most appropriate implementation and call that. If two protocols implement the same
+interface method, there's mechanisms internally to pick the best one. An example is
+the Power interface, where MRP and Companion both provide implementations for `turn_on`
+and `turn_off`. If both these protocols are configured, then the implementations
+provided by the Companion protocol will be used (as they are better), otherwise
+fallback will happen to MRP.
+
+From now on, the change log format changes a bit to list changes per protocol and
+scripts. The goal is to make it easier to see what has changed or been fixed. This
+release also introduces release names and all releases from now on will get a release
+name based on characters from Five Nights Freddy's. First letter of the next release
+name follows the letter of the previous one (the next release will be called
+Glitchtrap for instance). Oh, and this release text is also new...
+
+Other changes include a *big* overhaul of the documentation. A lot of things have
+been improved and added, for instance a new tutorial and a few new examples. There's
+a configuration for GitPod, so you can get going with pyatv development with a single
+click!
+
+Be sure to check out the migration notes before upgrading:
+
+https://pyatv.dev/support/migration/
+
+There's also a new page with a better summary of supported features:
+
+https://pyatv.dev/documentation/supported_features/
+
+I guess that is it!
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+* Reset revision if push update fails (#1004) fixes #1000
+
+*Protocol: MRP:*
+
+* bug: Do not deep copy protobuf messages (#1105) fixes #1038
+* bug: Handle missing artwork gracefully (#1033) fixes #937
+* bug: Implement and enforce internal protocol state (#1009) fixes #1007
+
+*Protocol: AirPlay:*
+
+* General clean up of module but no new features
+
+*Protocol: Companion:*
+
+* Initial release
+* Adds the Apps interface (list and launch apps)
+* Implements turn_on and turn_off in the Power interface
+
+*Protocol: RAOP:*
+
+* Initial release
+* Supports streaming WAV, MP3, OGG and Vorbis files
+* Reads metadata from supported formats (artist, album and title)
+* Supports volume controls
+
+*Script: atvlog:*
+
+* Exit if no output was generated (#1001)
+* Support serving output via web server (#997)
+
+*Script: atvremote:*
+
+* Fix bugs in manual mode (parameters not respected properly)
+
+**Notes:**
+
+* audio-metadata, bitarray and miniaudio are new dependencies in this release
+* At least version 3.12.0 of protobuf is required
+
+**All changes:**
+
+```
+6ffef9f build(deps): bump pytest-xdist from 2.2.1 to 2.3.0
+8e5691c build(deps): bump mypy-protobuf from 1.24 to 2.4
+70ef974 docs: Add examples
+b91b099 deps: Don't bump bitarray past 2.1.2
+1914a04 docs: Clarification regarding device listener
+0bc6eae docs: Add a tutorial
+5bbb81a docs: Update migration guide for 0.8.0
+4d9dbd4 scan: Migrate to use get_unique_id internally
+0049db1 scan: Be more forgiving if service parsing fails
+ecacad7 tests: Make RAOP work in fake device
+c36e6b5 raop: Teardown session after streaming
+116d29d build(deps): bump zeroconf from 0.28.0 to 0.28.2
+b8c3819 scripts: Unset PIP_USER in setup_dev_env.sh
+cd849b7 Upgrade to GitHub-native Dependabot
+5f590f5 build(deps): Bump bitarray from 2.1.2 to 2.1.3
+aa4b53d raop: Fallback to AirPlay credentials
+a5bd14c raop: Only perform auth-setup for AirPort Express
+795081b docs: Various documentation updates
+6cfa66c helpers: Add get_unique_id
+1c3adcf mypy: Fix typing issues
+73bb7fa build(deps): Bump mypy from 0.812 to 0.902
+85d03f0 build(deps): Update bitarray requirement from <2.1.1,==2.1.0 to ==2.1.2
+cc5bc8c raop: Support devices not implementing /info
+dae7518 raop: Minor updates to documentation
+1b3c183 raop: Handle muted volume level
+cf2696e raop: Only allow one stream at the time
+eaec0a5 raop: Support set_volume, volume_up, volume_down
+462512e raop: Make sure authentication is performed early
+3b37ec8 raop: Initial volume support
+15e4501 support: Add map_range function
+4ed1b2c facade: Enforce percentage level for audio
+0dea45f deps: Temporarily lock bitarray <2.1.1
+c1acb3b build(deps): Bump black from 21.5b2 to 21.6b0
+8e13c3c build(deps): Bump codespell from 2.0.0 to 2.1.0
+b844966 raop: Correctly implement position in metadata
+1d665d5 raop: Support progress (position and total_time)
+fae7b41 cq: Clean up usage of ensure_future
+6c0cd54 raop: Fix instability in retransmission test
+c2f7287 raop: Send feedback if supported by receiver
+58220e5 raop: Avoid blocking I/O when loading metadata
+7eb961d raop: Avoid blocking I/O in MiniaudioWrapper
+292fbb5 raop: Add initial functional tests
+68abbdc audiogen: Add new script to generate audio files
+5f3d1a8 raop: Add basic fake device
+32f8ed7 http: Add a simple web server implementation
+f1bfce3 build(deps): Bump pytest-cov from 2.12.0 to 2.12.1
+044f55e build(deps): Bump pylint from 2.8.2 to 2.8.3
+eb2d36d build(deps): Bump black from 21.5b1 to 21.5b2
+1d2b3a1 env: Don't post comment with GitPod link
+2b5b280 http: Ignore type mypy cannot find
+18d1597 http: Ignore case in when parsing headers
+0bd54d8 airplay: Fix encoding name typo
+e65eb59 airplay: Fix patching in tests
+74401a0 raop: Use feedback endpoint for keep-alive
+428b9b1 raop: Verify using AirPlay if credentials provided
+99f3037 airplay: Unify credentials with other protocols AirPlay was the first protocol to introduce SRP and credentials and suffers some internal design flaws that were improved when implementing the other protocols. This change tries to make the AirPlay implementation look more like how it's done in the other protocols using SRP, e.g. MRP. It's a good start, but some additional work needs to be done regarding credentials parsing (but leaving that for the future).
+894f0fd hap_srp: Rename Credentials to HapCredentials
+2211a00 atvremote: Fix bugs in manual mode
+be37e9f net: Move HttpSession to http
+46ae307 net: Move aiohttp session management to http
+7b62f96 airplay: Move StaticFileWebServer to http
+722967e airplay: Simulate streaming from fake device
+7aa1e35 airplay: Refactor to use new http module
+1ef8684 rtsp: Use composition instead of inheritance
+2d2bd57 raop: Convert RTSP to use the new HTTP module
+57b3b5b http: Generalize RTSP parsing to HTTP
+ded7458 companion: Fix case when app_list fails (#1106)
+980454e mrp: Do not deep copy protobuf messages (#1105)
+cc3de66 companion: Add support for turn_on and turn_off (#1104)
+d08c73a build(deps): Bump miniaudio from 1.43 to 1.44
+f57f122 raop: Set correct progress in metadata (#1100)
+2dd1539 raop: Support retransmission of lost packets (#1099)
+5f5ad5b raop: Add support for AirPort Express (#1098)
+311ca61 raop: Raise exception on RTSP error code (#1097)
+a24ee74 conf: Add device info for AirPort Express (#1096)
+75d31f4 mdns: Ignore link-local addresses when scanning (#1095)
+9393b51 build(deps): bump black from 21.5b0 to 21.5b1 (#1065)
+3d541bf build(deps): bump pydocstyle from 6.1.0 to 6.1.1
+0fd1393 build(deps): bump pylint from 2.7.4 to 2.8.2 (#1044)
+da37e28 docs: Update README.md (#1092)
+a64ca4d docs: General uplift of documentation (#1091)
+8822d66 build(deps): bump pydocstyle from 6.0.0 to 6.1.0
+be08cfa raop: Implement Metadata and PushUpdater interface (#1084)
+5051a17 build(deps): bump pytest-cov from 2.11.1 to 2.12.0
+c1d4d74 raop: Use metadata from input file as metadata (#1080)
+dc6c042 if: Add audio interface (#1074)
+41b5705 raop: Respect receiver audio properties (#1073)
+f2c625f raop: Add initial support for RAOP (#1060)
+a93601f facade: Add PushUpdates to the feature interface (#1072)
+6f53e7b env: Enable CodeQL (#1070)
+54d876a some small additions to the OPACK definitions (#1064)
+bb5ac0e build(deps): bump flake8 from 3.9.1 to 3.9.2
+0cde7a0 scripts: Protocol clean up (#1057)
+35c49b8 build(deps-dev): bump tox from 3.23.0 to 3.23.1
+f129725 build(deps): bump black from 21.4b2 to 21.5b0
+a01ff9c build(deps): bump pytest from 6.2.3 to 6.2.4
+cbfeba6 build(deps): bump deepdiff from 5.3.0 to 5.5.0
+c85f211 build(deps): bump black from 21.4b1 to 21.4b2 (#1050)
+f15fa67 mrp: Tidy upp keyboard related messages (#1048)
+22a0b29 Add series name, season and episode number (#1049)
+51a1da3 build(deps): bump black from 21.4b0 to 21.4b1 (#1046)
+f344a12 docs: Add section about commands in Companion (#1047)
+b5d015f docs: Change "Apps" section to "Known Issues" (#1045)
+58f8925 Implement facade pattern for public interface (#1042)
+3225c98 companion: Add pairing function tests (#1041)
+e230f1d gha: Run tests workflow on master (#1039)
+7979b1b build(deps): bump black from 20.8b1 to 21.4b0
+f6976e4 script: Install docs dependencies in dev env (#1032)
+c68ed51 mrp: Handle missing artwork gracefully (#1033)
+5df2295 gha: Minor changes to codecov (#1031)
+021cc7a docs: Clarify AAD for encryption in Companion (#1030)
+33d504d env: Various updats to environment and GitPod (#1029)
+f173531 env: Remove documentation tab from GitPod for now (#1028)
+1e8ffdc env: Add GitPod configuration
+d2dbc9e cq: Sort imports with isort (#1026)
+caeb039 build(deps): bump pytest-asyncio from 0.14.0 to 0.15.1 (#1027)
+bb7ff8f Fake device and tests for Companion (#1025)
+ddbe170 if: Add Apps interface to Companion (#1022)
+8ebc67d knock: Suppress CancelledError exception (#1023)
+ea5d3ea Support for the Companion link protocol (#657)
+e033942 scripts: Add module to log output (#1017)
+235484e build(deps): bump deepdiff from 5.2.3 to 5.3.0
+646c6d6 doc: Add mermaid to support diagrams (#1014)
+b0c9355 chore: update types in CryptoPairingMessage to be optional (#1013)
+9cb96ff mrp: Implement and enforce internal protocol state (fixes #1007) (#1009)
+df43f78 build(deps): bump flake8 from 3.9.0 to 3.9.1
+6d42bf5 build(deps): bump typed-ast from 1.4.2 to 1.4.3
+d6ae8e9 dmap: Reset revision if push update fails (#1004)
+ea1f816 build(deps): bump pytest from 6.2.2 to 6.2.3
+33acac2 atvlog: Exit if no output was generated (#1001)
+c59a3d3 build(deps): bump pylint from 2.7.2 to 2.7.4
+f3f7a1a atvlog: Support serving output via web server (#997)
+377e0eb build(deps): bump pydocstyle from 5.1.1 to 6.0.0
+00fa0cd protobuf: Bump lower version to 3.12.0 (#991)
+d291104 build(deps): bump flake8 from 3.8.4 to 3.9.0
+```
+
 ## 0.7.7 (2021-03-12)
 
-*Changes:*
+**Changes:**
 
 * Fix bug where apps would appear to crash on tvOS 14.5 (beta)
 * Add a retry to heartbeat loop
 * Add new script that parses logs: atvlog
 
-*All changes:*
+**All changes:**
 
 ```
 60df163 mrp: Use GenericMessage for heartbeats (#975)
@@ -40,7 +270,7 @@ dd91239 log2html: New script converting logs to HTML pages (#960)
 
 ## 0.7.6 (2021-01-29)
 
-*Changes:*
+**Changes:**
 
 * DNS parsing has been re-written which should be more stable
   and handle more use cases
@@ -52,14 +282,14 @@ dd91239 log2html: New script converting logs to HTML pages (#960)
   every 30s to detect connection problems
 * Protobuf definitions have been further lifted to match later tvOS versions
 
-*Notes:*
+**Notes:**
 
 * Fixed a bug where Playing instancess were not immutable
 * Push updates are only issued when something in the Playing instance changed.
   Previously, unrelated changes to the device could trigger push updates with
   the same content in Playing.
 
-*All changes:*
+**All changes:**
 
 ```
 0994733 build(deps-dev): bump tox from 3.21.2 to 3.21.3 (#946)
@@ -98,12 +328,12 @@ f3dd0af build(deps): bump pytest from 6.2.0 to 6.2.1
 
 ## 0.7.5 (2020-12-08)
 
-*Changes:*
+**Changes:**
 
 * Revert to use random source port for MDNS
 * Fix "Received UpdateClientMessage for unknown player xxx""
 
-*All changes:*
+**All changes:**
 
 ```
 cd6d53f mdns: Revert binding to port 5353
@@ -119,12 +349,12 @@ f1a7223 build(deps): bump pdoc3 from 0.9.1 to 0.9.2
 
 ## 0.7.4 (2020-10-12)
 
-*Changes:*
+**Changes:**
 
 * PIN code screen for MRP will now disappear after pairing
 * Less and more compact debug logs in mdns and knock
 
-*All changes:*
+**All changes:**
 
 ```
 9f1d1d0 mrp: Verify credentials after pairing
@@ -135,11 +365,11 @@ dc31ac9 build(deps-dev): bump tox from 3.20.0 to 3.20.1
 
 ## 0.7.3 (2020-10-08)
 
-*Changes:*
+**Changes:**
 
 * Minor hug fixes and clean ups, see all changes
 
-*All changes:*
+**All changes:**
 
 ```
 d2e5a33 mdns: Supress decoding errors
@@ -164,7 +394,7 @@ ba7c581 build(deps): bump zeroconf from 0.28.1 to 0.28.2
 
 ## 0.7.2 (2020-08-24)
 
-*Changes:*
+**Changes:**
 
 * Handle authority records in MDNS which fixes:
   `NotImplementedError: nscount > 0`
@@ -173,7 +403,7 @@ ba7c581 build(deps): bump zeroconf from 0.28.1 to 0.28.2
 * Abort scanning early when expected device (by identifier)
   is found
 
-*All changes:*
+**All changes:**
 
 ```
 6a692e0 build(deps): bump pydocstyle from 5.0.2 to 5.1.0
@@ -186,14 +416,14 @@ b020b67 mdns: Add support for authority records
 
 ## 0.7.1 (2020-08-16)
 
-*Changes:*
+**Changes:**
 
 * Fixed lots of issues with scanning
 * Improved performance for MRP playing information
 * Fixed wrong identifier for DMAP when MDNS name collision exists
 * Support for python 3.9 (beta)
 
-*All changes:*
+**All changes:**
 
 ```
 8cec795 gha: Retry tox if first run fails
@@ -224,7 +454,7 @@ c05c351 build(deps-dev): bump tox from 3.17.0 to 3.17.1
 
 ## 0.7.0 (2020-07-14)
 
-*Changes:*
+**Changes:**
 
 * Input actions (single/double tap and hold) are now supported
 * Support for aiohttp 4 (only tested with pre-release)
@@ -241,7 +471,7 @@ c05c351 build(deps-dev): bump tox from 3.17.0 to 3.17.1
 * Fix broken pairing (DMAP)
 * Fix missing application name (MRP)
 
-*Notes:*
+**Notes:**
 
 * This release contains re-written scanning logic which hopefully
   makes scanning more reliable (not 100% foolproof though). This
@@ -253,7 +483,7 @@ c05c351 build(deps-dev): bump tox from 3.17.0 to 3.17.1
   disconnect) after 20 seconds of no replies.
 
 
-*All changes:*
+**All changes:**
 
 ```
 c7f8166 cq: Minor clean ups
@@ -346,11 +576,11 @@ be953a6 build(deps): bump pytest-asyncio from 0.10.0 to 0.12.0
 
 ## 0.6.1 (2020-04-28)
 
-*Changes:*
+**Changes:**
 
 * Fixes compatibility issues with older protobuf versions
 
-*All changes:*
+**All changes:**
 
 ```
 230cf9c mrp: Fixes to support older protobuf versions
@@ -358,7 +588,7 @@ be953a6 build(deps): bump pytest-asyncio from 0.10.0 to 0.12.0
 
 ## 0.6.0 (2020-04-28)
 
-*Changes:*
+**Changes:**
 
 * Stream local files via AirPlay
 * Unicast scanning will now wake up sleeping devices automatically
@@ -370,7 +600,7 @@ be953a6 build(deps): bump pytest-asyncio from 0.10.0 to 0.12.0
 * Fix retrieval of artwork with missing identifier
 * Many improvements to atvscript (timestamp, exception handling, etc.)
 
-*Notes:*
+**Notes:**
 
 * Default timeout for HTTP requests (DMAP and AirPlay) has been increased to
   25 seconds to deal with waking up devices
@@ -383,7 +613,7 @@ be953a6 build(deps): bump pytest-asyncio from 0.10.0 to 0.12.0
 * Additional log points have been added and existing log points have been
   changed to be more consistent within pyatv
 
-*All changes:*
+**All changes:**
 
 ```
 e81e031 docs: Rename variable in credentials example
@@ -472,7 +702,7 @@ f088bcd scripts: Add start of fake device script
 
 ## 0.5.0 (2020-03-19)
 
-*Changes:*
+**Changes:**
 
 * Add power interface
 * Add device information interface
@@ -493,12 +723,12 @@ f088bcd scripts: Add start of fake device script
   python 3.5, so support for python 3.5 has been dropped.
 * helpers.auto_connect is now a coroutine
 
-*Notes:*
+**Notes:**
 
 * Lots of updates to documentation and tests have been made
 * An API reference is now available at pyatv.dev
 
-*All changes:*
+**All changes:**
 
 ```
 0cf6689 mrp: Support volume control features
@@ -548,17 +778,17 @@ eaf5176 cq: Move from pylint to black for linting
 
 ## 0.4.1a1 (2020-03-02)
 
-*Changes:*
+**Changes:**
 
 * Add power interface
 * Add device information interface
 * Convert module (convert.py) is now public API
 
-*Notes:*
+**Notes:**
 
 * General improvements to protobuf handling (for developers)
 
-*All changes:*
+**All changes:**
 
 ```
 e4f6590 devinfo: Minor clean ups
@@ -582,12 +812,12 @@ c765dbe mrp: Download protoc and verify generated code
 
 ## 0.4.0 (2020-02-20)
 
-*Changes:*
+**Changes:**
 
 The 0.4.0 release is here! It contains too many changes to list.
 Have a glance a pre-releases to get an idea of what it contains.
 
-*All changes:*
+**All changes:**
 
 ```
 46a5399 docs: Add basic migration instructions
@@ -596,11 +826,11 @@ f0789c1 Bump mypy-protobuf from 1.18 to 1.19
 
 ## 0.4.0a16 (2020-02-18)
 
-*Changes:*
+**Changes:**
 
 * Fixes position in MRP
 
-*All changes:*
+**All changes:**
 
 ```
 511e83e mrp: Fix calcuation of position
@@ -609,11 +839,11 @@ f0789c1 Bump mypy-protobuf from 1.18 to 1.19
 
 ## 0.4.0a15 (2020-02-15)
 
-*Changes:*
+**Changes:**
 
 * Fix minor state bug and implement seeking in MRP
 
-*All changes:*
+**All changes:**
 
 ```
 9ab37c6 Change zeroconf warning to debug
@@ -623,13 +853,13 @@ f0789c1 Bump mypy-protobuf from 1.18 to 1.19
 
 ## 0.4.0a14 (2020-02-11)
 
-*Changes:*
+**Changes:**
 
 * Added some missing DMAP tags
 * Limit log print outs to not flood logs
 * Minor updates to protobuf definitions
 
-*All changes:*
+**All changes:**
 
 ```
 5f46dac Consolidate protobuf scripts into one script
@@ -642,7 +872,7 @@ bfa5a45 New protobuf message and minor updates
 
 ## 0.4.0a13 (2020-01-31)
 
-*Changes:*
+**Changes:**
 
 * Fixed bug where device state would be reported as "paused"
   when playing (yielding incorrect position as side-effect). This
@@ -664,7 +894,7 @@ bfa5a45 New protobuf message and minor updates
 * AirPlay interface has been renamed to "stream", e.g. use
   atv.stream.play_url instead of atv.airplay.play_url.
 
-*Notes:*
+**Notes:**
 
 * Running tests on Windows works again
 * This release contains a lot new test coverage and all "common"
@@ -672,7 +902,7 @@ bfa5a45 New protobuf message and minor updates
 * Last documentation have been migrated to markdown
 * Moved from travis to GitHub actions
 
-*All changes:*
+**All changes:**
 
 ```
 635ec68 Change last files from rst to markdown
@@ -705,11 +935,11 @@ d49837d Re-raise OSError during AirPlay pairing on errors
 
 ## 0.4.0a12 (2020-01-19)
 
-*Changes:*
+**Changes:**
 
 * Minor bug fixes and improvements, see log below
 
-*All changes:*
+**All changes:**
 
 ```
 0c68936 Some updates to the MRP proxy
@@ -725,17 +955,17 @@ e00c6a4 Set unicast bit in qtype field
 
 ## 0.4.0a11 (2020-01-09)
 
-*Changes:*
+**Changes:**
 
 * Support for unicast scanning
 * Added wakeup command in remote control interface
 * Mostly quality release with minor bug fixes and more tests
 
-*Notes:*
+**Notes:**
 
 * Breaking changes in this release due to change to enums (6018ba2)
 
-*All changes:*
+**All changes:**
 
 ```
 998e77c Minor bug fixes
@@ -761,13 +991,13 @@ deb7374 Additional atvremote tests
 
 ## 0.4.0a10 (2019-12-11)
 
-*Changes:*
+**Changes:**
 
 * Support for artwork in MRP
 * Retry attempts in AirPlay
 * Better test coverage
 
-*All changes:*
+**All changes:**
 
 ```
 f5f775b Add retry attempts when AirPlay streaming fails
@@ -781,7 +1011,7 @@ e45deba Prepare for adding MRP tests
 
 ## 0.4.0a9 (2019-12-07)
 
-*All changes:*
+**All changes:**
 
 ```
 c25da51 Fix MRP idle state
@@ -789,11 +1019,11 @@ c25da51 Fix MRP idle state
 
 ## 0.4.0a8 (2019-12-06)
 
-*Changes:*
+**Changes:**
 
 * Leading zeros when pairing AirPlay works now
 
-*All changes:*
+**All changes:**
 
 ```
 bf71b8f Include all changes from git in CHANGES.rst
@@ -810,7 +1040,7 @@ bf71b8f Include all changes from git in CHANGES.rst
   connections (i.e. spinng wheel after playback)
 * Documentation finalized
 
-*All changes:*
+**All changes:**
 
 ```
 ed026dc Add initial script to make releases
@@ -828,7 +1058,7 @@ aa8f629 Throw exception if MRP pairing fails
 
 ## 0.4.0a6 (2019-11-26)
 
-*All changes:*
+**All changes:**
 
 ```
 ffc4b40 Fix connection handling in MRP pairing
@@ -836,7 +1066,7 @@ ffc4b40 Fix connection handling in MRP pairing
 
 ## 0.4.0a5 (2019-11-26)
 
-*All changes:*
+**All changes:**
 
 ```
 96f3b81 Update dmap implementation
@@ -850,7 +1080,7 @@ f133fb8 Implement asyncio.sleep
 
 ## 0.4.0a4 (2019-11-20)
 
-*Changes:*
+**Changes:**
 
 ```
 cfa0514 Fix push updater in MRP
@@ -888,7 +1118,7 @@ is the biggest addition.
 
 ## 0.3.8 (2017-11-17)
 
-*Changes:*
+**Changes:**
 
 * Revert some of the earlier AirPlay clean ups from 0.3.5 as that made playback
   less reliable
@@ -897,13 +1127,13 @@ is the biggest addition.
 
 ## 0.3.6 (2017-10-01)
 
-*Changes:*
+**Changes:**
 
 * Fix string conversion for idle state (#120)
 
 ## 0.3.5 (2017-09-26)
 
-*Changes:*
+**Changes:**
 
 * Fix support for genre (#106)
 * Handle playstate idle/0 (#115)
@@ -911,13 +1141,13 @@ is the biggest addition.
 
 ## 0.3.4 (2017-07-18)
 
-*Changes:*
+**Changes:**
 
 * Add long_description to get description on pypi
 
 ## 0.3.3 (2017-07-18)
 
-*Changes:*
+**Changes:**
 
 * Fixed broken device_id function (always generated same id)
 
@@ -927,20 +1157,20 @@ is the biggest addition.
 
 ## 0.3.2 (2017-06-20)
 
-*Notes:*
+**Notes:**
 
 * Same as 0.3.1 but fixed with pypi
 
 ## 0.3.1 (2017-06-20)
 
-*Changes:*
+**Changes:**
 
 * Add device_id
 * Remove developer commands
 
 ## 0.3.0 (2017-06-19)
 
-*Changes:*
+**Changes:**
 
 * Support AirPlay device authentication
 * Support arrow keys (left, right, up, down)
@@ -960,7 +1190,7 @@ is the biggest addition.
 * New "help" command in atvremote
 * Fix atvremote exit codes
 
-*Notes:*
+**Notes:**
 
 * play_url has moved to the new airplay module and no longer
   accepts start position as required argument. This is a
@@ -973,24 +1203,24 @@ is the biggest addition.
 
 ## 0.2.2 (2017-03-04)
 
-*Changes:*
+**Changes:**
 
 * Allow custom pairing guid when pairing
 
-*Notes:*
+**Notes:**
 
 * By default, a random pairing guid is now generated when calling
   pyatv.pair_with_apple_tv.
 
 ## 0.2.1 (2017-02-28)
 
-*Changes:*
+**Changes:**
 
 * Always trigger one push update when starting
 
 ## 0.2.0 (2017-02-23)
 
-*Changes:*
+**Changes:**
 
 * Support for push updates
 * Fast auto discovery for single device
@@ -1005,24 +1235,24 @@ is the biggest addition.
 
 ## 0.1.4 (2017-02-11)
 
-*Changes:*
+**Changes:**
 
 * Added new function: artwork_url
 * aiohttp bumped to 1.3.1
 
 ## 0.1.3 (2017-02-09)
 
-*Changes:*
+**Changes:**
 
 * Made it possible to pass a custom ClientSession
 
-*Notes:*
+**Notes:**
 
 * Renamed topmenu to top_menu which is a breaking change
 
 ## 0.1.2 (2017-02-09)
 
-*Changes:*
+**Changes:**
 
 * aiohttp bumped to 1.3.0
 * Fix a potential request leak on error
@@ -1034,7 +1264,7 @@ in the changes.
 
 ## 0.1.0 (2017-02-07)
 
-*Changes:*
+**Changes:**
 
 * Pairing
 * Support both HSGID and pairing-guid
@@ -1042,7 +1272,7 @@ in the changes.
 * atvremote artwork will now save to file (artwork.png)
 * Zeroconf bumped to 0.18.0
 
-*Notes:*
+**Notes:**
 
 * asyncio loop is now passed to pyatv.scan_for_apple_tvs which breaks
   previous API
