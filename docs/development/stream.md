@@ -75,6 +75,33 @@ Files in MP3, wav, FLAC and ogg format are supported and will be automatically c
 to a format the receiving device supports. Metadata is also extracted from files
 of these types and sent to the receiver.
 
+It is also possible to stream directly from a buffer. In this example, a file is
+read into a buffer and streamed:
+
+```python
+import io
+
+with io.open("myfile.mp3", "rb") as source_file:
+    await stream.stream_file(source_file)
+```
+
+Streaming directly from `stdin` also works, e.g. when piping output from another
+process:
+
+```python
+await stream.stream_file(sys.stdin.buffer)
+```
+
+As `stdin` is a text stream, the underlying binary buffer must be retrieved and used.
+
+When streaming from a buffer, it's important to know that some audio formats are
+not suitable for that. MP3 works fine, WAV and OGG does not. The reason is that
+seeking is done in the stream and `stdin` does for instance not support that. If
+the buffer supports seeking, then all formats will work fine, otherwise stick with
+MP3. For the same reason, metadata will not work if seeking is not supported as
+that is extracted prior to playing the file, so seeking is needed to return to
+the beginning of file again before playback.
+
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
 

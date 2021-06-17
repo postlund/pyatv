@@ -17,3 +17,7 @@ Audio, 8 seconds static (no sound), ogg for compression:
 
   python ../../scripts/audiogen.py -n 132300 -s -o static_3sec.wav
   ffmpeg -i static_3sec.wav static_3sec.ogg
+
+Audio, 1 packets (=352 samples), with metadata:
+
+  python ../../scripts/audiogen.py --title pyatv --artist postlund --album raop -n 352 -o audio_1_packet_metadata.wav

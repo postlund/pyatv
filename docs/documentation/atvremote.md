@@ -177,24 +177,9 @@ Device state: Paused
 
 Updates will be displayed when they happen. Just press ENTER to stop.
 
-# Power management
-
-You can turn your Apple TV on:
-
-    $ atvremote -i 00:11:22:33:44:54 turn_on
-
-Or turn it off:
-
-    $ atvremote -i 00:11:22:33:44:54 turn_off
-
-Or check the current power state:
-
-    $ atvremote -i 00:11:22:33:44:54 power_state
-
 # Working with commands
 
-Several commands are supported by the library. Easiest is just to use the command
-called `commands`, as it will present a list of available commands:
+List supported commands:
 
 ```raw
 $ atvremote commands
@@ -208,81 +193,30 @@ Remote control commands:
 - pause - Press key play
 - play - Press key play
 - play_pause - Toggle between play and pause
-- previous - Press key previous
-- right - Press key right
-- select - Press key select
-- set_position - Seek in the current playing media
-- set_repeat - Change repeat state
-- set_shuffle - Change shuffle mode to on or off
-- skip_backward - Skip backwards a time interval
-- skip_forward - Skip forward a time interval
-- stop - Press key stop
-- suspend - Suspend the device
-- top_menu - Go to main menu (long press menu)
-- up - Press key up
-- volume_down - Press key volume down
-- volume_up - Press key volume up
-- wakeup - Wake up the device
-
-Metadata commands:
-- app - Return information about current app playing something
-- artwork - Return artwork for what is currently playing (or None)
-- artwork_id - Return a unique identifier for current artwork
-- device_id - Return a unique identifier for current device
-- playing - Return what is currently playing
-
-Power commands:
-- power_state - Return device power state
-- turn_off - Turn device off
-- turn_on - Turn device on
-
-Playing commands:
-- album - Album of the currently playing song
-- artist - Artist of the currently playing song
-- device_state - Device state, e.g. playing or paused
-- episode_number - Episode number of TV series
-- genre - Genre of the currently playing song
-- hash - Create a unique hash for what is currently playing
-- media_type - Type of media is currently playing, e.g. video, music
-- position - Position in the playing media (seconds)
-- repeat - Repeat mode
-- season_number - Season number of TV series
-- series_name - Title of TV series
-- shuffle - If shuffle is enabled or not
-- title - Title of the current media, e.g. movie or song name
-- total_time - Total play time in seconds
-
-AirPlay commands:
-- close - Close connection and release allocated resources
-- play_url - Play media from an URL on the device
-
-Device Info commands:
-- build_number - Operating system build number, e.g
-- mac - Device MAC address
-- model - Hardware model name, e.g
-- operating_system - Operating system running on device
-- version - Operating system version
-
-Device commands:
-- artwork_save - Download artwork and save it to artwork.png
-- cli - Enter commands in a simple CLI
-- delay - Sleep for a certain amount if milliseconds
-- device_info - Print various information about the device
-- features - Print a list of all features and options
-- push_updates - Listen for push updates
-
-Apps commands:
-- app_list - Fetch a list of apps that can be launched
-- launch_app - Launch an app based on bundle ID
-
-Global commands:
-- commands - Print a list with available commands
-- help - Print help text for a command
-- pair - Pair pyatv as a remote control with an Apple TV
-- scan - Scan for Apple TVs on the network
+...
 ```
 
-You can for instance get what is currently playing with `playing`:
+If you want additional help for a specific command, use help:
+
+```shell
+$ atvremote help pair
+COMMAND:
+>> pair(self)
+
+HELP:
+Pair pyatv as a remote control with an Apple TV.
+```
+
+Multiple commands can be specified a the same time and there's also a `delay` that sleeps
+a certain amount of milliseconds before next command is executed. Here's an example where
+`select` is pressed, followed by `left` after waiting a second:
+
+```raw
+$ atvremote --id 00:11:22:33:44:54 select delay=1000 left
+```
+## Play Status
+
+Get what is currently playing with `playing`:
 
 ```raw
 $ atvremote --id 00:11:22:33:44:54 playing
@@ -293,11 +227,31 @@ Device state: Playing
         Shuffle: False
 ```
 
-Or seek in the currently playing media:
+Artwork with a specific size (width,height):
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1
+```
+
+Using -1 will let the device decide that parameter in order to keep aspect ratio.
+
+## Remote Control
+
+Navigation and playback control:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 left
+$ atvremote --id 00:11:22:33:44:54 menu
+$ atvremote --id 00:11:22:33:44:54 play
+```
+
+Seek in the currently playing media:
 
 ```shell
 $ atvremote --id 00:11:22:33:44:54 set_position=123
 ```
+
+## Device Information
 
 Check operating system version:
 
@@ -314,7 +268,7 @@ Model/SW: 4K tvOS 13.3.1 build 17K795
         MAC: 00:11:22:33:44:55
 ```
 
-Perhaps see supported features:
+## Supported Features
 
 ```raw
 $ atvremote -n Vardagsrum -s 10.0.10.81 features
@@ -324,38 +278,7 @@ Up: Available
 Down: Available
 Left: Available
 Right: Available
-Play: Available
-PlayPause: Available
-Pause: Available
-Stop: Available
-Next: Available
-Previous: Available
-Select: Available
-Menu: Available
-VolumeUp: Unknown
-VolumeDown: Unknown
-Home: Available
-HomeHold: Available
-TopMenu: Available
-SkipForward: Unavailable
-SkipBackward: Unavailable
-SetPosition: Available
-SetShuffle: Available
-SetRepeat: Available
-Title: Available
-Artist: Available
-Album: Available
-Genre: Available
-TotalTime: Available
-Position: Available
-Shuffle: Available
-Repeat: Available
-Artwork: Available
-App: Available
-PlayUrl: Available
-PowerState: Available
-TurnOn: Available
-TurnOff: Available
+...
 
 Legend:
 -------
@@ -365,6 +288,8 @@ Unknown: Supported by the device but availability not known
 Unsupported: Not supported by this device (or by pyatv)
 ```
 
+## Apps
+
 Show active app:
 
 ```shell
@@ -372,53 +297,42 @@ $ atvremote --id 00:11:22:33:44:54 app
 App: Musik (com.apple.TVMusic)
 ```
 
+## Streaming
+
 Play a video via AirPlay:
 
 ```shell
 $ atvremote --id 00:11:22:33:44:54 play_url=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 ```
 
-Artwork with a specific size (width,height):
+Stream an audio file via AirPlay (RAOP):
 
 ```shell
-$ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1
+$ atvremote --id 00:11:22:33:44:54 stream_file=sample.mp3
 ```
 
-Using -1 will let the device decide that parameter in order to keep aspect ratio.
-
-Multiple commands can be specified to simplify scripting. There's also a
-`delay` that sleeps a certain amount of milliseconds before next command is
-executed. Here's an example where `select` is pressed, followed by `left` after
-waiting a second:
+Stream audio from another process (`ffmpeg` in this case):
 
 ```shell
-$ atvremote --id 00:11:22:33:44:54 select delay=1000 left
+ffmpeg -i sample.wav -f mp3 - | atvremote -s 10.0.10.194 --debug set_volume=80 stream_file=-
 ```
 
-If you want additional help for a specific command, use help:
+## Power management
 
-```shell
-$ atvremote help pair
-COMMAND:
->> pair(self)
+You can turn your Apple TV on:
 
-HELP:
-Pair pyatv as a remote control with an Apple TV.
-```
+    $ atvremote -i 00:11:22:33:44:54 turn_on
+
+Or turn it off:
+
+    $ atvremote -i 00:11:22:33:44:54 turn_off
+
+Or check the current power state:
+
+    $ atvremote -i 00:11:22:33:44:54 power_state
 
 # Logging and debugging
 
 You can enable additional debugging information by specifying
-either `--verbose` or `--debug.`. By default pyatv will limit some log points in length,
-mainly due to an excessive amount of data might be logged otherwise. This mainly applies to
-binary data (raw protocol data) and protobuf messages. These limits can be overridden by
-setting the following environment variables:
-
-```shell
-$ export PYATV_BINARY_MAX_LINE=1000
-$ export PYATV_PROTOBUF_MAX_LINE=1000
-$ atvremote --debug ... playing
-```
-
-In general, you shouldn't have to change these, but under some cicrumstances the complete
-logs might be deseriable.
+either `--verbose` or `--debug`. See
+[Logging](../../development/logging#bundled-scripts) for additional log options.

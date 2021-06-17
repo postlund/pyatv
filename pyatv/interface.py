@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import hashlib
 import inspect
+import io
 import re
 from typing import (
     Any,
@@ -730,7 +731,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         raise exceptions.NotSupportedError()
 
     @feature(44, "StreamFile", "Stream local file to device.")
-    async def stream_file(self, filename: str, **kwargs) -> None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
