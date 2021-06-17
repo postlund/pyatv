@@ -7,6 +7,7 @@ import glob
 import logging
 import os
 from pathlib import Path
+import pkgutil
 import re
 import subprocess
 import sys
@@ -14,21 +15,23 @@ import sys
 import api
 from packaging.version import InvalidVersion, Version
 
+from pyatv import const, scripts
+
 _LOGGER = logging.getLogger(__name__)
 
 CHANGES_TEMPLATE = """# CHANGES
 
-## {version}
-
-*Changes:*
+## {version} {name} ({date})
 
 REMOVE ME
 
-*Notes:*
+**Changes:**
+
+{sections}**Notes:**
 
 REMOVE ME
 
-*All changes:*
+**All changes:**
 
 ```
 {all_changes}
@@ -116,7 +119,7 @@ def generate_outputs():
     call("python3 setup.py sdist bdist_wheel", show_output=False)
 
 
-def insert_changes(version):
+def insert_changes(version, release_name):
     """Insert changelog entry into CHANGES.md."""
     _LOGGER.info("Adding entry to CHANGES.md")
     changes = Path("CHANGES.md").read_text().split("\n")
@@ -124,19 +127,59 @@ def insert_changes(version):
     if changes[2].startswith("## " + version + " "):
         _LOGGER.info("Changelog entry already present")
     else:
-        version_str = "{0} ({1})".format(version, datetime.now().strftime("%Y-%m-%d"))
-
         _LOGGER.info("Finding previous release commit")
         message = call('git log -1 --grep="^Release [0-9]"')
         commit_sha = message.split("\n")[0].split(" ")[1]
 
         _LOGGER.info("Getting all changes since %s", commit_sha)
-        all_changes = call("git log --oneline {0}..HEAD", commit_sha)
+        all_changes = (
+            call("git log --oneline {0}..HEAD", commit_sha).rstrip().split("\n")
+        )
+
+        sections = ""
+
+        # Find all protocols and script to generate templates like this:
+        #
+        # *Protocol: DMAP*
+        # ...
+        all_sections = {}
+        all_sections.update({protocol.name: "Protocol" for protocol in const.Protocol})
+        all_sections.update(
+            {script.name: "Script" for script in pkgutil.iter_modules(scripts.__path__)}
+        )
+
+        # Map all changes based on commit message, e.g "xxxx mrp: ..." maps
+        # to MRP protocol
+        grouped_changes = {}
+        for change in all_changes:
+            added = False
+            for name in [x.lower() for x in all_sections]:
+                if re.match(rf"^[0-9a-f]+ {name}:.*", change):
+                    grouped_changes.setdefault(name, []).append(change)
+                    added = True
+                    break
+
+            # Add to "Other" if not handled and not a dependency bump
+            if not added and "build(deps" not in change:
+                grouped_changes.setdefault("_", []).append(change)
+
+        for name, section_type in all_sections.items():
+            sections += (
+                f"*{section_type}: {name}:*\n\n"
+                + "\n".join(grouped_changes.get(name.lower(), []))
+                + "\n\n"
+            )
+
+        sections += "*Other:*\n\n" + "\n".join(grouped_changes.get("_", [])) + "\n\n"
 
         with open("CHANGES.md", "w") as f:
             f.write(
                 CHANGES_TEMPLATE.format(
-                    version=version_str, all_changes=all_changes.rstrip()
+                    version=version,
+                    name=release_name,
+                    date=datetime.now().strftime("%Y-%m-%d"),
+                    sections=sections,
+                    all_changes="\n".join(all_changes),
                 )
             )
             f.write("\n".join(changes[2:]))
@@ -189,12 +232,13 @@ def create_tag(version):
         call("git tag v{0}", version)
 
 
-def main():
+def main():  # pylint: disable=too-many-branches
     """Script starts here."""
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
     parser = argparse.ArgumentParser(description="release maker")
     parser.add_argument("version", help="version to release")
+    parser.add_argument("-n", "--name", help="codename of release")
     parser.add_argument(
         "--skip-branch", default=False, action="store_true", help="skip creating branch"
     )
@@ -256,6 +300,9 @@ def main():
 
     args = parser.parse_args()
 
+    if args.prepare_release and not args.name:
+        parser.error("release name must be specified")
+
     try:
         version = str(Version(args.version))
     except InvalidVersion:
@@ -273,7 +320,7 @@ def main():
         if not args.skip_update_version:
             update_version(version)
         if not args.skip_changes:
-            insert_changes(version)
+            insert_changes(version, args.name)
         _LOGGER.info("Update CHANGES.md and add files to include with git add")
     elif args.make_release:
         _LOGGER.info("Making release %s", version)
