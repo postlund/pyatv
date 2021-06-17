@@ -248,6 +248,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import hashlib
 import inspect
+import io
 import re
 from typing import (
     Any,
@@ -970,7 +971,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         raise exceptions.NotSupportedError()
 
     @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
         &#34;&#34;&#34;Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
@@ -3932,7 +3933,7 @@ def listener(self):
         raise exceptions.NotSupportedError()
 
     @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-    async def stream_file(self, filename: str, **kwargs) -&gt; None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
         &#34;&#34;&#34;Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
@@ -3977,7 +3978,7 @@ async def play_url(self, url: str, **kwargs) -&gt; None:
 </details>
 </dd>
 <dt id="pyatv.interface.Stream.stream_file"><code class="name flex">
-<span>async def <span class="ident">stream_file</span></span>(<span>self, filename: str, **kwargs) -> NoneType</span>
+<span>async def <span class="ident">stream_file</span></span>(<span>self, file: Union[str, _io.BufferedReader], **kwargs) -> NoneType</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Stream local file to device.</p>
@@ -3987,7 +3988,7 @@ async def play_url(self, url: str, **kwargs) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-async def stream_file(self, filename: str, **kwargs) -&gt; None:
+async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
     &#34;&#34;&#34;Stream local file to device.
 
     INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!

@@ -4,7 +4,6 @@ import asyncio
 import logging
 from time import monotonic
 from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
-import wave
 import weakref
 
 from bitarray import bitarray
@@ -13,6 +12,7 @@ from pyatv import exceptions
 from pyatv.airplay.auth import AirPlayPairingVerifier
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.raop import timing
+from pyatv.raop.audio_source import AudioSource
 from pyatv.raop.fifo import PacketFifo
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.raop.packets import (
@@ -453,7 +453,7 @@ class RaopClient:
         self.context.volume = volume
 
     async def send_audio(  # pylint: disable=too-many-branches
-        self, wave_file, metadata: AudioMetadata = EMPTY_METADATA
+        self, wave_file: AudioSource, metadata: AudioMetadata = EMPTY_METADATA
     ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
@@ -476,7 +476,7 @@ class RaopClient:
                 now = self.context.rtptime
                 end = (
                     self.context.start_ts
-                    + wave_file.getduration() * self.context.sample_rate
+                    + wave_file.duration * self.context.sample_rate
                 )
                 await self.rtsp.set_parameter("progress", f"{start}/{now}/{end}")
 
@@ -529,7 +529,7 @@ class RaopClient:
             if listener:
                 listener.stopped()
 
-    async def _stream_data(self, wave_file: wave.Wave_read, transport):
+    async def _stream_data(self, source: AudioSource, transport):
         packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
         packet_interval = 1 / packets_per_second
 
@@ -538,7 +538,9 @@ class RaopClient:
         while True:
             start_time = monotonic()
 
-            num_sent = self._send_packet(wave_file, stats.total_frames == 0, transport)
+            num_sent = await self._send_packet(
+                source, stats.total_frames == 0, transport
+            )
             if num_sent == 0:
                 break
 
@@ -555,8 +557,8 @@ class RaopClient:
                     max_packets,
                     frames_behind,
                 )
-                num_sent, has_more_packets = self._send_number_of_packets(
-                    wave_file, transport, max_packets
+                num_sent, has_more_packets = await self._send_number_of_packets(
+                    source, transport, max_packets
                 )
                 stats.tick(num_sent)
                 if not has_more_packets:
@@ -593,10 +595,10 @@ class RaopClient:
         )
         await asyncio.sleep(self.context.latency / self.context.sample_rate)
 
-    def _send_packet(
-        self, wave_file: wave.Wave_read, first_packet: bool, transport
+    async def _send_packet(
+        self, source: AudioSource, first_packet: bool, transport
     ) -> int:
-        frames = wave_file.readframes(FRAMES_PER_PACKET)
+        frames = await source.readframes(FRAMES_PER_PACKET)
         if not frames:
             return 0
 
@@ -633,8 +635,8 @@ class RaopClient:
             len(frames) / (self.context.channels * self.context.bytes_per_channel)
         )
 
-    def _send_number_of_packets(
-        self, wave_file: wave.Wave_read, transport, count: int
+    async def _send_number_of_packets(
+        self, source: AudioSource, transport, count: int
     ) -> Tuple[int, bool]:
         """Send a specific number of packets.
 
@@ -642,7 +644,7 @@ class RaopClient:
         """
         total_frames = 0
         for _ in range(count):
-            sent = self._send_packet(wave_file, False, transport)
+            sent = await self._send_packet(source, False, transport)
             total_frames += sent
             if sent == 0:
                 return total_frames, False
