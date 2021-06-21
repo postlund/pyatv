@@ -35,7 +35,8 @@ Small steps is key, so the tutorial will be divded into the following sections:
 
 The complete source code will be listed several times along the way. If you're unsure
 if you did it right, just scroll down and hopefully you can compare with the expected
-result. The final result is [here](#the-complete-example).
+result. The final result is [here](#the-complete-example). It is also available as an
+example at {% include code file="../examples/tutorial.py" %}.
 
 # Tutorial steps
 
@@ -56,9 +57,13 @@ routes = web.RouteTableDef()
 async def scan(request):
     return web.Response(text="Hello world!")
 
-app = web.Application()
-app.add_routes(routes)
-web.run_app(app)
+def main():
+    app = web.Application()
+    app.add_routes(routes)
+    web.run_app(app)
+
+if __name__ == "__main__":
+    main()
 ```
 
 Run the script with `python tutorial.py`:
@@ -191,11 +196,14 @@ async def on_shutdown(app: web.Application) -> None:
     for atv in app["atv"].values():
         atv.close()
 
-app = web.Application()
-app["atv"] = {}
-app.add_routes(routes)
-app.on_shutdown.append(on_shutdown)
-web.run_app(app)
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app.add_routes(routes)
+    app.on_shutdown.append(on_shutdown)
+    web.run_app(app)
+
+...
 ```
 
 The `on_shutdown` method will be called when the script is exitted, e.g. by
@@ -293,11 +301,16 @@ async def on_shutdown(app: web.Application) -> None:
         atv.close()
 
 
-app = web.Application()
-app["atv"] = {}
-app.add_routes(routes)
-app.on_shutdown.append(on_shutdown)
-web.run_app(app)
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app.add_routes(routes)
+    app.on_shutdown.append(on_shutdown)
+    web.run_app(app)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 </details>
@@ -468,11 +481,16 @@ async def on_shutdown(app: web.Application) -> None:
         atv.close()
 
 
-app = web.Application()
-app["atv"] = {}
-app.add_routes(routes)
-app.on_shutdown.append(on_shutdown)
-web.run_app(app)
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app.add_routes(routes)
+    app.on_shutdown.append(on_shutdown)
+    web.run_app(app)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 </details>
@@ -567,11 +585,12 @@ it getting garbage collected. Add the list in the setup code:
 
 ```python
 ...
-app = web.Application()
-app["atv"] = {}
-app["listeners"] = []  # <-- add this
-app.add_routes(routes)
-...
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app["listeners"] = []  # <-- add this
+    app.add_routes(routes)
+    ...
 ```
 
 Now we need to create the actual listener, make sure it receives updates and
@@ -630,12 +649,12 @@ so the push listener can send updates later. We'll start by adding somewhere to
 store these handlers (in the setup code):
 
 ```python
-...
-app = web.Application()
-app["atv"] = {}
-app["listeners"] = []
-app["clients"] = {}  # <--- add this
-...
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app["listeners"] = []
+    app["clients"] = {}  # <--- add this
+    ...
 ```
 
 We will map the device id to a list of clients, so that multiple clients can
@@ -645,14 +664,14 @@ let's define the websocket handler:
 ```python
 @routes.get("/ws/{id}")
 @web_command
-async def websocket_handler(request, pyatv):
+async def websocket_handler(request, atv):
     device_id = request.match_info["id"]
 
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     request.app["clients"].setdefault(device_id, []).append(ws)
 
-    playstatus = await pyatv.metadata.playing()
+    playstatus = await atv.metadata.playing()
     await ws.send_str(str(playstatus))
 
     async for msg in ws:
@@ -816,7 +835,8 @@ something on the device, it should hopefully update instantaneously!
 
 # The complete example
 
-Here is the final code for the application:
+Here is the final code for the application (or here:
+{% include code file="../examples/tutorial.py" %}):
 
 <details>
 
@@ -999,13 +1019,18 @@ async def on_shutdown(app: web.Application) -> None:
         atv.close()
 
 
-app = web.Application()
-app["atv"] = {}
-app["listeners"] = []
-app["clients"] = {}
-app.add_routes(routes)
-app.on_shutdown.append(on_shutdown)
-web.run_app(app)
+def main():
+    app = web.Application()
+    app["atv"] = {}
+    app["listeners"] = []
+    app["clients"] = {}
+    app.add_routes(routes)
+    app.on_shutdown.append(on_shutdown)
+    web.run_app(app)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 </details>
@@ -1016,7 +1041,7 @@ in any way you like (there's no copyright attached to it), but remember that
 it's more for inspiration than complete project. There are pitfalls,
 especially with regards to error handling.
 
-If you want some inspiration for additional thins to do, here are few:
+If you want some inspiration for additional things to do, here are few:
 
 * Implement additional commands, e.g. volume control, app launching, artwork
   or streaming
