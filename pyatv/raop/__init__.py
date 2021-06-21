@@ -319,6 +319,7 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
+            await audio_file.close()
             await self.playback_manager.teardown()
 
     def _get_credentials(self) -> Optional[LegacyCredentials]:

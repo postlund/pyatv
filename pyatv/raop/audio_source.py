@@ -1,20 +1,18 @@
-"""Basic wrapper for audio files that complies with Wave_read.
-
-This module can read all file types supported by the miniaudio library and
-provide an interface that is compatible with wave.Wave_read. Using this
-wrapper, any file type supported by miniaudio can be played by the RAOP
-implementation in pyatv.
-"""
+"""Audio sources that can provide raw PCM frames that pyatv can stream."""
 from abc import ABC, abstractmethod, abstractproperty
 import asyncio
+from contextlib import suppress
 from functools import partial
 import io
-from typing import Union
+import logging
+from typing import Optional, Union
 
 import miniaudio
 from miniaudio import SampleFormat
 
 from pyatv.exceptions import NotSupportedError
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _int2sf(sample_size: int) -> SampleFormat:
@@ -31,6 +29,9 @@ def _int2sf(sample_size: int) -> SampleFormat:
 
 class AudioSource(ABC):
     """Audio source that returns raw PCM frames."""
+
+    async def close(self) -> None:
+        """Close underlying resources."""
 
     @abstractmethod
     async def readframes(self, nframes: int) -> bytes:
@@ -79,10 +80,13 @@ class ReaderWrapper(miniaudio.StreamableSource):
 
 
 class BufferedReaderSource(AudioSource):
-    """Wrapper for the miniaudio library.
+    """Audio source used to play a file from a buffer.
 
-    Only the parts needed by pyatv (in Wave_read) are implemented!
+    This audio source adds a small internal buffer (corresponding to 0,5s) to deal with
+    tiny hiccups. Proper buffering should be done by the source buffer.
     """
+
+    CHUNK_SIZE = 352 * 3
 
     def __init__(
         self,
@@ -96,6 +100,13 @@ class BufferedReaderSource(AudioSource):
         self.loop = asyncio.get_event_loop()
         self.reader: miniaudio.WavFileReadStream = reader
         self.wrapper: ReaderWrapper = wrapper
+        self._buffer_task: Optional[asyncio.Task] = asyncio.ensure_future(
+            self._buffering_task()
+        )
+        self._audio_buffer: bytes = b""
+        self._buffer_needs_refilling: asyncio.Event = asyncio.Event()
+        self._data_was_added_to_buffer: asyncio.Event = asyncio.Event()
+        self._buffer_size: int = int(sample_rate / 2)
         self._sample_rate: int = sample_rate
         self._channels: int = channels
         self._sample_size: int = sample_size
@@ -108,7 +119,7 @@ class BufferedReaderSource(AudioSource):
         channels: int,
         sample_size: int,
     ) -> "BufferedReaderSource":
-        """Open an audio file and return an instance of MiniaudioWrapper."""
+        """Return a new AudioSource instance playing from the provided buffer."""
         wrapper = ReaderWrapper(buffered_reader)
         loop = asyncio.get_event_loop()
         src = await loop.run_in_executor(
@@ -133,13 +144,64 @@ class BufferedReaderSource(AudioSource):
         await loop.run_in_executor(None, reader.read, 44)
 
         # The source stream is passed here and saved to not be garbage collected
-        return cls(reader, wrapper, sample_rate, channels, sample_size)
+        instance = cls(reader, wrapper, sample_rate, channels, sample_size)
+        return instance
+
+    async def close(self) -> None:
+        """Close underlying resources."""
+        if self._buffer_task:
+            self._buffer_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._buffer_task
+            self._buffer_task = None
 
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
-        return await self.loop.run_in_executor(
-            None, self.reader.read, nframes * self._sample_size * self._channels
-        )
+        # If buffer is empty but the buffering task is still running, that means we are
+        # buffering and need to wait for more data to be added to buffer.
+        buffer_task_running = self._buffer_task and self._buffer_task.done()
+        if not self._audio_buffer and not buffer_task_running:
+            _LOGGER.debug("Audio source is buffering")
+            self._buffer_needs_refilling.set()
+            self._data_was_added_to_buffer.clear()
+            await self._data_was_added_to_buffer.wait()
+
+        total_bytes = nframes * self._sample_size * self._channels
+
+        # Return data corresponding to requested frame, or what is left
+        available_data = min(total_bytes, len(self._audio_buffer))
+        data = self._audio_buffer[0:available_data]
+        self._audio_buffer = self._audio_buffer[available_data:]
+
+        # Simple buffering scheme: fill up the buffer again when reaching <= 50%
+        if len(self._audio_buffer) < 0.5 * self._buffer_size:
+            self._buffer_needs_refilling.set()
+
+        return data
+
+    async def _buffering_task(self) -> None:
+        _LOGGER.debug("Starting audio buffering task")
+        while True:
+            try:
+                # Read a chunk and add it to the internal buffer. If no data as read,
+                # just break out.
+                chunk = await self.loop.run_in_executor(
+                    None, self.reader.read, self.CHUNK_SIZE
+                )
+                if not chunk:
+                    break
+
+                self._audio_buffer += chunk
+
+                self._data_was_added_to_buffer.set()
+                if len(self._audio_buffer) >= self._buffer_size:
+                    await self._buffer_needs_refilling.wait()
+                    self._buffer_needs_refilling.clear()
+
+            except Exception:
+                _LOGGER.exception("an error occurred during buffering")
+
+        self._data_was_added_to_buffer.set()
 
     @property
     def sample_rate(self) -> int:
@@ -168,13 +230,10 @@ class BufferedReaderSource(AudioSource):
 
 
 class FileSource(AudioSource):
-    """Wrapper for the miniaudio library.
-
-    Only the parts needed by pyatv (in Wave_read) are implemented!
-    """
+    """Audio source used to play a local audio file."""
 
     def __init__(self, src: miniaudio.DecodedSoundFile) -> None:
-        """Initialize a new MiniaudioWrapper instance."""
+        """Initialize a new FileSource instance."""
         self.src: miniaudio.DecodedSoundFile = src
         self.samples: bytes = self.src.samples.tobytes()
         self.pos: int = 0
@@ -183,7 +242,7 @@ class FileSource(AudioSource):
     async def open(
         cls, filename: str, sample_rate: int, channels: int, sample_size: int
     ) -> "FileSource":
-        """Open an audio file and return an instance of MiniaudioWrapper."""
+        """Return a new AudioSource instance playing from the provided file."""
         loop = asyncio.get_event_loop()
         src = await loop.run_in_executor(
             None,

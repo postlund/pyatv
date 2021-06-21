@@ -543,6 +543,7 @@ class RaopClient:
                 source, stats.total_frames == 0, transport
             )
             if num_sent == 0:
+                print("break out")
                 break
 
             stats.tick(num_sent)
@@ -563,6 +564,7 @@ class RaopClient:
                 )
                 stats.tick(num_sent)
                 if not has_more_packets:
+                    print("break out 2")
                     break
 
             # Log how long it took to send sample_rate amount of frames (should be
@@ -601,6 +603,7 @@ class RaopClient:
     ) -> int:
         frames = await source.readframes(FRAMES_PER_PACKET)
         if not frames:
+            print("no more frames")
             return 0
 
         header = AudioPacketHeader.encode(
