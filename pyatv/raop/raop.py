@@ -401,7 +401,6 @@ class RaopClient:
             self.context.channels,
             self.context.bytes_per_channel,
         ) = get_audio_properties(properties)
-        self.context.reset()
         _LOGGER.debug(
             "Update play settings to %d/%d/%dbit",
             self.context.sample_rate,
@@ -458,6 +457,8 @@ class RaopClient:
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
             raise Exception("not initialized")  # TODO: better exception
+
+        self.context.reset()
 
         transport = None
         try:
