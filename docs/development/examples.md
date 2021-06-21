@@ -17,6 +17,8 @@ files:
     description: Scans for devices, picks the first one and connects to it.
   - name: stream.py
     description: Stream audio file to an AirPlay/RAOP receiver.
+  - name: tutorial.py
+    description: Complete source code of [tutorial](../../documentation/tutorial).
 ---
 # Examples
 

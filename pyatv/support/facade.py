@@ -11,8 +11,20 @@ NB: Typing in this file suffers much from:
 https://github.com/python/mypy/issues/5374
 """
 import asyncio
+import io
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
@@ -313,12 +325,12 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         """Play media from an URL on the device."""
         await self.relay("play_url")(url, **kwargs)
 
-    async def stream_file(self, filename: str, **kwargs) -> None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        await self.relay("stream_file")(filename, **kwargs)
+        await self.relay("stream_file")(file, **kwargs)
 
 
 class FacadeApps(Relayer, interface.Apps):

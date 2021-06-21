@@ -657,6 +657,10 @@ async def _exec_command(obj, command, print_result, *args):
         # have to yield for the result and wait until it is available.
         tmp = getattr(obj, command)
         if inspect.ismethod(tmp):
+            # Special case for stream_file: if - is passed as input file, use stdin
+            # as source instead of passing filename
+            if command == interface.Stream.stream_file.__name__ and args[0] == "-":
+                args = [sys.stdin.buffer, *args[1:]]
             value = await tmp(*args)
         else:
             value = tmp

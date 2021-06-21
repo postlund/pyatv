@@ -5,8 +5,8 @@ TODO: Things to improve:
 * Add tests for timing server
 * Improve sync tests
 """
-
 import asyncio
+import io
 import logging
 import math
 from typing import Dict, List
@@ -411,3 +411,15 @@ async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
 async def test_teardown_called_after_playback(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
     assert raop_state.teardown_called
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+async def test_stream_from_buffer(raop_client, raop_state):
+    with io.open(data_path("audio_1_packet_metadata.wav"), "rb") as source_file:
+        await raop_client.stream.stream_file(source_file)
+
+    assert raop_state.metadata.artist == "postlund"
+    assert raop_state.metadata.album == "raop"
+    assert raop_state.metadata.title == "pyatv"
+
+    assert audio_matches(raop_state.raw_audio, frames=FRAMES_PER_PACKET)

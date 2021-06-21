@@ -1,9 +1,10 @@
 """Support for audio streaming using Remote Audio Output Protocol (RAOP)."""
 
 import asyncio
+import io
 import logging
 import math
-from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions
 from pyatv.airplay.srp import LegacyCredentials
@@ -19,8 +20,8 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
+from pyatv.raop.audio_source import open_source
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
-from pyatv.raop.miniaudio import MiniaudioWrapper
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
 from pyatv.support import map_range
@@ -266,7 +267,7 @@ class RaopStream(Stream):
         self.audio = audio
         self.playback_manager = playback_manager
 
-    async def stream_file(self, filename: str, **kwargs) -> None:
+    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
@@ -281,8 +282,8 @@ class RaopStream(Stream):
 
             # After initialize has been called, all the audio properties will be
             # initialized and can be used in the miniaudio wrapper
-            audio_file = await MiniaudioWrapper.open(
-                filename,
+            audio_file = await open_source(
+                file,
                 context.sample_rate,
                 context.channels,
                 context.bytes_per_channel,
@@ -291,9 +292,16 @@ class RaopStream(Stream):
             # Try to load metadata and pass it along if it succeeds
             metadata: AudioMetadata = EMPTY_METADATA
             try:
-                metadata = await get_metadata(filename)
+                # Source must support seeking to read metadata
+                if audio_file.supports_seek:
+                    metadata = await get_metadata(file)
+                    _LOGGER.error("loading metadata: %s", metadata)
+                else:
+                    _LOGGER.debug(
+                        "Seeking not supported by source, not loading metadata"
+                    )
             except Exception as ex:
-                _LOGGER.warning("Failed to extract metadata from %s: %s", filename, ex)
+                _LOGGER.exception("Failed to extract metadata from %s: %s", file, ex)
 
             # If the user didn't change volume level prior to streaming, try to extract
             # volume level from device (if supported). Otherwise set the default level
@@ -311,6 +319,7 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
+            await audio_file.close()
             await self.playback_manager.teardown()
 
     def _get_credentials(self) -> Optional[LegacyCredentials]:
