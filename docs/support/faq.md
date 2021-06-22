@@ -177,6 +177,15 @@ Reported in these issues: {% include issue no="958" %}
   [this](https://help.netflix.com/sv/node/2102) page.
 * During episode intros and "next episode" screens the device goes to idle state.
 
+## com.cellcom.cellcomtvappleos
+
+Does not seem to report any state. This app likely implements its own media player, bypassing
+the metadata mangement used by MRP meaning that no information is available when this app is used.
+
+Link to app in App Store: https://apps.apple.com/il/app/%D7%A1%D7%9C%D7%A7%D7%95%D7%9D-tv/id1159313682
+
+Reported in these issues: {% include issue no="1160" %}
+
 ## playbackRate issue
 
 Some apps incorrectly set the metadata item "playbackRate" as 0.0 instead of 1.0 which causes
