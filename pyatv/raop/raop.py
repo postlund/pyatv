@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import logging
-from time import monotonic
+from time import perf_counter
 from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
 
@@ -537,7 +537,7 @@ class RaopClient:
         stats = Statistics(self.context.sample_rate)
 
         while True:
-            start_time = monotonic()
+            start_time = perf_counter()
 
             num_sent = await self._send_packet(
                 source, stats.total_frames == 0, transport
@@ -581,7 +581,7 @@ class RaopClient:
 
             # Assuming processing isn't exceeding packet interval (i.e. we are
             # processing packets to slow), we should sleep for a while
-            processing_time = monotonic() - start_time
+            processing_time = perf_counter() - start_time
             if processing_time < packet_interval:
                 await asyncio.sleep(packet_interval - processing_time * 2)
             else:
@@ -594,7 +594,7 @@ class RaopClient:
 
         _LOGGER.debug(
             "Audio finished sending in %fs",
-            (timing.monotonic_ns() - stats.start_time_ns) / 10 ** 9,
+            (timing.perf_counter_ns() - stats.start_time_ns) / 10 ** 9,
         )
         await asyncio.sleep(self.context.latency / self.context.sample_rate)
 
@@ -661,8 +661,8 @@ class Statistics:
     def __init__(self, sample_rate: int):
         """Initialize a new Statistics instance."""
         self.sample_rate: int = sample_rate
-        self.start_time_ns: int = timing.monotonic_ns()
-        self.interval_time: float = monotonic()
+        self.start_time_ns: int = timing.perf_counter_ns()
+        self.interval_time: float = perf_counter()
         self.total_frames: int = 0
         self.interval_frames: int = 0
 
@@ -670,7 +670,8 @@ class Statistics:
     def expected_frame_count(self) -> int:
         """Number of frames expected to be sent at current time."""
         return int(
-            (timing.monotonic_ns() - self.start_time_ns) / (10 ** 9 / self.sample_rate)
+            (timing.perf_counter_ns() - self.start_time_ns)
+            / (10 ** 9 / self.sample_rate)
         )
 
     @property
@@ -694,7 +695,7 @@ class Statistics:
 
     def new_interval(self) -> Tuple[float, int]:
         """Start measuring a new time interval."""
-        end_time = monotonic()
+        end_time = perf_counter()
         diff = end_time - self.interval_time
         self.interval_time = end_time
 
