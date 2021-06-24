@@ -1,5 +1,54 @@
 # CHANGES
 
+## 0.8.1 Glitchtrap (2021-06-24)
+
+This minor release contains a few improvements to the RAOP protocol.
+First and foremost, `time.perf_counter` is now used in favor of
+`time.monotonic` for audio scheduling. Scheduling has also been changed to work
+with "global time" (from stream start) instead of per frame. These changes
+improve streaming stability, with less chance of getting out of sync. They were
+also necessary to get streaming working on Windows.
+
+Another important addition in the streaming department is the ability to read
+input from a FILE-like object, instead of just from a filename. One usecase for
+this is to take input via stdin from another process and send it to a receiver.
+`atvremote` has been adjusted to read from stdin if `-` is specified as
+filename. Here's an example streaming output from ffmpeg (RTSP as input!):
+
+```shell
+ffmpeg -i rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov -f mp3 - | atvremote -s 10.0.10.184 --debug stream_file=-
+```
+
+Documentation for this:
+
+https://pyatv.dev/documentation/atvremote/#streaming
+https://pyatv.dev/development/stream/#stream-a-file
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+f41d552 raop: Sync sending based on absolute time
+bd15ff2 raop: Use perf_counter instead of monotonic
+4abfc94 raop: Add small buffer to BufferedReaderSource
+ee1ee94 raop: Fix timing when starting to stream
+8096928 raop: Support streaming files from a buffer
+
+**All changes:**
+
+```
+f41d552 raop: Sync sending based on absolute time
+bd15ff2 raop: Use perf_counter instead of monotonic
+03f9a6b build(deps): bump mypy from 0.902 to 0.910
+244d9ee build(deps): bump isort from 5.8.0 to 5.9.1
+a23c144 docs: Add missing tutorial example
+4abfc94 raop: Add small buffer to BufferedReaderSource
+ee1ee94 raop: Fix timing when starting to stream
+8096928 raop: Support streaming files from a buffer
+a2df952 docs: Add tutorial as an example
+6cf2f4c build(deps): bump types-protobuf from 0.1.12 to 0.1.13
+```
+
 ## 0.8.0 Freddy (2021-06-17)
 
 Here comes a new release, filled to the brim with new stuff! First and foremost, it
