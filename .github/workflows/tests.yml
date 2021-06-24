@@ -63,7 +63,9 @@ jobs:
         python -m pip install --upgrade setuptools pip wheel
         python -m pip install tox-gh-actions
     - name: Test with tox
-      run: tox -q -p auto || tox -q -p auto
+      # Run once and if that fails, run again but force to re-download packages again.
+      # For some reason the cache breaks sometimes, see https://github.com/postlund/pyatv/issues/1174
+      run: tox -q -p auto || PIP_ARGS="--no-cache-dir" tox -q -p auto
     - name: Regression
       run: tox -q -p auto -e regression
       if: matrix.python-version == '3.8' && runner.os == 'Linux'
