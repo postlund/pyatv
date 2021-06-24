@@ -531,19 +531,14 @@ class RaopClient:
                 listener.stopped()
 
     async def _stream_data(self, source: AudioSource, transport):
-        packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
-        packet_interval = 1 / packets_per_second
-
         stats = Statistics(self.context.sample_rate)
 
+        initial_time = perf_counter()
         while True:
-            start_time = perf_counter()
-
             num_sent = await self._send_packet(
                 source, stats.total_frames == 0, transport
             )
             if num_sent == 0:
-                print("break out")
                 break
 
             stats.tick(num_sent)
@@ -564,7 +559,6 @@ class RaopClient:
                 )
                 stats.tick(num_sent)
                 if not has_more_packets:
-                    print("break out 2")
                     break
 
             # Log how long it took to send sample_rate amount of frames (should be
@@ -579,17 +573,21 @@ class RaopClient:
                     stats.expected_frame_count,
                 )
 
-            # Assuming processing isn't exceeding packet interval (i.e. we are
-            # processing packets to slow), we should sleep for a while
-            processing_time = perf_counter() - start_time
-            if processing_time < packet_interval:
-                await asyncio.sleep(packet_interval - processing_time * 2)
+            # Calculate the actual absolute position in stream and where we actually
+            # are (from when we initially stared to stream). The diff is the time we
+            # need to sleep until next lap.
+            abs_time_stream = stats.total_frames / self.context.sample_rate
+            rel_to_start = perf_counter() - initial_time
+            diff = abs_time_stream - rel_to_start
+            if diff > 0:
+                await asyncio.sleep(diff)
             else:
                 _LOGGER.warning(
-                    "Too slow to keep up for seqno %d (%f > %f)",
+                    "Too slow to keep up for seqno %d (%f vs %f => %f)",
                     self.context.rtpseq - 1,
-                    processing_time,
-                    packet_interval,
+                    abs_time_stream,
+                    rel_to_start,
+                    diff,
                 )
 
         _LOGGER.debug(
@@ -603,7 +601,6 @@ class RaopClient:
     ) -> int:
         frames = await source.readframes(FRAMES_PER_PACKET)
         if not frames:
-            print("no more frames")
             return 0
 
         header = AudioPacketHeader.encode(
