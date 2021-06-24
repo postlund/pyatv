@@ -20,7 +20,7 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
-from pyatv.raop.audio_source import open_source
+from pyatv.raop.audio_source import AudioSource, open_source
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
@@ -273,6 +273,7 @@ class RaopStream(Stream):
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
         self.playback_manager.acquire()
+        audio_file: Optional[AudioSource] = None
         try:
             client, _, context = await self.playback_manager.setup()
             client.credentials = self._get_credentials()
@@ -295,7 +296,6 @@ class RaopStream(Stream):
                 # Source must support seeking to read metadata
                 if audio_file.supports_seek:
                     metadata = await get_metadata(file)
-                    _LOGGER.error("loading metadata: %s", metadata)
                 else:
                     _LOGGER.debug(
                         "Seeking not supported by source, not loading metadata"
@@ -319,7 +319,8 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
-            await audio_file.close()
+            if audio_file:
+                await audio_file.close()
             await self.playback_manager.teardown()
 
     def _get_credentials(self) -> Optional[LegacyCredentials]:
