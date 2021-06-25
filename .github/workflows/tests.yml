@@ -65,7 +65,7 @@ jobs:
     - name: Test with tox
       # Run once and if that fails, run again but force to re-download packages again.
       # For some reason the cache breaks sometimes, see https://github.com/postlund/pyatv/issues/1174
-      run: tox -q -p auto || PIP_ARGS="--no-cache-dir" tox -q -p auto
+      run: ./scripts/tox.sh
     - name: Regression
       run: tox -q -p auto -e regression
       if: matrix.python-version == '3.8' && runner.os == 'Linux'
