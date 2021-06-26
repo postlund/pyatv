@@ -567,11 +567,26 @@ def dmap_service_handler(
     return name, service
 
 
+def hscp_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new HSCP service."""
+    name = mdns_service.properties.get("Machine Name", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.properties.get("hG"),
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
 def scan() -> Mapping[str, ScanHandler]:
     """Return handlers used for scanning."""
     return {
         "_appletv-v2._tcp.local": homesharing_service_handler,
         "_touch-able._tcp.local": dmap_service_handler,
+        "_hscp._tcp.local": hscp_service_handler,
     }
 
 

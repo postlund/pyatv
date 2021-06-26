@@ -8,13 +8,15 @@ from pyatv.support import mdns
 
 HOMESHARING_SERVICE = "_appletv-v2._tcp.local"
 DMAP_SERVICE = "_touch-able._tcp.local"
+HSCP_SERVICE: str = "_hscp._tcp.local"
 
 
 def test_dmap_scan_handlers_present():
     handlers = scan()
-    assert len(handlers) == 2
+    assert len(handlers) == 3
     assert HOMESHARING_SERVICE in handlers
     assert DMAP_SERVICE in handlers
+    assert HSCP_SERVICE in handlers
 
 
 def test_homesharing_handler_to_service():

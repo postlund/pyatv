@@ -10,6 +10,7 @@ DEVICE_SERVICE: str = "_touch-able._tcp.local"
 MEDIAREMOTE_SERVICE: str = "_mediaremotetv._tcp.local"
 AIRPLAY_SERVICE: str = "_airplay._tcp.local"
 RAOP_SERVICE: str = "_raop._tcp.local"
+HSCP_SERVICE: str = "_hscp._tcp.local"
 
 
 async def auto_connect(
@@ -60,6 +61,8 @@ def get_unique_id(
     """
     if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
         return service_name.split("_")[0]
+    if service_type == HSCP_SERVICE:
+        return properties.get("Machine ID")
     if service_type == MEDIAREMOTE_SERVICE:
         return properties.get("UniqueIdentifier")
     if service_type == AIRPLAY_SERVICE:
