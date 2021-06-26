@@ -133,7 +133,8 @@ app and power related functions.
 ## DMAP
 
 This protocol is the same protocol (suite) used by iTunes in the past and mainly deals with
-metadata and playback. Only used by legacy devices, like the Apple TV 3.
+metadata and playback. It is used by legacy devices, like Apple TV 3 and also to control the
+Music app in macOS.
 
 ### Supported Features
 
@@ -154,6 +155,9 @@ metadata and playback. Only used by legacy devices, like the Apple TV 3.
   support for this exists in the protocol
 * No support for different tap actions in conjunction with button (e.g. double tap or
   hold) as it's not supported by the protocol
+* It is possible to discover and control a Music app running on macOS, assuming macOS
+  version is at most 11.3. From 11.4, FairPlay authentication is required, which no one
+  has reverse engnieered yet (ar least publicly and not relying on Apple binaries).
 
 ## MRP
 

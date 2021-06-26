@@ -2,10 +2,15 @@
 
 import logging
 
-# TODO: pylint seems to mix up "parser" with some other deprecated
-# module (python 3.8 and later)?
-from .parser import DmapTag  # pylint: disable=deprecated-module
-from .tags import read_bool, read_bplist, read_bytes, read_ignore, read_str, read_uint
+from pyatv.dmap.parser import DmapTag
+from pyatv.dmap.tags import (
+    read_bool,
+    read_bplist,
+    read_bytes,
+    read_ignore,
+    read_str,
+    read_uint,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,12 +22,16 @@ def _read_unknown(data, start, length):
 
 # These are the tags that we know about so far
 _TAGS = {
+    "aels": DmapTag(read_uint, "com.apple.itunes.liked-state"),
     "aeFP": DmapTag(read_uint, "com.apple.itunes.req-fplay"),
+    "aeGs": DmapTag(read_bool, "com.apple.itunes.can-be-genius-seed"),
     "aeSV": DmapTag(read_uint, "com.apple.itunes.music-sharing-version"),
     "apro": DmapTag(read_uint, "daap.protocolversion"),
+    "asai": DmapTag(read_uint, "daap.songalbumid"),
     "asal": DmapTag(read_str, "daap.songalbum"),
     "asar": DmapTag(read_str, "daap.songartist"),
     "asgr": DmapTag(read_uint, "com.apple.itunes.gapless-resy"),
+    "astm": DmapTag(read_uint, "daap.songtime"),
     "ated": DmapTag(read_bool, "daap.supportsextradata"),
     "caar": DmapTag(read_uint, "dacp.albumrepeat"),
     "caas": DmapTag(read_uint, "dacp.albumshuffle"),
@@ -44,9 +53,8 @@ _TAGS = {
     "cavc": DmapTag(read_bool, "dacp.volumecontrollable"),
     "cave": DmapTag(read_bool, "dacp.dacpvisualizerenabled"),
     "cavs": DmapTag(read_uint, "dacp.visualizer"),
-    "ceQR": DmapTag(
-        "container", "com.apple.itunes.playqueue-contents-response"
-    ),  # NOQA
+    "ceGS": DmapTag(read_str, "com.apple.itunes.genius-selectable"),
+    "ceQR": DmapTag("container", "com.apple.itunes.playqueue-contents-response"),
     "ceSD": DmapTag(read_bplist, "playing metadata"),
     "cmcp": DmapTag("container", "dmcp.controlprompt"),
     "cmmk": DmapTag(read_uint, "dmcp.mediakind"),
@@ -99,6 +107,7 @@ _TAGS = {
     "ceMQ": DmapTag(read_bool, "unknown tag"),
     "ceNQ": DmapTag(read_uint, "unknown tag"),
     "ceNR": DmapTag(read_bytes, "unknown tag"),
+    "ceQu": DmapTag(read_bool, "unknown tag"),
     "cmbe": DmapTag(read_str, "unknown tag"),
     "cmcc": DmapTag(read_str, "unknown tag"),
     "cmce": DmapTag(read_str, "unknown tag"),
@@ -116,6 +125,6 @@ _TAGS = {
 def lookup_tag(name):
     """Look up a tag based on its key. Returns a DmapTag."""
     return next(
-        (value for tag, value in _TAGS.items() if tag == name),
+        (tag for tag_name, tag in _TAGS.items() if tag_name == name),
         DmapTag(_read_unknown, "unknown tag"),
     )

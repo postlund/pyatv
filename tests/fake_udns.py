@@ -129,6 +129,28 @@ def raop_service(
     return ("_raop._tcp.local", service)
 
 
+def hscp_service(
+    name: str,
+    identifier: str,
+    hsgid: str,
+    addresses: List[str] = ["127.0.0.1"],
+    port: int = 0,
+    model: Optional[str] = None,
+) -> Tuple[str, FakeDnsService]:
+    service = FakeDnsService(
+        name="HSCP Name",
+        addresses=addresses,
+        port=port,
+        properties={
+            "Machine Name": name.encode("utf-8"),
+            "Machine ID": identifier.encode("utf-8"),
+            "hG": hsgid.encode("utf-8"),
+        },
+        model=model,
+    )
+    return ("_hscp._tcp.local", service)
+
+
 def _lookup_service(
     question: dns.DnsQuestion,
     services: Dict[str, FakeDnsService],
