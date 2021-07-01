@@ -4,7 +4,7 @@ deepdiff==5.5.0
 flake8==3.9.2
 isort==5.9.1
 mutagen==1.45.1
-pylint==2.8.3
+pylint==2.9.1
 pytest==6.2.4
 pytest-asyncio==0.15.1
 pytest-cov==2.12.1
