@@ -1,5 +1,5 @@
 """Audio sources that can provide raw PCM frames that pyatv can stream."""
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 import asyncio
 from contextlib import suppress
 from functools import partial
@@ -37,23 +37,28 @@ class AudioSource(ABC):
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def sample_rate(self) -> int:
         """Return sample rate."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def channels(self) -> int:
         """Return number of audio channels."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def sample_size(self) -> int:
         """Return number of bytes per sample."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def duration(self) -> int:
         """Return duration in seconds."""
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def supports_seek(self) -> bool:
         """Return if source supports seeking."""
 
