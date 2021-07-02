@@ -2,7 +2,9 @@
 
 import logging
 
-from .parser import DmapTag
+# TODO: pylint seems to mix up "parser" with some other deprecated
+# module (python 3.8 and later)?
+from .parser import DmapTag  # pylint: disable=deprecated-module
 from .tags import read_bool, read_bplist, read_bytes, read_ignore, read_str, read_uint
 
 _LOGGER = logging.getLogger(__name__)
@@ -114,5 +116,6 @@ _TAGS = {
 def lookup_tag(name):
     """Look up a tag based on its key. Returns a DmapTag."""
     return next(
-        (_TAGS[t] for t in _TAGS if t == name), DmapTag(_read_unknown, "unknown tag")
+        (value for tag, value in _TAGS.items() if tag == name),
+        DmapTag(_read_unknown, "unknown tag"),
     )
