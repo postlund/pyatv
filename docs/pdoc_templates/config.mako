@@ -10,16 +10,16 @@
 
     # Show collapsed source code block next to each item.
     # Disabling this can improve rendering speed of large modules.
-    show_source_code = True
+    show_source_code = False
 
     # If set, format links to objects in online source code repository
     # according to this template. Supported keywords for interpolation
     # are: commit, path, start_line, end_line.
-    #git_link_template = 'https://github.com/USER/PROJECT/blob/{commit}/{path}#L{start_line}-L{end_line}'
+    git_link_template = 'https://github.com/postlund/pyatv/blob/master/{path}#L{start_line}-L{end_line}'
     #git_link_template = 'https://gitlab.com/USER/PROJECT/blob/{commit}/{path}#L{start_line}-L{end_line}'
     #git_link_template = 'https://bitbucket.org/USER/PROJECT/src/{commit}/{path}#lines-{start_line}:{end_line}'
     #git_link_template = 'https://CGIT_HOSTNAME/PROJECT/tree/{path}?id={commit}#n{start-line}'
-    git_link_template = None
+    #git_link_template = None
 
     # A prefix to use for every HTML hyperlink in the generated documentation.
     # No prefix results in all links being relative.
