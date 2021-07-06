@@ -183,11 +183,12 @@ class BaseScanner(ABC):  # pylint: disable=too-few-public-methods
         response: mdns.Response,
     ) -> None:
         _LOGGER.debug(
-            "Auto-discovered %s at %s:%d (%s)",
+            "Auto-discovered %s at %s:%d via %s (%s)",
             name,
             address,
             service.port,
             service.protocol,
+            service.properties,
         )
 
         if address not in self._found_devices:
