@@ -14,7 +14,6 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     MediaType,
-    PowerState,
     Protocol,
     RepeatState,
     ShuffleState,
@@ -22,18 +21,15 @@ from pyatv.const import (
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.interface import (
-    App,
     ArtworkInfo,
     FeatureInfo,
     Features,
     Metadata,
     Playing,
-    Power,
     PushUpdater,
     RemoteControl,
     StateProducer,
 )
-from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.relayer import Relayer
@@ -341,28 +337,6 @@ class DmapRemoteControl(RemoteControl):
         """Press key volume down."""
         await self.apple_tv.ctrl_int_cmd("volumedown")
 
-    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
-        """Press key home."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def home_hold(self) -> None:
-        """Hold key home."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def suspend(self) -> None:
-        """Suspend the device."""
-        # Not supported by DMAP
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def wakeup(self) -> None:
-        """Wake up the device."""
-        raise exceptions.NotSupportedError()
-
     async def skip_forward(self) -> None:
         """Skip forward a time interval.
 
@@ -447,28 +421,6 @@ class DmapMetadata(Metadata):
     async def playing(self):
         """Return current device state."""
         return await self.apple_tv.playstatus()
-
-    @property
-    def app(self) -> Optional[App]:
-        """Return information about running app."""
-        raise exceptions.NotSupportedError()
-
-
-class DmapPower(Power):
-    """Implementation of API for retrieving a power state from an Apple TV."""
-
-    @property
-    def power_state(self) -> PowerState:
-        """Return device power state."""
-        return PowerState.Unknown
-
-    async def turn_on(self, await_new_state: bool = False) -> None:
-        """Turn device on."""
-        raise exceptions.NotSupportedError()
-
-    async def turn_off(self, await_new_state: bool = False) -> None:
-        """Turn device off."""
-        raise exceptions.NotSupportedError()
 
 
 class DmapPushUpdater(PushUpdater):
@@ -606,7 +558,6 @@ def setup(
 
     interfaces[RemoteControl].register(DmapRemoteControl(apple_tv), Protocol.DMAP)
     interfaces[Metadata].register(metadata, Protocol.DMAP)
-    interfaces[Power].register(DmapPower(), Protocol.DMAP)
     interfaces[PushUpdater].register(push_updater, Protocol.DMAP)
     interfaces[Features].register(DmapFeatures(config, apple_tv), Protocol.DMAP)
 

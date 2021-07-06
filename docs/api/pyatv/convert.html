@@ -32,66 +32,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Various types of extraction and conversion functions.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Various types of extraction and conversion functions.&#34;&#34;&#34;
-
-from pyatv.const import DeviceState, MediaType, Protocol, RepeatState, ShuffleState
-
-
-def device_state_str(state: DeviceState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API device state to string.&#34;&#34;&#34;
-    return {
-        None: &#34;Idle&#34;,
-        DeviceState.Idle: &#34;Idle&#34;,
-        DeviceState.Loading: &#34;Loading&#34;,
-        DeviceState.Stopped: &#34;Stopped&#34;,
-        DeviceState.Paused: &#34;Paused&#34;,
-        DeviceState.Playing: &#34;Playing&#34;,
-        DeviceState.Seeking: &#34;Seeking&#34;,
-    }.get(state, &#34;Unsupported&#34;)
-
-
-def media_type_str(mediatype: MediaType) -&gt; str:
-    &#34;&#34;&#34;Convert internal API media type to string.&#34;&#34;&#34;
-    return {
-        MediaType.Unknown: &#34;Unknown&#34;,
-        MediaType.Video: &#34;Video&#34;,
-        MediaType.Music: &#34;Music&#34;,
-        MediaType.TV: &#34;TV&#34;,
-    }.get(mediatype, &#34;Unsupported&#34;)
-
-
-def repeat_str(state: RepeatState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API repeat state to string.&#34;&#34;&#34;
-    return {
-        RepeatState.Off: &#34;Off&#34;,
-        RepeatState.Track: &#34;Track&#34;,
-        RepeatState.All: &#34;All&#34;,
-    }.get(state, &#34;Unsupported&#34;)
-
-
-def shuffle_str(state: ShuffleState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API shuffle state to string.&#34;&#34;&#34;
-    return {
-        ShuffleState.Off: &#34;Off&#34;,
-        ShuffleState.Albums: &#34;Albums&#34;,
-        ShuffleState.Songs: &#34;Songs&#34;,
-    }.get(state, &#34;Unsupported&#34;)
-
-
-def protocol_str(protocol: Protocol) -&gt; str:
-    &#34;&#34;&#34;Convert internal API protocol to string.&#34;&#34;&#34;
-    return {
-        Protocol.MRP: &#34;MRP&#34;,
-        Protocol.DMAP: &#34;DMAP&#34;,
-        Protocol.AirPlay: &#34;AirPlay&#34;,
-        Protocol.Companion: &#34;Companion&#34;,
-        Protocol.RAOP: &#34;RAOP&#34;,
-    }.get(protocol, &#34;Unknown&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L0-L54" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -100,102 +41,50 @@ def protocol_str(protocol: Protocol) -&gt; str:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pyatv.convert.device_state_str"><code class="name flex">
+<dt id="pyatv.convert.device_state_str">
+<code class="name flex">
 <span>def <span class="ident">device_state_str</span></span>(<span>state: <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a>) -> str</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Convert internal API device state to string.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def device_state_str(state: DeviceState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API device state to string.&#34;&#34;&#34;
-    return {
-        None: &#34;Idle&#34;,
-        DeviceState.Idle: &#34;Idle&#34;,
-        DeviceState.Loading: &#34;Loading&#34;,
-        DeviceState.Stopped: &#34;Stopped&#34;,
-        DeviceState.Paused: &#34;Paused&#34;,
-        DeviceState.Playing: &#34;Playing&#34;,
-        DeviceState.Seeking: &#34;Seeking&#34;,
-    }.get(state, &#34;Unsupported&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L6-L16" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.convert.media_type_str"><code class="name flex">
+<dt id="pyatv.convert.media_type_str">
+<code class="name flex">
 <span>def <span class="ident">media_type_str</span></span>(<span>mediatype: <a title="pyatv.const.MediaType" href="const#pyatv.const.MediaType">MediaType</a>) -> str</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Convert internal API media type to string.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def media_type_str(mediatype: MediaType) -&gt; str:
-    &#34;&#34;&#34;Convert internal API media type to string.&#34;&#34;&#34;
-    return {
-        MediaType.Unknown: &#34;Unknown&#34;,
-        MediaType.Video: &#34;Video&#34;,
-        MediaType.Music: &#34;Music&#34;,
-        MediaType.TV: &#34;TV&#34;,
-    }.get(mediatype, &#34;Unsupported&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L19-L26" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.convert.protocol_str"><code class="name flex">
+<dt id="pyatv.convert.protocol_str">
+<code class="name flex">
 <span>def <span class="ident">protocol_str</span></span>(<span>protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> str</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Convert internal API protocol to string.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def protocol_str(protocol: Protocol) -&gt; str:
-    &#34;&#34;&#34;Convert internal API protocol to string.&#34;&#34;&#34;
-    return {
-        Protocol.MRP: &#34;MRP&#34;,
-        Protocol.DMAP: &#34;DMAP&#34;,
-        Protocol.AirPlay: &#34;AirPlay&#34;,
-        Protocol.Companion: &#34;Companion&#34;,
-        Protocol.RAOP: &#34;RAOP&#34;,
-    }.get(protocol, &#34;Unknown&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L47-L55" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.convert.repeat_str"><code class="name flex">
+<dt id="pyatv.convert.repeat_str">
+<code class="name flex">
 <span>def <span class="ident">repeat_str</span></span>(<span>state: <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>) -> str</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Convert internal API repeat state to string.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def repeat_str(state: RepeatState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API repeat state to string.&#34;&#34;&#34;
-    return {
-        RepeatState.Off: &#34;Off&#34;,
-        RepeatState.Track: &#34;Track&#34;,
-        RepeatState.All: &#34;All&#34;,
-    }.get(state, &#34;Unsupported&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L29-L35" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.convert.shuffle_str"><code class="name flex">
+<dt id="pyatv.convert.shuffle_str">
+<code class="name flex">
 <span>def <span class="ident">shuffle_str</span></span>(<span>state: <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>) -> str</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Convert internal API shuffle state to string.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def shuffle_str(state: ShuffleState) -&gt; str:
-    &#34;&#34;&#34;Convert internal API shuffle state to string.&#34;&#34;&#34;
-    return {
-        ShuffleState.Off: &#34;Off&#34;,
-        ShuffleState.Albums: &#34;Albums&#34;,
-        ShuffleState.Songs: &#34;Songs&#34;,
-    }.get(state, &#34;Unsupported&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/convert.py#L38-L44" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>

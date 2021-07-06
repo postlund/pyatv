@@ -29,80 +29,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Various helper methods.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Various helper methods.&#34;&#34;&#34;
-
-import asyncio
-from typing import Callable, Mapping, Optional
-
-import pyatv
-
-HOMESHARING_SERVICE: str = &#34;_appletv-v2._tcp.local&#34;
-DEVICE_SERVICE: str = &#34;_touch-able._tcp.local&#34;
-MEDIAREMOTE_SERVICE: str = &#34;_mediaremotetv._tcp.local&#34;
-AIRPLAY_SERVICE: str = &#34;_airplay._tcp.local&#34;
-RAOP_SERVICE: str = &#34;_raop._tcp.local&#34;
-
-
-async def auto_connect(
-    handler: Callable[[pyatv.interface.AppleTV], None],
-    timeout: int = 5,
-    not_found: Callable[[], None] = None,
-    loop: Optional[asyncio.AbstractEventLoop] = None,
-) -&gt; None:
-    &#34;&#34;&#34;Connect to first discovered device.
-
-    This is a convenience method that auto discovers devices, picks the first
-    device found, connects to it and passes it to a user provided handler. An
-    optional error handler can be provided that is called when no device was found.
-    Very inflexible in many cases, but can be handys sometimes when trying things.
-
-    Note: both handler and not_found must be coroutines
-    &#34;&#34;&#34;
-    # Scan and do connect in the event loop
-    async def _handle(loop):
-        atvs = await pyatv.scan(loop, timeout=timeout)
-
-        # Take the first device found
-        if atvs:
-            atv = await pyatv.connect(atvs[0], loop)
-
-            try:
-                await handler(atv)
-            finally:
-                atv.close()
-        else:
-            if not_found is not None:
-                await not_found()
-
-    loop = loop or asyncio.get_event_loop()
-    await _handle(loop)
-
-
-def get_unique_id(
-    service_type: str, service_name: str, properties: Mapping[str, str]
-) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return unique identifier from a Zeroconf service.
-
-    `service_type` is the Zeroconf service type (e.g. *_mediaremotetv._tcp.local*),
-    `service_name` name of the service (e.g. *Office* or *Living Room*) and
-    `properties` all key-value properties belonging to the service.
-
-    The unique identifier is returned if available, otherwise `None` is returned.
-    &#34;&#34;&#34;
-    if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
-        return service_name.split(&#34;_&#34;)[0]
-    if service_type == MEDIAREMOTE_SERVICE:
-        return properties.get(&#34;UniqueIdentifier&#34;)
-    if service_type == AIRPLAY_SERVICE:
-        return properties.get(&#34;deviceid&#34;)
-    if service_type == RAOP_SERVICE:
-        return service_name.split(&#34;@&#34;, maxsplit=1)[0]
-    return None</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L0-L68" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -111,9 +38,11 @@ def get_unique_id(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pyatv.helpers.auto_connect"><code class="name flex">
+<dt id="pyatv.helpers.auto_connect">
+<code class="name flex">
 <span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], NoneType], timeout: int = 5, not_found: Callable[[], NoneType] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Connect to first discovered device.</p>
 <p>This is a convenience method that auto discovers devices, picks the first
@@ -121,79 +50,20 @@ device found, connects to it and passes it to a user provided handler. An
 optional error handler can be provided that is called when no device was found.
 Very inflexible in many cases, but can be handys sometimes when trying things.</p>
 <p>Note: both handler and not_found must be coroutines</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def auto_connect(
-    handler: Callable[[pyatv.interface.AppleTV], None],
-    timeout: int = 5,
-    not_found: Callable[[], None] = None,
-    loop: Optional[asyncio.AbstractEventLoop] = None,
-) -&gt; None:
-    &#34;&#34;&#34;Connect to first discovered device.
-
-    This is a convenience method that auto discovers devices, picks the first
-    device found, connects to it and passes it to a user provided handler. An
-    optional error handler can be provided that is called when no device was found.
-    Very inflexible in many cases, but can be handys sometimes when trying things.
-
-    Note: both handler and not_found must be coroutines
-    &#34;&#34;&#34;
-    # Scan and do connect in the event loop
-    async def _handle(loop):
-        atvs = await pyatv.scan(loop, timeout=timeout)
-
-        # Take the first device found
-        if atvs:
-            atv = await pyatv.connect(atvs[0], loop)
-
-            try:
-                await handler(atv)
-            finally:
-                atv.close()
-        else:
-            if not_found is not None:
-                await not_found()
-
-    loop = loop or asyncio.get_event_loop()
-    await _handle(loop)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L15-L47" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.helpers.get_unique_id"><code class="name flex">
+<dt id="pyatv.helpers.get_unique_id">
+<code class="name flex">
 <span>def <span class="ident">get_unique_id</span></span>(<span>service_type: str, service_name: str, properties: Mapping[str, str]) -> Optional[str]</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return unique identifier from a Zeroconf service.</p>
 <p><code>service_type</code> is the Zeroconf service type (e.g. <em>_mediaremotetv._tcp.local</em>),
 <code>service_name</code> name of the service (e.g. <em>Office</em> or <em>Living Room</em>) and
 <code>properties</code> all key-value properties belonging to the service.</p>
 <p>The unique identifier is returned if available, otherwise <code>None</code> is returned.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_unique_id(
-    service_type: str, service_name: str, properties: Mapping[str, str]
-) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return unique identifier from a Zeroconf service.
-
-    `service_type` is the Zeroconf service type (e.g. *_mediaremotetv._tcp.local*),
-    `service_name` name of the service (e.g. *Office* or *Living Room*) and
-    `properties` all key-value properties belonging to the service.
-
-    The unique identifier is returned if available, otherwise `None` is returned.
-    &#34;&#34;&#34;
-    if service_type in [DEVICE_SERVICE, HOMESHARING_SERVICE]:
-        return service_name.split(&#34;_&#34;)[0]
-    if service_type == MEDIAREMOTE_SERVICE:
-        return properties.get(&#34;UniqueIdentifier&#34;)
-    if service_type == AIRPLAY_SERVICE:
-        return properties.get(&#34;deviceid&#34;)
-    if service_type == RAOP_SERVICE:
-        return service_name.split(&#34;@&#34;, maxsplit=1)[0]
-    return None</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L50-L69" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>
