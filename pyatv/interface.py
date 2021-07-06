@@ -120,7 +120,7 @@ def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnTyp
                 f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
             )
         _ALL_FEATURES[index] = (name, doc)
-
+        setattr(func, "_feature_name", name)
         return func
 
     return _feat_decorator

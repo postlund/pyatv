@@ -87,103 +87,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Local exceptions used by library.&#34;&#34;&#34;
-
-
-class NoServiceError(Exception):
-    &#34;&#34;&#34;Thrown when connecting to a device with no usable service.&#34;&#34;&#34;
-
-
-class UnsupportedProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.
-
-    DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!
-    &#34;&#34;&#34;
-
-
-class ConnectionFailedError(Exception):
-    &#34;&#34;&#34;Thrown when connection fails, e.g. refused or timed out.&#34;&#34;&#34;
-
-
-class PairingError(Exception):
-    &#34;&#34;&#34;Thrown when pairing fails.&#34;&#34;&#34;
-
-
-class AuthenticationError(Exception):
-    &#34;&#34;&#34;Thrown when authentication fails.&#34;&#34;&#34;
-
-
-class NotSupportedError(NotImplementedError):
-    &#34;&#34;&#34;Thrown when trying to perform an action that is not supported.&#34;&#34;&#34;
-
-
-class InvalidDmapDataError(Exception):
-    &#34;&#34;&#34;Thrown when invalid DMAP data is parsed.&#34;&#34;&#34;
-
-
-class UnknownMediaKindError(Exception):
-    &#34;&#34;&#34;Thrown when an unknown media kind is found.&#34;&#34;&#34;
-
-
-class UnknownPlayStateError(Exception):
-    &#34;&#34;&#34;Thrown when an unknown play state is found.&#34;&#34;&#34;
-
-
-class NoAsyncListenerError(Exception):
-    &#34;&#34;&#34;Thrown when starting AsyncUpdater with no listener.&#34;&#34;&#34;
-
-
-class NoCredentialsError(Exception):
-    &#34;&#34;&#34;Thrown if credentials are missing.&#34;&#34;&#34;
-
-
-class InvalidCredentialsError(Exception):
-    &#34;&#34;&#34;Thrown if credentials are invalid.&#34;&#34;&#34;
-
-
-class DeviceIdMissingError(Exception):
-    &#34;&#34;&#34;Thrown when device id is missing.&#34;&#34;&#34;
-
-
-class BackOffError(Exception):
-    &#34;&#34;&#34;Thrown when device mandates a backoff period.&#34;&#34;&#34;
-
-
-class PlaybackError(Exception):
-    &#34;&#34;&#34;Thrown when media playback failed.&#34;&#34;&#34;
-
-
-class CommandError(Exception):
-    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;
-
-
-class NonLocalSubnetError(Exception):
-    &#34;&#34;&#34;Thrown when address it not in any local subnet.
-
-    DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!
-    &#34;&#34;&#34;
-
-
-class InvalidStateError(Exception):
-    &#34;&#34;&#34;Thrown when trying to perform an action not possible in the current state.&#34;&#34;&#34;
-
-
-class ProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when a generic protocol error occurs.
-
-    Generic protocol errors includes for instance missing fields, incorrect or
-    unexpected types, etc. Any error that can happen when communicating with a device
-    that is not covered by another exception is covered by this exception.
-    &#34;&#34;&#34;
-
-
-class InvalidConfigError(Exception):
-    &#34;&#34;&#34;Thrown when something is wrong or missing in the config.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L0-L91" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -200,13 +104,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when authentication fails.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AuthenticationError(Exception):
-    &#34;&#34;&#34;Thrown when authentication fails.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L23-L24" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -219,13 +117,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device mandates a backoff period.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class BackOffError(Exception):
-    &#34;&#34;&#34;Thrown when device mandates a backoff period.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L59-L60" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -238,13 +130,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when a command (e.g. play or pause) failed.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class CommandError(Exception):
-    &#34;&#34;&#34;Thrown when a command (e.g. play or pause) failed.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L67-L68" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -257,13 +143,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connection fails, e.g. refused or timed out.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ConnectionFailedError(Exception):
-    &#34;&#34;&#34;Thrown when connection fails, e.g. refused or timed out.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L15-L16" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -276,13 +156,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device id is missing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DeviceIdMissingError(Exception):
-    &#34;&#34;&#34;Thrown when device id is missing.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L55-L56" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -295,13 +169,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when something is wrong or missing in the config.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class InvalidConfigError(Exception):
-    &#34;&#34;&#34;Thrown when something is wrong or missing in the config.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L91-L92" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -314,13 +182,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are invalid.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class InvalidCredentialsError(Exception):
-    &#34;&#34;&#34;Thrown if credentials are invalid.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L51-L52" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -333,13 +195,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when invalid DMAP data is parsed.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class InvalidDmapDataError(Exception):
-    &#34;&#34;&#34;Thrown when invalid DMAP data is parsed.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L31-L32" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -352,13 +208,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when trying to perform an action not possible in the current state.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class InvalidStateError(Exception):
-    &#34;&#34;&#34;Thrown when trying to perform an action not possible in the current state.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L78-L79" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -371,13 +221,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when starting AsyncUpdater with no listener.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class NoAsyncListenerError(Exception):
-    &#34;&#34;&#34;Thrown when starting AsyncUpdater with no listener.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L43-L44" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -390,13 +234,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are missing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class NoCredentialsError(Exception):
-    &#34;&#34;&#34;Thrown if credentials are missing.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L47-L48" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -409,13 +247,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connecting to a device with no usable service.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class NoServiceError(Exception):
-    &#34;&#34;&#34;Thrown when connecting to a device with no usable service.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L4-L5" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -429,16 +261,7 @@ class InvalidConfigError(Exception):
 <dd>
 <section class="desc"><p>Thrown when address it not in any local subnet.</p>
 <p>DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class NonLocalSubnetError(Exception):
-    &#34;&#34;&#34;Thrown when address it not in any local subnet.
-
-    DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!
-    &#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L71-L75" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -451,13 +274,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when trying to perform an action that is not supported.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class NotSupportedError(NotImplementedError):
-    &#34;&#34;&#34;Thrown when trying to perform an action that is not supported.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L27-L28" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.NotImplementedError</li>
@@ -472,13 +289,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when pairing fails.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PairingError(Exception):
-    &#34;&#34;&#34;Thrown when pairing fails.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L19-L20" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -491,13 +302,7 @@ class InvalidConfigError(Exception):
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when media playback failed.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PlaybackError(Exception):
-    &#34;&#34;&#34;Thrown when media playback failed.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L63-L64" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -513,18 +318,7 @@ class InvalidConfigError(Exception):
 <p>Generic protocol errors includes for instance missing fields, incorrect or
 unexpected types, etc. Any error that can happen when communicating with a device
 that is not covered by another exception is covered by this exception.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when a generic protocol error occurs.
-
-    Generic protocol errors includes for instance missing fields, incorrect or
-    unexpected types, etc. Any error that can happen when communicating with a device
-    that is not covered by another exception is covered by this exception.
-    &#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L82-L88" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -537,13 +331,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown media kind is found.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UnknownMediaKindError(Exception):
-    &#34;&#34;&#34;Thrown when an unknown media kind is found.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L35-L36" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -556,13 +344,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown play state is found.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UnknownPlayStateError(Exception):
-    &#34;&#34;&#34;Thrown when an unknown play state is found.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L39-L40" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -576,16 +358,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 <dd>
 <section class="desc"><p>Thrown when an unsupported protocol was requested.</p>
 <p>DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UnsupportedProtocolError(Exception):
-    &#34;&#34;&#34;Thrown when an unsupported protocol was requested.
-
-    DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!
-    &#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L8-L12" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>

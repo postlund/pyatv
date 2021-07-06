@@ -234,986 +234,7 @@ link_group: api
 <p>Public interface exposed by library.</p>
 <p>This module contains all the interfaces that represents a generic Apple TV device and
 all its features.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Public interface exposed by library.
-
-This module contains all the interfaces that represents a generic Apple TV device and
-all its features.
-&#34;&#34;&#34;
-
-from abc import ABC, abstractmethod
-import asyncio
-import hashlib
-import inspect
-import io
-import re
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    MutableMapping,
-    NamedTuple,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-)
-import weakref
-
-from pyatv import const, convert, exceptions
-from pyatv.const import (
-    DeviceModel,
-    FeatureName,
-    FeatureState,
-    InputAction,
-    OperatingSystem,
-    Protocol,
-)
-from pyatv.support.http import ClientSessionManager
-
-__pdoc__ = {}
-__pdoc__[&#34;feature&#34;] = False
-
-_ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
-
-ReturnType = TypeVar(&#34;ReturnType&#34;, bound=Callable[..., Any])
-
-
-class ArtworkInfo(NamedTuple):
-    &#34;&#34;&#34;Artwork information.&#34;&#34;&#34;
-
-    bytes: bytes
-    mimetype: str
-    width: int
-    height: int
-
-
-class FeatureInfo(NamedTuple):
-    &#34;&#34;&#34;Feature state and options.&#34;&#34;&#34;
-
-    state: FeatureState
-    options: Optional[Dict[str, object]] = {}
-
-
-class _ListenerProxy:
-    &#34;&#34;&#34;Proxy to call functions in a listener.
-
-    A proxy instance maintains a weak reference to a listener object and allows calling
-    functions in the listener. If no listener is set or the weak reference has expired,
-    a null-function (doing nothing) is returned so that nothing happens. This makes it
-    safe to call functions without having to check if either a listener has been set at
-    all or if the listener implements the called function.
-    &#34;&#34;&#34;
-
-    def __init__(self, listener):
-        &#34;&#34;&#34;Initialize a new ListenerProxy instance.&#34;&#34;&#34;
-        self.listener = listener
-
-    def __getattr__(self, attr):
-        &#34;&#34;&#34;Dynamically find target method in listener.&#34;&#34;&#34;
-        if self.listener is not None:
-            listener = self.listener()
-            if hasattr(listener, attr):
-                return getattr(listener, attr)
-
-        return lambda *args, **kwargs: None
-
-
-class StateProducer:
-    &#34;&#34;&#34;Base class for objects announcing state changes to a listener.&#34;&#34;&#34;
-
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new StateProducer instance.&#34;&#34;&#34;
-        self.__listener: Optional[weakref.ReferenceType[Any]] = None
-
-    @property
-    def listener(self):
-        &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
-        return _ListenerProxy(self.__listener)
-
-    @listener.setter
-    def listener(self, target) -&gt; None:
-        &#34;&#34;&#34;Change current listener object.
-
-        Set to None to remove active listener.
-        &#34;&#34;&#34;
-        if target is not None:
-            self.__listener = weakref.ref(target)
-        else:
-            self.__listener = None
-
-
-def feature(index: int, name: str, doc: str) -&gt; Callable[[ReturnType], ReturnType]:
-    &#34;&#34;&#34;Decorate functions and properties as a feature.
-
-    Note: This is an internal function.
-    &#34;&#34;&#34;
-
-    def _feat_decorator(func: ReturnType) -&gt; ReturnType:
-        if index in _ALL_FEATURES:
-            raise Exception(
-                f&#34;Index {index} collides between {name} and {_ALL_FEATURES[index]}&#34;
-            )
-        _ALL_FEATURES[index] = (name, doc)
-
-        return func
-
-    return _feat_decorator
-
-
-def _get_first_sentence_in_pydoc(obj):
-    doc = obj.__doc__
-    index = doc.find(&#34;.&#34;)
-    if index == -1:
-        # Here we have no leading . so return everything
-        return doc
-
-    # Try to find the first complete sentence and respect
-    # abbreviations correctly
-    match = re.findall(r&#34;(.*\.[^A-Z]*)\.(?: [A-Z].*|)&#34;, doc)
-    if len(match) == 1:
-        return match[0]
-    return doc[0:index]
-
-
-def retrieve_commands(obj: object):
-    &#34;&#34;&#34;Retrieve all commands and help texts from an API object.&#34;&#34;&#34;
-    commands = {}  # type: Dict[str, str]
-    for func in obj.__dict__:
-        if not inspect.isfunction(obj.__dict__[func]) and not isinstance(
-            obj.__dict__[func], property
-        ):
-            continue
-        if func.startswith(&#34;_&#34;) or func == &#34;listener&#34;:
-            continue
-        commands[func] = _get_first_sentence_in_pydoc(obj.__dict__[func])
-    return commands
-
-
-class BaseService:
-    &#34;&#34;&#34;Base class for protocol services.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        protocol: Protocol,
-        port: int,
-        properties: Optional[Mapping[str, str]],
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new BaseService.&#34;&#34;&#34;
-        self.__identifier = identifier
-        self.protocol = protocol
-        self.port = port
-        self.credentials: Optional[str] = None
-        self.properties: MutableMapping[str, str] = dict(properties or {})
-
-    @property
-    def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return unique identifier associated with this service.&#34;&#34;&#34;
-        return self.__identifier
-
-    def merge(self, other) -&gt; None:
-        &#34;&#34;&#34;Merge with other service of same type.&#34;&#34;&#34;
-        self.credentials = other.credentials or self.credentials
-        self.properties.update(other.properties)
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
-        return &#34;Protocol: {0}, Port: {1}, Credentials: {2}&#34;.format(
-            convert.protocol_str(self.protocol), self.port, self.credentials
-        )
-
-
-class PairingHandler(ABC):
-    &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
-
-    def __init__(
-        self, session_manager: ClientSessionManager, service: Optional[BaseService]
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
-        assert service is not None
-        self.session_manager = session_manager
-        self._service = service
-
-    @property
-    def service(self) -&gt; BaseService:
-        &#34;&#34;&#34;Return service used for pairing.&#34;&#34;&#34;
-        return self._service
-
-    async def close(self) -&gt; None:
-        &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-        await self.session_manager.close()
-
-    @abstractmethod
-    def pin(self, pin) -&gt; None:
-        &#34;&#34;&#34;Pin code used for pairing.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    @abstractmethod
-    def device_provides_pin(self) -&gt; bool:
-        &#34;&#34;&#34;Return True if remote device presents PIN code, else False.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    @abstractmethod
-    def has_paired(self) -&gt; bool:
-        &#34;&#34;&#34;If a successful pairing has been performed.
-
-        The value will be reset when stop() is called.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @abstractmethod
-    async def begin(self) -&gt; None:
-        &#34;&#34;&#34;Start pairing process.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @abstractmethod
-    async def finish(self) -&gt; None:
-        &#34;&#34;&#34;Stop pairing process.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class RemoteControl:
-    &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
-
-    # pylint: disable=invalid-name
-    @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-    async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-    async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-    async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-    async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
-    async def play(self) -&gt; None:
-        &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-    async def play_pause(self) -&gt; None:
-        &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
-    async def pause(self) -&gt; None:
-        &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
-    async def stop(self) -&gt; None:
-        &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
-    async def next(self) -&gt; None:
-        &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
-    async def previous(self) -&gt; None:
-        &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-    async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-    async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
-    async def volume_up(self) -&gt; None:
-        &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
-    async def volume_down(self) -&gt; None:
-        &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-    async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(
-        15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
-    )
-    async def home_hold(self) -&gt; None:
-        &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
-    async def top_menu(self) -&gt; None:
-        &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
-    async def suspend(self) -&gt; None:
-        &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
-    async def wakeup(self) -&gt; None:
-        &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(
-        36,
-        &#34;SkipForward&#34;,
-        &#34;Skip forward a time interval.&#34;,
-    )
-    async def skip_forward(self) -&gt; None:
-        &#34;&#34;&#34;Skip forward a time interval.
-
-        Skip interval is typically 15-30s, but is decided by the app.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
-    async def skip_backward(self) -&gt; None:
-        &#34;&#34;&#34;Skip backwards a time interval.
-
-        Skip interval is typically 15-30s, but is decided by the app.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
-    async def set_position(self, pos: int) -&gt; None:
-        &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
-    async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
-        &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
-    async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
-        &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-# TODO: Should be made into a dataclass when support for 3.6 is dropped
-class Playing(ABC):
-    &#34;&#34;&#34;Base class for retrieving what is currently playing.&#34;&#34;&#34;
-
-    _PROPERTIES = [
-        &#34;media_type&#34;,
-        &#34;device_state&#34;,
-        &#34;title&#34;,
-        &#34;artist&#34;,
-        &#34;album&#34;,
-        &#34;genre&#34;,
-        &#34;total_time&#34;,
-        &#34;position&#34;,
-        &#34;shuffle&#34;,
-        &#34;repeat&#34;,
-        &#34;hash&#34;,
-        &#34;series_name&#34;,
-        &#34;season_number&#34;,
-        &#34;episode_number&#34;,
-    ]
-
-    def __init__(
-        self,
-        media_type: const.MediaType = const.MediaType.Unknown,
-        device_state: const.DeviceState = const.DeviceState.Idle,
-        title: Optional[str] = None,
-        artist: Optional[str] = None,
-        album: Optional[str] = None,
-        genre: Optional[str] = None,
-        total_time: Optional[int] = None,
-        position: Optional[int] = None,
-        shuffle: Optional[const.ShuffleState] = None,
-        repeat: Optional[const.RepeatState] = None,
-        hash: Optional[str] = None,  # pylint: disable=redefined-builtin
-        series_name: Optional[str] = None,
-        season_number: Optional[int] = None,
-        episode_number: Optional[int] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
-        self._media_type = media_type
-        self._device_state = device_state
-        self._title = title
-        self._artist = artist
-        self._album = album
-        self._genre = genre
-        self._total_time = total_time
-        self._position = position
-        self._shuffle = shuffle
-        self._repeat = repeat
-        self._hash = hash
-        self._series_name = series_name
-        self._season_number = season_number
-        self._episode_number = episode_number
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
-        output = []
-        output.append(f&#34;  Media type: {convert.media_type_str(self.media_type)}&#34;)
-        output.append(f&#34;Device state: {convert.device_state_str(self.device_state)}&#34;)
-
-        if self.title is not None:
-            output.append(f&#34;       Title: {self.title}&#34;)
-
-        if self.artist is not None:
-            output.append(f&#34;      Artist: {self.artist}&#34;)
-
-        if self.album is not None:
-            output.append(f&#34;       Album: {self.album}&#34;)
-
-        if self.genre is not None:
-            output.append(f&#34;       Genre: {self.genre}&#34;)
-
-        if self.series_name is not None:
-            output.append(f&#34; Series Name: {self.series_name}&#34;)
-
-        if self.season_number is not None:
-            output.append(f&#34;      Season: {self.season_number}&#34;)
-
-        if self.episode_number is not None:
-            output.append(f&#34;     Episode: {self.episode_number}&#34;)
-
-        position = self.position
-        total_time = self.total_time
-        if position is not None and total_time is not None and total_time != 0:
-            output.append(
-                &#34;    Position: {0}/{1}s ({2:.1%})&#34;.format(
-                    position, total_time, float(position) / float(total_time)
-                )
-            )
-        elif position is not None and position != 0:
-            output.append(f&#34;    Position: {position}s&#34;)
-        elif total_time is not None and position != 0:
-            output.append(f&#34;  Total time: {total_time}s&#34;)
-
-        if self.repeat is not None:
-            output.append(f&#34;      Repeat: {convert.repeat_str(self.repeat)}&#34;)
-
-        if self.shuffle is not None:
-            output.append(f&#34;     Shuffle: {convert.shuffle_str(self.shuffle)}&#34;)
-
-        return &#34;\n&#34;.join(output)
-
-    def __eq__(self, other):
-        &#34;&#34;&#34;Compare if two objects are equal.&#34;&#34;&#34;
-        if isinstance(other, Playing):
-            for prop in self._PROPERTIES:
-                if getattr(self, prop) != getattr(other, prop):
-                    return False
-            return True
-        return False
-
-    @property
-    def hash(self) -&gt; str:
-        &#34;&#34;&#34;Create a unique hash for what is currently playing.
-
-        The hash is based on title, artist, album and total time. It should
-        always be the same for the same content, but it is not guaranteed.
-        &#34;&#34;&#34;
-        if self._hash:
-            return self._hash
-
-        base = &#34;{0}{1}{2}{3}&#34;.format(
-            self.title, self.artist, self.album, self.total_time
-        )
-        return hashlib.sha256(base.encode(&#34;utf-8&#34;)).hexdigest()
-
-    @property
-    def media_type(self) -&gt; const.MediaType:
-        &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        return self._media_type
-
-    @property
-    def device_state(self) -&gt; const.DeviceState:
-        &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        return self._device_state
-
-    @property  # type: ignore
-    @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
-    def title(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        return self._title
-
-    @property  # type: ignore
-    @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
-    def artist(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        return self._artist
-
-    @property  # type: ignore
-    @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
-    def album(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        return self._album
-
-    @property  # type: ignore
-    @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
-    def genre(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        return self._genre
-
-    @property  # type: ignore
-    @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-    def total_time(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        return self._total_time
-
-    @property  # type: ignore
-    @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-    def position(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        return self._position
-
-    @property  # type: ignore
-    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
-    def shuffle(self) -&gt; Optional[const.ShuffleState]:
-        &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        return self._shuffle
-
-    @property  # type: ignore
-    @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-    def repeat(self) -&gt; Optional[const.RepeatState]:
-        &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        return self._repeat
-
-    @property  # type: ignore
-    @feature(40, &#34;SeriesName&#34;, &#34;Title of TV series.&#34;)
-    def series_name(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
-        return self._series_name
-
-    @property  # type: ignore
-    @feature(41, &#34;SeasonNumber&#34;, &#34;Season number of TV series.&#34;)
-    def season_number(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
-        return self._season_number
-
-    @property  # type: ignore
-    @feature(42, &#34;EpisodeNumber&#34;, &#34;Episode number of TV series.&#34;)
-    def episode_number(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
-        return self._episode_number
-
-
-class App:
-    &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
-
-    def __init__(self, name: Optional[str], identifier: str) -&gt; None:
-        &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
-        self._name = name
-        self._identifier = identifier
-
-    @property
-    def name(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
-        return self._name
-
-    @property
-    def identifier(self) -&gt; str:
-        &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
-        return self._identifier
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
-        return f&#34;App: {self.name} ({self.identifier})&#34;
-
-    def __eq__(self, other) -&gt; bool:
-        &#34;&#34;&#34;Return self==other.&#34;&#34;&#34;
-        if isinstance(other, App):
-            return self.name == other.name and self.identifier == other.identifier
-        return False
-
-
-class Apps:
-    &#34;&#34;&#34;Base class for app handling.&#34;&#34;&#34;
-
-    @feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
-    async def app_list(self) -&gt; List[App]:
-        &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
-    async def launch_app(self, bundle_id: str) -&gt; None:
-        &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class Metadata:
-    &#34;&#34;&#34;Base class for retrieving metadata from an Apple TV.&#34;&#34;&#34;
-
-    @property
-    def device_id(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(
-        self, width: Optional[int] = 512, height: Optional[int] = None
-    ) -&gt; Optional[ArtworkInfo]:
-        &#34;&#34;&#34;Return artwork for what is currently playing (or None).
-
-        The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
-        specific size. This is just a request, the device might impose restrictions and
-        return artwork of a different size. Set both parameters to None to request
-        default size. Set one of them and let the other one be None to keep original
-        aspect ratio.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    def artwork_id(self) -&gt; str:
-        &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    async def playing(self) -&gt; Playing:
-        &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property  # type: ignore
-    @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-    def app(self) -&gt; Optional[App]:
-        &#34;&#34;&#34;Return information about current app playing something.
-
-        Do note that this property returns which app is currently playing something and
-        not which app is currently active. If nothing is playing, the corresponding
-        feature will be unavailable.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class PushListener(ABC):
-    &#34;&#34;&#34;Listener interface for push updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
-        &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;
-
-    @abstractmethod
-    def playstatus_error(self, updater, exception: Exception) -&gt; None:
-        &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;
-
-
-class PushUpdater(ABC, StateProducer):
-    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.
-
-    Listener interface: `pyatv.interface.PushListener`
-    &#34;&#34;&#34;
-
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
-        super().__init__()
-        self.loop = loop
-        self._previous_state: Optional[Playing] = None
-
-    @property
-    @abstractmethod
-    def active(self) -&gt; bool:
-        &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
-    @abstractmethod
-    def start(self, initial_delay: int = 0) -&gt; None:
-        &#34;&#34;&#34;Begin to listen to updates.
-
-        If an error occurs, start must be called again.
-        &#34;&#34;&#34;
-        raise NotImplementedError
-
-    @abstractmethod
-    def stop(self) -&gt; None:
-        &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def post_update(self, playing: Playing) -&gt; None:
-        &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
-        if playing != self._previous_state:
-            self.loop.call_soon(self.listener.playstatus_update, self, playing)
-
-        self._previous_state = playing
-
-
-class Stream:  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
-
-    def close(self) -&gt; None:  # pylint: disable=no-self-use
-        &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
-    async def play_url(self, url: str, **kwargs) -&gt; None:
-        &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
-        &#34;&#34;&#34;Stream local file to device.
-
-        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class DeviceListener(ABC):
-    &#34;&#34;&#34;Listener interface for generic device updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def connection_lost(self, exception: Exception) -&gt; None:
-        &#34;&#34;&#34;Device was unexpectedly disconnected.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-    @abstractmethod
-    def connection_closed(self) -&gt; None:
-        &#34;&#34;&#34;Device connection was (intentionally) closed.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-
-class PowerListener(ABC):  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;Listener interface for power updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def powerstate_update(
-        self, old_state: const.PowerState, new_state: const.PowerState
-    ):
-        &#34;&#34;&#34;Device power state was updated.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-
-class Power(StateProducer):
-    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
-
-    Listener interface: `pyatv.interfaces.PowerListener`
-    &#34;&#34;&#34;
-
-    @property  # type: ignore
-    @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
-    def power_state(self) -&gt; const.PowerState:
-        &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self, await_new_state: bool = False) -&gt; None:
-        &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self, await_new_state: bool = False) -&gt; None:
-        &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class DeviceInfo:
-    &#34;&#34;&#34;General information about device.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        os: const.OperatingSystem,
-        version: Optional[str],
-        build_number: Optional[str],
-        model: const.DeviceModel,
-        mac: Optional[str],
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new DeviceInfo instance.&#34;&#34;&#34;
-        self._os = os
-        self._version = version
-        self._build_number = build_number
-        self._model = model
-        self._mac = mac
-
-    @property
-    def operating_system(self) -&gt; const.OperatingSystem:
-        &#34;&#34;&#34;Operating system running on device.&#34;&#34;&#34;
-        return self._os
-
-    @property
-    def version(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Operating system version.&#34;&#34;&#34;
-        return self._version
-
-    @property
-    def build_number(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Operating system build number, e.g. 17K795.&#34;&#34;&#34;
-        return self._build_number
-
-    @property
-    def model(self) -&gt; const.DeviceModel:
-        &#34;&#34;&#34;Hardware model name, e.g. 3, 4 or 4K.&#34;&#34;&#34;
-        return self._model
-
-    @property
-    def mac(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Device MAC address.&#34;&#34;&#34;
-        return self._mac
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert device info to readable string.&#34;&#34;&#34;
-        output = (
-            self.model.name if self.model != DeviceModel.Unknown else &#34;Unknown Model&#34;
-        )
-
-        output += (
-            &#34; &#34;
-            + {
-                OperatingSystem.Legacy: &#34;ATV SW&#34;,
-                OperatingSystem.TvOS: &#34;tvOS&#34;,
-                OperatingSystem.AirPortOS: &#34;AirPortOS&#34;,
-            }.get(self.operating_system, &#34;Unknown OS&#34;)
-        )
-
-        if self.version:
-            output += &#34; &#34; + self.version
-
-        if self.build_number:
-            output += &#34; build &#34; + self.build_number
-
-        return output
-
-
-class Features:
-    &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
-
-    def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
-        &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-    def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
-        &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features: Dict[FeatureName, FeatureInfo] = {}
-        for name in FeatureName:
-            info = self.get_feature(name)
-            if info.state != FeatureState.Unsupported or include_unsupported:
-                features[name] = info
-        return features
-
-    def in_state(
-        self,
-        states: Union[List[FeatureState], FeatureState],
-        *feature_names: FeatureName
-    ):
-        &#34;&#34;&#34;Return if features are in a specific state.
-
-        This method will return True if all given features are in the state specified
-        by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
-        in one of the listed states.
-        &#34;&#34;&#34;
-        for name in feature_names:
-            info = self.get_feature(name)
-            expected_states = states if isinstance(states, list) else [states]
-            if info.state not in expected_states:
-                return False
-        return True
-
-
-class Audio:
-    &#34;&#34;&#34;Base class for audio functionality.
-
-    Volume level is managed in percent where 0 is muted and 100 is max volume.
-    &#34;&#34;&#34;
-
-    @property  # type: ignore
-    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
-    def volume(self) -&gt; float:
-        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
-    async def set_volume(self, level: float) -&gt; None:
-        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-
-class AppleTV(ABC, StateProducer):
-    &#34;&#34;&#34;Base class representing an Apple TV.
-
-    Listener interface: `pyatv.interfaces.DeviceListener`
-    &#34;&#34;&#34;
-
-    @abstractmethod
-    async def connect(self) -&gt; None:
-        &#34;&#34;&#34;Initiate connection to device.
-
-        No need to call it yourself, it&#39;s done automatically.
-        &#34;&#34;&#34;
-
-    @abstractmethod
-    def close(self) -&gt; None:
-        &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def device_info(self) -&gt; DeviceInfo:
-        &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def service(self) -&gt; BaseService:
-        &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def remote_control(self) -&gt; RemoteControl:
-        &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def metadata(self) -&gt; Metadata:
-        &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def push_updater(self) -&gt; PushUpdater:
-        &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def stream(self) -&gt; Stream:
-        &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def power(self) -&gt; Power:
-        &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def features(self) -&gt; Features:
-        &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def audio(self) -&gt; Audio:
-        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L0-L974" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -1222,28 +243,14 @@ class AppleTV(ABC, StateProducer):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pyatv.interface.retrieve_commands"><code class="name flex">
+<dt id="pyatv.interface.retrieve_commands">
+<code class="name flex">
 <span>def <span class="ident">retrieve_commands</span></span>(<span>obj: object)</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Retrieve all commands and help texts from an API object.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def retrieve_commands(obj: object):
-    &#34;&#34;&#34;Retrieve all commands and help texts from an API object.&#34;&#34;&#34;
-    commands = {}  # type: Dict[str, str]
-    for func in obj.__dict__:
-        if not inspect.isfunction(obj.__dict__[func]) and not isinstance(
-            obj.__dict__[func], property
-        ):
-            continue
-        if func.startswith(&#34;_&#34;) or func == &#34;listener&#34;:
-            continue
-        commands[func] = _get_first_sentence_in_pydoc(obj.__dict__[func])
-    return commands</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L144-L155" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>
@@ -1257,65 +264,18 @@ class AppleTV(ABC, StateProducer):
 <dd>
 <section class="desc"><p>Information about an app.</p>
 <p>Initialize a new App instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class App:
-    &#34;&#34;&#34;Information about an app.&#34;&#34;&#34;
-
-    def __init__(self, name: Optional[str], identifier: str) -&gt; None:
-        &#34;&#34;&#34;Initialize a new App instance.&#34;&#34;&#34;
-        self._name = name
-        self._identifier = identifier
-
-    @property
-    def name(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
-        return self._name
-
-    @property
-    def identifier(self) -&gt; str:
-        &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
-        return self._identifier
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert app info to readable string.&#34;&#34;&#34;
-        return f&#34;App: {self.name} ({self.identifier})&#34;
-
-    def __eq__(self, other) -&gt; bool:
-        &#34;&#34;&#34;Return self==other.&#34;&#34;&#34;
-        if isinstance(other, App):
-            return self.name == other.name and self.identifier == other.identifier
-        return False</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L583-L609" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.interface.App.identifier"><code class="name">var <span class="ident">identifier</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Return a unique bundle id for the app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def identifier(self) -&gt; str:
-    &#34;&#34;&#34;Return a unique bundle id for the app.&#34;&#34;&#34;
-    return self._identifier</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L596-L599" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.App.name"><code class="name">var <span class="ident">name</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>User friendly name of app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def name(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;User friendly name of app.&#34;&#34;&#34;
-    return self._name</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L591-L594" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1326,77 +286,7 @@ def name(self) -&gt; Optional[str]:
 <section class="desc"><p>Base class representing an Apple TV.</p>
 <p>Listener interface: <code>pyatv.interfaces.DeviceListener</code></p>
 <p>Initialize a new StateProducer instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AppleTV(ABC, StateProducer):
-    &#34;&#34;&#34;Base class representing an Apple TV.
-
-    Listener interface: `pyatv.interfaces.DeviceListener`
-    &#34;&#34;&#34;
-
-    @abstractmethod
-    async def connect(self) -&gt; None:
-        &#34;&#34;&#34;Initiate connection to device.
-
-        No need to call it yourself, it&#39;s done automatically.
-        &#34;&#34;&#34;
-
-    @abstractmethod
-    def close(self) -&gt; None:
-        &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def device_info(self) -&gt; DeviceInfo:
-        &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def service(self) -&gt; BaseService:
-        &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def remote_control(self) -&gt; RemoteControl:
-        &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def metadata(self) -&gt; Metadata:
-        &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def push_updater(self) -&gt; PushUpdater:
-        &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def stream(self) -&gt; Stream:
-        &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def power(self) -&gt; Power:
-        &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def features(self) -&gt; Features:
-        &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def apps(self) -&gt; Apps:
-        &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;
-
-    @property
-    @abstractmethod
-    def audio(self) -&gt; Audio:
-        &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L910-L975" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -1411,167 +301,74 @@ def name(self) -&gt; Optional[str]:
 <dt id="pyatv.interface.AppleTV.apps"><code class="name">var <span class="ident">apps</span> -> <a title="pyatv.interface.Apps" href="#pyatv.interface.Apps">Apps</a></code></dt>
 <dd>
 <section class="desc"><p>Return apps interface.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def apps(self) -&gt; Apps:
-    &#34;&#34;&#34;Return apps interface.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L967-L970" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.audio"><code class="name">var <span class="ident">audio</span> -> <a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></dt>
 <dd>
 <section class="desc"><p>Return audio interface.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def audio(self) -&gt; Audio:
-    &#34;&#34;&#34;Return audio interface.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L972-L975" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for device information.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def device_info(self) -&gt; DeviceInfo:
-    &#34;&#34;&#34;Return API for device information.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L927-L930" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.features"><code class="name">var <span class="ident">features</span> -> <a title="pyatv.interface.Features" href="#pyatv.interface.Features">Features</a></code></dt>
 <dd>
 <section class="desc"><p>Return features interface.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def features(self) -&gt; Features:
-    &#34;&#34;&#34;Return features interface.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L962-L965" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.metadata"><code class="name">var <span class="ident">metadata</span> -> <a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for retrieving metadata from the Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def metadata(self) -&gt; Metadata:
-    &#34;&#34;&#34;Return API for retrieving metadata from the Apple TV.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L942-L945" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.power"><code class="name">var <span class="ident">power</span> -> <a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for power management.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def power(self) -&gt; Power:
-    &#34;&#34;&#34;Return API for power management.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L957-L960" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.push_updater"><code class="name">var <span class="ident">push_updater</span> -> <a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for handling push update from the Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def push_updater(self) -&gt; PushUpdater:
-    &#34;&#34;&#34;Return API for handling push update from the Apple TV.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L947-L950" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.remote_control"><code class="name">var <span class="ident">remote_control</span> -> <a title="pyatv.interface.RemoteControl" href="#pyatv.interface.RemoteControl">RemoteControl</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for controlling the Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def remote_control(self) -&gt; RemoteControl:
-    &#34;&#34;&#34;Return API for controlling the Apple TV.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L937-L940" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.service"><code class="name">var <span class="ident">service</span> -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></dt>
 <dd>
 <section class="desc"><p>Return service used to connect to the Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def service(self) -&gt; BaseService:
-    &#34;&#34;&#34;Return service used to connect to the Apple TV.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L932-L935" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.stream"><code class="name">var <span class="ident">stream</span> -> <a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for streaming media.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def stream(self) -&gt; Stream:
-    &#34;&#34;&#34;Return API for streaming media.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L952-L955" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.AppleTV.close"><code class="name flex">
+<dt id="pyatv.interface.AppleTV.close">
+<code class="name flex">
 <span>def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def close(self) -&gt; None:
-    &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L923-L925" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.AppleTV.connect"><code class="name flex">
+<dt id="pyatv.interface.AppleTV.connect">
+<code class="name flex">
 <span>async def <span class="ident">connect</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Initiate connection to device.</p>
 <p>No need to call it yourself, it's done automatically.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-async def connect(self) -&gt; None:
-    &#34;&#34;&#34;Initiate connection to device.
-
-    No need to call it yourself, it&#39;s done automatically.
-    &#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L916-L921" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -1588,23 +385,7 @@ async def connect(self) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for app handling.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Apps:
-    &#34;&#34;&#34;Base class for app handling.&#34;&#34;&#34;
-
-    @feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
-    async def app_list(self) -&gt; List[App]:
-        &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
-    async def launch_app(self, bundle_id: str) -&gt; None:
-        &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L612-L623" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.companion.CompanionApps</li>
@@ -1612,35 +393,31 @@ async def connect(self) -&gt; None:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Apps.app_list"><code class="name flex">
+<dt id="pyatv.interface.Apps.app_list">
+<code class="name flex">
 <span>async def <span class="ident">app_list</span></span>(<span>self) -> List[<a title="pyatv.interface.App" href="#pyatv.interface.App">App</a>]</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.AppList" href="const#pyatv.const.FeatureName.AppList">FeatureName.AppList</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
+</div>
 <section class="desc"><p>Fetch a list of apps that can be launched.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(38, &#34;AppList&#34;, &#34;List of launchable apps.&#34;)
-async def app_list(self) -&gt; List[App]:
-    &#34;&#34;&#34;Fetch a list of apps that can be launched.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L615-L618" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Apps.launch_app"><code class="name flex">
+<dt id="pyatv.interface.Apps.launch_app">
+<code class="name flex">
 <span>async def <span class="ident">launch_app</span></span>(<span>self, bundle_id: str) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.LaunchApp" href="const#pyatv.const.FeatureName.LaunchApp">FeatureName.LaunchApp</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
+</div>
 <section class="desc"><p>Launch an app based on bundle ID.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(39, &#34;LaunchApp&#34;, &#34;Launch an app.&#34;)
-async def launch_app(self, bundle_id: str) -&gt; None:
-    &#34;&#34;&#34;Launch an app based on bundle ID.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L620-L623" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1650,18 +427,7 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Artwork information.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ArtworkInfo(NamedTuple):
-    &#34;&#34;&#34;Artwork information.&#34;&#34;&#34;
-
-    bytes: bytes
-    mimetype: str
-    width: int
-    height: int</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L47-L53" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.tuple</li>
@@ -1692,27 +458,7 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <dd>
 <section class="desc"><p>Base class for audio functionality.</p>
 <p>Volume level is managed in percent where 0 is muted and 100 is max volume.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Audio:
-    &#34;&#34;&#34;Base class for audio functionality.
-
-    Volume level is managed in percent where 0 is muted and 100 is max volume.
-    &#34;&#34;&#34;
-
-    @property  # type: ignore
-    @feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
-    def volume(self) -&gt; float:
-        &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
-    async def set_volume(self, level: float) -&gt; None:
-        &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L892-L907" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.raop.RaopAudio</li>
@@ -1722,35 +468,28 @@ async def launch_app(self, bundle_id: str) -&gt; None:
 <dl>
 <dt id="pyatv.interface.Audio.volume"><code class="name">var <span class="ident">volume</span> -> float</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Volume" href="const#pyatv.const.FeatureName.Volume">FeatureName.Volume</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Return current volume level.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(45, &#34;Volume&#34;, &#34;Current volume level.&#34;)
-def volume(self) -&gt; float:
-    &#34;&#34;&#34;Return current volume level.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L898-L902" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Audio.set_volume"><code class="name flex">
+<dt id="pyatv.interface.Audio.set_volume">
+<code class="name flex">
 <span>async def <span class="ident">set_volume</span></span>(<span>self, level: float) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SetVolume" href="const#pyatv.const.FeatureName.SetVolume">FeatureName.SetVolume</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Change current volume level.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(46, &#34;SetVolume&#34;, &#34;Set volume level.&#34;)
-async def set_volume(self, level: float) -&gt; None:
-    &#34;&#34;&#34;Change current volume level.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L904-L907" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1761,43 +500,7 @@ async def set_volume(self, level: float) -&gt; None:
 <dd>
 <section class="desc"><p>Base class for protocol services.</p>
 <p>Initialize a new BaseService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class BaseService:
-    &#34;&#34;&#34;Base class for protocol services.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        protocol: Protocol,
-        port: int,
-        properties: Optional[Mapping[str, str]],
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new BaseService.&#34;&#34;&#34;
-        self.__identifier = identifier
-        self.protocol = protocol
-        self.port = port
-        self.credentials: Optional[str] = None
-        self.properties: MutableMapping[str, str] = dict(properties or {})
-
-    @property
-    def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return unique identifier associated with this service.&#34;&#34;&#34;
-        return self.__identifier
-
-    def merge(self, other) -&gt; None:
-        &#34;&#34;&#34;Merge with other service of same type.&#34;&#34;&#34;
-        self.credentials = other.credentials or self.credentials
-        self.properties.update(other.properties)
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
-        return &#34;Protocol: {0}, Port: {1}, Credentials: {2}&#34;.format(
-            convert.protocol_str(self.protocol), self.port, self.credentials
-        )</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L158-L189" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.AirPlayService" href="conf#pyatv.conf.AirPlayService">AirPlayService</a></li>
@@ -1811,33 +514,19 @@ async def set_volume(self, level: float) -&gt; None:
 <dt id="pyatv.interface.BaseService.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return unique identifier associated with this service.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def identifier(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return unique identifier associated with this service.&#34;&#34;&#34;
-    return self.__identifier</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L175-L178" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.BaseService.merge"><code class="name flex">
+<dt id="pyatv.interface.BaseService.merge">
+<code class="name flex">
 <span>def <span class="ident">merge</span></span>(<span>self, other) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Merge with other service of same type.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def merge(self, other) -&gt; None:
-    &#34;&#34;&#34;Merge with other service of same type.&#34;&#34;&#34;
-    self.credentials = other.credentials or self.credentials
-    self.properties.update(other.properties)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L180-L183" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1848,142 +537,33 @@ def identifier(self) -&gt; Optional[str]:
 <dd>
 <section class="desc"><p>General information about device.</p>
 <p>Initialize a new DeviceInfo instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DeviceInfo:
-    &#34;&#34;&#34;General information about device.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        os: const.OperatingSystem,
-        version: Optional[str],
-        build_number: Optional[str],
-        model: const.DeviceModel,
-        mac: Optional[str],
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new DeviceInfo instance.&#34;&#34;&#34;
-        self._os = os
-        self._version = version
-        self._build_number = build_number
-        self._model = model
-        self._mac = mac
-
-    @property
-    def operating_system(self) -&gt; const.OperatingSystem:
-        &#34;&#34;&#34;Operating system running on device.&#34;&#34;&#34;
-        return self._os
-
-    @property
-    def version(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Operating system version.&#34;&#34;&#34;
-        return self._version
-
-    @property
-    def build_number(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Operating system build number, e.g. 17K795.&#34;&#34;&#34;
-        return self._build_number
-
-    @property
-    def model(self) -&gt; const.DeviceModel:
-        &#34;&#34;&#34;Hardware model name, e.g. 3, 4 or 4K.&#34;&#34;&#34;
-        return self._model
-
-    @property
-    def mac(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Device MAC address.&#34;&#34;&#34;
-        return self._mac
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert device info to readable string.&#34;&#34;&#34;
-        output = (
-            self.model.name if self.model != DeviceModel.Unknown else &#34;Unknown Model&#34;
-        )
-
-        output += (
-            &#34; &#34;
-            + {
-                OperatingSystem.Legacy: &#34;ATV SW&#34;,
-                OperatingSystem.TvOS: &#34;tvOS&#34;,
-                OperatingSystem.AirPortOS: &#34;AirPortOS&#34;,
-            }.get(self.operating_system, &#34;Unknown OS&#34;)
-        )
-
-        if self.version:
-            output += &#34; &#34; + self.version
-
-        if self.build_number:
-            output += &#34; build &#34; + self.build_number
-
-        return output</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L790-L854" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.interface.DeviceInfo.build_number"><code class="name">var <span class="ident">build_number</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system build number, e.g. 17K795.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def build_number(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Operating system build number, e.g. 17K795.&#34;&#34;&#34;
-    return self._build_number</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L818-L821" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.mac"><code class="name">var <span class="ident">mac</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Device MAC address.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def mac(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Device MAC address.&#34;&#34;&#34;
-    return self._mac</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L828-L831" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.model"><code class="name">var <span class="ident">model</span> -> <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a></code></dt>
 <dd>
 <section class="desc"><p>Hardware model name, e.g. 3, 4 or 4K.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def model(self) -&gt; const.DeviceModel:
-    &#34;&#34;&#34;Hardware model name, e.g. 3, 4 or 4K.&#34;&#34;&#34;
-    return self._model</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L823-L826" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.operating_system"><code class="name">var <span class="ident">operating_system</span> -> <a title="pyatv.const.OperatingSystem" href="const#pyatv.const.OperatingSystem">OperatingSystem</a></code></dt>
 <dd>
 <section class="desc"><p>Operating system running on device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def operating_system(self) -&gt; const.OperatingSystem:
-    &#34;&#34;&#34;Operating system running on device.&#34;&#34;&#34;
-    return self._os</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L808-L811" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.version"><code class="name">var <span class="ident">version</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system version.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def version(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Operating system version.&#34;&#34;&#34;
-    return self._version</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L813-L816" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1992,23 +572,7 @@ def version(self) -&gt; Optional[str]:
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for generic device updates.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DeviceListener(ABC):
-    &#34;&#34;&#34;Listener interface for generic device updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def connection_lost(self, exception: Exception) -&gt; None:
-        &#34;&#34;&#34;Device was unexpectedly disconnected.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-    @abstractmethod
-    def connection_closed(self) -&gt; None:
-        &#34;&#34;&#34;Device connection was (intentionally) closed.&#34;&#34;&#34;
-        raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L742-L753" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -2020,35 +584,23 @@ def version(self) -&gt; Optional[str]:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.DeviceListener.connection_closed"><code class="name flex">
+<dt id="pyatv.interface.DeviceListener.connection_closed">
+<code class="name flex">
 <span>def <span class="ident">connection_closed</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Device connection was (intentionally) closed.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def connection_closed(self) -&gt; None:
-    &#34;&#34;&#34;Device connection was (intentionally) closed.&#34;&#34;&#34;
-    raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L750-L753" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.DeviceListener.connection_lost"><code class="name flex">
+<dt id="pyatv.interface.DeviceListener.connection_lost">
+<code class="name flex">
 <span>def <span class="ident">connection_lost</span></span>(<span>self, exception: Exception) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Device was unexpectedly disconnected.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def connection_lost(self, exception: Exception) -&gt; None:
-    &#34;&#34;&#34;Device was unexpectedly disconnected.&#34;&#34;&#34;
-    raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L745-L748" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -2058,16 +610,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Feature state and options.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class FeatureInfo(NamedTuple):
-    &#34;&#34;&#34;Feature state and options.&#34;&#34;&#34;
-
-    state: FeatureState
-    options: Optional[Dict[str, object]] = {}</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L56-L60" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.tuple</li>
@@ -2089,44 +632,7 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for supported feature functionality.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Features:
-    &#34;&#34;&#34;Base class for supported feature functionality.&#34;&#34;&#34;
-
-    def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
-        &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
-        raise NotImplementedError()
-
-    def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
-        &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-        features: Dict[FeatureName, FeatureInfo] = {}
-        for name in FeatureName:
-            info = self.get_feature(name)
-            if info.state != FeatureState.Unsupported or include_unsupported:
-                features[name] = info
-        return features
-
-    def in_state(
-        self,
-        states: Union[List[FeatureState], FeatureState],
-        *feature_names: FeatureName
-    ):
-        &#34;&#34;&#34;Return if features are in a specific state.
-
-        This method will return True if all given features are in the state specified
-        by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
-        in one of the listed states.
-        &#34;&#34;&#34;
-        for name in feature_names:
-            info = self.get_feature(name)
-            expected_states = states if isinstance(states, list) else [states]
-            if info.state not in expected_states:
-                return False
-        return True</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L857-L889" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.airplay.AirPlayFeatures</li>
@@ -2138,69 +644,35 @@ def connection_lost(self, exception: Exception) -&gt; None:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Features.all_features"><code class="name flex">
+<dt id="pyatv.interface.Features.all_features">
+<code class="name flex">
 <span>def <span class="ident">all_features</span></span>(<span>self, include_unsupported=False) -> Dict[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>, <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a>]</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return state of all features.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def all_features(self, include_unsupported=False) -&gt; Dict[FeatureName, FeatureInfo]:
-    &#34;&#34;&#34;Return state of all features.&#34;&#34;&#34;
-    features: Dict[FeatureName, FeatureInfo] = {}
-    for name in FeatureName:
-        info = self.get_feature(name)
-        if info.state != FeatureState.Unsupported or include_unsupported:
-            features[name] = info
-    return features</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L864-L871" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Features.get_feature"><code class="name flex">
+<dt id="pyatv.interface.Features.get_feature">
+<code class="name flex">
 <span>def <span class="ident">get_feature</span></span>(<span>self, feature_name: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>) -> <a title="pyatv.interface.FeatureInfo" href="#pyatv.interface.FeatureInfo">FeatureInfo</a></span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return current state of a feature.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_feature(self, feature_name: FeatureName) -&gt; FeatureInfo:
-    &#34;&#34;&#34;Return current state of a feature.&#34;&#34;&#34;
-    raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L860-L862" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Features.in_state"><code class="name flex">
+<dt id="pyatv.interface.Features.in_state">
+<code class="name flex">
 <span>def <span class="ident">in_state</span></span>(<span>self, states: Union[List[<a title="pyatv.const.FeatureState" href="const#pyatv.const.FeatureState">FeatureState</a>], <a title="pyatv.const.FeatureState" href="const#pyatv.const.FeatureState">FeatureState</a>], *feature_names: <a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>)</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return if features are in a specific state.</p>
 <p>This method will return True if all given features are in the state specified
 by "states". If "states" is a list of states, it is enough for the feature to be
 in one of the listed states.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def in_state(
-    self,
-    states: Union[List[FeatureState], FeatureState],
-    *feature_names: FeatureName
-):
-    &#34;&#34;&#34;Return if features are in a specific state.
-
-    This method will return True if all given features are in the state specified
-    by &#34;states&#34;. If &#34;states&#34; is a list of states, it is enough for the feature to be
-    in one of the listed states.
-    &#34;&#34;&#34;
-    for name in feature_names:
-        info = self.get_feature(name)
-        expected_states = states if isinstance(states, list) else [states]
-        if info.state not in expected_states:
-            return False
-    return True</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L873-L889" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -2209,52 +681,7 @@ in one of the listed states.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for retrieving metadata from an Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Metadata:
-    &#34;&#34;&#34;Base class for retrieving metadata from an Apple TV.&#34;&#34;&#34;
-
-    @property
-    def device_id(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-    async def artwork(
-        self, width: Optional[int] = 512, height: Optional[int] = None
-    ) -&gt; Optional[ArtworkInfo]:
-        &#34;&#34;&#34;Return artwork for what is currently playing (or None).
-
-        The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
-        specific size. This is just a request, the device might impose restrictions and
-        return artwork of a different size. Set both parameters to None to request
-        default size. Set one of them and let the other one be None to keep original
-        aspect ratio.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    def artwork_id(self) -&gt; str:
-        &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    async def playing(self) -&gt; Playing:
-        &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property  # type: ignore
-    @feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-    def app(self) -&gt; Optional[App]:
-        &#34;&#34;&#34;Return information about current app playing something.
-
-        Do note that this property returns which app is currently playing something and
-        not which app is currently active. If nothing is playing, the corresponding
-        feature will be unavailable.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L626-L666" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapMetadata</li>
@@ -2266,97 +693,55 @@ in one of the listed states.</p></section>
 <dl>
 <dt id="pyatv.interface.Metadata.app"><code class="name">var <span class="ident">app</span> -> Optional[<a title="pyatv.interface.App" href="#pyatv.interface.App">App</a>]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.App" href="const#pyatv.const.FeatureName.App">FeatureName.App</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Return information about current app playing something.</p>
 <p>Do note that this property returns which app is currently playing something and
 not which app is currently active. If nothing is playing, the corresponding
 feature will be unavailable.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(35, &#34;App&#34;, &#34;App playing media.&#34;)
-def app(self) -&gt; Optional[App]:
-    &#34;&#34;&#34;Return information about current app playing something.
-
-    Do note that this property returns which app is currently playing something and
-    not which app is currently active. If nothing is playing, the corresponding
-    feature will be unavailable.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L657-L666" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Metadata.artwork_id"><code class="name">var <span class="ident">artwork_id</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current artwork.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def artwork_id(self) -&gt; str:
-    &#34;&#34;&#34;Return a unique identifier for current artwork.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L648-L651" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Metadata.device_id"><code class="name">var <span class="ident">device_id</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def device_id(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return a unique identifier for current device.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L629-L632" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Metadata.artwork"><code class="name flex">
+<dt id="pyatv.interface.Metadata.artwork">
+<code class="name flex">
 <span>async def <span class="ident">artwork</span></span>(<span>self, width: Optional[int] = 512, height: Optional[int] = None) -> Optional[<a title="pyatv.interface.ArtworkInfo" href="#pyatv.interface.ArtworkInfo">ArtworkInfo</a>]</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Artwork" href="const#pyatv.const.FeatureName.Artwork">FeatureName.Artwork</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Return artwork for what is currently playing (or None).</p>
 <p>The parameters "width" and "height" makes it possible to request artwork of a
 specific size. This is just a request, the device might impose restrictions and
 return artwork of a different size. Set both parameters to None to request
 default size. Set one of them and let the other one be None to keep original
 aspect ratio.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(30, &#34;Artwork&#34;, &#34;Playing media artwork.&#34;)
-async def artwork(
-    self, width: Optional[int] = 512, height: Optional[int] = None
-) -&gt; Optional[ArtworkInfo]:
-    &#34;&#34;&#34;Return artwork for what is currently playing (or None).
-
-    The parameters &#34;width&#34; and &#34;height&#34; makes it possible to request artwork of a
-    specific size. This is just a request, the device might impose restrictions and
-    return artwork of a different size. Set both parameters to None to request
-    default size. Set one of them and let the other one be None to keep original
-    aspect ratio.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L634-L646" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Metadata.playing"><code class="name flex">
+<dt id="pyatv.interface.Metadata.playing">
+<code class="name flex">
 <span>async def <span class="ident">playing</span></span>(<span>self) -> <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a></span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return what is currently playing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def playing(self) -&gt; Playing:
-    &#34;&#34;&#34;Return what is currently playing.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L653-L655" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -2367,60 +752,7 @@ async def artwork(
 <dd>
 <section class="desc"><p>Base class for API used to pair with an Apple TV.</p>
 <p>Initialize a new instance of PairingHandler.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PairingHandler(ABC):
-    &#34;&#34;&#34;Base class for API used to pair with an Apple TV.&#34;&#34;&#34;
-
-    def __init__(
-        self, session_manager: ClientSessionManager, service: Optional[BaseService]
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new instance of PairingHandler.&#34;&#34;&#34;
-        assert service is not None
-        self.session_manager = session_manager
-        self._service = service
-
-    @property
-    def service(self) -&gt; BaseService:
-        &#34;&#34;&#34;Return service used for pairing.&#34;&#34;&#34;
-        return self._service
-
-    async def close(self) -&gt; None:
-        &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-        await self.session_manager.close()
-
-    @abstractmethod
-    def pin(self, pin) -&gt; None:
-        &#34;&#34;&#34;Pin code used for pairing.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    @abstractmethod
-    def device_provides_pin(self) -&gt; bool:
-        &#34;&#34;&#34;Return True if remote device presents PIN code, else False.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @property
-    @abstractmethod
-    def has_paired(self) -&gt; bool:
-        &#34;&#34;&#34;If a successful pairing has been performed.
-
-        The value will be reset when stop() is called.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @abstractmethod
-    async def begin(self) -&gt; None:
-        &#34;&#34;&#34;Start pairing process.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @abstractmethod
-    async def finish(self) -&gt; None:
-        &#34;&#34;&#34;Stop pairing process.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L192-L240" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -2437,109 +769,57 @@ async def artwork(
 <dt id="pyatv.interface.PairingHandler.device_provides_pin"><code class="name">var <span class="ident">device_provides_pin</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>Return True if remote device presents PIN code, else False.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def device_provides_pin(self) -&gt; bool:
-    &#34;&#34;&#34;Return True if remote device presents PIN code, else False.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L217-L221" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.has_paired"><code class="name">var <span class="ident">has_paired</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>If a successful pairing has been performed.</p>
 <p>The value will be reset when stop() is called.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def has_paired(self) -&gt; bool:
-    &#34;&#34;&#34;If a successful pairing has been performed.
-
-    The value will be reset when stop() is called.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L223-L230" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.service"><code class="name">var <span class="ident">service</span> -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></dt>
 <dd>
 <section class="desc"><p>Return service used for pairing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def service(self) -&gt; BaseService:
-    &#34;&#34;&#34;Return service used for pairing.&#34;&#34;&#34;
-    return self._service</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L203-L206" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.PairingHandler.begin"><code class="name flex">
+<dt id="pyatv.interface.PairingHandler.begin">
+<code class="name flex">
 <span>async def <span class="ident">begin</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Start pairing process.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-async def begin(self) -&gt; None:
-    &#34;&#34;&#34;Start pairing process.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L232-L235" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PairingHandler.close"><code class="name flex">
+<dt id="pyatv.interface.PairingHandler.close">
+<code class="name flex">
 <span>async def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Call to free allocated resources after pairing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def close(self) -&gt; None:
-    &#34;&#34;&#34;Call to free allocated resources after pairing.&#34;&#34;&#34;
-    await self.session_manager.close()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L208-L210" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PairingHandler.finish"><code class="name flex">
+<dt id="pyatv.interface.PairingHandler.finish">
+<code class="name flex">
 <span>async def <span class="ident">finish</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Stop pairing process.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-async def finish(self) -&gt; None:
-    &#34;&#34;&#34;Stop pairing process.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L237-L240" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PairingHandler.pin"><code class="name flex">
+<dt id="pyatv.interface.PairingHandler.pin">
+<code class="name flex">
 <span>def <span class="ident">pin</span></span>(<span>self, pin) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Pin code used for pairing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def pin(self, pin) -&gt; None:
-    &#34;&#34;&#34;Pin code used for pairing.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L212-L215" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -2550,211 +830,7 @@ def pin(self, pin) -&gt; None:
 <dd>
 <section class="desc"><p>Base class for retrieving what is currently playing.</p>
 <p>Initialize a new Playing instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Playing(ABC):
-    &#34;&#34;&#34;Base class for retrieving what is currently playing.&#34;&#34;&#34;
-
-    _PROPERTIES = [
-        &#34;media_type&#34;,
-        &#34;device_state&#34;,
-        &#34;title&#34;,
-        &#34;artist&#34;,
-        &#34;album&#34;,
-        &#34;genre&#34;,
-        &#34;total_time&#34;,
-        &#34;position&#34;,
-        &#34;shuffle&#34;,
-        &#34;repeat&#34;,
-        &#34;hash&#34;,
-        &#34;series_name&#34;,
-        &#34;season_number&#34;,
-        &#34;episode_number&#34;,
-    ]
-
-    def __init__(
-        self,
-        media_type: const.MediaType = const.MediaType.Unknown,
-        device_state: const.DeviceState = const.DeviceState.Idle,
-        title: Optional[str] = None,
-        artist: Optional[str] = None,
-        album: Optional[str] = None,
-        genre: Optional[str] = None,
-        total_time: Optional[int] = None,
-        position: Optional[int] = None,
-        shuffle: Optional[const.ShuffleState] = None,
-        repeat: Optional[const.RepeatState] = None,
-        hash: Optional[str] = None,  # pylint: disable=redefined-builtin
-        series_name: Optional[str] = None,
-        season_number: Optional[int] = None,
-        episode_number: Optional[int] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new Playing instance.&#34;&#34;&#34;
-        self._media_type = media_type
-        self._device_state = device_state
-        self._title = title
-        self._artist = artist
-        self._album = album
-        self._genre = genre
-        self._total_time = total_time
-        self._position = position
-        self._shuffle = shuffle
-        self._repeat = repeat
-        self._hash = hash
-        self._series_name = series_name
-        self._season_number = season_number
-        self._episode_number = episode_number
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Convert this playing object to a readable string.&#34;&#34;&#34;
-        output = []
-        output.append(f&#34;  Media type: {convert.media_type_str(self.media_type)}&#34;)
-        output.append(f&#34;Device state: {convert.device_state_str(self.device_state)}&#34;)
-
-        if self.title is not None:
-            output.append(f&#34;       Title: {self.title}&#34;)
-
-        if self.artist is not None:
-            output.append(f&#34;      Artist: {self.artist}&#34;)
-
-        if self.album is not None:
-            output.append(f&#34;       Album: {self.album}&#34;)
-
-        if self.genre is not None:
-            output.append(f&#34;       Genre: {self.genre}&#34;)
-
-        if self.series_name is not None:
-            output.append(f&#34; Series Name: {self.series_name}&#34;)
-
-        if self.season_number is not None:
-            output.append(f&#34;      Season: {self.season_number}&#34;)
-
-        if self.episode_number is not None:
-            output.append(f&#34;     Episode: {self.episode_number}&#34;)
-
-        position = self.position
-        total_time = self.total_time
-        if position is not None and total_time is not None and total_time != 0:
-            output.append(
-                &#34;    Position: {0}/{1}s ({2:.1%})&#34;.format(
-                    position, total_time, float(position) / float(total_time)
-                )
-            )
-        elif position is not None and position != 0:
-            output.append(f&#34;    Position: {position}s&#34;)
-        elif total_time is not None and position != 0:
-            output.append(f&#34;  Total time: {total_time}s&#34;)
-
-        if self.repeat is not None:
-            output.append(f&#34;      Repeat: {convert.repeat_str(self.repeat)}&#34;)
-
-        if self.shuffle is not None:
-            output.append(f&#34;     Shuffle: {convert.shuffle_str(self.shuffle)}&#34;)
-
-        return &#34;\n&#34;.join(output)
-
-    def __eq__(self, other):
-        &#34;&#34;&#34;Compare if two objects are equal.&#34;&#34;&#34;
-        if isinstance(other, Playing):
-            for prop in self._PROPERTIES:
-                if getattr(self, prop) != getattr(other, prop):
-                    return False
-            return True
-        return False
-
-    @property
-    def hash(self) -&gt; str:
-        &#34;&#34;&#34;Create a unique hash for what is currently playing.
-
-        The hash is based on title, artist, album and total time. It should
-        always be the same for the same content, but it is not guaranteed.
-        &#34;&#34;&#34;
-        if self._hash:
-            return self._hash
-
-        base = &#34;{0}{1}{2}{3}&#34;.format(
-            self.title, self.artist, self.album, self.total_time
-        )
-        return hashlib.sha256(base.encode(&#34;utf-8&#34;)).hexdigest()
-
-    @property
-    def media_type(self) -&gt; const.MediaType:
-        &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-        return self._media_type
-
-    @property
-    def device_state(self) -&gt; const.DeviceState:
-        &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-        return self._device_state
-
-    @property  # type: ignore
-    @feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
-    def title(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-        return self._title
-
-    @property  # type: ignore
-    @feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
-    def artist(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-        return self._artist
-
-    @property  # type: ignore
-    @feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
-    def album(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-        return self._album
-
-    @property  # type: ignore
-    @feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
-    def genre(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-        return self._genre
-
-    @property  # type: ignore
-    @feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-    def total_time(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-        return self._total_time
-
-    @property  # type: ignore
-    @feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-    def position(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-        return self._position
-
-    @property  # type: ignore
-    @feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
-    def shuffle(self) -&gt; Optional[const.ShuffleState]:
-        &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-        return self._shuffle
-
-    @property  # type: ignore
-    @feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-    def repeat(self) -&gt; Optional[const.RepeatState]:
-        &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-        return self._repeat
-
-    @property  # type: ignore
-    @feature(40, &#34;SeriesName&#34;, &#34;Title of TV series.&#34;)
-    def series_name(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
-        return self._series_name
-
-    @property  # type: ignore
-    @feature(41, &#34;SeasonNumber&#34;, &#34;Season number of TV series.&#34;)
-    def season_number(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
-        return self._season_number
-
-    @property  # type: ignore
-    @feature(42, &#34;EpisodeNumber&#34;, &#34;Episode number of TV series.&#34;)
-    def episode_number(self) -&gt; Optional[int]:
-        &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
-        return self._episode_number</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L381-L580" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -2763,208 +839,119 @@ def pin(self, pin) -&gt; None:
 <dl>
 <dt id="pyatv.interface.Playing.album"><code class="name">var <span class="ident">album</span> -> Optional[str]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Album" href="const#pyatv.const.FeatureName.Album">FeatureName.Album</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Album of the currently playing song.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(24, &#34;Album&#34;, &#34;Album from playing artist.&#34;)
-def album(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Album of the currently playing song.&#34;&#34;&#34;
-    return self._album</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L528-L532" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Optional[str]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Artist" href="const#pyatv.const.FeatureName.Artist">FeatureName.Artist</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Artist of the currently playing song.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(23, &#34;Artist&#34;, &#34;Artist of playing song.&#34;)
-def artist(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Artist of the currently playing song.&#34;&#34;&#34;
-    return self._artist</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L522-L526" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.device_state"><code class="name">var <span class="ident">device_state</span> -> <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a></code></dt>
 <dd>
 <section class="desc"><p>Device state, e.g. playing or paused.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def device_state(self) -&gt; const.DeviceState:
-    &#34;&#34;&#34;Device state, e.g. playing or paused.&#34;&#34;&#34;
-    return self._device_state</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L511-L514" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.episode_number"><code class="name">var <span class="ident">episode_number</span> -> Optional[int]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.EpisodeNumber" href="const#pyatv.const.FeatureName.EpisodeNumber">FeatureName.EpisodeNumber</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Episode number of TV series.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(42, &#34;EpisodeNumber&#34;, &#34;Episode number of TV series.&#34;)
-def episode_number(self) -&gt; Optional[int]:
-    &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
-    return self._episode_number</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L576-L580" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Optional[str]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Genre" href="const#pyatv.const.FeatureName.Genre">FeatureName.Genre</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Genre of the currently playing song.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(25, &#34;Genre&#34;, &#34;Genre of playing song.&#34;)
-def genre(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Genre of the currently playing song.&#34;&#34;&#34;
-    return self._genre</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L534-L538" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.hash"><code class="name">var <span class="ident">hash</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Create a unique hash for what is currently playing.</p>
 <p>The hash is based on title, artist, album and total time. It should
 always be the same for the same content, but it is not guaranteed.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def hash(self) -&gt; str:
-    &#34;&#34;&#34;Create a unique hash for what is currently playing.
-
-    The hash is based on title, artist, album and total time. It should
-    always be the same for the same content, but it is not guaranteed.
-    &#34;&#34;&#34;
-    if self._hash:
-        return self._hash
-
-    base = &#34;{0}{1}{2}{3}&#34;.format(
-        self.title, self.artist, self.album, self.total_time
-    )
-    return hashlib.sha256(base.encode(&#34;utf-8&#34;)).hexdigest()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L491-L504" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.media_type"><code class="name">var <span class="ident">media_type</span> -> <a title="pyatv.const.MediaType" href="const#pyatv.const.MediaType">MediaType</a></code></dt>
 <dd>
 <section class="desc"><p>Type of media is currently playing, e.g. video, music.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def media_type(self) -&gt; const.MediaType:
-    &#34;&#34;&#34;Type of media is currently playing, e.g. video, music.&#34;&#34;&#34;
-    return self._media_type</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L506-L509" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.position"><code class="name">var <span class="ident">position</span> -> Optional[int]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Position" href="const#pyatv.const.FeatureName.Position">FeatureName.Position</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Position in the playing media (seconds).</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(27, &#34;Position&#34;, &#34;Current play time position.&#34;)
-def position(self) -&gt; Optional[int]:
-    &#34;&#34;&#34;Position in the playing media (seconds).&#34;&#34;&#34;
-    return self._position</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L546-L550" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.repeat"><code class="name">var <span class="ident">repeat</span> -> Optional[<a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Repeat" href="const#pyatv.const.FeatureName.Repeat">FeatureName.Repeat</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Repeat mode.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(29, &#34;Repeat&#34;, &#34;Repeat state.&#34;)
-def repeat(self) -&gt; Optional[const.RepeatState]:
-    &#34;&#34;&#34;Repeat mode.&#34;&#34;&#34;
-    return self._repeat</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L558-L562" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.season_number"><code class="name">var <span class="ident">season_number</span> -> Optional[int]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SeasonNumber" href="const#pyatv.const.FeatureName.SeasonNumber">FeatureName.SeasonNumber</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Season number of TV series.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(41, &#34;SeasonNumber&#34;, &#34;Season number of TV series.&#34;)
-def season_number(self) -&gt; Optional[int]:
-    &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
-    return self._season_number</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L570-L574" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.series_name"><code class="name">var <span class="ident">series_name</span> -> Optional[str]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SeriesName" href="const#pyatv.const.FeatureName.SeriesName">FeatureName.SeriesName</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Title of TV series.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(40, &#34;SeriesName&#34;, &#34;Title of TV series.&#34;)
-def series_name(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
-    return self._series_name</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L564-L568" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.shuffle"><code class="name">var <span class="ident">shuffle</span> -> Optional[<a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Shuffle" href="const#pyatv.const.FeatureName.Shuffle">FeatureName.Shuffle</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>If shuffle is enabled or not.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(28, &#34;Shuffle&#34;, &#34;Shuffle state.&#34;)
-def shuffle(self) -&gt; Optional[const.ShuffleState]:
-    &#34;&#34;&#34;If shuffle is enabled or not.&#34;&#34;&#34;
-    return self._shuffle</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L552-L556" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Optional[str]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Title" href="const#pyatv.const.FeatureName.Title">FeatureName.Title</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Title of the current media, e.g. movie or song name.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(22, &#34;Title&#34;, &#34;Title of playing media.&#34;)
-def title(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Title of the current media, e.g. movie or song name.&#34;&#34;&#34;
-    return self._title</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L516-L520" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.total_time"><code class="name">var <span class="ident">total_time</span> -> Optional[int]</code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.TotalTime" href="const#pyatv.const.FeatureName.TotalTime">FeatureName.TotalTime</a>,</span>
+<span>Supported by: </span>
+</div>
 <section class="desc"><p>Total play time in seconds.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(26, &#34;TotalTime&#34;, &#34;Total length of playing media (seconds).&#34;)
-def total_time(self) -&gt; Optional[int]:
-    &#34;&#34;&#34;Total play time in seconds.&#34;&#34;&#34;
-    return self._total_time</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L540-L544" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -2975,32 +962,7 @@ def total_time(self) -&gt; Optional[int]:
 <section class="desc"><p>Base class for retrieving power state from an Apple TV.</p>
 <p>Listener interface: <code>pyatv.interfaces.PowerListener</code></p>
 <p>Initialize a new StateProducer instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Power(StateProducer):
-    &#34;&#34;&#34;Base class for retrieving power state from an Apple TV.
-
-    Listener interface: `pyatv.interfaces.PowerListener`
-    &#34;&#34;&#34;
-
-    @property  # type: ignore
-    @feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
-    def power_state(self) -&gt; const.PowerState:
-        &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-    async def turn_on(self, await_new_state: bool = False) -&gt; None:
-        &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-    async def turn_off(self, await_new_state: bool = False) -&gt; None:
-        &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L767-L787" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.StateProducer" href="#pyatv.interface.StateProducer">StateProducer</a></li>
@@ -3008,7 +970,6 @@ def total_time(self) -&gt; Optional[int]:
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.companion.CompanionPower</li>
-<li>pyatv.dmap.DmapPower</li>
 <li>pyatv.mrp.MrpPower</li>
 <li>pyatv.support.facade.FacadePower</li>
 </ul>
@@ -3016,50 +977,41 @@ def total_time(self) -&gt; Optional[int]:
 <dl>
 <dt id="pyatv.interface.Power.power_state"><code class="name">var <span class="ident">power_state</span> -> <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a></code></dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.PowerState" href="const#pyatv.const.FeatureName.PowerState">FeatureName.PowerState</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Return device power state.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property  # type: ignore
-@feature(32, &#34;PowerState&#34;, &#34;Current device power state.&#34;)
-def power_state(self) -&gt; const.PowerState:
-    &#34;&#34;&#34;Return device power state.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L773-L777" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Power.turn_off"><code class="name flex">
+<dt id="pyatv.interface.Power.turn_off">
+<code class="name flex">
 <span>async def <span class="ident">turn_off</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.TurnOff" href="const#pyatv.const.FeatureName.TurnOff">FeatureName.TurnOff</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Turn device off.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(34, &#34;TurnOff&#34;, &#34;Turn off device.&#34;)
-async def turn_off(self, await_new_state: bool = False) -&gt; None:
-    &#34;&#34;&#34;Turn device off.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L784-L787" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Power.turn_on"><code class="name flex">
+<dt id="pyatv.interface.Power.turn_on">
+<code class="name flex">
 <span>async def <span class="ident">turn_on</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.TurnOn" href="const#pyatv.const.FeatureName.TurnOn">FeatureName.TurnOn</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Turn device on.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(33, &#34;TurnOn&#34;, &#34;Turn device on.&#34;)
-async def turn_on(self, await_new_state: bool = False) -&gt; None:
-    &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L779-L782" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -3076,20 +1028,7 @@ async def turn_on(self, await_new_state: bool = False) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for power updates.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PowerListener(ABC):  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;Listener interface for power updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def powerstate_update(
-        self, old_state: const.PowerState, new_state: const.PowerState
-    ):
-        &#34;&#34;&#34;Device power state was updated.&#34;&#34;&#34;
-        raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L756-L764" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -3101,22 +1040,14 @@ async def turn_on(self, await_new_state: bool = False) -&gt; None:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.PowerListener.powerstate_update"><code class="name flex">
+<dt id="pyatv.interface.PowerListener.powerstate_update">
+<code class="name flex">
 <span>def <span class="ident">powerstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a>, new_state: <a title="pyatv.const.PowerState" href="const#pyatv.const.PowerState">PowerState</a>)</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Device power state was updated.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def powerstate_update(
-    self, old_state: const.PowerState, new_state: const.PowerState
-):
-    &#34;&#34;&#34;Device power state was updated.&#34;&#34;&#34;
-    raise NotImplementedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L759-L764" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -3125,21 +1056,7 @@ def powerstate_update(
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for push updates.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PushListener(ABC):
-    &#34;&#34;&#34;Listener interface for push updates.&#34;&#34;&#34;
-
-    @abstractmethod
-    def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
-        &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;
-
-    @abstractmethod
-    def playstatus_error(self, updater, exception: Exception) -&gt; None:
-        &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L669-L678" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -3151,33 +1068,23 @@ def powerstate_update(
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.PushListener.playstatus_error"><code class="name flex">
+<dt id="pyatv.interface.PushListener.playstatus_error">
+<code class="name flex">
 <span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception: Exception) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Inform about an error when updating play status.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def playstatus_error(self, updater, exception: Exception) -&gt; None:
-    &#34;&#34;&#34;Inform about an error when updating play status.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L676-L678" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PushListener.playstatus_update"><code class="name flex">
+<dt id="pyatv.interface.PushListener.playstatus_update">
+<code class="name flex">
 <span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Inform about changes to what is currently playing.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
-    &#34;&#34;&#34;Inform about changes to what is currently playing.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L672-L674" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -3189,49 +1096,7 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 <section class="desc"><p>Base class for push/async updates from an Apple TV.</p>
 <p>Listener interface: <code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></p>
 <p>Initialize a new PushUpdater.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PushUpdater(ABC, StateProducer):
-    &#34;&#34;&#34;Base class for push/async updates from an Apple TV.
-
-    Listener interface: `pyatv.interface.PushListener`
-    &#34;&#34;&#34;
-
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        &#34;&#34;&#34;Initialize a new PushUpdater.&#34;&#34;&#34;
-        super().__init__()
-        self.loop = loop
-        self._previous_state: Optional[Playing] = None
-
-    @property
-    @abstractmethod
-    def active(self) -&gt; bool:
-        &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    @feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
-    @abstractmethod
-    def start(self, initial_delay: int = 0) -&gt; None:
-        &#34;&#34;&#34;Begin to listen to updates.
-
-        If an error occurs, start must be called again.
-        &#34;&#34;&#34;
-        raise NotImplementedError
-
-    @abstractmethod
-    def stop(self) -&gt; None:
-        &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-        raise NotImplementedError
-
-    def post_update(self, playing: Playing) -&gt; None:
-        &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
-        if playing != self._previous_state:
-            self.loop.call_soon(self.listener.playstatus_update, self, playing)
-
-        self._previous_state = playing</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L681-L718" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -3248,71 +1113,42 @@ def playstatus_update(self, updater, playstatus: Playing) -&gt; None:
 <dt id="pyatv.interface.PushUpdater.active"><code class="name">var <span class="ident">active</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>Return if push updater has been started.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-@abstractmethod
-def active(self) -&gt; bool:
-    &#34;&#34;&#34;Return if push updater has been started.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L693-L697" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.PushUpdater.post_update"><code class="name flex">
+<dt id="pyatv.interface.PushUpdater.post_update">
+<code class="name flex">
 <span>def <span class="ident">post_update</span></span>(<span>self, playing: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Post an update to listener.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def post_update(self, playing: Playing) -&gt; None:
-    &#34;&#34;&#34;Post an update to listener.&#34;&#34;&#34;
-    if playing != self._previous_state:
-        self.loop.call_soon(self.listener.playstatus_update, self, playing)
-
-    self._previous_state = playing</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L713-L718" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PushUpdater.start"><code class="name flex">
+<dt id="pyatv.interface.PushUpdater.start">
+<code class="name flex">
 <span>def <span class="ident">start</span></span>(<span>self, initial_delay: int = 0) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.PushUpdates" href="const#pyatv.const.FeatureName.PushUpdates">FeatureName.PushUpdates</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Begin to listen to updates.</p>
 <p>If an error occurs, start must be called again.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(43, &#34;PushUpdates&#34;, &#34;Push updates are supported.&#34;)
-@abstractmethod
-def start(self, initial_delay: int = 0) -&gt; None:
-    &#34;&#34;&#34;Begin to listen to updates.
-
-    If an error occurs, start must be called again.
-    &#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L699-L706" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.PushUpdater.stop"><code class="name flex">
+<dt id="pyatv.interface.PushUpdater.stop">
+<code class="name flex">
 <span>def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>No longer forward updates to listener.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@abstractmethod
-def stop(self) -&gt; None:
-    &#34;&#34;&#34;No longer forward updates to listener.&#34;&#34;&#34;
-    raise NotImplementedError</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L708-L711" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -3329,146 +1165,7 @@ def stop(self) -&gt; None:
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for API used to control an Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RemoteControl:
-    &#34;&#34;&#34;Base class for API used to control an Apple TV.&#34;&#34;&#34;
-
-    # pylint: disable=invalid-name
-    @feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-    async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-    async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-    async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-    async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
-    async def play(self) -&gt; None:
-        &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-    async def play_pause(self) -&gt; None:
-        &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
-    async def pause(self) -&gt; None:
-        &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
-    async def stop(self) -&gt; None:
-        &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
-    async def next(self) -&gt; None:
-        &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
-    async def previous(self) -&gt; None:
-        &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-    async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-    async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
-    async def volume_up(self) -&gt; None:
-        &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
-    async def volume_down(self) -&gt; None:
-        &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-    async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-        &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(
-        15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
-    )
-    async def home_hold(self) -&gt; None:
-        &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
-    async def top_menu(self) -&gt; None:
-        &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
-    async def suspend(self) -&gt; None:
-        &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
-    async def wakeup(self) -&gt; None:
-        &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(
-        36,
-        &#34;SkipForward&#34;,
-        &#34;Skip forward a time interval.&#34;,
-    )
-    async def skip_forward(self) -&gt; None:
-        &#34;&#34;&#34;Skip forward a time interval.
-
-        Skip interval is typically 15-30s, but is decided by the app.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
-    async def skip_backward(self) -&gt; None:
-        &#34;&#34;&#34;Skip backwards a time interval.
-
-        Skip interval is typically 15-30s, but is decided by the app.
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
-    async def set_position(self, pos: int) -&gt; None:
-        &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
-    async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
-        &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
-    async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
-        &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L243-L377" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.dmap.DmapRemoteControl</li>
@@ -3478,379 +1175,319 @@ def stop(self) -&gt; None:
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.RemoteControl.down"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.down">
+<code class="name flex">
 <span>async def <span class="ident">down</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Down" href="const#pyatv.const.FeatureName.Down">FeatureName.Down</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key down.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(1, &#34;Down&#34;, &#34;Down button on remote.&#34;)
-async def down(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key down.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L252-L255" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.home"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.home">
+<code class="name flex">
 <span>async def <span class="ident">home</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Home" href="const#pyatv.const.FeatureName.Home">FeatureName.Home</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key home.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(14, &#34;Home&#34;, &#34;Home/TV button.&#34;)
-async def home(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key home.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L317-L320" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.home_hold"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.home_hold">
+<code class="name flex">
 <span>async def <span class="ident">home_hold</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.HomeHold" href="const#pyatv.const.FeatureName.HomeHold">FeatureName.HomeHold</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Hold key home.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(
-    15, &#34;HomeHold&#34;, &#34;Long-press home button (deprecated: use RemoteControl.home).&#34;
-)
-async def home_hold(self) -&gt; None:
-    &#34;&#34;&#34;Hold key home.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L322-L327" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.left"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.left">
+<code class="name flex">
 <span>async def <span class="ident">left</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Left" href="const#pyatv.const.FeatureName.Left">FeatureName.Left</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key left.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(2, &#34;Left&#34;, &#34;Left button on remote.&#34;)
-async def left(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key left.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L257-L260" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.menu"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.menu">
+<code class="name flex">
 <span>async def <span class="ident">menu</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Menu" href="const#pyatv.const.FeatureName.Menu">FeatureName.Menu</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key menu.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(11, &#34;Menu&#34;, &#34;Go back to previous menu.&#34;)
-async def menu(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key menu.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L302-L305" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.next"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.next">
+<code class="name flex">
 <span>async def <span class="ident">next</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Next" href="const#pyatv.const.FeatureName.Next">FeatureName.Next</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key next.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(8, &#34;Next&#34;, &#34;Change to next item.&#34;)
-async def next(self) -&gt; None:
-    &#34;&#34;&#34;Press key next.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L287-L290" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.pause"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.pause">
+<code class="name flex">
 <span>async def <span class="ident">pause</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Pause" href="const#pyatv.const.FeatureName.Pause">FeatureName.Pause</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key play.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(6, &#34;Pause&#34;, &#34;Pause playing media.&#34;)
-async def pause(self) -&gt; None:
-    &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L277-L280" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.play"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.play">
+<code class="name flex">
 <span>async def <span class="ident">play</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Play" href="const#pyatv.const.FeatureName.Play">FeatureName.Play</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key play.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(4, &#34;Play&#34;, &#34;Start playing media.&#34;)
-async def play(self) -&gt; None:
-    &#34;&#34;&#34;Press key play.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L267-L270" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.play_pause"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.play_pause">
+<code class="name flex">
 <span>async def <span class="ident">play_pause</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.PlayPause" href="const#pyatv.const.FeatureName.PlayPause">FeatureName.PlayPause</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Toggle between play and pause.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(5, &#34;PlayPause&#34;, &#34;Toggle between play/pause.&#34;)
-async def play_pause(self) -&gt; None:
-    &#34;&#34;&#34;Toggle between play and pause.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L272-L275" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.previous"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.previous">
+<code class="name flex">
 <span>async def <span class="ident">previous</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Previous" href="const#pyatv.const.FeatureName.Previous">FeatureName.Previous</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key previous.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(9, &#34;Previous&#34;, &#34;Change to previous item.&#34;)
-async def previous(self) -&gt; None:
-    &#34;&#34;&#34;Press key previous.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L292-L295" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.right"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.right">
+<code class="name flex">
 <span>async def <span class="ident">right</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Right" href="const#pyatv.const.FeatureName.Right">FeatureName.Right</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key right.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(3, &#34;Right&#34;, &#34;Right button on remote.&#34;)
-async def right(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key right.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L262-L265" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.select"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.select">
+<code class="name flex">
 <span>async def <span class="ident">select</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Select" href="const#pyatv.const.FeatureName.Select">FeatureName.Select</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key select.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(10, &#34;Select&#34;, &#34;Select current option.&#34;)
-async def select(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key select.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L297-L300" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.set_position"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.set_position">
+<code class="name flex">
 <span>async def <span class="ident">set_position</span></span>(<span>self, pos: int) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SetPosition" href="const#pyatv.const.FeatureName.SetPosition">FeatureName.SetPosition</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Seek in the current playing media.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(19, &#34;SetPosition&#34;, &#34;Seek to position.&#34;)
-async def set_position(self, pos: int) -&gt; None:
-    &#34;&#34;&#34;Seek in the current playing media.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L364-L367" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.set_repeat"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.set_repeat">
+<code class="name flex">
 <span>async def <span class="ident">set_repeat</span></span>(<span>self, repeat_state: <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SetRepeat" href="const#pyatv.const.FeatureName.SetRepeat">FeatureName.SetRepeat</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Change repeat state.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(21, &#34;SetRepeat&#34;, &#34;Change repeat state.&#34;)
-async def set_repeat(self, repeat_state: const.RepeatState) -&gt; None:
-    &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L374-L377" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.set_shuffle"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.set_shuffle">
+<code class="name flex">
 <span>async def <span class="ident">set_shuffle</span></span>(<span>self, shuffle_state: <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SetShuffle" href="const#pyatv.const.FeatureName.SetShuffle">FeatureName.SetShuffle</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Change shuffle mode to on or off.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(20, &#34;SetShuffle&#34;, &#34;Change shuffle state.&#34;)
-async def set_shuffle(self, shuffle_state: const.ShuffleState) -&gt; None:
-    &#34;&#34;&#34;Change shuffle mode to on or off.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L369-L372" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.skip_backward"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.skip_backward">
+<code class="name flex">
 <span>async def <span class="ident">skip_backward</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SkipBackward" href="const#pyatv.const.FeatureName.SkipBackward">FeatureName.SkipBackward</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Skip backwards a time interval.</p>
 <p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(37, &#34;SkipBackward&#34;, &#34;Skip backwards a time interval.&#34;)
-async def skip_backward(self) -&gt; None:
-    &#34;&#34;&#34;Skip backwards a time interval.
-
-    Skip interval is typically 15-30s, but is decided by the app.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L356-L362" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.skip_forward"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.skip_forward">
+<code class="name flex">
 <span>async def <span class="ident">skip_forward</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.SkipForward" href="const#pyatv.const.FeatureName.SkipForward">FeatureName.SkipForward</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Skip forward a time interval.</p>
 <p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(
-    36,
-    &#34;SkipForward&#34;,
-    &#34;Skip forward a time interval.&#34;,
-)
-async def skip_forward(self) -&gt; None:
-    &#34;&#34;&#34;Skip forward a time interval.
-
-    Skip interval is typically 15-30s, but is decided by the app.
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L344-L354" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.stop"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.stop">
+<code class="name flex">
 <span>async def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Stop" href="const#pyatv.const.FeatureName.Stop">FeatureName.Stop</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key stop.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(7, &#34;Stop&#34;, &#34;Stop playing media.&#34;)
-async def stop(self) -&gt; None:
-    &#34;&#34;&#34;Press key stop.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L282-L285" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.suspend"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.suspend">
+<code class="name flex">
 <span>async def <span class="ident">suspend</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Suspend" href="const#pyatv.const.FeatureName.Suspend">FeatureName.Suspend</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Suspend the device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(17, &#34;Suspend&#34;, &#34;Suspend device (deprecated; use Power.turn_off).&#34;)
-async def suspend(self) -&gt; None:
-    &#34;&#34;&#34;Suspend the device.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L334-L337" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.top_menu"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.top_menu">
+<code class="name flex">
 <span>async def <span class="ident">top_menu</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.TopMenu" href="const#pyatv.const.FeatureName.TopMenu">FeatureName.TopMenu</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Go to main menu (long press menu).</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(16, &#34;TopMenu&#34;, &#34;Go to main menu.&#34;)
-async def top_menu(self) -&gt; None:
-    &#34;&#34;&#34;Go to main menu (long press menu).&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L329-L332" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.up"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.up">
+<code class="name flex">
 <span>async def <span class="ident">up</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.Up" href="const#pyatv.const.FeatureName.Up">FeatureName.Up</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Press key up.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(0, &#34;Up&#34;, &#34;Up button on remote.&#34;)
-async def up(self, action: InputAction = InputAction.SingleTap) -&gt; None:
-    &#34;&#34;&#34;Press key up.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L247-L250" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.volume_down"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.volume_down">
+<code class="name flex">
 <span>async def <span class="ident">volume_down</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.VolumeDown" href="const#pyatv.const.FeatureName.VolumeDown">FeatureName.VolumeDown</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Press key volume down.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(13, &#34;VolumeDown&#34;, &#34;Decrease volume.&#34;)
-async def volume_down(self) -&gt; None:
-    &#34;&#34;&#34;Press key volume down.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L312-L315" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.volume_up"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.volume_up">
+<code class="name flex">
 <span>async def <span class="ident">volume_up</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.VolumeUp" href="const#pyatv.const.FeatureName.VolumeUp">FeatureName.VolumeUp</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Press key volume up.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(12, &#34;VolumeUp&#34;, &#34;Increase volume.&#34;)
-async def volume_up(self) -&gt; None:
-    &#34;&#34;&#34;Press key volume up.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L307-L310" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.RemoteControl.wakeup"><code class="name flex">
+<dt id="pyatv.interface.RemoteControl.wakeup">
+<code class="name flex">
 <span>async def <span class="ident">wakeup</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.WakeUp" href="const#pyatv.const.FeatureName.WakeUp">FeatureName.WakeUp</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+</div>
 <section class="desc"><p>Wake up the device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(18, &#34;WakeUp&#34;, &#34;Wake up device (deprecated; use Power.turn_on).&#34;)
-async def wakeup(self) -&gt; None:
-    &#34;&#34;&#34;Wake up the device.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L339-L342" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -3860,33 +1497,7 @@ async def wakeup(self) -&gt; None:
 <dd>
 <section class="desc"><p>Base class for objects announcing state changes to a listener.</p>
 <p>Initialize a new StateProducer instance.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class StateProducer:
-    &#34;&#34;&#34;Base class for objects announcing state changes to a listener.&#34;&#34;&#34;
-
-    def __init__(self) -&gt; None:
-        &#34;&#34;&#34;Initialize a new StateProducer instance.&#34;&#34;&#34;
-        self.__listener: Optional[weakref.ReferenceType[Any]] = None
-
-    @property
-    def listener(self):
-        &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
-        return _ListenerProxy(self.__listener)
-
-    @listener.setter
-    def listener(self, target) -&gt; None:
-        &#34;&#34;&#34;Change current listener object.
-
-        Set to None to remove active listener.
-        &#34;&#34;&#34;
-        if target is not None:
-            self.__listener = weakref.ref(target)
-        else:
-            self.__listener = None</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L87-L108" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.AppleTV" href="#pyatv.interface.AppleTV">AppleTV</a></li>
@@ -3899,15 +1510,7 @@ async def wakeup(self) -&gt; None:
 <dt id="pyatv.interface.StateProducer.listener"><code class="name">var <span class="ident">listener</span></code></dt>
 <dd>
 <section class="desc"><p>Return current listener object.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def listener(self):
-    &#34;&#34;&#34;Return current listener object.&#34;&#34;&#34;
-    return _ListenerProxy(self.__listener)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L94-L97" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -3916,30 +1519,7 @@ def listener(self):
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for stream functionality.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Stream:  # pylint: disable=too-few-public-methods
-    &#34;&#34;&#34;Base class for stream functionality.&#34;&#34;&#34;
-
-    def close(self) -&gt; None:  # pylint: disable=no-self-use
-        &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
-    async def play_url(self, url: str, **kwargs) -&gt; None:
-        &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
-        raise exceptions.NotSupportedError()
-
-    @feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
-        &#34;&#34;&#34;Stream local file to device.
-
-        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
-        &#34;&#34;&#34;
-        raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L721-L739" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.airplay.AirPlayStream</li>
@@ -3948,53 +1528,41 @@ def listener(self):
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.interface.Stream.close"><code class="name flex">
+<dt id="pyatv.interface.Stream.close">
+<code class="name flex">
 <span>def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def close(self) -&gt; None:  # pylint: disable=no-self-use
-    &#34;&#34;&#34;Close connection and release allocated resources.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L724-L726" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Stream.play_url"><code class="name flex">
+<dt id="pyatv.interface.Stream.play_url">
+<code class="name flex">
 <span>async def <span class="ident">play_url</span></span>(<span>self, url: str, **kwargs) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.PlayUrl" href="const#pyatv.const.FeatureName.PlayUrl">FeatureName.PlayUrl</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.AirPlay" href="const#pyatv.const.Protocol.AirPlay">Protocol.AirPlay</a></span>
+</div>
 <section class="desc"><p>Play media from an URL on the device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(31, &#34;PlayUrl&#34;, &#34;Stream a URL on device.&#34;)
-async def play_url(self, url: str, **kwargs) -&gt; None:
-    &#34;&#34;&#34;Play media from an URL on the device.&#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L728-L731" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.interface.Stream.stream_file"><code class="name flex">
+<dt id="pyatv.interface.Stream.stream_file">
+<code class="name flex">
 <span>async def <span class="ident">stream_file</span></span>(<span>self, file: Union[str, _io.BufferedReader], **kwargs) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
+<div class="api_feature">
+<span>Feature: <a title="pyatv.const.FeatureName.StreamFile" href="const#pyatv.const.FeatureName.StreamFile">FeatureName.StreamFile</a>,</span>
+<span>Supported by: <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+</div>
 <section class="desc"><p>Stream local file to device.</p>
 <p>INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@feature(44, &#34;StreamFile&#34;, &#34;Stream local file to device.&#34;)
-async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -&gt; None:
-    &#34;&#34;&#34;Stream local file to device.
-
-    INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
-    &#34;&#34;&#34;
-    raise exceptions.NotSupportedError()</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L733-L739" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
