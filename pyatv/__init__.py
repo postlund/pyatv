@@ -9,15 +9,20 @@ from typing import Dict, List
 import aiohttp
 
 from pyatv import conf, exceptions, interface
+from pyatv.airplay import scan as airplay_scan
 from pyatv.airplay import setup as airplay_setup
 from pyatv.airplay.pairing import AirPlayPairingHandler
+from pyatv.companion import scan as companion_scan
 from pyatv.companion import setup as companion_setup
 from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.const import Protocol
+from pyatv.dmap import scan as dmap_scan
 from pyatv.dmap import setup as dmap_setup
 from pyatv.dmap.pairing import DmapPairingHandler
+from pyatv.mrp import scan as mrp_scan
 from pyatv.mrp import setup as mrp_setup
 from pyatv.mrp.pairing import MrpPairingHandler
+from pyatv.raop import scan as raop_scan
 from pyatv.raop import setup as raop_setup
 from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
@@ -32,6 +37,9 @@ _PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
     Protocol.Companion: companion_setup,
     Protocol.RAOP: raop_setup,
 }
+
+
+_PROTOCOLS_SCAN = [airplay_scan, companion_scan, dmap_scan, mrp_scan, raop_scan]
 
 
 async def scan(
@@ -60,6 +68,10 @@ async def scan(
         scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
     else:
         scanner = MulticastMdnsScanner(loop, identifier)
+
+    for proto_scan in _PROTOCOLS_SCAN:
+        for service_type, handler in proto_scan().items():
+            scanner.add_service(service_type, handler)
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]

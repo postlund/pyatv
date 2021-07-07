@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -20,6 +20,7 @@ from pyatv.const import (
 )
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
     FeatureInfo,
@@ -30,9 +31,11 @@ from pyatv.interface import (
     RemoteControl,
     StateProducer,
 )
+from pyatv.support import mdns
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -532,6 +535,42 @@ class DmapFeatures(Features):
                 if not expected_value or expected_value == value:
                     return FeatureState.Available
         return FeatureState.Unavailable
+
+
+def homesharing_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new DMAP (Home Sharing) service."""
+    name = mdns_service.properties.get("Name", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.properties.get("hG"),
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def dmap_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new DMAP service."""
+    name = mdns_service.properties.get("CtlN", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        None,
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {
+        "_appletv-v2._tcp.local": homesharing_service_handler,
+        "_touch-able._tcp.local": dmap_service_handler,
+    }
 
 
 def setup(

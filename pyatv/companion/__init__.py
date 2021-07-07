@@ -4,7 +4,18 @@ import asyncio
 from enum import Enum
 import logging
 from random import randint
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 
 from pyatv import conf, exceptions
 from pyatv.companion.connection import (
@@ -16,9 +27,11 @@ from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import App, Apps, FeatureInfo, Features, Power, StateProducer
+from pyatv.support import mdns
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -227,6 +240,22 @@ class CompanionPower(Power):
         if await_new_state:
             raise NotImplementedError("not supported by Companion yet")
         await self.api.sleep()
+
+
+def companion_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new Companion service."""
+    service = conf.CompanionService(
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return mdns_service.name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {"_companion-link._tcp.local": companion_service_handler}
 
 
 def setup(

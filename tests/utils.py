@@ -137,3 +137,12 @@ def data_path(filename: str) -> str:
     if not os.path.exists(abs_path):
         raise FileNotFoundError(f"test file does not exist: {filename}")
     return abs_path
+
+
+def assert_device(atv, name, address, identifier, protocol, port, creds=None):
+    assert atv.name == name
+    assert atv.address == address
+    assert atv.identifier == identifier
+    assert atv.get_service(protocol)
+    assert atv.get_service(protocol).port == port
+    assert atv.get_service(protocol).credentials == creds
