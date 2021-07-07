@@ -1,24 +1,16 @@
 """Unit tests for scan module."""
 
+from unittest.mock import patch
+
 import pytest
 
 from pyatv.support.mdns import Response, Service
-from pyatv.support.scan import (
-    AIRPLAY_SERVICE,
-    COMPANION_SERVICE,
-    DEVICE_SERVICE,
-    HOMESHARING_SERVICE,
-    MEDIAREMOTE_SERVICE,
-    RAOP_SERVICE,
-    get_unique_identifiers,
-)
+from pyatv.support.scan import BaseScanner, get_unique_identifiers
 
-HS = Service(HOMESHARING_SERVICE, "hsname", None, 0, {"hG": "hs_id"})
-DEVICE = Service(DEVICE_SERVICE, "devid", None, 0, {})
-MRP = Service(MEDIAREMOTE_SERVICE, "name", None, 0, {"UniqueIdentifier": "mrp_id"})
-AIRPLAY = Service(AIRPLAY_SERVICE, "name", None, 0, {"deviceid": "airplay_id"})
-COMPANION = Service(COMPANION_SERVICE, "name", None, 0, {})
-RAOP = Service(RAOP_SERVICE, "raop_id@name", None, 0, {})
+TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})
+TEST_SERVICE2 = Service("_service2._tcp.local", "service2", None, 0, {"c": "d"})
+
+# class TestScanner(BaseScanner):
 
 
 @pytest.fixture
@@ -30,58 +22,17 @@ def test_unique_identifier_empty(response):
     assert len(list(get_unique_identifiers(response))) == 0
 
 
-def test_unique_identifier_home_sharing(response):
-    response.services.append(HS)
+@patch("pyatv.support.scan.get_unique_id")
+def test_unique_identifiers(unique_id_mock, response):
+    response.services.append(TEST_SERVICE1)
+    response.services.append(TEST_SERVICE2)
 
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 1
-    assert "hsname" in identifiers
+    unique_id_mock.side_effect = ["id1", "id2"]
 
+    identifiers = get_unique_identifiers(response)
 
-def test_unique_identifier_device(response):
-    response.services.append(DEVICE)
-
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 1
-    assert "devid" in identifiers
-
-
-def test_unique_identifier_mrp(response):
-    response.services.append(MRP)
-
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 1
-    assert "mrp_id" in identifiers
-
-
-def test_unique_identifier_airplay(response):
-    response.services.append(AIRPLAY)
-
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 1
-    assert "airplay_id" in identifiers
-
-
-def test_unique_identifier_raop(response):
-    response.services.append(RAOP)
-
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 1
-    assert "raop_id" in identifiers
-
-
-def test_unique_identifier_multiple(response):
-    response.services.append(HS)
-    response.services.append(DEVICE)
-    response.services.append(MRP)
-    response.services.append(AIRPLAY)
-    response.services.append(COMPANION)
-    response.services.append(RAOP)
-
-    identifiers = list(get_unique_identifiers(response))
-    assert len(identifiers) == 5
-    assert "hsname" in identifiers
-    assert "devid" in identifiers
-    assert "mrp_id" in identifiers
-    assert "airplay_id" in identifiers
-    assert "raop_id" in identifiers
+    assert "id1" == next(identifiers)
+    unique_id_mock.assert_called_with("_service1._tcp.local", "service1", {"a": "b"})
+    assert "id2" == next(identifiers)
+    unique_id_mock.assert_called_with("_service2._tcp.local", "service2", {"c": "d"})
+    assert not next(identifiers, None)

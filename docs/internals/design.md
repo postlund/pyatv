@@ -81,17 +81,30 @@ graph TD
 **MulticastMdnsScanner:** Uses multicast and sends requests to all hosts on the network.
 
 Each request contains a list of all the services that pyatv are interested in, i.e. services
-used by the implemented protocols. These currently include (from {% include code file="support/scan.py" %}):
+used by the implemented protocols. Each protocol must implement a `scan` method returning
+which Zeroconf services it needs as well as handlers that are called when a service is found.
+An example from Companion looks like this:
 
 ```python
-HOMESHARING_SERVICE: str = "_appletv-v2._tcp.local"
-DEVICE_SERVICE: str = "_touch-able._tcp.local"
-MEDIAREMOTE_SERVICE: str = "_mediaremotetv._tcp.local"
-AIRPLAY_SERVICE: str = "_airplay._tcp.local"
-COMPANION_SERVICE: str = "_companion-link._tcp.local"
-RAOP_SERVICE: str = "_raop._tcp.local"
-AIRPORT_ADMIN_SERVICE: str = "_airport._tcp.local"
+def companion_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new Companion service."""
+    service = conf.CompanionService(
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return mdns_service.name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {"_companion-link._tcp.local": companion_service_handler}
 ```
+
+Whenever a service with type `_companion-link._tcp.local` is found, the function/handler
+`companion_service_handler` is called. Device name and a {% include api i="interface.BaseService" %}
+representing the service is returned and added to the final device configuration.
 
 Both unicast (which is a pyatv specific term) and multicast scanning uses a homegrown
 implementation of Zeroconf instead of relying on a third party. One exception however
