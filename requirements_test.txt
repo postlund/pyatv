@@ -2,7 +2,7 @@ black==21.6b0
 codecov==2.1.11
 deepdiff==5.5.0
 flake8==3.9.2
-isort==5.9.1
+isort==5.9.2
 mutagen==1.45.1
 pylint==2.9.3
 pytest==6.2.4
