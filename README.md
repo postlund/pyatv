@@ -39,7 +39,7 @@ Want to help out with `pyatv`? Press the button below to get a fully prepared de
 
 To save you some time, here are some shortcuts:
 
-* [Getting started](https://pyatv.dev/getting-started)
+* [Getting started](https://pyatv.dev/documentation/getting-started/)
 * [Documentation](https://pyatv.dev/documentation)
 * [Development](https://pyatv.dev/development)
 * [API Reference](https://pyatv.dev/api)
