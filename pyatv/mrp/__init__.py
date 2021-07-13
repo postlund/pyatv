@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.const import (
@@ -18,6 +18,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     ArtworkInfo,
@@ -37,11 +38,12 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 from pyatv.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protocol import MrpProtocol
-from pyatv.support import deprecated
+from pyatv.support import deprecated, mdns
 from pyatv.support.cache import Cache
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -682,6 +684,26 @@ class MrpFeatures(Features):
             return FeatureInfo(state=FeatureState.Unavailable)
 
         return FeatureInfo(state=FeatureState.Unsupported)
+
+
+def mrp_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new MRP service."""
+    name = mdns_service.properties.get("Name", "Unknown")
+    service = conf.MrpService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {
+        "_mediaremotetv._tcp.local": mrp_service_handler,
+    }
 
 
 def setup(  # pylint: disable=too-many-locals

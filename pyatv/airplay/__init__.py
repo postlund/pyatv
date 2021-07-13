@@ -3,15 +3,16 @@
 import asyncio
 import logging
 import os
-from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import AirPlayPairingVerifier
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
+from pyatv.helpers import get_unique_id
 from pyatv.interface import FeatureInfo, Features, FeatureState, StateProducer, Stream
-from pyatv.support import net
+from pyatv.support import mdns, net
 from pyatv.support.http import (
     ClientSessionManager,
     HttpConnection,
@@ -19,6 +20,7 @@ from pyatv.support.http import (
     http_connect,
 )
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,6 +111,23 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
                 connection.close()
             if server:
                 await server.close()
+
+
+def airplay_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new AirPlay service."""
+    service = conf.AirPlayService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return mdns_service.name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {"_airplay._tcp.local": airplay_service_handler}
 
 
 def setup(
