@@ -5,7 +5,7 @@ scanning, like scanning for a specific device or derive device model.
 Two "generic" protocols (MRP and AirPlay) have been arbitrarily chosen
 to have something to test with (could have been other protocols). They
 are just called "service1" and "service2" to emphasize that the specific
-protocols are irrelevant.
+protocols are irrelevant. Later, service3 was added as well...
 """
 
 from ipaddress import ip_address
@@ -27,6 +27,9 @@ SERVICE_2_ID = "AA:BB:CC:DD:EE:FF"
 SERVICE_2_NAME = "AirPlay ATV"
 SERVICE_2_IP = "10.0.0.2"
 
+SERVICE_3_ID = "raopid"
+SERVICE_3_NAME = "AirPlay ATV"
+
 DEFAULT_KNOCK_PORTS = {3689, 7000, 49152, 32498}
 
 pytestmark = pytest.mark.asyncio
@@ -44,6 +47,12 @@ def service1(model=None):
 
 def service2(address=SERVICE_1_IP):
     return fake_udns.airplay_service(SERVICE_2_NAME, SERVICE_2_ID, addresses=[address])
+
+
+def service3():
+    return fake_udns.raop_service(
+        SERVICE_3_NAME, SERVICE_3_ID, addresses=[SERVICE_1_IP], port=5000
+    )
 
 
 async def test_multicast_scan_no_device_found(multicast_scan: Scanner):
@@ -77,7 +86,7 @@ async def test_multicast_scan_device_info(udns_server, multicast_scan: Scanner):
     udns_server.add_service(service1())
     udns_server.add_service(service2())
 
-    atvs = await multicast_scan(protocol=Protocol.MRP)
+    atvs = await multicast_scan()
     assert len(atvs) == 1
 
     device_info = atvs[0].device_info
@@ -92,6 +101,22 @@ async def test_multicast_scan_device_model(udns_server, multicast_scan: Scanner)
 
     device_info = atvs[0].device_info
     assert device_info.model == DeviceModel.Gen4K
+
+
+async def test_multicast_filter_multiple_protocols(
+    udns_server, multicast_scan: Scanner
+):
+    udns_server.add_service(service1())
+    udns_server.add_service(service2())
+    udns_server.add_service(service3())
+
+    atvs = await multicast_scan(protocol={Protocol.MRP, Protocol.RAOP})
+    assert len(atvs) == 1
+
+    atv = atvs[0]
+    assert len(atv.services) == 2
+    assert atv.get_service(Protocol.MRP) is not None
+    assert atv.get_service(Protocol.RAOP) is not None
 
 
 async def test_unicast_scan_no_results(unicast_scan: Scanner):
@@ -142,3 +167,17 @@ async def test_unicast_scan_port_knock(unicast_scan: Scanner, stub_knock_server)
     await unicast_scan()
     assert stub_knock_server.ports == DEFAULT_KNOCK_PORTS
     assert stub_knock_server.knock_count == 1
+
+
+async def test_unicast_filter_multiple_protocols(udns_server, unicast_scan: Scanner):
+    udns_server.add_service(service1())
+    udns_server.add_service(service2())
+    udns_server.add_service(service3())
+
+    atvs = await unicast_scan(protocol={Protocol.MRP, Protocol.RAOP})
+    assert len(atvs) == 1
+
+    atv = atvs[0]
+    assert len(atv.services) == 2
+    assert atv.get_service(Protocol.MRP) is not None
+    assert atv.get_service(Protocol.RAOP) is not None

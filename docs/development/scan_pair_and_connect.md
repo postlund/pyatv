@@ -23,8 +23,8 @@ async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
 
 **identifier:** filter to scan for *one* particular device
 
-**protocol:** filter for devices with a particular protocol
-(one from {% include api i="const.Protocol" %})
+**protocol:** scan for one or more specific protocols
+({% include api i="const.Protocol" %})
 
 **hosts:** list of hosts to specifically scan for, e.g. `['10.0.0.1', '10.0.0.2']`
 
@@ -51,13 +51,20 @@ atvs = scan(loop, identifier='AA:BB:CC:DD:EE:FF')
 # Scan for a specific device by IP (unicast)
 atvs = scan(loop, hosts=['10.0.0.1'])
 
-# Only scan for MRP capable devices
+# Only scan for MRP services
 atvs = scan(loop, protocol=Protocol.MRP)
+
+# Include both MRP and AirPlay
+atvs = scan(loop, protocol={Protocol.MRP, Protocol.AirPlay})
 ```
 
 A list is always returned, even if a filter is applied. See
 {% include api i="conf.AppleTV" %} for what you can do with a configuration
 (e.g. extract deep sleep state or available services).
+
+When scanning for one or more protocols with `protocols`, only the listed
+protocols are added to the configuration regardless if more protocols are
+supported.
 
 ## Pairing
 

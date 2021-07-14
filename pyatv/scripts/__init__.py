@@ -40,6 +40,25 @@ class VerifyScanHosts(argparse.Action):
 
 
 # pylint: disable=too-few-public-methods
+class VerifyScanProtocols(argparse.Action):
+    """Transform scan protocols into an array."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Split protocols and save as array."""
+        protocols = {proto.name.lower(): proto for proto in const.Protocol}
+
+        parsed_protocols = set()
+        for protocol in values.split(","):
+            if protocol in protocols:
+                parsed_protocols.add(protocols[protocol])
+            else:
+                raise argparse.ArgumentTypeError(
+                    "Valid protocols are: " + ", ".join(protocols.keys())
+                )
+        setattr(namespace, self.dest, parsed_protocols)
+
+
+# pylint: disable=too-few-public-methods
 class TransformOutput(argparse.Action):
     """Transform output format to function."""
 
