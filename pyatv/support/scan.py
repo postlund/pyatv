@@ -17,6 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ScanHandlerReturn = Tuple[str, interface.BaseService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
+ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
 

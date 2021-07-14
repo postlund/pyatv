@@ -27,7 +27,7 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.interface import retrieve_commands
-from pyatv.scripts import TransformProtocol, VerifyScanHosts
+from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
 
 
 def _print_commands(title, api):
@@ -132,7 +132,10 @@ class GlobalCommands:
     async def scan(self):
         """Scan for Apple TVs on the network."""
         atvs = await scan(
-            self.loop, hosts=self.args.scan_hosts, timeout=self.args.scan_timeout
+            self.loop,
+            hosts=self.args.scan_hosts,
+            timeout=self.args.scan_timeout,
+            protocol=self.args.scan_protocols,
         )
         _print_found_apple_tvs(atvs, sys.stdout)
 
@@ -392,6 +395,13 @@ async def cli_handler(loop):
         action=VerifyScanHosts,
     )
     parser.add_argument(
+        "--scan-protocols",
+        help="scan for specific protocols",
+        dest="scan_protocols",
+        default=None,
+        action=VerifyScanProtocols,
+    )
+    parser.add_argument(
         "--version",
         action="version",
         help="version of atvremote and pyatv",
@@ -503,7 +513,7 @@ def _print_found_apple_tvs(atvs, outstream):
 
 async def _autodiscover_device(args, loop):
     apple_tv = await _scan_for_device(
-        args, args.scan_timeout, loop, protocol=args.protocol
+        args, args.scan_timeout, loop, protocol=args.scan_protocols
     )
     if not apple_tv:
         return None

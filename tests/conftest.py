@@ -131,9 +131,15 @@ async def multicast_scan_fixture(event_loop, udns_server):
 
 @pytest.fixture(name="unicast_scan")
 async def unicast_scan_fixture(event_loop, udns_server):
-    async def _scan(timeout=1):
+    async def _scan(timeout=1, identifier=None, protocol=None):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
-            return await pyatv.scan(event_loop, hosts=["127.0.0.1"], timeout=timeout)
+            return await pyatv.scan(
+                event_loop,
+                hosts=["127.0.0.1"],
+                timeout=timeout,
+                identifier=identifier,
+                protocol=protocol,
+            )
 
     yield _scan

@@ -46,7 +46,7 @@ async def test_multicast_scan_mrp_with_companion(udns_server, multicast_scan: Sc
         )
     )
 
-    atvs = await multicast_scan(protocol=Protocol.MRP)
+    atvs = await multicast_scan()
     assert len(atvs) == 1
 
     dev = atvs[0]
