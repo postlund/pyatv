@@ -20,6 +20,19 @@ COMPANION_AUTH_FRAMES = [
     FrameType.PV_Next,
 ]
 
+BUTTON_MAP = {
+    HidCommand.Up: "up",
+    HidCommand.Down: "down",
+    HidCommand.Left: "left",
+    HidCommand.Right: "right",
+    HidCommand.Select: "select",
+    HidCommand.Menu: "menu",
+    HidCommand.Home: "home",
+    HidCommand.VolumeDown: "volume_down",
+    HidCommand.VolumeUp: "volume_up",
+    HidCommand.PlayPause: "play_pause",
+}
+
 
 class FakeCompanionState:
     def __init__(self):
@@ -30,6 +43,7 @@ class FakeCompanionState:
         self.powered_on: bool = True
         self.sid: int = 0
         self.service_type: Optional[str] = None
+        self.latest_button: Optional[str] = None
 
 
 class FakeCompanionServiceFactory:
@@ -159,11 +173,14 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         if button_state == 2 and button_code == HidCommand.Sleep:
             _LOGGER.debug("Putting device to sleep")
             self.state.powered_on = False
-        elif button_state and button_code == HidCommand.Wake:
+        elif button_state == 2 and button_code == HidCommand.Wake:
             _LOGGER.debug("Waking up device")
             self.state.powered_on = True
+        elif button_state == 2 and button_code in BUTTON_MAP:
+            _LOGGER.debug("Button pressed: %s", BUTTON_MAP[button_code])
+            self.state.latest_button = BUTTON_MAP[button_code]
         else:
-            _LOGGER.warning("Unhandled command: %d %d", button_state, button_code)
+            _LOGGER.warning("Unhandled command: %d %s", button_state, button_code)
             return  # Would be good to send error message here
 
         self.send_response(message, {})

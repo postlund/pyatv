@@ -122,6 +122,7 @@ app and power related functions.
 * All features in the app interface ({% include api i="interface.Apps" %})
 * Turn on/off device ({% include api i="interface.Power.turn_on" %},
   {% include api i="interface.Power.turn_off" %})
+* Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
 
 ### Limitations and notes
 
@@ -142,7 +143,7 @@ Music app in macOS.
 * Device Metadata
 * Push Updates
 * Features interface
-* Remote control
+* Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
 * Artwork
 * Playing metadata
 * Device and playback state
@@ -170,7 +171,7 @@ as new ones, like notion of apps and game pad controls.
 * Device Metadata
 * Push Updates
 * Features interface
-* Remote control including different input actions
+* Remote control including different input actions (see {% include api i="interface.RemoteControl" %} for supported buttons)
 * Artwork
 * Playing metadata
 * Device and playback state

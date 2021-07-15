@@ -26,7 +26,7 @@ from pyatv.companion.connection import (
 from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
-from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.interface import (
     App,
     Apps,
@@ -34,6 +34,7 @@ from pyatv.interface import (
     Features,
     PairingHandler,
     Power,
+    RemoteControl,
     StateProducer,
 )
 from pyatv.support import mdns
@@ -44,6 +45,24 @@ from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
+SUPPORTED_FEATURES = set(
+    [
+        FeatureName.AppList,
+        FeatureName.LaunchApp,
+        FeatureName.TurnOn,
+        FeatureName.TurnOff,
+        FeatureName.Up,
+        FeatureName.Down,
+        FeatureName.Left,
+        FeatureName.Right,
+        FeatureName.Select,
+        FeatureName.Menu,
+        FeatureName.Home,
+        FeatureName.VolumeUp,
+        FeatureName.VolumeDown,
+        FeatureName.PlayPause,
+    ]
+)
 
 # pylint: disable=invalid-name
 
@@ -163,15 +182,8 @@ class CompanionAPI(CompanionConnectionListener):
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
-    async def sleep(self):
-        """Put device to sleep."""
-        await self._hid_command(False, HidCommand.Sleep)
-
-    async def wake(self):
-        """Wake up sleeping device."""
-        await self._hid_command(False, HidCommand.Wake)
-
-    async def _hid_command(self, down: bool, command: HidCommand) -> None:
+    async def hid_command(self, down: bool, command: HidCommand) -> None:
+        """Send a HID command."""
         await self._send_command(
             "_hidC", {"_hBtS": 1 if down else 2, "_hidC": command.value}
         )
@@ -191,12 +203,7 @@ class CompanionFeatures(Features):
         if self.service.credentials is not None:
             # Just assume these are available for now if the protocol is configured,
             # we don't have any way to verify it anyways.
-            if feature_name in [
-                FeatureName.AppList,
-                FeatureName.LaunchApp,
-                FeatureName.TurnOn,
-                FeatureName.TurnOff,
-            ]:
+            if feature_name in SUPPORTED_FEATURES:
                 return FeatureInfo(FeatureState.Available)
 
         return FeatureInfo(FeatureState.Unavailable)
@@ -237,14 +244,70 @@ class CompanionPower(Power):
         # TODO: add support for this
         if await_new_state:
             raise NotImplementedError("not supported by Companion yet")
-        await self.api.wake()
+        await self.api.hid_command(False, HidCommand.Wake)
 
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         # TODO: add support for this
         if await_new_state:
             raise NotImplementedError("not supported by Companion yet")
-        await self.api.sleep()
+        await self.api.hid_command(False, HidCommand.Sleep)
+
+
+class CompanionRemoteControl(RemoteControl):
+    """Implementation of remote control API."""
+
+    def __init__(self, api: CompanionAPI) -> None:
+        """Initialize a new CompanionRemoteControl."""
+        self.api = api
+
+    # pylint: disable=invalid-name
+    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key up."""
+        await self._press_button(HidCommand.Up, action)
+
+    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key down."""
+        await self._press_button(HidCommand.Down, action)
+
+    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key left."""
+        await self._press_button(HidCommand.Left, action)
+
+    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key right."""
+        await self._press_button(HidCommand.Right, action)
+
+    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key select."""
+        await self._press_button(HidCommand.Select, action)
+
+    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key menu."""
+        await self._press_button(HidCommand.Menu, action)
+
+    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key home."""
+        await self._press_button(HidCommand.Home, action)
+
+    async def volume_up(self) -> None:
+        """Press key volume up."""
+        await self._press_button(HidCommand.VolumeUp)
+
+    async def volume_down(self) -> None:
+        """Press key volume down."""
+        await self._press_button(HidCommand.VolumeDown)
+
+    async def play_pause(self) -> None:
+        """Toggle between play and pause."""
+        await self._press_button(HidCommand.PlayPause)
+
+    async def _press_button(
+        self, command: HidCommand, action: InputAction = InputAction.SingleTap
+    ) -> None:
+        if action != InputAction.SingleTap:
+            raise NotImplementedError(f"{action} not supported for {command} (yet)")
+        await self.api.hid_command(False, command)
 
 
 def companion_service_handler(
@@ -287,6 +350,7 @@ def setup(
         CompanionFeatures(cast(conf.CompanionService, service)), Protocol.Companion
     )
     interfaces[Power].register(CompanionPower(api), Protocol.Companion)
+    interfaces[RemoteControl].register(CompanionRemoteControl(api), Protocol.Companion)
 
     async def _connect() -> None:
         pass
@@ -297,14 +361,7 @@ def setup(
     return (
         _connect,
         _close,
-        set(
-            [
-                FeatureName.AppList,
-                FeatureName.LaunchApp,
-                FeatureName.TurnOn,
-                FeatureName.TurnOff,
-            ]
-        ),
+        SUPPORTED_FEATURES,
     )
 
 
