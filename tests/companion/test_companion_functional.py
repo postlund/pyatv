@@ -79,3 +79,23 @@ async def test_session_start(companion_client, companion_state):
     await companion_client.power.turn_off()
     assert companion_state.sid != 0
     assert companion_state.service_type == "com.apple.tvremoteservices"
+
+
+@pytest.mark.parametrize(
+    "button",
+    [
+        "up",
+        "down",
+        "left",
+        "right",
+        "select",
+        "menu",
+        "home",
+        "volume_down",
+        "volume_up",
+        "play_pause",
+    ],
+)
+async def test_remote_control_buttons(companion_client, companion_state, button):
+    await getattr(companion_client.remote_control, button)()
+    await until(lambda: companion_state.latest_button == button)
