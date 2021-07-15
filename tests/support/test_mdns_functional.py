@@ -168,7 +168,7 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
 async def test_multicast_end_condition_met(
     event_loop, udns_server, multicast_fastexit, stub_ip_address
 ):
-    multicast_fastexit(responses=4, requests=10)
+    multicast_fastexit(responses=1, requests=10)
 
     actor = MagicMock()
 
