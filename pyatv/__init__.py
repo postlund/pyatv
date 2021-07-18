@@ -107,20 +107,23 @@ async def connect(
     session_manager = await http.create_session(session)
     atv = FacadeAppleTV(config, session_manager)
 
-    for service in config.services:
-        proto_impl = _PROTOCOLS.get(service.protocol)
-        if not proto_impl:
-            raise RuntimeError("missing implementation for protocol {service.protocol}")
-
-        setup_data = proto_impl.setup(
-            loop, config, atv.interfaces, atv, session_manager
-        )
-        if setup_data:
-            _LOGGER.debug("Adding protocol %s", service.protocol)
-            atv.add_protocol(service.protocol, setup_data)
-        else:
-            _LOGGER.debug("Not adding protocol: %s", service.protocol)
     try:
+        for service in config.services:
+            proto_impl = _PROTOCOLS.get(service.protocol)
+            if not proto_impl:
+                raise RuntimeError(
+                    "missing implementation for protocol {service.protocol}"
+                )
+
+            setup_data = proto_impl.setup(
+                loop, config, atv.interfaces, atv, session_manager
+            )
+            if setup_data:
+                _LOGGER.debug("Adding protocol %s", service.protocol)
+                atv.add_protocol(service.protocol, setup_data)
+            else:
+                _LOGGER.debug("Not adding protocol: %s", service.protocol)
+
         await atv.connect()
     except Exception:
         await session_manager.close()
