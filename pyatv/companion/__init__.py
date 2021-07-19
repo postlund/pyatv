@@ -23,10 +23,19 @@ from pyatv.companion.connection import (
     CompanionConnectionListener,
     FrameType,
 )
+from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, Protocol
-from pyatv.interface import App, Apps, FeatureInfo, Features, Power, StateProducer
+from pyatv.interface import (
+    App,
+    Apps,
+    FeatureInfo,
+    Features,
+    PairingHandler,
+    Power,
+    StateProducer,
+)
 from pyatv.support import mdns
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
@@ -301,3 +310,13 @@ def setup(
             ]
         ),
     )
+
+
+def pair(
+    config: AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return CompanionPairingHandler(config, session_manager, loop, **kwargs)

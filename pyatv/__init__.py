@@ -4,7 +4,7 @@ import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
 import logging
-from typing import List, NamedTuple, Optional, Set, Union
+from typing import Callable, List, NamedTuple, Optional, Set, Union
 
 import aiohttp
 
@@ -15,11 +15,7 @@ from pyatv import dmap as dmap_proto
 from pyatv import exceptions, interface
 from pyatv import mrp as mrp_proto
 from pyatv import raop as raop_proto
-from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.const import Protocol
-from pyatv.dmap.pairing import DmapPairingHandler
-from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV, SetupMethod
 from pyatv.support.scan import (
@@ -31,23 +27,27 @@ from pyatv.support.scan import (
 
 _LOGGER = logging.getLogger(__name__)
 
+PairMethod = Callable[..., interface.PairingHandler]
+
 
 class ProtocolImpl(NamedTuple):
     """Represent implementation of a protocol."""
 
     setup: SetupMethod
     scan: ScanMethod
+    pair: Optional[PairMethod]
 
 
 _PROTOCOLS = {
-    Protocol.AirPlay: ProtocolImpl(airplay_proto.setup, airplay_proto.scan),
-    Protocol.Companion: ProtocolImpl(companion_proto.setup, companion_proto.scan),
-    Protocol.DMAP: ProtocolImpl(dmap_proto.setup, dmap_proto.scan),
-    Protocol.MRP: ProtocolImpl(mrp_proto.setup, mrp_proto.scan),
-    Protocol.RAOP: ProtocolImpl(
-        raop_proto.setup,
-        raop_proto.scan,
+    Protocol.AirPlay: ProtocolImpl(
+        airplay_proto.setup, airplay_proto.scan, airplay_proto.pair
     ),
+    Protocol.Companion: ProtocolImpl(
+        companion_proto.setup, companion_proto.scan, companion_proto.pair
+    ),
+    Protocol.DMAP: ProtocolImpl(dmap_proto.setup, dmap_proto.scan, dmap_proto.pair),
+    Protocol.MRP: ProtocolImpl(mrp_proto.setup, mrp_proto.scan, mrp_proto.pair),
+    Protocol.RAOP: ProtocolImpl(raop_proto.setup, raop_proto.scan, None),
 }
 
 
@@ -144,14 +144,14 @@ async def pair(
     if not service:
         raise exceptions.NoServiceError(f"no service available for {protocol}")
 
-    handler = {
-        Protocol.DMAP: DmapPairingHandler,
-        Protocol.MRP: MrpPairingHandler,
-        Protocol.AirPlay: AirPlayPairingHandler,
-        Protocol.Companion: CompanionPairingHandler,
-    }.get(protocol)
-
-    if handler is None:
+    proto_impl = _PROTOCOLS.get(protocol)
+    if not proto_impl:
         raise RuntimeError(f"missing implementation for {protocol}")
+
+    handler = proto_impl.pair
+    if handler is None:
+        raise exceptions.NotSupportedError(
+            f"protocol {protocol} does not support pairing"
+        )
 
     return handler(config, await http.create_session(session), loop, **kwargs)

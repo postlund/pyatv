@@ -25,6 +25,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Metadata,
+    PairingHandler,
     Playing,
     Power,
     PushUpdater,
@@ -33,6 +34,7 @@ from pyatv.interface import (
 )
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.connection import MrpConnection
+from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.mrp.player_state import PlayerState, PlayerStateManager
 from pyatv.mrp.protobuf import CommandInfo_pb2
 from pyatv.mrp.protobuf import ContentItemMetadata as cim
@@ -758,3 +760,13 @@ def setup(  # pylint: disable=too-many-locals
     features.update(_FIELD_FEATURES.keys())
 
     return _connect, _close, features
+
+
+def pair(
+    config: conf.AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return MrpPairingHandler(config, session_manager, loop, **kwargs)
