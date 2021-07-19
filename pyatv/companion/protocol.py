@@ -80,4 +80,7 @@ class CompanionProtocol:
                 f"Received unexpected type: {type(unpacked_object)}"
             )
 
+        if "_em" in unpacked_object:
+            raise exceptions.ProtocolError(f"Command failed: {unpacked_object['_em']}")
+
         return unpacked_object
