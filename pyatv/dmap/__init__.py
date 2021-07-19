@@ -20,12 +20,14 @@ from pyatv.const import (
 )
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
+from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
     FeatureInfo,
     Features,
     Metadata,
+    PairingHandler,
     Playing,
     PushUpdater,
     RemoteControl,
@@ -614,3 +616,13 @@ def setup(
     features.update(_FIELD_FEATURES.keys())
 
     return _connect, _close, features
+
+
+def pair(
+    config: conf.AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return DmapPairingHandler(config, session_manager, loop, **kwargs)

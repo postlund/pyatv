@@ -7,11 +7,19 @@ from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import AirPlayPairingVerifier
+from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
 from pyatv.helpers import get_unique_id
-from pyatv.interface import FeatureInfo, Features, FeatureState, StateProducer, Stream
+from pyatv.interface import (
+    FeatureInfo,
+    Features,
+    FeatureState,
+    PairingHandler,
+    StateProducer,
+    Stream,
+)
 from pyatv.support import mdns, net
 from pyatv.support.http import (
     ClientSessionManager,
@@ -158,3 +166,13 @@ def setup(
         stream.close()
 
     return _connect, _close, set([FeatureName.PlayUrl])
+
+
+def pair(
+    config: conf.AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return AirPlayPairingHandler(config, session_manager, loop, **kwargs)

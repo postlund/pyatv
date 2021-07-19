@@ -60,7 +60,7 @@ class CompanionConnection(asyncio.Protocol):
     ) -> None:
         """Initialize a new CompanionConnection instance."""
         self.loop = loop
-        self.host = str(host)
+        self.host = host
         self.port = port
         self.listener: Optional[CompanionConnectionListener] = listener
         self.transport = None

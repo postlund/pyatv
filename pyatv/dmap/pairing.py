@@ -1,5 +1,6 @@
 """Module used for pairing pyatv with a device."""
 
+import asyncio
 import hashlib
 from io import StringIO
 import ipaddress
@@ -10,6 +11,7 @@ from aiohttp import web
 import netifaces
 from zeroconf import Zeroconf
 
+from pyatv import conf
 from pyatv.const import Protocol
 from pyatv.dmap import tags
 from pyatv.interface import PairingHandler
@@ -46,7 +48,13 @@ class DmapPairingHandler(
     that responds to pairing requests.
     """
 
-    def __init__(self, config, session_manager: ClientSessionManager, loop, **kwargs):
+    def __init__(
+        self,
+        config: conf.AppleTV,
+        session_manager: ClientSessionManager,
+        loop: asyncio.AbstractEventLoop,
+        **kwargs
+    ):
         """Initialize a new instance."""
         super().__init__(session_manager, config.get_service(Protocol.DMAP))
         self._loop = loop
