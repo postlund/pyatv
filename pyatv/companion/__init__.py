@@ -138,16 +138,12 @@ class CompanionAPI(CompanionConnectionListener):
                     "_c": content,
                 },
             )
+        except exceptions.ProtocolError:
+            raise
         except Exception as ex:
             raise exceptions.ProtocolError(f"Command {identifier} failed") from ex
         else:
-            # Check if an error was present and throw exception if that's the case
-            if "_em" in resp:
-                raise exceptions.ProtocolError(
-                    f"Command {identifier} failed: {resp['_em']}"
-                )
-
-        return resp
+            return resp
 
     async def _session_start(self):
         local_sid = randint(0, 2 ** 32 - 1)
