@@ -1,9 +1,10 @@
 """Implementation of the RTSP protocol."""
 import asyncio
+from hashlib import md5
 import logging
 import plistlib
 from random import randrange
-from typing import Dict, Mapping, Optional, Tuple, Union
+from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.dmap import tags
 from pyatv.raop import timing
@@ -42,6 +43,28 @@ CURVE25519_PUB_KEY = (
 )
 
 
+class DigestInfo(NamedTuple):
+    """
+    OAuth information used for password protected devices.
+    """
+
+    username: str
+    realm: str
+    password: str
+    nonce: str
+
+
+def get_digest_payload(method, uri, user, realm, pwd, nonce):
+    """Return the Authorization payload for Apples OAuth."""
+    payload = (
+        'Digest username="{0}", realm="{1}", nonce="{2}", uri="{3}", response="{4}"'
+    )
+    ha1 = md5(f"{user}:{realm}:{pwd}".encode("utf-8")).hexdigest()
+    ha2 = md5(f"{method}:{uri}".encode("utf-8")).hexdigest()
+    di_response = md5(f"{ha1}:{nonce}:{ha2}".encode("utf-8")).hexdigest()
+    return payload.format(user, realm, nonce, uri, di_response)
+
+
 class RtspContext:
     """Data used for one RTSP session.
 
@@ -69,6 +92,9 @@ class RtspContext:
         self.session_id: int = randrange(2 ** 32)
         self.dacp_id: str = f"{randrange(2 ** 64):X}"
         self.active_remote: int = randrange(2 ** 32)
+
+        # Required for password authentication
+        self.digest_info: Optional[DigestInfo] = None
 
         self.volume: Optional[float] = None
 
@@ -143,7 +169,7 @@ class RtspSession:
             body=body,
         )
 
-    async def announce(self) -> HttpResponse:
+    async def announce(self, password: Optional[str]) -> HttpResponse:
         """Send ANNOUNCE message."""
         body = ANNOUNCE_PAYLOAD.format(
             session_id=self.context.session_id,
@@ -153,11 +179,30 @@ class RtspSession:
             channels=self.context.channels,
             sample_rate=self.context.sample_rate,
         )
-        return await self.exchange(
+
+        requires_password: bool = password is not None
+
+        response = await self.exchange(
             "ANNOUNCE",
             content_type="application/sdp",
             body=body,
+            allow_error=requires_password,
         )
+
+        # Save the necessary data for password authentication
+        www_authenticate = response.headers.get("www-authenticate", None)
+        if response.code == 401 and www_authenticate and requires_password:
+            _, realm, _, nonce, _ = www_authenticate.split('"')
+            info = DigestInfo("pyatv", realm, password, nonce)  # type: ignore
+            self.context.digest_info = info
+
+            response = await self.exchange(
+                "ANNOUNCE",
+                content_type="application/sdp",
+                body=body,
+            )
+
+        return response
 
     async def setup(self, control_port: int, timing_port: int) -> HttpResponse:
         """Send SETUP message."""
@@ -242,6 +287,13 @@ class RtspSession:
             "Active-Remote": self.context.active_remote,
             "Client-Instance": self.context.dacp_id,
         }
+
+        # Add the password authentication if required
+        if self.context.digest_info:
+            hdrs["Authorization"] = get_digest_payload(
+                method, uri or self.uri, *self.context.digest_info
+            )
+
         if headers:
             hdrs.update(headers)
 

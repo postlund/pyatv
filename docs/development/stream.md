@@ -21,8 +21,7 @@ very limited. These features are currently supported:
 
 Early support for streaming audio files via RAOP is also supported
 (even for non-Apple TV devices). MP3, wav, FLAC and ogg files are
-supported. Devices that require any kind of password or authentication
-is not supported at this stage.
+supported. Devices that require a password are only supported for the AirTunes/RAOP protocol, not the AirPlay protocol. 
 
 In the external interface, AirPlay (including RAOP) support is implemented via
 the {% include api i="interface.Stream" %} interface.
@@ -104,6 +103,17 @@ the beginning of file again before playback.
 
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
+
+## Password
+
+If you stream audio using the RAOP protocol and the device requires a password, you can set the password like this: 
+
+```python
+raop_service = atv_conf.get_service(Protocol.RAOP)
+raop_service.password = "test"
+atv = await connect(atv_conf, ...)
+await atv.stream.stream_file("sample.mp3")
+```
 
 ## Device Authentication
 

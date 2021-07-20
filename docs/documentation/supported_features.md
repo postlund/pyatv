@@ -203,7 +203,7 @@ AirTunes).
 
 * Metadata and push updates only reflect what pyatv is currently playing as there
   seems to not be possible to get current play state from an AirPlay receiver
-* Devices requiring password are not supported
+* Devices requiring password are only supported when using the RAOP protocol
 * Remote control commands does not work (except for volume_up and volume_down),
   e.g. play or pause {% include issue no="1068" %}
 * Does not implement support for {% include api i="interface.DeviceListener" %} and will

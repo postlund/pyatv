@@ -290,6 +290,7 @@ class RaopStream(Stream):
         try:
             client, _, context = await self.playback_manager.setup()
             client.credentials = self._get_credentials()
+            client.password = self.service.password
 
             client.listener = self.listener
             await client.initialize(self.service.properties)

@@ -284,8 +284,10 @@ class RaopService(BaseService):
         identifier: Optional[str],
         port: int = 7000,
         credentials: Optional[str] = None,
+        password: Optional[str] = None,
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new RaopService."""
         super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials
+        self.password = password
