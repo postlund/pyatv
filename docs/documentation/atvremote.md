@@ -189,6 +189,14 @@ In the future, `atvremote` will likely store these automatically for you. But as
 have to manage the credentials yourself. Follow progress at
 {% include issue no="243" %}.
 
+## Password
+
+The `raop` protocol optionally requires a password. You may specify a password using the `raop-password` flag. 
+
+```
+atvremote --id 00:11:22:33:44:55 --raop-password mypassword stream_file=mymusicfile.mp3
+```
+
 # Push updates
 
 With `atvremote` you can use `push_updates` to display current play status automatically

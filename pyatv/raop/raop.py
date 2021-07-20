@@ -288,6 +288,7 @@ class RaopClient:
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
         self.credentials: Optional[LegacyCredentials] = None
+        self.password: Optional[str] = None
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -418,7 +419,7 @@ class RaopClient:
             verifier = AirPlayPairingVerifier(self.rtsp.connection, srp)
             await verifier.verify_authed()
 
-        await self.rtsp.announce()
+        await self.rtsp.announce(self.password)
 
         resp = await self.rtsp.setup(self.control_client.port, self.timing_client.port)
         _, options = parse_transport(resp.headers["Transport"])

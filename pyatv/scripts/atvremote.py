@@ -437,6 +437,13 @@ async def cli_handler(loop):
         default=False,
     )
 
+    parser.add_argument(
+        "--raop-password",
+        help="optional password for raop",
+        dest="raop_password",
+        default=None,
+    )
+
     creds = parser.add_argument_group("credentials")
     for prot in Protocol:
         creds.add_argument(
@@ -527,6 +534,10 @@ async def _autodiscover_device(args, loop):
     for proto in Protocol:
         _set_credentials(proto, f"{proto.name.lower()}_credentials")
 
+    raop_service = apple_tv.get_service(Protocol.RAOP)
+    if raop_service:
+        raop_service.password = args.raop_password
+
     logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
     return apple_tv
@@ -550,7 +561,12 @@ def _manual_device(args):
         )
     if args.raop_credentials or args.protocol == const.Protocol.RAOP:
         config.add_service(
-            RaopService(args.id, args.port, credentials=args.raop_credentials)
+            RaopService(
+                args.id,
+                args.port,
+                credentials=args.raop_credentials,
+                password=args.raop_password,
+            )
         )
     return config
 
