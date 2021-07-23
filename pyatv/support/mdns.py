@@ -87,57 +87,66 @@ def _first_rd(qtype: QueryType, entries: typing.Dict[int, typing.List[DnsResourc
     return entries[qtype][0].rd if qtype in entries else None
 
 
-def parse_services(  # pylint: disable=too-many-locals
-    message: DnsMessage,
-) -> typing.List[Service]:
-    """Parse DNS response into Service objects."""
-    table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
-    ptrs: typing.Dict[str, str] = {}  # qname -> real name
-    results: typing.Dict[str, Service] = {}
+class ServiceParser:
+    """Parse zeroconf services from records in DNS messages."""
 
-    # Create a global table with all records
-    for record in message.answers + message.resources:
-        if record.qtype == QueryType.PTR and record.qname.startswith("_"):
-            ptrs[record.qname] = record.rd
-        else:
-            entry = table.setdefault(record.qname, {})
-            if record.qtype not in entry:
-                entry[record.qtype] = []
-            entry[record.qtype].append(record)
+    def __init__(self) -> None:
+        """Initialize a new ServiceParser instance."""
+        self.table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
+        self.ptrs: typing.Dict[str, str] = {}  # qname -> real name
 
-    # Build services
-    for service, device in table.items():
-        try:
-            service_name = ServiceInstanceName.split_name(service)
-        except ValueError:
-            continue
+    def add_message(self, message: DnsMessage) -> None:
+        """Add message to with records to parse."""
+        for record in message.answers + message.resources:
+            if record.qtype == QueryType.PTR and record.qname.startswith("_"):
+                self.ptrs[record.qname] = record.rd
+            else:
+                entry = self.table.setdefault(record.qname, {})
+                if record.qtype not in entry:
+                    entry[record.qtype] = []
+                entry[record.qtype].append(record)
 
-        srv_rd = _first_rd(QueryType.SRV, device)
-        target = srv_rd["target"] if srv_rd else None
+    def parse(self) -> typing.List[Service]:
+        """Parse records and return services."""
+        results: typing.Dict[str, Service] = {}
 
-        target_records = table.get(typing.cast(str, target), {}).get(QueryType.A, [])
-        address = None
+        # Build services
+        for service, device in self.table.items():
+            try:
+                service_name = ServiceInstanceName.split_name(service)
+            except ValueError:
+                continue
 
-        # Pick one address that is not link-local
-        for addr in [IPv4Address(record.rd) for record in target_records]:
-            if not addr.is_link_local:
-                address = addr
-                break
+            srv_rd = _first_rd(QueryType.SRV, device)
+            target = srv_rd["target"] if srv_rd else None
 
-        results[service] = Service(
-            service_name.ptr_name,
-            typing.cast(str, service_name.instance),
-            address,
-            srv_rd["port"] if srv_rd else 0,
-            _decode_properties(_first_rd(QueryType.TXT, device) or {}),
-        )
+            target_records = self.table.get(typing.cast(str, target), {}).get(
+                QueryType.A, []
+            )
+            address = None
 
-    # If there are PTRs to unknown services, create placeholders
-    for qname, real_name in ptrs.items():
-        if real_name not in results:
-            results[real_name] = Service(qname, real_name.split(".")[0], None, 0, {})
+            # Pick one address that is not link-local
+            for addr in [IPv4Address(record.rd) for record in target_records]:
+                if not addr.is_link_local:
+                    address = addr
+                    break
 
-    return list(results.values())
+            results[service] = Service(
+                service_name.ptr_name,
+                typing.cast(str, service_name.instance),
+                address,
+                srv_rd["port"] if srv_rd else 0,
+                _decode_properties(_first_rd(QueryType.TXT, device) or {}),
+            )
+
+        # If there are PTRs to unknown services, create placeholders
+        for qname, real_name in self.ptrs.items():
+            if real_name not in results:
+                results[real_name] = Service(
+                    qname, real_name.split(".")[0], None, 0, {}
+                )
+
+        return list(results.values())
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
@@ -167,7 +176,9 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
                 await self._task
             except asyncio.CancelledError:
                 pass
-        services = parse_services(self.result)
+        parser = ServiceParser()
+        parser.add_message(self.result)
+        services = parser.parse()
         return Response(
             services=services,
             deep_sleep=False,
@@ -363,7 +374,9 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
 
         # Suppress decode errors for now (but still log)
         try:
-            services = parse_services(DnsMessage().unpack(data))
+            parser = ServiceParser()
+            parser.add_message(DnsMessage().unpack(data))
+            services = parser.parse()
         except UnicodeDecodeError:
             log_binary(_LOGGER, "Failed to decode message", Msg=data)
             return
