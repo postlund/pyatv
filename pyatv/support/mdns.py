@@ -104,7 +104,9 @@ class ServiceParser:
                 entry = self.table.setdefault(record.qname, {})
                 if record.qtype not in entry:
                     entry[record.qtype] = []
-                entry[record.qtype].append(record)
+
+                if record not in entry[record.qtype]:
+                    entry[record.qtype].append(record)
 
     def parse(self) -> typing.List[Service]:
         """Parse records and return services."""

@@ -246,3 +246,20 @@ def test_parse_properties_converts_keys_to_lower_case():
     assert len(parsed) == 1
     assert parsed[0].properties["foo"] == "bar"
     assert parsed[0].properties["Bar"] == "FOO"
+
+
+def test_parse_ignore_duplicate_records():
+    service_params = ("_abc._tcp.local", "service", [], 0, {})
+    message = dns_utils.add_service(dns.DnsMessage(), *service_params)
+
+    parser = mdns.ServiceParser()
+    parser.add_message(message)
+    parser.add_message(message)
+
+    # One service should be present in the table
+    assert len(parser.table) == 1
+
+    # A single record should be there since duplicates is ignored
+    records = parser.table["service._abc._tcp.local"]
+    assert mdns.QueryType.SRV in records
+    assert len(records[mdns.QueryType.SRV]) == 1
