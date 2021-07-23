@@ -22,6 +22,9 @@ from pyatv.support.dns import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# Number of services to include in each request
+SERVICES_PER_MSG = 3
+
 # This module produces a lot of debug output, use a dedicated log level.
 # Maybe move this to top-level support later?
 TRAFFIC_LEVEL = logging.DEBUG - 5
@@ -74,6 +77,19 @@ def create_request(
     msg = DnsMessage(0x35FF)
     msg.questions += [DnsQuestion(s, qtype, 0x8001) for s in services]
     return msg.pack()
+
+
+def create_service_queries(services: typing.List[str]) -> typing.List[bytes]:
+    """Create service request messages."""
+    queries: typing.List[bytes] = []
+    for i in range(math.ceil(len(services) / SERVICES_PER_MSG)):
+        service_chunk = services[i * SERVICES_PER_MSG : i * SERVICES_PER_MSG + 4]
+
+        msg = DnsMessage(0x35FF)
+        msg.questions += [DnsQuestion(s, QueryType.PTR, 0x8001) for s in service_chunk]
+
+        queries.append(msg.pack())
+    return queries
 
 
 def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
@@ -156,12 +172,13 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     def __init__(self, services: typing.List[str], host: str, timeout: int):
         """Initialize a new UnicastDnsSdClientProtocol."""
-        self.message = create_request(services)
+        self.queries = create_service_queries(services)
         self.host = host
         self.timeout = timeout
         self.transport = None
+        self.parser: ServiceParser = ServiceParser()
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
-        self.result: DnsMessage = DnsMessage()
+        self.received_responses: int = 0
         self._task: typing.Optional[asyncio.Future] = None
 
     async def get_response(self) -> Response:
@@ -178,9 +195,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
                 await self._task
             except asyncio.CancelledError:
                 pass
-        parser = ServiceParser()
-        parser.add_message(self.result)
-        services = parser.parse()
+        services = self.parser.parse()
         return Response(
             services=services,
             deep_sleep=False,
@@ -194,14 +209,15 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     async def _resend_loop(self):
         for _ in range(math.ceil(self.timeout)):
-            log_binary(
-                _LOGGER,
-                "Sending DNS request to " + self.host,
-                level=TRAFFIC_LEVEL,
-                Data=self.message,
-            )
+            for query in self.queries:
+                log_binary(
+                    _LOGGER,
+                    "Sending DNS request to " + self.host,
+                    level=TRAFFIC_LEVEL,
+                    Data=query,
+                )
 
-            self.transport.sendto(self.message)
+                self.transport.sendto(query)
             await asyncio.sleep(1)
 
     def datagram_received(self, data: bytes, _) -> None:
@@ -211,12 +227,17 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             "Received DNS response from " + self.host,
             level=TRAFFIC_LEVEL,
             Data=data,
+            Index=self.received_responses + 1,
+            Total=len(self.queries),
         )
 
-        self.result = DnsMessage().unpack(data)
-        self._finished()
-        if self.transport:
-            self.transport.close()
+        self.parser.add_message(DnsMessage().unpack(data))
+        self.received_responses += 1
+
+        if self.received_responses == len(self.queries):
+            self._finished()
+            if self.transport:
+                self.transport.close()
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
