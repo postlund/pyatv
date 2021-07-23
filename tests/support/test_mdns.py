@@ -4,7 +4,7 @@ import asyncio
 import io
 from ipaddress import IPv4Address
 import logging
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 
@@ -33,6 +33,12 @@ def get_response_for_service(
     req = mdns.create_request([service])
     resp = fake_udns.create_response(req, TEST_SERVICES)
     return dns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
+
+
+def parse_services(message: mdns.DnsMessage) -> List[mdns.Service]:
+    parser = mdns.ServiceParser()
+    parser.add_message(message)
+    return parser.parse()
 
 
 def test_non_existing_service():
@@ -127,14 +133,14 @@ def test_authority():
 
 
 def test_parse_empty_service():
-    assert mdns.parse_services(dns.DnsMessage()) == []
+    assert parse_services(dns.DnsMessage()) == []
 
 
 def test_parse_no_service_type():
     service_params = (None, "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 0
 
 
@@ -142,7 +148,7 @@ def test_parse_no_service_name():
     service_params = ("_abc._tcp.local", None, [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 0
 
 
@@ -150,7 +156,7 @@ def test_parse_with_name_and_type():
     service_params = ("_abc._tcp.local", "service", [], 0, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
@@ -159,7 +165,7 @@ def test_parse_with_port_and_address():
     service_params = ("_abc._tcp.local", "service", ["10.0.0.1"], 123, {})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
@@ -168,7 +174,7 @@ def test_parse_single_service():
     service_params = ("_abc._tcp.local", "service", ["10.0.10.1"], 123, {"foo": "bar"})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     dns_utils.assert_service(parsed[0], *service_params)
 
@@ -191,7 +197,7 @@ def test_parse_double_service():
     message = dns_utils.add_service(dns.DnsMessage(), *service1_params)
     message = dns_utils.add_service(message, *service2_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 2
     dns_utils.assert_service(parsed[0], *service1_params)
     dns_utils.assert_service(parsed[1], *service2_params)
@@ -208,7 +214,7 @@ def test_parse_pick_one_available_address():
     )
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     assert str(parsed[0].address) in addresses
 
@@ -223,7 +229,7 @@ def test_parse_ignore_link_local_address():
     )
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     assert parsed[0].address is None
 
@@ -236,7 +242,7 @@ def test_parse_properties_converts_keys_to_lower_case():
     service_params = ("_abc._tcp.local", "service", [], 0, {"FOO": "bar", "Bar": "FOO"})
     message = dns_utils.add_service(dns.DnsMessage(), *service_params)
 
-    parsed = mdns.parse_services(message)
+    parsed = parse_services(message)
     assert len(parsed) == 1
     assert parsed[0].properties["foo"] == "bar"
     assert parsed[0].properties["Bar"] == "FOO"
