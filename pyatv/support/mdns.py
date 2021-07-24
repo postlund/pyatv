@@ -25,6 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 # Number of services to include in each request
 SERVICES_PER_MSG = 3
 
+SLEEP_PROXY_SERVICE = "_sleep-proxy._udp.local"
+
 # This module produces a lot of debug output, use a dedicated log level.
 # Maybe move this to top-level support later?
 TRAFFIC_LEVEL = logging.DEBUG - 5
@@ -87,7 +89,7 @@ def create_service_queries(services: typing.List[str]) -> typing.List[bytes]:
 
         msg = DnsMessage(0x35FF)
         msg.questions += [DnsQuestion(s, QueryType.PTR, 0x8001) for s in service_chunk]
-
+        msg.questions += [DnsQuestion(SLEEP_PROXY_SERVICE, QueryType.PTR, 0x8001)]
         queries.append(msg.pack())
     return queries
 

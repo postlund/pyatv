@@ -163,6 +163,30 @@ async def test_unicast_specific_service(event_loop, udns_server):
     assert resp.services[0].port == service.port
 
 
+async def test_unicast_includes_sleep_proxy_service(event_loop, udns_server):
+    udns_server.services = {
+        "_test._tcp.local": fake_udns.FakeDnsService(
+            name="test", addresses=["127.0.0.1"], port=1234, properties={}, model=None
+        ),
+        "_sleep-proxy._udp.local": fake_udns.FakeDnsService(
+            name="sleepy", addresses=["127.0.0.1"], port=5678, properties={}, model=None
+        ),
+    }
+
+    # _sleep-proxy._udp.local should be requested implicitly in unicast for
+    # any service
+    resp, _ = await unicast(event_loop, udns_server, ["_test._tcp.local"])
+    assert len(resp.services) == 2
+
+    proxy = [
+        service
+        for service in resp.services
+        if service.type == "_sleep-proxy._udp.local"
+    ][0]
+    assert proxy.name == "sleepy"
+    assert proxy.port == 5678
+
+
 async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=0, requests=0)
 
