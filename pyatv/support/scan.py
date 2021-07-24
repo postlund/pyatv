@@ -20,6 +20,7 @@ ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
+SLEEP_PROXY: str = "_sleep-proxy._udp.local"
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
@@ -54,10 +55,15 @@ class BaseScanner(ABC):
     def __init__(self) -> None:
         """Initialize a new BaseScanner."""
         self._services: Dict[str, ScanHandler] = {
-            DEVICE_INFO: lambda service, response: None
+            DEVICE_INFO: self._empty_handler,
+            SLEEP_PROXY: self._empty_handler,
         }
         self._found_devices: Dict[IPv4Address, FoundDevice] = {}
         self._properties: Dict[IPv4Address, Dict[str, Mapping[str, str]]] = {}
+
+    @staticmethod
+    def _empty_handler(service: mdns.Service, response: mdns.Response) -> None:
+        pass
 
     def add_service(self, service_type: str, handler: ScanHandler):
         """Add service type to discover."""
