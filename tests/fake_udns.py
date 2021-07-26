@@ -282,7 +282,7 @@ def stub_multicast(udns_server, loop):
         hosts = set(
             chain(*[service.addresses for service in udns_server.services.values()])
         )
-        devices = {}
+        devices = []
         sleep_proxy = udns_server.sleep_proxy
         udns_server.sleep_proxy = False
         for host in hosts:
@@ -290,8 +290,8 @@ def stub_multicast(udns_server, loop):
             response = await mdns.unicast(
                 loop, "127.0.0.1", services, port=udns_server.port
             )
-            devices[IPv4Address(host)] = mdns.Response(
-                response.services, sleep_proxy, response.model
+            devices.append(
+                mdns.Response(response.services, sleep_proxy, response.model)
             )
         return devices
 

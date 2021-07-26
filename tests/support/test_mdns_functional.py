@@ -83,7 +83,7 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
 
     # Checks if either response or request count has been fulfilled
     def _check_cond(protocol: mdns.MulticastDnsSdClientProtocol) -> bool:
-        if len(protocol.responses) == conditions["responses"]:
+        if len(protocol.query_responses) == conditions["responses"]:
             return False
         if conditions["requests"] == 0:
             return True
@@ -201,7 +201,7 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
     )
     assert len(resp) == 1
 
-    first = resp[IPv4Address("127.0.0.1")].services[0]
+    first = resp[0].services[0]
     assert first.type == MEDIAREMOTE_SERVICE
     assert first.name == SERVICE_NAME
     assert first.port == 1234
@@ -226,7 +226,7 @@ async def test_multicast_end_condition_met(
         end_condition=_end_cond,
     )
     assert len(resp) == 1
-    actor.assert_called_once_with(resp[IPv4Address("127.0.0.1")])
+    actor.assert_called_once_with(resp[0])
 
 
 async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fastexit):
@@ -260,7 +260,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert not resp[IPv4Address("127.0.0.1")].deep_sleep
+    assert not resp[0].deep_sleep
 
     udns_server.sleep_proxy = True
     multicast_fastexit(responses=1, requests=0)
@@ -269,7 +269,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert resp[IPv4Address("127.0.0.1")].deep_sleep
+    assert resp[0].deep_sleep
 
 
 async def test_multicast_device_model(event_loop, udns_server, multicast_fastexit):
@@ -279,7 +279,7 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert not resp[IPv4Address("127.0.0.1")].model
+    assert not resp[0].model
 
     udns_server.services = {
         MEDIAREMOTE_SERVICE: fake_udns.FakeDnsService(
@@ -296,4 +296,4 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert resp[IPv4Address("127.0.0.1")].model == "dummy"
+    assert resp[0].model == "dummy"
