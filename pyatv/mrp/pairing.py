@@ -1,8 +1,9 @@
 """Device pairing and derivation of encryption keys."""
 
+import asyncio
 import logging
 
-from pyatv import exceptions
+from pyatv import conf, exceptions
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.mrp.auth import MrpPairingProcedure, MrpPairingVerifier
@@ -18,7 +19,13 @@ _LOGGER = logging.getLogger(__name__)
 class MrpPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, config, session_manager: ClientSessionManager, loop):
+    def __init__(
+        self,
+        config: conf.AppleTV,
+        session_manager: ClientSessionManager,
+        loop: asyncio.AbstractEventLoop,
+        **kwargs
+    ):
         """Initialize a new MrpPairingHandler."""
         super().__init__(session_manager, config.get_service(Protocol.MRP))
         self.connection = MrpConnection(config.address, self.service.port, loop)

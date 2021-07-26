@@ -64,305 +64,7 @@ possible to manually create a configuration, but generally scanning for devices 
 provide configurations for you.</p>
 <p>For a configuration to be usable ("ready") it must have either a <code>DMAP</code> or <code>MRP</code>
 configuration (or both), as connecting to plain <code>AirPlay</code> devices it not supported.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Configuration used when connecting to a device.
-
-A configuration describes a device, e.g. it&#39;s name, IP address and credentials. It is
-possible to manually create a configuration, but generally scanning for devices will
-provide configurations for you.
-
-For a configuration to be usable (&#34;ready&#34;) it must have either a `DMAP` or `MRP`
-configuration (or both), as connecting to plain `AirPlay` devices it not supported.
-&#34;&#34;&#34;
-from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional, Tuple, cast
-
-from pyatv import exceptions
-from pyatv.const import DeviceModel, OperatingSystem, Protocol
-from pyatv.interface import BaseService, DeviceInfo
-from pyatv.support.device_info import lookup_model, lookup_version
-
-
-class AppleTV:
-    &#34;&#34;&#34;Representation of an Apple TV configuration.
-
-    An instance of this class represents a single device. A device can have
-    several services depending on the protocols it supports, e.g. DMAP or
-    AirPlay.
-    &#34;&#34;&#34;
-
-    def __init__(
-        self,
-        address: IPv4Address,
-        name: str,
-        deep_sleep: bool = False,
-        model: DeviceModel = DeviceModel.Unknown,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self._address = address
-        self._name = name
-        self._deep_sleep = deep_sleep
-        self._model = model
-        self._services: Dict[Protocol, BaseService] = {}
-        self._properties: Mapping[str, str] = properties or {}
-
-    @property
-    def address(self) -&gt; IPv4Address:
-        &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
-        return self._address
-
-    @property
-    def name(self) -&gt; str:
-        &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
-        return self._name
-
-    @property
-    def deep_sleep(self) -&gt; bool:
-        &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
-        return self._deep_sleep
-
-    @property
-    def ready(self) -&gt; bool:
-        &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-        ready_protocols = set(list(Protocol))
-
-        # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
-        # used independently for now
-        ready_protocols.remove(Protocol.Companion)
-
-        intersection = ready_protocols.intersection(self._services.keys())
-        return len(intersection) &gt; 0
-
-    @property
-    def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
-            service = self._services.get(prot)
-            if service:
-                return service.identifier
-        return None
-
-    @property
-    def all_identifiers(self) -&gt; List[str]:
-        &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-        return [x.identifier for x in self.services if x.identifier is not None]
-
-    def add_service(self, service: BaseService) -&gt; None:
-        &#34;&#34;&#34;Add a new service.
-
-        If the service already exists, it will be merged.
-        &#34;&#34;&#34;
-        existing = self._services.get(service.protocol)
-        if existing is not None:
-            existing.merge(service)
-        else:
-            self._services[service.protocol] = service
-
-    def get_service(self, protocol: Protocol) -&gt; Optional[BaseService]:
-        &#34;&#34;&#34;Look up a service based on protocol.
-
-        If a service with the specified protocol is not available, None is
-        returned.
-        &#34;&#34;&#34;
-        return self._services.get(protocol)
-
-    @property
-    def services(self) -&gt; List[BaseService]:
-        &#34;&#34;&#34;Return all supported services.&#34;&#34;&#34;
-        return list(self._services.values())
-
-    def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
-        &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
-        protocols = (
-            [protocol]
-            if protocol is not None
-            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
-        )
-
-        for prot in protocols:
-            service = self._services.get(prot)
-            if service is not None:
-                return service
-
-        raise exceptions.NoServiceError(&#34;no service to connect to&#34;)
-
-    def set_credentials(self, protocol: Protocol, credentials: str) -&gt; bool:
-        &#34;&#34;&#34;Set credentials for a protocol if it exists.&#34;&#34;&#34;
-        service = self.get_service(protocol)
-        if service:
-            service.credentials = credentials
-            return True
-        return False
-
-    # TODO: The extraction should be generialized and moved somewhere else. It is
-    # very hard to test rght now.
-    @property
-    def device_info(self) -&gt; DeviceInfo:
-        &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
-        properties = self._all_properties()
-
-        build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
-        version = properties.get(&#34;ov&#34;)
-        if not version:
-            version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-        model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
-        if model_name:
-            model = lookup_model(model_name)
-        else:
-            model = self._model
-
-        # MRP devices run tvOS (as far as we know now) as well as HomePods for
-        # some reason
-        if Protocol.MRP in self._services or model in [
-            DeviceModel.HomePod,
-            DeviceModel.HomePodMini,
-        ]:
-            os_type = OperatingSystem.TvOS
-        elif Protocol.DMAP in self._services:
-            os_type = OperatingSystem.Legacy
-        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
-            os_type = OperatingSystem.AirPortOS
-        else:
-            os_type = OperatingSystem.Unknown
-
-        mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
-        if mac:
-            mac = mac.upper()
-
-        # The waMA property comes from the _airport._tcp.local service, announced by
-        # AirPort Expresses (used by the admin tool). It contains various information,
-        # for instance MAC address and software version.
-        wama = properties.get(&#34;wama&#34;)
-        if wama:
-            props: Mapping[str, str] = dict(
-                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
-                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
-            )
-            if not mac:
-                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
-            version = props.get(&#34;syVs&#34;)
-
-        return DeviceInfo(os_type, version, build, model, mac)
-
-    def _all_properties(self) -&gt; Mapping[str, str]:
-        properties: Dict[str, str] = {}
-        properties.update(self._properties)
-        for service in self.services:
-            properties.update(service.properties)
-        return properties
-
-    def __eq__(self, other) -&gt; bool:
-        &#34;&#34;&#34;Compare instance with another instance.&#34;&#34;&#34;
-        if isinstance(other, self.__class__):
-            return self.identifier == other.identifier
-        return False
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
-        device_info = self.device_info
-        services = &#34;\n&#34;.join([&#34; - {0}&#34;.format(s) for s in self._services.values()])
-        identifiers = &#34;\n&#34;.join([&#34; - {0}&#34;.format(x) for x in self.all_identifiers])
-        return (
-            f&#34;       Name: {self.name}\n&#34;
-            f&#34;   Model/SW: {device_info}\n&#34;
-            f&#34;    Address: {self.address}\n&#34;
-            f&#34;        MAC: {self.device_info.mac}\n&#34;
-            f&#34; Deep Sleep: {self.deep_sleep}\n&#34;
-            f&#34;Identifiers:\n&#34;
-            f&#34;{identifiers}\n&#34;
-            f&#34;Services:\n&#34;
-            f&#34;{services}&#34;
-        )
-
-
-# pylint: disable=too-few-public-methods
-class DmapService(BaseService):
-    &#34;&#34;&#34;Representation of a DMAP service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        credentials: Optional[str],
-        port: int = 3689,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(
-            identifier,
-            Protocol.DMAP,
-            port,
-            properties,
-        )
-        self.credentials = credentials
-
-
-# pylint: disable=too-few-public-methods
-class MrpService(BaseService):
-    &#34;&#34;&#34;Representation of a MediaRemote Protocol (MRP) service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.MRP, port, properties)
-        self.credentials = credentials
-
-
-# pylint: disable=too-few-public-methods
-class AirPlayService(BaseService):
-    &#34;&#34;&#34;Representation of an AirPlay service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int = 7000,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.AirPlay, port, properties)
-        self.credentials = credentials
-
-
-# pylint: disable=too-few-public-methods
-class CompanionService(BaseService):
-    &#34;&#34;&#34;Representation of a Companion link service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        port: int,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new CompaniomService.&#34;&#34;&#34;
-        super().__init__(None, Protocol.Companion, port, properties)
-        self.credentials = credentials
-
-
-# pylint: disable=too-few-public-methods
-class RaopService(BaseService):
-    &#34;&#34;&#34;Representation of an RAOP service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int = 7000,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new RaopService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.RAOP, port, properties)
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L0-L292" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -380,24 +82,7 @@ class RaopService(BaseService):
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
 <p>Initialize a new AirPlayService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AirPlayService(BaseService):
-    &#34;&#34;&#34;Representation of an AirPlay service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int = 7000,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AirPlayService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.AirPlay, port, properties)
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L248-L260" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -414,7 +99,7 @@ class RaopService(BaseService):
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown, properties: Optional[Mapping[str, Mapping[str, str]]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -422,451 +107,90 @@ class RaopService(BaseService):
 several services depending on the protocols it supports, e.g. DMAP or
 AirPlay.</p>
 <p>Initialize a new AppleTV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AppleTV:
-    &#34;&#34;&#34;Representation of an Apple TV configuration.
-
-    An instance of this class represents a single device. A device can have
-    several services depending on the protocols it supports, e.g. DMAP or
-    AirPlay.
-    &#34;&#34;&#34;
-
-    def __init__(
-        self,
-        address: IPv4Address,
-        name: str,
-        deep_sleep: bool = False,
-        model: DeviceModel = DeviceModel.Unknown,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new AppleTV.&#34;&#34;&#34;
-        self._address = address
-        self._name = name
-        self._deep_sleep = deep_sleep
-        self._model = model
-        self._services: Dict[Protocol, BaseService] = {}
-        self._properties: Mapping[str, str] = properties or {}
-
-    @property
-    def address(self) -&gt; IPv4Address:
-        &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
-        return self._address
-
-    @property
-    def name(self) -&gt; str:
-        &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
-        return self._name
-
-    @property
-    def deep_sleep(self) -&gt; bool:
-        &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
-        return self._deep_sleep
-
-    @property
-    def ready(self) -&gt; bool:
-        &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-        ready_protocols = set(list(Protocol))
-
-        # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
-        # used independently for now
-        ready_protocols.remove(Protocol.Companion)
-
-        intersection = ready_protocols.intersection(self._services.keys())
-        return len(intersection) &gt; 0
-
-    @property
-    def identifier(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
-            service = self._services.get(prot)
-            if service:
-                return service.identifier
-        return None
-
-    @property
-    def all_identifiers(self) -&gt; List[str]:
-        &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-        return [x.identifier for x in self.services if x.identifier is not None]
-
-    def add_service(self, service: BaseService) -&gt; None:
-        &#34;&#34;&#34;Add a new service.
-
-        If the service already exists, it will be merged.
-        &#34;&#34;&#34;
-        existing = self._services.get(service.protocol)
-        if existing is not None:
-            existing.merge(service)
-        else:
-            self._services[service.protocol] = service
-
-    def get_service(self, protocol: Protocol) -&gt; Optional[BaseService]:
-        &#34;&#34;&#34;Look up a service based on protocol.
-
-        If a service with the specified protocol is not available, None is
-        returned.
-        &#34;&#34;&#34;
-        return self._services.get(protocol)
-
-    @property
-    def services(self) -&gt; List[BaseService]:
-        &#34;&#34;&#34;Return all supported services.&#34;&#34;&#34;
-        return list(self._services.values())
-
-    def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
-        &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
-        protocols = (
-            [protocol]
-            if protocol is not None
-            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
-        )
-
-        for prot in protocols:
-            service = self._services.get(prot)
-            if service is not None:
-                return service
-
-        raise exceptions.NoServiceError(&#34;no service to connect to&#34;)
-
-    def set_credentials(self, protocol: Protocol, credentials: str) -&gt; bool:
-        &#34;&#34;&#34;Set credentials for a protocol if it exists.&#34;&#34;&#34;
-        service = self.get_service(protocol)
-        if service:
-            service.credentials = credentials
-            return True
-        return False
-
-    # TODO: The extraction should be generialized and moved somewhere else. It is
-    # very hard to test rght now.
-    @property
-    def device_info(self) -&gt; DeviceInfo:
-        &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
-        properties = self._all_properties()
-
-        build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
-        version = properties.get(&#34;ov&#34;)
-        if not version:
-            version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-        model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
-        if model_name:
-            model = lookup_model(model_name)
-        else:
-            model = self._model
-
-        # MRP devices run tvOS (as far as we know now) as well as HomePods for
-        # some reason
-        if Protocol.MRP in self._services or model in [
-            DeviceModel.HomePod,
-            DeviceModel.HomePodMini,
-        ]:
-            os_type = OperatingSystem.TvOS
-        elif Protocol.DMAP in self._services:
-            os_type = OperatingSystem.Legacy
-        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
-            os_type = OperatingSystem.AirPortOS
-        else:
-            os_type = OperatingSystem.Unknown
-
-        mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
-        if mac:
-            mac = mac.upper()
-
-        # The waMA property comes from the _airport._tcp.local service, announced by
-        # AirPort Expresses (used by the admin tool). It contains various information,
-        # for instance MAC address and software version.
-        wama = properties.get(&#34;wama&#34;)
-        if wama:
-            props: Mapping[str, str] = dict(
-                cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
-                for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
-            )
-            if not mac:
-                mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
-            version = props.get(&#34;syVs&#34;)
-
-        return DeviceInfo(os_type, version, build, model, mac)
-
-    def _all_properties(self) -&gt; Mapping[str, str]:
-        properties: Dict[str, str] = {}
-        properties.update(self._properties)
-        for service in self.services:
-            properties.update(service.properties)
-        return properties
-
-    def __eq__(self, other) -&gt; bool:
-        &#34;&#34;&#34;Compare instance with another instance.&#34;&#34;&#34;
-        if isinstance(other, self.__class__):
-            return self.identifier == other.identifier
-        return False
-
-    def __str__(self) -&gt; str:
-        &#34;&#34;&#34;Return a string representation of this object.&#34;&#34;&#34;
-        device_info = self.device_info
-        services = &#34;\n&#34;.join([&#34; - {0}&#34;.format(s) for s in self._services.values()])
-        identifiers = &#34;\n&#34;.join([&#34; - {0}&#34;.format(x) for x in self.all_identifiers])
-        return (
-            f&#34;       Name: {self.name}\n&#34;
-            f&#34;   Model/SW: {device_info}\n&#34;
-            f&#34;    Address: {self.address}\n&#34;
-            f&#34;        MAC: {self.device_info.mac}\n&#34;
-            f&#34; Deep Sleep: {self.deep_sleep}\n&#34;
-            f&#34;Identifiers:\n&#34;
-            f&#34;{identifiers}\n&#34;
-            f&#34;Services:\n&#34;
-            f&#34;{services}&#34;
-        )</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L19-L207" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.conf.AppleTV.address"><code class="name">var <span class="ident">address</span> -> ipaddress.IPv4Address</code></dt>
 <dd>
 <section class="desc"><p>IP address of device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def address(self) -&gt; IPv4Address:
-    &#34;&#34;&#34;IP address of device.&#34;&#34;&#34;
-    return self._address</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L43-L46" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.all_identifiers"><code class="name">var <span class="ident">all_identifiers</span> -> List[str]</code></dt>
 <dd>
 <section class="desc"><p>Return all unique identifiers for this device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def all_identifiers(self) -&gt; List[str]:
-    &#34;&#34;&#34;Return all unique identifiers for this device.&#34;&#34;&#34;
-    return [x.identifier for x in self.services if x.identifier is not None]</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L75-L78" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.deep_sleep"><code class="name">var <span class="ident">deep_sleep</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>If device is in deep sleep.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def deep_sleep(self) -&gt; bool:
-    &#34;&#34;&#34;If device is in deep sleep.&#34;&#34;&#34;
-    return self._deep_sleep</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L53-L56" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="interface#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
 <dd>
 <section class="desc"><p>Return general device information.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def device_info(self) -&gt; DeviceInfo:
-    &#34;&#34;&#34;Return general device information.&#34;&#34;&#34;
-    properties = self._all_properties()
-
-    build: Optional[str] = properties.get(&#34;systembuildversion&#34;)
-    version = properties.get(&#34;ov&#34;)
-    if not version:
-        version = properties.get(&#34;osvers&#34;, lookup_version(build))
-
-    model_name: Optional[str] = properties.get(&#34;model&#34;, properties.get(&#34;am&#34;))
-    if model_name:
-        model = lookup_model(model_name)
-    else:
-        model = self._model
-
-    # MRP devices run tvOS (as far as we know now) as well as HomePods for
-    # some reason
-    if Protocol.MRP in self._services or model in [
-        DeviceModel.HomePod,
-        DeviceModel.HomePodMini,
-    ]:
-        os_type = OperatingSystem.TvOS
-    elif Protocol.DMAP in self._services:
-        os_type = OperatingSystem.Legacy
-    elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
-        os_type = OperatingSystem.AirPortOS
-    else:
-        os_type = OperatingSystem.Unknown
-
-    mac = properties.get(&#34;macaddress&#34;, properties.get(&#34;deviceid&#34;))
-    if mac:
-        mac = mac.upper()
-
-    # The waMA property comes from the _airport._tcp.local service, announced by
-    # AirPort Expresses (used by the admin tool). It contains various information,
-    # for instance MAC address and software version.
-    wama = properties.get(&#34;wama&#34;)
-    if wama:
-        props: Mapping[str, str] = dict(
-            cast(Tuple[str, str], prop.split(&#34;=&#34;, maxsplit=1))
-            for prop in (&#34;macaddress=&#34; + wama).split(&#34;,&#34;)
-        )
-        if not mac:
-            mac = props[&#34;macaddress&#34;].replace(&#34;-&#34;, &#34;:&#34;).upper()
-        version = props.get(&#34;syVs&#34;)
-
-    return DeviceInfo(os_type, version, build, model, mac)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L129-L176" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return the main identifier associated with this device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def identifier(self) -&gt; Optional[str]:
-    &#34;&#34;&#34;Return the main identifier associated with this device.&#34;&#34;&#34;
-    for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
-        service = self._services.get(prot)
-        if service:
-            return service.identifier
-    return None</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L66-L73" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Name of device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def name(self) -&gt; str:
-    &#34;&#34;&#34;Name of device.&#34;&#34;&#34;
-    return self._name</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L48-L51" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.ready"><code class="name">var <span class="ident">ready</span> -> bool</code></dt>
 <dd>
-<section class="desc"><p>Return if configuration is ready, i.e. has a main service.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def ready(self) -&gt; bool:
-    &#34;&#34;&#34;Return if configuration is ready, i.e. has a main service.&#34;&#34;&#34;
-    ready_protocols = set(list(Protocol))
-
-    # Companion has no unique identifier so it&#39;s the only protocol that can&#39;t be
-    # used independently for now
-    ready_protocols.remove(Protocol.Companion)
-
-    intersection = ready_protocols.intersection(self._services.keys())
-    return len(intersection) &gt; 0</code></pre>
-</details>
+<section class="desc"><p>Return if configuration is ready, (at least one service with identifier).</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L58-L64" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.services"><code class="name">var <span class="ident">services</span> -> List[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]</code></dt>
 <dd>
 <section class="desc"><p>Return all supported services.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def services(self) -&gt; List[BaseService]:
-    &#34;&#34;&#34;Return all supported services.&#34;&#34;&#34;
-    return list(self._services.values())</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L99-L102" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="pyatv.conf.AppleTV.add_service"><code class="name flex">
+<dt id="pyatv.conf.AppleTV.add_service">
+<code class="name flex">
 <span>def <span class="ident">add_service</span></span>(<span>self, service: <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>) -> NoneType</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Add a new service.</p>
 <p>If the service already exists, it will be merged.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_service(self, service: BaseService) -&gt; None:
-    &#34;&#34;&#34;Add a new service.
-
-    If the service already exists, it will be merged.
-    &#34;&#34;&#34;
-    existing = self._services.get(service.protocol)
-    if existing is not None:
-        existing.merge(service)
-    else:
-        self._services[service.protocol] = service</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L80-L89" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.conf.AppleTV.get_service"><code class="name flex">
+<dt id="pyatv.conf.AppleTV.get_service">
+<code class="name flex">
 <span>def <span class="ident">get_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> Optional[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Look up a service based on protocol.</p>
 <p>If a service with the specified protocol is not available, None is
 returned.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_service(self, protocol: Protocol) -&gt; Optional[BaseService]:
-    &#34;&#34;&#34;Look up a service based on protocol.
-
-    If a service with the specified protocol is not available, None is
-    returned.
-    &#34;&#34;&#34;
-    return self._services.get(protocol)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L91-L97" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.conf.AppleTV.main_service"><code class="name flex">
+<dt id="pyatv.conf.AppleTV.main_service">
+<code class="name flex">
 <span>def <span class="ident">main_service</span></span>(<span>self, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>] = None) -> <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Return suggested service used to establish connection.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def main_service(self, protocol: Optional[Protocol] = None) -&gt; BaseService:
-    &#34;&#34;&#34;Return suggested service used to establish connection.&#34;&#34;&#34;
-    protocols = (
-        [protocol]
-        if protocol is not None
-        else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
-    )
-
-    for prot in protocols:
-        service = self._services.get(prot)
-        if service is not None:
-            return service
-
-    raise exceptions.NoServiceError(&#34;no service to connect to&#34;)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L104-L117" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.conf.AppleTV.set_credentials"><code class="name flex">
+<dt id="pyatv.conf.AppleTV.set_credentials">
+<code class="name flex">
 <span>def <span class="ident">set_credentials</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, credentials: str) -> bool</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Set credentials for a protocol if it exists.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_credentials(self, protocol: Protocol, credentials: str) -&gt; bool:
-    &#34;&#34;&#34;Set credentials for a protocol if it exists.&#34;&#34;&#34;
-    service = self.get_service(protocol)
-    if service:
-        service.credentials = credentials
-        return True
-    return False</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L119-L125" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -877,23 +201,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a Companion link service.</p>
 <p>Initialize a new CompaniomService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class CompanionService(BaseService):
-    &#34;&#34;&#34;Representation of a Companion link service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        port: int,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new CompaniomService.&#34;&#34;&#34;
-        super().__init__(None, Protocol.Companion, port, properties)
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L264-L275" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -915,29 +223,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
 <p>Initialize a new DmapService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DmapService(BaseService):
-    &#34;&#34;&#34;Representation of a DMAP service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        credentials: Optional[str],
-        port: int = 3689,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new DmapService.&#34;&#34;&#34;
-        super().__init__(
-            identifier,
-            Protocol.DMAP,
-            port,
-            properties,
-        )
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L211-L228" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -959,24 +245,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
 <p>Initialize a new MrpService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MrpService(BaseService):
-    &#34;&#34;&#34;Representation of a MediaRemote Protocol (MRP) service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new MrpService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.MRP, port, properties)
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L232-L244" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -993,29 +262,12 @@ returned.</p></section>
 </dd>
 <dt id="pyatv.conf.RaopService"><code class="flex name class">
 <span>class <span class="ident">RaopService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, password: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an RAOP service.</p>
 <p>Initialize a new RaopService.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RaopService(BaseService):
-    &#34;&#34;&#34;Representation of an RAOP service.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        identifier: Optional[str],
-        port: int = 7000,
-        credentials: Optional[str] = None,
-        properties: Optional[Mapping[str, str]] = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;Initialize a new RaopService.&#34;&#34;&#34;
-        super().__init__(identifier, Protocol.RAOP, port, properties)
-        self.credentials = credentials</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L279-L293" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>

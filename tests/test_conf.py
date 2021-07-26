@@ -223,13 +223,18 @@ def test_airport_express_info(config):
 
 
 def test_airport_express_extra_properties():
-    extra_properties = {
+    airport_properties = {
         # MAC, raMA=2.4GHz MAC, raM2=5GHz MAC
         "wama": "AA-AA-AA-AA-AA-AA,raMA=BB-BB-BB-BB-BB-BB,raM2=CC-CC-CC-CC-CC-CC,"
         + "raNm=MySsid,raCh=11,rCh2=112,raSt=1,raNA=0,syFl=0x80C,syAP=115,syVs=7.8.1,"
         + "srcv=78100.3,bjSd=2"
     }
-    config = conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True, properties=extra_properties)
+    config = conf.AppleTV(
+        ADDRESS_1,
+        NAME,
+        deep_sleep=True,
+        properties={"_airport._tcp.local": airport_properties},
+    )
     config.add_service(AIRPORT_SERVICE)
 
     device_info = config.device_info

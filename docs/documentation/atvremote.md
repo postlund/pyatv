@@ -90,6 +90,33 @@ The `--scan-hosts` flag can be used with any other command as well:
 $ atvremote --scan-hosts 10.0.0.10 -n Kitchen <some command>
 ```
 
+## Discovering specific protocols
+
+By default, pyatv will scan for all protocols supported by a device. It is however possible
+to be more specific about which protocols to scan for with `--scan-protocols`:
+
+```raw
+$  atvremote --scan-protocols mrp scan
+Scan Results
+========================================
+       Name: Vardagsrum
+   Model/SW: Gen4K tvOS 14.x build 18L569
+    Address: 10.0.0.10
+        MAC: AA:BB:CC:DD:EE:FF
+ Deep Sleep: False
+Identifiers:
+ - 01234567-89AB-CDEF-0123-4567890ABCDE
+Services:
+ - Protocol: MRP, Port: 49153, Credentials: None
+```
+
+Only the specified protocols are scanned for. Multiple protocols can be specified
+as a comma-separated list:
+
+```raw
+$ atvremote --scan-protocols mrp,raop,companion scan
+```
+
 ## Specifying a device
 
 In order for `atvremote` to know which device you want to control, you must specify the
@@ -161,6 +188,14 @@ $ atvremote -n Kitchen --mrp-credentials abcd --airplay-credentials 1234 playing
 In the future, `atvremote` will likely store these automatically for you. But as of right now, you
 have to manage the credentials yourself. Follow progress at
 {% include issue no="243" %}.
+
+## Password
+
+The `raop` protocol optionally requires a password. You may specify a password using the `raop-password` flag. 
+
+```
+atvremote --id 00:11:22:33:44:55 --raop-password mypassword stream_file=mymusicfile.mp3
+```
 
 # Push updates
 

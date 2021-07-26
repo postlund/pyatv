@@ -4,7 +4,18 @@ import asyncio
 from enum import Enum
 import logging
 from random import randint
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 
 from pyatv import conf, exceptions
 from pyatv.companion.connection import (
@@ -12,16 +23,46 @@ from pyatv.companion.connection import (
     CompanionConnectionListener,
     FrameType,
 )
+from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
-from pyatv.const import FeatureName, FeatureState, Protocol
-from pyatv.interface import App, Apps, FeatureInfo, Features, Power, StateProducer
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.interface import (
+    App,
+    Apps,
+    FeatureInfo,
+    Features,
+    PairingHandler,
+    Power,
+    RemoteControl,
+    StateProducer,
+)
+from pyatv.support import mdns
 from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
+SUPPORTED_FEATURES = set(
+    [
+        FeatureName.AppList,
+        FeatureName.LaunchApp,
+        FeatureName.TurnOn,
+        FeatureName.TurnOff,
+        FeatureName.Up,
+        FeatureName.Down,
+        FeatureName.Left,
+        FeatureName.Right,
+        FeatureName.Select,
+        FeatureName.Menu,
+        FeatureName.Home,
+        FeatureName.VolumeUp,
+        FeatureName.VolumeDown,
+        FeatureName.PlayPause,
+    ]
+)
 
 # pylint: disable=invalid-name
 
@@ -116,16 +157,12 @@ class CompanionAPI(CompanionConnectionListener):
                     "_c": content,
                 },
             )
+        except exceptions.ProtocolError:
+            raise
         except Exception as ex:
             raise exceptions.ProtocolError(f"Command {identifier} failed") from ex
         else:
-            # Check if an error was present and throw exception if that's the case
-            if "_em" in resp:
-                raise exceptions.ProtocolError(
-                    f"Command {identifier} failed: {resp['_em']}"
-                )
-
-        return resp
+            return resp
 
     async def _session_start(self):
         local_sid = randint(0, 2 ** 32 - 1)
@@ -145,15 +182,8 @@ class CompanionAPI(CompanionConnectionListener):
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
-    async def sleep(self):
-        """Put device to sleep."""
-        await self._hid_command(False, HidCommand.Sleep)
-
-    async def wake(self):
-        """Wake up sleeping device."""
-        await self._hid_command(False, HidCommand.Wake)
-
-    async def _hid_command(self, down: bool, command: HidCommand) -> None:
+    async def hid_command(self, down: bool, command: HidCommand) -> None:
+        """Send a HID command."""
         await self._send_command(
             "_hidC", {"_hBtS": 1 if down else 2, "_hidC": command.value}
         )
@@ -173,12 +203,7 @@ class CompanionFeatures(Features):
         if self.service.credentials is not None:
             # Just assume these are available for now if the protocol is configured,
             # we don't have any way to verify it anyways.
-            if feature_name in [
-                FeatureName.AppList,
-                FeatureName.LaunchApp,
-                FeatureName.TurnOn,
-                FeatureName.TurnOff,
-            ]:
+            if feature_name in SUPPORTED_FEATURES:
                 return FeatureInfo(FeatureState.Available)
 
         return FeatureInfo(FeatureState.Unavailable)
@@ -219,14 +244,86 @@ class CompanionPower(Power):
         # TODO: add support for this
         if await_new_state:
             raise NotImplementedError("not supported by Companion yet")
-        await self.api.wake()
+        await self.api.hid_command(False, HidCommand.Wake)
 
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         # TODO: add support for this
         if await_new_state:
             raise NotImplementedError("not supported by Companion yet")
-        await self.api.sleep()
+        await self.api.hid_command(False, HidCommand.Sleep)
+
+
+class CompanionRemoteControl(RemoteControl):
+    """Implementation of remote control API."""
+
+    def __init__(self, api: CompanionAPI) -> None:
+        """Initialize a new CompanionRemoteControl."""
+        self.api = api
+
+    # pylint: disable=invalid-name
+    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key up."""
+        await self._press_button(HidCommand.Up, action)
+
+    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key down."""
+        await self._press_button(HidCommand.Down, action)
+
+    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key left."""
+        await self._press_button(HidCommand.Left, action)
+
+    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key right."""
+        await self._press_button(HidCommand.Right, action)
+
+    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key select."""
+        await self._press_button(HidCommand.Select, action)
+
+    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key menu."""
+        await self._press_button(HidCommand.Menu, action)
+
+    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key home."""
+        await self._press_button(HidCommand.Home, action)
+
+    async def volume_up(self) -> None:
+        """Press key volume up."""
+        await self._press_button(HidCommand.VolumeUp)
+
+    async def volume_down(self) -> None:
+        """Press key volume down."""
+        await self._press_button(HidCommand.VolumeDown)
+
+    async def play_pause(self) -> None:
+        """Toggle between play and pause."""
+        await self._press_button(HidCommand.PlayPause)
+
+    async def _press_button(
+        self, command: HidCommand, action: InputAction = InputAction.SingleTap
+    ) -> None:
+        if action != InputAction.SingleTap:
+            raise NotImplementedError(f"{action} not supported for {command} (yet)")
+        await self.api.hid_command(False, command)
+
+
+def companion_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new Companion service."""
+    service = conf.CompanionService(
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return mdns_service.name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {"_companion-link._tcp.local": companion_service_handler}
 
 
 def setup(
@@ -253,6 +350,7 @@ def setup(
         CompanionFeatures(cast(conf.CompanionService, service)), Protocol.Companion
     )
     interfaces[Power].register(CompanionPower(api), Protocol.Companion)
+    interfaces[RemoteControl].register(CompanionRemoteControl(api), Protocol.Companion)
 
     async def _connect() -> None:
         pass
@@ -263,12 +361,15 @@ def setup(
     return (
         _connect,
         _close,
-        set(
-            [
-                FeatureName.AppList,
-                FeatureName.LaunchApp,
-                FeatureName.TurnOn,
-                FeatureName.TurnOff,
-            ]
-        ),
+        SUPPORTED_FEATURES,
     )
+
+
+def pair(
+    config: AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return CompanionPairingHandler(config, session_manager, loop, **kwargs)

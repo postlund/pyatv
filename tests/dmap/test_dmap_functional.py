@@ -200,20 +200,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         atv.close()
 
     @unittest_run_loop
-    async def test_unsupported_power_state(self):
-
-        # Check if power state return PowerState.Unknown as expected
-        self.assertEqual(self.atv.power.power_state, PowerState.Unknown)
-
-        # Call turn_on and check for exception
-        with self.assertRaises(exceptions.NotSupportedError):
-            await self.atv.power.turn_on()
-
-        # Call turn_off and check for exception
-        with self.assertRaises(exceptions.NotSupportedError):
-            await self.atv.power.turn_off()
-
-    @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.Legacy)
 

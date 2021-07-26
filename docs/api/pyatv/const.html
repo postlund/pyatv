@@ -174,357 +174,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Constants used in the public API.&#34;&#34;&#34;
-# pylint: disable=invalid-name
-
-from enum import Enum
-
-MAJOR_VERSION = &#34;0&#34;
-MINOR_VERSION = &#34;8&#34;
-PATCH_VERSION = &#34;0&#34;
-__short_version__ = &#34;{}.{}&#34;.format(MAJOR_VERSION, MINOR_VERSION)
-__version__ = &#34;{}.{}&#34;.format(__short_version__, PATCH_VERSION)
-
-
-class Protocol(Enum):
-    &#34;&#34;&#34;All supported protocols.&#34;&#34;&#34;
-
-    DMAP = 1
-    &#34;&#34;&#34;Protocol constant representing DMAP.&#34;&#34;&#34;
-
-    MRP = 2
-    &#34;&#34;&#34;Protocol constant representing MRP.&#34;&#34;&#34;
-
-    AirPlay = 3
-    &#34;&#34;&#34;Protocol constant representing AirPlay.&#34;&#34;&#34;
-
-    Companion = 4
-    &#34;&#34;&#34;Protocol constant representing Companion link.&#34;&#34;&#34;
-
-    RAOP = 5
-    &#34;&#34;&#34;Protocol constant representing RAOP.&#34;&#34;&#34;
-
-
-class MediaType(Enum):
-    &#34;&#34;&#34;All supported media types.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Media type is not known.
-
-    This can be either the case that nothing is playing or the app does
-    not report a valid media type.
-    &#34;&#34;&#34;
-
-    Video = 1
-    &#34;&#34;&#34;Media type is video.&#34;&#34;&#34;
-
-    Music = 2
-    &#34;&#34;&#34;Media type is music.&#34;&#34;&#34;
-
-    TV = 3
-    &#34;&#34;&#34;Media type is a TV show.&#34;&#34;&#34;
-
-
-class DeviceState(Enum):
-    &#34;&#34;&#34;All supported device states.&#34;&#34;&#34;
-
-    Idle = 0
-    &#34;&#34;&#34;Device is idling, i.e. nothing is playing or about to play.&#34;&#34;&#34;
-
-    Loading = 1
-    &#34;&#34;&#34;Media is being loaded but not yet playing.&#34;&#34;&#34;
-
-    Paused = 2
-    &#34;&#34;&#34;Media is in paused state.&#34;&#34;&#34;
-
-    Playing = 3
-    &#34;&#34;&#34;Media is playing.&#34;&#34;&#34;
-
-    Stopped = 4
-    &#34;&#34;&#34;Media is stopped.&#34;&#34;&#34;
-
-    Seeking = 5
-    &#34;&#34;&#34;Media is seeking, e.g fast forward.&#34;&#34;&#34;
-
-
-class RepeatState(Enum):
-    &#34;&#34;&#34;All supported repeat states.&#34;&#34;&#34;
-
-    Off = 0
-    &#34;&#34;&#34;Repeat is off.&#34;&#34;&#34;
-
-    Track = 1
-    &#34;&#34;&#34;Repeat current track or item.&#34;&#34;&#34;
-
-    All = 2
-    &#34;&#34;&#34;Repeat all tracks or items.&#34;&#34;&#34;
-
-
-class ShuffleState(Enum):
-    &#34;&#34;&#34;All supported shuffle states.&#34;&#34;&#34;
-
-    Off = 0
-    &#34;&#34;&#34;Shuffle is off.&#34;&#34;&#34;
-
-    Albums = 1
-    &#34;&#34;&#34;Shuffle on album level.&#34;&#34;&#34;
-
-    Songs = 2
-    &#34;&#34;&#34;Shuffle on song level.&#34;&#34;&#34;
-
-
-class PowerState(Enum):
-    &#34;&#34;&#34;All supported power states.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Power state is not determinable.&#34;&#34;&#34;
-
-    Off = 1
-    &#34;&#34;&#34;Device is turned off (standby).&#34;&#34;&#34;
-
-    On = 2
-    &#34;&#34;&#34;Device is turned on.&#34;&#34;&#34;
-
-
-class OperatingSystem(Enum):
-    &#34;&#34;&#34;Operating system on device.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Operating system is not known.&#34;&#34;&#34;
-
-    Legacy = 1
-    &#34;&#34;&#34;Operating system  is Apple TV Software (pre-tvOS).&#34;&#34;&#34;
-
-    TvOS = 2
-    &#34;&#34;&#34;Operating system is tvOS.&#34;&#34;&#34;
-
-    AirPortOS = 3
-    &#34;&#34;&#34;Operating system is AirPortOS.
-
-    This OS is used by AirPort Express devices. It is not an official name but made up
-    in pyatv as no official name has been found.
-    &#34;&#34;&#34;
-
-
-class DeviceModel(Enum):
-    &#34;&#34;&#34;Hardware device model.
-
-    Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
-    future.
-    &#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Device model is unknown.&#34;&#34;&#34;
-
-    Gen2 = 1
-    &#34;&#34;&#34;Device model is second generation Apple TV (Apple TV 2).&#34;&#34;&#34;
-
-    Gen3 = 2
-    &#34;&#34;&#34;Device model is third generation Apple TV (Apple TV 3).&#34;&#34;&#34;
-
-    Gen4 = 3
-    &#34;&#34;&#34;Device model is fourth generation Apple TV (Apple TV 4).&#34;&#34;&#34;
-
-    Gen4K = 4
-    &#34;&#34;&#34;Device model is fifth generation Apple TV (Apple TV 4K).&#34;&#34;&#34;
-
-    HomePod = 5
-    &#34;&#34;&#34;Device model is HomePod (first generation).&#34;&#34;&#34;
-
-    HomePodMini = 6
-    &#34;&#34;&#34;Device model is HomePod Mini (first generation).&#34;&#34;&#34;
-
-    AirPortExpress = 7
-    &#34;&#34;&#34;Device model is AirPort Express (first generation).&#34;&#34;&#34;
-
-    AirPortExpressGen2 = 8
-    &#34;&#34;&#34;Device model is AirPort Express (second generation).&#34;&#34;&#34;
-
-    AppleTV4KGen2 = 9
-    &#34;&#34;&#34;Device model is sixth generation Apple TV (Apple TV 4K gen 2).&#34;&#34;&#34;
-
-
-class InputAction(Enum):
-    &#34;&#34;&#34;Type of input when pressing a button.&#34;&#34;&#34;
-
-    SingleTap = 0
-    &#34;&#34;&#34;Press and release quickly.&#34;&#34;&#34;
-
-    DoubleTap = 1
-    &#34;&#34;&#34;Press and release twice quickly.&#34;&#34;&#34;
-
-    Hold = 2
-    &#34;&#34;&#34;Press and hold for one second before releasing.&#34;&#34;&#34;
-
-
-class FeatureState(Enum):
-    &#34;&#34;&#34;State of a particular feature.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Feature is supported by device but it is not known if it is available or not.&#34;&#34;&#34;
-
-    Unsupported = 1
-    &#34;&#34;&#34;Device does not support this feature.&#34;&#34;&#34;
-
-    Unavailable = 2
-    &#34;&#34;&#34;Feature is supported by device but not available now.
-
-    Pause is for instance unavailable if nothing is playing.
-    &#34;&#34;&#34;
-
-    Available = 3
-    &#34;&#34;&#34;Feature is supported and available.&#34;&#34;&#34;
-
-
-# This enum is generated by scripts/features.py
-class FeatureName(Enum):
-    &#34;&#34;&#34;All supported features.&#34;&#34;&#34;
-
-    Up = 0
-    &#34;&#34;&#34;Up button on remote.&#34;&#34;&#34;
-
-    Down = 1
-    &#34;&#34;&#34;Down button on remote.&#34;&#34;&#34;
-
-    Left = 2
-    &#34;&#34;&#34;Left button on remote.&#34;&#34;&#34;
-
-    Right = 3
-    &#34;&#34;&#34;Right button on remote.&#34;&#34;&#34;
-
-    Play = 4
-    &#34;&#34;&#34;Start playing media.&#34;&#34;&#34;
-
-    PlayPause = 5
-    &#34;&#34;&#34;Toggle between play/pause.&#34;&#34;&#34;
-
-    Pause = 6
-    &#34;&#34;&#34;Pause playing media.&#34;&#34;&#34;
-
-    Stop = 7
-    &#34;&#34;&#34;Stop playing media.&#34;&#34;&#34;
-
-    Next = 8
-    &#34;&#34;&#34;Change to next item.&#34;&#34;&#34;
-
-    Previous = 9
-    &#34;&#34;&#34;Change to previous item.&#34;&#34;&#34;
-
-    Select = 10
-    &#34;&#34;&#34;Select current option.&#34;&#34;&#34;
-
-    Menu = 11
-    &#34;&#34;&#34;Go back to previous menu.&#34;&#34;&#34;
-
-    VolumeUp = 12
-    &#34;&#34;&#34;Increase volume.&#34;&#34;&#34;
-
-    VolumeDown = 13
-    &#34;&#34;&#34;Decrease volume.&#34;&#34;&#34;
-
-    Home = 14
-    &#34;&#34;&#34;Home/TV button.&#34;&#34;&#34;
-
-    HomeHold = 15
-    &#34;&#34;&#34;Long-press home button (deprecated: use RemoteControl.home).&#34;&#34;&#34;
-
-    TopMenu = 16
-    &#34;&#34;&#34;Go to main menu.&#34;&#34;&#34;
-
-    Suspend = 17
-    &#34;&#34;&#34;Suspend device (deprecated; use Power.turn_off).&#34;&#34;&#34;
-
-    WakeUp = 18
-    &#34;&#34;&#34;Wake up device (deprecated; use Power.turn_on).&#34;&#34;&#34;
-
-    SkipForward = 36
-    &#34;&#34;&#34;Skip forward a time interval.&#34;&#34;&#34;
-
-    SkipBackward = 37
-    &#34;&#34;&#34;Skip backwards a time interval.&#34;&#34;&#34;
-
-    SetPosition = 19
-    &#34;&#34;&#34;Seek to position.&#34;&#34;&#34;
-
-    SetShuffle = 20
-    &#34;&#34;&#34;Change shuffle state.&#34;&#34;&#34;
-
-    SetRepeat = 21
-    &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
-
-    Title = 22
-    &#34;&#34;&#34;Title of playing media.&#34;&#34;&#34;
-
-    Artist = 23
-    &#34;&#34;&#34;Artist of playing song.&#34;&#34;&#34;
-
-    Album = 24
-    &#34;&#34;&#34;Album from playing artist.&#34;&#34;&#34;
-
-    Genre = 25
-    &#34;&#34;&#34;Genre of playing song.&#34;&#34;&#34;
-
-    TotalTime = 26
-    &#34;&#34;&#34;Total length of playing media (seconds).&#34;&#34;&#34;
-
-    Position = 27
-    &#34;&#34;&#34;Current play time position.&#34;&#34;&#34;
-
-    Shuffle = 28
-    &#34;&#34;&#34;Shuffle state.&#34;&#34;&#34;
-
-    Repeat = 29
-    &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
-
-    SeriesName = 40
-    &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
-
-    SeasonNumber = 41
-    &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
-
-    EpisodeNumber = 42
-    &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
-
-    AppList = 38
-    &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
-
-    LaunchApp = 39
-    &#34;&#34;&#34;Launch an app.&#34;&#34;&#34;
-
-    Artwork = 30
-    &#34;&#34;&#34;Playing media artwork.&#34;&#34;&#34;
-
-    App = 35
-    &#34;&#34;&#34;App playing media.&#34;&#34;&#34;
-
-    PushUpdates = 43
-    &#34;&#34;&#34;Push updates are supported.&#34;&#34;&#34;
-
-    PlayUrl = 31
-    &#34;&#34;&#34;Stream a URL on device.&#34;&#34;&#34;
-
-    StreamFile = 44
-    &#34;&#34;&#34;Stream local file to device.&#34;&#34;&#34;
-
-    PowerState = 32
-    &#34;&#34;&#34;Current device power state.&#34;&#34;&#34;
-
-    TurnOn = 33
-    &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
-
-    TurnOff = 34
-    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;
-
-    Volume = 45
-    &#34;&#34;&#34;Current volume level.&#34;&#34;&#34;
-
-    SetVolume = 46
-    &#34;&#34;&#34;Set volume level.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L0-L345" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -543,47 +193,7 @@ class FeatureName(Enum):
 <section class="desc"><p>Hardware device model.</p>
 <p>Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
 future.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DeviceModel(Enum):
-    &#34;&#34;&#34;Hardware device model.
-
-    Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
-    future.
-    &#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Device model is unknown.&#34;&#34;&#34;
-
-    Gen2 = 1
-    &#34;&#34;&#34;Device model is second generation Apple TV (Apple TV 2).&#34;&#34;&#34;
-
-    Gen3 = 2
-    &#34;&#34;&#34;Device model is third generation Apple TV (Apple TV 3).&#34;&#34;&#34;
-
-    Gen4 = 3
-    &#34;&#34;&#34;Device model is fourth generation Apple TV (Apple TV 4).&#34;&#34;&#34;
-
-    Gen4K = 4
-    &#34;&#34;&#34;Device model is fifth generation Apple TV (Apple TV 4K).&#34;&#34;&#34;
-
-    HomePod = 5
-    &#34;&#34;&#34;Device model is HomePod (first generation).&#34;&#34;&#34;
-
-    HomePodMini = 6
-    &#34;&#34;&#34;Device model is HomePod Mini (first generation).&#34;&#34;&#34;
-
-    AirPortExpress = 7
-    &#34;&#34;&#34;Device model is AirPort Express (first generation).&#34;&#34;&#34;
-
-    AirPortExpressGen2 = 8
-    &#34;&#34;&#34;Device model is AirPort Express (second generation).&#34;&#34;&#34;
-
-    AppleTV4KGen2 = 9
-    &#34;&#34;&#34;Device model is sixth generation Apple TV (Apple TV 4K gen 2).&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L133-L168" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -638,31 +248,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported device states.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class DeviceState(Enum):
-    &#34;&#34;&#34;All supported device states.&#34;&#34;&#34;
-
-    Idle = 0
-    &#34;&#34;&#34;Device is idling, i.e. nothing is playing or about to play.&#34;&#34;&#34;
-
-    Loading = 1
-    &#34;&#34;&#34;Media is being loaded but not yet playing.&#34;&#34;&#34;
-
-    Paused = 2
-    &#34;&#34;&#34;Media is in paused state.&#34;&#34;&#34;
-
-    Playing = 3
-    &#34;&#34;&#34;Media is playing.&#34;&#34;&#34;
-
-    Stopped = 4
-    &#34;&#34;&#34;Media is stopped.&#34;&#34;&#34;
-
-    Seeking = 5
-    &#34;&#34;&#34;Media is seeking, e.g fast forward.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L52-L71" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -701,154 +287,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class FeatureName(Enum):
-    &#34;&#34;&#34;All supported features.&#34;&#34;&#34;
-
-    Up = 0
-    &#34;&#34;&#34;Up button on remote.&#34;&#34;&#34;
-
-    Down = 1
-    &#34;&#34;&#34;Down button on remote.&#34;&#34;&#34;
-
-    Left = 2
-    &#34;&#34;&#34;Left button on remote.&#34;&#34;&#34;
-
-    Right = 3
-    &#34;&#34;&#34;Right button on remote.&#34;&#34;&#34;
-
-    Play = 4
-    &#34;&#34;&#34;Start playing media.&#34;&#34;&#34;
-
-    PlayPause = 5
-    &#34;&#34;&#34;Toggle between play/pause.&#34;&#34;&#34;
-
-    Pause = 6
-    &#34;&#34;&#34;Pause playing media.&#34;&#34;&#34;
-
-    Stop = 7
-    &#34;&#34;&#34;Stop playing media.&#34;&#34;&#34;
-
-    Next = 8
-    &#34;&#34;&#34;Change to next item.&#34;&#34;&#34;
-
-    Previous = 9
-    &#34;&#34;&#34;Change to previous item.&#34;&#34;&#34;
-
-    Select = 10
-    &#34;&#34;&#34;Select current option.&#34;&#34;&#34;
-
-    Menu = 11
-    &#34;&#34;&#34;Go back to previous menu.&#34;&#34;&#34;
-
-    VolumeUp = 12
-    &#34;&#34;&#34;Increase volume.&#34;&#34;&#34;
-
-    VolumeDown = 13
-    &#34;&#34;&#34;Decrease volume.&#34;&#34;&#34;
-
-    Home = 14
-    &#34;&#34;&#34;Home/TV button.&#34;&#34;&#34;
-
-    HomeHold = 15
-    &#34;&#34;&#34;Long-press home button (deprecated: use RemoteControl.home).&#34;&#34;&#34;
-
-    TopMenu = 16
-    &#34;&#34;&#34;Go to main menu.&#34;&#34;&#34;
-
-    Suspend = 17
-    &#34;&#34;&#34;Suspend device (deprecated; use Power.turn_off).&#34;&#34;&#34;
-
-    WakeUp = 18
-    &#34;&#34;&#34;Wake up device (deprecated; use Power.turn_on).&#34;&#34;&#34;
-
-    SkipForward = 36
-    &#34;&#34;&#34;Skip forward a time interval.&#34;&#34;&#34;
-
-    SkipBackward = 37
-    &#34;&#34;&#34;Skip backwards a time interval.&#34;&#34;&#34;
-
-    SetPosition = 19
-    &#34;&#34;&#34;Seek to position.&#34;&#34;&#34;
-
-    SetShuffle = 20
-    &#34;&#34;&#34;Change shuffle state.&#34;&#34;&#34;
-
-    SetRepeat = 21
-    &#34;&#34;&#34;Change repeat state.&#34;&#34;&#34;
-
-    Title = 22
-    &#34;&#34;&#34;Title of playing media.&#34;&#34;&#34;
-
-    Artist = 23
-    &#34;&#34;&#34;Artist of playing song.&#34;&#34;&#34;
-
-    Album = 24
-    &#34;&#34;&#34;Album from playing artist.&#34;&#34;&#34;
-
-    Genre = 25
-    &#34;&#34;&#34;Genre of playing song.&#34;&#34;&#34;
-
-    TotalTime = 26
-    &#34;&#34;&#34;Total length of playing media (seconds).&#34;&#34;&#34;
-
-    Position = 27
-    &#34;&#34;&#34;Current play time position.&#34;&#34;&#34;
-
-    Shuffle = 28
-    &#34;&#34;&#34;Shuffle state.&#34;&#34;&#34;
-
-    Repeat = 29
-    &#34;&#34;&#34;Repeat state.&#34;&#34;&#34;
-
-    SeriesName = 40
-    &#34;&#34;&#34;Title of TV series.&#34;&#34;&#34;
-
-    SeasonNumber = 41
-    &#34;&#34;&#34;Season number of TV series.&#34;&#34;&#34;
-
-    EpisodeNumber = 42
-    &#34;&#34;&#34;Episode number of TV series.&#34;&#34;&#34;
-
-    AppList = 38
-    &#34;&#34;&#34;List of launchable apps.&#34;&#34;&#34;
-
-    LaunchApp = 39
-    &#34;&#34;&#34;Launch an app.&#34;&#34;&#34;
-
-    Artwork = 30
-    &#34;&#34;&#34;Playing media artwork.&#34;&#34;&#34;
-
-    App = 35
-    &#34;&#34;&#34;App playing media.&#34;&#34;&#34;
-
-    PushUpdates = 43
-    &#34;&#34;&#34;Push updates are supported.&#34;&#34;&#34;
-
-    PlayUrl = 31
-    &#34;&#34;&#34;Stream a URL on device.&#34;&#34;&#34;
-
-    StreamFile = 44
-    &#34;&#34;&#34;Stream local file to device.&#34;&#34;&#34;
-
-    PowerState = 32
-    &#34;&#34;&#34;Current device power state.&#34;&#34;&#34;
-
-    TurnOn = 33
-    &#34;&#34;&#34;Turn device on.&#34;&#34;&#34;
-
-    TurnOff = 34
-    &#34;&#34;&#34;Turn off device.&#34;&#34;&#34;
-
-    Volume = 45
-    &#34;&#34;&#34;Current volume level.&#34;&#34;&#34;
-
-    SetVolume = 46
-    &#34;&#34;&#34;Set volume level.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L204-L346" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1051,28 +490,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>State of a particular feature.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class FeatureState(Enum):
-    &#34;&#34;&#34;State of a particular feature.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Feature is supported by device but it is not known if it is available or not.&#34;&#34;&#34;
-
-    Unsupported = 1
-    &#34;&#34;&#34;Device does not support this feature.&#34;&#34;&#34;
-
-    Unavailable = 2
-    &#34;&#34;&#34;Feature is supported by device but not available now.
-
-    Pause is for instance unavailable if nothing is playing.
-    &#34;&#34;&#34;
-
-    Available = 3
-    &#34;&#34;&#34;Feature is supported and available.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L184-L200" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1104,22 +522,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Type of input when pressing a button.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class InputAction(Enum):
-    &#34;&#34;&#34;Type of input when pressing a button.&#34;&#34;&#34;
-
-    SingleTap = 0
-    &#34;&#34;&#34;Press and release quickly.&#34;&#34;&#34;
-
-    DoubleTap = 1
-    &#34;&#34;&#34;Press and release twice quickly.&#34;&#34;&#34;
-
-    Hold = 2
-    &#34;&#34;&#34;Press and hold for one second before releasing.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L171-L181" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1146,29 +549,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported media types.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class MediaType(Enum):
-    &#34;&#34;&#34;All supported media types.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Media type is not known.
-
-    This can be either the case that nothing is playing or the app does
-    not report a valid media type.
-    &#34;&#34;&#34;
-
-    Video = 1
-    &#34;&#34;&#34;Media type is video.&#34;&#34;&#34;
-
-    Music = 2
-    &#34;&#34;&#34;Media type is music.&#34;&#34;&#34;
-
-    TV = 3
-    &#34;&#34;&#34;Media type is a TV show.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L32-L49" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1201,29 +582,7 @@ not report a valid media type.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Operating system on device.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class OperatingSystem(Enum):
-    &#34;&#34;&#34;Operating system on device.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Operating system is not known.&#34;&#34;&#34;
-
-    Legacy = 1
-    &#34;&#34;&#34;Operating system  is Apple TV Software (pre-tvOS).&#34;&#34;&#34;
-
-    TvOS = 2
-    &#34;&#34;&#34;Operating system is tvOS.&#34;&#34;&#34;
-
-    AirPortOS = 3
-    &#34;&#34;&#34;Operating system is AirPortOS.
-
-    This OS is used by AirPort Express devices. It is not an official name but made up
-    in pyatv as no official name has been found.
-    &#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L113-L130" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1257,22 +616,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported power states.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class PowerState(Enum):
-    &#34;&#34;&#34;All supported power states.&#34;&#34;&#34;
-
-    Unknown = 0
-    &#34;&#34;&#34;Power state is not determinable.&#34;&#34;&#34;
-
-    Off = 1
-    &#34;&#34;&#34;Device is turned off (standby).&#34;&#34;&#34;
-
-    On = 2
-    &#34;&#34;&#34;Device is turned on.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L100-L110" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1299,28 +643,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported protocols.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Protocol(Enum):
-    &#34;&#34;&#34;All supported protocols.&#34;&#34;&#34;
-
-    DMAP = 1
-    &#34;&#34;&#34;Protocol constant representing DMAP.&#34;&#34;&#34;
-
-    MRP = 2
-    &#34;&#34;&#34;Protocol constant representing MRP.&#34;&#34;&#34;
-
-    AirPlay = 3
-    &#34;&#34;&#34;Protocol constant representing AirPlay.&#34;&#34;&#34;
-
-    Companion = 4
-    &#34;&#34;&#34;Protocol constant representing Companion link.&#34;&#34;&#34;
-
-    RAOP = 5
-    &#34;&#34;&#34;Protocol constant representing RAOP.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L13-L29" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1355,22 +678,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported repeat states.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RepeatState(Enum):
-    &#34;&#34;&#34;All supported repeat states.&#34;&#34;&#34;
-
-    Off = 0
-    &#34;&#34;&#34;Repeat is off.&#34;&#34;&#34;
-
-    Track = 1
-    &#34;&#34;&#34;Repeat current track or item.&#34;&#34;&#34;
-
-    All = 2
-    &#34;&#34;&#34;Repeat all tracks or items.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L74-L84" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -1397,22 +705,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported shuffle states.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ShuffleState(Enum):
-    &#34;&#34;&#34;All supported shuffle states.&#34;&#34;&#34;
-
-    Off = 0
-    &#34;&#34;&#34;Shuffle is off.&#34;&#34;&#34;
-
-    Albums = 1
-    &#34;&#34;&#34;Shuffle on album level.&#34;&#34;&#34;
-
-    Songs = 2
-    &#34;&#34;&#34;Shuffle on song level.&#34;&#34;&#34;</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L87-L97" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>

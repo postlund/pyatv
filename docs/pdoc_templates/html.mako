@@ -1,9 +1,11 @@
 <%
   import os
+  import sys
 
   import pdoc
   from pdoc.html_helpers import extract_toc, glimpse, to_html as _to_html, format_git_link
 
+  import pyatv
 
   def link(d, name=None, fmt='{}'):
     name = fmt.format(name or d.qualname + ('()' if isinstance(d, pdoc.Function) else ''))
@@ -13,6 +15,9 @@
                 top_ancestor=not show_inherited_members).replace(".html", "")
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
+  def const_link(refname):
+      desc = ".".join(refname.split(".")[-2:])
+      return f'<a title="{refname}" href="const#{refname}">{desc}</a>'
 
   def to_html(text):
     return _to_html(text, module=module, link=link, latex_math=latex_math)
@@ -35,7 +40,7 @@
         <summary>
             <span>Expand source code</span>
             % if git_link:
-              <a href="${git_link}" class="git-link">Browse git</a>
+              <a href="${git_link}" class="git-link">View at GitHub</a>
             %endif
         </summary>
         <pre><code class="python">${d.source | h}</code></pre>
@@ -46,7 +51,7 @@
   %endif
 </%def>
 
-<%def name="show_desc(d, short=False)">
+<%def name="show_desc(d, subclasses=None, short=False)">
   <%
   inherits = ' inherited' if d.inherits else ''
   docstring = glimpse(d.docstring) if short or inherits else d.docstring
@@ -61,6 +66,7 @@
           % endif
       </p>
   % endif
+  ${show_protocols(d, subclasses)}
   <section class="desc${inherits}">${docstring | to_html}</section>
   % if not isinstance(d, pdoc.Module):
   ${show_source(d)}
@@ -95,6 +101,34 @@
   </ul>
 </%def>
 
+<%def name="show_protocols(f, subclasses)">
+  <%
+  feature_name = getattr(f.obj, "_feature_name", "")
+  refname = "pyatv.const.FeatureName." + feature_name
+  protocols = []
+  proto_map = {proto.name.lower(): proto for proto in pyatv.const.Protocol}
+  %>
+  % if feature_name:
+      % for subclass in subclasses or []:
+          <%
+          # Get reference to method/property in protocol implementation
+          module_name, name = subclass.qualname.rsplit(".", maxsplit=1)
+          module = sys.modules[module_name]
+          method = getattr(getattr(module, name), f.name)
+
+          # If method is a property, extract the getter method
+          target = getattr(method, "fget", method)
+          if target != f.obj and "facade" not in module.__name__:
+              protocols.append(proto_map[module.__name__.split(".")[-1]])
+          %>
+      % endfor
+      <div class="api_feature">
+          <span>Feature: ${const_link(refname)},</span>
+          <span>Supported by: ${", ".join([const_link(f"pyatv.const.Protocol.{x.name}") for x in protocols])}</span>
+      </div>
+  %endif
+</%def>
+
 <%def name="show_module(module)">
   <%
   variables = module.variables(sort=sort_identifiers)
@@ -103,8 +137,9 @@
   submodules = module.submodules()
   %>
 
-  <%def name="show_func(f)">
-    <dt id="${f.refname}"><code class="name flex">
+  <%def name="show_func(f, subclasses)">
+    <dt id="${f.refname}">
+        <code class="name flex">
         <%
             params = ', '.join([insert_union_types(param, is_return=False) for param in f.params(annotate=show_type_annotations, link=link)])
             returns = show_type_annotations and f.return_annotation(link=link) or ''
@@ -112,8 +147,11 @@
                 returns = insert_union_types(returns)
         %>
         <span>${f.funcdef()} ${ident(f.name)}</span>(<span>${params})${returns}</span>
-    </code></dt>
-    <dd>${show_desc(f)}</dd>
+        </code>
+    </dt>
+    <dd>
+        ${show_desc(f, subclasses)}
+    </dd>
   </%def>
 
   <header>
@@ -164,7 +202,7 @@
     <h2 class="section-title" id="header-functions">Functions</h2>
     <dl>
     % for f in functions:
-      ${show_func(f)}
+      ${show_func(f, [])}
     % endfor
     </dl>
     % endif
@@ -223,7 +261,7 @@
           <h3>Static methods</h3>
           <dl>
           % for f in smethods:
-              ${show_func(f)}
+              ${show_func(f, subclasses)}
           % endfor
           </dl>
       % endif
@@ -237,7 +275,7 @@
                       var_type = insert_union_types(var_type)
               %>
               <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${var_type}</code></dt>
-              <dd>${show_desc(v)}</dd>
+              <dd>${show_desc(v, subclasses)}</dd>
           % endfor
           </dl>
       % endif
@@ -245,7 +283,7 @@
           <h3>Methods</h3>
           <dl>
           % for f in methods:
-              ${show_func(f)}
+              ${show_func(f, subclasses)}
           % endfor
           </dl>
       % endif

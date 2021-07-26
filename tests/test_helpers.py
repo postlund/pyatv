@@ -81,6 +81,7 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
         ("_airplay._tcp.local", "name", {"deviceid": "test"}, "test"),
         ("_raop._tcp.local", "abcd@name", {}, "abcd"),
         ("_raop._tcp.local", "abcd@name", {}, "abcd"),
+        ("_hscp._tcp.local", "name", {"Machine ID": "abcd"}, "abcd"),
     ],
 )
 def test_get_unique_id_(service_type, service_name, properties, expected_id):

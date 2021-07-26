@@ -1,5 +1,6 @@
 """Device pairing and derivation of encryption keys."""
 
+import asyncio
 import binascii
 import logging
 from typing import Optional
@@ -19,7 +20,11 @@ class AirPlayPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
     def __init__(
-        self, config: conf.AppleTV, session_manager: ClientSessionManager, _
+        self,
+        config: conf.AppleTV,
+        session_manager: ClientSessionManager,
+        loop: asyncio.AbstractEventLoop,
+        **kwargs
     ) -> None:
         """Initialize a new MrpPairingHandler."""
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))

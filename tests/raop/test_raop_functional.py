@@ -14,7 +14,8 @@ from typing import Dict, List
 import pytest
 
 from pyatv import exceptions, raop
-from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType
+from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
+from pyatv.exceptions import AuthenticationError
 from pyatv.interface import FeatureInfo, Playing, PushListener
 
 from tests.utils import data_path, until
@@ -134,6 +135,39 @@ async def test_stream_complete_legacy_auth(
 
     assert raop_state.auth_setup_performed == require_auth
     assert audio_matches(raop_state.raw_audio, frames=10)
+
+
+@pytest.mark.parametrize(
+    "raop_properties,raop_server_password,raop_client_password",
+    [
+        ({"et": "0"}, "test", "test"),
+        ({"et": "0"}, None, None),
+        ({"et": "0"}, "test", None),
+    ],
+)
+async def test_stream_with_password(
+    raop_client,
+    raop_state,
+    raop_usecase,
+    raop_conf,
+    raop_server_password,
+    raop_client_password,
+):
+    raop_usecase.password(raop_server_password)
+
+    raop_service = raop_conf.get_service(Protocol.RAOP)
+    if raop_service:
+        raop_service.password = raop_client_password
+
+    expect_error = raop_server_password != raop_client_password
+
+    try:
+        await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
+        assert not expect_error
+    except AuthenticationError as e:
+        assert expect_error
+    except Exception as e:
+        assert False
 
 
 @pytest.mark.parametrize(

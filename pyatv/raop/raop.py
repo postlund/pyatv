@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import logging
-from time import monotonic
+from time import perf_counter
 from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
 
@@ -288,6 +288,7 @@ class RaopClient:
         self.rtsp: RtspSession = rtsp
         self.context: RtspContext = context
         self.credentials: Optional[LegacyCredentials] = None
+        self.password: Optional[str] = None
         self.control_client: Optional[ControlClient] = None
         self.timing_client: Optional[TimingClient] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -418,7 +419,7 @@ class RaopClient:
             verifier = AirPlayPairingVerifier(self.rtsp.connection, srp)
             await verifier.verify_authed()
 
-        await self.rtsp.announce()
+        await self.rtsp.announce(self.password)
 
         resp = await self.rtsp.setup(self.control_client.port, self.timing_client.port)
         _, options = parse_transport(resp.headers["Transport"])
@@ -531,19 +532,14 @@ class RaopClient:
                 listener.stopped()
 
     async def _stream_data(self, source: AudioSource, transport):
-        packets_per_second = self.context.sample_rate / FRAMES_PER_PACKET
-        packet_interval = 1 / packets_per_second
-
         stats = Statistics(self.context.sample_rate)
 
+        initial_time = perf_counter()
         while True:
-            start_time = monotonic()
-
             num_sent = await self._send_packet(
                 source, stats.total_frames == 0, transport
             )
             if num_sent == 0:
-                print("break out")
                 break
 
             stats.tick(num_sent)
@@ -564,7 +560,6 @@ class RaopClient:
                 )
                 stats.tick(num_sent)
                 if not has_more_packets:
-                    print("break out 2")
                     break
 
             # Log how long it took to send sample_rate amount of frames (should be
@@ -579,22 +574,26 @@ class RaopClient:
                     stats.expected_frame_count,
                 )
 
-            # Assuming processing isn't exceeding packet interval (i.e. we are
-            # processing packets to slow), we should sleep for a while
-            processing_time = monotonic() - start_time
-            if processing_time < packet_interval:
-                await asyncio.sleep(packet_interval - processing_time * 2)
+            # Calculate the actual absolute position in stream and where we actually
+            # are (from when we initially stared to stream). The diff is the time we
+            # need to sleep until next lap.
+            abs_time_stream = stats.total_frames / self.context.sample_rate
+            rel_to_start = perf_counter() - initial_time
+            diff = abs_time_stream - rel_to_start
+            if diff > 0:
+                await asyncio.sleep(diff)
             else:
                 _LOGGER.warning(
-                    "Too slow to keep up for seqno %d (%f > %f)",
+                    "Too slow to keep up for seqno %d (%f vs %f => %f)",
                     self.context.rtpseq - 1,
-                    processing_time,
-                    packet_interval,
+                    abs_time_stream,
+                    rel_to_start,
+                    diff,
                 )
 
         _LOGGER.debug(
             "Audio finished sending in %fs",
-            (timing.monotonic_ns() - stats.start_time_ns) / 10 ** 9,
+            (timing.perf_counter_ns() - stats.start_time_ns) / 10 ** 9,
         )
         await asyncio.sleep(self.context.latency / self.context.sample_rate)
 
@@ -603,7 +602,6 @@ class RaopClient:
     ) -> int:
         frames = await source.readframes(FRAMES_PER_PACKET)
         if not frames:
-            print("no more frames")
             return 0
 
         header = AudioPacketHeader.encode(
@@ -661,8 +659,8 @@ class Statistics:
     def __init__(self, sample_rate: int):
         """Initialize a new Statistics instance."""
         self.sample_rate: int = sample_rate
-        self.start_time_ns: int = timing.monotonic_ns()
-        self.interval_time: float = monotonic()
+        self.start_time_ns: int = timing.perf_counter_ns()
+        self.interval_time: float = perf_counter()
         self.total_frames: int = 0
         self.interval_frames: int = 0
 
@@ -670,7 +668,8 @@ class Statistics:
     def expected_frame_count(self) -> int:
         """Number of frames expected to be sent at current time."""
         return int(
-            (timing.monotonic_ns() - self.start_time_ns) / (10 ** 9 / self.sample_rate)
+            (timing.perf_counter_ns() - self.start_time_ns)
+            / (10 ** 9 / self.sample_rate)
         )
 
     @property
@@ -694,7 +693,7 @@ class Statistics:
 
     def new_interval(self) -> Tuple[float, int]:
         """Start measuring a new time interval."""
-        end_time = monotonic()
+        end_time = perf_counter()
         diff = end_time - self.interval_time
         self.interval_time = end_time
 

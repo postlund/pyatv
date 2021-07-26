@@ -122,6 +122,7 @@ app and power related functions.
 * All features in the app interface ({% include api i="interface.Apps" %})
 * Turn on/off device ({% include api i="interface.Power.turn_on" %},
   {% include api i="interface.Power.turn_off" %})
+* Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
 
 ### Limitations and notes
 
@@ -133,7 +134,8 @@ app and power related functions.
 ## DMAP
 
 This protocol is the same protocol (suite) used by iTunes in the past and mainly deals with
-metadata and playback. Only used by legacy devices, like the Apple TV 3.
+metadata and playback. It is used by legacy devices, like Apple TV 3 and also to control the
+Music app in macOS.
 
 ### Supported Features
 
@@ -141,7 +143,7 @@ metadata and playback. Only used by legacy devices, like the Apple TV 3.
 * Device Metadata
 * Push Updates
 * Features interface
-* Remote control
+* Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
 * Artwork
 * Playing metadata
 * Device and playback state
@@ -154,6 +156,9 @@ metadata and playback. Only used by legacy devices, like the Apple TV 3.
   support for this exists in the protocol
 * No support for different tap actions in conjunction with button (e.g. double tap or
   hold) as it's not supported by the protocol
+* It is possible to discover and control a Music app running on macOS, assuming macOS
+  version is at most 11.3. From 11.4, FairPlay authentication is required, which no one
+  has reverse engnieered yet (ar least publicly and not relying on Apple binaries).
 
 ## MRP
 
@@ -166,7 +171,7 @@ as new ones, like notion of apps and game pad controls.
 * Device Metadata
 * Push Updates
 * Features interface
-* Remote control including different input actions
+* Remote control including different input actions (see {% include api i="interface.RemoteControl" %} for supported buttons)
 * Artwork
 * Playing metadata
 * Device and playback state
@@ -203,7 +208,7 @@ AirTunes).
 
 * Metadata and push updates only reflect what pyatv is currently playing as there
   seems to not be possible to get current play state from an AirPlay receiver
-* Devices requiring password are not supported
+* Devices requiring password are only supported when using the RAOP protocol
 * Remote control commands does not work (except for volume_up and volume_down),
   e.g. play or pause {% include issue no="1068" %}
 * Does not implement support for {% include api i="interface.DeviceListener" %} and will

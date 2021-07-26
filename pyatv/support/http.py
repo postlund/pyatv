@@ -377,7 +377,13 @@ class HttpConnection(asyncio.Protocol):
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
 
-        if response.code in [401, 403]:
+        if response.code == 403:
+            raise exceptions.AuthenticationError("not authenticated")
+
+        # Password required
+        if response.code == 401:
+            if allow_error:
+                return response
             raise exceptions.AuthenticationError("not authenticated")
 
         # Positive response

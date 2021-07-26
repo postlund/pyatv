@@ -33,14 +33,6 @@ def mdns_debug():
     yield
 
 
-@pytest.fixture
-async def udns_server(event_loop):
-    server = fake_udns.FakeUdns(event_loop, TEST_SERVICES)
-    await server.start()
-    yield server
-    server.close()
-
-
 @pytest.fixture(autouse=True)
 def stub_local_addresses():
     with patch("pyatv.support.net.get_private_addresses") as mock:
@@ -62,6 +54,7 @@ def stub_ip_address():
 # i.e. 5353 since data from other places can leak into the test
 @pytest.fixture(autouse=True)
 def redirect_mcast(udns_server):
+    udns_server.services = TEST_SERVICES
     real_mcast_socket = net.mcast_socket
     with patch("pyatv.support.net.mcast_socket") as mock:
         mock.side_effect = lambda addr, port=0: real_mcast_socket(
@@ -175,7 +168,7 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
 async def test_multicast_end_condition_met(
     event_loop, udns_server, multicast_fastexit, stub_ip_address
 ):
-    multicast_fastexit(responses=4, requests=10)
+    multicast_fastexit(responses=1, requests=10)
 
     actor = MagicMock()
 

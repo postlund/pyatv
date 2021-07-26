@@ -4,11 +4,23 @@ import asyncio
 import io
 import logging
 import math
-from typing import Any, Awaitable, Callable, Dict, Optional, Set, Tuple, Union, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from pyatv import conf, const, exceptions
 from pyatv.airplay.srp import LegacyCredentials
 from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
     FeatureInfo,
@@ -20,13 +32,14 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
-from pyatv.raop.audio_source import open_source
+from pyatv.raop.audio_source import AudioSource, open_source
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
 from pyatv.raop.rtsp import RtspContext, RtspSession
-from pyatv.support import map_range
+from pyatv.support import map_range, mdns
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -273,9 +286,11 @@ class RaopStream(Stream):
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
         self.playback_manager.acquire()
+        audio_file: Optional[AudioSource] = None
         try:
             client, _, context = await self.playback_manager.setup()
             client.credentials = self._get_credentials()
+            client.password = self.service.password
 
             client.listener = self.listener
             await client.initialize(self.service.properties)
@@ -295,7 +310,6 @@ class RaopStream(Stream):
                 # Source must support seeking to read metadata
                 if audio_file.supports_seek:
                     metadata = await get_metadata(file)
-                    _LOGGER.error("loading metadata: %s", metadata)
                 else:
                     _LOGGER.debug(
                         "Seeking not supported by source, not loading metadata"
@@ -319,7 +333,8 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
-            await audio_file.close()
+            if audio_file:
+                await audio_file.close()
             await self.playback_manager.teardown()
 
     def _get_credentials(self) -> Optional[LegacyCredentials]:
@@ -352,6 +367,27 @@ class RaopRemoteControl(RemoteControl):
     async def volume_down(self) -> None:
         """Press key volume down."""
         await self.audio.set_volume(max(self.audio.volume - 5.0, 0.0))
+
+
+def raop_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new RAOP service."""
+    _, name = mdns_service.name.split("@", maxsplit=1)
+    service = conf.RaopService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {
+        "_raop._tcp.local": raop_service_handler,
+        "_airport._tcp.local": lambda service, response: None,
+    }
 
 
 def setup(

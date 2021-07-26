@@ -27,6 +27,18 @@ link_group: api
 <li><code><a title="pyatv.scan" href="#pyatv.scan">scan</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.ProtocolImpl" href="#pyatv.ProtocolImpl">ProtocolImpl</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.ProtocolImpl.pair" href="#pyatv.ProtocolImpl.pair">pair</a></code></li>
+<li><code><a title="pyatv.ProtocolImpl.scan" href="#pyatv.ProtocolImpl.scan">scan</a></code></li>
+<li><code><a title="pyatv.ProtocolImpl.setup" href="#pyatv.ProtocolImpl.setup">setup</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </nav>
 <article id="content">
@@ -35,137 +47,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Main routines for interacting with an Apple TV.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Main routines for interacting with an Apple TV.&#34;&#34;&#34;
-
-import asyncio
-import datetime  # noqa
-from ipaddress import IPv4Address
-import logging
-from typing import Dict, List
-
-import aiohttp
-
-from pyatv import conf, exceptions, interface
-from pyatv.airplay import setup as airplay_setup
-from pyatv.airplay.pairing import AirPlayPairingHandler
-from pyatv.companion import setup as companion_setup
-from pyatv.companion.pairing import CompanionPairingHandler
-from pyatv.const import Protocol
-from pyatv.dmap import setup as dmap_setup
-from pyatv.dmap.pairing import DmapPairingHandler
-from pyatv.mrp import setup as mrp_setup
-from pyatv.mrp.pairing import MrpPairingHandler
-from pyatv.raop import setup as raop_setup
-from pyatv.support import http
-from pyatv.support.facade import FacadeAppleTV, SetupMethod
-from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
-
-_LOGGER = logging.getLogger(__name__)
-
-_PROTOCOL_IMPLEMENTATIONS: Dict[Protocol, SetupMethod] = {
-    Protocol.MRP: mrp_setup,
-    Protocol.DMAP: dmap_setup,
-    Protocol.AirPlay: airplay_setup,
-    Protocol.Companion: companion_setup,
-    Protocol.RAOP: raop_setup,
-}
-
-
-async def scan(
-    loop: asyncio.AbstractEventLoop,
-    timeout: int = 5,
-    identifier: str = None,
-    protocol: Protocol = None,
-    hosts: List[str] = None,
-) -&gt; List[conf.AppleTV]:
-    &#34;&#34;&#34;Scan for Apple TVs on network and return their configurations.&#34;&#34;&#34;
-
-    def _should_include(atv):
-        if not atv.ready:
-            return False
-
-        if identifier and identifier not in atv.all_identifiers:
-            return False
-
-        if protocol and atv.get_service(protocol) is None:
-            return False
-
-        return True
-
-    scanner: BaseScanner
-    if hosts:
-        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
-    else:
-        scanner = MulticastMdnsScanner(loop, identifier)
-
-    devices = (await scanner.discover(timeout)).values()
-    return [device for device in devices if _should_include(device)]
-
-
-async def connect(
-    config: conf.AppleTV,
-    loop: asyncio.AbstractEventLoop,
-    protocol: Protocol = None,
-    session: aiohttp.ClientSession = None,
-) -&gt; interface.AppleTV:
-    &#34;&#34;&#34;Connect to a device based on a configuration.&#34;&#34;&#34;
-    if not config.services:
-        raise exceptions.NoServiceError(&#34;no service to connect to&#34;)
-
-    if config.identifier is None:
-        raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
-
-    session_manager = await http.create_session(session)
-    atv = FacadeAppleTV(config, session_manager)
-
-    for service in config.services:
-        setup_method = _PROTOCOL_IMPLEMENTATIONS.get(service.protocol)
-        if not setup_method:
-            raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
-
-        setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        if setup_data:
-            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
-            atv.add_protocol(service.protocol, setup_data)
-        else:
-            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
-    try:
-        await atv.connect()
-    except Exception:
-        await session_manager.close()
-        raise
-    else:
-        return atv
-
-
-async def pair(
-    config: conf.AppleTV,
-    protocol: Protocol,
-    loop: asyncio.AbstractEventLoop,
-    session: aiohttp.ClientSession = None,
-    **kwargs
-):
-    &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
-    service = config.get_service(protocol)
-    if not service:
-        raise exceptions.NoServiceError(f&#34;no service available for {protocol}&#34;)
-
-    handler = {
-        Protocol.DMAP: DmapPairingHandler,
-        Protocol.MRP: MrpPairingHandler,
-        Protocol.AirPlay: AirPlayPairingHandler,
-        Protocol.Companion: CompanionPairingHandler,
-    }.get(protocol)
-
-    if handler is None:
-        raise RuntimeError(f&#34;missing implementation for {protocol}&#34;)
-
-    return handler(config, await http.create_session(session), loop, **kwargs)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L0-L156" class="git-link">Browse git</a></div>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
@@ -201,128 +83,66 @@ async def pair(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pyatv.connect"><code class="name flex">
+<dt id="pyatv.connect">
+<code class="name flex">
 <span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, loop: asyncio.events.AbstractEventLoop, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None, session: aiohttp.client.ClientSession = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a></span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Connect to a device based on a configuration.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def connect(
-    config: conf.AppleTV,
-    loop: asyncio.AbstractEventLoop,
-    protocol: Protocol = None,
-    session: aiohttp.ClientSession = None,
-) -&gt; interface.AppleTV:
-    &#34;&#34;&#34;Connect to a device based on a configuration.&#34;&#34;&#34;
-    if not config.services:
-        raise exceptions.NoServiceError(&#34;no service to connect to&#34;)
-
-    if config.identifier is None:
-        raise exceptions.DeviceIdMissingError(&#34;no device identifier&#34;)
-
-    session_manager = await http.create_session(session)
-    atv = FacadeAppleTV(config, session_manager)
-
-    for service in config.services:
-        setup_method = _PROTOCOL_IMPLEMENTATIONS.get(service.protocol)
-        if not setup_method:
-            raise RuntimeError(&#34;missing implementation for protocol {service.protocol}&#34;)
-
-        setup_data = setup_method(loop, config, atv.interfaces, atv, session_manager)
-        if setup_data:
-            _LOGGER.debug(&#34;Adding protocol %s&#34;, service.protocol)
-            atv.add_protocol(service.protocol, setup_data)
-        else:
-            _LOGGER.debug(&#34;Not adding protocol: %s&#34;, service.protocol)
-    try:
-        await atv.connect()
-    except Exception:
-        await session_manager.close()
-        raise
-    else:
-        return atv</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L94-L132" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.pair"><code class="name flex">
+<dt id="pyatv.pair">
+<code class="name flex">
 <span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, **kwargs)</span>
-</code></dt>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Pair a protocol for an Apple TV.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def pair(
-    config: conf.AppleTV,
-    protocol: Protocol,
-    loop: asyncio.AbstractEventLoop,
-    session: aiohttp.ClientSession = None,
-    **kwargs
-):
-    &#34;&#34;&#34;Pair a protocol for an Apple TV.&#34;&#34;&#34;
-    service = config.get_service(protocol)
-    if not service:
-        raise exceptions.NoServiceError(f&#34;no service available for {protocol}&#34;)
-
-    handler = {
-        Protocol.DMAP: DmapPairingHandler,
-        Protocol.MRP: MrpPairingHandler,
-        Protocol.AirPlay: AirPlayPairingHandler,
-        Protocol.Companion: CompanionPairingHandler,
-    }.get(protocol)
-
-    if handler is None:
-        raise RuntimeError(f&#34;missing implementation for {protocol}&#34;)
-
-    return handler(config, await http.create_session(session), loop, **kwargs)</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L135-L157" class="git-link">Browse git</a></div>
 </dd>
-<dt id="pyatv.scan"><code class="name flex">
-<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: str = None, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None, hosts: List[str] = None) -> List[<a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>]</span>
-</code></dt>
+<dt id="pyatv.scan">
+<code class="name flex">
+<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: str = None, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>]] = None, hosts: List[str] = None) -> List[<a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>]</span>
+</code>
+</dt>
 <dd>
 <section class="desc"><p>Scan for Apple TVs on network and return their configurations.</p></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def scan(
-    loop: asyncio.AbstractEventLoop,
-    timeout: int = 5,
-    identifier: str = None,
-    protocol: Protocol = None,
-    hosts: List[str] = None,
-) -&gt; List[conf.AppleTV]:
-    &#34;&#34;&#34;Scan for Apple TVs on network and return their configurations.&#34;&#34;&#34;
-
-    def _should_include(atv):
-        if not atv.ready:
-            return False
-
-        if identifier and identifier not in atv.all_identifiers:
-            return False
-
-        if protocol and atv.get_service(protocol) is None:
-            return False
-
-        return True
-
-    scanner: BaseScanner
-    if hosts:
-        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
-    else:
-        scanner = MulticastMdnsScanner(loop, identifier)
-
-    devices = (await scanner.discover(timeout)).values()
-    return [device for device in devices if _should_include(device)]</code></pre>
-</details>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L54-L91" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyatv.ProtocolImpl"><code class="flex name class">
+<span>class <span class="ident">ProtocolImpl</span></span>
+<span>(</span><span>setup: Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.interface.StateProducer" href="interface#pyatv.interface.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]], scan: Callable[[], Mapping[str, Callable[[pyatv.support.mdns.Service, pyatv.support.mdns.Response], Optional[Tuple[str, <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]]]]], pair: Optional[Callable[..., <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler">PairingHandler</a>]])</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Represent implementation of a protocol.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L33-L38" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.tuple</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.ProtocolImpl.pair"><code class="name">var <span class="ident">pair</span> -> Optional[Callable[..., <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler">PairingHandler</a>]]</code></dt>
+<dd>
+<section class="desc"><p>Alias for field number 2</p></section>
+</dd>
+<dt id="pyatv.ProtocolImpl.scan"><code class="name">var <span class="ident">scan</span> -> Callable[[], Mapping[str, Callable[[pyatv.support.mdns.Service, pyatv.support.mdns.Response], Optional[Tuple[str, <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]]]]]</code></dt>
+<dd>
+<section class="desc"><p>Alias for field number 1</p></section>
+</dd>
+<dt id="pyatv.ProtocolImpl.setup"><code class="name">var <span class="ident">setup</span> -> Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.interface.StateProducer" href="interface#pyatv.interface.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]]</code></dt>
+<dd>
+<section class="desc"><p>Alias for field number 0</p></section>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <footer id="footer">

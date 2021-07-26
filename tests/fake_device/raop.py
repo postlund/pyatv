@@ -1,8 +1,11 @@
 """Fake RAOP device for tests."""
 import asyncio
 from functools import wraps
+from hashlib import md5
 import logging
 import plistlib
+import random
+import string
 from types import SimpleNamespace
 from typing import Dict, Optional, cast
 
@@ -24,6 +27,12 @@ _LOGGER = logging.getLogger(__name__)
 
 INITIAL_VOLUME = -15.0
 
+DIGEST_PAYLOAD = (
+    'Digest username="{0}", realm="{1}", nonce="{2}", uri="{3}", response="{4}"'
+)
+
+REALM = "raop"
+
 
 def requires_auth(method):
     @wraps(method)
@@ -33,6 +42,53 @@ def requires_auth(method):
                 "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
             )
         return method(self, request, *args, **kwargs)
+
+    return _impl
+
+
+def verify_password(method):
+    @wraps(method)
+    def _impl(self, request: HttpRequest, *args, **kwargs):
+        # No password required
+        if not self.state.password:
+            return method(self, request, *args, **kwargs)
+
+        # Send a challenge
+        if not self.state.nonce:
+            nonce = self.state.nonce = "".join(
+                random.choices(string.ascii_letters + string.digits, k=32)
+            )
+            return HttpResponse(
+                "RTSP",
+                "1.0",
+                401,
+                "Unauthorized",
+                {
+                    "CSeq": request.headers["CSeq"],
+                    "WWW-Authenticate": f'Digest realm="{REALM}", nonce="{nonce}"',
+                },
+                b"",
+            )
+
+        # Verify the authentication payload send by the client
+        payload_data = request.headers.get("Authorization", "").split('"')
+        if len(payload_data) == 11:
+            uri = request.path
+            user = payload_data[1]
+            actual_response = payload_data[9]
+            nonce = self.state.nonce
+            pwd = self.state.password
+            ha1 = md5(f"{user}:{REALM}:{pwd}".encode("utf-8")).hexdigest()
+            ha2 = md5(f"{request.method}:{uri}".encode("utf-8")).hexdigest()
+            expected_response = md5(f"{ha1}:{nonce}:{ha2}".encode("utf-8")).hexdigest()
+
+            if actual_response == expected_response:
+                return method(self, request, *args, **kwargs)
+
+        # Password verification failed
+        return HttpResponse(
+            "RTSP", "1.0", 401, "Unauthorized", {"CSeq": request.headers["CSeq"]}, b""
+        )
 
     return _impl
 
@@ -53,6 +109,8 @@ class FakeRaopState:
     def __init__(self):
         self.metadata = SimpleNamespace(title=None, artist=None, album=None)
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
+        self.password: Optional[str] = None
+        self.nonce: Optional[str] = None
         self.auth_required: bool = False
         self.auth_setup_performed: bool = False
         self.supports_retransmissions: bool = True
@@ -294,6 +352,7 @@ class FakeRaopService(HttpSimpleRouter):
             self._control_server.close()
 
     @requires_auth
+    @verify_password
     def handle_announce(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming ANNOUNCE request."""
         _LOGGER.debug("Received ANNOUNCE: %s", request)
@@ -307,6 +366,7 @@ class FakeRaopService(HttpSimpleRouter):
         )
 
     @requires_auth
+    @verify_password
     def handle_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SETUP request."""
         _LOGGER.debug("Received SETUP: %s", request)
@@ -325,6 +385,7 @@ class FakeRaopService(HttpSimpleRouter):
         return HttpResponse("RTSP", "1.0", 200, "OK", headers, b"")
 
     @requires_auth
+    @verify_password
     def handle_set_parameter(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming SET_PARAMETER request."""
         _LOGGER.debug("Received SET_PARAMETER: %s", request)
@@ -350,6 +411,7 @@ class FakeRaopService(HttpSimpleRouter):
         )
 
     @requires_auth
+    @verify_password
     def handle_feedback(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming feedback request."""
         _LOGGER.debug("Received feedback: %s", request)
@@ -368,6 +430,7 @@ class FakeRaopService(HttpSimpleRouter):
         )
 
     @requires_auth
+    @verify_password
     def handle_record(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming RECORD request."""
         _LOGGER.debug("Received RECORD: %s", request)
@@ -375,6 +438,7 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @verify_password
     def handle_auth_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming auth-setup request."""
         _LOGGER.debug("Received auth-setup: %s", request)
@@ -450,6 +514,11 @@ class FakeRaopUseCases:
     def require_auth(self, is_required: bool) -> None:
         """Enable or disable requirement to perform authentication."""
         self.state.auth_required = is_required
+
+    def password(self, new_password: Optional[str]) -> None:
+        """Set a new password. Pass in None to remove the password."""
+        self.state.password = new_password
+        self.state.nonce = None
 
     def supports_info(self, is_supported: bool) -> None:
         """State if /info is supported or not."""

@@ -30,7 +30,7 @@ class AppleTV:
         name: str,
         deep_sleep: bool = False,
         model: DeviceModel = DeviceModel.Unknown,
-        properties: Optional[Mapping[str, str]] = None,
+        properties: Optional[Mapping[str, Mapping[str, str]]] = None,
     ) -> None:
         """Initialize a new AppleTV."""
         self._address = address
@@ -38,7 +38,7 @@ class AppleTV:
         self._deep_sleep = deep_sleep
         self._model = model
         self._services: Dict[Protocol, BaseService] = {}
-        self._properties: Mapping[str, str] = properties or {}
+        self._properties: Mapping[str, Mapping[str, str]] = properties or {}
 
     @property
     def address(self) -> IPv4Address:
@@ -57,15 +57,11 @@ class AppleTV:
 
     @property
     def ready(self) -> bool:
-        """Return if configuration is ready, i.e. has a main service."""
-        ready_protocols = set(list(Protocol))
-
-        # Companion has no unique identifier so it's the only protocol that can't be
-        # used independently for now
-        ready_protocols.remove(Protocol.Companion)
-
-        intersection = ready_protocols.intersection(self._services.keys())
-        return len(intersection) > 0
+        """Return if configuration is ready, (at least one service with identifier)."""
+        for service in self.services:
+            if service.identifier:
+                return True
+        return False
 
     @property
     def identifier(self) -> Optional[str]:
@@ -181,7 +177,8 @@ class AppleTV:
 
     def _all_properties(self) -> Mapping[str, str]:
         properties: Dict[str, str] = {}
-        properties.update(self._properties)
+        for props in self._properties.values():
+            properties.update(props)
         for service in self.services:
             properties.update(service.properties)
         return properties
@@ -287,8 +284,10 @@ class RaopService(BaseService):
         identifier: Optional[str],
         port: int = 7000,
         credentials: Optional[str] = None,
+        password: Optional[str] = None,
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new RaopService."""
         super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials
+        self.password = password

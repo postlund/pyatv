@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -14,29 +14,30 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     MediaType,
-    PowerState,
     Protocol,
     RepeatState,
     ShuffleState,
 )
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
+from pyatv.dmap.pairing import DmapPairingHandler
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
-    App,
     ArtworkInfo,
     FeatureInfo,
     Features,
     Metadata,
+    PairingHandler,
     Playing,
-    Power,
     PushUpdater,
     RemoteControl,
     StateProducer,
 )
-from pyatv.support import deprecated
+from pyatv.support import mdns
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.relayer import Relayer
+from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -341,28 +342,6 @@ class DmapRemoteControl(RemoteControl):
         """Press key volume down."""
         await self.apple_tv.ctrl_int_cmd("volumedown")
 
-    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
-        """Press key home."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def home_hold(self) -> None:
-        """Hold key home."""
-        # DMAP support unknown
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def suspend(self) -> None:
-        """Suspend the device."""
-        # Not supported by DMAP
-        raise exceptions.NotSupportedError()
-
-    @deprecated
-    async def wakeup(self) -> None:
-        """Wake up the device."""
-        raise exceptions.NotSupportedError()
-
     async def skip_forward(self) -> None:
         """Skip forward a time interval.
 
@@ -447,28 +426,6 @@ class DmapMetadata(Metadata):
     async def playing(self):
         """Return current device state."""
         return await self.apple_tv.playstatus()
-
-    @property
-    def app(self) -> Optional[App]:
-        """Return information about running app."""
-        raise exceptions.NotSupportedError()
-
-
-class DmapPower(Power):
-    """Implementation of API for retrieving a power state from an Apple TV."""
-
-    @property
-    def power_state(self) -> PowerState:
-        """Return device power state."""
-        return PowerState.Unknown
-
-    async def turn_on(self, await_new_state: bool = False) -> None:
-        """Turn device on."""
-        raise exceptions.NotSupportedError()
-
-    async def turn_off(self, await_new_state: bool = False) -> None:
-        """Turn device off."""
-        raise exceptions.NotSupportedError()
 
 
 class DmapPushUpdater(PushUpdater):
@@ -582,6 +539,57 @@ class DmapFeatures(Features):
         return FeatureState.Unavailable
 
 
+def homesharing_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new DMAP (Home Sharing) service."""
+    name = mdns_service.properties.get("Name", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.properties.get("hG"),
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def dmap_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new DMAP service."""
+    name = mdns_service.properties.get("CtlN", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        None,
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def hscp_service_handler(
+    mdns_service: mdns.Service, response: mdns.Response
+) -> ScanHandlerReturn:
+    """Parse and return a new HSCP service."""
+    name = mdns_service.properties.get("Machine Name", "Unknown")
+    service = conf.DmapService(
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        mdns_service.properties.get("hG"),
+        port=mdns_service.port,
+        properties=mdns_service.properties,
+    )
+    return name, service
+
+
+def scan() -> Mapping[str, ScanHandler]:
+    """Return handlers used for scanning."""
+    return {
+        "_appletv-v2._tcp.local": homesharing_service_handler,
+        "_touch-able._tcp.local": dmap_service_handler,
+        "_hscp._tcp.local": hscp_service_handler,
+    }
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
@@ -606,7 +614,6 @@ def setup(
 
     interfaces[RemoteControl].register(DmapRemoteControl(apple_tv), Protocol.DMAP)
     interfaces[Metadata].register(metadata, Protocol.DMAP)
-    interfaces[Power].register(DmapPower(), Protocol.DMAP)
     interfaces[PushUpdater].register(push_updater, Protocol.DMAP)
     interfaces[Features].register(DmapFeatures(config, apple_tv), Protocol.DMAP)
 
@@ -624,3 +631,13 @@ def setup(
     features.update(_FIELD_FEATURES.keys())
 
     return _connect, _close, features
+
+
+def pair(
+    config: conf.AppleTV,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    return DmapPairingHandler(config, session_manager, loop, **kwargs)

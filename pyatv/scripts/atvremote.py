@@ -27,7 +27,7 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.interface import retrieve_commands
-from pyatv.scripts import TransformProtocol, VerifyScanHosts
+from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
 
 
 def _print_commands(title, api):
@@ -132,7 +132,10 @@ class GlobalCommands:
     async def scan(self):
         """Scan for Apple TVs on the network."""
         atvs = await scan(
-            self.loop, hosts=self.args.scan_hosts, timeout=self.args.scan_timeout
+            self.loop,
+            hosts=self.args.scan_hosts,
+            timeout=self.args.scan_timeout,
+            protocol=self.args.scan_protocols,
         )
         _print_found_apple_tvs(atvs, sys.stdout)
 
@@ -392,6 +395,13 @@ async def cli_handler(loop):
         action=VerifyScanHosts,
     )
     parser.add_argument(
+        "--scan-protocols",
+        help="scan for specific protocols",
+        dest="scan_protocols",
+        default=None,
+        action=VerifyScanProtocols,
+    )
+    parser.add_argument(
         "--version",
         action="version",
         help="version of atvremote and pyatv",
@@ -425,6 +435,13 @@ async def cli_handler(loop):
         help="use manual device details",
         dest="manual",
         default=False,
+    )
+
+    parser.add_argument(
+        "--raop-password",
+        help="optional password for raop",
+        dest="raop_password",
+        default=None,
     )
 
     creds = parser.add_argument_group("credentials")
@@ -503,7 +520,7 @@ def _print_found_apple_tvs(atvs, outstream):
 
 async def _autodiscover_device(args, loop):
     apple_tv = await _scan_for_device(
-        args, args.scan_timeout, loop, protocol=args.protocol
+        args, args.scan_timeout, loop, protocol=args.scan_protocols
     )
     if not apple_tv:
         return None
@@ -516,6 +533,10 @@ async def _autodiscover_device(args, loop):
 
     for proto in Protocol:
         _set_credentials(proto, f"{proto.name.lower()}_credentials")
+
+    raop_service = apple_tv.get_service(Protocol.RAOP)
+    if raop_service:
+        raop_service.password = args.raop_password
 
     logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
@@ -540,7 +561,12 @@ def _manual_device(args):
         )
     if args.raop_credentials or args.protocol == const.Protocol.RAOP:
         config.add_service(
-            RaopService(args.id, args.port, credentials=args.raop_credentials)
+            RaopService(
+                args.id,
+                args.port,
+                credentials=args.raop_credentials,
+                password=args.raop_password,
+            )
         )
     return config
 
