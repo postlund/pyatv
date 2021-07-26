@@ -206,7 +206,7 @@ class MulticastMdnsScanner(BaseScanner):
             timeout=timeout,
             end_condition=self._end_if_identifier_found if self.identifier else None,
         )
-        for _, response in responses.items():
+        for response in responses:
             self.handle_response(response)
 
     def _end_if_identifier_found(self, response: mdns.Response):

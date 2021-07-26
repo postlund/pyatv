@@ -30,7 +30,7 @@ TEST_SERVICES = dict(
 def get_response_for_service(
     service: str,
 ) -> Tuple[dns.DnsMessage, Optional[fake_udns.FakeDnsService]]:
-    req = mdns.create_request([service])
+    req = mdns.create_service_queries([service], mdns.QueryType.PTR)[0]
     resp = fake_udns.create_response(req, TEST_SERVICES)
     return dns.DnsMessage().unpack(resp.pack()), TEST_SERVICES.get(service)
 
@@ -43,14 +43,14 @@ def parse_services(message: mdns.DnsMessage) -> List[mdns.Service]:
 
 def test_non_existing_service():
     resp, _ = get_response_for_service("_missing")
-    assert len(resp.questions) == 1
+    assert len(resp.questions) == 2
     assert len(resp.answers) == 0
     assert len(resp.resources) == 0
 
 
 def test_service_has_expected_responses():
     resp, _ = get_response_for_service(MEDIAREMOTE_SERVICE)
-    assert len(resp.questions) == 1
+    assert len(resp.questions) == 2
     assert len(resp.answers) == 1
     assert len(resp.resources) == 3
 
