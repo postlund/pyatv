@@ -107,9 +107,12 @@ class ServiceParser:
         """Initialize a new ServiceParser instance."""
         self.table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
         self.ptrs: typing.Dict[str, str] = {}  # qname -> real name
+        self._cache: typing.Optional[typing.List[Service]] = None
 
     def add_message(self, message: DnsMessage) -> "ServiceParser":
         """Add message to with records to parse."""
+        self._cache = None
+
         for record in message.answers + message.resources:
             if record.qtype == QueryType.PTR and record.qname.startswith("_"):
                 self.ptrs[record.qname] = record.rd
@@ -124,6 +127,9 @@ class ServiceParser:
 
     def parse(self) -> typing.List[Service]:
         """Parse records and return services."""
+        if self._cache:
+            return self._cache
+
         results: typing.Dict[str, Service] = {}
 
         # Build services
@@ -161,8 +167,8 @@ class ServiceParser:
                 results[real_name] = Service(
                     qname, real_name.split(".")[0], None, 0, {}
                 )
-
-        return list(results.values())
+        self._cache = list(results.values())
+        return self._cache
 
 
 class QueryResponse(SimpleNamespace):
