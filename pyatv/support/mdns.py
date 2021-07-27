@@ -455,11 +455,11 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
                 [service.name + "." + service.type for service in services],
                 QueryType.ANY,
             )
-        else:
+        elif query_resp.count >= len(self.queries):
             response = Response(
-                services=services,
+                services=query_resp.parser.parse(),
                 deep_sleep=query_resp.deep_sleep,
-                model=_get_model(services),
+                model=_get_model(query_resp.parser.parse()),
             )
 
             if self.end_condition(response):
