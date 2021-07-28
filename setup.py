@@ -26,7 +26,7 @@ setup(
     name="pyatv",
     version=__version__,
     license="MIT",
-    url="https;//pyatv.dev",
+    url="https://pyatv.dev",
     download_url=f"{GITHUB_URL}/archive/refs/tags/v{__version__}.zip",
     project_urls={
         "Repository": GITHUB_URL,
