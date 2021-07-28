@@ -1,5 +1,107 @@
 # CHANGES
 
+## 0.8.2 Helpy (2021-07-28)
+
+Time for another minor release! Highlights this time is
+improved scanning, password protected RAOP services, support
+for HSCP and some remote buttons in Companion.
+
+An issue hwere some devices were not discovered by Home Assistant
+anymore suddenly appeared (pun intended). Some digging concluded
+that asking for too many Zeroconf services in one request might
+yield a response too big to fit in one IP packet. This makes the
+sender silently drop records, rendering the response incomplete
+without pyatv knowing that. Since Companion and RAOP was added in
+0.8.0 (which require three new services in total), that was the
+tipping point. From now on, pyatv will spread services over a few
+requests to work around this issue.
+
+It is now possible to stream audio to password protected AirPlay
+receivers thanks to @Schlaubischlump! A password can be passed
+to atvremote via `--raop-password` and it's explained how to do
+it programmatically in the documentation.
+
+HSCP (unsure what it stands for, maybe something like
+*Home Sharing Control Protocol*?) is used to control instances of
+iTunes or Music running on a Mac. Unfortunately, Apple decided
+to require FairPlay authentication in macOS 11.4, so this will
+only work if you are running an OS with lower version number than
+that.
+
+Some buttons in the remote control interface is now supported by
+the Companion protocol. The API reference on
+[pyatv.dev](https://pyatv.dev) actually lists which which protocols
+implement a certain feature now, so it's recommended to look there
+for current status.
+
+There are a few house-keeping fixes in this release as well,
+mostly related to tests, documentation and environment. A complete
+list is below. See you all next time!
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+271c319 dmap: Add support for HSCP service
+
+*Protocol: Companion:*
+
+af77f3e companion: Add support for several buttons
+bdaf12a companion: Generalize OPACK error handling
+
+*Protocol: RAOP:*
+
+42a0e58 Add support for password protected RAOP devices
+
+*Other:*
+
+8faa4eb core: Fix potential aiohttp client session leak
+9be93f1 scan: Support scanning for specific protocols
+4d7f5bf debug: Include zeroconf properties in debug log
+2cf35e3 gha: Another attempt to re-run tox on failure
+3b55c6a env: Update metadata in setup.py
+
+**All changes:**
+
+```
+4c25021 mdns: Verify end condition with all services
+8fd7e09 mdns: Cache parsed services
+534006d mdns: Split multicast request in multiple messages
+bd6cc7c mdns: Ask for sleep-proxy in unicast requests
+44506a5 mdns: Split unicast requests over several messages
+5ed0491 mdns: Ignore duplicate records in ServiceParser
+84ae2c5 mdns: Refactor service parser to a class
+4eaadc5 build(deps): bump types-protobuf from 3.17.3 to 3.17.4
+af77f3e companion: Add support for several buttons
+7579a49 companion: Convert functional tests to pytest
+e1dab57 build(deps): bump pylint from 2.9.4 to 2.9.5
+1618e13 build(deps): bump pylint from 2.9.3 to 2.9.4
+271c319 dmap: Add support for HSCP service
+42a0e58 Add support for password protected RAOP devices
+bdaf12a companion: Generalize OPACK error handling
+536e271 cq: Refactor pairing handlers
+242023a build(deps): bump black from 21.6b0 to 21.7b0
+0c8b59b build(deps): bump types-protobuf from 3.17.1 to 3.17.3
+8faa4eb core: Fix potential aiohttp client session leak
+9be93f1 scan: Support scanning for specific protocols
+687f3bf mdns: Fix unstable multicast test
+e1bc26f env: Only verify docs with py3.8
+10a408d build(deps-dev): bump tox from 3.23.1 to 3.24.0
+00d3946 build(deps): bump types-protobuf from 3.17.0 to 3.17.1
+809c5a3 Update README.md
+9afd181 scan: Move scan code to protocols
+438e70e build(deps): bump types-protobuf from 0.1.13 to 3.17.0
+3b5e7d8 build(deps): bump isort from 5.9.1 to 5.9.2
+d1dbc5d build(deps): bump pylint from 2.8.3 to 2.9.3
+4d7f5bf debug: Include zeroconf properties in debug log
+a147a27 gha: Fix running tox on Windows
+0b0908d docs: Add feature name and supported protocols
+2cf35e3 gha: Another attempt to re-run tox on failure
+f9f00b6 build(deps): bump mypy-protobuf from 2.4 to 2.5
+3b55c6a env: Update metadata in setup.py
+a8b4d88 gha: Re-run tox without cache if failure
+```
+
 ## 0.8.1 Glitchtrap (2021-06-24)
 
 This minor release contains a few improvements to the RAOP protocol.
