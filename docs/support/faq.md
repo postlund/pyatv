@@ -180,7 +180,7 @@ Reported in these issues: {% include issue no="958" %}
 ## com.cellcom.cellcomtvappleos
 
 Does not seem to report any state. This app likely implements its own media player, bypassing
-the metadata mangement used by MRP meaning that no information is available when this app is used.
+the metadata management used by MRP meaning that no information is available when this app is used.
 
 Link to app in App Store: https://apps.apple.com/il/app/%D7%A1%D7%9C%D7%A7%D7%95%D7%9D-tv/id1159313682
 
