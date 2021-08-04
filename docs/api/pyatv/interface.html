@@ -228,7 +228,7 @@ link_group: api
 <p>Public interface exposed by library.</p>
 <p>This module contains all the interfaces that represents a generic Apple TV device and
 all its features.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L0-L927" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1-L928" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -358,7 +358,7 @@ all its features.</p>
 </dd>
 <dt id="pyatv.interface.AppleTV.connect">
 <code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">connect</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -405,7 +405,7 @@ all its features.</p>
 </dd>
 <dt id="pyatv.interface.Apps.launch_app">
 <code class="name flex">
-<span>async def <span class="ident">launch_app</span></span>(<span>self, bundle_id: str) -> NoneType</span>
+<span>async def <span class="ident">launch_app</span></span>(<span>self, bundle_id: str) -> None</span>
 </code>
 </dt>
 <dd>
@@ -477,7 +477,7 @@ all its features.</p>
 <dl>
 <dt id="pyatv.interface.Audio.set_volume">
 <code class="name flex">
-<span>async def <span class="ident">set_volume</span></span>(<span>self, level: float) -> NoneType</span>
+<span>async def <span class="ident">set_volume</span></span>(<span>self, level: float) -> None</span>
 </code>
 </dt>
 <dd>
@@ -518,7 +518,7 @@ all its features.</p>
 <dl>
 <dt id="pyatv.interface.BaseService.merge">
 <code class="name flex">
-<span>def <span class="ident">merge</span></span>(<span>self, other) -> NoneType</span>
+<span>def <span class="ident">merge</span></span>(<span>self, other) -> None</span>
 </code>
 </dt>
 <dd>
@@ -583,7 +583,7 @@ all its features.</p>
 <dl>
 <dt id="pyatv.interface.DeviceListener.connection_closed">
 <code class="name flex">
-<span>def <span class="ident">connection_closed</span></span>(<span>self) -> NoneType</span>
+<span>def <span class="ident">connection_closed</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -592,7 +592,7 @@ all its features.</p>
 </dd>
 <dt id="pyatv.interface.DeviceListener.connection_lost">
 <code class="name flex">
-<span>def <span class="ident">connection_lost</span></span>(<span>self, exception: Exception) -> NoneType</span>
+<span>def <span class="ident">connection_lost</span></span>(<span>self, exception: Exception) -> None</span>
 </code>
 </dt>
 <dd>
@@ -784,7 +784,7 @@ aspect ratio.</p></section>
 <dl>
 <dt id="pyatv.interface.PairingHandler.begin">
 <code class="name flex">
-<span>async def <span class="ident">begin</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">begin</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -793,7 +793,7 @@ aspect ratio.</p></section>
 </dd>
 <dt id="pyatv.interface.PairingHandler.close">
 <code class="name flex">
-<span>async def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">close</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -802,7 +802,7 @@ aspect ratio.</p></section>
 </dd>
 <dt id="pyatv.interface.PairingHandler.finish">
 <code class="name flex">
-<span>async def <span class="ident">finish</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">finish</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -811,7 +811,7 @@ aspect ratio.</p></section>
 </dd>
 <dt id="pyatv.interface.PairingHandler.pin">
 <code class="name flex">
-<span>def <span class="ident">pin</span></span>(<span>self, pin) -> NoneType</span>
+<span>def <span class="ident">pin</span></span>(<span>self, pin) -> None</span>
 </code>
 </dt>
 <dd>
@@ -989,7 +989,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.Power.turn_off">
 <code class="name flex">
-<span>async def <span class="ident">turn_off</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
+<span>async def <span class="ident">turn_off</span></span>(<span>self, await_new_state: bool = False) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1002,7 +1002,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.Power.turn_on">
 <code class="name flex">
-<span>async def <span class="ident">turn_on</span></span>(<span>self, await_new_state: bool = False) -> NoneType</span>
+<span>async def <span class="ident">turn_on</span></span>(<span>self, await_new_state: bool = False) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1071,7 +1071,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.PushListener.playstatus_error">
 <code class="name flex">
-<span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception: Exception) -> NoneType</span>
+<span>def <span class="ident">playstatus_error</span></span>(<span>self, updater, exception: Exception) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1080,7 +1080,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.PushListener.playstatus_update">
 <code class="name flex">
-<span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
+<span>def <span class="ident">playstatus_update</span></span>(<span>self, updater, playstatus: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1122,7 +1122,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.PushUpdater.post_update">
 <code class="name flex">
-<span>def <span class="ident">post_update</span></span>(<span>self, playing: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> NoneType</span>
+<span>def <span class="ident">post_update</span></span>(<span>self, playing: <a title="pyatv.interface.Playing" href="#pyatv.interface.Playing">Playing</a>) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1131,7 +1131,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.PushUpdater.start">
 <code class="name flex">
-<span>def <span class="ident">start</span></span>(<span>self, initial_delay: int = 0) -> NoneType</span>
+<span>def <span class="ident">start</span></span>(<span>self, initial_delay: int = 0) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1145,7 +1145,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.PushUpdater.stop">
 <code class="name flex">
-<span>def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
+<span>def <span class="ident">stop</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1181,7 +1181,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.RemoteControl.down">
 <code class="name flex">
-<span>async def <span class="ident">down</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">down</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1194,7 +1194,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home">
 <code class="name flex">
-<span>async def <span class="ident">home</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">home</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1207,7 +1207,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home_hold">
 <code class="name flex">
-<span>async def <span class="ident">home_hold</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">home_hold</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1220,7 +1220,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.left">
 <code class="name flex">
-<span>async def <span class="ident">left</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">left</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1233,7 +1233,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.menu">
 <code class="name flex">
-<span>async def <span class="ident">menu</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">menu</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1246,7 +1246,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.next">
 <code class="name flex">
-<span>async def <span class="ident">next</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">next</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1259,7 +1259,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.pause">
 <code class="name flex">
-<span>async def <span class="ident">pause</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">pause</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1272,7 +1272,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play">
 <code class="name flex">
-<span>async def <span class="ident">play</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">play</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1285,7 +1285,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play_pause">
 <code class="name flex">
-<span>async def <span class="ident">play_pause</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">play_pause</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1298,7 +1298,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.previous">
 <code class="name flex">
-<span>async def <span class="ident">previous</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">previous</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1311,7 +1311,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.right">
 <code class="name flex">
-<span>async def <span class="ident">right</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">right</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1324,7 +1324,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.select">
 <code class="name flex">
-<span>async def <span class="ident">select</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">select</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1337,7 +1337,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_position">
 <code class="name flex">
-<span>async def <span class="ident">set_position</span></span>(<span>self, pos: int) -> NoneType</span>
+<span>async def <span class="ident">set_position</span></span>(<span>self, pos: int) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1350,7 +1350,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_repeat">
 <code class="name flex">
-<span>async def <span class="ident">set_repeat</span></span>(<span>self, repeat_state: <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>) -> NoneType</span>
+<span>async def <span class="ident">set_repeat</span></span>(<span>self, repeat_state: <a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1363,7 +1363,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_shuffle">
 <code class="name flex">
-<span>async def <span class="ident">set_shuffle</span></span>(<span>self, shuffle_state: <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>) -> NoneType</span>
+<span>async def <span class="ident">set_shuffle</span></span>(<span>self, shuffle_state: <a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1376,7 +1376,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.skip_backward">
 <code class="name flex">
-<span>async def <span class="ident">skip_backward</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">skip_backward</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1390,7 +1390,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.skip_forward">
 <code class="name flex">
-<span>async def <span class="ident">skip_forward</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">skip_forward</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1404,7 +1404,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.stop">
 <code class="name flex">
-<span>async def <span class="ident">stop</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">stop</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1417,7 +1417,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.suspend">
 <code class="name flex">
-<span>async def <span class="ident">suspend</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">suspend</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1430,7 +1430,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.top_menu">
 <code class="name flex">
-<span>async def <span class="ident">top_menu</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">top_menu</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1443,7 +1443,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.up">
 <code class="name flex">
-<span>async def <span class="ident">up</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> NoneType</span>
+<span>async def <span class="ident">up</span></span>(<span>self, action: <a title="pyatv.const.InputAction" href="const#pyatv.const.InputAction">InputAction</a> = InputAction.SingleTap) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1456,7 +1456,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_down">
 <code class="name flex">
-<span>async def <span class="ident">volume_down</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">volume_down</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1469,7 +1469,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_up">
 <code class="name flex">
-<span>async def <span class="ident">volume_up</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">volume_up</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1482,7 +1482,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.RemoteControl.wakeup">
 <code class="name flex">
-<span>async def <span class="ident">wakeup</span></span>(<span>self) -> NoneType</span>
+<span>async def <span class="ident">wakeup</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1511,7 +1511,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.Stream.close">
 <code class="name flex">
-<span>def <span class="ident">close</span></span>(<span>self) -> NoneType</span>
+<span>def <span class="ident">close</span></span>(<span>self) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1520,7 +1520,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.Stream.play_url">
 <code class="name flex">
-<span>async def <span class="ident">play_url</span></span>(<span>self, url: str, **kwargs) -> NoneType</span>
+<span>async def <span class="ident">play_url</span></span>(<span>self, url: str, **kwargs) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1533,7 +1533,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dd>
 <dt id="pyatv.interface.Stream.stream_file">
 <code class="name flex">
-<span>async def <span class="ident">stream_file</span></span>(<span>self, file: Union[str, _io.BufferedReader], **kwargs) -> NoneType</span>
+<span>async def <span class="ident">stream_file</span></span>(<span>self, file: Union[str, _io.BufferedReader], **kwargs) -> None</span>
 </code>
 </dt>
 <dd>
