@@ -145,7 +145,9 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ]
 ]:
     """Set up a new AirPlay service."""
     service = config.get_service(Protocol.AirPlay)
@@ -162,8 +164,9 @@ def setup(
     async def _connect() -> None:
         pass
 
-    def _close() -> None:
+    def _close() -> Set[asyncio.Task]:
         stream.close()
+        return set()
 
     return _connect, _close, set([FeatureName.PlayUrl])
 

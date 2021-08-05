@@ -333,7 +333,9 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ]
 ]:
     """Set up a new Companion service."""
     service = config.get_service(Protocol.Companion)
@@ -355,8 +357,8 @@ def setup(
     async def _connect() -> None:
         pass
 
-    def _close() -> None:
-        pass
+    def _close() -> Set[asyncio.Task]:
+        return set()
 
     return (
         _connect,

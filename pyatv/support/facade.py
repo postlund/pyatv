@@ -52,7 +52,9 @@ PUBLIC_INTERFACES = [
 ]
 
 # TODO: These should be moved somewhere and shared with protocol implementations
-SetupData = Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+SetupData = Tuple[
+    Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+]
 SetupMethod = Callable[
     [
         asyncio.AbstractEventLoop,
@@ -411,11 +413,13 @@ class FacadeAppleTV(interface.AppleTV):
         for protocol_connect, _, _ in self._protocol_handlers.values():
             await protocol_connect()
 
-    def close(self) -> None:
+    def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
+        pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
         for _, protocol_close, _ in self._protocol_handlers.values():
-            protocol_close()
+            pending_tasks.update(protocol_close())
+        return pending_tasks
 
     @property
     def device_info(self) -> interface.DeviceInfo:

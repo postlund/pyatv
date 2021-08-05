@@ -597,7 +597,9 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ]
 ]:
     """Set up a new DMAP service."""
     service = config.get_service(Protocol.DMAP)
@@ -620,9 +622,10 @@ def setup(
     async def _connect() -> None:
         await requester.login()
 
-    def _close() -> None:
+    def _close() -> Set[asyncio.Task]:
         push_updater.stop()
         device_listener.listener.connection_closed()
+        return set()
 
     # Features managed by this protocol
     features = set([FeatureName.VolumeDown, FeatureName.VolumeUp])

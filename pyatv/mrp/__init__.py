@@ -715,7 +715,9 @@ def setup(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ]
 ]:
     """Set up a new MRP service."""
     service = config.get_service(Protocol.MRP)
@@ -742,9 +744,10 @@ def setup(  # pylint: disable=too-many-locals
     async def _connect() -> None:
         await protocol.start()
 
-    def _close() -> None:
+    def _close() -> Set[asyncio.Task]:
         push_updater.stop()
         protocol.stop()
+        return set()
 
     # Features managed by this protocol
     features = set(
