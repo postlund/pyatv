@@ -1,6 +1,9 @@
 """Unit tests for pyatv.support.facade."""
+import asyncio
 import inspect
 from ipaddress import IPv4Address
+from typing import Set
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -186,3 +189,29 @@ async def test_audio_set_volume_out_of_range(facade_dummy, register_interface, v
 
     with pytest.raises(exceptions.ProtocolError):
         await facade_dummy.audio.set_volume(volume)
+
+
+async def test_close_pending_tasks(facade_dummy, session_manager):
+    obj = MagicMock()
+    obj.called = False
+
+    async def connect() -> None:
+        pass
+
+    def close() -> Set[asyncio.Task]:
+        async def close_task() -> None:
+            obj.called = True
+
+        return set([asyncio.ensure_future(close_task())])
+
+    facade_dummy.add_protocol(Protocol.DMAP, (connect, close, {FeatureName.Play}))
+
+    # close will return remaining tasks but not run them
+    tasks = facade_dummy.close()
+    assert not obj.called
+    assert not session_manager.session.closed
+
+    # Let remaining tasks run and verify they have finished
+    await asyncio.gather(*tasks)
+    assert obj.called
+    assert session_manager.session.closed

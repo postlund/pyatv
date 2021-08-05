@@ -19,6 +19,7 @@ from typing import (
     MutableMapping,
     NamedTuple,
     Optional,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -921,7 +922,7 @@ class AppleTV(ABC, StateProducer):
         """
 
     @abstractmethod
-    def close(self) -> None:
+    def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
 
     @property

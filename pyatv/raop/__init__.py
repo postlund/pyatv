@@ -397,7 +397,9 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ]
 ]:
     """Set up a new RAOP service."""
     service = config.get_service(Protocol.RAOP)
@@ -444,8 +446,8 @@ def setup(
     async def _connect() -> None:
         pass
 
-    def _close() -> None:
-        pass
+    def _close() -> Set[asyncio.Task]:
+        return set()
 
     return (
         _connect,
