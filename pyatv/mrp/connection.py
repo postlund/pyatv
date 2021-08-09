@@ -49,7 +49,7 @@ class MrpConnection(
         """Device connection was dropped."""
         _LOGGER.debug("%s Disconnected from device: %s", self._log_str, exc)
         self._transport = None
-        self.listener.stop()
+        self.listener.stop()  # type: ignore
 
         if self.atv:
             if exc is None:
@@ -144,4 +144,4 @@ class MrpConnection(
         parsed.ParseFromString(data)
         log_protobuf(_LOGGER, self._log_str + "<< Receive: Protobuf", parsed)
 
-        self.listener.message_received(parsed, data)
+        self.listener.message_received(parsed, data)  # type: ignore
