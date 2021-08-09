@@ -27,45 +27,45 @@ This is the general feature list provided by the external interface.
 
 | **Feature**                                                     | **Links** |
 | --------------------------------------------------------------- | --------- |
-| Automatic discovery of devices (zeroconf/Bonjour)               | [Concept](documentation/concepts/#scanning), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| Automatic discovery of devices (zeroconf/Bonjour)               | [Concept](../concepts/#scanning), [Doc](../../development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
 | --------------------------------------------------------------- | --------- |
-| Device Metadata (e.g. operating system and version)             | [Concept](documentation/concepts/#device-metadata), [Doc](development/device_info), {% include api i="interface.DeviceInfo" %}
+| Device Metadata (e.g. operating system and version)             | [Concept](../concepts/#device-metadata), [Doc](../../development/device_info), {% include api i="interface.DeviceInfo" %}
 | --------------------------------------------------------------- | --------- |
-| Push updates                                                    | [Concept](documentation/concepts/#metadata-and-push-updates), [Doc](development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
+| Push updates                                                    | [Concept](../concepts/#metadata-and-push-updates), [Doc](../../development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
 | --------------------------------------------------------------- | --------- |
-| Remote control pairing                                          | [Concept](documentation/concepts/#pairing), [Doc](development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
+| Remote control pairing                                          | [Concept](../concepts/#pairing), [Doc](../../development/scan_pair_and_connect/#pairing), {% include api i="interface.PairingHandler" %}
 | --------------------------------------------------------------- | --------- |
-| List supported features                                         | [Concept](documentation/concepts/#features), [Doc](development/features), {% include api i="interface.Features" %}
+| List supported features                                         | [Concept](../concepts/#features), [Doc](../../development/features), {% include api i="interface.Features" %}
 | --------------------------------------------------------------- | --------- |
-| AirPlay stream URL (including local files)                      | [Doc](development/stream), {% include api i="interface.Stream" %}
+| AirPlay stream URL (including local files)                      | [Doc](../../development/stream), {% include api i="interface.Stream" %}
 | --------------------------------------------------------------- | --------- |
-| Playback controls (play, pause, next, stop, etc.)               | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| Playback controls (play, pause, next, stop, etc.)               | [Doc](../../development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
-| Navigation controls (select, menu, top_menu, arrow keys)        | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| Navigation controls (select, menu, top_menu, arrow keys)        | [Doc](../../development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
-| Different input actions (tap, double tap, hold)                 | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| Different input actions (tap, double tap, hold)                 | [Doc](../../development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
-| Fetch artwork                                                   | [Doc](development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
+| Fetch artwork                                                   | [Doc](../../development/metadata/#artwork), {% include api i="interface.Metadata.artwork" %}
 | --------------------------------------------------------------- | --------- |
-| Currently playing (e.g. title, artist, album, total time, etc.) | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| Currently playing (e.g. title, artist, album, total time, etc.) | [Doc](../../development/metadata), {% include api i="interface.Metadata" %}
 | --------------------------------------------------------------- | --------- |
-| App used for playback                                           | [Doc](development/metadata/#active-app), {% include api i="interface.App" %}
+| App used for playback                                           | [Doc](../../development/metadata/#active-app), {% include api i="interface.App" %}
 | --------------------------------------------------------------- | --------- |
-| Media type and play state                                       | [Doc](development/metadata), {% include api i="interface.Metadata" %}
+| Media type and play state                                       | [Doc](../../development/metadata), {% include api i="interface.Metadata" %}
 | --------------------------------------------------------------- | --------- |
-| Change media position                                           | [Doc](development/metadata), {% include api i="interface.Metadata.set_position" %}
+| Change media position                                           | [Doc](../../development/metadata), {% include api i="interface.Metadata.set_position" %}
 | --------------------------------------------------------------- | --------- |
-| Shuffle and repeat                                              | [Doc](development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
+| Shuffle and repeat                                              | [Doc](../../development/metadata), {% include api i="interface.Metadata.set_shuffle" %}, {% include api i="interface.Metadata.set_repeat" %}
 | --------------------------------------------------------------- | --------- |
-| Volume Controls                                                 | [Doc](development/control), {% include api i="interface.RemoteControl" %}
+| Volume Controls                                                 | [Doc](../../development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
-| Power management                                                | [Doc](development/power_management), {% include api i="interface.Power" %}
+| Power management                                                | [Doc](../../development/power_management), {% include api i="interface.Power" %}
 | --------------------------------------------------------------- | --------- |
-| Deep Sleep Detection                                            | [Concept](documentation/concepts/#deep-sleep-detection), [Doc](development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
+| Deep Sleep Detection                                            | [Concept](../concepts/#deep-sleep-detection), [Doc](../../development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
 | --------------------------------------------------------------- | --------- |
-| Launch application                                              | [Doc](development/apps), {% include api i="interface.Apps" %}
+| Launch application                                              | [Doc](../../development/apps), {% include api i="interface.Apps" %}
 | --------------------------------------------------------------- | --------- |
-| List installed apps                                             | [Doc](development/apps), {% include api i="interface.Apps" %}
+| List installed apps                                             | [Doc](../../development/apps), {% include api i="interface.Apps" %}
 
 # Core Features
 
