@@ -10,8 +10,6 @@ from pyatv.support.scan import BaseScanner, get_unique_identifiers
 TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})
 TEST_SERVICE2 = Service("_service2._tcp.local", "service2", None, 0, {"c": "d"})
 
-# class TestScanner(BaseScanner):
-
 
 @pytest.fixture
 def response():

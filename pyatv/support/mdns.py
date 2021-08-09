@@ -4,6 +4,7 @@ from ipaddress import IPv4Address, ip_address
 import logging
 import math
 import socket
+from types import SimpleNamespace
 import typing
 import weakref
 
@@ -21,6 +22,11 @@ from pyatv.support.dns import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Number of services to include in each request
+SERVICES_PER_MSG = 3
+
+SLEEP_PROXY_SERVICE = "_sleep-proxy._udp.local"
 
 # This module produces a lot of debug output, use a dedicated log level.
 # Maybe move this to top-level support later?
@@ -67,13 +73,20 @@ def _decode_properties(
     return CaseInsensitiveDict({k: _decode(v) for k, v in properties.items()})
 
 
-def create_request(
-    services: typing.List[str], qtype: QueryType = QueryType.PTR
-) -> bytes:
-    """Create a new DnsMessage requesting specified services."""
-    msg = DnsMessage(0x35FF)
-    msg.questions += [DnsQuestion(s, qtype, 0x8001) for s in services]
-    return msg.pack()
+def create_service_queries(
+    services: typing.List[str], qtype: QueryType
+) -> typing.List[bytes]:
+    """Create service request messages."""
+    queries: typing.List[bytes] = []
+    for i in range(math.ceil(len(services) / SERVICES_PER_MSG)):
+        service_chunk = services[i * SERVICES_PER_MSG : i * SERVICES_PER_MSG + 4]
+
+        msg = DnsMessage(0x35FF)
+        msg.questions += [DnsQuestion(s, qtype, 0x8001) for s in service_chunk]
+        msg.questions += [DnsQuestion(SLEEP_PROXY_SERVICE, qtype, 0x8001)]
+
+        queries.append(msg.pack())
+    return queries
 
 
 def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
@@ -87,57 +100,83 @@ def _first_rd(qtype: QueryType, entries: typing.Dict[int, typing.List[DnsResourc
     return entries[qtype][0].rd if qtype in entries else None
 
 
-def parse_services(  # pylint: disable=too-many-locals
-    message: DnsMessage,
-) -> typing.List[Service]:
-    """Parse DNS response into Service objects."""
-    table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
-    ptrs: typing.Dict[str, str] = {}  # qname -> real name
-    results: typing.Dict[str, Service] = {}
+class ServiceParser:
+    """Parse zeroconf services from records in DNS messages."""
 
-    # Create a global table with all records
-    for record in message.answers + message.resources:
-        if record.qtype == QueryType.PTR and record.qname.startswith("_"):
-            ptrs[record.qname] = record.rd
-        else:
-            entry = table.setdefault(record.qname, {})
-            if record.qtype not in entry:
-                entry[record.qtype] = []
-            entry[record.qtype].append(record)
+    def __init__(self) -> None:
+        """Initialize a new ServiceParser instance."""
+        self.table: typing.Dict[str, typing.Dict[int, typing.List[DnsResource]]] = {}
+        self.ptrs: typing.Dict[str, str] = {}  # qname -> real name
+        self._cache: typing.Optional[typing.List[Service]] = None
 
-    # Build services
-    for service, device in table.items():
-        try:
-            service_name = ServiceInstanceName.split_name(service)
-        except ValueError:
-            continue
+    def add_message(self, message: DnsMessage) -> "ServiceParser":
+        """Add message to with records to parse."""
+        self._cache = None
 
-        srv_rd = _first_rd(QueryType.SRV, device)
-        target = srv_rd["target"] if srv_rd else None
+        for record in message.answers + message.resources:
+            if record.qtype == QueryType.PTR and record.qname.startswith("_"):
+                self.ptrs[record.qname] = record.rd
+            else:
+                entry = self.table.setdefault(record.qname, {})
+                if record.qtype not in entry:
+                    entry[record.qtype] = []
 
-        target_records = table.get(typing.cast(str, target), {}).get(QueryType.A, [])
-        address = None
+                if record not in entry[record.qtype]:
+                    entry[record.qtype].append(record)
+        return self
 
-        # Pick one address that is not link-local
-        for addr in [IPv4Address(record.rd) for record in target_records]:
-            if not addr.is_link_local:
-                address = addr
-                break
+    def parse(self) -> typing.List[Service]:
+        """Parse records and return services."""
+        if self._cache:
+            return self._cache
 
-        results[service] = Service(
-            service_name.ptr_name,
-            typing.cast(str, service_name.instance),
-            address,
-            srv_rd["port"] if srv_rd else 0,
-            _decode_properties(_first_rd(QueryType.TXT, device) or {}),
-        )
+        results: typing.Dict[str, Service] = {}
 
-    # If there are PTRs to unknown services, create placeholders
-    for qname, real_name in ptrs.items():
-        if real_name not in results:
-            results[real_name] = Service(qname, real_name.split(".")[0], None, 0, {})
+        # Build services
+        for service, device in self.table.items():
+            try:
+                service_name = ServiceInstanceName.split_name(service)
+            except ValueError:
+                continue
 
-    return list(results.values())
+            srv_rd = _first_rd(QueryType.SRV, device)
+            target = srv_rd["target"] if srv_rd else None
+
+            target_records = self.table.get(typing.cast(str, target), {}).get(
+                QueryType.A, []
+            )
+            address = None
+
+            # Pick one address that is not link-local
+            for addr in [IPv4Address(record.rd) for record in target_records]:
+                if not addr.is_link_local:
+                    address = addr
+                    break
+
+            results[service] = Service(
+                service_name.ptr_name,
+                typing.cast(str, service_name.instance),
+                address,
+                srv_rd["port"] if srv_rd else 0,
+                _decode_properties(_first_rd(QueryType.TXT, device) or {}),
+            )
+
+        # If there are PTRs to unknown services, create placeholders
+        for qname, real_name in self.ptrs.items():
+            if real_name not in results:
+                results[real_name] = Service(
+                    qname, real_name.split(".")[0], None, 0, {}
+                )
+        self._cache = list(results.values())
+        return self._cache
+
+
+class QueryResponse(SimpleNamespace):
+    """Hold DNS query response records."""
+
+    count: int
+    deep_sleep: bool
+    parser: ServiceParser
 
 
 class UnicastDnsSdClientProtocol(asyncio.Protocol):
@@ -145,12 +184,13 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     def __init__(self, services: typing.List[str], host: str, timeout: int):
         """Initialize a new UnicastDnsSdClientProtocol."""
-        self.message = create_request(services)
+        self.queries = create_service_queries(services, QueryType.PTR)
         self.host = host
         self.timeout = timeout
         self.transport = None
+        self.parser: ServiceParser = ServiceParser()
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
-        self.result: DnsMessage = DnsMessage()
+        self.received_responses: int = 0
         self._task: typing.Optional[asyncio.Future] = None
 
     async def get_response(self) -> Response:
@@ -167,7 +207,8 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
                 await self._task
             except asyncio.CancelledError:
                 pass
-        services = parse_services(self.result)
+
+        services = self.parser.parse()
         return Response(
             services=services,
             deep_sleep=False,
@@ -181,14 +222,15 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
 
     async def _resend_loop(self):
         for _ in range(math.ceil(self.timeout)):
-            log_binary(
-                _LOGGER,
-                "Sending DNS request to " + self.host,
-                level=TRAFFIC_LEVEL,
-                Data=self.message,
-            )
+            for query in self.queries:
+                log_binary(
+                    _LOGGER,
+                    "Sending DNS request to " + self.host,
+                    level=TRAFFIC_LEVEL,
+                    Data=query,
+                )
 
-            self.transport.sendto(self.message)
+                self.transport.sendto(query)
             await asyncio.sleep(1)
 
     def datagram_received(self, data: bytes, _) -> None:
@@ -198,12 +240,17 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             "Received DNS response from " + self.host,
             level=TRAFFIC_LEVEL,
             Data=data,
+            Index=self.received_responses + 1,
+            Total=len(self.queries),
         )
 
-        self.result = DnsMessage().unpack(data)
-        self._finished()
-        if self.transport:
-            self.transport.close()
+        self.parser.add_message(DnsMessage().unpack(data))
+        self.received_responses += 1
+
+        if self.received_responses == len(self.queries):
+            self._finished()
+            if self.transport:
+                self.transport.close()
 
     def error_received(self, exc) -> None:
         """Error received during communication."""
@@ -285,13 +332,14 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
         """Initialize a new MulticastDnsSdClientProtocol."""
         self.loop = loop
         self.services = services
-        self.message = create_request(services)
+        self.queries = create_service_queries(services, QueryType.PTR)
+        self.query_responses: typing.Dict[str, QueryResponse] = {}
         self.address = address
         self.port = port
         self.end_condition = end_condition or (lambda _: False)
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
-        self.responses: typing.Dict[IPv4Address, Response] = {}
-        self._unicasts: typing.Dict[IPv4Address, bytes] = {}
+        self.parser = ServiceParser()
+        self._unicasts: typing.Dict[IPv4Address, typing.List[bytes]] = {}
         self._task: typing.Optional[asyncio.Future] = None
         self._receivers: typing.List[asyncio.BaseProtocol] = []
 
@@ -304,7 +352,7 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
 
         self._receivers.append(protocol)
 
-    async def get_response(self, timeout: int) -> typing.Dict[IPv4Address, Response]:
+    async def get_response(self, timeout: int) -> typing.List[Response]:
         """Get respoonse with a maximum timeout."""
         # Semaphore used here as a quick-bailout when testing
         try:
@@ -320,28 +368,39 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
                 except asyncio.CancelledError:
                     pass
                 self._task = None
-        return self.responses
+
+        def _to_response(query_response: QueryResponse):
+            services = query_response.parser.parse()
+            return Response(
+                services=services,
+                deep_sleep=query_response.deep_sleep,
+                model=_get_model(services),
+            )
+
+        return [_to_response(response) for response in self.query_responses.values()]
 
     async def _resend_loop(self, timeout):
         for _ in range(math.ceil(timeout)):
-            log_binary(
-                _LOGGER,
-                f"Sending multicast DNS request to {self.address}:{self.port}",
-                level=TRAFFIC_LEVEL,
-                Data=self.message,
-            )
-
-            self._sendto(self.message, (self.address, self.port))
-
-            # Send unicast requests if devices are sleeping
-            for address, message in self._unicasts.items():
+            for query in self.queries:
                 log_binary(
                     _LOGGER,
-                    f"Sending unicast DNS request to {address}:{self.port}",
+                    f"Sending multicast DNS request to {self.address}:{self.port}",
                     level=TRAFFIC_LEVEL,
-                    Data=message,
+                    Data=query,
                 )
-                self._sendto(message, (address, self.port))
+
+                self._sendto(query, (self.address, self.port))
+
+            # Send unicast requests if devices are sleeping
+            for address, queries in self._unicasts.items():
+                for query in queries:
+                    log_binary(
+                        _LOGGER,
+                        f"Sending unicast DNS request to {address}:{self.port}",
+                        level=TRAFFIC_LEVEL,
+                        Data=query,
+                    )
+                    self._sendto(query, (address, self.port))
 
             await asyncio.sleep(1)
 
@@ -361,41 +420,53 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             Data=data,
         )
 
+        query_resp = self.query_responses.setdefault(
+            addr[0], QueryResponse(count=0, deep_sleep=False, parser=ServiceParser())
+        )
+
         # Suppress decode errors for now (but still log)
         try:
-            services = parse_services(DnsMessage().unpack(data))
+            decoded_msg = DnsMessage().unpack(data)
+
+            parser = ServiceParser()
+            services = parser.add_message(decoded_msg).parse()
         except UnicodeDecodeError:
             log_binary(_LOGGER, "Failed to decode message", Msg=data)
             return
+        else:
+            if not services:
+                return
 
         # Ignore responses from other services
         for service in services:
-            if (
-                service.type not in self.services
-                and service.type != DEVICE_INFO_SERVICE
+            if not (
+                service.type in self.services
+                or service.type in [DEVICE_INFO_SERVICE, SLEEP_PROXY_SERVICE]
             ):
                 return
 
         is_sleep_proxy = all(service.port == 0 for service in services)
+        query_resp.count += 1
+        query_resp.deep_sleep |= is_sleep_proxy
+        query_resp.parser.add_message(decoded_msg)
+
         if is_sleep_proxy:
-            self._unicasts[addr[0]] = create_request(
+            self._unicasts[addr[0]] = create_service_queries(
                 [service.name + "." + service.type for service in services],
-                qtype=QueryType.ANY,
+                QueryType.ANY,
             )
-        else:
+        elif query_resp.count >= len(self.queries):
             response = Response(
-                services=services,
-                deep_sleep=(addr[0] in self._unicasts),
-                model=_get_model(services),
+                services=query_resp.parser.parse(),
+                deep_sleep=query_resp.deep_sleep,
+                model=_get_model(query_resp.parser.parse()),
             )
 
             if self.end_condition(response):
                 # Matches end condition: replace everything found so far and abort
-                self.responses = {IPv4Address(addr[0]): response}
+                self.query_responses = {addr[0]: self.query_responses[addr[0]]}
                 self.semaphore.release()
                 self.close()
-            else:
-                self.responses[IPv4Address(addr[0])] = response
 
     @staticmethod
     def error_received(exc) -> None:
@@ -436,7 +507,7 @@ async def multicast(  # pylint: disable=too-many-arguments
     port: int = 5353,
     timeout: int = 4,
     end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
-) -> typing.Dict[IPv4Address, Response]:
+) -> typing.List[Response]:
     """Send multicast request for services."""
     protocol = MulticastDnsSdClientProtocol(
         loop, services, address, port, end_condition

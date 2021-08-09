@@ -16,6 +16,7 @@ SERVICE_NAME = "Kitchen"
 MEDIAREMOTE_SERVICE = "_mediaremotetv._tcp.local"
 DEVICE_INFO_SERVICE = "_device-info._tcp._local"
 
+SERVICES_PER_REQUEST = 3
 
 TEST_SERVICES = dict(
     [
@@ -24,6 +25,13 @@ TEST_SERVICES = dict(
         ),
     ]
 )
+
+
+def gen_test_services(count: int) -> typing.List[str]:
+    return [f"srv{i}._tcp.local" for i in range(count)]
+
+
+pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture(autouse=True)
@@ -75,7 +83,7 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
 
     # Checks if either response or request count has been fulfilled
     def _check_cond(protocol: mdns.MulticastDnsSdClientProtocol) -> bool:
-        if len(protocol.responses) == conditions["responses"]:
+        if len(protocol.query_responses) == conditions["responses"]:
             return False
         if conditions["requests"] == 0:
             return True
@@ -97,42 +105,55 @@ async def multicast_fastexit(event_loop, monkeypatch, udns_server):
     await asyncio.gather(*clients)
 
 
-async def unicast(event_loop, udns_server, service_name, timeout=1):
+async def unicast(event_loop, udns_server, service_names, timeout=1):
     return (
         await mdns.unicast(
             event_loop,
             "127.0.0.1",
-            [service_name],
+            service_names,
             port=udns_server.port,
             timeout=timeout,
         ),
-        TEST_SERVICES.get(service_name),
+        TEST_SERVICES.get(service_names[0]),
     )
 
 
-@pytest.mark.asyncio
 async def test_unicast_has_valid_service(event_loop, udns_server):
-    resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE)
+    resp, service = await unicast(event_loop, udns_server, [MEDIAREMOTE_SERVICE])
     assert len(resp.services) == 1
     assert resp.services[0].type == MEDIAREMOTE_SERVICE
     assert resp.services[0].name == service.name
     assert resp.services[0].port == service.port
 
 
-@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "service_count,expected_requests",
+    [
+        (1, 1),
+        (SERVICES_PER_REQUEST, 1),
+        (SERVICES_PER_REQUEST + 1, 2),
+        (2 * SERVICES_PER_REQUEST + 1, 3),
+    ],
+)
+async def test_unicast_multiple_requests(
+    service_count, expected_requests, event_loop, udns_server
+):
+    resp, _ = await unicast(event_loop, udns_server, gen_test_services(service_count))
+    assert udns_server.request_count == expected_requests
+
+
 async def test_unicast_resend_if_no_response(event_loop, udns_server):
     udns_server.skip_count = 2
-    resp, service = await unicast(event_loop, udns_server, MEDIAREMOTE_SERVICE, 3)
+    resp, service = await unicast(event_loop, udns_server, [MEDIAREMOTE_SERVICE], 3)
     assert len(resp.services) == 1
     assert resp.services[0].type == MEDIAREMOTE_SERVICE
     assert resp.services[0].name == service.name
     assert resp.services[0].port == service.port
 
 
-@pytest.mark.asyncio
 async def test_unicast_specific_service(event_loop, udns_server):
     resp, _ = await unicast(
-        event_loop, udns_server, SERVICE_NAME + "." + MEDIAREMOTE_SERVICE
+        event_loop, udns_server, [SERVICE_NAME + "." + MEDIAREMOTE_SERVICE]
     )
     assert len(resp.services) == 1
 
@@ -142,14 +163,36 @@ async def test_unicast_specific_service(event_loop, udns_server):
     assert resp.services[0].port == service.port
 
 
-@pytest.mark.asyncio
+async def test_unicast_includes_sleep_proxy_service(event_loop, udns_server):
+    udns_server.services = {
+        "_test._tcp.local": fake_udns.FakeDnsService(
+            name="test", addresses=["127.0.0.1"], port=1234, properties={}, model=None
+        ),
+        "_sleep-proxy._udp.local": fake_udns.FakeDnsService(
+            name="sleepy", addresses=["127.0.0.1"], port=5678, properties={}, model=None
+        ),
+    }
+
+    # _sleep-proxy._udp.local should be requested implicitly in unicast for
+    # any service
+    resp, _ = await unicast(event_loop, udns_server, ["_test._tcp.local"])
+    assert len(resp.services) == 2
+
+    proxy = [
+        service
+        for service in resp.services
+        if service.type == "_sleep-proxy._udp.local"
+    ][0]
+    assert proxy.name == "sleepy"
+    assert proxy.port == 5678
+
+
 async def test_multicast_no_response(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=0, requests=0)
 
     await mdns.multicast(event_loop, [], "127.0.0.1", udns_server.port)
 
 
-@pytest.mark.asyncio
 async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=1, requests=0)
 
@@ -158,13 +201,12 @@ async def test_multicast_has_valid_service(event_loop, udns_server, multicast_fa
     )
     assert len(resp) == 1
 
-    first = resp[IPv4Address("127.0.0.1")].services[0]
+    first = resp[0].services[0]
     assert first.type == MEDIAREMOTE_SERVICE
     assert first.name == SERVICE_NAME
     assert first.port == 1234
 
 
-@pytest.mark.asyncio
 async def test_multicast_end_condition_met(
     event_loop, udns_server, multicast_fastexit, stub_ip_address
 ):
@@ -184,10 +226,9 @@ async def test_multicast_end_condition_met(
         end_condition=_end_cond,
     )
     assert len(resp) == 1
-    actor.assert_called_once_with(resp[IPv4Address("127.0.0.1")])
+    actor.assert_called_once_with(resp[0])
 
 
-@pytest.mark.asyncio
 async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=0, requests=3)
     udns_server.sleep_proxy = True
@@ -212,7 +253,6 @@ async def test_multicast_sleeping_device(event_loop, udns_server, multicast_fast
     assert len(resp) == 1
 
 
-@pytest.mark.asyncio
 async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=1, requests=0)
 
@@ -220,7 +260,7 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert not resp[IPv4Address("127.0.0.1")].deep_sleep
+    assert not resp[0].deep_sleep
 
     udns_server.sleep_proxy = True
     multicast_fastexit(responses=1, requests=0)
@@ -229,10 +269,9 @@ async def test_multicast_deep_sleep(event_loop, udns_server, multicast_fastexit)
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert resp[IPv4Address("127.0.0.1")].deep_sleep
+    assert resp[0].deep_sleep
 
 
-@pytest.mark.asyncio
 async def test_multicast_device_model(event_loop, udns_server, multicast_fastexit):
     multicast_fastexit(responses=1, requests=0)
 
@@ -240,7 +279,7 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert not resp[IPv4Address("127.0.0.1")].model
+    assert not resp[0].model
 
     udns_server.services = {
         MEDIAREMOTE_SERVICE: fake_udns.FakeDnsService(
@@ -257,4 +296,4 @@ async def test_multicast_device_model(event_loop, udns_server, multicast_fastexi
         event_loop, [MEDIAREMOTE_SERVICE], "127.0.0.1", udns_server.port
     )
 
-    assert resp[IPv4Address("127.0.0.1")].model == "dummy"
+    assert resp[0].model == "dummy"
