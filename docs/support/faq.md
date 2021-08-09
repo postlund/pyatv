@@ -148,6 +148,22 @@ Or a warning if not supported:
 Most versions of macOS and Linux should work with no problems. For Windows, you need at
 least Windows 10 build 1709.
 
+pyatv.
+
+# When using pyatv on a Raspberry pi, e.g running atvremote, I get "Illegal instruction". How do I fix that?
+
+It seems like the wheels (prebuilt binaries) for miniaudio does not work properly. You can fix this
+by manually uninstalling miniaudio and building it from source:
+
+```shell
+pip uninstall miniaudio
+pip install --no-binary :all: miniaudio
+```
+
+You might have to install some additional system packages (like a C-compiler) for this.
+
+Reported in this issue: {% include issue no="1249" %}
+
 # Known Issues
 
 Some apps behave in unexpected ways that are out of control of this library (including general things in tvOS), i.e. nothing can be done in pyatv to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
