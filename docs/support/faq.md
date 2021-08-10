@@ -148,6 +148,22 @@ Or a warning if not supported:
 Most versions of macOS and Linux should work with no problems. For Windows, you need at
 least Windows 10 build 1709.
 
+pyatv.
+
+# When using pyatv on a Raspberry pi, e.g running atvremote, I get "Illegal instruction". How do I fix that?
+
+It seems like the wheels (prebuilt binaries) for miniaudio does not work properly. You can fix this
+by manually uninstalling miniaudio and building it from source:
+
+```shell
+pip uninstall miniaudio
+pip install --no-binary :all: miniaudio
+```
+
+You might have to install some additional system packages (like a C-compiler) for this.
+
+Reported in this issue: {% include issue no="1249" %}
+
 # Known Issues
 
 Some apps behave in unexpected ways that are out of control of this library (including general things in tvOS), i.e. nothing can be done in pyatv to circumvent these behaviors. This sections lists the known ones. If you are experiencing issues with an app, feel free to add it here (write an issue, make a PR or just press *Edit this page* at the bottom of this page).
@@ -176,6 +192,15 @@ Reported in these issues: {% include issue no="958" %}
   not content of the preview). A workaround is to disable these previews, see
   [this](https://help.netflix.com/sv/node/2102) page.
 * During episode intros and "next episode" screens the device goes to idle state.
+
+## com.cellcom.cellcomtvappleos
+
+Does not seem to report any state. This app likely implements its own media player, bypassing
+the metadata management used by MRP meaning that no information is available when this app is used.
+
+Link to app in App Store: https://apps.apple.com/il/app/%D7%A1%D7%9C%D7%A7%D7%95%D7%9D-tv/id1159313682
+
+Reported in these issues: {% include issue no="1160" %}
 
 ## playbackRate issue
 
