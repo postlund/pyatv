@@ -1330,3 +1330,441 @@ CSeq: 0
 [AirTunes v2](https://git.zx2c4.com/Airtunes2/about/)
 
 [AirPlayAuth](https://github.com/funtax/AirPlayAuth)
+
+# AirPlay 2
+
+In reality, AirPlay 2 has a lot in common with its predecessor, but a lot also differs
+so it deserves it's own capter.
+
+For now, main focus here is to describe how AirPlay can be setup for remote control
+only, i.e. how to get metadata for what is playing. Other parts will be added later.
+
+## Service Discovery
+
+TBD
+
+## Authentication
+
+There are multiple ways to authenticate a device, all based on HAP just like Companion
+and MRP. Implementations of regular pairing and transient pairing (written in C) can
+be found [here](https://github.com/ejurgensen/pair_ap).
+
+*TBD: Add details regarding pairing and encryption.*
+
+### Encryption
+All channels described here are encrypted using Chacha20Poly1305. The session key is always
+derived (with HKDF) from the shared secret agreed upon during authentication. Salt and info
+values varies depending on channel.
+
+Data is encrypted in blocks of at most 1024 bytes, with a two bytes (little-endian) size
+field prepended to it and as well as a 16 byte auth tag appended:
+
+| **Size (2 bytes)** | **Data (n bytes)** | **Auth tag (16 bytes)** |
+
+
+This is also described in the HAP specification, section 5.2.2 (Release R1).
+
+## Remote Control
+
+*NB: This is WIP. Far from everything is understood yet, so take this part with a grain
+of salt.*
+
+Setting up a remote control session works more or less like setting up a regular audio
+stream, but it has a different type and the data channel will carry control messages.
+Below is a sequence diagram outlining the setup flow on a higher level. Three channels
+are used: control, event and data. You should interpret *Control Sender* as the control
+channel on the "sender" side, e.g. an iPhone.
+
+<code class="diagram">
+sequenceDiagram
+    participant CS as Control Sender
+    participant CR as Control Receiver
+    participant ES as Event Sender
+    participant ER as Event Receiver
+    participant DS as Data Sender
+    participant DR as Data Receiver
+    CS->>CR: SETUP {isRemoteControlOnly: True}
+    CR->>CS: OK {eventPort}
+    CS-->>ES: Start Event Sender
+    ES->>ER: Connect (eventPort)
+    ER-->>ES:
+    CS->>CR: RECORD
+    CR->>CS: OK
+    ER->>ES: System info update
+    CS->>CR: SETUP (stream)
+    CR->>CS: OK {dataPort}
+    CS-->>DS: Start Data Sender
+    DS->>DR: Connect (dataPort)
+    DR-->>DS:
+    note over DS,DR: Exchange messages here
+    loop Every two seconds
+        CS->>CR: POST /feedback
+        CR->>CS: OK
+    end
+</code>
+
+### Control Channel (RTSP)
+This section describes how a remote control session is set up on the main (control) channel.
+An event and data channel will be set up in parallel, so be prepared to skip back and forth
+between chapters a bit to understand what's going on. Keep the sequence diagram above ready
+at hand.
+
+The sender starts by setting up a new session, requesting a remote control session via
+`isRemoteControlOnly`:
+
+**Sender -> Receiver:**
+```raw
+SETUP rtsp://10.0.10.254/14511846595692938970 RTSP/1.0
+Content-Length: 376
+Content-Type: application/x-apple-binary-plist
+CSeq: 7
+User-Agent: AirPlay/550.10
+
+bplist00\xdb\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16_\x10\x13isRemoteControlOnlyVosName]sourceVersion^timingProtocolUmodelXdeviceIDYosVersion^osBuildVersionZmacAddress[sessionUUIDTname\tYiPhone OSV550.10TNoneZiPhone10,6_\x10\x11FF:EE:DD:CC:BB:AAV14.7.1U18G82_\x10\x11AA:BB:CC:DD:EE:FF_\x10$C9646F97-7B3D-46DA-9F92-332ED10EC258^Pierres iPhone\x00\x08\x00\x1f\x005\x00<\x00J\x00Y\x00_\x00h\x00r\x00\x81\x00\x8c\x00\x98\x00\x9d\x00\x9e\x00\xa8\x00\xaf\x00\xb4\x00\xbf\x00\xd3\x00\xda\x00\xe0\x00\xf4\x01\x1b\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00\x17\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01*
+```
+
+The decoded content looks like this:
+
+```javascript
+{'isRemoteControlOnly': True, 'osName': 'iPhone OS', 'sourceVersion': '550.10', 'timingProtocol': 'None', 'model': 'iPhone10,6', 'deviceID': 'FF:EE:DD:CC:BB:AA', 'osVersion': '14.7.1', 'osBuildVersion': '18G82', 'macAddress': 'AA:BB:CC:DD:EE:FF', 'sessionUUID': 'C9646F97-7B3D-46DA-9F92-332ED10EC258', 'name': 'Pierres iPhone'}
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Fri, 20 Aug 2021 17:09:58 GMT
+Content-Length: 59
+Content-Type: application/x-apple-binary-plist
+Server: AirTunes/550.10
+CSeq: 7
+
+bplist00\xd1\x01\x02YeventPort\x11\xc0\xba\x08\x0b\x15\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18'
+```
+
+Which decodes to:
+
+```javascript
+{'eventPort': 49338}
+```
+
+At this stage, the receiver expects the sender to establish a TCP connection to the port specified
+by `eventPort`. This connection will be used for regular AirPlay events, i.e. RTSP messages
+are exchanged here. See next chapter for more details.
+
+After the sender has connected to the event port, it shall start the stream using `RECORD`
+(iOS seems to request `/info` before doing this, that's why CSeq 8 is skipped):
+
+**Sender -> Receiver:**
+```raw
+RECORD rtsp://10.0.10.254/14511846595692938970 RTSP/1.0
+CSeq: 9
+User-Agent: AirPlay/550.10
+```
+
+The receiver will respond with:
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Thu, 19 Aug 2021 20:17:58 GMT
+Content-Length: 0
+Audio-Latency: 0
+Server: AirTunes/550.10
+CSeq: 9
+```
+
+Now the receiver will send a "system info update" on the event channel.
+
+Next step is to set up a channel for the actual remote control messages:
+
+**Sender -> Receiver:**
+```raw
+SETUP rtsp://10.0.10.254/14511846595692938970 RTSP/1.0
+Content-Length: 298
+Content-Type: application/x-apple-binary-plist
+CSeq: 10
+User-Agent: AirPlay/550.10
+
+bplist00\xd1\x01\x02Wstreams\xa1\x03\xd7\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11[controlTypeYchannelIDTseedZclientUUIDTtype_\x10\x14wantsDedicatedSocket^clientTypeUUID\x10\x02_\x10$DA6501B1-1452-4417-AE27-ED8E309DEBCE\x13\xd0_\x18\xd7\x13\xcbh\xd6_\x10$11F965B7-8653-4A25-B82E-D9416C05FE68\x10\x82\t_\x10$1910A70F-DBC0-4242-AF95-115DB30604E1\x08\x0b\x13\x15$0:?JOfuw\x9e\xa7\xce\xd0\xd1\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x12\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf8
+```
+
+Which decodes to:
+
+```javascript
+{'streams': [{'controlType': 2, 'channelID': 'DA6501B1-1452-4417-AE27-ED8E309DEBCE', 'seed': -3431997079003895594, 'clientUUID': '11F965B7-8653-4A25-B82E-D9416C05FE68', 'type': 130, 'wantsDedicatedSocket': True, 'clientTypeUUID': '1910A70F-DBC0-4242-AF95-115DB30604E1'}]}
+```
+
+Some things to note here:
+
+* `channelID` and `clientUUID` change each time, so they are likely randomized
+* `clientTypeUUID` must be hardcoded to `1910A70F-DBC0-4242-AF95-115DB30604E1` (there
+  are a few other values used under other circumstances)
+* `type` 130 represents remote control type
+* `seed` is used when deriving encryption keys for the channel
+
+The response looks like this:
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Thu, 19 Aug 2021 20:17:58 GMT
+Content-Length: 100
+Content-Type: application/x-apple-binary-plist
+Server: AirTunes/550.10
+CSeq: 10
+
+bplist00\xd1\x01\x02Wstreams\xa1\x03\xd3\x04\x05\x06\x07\x08\tTtypeXstreamIDXdataPort\x10\x82\x10\x01\x11\xc0\xae\x08\x0b\x13\x15\x1c!*357\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00:
+```
+
+Which decodes to:
+
+```javascript
+{'streams': [{'type': 130, 'streamID': 1, 'dataPort': 49326}]}
+```
+
+Like with the event channel, the sender is expected to establish a TCP connection to
+`dataPort` and enable encryption. Remote control messages are from now on exchanged on the
+data channel.
+
+The sender shall continuously send feedback updates to the receiver on the control channel:
+
+**Sender -> Receiver:**
+```raw
+POST /feedback RTSP/1.0
+CSeq: 12
+User-Agent: AirPlay/550.10
+```
+
+**Receiver -> Sender:**
+```raw
+RTSP/1.0 200 OK
+Date: Thu, 19 Aug 2021 20:18:08 GMT
+Content-Length: 55
+Content-Type: application/x-apple-binary-plist
+Server: AirTunes/550.10
+CSeq: 12
+
+bplist00\xd1\x01\x02Wstreams\xa0\x08\x0b\x13\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x14
+````
+
+Which decodes to this:
+
+```javascript
+{'streams': []}
+```
+
+It seems iOS is doing this every two seconds. If that frequence is needed or not has not been
+investigated.
+
+**Now it's done!**
+
+### Event Channel
+The event channel is initiated by the sender to the port returned in the response to `SETUP`.
+After `SETUP` has finished, the sender shall connect to this port (TCP) and enable encryption.
+The following paramers are used to derive encryption keys:
+
+| Direction | Salt | Info |
+| --------- | ---- | ---- |
+| Output    | Events-Salt | Events-Write-Encryption-Key |
+| Input     | Events-Salt | Events-Read-Encryption-Key |
+
+After the stream has been started using `RECORD`, the receiver will send a "system info update",
+which is basically what is returned when requesting `/info`:
+
+**Receiver -> Sender:**
+```raw
+POST /command RTSP/1.0
+CSeq: 0
+Content-Length: 1386
+Content-Type: application/x-apple-binary-plist
+
+bplist00\xd2\x01\x02\x03\x04TtypeUvalueZupdateInfo\xdf\x10\x18\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f&\'#)*+,-.&0123;#=>?@ASpsiRvv_\x10\x14playbackCapabilities_\x10\x15canRecordScreenStream[statusFlags_\x10\x18keepAliveSendStatsAsBodyTname_\x10\x0fprotocolVersion_\x10\x11volumeControlType]senderAddressXdeviceIDRpi^screenDemoMode]initialVolumeZfeaturesExZtxtAirPlay_\x10\x10supportedFormats]sourceVersion_\x10\x16hasUDPMirroringSupportUmodelRpkZmacAddress_\x10\x15receiverHDRCapabilityXfeatures_\x10$6EE2C905-874B-4B4B-A50B-0F06B1800A17\x10\x02\xd3 !"###_\x10\x15supportsInterstitials_\x10\x15supportsFPSSecureStop_\x10\x1dsupportsUIForAudioOnlyContent\t\t\t\x08\x11\x02D\tZVardagsrumS1.1\x10\x04_\x10\x1110.0.10.254:46164_\x10\x11AA:BB:CC:DD:EE:FF_\x10$de7562c4-7bd2-4005-a8e4-d584bf63161a\x08#\xc04\x00\x00\x00\x00\x00\x00[1d9/St5fFTwO\x11\x01\x7f\x05acl=0\x18btaddr=FF:EE:DD:CC:BB:AA\x1adeviceid=AA:BB:CC:DD:EE:FF\x0ffex=1d9/St5fFTw\x1efeatures=0x4A7FDFD5,0x3C155FDE\x0bflags=0x244(gid=4D826039-0F40-4605-AD11-A6516183BAA6\x05igl=1\x06gcgl=1\x10model=AppleTV6,2\rprotovers=1.1\'pi=de7562c4-7bd2-4005-a8e4-d584bf63161a(psi=6EE2C905-874B-4B4B-A50B-0F06B1800A17Cpk=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x0esrcvers=550.10\x0bosvers=14.7\x04vv=2\xd44567899:_\x10\x15lowLatencyAudioStream\\screenStream[audioStream\\bufferStream\x10\x00\x12\x01D\x08\x00\x12\x00\xe0\x00\x00V550.10\tZAppleTV6,2O\x10 \xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa_\x10\x11AA:BB:CC:DD:EE:FFT4k30\x13<\x15_\xdeJ\x7f\xdf\xd5\x00\x08\x00\r\x00\x12\x00\x18\x00#\x00V\x00Z\x00]\x00t\x00\x8c\x00\x98\x00\xb3\x00\xb8\x00\xca\x00\xde\x00\xec\x00\xf5\x00\xf8\x01\x07\x01\x15\x01 \x01+\x01>\x01L\x01e\x01k\x01n\x01y\x01\x91\x01\x9a\x01\xc1\x01\xc3\x01\xca\x01\xe2\x01\xfa\x02\x1a\x02\x1b\x02\x1c\x02\x1d\x02\x1e\x02!\x02"\x02-\x021\x023\x02G\x02[\x02\x82\x02\x83\x02\x8c\x02\x98\x04\x1b\x04$\x04<\x04I\x04U\x04b\x04d\x04i\x04n\x04u\x04v\x04\x81\x04\xa4\x04\xb8\x04\xbd\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00B\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\xc6
+```
+
+Which decodes to this (identifiers replaced with random values):
+
+```javascript
+{'type': 'updateInfo', 'value': {'psi': '6EE2C905-874B-4B4B-A50B-0F06B1800A17', 'vv': 2, 'playbackCapabilities': {'supportsInterstitials': True, 'supportsFPSSecureStop': True, 'supportsUIForAudioOnlyContent': True}, 'canRecordScreenStream': False, 'statusFlags': 580, 'keepAliveSendStatsAsBody': True, 'name': 'Vardagsrum', 'protocolVersion': '1.1', 'volumeControlType': 4, 'senderAddress': '10.0.10.254:46164', 'deviceID': 'AA:BB:CC:DD:EE:FF', 'pi': 'de7562c4-7bd2-4005-a8e4-d584bf63161a', 'screenDemoMode': False, 'initialVolume': -20.0, 'featuresEx': '1d9/St5fFTw', 'txtAirPlay': b"\x05acl=0\x18btaddr=FF:EE:DD:CC:BB:AA\x1adeviceid=AA:BB:CC:DD:EE:FF\x0ffex=1d9/St5fFTw\x1efeatures=0x4A7FDFD5,0x3C155FDE\x0bflags=0x244(gid=4D826039-0F40-4605-AD11-A6516183BAA6\x05igl=1\x06gcgl=1\x10model=AppleTV6,2\rprotovers=1.1'pi=de7562c4-7bd2-4005-a8e4-d584bf63161a(psi=6EE2C905-874B-4B4B-A50B-0F06B1800A17Cpk=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x0esrcvers=550.10\x0bosvers=14.7\x04vv=2", 'supportedFormats': {'lowLatencyAudioStream': 0, 'screenStream': 21235712, 'audioStream': 21235712, 'bufferStream': 14680064}, 'sourceVersion': '550.10', 'hasUDPMirroringSupport': True, 'model': 'AppleTV6,2', 'pk': b'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa', 'macAddress': 'AA:BB:CC:DD:EE:FF', 'receiverHDRCapability': '4k30', 'features': 4329472025123872725}}
+```
+
+No other message has been seen on this channel with regards to remote control support.
+
+### Data Channel
+The data channel carries messages related to the remote control. In reality, it's MRP messages
+(so protobuf). The same message definitions used by Media Remote Protocol is also valid
+here.
+
+#### Encryption
+
+The following paramers are used to derive encryption keys:
+
+| Direction | Salt | Info |
+| --------- | ---- | ---- |
+| Output    | DataStream-Salt*X* | DataStream-Output-Encryption-Key |
+| Input     | DataStream-Salt*X* | DataStream-Input-Encryption-Key |
+
+Where *X* is `seed` (64 bit) from the response to `SETUP`. It shall always be
+treated as an unsigned integer (`%llu`), so `-3431997079003895594` would be
+`15014746994705656022`. The salt value in this case would then be
+`DataStream-Salt15014746994705656022`.
+
+#### Message format
+
+The format of the data sent on the data channel is still a bit "hazy", so this is mostly
+educated guesses. Each message includes a 32 byte header where the first four bytes are
+the message size. Messages can be segmented over several packets, so it's necessary to
+put data in a buffer and decode from that. The message format looks like this:
+
+| Field | Size | Comment |
+| ----- | ---- | ------- |
+| Size | 4 byte | Size of message, including size field and all other headers
+| Message Type | 12 byte | Either `sync` for a request or `rply` for a response. Remaining bytes are padded with zeroes (binary, not the digit 0). Might be padding or other unused fields(?).
+| Command | 4 byte | Only `comm` and `cmnd` seen so far. If *Message Type* is `rply`, this field is zero.
+| Sequence number | 8 byte | This is either one or two individual fields, it's not entirely clear. A `rply` message will always contain the same value here as it's corresponding `sync` message. If *Command* is `comm`, then the value is always the same for all requests. Upper four bytes seems to be 1 and the lower four bytes random (generated at session start). If *Command* is `cmnd`, then each request has a random value.
+| Padding | 4 byte | Seems to always be zeroes, maybe has other purpose?
+| Payload | *Size* - 32 | Any payload included in the message, always a binary plist(?).
+
+Some real world examples should make it more clear. Here is one without payload:
+
+```raw
+size=32  sync                     cmnd     sequence number   padding
+00000020 73796e630000000000000000 636d6e64 cf493446 9b4941ae 00000000
+
+size=32  rply                              sequence number   padding
+00000020 72706c790000000000000000 00000000 cf493446 9b4941ae 00000000
+```
+
+And here's one with payload:
+
+```raw
+size=157 sync                     comm     sequence number   padding   payload
+0000009d 73796e630000000000000000 636f6d6d 00000001 6155c3e0 00000000   62706c6973743030d1010256706172616d73d1030454646174614f103b3a08102000aa010c080110001801200028013000aa052436423031354543352d313941412d344534412d394345442d304439343742383144393635080b12151a0000000000000101000000000000000500000000000000000000000000000058
+
+size=74  sync                              sequence number   padding   payload
+0000004a 72706c790000000000000000 00000000 00000001 6155c3e0 00000000   62706c6973743030d0080000000000000101000000000000000100000000000000000000000000000009
+```
+
+If payload is included with a message, it's serialized as a binary property list and has
+this format (others might exist, but not seen so far):
+
+```javascript
+{"params": {"data": xxx}}
+```
+
+Where `xxx` is the transported message. It is actually a
+[varint](https://developers.google.com/protocol-buffers/docs/encoding#varints) with the
+message size followed by a message.
+
+One example looks like this:
+
+```javascript
+{'params': {'data': b'0\x08& \x00\xd2\x02\x02\x08\x02\xaa\x05$E66952D1-F8F3-4F58-8914-4B507443B321'}}
+```
+
+The first byte (in this case), `0x30` decodes to 48 which happens to be the size of
+the remaining data. Decoding that data as a protobuf message yields:
+
+```raw
+type: SET_CONNECTION_STATE_MESSAGE
+errorCode: NoError
+[setConnectionStateMessage] {
+  state: Connected
+}
+uniqueIdentifier: "E66952D1-F8F3-4F58-8914-4B507443B321"
+```
+
+#### General message flow
+
+From here on, protobuf messages are exchanged in a similar manner to how
+the MRP protocol works. They are encapsulated as previously described. One
+thing to note is that the sender sets *Command* to `comm`. The receiver on
+the other hand sets *Command* to `cmnd`. The reason or importance of this
+is yet unknown.
+
+As an example, here is the initial `DEVICE_INFO_MESSAGE` message sent by
+the sender and the answer:
+
+**Sender -> Receiver:**
+```raw
+Hex:
+000001ae73796e630000000000000000
+636f6d6d000000016155c3e000000000
+62706c6973743030d101025670617261
+6d73d1030454646174614f110146c402
+080f122430433236323835302d463145
+382d344637462d383844462d33463331
+39324231413031392000a201ef010a24
+39334543443531352d453735422d3442
+32332d394237312d3845453730384134
+32423132120e50696572726573206950
+686f6e651a066950686f6e6522053138
+4738322a16636f6d2e6170706c652e6d
+6564696172656d6f7465643801406c48
+015001620f636f6d2e6170706c652e4d
+7573696368017001880103a201116161
+3a62623a63633a64643a65653a6666a8
+0101b00101c00101e80101f00100fa01
+12636f6d2e6170706c652e706f646361
+73747382022439444244433031352d32
+3038342d343930352d394139442d3234
+34333544314345363137a80200b00201
+ba020a6950686f6e6531302c36aa0524
+30334246453834342d353037412d3430
+45382d383938362d3633464446383237
+393130330008000b00120015001a0000
+00000000020100000000000000050000
+0000000000000000000000000164
+
+Binary:
+\x00\x00\x01\xaesync\x00\x00\x00\x00\x00\x00\x00\x00comm\x00\x00\x00\x01aU\xc3\xe0\x00\x00\x00\x00bplist00\xd1\x01\x02Vparams\xd1\x03\x04TdataO\x11\x01F\xc4\x02\x08\x0f\x12$0C262850-F1E8-4F7F-88DF-3F3192B1A019 \x00\xa2\x01\xef\x01\n$93ECD515-E75B-4B23-9B71-8EE708A42B12\x12\x0ePierres iPhone\x1a\x06iPhone"\x0518G82*\x16com.apple.mediaremoted8\x01@lH\x01P\x01b\x0fcom.apple.Musich\x01p\x01\x88\x01\x03\xa2\x01\x11aa:bb:cc:dd:ee:ff\xa8\x01\x01\xb0\x01\x01\xc0\x01\x01\xe8\x01\x01\xf0\x01\x00\xfa\x01\x12com.apple.podcasts\x82\x02$9DBDC015-2084-4905-9A9D-24435D1CE617\xa8\x02\x00\xb0\x02\x01\xba\x02\niPhone10,6\xaa\x05$03BFE844-507A-40E8-8986-63FDF8279103\x00\x08\x00\x0b\x00\x12\x00\x15\x00\x1a\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01d
+```
+
+Which decodes to:
+
+```raw
+type: DEVICE_INFO_MESSAGE
+identifier: "0C262850-F1E8-4F7F-88DF-3F3192B1A019"
+errorCode: NoError
+[deviceInfoMessage] {
+  uniqueIdentifier: "93ECD515-E75B-4B23-9B71-8EE708A42B12"
+  name: "Pierres iPhone"
+  localizedModelName: "iPhone"
+  systemBuildVersion: "18G82"
+  applicationBundleIdentifier: "com.apple.mediaremoted"
+  protocolVersion: 1
+  lastSupportedMessageType: 108
+  supportsSystemPairing: true
+  allowsPairing: true
+  systemMediaApplication: "com.apple.Music"
+  supportsACL: true
+  supportsSharedQueue: true
+  sharedQueueVersion: 3
+  managedConfigDeviceID: "aa:bb:cc:dd:ee:ff"
+  deviceClass: iPhone
+  logicalDeviceCount: 1
+  isProxyGroupPlayer: true
+  isGroupLeader: true
+  isAirplayActive: false
+  systemPodcastApplication: "com.apple.podcasts"
+  enderDefaultGroupUID: "9DBDC015-2084-4905-9A9D-24435D1CE617"
+  clusterType: 0
+  isClusterAware: true
+  modelID: "iPhone10,6"
+}
+uniqueIdentifier: "03BFE844-507A-40E8-8986-63FDF8279103"
+```
+
+**Receiver -> Sender:**
+```raw
+Hex:
+0000004a72706c790000000000000000
+00000000000000016155c3e000000000
+62706c6973743030d008000000000000
+01010000000000000001000000000000
+00000000000000000009
+
+Bytes:
+\x00\x00\x00Jrply\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01aU\xc3\xe0\x00\x00\x00\x00bplist00\xd0\x08\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\t
+```
+
+Which just decodes to an empty dict (`{}`).
