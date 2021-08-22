@@ -1387,7 +1387,7 @@ sequenceDiagram
     CR->>CS: OK {eventPort}
     CS-->>ES: Start Event Sender
     ES->>ER: Connect (eventPort)
-    ER-->>ES:
+    ER-->>ES: 
     CS->>CR: RECORD
     CR->>CS: OK
     ER->>ES: System info update
@@ -1395,7 +1395,7 @@ sequenceDiagram
     CR->>CS: OK {dataPort}
     CS-->>DS: Start Data Sender
     DS->>DR: Connect (dataPort)
-    DR-->>DS:
+    DR-->>DS: 
     note over DS,DR: Exchange messages here
     loop Every two seconds
         CS->>CR: POST /feedback
