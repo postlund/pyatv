@@ -5,8 +5,8 @@ import binascii
 import pytest
 
 from pyatv.airplay.auth_legacy import (
-    AirPlayPairSetupProcedure,
-    AirPlayPairVerifyProcedure,
+    AirPlayLegacyPairSetupProcedure,
+    AirPlayLegacyPairVerifyProcedure,
     HapCredentials,
 )
 from pyatv.airplay.srp import SRPAuthHandler
@@ -28,7 +28,7 @@ async def test_verify_invalid(airplay_device, client_connection):
     srp = SRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
     srp.initialize()
 
-    verifier = AirPlayPairVerifyProcedure(client_connection, srp)
+    verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
     with pytest.raises(AuthenticationError):
         await verifier.verify_credentials()
 
@@ -39,7 +39,7 @@ async def test_verify_authenticated(airplay_device, client_connection):
     )
     srp.initialize()
 
-    verifier = AirPlayPairVerifyProcedure(client_connection, srp)
+    verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
     assert await verifier.verify_credentials()
 
 
@@ -49,7 +49,7 @@ async def test_verify_has_no_encryption_keys(airplay_device, client_connection):
     )
     srp.initialize()
 
-    verifier = AirPlayPairVerifyProcedure(client_connection, srp)
+    verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
     with pytest.raises(NotSupportedError):
         assert verifier.encryption_keys()
 
@@ -58,7 +58,7 @@ async def test_pairing_failed(airplay_device, client_connection):
     srp = SRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
     srp.initialize()
 
-    pairing_procedure = AirPlayPairSetupProcedure(client_connection, srp)
+    pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
     await pairing_procedure.start_pairing()
     with pytest.raises(AuthenticationError):
         await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN)
@@ -70,6 +70,6 @@ async def test_pairing_successful(airplay_device, client_connection):
     )
     srp.initialize()
 
-    pairing_procedure = AirPlayPairSetupProcedure(client_connection, srp)
+    pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
     await pairing_procedure.start_pairing()
     assert await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN)

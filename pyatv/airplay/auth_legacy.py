@@ -23,11 +23,11 @@ _AIRPLAY_HEADERS = {
 }
 
 
-class AirPlayPairSetupProcedure(PairSetupProcedure):
+class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
     """Authenticate a device for AirPlay playback."""
 
     def __init__(self, http: HttpConnection, auth_handler: SRPAuthHandler) -> None:
-        """Initialize a new AirPlayPairingProcedure."""
+        """Initialize a new AirPlayLegacyPairSetupProcedure."""
         self.http = http
         self.srp = auth_handler
 
@@ -79,7 +79,7 @@ class AirPlayPairSetupProcedure(PairSetupProcedure):
         )
 
 
-class AirPlayPairVerifyProcedure(PairVerifyProcedure):
+class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
     """Verify if a device is allowed to perform AirPlay playback."""
 
     def __init__(self, http: HttpConnection, auth_handler: SRPAuthHandler) -> None:

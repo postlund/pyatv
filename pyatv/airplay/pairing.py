@@ -6,7 +6,7 @@ import logging
 from typing import Optional
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth_legacy import AirPlayPairSetupProcedure, HapCredentials
+from pyatv.airplay.auth_legacy import AirPlayLegacyPairSetupProcedure, HapCredentials
 from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
@@ -30,7 +30,7 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
-        self.pairing_procedure: Optional[AirPlayPairSetupProcedure] = None
+        self.pairing_procedure: Optional[AirPlayLegacyPairSetupProcedure] = None
         self.credentials: HapCredentials = self._setup_credentials()
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False
@@ -60,7 +60,7 @@ class AirPlayPairingHandler(PairingHandler):
         srp.initialize()
 
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = AirPlayPairSetupProcedure(self.http, srp)
+        self.pairing_procedure = AirPlayLegacyPairSetupProcedure(self.http, srp)
 
         self._has_paired = False
         return await error_handler(

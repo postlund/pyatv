@@ -6,7 +6,7 @@ import os
 from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth_legacy import AirPlayPairVerifyProcedure, HapCredentials
+from pyatv.airplay.auth_legacy import AirPlayLegacyPairVerifyProcedure, HapCredentials
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import SRPAuthHandler
@@ -82,7 +82,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         if self.credentials:
             srp = SRPAuthHandler(self.credentials)
             srp.initialize()
-            verifier = AirPlayPairVerifyProcedure(connection, srp)
+            verifier = AirPlayLegacyPairVerifyProcedure(connection, srp)
             await verifier.verify_credentials()
 
         return player
