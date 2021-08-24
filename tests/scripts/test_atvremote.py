@@ -38,8 +38,6 @@ class AtvremoteTest(ScriptTest):
             "airplay",
             "--id",
             MRP_ID,
-            "--airplay-credentials",
-            DEVICE_CREDENTIALS,
             "pair",
         )
         self.has_output(

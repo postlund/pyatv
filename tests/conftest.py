@@ -7,10 +7,12 @@ import pytest
 
 import pyatv
 from pyatv import conf
+from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.support.http import create_session
 from pyatv.support.net import unused_port
 
 from tests import fake_udns
+from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests.fake_knock import create_knock_server
 from tests.utils import stub_sleep, unstub_sleep
 
@@ -143,3 +145,15 @@ async def unicast_scan_fixture(event_loop, udns_server):
             )
 
     yield _scan
+
+
+# This fixture stubs the normally random credential generation of legacy credentials
+# in AirPlay, so the hardcoded device credentials can be used. It should ultimately
+# be placed somewhere more close to the AirPlay code, but since some tests requiring
+# this fixture haven't been converted to pytest yet (and cannot explicitly use
+# fixtures), it will live here for now.
+@pytest.fixture(name="airplay_creds", autouse=True)
+def airplay_creds_fixture():
+    with patch("pyatv.airplay.auth.new_credentials") as new_credentials:
+        new_credentials.return_value = parse_credentials(DEVICE_CREDENTIALS)
+        yield

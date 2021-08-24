@@ -68,8 +68,3 @@ async def test_pairing_with_device_new_credentials(airplay_conf):
     with patch("pyatv.airplay.srp.urandom") as rand_func:
         rand_func.side_effect = predetermined_key
         await perform_pairing(airplay_conf)
-
-
-async def test_pairing_with_device_existing_credentials(airplay_conf):
-    airplay_conf.get_service(Protocol.AirPlay).credentials = DEVICE_CREDENTIALS
-    await perform_pairing(airplay_conf)

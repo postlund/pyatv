@@ -35,12 +35,9 @@ class NullPairVerifyProcedure:
         )
 
 
-def pair_setup(
-    credentials: HapCredentials, connection: HttpConnection
-) -> PairSetupProcedure:
+def pair_setup(connection: HttpConnection) -> PairSetupProcedure:
     """Return procedure object used for Pair-Setup."""
-    if credentials == NO_CREDENTIALS:
-        credentials = new_credentials()
+    credentials = new_credentials()
 
     _LOGGER.debug(
         "Setting up new AirPlay Pair-Setup procedure with credentials %s", credentials
