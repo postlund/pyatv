@@ -8,11 +8,11 @@ from pyatv.auth.hap_pairing import (
     PairSetupProcedure,
     PairVerifyProcedure,
 )
+from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, stringify, write_tlv
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
-from pyatv.support import hap_tlv8, log_binary
-from pyatv.support.hap_srp import SRPAuthHandler
-from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
+from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Start,
             {
-                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: write_tlv(
                     {TlvValue.Method: b"\x00", TlvValue.SeqNo: b"\x01"}
                 ),
                 "_pwTy": 1,
@@ -84,7 +84,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Next,
             {
-                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: write_tlv(
                     {
                         TlvValue.SeqNo: b"\x03",
                         TlvValue.PublicKey: pub_key,
@@ -116,7 +116,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
         resp = await self.protocol.exchange_opack(
             FrameType.PS_Next,
             {
-                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: write_tlv(
                     {
                         TlvValue.SeqNo: b"\x05",
                         TlvValue.EncryptedData: encrypted_data,
@@ -152,7 +152,7 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
         resp = await self.protocol.exchange_opack(
             FrameType.PV_Start,
             {
-                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: write_tlv(
                     {TlvValue.SeqNo: b"\x01", TlvValue.PublicKey: public_key}
                 ),
                 "_auTy": 4,
@@ -169,7 +169,7 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
         await self.protocol.exchange_opack(
             FrameType.PV_Next,
             {
-                PAIRING_DATA_KEY: hap_tlv8.write_tlv(
+                PAIRING_DATA_KEY: write_tlv(
                     {TlvValue.SeqNo: b"\x03", TlvValue.EncryptedData: encrypted_data}
                 ),
             },

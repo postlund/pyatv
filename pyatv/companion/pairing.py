@@ -4,6 +4,7 @@ import logging
 from typing import Optional, cast
 
 from pyatv import conf, exceptions
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.companion.auth import CompanionPairSetupProcedure
 from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.protocol import CompanionProtocol
@@ -11,7 +12,6 @@ from pyatv.conf import CompanionService
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
-from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)

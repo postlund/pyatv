@@ -18,6 +18,7 @@ from typing import (
 )
 
 from pyatv import conf, exceptions
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.companion.connection import (
     CompanionConnection,
     CompanionConnectionListener,
@@ -38,7 +39,6 @@ from pyatv.interface import (
     StateProducer,
 )
 from pyatv.support import mdns
-from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn

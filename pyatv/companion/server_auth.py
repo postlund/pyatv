@@ -14,11 +14,11 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 )
 from srptools import SRPContext, SRPServerSession, constants
 
+from pyatv.auth.hap_srp import hkdf_expand
+from pyatv.auth.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
-from pyatv.support import chacha20, hap_tlv8, log_binary
-from pyatv.support.hap_srp import hkdf_expand
-from pyatv.support.hap_tlv8 import TlvValue
+from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class CompanionServerAuth(ABC):
     def handle_auth_frame(self, frame_type, data):
         """Handle incoming auth message."""
         _LOGGER.debug("Received auth frame: type=%s, data=%s", frame_type, data)
-        pairing_data = hap_tlv8.read_tlv(data["_pd"])
+        pairing_data = read_tlv(data["_pd"])
         seqno = int.from_bytes(pairing_data[TlvValue.SeqNo], byteorder="little")
 
         suffix = (
@@ -126,14 +126,14 @@ class CompanionServerAuth(ABC):
         info = server_pub_key + self.unique_id + client_pub_key
         signature = self.keys.sign.sign(info)
 
-        tlv = hap_tlv8.write_tlv(
+        tlv = write_tlv(
             {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
 
-        tlv = hap_tlv8.write_tlv(
+        tlv = write_tlv(
             {
                 TlvValue.SeqNo: b"\x02",
                 TlvValue.PublicKey: server_pub_key,
@@ -150,12 +150,12 @@ class CompanionServerAuth(ABC):
 
     def _m3_verify(self, pairing_data):
         self.send_to_client(
-            FrameType.PV_Next, {"_pd": hap_tlv8.write_tlv({TlvValue.SeqNo: b"\x04"})}
+            FrameType.PV_Next, {"_pd": write_tlv({TlvValue.SeqNo: b"\x04"})}
         )
         self.enable_encryption(self.output_key, self.input_key)
 
     def _m1_setup(self, pairing_data):
-        tlv = hap_tlv8.write_tlv(
+        tlv = write_tlv(
             {
                 TlvValue.SeqNo: b"\x02",
                 TlvValue.Salt: binascii.unhexlify(self.salt),
@@ -174,11 +174,11 @@ class CompanionServerAuth(ABC):
             tlv = {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
         else:
             tlv = {
-                TlvValue.Error: bytes([hap_tlv8.ErrorCode.Authentication]),
+                TlvValue.Error: bytes([ErrorCode.Authentication]),
                 TlvValue.SeqNo: b"\x04",
             }
 
-        self.send_to_client(FrameType.PS_Next, {"_pd": hap_tlv8.write_tlv(tlv)})
+        self.send_to_client(FrameType.PS_Next, {"_pd": write_tlv(tlv)})
 
     def _m5_setup(self, pairing_data):
         session_key = hkdf_expand(
@@ -198,7 +198,7 @@ class CompanionServerAuth(ABC):
             pairing_data[TlvValue.EncryptedData], nounce="PS-Msg05".encode()
         )
 
-        _LOGGER.debug("MSG5 EncryptedData=%s", hap_tlv8.read_tlv(decrypted_tlv_bytes))
+        _LOGGER.debug("MSG5 EncryptedData=%s", read_tlv(decrypted_tlv_bytes))
 
         other = {
             "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
@@ -219,14 +219,12 @@ class CompanionServerAuth(ABC):
             17: opack.pack(other),
         }
 
-        tlv = hap_tlv8.write_tlv(tlv)
+        tlv = write_tlv(tlv)
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
 
-        tlv = hap_tlv8.write_tlv(
-            {TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted}
-        )
+        tlv = write_tlv({TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted})
 
         self.send_to_client(FrameType.PS_Next, {"_pd": tlv})
         self.has_paired()

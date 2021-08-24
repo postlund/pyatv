@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.conf import MrpService
 from pyatv.const import Protocol
 from pyatv.mrp.connection import MrpConnection
@@ -12,7 +13,6 @@ from pyatv.mrp.protocol import (
     MrpProtocol,
     heartbeat_loop,
 )
-from pyatv.support.hap_srp import SRPAuthHandler
 
 from tests.fake_device import FakeAppleTV
 from tests.utils import total_sleep_time, until

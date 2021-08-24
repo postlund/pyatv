@@ -4,13 +4,13 @@ import asyncio
 import logging
 
 from pyatv import conf, exceptions
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.mrp.auth import HapCredentials, MrpPairSetupProcedure, MrpPairVerifyProcedure
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
-from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
