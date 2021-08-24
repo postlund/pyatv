@@ -9,7 +9,7 @@ from pyatv.airplay.auth.legacy import (
     AirPlayLegacyPairVerifyProcedure,
     HapCredentials,
 )
-from pyatv.airplay.srp import SRPAuthHandler
+from pyatv.airplay.srp import LegacySRPAuthHandler
 from pyatv.exceptions import AuthenticationError, NotSupportedError
 
 from tests.fake_device.airplay import DEVICE_AUTH_KEY, DEVICE_IDENTIFIER, DEVICE_PIN
@@ -27,7 +27,7 @@ def new_credentials(identifier: str, seed: str) -> HapCredentials:
 
 
 async def test_verify_invalid(airplay_device, client_connection):
-    srp = SRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
+    srp = LegacySRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
     srp.initialize()
 
     verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
@@ -36,7 +36,7 @@ async def test_verify_invalid(airplay_device, client_connection):
 
 
 async def test_verify_authenticated(airplay_device, client_connection):
-    srp = SRPAuthHandler(new_credentials(IDENTIFIER, DEVICE_AUTH_KEY))
+    srp = LegacySRPAuthHandler(new_credentials(IDENTIFIER, DEVICE_AUTH_KEY))
     srp.initialize()
 
     verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
@@ -44,7 +44,7 @@ async def test_verify_authenticated(airplay_device, client_connection):
 
 
 async def test_verify_has_no_encryption_keys(airplay_device, client_connection):
-    srp = SRPAuthHandler(new_credentials(IDENTIFIER, DEVICE_AUTH_KEY))
+    srp = LegacySRPAuthHandler(new_credentials(IDENTIFIER, DEVICE_AUTH_KEY))
     srp.initialize()
 
     verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
@@ -53,7 +53,7 @@ async def test_verify_has_no_encryption_keys(airplay_device, client_connection):
 
 
 async def test_pairing_failed(airplay_device, client_connection):
-    srp = SRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
+    srp = LegacySRPAuthHandler(new_credentials(IDENTIFIER, INVALID_AUTH_KEY))
     srp.initialize()
 
     pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
@@ -63,7 +63,7 @@ async def test_pairing_failed(airplay_device, client_connection):
 
 
 async def test_pairing_successful(airplay_device, client_connection):
-    srp = SRPAuthHandler(new_credentials(DEVICE_IDENTIFIER, DEVICE_AUTH_KEY))
+    srp = LegacySRPAuthHandler(new_credentials(DEVICE_IDENTIFIER, DEVICE_AUTH_KEY))
     srp.initialize()
 
     pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
