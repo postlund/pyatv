@@ -6,7 +6,7 @@ import plistlib
 from typing import Dict, Tuple
 
 from pyatv import exceptions
-from pyatv.airplay.srp import SRPAuthHandler
+from pyatv.airplay.srp import LegacySRPAuthHandler
 from pyatv.auth.hap_pairing import (
     HapCredentials,
     PairSetupProcedure,
@@ -25,7 +25,9 @@ _AIRPLAY_HEADERS = {
 class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
     """Authenticate a device for AirPlay playback."""
 
-    def __init__(self, http: HttpConnection, auth_handler: SRPAuthHandler) -> None:
+    def __init__(
+        self, http: HttpConnection, auth_handler: LegacySRPAuthHandler
+    ) -> None:
         """Initialize a new AirPlayLegacyPairSetupProcedure."""
         self.http = http
         self.srp = auth_handler
@@ -82,7 +84,9 @@ class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
 class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
     """Verify if a device is allowed to perform AirPlay playback."""
 
-    def __init__(self, http: HttpConnection, auth_handler: SRPAuthHandler) -> None:
+    def __init__(
+        self, http: HttpConnection, auth_handler: LegacySRPAuthHandler
+    ) -> None:
         """Initialize a new AirPlayPairingVerifier."""
         self.http = http
         self.srp = auth_handler

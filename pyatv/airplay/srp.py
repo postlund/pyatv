@@ -69,7 +69,7 @@ class AtvSRPContext(SRPContext):
         return k_1 + k_2
 
 
-class SRPAuthHandler:
+class LegacySRPAuthHandler:
     """Handle SRP data and crypto routines for auth and verification."""
 
     def __init__(self, credentials: HapCredentials):

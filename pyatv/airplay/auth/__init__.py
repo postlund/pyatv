@@ -4,17 +4,22 @@ import logging
 from typing import Tuple
 
 from pyatv import exceptions
+from pyatv.airplay.auth.hap import (
+    AirPlayHapPairSetupProcedure,
+    AirPlayHapPairVerifyProcedure,
+)
 from pyatv.airplay.auth.legacy import (
     AirPlayLegacyPairSetupProcedure,
     AirPlayLegacyPairVerifyProcedure,
 )
-from pyatv.airplay.srp import SRPAuthHandler, new_credentials
+from pyatv.airplay.srp import LegacySRPAuthHandler, new_credentials
 from pyatv.auth.hap_pairing import (
     NO_CREDENTIALS,
     HapCredentials,
     PairSetupProcedure,
     PairVerifyProcedure,
 )
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,6 +32,9 @@ class AuthenticationType(Enum):
 
     Legacy = 1
     """Legacy SRP based authentication."""
+
+    HAP = 2
+    """Authentication based on HAP (Home-Kit)."""
 
 
 # pylint: enable=invalid-name
@@ -48,18 +56,32 @@ class NullPairVerifyProcedure:
         )
 
 
+def _get_auth_type(credentials: HapCredentials) -> AuthenticationType:
+    if (
+        credentials.ltpk == b""
+        and credentials.ltsk != b""
+        and credentials.atv_id == b""
+        and credentials.client_id != b""
+    ):
+        return AuthenticationType.Legacy
+    return AuthenticationType.HAP
+
+
 def pair_setup(
     auth_type: AuthenticationType, connection: HttpConnection
 ) -> PairSetupProcedure:
     """Return procedure object used for Pair-Setup."""
-    credentials = new_credentials()
+    _LOGGER.debug("Setting up new AirPlay Pair-Setup procedure with type %s", auth_type)
 
-    _LOGGER.debug(
-        "Setting up new AirPlay Pair-Setup procedure with credentials %s", credentials
-    )
-    srp = SRPAuthHandler(credentials)
+    if auth_type == AuthenticationType.Legacy:
+        srp = LegacySRPAuthHandler(new_credentials())
+        srp.initialize()
+        return AirPlayLegacyPairSetupProcedure(connection, srp)
+
+    # HAP
+    srp = SRPAuthHandler()
     srp.initialize()
-    return AirPlayLegacyPairSetupProcedure(connection, srp)
+    return AirPlayHapPairSetupProcedure(connection, srp)
 
 
 def pair_verify(
@@ -69,9 +91,18 @@ def pair_verify(
     if credentials == NO_CREDENTIALS:
         return NullPairVerifyProcedure()
 
+    auth_type = _get_auth_type(credentials)
+
     _LOGGER.debug(
-        "Setting up new AirPlay Pair-Verify procedure with credentials %s", credentials
+        "Setting up new AirPlay Pair-Verify procedure with type %s", auth_type
     )
-    srp = SRPAuthHandler(credentials)
+
+    if auth_type == AuthenticationType.Legacy:
+        srp = LegacySRPAuthHandler(credentials)
+        srp.initialize()
+        return AirPlayLegacyPairVerifyProcedure(connection, srp)
+
+    # HAP
+    srp = SRPAuthHandler()
     srp.initialize()
-    return AirPlayLegacyPairVerifyProcedure(connection, srp)
+    return AirPlayHapPairVerifyProcedure(connection, srp, credentials)
