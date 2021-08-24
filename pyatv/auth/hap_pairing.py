@@ -1,6 +1,6 @@
 """Abstraction for authentication based on HAP/SRP."""
 import binascii
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pyatv import exceptions
 
@@ -17,28 +17,6 @@ class HapCredentials:
         self.ltsk: bytes = ltsk
         self.atv_id: bytes = atv_id
         self.client_id: bytes = client_id
-
-    @classmethod
-    def parse(cls, detail_string: str) -> "HapCredentials":
-        """Parse a string represention of Credentials."""
-        split = detail_string.split(":")
-
-        # Compatibility with "legacy credentials" used by AirPlay where seed is stored
-        # as LTSK and identifier as client_id (others are empty).
-        if len(split) == 2:
-            client_id = binascii.unhexlify(split[0])
-            ltsk = binascii.unhexlify(split[1])
-            return HapCredentials(b"", ltsk, b"", client_id)
-        if len(split) == 4:
-            ltpk = binascii.unhexlify(split[0])
-            ltsk = binascii.unhexlify(split[1])
-            atv_id = binascii.unhexlify(split[2])
-            client_id = binascii.unhexlify(split[3])
-            return HapCredentials(ltpk, ltsk, atv_id, client_id)
-
-        raise exceptions.InvalidCredentialsError(
-            "invalid credentials: " + detail_string
-        )
 
     def __eq__(self, other: object) -> bool:
         """Return if two instances of HapCredentials are equal."""
@@ -82,3 +60,29 @@ class PairVerifyProcedure:
 
     def encryption_keys(self) -> Tuple[str, str]:
         """Return derived encryption keys."""
+
+
+NO_CREDENTIALS = HapCredentials(b"", b"", b"", b"")
+
+
+def parse_credentials(detail_string: Optional[str]) -> HapCredentials:
+    """Parse a string represention of HapCredentials."""
+    if detail_string is None:
+        return NO_CREDENTIALS
+
+    split = detail_string.split(":")
+
+    # Compatibility with "legacy credentials" used by AirPlay where seed is stored
+    # as LTSK and identifier as client_id (others are empty).
+    if len(split) == 2:
+        client_id = binascii.unhexlify(split[0])
+        ltsk = binascii.unhexlify(split[1])
+        return HapCredentials(b"", ltsk, b"", client_id)
+    if len(split) == 4:
+        ltpk = binascii.unhexlify(split[0])
+        ltsk = binascii.unhexlify(split[1])
+        atv_id = binascii.unhexlify(split[2])
+        client_id = binascii.unhexlify(split[3])
+        return HapCredentials(ltpk, ltsk, atv_id, client_id)
+
+    raise exceptions.InvalidCredentialsError("invalid credentials: " + detail_string)

@@ -1,13 +1,12 @@
 """Device pairing and derivation of encryption keys."""
 
 import asyncio
-import binascii
 import logging
 from typing import Optional
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth_legacy import AirPlayLegacyPairSetupProcedure, HapCredentials
-from pyatv.airplay.srp import SRPAuthHandler, new_credentials
+from pyatv.airplay.auth import pair_setup
+from pyatv.auth.hap_pairing import PairSetupProcedure, parse_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
@@ -30,16 +29,9 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
-        self.pairing_procedure: Optional[AirPlayLegacyPairSetupProcedure] = None
-        self.credentials: HapCredentials = self._setup_credentials()
+        self.pairing_procedure: Optional[PairSetupProcedure] = None
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False
-
-    def _setup_credentials(self) -> HapCredentials:
-        # If service has credentials, use those. Otherwise generate new.
-        if self.service.credentials is None:
-            return new_credentials()
-        return HapCredentials.parse(self.service.credentials)
 
     @property
     def has_paired(self) -> bool:
@@ -54,14 +46,10 @@ class AirPlayPairingHandler(PairingHandler):
 
     async def begin(self) -> None:
         """Start pairing process."""
-        _LOGGER.debug("Starting AirPlay pairing with credentials %s", self.credentials)
-
-        srp: SRPAuthHandler = SRPAuthHandler(self.credentials)
-        srp.initialize()
-
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = AirPlayLegacyPairSetupProcedure(self.http, srp)
-
+        self.pairing_procedure = pair_setup(
+            parse_credentials(self.service.credentials), self.http
+        )
         self._has_paired = False
         return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError
@@ -78,7 +66,7 @@ class AirPlayPairingHandler(PairingHandler):
             await error_handler(
                 self.pairing_procedure.finish_pairing,
                 exceptions.PairingError,
-                binascii.hexlify(self.credentials.client_id).decode("ascii").upper(),
+                "",
                 self.pin_code,
             )
         )
