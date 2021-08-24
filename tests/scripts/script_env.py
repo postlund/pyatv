@@ -91,9 +91,9 @@ class ScriptTest(AioHTTPTestCase):
     def user_input(self, text):
         self.inputs.append(text)
 
-    def has_output(self, *strings):
-        for string in strings:
-            self.assertIn(string, self.stdout)
+    def has_output(self, *objs):
+        for obj in objs:
+            self.assertIn(str(obj), self.stdout)
 
     def has_error(self, *strings):
         for string in strings:

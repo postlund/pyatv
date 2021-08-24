@@ -8,8 +8,7 @@ import uuid
 
 from pyatv import exceptions
 from pyatv.mrp import messages, protobuf
-from pyatv.mrp.auth import MrpPairingVerifier
-from pyatv.support.hap_srp import HapCredentials
+from pyatv.mrp.auth import HapCredentials, MrpPairVerifyProcedure
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -172,7 +171,7 @@ class MrpProtocol:
         if self.service.credentials:
             # Verify credentials and generate keys
             credentials = HapCredentials.parse(self.service.credentials)
-            pair_verifier = MrpPairingVerifier(self, self.srp, credentials)
+            pair_verifier = MrpPairVerifyProcedure(self, self.srp, credentials)
 
             try:
                 await pair_verifier.verify_credentials()

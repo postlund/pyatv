@@ -15,7 +15,8 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import (
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from srptools import SRPClientSession, SRPContext, constants
 
-from pyatv.exceptions import AuthenticationError, InvalidCredentialsError
+from pyatv.auth.hap_pairing import HapCredentials
+from pyatv.exceptions import AuthenticationError
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,39 +49,11 @@ def aes_encrypt(mode, aes_key, aes_iv, *data):
     return result, None if not hasattr(encryptor, "tag") else encryptor.tag
 
 
-# pylint: disable=too-few-public-methods
-class LegacyCredentials:
-    """Identifiers and encryption keys used by legacy authentication."""
-
-    def __init__(self, identifier: bytes, seed: bytes) -> None:
-        """Initialize a new LegacyCredentials."""
-        self.identifier: bytes = identifier
-        self.seed: bytes = seed
-
-    @classmethod
-    def parse(cls, detail_string) -> "LegacyCredentials":
-        """Parse a string represention of LegacyCredentials."""
-        split = detail_string.split(":")
-        if len(split) != 2:
-            raise InvalidCredentialsError("invalid credentials: " + detail_string)
-
-        identifier = binascii.unhexlify(split[0])
-        seed = binascii.unhexlify(split[1])
-        return LegacyCredentials(identifier, seed)
-
-    def __str__(self):
-        """Return a string representation of credentials."""
-        return ":".join(
-            [
-                binascii.hexlify(self.identifier).decode("utf-8"),
-                binascii.hexlify(self.seed).decode("utf-8"),
-            ]
-        ).upper()
-
-
-def new_credentials() -> LegacyCredentials:
+def new_credentials() -> HapCredentials:
     """Generate a new identifier and seed for authentication."""
-    return LegacyCredentials(urandom(8), urandom(32))
+    # Auth here is technically not HAP, but it's close and for the sake of abstraction
+    # HAP will be emulated. LTSK will hold the seed and client_id the identifier.
+    return HapCredentials(b"", urandom(32), b"", urandom(8))
 
 
 class AtvSRPContext(SRPContext):
@@ -99,9 +72,9 @@ class AtvSRPContext(SRPContext):
 class SRPAuthHandler:
     """Handle SRP data and crypto routines for auth and verification."""
 
-    def __init__(self, credentials: LegacyCredentials):
+    def __init__(self, credentials: HapCredentials):
         """Initialize a new SRPAuthHandler."""
-        self.credentials: LegacyCredentials = credentials
+        self.credentials: HapCredentials = credentials
         self.session = None
         self._public_bytes = None
         self._auth_private = None
@@ -111,7 +84,7 @@ class SRPAuthHandler:
 
     def initialize(self):
         """Initialize handler operation."""
-        signing_key = Ed25519PrivateKey.from_private_bytes(self.credentials.seed)
+        signing_key = Ed25519PrivateKey.from_private_bytes(self.credentials.ltsk)
         verifying_key = signing_key.public_key()
         self._auth_private = signing_key.private_bytes(
             encoding=serialization.Encoding.Raw,
@@ -131,7 +104,7 @@ class SRPAuthHandler:
     def verify1(self):
         """First device verification step."""
         self._verify_private = X25519PrivateKey.from_private_bytes(
-            self.credentials.seed
+            self.credentials.ltsk
         )
         self._verify_public = self._verify_private.public_key()
         verify_private_bytes = self._verify_private.private_bytes(

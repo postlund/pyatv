@@ -6,11 +6,11 @@ import logging
 from pyatv import conf, exceptions
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.mrp.auth import MrpPairingProcedure, MrpPairingVerifier
+from pyatv.mrp.auth import HapCredentials, MrpPairSetupProcedure, MrpPairVerifyProcedure
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
-from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
+from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class MrpPairingHandler(PairingHandler):
         self.connection = MrpConnection(config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(self.connection, self.srp, self.service)
-        self.pairing_procedure = MrpPairingProcedure(self.protocol, self.srp)
+        self.pairing_procedure = MrpPairSetupProcedure(self.protocol, self.srp)
         self.pin_code = None
         self._has_paired = False
 
@@ -60,13 +60,14 @@ class MrpPairingHandler(PairingHandler):
             await error_handler(
                 self.pairing_procedure.finish_pairing,
                 exceptions.PairingError,
+                "",  # username required but not used
                 self.pin_code,
             )
         )
 
         _LOGGER.debug("Verifying credentials %s", credentials)
 
-        verifier = MrpPairingVerifier(
+        verifier = MrpPairVerifyProcedure(
             self.protocol, self.srp, HapCredentials.parse(credentials)
         )
         await error_handler(verifier.verify_credentials, exceptions.PairingError)

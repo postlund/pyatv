@@ -4,7 +4,7 @@ import logging
 from typing import Optional, cast
 
 from pyatv import conf, exceptions
-from pyatv.companion.auth import CompanionPairingProcedure
+from pyatv.companion.auth import CompanionPairSetupProcedure
 from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import CompanionService
@@ -36,7 +36,7 @@ class CompanionPairingHandler(PairingHandler):
         self.protocol = CompanionProtocol(
             self.connection, self.srp, cast(CompanionService, self.service)
         )
-        self.pairing_procedure = CompanionPairingProcedure(self.protocol, self.srp)
+        self.pairing_procedure = CompanionPairSetupProcedure(self.protocol, self.srp)
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False
 
@@ -67,6 +67,7 @@ class CompanionPairingHandler(PairingHandler):
             await error_handler(
                 self.pairing_procedure.finish_pairing,
                 exceptions.PairingError,
+                "",  # username required but not used
                 self.pin_code,
             )
         )
