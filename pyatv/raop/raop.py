@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import logging
+from random import randrange
 from time import perf_counter
 from typing import Any, Dict, List, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
@@ -28,7 +29,7 @@ from pyatv.raop.parsers import (
     get_encryption_types,
     get_metadata_types,
 )
-from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspContext, RtspSession
+from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspSession
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,6 +50,49 @@ MISSING_METADATA = AudioMetadata(
 SUPPORTED_ENCRYPTIONS = EncryptionType.Unencrypted | EncryptionType.MFiSAP
 
 
+class RaopContext:
+    """Data used for one RAOP session."""
+
+    def __init__(self) -> None:
+        """Initialize a new RaopContext."""
+        self.sample_rate: int = 44100
+        self.channels: int = 2
+        self.bytes_per_channel: int = 2
+        self.latency = 22050 + self.sample_rate
+
+        self.rtpseq: int = 0
+        self.start_ts = 0
+        self.head_ts = 0
+
+        self.server_port: int = 0
+        self.control_port: int = 0
+        self.timing_port: int = 0
+        self.rtsp_session: int = 0
+
+        self.volume: Optional[float] = None
+
+    def reset(self) -> None:
+        """Reset seasion.
+
+        Must be done when sample rate changes.
+        """
+        self.rtpseq = randrange(2 ** 16)
+        self.start_ts = timing.ntp2ts(timing.ntp_now(), self.sample_rate)
+        self.head_ts = self.start_ts
+        self.latency = 22050 + self.sample_rate
+
+    @property
+    def rtptime(self) -> int:
+        """Current RTP time with latency."""
+        return self.head_ts - (self.start_ts - self.latency)
+
+    @property
+    def position(self) -> float:
+        """Current position in stream (seconds with fraction)."""
+        # Do not consider latency here (so do not use rtptime)
+        return timing.ts2ms(self.head_ts - self.start_ts, self.sample_rate) / 1000.0
+
+
 class PlaybackInfo(NamedTuple):
     """Information for what is currently playing."""
 
@@ -59,7 +103,7 @@ class PlaybackInfo(NamedTuple):
 class ControlClient(asyncio.Protocol):
     """Control client responsible for e.g. sync packets."""
 
-    def __init__(self, context: RtspContext, packet_backlog: PacketFifo):
+    def __init__(self, context: RaopContext, packet_backlog: PacketFifo):
         """Initialize a new ControlClient."""
         self.transport = None
         self.context = context
@@ -281,12 +325,12 @@ class RaopClient:
     def __init__(
         self,
         rtsp: RtspSession,
-        context: RtspContext,
+        context: RaopContext,
     ):
         """Initialize a new RaopClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
-        self.context: RtspContext = context
+        self.context: RaopContext = context
         self.credentials: Optional[HapCredentials] = None
         self.password: Optional[str] = None
         self.control_client: Optional[ControlClient] = None
@@ -416,9 +460,22 @@ class RaopClient:
         verifier = pair_verify(self.credentials, self.rtsp.connection)
         await verifier.verify_credentials()
 
-        await self.rtsp.announce(self.password)
+        await self.rtsp.announce(
+            self.context.bytes_per_channel,
+            self.context.channels,
+            self.context.sample_rate,
+            self.password,
+        )
 
-        resp = await self.rtsp.setup(self.control_client.port, self.timing_client.port)
+        resp = await self.rtsp.setup(
+            headers={
+                "Transport": (
+                    "RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;"
+                    f"control_port={self.control_client.port};"
+                    f"timing_port={self.timing_client.port}"
+                )
+            }
+        )
         _, options = parse_transport(resp.headers["Transport"])
         self.context.timing_port = int(options.get("timing_port", 0))
         self.context.control_port = int(options["control_port"])
@@ -484,6 +541,7 @@ class RaopClient:
             if MetadataType.Text in self._metadata_types:
                 _LOGGER.debug("Playing with metadata: %s", self.playback_info.metadata)
                 await self.rtsp.set_metadata(
+                    self.context.rtsp_session,
                     self.context.rtpseq,
                     self.context.rtptime,
                     self.playback_info.metadata,
@@ -501,7 +559,15 @@ class RaopClient:
                 listener.playing(self.playback_info)
 
             # Start playback
-            await self.rtsp.record(self.context.rtpseq, self.context.rtptime)
+            await self.rtsp.record(
+                headers={
+                    "Range": "npt=0-",
+                    "Session": self.context.rtsp_session,
+                    "RTP-Info": (
+                        f"seq={self.context.rtpseq};rtptime={self.context.rtptime}"
+                    ),
+                }
+            )
 
             await self._stream_data(wave_file, transport)
         except (  # pylint: disable=try-except-raise
@@ -517,7 +583,7 @@ class RaopClient:
                 # TODO: Teardown should not be done here. In fact, nothing should be
                 # closed here since the connection should be re-usable for streaming
                 # more audio files. Refactor when support for that is added.
-                await self.rtsp.teardown()
+                await self.rtsp.teardown(self.context.rtsp_session)
                 transport.close()
             if self._keep_alive_task:
                 self._keep_alive_task.cancel()
@@ -606,7 +672,7 @@ class RaopClient:
             0xE0 if first_packet else 0x60,
             self.context.rtpseq,
             self.context.rtptime,
-            self.context.session_id,
+            self.rtsp.session_id,
         )
 
         # ALAC frame with raw data. Not so pretty but will work for now until a

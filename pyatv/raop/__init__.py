@@ -34,8 +34,8 @@ from pyatv.interface import (
 )
 from pyatv.raop.audio_source import AudioSource, open_source
 from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
-from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopListener
-from pyatv.raop.rtsp import RtspContext, RtspSession
+from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
+from pyatv.raop.rtsp import RtspSession
 from pyatv.support import map_range, mdns
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.relayer import Relayer
@@ -98,13 +98,13 @@ class RaopPlaybackManager:
         self._is_acquired: bool = False
         self._address: str = address
         self._port: int = port
-        self._context: RtspContext = RtspContext()
+        self._context: RaopContext = RaopContext()
         self._connection: Optional[HttpConnection] = None
         self._rtsp: Optional[RtspSession] = None
         self._raop: Optional[RaopClient] = None
 
     @property
-    def context(self) -> RtspContext:
+    def context(self) -> RaopContext:
         """Return RTSP context if a session is active."""
         return self._context
 
@@ -120,13 +120,13 @@ class RaopPlaybackManager:
 
         self._is_acquired = True
 
-    async def setup(self) -> Tuple[RaopClient, RtspSession, RtspContext]:
+    async def setup(self) -> Tuple[RaopClient, RtspSession, RaopContext]:
         """Set up a session or return active if it exists."""
         if self._raop and self._rtsp and self._context:
             return self._raop, self._rtsp, self._context
 
         self._connection = await http_connect(self._address, self._port)
-        self._rtsp = RtspSession(self._connection, self._context)
+        self._rtsp = RtspSession(self._connection)
         self._raop = RaopClient(self._rtsp, self._context)
         return self._raop, self._rtsp, self._context
 
