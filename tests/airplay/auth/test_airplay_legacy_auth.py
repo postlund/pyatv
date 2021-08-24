@@ -40,7 +40,7 @@ async def test_verify_authenticated(airplay_device, client_connection):
     srp.initialize()
 
     verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
-    assert await verifier.verify_credentials()
+    assert not await verifier.verify_credentials()
 
 
 async def test_verify_has_no_encryption_keys(airplay_device, client_connection):
