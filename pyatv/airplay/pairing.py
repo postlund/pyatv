@@ -6,6 +6,7 @@ from typing import Optional
 
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import AuthenticationType, pair_setup
+from pyatv.airplay.features import AirPlayFeatures, parse
 from pyatv.auth.hap_pairing import PairSetupProcedure
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
@@ -13,6 +14,15 @@ from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _get_preferred_auth_type(service: conf.BaseService) -> AuthenticationType:
+    features_string = service.properties.get("features")
+    if features_string:
+        features = parse(features_string)
+        if AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features:
+            return AuthenticationType.HAP
+    return AuthenticationType.Legacy
 
 
 class AirPlayPairingHandler(PairingHandler):
@@ -47,7 +57,9 @@ class AirPlayPairingHandler(PairingHandler):
     async def begin(self) -> None:
         """Start pairing process."""
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = pair_setup(AuthenticationType.Legacy, self.http)
+        self.pairing_procedure = pair_setup(
+            _get_preferred_auth_type(self.service), self.http
+        )
         self._has_paired = False
         return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError
