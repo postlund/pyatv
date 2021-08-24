@@ -1,13 +1,16 @@
-"""Implementation of the RTSP protocol."""
+"""Implementation of the RTSP protocol.
+
+This is a simple implementation of the RTSP protocol used by Apple (with its quirks
+and all). It is somewhat generalized to support both AirPlay 1 and 2.
+"""
 import asyncio
 from hashlib import md5
 import logging
 import plistlib
 from random import randrange
-from typing import Dict, Mapping, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.dmap import tags
-from pyatv.raop import timing
 from pyatv.raop.metadata import AudioMetadata
 from pyatv.support.http import HttpConnection, HttpResponse
 
@@ -65,76 +68,25 @@ def get_digest_payload(method, uri, user, realm, pwd, nonce):
     return payload.format(user, realm, nonce, uri, di_response)
 
 
-class RtspContext:
-    """Data used for one RTSP session.
+class RtspSession:
+    """Representation of an RTSP session."""
 
-    This class holds a bit too much information, should be
-    restructured a bit.
-    """
+    def __init__(self, connection: HttpConnection) -> None:
+        """Initialize a new RtspSession."""
+        super().__init__()
+        self.connection = connection
+        self.requests: Dict[int, Tuple[asyncio.Event, Optional[HttpResponse]]] = {}
 
-    def __init__(self) -> None:
-        """Initialize a new RtspContext."""
-        self.sample_rate: int = 44100
-        self.channels: int = 2
-        self.bytes_per_channel: int = 2
-        self.latency = 22050 + self.sample_rate
-
-        self.rtpseq: int = 0
-        self.start_ts = 0
-        self.head_ts = 0
-
-        self.server_port: int = 0
-        self.control_port: int = 0
-        self.timing_port: int = 0
-        self.rtsp_session: int = 0
-
-        # TODO: Not entirely sure about the ranges for these
+        self.digest_info: Optional[DigestInfo] = None  # Password authentication
+        self.cseq = 0
         self.session_id: int = randrange(2 ** 32)
         self.dacp_id: str = f"{randrange(2 ** 64):X}"
         self.active_remote: int = randrange(2 ** 32)
 
-        # Required for password authentication
-        self.digest_info: Optional[DigestInfo] = None
-
-        self.volume: Optional[float] = None
-
-    def reset(self) -> None:
-        """Reset seasion.
-
-        Must be done when sample rate changes.
-        """
-        self.rtpseq = randrange(2 ** 16)
-        self.start_ts = timing.ntp2ts(timing.ntp_now(), self.sample_rate)
-        self.head_ts = self.start_ts
-        self.latency = 22050 + self.sample_rate
-
-    @property
-    def rtptime(self) -> int:
-        """Current RTP time with latency."""
-        return self.head_ts - (self.start_ts - self.latency)
-
-    @property
-    def position(self) -> float:
-        """Current position in stream (seconds with fraction)."""
-        # Do not consider latency here (so do not use rtptime)
-        return timing.ts2ms(self.head_ts - self.start_ts, self.sample_rate) / 1000.0
-
-
-class RtspSession:
-    """Representation of an RTSP session."""
-
-    def __init__(self, connection: HttpConnection, context: RtspContext) -> None:
-        """Initialize a new RtspSession."""
-        super().__init__()
-        self.connection = connection
-        self.context = context
-        self.requests: Dict[int, Tuple[asyncio.Event, Optional[HttpResponse]]] = {}
-        self.cseq = 0
-
     @property
     def uri(self) -> str:
         """Return URI used for session requests."""
-        return f"rtsp://{self.connection.local_ip}/{self.context.session_id}"
+        return f"rtsp://{self.connection.local_ip}/{self.session_id}"
 
     @staticmethod
     def error_received(exc) -> None:
@@ -169,15 +121,25 @@ class RtspSession:
             body=body,
         )
 
-    async def announce(self, password: Optional[str]) -> HttpResponse:
+    # This method is only used by AirPlay 1 and is very specific (e.g. does not support
+    # annnouncing arbitrary audio formats) and should probably move to the AirPlay 1
+    # specific RAOP implementation. It will however live here for now until something
+    # motivates that.
+    async def announce(
+        self,
+        bytes_per_channel: int,
+        channels: int,
+        sample_rate: int,
+        password: Optional[str],
+    ) -> HttpResponse:
         """Send ANNOUNCE message."""
         body = ANNOUNCE_PAYLOAD.format(
-            session_id=self.context.session_id,
+            session_id=self.session_id,
             local_ip=self.connection.local_ip,
             remote_ip=self.connection.remote_ip,
-            bits_per_channel=8 * self.context.bytes_per_channel,
-            channels=self.context.channels,
-            sample_rate=self.context.sample_rate,
+            bits_per_channel=8 * bytes_per_channel,
+            channels=channels,
+            sample_rate=sample_rate,
         )
 
         requires_password: bool = password is not None
@@ -194,7 +156,7 @@ class RtspSession:
         if response.code == 401 and www_authenticate and requires_password:
             _, realm, _, nonce, _ = www_authenticate.split('"')
             info = DigestInfo("pyatv", realm, password, nonce)  # type: ignore
-            self.context.digest_info = info
+            self.digest_info = info
 
             response = await self.exchange(
                 "ANNOUNCE",
@@ -204,26 +166,23 @@ class RtspSession:
 
         return response
 
-    async def setup(self, control_port: int, timing_port: int) -> HttpResponse:
+    async def setup(
+        self,
+        /,
+        headers: Optional[Dict[str, Any]] = None,
+        body: Optional[Union[str, bytes]] = None
+    ) -> HttpResponse:
         """Send SETUP message."""
-        return await self.exchange(
-            "SETUP",
-            headers={
-                "Transport": "RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;"
-                + f"control_port={control_port};timing_port={timing_port}",
-            },
-        )
+        return await self.exchange("SETUP", headers=headers, body=body)
 
-    async def record(self, rtpseq: int, rtptime: int) -> HttpResponse:
+    async def record(
+        self,
+        /,
+        headers: Optional[Dict[str, Any]] = None,
+        body: Optional[Union[str, bytes]] = None
+    ) -> HttpResponse:
         """Send RECORD message."""
-        return await self.exchange(
-            "RECORD",
-            headers={
-                "Range": "npt=0-",
-                "Session": self.context.rtsp_session,
-                "RTP-Info": f"seq={rtpseq};rtptime={rtptime}",
-            },
-        )
+        return await self.exchange("RECORD", headers=headers, body=body)
 
     async def set_parameter(self, parameter: str, value: str) -> HttpResponse:
         """Send SET_PARAMETER message."""
@@ -235,6 +194,7 @@ class RtspSession:
 
     async def set_metadata(
         self,
+        rtsp_session: int,
         rtpseq: int,
         rtptime: int,
         metadata: AudioMetadata,
@@ -252,7 +212,7 @@ class RtspSession:
             "SET_PARAMETER",
             content_type="application/x-dmap-tagged",
             headers={
-                "Session": self.context.rtsp_session,
+                "Session": rtsp_session,
                 "RTP-Info": f"seq={rtpseq};rtptime={rtptime}",
             },
             body=tags.container_tag("mlit", payload),
@@ -262,11 +222,9 @@ class RtspSession:
         """Send SET_PARAMETER message."""
         return await self.exchange("POST", uri="/feedback", allow_error=allow_error)
 
-    async def teardown(self, allow_error=False) -> HttpResponse:
+    async def teardown(self, rtsp_session) -> HttpResponse:
         """Send TEARDOWN message."""
-        return await self.exchange(
-            "TEARDOWN", headers={"Session": self.context.rtsp_session}
-        )
+        return await self.exchange("TEARDOWN", headers={"Session": rtsp_session})
 
     async def exchange(
         self,
@@ -283,15 +241,15 @@ class RtspSession:
 
         hdrs = {
             "CSeq": cseq,
-            "DACP-ID": self.context.dacp_id,
-            "Active-Remote": self.context.active_remote,
-            "Client-Instance": self.context.dacp_id,
+            "DACP-ID": self.dacp_id,
+            "Active-Remote": self.active_remote,
+            "Client-Instance": self.dacp_id,
         }
 
         # Add the password authentication if required
-        if self.context.digest_info:
+        if self.digest_info:
             hdrs["Authorization"] = get_digest_payload(
-                method, uri or self.uri, *self.context.digest_info
+                method, uri or self.uri, *self.digest_info
             )
 
         if headers:
