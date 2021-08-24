@@ -15,7 +15,6 @@ from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.raop import timing
 from pyatv.raop.audio_source import AudioSource
 from pyatv.raop.fifo import PacketFifo
-from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.raop.packets import (
     AudioPacketHeader,
     RetransmitReqeust,
@@ -30,6 +29,7 @@ from pyatv.raop.parsers import (
     get_metadata_types,
 )
 from pyatv.support import log_binary
+from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata
 from pyatv.support.rtsp import FRAMES_PER_PACKET, RtspSession
 
 _LOGGER = logging.getLogger(__name__)

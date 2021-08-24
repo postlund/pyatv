@@ -11,8 +11,8 @@ from random import randrange
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.dmap import tags
-from pyatv.raop.metadata import AudioMetadata
 from pyatv.support.http import HttpConnection, HttpResponse
+from pyatv.support.metadata import AudioMetadata
 
 _LOGGER = logging.getLogger(__name__)
 

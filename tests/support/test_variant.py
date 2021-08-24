@@ -1,7 +1,7 @@
 """Unit tests for pyatv.mrp.variant."""
 import pytest
 
-from pyatv.mrp.variant import read_variant, write_variant
+from pyatv.support.variant import read_variant, write_variant
 
 
 def test_read_single_byte():

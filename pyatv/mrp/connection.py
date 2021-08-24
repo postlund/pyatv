@@ -6,9 +6,9 @@ import logging
 from pyatv import exceptions
 from pyatv.interface import StateProducer
 from pyatv.mrp import protobuf
-from pyatv.mrp.variant import read_variant, write_variant
 from pyatv.support import chacha20, log_binary, log_protobuf
 from pyatv.support.net import tcp_keepalive
+from pyatv.support.variant import read_variant, write_variant
 
 _LOGGER = logging.getLogger(__name__)
 
