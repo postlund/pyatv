@@ -1,4 +1,5 @@
 """Pick authentication type based on device support."""
+from enum import Enum
 import logging
 from typing import Tuple
 
@@ -18,6 +19,18 @@ from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
 
+# pylint: disable=invalid-name
+
+
+class AuthenticationType(Enum):
+    """Supported authentication type."""
+
+    Legacy = 1
+    """Legacy SRP based authentication."""
+
+
+# pylint: enable=invalid-name
+
 
 class NullPairVerifyProcedure:
     """Null implementation for Pair-Verify when no verification is needed."""
@@ -35,7 +48,9 @@ class NullPairVerifyProcedure:
         )
 
 
-def pair_setup(connection: HttpConnection) -> PairSetupProcedure:
+def pair_setup(
+    auth_type: AuthenticationType, connection: HttpConnection
+) -> PairSetupProcedure:
     """Return procedure object used for Pair-Setup."""
     credentials = new_credentials()
 
