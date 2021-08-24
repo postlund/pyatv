@@ -6,7 +6,7 @@ from typing import Optional
 
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import pair_setup
-from pyatv.auth.hap_pairing import PairSetupProcedure, parse_credentials
+from pyatv.auth.hap_pairing import PairSetupProcedure
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
@@ -47,9 +47,7 @@ class AirPlayPairingHandler(PairingHandler):
     async def begin(self) -> None:
         """Start pairing process."""
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = pair_setup(
-            parse_credentials(self.service.credentials), self.http
-        )
+        self.pairing_procedure = pair_setup(self.http)
         self._has_paired = False
         return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError
