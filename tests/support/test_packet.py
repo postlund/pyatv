@@ -1,10 +1,10 @@
-"""Unit tests for pyatv.raop.packets."""
+"""Unit tests for pyatv.support.packet."""
 
 import pytest
 
-from pyatv.raop.packets import defmsg
+from pyatv.support.packet import defpacket
 
-Foo = defmsg("Foo", a="c", b="h")
+Foo = defpacket("Foo", a="c", b="h")
 Bar = Foo.extend("Bar", c="I")
 
 

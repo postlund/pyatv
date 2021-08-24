@@ -1,38 +1,7 @@
 """Packet formats used by RAOP."""
-from collections import namedtuple
-import struct
+from pyatv.support.packet import defpacket
 
-
-def defmsg(name: str, **kwargs):
-    """Define a protocol message."""
-    fmt: str = ">" + "".join(kwargs.values())
-    msg_type = namedtuple(name, kwargs.keys())  # type: ignore
-
-    class _MessageType:
-        @staticmethod
-        def decode(data: bytes, allow_excessive=False):
-            """Decode binary data as message."""
-            return msg_type._make(
-                struct.unpack(
-                    fmt, data if not allow_excessive else data[0 : struct.calcsize(fmt)]
-                )
-            )
-
-        @staticmethod
-        def encode(*args) -> bytes:
-            """Encode a message into binary data."""
-            return struct.pack(fmt, *args)
-
-        @staticmethod
-        def extend(ext_name, **ext_kwargs):
-            """Extend a message type with additional fields."""
-            fields = {**kwargs, **ext_kwargs}
-            return defmsg(ext_name, **fields)
-
-    return _MessageType
-
-
-RtpHeader = defmsg("RtpHeader", proto="B", type="B", seqno="H")
+RtpHeader = defpacket("RtpHeader", proto="B", type="B", seqno="H")
 
 TimingPacket = RtpHeader.extend(
     "TimingPacket",
