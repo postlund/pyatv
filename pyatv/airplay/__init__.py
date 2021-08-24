@@ -6,7 +6,7 @@ import os
 from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth import pair_verify
+from pyatv.airplay.auth import verify_connection
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
@@ -68,11 +68,6 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
             self._play_task.cancel()
             self._play_task = None
 
-    async def _player(self, connection: HttpConnection) -> AirPlayPlayer:
-        verifier = pair_verify(self._credentials, connection)
-        await verifier.verify_credentials()
-        return AirPlayPlayer(connection)
-
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device.
 
@@ -94,8 +89,11 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
 
         connection: Optional[HttpConnection] = None
         try:
+            # Connect and verify connection to set up encryption
             connection = await http_connect(str(self.config.address), self.service.port)
-            player = await self._player(connection)
+            await verify_connection(self._credentials, connection)
+
+            player = AirPlayPlayer(connection)
             position = int(kwargs.get("position", 0))
             self._play_task = asyncio.ensure_future(player.play_url(url, position))
             return await self._play_task
