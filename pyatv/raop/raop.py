@@ -29,8 +29,8 @@ from pyatv.raop.parsers import (
     get_encryption_types,
     get_metadata_types,
 )
-from pyatv.raop.rtsp import FRAMES_PER_PACKET, RtspSession
 from pyatv.support import log_binary
+from pyatv.support.rtsp import FRAMES_PER_PACKET, RtspSession
 
 _LOGGER = logging.getLogger(__name__)
 
