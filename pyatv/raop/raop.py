@@ -9,7 +9,7 @@ import weakref
 from bitarray import bitarray
 
 from pyatv import exceptions
-from pyatv.airplay.auth_legacy import AirPlayPairVerifyProcedure, HapCredentials
+from pyatv.airplay.auth_legacy import AirPlayLegacyPairVerifyProcedure, HapCredentials
 from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.raop import timing
 from pyatv.raop.audio_source import AudioSource
@@ -416,7 +416,7 @@ class RaopClient:
             _LOGGER.debug("Verifying connection with credentials %s", self.credentials)
             srp = SRPAuthHandler(self.credentials)
             srp.initialize()
-            verifier = AirPlayPairVerifyProcedure(self.rtsp.connection, srp)
+            verifier = AirPlayLegacyPairVerifyProcedure(self.rtsp.connection, srp)
             await verifier.verify_credentials()
 
         await self.rtsp.announce(self.password)
