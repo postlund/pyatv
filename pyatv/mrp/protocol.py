@@ -16,6 +16,10 @@ _LOGGER = logging.getLogger(__name__)
 HEARTBEAT_INTERVAL = 30
 HEARTBEAT_RETRIES = 1  # One regular attempt + retries
 
+SRP_SALT = "MediaRemote-Salt"
+SRP_OUTPUT_INFO = "MediaRemote-Write-Encryption-Key"
+SRP_INPUT_INFO = "MediaRemote-Read-Encryption-Key"
+
 Listener = namedtuple("Listener", "func data")
 OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
 
@@ -176,7 +180,9 @@ class MrpProtocol:
 
             try:
                 await pair_verifier.verify_credentials()
-                output_key, input_key = pair_verifier.encryption_keys()
+                output_key, input_key = pair_verifier.encryption_keys(
+                    SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
+                )
                 self.connection.enable_encryption(output_key, input_key)
             except Exception as ex:
                 raise exceptions.AuthenticationError(str(ex)) from ex

@@ -3,7 +3,6 @@ from copy import copy
 import logging
 from typing import Any, Dict, Tuple
 
-from pyatv import exceptions
 from pyatv.auth import hap_tlv8
 from pyatv.auth.hap_pairing import (
     HapCredentials,
@@ -22,11 +21,6 @@ _AIRPLAY_HEADERS = {
     "X-Apple-HKP": 3,
     "Content-Type": "application/octet-stream",
 }
-
-
-SRP_SALT = "Control-Salt"
-SRP_OUTPUT_INFO = "Control-Write-Encryption-Key"
-SRP_INPUT_INFO = "Control-Read-Encryption-Key"
 
 
 class AirPlayHapPairSetupProcedure(PairSetupProcedure):
@@ -102,8 +96,6 @@ class AirPlayHapPairVerifyProcedure(PairVerifyProcedure):
         self.http = http
         self.srp = auth_handler
         self.credentials = credentials
-        self._output_key = None
-        self._input_key = None
 
     async def verify_credentials(self) -> bool:
         """Verify if device is allowed to use AirPlau."""
@@ -132,16 +124,6 @@ class AirPlayHapPairVerifyProcedure(PairVerifyProcedure):
 
         # TODO: check status code
 
-        self._output_key, self._input_key = self.srp.verify2(
-            SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
-        )
-
-        log_binary(
-            _LOGGER,
-            "Got encryption keys",
-            Input=self._input_key,
-            Output=self._output_key,
-        )
         return True
 
     async def _send(self, data: Dict[Any, Any]) -> HttpResponse:
@@ -151,8 +133,8 @@ class AirPlayHapPairVerifyProcedure(PairVerifyProcedure):
             "/pair-verify", body=hap_tlv8.write_tlv(data), headers=headers
         )
 
-    def encryption_keys(self) -> Tuple[str, str]:
+    def encryption_keys(
+        self, salt: str, output_info: str, input_info: str
+    ) -> Tuple[str, str]:
         """Return derived encryption keys."""
-        if self._output_key is None or self._input_key is None:
-            raise exceptions.NoCredentialsError("verification has not succeeded")
-        return self._output_key, self._input_key
+        return self.srp.verify2(salt, output_info, input_info)

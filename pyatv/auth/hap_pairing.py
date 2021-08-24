@@ -58,7 +58,9 @@ class PairVerifyProcedure:
     async def verify_credentials(self) -> bool:
         """Verify if credentials are valid and returns True if keys are generated."""
 
-    def encryption_keys(self) -> Tuple[str, str]:
+    def encryption_keys(
+        self, salt: str, output_info: str, input_info: str
+    ) -> Tuple[str, str]:
         """Return derived encryption keys."""
 
 
