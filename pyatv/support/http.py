@@ -26,6 +26,14 @@ SERVER_NAME = f"pyatv-www/{const.__version__}"
 # have been seen. So to deal with that, keep this high.
 DEFAULT_TIMEOUT = 25.0  # Seconds
 
+# Used for pre/post processing in HTTP
+DataProcessor = Callable[[bytes], bytes]
+
+
+def _null_processor(data: bytes) -> bytes:
+    """Data processor not doing any processing (just returning data)."""
+    return data
+
 
 def _format_message(
     method: str,
@@ -259,9 +267,19 @@ class HttpSession:
 class HttpConnection(asyncio.Protocol):
     """Representation of a HTTP connection."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        receive_processor: Optional[Callable[[bytes], bytes]] = None,
+        send_processor: Optional[Callable[[bytes], bytes]] = None,
+    ) -> None:
         """Initialize a new ."""
         self.transport: Optional[asyncio.Transport] = None
+        self.receive_processor: Callable[[bytes], bytes] = (
+            receive_processor or _null_processor
+        )
+        self.send_processor: Callable[[bytes], bytes] = (
+            send_processor or _null_processor
+        )
         self._local_ip: Optional[str] = None
         self._remote_ip: Optional[str] = None
         self._requests: deque = deque()
@@ -299,6 +317,8 @@ class HttpConnection(asyncio.Protocol):
 
     def data_received(self, data: bytes) -> None:
         """Handle incoming HTTP data."""
+        data = self.receive_processor(data)
+
         _LOGGER.debug("Received: %s", data)
         self._buffer += data
         while self._buffer:
@@ -361,7 +381,7 @@ class HttpConnection(asyncio.Protocol):
         if not self.transport:
             raise RuntimeError("not connected to remote")
 
-        self.transport.write(output)
+        self.transport.write(self.send_processor(output))
 
         event = asyncio.Event()
         self._requests.appendleft(event)

@@ -145,13 +145,19 @@ def test_parse_request_method_with_underscore():
 # BASIC HTTP SERVER
 
 
-async def serve_and_connect(handler) -> Tuple[HttpSession, asyncio.AbstractServer]:
+async def serve(handler) -> Tuple[asyncio.AbstractServer, int]:
     if inspect.isfunction(handler):
         mock = MagicMock()
         mock.handle_request = handler
         handler = mock
 
-    server, port = await http_server(lambda: BasicHttpServer(handler))
+    return await http_server(lambda: BasicHttpServer(handler))
+
+
+async def serve_and_connect(
+    handler,
+) -> Tuple[HttpSession, asyncio.AbstractServer]:
+    server, port = await serve(handler)
     client = await http_connect("127.0.0.1", port)
     return client, server
 
@@ -217,9 +223,13 @@ class DummyRouter(HttpSimpleRouter):
     def __init__(self):
         super().__init__()
         self.add_route("GET", "/foo", self.foo)
+        self.add_route("GET", "/bar", self.bar)
 
     def foo(self, request: HttpRequest) -> Optional[HttpResponse]:
         return HttpResponse("HTTP", "1.1", 200, "foo", {}, request.body)
+
+    def bar(self, request: HttpRequest) -> Optional[HttpResponse]:
+        return HttpResponse("HTTP", "1.1", 123, "dummy", {}, request.body)
 
 
 async def test_simple_router():
@@ -246,5 +256,36 @@ async def test_server_with_router():
 
     resp = await client.get("/foo", allow_error=True)
     assert resp.code == 200
+
+    server.close()
+
+
+# HTTP CONNECTION
+
+
+async def test_connection_send_processor():
+    def send_processor(data: bytes) -> bytes:
+        return data.replace(b"/foo", b"/bar")
+
+    client, server = await serve_and_connect(DummyRouter())
+    client.send_processor = send_processor
+
+    resp = await client.get("/foo", allow_error=True)
+    assert resp.code == 123
+    assert resp.message == "dummy"
+
+    server.close()
+
+
+async def test_connection_receive_processor():
+    def receive_processor(data: bytes) -> bytes:
+        return data.replace(b"foo", b"something else")
+
+    client, server = await serve_and_connect(DummyRouter())
+    client.receive_processor = receive_processor
+
+    resp = await client.get("/foo", allow_error=True)
+    assert resp.code == 200
+    assert resp.message == "something else"
 
     server.close()
