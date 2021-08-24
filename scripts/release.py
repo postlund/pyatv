@@ -109,7 +109,7 @@ def update_version(version):
             "(" + component + "_VERSION =).*", '\\1 "' + split[i] + '"', output
         )
 
-    with open("pyatv/const.py", "w") as f:
+    with open("pyatv/const.py", encoding="utf-8", mode="w") as f:
         f.write(output)
 
 
@@ -172,7 +172,7 @@ def insert_changes(version, release_name):
 
         sections += "*Other:*\n\n" + "\n".join(grouped_changes.get("_", [])) + "\n\n"
 
-        with open("CHANGES.md", "w") as f:
+        with open("CHANGES.md", encoding="utf-8", mode="w") as f:
             f.write(
                 CHANGES_TEMPLATE.format(
                     version=version,

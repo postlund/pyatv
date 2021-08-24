@@ -28,7 +28,7 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
         **kwargs
     ):
         """Create a `CaseInensitiveDict`. It takes the same arguments as `dict`."""
-        self._data = dict()
+        self._data = {}
         if isinstance(mapping_or_iterable, collections.abc.Mapping):
             self._data.update(map(self._lower_key, mapping_or_iterable.items()))
         elif isinstance(mapping_or_iterable, collections.abc.Iterable):
