@@ -98,7 +98,7 @@ class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
         atv_public_secret = resp.body[0:32]
         data = resp.body[32:]  # TODO: what is this?
         await self._send(self.srp.verify2(atv_public_secret, data))
-        return True
+        return False
 
     async def _send(self, data: bytes) -> HttpResponse:
         headers = _AIRPLAY_HEADERS.copy()

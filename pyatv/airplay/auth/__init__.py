@@ -19,6 +19,7 @@ from pyatv.auth.hap_pairing import (
     PairSetupProcedure,
     PairVerifyProcedure,
 )
+from pyatv.auth.hap_session import HAPSession
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.support.http import HttpConnection
 
@@ -46,7 +47,7 @@ class NullPairVerifyProcedure:
     async def verify_credentials(self) -> bool:
         """Verify if credentials are valid."""
         _LOGGER.debug("Performing null Pair-Verify")
-        return True
+        return False
 
     @staticmethod
     def encryption_keys() -> Tuple[str, str]:
@@ -106,3 +107,19 @@ def pair_verify(
     srp = SRPAuthHandler()
     srp.initialize()
     return AirPlayHapPairVerifyProcedure(connection, srp, credentials)
+
+
+async def verify_connection(
+    credentials: HapCredentials, connection: HttpConnection
+) -> None:
+    """Perform Pair-Verify on a connection and enable encryption."""
+    verifier = pair_verify(credentials, connection)
+    has_encryption_keys = await verifier.verify_credentials()
+
+    if has_encryption_keys:
+        output_key, input_key = verifier.encryption_keys()
+
+        session = HAPSession()
+        session.enable(output_key, input_key)
+        connection.receive_processor = session.decrypt
+        connection.send_processor = session.encrypt
