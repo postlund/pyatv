@@ -33,10 +33,10 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.raop.audio_source import AudioSource, open_source
-from pyatv.raop.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
 from pyatv.support import map_range, mdns
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
+from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.relayer import Relayer
 from pyatv.support.rtsp import RtspSession
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn

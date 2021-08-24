@@ -285,7 +285,7 @@ def decode_and_print_message(args):
     """Decode and print protobuf messages."""
     # Import here to allow other parts of script, e.g. message generation to run
     # without having pyatv installed
-    from pyatv.mrp import variant  # pylint: disable=import-outside-toplevel
+    from pyatv.support import variant  # pylint: disable=import-outside-toplevel
 
     buf = binascii.unhexlify(args.message)
     if not args.stream:

@@ -17,11 +17,11 @@ from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.protocol import CompanionProtocol, FrameType
 from pyatv.companion.server_auth import CompanionServerAuth
 from pyatv.conf import CompanionService, MrpService
-from pyatv.mrp import protobuf, variant
+from pyatv.mrp import protobuf
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
-from pyatv.support import chacha20, log_binary, mdns, net
+from pyatv.support import chacha20, log_binary, mdns, net, variant
 
 _LOGGER = logging.getLogger(__name__)
 
