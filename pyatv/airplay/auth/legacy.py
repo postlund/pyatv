@@ -12,7 +12,6 @@ from pyatv.auth.hap_pairing import (
     PairSetupProcedure,
     PairVerifyProcedure,
 )
-from pyatv.exceptions import AuthenticationError
 from pyatv.support.http import HttpConnection, HttpResponse
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,9 +35,7 @@ class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
 
         This method will show the expected PIN on screen.
         """
-        resp = await self.http.post("/pair-pin-start", headers=_AIRPLAY_HEADERS)
-        if resp.code != 200:
-            raise AuthenticationError("pair start failed")
+        await self.http.post("/pair-pin-start", headers=_AIRPLAY_HEADERS)
 
     async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
         """Finish pairing process.
@@ -47,8 +44,11 @@ class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
         screen must be provided.
         """
         # Step 1
-        self.srp.step1(username, pin_code)
-        resp = await self._send_plist(method="pin", user=username)
+        client_id = (
+            binascii.hexlify(self.srp.credentials.client_id).decode("ascii").upper()
+        )
+        self.srp.step1(client_id, pin_code)
+        resp = await self._send_plist(method="pin", user=client_id)
         resp = plistlib.loads(
             resp.body if isinstance(resp.body, bytes) else resp.body.encode("utf-8")
         )

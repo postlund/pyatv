@@ -4,10 +4,11 @@ import asyncio
 import logging
 
 from pyatv import conf, exceptions
+from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
-from pyatv.mrp.auth import HapCredentials, MrpPairSetupProcedure, MrpPairVerifyProcedure
+from pyatv.mrp.auth import MrpPairSetupProcedure, MrpPairVerifyProcedure
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
@@ -68,7 +69,7 @@ class MrpPairingHandler(PairingHandler):
         _LOGGER.debug("Verifying credentials %s", credentials)
 
         verifier = MrpPairVerifyProcedure(
-            self.protocol, self.srp, HapCredentials.parse(credentials)
+            self.protocol, self.srp, parse_credentials(credentials)
         )
         await error_handler(verifier.verify_credentials, exceptions.PairingError)
 

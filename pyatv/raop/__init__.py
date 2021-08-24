@@ -18,7 +18,7 @@ from typing import (
 )
 
 from pyatv import conf, const, exceptions
-from pyatv.auth.hap_pairing import HapCredentials
+from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -350,7 +350,7 @@ class RaopStream(Stream):
                 airplay_service = cast(conf.AirPlayService, service)
                 credentials = airplay_service.credentials
 
-        return HapCredentials.parse(credentials) if credentials else None
+        return parse_credentials(credentials)
 
 
 class RaopRemoteControl(RemoteControl):
