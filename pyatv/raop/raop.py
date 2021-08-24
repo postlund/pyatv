@@ -9,7 +9,7 @@ import weakref
 from bitarray import bitarray
 
 from pyatv import exceptions
-from pyatv.airplay.auth import AirPlayPairingVerifier
+from pyatv.airplay.auth_legacy import AirPlayPairingVerifier
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.raop import timing
 from pyatv.raop.audio_source import AudioSource

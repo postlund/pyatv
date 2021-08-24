@@ -6,7 +6,7 @@ import logging
 from typing import Optional
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth import AirPlayPairingProcedure
+from pyatv.airplay.auth_legacy import AirPlayPairingProcedure
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler

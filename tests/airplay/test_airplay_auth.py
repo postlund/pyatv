@@ -4,7 +4,7 @@ import binascii
 
 import pytest
 
-from pyatv.airplay.auth import AirPlayPairingProcedure, AirPlayPairingVerifier
+from pyatv.airplay.auth_legacy import AirPlayPairingProcedure, AirPlayPairingVerifier
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
 from pyatv.exceptions import AuthenticationError
 

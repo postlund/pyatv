@@ -6,7 +6,7 @@ import os
 from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth import AirPlayPairingVerifier
+from pyatv.airplay.auth_legacy import AirPlayPairingVerifier
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
