@@ -22,8 +22,8 @@ from srptools import SRPClientSession, SRPContext, constants
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import HapCredentials
-from pyatv.support import chacha20, hap_tlv8, log_binary
-from pyatv.support.hap_tlv8 import TlvValue
+from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, write_tlv
+from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,9 +86,7 @@ class SRPAuthHandler:
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        decrypted_tlv = hap_tlv8.read_tlv(
-            chacha.decrypt(encrypted, nounce="PV-Msg02".encode())
-        )
+        decrypted_tlv = read_tlv(chacha.decrypt(encrypted, nounce="PV-Msg02".encode()))
 
         identifier = decrypted_tlv[TlvValue.Identifier]
         signature = decrypted_tlv[TlvValue.Signature]
@@ -110,7 +108,7 @@ class SRPAuthHandler:
             device_info
         )
 
-        tlv = hap_tlv8.write_tlv(
+        tlv = write_tlv(
             {
                 TlvValue.Identifier: credentials.client_id,
                 TlvValue.Signature: device_signature,
@@ -183,9 +181,7 @@ class SRPAuthHandler:
             tlv.update(additional_data)
 
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        encrypted_data = chacha.encrypt(
-            hap_tlv8.write_tlv(tlv), nounce="PS-Msg05".encode()
-        )
+        encrypted_data = chacha.encrypt(write_tlv(tlv), nounce="PS-Msg05".encode())
         log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
@@ -197,7 +193,7 @@ class SRPAuthHandler:
         if not decrypted_tlv_bytes:
             raise exceptions.AuthenticationError("data decrypt failed")
 
-        decrypted_tlv = hap_tlv8.read_tlv(decrypted_tlv_bytes)
+        decrypted_tlv = read_tlv(decrypted_tlv_bytes)
         _LOGGER.debug("PS-Msg06: %s", decrypted_tlv)
 
         atv_identifier = decrypted_tlv[TlvValue.Identifier]

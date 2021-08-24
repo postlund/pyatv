@@ -5,11 +5,11 @@ from typing import Dict
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import HapCredentials
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.companion import opack
 from pyatv.companion.auth import CompanionPairVerifyProcedure
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.conf import CompanionService
-from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 

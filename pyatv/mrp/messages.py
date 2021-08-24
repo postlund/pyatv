@@ -3,8 +3,8 @@
 import binascii
 
 from pyatv import const
+from pyatv.auth import hap_tlv8
 from pyatv.mrp import protobuf
-from pyatv.support import hap_tlv8
 
 
 def create(message_type, error_code=0, identifier=None):

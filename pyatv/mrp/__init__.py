@@ -7,6 +7,7 @@ import math
 from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -42,7 +43,6 @@ from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import deprecated, mdns
 from pyatv.support.cache import Cache
-from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn

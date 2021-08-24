@@ -9,9 +9,9 @@ from pyatv.auth.hap_pairing import (
     PairSetupProcedure,
     PairVerifyProcedure,
 )
+from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, stringify
 from pyatv.mrp import messages
 from pyatv.support import log_binary
-from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
 
