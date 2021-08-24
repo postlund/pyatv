@@ -2,6 +2,7 @@
 
 from aiohttp.test_utils import unittest_run_loop
 
+from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.const import Protocol
 from pyatv.mrp.server_auth import CLIENT_CREDENTIALS
 
@@ -41,7 +42,11 @@ class AtvremoteTest(ScriptTest):
             DEVICE_CREDENTIALS,
             "pair",
         )
-        self.has_output("Enter PIN", "seems to have succeeded", DEVICE_CREDENTIALS)
+        self.has_output(
+            "Enter PIN",
+            "seems to have succeeded",
+            HapCredentials.parse(DEVICE_CREDENTIALS),
+        )
         self.exit(0)
 
     @unittest_run_loop

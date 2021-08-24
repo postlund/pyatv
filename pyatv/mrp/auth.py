@@ -1,9 +1,14 @@
 """Device pairing and derivation of encryption keys."""
 
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import (
+    HapCredentials,
+    PairSetupProcedure,
+    PairVerifyProcedure,
+)
 from pyatv.mrp import messages
 from pyatv.support import log_binary
 from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
@@ -22,7 +27,7 @@ def _get_pairing_data(resp):
     return tlv
 
 
-class MrpPairingProcedure:
+class MrpPairSetupProcedure(PairSetupProcedure):
     """Perform pairing and return new credentials."""
 
     def __init__(self, protocol, srp):
@@ -48,9 +53,9 @@ class MrpPairingProcedure:
         self._atv_salt = pairing_data[TlvValue.Salt]
         self._atv_pub_key = pairing_data[TlvValue.PublicKey]
 
-    async def finish_pairing(self, pin):
+    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
         """Finish pairing process."""
-        self.srp.step1(pin)
+        self.srp.step1(pin_code)
 
         pub_key, proof = self.srp.step2(self._atv_pub_key, self._atv_salt)
 
@@ -79,18 +84,18 @@ class MrpPairingProcedure:
         return self.srp.step4(encrypted_data)
 
 
-class MrpPairingVerifier:
+class MrpPairVerifyProcedure(PairVerifyProcedure):
     """Verify credentials and derive new encryption keys."""
 
-    def __init__(self, protocol, srp, credentials):
+    def __init__(self, protocol, srp, credentials: HapCredentials):
         """Initialize a new MrpPairingVerifier."""
         self.protocol = protocol
         self.srp = srp
         self.credentials = credentials
-        self._output_key = None
-        self._input_key = None
+        self._output_key: Optional[str] = None
+        self._input_key: Optional[str] = None
 
-    async def verify_credentials(self):
+    async def verify_credentials(self) -> bool:
         """Verify credentials with device."""
         _, public_key = self.srp.initialize()
 
@@ -115,6 +120,7 @@ class MrpPairingVerifier:
         self._output_key, self._input_key = self.srp.verify2(
             SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
         )
+        return True
 
     def encryption_keys(self) -> Tuple[str, str]:
         """Return derived encryption keys."""

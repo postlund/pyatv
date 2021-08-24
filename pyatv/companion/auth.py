@@ -3,10 +3,15 @@ import logging
 from typing import Dict, Tuple
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import (
+    HapCredentials,
+    PairSetupProcedure,
+    PairVerifyProcedure,
+)
 from pyatv.companion import opack
 from pyatv.companion.connection import FrameType
 from pyatv.support import hap_tlv8, log_binary
-from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
+from pyatv.support.hap_srp import SRPAuthHandler
 from pyatv.support.hap_tlv8 import TlvValue, read_tlv, stringify
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +40,7 @@ def _get_pairing_data(message: Dict[str, object]):
     return tlv
 
 
-class CompanionPairingProcedure:
+class CompanionPairSetupProcedure(PairSetupProcedure):
     """Perform pairing and return new credentials."""
 
     def __init__(self, protocol, srp: SRPAuthHandler) -> None:
@@ -70,9 +75,9 @@ class CompanionPairingProcedure:
             PubKey=self._atv_pub_key,
         )
 
-    async def finish_pairing(self, pin: int) -> HapCredentials:
+    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
         """Finish pairing process."""
-        self.srp.step1(pin)
+        self.srp.step1(pin_code)
 
         pub_key, proof = self.srp.step2(self._atv_pub_key, self._atv_salt)
 
@@ -127,7 +132,7 @@ class CompanionPairingProcedure:
         return self.srp.step4(encrypted_data)
 
 
-class CompanionPairingVerifier:
+class CompanionPairVerifyProcedure(PairVerifyProcedure):
     """Verify credentials and derive new encryption keys."""
 
     def __init__(
@@ -140,7 +145,7 @@ class CompanionPairingVerifier:
         self._output_key = None
         self._input_key = None
 
-    async def verify_credentials(self) -> None:
+    async def verify_credentials(self) -> bool:
         """Verify credentials with device."""
         _, public_key = self.srp.initialize()
 
@@ -175,6 +180,7 @@ class CompanionPairingVerifier:
         self._output_key, self._input_key = self.srp.verify2(
             SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
         )
+        return True
 
     def encryption_keys(self) -> Tuple[str, str]:
         """Return derived encryption keys."""

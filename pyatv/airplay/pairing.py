@@ -6,8 +6,8 @@ import logging
 from typing import Optional
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth_legacy import AirPlayPairingProcedure
-from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler, new_credentials
+from pyatv.airplay.auth_legacy import AirPlayPairSetupProcedure, HapCredentials
+from pyatv.airplay.srp import SRPAuthHandler, new_credentials
 from pyatv.const import Protocol
 from pyatv.interface import PairingHandler
 from pyatv.support import error_handler
@@ -30,16 +30,16 @@ class AirPlayPairingHandler(PairingHandler):
         super().__init__(session_manager, config.get_service(Protocol.AirPlay))
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
-        self.pairing_procedure: Optional[AirPlayPairingProcedure] = None
-        self.credentials: LegacyCredentials = self._setup_credentials()
+        self.pairing_procedure: Optional[AirPlayPairSetupProcedure] = None
+        self.credentials: HapCredentials = self._setup_credentials()
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False
 
-    def _setup_credentials(self) -> LegacyCredentials:
+    def _setup_credentials(self) -> HapCredentials:
         # If service has credentials, use those. Otherwise generate new.
         if self.service.credentials is None:
             return new_credentials()
-        return LegacyCredentials.parse(self.service.credentials)
+        return HapCredentials.parse(self.service.credentials)
 
     @property
     def has_paired(self) -> bool:
@@ -60,7 +60,7 @@ class AirPlayPairingHandler(PairingHandler):
         srp.initialize()
 
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = AirPlayPairingProcedure(self.http, srp)
+        self.pairing_procedure = AirPlayPairSetupProcedure(self.http, srp)
 
         self._has_paired = False
         return await error_handler(
@@ -78,7 +78,7 @@ class AirPlayPairingHandler(PairingHandler):
             await error_handler(
                 self.pairing_procedure.finish_pairing,
                 exceptions.PairingError,
-                binascii.hexlify(self.credentials.identifier).decode("ascii").upper(),
+                binascii.hexlify(self.credentials.client_id).decode("ascii").upper(),
                 self.pin_code,
             )
         )

@@ -21,50 +21,11 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from srptools import SRPClientSession, SRPContext, constants
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.support import chacha20, hap_tlv8, log_binary
 from pyatv.support.hap_tlv8 import TlvValue
 
 _LOGGER = logging.getLogger(__name__)
-
-
-# pylint: disable=too-few-public-methods
-class HapCredentials:
-    """Identifiers and encryption keys used by HAP."""
-
-    def __init__(
-        self, ltpk: bytes, ltsk: bytes, atv_id: bytes, client_id: bytes
-    ) -> None:
-        """Initialize a new Credentials."""
-        self.ltpk: bytes = ltpk
-        self.ltsk: bytes = ltsk
-        self.atv_id: bytes = atv_id
-        self.client_id: bytes = client_id
-
-    @classmethod
-    def parse(cls, detail_string) -> "HapCredentials":
-        """Parse a string represention of Credentials."""
-        split = detail_string.split(":")
-        if len(split) != 4:
-            raise exceptions.InvalidCredentialsError(
-                "invalid credentials: " + detail_string
-            )
-
-        ltpk = binascii.unhexlify(split[0])
-        ltsk = binascii.unhexlify(split[1])
-        atv_id = binascii.unhexlify(split[2])
-        client_id = binascii.unhexlify(split[3])
-        return HapCredentials(ltpk, ltsk, atv_id, client_id)
-
-    def __str__(self):
-        """Return a string representation of credentials."""
-        return ":".join(
-            [
-                binascii.hexlify(self.ltpk).decode("utf-8"),
-                binascii.hexlify(self.ltsk).decode("utf-8"),
-                binascii.hexlify(self.atv_id).decode("utf-8"),
-                binascii.hexlify(self.client_id).decode("utf-8"),
-            ]
-        )
 
 
 def hkdf_expand(salt, info, shared_secret):

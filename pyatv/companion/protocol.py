@@ -4,11 +4,12 @@ import logging
 from typing import Dict
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.companion import opack
-from pyatv.companion.auth import CompanionPairingVerifier
+from pyatv.companion.auth import CompanionPairVerifyProcedure
 from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.conf import CompanionService
-from pyatv.support.hap_srp import HapCredentials, SRPAuthHandler
+from pyatv.support.hap_srp import SRPAuthHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class CompanionProtocol:
     async def _setup_encryption(self):
         if self.service.credentials:
             credentials = HapCredentials.parse(self.service.credentials)
-            pair_verifier = CompanionPairingVerifier(self, self.srp, credentials)
+            pair_verifier = CompanionPairVerifyProcedure(self, self.srp, credentials)
 
             try:
                 await pair_verifier.verify_credentials()

@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from pyatv import exceptions, pair
+from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.const import Protocol
 
 from tests.fake_device.airplay import (
@@ -44,7 +45,9 @@ async def perform_pairing(conf, pin=DEVICE_PIN):
 
     await pairing.finish()
     assert pairing.has_paired
-    assert conf.get_service(Protocol.AirPlay).credentials == DEVICE_CREDENTIALS
+    assert HapCredentials.parse(
+        conf.get_service(Protocol.AirPlay).credentials
+    ) == HapCredentials.parse(DEVICE_CREDENTIALS)
 
 
 async def test_pairing_exception_invalid_pin(airplay_conf):

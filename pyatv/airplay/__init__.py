@@ -6,10 +6,10 @@ import os
 from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
 
 from pyatv import conf, exceptions
-from pyatv.airplay.auth_legacy import AirPlayPairingVerifier
+from pyatv.airplay.auth_legacy import AirPlayPairVerifyProcedure, HapCredentials
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
-from pyatv.airplay.srp import LegacyCredentials, SRPAuthHandler
+from pyatv.airplay.srp import SRPAuthHandler
 from pyatv.const import FeatureName, Protocol
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -56,7 +56,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
         self.service = self.config.get_service(Protocol.AirPlay)
-        self.credentials: Optional[LegacyCredentials] = self._get_credentials()
+        self.credentials: Optional[HapCredentials] = self._get_credentials()
         self._play_task: Optional[asyncio.Future] = None
 
     def close(self) -> None:
@@ -66,12 +66,12 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
             self._play_task.cancel()
             self._play_task = None
 
-    def _get_credentials(self) -> Optional[LegacyCredentials]:
+    def _get_credentials(self) -> Optional[HapCredentials]:
         if not self.service or self.service.credentials is None:
             _LOGGER.debug("No AirPlay credentials loaded")
             return None
 
-        credentials = LegacyCredentials.parse(self.service.credentials)
+        credentials = HapCredentials.parse(self.service.credentials)
         _LOGGER.debug("Loaded AirPlay credentials: %s", credentials)
         return credentials
 
@@ -82,8 +82,8 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         if self.credentials:
             srp = SRPAuthHandler(self.credentials)
             srp.initialize()
-            verifier = AirPlayPairingVerifier(connection, srp)
-            await verifier.verify_authed()
+            verifier = AirPlayPairVerifyProcedure(connection, srp)
+            await verifier.verify_credentials()
 
         return player
 

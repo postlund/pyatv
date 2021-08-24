@@ -18,7 +18,7 @@ from typing import (
 )
 
 from pyatv import conf, const, exceptions
-from pyatv.airplay.srp import LegacyCredentials
+from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -337,7 +337,7 @@ class RaopStream(Stream):
                 await audio_file.close()
             await self.playback_manager.teardown()
 
-    def _get_credentials(self) -> Optional[LegacyCredentials]:
+    def _get_credentials(self) -> Optional[HapCredentials]:
         credentials: Optional[str] = None
 
         # First and foremost use RAOP credentials, otherwise fall back to AirPlay
@@ -350,7 +350,7 @@ class RaopStream(Stream):
                 airplay_service = cast(conf.AirPlayService, service)
                 credentials = airplay_service.credentials
 
-        return LegacyCredentials.parse(credentials) if credentials else None
+        return HapCredentials.parse(credentials) if credentials else None
 
 
 class RaopRemoteControl(RemoteControl):
