@@ -33,3 +33,8 @@ def test_extend_decode():
     assert decoded.a == b"\x77"
     assert decoded.b == 0x0067
     assert decoded.c == 0xAABBCCDD
+
+
+def test_message_length():
+    assert Foo.length == 3
+    assert Bar.length == 3 + 4

@@ -9,6 +9,8 @@ def defpacket(name: str, **kwargs):
     msg_type = namedtuple(name, kwargs.keys())  # type: ignore
 
     class _MessageType:
+        length = struct.calcsize(fmt)
+
         @staticmethod
         def decode(data: bytes, allow_excessive=False):
             """Decode binary data as message."""
