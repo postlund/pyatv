@@ -297,7 +297,7 @@ async def appstart():
         if args.web_server:
             await serve_page(page, args.port)
         elif args.output:
-            with open(args.output, "w") as out:
+            with open(args.output, mode="w", encoding="utf-8") as out:
                 out.write(page)
         else:
             print(page)
@@ -307,7 +307,7 @@ async def appstart():
     elif args.file == "-":
         await _generate_log(sys.stdin)
     else:
-        with open(args.file) as stream:
+        with open(args.file, encoding="utf-8") as stream:
             await _generate_log(stream)
 
     return 0

@@ -140,7 +140,7 @@ def extract_message_info():
     """Get information about all messages of interest."""
     filename = os.path.join(BASE_PATH, "ProtocolMessage.proto")
 
-    with open(filename, "r") as file:
+    with open(filename, encoding="utf-8", mode="r") as file:
         types_found = False
 
         for line in file:
@@ -172,7 +172,7 @@ def extract_unreferenced_messages():
         if tmp[1] != ".proto" or tmp[0] == "ProtocolMessage":
             continue
 
-        with open(os.path.join(BASE_PATH, filename)) as file:
+        with open(os.path.join(BASE_PATH, filename), encoding="utf-8") as file:
             for line in file:
                 if line.startswith("message"):
                     yield tmp[0] + "_pb2", line.split(" ")[1]
@@ -231,7 +231,7 @@ def update_auto_generated_code():
     )
 
     module_code = generate_module_code()
-    with open(os.path.join(BASE_PATH, "__init__.py"), "w") as f:
+    with open(os.path.join(BASE_PATH, "__init__.py"), encoding="utf-8", mode="w") as f:
         f.write(module_code)
 
     return 0
@@ -241,7 +241,7 @@ def verify_generated_code():
     """Verify that generated code is up-to-date."""
     generated_code = generate_module_code().splitlines(True)
 
-    with open(os.path.join(BASE_PATH, "__init__.py"), "r") as f:
+    with open(os.path.join(BASE_PATH, "__init__.py"), encoding="utf-8", mode="r") as f:
         actual = f.readlines()
 
         diff = list(
