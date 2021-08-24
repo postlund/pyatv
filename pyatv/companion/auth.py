@@ -16,10 +16,6 @@ from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
-SRP_SALT = ""
-SRP_OUTPUT_INFO = "ClientEncrypt-main"
-SRP_INPUT_INFO = "ServerEncrypt-main"
-
 PAIRING_DATA_KEY = "_pd"
 
 
@@ -142,8 +138,6 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
         self.protocol = protocol
         self.srp = srp
         self.credentials = credentials
-        self._output_key = None
-        self._input_key = None
 
     async def verify_credentials(self) -> bool:
         """Verify credentials with device."""
@@ -177,13 +171,10 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
 
         # TODO: check status code
 
-        self._output_key, self._input_key = self.srp.verify2(
-            SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
-        )
         return True
 
-    def encryption_keys(self) -> Tuple[str, str]:
+    def encryption_keys(
+        self, salt: str, output_info: str, input_info: str
+    ) -> Tuple[str, str]:
         """Return derived encryption keys."""
-        if self._output_key is None or self._input_key is None:
-            raise exceptions.NoCredentialsError("verification has not succeeded")
-        return self._output_key, self._input_key
+        return self.srp.verify2(salt, output_info, input_info)

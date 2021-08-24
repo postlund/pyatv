@@ -25,6 +25,11 @@ from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
 
+CONTROL_SALT = "Control-Salt"
+CONTROL_OUTPUT_INFO = "Control-Write-Encryption-Key"
+CONTROL_INPUT_INFO = "Control-Read-Encryption-Key"
+
+
 # pylint: disable=invalid-name
 
 
@@ -50,7 +55,7 @@ class NullPairVerifyProcedure:
         return False
 
     @staticmethod
-    def encryption_keys() -> Tuple[str, str]:
+    def encryption_keys(salt: str, output_info: str, input_key: str) -> Tuple[str, str]:
         """Return derived encryption keys."""
         raise exceptions.NotSupportedError(
             "encryption keys not supported by null implementation"
@@ -117,9 +122,13 @@ async def verify_connection(
     has_encryption_keys = await verifier.verify_credentials()
 
     if has_encryption_keys:
-        output_key, input_key = verifier.encryption_keys()
+        output_key, input_key = verifier.encryption_keys(
+            CONTROL_SALT, CONTROL_OUTPUT_INFO, CONTROL_INPUT_INFO
+        )
 
         session = HAPSession()
         session.enable(output_key, input_key)
         connection.receive_processor = session.decrypt
         connection.send_processor = session.encrypt
+
+    return verifier

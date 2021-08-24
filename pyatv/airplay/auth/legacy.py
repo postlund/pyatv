@@ -106,7 +106,9 @@ class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
         return await self.http.post("/pair-verify", headers=headers, body=data)
 
     @staticmethod
-    def encryption_keys() -> Tuple[str, str]:
+    def encryption_keys(
+        salt: str, output_info: str, input_info: str
+    ) -> Tuple[str, str]:
         """Return derived encryption keys."""
         raise exceptions.NotSupportedError(
             "encryption keys not supported by legacy auth"

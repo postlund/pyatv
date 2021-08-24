@@ -49,7 +49,7 @@ async def test_verify_has_no_encryption_keys(airplay_device, client_connection):
 
     verifier = AirPlayLegacyPairVerifyProcedure(client_connection, srp)
     with pytest.raises(NotSupportedError):
-        assert verifier.encryption_keys()
+        assert verifier.encryption_keys("salt", "output", "input")
 
 
 async def test_pairing_failed(airplay_device, client_connection):
