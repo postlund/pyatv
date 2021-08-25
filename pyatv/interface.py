@@ -860,7 +860,7 @@ class Audio:
         raise exceptions.NotSupportedError()
 
 
-class AppleTV(ABC, StateProducer):
+class AppleTV(ABC, StateProducer[DeviceListener]):
     """Base class representing an Apple TV.
 
     Listener interface: `pyatv.interfaces.DeviceListener`
