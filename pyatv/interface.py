@@ -24,7 +24,6 @@ from typing import (
     TypeVar,
     Union,
 )
-import weakref
 
 from pyatv import const, convert, exceptions
 from pyatv.const import (
@@ -35,6 +34,7 @@ from pyatv.const import (
     OperatingSystem,
     Protocol,
 )
+from pyatv.core import StateProducer
 from pyatv.support.http import ClientSessionManager
 
 __pdoc__ = {}
@@ -59,54 +59,6 @@ class FeatureInfo(NamedTuple):
 
     state: FeatureState
     options: Optional[Dict[str, object]] = {}
-
-
-class _ListenerProxy:
-    """Proxy to call functions in a listener.
-
-    A proxy instance maintains a weak reference to a listener object and allows calling
-    functions in the listener. If no listener is set or the weak reference has expired,
-    a null-function (doing nothing) is returned so that nothing happens. This makes it
-    safe to call functions without having to check if either a listener has been set at
-    all or if the listener implements the called function.
-    """
-
-    def __init__(self, listener):
-        """Initialize a new ListenerProxy instance."""
-        self.listener = listener
-
-    def __getattr__(self, attr):
-        """Dynamically find target method in listener."""
-        if self.listener is not None:
-            listener = self.listener()
-            if hasattr(listener, attr):
-                return getattr(listener, attr)
-
-        return lambda *args, **kwargs: None
-
-
-class StateProducer:
-    """Base class for objects announcing state changes to a listener."""
-
-    def __init__(self) -> None:
-        """Initialize a new StateProducer instance."""
-        self.__listener: Optional[weakref.ReferenceType[Any]] = None
-
-    @property
-    def listener(self):
-        """Return current listener object."""
-        return _ListenerProxy(self.__listener)
-
-    @listener.setter
-    def listener(self, target) -> None:
-        """Change current listener object.
-
-        Set to None to remove active listener.
-        """
-        if target is not None:
-            self.__listener = weakref.ref(target)
-        else:
-            self.__listener = None
 
 
 def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnType]:
@@ -765,7 +717,7 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
         raise NotImplementedError()
 
 
-class Power(StateProducer):
+class Power(ABC, StateProducer):
     """Base class for retrieving power state from an Apple TV.
 
     Listener interface: `pyatv.interfaces.PowerListener`
