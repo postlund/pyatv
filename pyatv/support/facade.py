@@ -387,6 +387,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
         )
         self._features = FacadeFeatures(self._push_updates)
+        self._pending_tasks: Optional[set] = None
         self.interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
@@ -415,11 +416,15 @@ class FacadeAppleTV(interface.AppleTV):
 
     def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
-        pending_tasks = set()
+        # If close was called before, returning pending tasks
+        if self._pending_tasks is not None:
+            return set()
+
+        self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
         for _, protocol_close, _ in self._protocol_handlers.values():
-            pending_tasks.update(protocol_close())
-        return pending_tasks
+            self._pending_tasks.update(protocol_close())
+        return self._pending_tasks
 
     @property
     def device_info(self) -> interface.DeviceInfo:

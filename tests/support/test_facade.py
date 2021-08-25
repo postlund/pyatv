@@ -33,6 +33,7 @@ class SetupDataGenerator:
     def __init__(self, *features):
         self.connect_called = False
         self.close_called = False
+        self.close_calls = 0
         self.features = set(features)
 
     async def connect(self):
@@ -40,6 +41,7 @@ class SetupDataGenerator:
 
     def close(self):
         self.close_called = True
+        self.close_calls += 1
         return set()
 
     def get_setup_data(self) -> SetupData:
@@ -257,3 +259,15 @@ def test_device_update_disconnect_protocols(facade_dummy, register_interface):
 
     assert dmap_sdg.close_called
     assert mrp_sdg.close_called
+
+
+def test_close_only_once(facade_dummy, register_interface):
+    _, sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+
+    facade_dummy.close()
+    assert sdg.close_calls == 1
+
+    facade_dummy.close()
+    assert sdg.close_calls == 1
