@@ -475,3 +475,11 @@ class FacadeAppleTV(interface.AppleTV):
     def audio(self) -> interface.Audio:
         """Return audio interface."""
         return cast(interface.Audio, self.interfaces[interface.Audio])
+
+    def state_was_updated(self) -> None:
+        """Call when state was updated.
+
+        One of the protocol called a method in DeviceListener so everything should
+        be torn down.
+        """
+        self.close()

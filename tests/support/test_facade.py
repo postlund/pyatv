@@ -40,6 +40,7 @@ class SetupDataGenerator:
 
     def close(self):
         self.close_called = True
+        return set()
 
     def get_setup_data(self) -> SetupData:
         return self.connect, self.close, self.features
@@ -116,7 +117,7 @@ def register_interface_fixture(facade_dummy):
         sdg = SetupDataGenerator(feature)
         facade_dummy.interfaces[interface].register(instance, protocol)
         facade_dummy.add_protocol(protocol, sdg.get_setup_data())
-        return instance
+        return instance, sdg
 
     yield _register_func
 
@@ -179,8 +180,8 @@ def test_features_push_updates(facade_dummy, event_loop, register_interface):
     "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
 )
 async def test_power_prefer_companion(feature, func, facade_dummy, register_interface):
-    power_mrp = register_interface(feature, DummyPower(), Protocol.MRP)
-    power_comp = register_interface(feature, DummyPower(), Protocol.Companion)
+    power_mrp, _ = register_interface(feature, DummyPower(), Protocol.MRP)
+    power_comp, _ = register_interface(feature, DummyPower(), Protocol.Companion)
 
     await getattr(facade_dummy.power, func)()
 
@@ -242,3 +243,17 @@ async def test_only_one_device_update(facade_dummy):
     facade_dummy.listener.connection_closed()
     assert listener.lost_calls == 1
     assert listener.closed_calls == 0
+
+
+def test_device_update_disconnect_protocols(facade_dummy, register_interface):
+    _, dmap_sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+    _, mrp_sdg = register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
+    )
+
+    facade_dummy.listener.connection_closed()
+
+    assert dmap_sdg.close_called
+    assert mrp_sdg.close_called
