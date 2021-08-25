@@ -36,7 +36,13 @@ class _ListenerProxy:
         if self.__listener is not None:
             listener = self.__listener()
             if hasattr(listener, attr):
+                producer.state_was_updated()
                 return getattr(listener, attr)
+        else:
+            # If no listener is set, still annonunce that state was changed. Setting
+            # a listener is optional but the outcome of announcing a new state is still
+            # likely expected to be the same no matter if a listener is set or not.
+            producer.state_was_updated()
 
         return lambda *args, **kwargs: None
 
@@ -62,3 +68,6 @@ class StateProducer(Generic[StateListener]):
         Set to None to remove active listener.
         """
         self.__listener = weakref.ref(target) if target is not None else None
+
+    def state_was_updated(self) -> None:
+        """Call when state was updated."""

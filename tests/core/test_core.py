@@ -6,6 +6,15 @@ from pyatv.core import StateProducer
 # StateProducer
 
 
+class DummyStateProducer(StateProducer):
+    def __init__(self):
+        super().__init__()
+        self.state_was_updated_called = False
+
+    def state_was_updated(self) -> None:
+        self.state_was_updated_called = True
+
+
 class DummyListener:
     def __init__(self):
         self.foo_called: bool = False
@@ -59,3 +68,26 @@ def test_call_ignore_max_count():
 
     producer.listener.foo()
     assert listener.foo_calls == 2
+
+
+def test_call_state_was_updated_after_update_no_listener():
+    producer = DummyStateProducer()
+
+    producer.listener.missing()
+    assert producer.state_was_updated_called
+
+    producer.state_was_updated_called = False
+    producer.listener.foo()
+    assert producer.state_was_updated_called
+
+
+def test_call_state_was_updated_after_update_with_listener():
+    listener = DummyListener()
+    producer = DummyStateProducer()
+    producer.listener = listener
+
+    producer.listener.missing()
+    assert not producer.state_was_updated_called
+
+    producer.listener.foo()
+    assert producer.state_was_updated_called
