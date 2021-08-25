@@ -31,10 +31,11 @@ def facade_dummy_fixture(session_manager):
 
 class SetupDataGenerator:
     def __init__(self, *features):
-        self.connect_called = False
-        self.close_called = False
-        self.close_calls = 0
-        self.features = set(features)
+        self.connect_called: bool = False
+        self.close_called: bool = False
+        self.close_calls: int = 0
+        self.features: set = set(features)
+        self.pending_tasks: set = set()
 
     async def connect(self):
         self.connect_called = True
@@ -42,7 +43,7 @@ class SetupDataGenerator:
     def close(self):
         self.close_called = True
         self.close_calls += 1
-        return set()
+        return self.pending_tasks
 
     def get_setup_data(self) -> SetupData:
         return self.connect, self.close, self.features
@@ -271,3 +272,19 @@ def test_close_only_once(facade_dummy, register_interface):
 
     facade_dummy.close()
     assert sdg.close_calls == 1
+
+
+def test_close_returns_pending_tasks_from_previous_close(
+    facade_dummy, register_interface
+):
+    _, sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+
+    task = MagicMock()
+    sdg.pending_tasks.add(task)
+
+    facade_dummy.close()
+    pending_tasks = facade_dummy.close()
+    assert len(pending_tasks) == 1
+    assert task in pending_tasks

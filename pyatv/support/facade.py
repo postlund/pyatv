@@ -418,7 +418,7 @@ class FacadeAppleTV(interface.AppleTV):
         """Close connection and release allocated resources."""
         # If close was called before, returning pending tasks
         if self._pending_tasks is not None:
-            return set()
+            return self._pending_tasks
 
         self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
