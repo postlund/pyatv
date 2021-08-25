@@ -15,6 +15,7 @@ link_group: api
 <li><code><a title="pyatv.conf" href="conf">pyatv.conf</a></code></li>
 <li><code><a title="pyatv.const" href="const">pyatv.const</a></code></li>
 <li><code><a title="pyatv.convert" href="convert">pyatv.convert</a></code></li>
+<li><code><a title="pyatv.core" href="core/index">pyatv.core</a></code></li>
 <li><code><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></li>
 <li><code><a title="pyatv.helpers" href="helpers">pyatv.helpers</a></code></li>
 <li><code><a title="pyatv.interface" href="interface">pyatv.interface</a></code></li>
@@ -63,6 +64,10 @@ link_group: api
 <dt><code class="name"><a title="pyatv.convert" href="convert">pyatv.convert</a></code></dt>
 <dd>
 <section class="desc"><p>Various types of extraction and conversion functions.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.core" href="core/index">pyatv.core</a></code></dt>
+<dd>
+<section class="desc"><p>Core module of pyatv.</p></section>
 </dd>
 <dt><code class="name"><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></dt>
 <dd>
@@ -117,7 +122,7 @@ link_group: api
 <dl>
 <dt id="pyatv.ProtocolImpl"><code class="flex name class">
 <span>class <span class="ident">ProtocolImpl</span></span>
-<span>(</span><span>setup: Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.interface.StateProducer" href="interface#pyatv.interface.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[], Set[_asyncio.Task]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]], scan: Callable[[], Mapping[str, Callable[[pyatv.support.mdns.Service, pyatv.support.mdns.Response], Optional[Tuple[str, <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]]]]], pair: Optional[Callable[..., <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler">PairingHandler</a>]])</span>
+<span>(</span><span>setup: Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.core.StateProducer" href="core/index#pyatv.core.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[], Set[_asyncio.Task]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]], scan: Callable[[], Mapping[str, Callable[[pyatv.support.mdns.Service, pyatv.support.mdns.Response], Optional[Tuple[str, <a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]]]]], pair: Optional[Callable[..., <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler">PairingHandler</a>]])</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Represent implementation of a protocol.</p></section>
@@ -136,7 +141,7 @@ link_group: api
 <dd>
 <section class="desc"><p>Alias for field number 1</p></section>
 </dd>
-<dt id="pyatv.ProtocolImpl.setup"><code class="name">var <span class="ident">setup</span> -> Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.interface.StateProducer" href="interface#pyatv.interface.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[], Set[_asyncio.Task]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]]</code></dt>
+<dt id="pyatv.ProtocolImpl.setup"><code class="name">var <span class="ident">setup</span> -> Callable[[asyncio.events.AbstractEventLoop, <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, Dict[Any, pyatv.support.relayer.Relayer], <a title="pyatv.core.StateProducer" href="core/index#pyatv.core.StateProducer">StateProducer</a>, pyatv.support.http.ClientSessionManager], Optional[Tuple[Callable[[], Awaitable[NoneType]], Callable[[], Set[_asyncio.Task]], Set[<a title="pyatv.const.FeatureName" href="const#pyatv.const.FeatureName">FeatureName</a>]]]]</code></dt>
 <dd>
 <section class="desc"><p>Alias for field number 0</p></section>
 </dd>
