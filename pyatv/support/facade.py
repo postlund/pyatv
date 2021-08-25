@@ -379,7 +379,7 @@ class FacadeAppleTV(interface.AppleTV):
 
     def __init__(self, config: conf.AppleTV, session_manager: ClientSessionManager):
         """Initialize a new FacadeAppleTV instance."""
-        super().__init__()
+        super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
         self._config = config
         self._session_manager = session_manager
         self._protocol_handlers: Dict[Protocol, SetupData] = {}

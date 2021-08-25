@@ -238,7 +238,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.atv.listener = listener
         self.atv.close()
 
-        await asyncio.wait_for(self.atv.listener.closed_sem.acquire(), timeout=3.0)
+        await asyncio.wait_for(listener.closed_sem.acquire(), timeout=3.0)
 
     @unittest_run_loop
     async def test_metadata_video_paused(self):

@@ -12,6 +12,7 @@ from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import (
     Audio,
+    DeviceListener,
     FeatureInfo,
     Features,
     FeatureState,
@@ -94,6 +95,18 @@ class DummyAudio(Audio):
 
     async def set_volume(self, level: float) -> None:
         self._volume = volume
+
+
+class DummyDeviceListener(DeviceListener):
+    def __init__(self):
+        self.lost_calls: int = 0
+        self.closed_calls: int = 0
+
+    def connection_lost(self, exception: Exception) -> None:
+        self.lost_calls += 1
+
+    def connection_closed(self) -> None:
+        self.closed_calls += 1
 
 
 @pytest.fixture(name="register_interface")
@@ -215,3 +228,17 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
     await asyncio.gather(*tasks)
     assert obj.called
     assert session_manager.session.closed
+
+
+@pytest.mark.asyncio
+async def test_only_one_device_update(facade_dummy):
+    listener = DummyDeviceListener()
+    facade_dummy.listener = listener
+
+    facade_dummy.listener.connection_lost(Exception())
+    assert listener.lost_calls == 1
+    assert listener.closed_calls == 0
+
+    facade_dummy.listener.connection_closed()
+    assert listener.lost_calls == 1
+    assert listener.closed_calls == 0
