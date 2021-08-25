@@ -1568,6 +1568,10 @@ The following paramers are used to derive encryption keys:
 | Output    | Events-Salt | Events-Write-Encryption-Key |
 | Input     | Events-Salt | Events-Read-Encryption-Key |
 
+Even though the channel set up is initiated by the sender, the channel should be treated as
+originating from the receiver. This means that input and output keys shall be switched on
+the sender side (use `Output` as `Input` and `Input` as `Output` to SRP).
+
 After the stream has been started using `RECORD`, the receiver will send a "system info update",
 which is basically what is returned when requesting `/info`:
 
@@ -1585,6 +1589,17 @@ Which decodes to this (identifiers replaced with random values):
 
 ```javascript
 {'type': 'updateInfo', 'value': {'psi': '6EE2C905-874B-4B4B-A50B-0F06B1800A17', 'vv': 2, 'playbackCapabilities': {'supportsInterstitials': True, 'supportsFPSSecureStop': True, 'supportsUIForAudioOnlyContent': True}, 'canRecordScreenStream': False, 'statusFlags': 580, 'keepAliveSendStatsAsBody': True, 'name': 'Vardagsrum', 'protocolVersion': '1.1', 'volumeControlType': 4, 'senderAddress': '10.0.10.254:46164', 'deviceID': 'AA:BB:CC:DD:EE:FF', 'pi': 'de7562c4-7bd2-4005-a8e4-d584bf63161a', 'screenDemoMode': False, 'initialVolume': -20.0, 'featuresEx': '1d9/St5fFTw', 'txtAirPlay': b"\x05acl=0\x18btaddr=FF:EE:DD:CC:BB:AA\x1adeviceid=AA:BB:CC:DD:EE:FF\x0ffex=1d9/St5fFTw\x1efeatures=0x4A7FDFD5,0x3C155FDE\x0bflags=0x244(gid=4D826039-0F40-4605-AD11-A6516183BAA6\x05igl=1\x06gcgl=1\x10model=AppleTV6,2\rprotovers=1.1'pi=de7562c4-7bd2-4005-a8e4-d584bf63161a(psi=6EE2C905-874B-4B4B-A50B-0F06B1800A17Cpk=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x0esrcvers=550.10\x0bosvers=14.7\x04vv=2", 'supportedFormats': {'lowLatencyAudioStream': 0, 'screenStream': 21235712, 'audioStream': 21235712, 'bufferStream': 14680064}, 'sourceVersion': '550.10', 'hasUDPMirroringSupport': True, 'model': 'AppleTV6,2', 'pk': b'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa', 'macAddress': 'AA:BB:CC:DD:EE:FF', 'receiverHDRCapability': '4k30', 'features': 4329472025123872725}}
+```
+
+It is important to send a response to this request, otherwise the connection will timeout after
+30 seconds and closed by the receiver:
+
+```raw
+RTSP/1.0 200 OK
+Content-Length:0
+Audio-Latency: 0
+Server: AirTunes/550.10
+CSeq: 0
 ```
 
 No other message has been seen on this channel with regards to remote control support.
@@ -1768,3 +1783,6 @@ Bytes:
 ```
 
 Which just decodes to an empty dict (`{}`).
+
+It is important to include `uniqueIdentifier` in the "envelope message" (`ProtocolMessage`) as
+the device doesn't seem to respond otherwise. It shall be set to a random UUID4 string.
