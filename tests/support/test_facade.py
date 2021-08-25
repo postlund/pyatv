@@ -12,6 +12,7 @@ from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
 from pyatv.interface import (
     Audio,
+    DeviceListener,
     FeatureInfo,
     Features,
     FeatureState,
@@ -30,15 +31,19 @@ def facade_dummy_fixture(session_manager):
 
 class SetupDataGenerator:
     def __init__(self, *features):
-        self.connect_called = False
-        self.close_called = False
-        self.features = set(features)
+        self.connect_called: bool = False
+        self.close_called: bool = False
+        self.close_calls: int = 0
+        self.features: set = set(features)
+        self.pending_tasks: set = set()
 
     async def connect(self):
         self.connect_called = True
 
     def close(self):
         self.close_called = True
+        self.close_calls += 1
+        return self.pending_tasks
 
     def get_setup_data(self) -> SetupData:
         return self.connect, self.close, self.features
@@ -96,6 +101,18 @@ class DummyAudio(Audio):
         self._volume = volume
 
 
+class DummyDeviceListener(DeviceListener):
+    def __init__(self):
+        self.lost_calls: int = 0
+        self.closed_calls: int = 0
+
+    def connection_lost(self, exception: Exception) -> None:
+        self.lost_calls += 1
+
+    def connection_closed(self) -> None:
+        self.closed_calls += 1
+
+
 @pytest.fixture(name="register_interface")
 def register_interface_fixture(facade_dummy):
     def _register_func(feature: FeatureName, instance, protocol: Protocol):
@@ -103,7 +120,7 @@ def register_interface_fixture(facade_dummy):
         sdg = SetupDataGenerator(feature)
         facade_dummy.interfaces[interface].register(instance, protocol)
         facade_dummy.add_protocol(protocol, sdg.get_setup_data())
-        return instance
+        return instance, sdg
 
     yield _register_func
 
@@ -166,8 +183,8 @@ def test_features_push_updates(facade_dummy, event_loop, register_interface):
     "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
 )
 async def test_power_prefer_companion(feature, func, facade_dummy, register_interface):
-    power_mrp = register_interface(feature, DummyPower(), Protocol.MRP)
-    power_comp = register_interface(feature, DummyPower(), Protocol.Companion)
+    power_mrp, _ = register_interface(feature, DummyPower(), Protocol.MRP)
+    power_comp, _ = register_interface(feature, DummyPower(), Protocol.Companion)
 
     await getattr(facade_dummy.power, func)()
 
@@ -215,3 +232,59 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
     await asyncio.gather(*tasks)
     assert obj.called
     assert session_manager.session.closed
+
+
+@pytest.mark.asyncio
+async def test_only_one_device_update(facade_dummy):
+    listener = DummyDeviceListener()
+    facade_dummy.listener = listener
+
+    facade_dummy.listener.connection_lost(Exception())
+    assert listener.lost_calls == 1
+    assert listener.closed_calls == 0
+
+    facade_dummy.listener.connection_closed()
+    assert listener.lost_calls == 1
+    assert listener.closed_calls == 0
+
+
+def test_device_update_disconnect_protocols(facade_dummy, register_interface):
+    _, dmap_sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+    _, mrp_sdg = register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
+    )
+
+    facade_dummy.listener.connection_closed()
+
+    assert dmap_sdg.close_called
+    assert mrp_sdg.close_called
+
+
+def test_close_only_once(facade_dummy, register_interface):
+    _, sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+
+    facade_dummy.close()
+    assert sdg.close_calls == 1
+
+    facade_dummy.close()
+    assert sdg.close_calls == 1
+
+
+def test_close_returns_pending_tasks_from_previous_close(
+    facade_dummy, register_interface
+):
+    _, sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+
+    task = MagicMock()
+    sdg.pending_tasks.add(task)
+
+    facade_dummy.close()
+    pending_tasks = facade_dummy.close()
+    assert len(pending_tasks) == 1
+    assert task in pending_tasks

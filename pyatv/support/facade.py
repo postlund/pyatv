@@ -379,7 +379,7 @@ class FacadeAppleTV(interface.AppleTV):
 
     def __init__(self, config: conf.AppleTV, session_manager: ClientSessionManager):
         """Initialize a new FacadeAppleTV instance."""
-        super().__init__()
+        super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
         self._config = config
         self._session_manager = session_manager
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
@@ -387,6 +387,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
         )
         self._features = FacadeFeatures(self._push_updates)
+        self._pending_tasks: Optional[set] = None
         self.interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
@@ -415,11 +416,15 @@ class FacadeAppleTV(interface.AppleTV):
 
     def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
-        pending_tasks = set()
+        # If close was called before, returning pending tasks
+        if self._pending_tasks is not None:
+            return self._pending_tasks
+
+        self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
         for _, protocol_close, _ in self._protocol_handlers.values():
-            pending_tasks.update(protocol_close())
-        return pending_tasks
+            self._pending_tasks.update(protocol_close())
+        return self._pending_tasks
 
     @property
     def device_info(self) -> interface.DeviceInfo:
@@ -475,3 +480,11 @@ class FacadeAppleTV(interface.AppleTV):
     def audio(self) -> interface.Audio:
         """Return audio interface."""
         return cast(interface.Audio, self.interfaces[interface.Audio])
+
+    def state_was_updated(self) -> None:
+        """Call when state was updated.
+
+        One of the protocol called a method in DeviceListener so everything should
+        be torn down.
+        """
+        self.close()
