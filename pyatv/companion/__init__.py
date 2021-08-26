@@ -9,6 +9,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    Generator,
     List,
     Mapping,
     Optional,
@@ -332,10 +333,12 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
+) -> Generator[
     Tuple[
         Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ]
+    ],
+    None,
+    None,
 ]:
     """Set up a new Companion service."""
     service = config.get_service(Protocol.Companion)
@@ -360,7 +363,7 @@ def setup(
     def _close() -> Set[asyncio.Task]:
         return set()
 
-    return (
+    yield (
         _connect,
         _close,
         SUPPORTED_FEATURES,

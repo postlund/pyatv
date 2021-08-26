@@ -9,6 +9,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    Generator,
     Mapping,
     Optional,
     Set,
@@ -396,10 +397,12 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
+) -> Generator[
     Tuple[
         Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ]
+    ],
+    None,
+    None,
 ]:
     """Set up a new RAOP service."""
     service = config.get_service(Protocol.RAOP)
@@ -449,7 +452,7 @@ def setup(
     def _close() -> Set[asyncio.Task]:
         return set()
 
-    return (
+    yield (
         _connect,
         _close,
         set(

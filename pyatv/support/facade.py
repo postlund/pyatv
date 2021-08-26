@@ -18,6 +18,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    Generator,
     List,
     Optional,
     Set,
@@ -63,7 +64,7 @@ SetupMethod = Callable[
         interface.StateProducer,
         ClientSessionManager,
     ],
-    Optional[SetupData],
+    Generator[SetupData, None, None],
 ]
 
 

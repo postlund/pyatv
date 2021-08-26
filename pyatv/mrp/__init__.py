@@ -4,7 +4,18 @@ import asyncio
 import datetime
 import logging
 import math
-from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+)
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -714,10 +725,12 @@ def setup(  # pylint: disable=too-many-locals
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
+) -> Generator[
     Tuple[
         Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ]
+    ],
+    None,
+    None,
 ]:
     """Set up a new MRP service."""
     service = config.get_service(Protocol.MRP)
@@ -762,7 +775,7 @@ def setup(  # pylint: disable=too-many-locals
     features.update(_FEATURE_COMMAND_MAP.keys())
     features.update(_FIELD_FEATURES.keys())
 
-    return _connect, _close, features
+    yield _connect, _close, features
 
 
 def pair(

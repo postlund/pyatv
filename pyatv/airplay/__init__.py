@@ -3,7 +3,18 @@
 import asyncio
 import logging
 import os
-from typing import Any, Awaitable, Callable, Dict, Mapping, Optional, Set, Tuple, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generator,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 
 from pyatv import conf, exceptions
 from pyatv.airplay.auth import verify_connection
@@ -128,10 +139,12 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
+) -> Generator[
     Tuple[
         Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ]
+    ],
+    None,
+    None,
 ]:
     """Set up a new AirPlay service."""
     service = config.get_service(Protocol.AirPlay)
@@ -152,7 +165,7 @@ def setup(
         stream.close()
         return set()
 
-    return _connect, _close, set([FeatureName.PlayUrl])
+    yield _connect, _close, set([FeatureName.PlayUrl])
 
 
 def pair(
