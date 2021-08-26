@@ -121,11 +121,7 @@ async def connect(
             for setup_data in proto_impl.setup(
                 loop, config, atv.interfaces, atv, session_manager
             ):
-                if setup_data:
-                    _LOGGER.debug("Adding protocol %s", service.protocol)
-                    atv.add_protocol(service.protocol, setup_data)
-                else:
-                    _LOGGER.debug("Not adding protocol: %s", service.protocol)
+                atv.add_protocol(setup_data[0], setup_data)
 
         await atv.connect()
     except Exception:

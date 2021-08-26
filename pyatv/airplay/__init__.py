@@ -135,7 +135,7 @@ def scan() -> Mapping[str, ScanHandler]:
     return {"_airplay._tcp.local": airplay_service_handler}
 
 
-def setup(
+def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
     interfaces: Dict[Any, Relayer],
@@ -143,7 +143,10 @@ def setup(
     session_manager: ClientSessionManager,
 ) -> Generator[
     Tuple[
-        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+        Protocol,
+        Callable[[], Awaitable[None]],
+        Callable[[], Set[asyncio.Task]],
+        Set[FeatureName],
     ],
     None,
     None,
@@ -167,7 +170,7 @@ def setup(
         stream.close()
         return set()
 
-    yield _connect, _close, set([FeatureName.PlayUrl])
+    yield Protocol.AirPlay, _connect, _close, set([FeatureName.PlayUrl])
 
     # Set up remote control channel if it is supported
     if remote_control.is_supported(service) and service.credentials:
@@ -182,7 +185,7 @@ def setup(
 
         # When tunneling, we don't have any identifier or port available at this stage
         config.add_service(conf.MrpService(None, 0))
-        mrp_connect, mrp_close, mrp_features = mrp.create_with_connection(
+        _, mrp_connect, mrp_close, mrp_features = mrp.create_with_connection(
             loop,
             config,
             interfaces,
@@ -201,7 +204,7 @@ def setup(
             control.stop()
             return set()
 
-        yield _connect_rc, _close_rc, mrp_features
+        yield Protocol.MRP, _connect_rc, _close_rc, mrp_features
 
 
 def pair(

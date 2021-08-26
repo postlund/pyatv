@@ -54,7 +54,10 @@ PUBLIC_INTERFACES = [
 
 # TODO: These should be moved somewhere and shared with protocol implementations
 SetupData = Tuple[
-    Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    const.Protocol,
+    Callable[[], Awaitable[None]],
+    Callable[[], Set[asyncio.Task]],
+    Set[FeatureName],
 ]
 SetupMethod = Callable[
     [
@@ -402,8 +405,12 @@ class FacadeAppleTV(interface.AppleTV):
 
     def add_protocol(self, protocol: Protocol, setup_data: SetupData):
         """Add a new protocol to the relay."""
-        self._protocol_handlers[protocol] = setup_data
-        self._features.add_mapping(protocol, setup_data[2])
+        if protocol not in self._protocol_handlers:
+            _LOGGER.debug("Adding protocol %s", protocol)
+            self._protocol_handlers[protocol] = setup_data
+            self._features.add_mapping(protocol, setup_data[3])
+        else:
+            _LOGGER.debug("Protocol %s already added (ignoring)", protocol)
 
     async def connect(self) -> None:
         """Initiate connection to device."""
@@ -412,7 +419,7 @@ class FacadeAppleTV(interface.AppleTV):
 
         # TODO: Parallelize with asyncio.gather? Needs to handle cancling
         # of ongoing tasks in case of error.
-        for protocol_connect, _, _ in self._protocol_handlers.values():
+        for _, protocol_connect, _, _ in self._protocol_handlers.values():
             await protocol_connect()
 
     def close(self) -> Set[asyncio.Task]:
@@ -423,7 +430,7 @@ class FacadeAppleTV(interface.AppleTV):
 
         self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
-        for _, protocol_close, _ in self._protocol_handlers.values():
+        for _, _, protocol_close, _ in self._protocol_handlers.values():
             self._pending_tasks.update(protocol_close())
         return self._pending_tasks
 
