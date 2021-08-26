@@ -18,6 +18,7 @@ def _filter_func(doc):
         "airplay",
         "auth",
         "companion",
+        "core",
         "dmap",
         "mrp",
         "raop",

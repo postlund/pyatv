@@ -25,6 +25,9 @@ from pyatv.support.scan import (
     UnicastMdnsScanner,
 )
 
+__pdoc__ = {}
+__pdoc__["ProtocolImpl"] = False
+
 _LOGGER = logging.getLogger(__name__)
 
 PairMethod = Callable[..., interface.PairingHandler]
