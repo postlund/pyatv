@@ -1,6 +1,7 @@
 """Helper code for dealing with protobuf messages."""
 
 import binascii
+from uuid import uuid4
 
 from pyatv import const
 from pyatv.auth import hap_tlv8
@@ -12,6 +13,7 @@ def create(message_type, error_code=0, identifier=None):
     message = protobuf.ProtocolMessage()
     message.type = message_type
     message.errorCode = error_code
+    message.uniqueIdentifier = str(uuid4()).upper()
     if identifier:
         message.identifier = identifier
     return message
@@ -75,7 +77,13 @@ def crypto_pairing(pairing_data, is_pairing=False):
     return message
 
 
-def client_updates_config(artwork=True, now_playing=False, volume=True, keyboard=True):
+def client_updates_config(
+    artwork=True,
+    now_playing=False,
+    volume=True,
+    keyboard=True,
+    output_device_updates=True,
+):
     """Create a new CLIENT_UPDATES_CONFIG_MESSAGE."""
     message = create(protobuf.CLIENT_UPDATES_CONFIG_MESSAGE)
     config = message.inner()
@@ -83,7 +91,7 @@ def client_updates_config(artwork=True, now_playing=False, volume=True, keyboard
     config.nowPlayingUpdates = now_playing
     config.volumeUpdates = volume
     config.keyboardUpdates = keyboard
-    config.outputDeviceUpdates = False
+    config.outputDeviceUpdates = output_device_updates
     return message
 
 

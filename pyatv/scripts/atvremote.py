@@ -29,6 +29,10 @@ from pyatv.const import (
 from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
 
+_LOGGER = logging.getLogger(__name__)
+
+DEFAULT_TIMEOUT = 10.0
+
 
 def _print_commands(title, api):
     cmd_list = retrieve_commands(api)
@@ -61,11 +65,11 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
         devices = atvs
 
     if not atvs:
-        logging.error("Could not find any Apple TV on current network")
+        _LOGGER.error("Could not find any Apple TV on current network")
         return None
 
     if len(devices) > 1:
-        logging.error("Found more than one Apple TV; specify one using --id")
+        _LOGGER.error("Found more than one Apple TV; specify one using --id")
         _print_found_apple_tvs(devices, sys.stderr)
         return None
 
@@ -144,7 +148,7 @@ class GlobalCommands:
     async def pair(self):
         """Pair pyatv as a remote control with an Apple TV."""
         if self.args.protocol is None:
-            logging.error("No protocol specified")
+            _LOGGER.error("No protocol specified")
             return 1
 
         if self.args.manual:
@@ -176,7 +180,7 @@ class GlobalCommands:
         try:
             await self._perform_pairing(pairing)
         except Exception:  # pylint: disable=broad-except  # noqa
-            logging.exception("Pairing failed")
+            _LOGGER.exception("Pairing failed")
             return 3
         finally:
             await pairing.close()
@@ -337,7 +341,7 @@ class DeviceListener(interface.DeviceListener):
 
     def connection_closed(self):
         """Call when connection was (intentionally) closed."""
-        logging.debug("Connection was closed properly")
+        _LOGGER.debug("Connection was closed properly")
 
 
 def _in_range(lower, upper, allow_none=False):
@@ -480,6 +484,7 @@ async def cli_handler(loop):
 
     logging.basicConfig(
         level=loglevel,
+        stream=sys.stdout,
         datefmt="%Y-%m-%d %H:%M:%S",
         format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
     )
@@ -504,7 +509,7 @@ async def cli_handler(loop):
         return await _handle_commands(args, config, loop)
 
     if args.port == 0 or args.address is None or args.protocol is None:
-        logging.error("You must specify address, port and protocol in manual mode")
+        _LOGGER.error("You must specify address, port and protocol in manual mode")
         return 1
 
     config = _manual_device(args)
@@ -538,7 +543,7 @@ async def _autodiscover_device(args, loop):
     if raop_service:
         raop_service.password = args.raop_password
 
-    logging.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
+    _LOGGER.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
     return apple_tv
 
@@ -623,8 +628,7 @@ async def _handle_commands(args, config, loop):
             if ret != 0:
                 return ret
     finally:
-        atv.close()
-
+        await asyncio.wait_for(asyncio.gather(*atv.close()), DEFAULT_TIMEOUT)
     return 0
 
 
@@ -672,7 +676,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     if cmd in audio:
         return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
-    logging.error("Unknown command: %s", cmd)
+    _LOGGER.error("Unknown command: %s", cmd)
     return 1
 
 
@@ -698,9 +702,9 @@ async def _exec_command(obj, command, print_result, *args):
             return 0
         return value
     except NotImplementedError:
-        logging.exception("Command '%s' is not supported by device", command)
+        _LOGGER.exception("Command '%s' is not supported by device", command)
     except exceptions.AuthenticationError as ex:
-        logging.exception("Authentication error: %s", str(ex))
+        _LOGGER.exception("Authentication error: %s", str(ex))
     return 1
 
 

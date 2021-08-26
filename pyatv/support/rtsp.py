@@ -168,18 +168,16 @@ class RtspSession:
 
     async def setup(
         self,
-        /,
         headers: Optional[Dict[str, Any]] = None,
-        body: Optional[Union[str, bytes]] = None
+        body: Optional[Union[str, bytes]] = None,
     ) -> HttpResponse:
         """Send SETUP message."""
         return await self.exchange("SETUP", headers=headers, body=body)
 
     async def record(
         self,
-        /,
         headers: Optional[Dict[str, Any]] = None,
-        body: Optional[Union[str, bytes]] = None
+        body: Optional[Union[str, bytes]] = None,
     ) -> HttpResponse:
         """Send RECORD message."""
         return await self.exchange("RECORD", headers=headers, body=body)

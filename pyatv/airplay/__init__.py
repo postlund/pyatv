@@ -16,8 +16,10 @@ from typing import (
     cast,
 )
 
-from pyatv import conf, exceptions
+from pyatv import conf, exceptions, mrp
+from pyatv.airplay import remote_control
 from pyatv.airplay.auth import verify_connection
+from pyatv.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
@@ -166,6 +168,40 @@ def setup(
         return set()
 
     yield _connect, _close, set([FeatureName.PlayUrl])
+
+    # Set up remote control channel if it is supported
+    if remote_control.is_supported(service) and service.credentials:
+        _LOGGER.debug("Remote control channel is supported")
+
+        control = remote_control.RemoteControl(
+            loop,
+            str(config.address),
+            service.port,
+            parse_credentials(service.credentials),
+        )
+
+        # When tunneling, we don't have any identifier or port available at this stage
+        config.add_service(conf.MrpService(None, 0))
+        mrp_connect, mrp_close, mrp_features = mrp.create_with_connection(
+            loop,
+            config,
+            interfaces,
+            device_listener,
+            session_manager,
+            AirPlayMrpConnection(control, device_listener),
+            requires_heatbeat=False,  # Already have heartbeat on control channel
+        )
+
+        async def _connect_rc() -> None:
+            await control.start()
+            await mrp_connect()
+
+        def _close_rc() -> Set[asyncio.Task]:
+            mrp_close()
+            control.stop()
+            return set()
+
+        yield _connect_rc, _close_rc, mrp_features
 
 
 def pair(
