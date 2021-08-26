@@ -19,10 +19,340 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n,pyatv/mrp/protobuf/ContentItemMetadata.proto\"\xce\x11\n\x13\x43ontentItemMetadata\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08subtitle\x18\x02 \x01(\t\x12\x13\n\x0bisContainer\x18\x03 \x01(\x08\x12\x12\n\nisPlayable\x18\x04 \x01(\x08\x12\x18\n\x10playbackProgress\x18\x05 \x01(\x02\x12\x11\n\talbumName\x18\x06 \x01(\t\x12\x17\n\x0ftrackArtistName\x18\x07 \x01(\t\x12\x17\n\x0f\x61lbumArtistName\x18\x08 \x01(\t\x12\x14\n\x0c\x64irectorName\x18\t \x01(\t\x12\x14\n\x0cseasonNumber\x18\n \x01(\x05\x12\x15\n\repisodeNumber\x18\x0b \x01(\x05\x12\x13\n\x0breleaseDate\x18\x0c \x01(\x01\x12\x11\n\tplayCount\x18\r \x01(\x05\x12\x10\n\x08\x64uration\x18\x0e \x01(\x01\x12\x1e\n\x16localizedContentRating\x18\x0f \x01(\t\x12\x16\n\x0eisExplicitItem\x18\x10 \x01(\x08\x12\x14\n\x0cplaylistType\x18\x11 \x01(\x05\x12\x18\n\x10radioStationType\x18\x12 \x01(\x05\x12\x18\n\x10\x61rtworkAvailable\x18\x13 \x01(\x08\x12\x15\n\rinfoAvailable\x18\x15 \x01(\x08\x12 \n\x18languageOptionsAvailable\x18\x16 \x01(\x08\x12\x18\n\x10numberOfSections\x18\x17 \x01(\x05\x12\x17\n\x0flyricsAvailable\x18\x18 \x01(\x08\x12\x19\n\x11\x65\x64itingStyleFlags\x18\x19 \x01(\x05\x12\x1a\n\x12isStreamingContent\x18\x1a \x01(\x08\x12\x1a\n\x12isCurrentlyPlaying\x18\x1b \x01(\x08\x12\x1c\n\x14\x63ollectionIdentifier\x18\x1c \x01(\t\x12\x19\n\x11profileIdentifier\x18\x1d \x01(\t\x12\x11\n\tstartTime\x18\x1e \x01(\x01\x12\x17\n\x0f\x61rtworkMIMEType\x18\x1f \x01(\t\x12\x16\n\x0e\x61ssetURLString\x18  \x01(\t\x12\x10\n\x08\x63omposer\x18! \x01(\t\x12\x12\n\ndiscNumber\x18\" \x01(\x05\x12\x13\n\x0b\x65lapsedTime\x18# \x01(\x01\x12\r\n\x05genre\x18$ \x01(\t\x12\x14\n\x0cisAlwaysLive\x18% \x01(\x08\x12\x14\n\x0cplaybackRate\x18\' \x01(\x02\x12\x14\n\x0c\x63hapterCount\x18( \x01(\x05\x12\x16\n\x0etotalDiscCount\x18) \x01(\x05\x12\x17\n\x0ftotalTrackCount\x18* \x01(\x05\x12\x13\n\x0btrackNumber\x18+ \x01(\x05\x12\x19\n\x11\x63ontentIdentifier\x18, \x01(\t\x12\x12\n\nisSharable\x18. \x01(\x08\x12\x0f\n\x07isLiked\x18\x30 \x01(\x08\x12\x14\n\x0cisInWishList\x18\x31 \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\x32 \x01(\x03\x12\x18\n\x10radioStationName\x18\x34 \x01(\t\x12\x1a\n\x12radioStationString\x18\x35 \x01(\t\x12\x1d\n\x15iTunesStoreIdentifier\x18\x36 \x01(\x03\x12)\n!iTunesStoreSubscriptionIdentifier\x18\x37 \x01(\x03\x12#\n\x1biTunesStoreArtistIdentifier\x18\x38 \x01(\x03\x12\"\n\x1aiTunesStoreAlbumIdentifier\x18\x39 \x01(\x03\x12\x18\n\x10purchaseInfoData\x18: \x01(\x0c\x12\x1b\n\x13\x64\x65\x66\x61ultPlaybackRate\x18; \x01(\x02\x12\x15\n\rdownloadState\x18< \x01(\x05\x12\x18\n\x10\x64ownloadProgress\x18= \x01(\x02\x12\x16\n\x0e\x61ppMetricsData\x18> \x01(\x0c\x12\x12\n\nseriesName\x18? \x01(\t\x12\x31\n\tmediaType\x18@ \x01(\x0e\x32\x1e.ContentItemMetadata.MediaType\x12\x37\n\x0cmediaSubType\x18\x41 \x01(\x0e\x32!.ContentItemMetadata.MediaSubType\x12\x1a\n\x12nowPlayingInfoData\x18\x43 \x01(\x0c\x12\x14\n\x0cuserInfoData\x18\x44 \x01(\x0c\x12\x13\n\x0bisSteerable\x18\x45 \x01(\x08\x12\x12\n\nartworkURL\x18\x46 \x01(\t\x12\x11\n\tlyricsURL\x18G \x01(\t\x12\"\n\x1a\x64\x65viceSpecificUserInfoData\x18H \x01(\x0c\x12\x1a\n\x12\x63ollectionInfoData\x18I \x01(\x0c\x12\x1c\n\x14\x65lapsedTimeTimestamp\x18J \x01(\x01\x12\x19\n\x11inferredTimestamp\x18K \x01(\x01\x12\x19\n\x11serviceIdentifier\x18L \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18M \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18N \x01(\x05\x12\x1f\n\x17\x63urrentPlaybackDateData\x18O \x01(\x0c\x12\x19\n\x11\x61rtworkIdentifier\x18P \x01(\t\x12\x11\n\tisLoading\x18Q \x01(\x08\x12\x1f\n\x17\x61rtworkURLTemplatesData\x18R \x01(\x0c\x12\x1e\n\x16legacyUniqueIdentifier\x18S \x01(\x03\x12\x13\n\x0b\x65pisodeType\x18T \x01(\x05\x12\x16\n\x0e\x61rtworkFileURL\x18U \x01(\t\x12\x17\n\x0f\x62randIdentifier\x18V \x01(\t\x12\x1f\n\x17localizedDurationString\x18W \x01(\t\"7\n\tMediaType\x12\x14\n\x10UnknownMediaType\x10\x00\x12\t\n\x05\x41udio\x10\x01\x12\t\n\x05Video\x10\x02\"[\n\x0cMediaSubType\x12\x17\n\x13UnknownMediaSubType\x10\x00\x12\t\n\x05Music\x10\x01\x12\x0b\n\x07Podcast\x10\x04\x12\r\n\tAudioBook\x10\x05\x12\x0b\n\x07ITunesU\x10\x06'
+  serialized_pb=b'\n,pyatv/mrp/protobuf/ContentItemMetadata.proto\"\xb9\x01\n\x0e\x41udioRouteType\"\xa6\x01\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x12\n\x0e\x44\x65vicesSpeaker\x10\x01\x12\x0b\n\x07LineOut\x10\x02\x12\x0e\n\nHeadphones\x10\x03\x12\x17\n\x13\x42luetoothHeadphones\x10\x04\x12\x14\n\x10\x42luetoothSpeaker\x10\x05\x12\x0c\n\x08USBAudio\x10\x06\x12\x0c\n\x08\x43\x61rAudio\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\x0b\n\x07\x41irPlay\x10\t\"Y\n\nAudioRoute\x12\x1d\n\x04type\x18\x01 \x01(\x0b\x32\x0f.AudioRouteType\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1e\n\x16supportsSpatialization\x18\x03 \x01(\x08\"y\n\tAudioTier\"l\n\x04\x45num\x12\x16\n\x12LowBandwidthStereo\x10\x01\x12\x15\n\x11HighQualityStereo\x10\x02\x12\x0c\n\x08Lossless\x10\x03\x12\x1a\n\x16HighResolutionLossless\x10\x04\x12\x0b\n\x07Spatial\x10\x05\"\x87\x01\n\nSongTraits\"y\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\x17\n\x13\x41ppleDigitialMaster\x10\x01\x12\x0c\n\x08Lossless\x10\x02\x12\x1a\n\x16HighResolutionLossless\x10\x04\x12\x0b\n\x07Spatial\x10\x08\x12\t\n\x05\x41tmos\x10\x10\x12\x0c\n\x08Surround\x10 \"\x88\x01\n\x0b\x41lbumTraits\"y\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\x17\n\x13\x41ppleDigitialMaster\x10\x01\x12\x0c\n\x08Lossless\x10\x02\x12\x1a\n\x16HighResolutionLossless\x10\x04\x12\x0b\n\x07Spatial\x10\x08\x12\t\n\x05\x41tmos\x10\x10\x12\x0c\n\x08Surround\x10 \"H\n\x0ePlaylistTraits\"6\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\x0b\n\x07Spatial\x10\x08\x12\t\n\x05\x41tmos\x10\x10\x12\x0c\n\x08Surround\x10 \"\xbc\x01\n\x19\x41\x63tiveFormatJustification\"\x9e\x01\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0f\n\x0bUnavailable\x10\x01\x12\x12\n\x0eUserPreference\x10\x64\x12\x10\n\x0cUserDownload\x10\x65\x12\x16\n\x11RouteIncompatible\x10\xf4\x03\x12\x1e\n\x19RouteUnknownCompatibility\x10\xf5\x03\x12\x1a\n\x15\x42\x61ndwidthInsufficient\x10\xe8\x07\"z\n\nFormatTier\"l\n\x04\x45num\x12\x16\n\x12LowBandwidthStereo\x10\x01\x12\x15\n\x11HighQualityStereo\x10\x02\x12\x0c\n\x08Lossless\x10\x04\x12\x1a\n\x16HighResolutionLossless\x10\x08\x12\x0b\n\x07Spatial\x10\x10\"\x85\x02\n\x0b\x41udioFormat\x12\x1d\n\x04tier\x18\x01 \x01(\x0e\x32\x0f.AudioTier.Enum\x12\x0f\n\x07\x62itrate\x18\x02 \x01(\x03\x12\x12\n\nsampleRate\x18\x03 \x01(\x03\x12\x10\n\x08\x62itDepth\x18\x04 \x01(\x03\x12\r\n\x05\x63odec\x18\x05 \x01(\r\x12\x13\n\x0bspatialized\x18\x06 \x01(\x08\x12\x14\n\x0cmultiChannel\x18\x07 \x01(\x08\x12\x15\n\rchannelLayout\x18\x08 \x01(\r\x12%\n\x1d\x61udioChannelLayoutDescription\x18\t \x01(\t\x12\x0f\n\x07groupID\x18\n \x01(\t\x12\x17\n\x0fstableVariantID\x18\x0b \x01(\t\"\xe7\x14\n\x13\x43ontentItemMetadata\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08subtitle\x18\x02 \x01(\t\x12\x13\n\x0bisContainer\x18\x03 \x01(\x08\x12\x12\n\nisPlayable\x18\x04 \x01(\x08\x12\x18\n\x10playbackProgress\x18\x05 \x01(\x02\x12\x11\n\talbumName\x18\x06 \x01(\t\x12\x17\n\x0ftrackArtistName\x18\x07 \x01(\t\x12\x17\n\x0f\x61lbumArtistName\x18\x08 \x01(\t\x12\x14\n\x0c\x64irectorName\x18\t \x01(\t\x12\x14\n\x0cseasonNumber\x18\n \x01(\x05\x12\x15\n\repisodeNumber\x18\x0b \x01(\x05\x12\x13\n\x0breleaseDate\x18\x0c \x01(\x01\x12\x11\n\tplayCount\x18\r \x01(\x05\x12\x10\n\x08\x64uration\x18\x0e \x01(\x01\x12\x1e\n\x16localizedContentRating\x18\x0f \x01(\t\x12\x16\n\x0eisExplicitItem\x18\x10 \x01(\x08\x12\x14\n\x0cplaylistType\x18\x11 \x01(\x05\x12\x18\n\x10radioStationType\x18\x12 \x01(\x05\x12\x18\n\x10\x61rtworkAvailable\x18\x13 \x01(\x08\x12\x15\n\rinfoAvailable\x18\x15 \x01(\x08\x12 \n\x18languageOptionsAvailable\x18\x16 \x01(\x08\x12\x18\n\x10numberOfSections\x18\x17 \x01(\x05\x12\x17\n\x0flyricsAvailable\x18\x18 \x01(\x08\x12\x19\n\x11\x65\x64itingStyleFlags\x18\x19 \x01(\x05\x12\x1a\n\x12isStreamingContent\x18\x1a \x01(\x08\x12\x1a\n\x12isCurrentlyPlaying\x18\x1b \x01(\x08\x12\x1c\n\x14\x63ollectionIdentifier\x18\x1c \x01(\t\x12\x19\n\x11profileIdentifier\x18\x1d \x01(\t\x12\x11\n\tstartTime\x18\x1e \x01(\x01\x12\x17\n\x0f\x61rtworkMIMEType\x18\x1f \x01(\t\x12\x16\n\x0e\x61ssetURLString\x18  \x01(\t\x12\x10\n\x08\x63omposer\x18! \x01(\t\x12\x12\n\ndiscNumber\x18\" \x01(\x05\x12\x13\n\x0b\x65lapsedTime\x18# \x01(\x01\x12\r\n\x05genre\x18$ \x01(\t\x12\x14\n\x0cisAlwaysLive\x18% \x01(\x08\x12\x14\n\x0cplaybackRate\x18\' \x01(\x02\x12\x14\n\x0c\x63hapterCount\x18( \x01(\x05\x12\x16\n\x0etotalDiscCount\x18) \x01(\x05\x12\x17\n\x0ftotalTrackCount\x18* \x01(\x05\x12\x13\n\x0btrackNumber\x18+ \x01(\x05\x12\x19\n\x11\x63ontentIdentifier\x18, \x01(\t\x12\x12\n\nisSharable\x18. \x01(\x08\x12\x0f\n\x07isLiked\x18\x30 \x01(\x08\x12\x14\n\x0cisInWishList\x18\x31 \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\x32 \x01(\x03\x12\x18\n\x10radioStationName\x18\x34 \x01(\t\x12\x1a\n\x12radioStationString\x18\x35 \x01(\t\x12\x1d\n\x15iTunesStoreIdentifier\x18\x36 \x01(\x03\x12)\n!iTunesStoreSubscriptionIdentifier\x18\x37 \x01(\x03\x12#\n\x1biTunesStoreArtistIdentifier\x18\x38 \x01(\x03\x12\"\n\x1aiTunesStoreAlbumIdentifier\x18\x39 \x01(\x03\x12\x18\n\x10purchaseInfoData\x18: \x01(\x0c\x12\x1b\n\x13\x64\x65\x66\x61ultPlaybackRate\x18; \x01(\x02\x12\x15\n\rdownloadState\x18< \x01(\x05\x12\x18\n\x10\x64ownloadProgress\x18= \x01(\x02\x12\x16\n\x0e\x61ppMetricsData\x18> \x01(\x0c\x12\x12\n\nseriesName\x18? \x01(\t\x12\x31\n\tmediaType\x18@ \x01(\x0e\x32\x1e.ContentItemMetadata.MediaType\x12\x37\n\x0cmediaSubType\x18\x41 \x01(\x0e\x32!.ContentItemMetadata.MediaSubType\x12\x1a\n\x12nowPlayingInfoData\x18\x43 \x01(\x0c\x12\x14\n\x0cuserInfoData\x18\x44 \x01(\x0c\x12\x13\n\x0bisSteerable\x18\x45 \x01(\x08\x12\x12\n\nartworkURL\x18\x46 \x01(\t\x12\x11\n\tlyricsURL\x18G \x01(\t\x12\"\n\x1a\x64\x65viceSpecificUserInfoData\x18H \x01(\x0c\x12\x1a\n\x12\x63ollectionInfoData\x18I \x01(\x0c\x12\x1c\n\x14\x65lapsedTimeTimestamp\x18J \x01(\x01\x12\x19\n\x11inferredTimestamp\x18K \x01(\x01\x12\x19\n\x11serviceIdentifier\x18L \x01(\t\x12\x18\n\x10\x61rtworkDataWidth\x18M \x01(\x05\x12\x19\n\x11\x61rtworkDataHeight\x18N \x01(\x05\x12\x1f\n\x17\x63urrentPlaybackDateData\x18O \x01(\x0c\x12\x19\n\x11\x61rtworkIdentifier\x18P \x01(\t\x12\x11\n\tisLoading\x18Q \x01(\x08\x12\x1f\n\x17\x61rtworkURLTemplatesData\x18R \x01(\x0c\x12\x1e\n\x16legacyUniqueIdentifier\x18S \x01(\x03\x12\x13\n\x0b\x65pisodeType\x18T \x01(\x05\x12\x16\n\x0e\x61rtworkFileURL\x18U \x01(\t\x12\x17\n\x0f\x62randIdentifier\x18V \x01(\t\x12\x1f\n\x17localizedDurationString\x18W \x01(\t\x12\x11\n\talbumYear\x18X \x01(\t\x12$\n\nsongTraits\x18Y \x01(\x0e\x32\x10.SongTraits.Enum\x12&\n\x0b\x61lbumTraits\x18Z \x01(\x0e\x32\x11.AlbumTraits.Enum\x12,\n\x0eplaylistTraits\x18[ \x01(\x0e\x32\x14.PlaylistTraits.Enum\x12%\n\x0fpreferredFormat\x18\\ \x01(\x0b\x32\x0c.AudioFormat\x12\"\n\x0c\x61\x63tiveFormat\x18] \x01(\x0b\x32\x0c.AudioFormat\x12\x42\n\x19\x61\x63tiveFormatJustification\x18^ \x01(\x0e\x32\x1f.ActiveFormatJustification.Enum\x12.\n\x14\x66ormatTierPreference\x18_ \x01(\x0e\x32\x10.FormatTier.Enum\x12\x1f\n\naudioRoute\x18` \x01(\x0b\x32\x0b.AudioRoute\x12(\n\x12\x61lternativeFormats\x18\x61 \x03(\x0b\x32\x0c.AudioFormat\"7\n\tMediaType\x12\x14\n\x10UnknownMediaType\x10\x00\x12\t\n\x05\x41udio\x10\x01\x12\t\n\x05Video\x10\x02\"[\n\x0cMediaSubType\x12\x17\n\x13UnknownMediaSubType\x10\x00\x12\t\n\x05Music\x10\x01\x12\x0b\n\x07Podcast\x10\x04\x12\r\n\tAudioBook\x10\x05\x12\x0b\n\x07ITunesU\x10\x06'
 )
 
 
+
+_AUDIOROUTETYPE_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='AudioRouteType.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='DevicesSpeaker', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='LineOut', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Headphones', index=3, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='BluetoothHeadphones', index=4, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='BluetoothSpeaker', index=5, number=5,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='USBAudio', index=6, number=6,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='CarAudio', index=7, number=7,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HDMI', index=8, number=8,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='AirPlay', index=9, number=9,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=68,
+  serialized_end=234,
+)
+_sym_db.RegisterEnumDescriptor(_AUDIOROUTETYPE_ENUM)
+
+_AUDIOTIER_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='AudioTier.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='LowBandwidthStereo', index=0, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighQualityStereo', index=1, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Lossless', index=2, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighResolutionLossless', index=3, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Spatial', index=4, number=5,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=340,
+  serialized_end=448,
+)
+_sym_db.RegisterEnumDescriptor(_AUDIOTIER_ENUM)
+
+_SONGTRAITS_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='SongTraits.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='None', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='AppleDigitialMaster', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Lossless', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighResolutionLossless', index=3, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Spatial', index=4, number=8,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Atmos', index=5, number=16,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Surround', index=6, number=32,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=465,
+  serialized_end=586,
+)
+_sym_db.RegisterEnumDescriptor(_SONGTRAITS_ENUM)
+
+_ALBUMTRAITS_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='AlbumTraits.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='None', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='AppleDigitialMaster', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Lossless', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighResolutionLossless', index=3, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Spatial', index=4, number=8,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Atmos', index=5, number=16,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Surround', index=6, number=32,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=465,
+  serialized_end=586,
+)
+_sym_db.RegisterEnumDescriptor(_ALBUMTRAITS_ENUM)
+
+_PLAYLISTTRAITS_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='PlaylistTraits.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='None', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Spatial', index=1, number=8,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Atmos', index=2, number=16,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Surround', index=3, number=32,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=745,
+  serialized_end=799,
+)
+_sym_db.RegisterEnumDescriptor(_PLAYLISTTRAITS_ENUM)
+
+_ACTIVEFORMATJUSTIFICATION_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='ActiveFormatJustification.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Unavailable', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='UserPreference', index=2, number=100,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='UserDownload', index=3, number=101,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='RouteIncompatible', index=4, number=500,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='RouteUnknownCompatibility', index=5, number=501,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='BandwidthInsufficient', index=6, number=1000,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=832,
+  serialized_end=990,
+)
+_sym_db.RegisterEnumDescriptor(_ACTIVEFORMATJUSTIFICATION_ENUM)
+
+_FORMATTIER_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='FormatTier.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='LowBandwidthStereo', index=0, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighQualityStereo', index=1, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Lossless', index=2, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='HighResolutionLossless', index=3, number=8,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Spatial', index=4, number=16,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=1006,
+  serialized_end=1114,
+)
+_sym_db.RegisterEnumDescriptor(_FORMATTIER_ENUM)
 
 _CONTENTITEMMETADATA_MEDIATYPE = _descriptor.EnumDescriptor(
   name='MediaType',
@@ -49,8 +379,8 @@ _CONTENTITEMMETADATA_MEDIATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2155,
-  serialized_end=2210,
+  serialized_start=3896,
+  serialized_end=3951,
 )
 _sym_db.RegisterEnumDescriptor(_CONTENTITEMMETADATA_MEDIATYPE)
 
@@ -89,10 +419,340 @@ _CONTENTITEMMETADATA_MEDIASUBTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2212,
-  serialized_end=2303,
+  serialized_start=3953,
+  serialized_end=4044,
 )
 _sym_db.RegisterEnumDescriptor(_CONTENTITEMMETADATA_MEDIASUBTYPE)
+
+
+_AUDIOROUTETYPE = _descriptor.Descriptor(
+  name='AudioRouteType',
+  full_name='AudioRouteType',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _AUDIOROUTETYPE_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=49,
+  serialized_end=234,
+)
+
+
+_AUDIOROUTE = _descriptor.Descriptor(
+  name='AudioRoute',
+  full_name='AudioRoute',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='type', full_name='AudioRoute.type', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='AudioRoute.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='supportsSpatialization', full_name='AudioRoute.supportsSpatialization', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=236,
+  serialized_end=325,
+)
+
+
+_AUDIOTIER = _descriptor.Descriptor(
+  name='AudioTier',
+  full_name='AudioTier',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _AUDIOTIER_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=327,
+  serialized_end=448,
+)
+
+
+_SONGTRAITS = _descriptor.Descriptor(
+  name='SongTraits',
+  full_name='SongTraits',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _SONGTRAITS_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=451,
+  serialized_end=586,
+)
+
+
+_ALBUMTRAITS = _descriptor.Descriptor(
+  name='AlbumTraits',
+  full_name='AlbumTraits',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _ALBUMTRAITS_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=589,
+  serialized_end=725,
+)
+
+
+_PLAYLISTTRAITS = _descriptor.Descriptor(
+  name='PlaylistTraits',
+  full_name='PlaylistTraits',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _PLAYLISTTRAITS_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=727,
+  serialized_end=799,
+)
+
+
+_ACTIVEFORMATJUSTIFICATION = _descriptor.Descriptor(
+  name='ActiveFormatJustification',
+  full_name='ActiveFormatJustification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _ACTIVEFORMATJUSTIFICATION_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=802,
+  serialized_end=990,
+)
+
+
+_FORMATTIER = _descriptor.Descriptor(
+  name='FormatTier',
+  full_name='FormatTier',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _FORMATTIER_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=992,
+  serialized_end=1114,
+)
+
+
+_AUDIOFORMAT = _descriptor.Descriptor(
+  name='AudioFormat',
+  full_name='AudioFormat',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tier', full_name='AudioFormat.tier', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bitrate', full_name='AudioFormat.bitrate', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sampleRate', full_name='AudioFormat.sampleRate', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bitDepth', full_name='AudioFormat.bitDepth', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='codec', full_name='AudioFormat.codec', index=4,
+      number=5, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='spatialized', full_name='AudioFormat.spatialized', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='multiChannel', full_name='AudioFormat.multiChannel', index=6,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='channelLayout', full_name='AudioFormat.channelLayout', index=7,
+      number=8, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='audioChannelLayoutDescription', full_name='AudioFormat.audioChannelLayoutDescription', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='groupID', full_name='AudioFormat.groupID', index=9,
+      number=10, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='stableVariantID', full_name='AudioFormat.stableVariantID', index=10,
+      number=11, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1117,
+  serialized_end=1378,
+)
 
 
 _CONTENTITEMMETADATA = _descriptor.Descriptor(
@@ -670,6 +1330,76 @@ _CONTENTITEMMETADATA = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='albumYear', full_name='ContentItemMetadata.albumYear', index=81,
+      number=88, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='songTraits', full_name='ContentItemMetadata.songTraits', index=82,
+      number=89, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='albumTraits', full_name='ContentItemMetadata.albumTraits', index=83,
+      number=90, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='playlistTraits', full_name='ContentItemMetadata.playlistTraits', index=84,
+      number=91, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='preferredFormat', full_name='ContentItemMetadata.preferredFormat', index=85,
+      number=92, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='activeFormat', full_name='ContentItemMetadata.activeFormat', index=86,
+      number=93, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='activeFormatJustification', full_name='ContentItemMetadata.activeFormatJustification', index=87,
+      number=94, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='formatTierPreference', full_name='ContentItemMetadata.formatTierPreference', index=88,
+      number=95, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='audioRoute', full_name='ContentItemMetadata.audioRoute', index=89,
+      number=96, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='alternativeFormats', full_name='ContentItemMetadata.alternativeFormats', index=90,
+      number=97, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -684,16 +1414,106 @@ _CONTENTITEMMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=49,
-  serialized_end=2303,
+  serialized_start=1381,
+  serialized_end=4044,
 )
 
+_AUDIOROUTETYPE_ENUM.containing_type = _AUDIOROUTETYPE
+_AUDIOROUTE.fields_by_name['type'].message_type = _AUDIOROUTETYPE
+_AUDIOTIER_ENUM.containing_type = _AUDIOTIER
+_SONGTRAITS_ENUM.containing_type = _SONGTRAITS
+_ALBUMTRAITS_ENUM.containing_type = _ALBUMTRAITS
+_PLAYLISTTRAITS_ENUM.containing_type = _PLAYLISTTRAITS
+_ACTIVEFORMATJUSTIFICATION_ENUM.containing_type = _ACTIVEFORMATJUSTIFICATION
+_FORMATTIER_ENUM.containing_type = _FORMATTIER
+_AUDIOFORMAT.fields_by_name['tier'].enum_type = _AUDIOTIER_ENUM
 _CONTENTITEMMETADATA.fields_by_name['mediaType'].enum_type = _CONTENTITEMMETADATA_MEDIATYPE
 _CONTENTITEMMETADATA.fields_by_name['mediaSubType'].enum_type = _CONTENTITEMMETADATA_MEDIASUBTYPE
+_CONTENTITEMMETADATA.fields_by_name['songTraits'].enum_type = _SONGTRAITS_ENUM
+_CONTENTITEMMETADATA.fields_by_name['albumTraits'].enum_type = _ALBUMTRAITS_ENUM
+_CONTENTITEMMETADATA.fields_by_name['playlistTraits'].enum_type = _PLAYLISTTRAITS_ENUM
+_CONTENTITEMMETADATA.fields_by_name['preferredFormat'].message_type = _AUDIOFORMAT
+_CONTENTITEMMETADATA.fields_by_name['activeFormat'].message_type = _AUDIOFORMAT
+_CONTENTITEMMETADATA.fields_by_name['activeFormatJustification'].enum_type = _ACTIVEFORMATJUSTIFICATION_ENUM
+_CONTENTITEMMETADATA.fields_by_name['formatTierPreference'].enum_type = _FORMATTIER_ENUM
+_CONTENTITEMMETADATA.fields_by_name['audioRoute'].message_type = _AUDIOROUTE
+_CONTENTITEMMETADATA.fields_by_name['alternativeFormats'].message_type = _AUDIOFORMAT
 _CONTENTITEMMETADATA_MEDIATYPE.containing_type = _CONTENTITEMMETADATA
 _CONTENTITEMMETADATA_MEDIASUBTYPE.containing_type = _CONTENTITEMMETADATA
+DESCRIPTOR.message_types_by_name['AudioRouteType'] = _AUDIOROUTETYPE
+DESCRIPTOR.message_types_by_name['AudioRoute'] = _AUDIOROUTE
+DESCRIPTOR.message_types_by_name['AudioTier'] = _AUDIOTIER
+DESCRIPTOR.message_types_by_name['SongTraits'] = _SONGTRAITS
+DESCRIPTOR.message_types_by_name['AlbumTraits'] = _ALBUMTRAITS
+DESCRIPTOR.message_types_by_name['PlaylistTraits'] = _PLAYLISTTRAITS
+DESCRIPTOR.message_types_by_name['ActiveFormatJustification'] = _ACTIVEFORMATJUSTIFICATION
+DESCRIPTOR.message_types_by_name['FormatTier'] = _FORMATTIER
+DESCRIPTOR.message_types_by_name['AudioFormat'] = _AUDIOFORMAT
 DESCRIPTOR.message_types_by_name['ContentItemMetadata'] = _CONTENTITEMMETADATA
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+AudioRouteType = _reflection.GeneratedProtocolMessageType('AudioRouteType', (_message.Message,), {
+  'DESCRIPTOR' : _AUDIOROUTETYPE,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:AudioRouteType)
+  })
+_sym_db.RegisterMessage(AudioRouteType)
+
+AudioRoute = _reflection.GeneratedProtocolMessageType('AudioRoute', (_message.Message,), {
+  'DESCRIPTOR' : _AUDIOROUTE,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:AudioRoute)
+  })
+_sym_db.RegisterMessage(AudioRoute)
+
+AudioTier = _reflection.GeneratedProtocolMessageType('AudioTier', (_message.Message,), {
+  'DESCRIPTOR' : _AUDIOTIER,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:AudioTier)
+  })
+_sym_db.RegisterMessage(AudioTier)
+
+SongTraits = _reflection.GeneratedProtocolMessageType('SongTraits', (_message.Message,), {
+  'DESCRIPTOR' : _SONGTRAITS,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:SongTraits)
+  })
+_sym_db.RegisterMessage(SongTraits)
+
+AlbumTraits = _reflection.GeneratedProtocolMessageType('AlbumTraits', (_message.Message,), {
+  'DESCRIPTOR' : _ALBUMTRAITS,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:AlbumTraits)
+  })
+_sym_db.RegisterMessage(AlbumTraits)
+
+PlaylistTraits = _reflection.GeneratedProtocolMessageType('PlaylistTraits', (_message.Message,), {
+  'DESCRIPTOR' : _PLAYLISTTRAITS,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:PlaylistTraits)
+  })
+_sym_db.RegisterMessage(PlaylistTraits)
+
+ActiveFormatJustification = _reflection.GeneratedProtocolMessageType('ActiveFormatJustification', (_message.Message,), {
+  'DESCRIPTOR' : _ACTIVEFORMATJUSTIFICATION,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:ActiveFormatJustification)
+  })
+_sym_db.RegisterMessage(ActiveFormatJustification)
+
+FormatTier = _reflection.GeneratedProtocolMessageType('FormatTier', (_message.Message,), {
+  'DESCRIPTOR' : _FORMATTIER,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:FormatTier)
+  })
+_sym_db.RegisterMessage(FormatTier)
+
+AudioFormat = _reflection.GeneratedProtocolMessageType('AudioFormat', (_message.Message,), {
+  'DESCRIPTOR' : _AUDIOFORMAT,
+  '__module__' : 'pyatv.mrp.protobuf.ContentItemMetadata_pb2'
+  # @@protoc_insertion_point(class_scope:AudioFormat)
+  })
+_sym_db.RegisterMessage(AudioFormat)
 
 ContentItemMetadata = _reflection.GeneratedProtocolMessageType('ContentItemMetadata', (_message.Message,), {
   'DESCRIPTOR' : _CONTENTITEMMETADATA,

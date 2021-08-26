@@ -29,6 +29,7 @@ from . import RegisterVoiceInputDeviceResponseMessage_pb2
 from . import RemoteTextInputMessage_pb2
 from . import RemoveClientMessage_pb2
 from . import RemoveEndpointsMessage_pb2
+from . import RemoveOutputDevicesMessage_pb2
 from . import RemovePlayerMessage_pb2
 from . import SendCommandMessage_pb2
 from . import SendCommandResultMessage_pb2
@@ -48,6 +49,7 @@ from . import SetVolumeMessage_pb2
 from . import TextInputMessage_pb2
 from . import TransactionMessage_pb2
 from . import UpdateClientMessage_pb2
+from . import UpdateContentItemArtworkMessage_pb2
 from . import UpdateContentItemMessage_pb2
 from . import UpdateEndPointsMessage_pb2
 from . import UpdateOutputDeviceMessage_pb2
@@ -60,6 +62,9 @@ from .AudioFadeResponseMessage_pb2 import AudioFadeResponseMessage
 from .AudioFormatSettingsMessage_pb2 import AudioFormatSettings
 from .ClientUpdatesConfigMessage_pb2 import ClientUpdatesConfigMessage
 from .CommandInfo_pb2 import CommandInfo
+from .CommandInfo_pb2 import DisableReason
+from .CommandInfo_pb2 import PreloadedPlaybackSessionInfo
+from .CommandInfo_pb2 import QueueEndAction
 from .CommandOptions_pb2 import CommandOptions
 from .Common_pb2 import DeviceClass
 from .Common_pb2 import DeviceSubType
@@ -67,7 +72,16 @@ from .Common_pb2 import DeviceType
 from .Common_pb2 import PlaybackState
 from .Common_pb2 import RepeatMode
 from .Common_pb2 import ShuffleMode
+from .ContentItemMetadata_pb2 import ActiveFormatJustification
+from .ContentItemMetadata_pb2 import AlbumTraits
+from .ContentItemMetadata_pb2 import AudioFormat
+from .ContentItemMetadata_pb2 import AudioRoute
+from .ContentItemMetadata_pb2 import AudioRouteType
+from .ContentItemMetadata_pb2 import AudioTier
 from .ContentItemMetadata_pb2 import ContentItemMetadata
+from .ContentItemMetadata_pb2 import FormatTier
+from .ContentItemMetadata_pb2 import PlaylistTraits
+from .ContentItemMetadata_pb2 import SongTraits
 from .ContentItem_pb2 import ContentItem
 from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
@@ -104,6 +118,7 @@ from .RegisterVoiceInputDeviceResponseMessage_pb2 import RegisterVoiceInputDevic
 from .RemoteTextInputMessage_pb2 import RemoteTextInputMessage
 from .RemoveClientMessage_pb2 import RemoveClientMessage
 from .RemoveEndpointsMessage_pb2 import RemoveEndpointsMessage
+from .RemoveOutputDevicesMessage_pb2 import RemoveOutputDevicesMessage
 from .RemovePlayerMessage_pb2 import RemovePlayerMessage
 from .SendButtonEventMessage_pb2 import SendButtonEventMessage
 from .SendCommandMessage_pb2 import SendCommandMessage
@@ -135,6 +150,7 @@ from .TransactionMessage_pb2 import TransactionMessage
 from .TransactionPacket_pb2 import TransactionPacket
 from .TransactionPackets_pb2 import TransactionPackets
 from .UpdateClientMessage_pb2 import UpdateClientMessage
+from .UpdateContentItemArtworkMessage_pb2 import UpdateContentItemArtworkMessage
 from .UpdateContentItemMessage_pb2 import UpdateContentItemMessage
 from .UpdateEndPointsMessage_pb2 import AVEndpointDescriptor
 from .UpdateEndPointsMessage_pb2 import UpdateEndPointsMessage
@@ -173,6 +189,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.REMOTE_TEXT_INPUT_MESSAGE: RemoteTextInputMessage_pb2.remoteTextInputMessage,
     ProtocolMessage.REMOVE_CLIENT_MESSAGE: RemoveClientMessage_pb2.removeClientMessage,
     ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE: RemoveEndpointsMessage_pb2.removeEndpointsMessage,
+    ProtocolMessage.REMOVE_OUTPUT_DEVICES_MESSAGE: RemoveOutputDevicesMessage_pb2.removeOutputDevicesMessage,
     ProtocolMessage.REMOVE_PLAYER_MESSAGE: RemovePlayerMessage_pb2.removePlayerMessage,
     ProtocolMessage.SEND_COMMAND_MESSAGE: SendCommandMessage_pb2.sendCommandMessage,
     ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE: SendCommandResultMessage_pb2.sendCommandResultMessage,
@@ -192,6 +209,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.TEXT_INPUT_MESSAGE: TextInputMessage_pb2.textInputMessage,
     ProtocolMessage.TRANSACTION_MESSAGE: TransactionMessage_pb2.transactionMessage,
     ProtocolMessage.UPDATE_CLIENT_MESSAGE: UpdateClientMessage_pb2.updateClientMessage,
+    ProtocolMessage.UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE: UpdateContentItemArtworkMessage_pb2.updateContentItemArtworkMessage,
     ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE: UpdateContentItemMessage_pb2.updateContentItemMessage,
     ProtocolMessage.UPDATE_END_POINTS_MESSAGE: UpdateEndPointsMessage_pb2.updateEndPointsMessage,
     ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE: UpdateOutputDeviceMessage_pb2.updateOutputDeviceMessage,
@@ -224,6 +242,7 @@ REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE = ProtocolMessage.REGISTER_VOICE_IN
 REMOTE_TEXT_INPUT_MESSAGE = ProtocolMessage.REMOTE_TEXT_INPUT_MESSAGE
 REMOVE_CLIENT_MESSAGE = ProtocolMessage.REMOVE_CLIENT_MESSAGE
 REMOVE_ENDPOINTS_MESSAGE = ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE
+REMOVE_OUTPUT_DEVICES_MESSAGE = ProtocolMessage.REMOVE_OUTPUT_DEVICES_MESSAGE
 REMOVE_PLAYER_MESSAGE = ProtocolMessage.REMOVE_PLAYER_MESSAGE
 SEND_COMMAND_MESSAGE = ProtocolMessage.SEND_COMMAND_MESSAGE
 SEND_COMMAND_RESULT_MESSAGE = ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE
@@ -243,6 +262,7 @@ SET_VOLUME_MESSAGE = ProtocolMessage.SET_VOLUME_MESSAGE
 TEXT_INPUT_MESSAGE = ProtocolMessage.TEXT_INPUT_MESSAGE
 TRANSACTION_MESSAGE = ProtocolMessage.TRANSACTION_MESSAGE
 UPDATE_CLIENT_MESSAGE = ProtocolMessage.UPDATE_CLIENT_MESSAGE
+UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE
 UPDATE_CONTENT_ITEM_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE
 UPDATE_END_POINTS_MESSAGE = ProtocolMessage.UPDATE_END_POINTS_MESSAGE
 UPDATE_OUTPUT_DEVICE_MESSAGE = ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE

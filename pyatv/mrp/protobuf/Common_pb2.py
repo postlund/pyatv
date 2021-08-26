@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"<\n\nRepeatMode\".\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\x07\n\x03One\x10\x02\x12\x07\n\x03\x41ll\x10\x03\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\xca\x01\n\rDeviceSubType\"\xb8\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r\"h\n\rPlaybackState\"W\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05'
+  serialized_pb=b'\n\x1fpyatv/mrp/protobuf/Common.proto\"<\n\nRepeatMode\".\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\x07\n\x03One\x10\x02\x12\x07\n\x03\x41ll\x10\x03\"B\n\x0bShuffleMode\"3\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x07\n\x03Off\x10\x01\x12\n\n\x06\x41lbums\x10\x02\x12\t\n\x05Songs\x10\x03\"\x89\x01\n\x0b\x44\x65viceClass\"z\n\x04\x45num\x12\x0b\n\x07Invalid\x10\x00\x12\n\n\x06iPhone\x10\x01\x12\x08\n\x04iPod\x10\x02\x12\x08\n\x04iPad\x10\x03\x12\x0b\n\x07\x41ppleTV\x10\x04\x12\t\n\x05iFPGA\x10\x05\x12\t\n\x05Watch\x10\x06\x12\r\n\tAccessory\x10\x07\x12\n\n\x06\x42ridge\x10\x08\x12\x07\n\x03Mac\x10\t\"b\n\nDeviceType\"T\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07\x41irPlay\x10\x01\x12\r\n\tBluetooth\x10\x02\x12\x0b\n\x07\x43\x61rPlay\x10\x03\x12\x0b\n\x07\x42uiltIn\x10\x04\x12\t\n\x05Wired\x10\x05\"\x80\x02\n\rDeviceSubType\"\xee\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x0b\n\x07Speaker\x10\x01\x12\x0e\n\nHeadphones\x10\x02\x12\x0b\n\x07Headset\x10\x03\x12\x0c\n\x08Receiver\x10\x04\x12\x0b\n\x07LineOut\x10\x05\x12\x07\n\x03USB\x10\x06\x12\x0f\n\x0b\x44isplayPort\x10\x07\x12\x08\n\x04HDMI\x10\x08\x12\r\n\tLowEnergy\x10\t\x12\t\n\x05SPDIF\x10\n\x12\x06\n\x02TV\x10\x0b\x12\x0b\n\x07HomePod\x10\x0c\x12\x0b\n\x07\x41ppleTV\x10\r\x12\x0b\n\x07Vehicle\x10\x0e\x12\x0b\n\x07\x43luster\x10\x0f\x12\r\n\tSetTopBox\x10\x10\x12\x0b\n\x07TVStick\x10\x11\"h\n\rPlaybackState\"W\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0b\n\x07Playing\x10\x01\x12\n\n\x06Paused\x10\x02\x12\x0b\n\x07Stopped\x10\x03\x12\x0f\n\x0bInterrupted\x10\x04\x12\x0b\n\x07Seeking\x10\x05'
 )
 
 
@@ -281,11 +281,31 @@ _DEVICESUBTYPE_ENUM = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Vehicle', index=14, number=14,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Cluster', index=15, number=15,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SetTopBox', index=16, number=16,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='TVStick', index=17, number=17,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=424,
-  serialized_end=608,
+  serialized_end=662,
 )
 _sym_db.RegisterEnumDescriptor(_DEVICESUBTYPE_ENUM)
 
@@ -329,8 +349,8 @@ _PLAYBACKSTATE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=627,
-  serialized_end=714,
+  serialized_start=681,
+  serialized_end=768,
 )
 _sym_db.RegisterEnumDescriptor(_PLAYBACKSTATE_ENUM)
 
@@ -461,7 +481,7 @@ _DEVICESUBTYPE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=406,
-  serialized_end=608,
+  serialized_end=662,
 )
 
 
@@ -486,8 +506,8 @@ _PLAYBACKSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=610,
-  serialized_end=714,
+  serialized_start=664,
+  serialized_end=768,
 )
 
 _REPEATMODE_ENUM.containing_type = _REPEATMODE
