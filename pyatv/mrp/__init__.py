@@ -45,7 +45,7 @@ from pyatv.interface import (
     StateProducer,
 )
 from pyatv.mrp import messages, protobuf
-from pyatv.mrp.connection import MrpConnection
+from pyatv.mrp.connection import AbstractMrpConnection, MrpConnection
 from pyatv.mrp.pairing import MrpPairingHandler
 from pyatv.mrp.player_state import PlayerState, PlayerStateManager
 from pyatv.mrp.protobuf import CommandInfo_pb2
@@ -719,24 +719,21 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
-def setup(  # pylint: disable=too-many-locals
+def create_with_connection(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Generator[
-    Tuple[
-        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ],
-    None,
-    None,
+    connection: AbstractMrpConnection,
+    requires_heatbeat: bool = True,
+) -> Tuple[
+    Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
 ]:
-    """Set up a new MRP service."""
+    """Set up a new MRP service from a connection."""
     service = config.get_service(Protocol.MRP)
     assert service is not None
 
-    connection = MrpConnection(config.address, service.port, loop, atv=device_listener)
     protocol = MrpProtocol(connection, SRPAuthHandler(), service)
     psm = PlayerStateManager(protocol)
 
@@ -756,6 +753,8 @@ def setup(  # pylint: disable=too-many-locals
 
     async def _connect() -> None:
         await protocol.start()
+        if requires_heatbeat:
+            protocol.enable_heartbeat()
 
     def _close() -> Set[asyncio.Task]:
         push_updater.stop()
@@ -775,7 +774,34 @@ def setup(  # pylint: disable=too-many-locals
     features.update(_FEATURE_COMMAND_MAP.keys())
     features.update(_FIELD_FEATURES.keys())
 
-    yield _connect, _close, features
+    return _connect, _close, features
+
+
+def setup(
+    loop: asyncio.AbstractEventLoop,
+    config: conf.AppleTV,
+    interfaces: Dict[Any, Relayer],
+    device_listener: StateProducer,
+    session_manager: ClientSessionManager,
+) -> Generator[
+    Tuple[
+        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    ],
+    None,
+    None,
+]:
+    """Set up a new MRP service."""
+    service = config.get_service(Protocol.MRP)
+    assert service is not None
+
+    yield create_with_connection(
+        loop,
+        config,
+        interfaces,
+        device_listener,
+        session_manager,
+        MrpConnection(config.address, service.port, loop, atv=device_listener),
+    )
 
 
 def pair(
