@@ -609,7 +609,10 @@ def setup(
     session_manager: ClientSessionManager,
 ) -> Generator[
     Tuple[
-        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+        Protocol,
+        Callable[[], Awaitable[None]],
+        Callable[[], Set[asyncio.Task]],
+        Set[FeatureName],
     ],
     None,
     None,
@@ -646,7 +649,7 @@ def setup(
     features.update(_UNKNOWN_FEATURES)
     features.update(_FIELD_FEATURES.keys())
 
-    yield _connect, _close, features
+    yield Protocol.DMAP, _connect, _close, features
 
 
 def pair(

@@ -30,7 +30,8 @@ def facade_dummy_fixture(session_manager):
 
 
 class SetupDataGenerator:
-    def __init__(self, *features):
+    def __init__(self, protocol, *features):
+        self.protocol = protocol
         self.connect_called: bool = False
         self.close_called: bool = False
         self.close_calls: int = 0
@@ -46,7 +47,7 @@ class SetupDataGenerator:
         return self.pending_tasks
 
     def get_setup_data(self) -> SetupData:
-        return self.connect, self.close, self.features
+        return self.protocol, self.connect, self.close, self.features
 
 
 class DummyFeatures(Features):
@@ -117,7 +118,7 @@ class DummyDeviceListener(DeviceListener):
 def register_interface_fixture(facade_dummy):
     def _register_func(feature: FeatureName, instance, protocol: Protocol):
         interface = inspect.getmro(type(instance))[1]
-        sdg = SetupDataGenerator(feature)
+        sdg = SetupDataGenerator(protocol, feature)
         facade_dummy.interfaces[interface].register(instance, protocol)
         facade_dummy.add_protocol(protocol, sdg.get_setup_data())
         return instance, sdg
@@ -147,6 +148,21 @@ def test_features_multi_instances(facade_dummy, register_interface):
 
     # Default state with no instance
     assert feat.get_feature(FeatureName.PlayUrl).state == FeatureState.Unsupported
+
+
+def test_add_existing_protocol_ignores(facade_dummy, register_interface):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.DMAP
+    )
+
+    feat = facade_dummy.features
+
+    assert feat.get_feature(FeatureName.Play).state == FeatureState.Available
+
+    # As DMAP was already added with Play as supported, the second instance should be
+    # ignored (this not affecting state)
+    assert feat.get_feature(FeatureName.Pause).state == FeatureState.Unsupported
 
 
 def test_features_feature_overlap_uses_priority(facade_dummy, register_interface):
@@ -221,7 +237,9 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
 
         return set([asyncio.ensure_future(close_task())])
 
-    facade_dummy.add_protocol(Protocol.DMAP, (connect, close, {FeatureName.Play}))
+    facade_dummy.add_protocol(
+        Protocol.DMAP, (Protocol.DMAP, connect, close, {FeatureName.Play})
+    )
 
     # close will return remaining tasks but not run them
     tasks = facade_dummy.close()

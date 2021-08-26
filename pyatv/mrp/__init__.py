@@ -728,7 +728,10 @@ def create_with_connection(  # pylint: disable=too-many-locals
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> Tuple[
-    Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+    Protocol,
+    Callable[[], Awaitable[None]],
+    Callable[[], Set[asyncio.Task]],
+    Set[FeatureName],
 ]:
     """Set up a new MRP service from a connection."""
     service = config.get_service(Protocol.MRP)
@@ -774,7 +777,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     features.update(_FEATURE_COMMAND_MAP.keys())
     features.update(_FIELD_FEATURES.keys())
 
-    return _connect, _close, features
+    return Protocol.MRP, _connect, _close, features
 
 
 def setup(
@@ -785,7 +788,10 @@ def setup(
     session_manager: ClientSessionManager,
 ) -> Generator[
     Tuple[
-        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+        Protocol,
+        Callable[[], Awaitable[None]],
+        Callable[[], Set[asyncio.Task]],
+        Set[FeatureName],
     ],
     None,
     None,

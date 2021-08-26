@@ -335,7 +335,10 @@ def setup(
     session_manager: ClientSessionManager,
 ) -> Generator[
     Tuple[
-        Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
+        Protocol,
+        Callable[[], Awaitable[None]],
+        Callable[[], Set[asyncio.Task]],
+        Set[FeatureName],
     ],
     None,
     None,
@@ -364,6 +367,7 @@ def setup(
         return set()
 
     yield (
+        Protocol.Companion,
         _connect,
         _close,
         SUPPORTED_FEATURES,
