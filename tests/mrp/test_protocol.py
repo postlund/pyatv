@@ -41,6 +41,7 @@ async def mrp_protocol(event_loop, mrp_atv):
 @pytest.mark.use_heartbeat
 async def test_heartbeat_loop(mrp_atv, mrp_protocol):
     await mrp_protocol.start()
+    mrp_protocol.enable_heartbeat()
 
     mrp_state = mrp_atv.get_state(Protocol.MRP)
     await until(lambda: mrp_state.heartbeat_count >= 3)

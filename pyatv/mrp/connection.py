@@ -1,5 +1,6 @@
 """Network layer for MRP."""
 
+from abc import abstractmethod
 import asyncio
 import logging
 
@@ -13,8 +14,29 @@ from pyatv.support.variant import read_variant, write_variant
 _LOGGER = logging.getLogger(__name__)
 
 
+class AbstractMrpConnection(asyncio.Protocol, StateProducer):
+    """Abstract base class for an MRP connection."""
+
+    @abstractmethod
+    async def connect(self) -> None:
+        """Connect to device."""
+
+    @property
+    @abstractmethod
+    def connected(self) -> bool:
+        """If a connection is open or not."""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close connection to device."""
+
+    @abstractmethod
+    def send(self, message: protobuf.ProtocolMessage) -> None:
+        """Send protobuf message to device."""
+
+
 class MrpConnection(
-    asyncio.Protocol, StateProducer
+    AbstractMrpConnection
 ):  # pylint: disable=too-many-instance-attributes  # noqa
     """Network layer that encryptes/decryptes and (de)serializes messages."""
 
@@ -69,15 +91,15 @@ class MrpConnection(
         self._chacha = chacha20.Chacha20Cipher(output_key, input_key)
 
     @property
-    def connected(self):
+    def connected(self) -> bool:
         """If a connection is open or not."""
         return self._transport is not None
 
-    def connect(self):
+    async def connect(self) -> None:
         """Connect to device."""
-        return self.loop.create_connection(lambda: self, self.host, self.port)
+        await self.loop.create_connection(lambda: self, self.host, self.port)
 
-    def close(self):
+    def close(self) -> None:
         """Close connection to device."""
         _LOGGER.debug("%s Closing connection", self._log_str)
         if self._transport:
@@ -85,8 +107,8 @@ class MrpConnection(
         self._transport = None
         self._chacha = None
 
-    def send(self, message):
-        """Send message to device."""
+    def send(self, message: protobuf.ProtocolMessage) -> None:
+        """Send protobuf message to device."""
         serialized = message.SerializeToString()
 
         log_binary(_LOGGER, self._log_str + ">> Send", Data=serialized)

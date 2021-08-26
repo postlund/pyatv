@@ -146,8 +146,6 @@ class MrpProtocol:
             # Subscribe to updates at this stage
             await self.send_and_receive(messages.client_updates_config())
             await self.send_and_receive(messages.get_keyboard_session())
-
-            self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
         except Exception:
             # Something went wrong, let's do cleanup
             self.stop()
@@ -169,6 +167,10 @@ class MrpProtocol:
         self._outstanding = {}
         self.connection.close()
         self._state = ProtocolState.STOPPED
+
+    def enable_heartbeat(self) -> None:
+        """Enable sending periodic heartbeat messages."""
+        self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
 
     async def _enable_encryption(self):
         # Encryption can be enabled whenever credentials are available but only
