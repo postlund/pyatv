@@ -60,6 +60,10 @@ message DeviceSubType {
     TV = 11;
     HomePod = 12;
     AppleTV = 13;
+    Vehicle = 14;
+    Cluster = 15;
+    SetTopBox = 16;
+    TVStick = 17;
   }
 }
 

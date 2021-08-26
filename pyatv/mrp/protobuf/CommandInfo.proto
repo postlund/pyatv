@@ -54,6 +54,34 @@ enum Command {
   PlayItemInPlaybackQueue = 57;
   PrepareForSetQueue = 58;
   SetPlaybackSession = 59;
+  PreloadedPlaybackSession = 60;
+  SetPriorityForPlaybackSession = 61;
+  DiscardPlaybackSession = 62;
+  Reshuffle = 63;
+  ChangeQueueEndAction = 135;
+}
+
+message QueueEndAction {
+  enum Enum {
+    ClearAction = 0;
+    None = 1;
+    Reset = 2;
+    AutoPlay = 3;
+  }
+}
+
+message DisableReason {
+  enum Enum {
+    Unknown = 0;
+    AdPlayback = 1;
+    SkipLimitReached = 2;
+  }
+}
+
+message PreloadedPlaybackSessionInfo {
+  optional string playbackSessionIdentifier = 1;
+  optional string playbackSessionRevision = 2;
+  optional int32 playbackSessionPriority = 3;
 }
 
 message CommandInfo {
@@ -82,4 +110,8 @@ message CommandInfo {
   repeated string supportedPlaybackSessionTypes = 23;
   repeated string currentPlaybackSessionTypes = 24;
   optional string playbackSessionIdentifier = 25;
+  optional QueueEndAction.Enum currentQueueEndAction = 26;
+  repeated QueueEndAction.Enum supportedEndQueueActions = 27;
+  optional DisableReason.Enum disableReason = 28;
+  repeated PreloadedPlaybackSessionInfo supportedPlaybackSessionIdentifiers = 29;
 }

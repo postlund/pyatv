@@ -1,5 +1,105 @@
 syntax = "proto2";
 
+message AudioRouteType {
+  enum Enum {
+    Unknown = 0;
+    DevicesSpeaker = 1;
+    LineOut = 2;
+    Headphones = 3;
+    BluetoothHeadphones = 4;
+    BluetoothSpeaker = 5;
+    USBAudio = 6;
+    CarAudio = 7;
+    HDMI = 8;
+    AirPlay = 9;
+  }
+}
+
+message AudioRoute {
+  optional AudioRouteType type = 1;
+  optional string name = 2;
+  optional bool supportsSpatialization = 3; 
+}
+
+message AudioTier {
+  enum Enum {
+    LowBandwidthStereo = 1;
+    HighQualityStereo = 2;
+    Lossless = 3;
+    HighResolutionLossless = 4;
+    Spatial = 5;
+  }
+}
+
+message SongTraits {
+  enum Enum {
+    None = 0;
+    AppleDigitialMaster = 1;
+    Lossless = 2;
+    HighResolutionLossless = 4;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message AlbumTraits {
+  enum Enum {
+    None = 0;
+    AppleDigitialMaster = 1;
+    Lossless = 2;
+    HighResolutionLossless = 4;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message PlaylistTraits {
+  enum Enum {
+    None = 0;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message ActiveFormatJustification {
+  enum Enum {
+    Unknown = 0;
+    Unavailable = 1;
+    UserPreference = 100;
+    UserDownload = 101;
+    RouteIncompatible = 500;
+    RouteUnknownCompatibility = 501;
+    BandwidthInsufficient = 1000;
+  }
+}
+
+message FormatTier {
+  enum Enum {
+    LowBandwidthStereo = 1;
+    HighQualityStereo = 2;
+    Lossless = 4;
+    HighResolutionLossless = 8;
+    Spatial = 16;
+  }
+}
+
+message AudioFormat {
+  optional AudioTier.Enum tier = 1;
+  optional int64 bitrate = 2;
+  optional int64 sampleRate = 3;
+  optional int64 bitDepth = 4;
+  optional uint32 codec = 5;
+  optional bool spatialized = 6;
+  optional bool multiChannel = 7;
+  optional uint32 channelLayout = 8;
+  optional string audioChannelLayoutDescription = 9;
+  optional string groupID = 10;
+  optional string stableVariantID = 11;
+}
+
 message ContentItemMetadata {
     enum MediaType {
       UnknownMediaType = 0;
@@ -100,4 +200,14 @@ message ContentItemMetadata {
     optional string artworkFileURL = 85;
     optional string brandIdentifier = 86;
     optional string localizedDurationString = 87;
+    optional string albumYear = 88;
+    optional SongTraits.Enum songTraits = 89;
+    optional AlbumTraits.Enum albumTraits = 90;
+    optional PlaylistTraits.Enum playlistTraits = 91;
+    optional AudioFormat preferredFormat = 92;
+    optional AudioFormat activeFormat = 93;
+    optional ActiveFormatJustification.Enum activeFormatJustification = 94;
+    optional FormatTier.Enum formatTierPreference = 95;
+    optional AudioRoute audioRoute = 96;
+    repeated AudioFormat alternativeFormats = 97;
 }

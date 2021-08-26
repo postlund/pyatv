@@ -44,7 +44,7 @@ message AVOutputDeviceDescriptor {
   optional bool groupContainsGroupLeader = 28;
   optional bool supportsBufferedAirPlay = 29;
   optional bool canPlayEncryptedProgressiveDownloadAssets = 30;
-  optional bool anFetchMediaDataFromSender = 31;
+  optional bool canFetchMediaDataFromSender = 31;
   optional bool resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets = 32;
   optional bool isAirPlayReceiverSessionActive = 33;
   optional string parentGroupIdentifier = 34;
@@ -52,6 +52,13 @@ message AVOutputDeviceDescriptor {
   optional bool isAddedToHomeKit = 36;
   optional int32 volumeCapabilities = 37;
   optional string bluetoothID = 38;
+  optional bool supportsHAP = 39;
+  optional bool usingJSONProtocol = 40;
+  repeated AVOutputDeviceDescriptor clusterCompositions = 41;
+  optional uint32 clusterType = 42;
+  optional string primaryUID = 43;
+  optional uint32 configuredClusterSize = 44;
+  optional bool producesLowFidelityAudio = 49;
 }
 
 message UpdateOutputDeviceMessage {
