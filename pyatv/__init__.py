@@ -115,14 +115,14 @@ async def connect(
                     "missing implementation for protocol {service.protocol}"
                 )
 
-            setup_data = proto_impl.setup(
+            for setup_data in proto_impl.setup(
                 loop, config, atv.interfaces, atv, session_manager
-            )
-            if setup_data:
-                _LOGGER.debug("Adding protocol %s", service.protocol)
-                atv.add_protocol(service.protocol, setup_data)
-            else:
-                _LOGGER.debug("Not adding protocol: %s", service.protocol)
+            ):
+                if setup_data:
+                    _LOGGER.debug("Adding protocol %s", service.protocol)
+                    atv.add_protocol(service.protocol, setup_data)
+                else:
+                    _LOGGER.debug("Not adding protocol: %s", service.protocol)
 
         await atv.connect()
     except Exception:

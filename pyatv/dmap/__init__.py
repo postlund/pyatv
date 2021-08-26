@@ -2,7 +2,18 @@
 
 import asyncio
 import logging
-from typing import Any, Awaitable, Callable, Dict, List, Mapping, Optional, Set, Tuple
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+)
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -596,10 +607,12 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
+) -> Generator[
     Tuple[
         Callable[[], Awaitable[None]], Callable[[], Set[asyncio.Task]], Set[FeatureName]
-    ]
+    ],
+    None,
+    None,
 ]:
     """Set up a new DMAP service."""
     service = config.get_service(Protocol.DMAP)
@@ -633,7 +646,7 @@ def setup(
     features.update(_UNKNOWN_FEATURES)
     features.update(_FIELD_FEATURES.keys())
 
-    return _connect, _close, features
+    yield _connect, _close, features
 
 
 def pair(
