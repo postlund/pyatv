@@ -2,24 +2,43 @@
 from abc import ABC, abstractmethod
 import asyncio
 import logging
-from typing import Callable, Tuple, cast
+from typing import Callable, Optional, Tuple, cast
 
+from pyatv import exceptions
 from pyatv.auth.hap_pairing import PairVerifyProcedure
 from pyatv.auth.hap_session import HAPSession
+from pyatv.core import StateProducer
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class AbstractHAPChannel(ABC, asyncio.Protocol):
+class AbstractHAPChannel(ABC, StateProducer, asyncio.Protocol):
     """Abstract base class for connections using HAP encryption and segmenting."""
 
     def __init__(self, output_key: bytes, input_key: bytes) -> None:
         """Initialize a new AbstractHAPChannel instance."""
-        self.buffer = b""
-        self.transport = None
+        super().__init__()
+        self.buffer: bytes = b""
+        self.transport: Optional[asyncio.Transport] = None
         self.session: HAPSession = HAPSession()
         self.session.enable(output_key, input_key)
+
+    @property
+    def port(self) -> int:
+        """Remote connection port number."""
+        if self.transport is None:
+            raise exceptions.InvalidStateError("not connected")
+
+        sock = self.transport.get_extra_info("socket")
+        _, dstport = sock.getpeername()
+        return dstport
+
+    def close(self) -> None:
+        """Close the channel."""
+        if self.transport:
+            self.transport.close()
+            self.transport = None
 
     def connection_made(self, transport) -> None:
         """Device connection was made."""
