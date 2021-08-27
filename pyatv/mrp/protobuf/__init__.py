@@ -54,6 +54,7 @@ from . import UpdateContentItemMessage_pb2
 from . import UpdateEndPointsMessage_pb2
 from . import UpdateOutputDeviceMessage_pb2
 from . import VolumeControlAvailabilityMessage_pb2
+from . import VolumeDidChangeMessage_pb2
 from . import WakeDeviceMessage_pb2
 
 
@@ -161,6 +162,7 @@ from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescripto
 from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from .VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
 from .VolumeControlCapabilitiesDidChange_pb2 import VolumeControlCapabilitiesDidChangeMessage
+from .VolumeDidChangeMessage_pb2 import VolumeDidChangeMessage
 from .WakeDeviceMessage_pb2 import WakeDeviceMessage
 
 
@@ -214,6 +216,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.UPDATE_END_POINTS_MESSAGE: UpdateEndPointsMessage_pb2.updateEndPointsMessage,
     ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE: UpdateOutputDeviceMessage_pb2.updateOutputDeviceMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
+    ProtocolMessage.VOLUME_DID_CHANGE_MESSAGE: VolumeDidChangeMessage_pb2.volumeDidChangeMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
 }
 
@@ -267,6 +270,7 @@ UPDATE_CONTENT_ITEM_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE
 UPDATE_END_POINTS_MESSAGE = ProtocolMessage.UPDATE_END_POINTS_MESSAGE
 UPDATE_OUTPUT_DEVICE_MESSAGE = ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
+VOLUME_DID_CHANGE_MESSAGE = ProtocolMessage.VOLUME_DID_CHANGE_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 
 
