@@ -6,6 +6,8 @@ import pytest
 
 from pyatv import conf, helpers
 
+from tests.utils import data_path
+
 
 @pytest.fixture
 def mock_scan():
@@ -86,3 +88,15 @@ async def test_auto_connect_with_device(mock_scan, mock_connect):
 )
 def test_get_unique_id_(service_type, service_name, properties, expected_id):
     assert helpers.get_unique_id(service_type, service_name, properties) == expected_id
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "test_file,streamable",
+    [
+        ("only_metadata.wav", True),
+        ("README", False),
+    ],
+)
+async def test_is_streamable_supported_file(test_file, streamable):
+    assert await helpers.is_streamable(data_path(test_file)) == streamable

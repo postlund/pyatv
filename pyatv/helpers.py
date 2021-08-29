@@ -3,6 +3,8 @@
 import asyncio
 from typing import Callable, Mapping, Optional
 
+import miniaudio
+
 import pyatv
 
 HOMESHARING_SERVICE: str = "_appletv-v2._tcp.local"
@@ -70,3 +72,19 @@ def get_unique_id(
     if service_type == RAOP_SERVICE:
         return service_name.split("@", maxsplit=1)[0]
     return None
+
+
+async def is_streamable(filename: str) -> bool:
+    """Return if a file is streamable by pyatv.
+
+    This method will return if the file format of the given file is supported
+    and streamable by pyatv. It will never raise an exception, e.g. because the
+    file is missing or lack of permissions.
+    """
+    try:
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, miniaudio.get_file_info, filename)
+    except Exception:
+        return False
+    else:
+        return True
