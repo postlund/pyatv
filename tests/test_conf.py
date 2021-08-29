@@ -17,6 +17,7 @@ IDENTIFIER_2 = "id2"
 IDENTIFIER_3 = "id3"
 IDENTIFIER_4 = "id4"
 CREDENTIALS_1 = "cred1"
+PASSWORD_1 = "password1"
 
 MRP_PROPERTIES = {
     "systembuildversion": "17K795",
@@ -277,3 +278,9 @@ def test_to_str(config):
     assert str(PORT_2) in output
     assert "3689" in output
     assert "Deep Sleep: True" in output
+
+
+def test_raop_password_in_str(config):
+    config.add_service(conf.RaopService(IDENTIFIER_1, password=PASSWORD_1))
+
+    assert PASSWORD_1 in str(config)
