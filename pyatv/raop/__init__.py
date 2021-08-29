@@ -295,6 +295,19 @@ class RaopStream(Stream):
             client.listener = self.listener
             await client.initialize(self.service.properties)
 
+            # Try to load metadata and pass it along if it succeeds
+            metadata: AudioMetadata = EMPTY_METADATA
+            try:
+                # Source must support seeking to read metadata (or point to file)
+                if isinstance(file, str) or file.seekable:
+                    metadata = await get_metadata(file)
+                else:
+                    _LOGGER.debug(
+                        "Seeking not supported by source, not loading metadata"
+                    )
+            except Exception as ex:
+                _LOGGER.exception("Failed to extract metadata from %s: %s", file, ex)
+
             # After initialize has been called, all the audio properties will be
             # initialized and can be used in the miniaudio wrapper
             audio_file = await open_source(
@@ -303,19 +316,6 @@ class RaopStream(Stream):
                 context.channels,
                 context.bytes_per_channel,
             )
-
-            # Try to load metadata and pass it along if it succeeds
-            metadata: AudioMetadata = EMPTY_METADATA
-            try:
-                # Source must support seeking to read metadata
-                if audio_file.supports_seek:
-                    metadata = await get_metadata(file)
-                else:
-                    _LOGGER.debug(
-                        "Seeking not supported by source, not loading metadata"
-                    )
-            except Exception as ex:
-                _LOGGER.exception("Failed to extract metadata from %s: %s", file, ex)
 
             # If the user didn't change volume level prior to streaming, try to extract
             # volume level from device (if supported). Otherwise set the default level
