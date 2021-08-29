@@ -1,7 +1,7 @@
 A client library for Apple TV and AirPlay devices
 =================================================
 
-<img src="docs/assets/img/logo.svg?raw=true" width="150">
+<img src="https://raw.githubusercontent.com/postlund/pyatv/master/docs/assets/img/logo.svg?raw=true" width="150">
 
 ![Tests](https://github.com/postlund/pyatv/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
