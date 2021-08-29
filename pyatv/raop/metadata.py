@@ -3,7 +3,7 @@ import asyncio
 import io
 from typing import NamedTuple, Optional, Union
 
-from audio_metadata import load
+from mediafile import MediaFile
 
 
 class AudioMetadata(NamedTuple):
@@ -18,25 +18,25 @@ class AudioMetadata(NamedTuple):
 EMPTY_METADATA = AudioMetadata(None, None, None, None)
 
 
+def _open_file(file: io.BufferedReader) -> MediaFile:
+    start_position = file.tell()
+    in_file = MediaFile(file)
+    file.seek(start_position)
+    return in_file
+
+
 async def get_metadata(file: Union[str, io.BufferedReader]) -> AudioMetadata:
     """Extract metadata from a file and return it."""
     loop = asyncio.get_event_loop()
-    in_file = await loop.run_in_executor(None, load, file)
 
-    # If no metadata, return something that can be easily compared with
-    if not in_file.tags:
-        return EMPTY_METADATA
-
-    duration = in_file.streaminfo.get("duration")
-
-    # All tags are always lists, so need to be joined into a string
-    title = in_file.tags.get("title")
-    artist = in_file.tags.get("artist")
-    album = in_file.tags.get("album")
+    if isinstance(file, io.BufferedReader):
+        in_file = await loop.run_in_executor(None, _open_file, file)
+    else:
+        in_file = await loop.run_in_executor(None, MediaFile, file)
 
     return AudioMetadata(
-        ", ".join(title) if title else None,
-        ", ".join(artist) if artist else None,
-        ", ".join(album) if album else None,
-        duration,
+        in_file.title,
+        in_file.artist,
+        in_file.album,
+        in_file.length,
     )

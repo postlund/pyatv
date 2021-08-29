@@ -57,11 +57,6 @@ class AudioSource(ABC):
     def duration(self) -> int:
         """Return duration in seconds."""
 
-    @property
-    @abstractmethod
-    def supports_seek(self) -> bool:
-        """Return if source supports seeking."""
-
 
 class ReaderWrapper(miniaudio.StreamableSource):
     """Wraps a reader into a StreamableSource that miniaudio can consume."""
@@ -228,11 +223,6 @@ class BufferedReaderSource(AudioSource):
         """Return duration in seconds."""
         return 0  # We don't know the duration
 
-    @property
-    def supports_seek(self) -> bool:
-        """Return if source supports seeking."""
-        return self.wrapper.reader.seekable()
-
 
 class FileSource(AudioSource):
     """Audio source used to play a local audio file."""
@@ -290,11 +280,6 @@ class FileSource(AudioSource):
     def duration(self) -> int:
         """Return duration in seconds."""
         return round(self.src.duration)
-
-    @property
-    def supports_seek(self) -> bool:
-        """Return if source supports seeking."""
-        return True
 
 
 async def open_source(
