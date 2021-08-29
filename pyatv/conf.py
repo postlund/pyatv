@@ -192,8 +192,8 @@ class AppleTV:
     def __str__(self) -> str:
         """Return a string representation of this object."""
         device_info = self.device_info
-        services = "\n".join([" - {0}".format(s) for s in self._services.values()])
-        identifiers = "\n".join([" - {0}".format(x) for x in self.all_identifiers])
+        services = "\n".join([f" - {s}" for s in self._services.values()])
+        identifiers = "\n".join([f" - {x}" for x in self.all_identifiers])
         return (
             f"       Name: {self.name}\n"
             f"   Model/SW: {device_info}\n"
@@ -291,3 +291,7 @@ class RaopService(BaseService):
         super().__init__(identifier, Protocol.RAOP, port, properties)
         self.credentials = credentials
         self.password = password
+
+    def __str__(self) -> str:
+        """Return a string representation of this object."""
+        return super().__str__() + f", Password: {self.password}"
