@@ -4,6 +4,11 @@ title: Stream
 permalink: /development/stream/
 link_group: development
 ---
+ Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
 # Stream
 
 It is possible to stream audio and video to a device via the stream interface using
@@ -103,6 +108,27 @@ the beginning of file again before playback.
 
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
+
+#### File Compatibility
+
+It is possible to verify if a file is supported programmatically using
+{% include api i="helpers.is_streamable" %}:
+
+```python
+from pyatv.helpers import is_streamable
+
+if await is_streamable("myfile.mp3"):
+    await atv.stream_file("myfile.mp3")
+else:
+    print("File is not supported")
+```
+
+There are a few caveats worth knowing:
+
+* No exception is ever raised, even when file is not found or lack of permissions
+* Only valid for {% include api i="interface.Stream.stream_file" %} (*not*
+  {% include api i="interface.Stream.play_url" %})
+* Only a basic check is made, the file might be broken and not still not playable
 
 ## Password
 
