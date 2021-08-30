@@ -17,12 +17,15 @@ from typing import cast
 import wave
 
 from mutagen import File
-from mutagen.id3 import TALB, TIT2, TPE1
+from mutagen.id3 import TALB, TCON, TIT2, TORY, TPE1, TRCK, Encoding
 
 METADATA_FIELDS = {
     "title": TIT2,
     "artist": TPE1,
     "album": TALB,
+    "year": TORY,
+    "track": TRCK,
+    "genre": TCON,
 }
 
 FRAMES_PER_PACKET = 352
@@ -55,7 +58,7 @@ def add_metadata(filename: str, args):
     f = File(filename)
     f.add_tags()
     for title, tag in METADATA_FIELDS.items():
-        f.tags.add(tag(encoding=3, text=[getattr(args, title)]))
+        f.tags.add(tag(encoding=Encoding.UTF8, text=[getattr(args, title)]))
     f.save()
 
 
