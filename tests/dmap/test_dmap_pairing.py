@@ -64,7 +64,7 @@ async def mock_pairing(event_loop):
             options["name"] = name
 
         obj.pairing = pairing.DmapPairingHandler(
-            config, await http.create_session(), event_loop, **options
+            config, service, await http.create_session(), event_loop, **options
         )
         await obj.pairing.begin()
         obj.pairing.pin(pin_code)

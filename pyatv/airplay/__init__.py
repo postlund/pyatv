@@ -16,6 +16,7 @@ from pyatv.const import FeatureName, Protocol
 from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
+    BaseService,
     FeatureInfo,
     Features,
     FeatureState,
@@ -207,9 +208,10 @@ def setup(  # pylint: disable=too-many-locals
 
 def pair(
     config: conf.AppleTV,
+    service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return AirPlayPairingHandler(config, session_manager, loop, **kwargs)
+    return AirPlayPairingHandler(config, service, session_manager, loop, **kwargs)

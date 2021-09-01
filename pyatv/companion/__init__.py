@@ -21,6 +21,7 @@ from pyatv.core import SetupData
 from pyatv.interface import (
     App,
     Apps,
+    BaseService,
     FeatureInfo,
     Features,
     PairingHandler,
@@ -355,9 +356,10 @@ def setup(
 
 def pair(
     config: AppleTV,
+    service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return CompanionPairingHandler(config, session_manager, loop, **kwargs)
+    return CompanionPairingHandler(config, service, session_manager, loop, **kwargs)

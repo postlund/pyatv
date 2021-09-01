@@ -8,15 +8,14 @@ from pyatv import conf, exceptions
 from pyatv.airplay.auth import AuthenticationType, pair_setup
 from pyatv.airplay.features import AirPlayFeatures, parse
 from pyatv.auth.hap_pairing import PairSetupProcedure
-from pyatv.const import Protocol
-from pyatv.interface import PairingHandler
+from pyatv.interface import BaseService, PairingHandler
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _get_preferred_auth_type(service: conf.BaseService) -> AuthenticationType:
+def _get_preferred_auth_type(service: BaseService) -> AuthenticationType:
     features_string = service.properties.get("features")
     if features_string:
         features = parse(features_string)
@@ -31,12 +30,13 @@ class AirPlayPairingHandler(PairingHandler):
     def __init__(
         self,
         config: conf.AppleTV,
+        service: BaseService,
         session_manager: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,
         **kwargs
     ) -> None:
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session_manager, config.get_service(Protocol.AirPlay))
+        super().__init__(session_manager, service)
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
         self.pairing_procedure: Optional[PairSetupProcedure] = None

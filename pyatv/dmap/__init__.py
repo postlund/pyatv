@@ -25,6 +25,7 @@ from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
+    BaseService,
     FeatureInfo,
     Features,
     Metadata,
@@ -636,9 +637,10 @@ def setup(
 
 def pair(
     config: conf.AppleTV,
+    service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return DmapPairingHandler(config, session_manager, loop, **kwargs)
+    return DmapPairingHandler(config, service, session_manager, loop, **kwargs)

@@ -9,8 +9,7 @@ from pyatv.companion.auth import CompanionPairSetupProcedure
 from pyatv.companion.connection import CompanionConnection
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import CompanionService
-from pyatv.const import Protocol
-from pyatv.interface import PairingHandler
+from pyatv.interface import BaseService, PairingHandler
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager
 
@@ -23,12 +22,13 @@ class CompanionPairingHandler(PairingHandler):
     def __init__(
         self,
         config: conf.AppleTV,
+        service: BaseService,
         session: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,
         **kwargs
     ):
         """Initialize a new CompanionPairingHandler."""
-        super().__init__(session, config.get_service(Protocol.Companion))
+        super().__init__(session, service)
         self.connection = CompanionConnection(
             loop, str(config.address), self.service.port, None
         )
