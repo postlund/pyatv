@@ -96,14 +96,12 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.make_login_fail()
 
         with self.assertRaises(exceptions.AuthenticationError):
-            await self.atv.connect()
+            await self.get_connected_device(HSGID)
 
     # This test verifies issue #2 (automatic re-login). It uses the artwork
     # API, but it could have been any API since the login code is the same.
     @unittest_run_loop
     async def test_relogin_if_session_expired(self):
-        await self.atv.connect()
-
         # Here, we are logged in and currently have a asession id. These
         # usescases will result in being logged out (HTTP 403) and forcing a
         # re-login with a new session id (1234)
@@ -135,8 +133,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
         self.atv.close()
-        self.atv = await self.get_connected_device(PAIRING_GUID)
-        await self.atv.connect()
+
+        # This call will connect and trigger re-login
+        await self.get_connected_device(PAIRING_GUID)
 
     @unittest_run_loop
     async def test_connection_lost(self):

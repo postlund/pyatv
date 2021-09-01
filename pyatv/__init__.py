@@ -4,7 +4,7 @@ import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
 import logging
-from typing import Callable, List, NamedTuple, Optional, Set, Union
+from typing import Callable, Generator, List, NamedTuple, Optional, Set, Union
 
 import aiohttp
 
@@ -16,8 +16,10 @@ from pyatv import exceptions, interface
 from pyatv import mrp as mrp_proto
 from pyatv import raop as raop_proto
 from pyatv.const import Protocol
+from pyatv.core import SetupData, StateProducer
 from pyatv.support import http
-from pyatv.support.facade import FacadeAppleTV, SetupMethod
+from pyatv.support.facade import FacadeAppleTV
+from pyatv.support.http import ClientSessionManager
 from pyatv.support.scan import (
     BaseScanner,
     MulticastMdnsScanner,
@@ -30,6 +32,15 @@ __pdoc__["ProtocolImpl"] = False
 
 _LOGGER = logging.getLogger(__name__)
 
+SetupMethod = Callable[
+    [
+        asyncio.AbstractEventLoop,
+        conf.AppleTV,
+        StateProducer,
+        ClientSessionManager,
+    ],
+    Generator[SetupData, None, None],
+]
 PairMethod = Callable[..., interface.PairingHandler]
 
 
@@ -118,10 +129,8 @@ async def connect(
                     "missing implementation for protocol {service.protocol}"
                 )
 
-            for setup_data in proto_impl.setup(
-                loop, config, atv.interfaces, atv, session_manager
-            ):
-                atv.add_protocol(setup_data[0], setup_data)
+            for setup_data in proto_impl.setup(loop, config, atv, session_manager):
+                atv.add_protocol(setup_data)
 
         await atv.connect()
     except Exception:

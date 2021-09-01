@@ -1,10 +1,34 @@
 """Core module of pyatv."""
-from typing import Generic, Optional, TypeVar, cast
+import asyncio
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Generic,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    TypeVar,
+    cast,
+)
 import weakref
+
+from pyatv.const import FeatureName, Protocol
 
 NO_MAX_CALLS = 0
 
 StateListener = TypeVar("StateListener")
+
+
+class SetupData(NamedTuple):
+    """Information for setting up a protocol."""
+
+    protocol: Protocol
+    connect: Callable[[], Awaitable[bool]]
+    close: Callable[[], Set[asyncio.Task]]
+    interfaces: Mapping[Any, Any]
+    features: Set[FeatureName]
 
 
 class _ListenerProxy:

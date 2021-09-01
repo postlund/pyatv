@@ -2,18 +2,7 @@
 
 import asyncio
 import logging
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Mapping,
-    Optional,
-    Set,
-    Tuple,
-)
+from typing import Dict, Generator, List, Mapping, Optional, Set
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -29,6 +18,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
+from pyatv.core import SetupData
 from pyatv.dmap import daap, parser, tags
 from pyatv.dmap.daap import DaapRequester
 from pyatv.dmap.pairing import DmapPairingHandler
@@ -47,7 +37,6 @@ from pyatv.interface import (
 from pyatv.support import mdns
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
-from pyatv.support.relayer import Relayer
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
@@ -604,19 +593,9 @@ def scan() -> Mapping[str, ScanHandler]:
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
-    interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Generator[
-    Tuple[
-        Protocol,
-        Callable[[], Awaitable[None]],
-        Callable[[], Set[asyncio.Task]],
-        Set[FeatureName],
-    ],
-    None,
-    None,
-]:
+) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
     service = config.get_service(Protocol.DMAP)
     assert service is not None
@@ -630,13 +609,16 @@ def setup(
     push_updater = DmapPushUpdater(loop, apple_tv, device_listener)
     metadata = DmapMetadata(config.identifier, apple_tv)
 
-    interfaces[RemoteControl].register(DmapRemoteControl(apple_tv), Protocol.DMAP)
-    interfaces[Metadata].register(metadata, Protocol.DMAP)
-    interfaces[PushUpdater].register(push_updater, Protocol.DMAP)
-    interfaces[Features].register(DmapFeatures(config, apple_tv), Protocol.DMAP)
+    interfaces = {
+        RemoteControl: DmapRemoteControl(apple_tv),
+        Metadata: metadata,
+        PushUpdater: push_updater,
+        Features: DmapFeatures(config, apple_tv),
+    }
 
-    async def _connect() -> None:
+    async def _connect() -> bool:
         await requester.login()
+        return True
 
     def _close() -> Set[asyncio.Task]:
         push_updater.stop()
@@ -649,7 +631,7 @@ def setup(
     features.update(_UNKNOWN_FEATURES)
     features.update(_FIELD_FEATURES.keys())
 
-    yield Protocol.DMAP, _connect, _close, features
+    yield SetupData(Protocol.DMAP, _connect, _close, interfaces, features)
 
 
 def pair(
