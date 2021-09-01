@@ -6,8 +6,7 @@ import logging
 from pyatv import conf, exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.const import Protocol
-from pyatv.interface import PairingHandler
+from pyatv.interface import BaseService, PairingHandler
 from pyatv.mrp.auth import MrpPairSetupProcedure, MrpPairVerifyProcedure
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
@@ -23,12 +22,13 @@ class MrpPairingHandler(PairingHandler):
     def __init__(
         self,
         config: conf.AppleTV,
+        service: BaseService,
         session_manager: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,
         **kwargs
     ):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session_manager, config.get_service(Protocol.MRP))
+        super().__init__(session_manager, service)
         self.connection = MrpConnection(config.address, self.service.port, loop)
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(self.connection, self.srp, self.service)

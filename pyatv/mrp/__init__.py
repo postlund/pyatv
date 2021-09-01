@@ -24,6 +24,7 @@ from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     ArtworkInfo,
+    BaseService,
     FeatureInfo,
     Features,
     Metadata,
@@ -784,9 +785,10 @@ def setup(
 
 def pair(
     config: conf.AppleTV,
+    service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return MrpPairingHandler(config, session_manager, loop, **kwargs)
+    return MrpPairingHandler(config, service, session_manager, loop, **kwargs)

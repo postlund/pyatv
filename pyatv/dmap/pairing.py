@@ -12,9 +12,8 @@ import netifaces
 from zeroconf import Zeroconf
 
 from pyatv import conf
-from pyatv.const import Protocol
 from pyatv.dmap import tags
-from pyatv.interface import PairingHandler
+from pyatv.interface import BaseService, PairingHandler
 from pyatv.support import mdns
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.net import unused_port
@@ -51,12 +50,13 @@ class DmapPairingHandler(
     def __init__(
         self,
         config: conf.AppleTV,
+        service: BaseService,
         session_manager: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,
         **kwargs
     ):
         """Initialize a new instance."""
-        super().__init__(session_manager, config.get_service(Protocol.DMAP))
+        super().__init__(session_manager, service)
         self._loop = loop
         self._zeroconf = kwargs.get("zeroconf", Zeroconf())
         self._name = kwargs.get("name", "pyatv")

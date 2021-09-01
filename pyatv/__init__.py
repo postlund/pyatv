@@ -162,4 +162,4 @@ async def pair(
             f"protocol {protocol} does not support pairing"
         )
 
-    return handler(config, await http.create_session(session), loop, **kwargs)
+    return handler(config, service, await http.create_session(session), loop, **kwargs)
