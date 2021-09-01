@@ -182,12 +182,8 @@ def setup(  # pylint: disable=too-many-locals
     else:
         _LOGGER.debug("Remote control channel is supported")
 
-        control = remote_control.RemoteControl(
-            loop,
-            str(config.address),
-            service.port,
-            credentials,
-        )
+        control = remote_control.RemoteControl(device_listener)
+        control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
         config.add_service(conf.MrpService(None, 0))
@@ -203,16 +199,18 @@ def setup(  # pylint: disable=too-many-locals
 
         async def _connect_rc() -> None:
             try:
-                await control.start()
-            except exceptions.ProtocolError as ex:
-                _LOGGER.warning("failed to set up remote control channel: %s", ex)
+
+                await control.start(str(config.address), control_port, credentials)
+            except Exception as ex:
+                _LOGGER.exception("failed to set up remote control channel: %s", ex)
             else:
                 await mrp_connect()
 
         def _close_rc() -> Set[asyncio.Task]:
-            mrp_close()
-            control.stop()
-            return set()
+            tasks = set()
+            tasks.update(mrp_close())
+            tasks.update(control.stop())
+            return tasks
 
         yield Protocol.MRP, _connect_rc, _close_rc, mrp_features
 

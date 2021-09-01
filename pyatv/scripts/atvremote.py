@@ -42,7 +42,7 @@ def _print_commands(title, api):
     print("{} commands:\n{}\n".format(title, commands))
 
 
-async def _read_input(loop, prompt):
+async def _read_input(loop: asyncio.AbstractEventLoop, prompt: str):
     sys.stdout.write(prompt)
     sys.stdout.flush()
     user_input = await loop.run_in_executor(None, sys.stdin.readline)
@@ -337,7 +337,8 @@ class DeviceListener(interface.DeviceListener):
 
     def connection_lost(self, exception):
         """Call when unexpectedly being disconnected from device."""
-        print("Connection lost with error:", str(exception), file=sys.stderr)
+        print("Connection lost, stack trace below:", file=sys.stderr)
+        traceback.print_tb(exception.__traceback__, file=sys.stderr)
 
     def connection_closed(self):
         """Call when connection was (intentionally) closed."""
@@ -628,7 +629,9 @@ async def _handle_commands(args, config, loop):
             if ret != 0:
                 return ret
     finally:
-        await asyncio.wait_for(asyncio.gather(*atv.close()), DEFAULT_TIMEOUT)
+        remaining_tasks = atv.close()
+        _LOGGER.debug("Waiting for %d remaining tasks", len(remaining_tasks))
+        await asyncio.wait_for(asyncio.gather(*remaining_tasks), DEFAULT_TIMEOUT)
     return 0
 
 
