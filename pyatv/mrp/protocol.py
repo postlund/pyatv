@@ -8,6 +8,7 @@ import uuid
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
+from pyatv.core.protocol import heartbeater
 from pyatv.mrp import messages, protobuf
 from pyatv.mrp.auth import MrpPairVerifyProcedure
 
@@ -170,24 +171,33 @@ class MrpProtocol:
 
     def enable_heartbeat(self) -> None:
         """Enable sending periodic heartbeat messages."""
-        self._heartbeat_task = asyncio.ensure_future(heartbeat_loop(self))
+        self._heartbeat_task = asyncio.ensure_future(
+            heartbeater(
+                name=str(self.connection),
+                sender_func=self.send_and_receive,
+                failure_func=lambda exc: self.connection.close,
+                message_factory=lambda: messages.create(protobuf.GENERIC_MESSAGE),
+            )
+        )
 
     async def _enable_encryption(self):
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
-        if self.service.credentials:
-            # Verify credentials and generate keys
-            credentials = parse_credentials(self.service.credentials)
-            pair_verifier = MrpPairVerifyProcedure(self, self.srp, credentials)
+        if self.service.credentials is None:
+            return
 
-            try:
-                await pair_verifier.verify_credentials()
-                output_key, input_key = pair_verifier.encryption_keys(
-                    SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
-                )
-                self.connection.enable_encryption(output_key, input_key)
-            except Exception as ex:
-                raise exceptions.AuthenticationError(str(ex)) from ex
+        # Verify credentials and generate keys
+        credentials = parse_credentials(self.service.credentials)
+        pair_verifier = MrpPairVerifyProcedure(self, self.srp, credentials)
+
+        try:
+            await pair_verifier.verify_credentials()
+            output_key, input_key = pair_verifier.encryption_keys(
+                SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
+            )
+            self.connection.enable_encryption(output_key, input_key)
+        except Exception as ex:
+            raise exceptions.AuthenticationError(str(ex)) from ex
 
     async def send(self, message):
         """Send a message and expect no response."""

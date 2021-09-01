@@ -1,3 +1,4 @@
+import logging
 from types import SimpleNamespace
 import typing
 from unittest.mock import Mock, patch
@@ -15,6 +16,8 @@ from tests import fake_udns
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests.fake_knock import create_knock_server
 from tests.utils import stub_sleep, unstub_sleep
+
+_LOGGER = logging.getLogger(__name__)
 
 #: A type alias for the [multi,uni]cast_scan fixtures.
 # There isn't a way to type-hint optional arguments, so instead we leave it unspecified.
@@ -65,10 +68,10 @@ def stub_sleep_fixture():
 def stub_heartbeat_loop(request):
     if "use_heartbeat" not in request.keywords:
 
-        async def _stub_heartbeat_loop(protocol):
-            pass
+        async def _stub_heartbeat_loop(*args, **kwargs):
+            _LOGGER.debug("Using stub for heartbeat")
 
-        with patch("pyatv.mrp.protocol.heartbeat_loop") as mock_heartbeat:
+        with patch("pyatv.mrp.protocol.heartbeater") as mock_heartbeat:
             mock_heartbeat.side_effect = _stub_heartbeat_loop
             yield
     else:

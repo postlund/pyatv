@@ -53,7 +53,7 @@ class EventChannel(AbstractHAPChannel):
                 )
                 self.send(response.encode("utf-8"))
             except Exception:
-                _LOGGER.exception("Failed to message on event channel")
+                _LOGGER.exception("Failed to handle message on event channel")
 
 
 class DataStreamListener(ABC):

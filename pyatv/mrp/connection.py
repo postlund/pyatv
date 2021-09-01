@@ -167,3 +167,7 @@ class MrpConnection(
         log_protobuf(_LOGGER, self._log_str + "<< Receive: Protobuf", parsed)
 
         self.listener.message_received(parsed, data)  # pylint: disable=no-member
+
+    def __str__(self):
+        """Return string representation of connection object."""
+        return f"MRP:{self.host}"
