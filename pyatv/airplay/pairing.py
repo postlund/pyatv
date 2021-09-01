@@ -1,6 +1,4 @@
 """Device pairing and derivation of encryption keys."""
-
-import asyncio
 import logging
 from typing import Optional
 
@@ -15,7 +13,8 @@ from pyatv.support.http import ClientSessionManager, HttpConnection, http_connec
 _LOGGER = logging.getLogger(__name__)
 
 
-def _get_preferred_auth_type(service: BaseService) -> AuthenticationType:
+def get_preferred_auth_type(service: BaseService) -> AuthenticationType:
+    """Return the preferred authentication type depending on what is supported."""
     features_string = service.properties.get("features")
     if features_string:
         features = parse(features_string)
@@ -32,11 +31,12 @@ class AirPlayPairingHandler(PairingHandler):
         config: conf.AppleTV,
         service: BaseService,
         session_manager: ClientSessionManager,
-        loop: asyncio.AbstractEventLoop,
+        auth_type: AuthenticationType,
         **kwargs
     ) -> None:
         """Initialize a new MrpPairingHandler."""
         super().__init__(session_manager, service)
+        self.auth_type = auth_type
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
         self.pairing_procedure: Optional[PairSetupProcedure] = None
@@ -57,9 +57,7 @@ class AirPlayPairingHandler(PairingHandler):
     async def begin(self) -> None:
         """Start pairing process."""
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = pair_setup(
-            _get_preferred_auth_type(self.service), self.http
-        )
+        self.pairing_procedure = pair_setup(self.auth_type, self.http)
         self._has_paired = False
         return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError
