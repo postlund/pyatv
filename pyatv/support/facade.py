@@ -13,22 +13,12 @@ https://github.com/python/mypy/issues/5374
 import asyncio
 import io
 import logging
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from queue import Queue
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.core import SetupData
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
@@ -40,34 +30,6 @@ DEFAULT_PRIORITIES = [
     Protocol.Companion,
     Protocol.AirPlay,
     Protocol.RAOP,
-]
-
-PUBLIC_INTERFACES = [
-    interface.RemoteControl,
-    interface.Metadata,
-    interface.PushUpdater,
-    interface.Stream,
-    interface.Power,
-    interface.Features,
-    interface.Apps,
-]
-
-# TODO: These should be moved somewhere and shared with protocol implementations
-SetupData = Tuple[
-    const.Protocol,
-    Callable[[], Awaitable[None]],
-    Callable[[], Set[asyncio.Task]],
-    Set[FeatureName],
-]
-SetupMethod = Callable[
-    [
-        asyncio.AbstractEventLoop,
-        conf.AppleTV,
-        Dict[Any, Relayer],
-        interface.StateProducer,
-        ClientSessionManager,
-    ],
-    Generator[SetupData, None, None],
 ]
 
 
@@ -386,13 +348,14 @@ class FacadeAppleTV(interface.AppleTV):
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
         self._config = config
         self._session_manager = session_manager
+        self._protocols_to_setup: Queue[SetupData] = Queue()
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
         self._push_updates = Relayer(
             interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
         )
         self._features = FacadeFeatures(self._push_updates)
         self._pending_tasks: Optional[set] = None
-        self.interfaces = {
+        self._interfacea = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
@@ -403,24 +366,55 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Audio: FacadeAudio(),
         }
 
-    def add_protocol(self, protocol: Protocol, setup_data: SetupData):
+    def add_protocol(self, setup_data: SetupData):
         """Add a new protocol to the relay."""
-        if protocol not in self._protocol_handlers:
-            _LOGGER.debug("Adding protocol %s", protocol)
-            self._protocol_handlers[protocol] = setup_data
-            self._features.add_mapping(protocol, setup_data[3])
-        else:
-            _LOGGER.debug("Protocol %s already added (ignoring)", protocol)
+        # Connecting commits current configuration, thus adding new protocols is not
+        # allowed anymore after that
+        if self._protocol_handlers:
+            raise exceptions.InvalidStateError(
+                "cannot add protocol after connect was called"
+            )
+
+        _LOGGER.debug("Adding handler for protocol %s", setup_data.protocol)
+        self._protocols_to_setup.put(setup_data)
 
     async def connect(self) -> None:
         """Initiate connection to device."""
-        if not self._protocol_handlers:
+        # No protocols to setup + no protocols previously set up => no service
+        if self._protocols_to_setup.empty() and not self._protocol_handlers:
             raise exceptions.NoServiceError("no service to connect to")
 
-        # TODO: Parallelize with asyncio.gather? Needs to handle cancling
-        # of ongoing tasks in case of error.
-        for _, protocol_connect, _, _ in self._protocol_handlers.values():
-            await protocol_connect()
+        # Protocols set up already => we have already connected
+        if self._protocol_handlers:
+            raise exceptions.InvalidStateError("already connected")
+
+        # Set up protocols, ignoring duplicates
+        while not self._protocols_to_setup.empty():
+            setup_data = self._protocols_to_setup.get()
+
+            if setup_data.protocol in self._protocol_handlers:
+                _LOGGER.debug(
+                    "Protocol %s already set up, ignoring", setup_data.protocol
+                )
+                continue
+
+            _LOGGER.debug("Connecting to protocol: %s", setup_data.protocol)
+            if await setup_data.connect():
+                self._protocol_handlers[setup_data.protocol] = setup_data
+
+                for iface, instance in setup_data.interfaces.items():
+                    self._interfacea[iface].register(instance, setup_data.protocol)
+
+                self._features.add_mapping(setup_data.protocol, setup_data.features)
+
+        # Forward power events in case an interface exists for it
+        try:
+            power = cast(
+                interface.Power, self._interfacea[interface.Power].main_instance
+            )
+            power.listener = self._interfacea[interface.Power]
+        except exceptions.NotSupportedError:
+            _LOGGER.debug("Power management not supported by any protocols")
 
     def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
@@ -430,8 +424,8 @@ class FacadeAppleTV(interface.AppleTV):
 
         self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
-        for _, _, protocol_close, _ in self._protocol_handlers.values():
-            self._pending_tasks.update(protocol_close())
+        for setup_data in self._protocol_handlers.values():
+            self._pending_tasks.update(setup_data.close())
         return self._pending_tasks
 
     @property
@@ -452,42 +446,42 @@ class FacadeAppleTV(interface.AppleTV):
     @property
     def remote_control(self) -> interface.RemoteControl:
         """Return API for controlling the Apple TV."""
-        return cast(interface.RemoteControl, self.interfaces[interface.RemoteControl])
+        return cast(interface.RemoteControl, self._interfacea[interface.RemoteControl])
 
     @property
     def metadata(self) -> interface.Metadata:
         """Return API for retrieving metadata from the Apple TV."""
-        return cast(interface.Metadata, self.interfaces[interface.Metadata])
+        return cast(interface.Metadata, self._interfacea[interface.Metadata])
 
     @property
     def push_updater(self) -> interface.PushUpdater:
         """Return API for handling push update from the Apple TV."""
-        return self.interfaces[interface.PushUpdater].main_instance  # type: ignore
+        return self._interfacea[interface.PushUpdater].main_instance  # type: ignore
 
     @property
     def stream(self) -> interface.Stream:
         """Return API for streaming media."""
-        return cast(interface.Stream, self.interfaces[interface.Stream])
+        return cast(interface.Stream, self._interfacea[interface.Stream])
 
     @property
     def power(self) -> interface.Power:
         """Return API for power management."""
-        return cast(interface.Power, self.interfaces[interface.Power])
+        return cast(interface.Power, self._interfacea[interface.Power])
 
     @property
     def features(self) -> interface.Features:
         """Return features interface."""
-        return cast(interface.Features, self.interfaces[interface.Features])
+        return cast(interface.Features, self._interfacea[interface.Features])
 
     @property
     def apps(self) -> interface.Apps:
         """Return apps interface."""
-        return cast(interface.Apps, self.interfaces[interface.Apps])
+        return cast(interface.Apps, self._interfacea[interface.Apps])
 
     @property
     def audio(self) -> interface.Audio:
         """Return audio interface."""
-        return cast(interface.Audio, self.interfaces[interface.Audio])
+        return cast(interface.Audio, self._interfacea[interface.Audio])
 
     def state_was_updated(self) -> None:
         """Call when state was updated.

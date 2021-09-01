@@ -10,6 +10,7 @@ import pytest
 from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, Protocol
+from pyatv.core import SetupData
 from pyatv.interface import (
     Audio,
     DeviceListener,
@@ -20,6 +21,8 @@ from pyatv.interface import (
     PushUpdater,
 )
 from pyatv.support.facade import FacadeAppleTV, SetupData
+
+pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture(name="facade_dummy")
@@ -35,11 +38,14 @@ class SetupDataGenerator:
         self.connect_called: bool = False
         self.close_called: bool = False
         self.close_calls: int = 0
+        self.interfaces: Mapping[Any, Any] = {}
         self.features: set = set(features)
         self.pending_tasks: set = set()
+        self.connect_succeeded = True
 
     async def connect(self):
         self.connect_called = True
+        return self.connect_succeeded
 
     def close(self):
         self.close_called = True
@@ -47,7 +53,9 @@ class SetupDataGenerator:
         return self.pending_tasks
 
     def get_setup_data(self) -> SetupData:
-        return self.protocol, self.connect, self.close, self.features
+        return SetupData(
+            self.protocol, self.connect, self.close, self.interfaces, self.features
+        )
 
 
 class DummyFeatures(Features):
@@ -119,25 +127,50 @@ def register_interface_fixture(facade_dummy):
     def _register_func(feature: FeatureName, instance, protocol: Protocol):
         interface = inspect.getmro(type(instance))[1]
         sdg = SetupDataGenerator(protocol, feature)
-        facade_dummy.interfaces[interface].register(instance, protocol)
-        facade_dummy.add_protocol(protocol, sdg.get_setup_data())
+        sdg.interfaces[interface] = instance
+        facade_dummy.add_protocol(sdg.get_setup_data())
         return instance, sdg
 
     yield _register_func
 
 
-@pytest.mark.asyncio
 async def test_connect_with_no_protocol(facade_dummy):
     with pytest.raises(exceptions.NoServiceError):
         await facade_dummy.connect()
 
 
-def test_features_multi_instances(facade_dummy, register_interface):
+async def test_connect_again_raises(facade_dummy, register_interface):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    await facade_dummy.connect()
+
+    with pytest.raises(exceptions.InvalidStateError):
+        await facade_dummy.connect()
+
+
+async def test_add_after_connect_raises(facade_dummy, register_interface):
+    feat = facade_dummy.features
+
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    assert feat.get_feature(FeatureName.Play).state == FeatureState.Unsupported
+
+    await facade_dummy.connect()
+
+    assert feat.get_feature(FeatureName.Play).state == FeatureState.Available
+
+
+async def test_interface_not_exposed_prior_to_connect(facade_dummy, register_interface):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+
+    await facade_dummy.connect()
+
+
+async def test_features_multi_instances(facade_dummy, register_interface):
     register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
     register_interface(
         FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
     )
 
+    await facade_dummy.connect()
     feat = facade_dummy.features
 
     # State from MRP
@@ -150,12 +183,13 @@ def test_features_multi_instances(facade_dummy, register_interface):
     assert feat.get_feature(FeatureName.PlayUrl).state == FeatureState.Unsupported
 
 
-def test_add_existing_protocol_ignores(facade_dummy, register_interface):
+async def test_ignore_already_connected_protocol(facade_dummy, register_interface):
     register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
     register_interface(
         FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.DMAP
     )
 
+    await facade_dummy.connect()
     feat = facade_dummy.features
 
     assert feat.get_feature(FeatureName.Play).state == FeatureState.Available
@@ -165,7 +199,7 @@ def test_add_existing_protocol_ignores(facade_dummy, register_interface):
     assert feat.get_feature(FeatureName.Pause).state == FeatureState.Unsupported
 
 
-def test_features_feature_overlap_uses_priority(facade_dummy, register_interface):
+async def test_features_feature_overlap_uses_priority(facade_dummy, register_interface):
     # Pause available for DMAP but not MRP -> pause is unavailable because MRP prio
     register_interface(
         FeatureName.Pause,
@@ -176,13 +210,14 @@ def test_features_feature_overlap_uses_priority(facade_dummy, register_interface
         FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.DMAP
     )
 
+    await facade_dummy.connect()
     assert (
         facade_dummy.features.get_feature(FeatureName.Pause).state
         == FeatureState.Unavailable
     )
 
 
-def test_features_push_updates(facade_dummy, event_loop, register_interface):
+async def test_features_push_updates(facade_dummy, event_loop, register_interface):
     feat = facade_dummy.features
 
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Unsupported
@@ -191,10 +226,10 @@ def test_features_push_updates(facade_dummy, event_loop, register_interface):
         FeatureName.PushUpdates, DummyPushUpdater(event_loop), Protocol.MRP
     )
 
+    await facade_dummy.connect()
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Available
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
 )
@@ -202,6 +237,7 @@ async def test_power_prefer_companion(feature, func, facade_dummy, register_inte
     power_mrp, _ = register_interface(feature, DummyPower(), Protocol.MRP)
     power_comp, _ = register_interface(feature, DummyPower(), Protocol.Companion)
 
+    await facade_dummy.connect()
     await getattr(facade_dummy.power, func)()
 
     assert not getattr(power_mrp, f"{func}_called")
@@ -211,6 +247,8 @@ async def test_power_prefer_companion(feature, func, facade_dummy, register_inte
 @pytest.mark.parametrize("volume", [-0.1, 100.1])
 async def test_audio_get_volume_out_of_range(facade_dummy, register_interface, volume):
     register_interface(FeatureName.Volume, DummyAudio(volume), Protocol.RAOP)
+
+    await facade_dummy.connect()
 
     with pytest.raises(exceptions.ProtocolError):
         facade_dummy.audio.volume
@@ -228,8 +266,8 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
     obj = MagicMock()
     obj.called = False
 
-    async def connect() -> None:
-        pass
+    async def connect() -> bool:
+        return True
 
     def close() -> Set[asyncio.Task]:
         async def close_task() -> None:
@@ -238,8 +276,12 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
         return set([asyncio.ensure_future(close_task())])
 
     facade_dummy.add_protocol(
-        Protocol.DMAP, (Protocol.DMAP, connect, close, {FeatureName.Play})
+        SetupData(
+            Protocol.DMAP, connect, close, {Power: DummyPower()}, {FeatureName.Play}
+        ),
     )
+
+    await facade_dummy.connect()
 
     # close will return remaining tasks but not run them
     tasks = facade_dummy.close()
@@ -252,7 +294,6 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
     assert session_manager.session.closed
 
 
-@pytest.mark.asyncio
 async def test_only_one_device_update(facade_dummy):
     listener = DummyDeviceListener()
     facade_dummy.listener = listener
@@ -266,7 +307,7 @@ async def test_only_one_device_update(facade_dummy):
     assert listener.closed_calls == 0
 
 
-def test_device_update_disconnect_protocols(facade_dummy, register_interface):
+async def test_device_update_disconnect_protocols(facade_dummy, register_interface):
     _, dmap_sdg = register_interface(
         FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
     )
@@ -274,30 +315,35 @@ def test_device_update_disconnect_protocols(facade_dummy, register_interface):
         FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
     )
 
+    await facade_dummy.connect()
     facade_dummy.listener.connection_closed()
 
     assert dmap_sdg.close_called
     assert mrp_sdg.close_called
 
 
-def test_close_only_once(facade_dummy, register_interface):
+async def test_close_only_once(facade_dummy, register_interface):
     _, sdg = register_interface(
         FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
     )
 
-    facade_dummy.close()
-    assert sdg.close_calls == 1
+    await facade_dummy.connect()
 
     facade_dummy.close()
     assert sdg.close_calls == 1
 
+    facade_dummy.close()
+    assert sdg.close_calls == 1
 
-def test_close_returns_pending_tasks_from_previous_close(
+
+async def test_close_returns_pending_tasks_from_previous_close(
     facade_dummy, register_interface
 ):
     _, sdg = register_interface(
         FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
     )
+
+    await facade_dummy.connect()
 
     task = MagicMock()
     sdg.pending_tasks.add(task)

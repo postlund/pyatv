@@ -4,19 +4,7 @@ import asyncio
 from enum import Enum
 import logging
 from random import randint
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Mapping,
-    Optional,
-    Set,
-    Tuple,
-    cast,
-)
+from typing import Dict, Generator, List, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -29,6 +17,7 @@ from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.core import SetupData
 from pyatv.interface import (
     App,
     Apps,
@@ -41,7 +30,6 @@ from pyatv.interface import (
 )
 from pyatv.support import mdns
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.relayer import Relayer
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
@@ -330,19 +318,9 @@ def scan() -> Mapping[str, ScanHandler]:
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
-    interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Generator[
-    Tuple[
-        Protocol,
-        Callable[[], Awaitable[None]],
-        Callable[[], Set[asyncio.Task]],
-        Set[FeatureName],
-    ],
-    None,
-    None,
-]:
+) -> Generator[SetupData, None, None]:
     """Set up a new Companion service."""
     service = config.get_service(Protocol.Companion)
     assert service is not None
@@ -353,23 +331,24 @@ def setup(
 
     api = CompanionAPI(config, loop)
 
-    interfaces[Apps].register(CompanionApps(api), Protocol.Companion)
-    interfaces[Features].register(
-        CompanionFeatures(cast(conf.CompanionService, service)), Protocol.Companion
-    )
-    interfaces[Power].register(CompanionPower(api), Protocol.Companion)
-    interfaces[RemoteControl].register(CompanionRemoteControl(api), Protocol.Companion)
+    interfaces = {
+        Apps: CompanionApps(api),
+        Features: CompanionFeatures(cast(conf.CompanionService, service)),
+        Power: CompanionPower(api),
+        RemoteControl: CompanionRemoteControl(api),
+    }
 
-    async def _connect() -> None:
-        pass
+    async def _connect() -> bool:
+        return True
 
     def _close() -> Set[asyncio.Task]:
         return set()
 
-    yield (
+    yield SetupData(
         Protocol.Companion,
         _connect,
         _close,
+        interfaces,
         SUPPORTED_FEATURES,
     )
 

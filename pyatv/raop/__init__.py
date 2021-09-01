@@ -4,23 +4,12 @@ import asyncio
 import io
 import logging
 import math
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    Mapping,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions
 from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
 from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
@@ -38,7 +27,6 @@ from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
 from pyatv.support import map_range, mdns
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
-from pyatv.support.relayer import Relayer
 from pyatv.support.rtsp import RtspSession
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
@@ -394,19 +382,9 @@ def scan() -> Mapping[str, ScanHandler]:
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
-    interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Generator[
-    Tuple[
-        Protocol,
-        Callable[[], Awaitable[None]],
-        Callable[[], Set[asyncio.Task]],
-        Set[FeatureName],
-    ],
-    None,
-    None,
-]:
+) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
     service = config.get_service(Protocol.RAOP)
     assert service is not None
@@ -439,26 +417,28 @@ def setup(
     raop_listener = RaopStateListener()
     raop_audio = RaopAudio(playback_manager)
 
-    interfaces[Stream].register(
-        RaopStream(config, service, raop_listener, raop_audio, playback_manager),
-        Protocol.RAOP,
-    )
-    interfaces[Features].register(RaopFeatures(playback_manager), Protocol.RAOP)
-    interfaces[PushUpdater].register(push_updater, Protocol.RAOP)
-    interfaces[Metadata].register(metadata, Protocol.RAOP)
-    interfaces[Audio].register(raop_audio, Protocol.RAOP)
-    interfaces[RemoteControl].register(RaopRemoteControl(raop_audio), Protocol.RAOP)
+    interfaces = {
+        Stream: RaopStream(
+            config, service, raop_listener, raop_audio, playback_manager
+        ),
+        Features: RaopFeatures(playback_manager),
+        PushUpdater: push_updater,
+        Metadata: metadata,
+        Audio: raop_audio,
+        RemoteControl: RaopRemoteControl(raop_audio),
+    }
 
-    async def _connect() -> None:
-        pass
+    async def _connect() -> bool:
+        return True
 
     def _close() -> Set[asyncio.Task]:
         return set()
 
-    yield (
+    yield SetupData(
         Protocol.RAOP,
         _connect,
         _close,
+        interfaces,
         set(
             [
                 FeatureName.StreamFile,

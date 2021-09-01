@@ -3,18 +3,7 @@
 import asyncio
 import logging
 import os
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    Mapping,
-    Optional,
-    Set,
-    Tuple,
-    cast,
-)
+from typing import Generator, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions, mrp
 from pyatv.airplay import remote_control
@@ -24,6 +13,7 @@ from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import FeatureName, Protocol
+from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     FeatureInfo,
@@ -40,7 +30,6 @@ from pyatv.support.http import (
     StaticFileWebServer,
     http_connect,
 )
-from pyatv.support.relayer import Relayer
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
@@ -138,19 +127,9 @@ def scan() -> Mapping[str, ScanHandler]:
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
-    interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Generator[
-    Tuple[
-        Protocol,
-        Callable[[], Awaitable[None]],
-        Callable[[], Set[asyncio.Task]],
-        Set[FeatureName],
-    ],
-    None,
-    None,
-]:
+) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     service = config.get_service(Protocol.AirPlay)
     assert service is not None
@@ -158,19 +137,21 @@ def setup(  # pylint: disable=too-many-locals
     # TODO: Split up in connect/protocol and Stream implementation
     stream = AirPlayStream(config)
 
-    interfaces[Features].register(
-        AirPlayFeatures(cast(conf.AirPlayService, service)), Protocol.AirPlay
-    )
-    interfaces[Stream].register(stream, Protocol.AirPlay)
+    interfaces = {
+        Features: AirPlayFeatures(cast(conf.AirPlayService, service)),
+        Stream: stream,
+    }
 
-    async def _connect() -> None:
-        pass
+    async def _connect() -> bool:
+        return True
 
     def _close() -> Set[asyncio.Task]:
         stream.close()
         return set()
 
-    yield Protocol.AirPlay, _connect, _close, set([FeatureName.PlayUrl])
+    yield SetupData(
+        Protocol.AirPlay, _connect, _close, interfaces, set([FeatureName.PlayUrl])
+    )
 
     credentials = extract_credentials(service)
 
@@ -187,24 +168,31 @@ def setup(  # pylint: disable=too-many-locals
 
         # When tunneling, we don't have any identifier or port available at this stage
         config.add_service(conf.MrpService(None, 0))
-        _, mrp_connect, mrp_close, mrp_features = mrp.create_with_connection(
+        (
+            _,
+            mrp_connect,
+            mrp_close,
+            mrp_interfaces,
+            mrp_features,
+        ) = mrp.create_with_connection(
             loop,
             config,
-            interfaces,
             device_listener,
             session_manager,
             AirPlayMrpConnection(control, device_listener),
             requires_heatbeat=False,  # Already have heartbeat on control channel
         )
 
-        async def _connect_rc() -> None:
+        async def _connect_rc() -> bool:
             try:
 
                 await control.start(str(config.address), control_port, credentials)
             except Exception as ex:
                 _LOGGER.exception("failed to set up remote control channel: %s", ex)
+                return False
             else:
                 await mrp_connect()
+            return True
 
         def _close_rc() -> Set[asyncio.Task]:
             tasks = set()
@@ -212,7 +200,9 @@ def setup(  # pylint: disable=too-many-locals
             tasks.update(control.stop())
             return tasks
 
-        yield Protocol.MRP, _connect_rc, _close_rc, mrp_features
+        yield SetupData(
+            Protocol.MRP, _connect_rc, _close_rc, mrp_interfaces, mrp_features
+        )
 
 
 def pair(
