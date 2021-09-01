@@ -49,7 +49,7 @@ class ProtocolImpl(NamedTuple):
 
     setup: SetupMethod
     scan: ScanMethod
-    pair: Optional[PairMethod]
+    pair: PairMethod
 
 
 _PROTOCOLS = {
@@ -61,7 +61,7 @@ _PROTOCOLS = {
     ),
     Protocol.DMAP: ProtocolImpl(dmap_proto.setup, dmap_proto.scan, dmap_proto.pair),
     Protocol.MRP: ProtocolImpl(mrp_proto.setup, mrp_proto.scan, mrp_proto.pair),
-    Protocol.RAOP: ProtocolImpl(raop_proto.setup, raop_proto.scan, None),
+    Protocol.RAOP: ProtocolImpl(raop_proto.setup, raop_proto.scan, raop_proto.pair),
 }
 
 
@@ -156,10 +156,9 @@ async def pair(
     if not proto_impl:
         raise RuntimeError(f"missing implementation for {protocol}")
 
-    handler = proto_impl.pair
-    if handler is None:
-        raise exceptions.NotSupportedError(
-            f"protocol {protocol} does not support pairing"
-        )
-
-    return handler(config, service, await http.create_session(session), loop, **kwargs)
+    session = await http.create_session(session)
+    try:
+        return proto_impl.pair(config, service, session, loop, **kwargs)
+    except Exception:
+        await session.close()
+        raise

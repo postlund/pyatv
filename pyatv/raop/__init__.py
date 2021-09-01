@@ -7,15 +7,19 @@ import math
 from typing import Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions
-from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
+from pyatv.airplay import features as ap_features
+from pyatv.airplay.pairing import AirPlayPairingHandler
+from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
+    BaseService,
     FeatureInfo,
     Features,
     Metadata,
+    PairingHandler,
     Playing,
     PushUpdater,
     RemoteControl,
@@ -278,7 +282,7 @@ class RaopStream(Stream):
         audio_file: Optional[AudioSource] = None
         try:
             client, _, context = await self.playback_manager.setup()
-            client.credentials = self._get_credentials()
+            client.credentials = parse_credentials(self.service.credentials)
             client.password = self.service.password
 
             client.listener = self.listener
@@ -325,21 +329,6 @@ class RaopStream(Stream):
             if audio_file:
                 await audio_file.close()
             await self.playback_manager.teardown()
-
-    def _get_credentials(self) -> Optional[HapCredentials]:
-        credentials: Optional[str] = None
-
-        # First and foremost use RAOP credentials, otherwise fall back to AirPlay
-        # if available
-        if self.service.credentials:
-            credentials = self.service.credentials
-        else:
-            service = self.config.get_service(Protocol.AirPlay)
-            if service:
-                airplay_service = cast(conf.AirPlayService, service)
-                credentials = airplay_service.credentials
-
-        return parse_credentials(credentials)
 
 
 class RaopRemoteControl(RemoteControl):
@@ -454,4 +443,26 @@ def setup(
                 FeatureName.VolumeDown,
             ]
         ),
+    )
+
+
+def pair(
+    config: conf.AppleTV,
+    service: BaseService,
+    session_manager: ClientSessionManager,
+    loop: asyncio.AbstractEventLoop,
+    **kwargs
+) -> PairingHandler:
+    """Return pairing handler for protocol."""
+    features = service.properties.get("ft")
+    if not features:
+        # TODO: Better handle cases like these (provide API)
+        raise exceptions.NotSupportedError("pairing not required")
+
+    parsed = ap_features.parse(features)
+    if ap_features.AirPlayFeatures.SupportsLegacyPairing not in parsed:
+        raise exceptions.NotSupportedError("legacy pairing not supported")
+
+    return AirPlayPairingHandler(
+        config, service, session_manager, AuthenticationType.Legacy, **kwargs
     )

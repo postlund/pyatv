@@ -9,7 +9,7 @@ from pyatv import conf, exceptions, mrp
 from pyatv.airplay import remote_control
 from pyatv.airplay.auth import extract_credentials, verify_connection
 from pyatv.airplay.mrp_connection import AirPlayMrpConnection
-from pyatv.airplay.pairing import AirPlayPairingHandler
+from pyatv.airplay.pairing import AirPlayPairingHandler, get_preferred_auth_type
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import FeatureName, Protocol
@@ -214,4 +214,6 @@ def pair(
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return AirPlayPairingHandler(config, service, session_manager, loop, **kwargs)
+    return AirPlayPairingHandler(
+        config, service, session_manager, get_preferred_auth_type(service), **kwargs
+    )
