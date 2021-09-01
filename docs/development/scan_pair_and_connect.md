@@ -4,6 +4,11 @@ title: Scan, Pair and Connect
 permalink: /development/scan_pair_and_connect/
 link_group: development
 ---
+# Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
 # Scan, Pair and Connect
 
 Finding a device, pairing with it and connecting to it are the basic actions needed
@@ -268,3 +273,22 @@ Please do note that this is not the recommended way as it has a couple of flaws:
 
 It can however be convenient to have if you test things when developing pyatv
 as you can shorten the feedback loop, since scanning can be avoided. But be warned.
+
+#### Closing connection
+
+To close the connection, use {% include api i="interface.AppleTV.close" %}:
+
+```python
+atv = await pyatv.connect(config, loop)
+
+# Do something
+
+atv.close()
+```
+
+A set of pending tasks are returned by {% include api i="interface.AppleTV.close" %},
+which can be awaited to make sure everything has been torn down:
+
+```python
+await asyncio.gather(*atv.close())
+```
