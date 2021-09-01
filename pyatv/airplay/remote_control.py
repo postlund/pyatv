@@ -36,6 +36,9 @@ DATASTREAM_INPUT_INFO = "DataStream-Input-Encryption-Key"
 def is_supported(service: BaseService) -> bool:
     """Return if device supports remote control tunneling."""
     model = service.properties.get("model", "")
+    if model.startswith("AudioAccessory"):
+        return True
+
     if not model.startswith("AppleTV"):
         return False
 

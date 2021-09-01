@@ -1,22 +1,70 @@
 """Abstraction for authentication based on HAP/SRP."""
 import binascii
+from enum import Enum, auto
 from typing import Optional, Tuple
 
 from pyatv import exceptions
 
+# pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
+
+class AuthenticationType(Enum):
+    """Supported authentication type."""
+
+    Null = auto()
+    """No authentication (just pass through)."""
+
+    Legacy = auto()
+    """Legacy SRP based authentication."""
+
+    HAP = auto()
+    """Authentication based on HAP (Home-Kit)."""
+
+    Transient = auto()
+    """Authentication based on transient HAP (Home-Kit)."""
+
+
+# pylint: enable=invalid-name
+
+
 class HapCredentials:
     """Identifiers and encryption keys used by HAP."""
 
     def __init__(
-        self, ltpk: bytes, ltsk: bytes, atv_id: bytes, client_id: bytes
+        self,
+        ltpk: bytes = b"",
+        ltsk: bytes = b"",
+        atv_id: bytes = b"",
+        client_id: bytes = b"",
     ) -> None:
         """Initialize a new Credentials."""
         self.ltpk: bytes = ltpk
         self.ltsk: bytes = ltsk
         self.atv_id: bytes = atv_id
         self.client_id: bytes = client_id
+        self.type: AuthenticationType = self._get_auth_type()
+
+    def _get_auth_type(self) -> AuthenticationType:
+        if (
+            self.ltpk == b""
+            and self.ltsk == b""
+            and self.atv_id == b""
+            and self.client_id == b""
+        ):
+            return AuthenticationType.Null
+        if self.ltpk == b"transient":
+            return AuthenticationType.Transient
+        if (
+            self.ltpk == b""
+            and self.ltsk != b""
+            and self.atv_id == b""
+            and self.client_id != b""
+        ):
+            return AuthenticationType.Legacy
+        if self.ltpk and self.ltsk and self.atv_id and self.client_id:
+            return AuthenticationType.HAP
+
+        raise exceptions.InvalidCredentialsError("invalid credentials type")
 
     def __eq__(self, other: object) -> bool:
         """Return if two instances of HapCredentials are equal."""
@@ -64,7 +112,8 @@ class PairVerifyProcedure:
         """Return derived encryption keys."""
 
 
-NO_CREDENTIALS = HapCredentials(b"", b"", b"", b"")
+NO_CREDENTIALS = HapCredentials()
+TRANSIENT_CREDENTIALS = HapCredentials(b"transient")
 
 
 def parse_credentials(detail_string: Optional[str]) -> HapCredentials:

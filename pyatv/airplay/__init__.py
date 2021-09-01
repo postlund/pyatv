@@ -18,11 +18,11 @@ from typing import (
 
 from pyatv import conf, exceptions, mrp
 from pyatv.airplay import remote_control
-from pyatv.airplay.auth import verify_connection
+from pyatv.airplay.auth import extract_credentials, verify_connection
 from pyatv.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.airplay.player import AirPlayPlayer
-from pyatv.auth.hap_pairing import HapCredentials, parse_credentials
+from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import FeatureName, Protocol
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -172,15 +172,21 @@ def setup(  # pylint: disable=too-many-locals
 
     yield Protocol.AirPlay, _connect, _close, set([FeatureName.PlayUrl])
 
+    credentials = extract_credentials(service)
+
     # Set up remote control channel if it is supported
-    if remote_control.is_supported(service) and service.credentials:
+    if not remote_control.is_supported(service):
+        _LOGGER.debug("Remote control not supported by device")
+    elif credentials.type not in [AuthenticationType.HAP, AuthenticationType.Transient]:
+        _LOGGER.debug("%s not supported by remote control channel", credentials.type)
+    else:
         _LOGGER.debug("Remote control channel is supported")
 
         control = remote_control.RemoteControl(
             loop,
             str(config.address),
             service.port,
-            parse_credentials(service.credentials),
+            credentials,
         )
 
         # When tunneling, we don't have any identifier or port available at this stage
@@ -196,8 +202,12 @@ def setup(  # pylint: disable=too-many-locals
         )
 
         async def _connect_rc() -> None:
-            await control.start()
-            await mrp_connect()
+            try:
+                await control.start()
+            except exceptions.ProtocolError as ex:
+                _LOGGER.warning("failed to set up remote control channel: %s", ex)
+            else:
+                await mrp_connect()
 
         def _close_rc() -> Set[asyncio.Task]:
             mrp_close()
