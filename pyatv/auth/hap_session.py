@@ -21,6 +21,7 @@ class HAPSession:
         self,
     ) -> None:
         """Initialize a new HAPSession instance."""
+        self._encrypted_data = b""
         self.chacha20: Optional[Chacha20Cipher] = None
 
     def enable(self, output_key: bytes, input_key: bytes) -> None:
@@ -32,15 +33,21 @@ class HAPSession:
         if self.chacha20 is None:
             return data
 
+        self._encrypted_data += data
+
         output = b""
-        while data:
-            length = data[0:2]
+        while self._encrypted_data:
+            length = self._encrypted_data[0:2]
             block_length = (
                 int.from_bytes(length, byteorder="little") + self.AUTH_TAG_LENGTH
             )
-            block = data[2 : 2 + block_length]
+            if len(self._encrypted_data) < block_length + 2:
+                return output
+
+            block = self._encrypted_data[2 : 2 + block_length]
             output += self.chacha20.decrypt(block, aad=length)
-            data = data[2 + block_length :]
+
+            self._encrypted_data = self._encrypted_data[2 + block_length :]
         return output
 
     def encrypt(self, data: bytes) -> bytes:

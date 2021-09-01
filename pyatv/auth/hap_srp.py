@@ -57,6 +57,11 @@ class SRPAuthHandler:
         self._shared = None
         self._session_key = None
 
+    @property
+    def shared_key(self) -> bytes:
+        """Return shared secret."""
+        return self._session.key
+
     def initialize(self):
         """Initialize operation by generating new keys."""
         self._signing_key = Ed25519PrivateKey.from_private_bytes(os.urandom(32))

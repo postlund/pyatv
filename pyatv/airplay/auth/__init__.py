@@ -1,13 +1,14 @@
 """Pick authentication type based on device support."""
-from enum import Enum
 import logging
 from typing import Tuple
 
 from pyatv import exceptions
+from pyatv.airplay import features as ft
 from pyatv.airplay.auth.hap import (
     AirPlayHapPairSetupProcedure,
     AirPlayHapPairVerifyProcedure,
 )
+from pyatv.airplay.auth.hap_transient import AirPlayHapTransientPairVerifyProcedure
 from pyatv.airplay.auth.legacy import (
     AirPlayLegacyPairSetupProcedure,
     AirPlayLegacyPairVerifyProcedure,
@@ -15,12 +16,16 @@ from pyatv.airplay.auth.legacy import (
 from pyatv.airplay.srp import LegacySRPAuthHandler, new_credentials
 from pyatv.auth.hap_pairing import (
     NO_CREDENTIALS,
+    TRANSIENT_CREDENTIALS,
+    AuthenticationType,
     HapCredentials,
     PairSetupProcedure,
     PairVerifyProcedure,
+    parse_credentials,
 )
 from pyatv.auth.hap_session import HAPSession
 from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.interface import BaseService
 from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,22 +33,6 @@ _LOGGER = logging.getLogger(__name__)
 CONTROL_SALT = "Control-Salt"
 CONTROL_OUTPUT_INFO = "Control-Write-Encryption-Key"
 CONTROL_INPUT_INFO = "Control-Read-Encryption-Key"
-
-
-# pylint: disable=invalid-name
-
-
-class AuthenticationType(Enum):
-    """Supported authentication type."""
-
-    Legacy = 1
-    """Legacy SRP based authentication."""
-
-    HAP = 2
-    """Authentication based on HAP (Home-Kit)."""
-
-
-# pylint: enable=invalid-name
 
 
 class NullPairVerifyProcedure:
@@ -62,17 +51,6 @@ class NullPairVerifyProcedure:
         )
 
 
-def _get_auth_type(credentials: HapCredentials) -> AuthenticationType:
-    if (
-        credentials.ltpk == b""
-        and credentials.ltsk != b""
-        and credentials.atv_id == b""
-        and credentials.client_id != b""
-    ):
-        return AuthenticationType.Legacy
-    return AuthenticationType.HAP
-
-
 def pair_setup(
     auth_type: AuthenticationType, connection: HttpConnection
 ) -> PairSetupProcedure:
@@ -83,35 +61,36 @@ def pair_setup(
         srp = LegacySRPAuthHandler(new_credentials())
         srp.initialize()
         return AirPlayLegacyPairSetupProcedure(connection, srp)
+    if auth_type == AuthenticationType.HAP:
+        srp = SRPAuthHandler()
+        srp.initialize()
+        return AirPlayHapPairSetupProcedure(connection, srp)
 
-    # HAP
-    srp = SRPAuthHandler()
-    srp.initialize()
-    return AirPlayHapPairSetupProcedure(connection, srp)
+    raise exceptions.NotSupportedError(
+        f"authentication type {auth_type} does not support Pair-Setup"
+    )
 
 
 def pair_verify(
     credentials: HapCredentials, connection: HttpConnection
 ) -> PairVerifyProcedure:
     """Return procedure object used for Pair-Verify."""
-    if credentials == NO_CREDENTIALS:
-        return NullPairVerifyProcedure()
-
-    auth_type = _get_auth_type(credentials)
-
     _LOGGER.debug(
-        "Setting up new AirPlay Pair-Verify procedure with type %s", auth_type
+        "Setting up new AirPlay Pair-Verify procedure with type %s", credentials.type
     )
 
-    if auth_type == AuthenticationType.Legacy:
+    if credentials.type == AuthenticationType.Null:
+        return NullPairVerifyProcedure()
+    if credentials.type == AuthenticationType.Legacy:
         srp = LegacySRPAuthHandler(credentials)
         srp.initialize()
         return AirPlayLegacyPairVerifyProcedure(connection, srp)
 
-    # HAP
     srp = SRPAuthHandler()
     srp.initialize()
-    return AirPlayHapPairVerifyProcedure(connection, srp, credentials)
+    if credentials.type == AuthenticationType.HAP:
+        return AirPlayHapPairVerifyProcedure(connection, srp, credentials)
+    return AirPlayHapTransientPairVerifyProcedure(connection, srp)
 
 
 async def verify_connection(
@@ -132,3 +111,18 @@ async def verify_connection(
         connection.send_processor = session.encrypt
 
     return verifier
+
+
+def extract_credentials(service: BaseService) -> HapCredentials:
+    """Extract credentials from service based on what's supported."""
+    if service.credentials is not None:
+        return parse_credentials(service.credentials)
+
+    features = ft.parse(service.properties.get("features", "0x0"))
+    if (
+        ft.AirPlayFeatures.SupportsSystemPairing in features
+        or ft.AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features
+    ):
+        return TRANSIENT_CREDENTIALS
+
+    return NO_CREDENTIALS

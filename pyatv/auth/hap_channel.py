@@ -52,10 +52,11 @@ class AbstractHAPChannel(ABC, StateProducer, asyncio.Protocol):
         """Message was received from device."""
         assert self.transport is not None
 
-        decrypt = self.session.decrypt(data)
         log_binary(_LOGGER, "Received data", Data=data)
-        self.buffer += decrypt
-        self.handle_received()
+        decrypt = self.session.decrypt(data)
+        if decrypt:
+            self.buffer += decrypt
+            self.handle_received()
 
     @abstractmethod
     def handle_received(self) -> None:
