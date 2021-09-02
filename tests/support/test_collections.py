@@ -4,7 +4,9 @@ from unittest.mock import sentinel
 
 import pytest
 
-from pyatv.support.collections import CaseInsensitiveDict
+from pyatv.support.collections import CaseInsensitiveDict, dict_merge
+
+# CaseInsentitiveDict
 
 
 @pytest.fixture
@@ -80,3 +82,25 @@ def test_init_kwargs():
     assert cid["foo"] == sentinel.foO
     assert cid["bar"] == sentinel.BAR
     assert len(cid) == 2
+
+
+# dict_merge
+
+
+@pytest.mark.parametrize(
+    "dict_a,dict_b,expected",
+    [
+        ({"a": 1}, {}, {"a": 1}),
+        ({}, {"a": 1}, {"a": 1}),
+        ({"a": 1}, {"a": 2}, {"a": 1}),
+    ],
+)
+def test_dict_merge(dict_a, dict_b, expected):
+    assert dict_merge(dict_a, dict_b) == expected
+
+
+def test_dict_merge_returns_dict_a():
+    dict_a = {"a": 1}
+    dict_b = {"b": 2}
+    merged = dict_merge(dict_a, dict_b)
+    assert merged is dict_a

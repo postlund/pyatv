@@ -5,6 +5,18 @@ import typing
 T = typing.TypeVar("T")
 
 
+def dict_merge(
+    dict_a: typing.Dict[typing.Any, typing.Any],
+    dict_b: typing.Mapping[typing.Any, typing.Any],
+) -> typing.Dict[typing.Any, typing.Any]:
+    """Merge items from dict_b into dict_a, not overriding existing keys.
+
+    This is effectively the same as the merge operator in python 3.9: dict_a | dict_b
+    """
+    dict_a.update({key: value for key, value in dict_b.items() if key not in dict_a})
+    return dict_a
+
+
 class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
     typing.MutableMapping[str, T]
 ):
