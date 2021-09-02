@@ -742,20 +742,30 @@ class Power(ABC, StateProducer):
 class DeviceInfo:
     """General information about device."""
 
-    def __init__(
-        self,
-        os: const.OperatingSystem,
-        version: Optional[str],
-        build_number: Optional[str],
-        model: const.DeviceModel,
-        mac: Optional[str],
-    ) -> None:
+    OPERATING_SYSTEM = "os"
+    VERSION = "version"
+    BUILD_NUMBER = "build_number"
+    MODEL = "model"
+    MAC = "mac"
+
+    def __init__(self, device_info: Mapping[str, Any]) -> None:
         """Initialize a new DeviceInfo instance."""
-        self._os = os
-        self._version = version
-        self._build_number = build_number
-        self._model = model
-        self._mac = mac
+        self._devinfo = device_info
+        self._os = self._pop_with_type(
+            self.OPERATING_SYSTEM, OperatingSystem.Unknown, OperatingSystem
+        )
+        self._version = self._pop_with_type(self.VERSION, None, str)
+        self._build_number = self._pop_with_type(self.BUILD_NUMBER, None, str)
+        self._model = self._pop_with_type(self.MODEL, DeviceModel.Unknown, DeviceModel)
+        self._mac = self._pop_with_type(self.MAC, None, str)
+
+    def _pop_with_type(self, field, default, expected_type):
+        value = self._devinfo.pop(field, default)
+        if value is None or isinstance(value, expected_type):
+            return value
+        raise TypeError(
+            f"expected {expected_type} for '{field}'' but got {type(value)}"
+        )
 
     @property
     def operating_system(self) -> const.OperatingSystem:

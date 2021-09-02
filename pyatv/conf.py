@@ -173,7 +173,15 @@ class AppleTV:
                 mac = props["macaddress"].replace("-", ":").upper()
             version = props.get("syVs")
 
-        return DeviceInfo(os_type, version, build, model, mac)
+        return DeviceInfo(
+            {
+                DeviceInfo.OPERATING_SYSTEM: os_type,
+                DeviceInfo.VERSION: version,
+                DeviceInfo.BUILD_NUMBER: build,
+                DeviceInfo.MODEL: model,
+                DeviceInfo.MAC: mac,
+            }
+        )
 
     def _all_properties(self) -> Mapping[str, str]:
         properties: Dict[str, str] = {}
