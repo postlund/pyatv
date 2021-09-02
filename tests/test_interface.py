@@ -15,7 +15,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.interface import App, FeatureInfo, Playing
+from pyatv.interface import App, DeviceInfo, FeatureInfo, Playing
 
 # Contains two valid values for each property that are tested
 # against each other
@@ -242,50 +242,80 @@ async def test_metadata_rest_not_supported():
 # DEVICE INFO
 
 
-def test_fields_set():
-    dev_info = interface.DeviceInfo(
-        OperatingSystem.TvOS,
-        "1.2.3",
-        "19A123",
-        DeviceModel.Gen4K,
-        "aa:bb:cc:dd:ee:ff",
-    )
+@pytest.mark.parametrize(
+    "indata,os,version,build_number,model,mac",
+    [
+        ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None),
+        (
+            {
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+                DeviceInfo.VERSION: "1.0",
+                DeviceInfo.BUILD_NUMBER: "ABC",
+                DeviceInfo.MODEL: DeviceModel.Gen3,
+                DeviceInfo.MAC: "AA:BB:CC:DD:EE:FF",
+            },
+            OperatingSystem.TvOS,
+            "1.0",
+            "ABC",
+            DeviceModel.Gen3,
+            "AA:BB:CC:DD:EE:FF",
+        ),
+    ],
+)
+def test_device_info_empty_input(indata, os, version, build_number, model, mac):
+    dev_info = DeviceInfo(indata)
+    assert dev_info.operating_system == os
+    assert dev_info.version == version
+    assert dev_info.build_number == build_number
+    assert dev_info.model == model
+    assert dev_info.mac == mac
 
-    assert dev_info.operating_system == OperatingSystem.TvOS
-    assert dev_info.version == "1.2.3"
-    assert dev_info.build_number == "19A123"
-    assert dev_info.model == DeviceModel.Gen4K
-    assert dev_info.mac == "aa:bb:cc:dd:ee:ff"
+
+@pytest.mark.parametrize(
+    "indata",
+    [
+        {DeviceInfo.OPERATING_SYSTEM: "bad"},
+        {DeviceInfo.VERSION: 123},
+        {DeviceInfo.BUILD_NUMBER: 456},
+        {DeviceInfo.MODEL: "bad"},
+        {DeviceInfo.MAC: 789},
+    ],
+)
+def test_device_info_bad_types(indata):
+    with pytest.raises(TypeError):
+        DeviceInfo(indata)
 
 
-def test_apple_tv_software_str():
-    dev_info = interface.DeviceInfo(
-        OperatingSystem.Legacy,
-        "2.2.3",
-        "13D333",
-        DeviceModel.Gen3,
-        "aa:bb:cc:dd:ee:ff",
+def test_device_info_apple_tv_software_str():
+    dev_info = DeviceInfo(
+        {
+            DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy,
+            DeviceInfo.VERSION: "2.2.3",
+            DeviceInfo.BUILD_NUMBER: "13D333",
+            DeviceInfo.MODEL: DeviceModel.Gen3,
+            DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff",
+        }
     )
 
     assert str(dev_info) == "Gen3 ATV SW 2.2.3 build 13D333"
 
 
-def test_tvos_str():
-    dev_info = interface.DeviceInfo(
-        OperatingSystem.TvOS,
-        "1.2.3",
-        "19A123",
-        DeviceModel.Gen4K,
-        "aa:bb:cc:dd:ee:ff",
+def test_device_info_tvos_str():
+    dev_info = DeviceInfo(
+        {
+            DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            DeviceInfo.VERSION: "1.2.3",
+            DeviceInfo.BUILD_NUMBER: "19A123",
+            DeviceInfo.MODEL: DeviceModel.Gen4K,
+            DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff",
+        }
     )
 
     assert str(dev_info) == "Gen4K tvOS 1.2.3 build 19A123"
 
 
-def test_unknown_str():
-    dev_info = interface.DeviceInfo(
-        OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None
-    )
+def test_device_info_unknown_str():
+    dev_info = DeviceInfo({})
 
     assert str(dev_info) == "Unknown Model Unknown OS"
 
@@ -346,6 +376,7 @@ def test_app_str():
     assert "App: name (id)" == str(app)
 
 
+# TODO: Replace with dataclass (>=3.7)
 def test_app_equality():
     assert App(None, None) != "test"
     assert App(None, None) == App(None, None)
@@ -374,10 +405,3 @@ def test_post_ignore_duplicate_update(event_loop, updates):
 
     assert listener.playstatus_update.call_count == 1
     listener.playstatus_update.assert_called_once_with(ANY, playing)
-
-
-# REMOTE CONTROL
-
-# @pytest.mark.asyncio
-# async def test_remote_control_not_supported():
-#    with pytest.raises(exceptions.NotSupportedError):
