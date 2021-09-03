@@ -55,10 +55,10 @@ Services:
 Or run in a container (x86_64, aarch64, armv7):
 
 ```raw
-docker run --rm --network=host ghcr.io/postlund/pyatv:latest atvremote scan
+docker run --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
 ```
 
-The `latest` tag points to latest commit on the `master` branch and can
+The `master` tag points to latest commit on the `master` branch and can
 be changed to a specific version, e.g. `v0.8.2`.
 
 # I need to change something?

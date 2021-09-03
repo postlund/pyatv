@@ -153,9 +153,7 @@ def setup(
     interfaces: Dict[Any, Relayer],
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
-) -> Optional[
-    Tuple[Callable[[], Awaitable[None]], Callable[[], None], Set[FeatureName]]
-]:
+) -> Generator[SetupData, None, None]:
     # Service information for current protocol
     service = config.get_service(Protocol.XXX)
 
@@ -163,25 +161,33 @@ def setup(
     protocol = DummyProtocol()
 
     # Register interfaces with corresponding relayers
-    interfaces[RemoteControl].register(DummyRemoteControl(protocol), Protocol.XXX)
+    interfaces = {
+        RemoteControl: DummyRemoteControl(protocol)
+    }
 
     # Called for all protocols _after_ setup has been called for all protocols
-    async def _connect() -> None:
+    async def _connect() -> bool:
         await protocol.start()
+        return True  # Connect succeeded
 
     # Called when closing the device connection
-    def _close() -> None:
+    def _close() -> Set[asyncio.Task]:
         protocol.stop()
+        return set()  # Tasks thas has not yet finished
 
-    # Return connect handler, close handler and a set with _all_ features supported
+    # Yield connect handler, close handler and a set with _all_ features supported
     # by the protocol.
-    return _connect, _close, set([FeatureName.Play])
+    yield SetupData(Protocol.XXX, _connect, _close, interfaces, set([FeatureName.Play]))
 ```
 
 The `_connect` and `close` methods will be called by the facade object when connecting
-or disconnecting. For the feature interface to work properly, each protocol must return
+or disconnecting. For the feature interface to work properly, each protocol must yield
 which features they support. This is used internally in the features implementation in
 the facade to know if a protocol implements a certain feature or not.
+
+A protocol can yield as many protocol implementations as they want, even protocols of
+a different kind. This is to support the use case where one protocol is tunneled over
+another protocol, for instance how MRP is carried over a stream in AirPlay 2.
 
 ### Relaying
 
@@ -332,8 +338,8 @@ sequenceDiagram
     User ->> pyatv: connect(config)
     loop For each service in config
         pyatv ->> Protocol: setup
-        Protocol ->> Facade: register interfaces
-        Protocol ->> pyatv: connect, close, feature list
+        Protocol ->> pyatv: protocol, connect, close, interfaces, feature list
+        pyatv ->> Facade: register interfaces
     end
     pyatv ->> Facade: connect
     loop For each protocol
