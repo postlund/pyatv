@@ -46,9 +46,16 @@ that protocol.
 
 There are methods in {% include api i="conf.AppleTV" %} to add and retrieve services. When using {% include api i="pyatv.scan" %}, all discovered protocols will be added automatically and all relevant information (e.g. which port is used) is stored as well. When manually creating a configuration, you have to provide this information yourself (e.g. via  {% include api i="conf.DmapService" %} for `DMAP`, and so on).
 
-## Device Metadata
+## Device Information
 
-In some cases it's interesting to show some more user friendly metadata, like which operating system and version a device runs.  There's no "good" way of getting this information, but pyatv will pull bits and pieces from the metadata received during scanning to make a good guess. Information from both the main protocol (`DMAP` or `MRP`) and `AirPlay` are used, so if you have disabled `AirPlay`, you will lose some metadata (e.g. tvOS version).
+It is possible to extract some general information about a device,
+for instance which operating system it runs or its MAC address.
+There's generally no "good" way of obtaining this information, but pyatv
+will pull bits and pieces from the metadata received during scanning to
+make a good guess. It can also extract additional information after
+connecting to the device, since some protocols provide information once
+a connection has been made. The amount of device information available
+can because of that differ when scanning or connecting.
 
 ## Identifiers
 

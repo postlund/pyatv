@@ -70,6 +70,9 @@ PLAYER_IDENTIFIER = "com.github.postlund.pyatv"
 DEFAULT_PLAYER_ID = "MediaRemote-DefaultPlayer"
 DEFAULT_PLAYER_NAME = "Default Player"
 
+BUILD_NUMBER = "18M60"
+OS_VERSION = "14.7"  # Must match BUILD_NUMBER (take from device_info.py)
+
 
 def _fill_item(item, metadata):
     if metadata.identifier:
@@ -342,6 +345,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         resp = messages.device_information(DEVICE_NAME, "1234", update=update)
         if identifier:
             resp.identifier = identifier
+        resp.inner().systemBuildVersion = BUILD_NUMBER
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
         self.send_to_client(resp)
 

@@ -770,7 +770,14 @@ def create_with_connection(  # pylint: disable=too-many-locals
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        return device_info(service.properties)
+        devinfo = device_info(service.properties)
+
+        # Extract build number from DEVICE_INFO_MESSAGE from device
+        if protocol.device_info:
+            build_number = protocol.device_info.inner().systemBuildVersion
+            devinfo[DeviceInfo.BUILD_NUMBER] = build_number
+
+        return devinfo
 
     # Features managed by this protocol
     features = set(
