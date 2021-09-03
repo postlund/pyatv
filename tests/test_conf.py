@@ -19,39 +19,19 @@ IDENTIFIER_4 = "id4"
 CREDENTIALS_1 = "cred1"
 PASSWORD_1 = "password1"
 
-MRP_PROPERTIES = {
-    "systembuildversion": "17K795",
-    "macaddress": "ff:ee:dd:cc:bb:aa",
-}
-
-AIRPLAY_PROPERTIES = {
-    "model": "AppleTV6,2",
-    "deviceid": "ff:ee:dd:cc:bb:aa",
-    "osvers": "8.0.0",
-}
-
-RAOP_PROPERTIES = {
-    "am": "AudioAccessory5,1",
-    "ov": "14.5",
-}
-
-AIRPORT_PROPERTIES = {
-    "am": "AirPort10,115",
-}
+TEST_PROPERTIES = {"_test._tcp.local": {"foo": "bar"}}
 
 DMAP_SERVICE = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
-MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=MRP_PROPERTIES)
-AIRPLAY_SERVICE = conf.AirPlayService(
-    IDENTIFIER_3, PORT_1, properties=AIRPLAY_PROPERTIES
-)
+MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=TEST_PROPERTIES)
+AIRPLAY_SERVICE = conf.AirPlayService(IDENTIFIER_3, PORT_1)
 COMPANION_SERVICE = conf.CompanionService(PORT_3)
-RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4, properties=RAOP_PROPERTIES)
-AIRPORT_SERVICE = conf.RaopService(IDENTIFIER_1, PORT_1, properties=AIRPORT_PROPERTIES)
+RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4)
+AIRPORT_SERVICE = conf.RaopService(IDENTIFIER_1, PORT_1)
 
 
 @pytest.fixture
 def config():
-    yield conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True, model=DeviceModel.Gen2)
+    yield conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True)
 
 
 def test_address_and_name(config):
@@ -65,6 +45,11 @@ def test_equality(config):
     atv2 = conf.AppleTV(ADDRESS_1, NAME)
     atv2.add_service(conf.AirPlayService(IDENTIFIER_1, PORT_1))
     assert config != atv2
+
+
+def test_properties():
+    assert "_test._tcp.local" in MRP_SERVICE.properties
+    assert MRP_SERVICE.properties["_test._tcp.local"] == {"foo": "bar"}
 
 
 def test_add_services_and_get(config):
@@ -153,97 +138,6 @@ def test_set_credentials(config):
 
     config.set_credentials(Protocol.DMAP, "dummy")
     assert config.get_service(Protocol.DMAP).credentials == "dummy"
-
-
-def test_empty_device_info(config):
-    config = conf.AppleTV(ADDRESS_1, NAME)
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.Unknown
-    assert device_info.version is None
-    assert device_info.build_number is None
-    assert device_info.model == DeviceModel.Unknown
-    assert device_info.mac is None
-
-
-def test_tvos_device_info(config):
-    config.add_service(MRP_SERVICE)
-    config.add_service(AIRPLAY_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.TvOS
-    assert device_info.version == "8.0.0"
-    assert device_info.build_number == "17K795"
-    assert device_info.model == DeviceModel.Gen4K
-    assert device_info.mac == "FF:EE:DD:CC:BB:AA"
-
-
-def test_tvos_device_info_no_airplay(config):
-    config.add_service(MRP_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.TvOS
-    assert device_info.version == "13.3.1"
-    assert device_info.build_number == "17K795"
-    assert device_info.model == DeviceModel.Gen2
-    assert device_info.mac == "FF:EE:DD:CC:BB:AA"
-
-
-def test_legacy_device_info(config):
-    config.add_service(DMAP_SERVICE)
-    config.add_service(AIRPLAY_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.Legacy
-    assert device_info.version == "8.0.0"
-    assert device_info.build_number is None
-    assert device_info.model == DeviceModel.Gen4K
-    assert device_info.mac == "FF:EE:DD:CC:BB:AA"
-
-
-# Mainly to test devices which are pure AirPlay devices/speakers
-def test_raop_device_info(config):
-    config.add_service(RAOP_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.TvOS
-    assert device_info.version == "14.5"
-    assert device_info.build_number is None
-    assert device_info.model == DeviceModel.HomePodMini
-    assert device_info.mac is None
-
-
-def test_airport_express_info(config):
-    config.add_service(AIRPORT_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.AirPortOS
-    assert device_info.version is None
-    assert device_info.build_number is None
-    assert device_info.model == DeviceModel.AirPortExpressGen2
-    assert device_info.mac is None
-
-
-def test_airport_express_extra_properties():
-    airport_properties = {
-        # MAC, raMA=2.4GHz MAC, raM2=5GHz MAC
-        "wama": "AA-AA-AA-AA-AA-AA,raMA=BB-BB-BB-BB-BB-BB,raM2=CC-CC-CC-CC-CC-CC,"
-        + "raNm=MySsid,raCh=11,rCh2=112,raSt=1,raNA=0,syFl=0x80C,syAP=115,syVs=7.8.1,"
-        + "srcv=78100.3,bjSd=2"
-    }
-    config = conf.AppleTV(
-        ADDRESS_1,
-        NAME,
-        deep_sleep=True,
-        properties={"_airport._tcp.local": airport_properties},
-    )
-    config.add_service(AIRPORT_SERVICE)
-
-    device_info = config.device_info
-    assert device_info.operating_system == OperatingSystem.AirPortOS
-    assert device_info.version == "7.8.1"
-    assert device_info.build_number is None
-    assert device_info.model == DeviceModel.AirPortExpressGen2
-    assert device_info.mac == "AA:AA:AA:AA:AA:AA"
 
 
 @pytest.mark.parametrize(

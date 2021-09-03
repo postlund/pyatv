@@ -4,7 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
-from typing import Dict, Generator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -14,6 +14,7 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     MediaType,
+    OperatingSystem,
     PowerState,
     Protocol,
     RepeatState,
@@ -25,6 +26,7 @@ from pyatv.interface import (
     App,
     ArtworkInfo,
     BaseService,
+    DeviceInfo,
     FeatureInfo,
     Features,
     Metadata,
@@ -45,6 +47,7 @@ from pyatv.mrp.protobuf import PlaybackState
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.support import deprecated, mdns
 from pyatv.support.cache import Cache
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
@@ -575,8 +578,8 @@ class MrpPower(Power):
             del self._waiters[new_state]
 
     @staticmethod
-    def _get_power_state(device_info) -> PowerState:
-        logical_device_count = device_info.inner().logicalDeviceCount
+    def _get_power_state(device_info_message) -> PowerState:
+        logical_device_count = device_info_message.inner().logicalDeviceCount
         if logical_device_count >= 1:
             return PowerState.On
         if logical_device_count == 0:
@@ -709,18 +712,36 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
+def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return device information from zeroconf properties."""
+    devinfo: Dict[str, Any] = {}
+    if "systembuildversion" in properties:
+        devinfo[DeviceInfo.BUILD_NUMBER] = properties["systembuildversion"]
+
+        version = lookup_version(properties["systembuildversion"])
+        if version:
+            devinfo[DeviceInfo.VERSION] = version
+    if "macaddress" in properties:
+        devinfo[DeviceInfo.MAC] = properties["macaddress"]
+
+    # MRP has only been seen on Apple TV and HomePod, which both run tvOS,
+    # so an educated guess is made here. It is border line OK, but will
+    # do for now.
+    devinfo[DeviceInfo.OPERATING_SYSTEM] = OperatingSystem.TvOS
+
+    return devinfo
+
+
 def create_with_connection(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> SetupData:
     """Set up a new MRP service from a connection."""
-    service = config.get_service(Protocol.MRP)
-    assert service is not None
-
     protocol = MrpProtocol(connection, SRPAuthHandler(), service)
     psm = PlayerStateManager(protocol)
 
@@ -748,6 +769,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
         protocol.stop()
         return set()
 
+    def _device_info() -> Dict[str, Any]:
+        return device_info(service.properties)
+
     # Features managed by this protocol
     features = set(
         [
@@ -761,22 +785,21 @@ def create_with_connection(  # pylint: disable=too-many-locals
     features.update(_FEATURE_COMMAND_MAP.keys())
     features.update(_FIELD_FEATURES.keys())
 
-    return SetupData(Protocol.MRP, _connect, _close, interfaces, features)
+    return SetupData(Protocol.MRP, _connect, _close, _device_info, interfaces, features)
 
 
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new MRP service."""
-    service = config.get_service(Protocol.MRP)
-    assert service is not None
-
     yield create_with_connection(
         loop,
         config,
+        service,
         device_listener,
         session_manager,
         MrpConnection(config.address, service.port, loop, atv=device_listener),

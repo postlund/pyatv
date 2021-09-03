@@ -14,11 +14,12 @@ import asyncio
 import io
 import logging
 from queue import Queue
-from typing import Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
+from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.relayer import Relayer
 
@@ -355,6 +356,7 @@ class FacadeAppleTV(interface.AppleTV):
         )
         self._features = FacadeFeatures(self._push_updates)
         self._pending_tasks: Optional[set] = None
+        self._device_info = interface.DeviceInfo({})
         self._interfacea = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
@@ -388,6 +390,8 @@ class FacadeAppleTV(interface.AppleTV):
         if self._protocol_handlers:
             raise exceptions.InvalidStateError("already connected")
 
+        devinfo: Dict[str, Any] = {}
+
         # Set up protocols, ignoring duplicates
         while not self._protocols_to_setup.empty():
             setup_data = self._protocols_to_setup.get()
@@ -406,6 +410,9 @@ class FacadeAppleTV(interface.AppleTV):
                     self._interfacea[iface].register(instance, setup_data.protocol)
 
                 self._features.add_mapping(setup_data.protocol, setup_data.features)
+                dict_merge(devinfo, setup_data.device_info())
+
+        self._device_info = interface.DeviceInfo(devinfo)
 
         # Forward power events in case an interface exists for it
         try:
@@ -431,7 +438,7 @@ class FacadeAppleTV(interface.AppleTV):
     @property
     def device_info(self) -> interface.DeviceInfo:
         """Return API for device information."""
-        return self._config.device_info
+        return self._device_info
 
     @property
     def service(self) -> interface.BaseService:

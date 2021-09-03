@@ -2,8 +2,11 @@
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
+import pytest
 
-from pyatv.companion import scan
+from pyatv.companion import device_info, scan
+from pyatv.const import DeviceModel
+from pyatv.interface import DeviceInfo
 from pyatv.support import mdns
 
 COMPANION_SERVICE = "_companion-link._tcp.local"
@@ -28,3 +31,14 @@ def test_companion_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"foo": "bar"})
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        ({"rpmd": "unknown"}, {}),
+        ({"rpmd": "AppleTV6,2"}, {DeviceInfo.MODEL: DeviceModel.Gen4K}),
+    ],
+)
+def test_device_info(properties, expected):
+    assert not DeepDiff(device_info(properties), expected)

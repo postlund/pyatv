@@ -243,7 +243,7 @@ async def test_metadata_rest_not_supported():
 
 
 @pytest.mark.parametrize(
-    "indata,os,version,build_number,model,mac",
+    "properties,os,version,build_number,model,mac",
     [
         ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None),
         (
@@ -262,8 +262,8 @@ async def test_metadata_rest_not_supported():
         ),
     ],
 )
-def test_device_info_empty_input(indata, os, version, build_number, model, mac):
-    dev_info = DeviceInfo(indata)
+def test_device_info_empty_input(properties, os, version, build_number, model, mac):
+    dev_info = DeviceInfo(properties)
     assert dev_info.operating_system == os
     assert dev_info.version == version
     assert dev_info.build_number == build_number
@@ -272,7 +272,7 @@ def test_device_info_empty_input(indata, os, version, build_number, model, mac):
 
 
 @pytest.mark.parametrize(
-    "indata",
+    "properties",
     [
         {DeviceInfo.OPERATING_SYSTEM: "bad"},
         {DeviceInfo.VERSION: 123},
@@ -281,9 +281,40 @@ def test_device_info_empty_input(indata, os, version, build_number, model, mac):
         {DeviceInfo.MAC: 789},
     ],
 )
-def test_device_info_bad_types(indata):
+def test_device_info_bad_types(properties):
     with pytest.raises(TypeError):
-        DeviceInfo(indata)
+        DeviceInfo(properties)
+
+
+@pytest.mark.parametrize(
+    "properties,expected_os",
+    [
+        ({DeviceInfo.MODEL: DeviceModel.AirPortExpress}, OperatingSystem.AirPortOS),
+        ({DeviceInfo.MODEL: DeviceModel.AirPortExpressGen2}, OperatingSystem.AirPortOS),
+        ({DeviceInfo.MODEL: DeviceModel.HomePod}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.HomePodMini}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.Gen2}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.Gen3}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.Gen4}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.Gen4K}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.AppleTV4KGen2}, OperatingSystem.TvOS),
+    ],
+)
+def test_device_info_guess_os(properties, expected_os):
+    """Try to make educated guess of OS on device."""
+    assert DeviceInfo(properties).operating_system == expected_os
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        ({DeviceInfo.VERSION: "1.0"}, "1.0"),
+        ({DeviceInfo.BUILD_NUMBER: "18M60"}, "14.7"),
+        ({DeviceInfo.VERSION: "1.0", DeviceInfo.BUILD_NUMBER: "18M60"}, "1.0"),
+    ],
+)
+def test_device_info_resolve_version_from_build_number(properties, expected):
+    assert DeviceInfo(properties).version == expected
 
 
 def test_device_info_apple_tv_software_str():

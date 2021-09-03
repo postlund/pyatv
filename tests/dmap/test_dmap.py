@@ -2,8 +2,11 @@
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
+import pytest
 
-from pyatv.dmap import scan
+from pyatv.const import OperatingSystem
+from pyatv.dmap import device_info, scan
+from pyatv.interface import DeviceInfo
 from pyatv.support import mdns
 
 HOMESHARING_SERVICE = "_appletv-v2._tcp.local"
@@ -47,3 +50,13 @@ def test_dmap_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"CtlN": "bar"})
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        ({}, {DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy}),
+    ],
+)
+def test_device_info(properties, expected):
+    assert not DeepDiff(device_info(properties), expected)

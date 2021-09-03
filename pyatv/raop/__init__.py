@@ -4,18 +4,19 @@ import asyncio
 import io
 import logging
 import math
-from typing import Generator, Mapping, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions
 from pyatv.airplay import features as ap_features
 from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
-from pyatv.const import FeatureName, FeatureState, Protocol
+from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
 from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
     BaseService,
+    DeviceInfo,
     FeatureInfo,
     Features,
     Metadata,
@@ -29,6 +30,8 @@ from pyatv.interface import (
 from pyatv.raop.audio_source import AudioSource, open_source
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
 from pyatv.support import map_range, mdns
+from pyatv.support.collections import dict_merge
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.rtsp import RtspSession
@@ -368,16 +371,37 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
+def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return device information from zeroconf properties."""
+    devinfo: Dict[str, Any] = {}
+    if "am" in properties:
+        model = lookup_model(properties["am"])
+        if model != DeviceModel.Unknown:
+            devinfo[DeviceInfo.MODEL] = model
+    if "ov" in properties:
+        devinfo[DeviceInfo.VERSION] = properties["ov"]
+
+    # This comes from _airport._tcp.local and belongs to AirPort Expresses
+    if "wama" in properties:
+        props: Mapping[str, str] = dict(
+            cast(Tuple[str, str], prop.split("=", maxsplit=1))
+            for prop in ("macaddress=" + properties["wama"]).split(",")
+        )
+        if DeviceInfo.MAC not in devinfo:
+            devinfo[DeviceInfo.MAC] = props["macaddress"].replace("-", ":").upper()
+        if "syVs" in props:
+            devinfo[DeviceInfo.VERSION] = props["syVs"]
+    return devinfo
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
-    service = config.get_service(Protocol.RAOP)
-    assert service is not None
-
     playback_manager = RaopPlaybackManager(str(config.address), service.port)
     metadata = RaopMetadata(playback_manager)
     push_updater = RaopPushUpdater(metadata, loop)
@@ -423,10 +447,19 @@ def setup(
     def _close() -> Set[asyncio.Task]:
         return set()
 
+    def _device_info() -> Dict[str, Any]:
+        devinfo: Dict[str, Any] = {}
+        for service_type in scan():
+            properties = config.properties.get(service_type)
+            if properties:
+                dict_merge(devinfo, device_info(properties))
+        return devinfo
+
     yield SetupData(
         Protocol.RAOP,
         _connect,
         _close,
+        _device_info,
         interfaces,
         set(
             [

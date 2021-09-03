@@ -3,17 +3,13 @@
 A configuration describes a device, e.g. it's name, IP address and credentials. It is
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.
-
-For a configuration to be usable ("ready") it must have either a `DMAP` or `MRP`
-configuration (or both), as connecting to plain `AirPlay` devices it not supported.
 """
 from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional, Tuple, cast
+from typing import Dict, List, Mapping, Optional
 
 from pyatv import exceptions
-from pyatv.const import DeviceModel, OperatingSystem, Protocol
+from pyatv.const import Protocol
 from pyatv.interface import BaseService, DeviceInfo
-from pyatv.support.device_info import lookup_model, lookup_version
 
 
 class AppleTV:
@@ -29,16 +25,16 @@ class AppleTV:
         address: IPv4Address,
         name: str,
         deep_sleep: bool = False,
-        model: DeviceModel = DeviceModel.Unknown,
         properties: Optional[Mapping[str, Mapping[str, str]]] = None,
+        device_info: Optional[DeviceInfo] = None,
     ) -> None:
         """Initialize a new AppleTV."""
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
-        self._model = model
         self._services: Dict[Protocol, BaseService] = {}
-        self._properties: Mapping[str, Mapping[str, str]] = properties or {}
+        self._device_info = device_info or DeviceInfo({})
+        self.properties: Mapping[str, Mapping[str, str]] = properties or {}
 
     @property
     def address(self) -> IPv4Address:
@@ -124,72 +120,10 @@ class AppleTV:
             return True
         return False
 
-    # TODO: The extraction should be generialized and moved somewhere else. It is
-    # very hard to test rght now.
     @property
     def device_info(self) -> DeviceInfo:
         """Return general device information."""
-        properties = self._all_properties()
-
-        build: Optional[str] = properties.get("systembuildversion")
-        version = properties.get("ov")
-        if not version:
-            version = properties.get("osvers", lookup_version(build))
-
-        model_name: Optional[str] = properties.get("model", properties.get("am"))
-        if model_name:
-            model = lookup_model(model_name)
-        else:
-            model = self._model
-
-        # MRP devices run tvOS (as far as we know now) as well as HomePods for
-        # some reason
-        if Protocol.MRP in self._services or model in [
-            DeviceModel.HomePod,
-            DeviceModel.HomePodMini,
-        ]:
-            os_type = OperatingSystem.TvOS
-        elif Protocol.DMAP in self._services:
-            os_type = OperatingSystem.Legacy
-        elif model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
-            os_type = OperatingSystem.AirPortOS
-        else:
-            os_type = OperatingSystem.Unknown
-
-        mac = properties.get("macaddress", properties.get("deviceid"))
-        if mac:
-            mac = mac.upper()
-
-        # The waMA property comes from the _airport._tcp.local service, announced by
-        # AirPort Expresses (used by the admin tool). It contains various information,
-        # for instance MAC address and software version.
-        wama = properties.get("wama")
-        if wama:
-            props: Mapping[str, str] = dict(
-                cast(Tuple[str, str], prop.split("=", maxsplit=1))
-                for prop in ("macaddress=" + wama).split(",")
-            )
-            if not mac:
-                mac = props["macaddress"].replace("-", ":").upper()
-            version = props.get("syVs")
-
-        return DeviceInfo(
-            {
-                DeviceInfo.OPERATING_SYSTEM: os_type,
-                DeviceInfo.VERSION: version,
-                DeviceInfo.BUILD_NUMBER: build,
-                DeviceInfo.MODEL: model,
-                DeviceInfo.MAC: mac,
-            }
-        )
-
-    def _all_properties(self) -> Mapping[str, str]:
-        properties: Dict[str, str] = {}
-        for props in self._properties.values():
-            properties.update(props)
-        for service in self.services:
-            properties.update(service.properties)
-        return properties
+        return self._device_info
 
     def __eq__(self, other) -> bool:
         """Compare instance with another instance."""
