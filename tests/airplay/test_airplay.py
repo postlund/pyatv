@@ -2,8 +2,11 @@
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
+import pytest
 
-from pyatv.airplay import scan
+from pyatv.airplay import device_info, scan
+from pyatv.const import DeviceModel
+from pyatv.interface import DeviceInfo
 from pyatv.support import mdns
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"
@@ -28,3 +31,16 @@ def test_airplay_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"foo": "bar"})
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        ({"model": "unknown"}, {}),
+        ({"model": "AppleTV6,2"}, {DeviceInfo.MODEL: DeviceModel.Gen4K}),
+        ({"osvers": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
+        ({"deviceid": "aa:bb:cc:dd:ee:ff"}, {DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff"}),
+    ],
+)
+def test_device_info(properties, expected):
+    assert not DeepDiff(device_info(properties), expected)

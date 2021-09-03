@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import os
-from typing import Generator, Mapping, Optional, Set, cast
+from typing import Any, Dict, Generator, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions, mrp
 from pyatv.airplay import remote_control
@@ -12,11 +12,12 @@ from pyatv.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.airplay.pairing import AirPlayPairingHandler, get_preferred_auth_type
 from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import FeatureName, Protocol
+from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     BaseService,
+    DeviceInfo,
     FeatureInfo,
     Features,
     FeatureState,
@@ -25,6 +26,7 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.support import mdns, net
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
     ClientSessionManager,
     HttpConnection,
@@ -125,16 +127,28 @@ def scan() -> Mapping[str, ScanHandler]:
     return {"_airplay._tcp.local": airplay_service_handler}
 
 
+def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return device information from zeroconf properties."""
+    devinfo: Dict[str, Any] = {}
+    if "model" in properties:
+        model = lookup_model(properties["model"])
+        if model != DeviceModel.Unknown:
+            devinfo[DeviceInfo.MODEL] = lookup_model(properties["model"])
+    if "osvers" in properties:
+        devinfo[DeviceInfo.VERSION] = properties["osvers"]
+    if "deviceid" in properties:
+        devinfo[DeviceInfo.MAC] = properties["deviceid"]
+    return devinfo
+
+
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
-    service = config.get_service(Protocol.AirPlay)
-    assert service is not None
-
     # TODO: Split up in connect/protocol and Stream implementation
     stream = AirPlayStream(config)
 
@@ -150,8 +164,16 @@ def setup(  # pylint: disable=too-many-locals
         stream.close()
         return set()
 
+    def _device_info() -> Dict[str, Any]:
+        return device_info(service.properties)
+
     yield SetupData(
-        Protocol.AirPlay, _connect, _close, interfaces, set([FeatureName.PlayUrl])
+        Protocol.AirPlay,
+        _connect,
+        _close,
+        _device_info,
+        interfaces,
+        set([FeatureName.PlayUrl]),
     )
 
     credentials = extract_credentials(service)
@@ -168,16 +190,19 @@ def setup(  # pylint: disable=too-many-locals
         control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
-        config.add_service(conf.MrpService(None, 0))
+        mrp_service = conf.MrpService(None, 0)
+        config.add_service(mrp_service)
         (
             _,
             mrp_connect,
             mrp_close,
+            mrp_device_info,
             mrp_interfaces,
             mrp_features,
         ) = mrp.create_with_connection(
             loop,
             config,
+            mrp_service,
             device_listener,
             session_manager,
             AirPlayMrpConnection(control, device_listener),
@@ -189,7 +214,7 @@ def setup(  # pylint: disable=too-many-locals
 
                 await control.start(str(config.address), control_port, credentials)
             except Exception as ex:
-                _LOGGER.exception("failed to set up remote control channel: %s", ex)
+                _LOGGER.warning("Failed to set up remote control channel: %s", ex)
                 return False
             else:
                 await mrp_connect()
@@ -202,7 +227,12 @@ def setup(  # pylint: disable=too-many-locals
             return tasks
 
         yield SetupData(
-            Protocol.MRP, _connect_rc, _close_rc, mrp_interfaces, mrp_features
+            Protocol.MRP,
+            _connect_rc,
+            _close_rc,
+            mrp_device_info,
+            mrp_interfaces,
+            mrp_features,
         )
 
 

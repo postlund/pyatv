@@ -4,7 +4,7 @@ import asyncio
 from enum import Enum
 import logging
 from random import randint
-from typing import Dict, Generator, List, Mapping, Optional, Set, cast
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -16,12 +16,13 @@ from pyatv.companion.connection import (
 from pyatv.companion.pairing import CompanionPairingHandler
 from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
-from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
 from pyatv.interface import (
     App,
     Apps,
     BaseService,
+    DeviceInfo,
     FeatureInfo,
     Features,
     PairingHandler,
@@ -30,6 +31,7 @@ from pyatv.interface import (
     StateProducer,
 )
 from pyatv.support import mdns
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
@@ -316,16 +318,24 @@ def scan() -> Mapping[str, ScanHandler]:
     return {"_companion-link._tcp.local": companion_service_handler}
 
 
+def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return device information from zeroconf properties."""
+    devinfo: Dict[str, Any] = {}
+    if "rpmd" in properties:
+        model = lookup_model(properties["rpmd"])
+        if model != DeviceModel.Unknown:
+            devinfo[DeviceInfo.MODEL] = model
+    return devinfo
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new Companion service."""
-    service = config.get_service(Protocol.Companion)
-    assert service is not None
-
     # Companion doesn't work without credentials, so don't setup if none exists
     if not service.credentials:
         return None
@@ -345,10 +355,14 @@ def setup(
     def _close() -> Set[asyncio.Task]:
         return set()
 
+    def _device_info() -> Dict[str, Any]:
+        return device_info(service.properties)
+
     yield SetupData(
         Protocol.Companion,
         _connect,
         _close,
+        _device_info,
         interfaces,
         SUPPORTED_FEATURES,
     )

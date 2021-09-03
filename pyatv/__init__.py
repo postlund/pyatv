@@ -4,7 +4,18 @@ import asyncio
 import datetime  # noqa
 from ipaddress import IPv4Address
 import logging
-from typing import Callable, Generator, List, NamedTuple, Optional, Set, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    Union,
+)
 
 import aiohttp
 
@@ -17,6 +28,7 @@ from pyatv import mrp as mrp_proto
 from pyatv import raop as raop_proto
 from pyatv.const import Protocol
 from pyatv.core import SetupData, StateProducer
+from pyatv.interface import BaseService
 from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV
 from pyatv.support.http import ClientSessionManager
@@ -36,12 +48,14 @@ SetupMethod = Callable[
     [
         asyncio.AbstractEventLoop,
         conf.AppleTV,
+        BaseService,
         StateProducer,
         ClientSessionManager,
     ],
     Generator[SetupData, None, None],
 ]
 PairMethod = Callable[..., interface.PairingHandler]
+DeviceInfoMethod = Callable[[Mapping[str, Any]], Dict[str, Any]]
 
 
 class ProtocolImpl(NamedTuple):
@@ -50,18 +64,31 @@ class ProtocolImpl(NamedTuple):
     setup: SetupMethod
     scan: ScanMethod
     pair: PairMethod
+    device_info: DeviceInfoMethod
 
 
 _PROTOCOLS = {
     Protocol.AirPlay: ProtocolImpl(
-        airplay_proto.setup, airplay_proto.scan, airplay_proto.pair
+        airplay_proto.setup,
+        airplay_proto.scan,
+        airplay_proto.pair,
+        airplay_proto.device_info,
     ),
     Protocol.Companion: ProtocolImpl(
-        companion_proto.setup, companion_proto.scan, companion_proto.pair
+        companion_proto.setup,
+        companion_proto.scan,
+        companion_proto.pair,
+        companion_proto.device_info,
     ),
-    Protocol.DMAP: ProtocolImpl(dmap_proto.setup, dmap_proto.scan, dmap_proto.pair),
-    Protocol.MRP: ProtocolImpl(mrp_proto.setup, mrp_proto.scan, mrp_proto.pair),
-    Protocol.RAOP: ProtocolImpl(raop_proto.setup, raop_proto.scan, raop_proto.pair),
+    Protocol.DMAP: ProtocolImpl(
+        dmap_proto.setup, dmap_proto.scan, dmap_proto.pair, dmap_proto.device_info
+    ),
+    Protocol.MRP: ProtocolImpl(
+        mrp_proto.setup, mrp_proto.scan, mrp_proto.pair, mrp_proto.device_info
+    ),
+    Protocol.RAOP: ProtocolImpl(
+        raop_proto.setup, raop_proto.scan, raop_proto.pair, raop_proto.device_info
+    ),
 }
 
 
@@ -99,7 +126,7 @@ async def scan(
             continue
 
         for service_type, handler in proto_impl.scan().items():
-            scanner.add_service(service_type, handler)
+            scanner.add_service(service_type, handler, proto_impl.device_info)
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]
@@ -126,10 +153,12 @@ async def connect(
             proto_impl = _PROTOCOLS.get(service.protocol)
             if not proto_impl:
                 raise RuntimeError(
-                    "missing implementation for protocol {service.protocol}"
+                    f"missing implementation for protocol {service.protocol}"
                 )
 
-            for setup_data in proto_impl.setup(loop, config, atv, session_manager):
+            for setup_data in proto_impl.setup(
+                loop, config, service, atv, session_manager
+            ):
                 atv.add_protocol(setup_data)
 
         await atv.connect()

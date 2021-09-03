@@ -5,12 +5,24 @@ import asyncio
 from ipaddress import IPv4Address
 import logging
 import os
-from typing import Callable, Dict, Generator, List, Mapping, NamedTuple, Optional, Tuple
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+)
 
 from pyatv import conf, interface
 from pyatv.const import DeviceModel
 from pyatv.helpers import get_unique_id
+from pyatv.interface import DeviceInfo
 from pyatv.support import knock, mdns
+from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,6 +30,8 @@ _LOGGER = logging.getLogger(__name__)
 ScanHandlerReturn = Tuple[str, interface.BaseService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
+
+DevInfoExtractor = Callable[[Mapping[str, Any]], Mapping[str, Any]]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
@@ -36,7 +50,6 @@ class FoundDevice(NamedTuple):
     deep_sleep: bool
     model: DeviceModel
     services: List[interface.BaseService]
-    service_properties: Dict[str, Dict[str, str]]
 
 
 def get_unique_identifiers(
@@ -49,25 +62,31 @@ def get_unique_identifiers(
             yield unique_id
 
 
+def _empty_handler(service: mdns.Service, response: mdns.Response) -> None:
+    pass
+
+
+def _empty_extractor(properties: Mapping[str, Any]) -> Mapping[str, Any]:
+    return {}
+
+
 class BaseScanner(ABC):
     """Base scanner for service discovery."""
 
     def __init__(self) -> None:
         """Initialize a new BaseScanner."""
-        self._services: Dict[str, ScanHandler] = {
-            DEVICE_INFO: self._empty_handler,
-            SLEEP_PROXY: self._empty_handler,
+        self._services: Dict[str, Tuple[ScanHandler, DevInfoExtractor]] = {
+            DEVICE_INFO: (_empty_handler, _empty_extractor),
+            SLEEP_PROXY: (_empty_handler, _empty_extractor),
         }
         self._found_devices: Dict[IPv4Address, FoundDevice] = {}
         self._properties: Dict[IPv4Address, Dict[str, Mapping[str, str]]] = {}
 
-    @staticmethod
-    def _empty_handler(service: mdns.Service, response: mdns.Response) -> None:
-        pass
-
-    def add_service(self, service_type: str, handler: ScanHandler):
+    def add_service(
+        self, service_type: str, handler: ScanHandler, device_info_extractor
+    ) -> None:
         """Add service type to discover."""
-        self._services[service_type] = handler
+        self._services[service_type] = (handler, device_info_extractor)
 
     @property
     def services(self) -> List[str]:
@@ -84,11 +103,13 @@ class BaseScanner(ABC):
                 address,
                 found_device.name,
                 deep_sleep=found_device.deep_sleep,
-                model=found_device.model,
                 properties=self._properties[address],
+                device_info=self._get_device_info(found_device),
             )
+
             for service in found_device.services:
                 devices[address].add_service(service)
+
         return devices
 
     @abstractmethod
@@ -117,7 +138,7 @@ class BaseScanner(ABC):
         if service.address is None or service.port == 0:
             return
 
-        result = self._services[service.type](service, response)
+        result = self._services[service.type][0](service, response)
         if result:
             name, base_service = result
             _LOGGER.debug(
@@ -136,7 +157,6 @@ class BaseScanner(ABC):
                     response.deep_sleep,
                     lookup_internal_name(response.model),
                     [],
-                    {},
                 )
             self._found_devices[service.address].services.append(base_service)
 
@@ -145,6 +165,24 @@ class BaseScanner(ABC):
             if service.address not in self._properties:
                 self._properties[service.address] = {}
             self._properties[service.address][service.type] = service.properties
+
+    def _get_device_info(self, device: FoundDevice) -> DeviceInfo:
+        device_info: Dict[str, Any] = {}
+
+        # Extract device info from all service responses
+        device_properties = self._properties[device.address]
+        for service_name, service_properties in device_properties.items():
+            service_info = self._services.get(service_name)
+            if service_info:
+                _, extractor = service_info
+                dict_merge(device_info, extractor(service_properties))
+
+        # If model was discovered via _device-info._tcp.local, manually add that
+        # to the device info
+        if device.model != DeviceModel.Unknown:
+            dict_merge(device_info, {DeviceInfo.MODEL: device.model})
+
+        return DeviceInfo(device_info)
 
 
 class UnicastMdnsScanner(BaseScanner):

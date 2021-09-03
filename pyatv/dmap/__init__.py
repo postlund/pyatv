@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, Generator, List, Mapping, Optional, Set
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -14,6 +14,7 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     MediaType,
+    OperatingSystem,
     Protocol,
     RepeatState,
     ShuffleState,
@@ -26,6 +27,7 @@ from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
     BaseService,
+    DeviceInfo,
     FeatureInfo,
     Features,
     Metadata,
@@ -591,16 +593,24 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
+def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return device information from zeroconf properties."""
+    devinfo: Dict[str, Any] = {}
+
+    # Like with MRP, this is also border line OK, but will do for now
+    devinfo[DeviceInfo.OPERATING_SYSTEM] = OperatingSystem.Legacy
+
+    return devinfo
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
+    service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
-    service = config.get_service(Protocol.DMAP)
-    assert service is not None
-
     daap_http = HttpSession(
         session_manager.session,
         f"http://{config.address}:{service.port}/",
@@ -626,13 +636,16 @@ def setup(
         device_listener.listener.connection_closed()
         return set()
 
+    def _device_info() -> Dict[str, Any]:
+        return device_info(service.properties)
+
     # Features managed by this protocol
     features = set([FeatureName.VolumeDown, FeatureName.VolumeUp])
     features.update(_AVAILABLE_FEATURES)
     features.update(_UNKNOWN_FEATURES)
     features.update(_FIELD_FEATURES.keys())
 
-    yield SetupData(Protocol.DMAP, _connect, _close, interfaces, features)
+    yield SetupData(Protocol.DMAP, _connect, _close, _device_info, interfaces, features)
 
 
 def pair(

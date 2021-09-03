@@ -2,9 +2,13 @@
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
+import pytest
 
-from pyatv.mrp import scan
+from pyatv.const import OperatingSystem
+from pyatv.interface import DeviceInfo
+from pyatv.mrp import device_info, scan
 from pyatv.support import mdns
+from pyatv.support.device_info import lookup_version
 
 MRP_SERVICE = "_mediaremotetv._tcp.local"
 
@@ -28,3 +32,34 @@ def test_mrp_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"Name": "test"})
+
+
+@pytest.mark.parametrize(
+    "properties,expected",
+    [
+        (
+            {"systembuildversion": "unknown"},
+            {
+                DeviceInfo.BUILD_NUMBER: "unknown",
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            },
+        ),
+        (
+            {"systembuildversion": "18M60"},
+            {
+                DeviceInfo.BUILD_NUMBER: "18M60",
+                DeviceInfo.VERSION: "14.7",
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            },
+        ),
+        (
+            {"macaddress": "aa:bb:cc:dd:ee:ff"},
+            {
+                DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff",
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            },
+        ),
+    ],
+)
+def test_device_info(properties, expected):
+    assert not DeepDiff(device_info(properties), expected)

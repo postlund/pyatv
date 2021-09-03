@@ -62,9 +62,7 @@ link_group: api
 <p>A configuration describes a device, e.g. it's name, IP address and credentials. It is
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.</p>
-<p>For a configuration to be usable ("ready") it must have either a <code>DMAP</code> or <code>MRP</code>
-configuration (or both), as connecting to plain <code>AirPlay</code> devices it not supported.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L305" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L239" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -82,7 +80,7 @@ configuration (or both), as connecting to plain <code>AirPlay</code> devices it 
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
 <p>Initialize a new AirPlayService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L256-L268" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L190-L202" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -99,7 +97,7 @@ configuration (or both), as connecting to plain <code>AirPlay</code> devices it 
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, model: <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a> = DeviceModel.Unknown, properties: Optional[Mapping[str, Mapping[str, str]]] = None)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, properties: Optional[Mapping[str, Mapping[str, str]]] = None, device_info: Optional[<a title="pyatv.interface.DeviceInfo" href="interface#pyatv.interface.DeviceInfo">DeviceInfo</a>] = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an Apple TV configuration.</p>
@@ -107,48 +105,48 @@ configuration (or both), as connecting to plain <code>AirPlay</code> devices it 
 several services depending on the protocols it supports, e.g. DMAP or
 AirPlay.</p>
 <p>Initialize a new AppleTV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L19-L215" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L15-L149" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.conf.AppleTV.address"><code class="name">var <span class="ident">address</span> -> ipaddress.IPv4Address</code></dt>
 <dd>
 <section class="desc"><p>IP address of device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L43-L46" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L39-L42" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.all_identifiers"><code class="name">var <span class="ident">all_identifiers</span> -> List[str]</code></dt>
 <dd>
 <section class="desc"><p>Return all unique identifiers for this device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L75-L78" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L71-L74" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.deep_sleep"><code class="name">var <span class="ident">deep_sleep</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>If device is in deep sleep.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L53-L56" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L49-L52" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="interface#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
 <dd>
 <section class="desc"><p>Return general device information.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L129-L184" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L123-L126" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return the main identifier associated with this device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L66-L73" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L62-L69" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Name of device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L48-L51" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L44-L47" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.ready"><code class="name">var <span class="ident">ready</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>Return if configuration is ready, (at least one service with identifier).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L58-L64" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L54-L60" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.services"><code class="name">var <span class="ident">services</span> -> List[<a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a>]</code></dt>
 <dd>
 <section class="desc"><p>Return all supported services.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L99-L102" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L95-L98" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -161,7 +159,7 @@ AirPlay.</p>
 <dd>
 <section class="desc"><p>Add a new service.</p>
 <p>If the service already exists, it will be merged.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L80-L89" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L76-L85" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.get_service">
 <code class="name flex">
@@ -172,7 +170,7 @@ AirPlay.</p>
 <section class="desc"><p>Look up a service based on protocol.</p>
 <p>If a service with the specified protocol is not available, None is
 returned.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L91-L97" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L87-L93" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.main_service">
 <code class="name flex">
@@ -181,7 +179,7 @@ returned.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Return suggested service used to establish connection.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L104-L117" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L100-L113" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.conf.AppleTV.set_credentials">
 <code class="name flex">
@@ -190,7 +188,7 @@ returned.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Set credentials for a protocol if it exists.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L119-L125" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L115-L121" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -201,7 +199,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a Companion link service.</p>
 <p>Initialize a new CompaniomService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L272-L283" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L206-L217" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -223,7 +221,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
 <p>Initialize a new DmapService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L219-L236" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L153-L170" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -245,7 +243,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
 <p>Initialize a new MrpService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L240-L252" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L174-L186" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -267,7 +265,7 @@ returned.</p></section>
 <dd>
 <section class="desc"><p>Representation of an RAOP service.</p>
 <p>Initialize a new RaopService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L287-L305" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L221-L239" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>

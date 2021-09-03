@@ -2,17 +2,18 @@
 import asyncio
 import inspect
 from ipaddress import IPv4Address
-from typing import Set
+from typing import Any, Dict, Set
 from unittest.mock import MagicMock
 
 import pytest
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV
-from pyatv.const import FeatureName, Protocol
+from pyatv.const import FeatureName, OperatingSystem, Protocol
 from pyatv.core import SetupData
 from pyatv.interface import (
     Audio,
+    DeviceInfo,
     DeviceListener,
     FeatureInfo,
     Features,
@@ -42,6 +43,7 @@ class SetupDataGenerator:
         self.features: set = set(features)
         self.pending_tasks: set = set()
         self.connect_succeeded = True
+        self.device_info = {}
 
     async def connect(self):
         self.connect_called = True
@@ -54,7 +56,12 @@ class SetupDataGenerator:
 
     def get_setup_data(self) -> SetupData:
         return SetupData(
-            self.protocol, self.connect, self.close, self.interfaces, self.features
+            self.protocol,
+            self.connect,
+            self.close,
+            lambda: self.device_info,
+            self.interfaces,
+            self.features,
         )
 
 
@@ -275,9 +282,17 @@ async def test_close_pending_tasks(facade_dummy, session_manager):
 
         return set([asyncio.ensure_future(close_task())])
 
+    def device_info() -> Dict[str, Any]:
+        return {}
+
     facade_dummy.add_protocol(
         SetupData(
-            Protocol.DMAP, connect, close, {Power: DummyPower()}, {FeatureName.Play}
+            Protocol.DMAP,
+            connect,
+            close,
+            device_info,
+            {Power: DummyPower()},
+            {FeatureName.Play},
         ),
     )
 
@@ -352,3 +367,51 @@ async def test_close_returns_pending_tasks_from_previous_close(
     pending_tasks = facade_dummy.close()
     assert len(pending_tasks) == 1
     assert task in pending_tasks
+
+
+async def tests_device_info_from_single_protocol(facade_dummy, register_interface):
+    _, sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+    sdg.device_info.update(
+        {
+            DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            DeviceInfo.VERSION: "1.0",
+        }
+    )
+
+    await facade_dummy.connect()
+
+    dev_info = facade_dummy.device_info
+    assert dev_info.operating_system == OperatingSystem.TvOS
+    assert dev_info.version == "1.0"
+
+
+async def tests_device_info_from_multiple_protocols(facade_dummy, register_interface):
+    _, sdg_dmap = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+    _, sdg_mrp = register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
+    )
+
+    sdg_dmap.device_info.update(
+        {
+            DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
+            DeviceInfo.VERSION: "1.0",
+        }
+    )
+    sdg_mrp.device_info.update(
+        {
+            DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy,
+            DeviceInfo.VERSION: "3.0",
+            DeviceInfo.BUILD_NUMBER: "ABC",
+        }
+    )
+
+    await facade_dummy.connect()
+
+    dev_info = facade_dummy.device_info
+    assert dev_info.operating_system == OperatingSystem.TvOS
+    assert dev_info.version == "1.0"
+    assert dev_info.build_number == "ABC"

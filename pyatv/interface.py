@@ -35,6 +35,7 @@ from pyatv.const import (
     Protocol,
 )
 from pyatv.core import StateProducer
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 
 __pdoc__ = {}
@@ -770,11 +771,34 @@ class DeviceInfo:
     @property
     def operating_system(self) -> const.OperatingSystem:
         """Operating system running on device."""
-        return self._os
+        if self._os != OperatingSystem.Unknown:
+            return self._os
+
+        if self.model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+            return OperatingSystem.AirPortOS
+        if self.model in [DeviceModel.HomePod, DeviceModel.HomePodMini]:
+            return OperatingSystem.TvOS
+        if self.model in [
+            DeviceModel.Gen2,
+            DeviceModel.Gen3,
+            DeviceModel.Gen4,
+            DeviceModel.Gen4K,
+            DeviceModel.AppleTV4KGen2,
+        ]:
+            return OperatingSystem.TvOS
+
+        return OperatingSystem.Unknown
 
     @property
     def version(self) -> Optional[str]:
         """Operating system version."""
+        if self._version:
+            return self._version
+
+        version = lookup_version(self.build_number)
+        if version:
+            return version
+
         return self._version
 
     @property
