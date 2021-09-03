@@ -29,7 +29,7 @@ This is the general feature list provided by the external interface.
 | --------------------------------------------------------------- | --------- |
 | Automatic discovery of devices (zeroconf/Bonjour)               | [Concept](../concepts/#scanning), [Doc](../../development/scan_pair_and_connect/#scanning), {% include api i="pyatv.scan" %}
 | --------------------------------------------------------------- | --------- |
-| Device Metadata (e.g. operating system and version)             | [Concept](../concepts/#device-metadata), [Doc](../../development/device_info), {% include api i="interface.DeviceInfo" %}
+| Device Metadata (e.g. operating system and version)             | [Concept](../concepts/#device-information), [Doc](../../development/device_info), {% include api i="interface.DeviceInfo" %}
 | --------------------------------------------------------------- | --------- |
 | Push updates                                                    | [Concept](../concepts/#metadata-and-push-updates), [Doc](../../development/listeners/#push-updates), {% include api i="interface.PushUpdater" %}
 | --------------------------------------------------------------- | --------- |
@@ -73,7 +73,7 @@ Some features are provided generally by pyatv and not bound to any particular pr
 *core* features include:
 
 * Automatic service discovery with zeroconf ([Scanning](../concepts#scanning))
-* Device information via information from service discovery ([Device Metadata](../concepts#device-metadata))
+* Device information via information from service discovery ([Device Metadata](../concepts#device-information))
 * Callbacks when connection is lost ([Device Updates](../../development/listeners#device-updates))
 
 # Protocols per Device

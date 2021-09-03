@@ -25,7 +25,7 @@ from pyatv.mrp.protobuf import CommandInfo_pb2
 from tests import common_functional_tests
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
-from tests.fake_device.mrp import APP_NAME, PLAYER_IDENTIFIER
+from tests.fake_device.mrp import APP_NAME, BUILD_NUMBER, OS_VERSION, PLAYER_IDENTIFIER
 from tests.utils import faketime, stub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
@@ -291,6 +291,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
+        self.assertEqual(self.atv.device_info.build_number, BUILD_NUMBER)
+        self.assertEqual(self.atv.device_info.version, OS_VERSION)
 
     @unittest_run_loop
     async def test_always_available_features(self):
