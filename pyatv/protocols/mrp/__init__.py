@@ -609,7 +609,7 @@ class MrpPushUpdater(PushUpdater):
             return
 
         self.psm.listener = self
-        asyncio.ensure_future(self.state_updated(), loop=self.loop)
+        asyncio.ensure_future(self.state_updated())
 
     def stop(self):
         """No longer forward updates to listener."""
