@@ -38,8 +38,14 @@ from pyatv.core import StateProducer
 from pyatv.core.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 
-__pdoc__ = {}
-__pdoc__["feature"] = False
+__pdoc__ = {
+    "feature": False,
+    "DeviceInfo.OPERATING_SYSTEM": False,
+    "DeviceInfo.VERSION": False,
+    "DeviceInfo.BUILD_NUMBER": False,
+    "DeviceInfo.MODEL": False,
+    "DeviceInfo.MAC": False,
+}
 
 _ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
 

@@ -57,6 +57,28 @@ If you need help or have questions, check out the [Support](support) page instea
 In case you are upgrading from an earlier version of pyatv, make sure to check out the migration
 guide [here](support/migration) that will help you port your existing code.
 
+# :cloud: In other the news...
+
+As pyatv depends solely on private and reverse engineered protocols, things sometimes break because
+Apple changes something. Or because of other reasons. This section covers the major things that you
+need to be aware of.
+
+* Apple removed the "regular" MRP protocol in tvOS 15 and started tunneling it over AirPlay instead.
+  Version 0.9.0 of pyatv is the first version supporting tvOS 15. As long as credentials are provided
+  for AirPlay, everything should be seamless, i.e. nothing more needs to be done. Credentials obtained
+  from earlier versions will not work however, pairing must be re-performed with 0.9.0 (or later).
+* Playing anything with {% include api i="interface.Stream.play_url" %} tends to break devices running
+  tvOS, e.g. metadata stops working. Rebooting is the only recovery. Everything points at a bug in
+  tvOS.
+* It is possible to control the Music app running on a Mac, but only up until macOS 11.3 as FairPlay
+  authentication is required in 11.4 and later (which is not reverse engineered).
+* There are some issues with {% include pypi package="miniaudio" %} when running on ARM
+  (e.g. Rasperry pi) which can be fixed by re-installing {% include pypi package="miniaudio" %} and
+  building it from source. See [here](support/faq#when-using-pyatv-on-a-raspberry-pi-eg-running-atvremote-i-get-illegal-instruction-how-do-i-fix-that)
+  for details.
+* {% include pypi package="miniaudio" %} fails to compile on Apple Silicon {% include issue no="1162" %}
+* Other general issues can be found in the [FAQ](support/faq).
+
 # :trophy: Who uses pyatv?
 
 Here are a few projects known to use pyatv:

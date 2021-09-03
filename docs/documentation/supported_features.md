@@ -21,6 +21,14 @@ See this page as informational.
 
 *This page is still work-in-progress and a bit inconsistent. State will improve over time.*
 
+# Some things worth knowing...
+
+Things change. Constantly. Here are a few things worth knowing about the protocols:
+
+* The DMAP protocol (suite) stems from iTunes and was used on all Apple TVs until tvOS 13, i.e. all versions of Apple TV 3 and earlier as well as Apple TV 4 (and later) until tvOS 13 was released. It means it's not widely used anymore, other than with older devices. It can be used to control the Music app in macOS 11.3 and earlier {% include issue no="1172" %}.
+* The MRP protocol was introduced in tvOS when the Apple TV 4 was introduced. In tvOS 15, it was demoted from a separate protocol (it used to have it's own Remote app as well as Zeroconf service, `_mediaremotetv._tcp.local`) and moved to a special stream type in AirPlay 2 instead. Devices running tvOS 15 (beta or later) require AirPlay to be set up to function properly.
+* tvOS 10.2 enforced "device authentication" for AirPlay to function. This is referred to as "legacy pairing" and is only used to verify a connection, it does not enforce any encryption. It also works for RAOP. AirPlay 2 however require "HAP" (HomeKit) authentication, which enforce encryption. Only legacy pairing is supported for RAOP in pyatv at the moment (as encryption has not been implemented for HAP based authentication).
+
 # Feature List
 
 This is the general feature list provided by the external interface.
@@ -73,7 +81,8 @@ Some features are provided generally by pyatv and not bound to any particular pr
 *core* features include:
 
 * Automatic service discovery with zeroconf ([Scanning](../concepts#scanning))
-* Device information via information from service discovery ([Device Metadata](../concepts#device-information))
+* Device information via information from service discovery ([Device Information](../concepts#device-information))
+* Set up of protocols based on provided configuration
 * Callbacks when connection is lost ([Device Updates](../../development/listeners#device-updates))
 
 # Protocols per Device
@@ -85,8 +94,8 @@ Here is a summary of what protocols various devices support:
 | AirPlay (video) | Apple TV (any)
 | Companion       | Apple TV 4(K), HomePod (mini)
 | DMAP            | Apple TV 2/3
-| MRP             | Apple TV 4(K)
-| RAOP            | Apple TV, AirPort Express, HomePod (mini), 3rd party speakers
+| MRP             | Apple TV 4(K), tvOS <=14
+| RAOP            | Apple TV, AirPort Express gen 2, HomePod (mini), 3rd party speakers
 
 `pyatv` might still not support a particular combination of protocol or hardware, please
 refer to protocol details below.
@@ -102,8 +111,10 @@ screen mirroring and image sharing.
 
 ### Supported Features
 
-* Pairing
+* Legacy pairing for older devices (e.g. Apple TV 3)
+* HAP based for AirPlay 2 features (only used for remote control)
 * Playing files with {% include api i="interface.Stream.play_url" %}
+* Tunneling of MRP over AirPlay 2 to support tvOS 15 and the HomePod
 
 ### Limitations and notes
 
@@ -176,7 +187,7 @@ as new ones, like notion of apps and game pad controls.
 * Playing metadata
 * Device and playback state
 * Shuffle and repeat
-* Volume control
+* Volume control (volume_up, volume_down)
 * Current playing app
 * Power management
 
@@ -200,14 +211,13 @@ AirTunes).
 * Push Updates
 * Volume controls (volume level, set_volume, volume_up, volume_down)
 * One stream can be played at the time (second call raises {% include api i="exceptions.InvalidStateError" %})
-* If the device requires pairing, e.g. Apple TV 4 or later, the same pairing
-  procedure and credentials as AirPlay is to be used. If AirPlay credentials
-  are present, they will be used if no RAOP credentials are given.
+* If the device requires pairing, e.g. Apple TV 4 or later, pairing must be performed and credentials provided. AirPlay credentials obtained prior to version 0.8.2 are compatible, later versions require re-pairing specifically with RAOP.
 
 ### Limitations and notes
 
 * Metadata and push updates only reflect what pyatv is currently playing as there
-  seems to not be possible to get current play state from an AirPlay receiver
+  seems to not be possible to get current play state from an AirPlay receiver (see next bullet for exceptions).
+* It is possible to obtain metadata in some cases by combining protocols, e.g. by pairing RAOP in conjunction with AirPlay or MRP for instance. On the HomePod, the AirPlay protocol will provide metadata by tunneling the MRP protocol.
 * Devices requiring password are only supported when using the RAOP protocol
 * Remote control commands does not work (except for volume_up and volume_down),
   e.g. play or pause {% include issue no="1068" %}
@@ -219,6 +229,7 @@ AirTunes).
 Audio streaming has been verified to work with these devices:
 
 * Apple TV 3 (v8.4.4)
+* Apple TV 4K gen 1 (v14.5)
 * HomePod Mini (v14.5)
 * AirPort Express (v7.8.1)
 * Yamaha RX-V773 (v1.98)

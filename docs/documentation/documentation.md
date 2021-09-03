@@ -31,7 +31,7 @@ page for all available images.
 To test atvremote, you can run:
 
 ```shell
-$ docker run --rm --network=host ghcr.io/postlund/pyatv:latest atvremote scan
+$ docker run --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
 ```
 
 It is also possible to run simple scripts and applications like this:
