@@ -466,7 +466,7 @@ class DmapPushUpdater(PushUpdater):
         # Delay before restarting after an error
         self._initial_delay = initial_delay
 
-        self._future = asyncio.ensure_future(self._poller(), loop=self.loop)
+        self._future = asyncio.ensure_future(self._poller())
 
     def stop(self):
         """No longer forward updates to listener."""

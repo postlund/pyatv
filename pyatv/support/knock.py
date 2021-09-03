@@ -32,7 +32,9 @@ async def knock(
 ):
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    await asyncio.wait([_async_knock(address, port) for port in ports])
+    await asyncio.wait(
+        [asyncio.ensure_future(_async_knock(address, port)) for port in ports]
+    )
 
 
 async def knocker(
