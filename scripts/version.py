@@ -60,8 +60,14 @@ def update_sha1() -> None:
 
 def is_release() -> bool:
     """Return if current branch is a release branch."""
-    branch_name = call("git rev-parse --abbrev-ref HEAD")
-    return re.match(r"^release_\d+_\d+_\d+", branch_name) is not None
+    tag_name = call("git describe --tags").replace("\n", "")
+    return re.match(r"^v\d+\.\d+\.\d+$", tag_name) is not None
+
+
+def is_master() -> bool:
+    """Return if current branch is master."""
+    branch_name = call("git rev-parse --abbrev-ref HEAD").replace("\n", "")
+    return branch_name == "master"
 
 
 def main() -> None:
@@ -76,7 +82,8 @@ def main() -> None:
 
     subparsers.add_parser("sha1", help="Insert SHA1 into patch version")
 
-    subparsers.add_parser("is_release", help="Return if branch is a release branch")
+    subparsers.add_parser("is_release", help="Return if branch is release tag")
+    subparsers.add_parser("is_master", help="Return if branch is master")
 
     args = parser.parse_args()
     if not args.command:
@@ -91,6 +98,8 @@ def main() -> None:
         update_sha1()
     elif args.command == "is_release":
         return "true" if is_release() else "false"
+    elif args.command == "is_master":
+        return "true" if is_master() else "false"
     else:
         return 1
     return 0
