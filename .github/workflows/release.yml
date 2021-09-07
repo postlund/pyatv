@@ -1,0 +1,58 @@
+name: Create GitHub release
+
+on:
+  create:
+    tags:
+      - '*'
+
+env:
+  PYTHON_VERSION: 3.9
+
+jobs:
+  make_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Extract release notes and name
+        id: info
+        shell: python {0}
+        run: |
+          import re
+
+          name = None
+          version = None
+          notes = ""
+          with open("CHANGES.md", "r", encoding="utf-8") as handle:
+            for line in handle:
+              if line.startswith("##"):
+                if name is None:
+                  version, name = re.match(r"## ([0-9.]+) ([^(]+) \(.*", line).groups()
+                else:
+                  break
+              if name is not None:
+                notes += line
+
+          print("::set-output name=name::" + name)
+          print("::set-output name=version::" + version)
+
+          with open("notes.md", "w", encoding="utf-8") as handle:
+            handle.write(notes)
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/pyatv-${{ steps.info.outputs.version }}.tar.gz,dist/pyatv-${{ steps.info.outputs.version}-*.whl"
+          bodyFile: "notes.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag: v${{ steps.info.outputs.version }}
+          name: ${{ steps.info.outputs.name }}
+
