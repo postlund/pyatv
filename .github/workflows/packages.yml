@@ -1,0 +1,78 @@
+name: Create and publish a Docker images
+
+on:
+  push:
+    branches: ['test']
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  PYTHON_VERSION: 3.9
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  docker-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build wheel
+        id: wheel
+        run: |
+          # If not a release branch, add SHA1 to patch version
+          if [ ! "$(python scripts/version.py is_release)" = "false" ]; then
+            python scripts/version.py sha1
+          fi
+
+          python -m pip install --upgrade setuptools pip wheel
+          python setup.py bdist_wheel
+          echo "::set-output name=version::$(python scripts/version.py get)"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Testing
+        run:
+          docker run --privileged --rm tonistiigi/binfmt --install all
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.wheel.outputs.version }}
