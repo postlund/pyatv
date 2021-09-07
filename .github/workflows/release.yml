@@ -1,14 +1,16 @@
-name: Create and publish a Docker images
+name: Publish containers and make release
 
 on:
+  create:
+    tags:
+      - '*'
   push:
-    branches: ['test']
+    branches: ['master', 'test_release_branch']
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   PYTHON_VERSION: 3.9
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   docker-image:
@@ -56,11 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Testing
-        run:
-          docker run --privileged --rm tonistiigi/binfmt --install all
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -76,3 +74,51 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             VERSION=${{ steps.wheel.outputs.version }}
+
+  make_release:
+    if: github.event_name == "create" && github.event.ref_type == "tag"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Extract release notes and name
+        id: info
+        shell: python {0}
+        run: |
+          import re
+
+          name = None
+          version = None
+          notes = ""
+          with open("CHANGES.md", "r", encoding="utf-8") as handle:
+            for line in handle:
+              if line.startswith("##"):
+                if name is None:
+                  version, name = re.match(r"## ([0-9.]+) ([^(]+) \(.*", line).groups()
+                else:
+                  break
+              if name is not None:
+                notes += line
+
+          print("::set-output name=name::" + name)
+          print("::set-output name=version::" + version)
+
+          with open("notes.md", "w", encoding="utf-8") as handle:
+            handle.write(notes)
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/pyatv-${{ steps.info.outputs.version }}.tar.gz,dist/pyatv-${{ steps.info.outputs.version }}-*.whl"
+          bodyFile: "notes.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          tag: v${{ steps.info.outputs.version }}
+          name: ${{ steps.info.outputs.name }}
