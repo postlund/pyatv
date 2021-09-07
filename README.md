@@ -29,7 +29,39 @@ Some examples include:
 * List and launch installed apps
 
 ...and lots more! A complete list is available [here](https://pyatv.dev/documentation/supported_features/).
-# Develop pyatv
+
+# Great, but how do I use it?
+
+All documentation (especially for developers) are available at [pyatv.dev](https://pyatv.dev).
+It is however possible to install with `pip` and try things out with `atvremote`:
+
+```raw
+$ pip install pyatv
+$ atvremote scan
+       Name: Office
+   Model/SW: HomePodMini tvOS 14.7
+    Address: 10.0.10.84
+        MAC: AA:BB:CC:DD:EE:FF
+ Deep Sleep: False
+Identifiers:
+ - AA:BB:CC:DD:EE:FF
+ - AABBCCDDEEFF
+Services:
+ - Protocol: AirPlay, Port: 7000, Credentials: None
+ - Protocol: Companion, Port: 49152, Credentials: None
+ - Protocol: RAOP, Port: 7000, Credentials: None, Password: None
+```
+
+Or run in a container (x86_64, aarch64, armv7):
+
+```raw
+docker run --rm --network=host ghcr.io/postlund/pyatv:latest atvremote scan
+```
+
+The `latest` tag points to latest commit on the `master` branch and can
+be changed to a specific version, e.g. `v0.8.2`.
+
+# I need to change something?
 
 Want to help out with `pyatv`? Press the button below to get a fully prepared development environment and get started right away!
 

@@ -13,7 +13,7 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  docker-image:
+  build_containers:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,12 +39,12 @@ jobs:
         id: wheel
         run: |
           # If not a release branch, add SHA1 to patch version
-          if [ ! "$(python scripts/version.py is_release)" = "false" ]; then
+          if [ "$(python scripts/version.py is_release)" = "false" ]; then
             python scripts/version.py sha1
           fi
 
           python -m pip install --upgrade setuptools pip wheel
-          python setup.py bdist_wheel
+          python setup.py sdist bdist_wheel
           echo "::set-output name=version::$(python scripts/version.py get)"
 
       - name: Log in to the Container registry
@@ -75,8 +75,16 @@ jobs:
           build-args: |
             VERSION=${{ steps.wheel.outputs.version }}
 
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: |
+            dist
+
   make_release:
-    if: github.event_name == "create" && github.event.ref_type == "tag"
+    if: github.event_name =='create' && github.event.ref_type == 'tag'
+    needs: build_containers
     runs-on: ubuntu-latest
 
     steps:
@@ -87,6 +95,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v2
+        with:
+          name: packages
+          path: dist
 
       - name: Extract release notes and name
         id: info
@@ -119,6 +133,12 @@ jobs:
           artifacts: "dist/pyatv-${{ steps.info.outputs.version }}.tar.gz,dist/pyatv-${{ steps.info.outputs.version }}-*.whl"
           bodyFile: "notes.md"
           token: ${{ secrets.GITHUB_TOKEN }}
-          draft: true
+          draft: false
           tag: v${{ steps.info.outputs.version }}
           name: ${{ steps.info.outputs.name }}
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
