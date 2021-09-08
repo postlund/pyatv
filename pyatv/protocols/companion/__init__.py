@@ -11,6 +11,7 @@ from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.conf import AppleTV
 from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
+from pyatv.core.device_info import lookup_model
 from pyatv.interface import (
     App,
     Apps,
@@ -31,7 +32,6 @@ from pyatv.protocols.companion.connection import (
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.protocols.companion.protocol import CompanionProtocol
 from pyatv.support import mdns
-from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
