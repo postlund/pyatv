@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.airplay."""
+"""Unit tests for pyatv.dmap."""
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff

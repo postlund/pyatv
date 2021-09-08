@@ -1,7 +1,7 @@
-"""Unit tests for pyatv.airplay.features."""
+"""Unit tests for pyatv.protocols.airplay.features."""
 import pytest
 
-from pyatv.airplay.features import AirPlayFeatures, parse
+from pyatv.protocols.airplay.features import AirPlayFeatures, parse
 
 
 @pytest.mark.parametrize(

@@ -1,12 +1,12 @@
-"""Unit tests for pyatv.airplay."""
+"""Unit tests for pyatv.protocols.airplay."""
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.airplay import device_info, scan
 from pyatv.const import DeviceModel
 from pyatv.interface import DeviceInfo
+from pyatv.protocols.airplay import device_info, scan
 from pyatv.support import mdns
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"

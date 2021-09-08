@@ -6,11 +6,6 @@ import os
 from typing import Any, Dict, Generator, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions, mrp
-from pyatv.airplay import remote_control
-from pyatv.airplay.auth import extract_credentials, verify_connection
-from pyatv.airplay.mrp_connection import AirPlayMrpConnection
-from pyatv.airplay.pairing import AirPlayPairingHandler, get_preferred_auth_type
-from pyatv.airplay.player import AirPlayPlayer
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData
@@ -25,6 +20,14 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
+from pyatv.protocols.airplay import remote_control
+from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
+from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
+from pyatv.protocols.airplay.pairing import (
+    AirPlayPairingHandler,
+    get_preferred_auth_type,
+)
+from pyatv.protocols.airplay.player import AirPlayPlayer
 from pyatv.support import mdns, net
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (

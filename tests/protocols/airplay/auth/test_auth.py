@@ -1,25 +1,25 @@
-"""Unit tests for pyatv.airplay.auth."""
+"""Unit tests for pyatv.protocols.airplay.auth."""
 
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pyatv.airplay.auth import (
+from pyatv.auth.hap_pairing import NO_CREDENTIALS, HapCredentials
+from pyatv.protocols.airplay.auth import (
     AuthenticationType,
     HapCredentials,
     NullPairVerifyProcedure,
     pair_setup,
     pair_verify,
 )
-from pyatv.airplay.auth.hap import (
+from pyatv.protocols.airplay.auth.hap import (
     AirPlayHapPairSetupProcedure,
     AirPlayHapPairVerifyProcedure,
 )
-from pyatv.airplay.auth.legacy import (
+from pyatv.protocols.airplay.auth.legacy import (
     AirPlayLegacyPairSetupProcedure,
     AirPlayLegacyPairVerifyProcedure,
 )
-from pyatv.auth.hap_pairing import NO_CREDENTIALS, HapCredentials
 
 # Legacy credentials only have ltsk (seed) and client_id (identifier) filled in
 LEGACY_CREDENTIALS = HapCredentials(b"", b"1", b"", b"2")
@@ -29,7 +29,7 @@ HAP_CREDENTIALS = HapCredentials(b"1", b"2", b"3", b"4")
 
 @pytest.fixture(name="srp")
 def srp_fixture():
-    with patch("pyatv.airplay.auth.LegacySRPAuthHandler") as srp:
+    with patch("pyatv.protocols.airplay.auth.LegacySRPAuthHandler") as srp:
         yield srp
 
 
@@ -51,7 +51,7 @@ def test_pair_verify_no_credentials(srp, connection):
 # Legacy authentication
 
 
-@patch("pyatv.airplay.auth.new_credentials", return_value=LEGACY_CREDENTIALS)
+@patch("pyatv.protocols.airplay.auth.new_credentials", return_value=LEGACY_CREDENTIALS)
 def test_pair_setup_legacy(new_credentials, srp, connection):
     procedure = pair_setup(AuthenticationType.Legacy, connection)
 

@@ -157,6 +157,6 @@ async def unicast_scan_fixture(event_loop, udns_server):
 # fixtures), it will live here for now.
 @pytest.fixture(name="airplay_creds", autouse=True)
 def airplay_creds_fixture():
-    with patch("pyatv.airplay.auth.new_credentials") as new_credentials:
+    with patch("pyatv.protocols.airplay.auth.new_credentials") as new_credentials:
         new_credentials.return_value = parse_credentials(DEVICE_CREDENTIALS)
         yield

@@ -65,6 +65,6 @@ async def test_pairing_with_device_new_credentials(airplay_conf):
     # worked around using asynctest. This is however the only async test using patch
     # for now, so lets use a context manager and introduce asynctest when needed.
     # Source: https://github.com/pytest-dev/pytest-asyncio/issues/130
-    with patch("pyatv.airplay.srp.urandom") as rand_func:
+    with patch("pyatv.protocols.airplay.srp.urandom") as rand_func:
         rand_func.side_effect = predetermined_key
         await perform_pairing(airplay_conf)

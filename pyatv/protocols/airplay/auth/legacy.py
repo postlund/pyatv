@@ -6,12 +6,12 @@ import plistlib
 from typing import Dict, Tuple
 
 from pyatv import exceptions
-from pyatv.airplay.srp import LegacySRPAuthHandler
 from pyatv.auth.hap_pairing import (
     HapCredentials,
     PairSetupProcedure,
     PairVerifyProcedure,
 )
+from pyatv.protocols.airplay.srp import LegacySRPAuthHandler
 from pyatv.support.http import HttpConnection, HttpResponse
 
 _LOGGER = logging.getLogger(__name__)

@@ -1,10 +1,10 @@
-"""Functional tests for Airplay."""
+"""Unit tests for pyatv.protocols.airplay.player."""
 import math
 
 import pytest
 
 from pyatv import exceptions
-from pyatv.airplay import player
+from pyatv.protocols.airplay import player
 
 from tests.utils import total_sleep_time
 
