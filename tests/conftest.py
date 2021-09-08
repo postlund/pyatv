@@ -9,8 +9,8 @@ import pytest
 import pyatv
 from pyatv import conf
 from pyatv.auth.hap_pairing import parse_credentials
+from pyatv.core.net import unused_port
 from pyatv.support.http import create_session
-from pyatv.support.net import unused_port
 
 from tests import fake_udns
 from tests.fake_device.airplay import DEVICE_CREDENTIALS

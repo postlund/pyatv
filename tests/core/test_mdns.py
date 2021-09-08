@@ -8,8 +8,8 @@ from typing import List, Optional, Tuple
 
 import pytest
 
-from pyatv.core import mdns
-from pyatv.support import dns, net
+from pyatv.core import mdns, net
+from pyatv.support import dns
 
 from tests import fake_udns
 from tests.support import dns_utils
