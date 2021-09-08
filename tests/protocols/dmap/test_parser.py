@@ -1,11 +1,11 @@
-"""Unit tests for pyatv.dmap.parser."""
+"""Unit tests for pyatv.protocools.dmap.parser."""
 
 import plistlib
 
 import pytest
 
 from pyatv import exceptions
-from pyatv.dmap import parser, tags
+from pyatv.protocols.dmap import parser, tags
 
 TEST_TAGS = {
     "uuu8": parser.DmapTag(tags.read_uint, "uint8"),

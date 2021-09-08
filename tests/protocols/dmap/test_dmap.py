@@ -1,12 +1,12 @@
-"""Unit tests for pyatv.dmap."""
+"""Unit tests for pyatv.protocols.dmap."""
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import OperatingSystem
-from pyatv.dmap import device_info, scan
 from pyatv.interface import DeviceInfo
+from pyatv.protocols.dmap import device_info, scan
 from pyatv.support import mdns
 
 HOMESHARING_SERVICE = "_appletv-v2._tcp.local"

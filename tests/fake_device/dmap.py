@@ -7,7 +7,7 @@ import math
 from aiohttp import web
 
 from pyatv.const import InputAction, RepeatState, ShuffleState
-from pyatv.dmap import parser, tag_definitions, tags
+from pyatv.protocols.dmap import parser, tag_definitions, tags
 from pyatv.support.net import unused_port
 
 from tests import utils

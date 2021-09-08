@@ -17,7 +17,6 @@ def _filter_func(doc):
     for exclude in [
         "auth",
         "core",
-        "dmap",
         "mrp",
         "protocols",
         "raop",

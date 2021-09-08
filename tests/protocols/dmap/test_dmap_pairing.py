@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from pyatv import conf
-from pyatv.dmap import pairing, parser, tag_definitions
+from pyatv.protocols.dmap import pairing, parser, tag_definitions
 from pyatv.support import http
 
 from tests import utils, zeroconf_stub
