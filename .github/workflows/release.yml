@@ -1,11 +1,10 @@
 name: Publish containers and make release
 
 on:
-  create:
-    tags:
-      - '*'
   push:
     branches: ['master', 'test_release_branch']
+    tags:
+      - '*'
   workflow_dispatch:
 
 env:
@@ -59,6 +58,14 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
+          labels: |
+            org.opencontainers.image.ref.name=${{ github.ref }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr,
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
