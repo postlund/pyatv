@@ -1,0 +1,16 @@
+name: Investigation
+description: Use for investigations or if something is unclear before creating an implementation proposal
+labels: [investigation]
+body:
+  - type: textarea
+    id: to-investigate
+    attributes:
+      label: What to investigate?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: Expected outcome
+    validations:
+      required: true

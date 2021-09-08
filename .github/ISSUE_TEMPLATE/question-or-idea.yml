@@ -1,0 +1,11 @@
+name: Question or idea
+description: Ask a question or leave an idea
+labels: [question]
+body:
+  - type: textarea
+    id: question-idea
+    attributes:
+      label: What's on your mind?
+      description: Please enter your question or idea below. Make sure to include software versions, error logs, etc. when applicable.
+    validations:
+      required: true
