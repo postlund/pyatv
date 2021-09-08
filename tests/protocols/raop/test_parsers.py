@@ -1,9 +1,9 @@
-"""Unit tests for pyatv.raop.raop."""
+"""Unit tests for pyatv.protocols.raop.raop."""
 
 import pytest
 
 from pyatv.exceptions import ProtocolError
-from pyatv.raop.parsers import (
+from pyatv.protocols.raop.parsers import (
     EncryptionType,
     MetadataType,
     get_audio_properties,

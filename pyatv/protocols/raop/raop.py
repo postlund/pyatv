@@ -12,16 +12,16 @@ from bitarray import bitarray
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.protocols.airplay.auth import pair_verify
-from pyatv.raop import timing
-from pyatv.raop.audio_source import AudioSource
-from pyatv.raop.fifo import PacketFifo
-from pyatv.raop.packets import (
+from pyatv.protocols.raop import timing
+from pyatv.protocols.raop.audio_source import AudioSource
+from pyatv.protocols.raop.fifo import PacketFifo
+from pyatv.protocols.raop.packets import (
     AudioPacketHeader,
     RetransmitReqeust,
     SyncPacket,
     TimingPacket,
 )
-from pyatv.raop.parsers import (
+from pyatv.protocols.raop.parsers import (
     EncryptionType,
     MetadataType,
     get_audio_properties,

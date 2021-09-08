@@ -13,8 +13,8 @@ from bitarray import bitarray
 
 from pyatv.protocols.dmap import parser
 from pyatv.protocols.dmap.tag_definitions import lookup_tag
-from pyatv.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
-from pyatv.raop.raop import parse_transport
+from pyatv.protocols.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
+from pyatv.protocols.raop.raop import parse_transport
 from pyatv.support.http import (
     BasicHttpServer,
     HttpRequest,
