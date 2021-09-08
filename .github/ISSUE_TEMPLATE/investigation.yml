@@ -1,6 +1,6 @@
 name: Investigation
 description: Use for investigations or if something is unclear before creating an implementation proposal
-labels: [investigation]
+labels: [investigate]
 body:
   - type: textarea
     id: to-investigate

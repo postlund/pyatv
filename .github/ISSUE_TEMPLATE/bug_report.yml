@@ -1,6 +1,6 @@
 name: Bug report
 description: Create a report to help us improve
-labels: [investigation]
+labels: [bug]
 body:
   - type: textarea
     id: bug-description
