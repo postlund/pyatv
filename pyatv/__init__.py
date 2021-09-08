@@ -11,9 +11,9 @@ import aiohttp
 from pyatv import conf, exceptions, interface
 from pyatv.const import Protocol
 from pyatv.core.facade import FacadeAppleTV
+from pyatv.core.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 from pyatv.protocols import PROTOCOLS
 from pyatv.support import http
-from pyatv.support.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 
 _LOGGER = logging.getLogger(__name__)
 

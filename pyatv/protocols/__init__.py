@@ -5,13 +5,13 @@ from typing import Any, Callable, Dict, Generator, Mapping, NamedTuple
 from pyatv import conf, interface
 from pyatv.const import Protocol
 from pyatv.core import SetupData, StateProducer
+from pyatv.core.scan import ScanMethod
 from pyatv.protocols import airplay as airplay_proto
 from pyatv.protocols import companion as companion_proto
 from pyatv.protocols import dmap as dmap_proto
 from pyatv.protocols import mrp as mrp_proto
 from pyatv.protocols import raop as raop_proto
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.scan import ScanMethod
 
 SetupMethod = Callable[
     [

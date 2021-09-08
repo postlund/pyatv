@@ -10,6 +10,7 @@ from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_cre
 from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData, mdns, net
 from pyatv.core.device_info import lookup_model
+from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     BaseService,
@@ -36,7 +37,6 @@ from pyatv.support.http import (
     StaticFileWebServer,
     http_connect,
 )
-from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 

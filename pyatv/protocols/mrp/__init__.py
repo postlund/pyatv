@@ -22,6 +22,7 @@ from pyatv.const import (
 )
 from pyatv.core import SetupData, mdns
 from pyatv.core.device_info import lookup_version
+from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
@@ -49,7 +50,6 @@ from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 
