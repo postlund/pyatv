@@ -20,7 +20,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData
+from pyatv.core import SetupData, mdns
 from pyatv.core.device_info import lookup_version
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -46,7 +46,7 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from pyatv.protocols.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
-from pyatv.support import deprecated, mdns
+from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn

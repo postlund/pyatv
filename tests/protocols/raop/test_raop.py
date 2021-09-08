@@ -5,9 +5,9 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import DeviceModel
+from pyatv.core import mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.raop import device_info, scan
-from pyatv.support import mdns
 
 RAOP_SERVICE = "_raop._tcp.local"
 AIRPORT_SERVICE = "_airport._tcp.local"

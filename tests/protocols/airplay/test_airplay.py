@@ -5,9 +5,9 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import DeviceModel
+from pyatv.core import mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.airplay import device_info, scan
-from pyatv.support import mdns
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"
 

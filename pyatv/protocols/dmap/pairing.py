@@ -12,9 +12,9 @@ import netifaces
 from zeroconf import Zeroconf
 
 from pyatv import conf
+from pyatv.core import mdns
 from pyatv.interface import BaseService, PairingHandler
 from pyatv.protocols.dmap import tags
-from pyatv.support import mdns
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.net import unused_port
 
