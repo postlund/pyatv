@@ -1,12 +1,12 @@
-"""Unit tests for pyatv.companion."""
+"""Unit tests for pyatv.protocols.companion."""
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.companion import device_info, scan
 from pyatv.const import DeviceModel
 from pyatv.interface import DeviceInfo
+from pyatv.protocols.companion import device_info, scan
 from pyatv.support import mdns
 
 COMPANION_SERVICE = "_companion-link._tcp.local"

@@ -7,9 +7,9 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
-from pyatv.companion.server_auth import CLIENT_CREDENTIALS, PIN_CODE
 from pyatv.conf import AppleTV, CompanionService, MrpService
 from pyatv.const import Protocol
+from pyatv.protocols.companion.server_auth import CLIENT_CREDENTIALS, PIN_CODE
 
 from tests.fake_device import FakeAppleTV
 

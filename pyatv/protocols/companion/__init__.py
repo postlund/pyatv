@@ -8,13 +8,6 @@ from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.companion.connection import (
-    CompanionConnection,
-    CompanionConnectionListener,
-    FrameType,
-)
-from pyatv.companion.pairing import CompanionPairingHandler
-from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import AppleTV
 from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
@@ -30,6 +23,13 @@ from pyatv.interface import (
     RemoteControl,
     StateProducer,
 )
+from pyatv.protocols.companion.connection import (
+    CompanionConnection,
+    CompanionConnectionListener,
+    FrameType,
+)
+from pyatv.protocols.companion.pairing import CompanionPairingHandler
+from pyatv.protocols.companion.protocol import CompanionProtocol
 from pyatv.support import mdns
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager

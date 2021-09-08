@@ -381,7 +381,7 @@ all its features.</p>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L565-L576" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.companion.CompanionApps</li>
+<li>pyatv.protocols.companion.CompanionApps</li>
 <li>pyatv.support.facade.FacadeApps</li>
 </ul>
 <h3>Methods</h3>
@@ -651,10 +651,10 @@ all its features.</p>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L843-L875" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.companion.CompanionFeatures</li>
 <li>pyatv.dmap.DmapFeatures</li>
 <li>pyatv.mrp.MrpFeatures</li>
 <li>pyatv.protocols.airplay.AirPlayFeatures</li>
+<li>pyatv.protocols.companion.CompanionFeatures</li>
 <li>pyatv.raop.RaopFeatures</li>
 <li>pyatv.support.facade.FacadeFeatures</li>
 </ul>
@@ -775,10 +775,10 @@ aspect ratio.</p></section>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.companion.pairing.CompanionPairingHandler</li>
 <li>pyatv.dmap.pairing.DmapPairingHandler</li>
 <li>pyatv.mrp.pairing.MrpPairingHandler</li>
 <li>pyatv.protocols.airplay.pairing.AirPlayPairingHandler</li>
+<li>pyatv.protocols.companion.pairing.CompanionPairingHandler</li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
@@ -988,8 +988,8 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.companion.CompanionPower</li>
 <li>pyatv.mrp.MrpPower</li>
+<li>pyatv.protocols.companion.CompanionPower</li>
 <li>pyatv.support.facade.FacadePower</li>
 </ul>
 <h3>Instance variables</h3>
@@ -1014,7 +1014,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.TurnOff" href="const#pyatv.const.FeatureName.TurnOff">FeatureName.TurnOff</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Turn device off.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L737-L740" class="git-link">Browse git</a></div>
@@ -1027,7 +1027,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.TurnOn" href="const#pyatv.const.FeatureName.TurnOn">FeatureName.TurnOn</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Turn device on.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L732-L735" class="git-link">Browse git</a></div>
@@ -1172,9 +1172,9 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L196-L330" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li>pyatv.companion.CompanionRemoteControl</li>
 <li>pyatv.dmap.DmapRemoteControl</li>
 <li>pyatv.mrp.MrpRemoteControl</li>
+<li>pyatv.protocols.companion.CompanionRemoteControl</li>
 <li>pyatv.raop.RaopRemoteControl</li>
 <li>pyatv.support.facade.FacadeRemoteControl</li>
 </ul>
@@ -1188,7 +1188,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Down" href="const#pyatv.const.FeatureName.Down">FeatureName.Down</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key down.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L205-L208" class="git-link">Browse git</a></div>
@@ -1201,7 +1201,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Home" href="const#pyatv.const.FeatureName.Home">FeatureName.Home</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key home.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L270-L273" class="git-link">Browse git</a></div>
@@ -1227,7 +1227,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Left" href="const#pyatv.const.FeatureName.Left">FeatureName.Left</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key left.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L210-L213" class="git-link">Browse git</a></div>
@@ -1240,7 +1240,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Menu" href="const#pyatv.const.FeatureName.Menu">FeatureName.Menu</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key menu.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L255-L258" class="git-link">Browse git</a></div>
@@ -1292,7 +1292,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.PlayPause" href="const#pyatv.const.FeatureName.PlayPause">FeatureName.PlayPause</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Toggle between play and pause.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L225-L228" class="git-link">Browse git</a></div>
@@ -1318,7 +1318,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Right" href="const#pyatv.const.FeatureName.Right">FeatureName.Right</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key right.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L215-L218" class="git-link">Browse git</a></div>
@@ -1331,7 +1331,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Select" href="const#pyatv.const.FeatureName.Select">FeatureName.Select</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key select.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L250-L253" class="git-link">Browse git</a></div>
@@ -1450,7 +1450,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.Up" href="const#pyatv.const.FeatureName.Up">FeatureName.Up</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Press key up.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L200-L203" class="git-link">Browse git</a></div>
@@ -1463,7 +1463,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.VolumeDown" href="const#pyatv.const.FeatureName.VolumeDown">FeatureName.VolumeDown</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
 </div>
 <section class="desc"><p>Press key volume down.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L265-L268" class="git-link">Browse git</a></div>
@@ -1476,7 +1476,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dd>
 <div class="api_feature">
 <span>Feature: <a title="pyatv.const.FeatureName.VolumeUp" href="const#pyatv.const.FeatureName.VolumeUp">FeatureName.VolumeUp</a>,</span>
-<span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
+<span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a>, <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.RAOP" href="const#pyatv.const.Protocol.RAOP">Protocol.RAOP</a></span>
 </div>
 <section class="desc"><p>Press key volume up.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L260-L263" class="git-link">Browse git</a></div>

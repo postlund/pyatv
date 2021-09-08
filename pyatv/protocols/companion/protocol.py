@@ -6,10 +6,10 @@ from typing import Dict
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.companion import opack
-from pyatv.companion.auth import CompanionPairVerifyProcedure
-from pyatv.companion.connection import CompanionConnection, FrameType
 from pyatv.conf import CompanionService
+from pyatv.protocols.companion import opack
+from pyatv.protocols.companion.auth import CompanionPairVerifyProcedure
+from pyatv.protocols.companion.connection import CompanionConnection, FrameType
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -4,9 +4,9 @@ from typing import cast
 import pytest
 
 from pyatv import connect
-from pyatv.companion.server_auth import CLIENT_CREDENTIALS
 from pyatv.conf import AirPlayService, AppleTV, CompanionService
 from pyatv.const import Protocol
+from pyatv.protocols.companion.server_auth import CLIENT_CREDENTIALS
 
 from tests.fake_device import FakeAppleTV, companion
 from tests.fake_device.companion import FakeCompanionUseCases
