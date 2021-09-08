@@ -7,7 +7,7 @@ from typing import Optional
 
 from pyatv import exceptions
 from pyatv.const import DeviceState, MediaType
-from pyatv.dmap import parser
+from pyatv.protocols.dmap import parser
 from pyatv.support import log_binary
 
 from .tag_definitions import lookup_tag

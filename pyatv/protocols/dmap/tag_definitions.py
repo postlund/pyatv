@@ -2,8 +2,8 @@
 
 import logging
 
-from pyatv.dmap.parser import DmapTag
-from pyatv.dmap.tags import (
+from pyatv.protocols.dmap.parser import DmapTag
+from pyatv.protocols.dmap.tags import (
     read_bool,
     read_bplist,
     read_bytes,

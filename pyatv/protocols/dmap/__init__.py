@@ -20,9 +20,6 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.core import SetupData
-from pyatv.dmap import daap, parser, tags
-from pyatv.dmap.daap import DaapRequester
-from pyatv.dmap.pairing import DmapPairingHandler
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
@@ -37,6 +34,9 @@ from pyatv.interface import (
     RemoteControl,
     StateProducer,
 )
+from pyatv.protocols.dmap import daap, parser, tags
+from pyatv.protocols.dmap.daap import DaapRequester
+from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support import mdns
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession

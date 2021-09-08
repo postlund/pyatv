@@ -10,7 +10,7 @@ import plistlib
 from random import randrange
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
-from pyatv.dmap import tags
+from pyatv.protocols.dmap import tags
 from pyatv.support.http import HttpConnection, HttpResponse
 from pyatv.support.metadata import AudioMetadata
 

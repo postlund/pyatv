@@ -18,7 +18,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.dmap import pairing
+from pyatv.protocols.dmap import pairing
 
 from tests import common_functional_tests, zeroconf_stub
 from tests.common_functional_tests import DummyDeviceListener
