@@ -4,13 +4,13 @@ import binascii
 
 import pytest
 
-from pyatv.airplay.auth.legacy import (
+from pyatv.exceptions import AuthenticationError, NotSupportedError
+from pyatv.protocols.airplay.auth.legacy import (
     AirPlayLegacyPairSetupProcedure,
     AirPlayLegacyPairVerifyProcedure,
     HapCredentials,
 )
-from pyatv.airplay.srp import LegacySRPAuthHandler
-from pyatv.exceptions import AuthenticationError, NotSupportedError
+from pyatv.protocols.airplay.srp import LegacySRPAuthHandler
 
 from tests.fake_device.airplay import DEVICE_AUTH_KEY, DEVICE_IDENTIFIER, DEVICE_PIN
 

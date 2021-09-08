@@ -3,17 +3,6 @@ import logging
 from typing import Tuple
 
 from pyatv import exceptions
-from pyatv.airplay import features as ft
-from pyatv.airplay.auth.hap import (
-    AirPlayHapPairSetupProcedure,
-    AirPlayHapPairVerifyProcedure,
-)
-from pyatv.airplay.auth.hap_transient import AirPlayHapTransientPairVerifyProcedure
-from pyatv.airplay.auth.legacy import (
-    AirPlayLegacyPairSetupProcedure,
-    AirPlayLegacyPairVerifyProcedure,
-)
-from pyatv.airplay.srp import LegacySRPAuthHandler, new_credentials
 from pyatv.auth.hap_pairing import (
     NO_CREDENTIALS,
     TRANSIENT_CREDENTIALS,
@@ -26,6 +15,19 @@ from pyatv.auth.hap_pairing import (
 from pyatv.auth.hap_session import HAPSession
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.interface import BaseService
+from pyatv.protocols.airplay import features as ft
+from pyatv.protocols.airplay.auth.hap import (
+    AirPlayHapPairSetupProcedure,
+    AirPlayHapPairVerifyProcedure,
+)
+from pyatv.protocols.airplay.auth.hap_transient import (
+    AirPlayHapTransientPairVerifyProcedure,
+)
+from pyatv.protocols.airplay.auth.legacy import (
+    AirPlayLegacyPairSetupProcedure,
+    AirPlayLegacyPairVerifyProcedure,
+)
+from pyatv.protocols.airplay.srp import LegacySRPAuthHandler, new_credentials
 from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)

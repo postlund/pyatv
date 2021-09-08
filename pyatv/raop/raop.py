@@ -10,8 +10,8 @@ import weakref
 from bitarray import bitarray
 
 from pyatv import exceptions
-from pyatv.airplay.auth import pair_verify
 from pyatv.auth.hap_pairing import HapCredentials
+from pyatv.protocols.airplay.auth import pair_verify
 from pyatv.raop import timing
 from pyatv.raop.audio_source import AudioSource
 from pyatv.raop.fifo import PacketFifo

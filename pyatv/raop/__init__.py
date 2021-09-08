@@ -7,8 +7,6 @@ import math
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import conf, const, exceptions
-from pyatv.airplay import features as ap_features
-from pyatv.airplay.pairing import AirPlayPairingHandler
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
 from pyatv.core import SetupData
@@ -27,6 +25,8 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
+from pyatv.protocols.airplay import features as ap_features
+from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
 from pyatv.raop.audio_source import AudioSource, open_source
 from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
 from pyatv.support import map_range, mdns
