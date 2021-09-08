@@ -10,7 +10,7 @@ import sys
 from zeroconf import Zeroconf
 
 from pyatv.const import Protocol
-from pyatv.support import mdns
+from pyatv.core import mdns
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/..")  # noqa
 

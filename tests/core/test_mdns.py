@@ -1,4 +1,4 @@
-"""Unit tests pyatv.support.mdns."""
+"""Unit tests pyatv.core.mdns."""
 
 import asyncio
 import io
@@ -8,7 +8,8 @@ from typing import List, Optional, Tuple
 
 import pytest
 
-from pyatv.support import dns, mdns, net
+from pyatv.core import mdns
+from pyatv.support import dns, net
 
 from tests import fake_udns
 from tests.support import dns_utils

@@ -8,7 +8,8 @@ import struct
 from typing import Dict, List, Mapping, NamedTuple, Optional, Tuple, Union, cast
 from unittest.mock import patch
 
-from pyatv.support import dns, mdns
+from pyatv.core import mdns
+from pyatv.support import dns
 
 from tests.support import dns_utils
 
@@ -275,7 +276,7 @@ class FakeUdns(asyncio.Protocol):
 
 @contextmanager
 def stub_multicast(udns_server, loop):
-    patcher = patch("pyatv.support.mdns.multicast")
+    patcher = patch("pyatv.core.mdns.multicast")
 
     async def _multicast(loop, services, **kwargs):
         # Flatten list of lists of addresses: [["1.2.3.4"], ["2.2.2.2"]] -> ["1.2.3.4", "2.2.2.2"]

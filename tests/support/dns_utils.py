@@ -4,7 +4,8 @@ from ipaddress import IPv4Address
 import struct
 from typing import Dict, List, Optional
 
-from pyatv.support import dns, mdns
+from pyatv.core import mdns
+from pyatv.support import dns
 
 DEFAULT_QCLASS = 1
 DEFAULT_TTL = 10

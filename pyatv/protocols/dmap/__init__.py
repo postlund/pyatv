@@ -19,7 +19,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData
+from pyatv.core import SetupData, mdns
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
@@ -37,7 +37,6 @@ from pyatv.interface import (
 from pyatv.protocols.dmap import daap, parser, tags
 from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
-from pyatv.support import mdns
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.scan import ScanHandler, ScanHandlerReturn

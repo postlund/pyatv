@@ -1,4 +1,4 @@
-"""Functional tests pyatv.support.mdns."""
+"""Functional tests pyatv.core.mdns."""
 
 import asyncio
 from ipaddress import IPv4Address
@@ -8,7 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pyatv.support import mdns, net
+from pyatv.core import mdns
+from pyatv.support import net
 
 from tests import fake_udns, utils
 
@@ -36,7 +37,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture(autouse=True)
 def mdns_debug():
-    logger = logging.getLogger("pyatv.support.mdns")
+    logger = logging.getLogger("pyatv.core.mdns")
     logger.setLevel(mdns.TRAFFIC_LEVEL)
     yield
 
@@ -52,7 +53,7 @@ def stub_local_addresses():
 # is not s loopback address
 @pytest.fixture(autouse=True)
 def stub_ip_address():
-    with patch("pyatv.support.mdns.ip_address") as mock:
+    with patch("pyatv.core.mdns.ip_address") as mock:
         mock.return_value = mock
         mock.is_loopback = False
         yield

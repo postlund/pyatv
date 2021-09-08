@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pyatv.support.mdns import Response, Service
+from pyatv.core.mdns import Response, Service
 from pyatv.support.scan import BaseScanner, get_unique_identifiers
 
 TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})

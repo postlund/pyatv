@@ -5,9 +5,9 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import DeviceModel
+from pyatv.core import mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.companion import device_info, scan
-from pyatv.support import mdns
 
 COMPANION_SERVICE = "_companion-link._tcp.local"
 

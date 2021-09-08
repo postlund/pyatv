@@ -5,9 +5,9 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import OperatingSystem
+from pyatv.core import mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.dmap import device_info, scan
-from pyatv.support import mdns
 
 HOMESHARING_SERVICE = "_appletv-v2._tcp.local"
 DMAP_SERVICE = "_touch-able._tcp.local"

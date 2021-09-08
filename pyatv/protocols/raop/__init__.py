@@ -9,7 +9,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, c
 from pyatv import conf, const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
-from pyatv.core import SetupData
+from pyatv.core import SetupData, mdns
 from pyatv.core.device_info import lookup_model
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -35,7 +35,7 @@ from pyatv.protocols.raop.raop import (
     RaopContext,
     RaopListener,
 )
-from pyatv.support import map_range, mdns
+from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
