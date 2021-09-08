@@ -20,6 +20,7 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.core import SetupData, mdns
+from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
@@ -39,7 +40,6 @@ from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
-from pyatv.support.scan import ScanHandler, ScanHandlerReturn
 
 _LOGGER = logging.getLogger(__name__)
 

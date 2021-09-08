@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from pyatv.core.mdns import Response, Service
-from pyatv.support.scan import BaseScanner, get_unique_identifiers
+from pyatv.core.scan import BaseScanner, get_unique_identifiers
 
 TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})
 TEST_SERVICE2 = Service("_service2._tcp.local", "service2", None, 0, {"c": "d"})
@@ -20,7 +20,7 @@ def test_unique_identifier_empty(response):
     assert len(list(get_unique_identifiers(response))) == 0
 
 
-@patch("pyatv.support.scan.get_unique_id")
+@patch("pyatv.core.scan.get_unique_id")
 def test_unique_identifiers(unique_id_mock, response):
     response.services.append(TEST_SERVICE1)
     response.services.append(TEST_SERVICE2)
