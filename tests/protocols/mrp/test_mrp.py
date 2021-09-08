@@ -5,10 +5,10 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import OperatingSystem
+from pyatv.core.device_info import lookup_version
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.mrp import device_info, scan
 from pyatv.support import mdns
-from pyatv.support.device_info import lookup_version
 
 MRP_SERVICE = "_mediaremotetv._tcp.local"
 
