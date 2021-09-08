@@ -19,6 +19,32 @@ first.
 
 # Installing pyatv
 
+You can install/run pyatv either in a container using pre-built images or a virtual environment.
+
+## Container (Docker)
+
+Starting with release 0.9.0, container images for x86_64, aarch64 and armv7 are automatically built and
+available from GitHub. Images are published per version (e.g. v0.9.0, v0.9.1, etc.) and the latest
+commit on `master` (just labeled with `latest`). See the [images](https://github.com/postlund/pyatv/pkgs/container/pyatv)
+page for all available images.
+
+To test atvremote, you can run:
+
+```shell
+$ docker run --rm --network=host ghcr.io/postlund/pyatv:latest atvremote scan
+```
+
+It is also possible to run simple scripts and applications like this:
+
+```shell
+$ docker run --rm --network=host -v $PWD:/app ghcr.io/postlund/pyatv:v0.9.0 python /app/scan.py
+```
+
+Note that network must be used in `host` mode, otherwise pyatv will not be able to find your
+devices when scanning.
+
+## Virtual Environment
+
 It is recommended to install pyatv in a virtual environment rather than
 system-wide. To create a new virtual environment:
 
@@ -38,7 +64,7 @@ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 
 Now you can continue by installing the version of pyatv you want.
 
-## Latest Stable Version
+### Latest Stable Version
 
 Install pyatv using `pip3`:
 
@@ -46,7 +72,7 @@ Install pyatv using `pip3`:
 pip3 install {{ site.pyatv_version }}
 ```
 
-## Development Version
+### Development Version
 
 To try out the latest development version (a.k.a. `master` on GitHub), you can install with:
 
@@ -54,7 +80,7 @@ To try out the latest development version (a.k.a. `master` on GitHub), you can i
 pip3 install --upgrade git+https://github.com/postlund/pyatv.git
 ```
 
-## Specific Branch or a Pull Request
+### Specific Branch or a Pull Request
 
 To install from a branch, you can install like this:
 
