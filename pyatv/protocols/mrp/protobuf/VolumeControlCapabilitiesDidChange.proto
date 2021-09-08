@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto";
+
+extend ProtocolMessage {
+  optional VolumeControlCapabilitiesDidChangeMessage volumeControlCapabilitiesDidChangeMessage = 68;
+}
+
+message VolumeControlCapabilitiesDidChangeMessage {
+  optional VolumeControlAvailabilityMessage capabilities = 1;
+  optional string endpointUID = 3;
+  optional string outputDeviceUID = 4;
+}

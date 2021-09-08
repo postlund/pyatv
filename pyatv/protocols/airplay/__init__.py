@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Any, Dict, Generator, Mapping, Optional, Set, cast
 
-from pyatv import conf, exceptions, mrp
+from pyatv import conf, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData
@@ -20,6 +20,7 @@ from pyatv.interface import (
     StateProducer,
     Stream,
 )
+from pyatv.protocols import mrp
 from pyatv.protocols.airplay import remote_control
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection

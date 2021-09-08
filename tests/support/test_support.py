@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pyatv import exceptions
-from pyatv.mrp.protobuf import ProtocolMessage
+from pyatv.protocols.mrp.protobuf import ProtocolMessage
 from pyatv.support import error_handler, log_binary, log_protobuf, map_range
 
 

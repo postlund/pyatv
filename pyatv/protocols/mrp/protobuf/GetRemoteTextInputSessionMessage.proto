@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional GetRemoteTextInputSessionMessage getRemoteTextInputSessionMessage = 72;
+}
+
+message GetRemoteTextInputSessionMessage {
+}

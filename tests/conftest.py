@@ -71,7 +71,7 @@ def stub_heartbeat_loop(request):
         async def _stub_heartbeat_loop(*args, **kwargs):
             _LOGGER.debug("Using stub for heartbeat")
 
-        with patch("pyatv.mrp.protocol.heartbeater") as mock_heartbeat:
+        with patch("pyatv.protocols.mrp.protocol.heartbeater") as mock_heartbeat:
             mock_heartbeat.side_effect = _stub_heartbeat_loop
             yield
     else:

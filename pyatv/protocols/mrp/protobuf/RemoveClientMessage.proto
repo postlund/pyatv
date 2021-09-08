@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/NowPlayingClient.proto";
+
+extend ProtocolMessage {
+  optional RemoveClientMessage removeClientMessage = 57;
+}
+
+message RemoveClientMessage {
+  optional NowPlayingClient client = 1;
+}

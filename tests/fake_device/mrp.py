@@ -9,11 +9,11 @@ from typing import Dict, Optional, Tuple
 from google.protobuf.message import Message as ProtobufMessage
 
 from pyatv import const
-from pyatv.mrp import messages, protobuf
-from pyatv.mrp.protobuf import CommandInfo_pb2 as cmd
-from pyatv.mrp.protobuf import PlaybackState
-from pyatv.mrp.protobuf import SendCommandResultMessage as scr
-from pyatv.mrp.server_auth import MrpServerAuth
+from pyatv.protocols.mrp import messages, protobuf
+from pyatv.protocols.mrp.protobuf import CommandInfo_pb2 as cmd
+from pyatv.protocols.mrp.protobuf import PlaybackState
+from pyatv.protocols.mrp.protobuf import SendCommandResultMessage as scr
+from pyatv.protocols.mrp.server_auth import MrpServerAuth
 from pyatv.support import chacha20, log_protobuf, variant
 
 from tests.utils import stub_sleep
@@ -405,7 +405,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         outstanding = self.state.outstanding_keypresses
 
         # These corresponds to the bytes mapping to pressed key (see
-        # send_hid_event in pyatv/mrp/messages.py)
+        # send_hid_event in pyatv/protocols/mrp/messages.py)
         start = inner.hidEventData[43:49]
         use_page, usage, down_press = struct.unpack(">HHH", start)
 

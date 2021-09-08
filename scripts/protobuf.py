@@ -23,7 +23,7 @@ PROTOBUF_VERSION = "3.17.3"
 # New messages re-using inner message of another type
 REUSED_MESSAGES = {"DEVICE_INFO_MESSAGE": "DEVICE_INFO_UPDATE_MESSAGE"}
 
-BASE_PATH = os.path.join("pyatv", "mrp", "protobuf")
+BASE_PATH = os.path.join("pyatv", "protocols", "mrp", "protobuf")
 OUTPUT_TEMPLATE = """\"\"\"Simplified extension handling for protobuf messages.
 
 THIS CODE IS AUTO-GENERATED - DO NOT EDIT!!!
@@ -265,9 +265,10 @@ def verify_generated_code():
 def _print_single_message(data, unknown_fields):
     # Import here to allow other parts of script, e.g. message generation to run
     # without having pyatv installed
-    from pyatv.mrp.protobuf import (  # pylint: disable=import-outside-toplevel
-        ProtocolMessage,
-    )
+    # pylint: disable=import-outside-toplevel
+    from pyatv.protocols.mrp.protobuf import ProtocolMessage
+
+    # pylint: enable=import-outside-toplevel
 
     parsed = ProtocolMessage()
     parsed.ParseFromString(data)

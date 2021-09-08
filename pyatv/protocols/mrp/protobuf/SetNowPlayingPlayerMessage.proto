@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional SetNowPlayingPlayerMessage setNowPlayingPlayerMessage = 51;
+}
+
+message SetNowPlayingPlayerMessage {
+  optional PlayerPath playerPath = 1;
+}

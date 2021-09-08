@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.mrp.variant."""
+"""Unit tests for pyatv.protocols.mrp.variant."""
 import pytest
 
 from pyatv.support.variant import read_variant, write_variant
