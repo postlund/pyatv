@@ -1,9 +1,9 @@
-"""Unit tests for pyatv.support.relayer."""
+"""Unit tests for pyatv.core.relayer."""
 import pytest
 
 from pyatv import exceptions
 from pyatv.const import Protocol
-from pyatv.support.relayer import Relayer
+from pyatv.core.relayer import Relayer
 
 
 @pytest.fixture

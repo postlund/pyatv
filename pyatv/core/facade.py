@@ -19,9 +19,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
+from pyatv.core.relayer import Relayer
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.relayer import Relayer
 
 _LOGGER = logging.getLogger(__name__)
 
