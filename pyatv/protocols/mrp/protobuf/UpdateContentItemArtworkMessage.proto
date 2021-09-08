@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/ContentItem.proto";
+import "pyatv/protocols/mrp/protobuf/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional UpdateContentItemArtworkMessage updateContentItemArtworkMessage = 61;
+}
+
+message UpdateContentItemArtworkMessage {
+  repeated ContentItem contentItems = 1;
+  optional PlayerPath playerPath = 2;
+}

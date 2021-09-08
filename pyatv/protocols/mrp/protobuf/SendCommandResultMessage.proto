@@ -1,0 +1,47 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional SendCommandResultMessage sendCommandResultMessage = 7;
+}
+
+message SendError {
+  enum Enum {
+    NoError = 0;  // This is None in original message definitions (no-go with python)
+    ApplicationNotFound = 1;
+    ConnectionFailed = 2;
+    Ignored = 3;
+    CouldNotLaunchApplication = 4;
+    TimedOut = 5;
+    OriginDoesNotExist = 6;
+    InvalidOptions = 7;
+    NoCommandHandlers = 8;
+    ApplicationNotInstalled = 9;
+  }
+}
+
+message HandlerReturnStatus {
+  enum Enum {
+    Success = 0;
+    NoSuchContent = 1;
+    CommandFailed = 2;
+    NoActionableNowPlayingItem = 10;
+    DeviceNotFound = 20;
+    UIKitLegacy = 3;
+    SkipAdProhibited = 100;
+    QueueIsUserCurated = 101;
+    UserModifiedQueueDisabled = 102;
+    UserQueueModificationNotSupportedForCurrentItem = 103;
+    SubscriptionRequiredForSharedQueue = 104;
+  }
+}
+
+message SendCommandResultMessage {
+  optional SendError.Enum sendError = 1;
+  optional HandlerReturnStatus.Enum handlerReturnStatus = 2;
+  repeated bytes handlerReturnStatusDatas = 3;
+  optional string commandID = 4;
+  optional PlayerPath playerPath = 5;
+}

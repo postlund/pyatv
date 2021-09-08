@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional PlayerClientPropertiesMessage playerClientPropertiesMessage = 86;
+}
+
+message PlayerClientPropertiesMessage {
+  optional PlayerPath playerPath = 1;
+  optional double lastPlayingTimestamp = 2;
+}

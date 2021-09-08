@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/DeviceInfoMessage.proto";
+
+message Origin {
+  enum Type {
+    Unknown = 0;
+    Local = 1;
+    Custom = 2;
+  }
+
+  optional Type type = 1;
+  optional string displayName = 2;
+  optional int32 identifier = 3;
+  optional DeviceInfoMessage deviceInfo = 4;
+}

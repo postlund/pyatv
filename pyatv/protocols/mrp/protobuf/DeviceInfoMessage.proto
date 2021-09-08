@@ -1,0 +1,49 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+import "pyatv/protocols/mrp/protobuf/Common.proto";
+
+extend ProtocolMessage {
+  optional DeviceInfoMessage deviceInfoMessage = 20;
+}
+
+message DeviceInfoMessage {
+  required string uniqueIdentifier = 1; // Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063
+  required string name = 2; // Example: Jean's iPhone
+  optional string localizedModelName = 3; // Example: iPhone
+  required string systemBuildVersion = 4; // Example: 13F69
+  required string applicationBundleIdentifier = 5; // Example: com.example.myremote
+  optional string applicationBundleVersion = 6; // Example: 107
+  required int32 protocolVersion = 7; // Example: 1
+  optional uint32 lastSupportedMessageType = 8;
+  optional bool supportsSystemPairing = 9;
+  optional bool allowsPairing = 10;
+  optional bool connected = 11;
+  optional string systemMediaApplication = 12;
+  optional bool supportsACL = 13;
+  optional bool supportsSharedQueue = 14;
+  optional bool supportsExtendedMotion = 15;
+  optional bytes bluetoothAddress = 16;
+  optional uint32 sharedQueueVersion = 17;
+  optional string deviceUID = 19;
+  optional string managedConfigDeviceID = 20;
+  optional DeviceClass.Enum deviceClass = 21;
+  optional uint32 logicalDeviceCount = 22;
+  optional bool tightlySyncedGroup = 23;
+  optional bool isProxyGroupPlayer = 24;
+  optional string tightSyncUID = 25;
+  optional string groupUID = 26;
+  optional string groupName = 27;
+  repeated DeviceInfoMessage groupedDevices = 28;
+  optional bool isGroupLeader = 29;
+  optional bool isAirplayActive = 30;
+  optional string systemPodcastApplication = 31;
+  optional string enderDefaultGroupUID = 32;
+  repeated string airplayReceivers = 33;
+  optional string linkAgent = 34;
+  optional string clusterID = 35;
+  optional string clusterLeaderID = 36;
+  optional uint32 clusterType = 37;
+  optional bool isClusterAware = 38;
+  optional string modelID = 39;
+}

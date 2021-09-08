@@ -9,7 +9,7 @@ from random import randrange
 from typing import Optional
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
-from pyatv.mrp import protobuf
+from pyatv.protocols.mrp import protobuf
 from pyatv.support.http import parse_request
 from pyatv.support.packet import defpacket
 from pyatv.support.variant import read_variant, write_variant
