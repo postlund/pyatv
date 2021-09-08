@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.companion.opack.
+"""Unit tests for pyatv.protocols.companion.opack.
 
 TODO: Add integration tests using pack and unpack together.
 """
@@ -8,7 +8,7 @@ from uuid import UUID
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.companion.opack import pack, unpack
+from pyatv.protocols.companion.opack import pack, unpack
 
 
 def test_pack_unsupported_type():

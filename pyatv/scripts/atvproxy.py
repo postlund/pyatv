@@ -12,15 +12,15 @@ from google.protobuf.message import Message as ProtobufMessage
 from zeroconf import Zeroconf
 
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.companion import opack
-from pyatv.companion.connection import CompanionConnection
-from pyatv.companion.protocol import CompanionProtocol, FrameType
-from pyatv.companion.server_auth import CompanionServerAuth
 from pyatv.conf import CompanionService, MrpService
 from pyatv.mrp import protobuf
 from pyatv.mrp.connection import MrpConnection
 from pyatv.mrp.protocol import MrpProtocol
 from pyatv.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
+from pyatv.protocols.companion import opack
+from pyatv.protocols.companion.connection import CompanionConnection
+from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
+from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.support import chacha20, log_binary, mdns, net, variant
 
 _LOGGER = logging.getLogger(__name__)

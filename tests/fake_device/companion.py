@@ -4,9 +4,9 @@ import asyncio
 import logging
 from typing import Dict, Optional
 
-from pyatv.companion import HidCommand, opack
-from pyatv.companion.connection import FrameType
-from pyatv.companion.server_auth import CompanionServerAuth
+from pyatv.protocols.companion import HidCommand, opack
+from pyatv.protocols.companion.connection import FrameType
+from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)

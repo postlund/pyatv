@@ -5,11 +5,11 @@ from typing import Optional, cast
 
 from pyatv import conf, exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.companion.auth import CompanionPairSetupProcedure
-from pyatv.companion.connection import CompanionConnection
-from pyatv.companion.protocol import CompanionProtocol
 from pyatv.conf import CompanionService
 from pyatv.interface import BaseService, PairingHandler
+from pyatv.protocols.companion.auth import CompanionPairSetupProcedure
+from pyatv.protocols.companion.connection import CompanionConnection
+from pyatv.protocols.companion.protocol import CompanionProtocol
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager
 

@@ -19,7 +19,6 @@ from typing import (
 
 import aiohttp
 
-from pyatv import companion as companion_proto
 from pyatv import conf
 from pyatv import dmap as dmap_proto
 from pyatv import exceptions, interface
@@ -29,6 +28,7 @@ from pyatv.const import Protocol
 from pyatv.core import SetupData, StateProducer
 from pyatv.interface import BaseService
 from pyatv.protocols import airplay as airplay_proto
+from pyatv.protocols import companion as companion_proto
 from pyatv.support import http
 from pyatv.support.facade import FacadeAppleTV
 from pyatv.support.http import ClientSessionManager

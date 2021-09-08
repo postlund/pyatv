@@ -10,8 +10,8 @@ from pyatv.auth.hap_pairing import (
 )
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, stringify, write_tlv
-from pyatv.companion import opack
-from pyatv.companion.connection import FrameType
+from pyatv.protocols.companion import opack
+from pyatv.protocols.companion.connection import FrameType
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
