@@ -5,10 +5,10 @@ import asyncio
 import logging
 
 from pyatv import exceptions
+from pyatv.core.net import tcp_keepalive
 from pyatv.interface import StateProducer
 from pyatv.protocols.mrp import protobuf
 from pyatv.support import chacha20, log_binary, log_protobuf
-from pyatv.support.net import tcp_keepalive
 from pyatv.support.variant import read_variant, write_variant
 
 _LOGGER = logging.getLogger(__name__)

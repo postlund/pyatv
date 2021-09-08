@@ -11,7 +11,8 @@ import weakref
 from zeroconf import ServiceInfo, Zeroconf
 
 from pyatv import exceptions
-from pyatv.support import log_binary, net
+from pyatv.core import net
+from pyatv.support import log_binary
 from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.dns import (
     DnsMessage,
