@@ -1,0 +1,29 @@
+name: Implementation Proposal
+description: Suggest how a feature should be implemented
+labels: [feature]
+body:
+  - type: textarea
+    id: short-desc
+    attributes:
+      label: Short feature/function description
+    validations:
+      required: true
+  - type: textarea
+    id: to-be-done
+    attributes:
+      label: What needs to be done?
+    validations:
+      required: true
+  - type: textarea
+    id: breaking-change
+    attributes:
+      label: Is this a breaking change?
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Anything else worth knowing?
+    validations:
+      required: true
+

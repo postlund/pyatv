@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: [feature]
+body:
+  - type: textarea
+    id: short-desc
+    attributes:
+      label: What feature would you like?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Any other information to share?
+    validations:
+      required: true

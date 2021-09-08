@@ -1,0 +1,79 @@
+name: Bug report
+description: Create a report to help us improve
+labels: [investigation]
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: |
+        Thank you for reporting any bugs you find! Before opening a new issue, please look through already reported [bugs](https://github.com/postlund/pyatv/issues?q=is%3Aissue+label%3Abug) (someone else might have reported it already). Also, take a look in the [FAQ](https://pyatv.dev/support/faq/) and especially the *Known Issues* section at the bottom.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Error log
+      description: Please paste any relevant error logs in this field.
+      value: |
+        ```log
+        <place log here>
+        ```
+    validations:
+      required: false
+  - type: textarea
+    id: to-reproduce
+    attributes:
+      label: How to reproduce the bug?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What is expected behavior?
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you running?
+      placeholder: Windows/Linux/macOS
+    validations:
+      required: true
+  - type: dropdown
+    id: python-version
+    attributes:
+      label: Python
+      description: What version of python do you use?
+      options:
+        - 3.6
+        - 3.7
+        - 3.8
+        - 3.9
+        - 3.10
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: pyatv-version
+    attributes:
+      label: pyatv
+      description: What version of pyatv are you running?
+      placeholder: 0.8.2
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: What device and software version do you have?
+      placeholder: Apple TV 4K tvOS 14.7
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+    validations:
+      required: true
