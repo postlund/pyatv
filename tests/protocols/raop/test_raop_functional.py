@@ -13,7 +13,7 @@ from typing import Dict, List
 
 import pytest
 
-from pyatv import exceptions, raop
+from pyatv import exceptions
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
 from pyatv.exceptions import AuthenticationError
 from pyatv.interface import FeatureInfo, Playing, PushListener

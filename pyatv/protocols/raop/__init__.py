@@ -27,8 +27,13 @@ from pyatv.interface import (
 )
 from pyatv.protocols.airplay import features as ap_features
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
-from pyatv.raop.audio_source import AudioSource, open_source
-from pyatv.raop.raop import PlaybackInfo, RaopClient, RaopContext, RaopListener
+from pyatv.protocols.raop.audio_source import AudioSource, open_source
+from pyatv.protocols.raop.raop import (
+    PlaybackInfo,
+    RaopClient,
+    RaopContext,
+    RaopListener,
+)
 from pyatv.support import map_range, mdns
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model

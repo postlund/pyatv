@@ -1,8 +1,8 @@
-"""Unit tests for pyatv.raop.fifo."""
+"""Unit tests for pyatv.protocols.raop.fifo."""
 
 import pytest
 
-from pyatv.raop.fifo import PacketFifo
+from pyatv.protocols.raop.fifo import PacketFifo
 
 
 def test_add_to_fifo():

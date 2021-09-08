@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.raop."""
+"""Unit tests for pyatv.protocols.raop."""
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
@@ -6,7 +6,7 @@ import pytest
 
 from pyatv.const import DeviceModel
 from pyatv.interface import DeviceInfo
-from pyatv.raop import device_info, scan
+from pyatv.protocols.raop import device_info, scan
 from pyatv.support import mdns
 
 RAOP_SERVICE = "_raop._tcp.local"
