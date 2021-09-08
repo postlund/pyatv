@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.support.facade."""
+"""Unit tests for pyatv.core.facade."""
 import asyncio
 import inspect
 from ipaddress import IPv4Address
@@ -11,6 +11,7 @@ from pyatv import exceptions
 from pyatv.conf import AppleTV
 from pyatv.const import FeatureName, OperatingSystem, Protocol
 from pyatv.core import SetupData
+from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     Audio,
     DeviceInfo,
@@ -21,7 +22,6 @@ from pyatv.interface import (
     Power,
     PushUpdater,
 )
-from pyatv.support.facade import FacadeAppleTV, SetupData
 
 pytestmark = pytest.mark.asyncio
 
