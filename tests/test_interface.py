@@ -154,6 +154,21 @@ def test_playing_basic_fields():
     assert "2468" in out
 
 
+@pytest.mark.parametrize(
+    "position,total_time,expected",
+    [
+        (None, 10, None),
+        (5, None, 5),
+        (-1, None, 0),
+        (-1, 10, 0),
+        (5, 10, 5),
+        (11, 10, 10),
+    ],
+)
+def test_playing_position_force_in_range(position, total_time, expected):
+    assert Playing(position=position, total_time=total_time).position == expected
+
+
 def test_playing_only_position():
     assert "1234" in str(Playing(position=1234))
 

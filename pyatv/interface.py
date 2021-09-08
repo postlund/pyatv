@@ -383,6 +383,16 @@ class Playing(ABC):
         self._series_name = series_name
         self._season_number = season_number
         self._episode_number = episode_number
+        self._post_process()
+
+    def _post_process(self):
+        if self._position:
+            # Make sure position never is negative
+            self._position = max(self._position, 0)
+
+            # If there's a total time, never exceed that'
+            if self._total_time:
+                self._position = min(self._position, self._total_time)
 
     def __str__(self) -> str:
         """Convert this playing object to a readable string."""
