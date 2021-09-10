@@ -14,6 +14,34 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
+class KeyboardState(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
+    class _Enum:
+        V = typing.NewType('V', builtins.int)
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.V], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Unknown = KeyboardState.Enum.V(0)
+        NotEditing = KeyboardState.Enum.V(1)
+        DidBeginEditing = KeyboardState.Enum.V(2)
+        Editing = KeyboardState.Enum.V(3)
+        TextDidChange = KeyboardState.Enum.V(4)
+        DidEndEditing = KeyboardState.Enum.V(5)
+        Response = KeyboardState.Enum.V(6)
+
+    Unknown = KeyboardState.Enum.V(0)
+    NotEditing = KeyboardState.Enum.V(1)
+    DidBeginEditing = KeyboardState.Enum.V(2)
+    Editing = KeyboardState.Enum.V(3)
+    TextDidChange = KeyboardState.Enum.V(4)
+    DidEndEditing = KeyboardState.Enum.V(5)
+    Response = KeyboardState.Enum.V(6)
+
+    def __init__(self,
+        ) -> None: ...
+global___KeyboardState = KeyboardState
+
 class AutocapitalizationType(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
@@ -176,13 +204,13 @@ class KeyboardMessage(google.protobuf.message.Message):
     STATE_FIELD_NUMBER: builtins.int
     ATTRIBUTES_FIELD_NUMBER: builtins.int
     ENCRYPTEDTEXTCYPHERTEXT_FIELD_NUMBER: builtins.int
-    state: builtins.int = ...
+    state: global___KeyboardState.Enum.V = ...
     @property
     def attributes(self) -> global___TextEditingAttributes: ...
     encryptedTextCyphertext: builtins.bytes = ...
     def __init__(self,
         *,
-        state : typing.Optional[builtins.int] = ...,
+        state : typing.Optional[global___KeyboardState.Enum.V] = ...,
         attributes : typing.Optional[global___TextEditingAttributes] = ...,
         encryptedTextCyphertext : typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
