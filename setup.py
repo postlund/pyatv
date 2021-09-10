@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
+from os.path import dirname, join
 from pathlib import Path
-from os.path import join, dirname
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 GITHUB_URL = "https://github.com/postlund/pyatv"
 
@@ -28,10 +29,7 @@ setup(
     license="MIT",
     url="https://pyatv.dev",
     download_url=f"{GITHUB_URL}/archive/refs/tags/v{__version__}.zip",
-    project_urls={
-        "Repository": GITHUB_URL,
-        "Bug Reports": f"{GITHUB_URL}/issues"
-    },
+    project_urls={"Repository": GITHUB_URL, "Bug Reports": f"{GITHUB_URL}/issues"},
     author="Pierre Ståhl",
     author_email="pierre.staahl@gmail.com",
     description="A client library for Apple TV and AirPlay devices",
@@ -44,8 +42,6 @@ setup(
     install_requires=get_requirements(),
     test_suite="tests",
     keywords=["apple", "tv", "airplay", "raop", "companion", "dmap", "dacp"],
-    setup_requires=["pytest-runner"],
-    tests_require=["tox==3.24.3", "pytest==6.2.5", "pytest-xdist==2.3.0"],
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [

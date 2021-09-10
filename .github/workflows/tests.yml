@@ -30,6 +30,14 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
+    - name: Cache .tox directory
+      if: ${{ !(matrix.platform == 'windows-latest' && matrix.python-version == '3.6') }}
+      uses: actions/cache@v2
+      with:
+        path: '.tox'
+        # -X at the end can be bumped to force by-pass of a cache in case it's broken
+        # as GitHub actions does not support deletion of caches...
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('requirements_*.txt', 'base_versions.txt') }}-1
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
