@@ -6,6 +6,18 @@ extend ProtocolMessage {
   optional KeyboardMessage keyboardMessage = 28;
 }
 
+message KeyboardState {
+  enum Enum {
+    Unknown = 0;
+    NotEditing = 1;
+    DidBeginEditing = 2;
+    Editing = 3;
+    TextDidChange = 4;
+    DidEndEditing = 5;
+    Response = 6;
+  }
+}
+
 message AutocapitalizationType {
   enum Enum {
     None = 0;
@@ -70,7 +82,7 @@ message TextEditingAttributes {
 }
 
 message KeyboardMessage {
-  optional int32 state = 1;
+  optional KeyboardState.Enum state = 1;
   optional TextEditingAttributes attributes = 3;
   optional bytes encryptedTextCyphertext = 4;
 }
