@@ -73,6 +73,8 @@ DEFAULT_PLAYER_NAME = "Default Player"
 BUILD_NUMBER = "18M60"
 OS_VERSION = "14.7"  # Must match BUILD_NUMBER (take from device_info.py)
 
+DEVICE_UID = "E510C430-B01D-45DF-B558-6EA6F8251069"
+
 
 def _fill_item(item, metadata):
     if metadata.identifier:
@@ -196,6 +198,7 @@ class FakeMrpState:
         self.powered_on = True
         self.has_authenticated = False
         self.heartbeat_count = 0
+        self.volume: float = 0.0
 
     def _send(self, msg):
         for client in self.clients:
@@ -270,6 +273,14 @@ class FakeMrpState:
             item.command = command
             item.enabled = True
         msg.inner().playerPath.client.bundleIdentifier = PLAYER_IDENTIFIER
+        self._send(msg)
+
+    def set_volume(self, volume, device_uid):
+        self.volume = volume
+
+        msg = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
+        msg.inner().outputDeviceUID = device_uid
+        msg.inner().volume = volume
         self._send(msg)
 
 
@@ -347,6 +358,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             resp.identifier = identifier
         resp.inner().systemBuildVersion = BUILD_NUMBER
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
+        resp.inner().deviceUID = DEVICE_UID
         self.send_to_client(resp)
 
     def data_received(self, data):
@@ -521,6 +533,15 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             )
         )
 
+    def handle_set_volume(self, message, inner):
+        _LOGGER.debug("Setting volume to %f", inner.volume)
+        self.state.set_volume(inner.volume, inner.outputDeviceUID)
+        self.send_to_client(
+            messages.create(
+                protobuf.ProtocolMessage.UNKNOWN_MESSAGE, identifier=message.identifier
+            )
+        )
+
 
 class FakeMrpUseCases:
     """Wrapper for altering behavior of a FakeMrpAppleTV instance."""
@@ -680,3 +701,7 @@ class FakeMrpUseCases:
     def default_supported_commands(self, commands):
         """Call to set default supported commands."""
         self.state.default_supported_commands(commands)
+
+    def set_volume(self, volume: float, device_uid: str) -> None:
+        """Change current volume."""
+        self.state.set_volume(volume, device_uid)
