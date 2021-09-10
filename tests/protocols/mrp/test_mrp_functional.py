@@ -25,7 +25,13 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from tests import common_functional_tests
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
-from tests.fake_device.mrp import APP_NAME, BUILD_NUMBER, OS_VERSION, PLAYER_IDENTIFIER
+from tests.fake_device.mrp import (
+    APP_NAME,
+    BUILD_NUMBER,
+    DEVICE_UID,
+    OS_VERSION,
+    PLAYER_IDENTIFIER,
+)
 from tests.utils import faketime, stub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,6 +71,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def get_connected_device(self):
         return await pyatv.connect(self.conf, loop=self.loop)
+
+    def supported_volume_controls(self):
+        return [
+            FeatureName.VolumeUp,
+            FeatureName.VolumeDown,
+            FeatureName.Volume,
+            FeatureName.SetVolume,
+        ]
 
     @unittest_run_loop
     async def test_button_up_actions(self):
@@ -489,3 +503,17 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.position, 10)
             self.assertEqual(playing.season_number, 12)
             self.assertEqual(playing.episode_number, 4)
+
+    @unittest_run_loop
+    async def test_volume_change(self):
+        self.usecase.change_volume_control(available=True)
+
+        assert math.isclose(self.atv.audio.volume, 0.0)
+
+        # Manually set a new volume level
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device
+        self.usecase.set_volume(0.3, DEVICE_UID)
+        await until(lambda: math.isclose(self.atv.audio.volume, 30.0))

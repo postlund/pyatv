@@ -601,6 +601,8 @@ def _extract_command_with_args(cmd):
             return [RepeatState(args[0])]
         if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
             return [InputAction(args[0])]
+        if cmd == "set_volume":
+            return [float(args[0])]
         return args
 
     equal_sign = cmd.find("=")

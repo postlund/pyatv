@@ -189,3 +189,12 @@ def seek_to_position(position):
     send_command = message.inner()
     send_command.options.playbackPosition = position
     return message
+
+
+def set_volume(device_uid: str, volume: float) -> protobuf.ProtocolMessage:
+    """Change volume on a device."""
+    message = create(protobuf.SET_VOLUME_MESSAGE)
+    inner = message.inner()
+    inner.outputDeviceUID = device_uid
+    inner.volume = volume
+    return message

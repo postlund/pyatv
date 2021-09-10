@@ -16,6 +16,8 @@ PLAYER_NAME_1 = "player_name_1"
 
 DEFAULT_PLAYER = "MediaRemote-DefaultPlayer"
 
+pytestmark = pytest.mark.asyncio
+
 
 def set_path(
     message,
@@ -84,7 +86,6 @@ def psm(protocol):
     yield player_state.PlayerStateManager(protocol)
 
 
-@pytest.mark.asyncio
 async def test_get_client_and_player(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
@@ -98,7 +99,6 @@ async def test_get_client_and_player(psm, protocol):
     assert client.display_name == CLIENT_NAME_1
 
 
-@pytest.mark.asyncio
 async def test_no_metadata(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
@@ -107,7 +107,6 @@ async def test_no_metadata(psm, protocol):
     assert player.metadata is None
 
 
-@pytest.mark.asyncio
 async def test_metadata_single_item(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item")
@@ -117,7 +116,6 @@ async def test_metadata_single_item(psm, protocol):
     assert player.metadata.title == "item"
 
 
-@pytest.mark.asyncio
 async def test_metadata_multiple_items(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item1")
@@ -128,7 +126,6 @@ async def test_metadata_multiple_items(psm, protocol):
     assert player.metadata.title == "item2"
 
 
-@pytest.mark.asyncio
 async def test_metadata_no_item_identifier(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
@@ -137,7 +134,6 @@ async def test_metadata_no_item_identifier(psm, protocol):
     assert player.item_identifier is None
 
 
-@pytest.mark.asyncio
 async def test_metadata_item_identifier(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, identifier="id1", title="item1")
@@ -153,7 +149,6 @@ async def test_metadata_item_identifier(psm, protocol):
     assert player.item_identifier == "id2"
 
 
-@pytest.mark.asyncio
 async def test_get_metadata_field(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item", playCount=123)
@@ -164,7 +159,6 @@ async def test_get_metadata_field(psm, protocol):
     assert player.metadata_field("playCount") == 123
 
 
-@pytest.mark.asyncio
 async def test_content_item_update(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, identifier="id", title="item", playCount=123)
@@ -182,7 +176,6 @@ async def test_content_item_update(psm, protocol):
     assert player.metadata_field("playCount") == 1111
 
 
-@pytest.mark.asyncio
 async def test_get_command_info(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     info = msg.inner().supportedCommands.supportedCommands.add()
@@ -194,7 +187,6 @@ async def test_get_command_info(psm, protocol):
     assert player.command_info(pb.CommandInfo_pb2.Pause) is not None
 
 
-@pytest.mark.asyncio
 async def test_playback_state_without_rate(psm, protocol):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg.inner().playbackState = pb.PlaybackState.Paused
@@ -211,7 +203,6 @@ async def test_playback_state_without_rate(psm, protocol):
     assert player.playback_state is pb.PlaybackState.Playing
 
 
-@pytest.mark.asyncio
 async def test_playback_state_playing(psm, protocol):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
     set_state.inner().playbackState = pb.PlaybackState.Playing
@@ -222,7 +213,6 @@ async def test_playback_state_playing(psm, protocol):
     assert player.playback_state == pb.PlaybackState.Playing
 
 
-@pytest.mark.asyncio
 async def test_playback_state_seeking(psm, protocol):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
     set_state.inner().playbackState = pb.PlaybackState.Playing
@@ -233,7 +223,6 @@ async def test_playback_state_seeking(psm, protocol):
     assert player.playback_state == pb.PlaybackState.Seeking
 
 
-@pytest.mark.asyncio
 async def test_change_listener(psm, protocol, listener):
     assert psm.listener == listener
 
@@ -241,7 +230,6 @@ async def test_change_listener(psm, protocol, listener):
     assert psm.listener is None
 
 
-@pytest.mark.asyncio
 async def test_set_now_playing_client(psm, protocol, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
@@ -253,7 +241,6 @@ async def test_set_now_playing_client(psm, protocol, listener):
     assert psm.client.bundle_identifier == CLIENT_ID_1
 
 
-@pytest.mark.asyncio
 async def test_set_now_playing_player_when_no_client(psm, protocol, listener):
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
     await protocol.inject(msg)
@@ -264,7 +251,6 @@ async def test_set_now_playing_player_when_no_client(psm, protocol, listener):
     assert not psm.playing.display_name
 
 
-@pytest.mark.asyncio
 async def test_set_now_playing_player_for_active_client(psm, protocol, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
@@ -280,7 +266,6 @@ async def test_set_now_playing_player_for_active_client(psm, protocol, listener)
     assert psm.playing.display_name == PLAYER_NAME_1
 
 
-@pytest.mark.asyncio
 async def test_default_player_when_only_client_set(psm, protocol, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
@@ -300,7 +285,6 @@ async def test_default_player_when_only_client_set(psm, protocol, listener):
     assert psm.playing.display_name == "Default Name"
 
 
-@pytest.mark.asyncio
 async def test_set_state_calls_active_listener(psm, protocol, listener):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(set_state)
@@ -324,7 +308,6 @@ async def test_set_state_calls_active_listener(psm, protocol, listener):
     assert listener.call_count == 4
 
 
-@pytest.mark.asyncio
 async def test_content_item_update_calls_active_listener(psm, protocol, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     await protocol.inject(msg)
@@ -354,7 +337,6 @@ async def test_content_item_update_calls_active_listener(psm, protocol, listener
     assert listener.call_count == 5
 
 
-@pytest.mark.asyncio
 async def test_update_client(psm, protocol, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
@@ -459,23 +441,6 @@ async def test_remove_active_player_reverts_to_default(psm, protocol, listener):
     assert psm.playing.identifier == DEFAULT_PLAYER
 
 
-@pytest.mark.asyncio
-async def test_volume_control_availability(psm, protocol, listener):
-    msg = messages.create(pb.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
-    msg.inner().volumeControlAvailable = True
-    await protocol.inject(msg)
-
-    assert listener.call_count == 1
-    assert psm.volume_controls_available
-
-    msg.inner().volumeControlAvailable = False
-    await protocol.inject(msg)
-
-    assert listener.call_count == 2
-    assert not psm.volume_controls_available
-
-
-@pytest.mark.asyncio
 async def test_set_default_supported_commands(psm, protocol, listener):
     msg = messages.create(pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
     supported_commands = msg.inner().supportedCommands.supportedCommands

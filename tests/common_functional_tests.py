@@ -79,6 +79,9 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await until(lambda: self.state.last_button_pressed == button)
         await until(lambda: self.state.last_button_action == action)
 
+    def supported_volume_controls(self):
+        return [FeatureName.VolumeUp, FeatureName.VolumeDown]
+
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
@@ -536,7 +539,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_volume_controls(self):
-        controls = [FeatureName.VolumeUp, FeatureName.VolumeDown]
+        controls = self.supported_volume_controls()
 
         self.assertFeatures(FeatureState.Unavailable, *controls)
 

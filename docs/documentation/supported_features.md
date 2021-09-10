@@ -187,7 +187,7 @@ as new ones, like notion of apps and game pad controls.
 * Playing metadata
 * Device and playback state
 * Shuffle and repeat
-* Volume control (volume_up, volume_down)
+* Volume controls
 * Current playing app
 * Power management
 

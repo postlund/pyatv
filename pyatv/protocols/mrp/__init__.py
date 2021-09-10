@@ -27,6 +27,7 @@ from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     ArtworkInfo,
+    Audio,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -630,13 +631,77 @@ class MrpPushUpdater(PushUpdater):
             self.loop.call_soon(self.listener.playstatus_error, self, ex)
 
 
+class MrpAudio(Audio):
+    """Implementation of audio functionality."""
+
+    def __init__(self, protocol: MrpProtocol):
+        """Initialize a new MrpAudio instance."""
+        self.protocol = protocol
+        self.volume_controls_available = False
+        self._volume = 0.0
+        self._add_listeners()
+
+    def _add_listeners(self):
+        self.protocol.add_listener(
+            self._volume_control_availability,
+            protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE,
+        )
+        self.protocol.add_listener(
+            self._volume_control_changed,
+            protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE,
+        )
+        self.protocol.add_listener(
+            self._volume_did_change, protobuf.VOLUME_DID_CHANGE_MESSAGE
+        )
+
+    async def _volume_control_availability(self, message, _) -> None:
+        self._update_volume_controls(message.inner())
+
+    async def _volume_control_changed(self, message, _) -> None:
+        inner = message.inner()
+
+        # Make sure update is for our device (in case it changed for someone else)
+        if inner.outputDeviceUID == self.protocol.device_info.inner().deviceUID:
+            self._update_volume_controls(inner.capabilities)
+
+    def _update_volume_controls(
+        self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
+    ) -> None:
+        self.volume_controls_available = availabilty_message.volumeControlAvailable
+        _LOGGER.debug(
+            "Volume control availability changed to %s", self.volume_controls_available
+        )
+
+    async def _volume_did_change(self, message, _) -> None:
+        inner = message.inner()
+
+        # Make sure update is for our device (in case it changed for someone else)
+        if inner.outputDeviceUID == self.protocol.device_info.inner().deviceUID:
+            self._volume = round(inner.volume * 100.0, 1)
+            _LOGGER.debug("Volume changed to %0.1f", self.volume)
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level."""
+        return self._volume
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level."""
+        await self.protocol.send_and_receive(
+            messages.set_volume(
+                self.protocol.device_info.inner().deviceUID, level / 100.0
+            )
+        )
+
+
 class MrpFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
-    def __init__(self, config: conf.AppleTV, psm: PlayerStateManager):
+    def __init__(self, config: conf.AppleTV, psm: PlayerStateManager, audio: MrpAudio):
         """Initialize a new MrpFeatures instance."""
         self.config = config
         self.psm = psm
+        self.audio = audio
 
     def get_feature(  # pylint: disable=too-many-return-statements,too-many-branches
         self, feature_name: FeatureName
@@ -684,8 +749,14 @@ class MrpFeatures(Features):
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
-        if feature_name in [FeatureName.VolumeDown, FeatureName.VolumeUp]:
-            if self.psm.volume_controls_available:
+        if feature_name in [
+            FeatureName.VolumeDown,
+            FeatureName.VolumeUp,
+            FeatureName.Volume,
+            FeatureName.SetVolume,
+        ]:
+            print(self.audio.volume_controls_available)
+            if self.audio.volume_controls_available:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
@@ -749,13 +820,15 @@ def create_with_connection(  # pylint: disable=too-many-locals
     metadata = MrpMetadata(protocol, psm, config.identifier)
     power = MrpPower(loop, protocol, remote_control)
     push_updater = MrpPushUpdater(loop, metadata, psm)
+    audio = MrpAudio(protocol)
 
     interfaces = {
         RemoteControl: remote_control,
         Metadata: metadata,
         Power: power,
         PushUpdater: push_updater,
-        Features: MrpFeatures(config, psm),
+        Features: MrpFeatures(config, psm, audio),
+        Audio: audio,
     }
 
     async def _connect() -> bool:
@@ -785,6 +858,8 @@ def create_with_connection(  # pylint: disable=too-many-locals
             FeatureName.Artwork,
             FeatureName.VolumeDown,
             FeatureName.VolumeUp,
+            FeatureName.SetVolume,
+            FeatureName.Volume,
             FeatureName.App,
         ]
     )
