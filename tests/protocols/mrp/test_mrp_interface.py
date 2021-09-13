@@ -29,7 +29,7 @@ class MrpProtocolMock:
 
 
 @pytest.fixture(name="protocol")
-def protocol_fixture():
+def protocol_fixture(event_loop):
     yield MrpProtocolMock()
 
 

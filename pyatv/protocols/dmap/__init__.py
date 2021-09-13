@@ -24,6 +24,7 @@ from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
+    Audio,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -541,6 +542,22 @@ class DmapFeatures(Features):
         return FeatureState.Unavailable
 
 
+class DmapAudio(Audio):
+    """Implementation of API for audio functionality."""
+
+    def __init__(self, apple_tv: BaseDmapAppleTV) -> None:
+        """Initialize a new DmapAudio instance."""
+        self.apple_tv = apple_tv
+
+    async def volume_up(self) -> None:
+        """Increase volume by one step."""
+        await self.apple_tv.ctrl_int_cmd("volumeup")
+
+    async def volume_down(self) -> None:
+        """Decrease volume by one step."""
+        await self.apple_tv.ctrl_int_cmd("volumedown")
+
+
 def homesharing_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
@@ -602,7 +619,7 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
-def setup(
+def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: conf.AppleTV,
     service: BaseService,
@@ -618,16 +635,21 @@ def setup(
     apple_tv = BaseDmapAppleTV(requester)
     push_updater = DmapPushUpdater(loop, apple_tv, device_listener)
     metadata = DmapMetadata(config.identifier, apple_tv)
+    audio = DmapAudio(apple_tv)
 
     interfaces = {
         RemoteControl: DmapRemoteControl(apple_tv),
         Metadata: metadata,
         PushUpdater: push_updater,
         Features: DmapFeatures(config, apple_tv),
+        Audio: audio,
     }
 
     async def _connect() -> bool:
         await requester.login()
+
+        # Retrieve initial state to have volume control state
+        await apple_tv.playstatus()
         return True
 
     def _close() -> Set[asyncio.Task]:

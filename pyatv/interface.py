@@ -75,13 +75,14 @@ def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnTyp
     """
 
     def _feat_decorator(func: ReturnType) -> ReturnType:
-        if index in _ALL_FEATURES:
-            raise Exception(
-                f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
-            )
-        _ALL_FEATURES[index] = (name, doc)
-        setattr(func, "_feature_name", name)
-        return func
+        if index not in _ALL_FEATURES or _ALL_FEATURES[index][0] == name:
+            _ALL_FEATURES[index] = (name, doc)
+            setattr(func, "_feature_name", name)
+            return func
+
+        raise Exception(
+            f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
+        )
 
     return _feat_decorator
 
@@ -263,14 +264,20 @@ class RemoteControl:
         """Press key menu."""
         raise exceptions.NotSupportedError()
 
-    @feature(12, "VolumeUp", "Increase volume.")
+    @feature(12, "VolumeUp", "Increase volume (deprecated: use Audio.volume_up).")
     async def volume_up(self) -> None:
-        """Press key volume up."""
+        """Press key volume up.
+
+        **DEPRECATED: Use `pyatv.interface.Audio.volume_up` instead.**
+        """
         raise exceptions.NotSupportedError()
 
-    @feature(13, "VolumeDown", "Decrease volume.")
+    @feature(13, "VolumeDown", "Decrease volume (deprecated: use Audio.volume_down)..")
     async def volume_down(self) -> None:
-        """Press key volume down."""
+        """Press key volume down.
+
+        **DEPRECATED: Use `pyatv.interface.Audio.volume_down` instead.**
+        """
         raise exceptions.NotSupportedError()
 
     @feature(14, "Home", "Home/TV button.")
@@ -292,12 +299,18 @@ class RemoteControl:
 
     @feature(17, "Suspend", "Suspend device (deprecated; use Power.turn_off).")
     async def suspend(self) -> None:
-        """Suspend the device."""
+        """Suspend the device.
+
+        **DEPRECATED: Use `pyatv.interface.Power.turn_off` instead.**
+        """
         raise exceptions.NotSupportedError()
 
     @feature(18, "WakeUp", "Wake up device (deprecated; use Power.turn_on).")
     async def wakeup(self) -> None:
-        """Wake up the device."""
+        """Wake up the device.
+
+        **DEPRECATED: Use `pyatv.interface.Power.turn_on` instead.**
+        """
         raise exceptions.NotSupportedError()
 
     @feature(
@@ -900,12 +913,42 @@ class Audio:
     @property  # type: ignore
     @feature(45, "Volume", "Current volume level.")
     def volume(self) -> float:
-        """Return current volume level."""
+        """Return current volume level.
+
+        Range is in percent, i.e. [0.0-100.0].
+        """
         raise exceptions.NotSupportedError()
 
     @feature(46, "SetVolume", "Set volume level.")
     async def set_volume(self, level: float) -> None:
-        """Change current volume level."""
+        """Change current volume level.
+
+        Range is in percent, i.e. [0.0-100.0].
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(12, "VolumeUp", "Increase volume.")
+    async def volume_up(self) -> None:
+        """Increase volume by one step.
+
+        Step size is device dependent, but usually around 2,5% of the total volume
+        range. It is not necessarily linear.
+
+        Call will block until volume change has been acknowledged by the device (when
+        possible and supported).
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(13, "VolumeDown", "Decrease volume.")
+    async def volume_down(self) -> None:
+        """Decrease volume by one step.
+
+        Step size is device dependent, but usually around 2.5% of the total volume
+        range. It is not necessarily linear.
+
+        Call will block until volume change has been acknowledged by the device (when
+        possible and supported).
+        """
         raise exceptions.NotSupportedError()
 
 

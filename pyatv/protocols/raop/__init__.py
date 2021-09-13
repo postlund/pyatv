@@ -262,6 +262,14 @@ class RaopAudio(Audio):
         else:
             self.playback_manager.context.volume = remapped
 
+    async def volume_up(self) -> None:
+        """Increase volume by one step."""
+        await self.set_volume(min(self.volume + 5.0, 100.0))
+
+    async def volume_down(self) -> None:
+        """Decrease volume by one step."""
+        await self.set_volume(max(self.volume - 5.0, 0.0))
+
 
 class RaopStream(Stream):
     """Implementation of stream functionality."""

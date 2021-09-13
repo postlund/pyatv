@@ -48,7 +48,6 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from pyatv.protocols.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
-from pyatv.support import deprecated
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager
 
@@ -249,6 +248,31 @@ def build_playing_instance(state: PlayerState) -> Playing:
     )
 
 
+async def _send_hid_key(protocol: MrpProtocol, key: str, action: InputAction) -> None:
+    async def _do_press(keycode: Tuple[int, int], hold: bool):
+        await protocol.send(messages.send_hid_event(keycode[0], keycode[1], True))
+
+        if hold:
+            # Hardcoded hold time for one second
+            await asyncio.sleep(1)
+
+        await protocol.send(messages.send_hid_event(keycode[0], keycode[1], False))
+
+    keycode = _KEY_LOOKUP.get(key)
+    if not keycode:
+        raise exceptions.NotSupportedError(f"unsupported key: {key}")
+
+    if action == InputAction.SingleTap:
+        await _do_press(keycode, False)
+    elif action == InputAction.DoubleTap:
+        await _do_press(keycode, False)
+        await _do_press(keycode, False)
+    elif action == InputAction.Hold:
+        await _do_press(keycode, True)
+    else:
+        raise exceptions.NotSupportedError(f"unsupported input action: {action}")
+
+
 # pylint: disable=too-many-public-methods
 class MrpRemoteControl(RemoteControl):
     """Implementation of API for controlling an Apple TV."""
@@ -263,34 +287,6 @@ class MrpRemoteControl(RemoteControl):
         self.loop = loop
         self.psm = psm
         self.protocol = protocol
-
-    async def _press_key(self, key: str, action: InputAction) -> None:
-        async def _do_press(keycode: Tuple[int, int], hold: bool):
-            await self.protocol.send(
-                messages.send_hid_event(keycode[0], keycode[1], True)
-            )
-
-            if hold:
-                # Hardcoded hold time for one second
-                await asyncio.sleep(1)
-
-            await self.protocol.send(
-                messages.send_hid_event(keycode[0], keycode[1], False)
-            )
-
-        keycode = _KEY_LOOKUP.get(key)
-        if not keycode:
-            raise Exception(f"unsupported key: {key}")
-
-        if action == InputAction.SingleTap:
-            await _do_press(keycode, False)
-        elif action == InputAction.DoubleTap:
-            await _do_press(keycode, False)
-            await _do_press(keycode, False)
-        elif action == InputAction.Hold:
-            await _do_press(keycode, True)
-        else:
-            raise Exception(f"unsupported input action: {action}")
 
     async def _send_command(self, command, **kwargs):
         resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
@@ -308,19 +304,19 @@ class MrpRemoteControl(RemoteControl):
 
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
-        await self._press_key("up", action)
+        await _send_hid_key(self.protocol, "up", action)
 
     async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
-        await self._press_key("down", action)
+        await _send_hid_key(self.protocol, "down", action)
 
     async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
-        await self._press_key("left", action)
+        await _send_hid_key(self.protocol, "left", action)
 
     async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
-        await self._press_key("right", action)
+        await _send_hid_key(self.protocol, "right", action)
 
     async def play(self) -> None:
         """Press key play."""
@@ -357,42 +353,39 @@ class MrpRemoteControl(RemoteControl):
 
     async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
-        await self._press_key("select", action)
+        await _send_hid_key(self.protocol, "select", action)
 
     async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
-        await self._press_key("menu", action)
+        await _send_hid_key(self.protocol, "menu", action)
 
     async def volume_up(self) -> None:
         """Press key volume up."""
-        await self._press_key("volume_up", InputAction.SingleTap)
+        await _send_hid_key(self.protocol, "volume_up", InputAction.SingleTap)
 
     async def volume_down(self) -> None:
         """Press key volume down."""
-        await self._press_key("volume_down", InputAction.SingleTap)
+        await _send_hid_key(self.protocol, "volume_down", InputAction.SingleTap)
 
     async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
-        await self._press_key("home", action)
+        await _send_hid_key(self.protocol, "home", action)
 
-    @deprecated
     async def home_hold(self) -> None:
         """Hold key home."""
-        await self._press_key("home", InputAction.Hold)
+        await _send_hid_key(self.protocol, "home", InputAction.Hold)
 
     async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
-        await self._press_key("topmenu", InputAction.SingleTap)
+        await _send_hid_key(self.protocol, "topmenu", InputAction.SingleTap)
 
-    @deprecated
     async def suspend(self) -> None:
         """Suspend the device."""
-        await self._press_key("suspend", InputAction.SingleTap)
+        await _send_hid_key(self.protocol, "suspend", InputAction.SingleTap)
 
-    @deprecated
     async def wakeup(self) -> None:
         """Wake up the device."""
-        await self._press_key("wakeup", InputAction.SingleTap)
+        await _send_hid_key(self.protocol, "wakeup", InputAction.SingleTap)
 
     async def skip_forward(self) -> None:
         """Skip forward a time interval.
@@ -636,9 +629,10 @@ class MrpAudio(Audio):
 
     def __init__(self, protocol: MrpProtocol):
         """Initialize a new MrpAudio instance."""
-        self.protocol = protocol
-        self.volume_controls_available = False
-        self._volume = 0.0
+        self.protocol: MrpProtocol = protocol
+        self.volume_controls_available: bool = False
+        self._volume: float = 0.0
+        self._volume_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
 
     def _add_listeners(self):
@@ -680,6 +674,16 @@ class MrpAudio(Audio):
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
+            # There are no responses to the volume_up/down commands sent to the device.
+            # So when calling volume_up/down here, they will wait for the volume to
+            # change to know when done. Here, a single asyncio.Event is used which
+            # works as long as no more than one task is calling either function at the
+            # same time. If two or more call those functions, all of them will return
+            # at once (when first volume update occurs) instead of one by one. This is
+            # generally fine, but can be improved if there's a need for it.
+            self._volume_event.set()
+            self._volume_event.clear()
+
     @property
     def volume(self) -> float:
         """Return current volume level."""
@@ -692,6 +696,18 @@ class MrpAudio(Audio):
                 self.protocol.device_info.inner().deviceUID, level / 100.0
             )
         )
+
+    async def volume_up(self) -> None:
+        """Increase volume by one step."""
+        if self._volume < 100.0:
+            await _send_hid_key(self.protocol, "volume_up", InputAction.SingleTap)
+            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+
+    async def volume_down(self) -> None:
+        """Decrease volume by one step."""
+        if self._volume > 0.0:
+            await _send_hid_key(self.protocol, "volume_down", InputAction.SingleTap)
+            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
 
 class MrpFeatures(Features):
@@ -755,7 +771,6 @@ class MrpFeatures(Features):
             FeatureName.Volume,
             FeatureName.SetVolume,
         ]:
-            print(self.audio.volume_controls_available)
             if self.audio.volume_controls_available:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)

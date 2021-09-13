@@ -656,6 +656,11 @@ async def _handle_device_command(args, cmd, atv, loop):
             DeviceCommands(atv, loop, args), cmd, False, *cmd_args
         )
 
+    # NB: Needs to be above RemoteControl for now as volume_up/down exists in both
+    # but implementations in Audio shall be called
+    if cmd in audio:
+        return await _exec_command(atv.audio, cmd, True, *cmd_args)
+
     if cmd in ctrl:
         return await _exec_command(atv.remote_control, cmd, True, *cmd_args)
 
@@ -677,9 +682,6 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
-
-    if cmd in audio:
-        return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1
