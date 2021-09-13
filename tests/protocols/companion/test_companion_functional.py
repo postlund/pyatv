@@ -98,4 +98,14 @@ async def test_session_start(companion_client, companion_state):
 )
 async def test_remote_control_buttons(companion_client, companion_state, button):
     await getattr(companion_client.remote_control, button)()
-    await until(lambda: companion_state.latest_button == button)
+    assert companion_state.latest_button == button
+
+
+async def test_audio_volume_up(companion_client, companion_state):
+    await companion_client.audio.volume_up()
+    assert companion_state.latest_button == "volume_up"
+
+
+async def test_audio_volume_down(companion_client, companion_state):
+    await companion_client.audio.volume_down()
+    assert companion_state.latest_button == "volume_down"

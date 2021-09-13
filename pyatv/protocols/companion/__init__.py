@@ -16,6 +16,7 @@ from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
     Apps,
+    Audio,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -301,6 +302,22 @@ class CompanionRemoteControl(RemoteControl):
         await self.api.hid_command(False, command)
 
 
+class CompanionAudio(Audio):
+    """Implementation of audio API."""
+
+    def __init__(self, api: CompanionAPI) -> None:
+        """Initialize a new CompanionAudio instance."""
+        self.api = api
+
+    async def volume_up(self) -> None:
+        """Increase volume by one step."""
+        await self.api.hid_command(False, HidCommand.VolumeUp)
+
+    async def volume_down(self) -> None:
+        """Decrease volume by one step."""
+        await self.api.hid_command(False, HidCommand.VolumeDown)
+
+
 def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
@@ -346,6 +363,7 @@ def setup(
         Features: CompanionFeatures(cast(conf.CompanionService, service)),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
+        Audio: CompanionAudio(api),
     }
 
     async def _connect() -> bool:

@@ -3,6 +3,7 @@
 import asyncio
 from datetime import datetime
 import logging
+import math
 import struct
 from typing import Dict, Optional, Tuple
 
@@ -74,6 +75,8 @@ BUILD_NUMBER = "18M60"
 OS_VERSION = "14.7"  # Must match BUILD_NUMBER (take from device_info.py)
 
 DEVICE_UID = "E510C430-B01D-45DF-B558-6EA6F8251069"
+
+VOLUME_STEP = 0.05
 
 
 def _fill_item(item, metadata):
@@ -198,7 +201,7 @@ class FakeMrpState:
         self.powered_on = True
         self.has_authenticated = False
         self.heartbeat_count = 0
-        self.volume: float = 0.0
+        self.volume: float = 0.5
 
     def _send(self, msg):
         for client in self.clients:
@@ -276,12 +279,15 @@ class FakeMrpState:
         self._send(msg)
 
     def set_volume(self, volume, device_uid):
-        self.volume = volume
+        if 0 <= volume <= 1:
+            self.volume = volume
 
-        msg = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
-        msg.inner().outputDeviceUID = device_uid
-        msg.inner().volume = volume
-        self._send(msg)
+            msg = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
+            msg.inner().outputDeviceUID = device_uid
+            msg.inner().volume = volume
+            self._send(msg)
+        else:
+            _LOGGER.debug("Value %f out of range", volume)
 
 
 class FakeMrpServiceFactory:
@@ -448,6 +454,20 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 del outstanding[(use_page, usage)]
                 _LOGGER.debug("Pressed button: %s", self.state.last_button_pressed)
                 self.send_to_client(messages.create(0, identifier=message.identifier))
+
+                # Special cases for some buttons
+                if pressed_key == "volumeup" and not math.isclose(
+                    self.state.volume, 100.0
+                ):
+                    self.state.set_volume(
+                        min(self.state.volume + VOLUME_STEP, 100.0), DEVICE_UID
+                    )
+                elif pressed_key == "volumedown" and not math.isclose(
+                    self.state.volume, 0.0
+                ):
+                    self.state.set_volume(
+                        max(self.state.volume - VOLUME_STEP, 0.0), DEVICE_UID
+                    )
             else:
                 _LOGGER.error("Missing key down for %d,%d", use_page, usage)
         else:
@@ -553,6 +573,10 @@ class FakeMrpUseCases:
     def change_volume_control(self, available):
         """Change volume control availability."""
         self.state.volume_control(available)
+
+        # Device always sends current volume if controls are available
+        if available:
+            self.state.set_volume(self.state.volume, DEVICE_UID)
 
     def change_artwork(
         self, artwork, mimetype, identifier="artwork", width=None, height=None

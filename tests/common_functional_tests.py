@@ -554,3 +554,23 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.playing(title="dummy2")
 
         self.assertFeatures(FeatureState.Available, *controls)
+
+    # As DMAP is request based, volume control availability will not be automatically
+    # updated when changed, i.e. it needs to be requested. This is the reason for
+    # retrieving what is playing.
+    @unittest_run_loop
+    async def test_audio_volume_controls(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.metadata.playing()
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.VolumeUp, FeatureName.VolumeDown
+            )
+        )
+
+        await self.atv.audio.volume_up()
+        await until(lambda: self.state.last_button_pressed == "volumeup")
+
+        await self.atv.audio.volume_down()
+        await until(lambda: self.state.last_button_pressed == "volumedown")

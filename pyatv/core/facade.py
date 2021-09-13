@@ -20,6 +20,7 @@ from pyatv import conf, const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
 from pyatv.core.relayer import Relayer
+from pyatv.support import deprecated
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
 
@@ -90,10 +91,12 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Press key menu."""
         return await self.relay("menu")(action=action)
 
+    @deprecated
     async def volume_up(self) -> None:
         """Press key volume up."""
         return await self.relay("volume_up")()
 
+    @deprecated
     async def volume_down(self) -> None:
         """Press key volume down."""
         return await self.relay("volume_down")()
@@ -110,10 +113,12 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Go to main menu (long press menu)."""
         return await self.relay("top_menu")()
 
+    @deprecated
     async def suspend(self) -> None:
         """Suspend the device."""
         return await self.relay("suspend")()
 
+    @deprecated
     async def wakeup(self) -> None:
         """Wake up the device."""
         return await self.relay("wakeup")()
@@ -324,6 +329,14 @@ class FacadeAudio(Relayer, interface.Audio):
     def __init__(self):
         """Initialize a new FacadeAudio instance."""
         super().__init__(interface.Audio, DEFAULT_PRIORITIES)
+
+    async def volume_up(self) -> None:
+        """Press key volume up."""
+        return await self.relay("volume_up")()
+
+    async def volume_down(self) -> None:
+        """Press key volume down."""
+        return await self.relay("volume_down")()
 
     @property
     def volume(self) -> float:
