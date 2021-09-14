@@ -330,11 +330,10 @@ class HttpConnection(asyncio.Protocol):
 
             # Dispatch message to first receiver
             self._responses.put(parsed)
-            event = self._requests.pop()
-            if event:
-                event.set()
+            if self._requests:
+                self._requests.pop().set()
             else:
-                _LOGGER.warning("Got response without having a request")
+                _LOGGER.warning("Got response without having a request: %s", parsed)
 
     @staticmethod
     def error_received(exc) -> None:
