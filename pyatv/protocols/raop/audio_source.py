@@ -14,6 +14,8 @@ from pyatv.exceptions import NotSupportedError
 
 _LOGGER = logging.getLogger(__name__)
 
+FRAMES_PER_PACKET = 352
+
 
 def _int2sf(sample_size: int) -> SampleFormat:
     if sample_size == 1:
@@ -86,7 +88,7 @@ class BufferedReaderSource(AudioSource):
     tiny hiccups. Proper buffering should be done by the source buffer.
     """
 
-    CHUNK_SIZE = 352 * 3
+    CHUNK_SIZE = FRAMES_PER_PACKET * 3
 
     def __init__(
         self,
@@ -193,7 +195,13 @@ class BufferedReaderSource(AudioSource):
 
                 self._audio_buffer += chunk
 
-                self._data_was_added_to_buffer.set()
+                # Wait for an entire packet
+                if (
+                    len(self._audio_buffer)
+                    >= FRAMES_PER_PACKET * self._channels * self._sample_size
+                ):
+                    self._data_was_added_to_buffer.set()
+
                 if len(self._audio_buffer) >= self._buffer_size:
                     await self._buffer_needs_refilling.wait()
                     self._buffer_needs_refilling.clear()

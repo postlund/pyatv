@@ -63,6 +63,7 @@ class RaopContext:
         self.rtpseq: int = 0
         self.start_ts = 0
         self.head_ts = 0
+        self.padding_sent: int = 0
 
         self.server_port: int = 0
         self.control_port: int = 0
@@ -80,6 +81,7 @@ class RaopContext:
         self.start_ts = timing.ntp2ts(timing.ntp_now(), self.sample_rate)
         self.head_ts = self.start_ts
         self.latency = 22050 + self.sample_rate
+        self.padding_sent = 0
 
     @property
     def rtptime(self) -> int:
@@ -91,6 +93,16 @@ class RaopContext:
         """Current position in stream (seconds with fraction)."""
         # Do not consider latency here (so do not use rtptime)
         return timing.ts2ms(self.head_ts - self.start_ts, self.sample_rate) / 1000.0
+
+    @property
+    def frame_size(self) -> int:
+        """Size of a single audio frame."""
+        return self.channels * self.bytes_per_channel
+
+    @property
+    def packet_size(self) -> int:
+        """Size of a full audio packet."""
+        return FRAMES_PER_PACKET * self.frame_size
 
 
 class PlaybackInfo(NamedTuple):
@@ -658,14 +670,27 @@ class RaopClient:
             "Audio finished sending in %fs",
             (timing.perf_counter_ns() - stats.start_time_ns) / 10 ** 9,
         )
-        await asyncio.sleep(self.context.latency / self.context.sample_rate)
 
     async def _send_packet(
         self, source: AudioSource, first_packet: bool, transport
     ) -> int:
+        # Once all frames in the audio stream have been sent, we are still "latency"
+        # behind and will start sending padding (empty audio) until we catch up. This
+        # is needed to keep the sync packets in line with real time.
+        if self.context.padding_sent >= self.context.latency:
+            return 0
+
         frames = await source.readframes(FRAMES_PER_PACKET)
         if not frames:
-            return 0
+            # No more frames to send means we send padding packets (just zeros) to keep
+            # sync packets accurate
+            # TODO: Cache empty packet as this is unnecessarily expensive
+            frames = self.context.packet_size * b"\x00"
+            self.context.padding_sent += int(len(frames) / self.context.frame_size)
+        elif len(frames) != self.context.packet_size:
+            # The audio stream length seldom aligns with number of frames per packet,
+            # so pad the last packet with zeros
+            frames += (self.context.packet_size - len(frames)) * b"\x00"
 
         header = AudioPacketHeader.encode(
             0x80,
@@ -692,13 +717,9 @@ class RaopClient:
         transport.sendto(packet)
 
         self.context.rtpseq = (self.context.rtpseq + 1) % (2 ** 16)
-        self.context.head_ts += int(
-            len(frames) / (self.context.channels * self.context.bytes_per_channel)
-        )
+        self.context.head_ts += int(len(frames) / self.context.frame_size)
 
-        return int(
-            len(frames) / (self.context.channels * self.context.bytes_per_channel)
-        )
+        return int(len(frames) / self.context.frame_size)
 
     async def _send_number_of_packets(
         self, source: AudioSource, transport, count: int

@@ -15,7 +15,7 @@ TimingPacket = RtpHeader.extend(
 )
 
 SyncPacket = RtpHeader.extend(
-    "AudioPacket",
+    "SyncPacket",
     now_without_latency="I",
     last_sync_sec="I",
     last_sync_frac="I",
