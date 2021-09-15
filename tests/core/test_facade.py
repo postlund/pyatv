@@ -21,7 +21,10 @@ from pyatv.interface import (
     FeatureState,
     Power,
     PushUpdater,
+    Stream,
 )
+
+TEST_URL = "http://test"
 
 pytestmark = pytest.mark.asyncio
 
@@ -127,6 +130,14 @@ class DummyDeviceListener(DeviceListener):
 
     def connection_closed(self) -> None:
         self.closed_calls += 1
+
+
+class DummyStream(Stream):
+    def __init__(self) -> None:
+        self.url = None
+
+    async def play_url(self, url: str, **kwargs) -> None:
+        self.url = url
 
 
 @pytest.fixture(name="register_interface")
@@ -415,3 +426,27 @@ async def tests_device_info_from_multiple_protocols(facade_dummy, register_inter
     assert dev_info.operating_system == OperatingSystem.TvOS
     assert dev_info.version == "1.0"
     assert dev_info.build_number == "ABC"
+
+
+async def test_stream_play_url_not_available(facade_dummy, register_interface):
+    stream, _ = register_interface(FeatureName.Volume, DummyStream(), Protocol.RAOP)
+
+    await facade_dummy.connect()
+
+    with pytest.raises(exceptions.NotSupportedError):
+        await facade_dummy.stream.play_url(TEST_URL)
+
+
+async def test_stream_play_url_available(facade_dummy, register_interface):
+    stream, _ = register_interface(FeatureName.PlayUrl, DummyStream(), Protocol.RAOP)
+
+    # play_url requires FeatureName.PlayUrl to be available, so add the feature interface
+    register_interface(
+        FeatureName.PlayUrl, DummyFeatures(FeatureName.PlayUrl), Protocol.DMAP
+    )
+
+    await facade_dummy.connect()
+
+    await facade_dummy.stream.play_url(TEST_URL)
+
+    assert stream.url == TEST_URL
