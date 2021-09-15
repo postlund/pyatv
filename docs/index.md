@@ -5,8 +5,8 @@ title: pyatv
 # :tv: Main Page
 
 This is an asyncio python library for interacting with Apple TV and AirPlay devices. It mainly
-targets Apple TVs, but also support audio streaming via AirPlay to receivers like the HomePod
-as well.
+targets Apple TVs (all generations), but also support audio streaming via AirPlay to receivers like the HomePod,
+AirPort Express and third-party speakers. It can act as remote control to the Music app/iTunes in macOS.
 
 ![Tests](https://github.com/postlund/pyatv/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
@@ -29,6 +29,7 @@ Here is a short summary of supported features:
 * Basic support for streaming video and audio with AirPlay
 * Listing installed apps, launching apps and currently playing app
 * Power management, e.g. turn on or off
+* Supports Apple TV (all of them), AirPort Express, HomePod, macOS music app and most AirPlay v1 receivers
 
 A complete list of supported features and limitations is available
 [here](documentation/supported_features).
@@ -70,8 +71,8 @@ need to be aware of.
 * Playing anything with {% include api i="interface.Stream.play_url" %} tends to break devices running
   tvOS, e.g. metadata stops working. Rebooting is the only recovery. Everything points at a bug in
   tvOS.
-* It is possible to control the Music app running on a Mac, but only up until macOS 11.3 as FairPlay
-  authentication is required in 11.4 and later (which is not reverse engineered).
+* It is possible to control the Music app running on a Mac, but macOS 11.4 seems to not work. Make
+  sure to upgrade.
 * There are some issues with {% include pypi package="miniaudio" %} when running on ARM
   (e.g. Rasperry pi) which can be fixed by re-installing {% include pypi package="miniaudio" %} and
   building it from source. See [here](support/faq#when-using-pyatv-on-a-raspberry-pi-eg-running-atvremote-i-get-illegal-instruction-how-do-i-fix-that)
