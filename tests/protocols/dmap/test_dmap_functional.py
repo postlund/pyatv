@@ -77,7 +77,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def get_connected_device(self, hsgid):
         self.dmap_service = DmapService("dmapid", hsgid, port=self.server.port)
         self.airplay_service = AirPlayService(
-            "airplay_id", self.server.port, DEVICE_CREDENTIALS
+            "airplay_id",
+            self.server.port,
+            DEVICE_CREDENTIALS,
+            properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
         self.conf = AppleTV(ipaddress.IPv4Address("127.0.0.1"), "Apple TV")
         self.conf.add_service(self.dmap_service)

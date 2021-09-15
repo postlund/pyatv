@@ -506,7 +506,7 @@ def pair(
         raise exceptions.NotSupportedError("pairing not required")
 
     parsed = ap_features.parse(features)
-    if ap_features.AirPlayFeatures.SupportsLegacyPairing not in parsed:
+    if ap_features.AirPlayFlags.SupportsLegacyPairing not in parsed:
         raise exceptions.NotSupportedError("legacy pairing not supported")
 
     return AirPlayPairingHandler(

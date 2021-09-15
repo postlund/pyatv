@@ -5,7 +5,7 @@ import re
 # pylint: disable=invalid-name
 
 
-class AirPlayFeatures(IntFlag):
+class AirPlayFlags(IntFlag):
     """Features supported by AirPlay."""
 
     SupportsAirPlayVideoV1 = 1 << 0
@@ -54,7 +54,7 @@ class AirPlayFeatures(IntFlag):
 # pylint: enable=invalid-name
 
 
-def parse(features: str) -> AirPlayFeatures:
+def parse(features: str) -> AirPlayFlags:
     """Parse an AirPlay feature string and return what is supported.
 
     A feature string have one of the following formats:
@@ -68,4 +68,4 @@ def parse(features: str) -> AirPlayFeatures:
     value, upper = match.groups()
     if upper is not None:
         value = upper + value
-    return AirPlayFeatures(int(value, 16))
+    return AirPlayFlags(int(value, 16))
