@@ -287,9 +287,10 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
 class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-methods
     """Facade implementation for stream functionality."""
 
-    def __init__(self):
+    def __init__(self, features: interface.Features):
         """Initialize a new FacadeStream instance."""
         super().__init__(interface.Stream, DEFAULT_PRIORITIES)
+        self._features = features
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
@@ -297,6 +298,9 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
 
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
+        if not self._features.in_state(FeatureState.Available, FeatureName.PlayUrl):
+            raise exceptions.NotSupportedError("play_url is not supported")
+
         await self.relay("play_url")(url, **kwargs)
 
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
@@ -376,7 +380,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Metadata: FacadeMetadata(),
             interface.Power: FacadePower(),
             interface.PushUpdater: self._push_updates,
-            interface.Stream: FacadeStream(),
+            interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
             interface.Audio: FacadeAudio(),
         }
