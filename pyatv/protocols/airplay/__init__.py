@@ -25,6 +25,7 @@ from pyatv.interface import (
 from pyatv.protocols import mrp
 from pyatv.protocols.airplay import remote_control
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
+from pyatv.protocols.airplay.features import AirPlayFlags, parse
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
     AirPlayPairingHandler,
@@ -47,11 +48,14 @@ class AirPlayFeatures(Features):
     def __init__(self, service: conf.AirPlayService) -> None:
         """Initialize a new AirPlayFeatures instance."""
         self.service = service
+        self._features = parse(self.service.properties.get("features", "0x0"))
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
-        has_credentials = self.service.credentials
-        if feature_name == FeatureName.PlayUrl and has_credentials:
+        if feature_name == FeatureName.PlayUrl and (
+            AirPlayFlags.SupportsAirPlayVideoV1 in self._features
+            or AirPlayFlags.SupportsAirPlayVideoV2 in self._features
+        ):
             return FeatureInfo(FeatureState.Available)
 
         return FeatureInfo(FeatureState.Unavailable)

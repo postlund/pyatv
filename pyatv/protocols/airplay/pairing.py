@@ -6,7 +6,7 @@ from pyatv import conf, exceptions
 from pyatv.auth.hap_pairing import PairSetupProcedure
 from pyatv.interface import BaseService, PairingHandler
 from pyatv.protocols.airplay.auth import AuthenticationType, pair_setup
-from pyatv.protocols.airplay.features import AirPlayFeatures, parse
+from pyatv.protocols.airplay.features import AirPlayFlags, parse
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
@@ -18,7 +18,7 @@ def get_preferred_auth_type(service: BaseService) -> AuthenticationType:
     features_string = service.properties.get("features")
     if features_string:
         features = parse(features_string)
-        if AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features:
+        if AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in features:
             return AuthenticationType.HAP
     return AuthenticationType.Legacy
 
