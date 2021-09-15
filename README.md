@@ -14,8 +14,8 @@ A client library for Apple TV and AirPlay devices
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is an asyncio python library for interacting with Apple TV and AirPlay devices. It mainly
-targets Apple TVs, but also support audio streaming via AirPlay to receivers like the HomePod
-as well.
+targets Apple TVs (all generations), but also support audio streaming via AirPlay to receivers like the HomePod,
+AirPort Express and third-party speakers. It can act as remote control to the Music app/iTunes in macOS.
 
 All the documentation you need is available at **[pyatv.dev](https://pyatv.dev)**.
 
@@ -55,7 +55,7 @@ Services:
 Or run in a container (x86_64, aarch64, armv7):
 
 ```raw
-docker run --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
+docker run -it --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
 ```
 
 The `master` tag points to latest commit on the `master` branch and can
