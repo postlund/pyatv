@@ -82,7 +82,7 @@ def stub_heartbeat_loop(request):
 async def session_manager():
     session_manager = await create_session()
     yield session_manager
-    session_manager.close()
+    await session_manager.close()
 
 
 @pytest.fixture

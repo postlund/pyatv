@@ -122,8 +122,8 @@ def extract_credentials(service: BaseService) -> HapCredentials:
 
     features = ft.parse(service.properties.get("features", "0x0"))
     if (
-        ft.AirPlayFeatures.SupportsSystemPairing in features
-        or ft.AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features
+        ft.AirPlayFlags.SupportsSystemPairing in features
+        or ft.AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in features
     ):
         return TRANSIENT_CREDENTIALS
 

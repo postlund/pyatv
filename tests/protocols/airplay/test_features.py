@@ -1,26 +1,26 @@
 """Unit tests for pyatv.protocols.airplay.features."""
 import pytest
 
-from pyatv.protocols.airplay.features import AirPlayFeatures, parse
+from pyatv.protocols.airplay.features import AirPlayFlags, parse
 
 
 @pytest.mark.parametrize(
     "flags,output",
     [
         # Single feature flag
-        ("0x00000001", AirPlayFeatures.SupportsAirPlayVideoV1),
+        ("0x00000001", AirPlayFlags.SupportsAirPlayVideoV1),
         (
             "0x40000003",
-            AirPlayFeatures.HasUnifiedAdvertiserInfo
-            | AirPlayFeatures.SupportsAirPlayPhoto
-            | AirPlayFeatures.SupportsAirPlayVideoV1,
+            AirPlayFlags.HasUnifiedAdvertiserInfo
+            | AirPlayFlags.SupportsAirPlayPhoto
+            | AirPlayFlags.SupportsAirPlayVideoV1,
         ),
         # Dual feature flag
         (
             "0x00000003,0x00000001",
-            AirPlayFeatures.IsCarPlay
-            | AirPlayFeatures.SupportsAirPlayPhoto
-            | AirPlayFeatures.SupportsAirPlayVideoV1,
+            AirPlayFlags.IsCarPlay
+            | AirPlayFlags.SupportsAirPlayPhoto
+            | AirPlayFlags.SupportsAirPlayVideoV1,
         ),
     ],
 )

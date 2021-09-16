@@ -54,7 +54,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
         )
         self.conf.add_service(
-            AirPlayService("airplay_id", self.server.port, DEVICE_CREDENTIALS)
+            AirPlayService(
+                "airplay_id",
+                self.server.port,
+                DEVICE_CREDENTIALS,
+                properties={"features": "0x1"},  # AirPlayVideoV1 supported
+            )
         )
         self.atv = await self.get_connected_device()
 

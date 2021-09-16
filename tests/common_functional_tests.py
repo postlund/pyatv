@@ -518,9 +518,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_features_play_url(self):
-        # TODO: The test always sets up AirPlay, so PlayUrl will always be available.
-        # In the future (after migrating to pytest fixtures), I will add a test where
-        # AirPlay is not available.
+        # TODO: As availability is based on zeroconf properties, this test just
+        # verifies that PlayUrl is available. It's hard to change zeroconf properties
+        # between test runs here, so better tests will be written when dedicated
+        # functional tests for AirPlay are written.
         self.assertFeatures(FeatureState.Available, FeatureName.PlayUrl)
 
     @unittest_run_loop
