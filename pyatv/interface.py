@@ -126,28 +126,49 @@ class BaseService:
         protocol: Protocol,
         port: int,
         properties: Optional[Mapping[str, str]],
+        credentials: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """Initialize a new BaseService."""
         self.__identifier = identifier
-        self.protocol = protocol
-        self.port = port
-        self.credentials: Optional[str] = None
-        self.properties: MutableMapping[str, str] = dict(properties or {})
+        self._protocol = protocol
+        self._port = port
+        self._properties: MutableMapping[str, str] = dict(properties or {})
+        self.credentials: Optional[str] = credentials
+        self.password: Optional[str] = password
 
     @property
     def identifier(self) -> Optional[str]:
         """Return unique identifier associated with this service."""
         return self.__identifier
 
+    @property
+    def protocol(self) -> Protocol:
+        """Return protocol type."""
+        return self._protocol
+
+    @property
+    def port(self) -> int:
+        """Return service port number."""
+        return self._port
+
+    @property
+    def properties(self) -> Mapping[str, str]:
+        """Return service Zeroconf properties."""
+        return self._properties
+
     def merge(self, other) -> None:
         """Merge with other service of same type."""
         self.credentials = other.credentials or self.credentials
-        self.properties.update(other.properties)
+        self._properties.update(other.properties)
 
     def __str__(self) -> str:
         """Return a string representation of this object."""
-        return "Protocol: {0}, Port: {1}, Credentials: {2}".format(
-            convert.protocol_str(self.protocol), self.port, self.credentials
+        return "Protocol: {0}, Port: {1}, Credentials: {2}, Password: {3}".format(
+            convert.protocol_str(self.protocol),
+            self.port,
+            self.credentials,
+            self.password,
         )
 
 

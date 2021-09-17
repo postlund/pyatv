@@ -7,8 +7,9 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AppleTV, CompanionService, MrpService
+from pyatv.conf import AppleTV
 from pyatv.const import Protocol
+from pyatv.interface import BaseService
 from pyatv.protocols.companion.server_auth import CLIENT_CREDENTIALS, PIN_CODE
 
 from tests.fake_device import FakeAppleTV
@@ -16,10 +17,14 @@ from tests.fake_device import FakeAppleTV
 
 class CompanionAuthFunctionalTest(AioHTTPTestCase):
     async def setUpAsync(self):
-        self.service = CompanionService(self.fake_atv.get_port(Protocol.Companion))
+        self.service = BaseService(
+            None, Protocol.Companion, self.fake_atv.get_port(Protocol.Companion), {}
+        )
         self.conf = AppleTV(IPv4Address("127.0.0.1"), "Test device")
         self.conf.add_service(
-            MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
+            BaseService(
+                "mrp_id", Protocol.MRP, self.fake_atv.get_port(Protocol.MRP), {}
+            )
         )
         self.conf.add_service(self.service)
 

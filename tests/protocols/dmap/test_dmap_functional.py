@@ -7,7 +7,7 @@ import logging
 from aiohttp.test_utils import unittest_run_loop
 
 from pyatv import connect, exceptions
-from pyatv.conf import AirPlayService, AppleTV, DmapService
+from pyatv.conf import AppleTV
 from pyatv.const import (
     FeatureName,
     FeatureState,
@@ -18,6 +18,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
+from pyatv.interface import BaseService
 from pyatv.protocols.dmap import pairing
 
 from tests import common_functional_tests, zeroconf_stub
@@ -75,13 +76,15 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         return self.fake_atv.app
 
     async def get_connected_device(self, hsgid):
-        self.dmap_service = DmapService("dmapid", hsgid, port=self.server.port)
-        self.airplay_service = AirPlayService(
+        self.dmap_service = BaseService("dmapid", Protocol.DMAP, self.server.port, {})
+        self.dmap_service.credentials = hsgid
+        self.airplay_service = BaseService(
             "airplay_id",
+            Protocol.AirPlay,
             self.server.port,
-            DEVICE_CREDENTIALS,
             properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
+        self.airplay_service.credentials = DEVICE_CREDENTIALS
         self.conf = AppleTV(ipaddress.IPv4Address("127.0.0.1"), "Apple TV")
         self.conf.add_service(self.dmap_service)
         self.conf.add_service(self.airplay_service)

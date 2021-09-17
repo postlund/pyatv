@@ -10,14 +10,7 @@ import sys
 import traceback
 
 from pyatv import connect, const, exceptions, interface, pair, scan
-from pyatv.conf import (
-    AirPlayService,
-    AppleTV,
-    CompanionService,
-    DmapService,
-    MrpService,
-    RaopService,
-)
+from pyatv.conf import AppleTV
 from pyatv.const import (
     FeatureName,
     FeatureState,
@@ -26,7 +19,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.interface import retrieve_commands
+from pyatv.interface import BaseService, retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
 
 _LOGGER = logging.getLogger(__name__)
@@ -551,29 +544,10 @@ async def _autodiscover_device(args, loop):
 
 def _manual_device(args):
     config = AppleTV(IPv4Address(args.address), args.name)
-    if args.dmap_credentials or args.protocol == const.Protocol.DMAP:
-        config.add_service(DmapService(args.id, args.dmap_credentials, port=args.port))
-    if args.mrp_credentials or args.protocol == const.Protocol.MRP:
-        config.add_service(
-            MrpService(args.id, args.port, credentials=args.mrp_credentials)
-        )
-    if args.airplay_credentials or args.protocol == const.Protocol.AirPlay:
-        config.add_service(
-            AirPlayService(args.id, credentials=args.airplay_credentials)
-        )
-    if args.companion_credentials or args.protocol == const.Protocol.Companion:
-        config.add_service(
-            CompanionService(args.port, credentials=args.companion_credentials)
-        )
-    if args.raop_credentials or args.protocol == const.Protocol.RAOP:
-        config.add_service(
-            RaopService(
-                args.id,
-                args.port,
-                credentials=args.raop_credentials,
-                password=args.raop_password,
-            )
-        )
+    service = BaseService(args.id, args.protocol, args.port, {})
+    service.credentials = getattr(args, f"{args.protocol.name.lower()}_credentials")
+    service.password = args.raop_password
+    config.add_service(service)
     return config
 
 

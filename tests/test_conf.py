@@ -4,6 +4,7 @@ import pytest
 
 from pyatv import conf, exceptions
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
+from pyatv.interface import BaseService
 
 ADDRESS_1 = "127.0.0.1"
 ADDRESS_2 = "192.168.0.1"
@@ -21,12 +22,12 @@ PASSWORD_1 = "password1"
 
 TEST_PROPERTIES = {"_test._tcp.local": {"foo": "bar"}}
 
-DMAP_SERVICE = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
-MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=TEST_PROPERTIES)
-AIRPLAY_SERVICE = conf.AirPlayService(IDENTIFIER_3, PORT_1)
-COMPANION_SERVICE = conf.CompanionService(PORT_3)
-RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4)
-AIRPORT_SERVICE = conf.RaopService(IDENTIFIER_1, PORT_1)
+DMAP_SERVICE = BaseService(IDENTIFIER_1, Protocol.DMAP, PORT_1, {})
+MRP_SERVICE = BaseService(IDENTIFIER_2, Protocol.MRP, PORT_2, TEST_PROPERTIES)
+AIRPLAY_SERVICE = BaseService(IDENTIFIER_3, Protocol.AirPlay, PORT_1, {})
+COMPANION_SERVICE = BaseService(None, Protocol.Companion, PORT_3, {})
+RAOP_SERVICE = BaseService(IDENTIFIER_4, Protocol.RAOP, PORT_4, {})
+AIRPORT_SERVICE = BaseService(IDENTIFIER_1, Protocol.RAOP, PORT_1, {})
 
 
 @pytest.fixture
@@ -43,7 +44,7 @@ def test_equality(config):
     assert config == config
 
     atv2 = conf.AppleTV(ADDRESS_1, NAME)
-    atv2.add_service(conf.AirPlayService(IDENTIFIER_1, PORT_1))
+    atv2.add_service(BaseService(IDENTIFIER_1, Protocol.AirPlay, PORT_1, {}))
     assert config != atv2
 
 
@@ -161,8 +162,8 @@ def test_ready(config, service, expected):
 # but it's mainly to exercise string as that is important. Might refactor
 # this in the future.
 def test_to_str(config):
-    config.add_service(conf.DmapService(IDENTIFIER_1, "LOGIN_ID"))
-    config.add_service(conf.MrpService(IDENTIFIER_2, PORT_2))
+    config.add_service(BaseService(IDENTIFIER_1, Protocol.DMAP, 3689, {}, "LOGIN_ID"))
+    config.add_service(BaseService(IDENTIFIER_2, Protocol.MRP, PORT_2, {}))
 
     # Check for some keywords to not lock up format too much
     output = str(config)
@@ -175,6 +176,8 @@ def test_to_str(config):
 
 
 def test_raop_password_in_str(config):
-    config.add_service(conf.RaopService(IDENTIFIER_1, password=PASSWORD_1))
+    config.add_service(
+        BaseService(IDENTIFIER_1, Protocol.RAOP, 1234, {}, password=PASSWORD_1)
+    )
 
     assert PASSWORD_1 in str(config)

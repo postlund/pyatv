@@ -6,7 +6,7 @@ from typing import Dict
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.conf import CompanionService
+from pyatv.interface import BaseService
 from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.auth import CompanionPairVerifyProcedure
 from pyatv.protocols.companion.connection import CompanionConnection, FrameType
@@ -27,7 +27,7 @@ class CompanionProtocol:
         self,
         connection: CompanionConnection,
         srp: SRPAuthHandler,
-        service: CompanionService,
+        service: BaseService,
     ):
         """Initialize a new CompanionProtocol."""
         self.connection = connection
