@@ -73,7 +73,7 @@ link_group: api
 <dl>
 <dt id="pyatv.connect">
 <code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, loop: asyncio.events.AbstractEventLoop, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None, session: aiohttp.client.ClientSession = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a></span>
+<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, loop: asyncio.events.AbstractEventLoop, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None, session: aiohttp.client.ClientSession = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a></span>
 </code>
 </dt>
 <dd>
@@ -82,7 +82,7 @@ link_group: api
 </dd>
 <dt id="pyatv.pair">
 <code class="name flex">
-<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, **kwargs)</span>
+<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, **kwargs)</span>
 </code>
 </dt>
 <dd>
@@ -91,7 +91,7 @@ link_group: api
 </dd>
 <dt id="pyatv.scan">
 <code class="name flex">
-<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: str = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], None] = None, hosts: List[str] = None) -> List[<a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a>]</span>
+<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: str = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], None] = None, hosts: List[str] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
 </code>
 </dt>
 <dd>

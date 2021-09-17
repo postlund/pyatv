@@ -72,6 +72,24 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.interface.BaseConfig" href="#pyatv.interface.BaseConfig">BaseConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.interface.BaseConfig.add_service" href="#pyatv.interface.BaseConfig.add_service">add_service</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.address" href="#pyatv.interface.BaseConfig.address">address</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.all_identifiers" href="#pyatv.interface.BaseConfig.all_identifiers">all_identifiers</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.deep_sleep" href="#pyatv.interface.BaseConfig.deep_sleep">deep_sleep</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.device_info" href="#pyatv.interface.BaseConfig.device_info">device_info</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.get_service" href="#pyatv.interface.BaseConfig.get_service">get_service</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.identifier" href="#pyatv.interface.BaseConfig.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.main_service" href="#pyatv.interface.BaseConfig.main_service">main_service</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.name" href="#pyatv.interface.BaseConfig.name">name</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.properties" href="#pyatv.interface.BaseConfig.properties">properties</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.ready" href="#pyatv.interface.BaseConfig.ready">ready</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.services" href="#pyatv.interface.BaseConfig.services">services</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.set_credentials" href="#pyatv.interface.BaseConfig.set_credentials">set_credentials</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.BaseService.identifier" href="#pyatv.interface.BaseService.identifier">identifier</a></code></li>
@@ -230,7 +248,7 @@ link_group: api
 <p>Public interface exposed by library.</p>
 <p>This module contains all the interfaces that represents a generic Apple TV device and
 all its features.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1-L1020" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1-L1147" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -246,7 +264,7 @@ all its features.</p>
 </dt>
 <dd>
 <section class="desc"><p>Retrieve all commands and help texts from an API object.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L105-L116" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L106-L117" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>
@@ -260,18 +278,18 @@ all its features.</p>
 <dd>
 <section class="desc"><p>Information about an app.</p>
 <p>Initialize a new App instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L565-L591" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L566-L592" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.interface.App.identifier"><code class="name">var <span class="ident">identifier</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Return a unique bundle id for the app.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L578-L581" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L579-L582" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.App.name"><code class="name">var <span class="ident">name</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>User friendly name of app.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L573-L576" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L574-L577" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -283,7 +301,7 @@ all its features.</p>
 <section class="desc"><p>Base class representing an Apple TV.</p>
 <p>Listener interface: <code>pyatv.interfaces.DeviceListener</code></p>
 <p>Initialize a new StateProducer instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L955-L1020" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1082-L1147" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -299,52 +317,52 @@ all its features.</p>
 <dt id="pyatv.interface.AppleTV.apps"><code class="name">var <span class="ident">apps</span> -> <a title="pyatv.interface.Apps" href="#pyatv.interface.Apps">Apps</a></code></dt>
 <dd>
 <section class="desc"><p>Return apps interface.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1012-L1015" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1139-L1142" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.audio"><code class="name">var <span class="ident">audio</span> -> <a title="pyatv.interface.Audio" href="#pyatv.interface.Audio">Audio</a></code></dt>
 <dd>
 <section class="desc"><p>Return audio interface.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1017-L1020" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1144-L1147" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for device information.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L972-L975" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1099-L1102" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.features"><code class="name">var <span class="ident">features</span> -> <a title="pyatv.interface.Features" href="#pyatv.interface.Features">Features</a></code></dt>
 <dd>
 <section class="desc"><p>Return features interface.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1007-L1010" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1134-L1137" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.metadata"><code class="name">var <span class="ident">metadata</span> -> <a title="pyatv.interface.Metadata" href="#pyatv.interface.Metadata">Metadata</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for retrieving metadata from the Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L987-L990" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1114-L1117" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.power"><code class="name">var <span class="ident">power</span> -> <a title="pyatv.interface.Power" href="#pyatv.interface.Power">Power</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for power management.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1002-L1005" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1129-L1132" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.push_updater"><code class="name">var <span class="ident">push_updater</span> -> <a title="pyatv.interface.PushUpdater" href="#pyatv.interface.PushUpdater">PushUpdater</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for handling push update from the Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L992-L995" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1119-L1122" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.remote_control"><code class="name">var <span class="ident">remote_control</span> -> <a title="pyatv.interface.RemoteControl" href="#pyatv.interface.RemoteControl">RemoteControl</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for controlling the Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L982-L985" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1109-L1112" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.service"><code class="name">var <span class="ident">service</span> -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></dt>
 <dd>
 <section class="desc"><p>Return service used to connect to the Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L977-L980" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1104-L1107" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.stream"><code class="name">var <span class="ident">stream</span> -> <a title="pyatv.interface.Stream" href="#pyatv.interface.Stream">Stream</a></code></dt>
 <dd>
 <section class="desc"><p>Return API for streaming media.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L997-L1000" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1124-L1127" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -356,7 +374,7 @@ all its features.</p>
 </dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L968-L970" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1095-L1097" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.AppleTV.connect">
 <code class="name flex">
@@ -366,7 +384,7 @@ all its features.</p>
 <dd>
 <section class="desc"><p>Initiate connection to device.</p>
 <p>No need to call it yourself, it's done automatically.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L961-L966" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1088-L1093" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -375,7 +393,7 @@ all its features.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for app handling.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L594-L605" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L595-L606" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeApps</li>
@@ -394,7 +412,7 @@ all its features.</p>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Fetch a list of apps that can be launched.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L597-L600" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L598-L601" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Apps.launch_app">
 <code class="name flex">
@@ -407,7 +425,7 @@ all its features.</p>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
 <section class="desc"><p>Launch an app based on bundle ID.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L602-L605" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L603-L606" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -417,7 +435,7 @@ all its features.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Artwork information.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L55-L61" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L56-L62" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.tuple</li>
@@ -448,7 +466,7 @@ all its features.</p>
 <dd>
 <section class="desc"><p>Base class for audio functionality.</p>
 <p>Volume level is managed in percent where 0 is muted and 100 is max volume.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L907-L952" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L908-L953" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeAudio</li>
@@ -467,7 +485,7 @@ all its features.</p>
 </div>
 <section class="desc"><p>Return current volume level.</p>
 <p>Range is in percent, i.e. [0.0-100.0].</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L913-L920" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L914-L921" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -484,7 +502,7 @@ all its features.</p>
 </div>
 <section class="desc"><p>Change current volume level.</p>
 <p>Range is in percent, i.e. [0.0-100.0].</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L922-L928" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L923-L929" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Audio.volume_down">
 <code class="name flex">
@@ -501,7 +519,7 @@ all its features.</p>
 range. It is not necessarily linear.</p>
 <p>Call will block until volume change has been acknowledged by the device (when
 possible and supported).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L942-L952" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L943-L953" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Audio.volume_up">
 <code class="name flex">
@@ -518,7 +536,117 @@ possible and supported).</p></section>
 range. It is not necessarily linear.</p>
 <p>Call will block until volume change has been acknowledged by the device (when
 possible and supported).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L930-L940" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L931-L941" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.interface.BaseConfig"><code class="flex name class">
+<span>class <span class="ident">BaseConfig</span></span>
+<span>(</span><span>properties: Mapping[str, Mapping[str, Any]])</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Representation of a device configuration.</p>
+<p>An instance of this class represents a single device. A device can have
+several services depending on the protocols it supports, e.g. DMAP or
+AirPlay.</p>
+<p>Initialize a new BaseConfig instance.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L956-L1079" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="pyatv.conf.AppleTV" href="conf#pyatv.conf.AppleTV">AppleTV</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.BaseConfig.address"><code class="name">var <span class="ident">address</span> -> ipaddress.IPv4Address</code></dt>
+<dd>
+<section class="desc"><p>IP address of device.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L968-L971" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.all_identifiers"><code class="name">var <span class="ident">all_identifiers</span> -> List[str]</code></dt>
+<dd>
+<section class="desc"><p>Return all unique identifiers for this device.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1030-L1033" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.deep_sleep"><code class="name">var <span class="ident">deep_sleep</span> -> bool</code></dt>
+<dd>
+<section class="desc"><p>If device is in deep sleep.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L978-L981" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.interface.DeviceInfo" href="#pyatv.interface.DeviceInfo">DeviceInfo</a></code></dt>
+<dd>
+<section class="desc"><p>Return general device information.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L988-L991" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
+<dd>
+<section class="desc"><p>Return the main identifier associated with this device.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1021-L1028" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
+<dd>
+<section class="desc"><p>Name of device.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L973-L976" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.properties"><code class="name">var <span class="ident">properties</span> -> Mapping[str, Mapping[str, str]]</code></dt>
+<dd>
+<section class="desc"><p>Return Zeroconf properties.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1008-L1011" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.ready"><code class="name">var <span class="ident">ready</span> -> bool</code></dt>
+<dd>
+<section class="desc"><p>Return if configuration is ready, (at least one service with identifier).</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1013-L1019" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.services"><code class="name">var <span class="ident">services</span> -> List[<a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>]</code></dt>
+<dd>
+<section class="desc"><p>Return all supported services.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L983-L986" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyatv.interface.BaseConfig.add_service">
+<code class="name flex">
+<span>def <span class="ident">add_service</span></span>(<span>self, service: <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>) -> None</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Add a new service.</p>
+<p>If the service already exists, it will be merged.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L993-L998" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.get_service">
+<code class="name flex">
+<span>def <span class="ident">get_service</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>) -> Optional[<a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a>]</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Look up a service based on protocol.</p>
+<p>If a service with the specified protocol is not available, None is
+returned.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1000-L1006" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.main_service">
+<code class="name flex">
+<span>def <span class="ident">main_service</span></span>(<span>self, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>] = None) -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Return suggested service used to establish connection.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1035-L1048" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.interface.BaseConfig.set_credentials">
+<code class="name flex">
+<span>def <span class="ident">set_credentials</span></span>(<span>self, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, credentials: str) -> bool</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Set credentials for a protocol if it exists.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1050-L1056" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -529,7 +657,7 @@ possible and supported).</p></section>
 <dd>
 <section class="desc"><p>Base class for protocol services.</p>
 <p>Initialize a new BaseService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L119-L150" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L120-L151" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.AirPlayService" href="conf#pyatv.conf.AirPlayService">AirPlayService</a></li>
@@ -543,7 +671,7 @@ possible and supported).</p></section>
 <dt id="pyatv.interface.BaseService.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return unique identifier associated with this service.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L136-L139" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L137-L140" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -555,7 +683,7 @@ possible and supported).</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Merge with other service of same type.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L141-L144" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L142-L145" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -566,33 +694,33 @@ possible and supported).</p></section>
 <dd>
 <section class="desc"><p>General information about device.</p>
 <p>Initialize a new DeviceInfo instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L772-L869" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L773-L870" class="git-link">Browse git</a></div>
 <h3>Instance variables</h3>
 <dl>
 <dt id="pyatv.interface.DeviceInfo.build_number"><code class="name">var <span class="ident">build_number</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system build number, e.g. 17K795.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L833-L836" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L834-L837" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.mac"><code class="name">var <span class="ident">mac</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Device MAC address.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L843-L846" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L844-L847" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.model"><code class="name">var <span class="ident">model</span> -> <a title="pyatv.const.DeviceModel" href="const#pyatv.const.DeviceModel">DeviceModel</a></code></dt>
 <dd>
 <section class="desc"><p>Hardware model name, e.g. 3, 4 or 4K.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L838-L841" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L839-L842" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.operating_system"><code class="name">var <span class="ident">operating_system</span> -> <a title="pyatv.const.OperatingSystem" href="const#pyatv.const.OperatingSystem">OperatingSystem</a></code></dt>
 <dd>
 <section class="desc"><p>Operating system running on device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L800-L819" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L801-L820" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceInfo.version"><code class="name">var <span class="ident">version</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Operating system version.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L821-L831" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L822-L832" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -601,7 +729,7 @@ possible and supported).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for generic device updates.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L724-L735" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L725-L736" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -620,7 +748,7 @@ possible and supported).</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Device connection was (intentionally) closed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L732-L735" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L733-L736" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.DeviceListener.connection_lost">
 <code class="name flex">
@@ -629,7 +757,7 @@ possible and supported).</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Device was unexpectedly disconnected.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L727-L730" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L728-L731" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -639,7 +767,7 @@ possible and supported).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Feature state and options.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L64-L68" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L65-L69" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.tuple</li>
@@ -661,7 +789,7 @@ possible and supported).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for supported feature functionality.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L872-L904" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L873-L905" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeFeatures</li>
@@ -680,7 +808,7 @@ possible and supported).</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Return state of all features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L879-L886" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L880-L887" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Features.get_feature">
 <code class="name flex">
@@ -689,7 +817,7 @@ possible and supported).</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Return current state of a feature.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L875-L877" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L876-L878" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Features.in_state">
 <code class="name flex">
@@ -701,7 +829,7 @@ possible and supported).</p></section>
 <p>This method will return True if all given features are in the state specified
 by "states". If "states" is a list of states, it is enough for the feature to be
 in one of the listed states.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L888-L904" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L889-L905" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -710,7 +838,7 @@ in one of the listed states.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for retrieving metadata from an Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L608-L648" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L609-L649" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeMetadata</li>
@@ -730,17 +858,17 @@ in one of the listed states.</p></section>
 <p>Do note that this property returns which app is currently playing something and
 not which app is currently active. If nothing is playing, the corresponding
 feature will be unavailable.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L639-L648" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L640-L649" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Metadata.artwork_id"><code class="name">var <span class="ident">artwork_id</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current artwork.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L630-L633" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L631-L634" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Metadata.device_id"><code class="name">var <span class="ident">device_id</span> -> Optional[str]</code></dt>
 <dd>
 <section class="desc"><p>Return a unique identifier for current device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L611-L614" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L612-L615" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -761,7 +889,7 @@ specific size. This is just a request, the device might impose restrictions and
 return artwork of a different size. Set both parameters to None to request
 default size. Set one of them and let the other one be None to keep original
 aspect ratio.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L616-L628" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L617-L629" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Metadata.playing">
 <code class="name flex">
@@ -770,7 +898,7 @@ aspect ratio.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Return what is currently playing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L635-L637" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L636-L638" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -781,7 +909,7 @@ aspect ratio.</p></section>
 <dd>
 <section class="desc"><p>Base class for API used to pair with an Apple TV.</p>
 <p>Initialize a new instance of PairingHandler.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L153-L200" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L154-L201" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -798,18 +926,18 @@ aspect ratio.</p></section>
 <dt id="pyatv.interface.PairingHandler.device_provides_pin"><code class="name">var <span class="ident">device_provides_pin</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>Return True if remote device presents PIN code, else False.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L177-L181" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L178-L182" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.has_paired"><code class="name">var <span class="ident">has_paired</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>If a successful pairing has been performed.</p>
 <p>The value will be reset when stop() is called.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L183-L190" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L184-L191" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.service"><code class="name">var <span class="ident">service</span> -> <a title="pyatv.interface.BaseService" href="#pyatv.interface.BaseService">BaseService</a></code></dt>
 <dd>
 <section class="desc"><p>Return service used for pairing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L163-L166" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L164-L167" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -821,7 +949,7 @@ aspect ratio.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Start pairing process.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L192-L195" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L193-L196" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.close">
 <code class="name flex">
@@ -830,7 +958,7 @@ aspect ratio.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Call to free allocated resources after pairing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L168-L170" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L169-L171" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.finish">
 <code class="name flex">
@@ -839,7 +967,7 @@ aspect ratio.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Stop pairing process.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L197-L200" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L198-L201" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PairingHandler.pin">
 <code class="name flex">
@@ -848,7 +976,7 @@ aspect ratio.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Pin code used for pairing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L172-L175" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L173-L176" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -859,7 +987,7 @@ aspect ratio.</p></section>
 <dd>
 <section class="desc"><p>Base class for retrieving what is currently playing.</p>
 <p>Initialize a new Playing instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L353-L562" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L354-L563" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -873,7 +1001,7 @@ aspect ratio.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Album of the currently playing song.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L510-L514" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L511-L515" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.artist"><code class="name">var <span class="ident">artist</span> -> Optional[str]</code></dt>
 <dd>
@@ -882,12 +1010,12 @@ aspect ratio.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Artist of the currently playing song.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L504-L508" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L505-L509" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.device_state"><code class="name">var <span class="ident">device_state</span> -> <a title="pyatv.const.DeviceState" href="const#pyatv.const.DeviceState">DeviceState</a></code></dt>
 <dd>
 <section class="desc"><p>Device state, e.g. playing or paused.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L493-L496" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L494-L497" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.episode_number"><code class="name">var <span class="ident">episode_number</span> -> Optional[int]</code></dt>
 <dd>
@@ -896,7 +1024,7 @@ aspect ratio.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Episode number of TV series.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L558-L562" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L559-L563" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.genre"><code class="name">var <span class="ident">genre</span> -> Optional[str]</code></dt>
 <dd>
@@ -905,19 +1033,19 @@ aspect ratio.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Genre of the currently playing song.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L516-L520" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L517-L521" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.hash"><code class="name">var <span class="ident">hash</span> -> str</code></dt>
 <dd>
 <section class="desc"><p>Create a unique hash for what is currently playing.</p>
 <p>The hash is based on title, artist, album and total time. It should
 always be the same for the same content, but it is not guaranteed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L473-L486" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L474-L487" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.media_type"><code class="name">var <span class="ident">media_type</span> -> <a title="pyatv.const.MediaType" href="const#pyatv.const.MediaType">MediaType</a></code></dt>
 <dd>
 <section class="desc"><p>Type of media is currently playing, e.g. video, music.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L488-L491" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L489-L492" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.position"><code class="name">var <span class="ident">position</span> -> Optional[int]</code></dt>
 <dd>
@@ -926,7 +1054,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Position in the playing media (seconds).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L528-L532" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L529-L533" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.repeat"><code class="name">var <span class="ident">repeat</span> -> Optional[<a title="pyatv.const.RepeatState" href="const#pyatv.const.RepeatState">RepeatState</a>]</code></dt>
 <dd>
@@ -935,7 +1063,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Repeat mode.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L540-L544" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L541-L545" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.season_number"><code class="name">var <span class="ident">season_number</span> -> Optional[int]</code></dt>
 <dd>
@@ -944,7 +1072,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Season number of TV series.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L552-L556" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L553-L557" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.series_name"><code class="name">var <span class="ident">series_name</span> -> Optional[str]</code></dt>
 <dd>
@@ -953,7 +1081,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Title of TV series.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L546-L550" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L547-L551" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.shuffle"><code class="name">var <span class="ident">shuffle</span> -> Optional[<a title="pyatv.const.ShuffleState" href="const#pyatv.const.ShuffleState">ShuffleState</a>]</code></dt>
 <dd>
@@ -962,7 +1090,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>If shuffle is enabled or not.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L534-L538" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L535-L539" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.title"><code class="name">var <span class="ident">title</span> -> Optional[str]</code></dt>
 <dd>
@@ -971,7 +1099,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Title of the current media, e.g. movie or song name.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L498-L502" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L499-L503" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.total_time"><code class="name">var <span class="ident">total_time</span> -> Optional[int]</code></dt>
 <dd>
@@ -980,7 +1108,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: </span>
 </div>
 <section class="desc"><p>Total play time in seconds.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L522-L526" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L523-L527" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -992,7 +1120,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <section class="desc"><p>Base class for retrieving power state from an Apple TV.</p>
 <p>Listener interface: <code>pyatv.interfaces.PowerListener</code></p>
 <p>Initialize a new StateProducer instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L749-L769" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L750-L770" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -1014,7 +1142,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Return device power state.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L755-L759" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L756-L760" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1030,7 +1158,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Turn device off.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L766-L769" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L767-L770" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Power.turn_on">
 <code class="name flex">
@@ -1043,7 +1171,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Turn device on.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L761-L764" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L762-L765" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1052,7 +1180,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for power updates.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L738-L746" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L739-L747" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -1071,7 +1199,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Device power state was updated.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L741-L746" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L742-L747" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1080,7 +1208,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Listener interface for push updates.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L651-L660" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L652-L661" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -1099,7 +1227,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Inform about an error when updating play status.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L658-L660" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L659-L661" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PushListener.playstatus_update">
 <code class="name flex">
@@ -1108,7 +1236,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Inform about changes to what is currently playing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L654-L656" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L655-L657" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1120,7 +1248,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <section class="desc"><p>Base class for push/async updates from an Apple TV.</p>
 <p>Listener interface: <code><a title="pyatv.interface.PushListener" href="#pyatv.interface.PushListener">PushListener</a></code></p>
 <p>Initialize a new PushUpdater.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L663-L700" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L664-L701" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>abc.ABC</li>
@@ -1138,7 +1266,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dt id="pyatv.interface.PushUpdater.active"><code class="name">var <span class="ident">active</span> -> bool</code></dt>
 <dd>
 <section class="desc"><p>Return if push updater has been started.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L675-L679" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L676-L680" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -1150,7 +1278,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Post an update to listener.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L695-L700" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L696-L701" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PushUpdater.start">
 <code class="name flex">
@@ -1164,7 +1292,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Begin to listen to updates.</p>
 <p>If an error occurs, start must be called again.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L681-L688" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L682-L689" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.PushUpdater.stop">
 <code class="name flex">
@@ -1173,7 +1301,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>No longer forward updates to listener.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L690-L693" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L691-L694" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1182,7 +1310,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for API used to control an Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L203-L349" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L204-L350" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeRemoteControl</li>
@@ -1204,7 +1332,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key down.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L212-L215" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L213-L216" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home">
 <code class="name flex">
@@ -1217,7 +1345,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key home.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L283-L286" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L284-L287" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.home_hold">
 <code class="name flex">
@@ -1230,7 +1358,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Hold key home.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L288-L293" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L289-L294" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.left">
 <code class="name flex">
@@ -1243,7 +1371,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key left.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L217-L220" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L218-L221" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.menu">
 <code class="name flex">
@@ -1256,7 +1384,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key menu.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L262-L265" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L263-L266" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.next">
 <code class="name flex">
@@ -1269,7 +1397,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key next.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L247-L250" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L248-L251" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.pause">
 <code class="name flex">
@@ -1282,7 +1410,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key play.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L237-L240" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L238-L241" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play">
 <code class="name flex">
@@ -1295,7 +1423,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key play.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L227-L230" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L228-L231" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.play_pause">
 <code class="name flex">
@@ -1308,7 +1436,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Toggle between play and pause.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L232-L235" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L233-L236" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.previous">
 <code class="name flex">
@@ -1321,7 +1449,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key previous.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L252-L255" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L253-L256" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.right">
 <code class="name flex">
@@ -1334,7 +1462,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key right.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L222-L225" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L223-L226" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.select">
 <code class="name flex">
@@ -1347,7 +1475,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key select.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L257-L260" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L258-L261" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_position">
 <code class="name flex">
@@ -1360,7 +1488,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Seek in the current playing media.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L336-L339" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L337-L340" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_repeat">
 <code class="name flex">
@@ -1373,7 +1501,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Change repeat state.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L346-L349" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L347-L350" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.set_shuffle">
 <code class="name flex">
@@ -1386,7 +1514,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Change shuffle mode to on or off.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L341-L344" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L342-L345" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.skip_backward">
 <code class="name flex">
@@ -1400,7 +1528,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Skip backwards a time interval.</p>
 <p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L328-L334" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L329-L335" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.skip_forward">
 <code class="name flex">
@@ -1414,7 +1542,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Skip forward a time interval.</p>
 <p>Skip interval is typically 15-30s, but is decided by the app.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L316-L326" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L317-L327" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.stop">
 <code class="name flex">
@@ -1427,7 +1555,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key stop.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L242-L245" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L243-L246" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.suspend">
 <code class="name flex">
@@ -1441,7 +1569,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Suspend the device.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.interface.Power.turn_off" href="#pyatv.interface.Power.turn_off">Power.turn_off()</a></code> instead.</strong></p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L300-L306" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L301-L307" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.top_menu">
 <code class="name flex">
@@ -1454,7 +1582,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Go to main menu (long press menu).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L295-L298" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L296-L299" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.up">
 <code class="name flex">
@@ -1467,7 +1595,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a>, <a title="pyatv.const.Protocol.DMAP" href="const#pyatv.const.Protocol.DMAP">Protocol.DMAP</a>, <a title="pyatv.const.Protocol.MRP" href="const#pyatv.const.Protocol.MRP">Protocol.MRP</a></span>
 </div>
 <section class="desc"><p>Press key up.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L207-L210" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L208-L211" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_down">
 <code class="name flex">
@@ -1481,7 +1609,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Press key volume down.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.interface.Audio.volume_down" href="#pyatv.interface.Audio.volume_down">Audio.volume_down()</a></code> instead.</strong></p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L275-L281" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L276-L282" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.volume_up">
 <code class="name flex">
@@ -1495,7 +1623,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Press key volume up.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.interface.Audio.volume_up" href="#pyatv.interface.Audio.volume_up">Audio.volume_up()</a></code> instead.</strong></p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L267-L273" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L268-L274" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.RemoteControl.wakeup">
 <code class="name flex">
@@ -1509,7 +1637,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Wake up the device.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.interface.Power.turn_on" href="#pyatv.interface.Power.turn_on">Power.turn_on()</a></code> instead.</strong></p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L308-L314" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L309-L315" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -1518,7 +1646,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Base class for stream functionality.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L703-L721" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L704-L722" class="git-link">Browse git</a></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li>pyatv.core.facade.FacadeStream</li>
@@ -1534,7 +1662,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Close connection and release allocated resources.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L706-L708" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L707-L709" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Stream.play_url">
 <code class="name flex">
@@ -1547,7 +1675,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <span>Supported by: <a title="pyatv.const.Protocol.AirPlay" href="const#pyatv.const.Protocol.AirPlay">Protocol.AirPlay</a></span>
 </div>
 <section class="desc"><p>Play media from an URL on the device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L710-L713" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L711-L714" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Stream.stream_file">
 <code class="name flex">
@@ -1561,7 +1689,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 </div>
 <section class="desc"><p>Stream local file to device.</p>
 <p>INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L715-L721" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L716-L722" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>

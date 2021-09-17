@@ -22,7 +22,7 @@ from pyatv.const import DeviceModel
 from pyatv.core import mdns
 from pyatv.core.device_info import lookup_internal_name
 from pyatv.helpers import get_unique_id
-from pyatv.interface import DeviceInfo
+from pyatv.interface import BaseConfig, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import dict_merge
 
@@ -94,7 +94,7 @@ class BaseScanner(ABC):
         """Return list of service types to scan for."""
         return list(self._services.keys())
 
-    async def discover(self, timeout: int) -> Mapping[IPv4Address, conf.AppleTV]:
+    async def discover(self, timeout: int) -> Mapping[IPv4Address, BaseConfig]:
         """Start discovery of devices and services."""
         await self.process(timeout)
 

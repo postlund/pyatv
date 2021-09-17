@@ -16,7 +16,7 @@ import logging
 from queue import Queue
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
-from pyatv import conf, const, exceptions, interface
+from pyatv import const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
 from pyatv.core.relayer import Relayer
@@ -361,7 +361,9 @@ class FacadeAudio(Relayer, interface.Audio):
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
-    def __init__(self, config: conf.AppleTV, session_manager: ClientSessionManager):
+    def __init__(
+        self, config: interface.BaseConfig, session_manager: ClientSessionManager
+    ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
         self._config = config

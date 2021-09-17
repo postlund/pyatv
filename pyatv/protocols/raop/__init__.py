@@ -15,6 +15,7 @@ from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -276,7 +277,7 @@ class RaopStream(Stream):
 
     def __init__(
         self,
-        config: conf.AppleTV,
+        config: BaseConfig,
         service: conf.RaopService,
         listener: RaopListener,
         audio: RaopAudio,
@@ -409,7 +410,7 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
 
 def setup(
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -493,7 +494,7 @@ def setup(
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

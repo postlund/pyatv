@@ -8,7 +8,7 @@ from typing import List, Optional, Set, Union
 
 import aiohttp
 
-from pyatv import conf, exceptions, interface
+from pyatv import exceptions, interface
 from pyatv.const import Protocol
 from pyatv.core.facade import FacadeAppleTV
 from pyatv.core.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
@@ -24,7 +24,7 @@ async def scan(
     identifier: str = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
     hosts: List[str] = None,
-) -> List[conf.AppleTV]:
+) -> List[interface.BaseConfig]:
     """Scan for Apple TVs on network and return their configurations."""
 
     def _should_include(atv):
@@ -59,7 +59,7 @@ async def scan(
 
 
 async def connect(
-    config: conf.AppleTV,
+    config: interface.BaseConfig,
     loop: asyncio.AbstractEventLoop,
     protocol: Protocol = None,
     session: aiohttp.ClientSession = None,
@@ -96,7 +96,7 @@ async def connect(
 
 
 async def pair(
-    config: conf.AppleTV,
+    config: interface.BaseConfig,
     protocol: Protocol,
     loop: asyncio.AbstractEventLoop,
     session: aiohttp.ClientSession = None,
