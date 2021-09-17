@@ -9,7 +9,6 @@ from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData, mdns, net
-from pyatv.core.device_info import lookup_model
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -33,6 +32,7 @@ from pyatv.protocols.airplay.pairing import (
     get_preferred_auth_type,
 )
 from pyatv.protocols.airplay.player import AirPlayPlayer
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
     ClientSessionManager,
     HttpConnection,

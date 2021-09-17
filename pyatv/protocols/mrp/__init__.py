@@ -21,7 +21,6 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_version
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -50,6 +49,7 @@ from pyatv.protocols.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)

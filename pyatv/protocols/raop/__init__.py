@@ -10,7 +10,6 @@ from pyatv import const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
 from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_model
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -39,6 +38,7 @@ from pyatv.protocols.raop.raop import (
 )
 from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.rtsp import RtspSession

@@ -10,7 +10,6 @@ from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_model
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
@@ -33,6 +32,7 @@ from pyatv.protocols.companion.connection import (
 )
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.protocols.companion.protocol import CompanionProtocol
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
