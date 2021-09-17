@@ -23,7 +23,6 @@ from pyatv.interface import (
     PairingHandler,
     Power,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.companion.connection import (
     CompanionConnection,
@@ -34,6 +33,7 @@ from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.protocols.companion.protocol import CompanionProtocol
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

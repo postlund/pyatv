@@ -1,7 +1,7 @@
 """Unit tests for pyatc.core."""
 import pytest
 
-from pyatv.core import StateProducer
+from pyatv.support.state_producer import StateProducer
 
 # StateProducer
 

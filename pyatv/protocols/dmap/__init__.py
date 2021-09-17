@@ -35,13 +35,13 @@ from pyatv.interface import (
     Playing,
     PushUpdater,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.dmap import daap, parser, tags
 from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

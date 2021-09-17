@@ -9,11 +9,12 @@ from uuid import uuid4
 from pyatv.auth.hap_channel import setup_channel
 from pyatv.auth.hap_pairing import HapCredentials, PairVerifyProcedure
 from pyatv.core.protocol import heartbeater
-from pyatv.interface import BaseService, StateProducer
+from pyatv.interface import BaseService
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
 from pyatv.support.http import HttpConnection, http_connect
 from pyatv.support.rtsp import RtspSession
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

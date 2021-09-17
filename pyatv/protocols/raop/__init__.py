@@ -24,7 +24,6 @@ from pyatv.interface import (
     Playing,
     PushUpdater,
     RemoteControl,
-    StateProducer,
     Stream,
 )
 from pyatv.protocols.airplay import features as ap_features
@@ -42,6 +41,7 @@ from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.rtsp import RtspSession
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

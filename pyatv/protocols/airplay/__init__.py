@@ -19,7 +19,6 @@ from pyatv.interface import (
     Features,
     FeatureState,
     PairingHandler,
-    StateProducer,
     Stream,
 )
 from pyatv.protocols import mrp
@@ -39,6 +38,7 @@ from pyatv.support.http import (
     StaticFileWebServer,
     http_connect,
 )
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
