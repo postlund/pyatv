@@ -153,6 +153,11 @@ class BaseService(ABC):
         return self._port
 
     @property
+    @abstractmethod
+    def requires_password(self) -> bool:
+        """Return if a password is required to access service."""
+
+    @property
     def properties(self) -> Mapping[str, str]:
         """Return service Zeroconf properties."""
         return self._properties
@@ -164,11 +169,12 @@ class BaseService(ABC):
 
     def __str__(self) -> str:
         """Return a string representation of this object."""
-        return "Protocol: {0}, Port: {1}, Credentials: {2}, Password: {3}".format(
-            convert.protocol_str(self.protocol),
-            self.port,
-            self.credentials,
-            self.password,
+        return (
+            f"Protocol: {convert.protocol_str(self.protocol)}, "
+            f"Port: {self.port}, "
+            f"Credentials: {self.credentials}, "
+            f"Requires Password: {self.requires_password}, "
+            f"Password: {self.password}"
         )
 
 
