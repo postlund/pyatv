@@ -4,10 +4,10 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel
-from pyatv.core import mdns
+from pyatv.const import DeviceModel, Protocol
+from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.raop import device_info, scan
+from pyatv.protocols.raop import device_info, scan, service_info
 
 RAOP_SERVICE = "_raop._tcp.local"
 AIRPORT_SERVICE = "_airport._tcp.local"
@@ -72,3 +72,37 @@ def test_airport_handler():
 )
 def test_device_info(properties, expected):
     assert not DeepDiff(device_info(properties), expected)
+
+
+@pytest.mark.parametrize(
+    "raop_props,mrp_props,requires_password",
+    [
+        ({}, {}, False),
+        ({}, {"pw": "true"}, False),
+        ({}, {"pw": "TRUE"}, False),
+        ({"pw": "false"}, {}, False),
+        ({"pw": "true"}, {}, True),
+        ({"pw": "TRUE"}, {}, True),
+        ({"sf": "0x1"}, {}, False),
+        ({"sf": "0x80"}, {}, True),
+        ({}, {"sf": "0x80"}, False),
+        ({"flags": "0x1"}, {}, False),
+        ({"flags": "0x80"}, {}, True),
+        ({}, {"flags": "0x80"}, False),
+    ],
+)
+async def test_service_info_password(raop_props, mrp_props, requires_password):
+    raop_service = MutableService("id", Protocol.RAOP, 0, raop_props)
+    mrp_service = MutableService("mrp", Protocol.MRP, 0, mrp_props)
+
+    assert not raop_service.requires_password
+    assert not mrp_service.requires_password
+
+    await service_info(
+        raop_service,
+        DeviceInfo({}),
+        {Protocol.MRP: mrp_service, Protocol.RAOP: raop_service},
+    )
+
+    assert raop_service.requires_password == requires_password
+    assert not mrp_service.requires_password

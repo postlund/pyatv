@@ -414,7 +414,21 @@ async def service_info(
     devinfo: DeviceInfo,
     services: Mapping[Protocol, BaseService],
 ) -> None:
-    """Update service with additional information."""
+    """Update service with additional information.
+
+    A password is required under these conditions:
+    - "pw" is true
+    - "sf" or "flags" has bit 0x80 set
+    """
+    # "pw" flag
+    service.requires_password = service.properties.get("pw", "false").lower() == "true"
+
+    # "sf" and "flags" (treated the same)
+    flags = int(
+        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
+    )
+    if (flags & 0x80) != 0:
+        service.requires_password = True
 
 
 def setup(

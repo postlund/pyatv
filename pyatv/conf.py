@@ -84,6 +84,25 @@ class AppleTV(BaseConfig):
 class ManualService(BaseService):
     """Service used when manually creating and adding a service."""
 
+    def __init__(
+        self,
+        identifier: Optional[str],
+        protocol: Protocol,
+        port: int,
+        properties: Optional[Mapping[str, str]],
+        credentials: Optional[str] = None,
+        password: Optional[str] = None,
+        requires_password: bool = False,
+    ) -> None:
+        """Initialize a new ManualService."""
+        super().__init__(identifier, protocol, port, properties, credentials, password)
+        self._requires_password = requires_password
+
+    @property
+    def requires_password(self) -> bool:
+        """Return if a password is required to access service."""
+        return self._requires_password
+
 
 # pylint: disable=too-few-public-methods
 class DmapService(ManualService):
