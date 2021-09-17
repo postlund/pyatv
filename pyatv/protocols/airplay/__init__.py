@@ -24,13 +24,17 @@ from pyatv.interface import (
 from pyatv.protocols import mrp
 from pyatv.protocols.airplay import remote_control
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
-from pyatv.protocols.airplay.features import AirPlayFlags, parse
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
     AirPlayPairingHandler,
     get_preferred_auth_type,
 )
 from pyatv.protocols.airplay.player import AirPlayPlayer
+from pyatv.protocols.airplay.utils import (
+    AirPlayFlags,
+    is_password_required,
+    parse_features,
+)
 from pyatv.support import net
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
@@ -50,7 +54,7 @@ class AirPlayFeatures(Features):
     def __init__(self, service: BaseService) -> None:
         """Initialize a new AirPlayFeatures instance."""
         self.service = service
-        self._features = parse(self.service.properties.get("features", "0x0"))
+        self._features = parse_features(self.service.properties.get("features", "0x0"))
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
@@ -155,6 +159,7 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
+    service.requires_password = is_password_required(service)
 
 
 def setup(  # pylint: disable=too-many-locals

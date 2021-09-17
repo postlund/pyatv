@@ -2,6 +2,8 @@
 from enum import IntFlag
 import re
 
+from pyatv.interface import BaseService
+
 # pylint: disable=invalid-name
 
 
@@ -54,7 +56,7 @@ class AirPlayFlags(IntFlag):
 # pylint: enable=invalid-name
 
 
-def parse(features: str) -> AirPlayFlags:
+def parse_features(features: str) -> AirPlayFlags:
     """Parse an AirPlay feature string and return what is supported.
 
     A feature string have one of the following formats:
@@ -69,3 +71,24 @@ def parse(features: str) -> AirPlayFlags:
     if upper is not None:
         value = upper + value
     return AirPlayFlags(int(value, 16))
+
+
+def is_password_required(service: BaseService) -> bool:
+    """Return if password is required by AirPlay service.
+
+    A password is required under these conditions:
+    - "pw" is true
+    - "sf" or "flags" has bit 0x80 set
+    """
+    # "pw" flag
+    if service.properties.get("pw", "false").lower() == "true":
+        return True
+
+    # "sf" and "flags" (treated the same)
+    flags = int(
+        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
+    )
+    if (flags & 0x80) != 0:
+        return True
+
+    return False

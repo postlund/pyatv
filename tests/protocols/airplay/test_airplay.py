@@ -4,10 +4,10 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel
-from pyatv.core import mdns
+from pyatv.const import DeviceModel, Protocol
+from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.airplay import device_info, scan
+from pyatv.protocols.airplay import device_info, scan, service_info
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"
 
@@ -44,3 +44,33 @@ def test_airplay_handler_to_service():
 )
 def test_device_info(properties, expected):
     assert not DeepDiff(device_info(properties), expected)
+
+
+@pytest.mark.parametrize(
+    "airplay_props,mrp_props,requires_password",
+    [
+        ({}, {}, False),
+        ({}, {"pw": "true"}, False),
+        ({"pw": "true"}, {}, True),
+        ({"pw": "TRUE"}, {}, True),
+        ({"sf": "0x80"}, {}, True),
+        ({}, {"sf": "0x80"}, False),
+        ({"flags": "0x80"}, {}, True),
+        ({}, {"flags": "0x80"}, False),
+    ],
+)
+async def test_service_info_password(airplay_props, mrp_props, requires_password):
+    airplay_service = MutableService("id", Protocol.AirPlay, 0, airplay_props)
+    mrp_service = MutableService("mrp", Protocol.MRP, 0, mrp_props)
+
+    assert not airplay_service.requires_password
+    assert not mrp_service.requires_password
+
+    await service_info(
+        airplay_service,
+        DeviceInfo({}),
+        {Protocol.MRP: mrp_service, Protocol.AirPlay: airplay_service},
+    )
+
+    assert airplay_service.requires_password == requires_password
+    assert not mrp_service.requires_password
