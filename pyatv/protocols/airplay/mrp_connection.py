@@ -3,12 +3,12 @@ import logging
 from typing import Optional
 
 from pyatv import exceptions
-from pyatv.interface import StateProducer
 from pyatv.protocols.airplay.channels import DataStreamChannel, DataStreamListener
 from pyatv.protocols.airplay.remote_control import RemoteControl
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import AbstractMrpConnection
 from pyatv.support import log_protobuf
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -35,9 +35,9 @@ from pyatv.const import (
     OperatingSystem,
     Protocol,
 )
-from pyatv.core import StateProducer
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 __pdoc__ = {
     "feature": False,

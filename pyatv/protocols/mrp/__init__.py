@@ -38,7 +38,6 @@ from pyatv.interface import (
     Power,
     PushUpdater,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.connection import AbstractMrpConnection, MrpConnection
@@ -51,6 +50,7 @@ from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
