@@ -26,8 +26,12 @@ from pyatv.interface import (
     RemoteControl,
     Stream,
 )
-from pyatv.protocols.airplay import features as ap_features
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
+from pyatv.protocols.airplay.utils import (
+    AirPlayFlags,
+    is_password_required,
+    parse_features,
+)
 from pyatv.protocols.raop.audio_source import AudioSource, open_source
 from pyatv.protocols.raop.raop import (
     PlaybackInfo,
@@ -414,21 +418,8 @@ async def service_info(
     devinfo: DeviceInfo,
     services: Mapping[Protocol, BaseService],
 ) -> None:
-    """Update service with additional information.
-
-    A password is required under these conditions:
-    - "pw" is true
-    - "sf" or "flags" has bit 0x80 set
-    """
-    # "pw" flag
-    service.requires_password = service.properties.get("pw", "false").lower() == "true"
-
-    # "sf" and "flags" (treated the same)
-    flags = int(
-        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
-    )
-    if (flags & 0x80) != 0:
-        service.requires_password = True
+    """Update service with additional information."""
+    service.requires_password = is_password_required(service)
 
 
 def setup(
@@ -527,8 +518,8 @@ def pair(
         # TODO: Better handle cases like these (provide API)
         raise exceptions.NotSupportedError("pairing not required")
 
-    parsed = ap_features.parse(features)
-    if ap_features.AirPlayFlags.SupportsLegacyPairing not in parsed:
+    flags = parse_features(features)
+    if AirPlayFlags.SupportsLegacyPairing not in flags:
         raise exceptions.NotSupportedError("legacy pairing not supported")
 
     return AirPlayPairingHandler(
