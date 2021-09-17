@@ -1,4 +1,4 @@
-"""Unit tests for the net support module."""
+"""Unit tests for pyatv.support.net."""
 
 from ipaddress import IPv4Address, ip_address
 import platform
@@ -10,8 +10,8 @@ from unittest.mock import patch
 import netifaces
 import pytest
 
-from pyatv.core.net import get_private_addresses, tcp_keepalive
 from pyatv.exceptions import NotSupportedError
+from pyatv.support.net import get_private_addresses, tcp_keepalive
 
 skip_darwin = pytest.mark.skipif(
     platform.system() == "Darwin",
