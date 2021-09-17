@@ -12,9 +12,9 @@ from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 
 from pyatv import const, exceptions
-from pyatv.core.net import unused_port
 from pyatv.support import log_binary
 from pyatv.support.collections import CaseInsensitiveDict
+from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 

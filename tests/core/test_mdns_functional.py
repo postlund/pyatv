@@ -8,7 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pyatv.core import mdns, net
+from pyatv.core import mdns
+from pyatv.support import net
 
 from tests import fake_udns, utils
 
@@ -43,7 +44,7 @@ def mdns_debug():
 
 @pytest.fixture(autouse=True)
 def stub_local_addresses():
-    with patch("pyatv.core.net.get_private_addresses") as mock:
+    with patch("pyatv.support.net.get_private_addresses") as mock:
         mock.return_value = [IPv4Address("127.0.0.1")]
         yield
 
@@ -64,7 +65,7 @@ def stub_ip_address():
 def redirect_mcast(udns_server):
     udns_server.services = TEST_SERVICES
     real_mcast_socket = net.mcast_socket
-    with patch("pyatv.core.net.mcast_socket") as mock:
+    with patch("pyatv.support.net.mcast_socket") as mock:
         mock.side_effect = lambda addr, port=0: real_mcast_socket(
             addr, port if port == udns_server.port else 0
         )

@@ -12,10 +12,10 @@ import netifaces
 from zeroconf import Zeroconf
 
 from pyatv.core import mdns
-from pyatv.core.net import unused_port
 from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.dmap import tags
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
