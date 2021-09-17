@@ -346,6 +346,14 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information."""
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
     config: BaseConfig,

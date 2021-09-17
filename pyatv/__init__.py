@@ -46,13 +46,19 @@ async def scan(
     if protocol:
         protocols.update(protocol if isinstance(protocol, set) else {protocol})
 
-    for proto, proto_impl in PROTOCOLS.items():
+    for proto, proto_methods in PROTOCOLS.items():
         # If specific protocols was given, skip this one if it isn't listed
         if protocol and proto not in protocols:
             continue
 
-        for service_type, handler in proto_impl.scan().items():
-            scanner.add_service(service_type, handler, proto_impl.device_info)
+        scanner.add_service_info(proto, proto_methods.service_info)
+
+        for service_type, handler in proto_methods.scan().items():
+            scanner.add_service(
+                service_type,
+                handler,
+                proto_methods.device_info,
+            )
 
     devices = (await scanner.discover(timeout)).values()
     return [device for device in devices if _should_include(device)]
@@ -76,13 +82,13 @@ async def connect(
 
     try:
         for service in config.services:
-            proto_impl = PROTOCOLS.get(service.protocol)
-            if not proto_impl:
+            proto_methods = PROTOCOLS.get(service.protocol)
+            if not proto_methods:
                 raise RuntimeError(
                     f"missing implementation for protocol {service.protocol}"
                 )
 
-            for setup_data in proto_impl.setup(
+            for setup_data in proto_methods.setup(
                 loop, config, service, atv, session_manager
             ):
                 atv.add_protocol(setup_data)
@@ -107,13 +113,13 @@ async def pair(
     if not service:
         raise exceptions.NoServiceError(f"no service available for {protocol}")
 
-    proto_impl = PROTOCOLS.get(protocol)
-    if not proto_impl:
+    proto_methods = PROTOCOLS.get(protocol)
+    if not proto_methods:
         raise RuntimeError(f"missing implementation for {protocol}")
 
     session = await http.create_session(session)
     try:
-        return proto_impl.pair(config, service, session, loop, **kwargs)
+        return proto_methods.pair(config, service, session, loop, **kwargs)
     except Exception:
         await session.close()
         raise
