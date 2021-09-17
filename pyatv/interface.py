@@ -36,7 +36,7 @@ from pyatv.const import (
     Protocol,
 )
 from pyatv.core import StateProducer
-from pyatv.core.device_info import lookup_version
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 
 __pdoc__ = {

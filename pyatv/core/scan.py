@@ -20,11 +20,11 @@ from typing import (
 from pyatv import conf, interface
 from pyatv.const import DeviceModel
 from pyatv.core import mdns
-from pyatv.core.device_info import lookup_internal_name
 from pyatv.helpers import get_unique_id
 from pyatv.interface import BaseConfig, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import dict_merge
+from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
 
