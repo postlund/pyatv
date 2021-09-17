@@ -6,7 +6,7 @@ import logging
 import math
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
-from pyatv import conf, const, exceptions
+from pyatv import const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
 from pyatv.core import SetupData, mdns
@@ -278,7 +278,7 @@ class RaopStream(Stream):
     def __init__(
         self,
         config: BaseConfig,
-        service: conf.RaopService,
+        service: BaseService,
         listener: RaopListener,
         audio: RaopAudio,
         playback_manager: RaopPlaybackManager,
@@ -369,10 +369,11 @@ def raop_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new RAOP service."""
     _, name = mdns_service.name.split("@", maxsplit=1)
-    service = conf.RaopService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.RAOP,
         mdns_service.port,
-        properties=mdns_service.properties,
+        mdns_service.properties,
     )
     return name, service
 
@@ -438,8 +439,6 @@ def setup(
             """Trigger push update."""
             if push_updater.active:
                 asyncio.ensure_future(push_updater.state_updated(), loop=loop)
-
-    service = cast(conf.RaopService, service)
 
     raop_listener = RaopStateListener()
     raop_audio = RaopAudio(playback_manager)

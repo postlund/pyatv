@@ -6,7 +6,7 @@ import logging
 import math
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import (
     DeviceState,
@@ -784,8 +784,9 @@ def mrp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new MRP service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = conf.MrpService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.MRP,
         mdns_service.port,
         properties=mdns_service.properties,
     )

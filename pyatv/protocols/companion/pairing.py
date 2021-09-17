@@ -1,11 +1,10 @@
 """Device pairing and derivation of encryption keys."""
 import asyncio
 import logging
-from typing import Optional, cast
+from typing import Optional
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.conf import CompanionService
 from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.companion.auth import CompanionPairSetupProcedure
 from pyatv.protocols.companion.connection import CompanionConnection
@@ -33,9 +32,7 @@ class CompanionPairingHandler(PairingHandler):
             loop, str(config.address), self.service.port, None
         )
         self.srp = SRPAuthHandler()
-        self.protocol = CompanionProtocol(
-            self.connection, self.srp, cast(CompanionService, self.service)
-        )
+        self.protocol = CompanionProtocol(self.connection, self.srp, self.service)
         self.pairing_procedure = CompanionPairSetupProcedure(self.protocol, self.srp)
         self.pin_code: Optional[str] = None
         self._has_paired: bool = False

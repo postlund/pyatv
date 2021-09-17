@@ -6,7 +6,7 @@ import logging
 from random import randint
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData, mdns
@@ -184,7 +184,7 @@ class CompanionAPI(CompanionConnectionListener):
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: conf.CompanionService) -> None:
+    def __init__(self, service: BaseService) -> None:
         """Initialize a new CompanionFeatures instance."""
         super().__init__()
         self.service = service
@@ -322,9 +322,11 @@ def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new Companion service."""
-    service = conf.CompanionService(
+    service = BaseService(
+        None,
+        Protocol.Companion,
         mdns_service.port,
-        properties=mdns_service.properties,
+        mdns_service.properties,
     )
     return mdns_service.name, service
 
@@ -360,7 +362,7 @@ def setup(
 
     interfaces = {
         Apps: CompanionApps(api),
-        Features: CompanionFeatures(cast(conf.CompanionService, service)),
+        Features: CompanionFeatures(service),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api),

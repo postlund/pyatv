@@ -1,8 +1,9 @@
 """Shared test code for AirPlay test cases."""
 import pytest
 
-from pyatv.conf import AirPlayService, AppleTV
+from pyatv.conf import AppleTV
 from pyatv.const import Protocol
+from pyatv.interface import BaseService
 from pyatv.support.http import http_connect
 
 from tests.fake_device import FakeAppleTV
@@ -34,8 +35,8 @@ def airplay_state_fixture(airplay_device):
 
 @pytest.fixture(name="airplay_conf")
 def airplay_conf_fixture(airplay_device):
-    service = AirPlayService(
-        "airplay_id", port=airplay_device.get_port(Protocol.AirPlay)
+    service = BaseService(
+        "airplay_id", Protocol.AirPlay, airplay_device.get_port(Protocol.AirPlay), {}
     )
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)

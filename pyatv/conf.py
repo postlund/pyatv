@@ -92,13 +92,7 @@ class DmapService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new DmapService."""
-        super().__init__(
-            identifier,
-            Protocol.DMAP,
-            port,
-            properties,
-        )
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.DMAP, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
@@ -113,8 +107,7 @@ class MrpService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new MrpService."""
-        super().__init__(identifier, Protocol.MRP, port, properties)
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.MRP, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
@@ -129,8 +122,7 @@ class AirPlayService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new AirPlayService."""
-        super().__init__(identifier, Protocol.AirPlay, port, properties)
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.AirPlay, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
@@ -144,8 +136,7 @@ class CompanionService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new CompaniomService."""
-        super().__init__(None, Protocol.Companion, port, properties)
-        self.credentials = credentials
+        super().__init__(None, Protocol.Companion, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
@@ -161,10 +152,6 @@ class RaopService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new RaopService."""
-        super().__init__(identifier, Protocol.RAOP, port, properties)
-        self.credentials = credentials
-        self.password = password
-
-    def __str__(self) -> str:
-        """Return a string representation of this object."""
-        return super().__str__() + f", Password: {self.password}"
+        super().__init__(
+            identifier, Protocol.RAOP, port, properties, credentials, password=password
+        )

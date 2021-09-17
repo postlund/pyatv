@@ -7,7 +7,7 @@ import weakref
 
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -564,12 +564,13 @@ def homesharing_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP (Home Sharing) service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = conf.DmapService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        mdns_service.properties.get("hG"),
-        port=mdns_service.port,
-        properties=mdns_service.properties,
+        Protocol.DMAP,
+        mdns_service.port,
+        mdns_service.properties,
     )
+    service.credentials = mdns_service.properties.get("hG")
     return name, service
 
 
@@ -578,11 +579,11 @@ def dmap_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP service."""
     name = mdns_service.properties.get("CtlN", "Unknown")
-    service = conf.DmapService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        None,
-        port=mdns_service.port,
-        properties=mdns_service.properties,
+        Protocol.DMAP,
+        mdns_service.port,
+        mdns_service.properties,
     )
     return name, service
 
@@ -592,12 +593,13 @@ def hscp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new HSCP service."""
     name = mdns_service.properties.get("Machine Name", "Unknown")
-    service = conf.DmapService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        mdns_service.properties.get("hG"),
+        Protocol.DMAP,
         port=mdns_service.port,
         properties=mdns_service.properties,
     )
+    service.credentials = mdns_service.properties.get("hG")
     return name, service
 
 

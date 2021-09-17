@@ -3,9 +3,9 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict, Generator, Mapping, Optional, Set, cast
+from typing import Any, Dict, Generator, Mapping, Optional, Set
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import SetupData, mdns, net
@@ -46,7 +46,7 @@ _LOGGER = logging.getLogger(__name__)
 class AirPlayFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: conf.AirPlayService) -> None:
+    def __init__(self, service: BaseService) -> None:
         """Initialize a new AirPlayFeatures instance."""
         self.service = service
         self._features = parse(self.service.properties.get("features", "0x0"))
@@ -65,12 +65,10 @@ class AirPlayFeatures(Features):
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config: BaseConfig) -> None:
+    def __init__(self, config: BaseConfig, service: BaseService) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
-        self.service: conf.AirPlayService = cast(
-            conf.AirPlayService, self.config.get_service(Protocol.AirPlay)
-        )
+        self.service = service
         self._credentials: HapCredentials = parse_credentials(self.service.credentials)
         self._play_task: Optional[asyncio.Future] = None
 
@@ -122,8 +120,9 @@ def airplay_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new AirPlay service."""
-    service = conf.AirPlayService(
+    service = BaseService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.AirPlay,
         mdns_service.port,
         properties=mdns_service.properties,
     )
@@ -158,10 +157,10 @@ def setup(  # pylint: disable=too-many-locals
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
-    stream = AirPlayStream(config)
+    stream = AirPlayStream(config, service)
 
     interfaces = {
-        Features: AirPlayFeatures(cast(conf.AirPlayService, service)),
+        Features: AirPlayFeatures(service),
         Stream: stream,
     }
 
@@ -198,7 +197,7 @@ def setup(  # pylint: disable=too-many-locals
         control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
-        mrp_service = conf.MrpService(None, 0)
+        mrp_service = BaseService(None, Protocol.MRP, 0, {})
         config.add_service(mrp_service)
         (
             _,
