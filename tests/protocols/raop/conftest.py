@@ -4,9 +4,8 @@ from typing import cast
 import pytest
 
 from pyatv import connect
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.interface import BaseService
 
 from tests.fake_device import FakeAppleTV, raop
 from tests.fake_device.raop import FakeRaopUseCases
@@ -33,7 +32,7 @@ async def raop_usecase_fixture(raop_device) -> FakeRaopUseCases:
 
 @pytest.fixture(name="raop_conf")
 def raop_conf_fixture(raop_device, raop_properties):
-    service = BaseService(
+    service = ManualService(
         "raop_id", Protocol.RAOP, raop_device.get_port(Protocol.RAOP), raop_properties
     )
     conf = AppleTV("127.0.0.1", "Apple TV")

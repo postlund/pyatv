@@ -8,7 +8,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, Protocol
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -121,7 +121,7 @@ def airplay_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new AirPlay service."""
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.AirPlay,
         mdns_service.port,
@@ -198,7 +198,7 @@ def setup(  # pylint: disable=too-many-locals
         control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
-        mrp_service = BaseService(None, Protocol.MRP, 0, {})
+        mrp_service = MutableService(None, Protocol.MRP, 0, {})
         config.add_service(mrp_service)
         (
             _,

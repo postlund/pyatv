@@ -4,9 +4,8 @@ from typing import cast
 import pytest
 
 from pyatv import connect
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.interface import BaseService
 from pyatv.protocols.companion.server_auth import CLIENT_CREDENTIALS
 
 from tests.fake_device import FakeAppleTV, companion
@@ -34,8 +33,8 @@ async def companion_usecase_fixture(companion_device) -> FakeCompanionUseCases:
 
 @pytest.fixture(name="companion_conf")
 def companion_conf_fixture(companion_device):
-    airplay = BaseService("airplayid", Protocol.AirPlay, 0, {})
-    service = BaseService(
+    airplay = ManualService("airplayid", Protocol.AirPlay, 0, {})
+    service = ManualService(
         None,
         Protocol.Companion,
         companion_device.get_port(Protocol.Companion),

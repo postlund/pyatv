@@ -19,7 +19,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -564,7 +564,7 @@ def homesharing_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP (Home Sharing) service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.DMAP,
         mdns_service.port,
@@ -579,7 +579,7 @@ def dmap_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP service."""
     name = mdns_service.properties.get("CtlN", "Unknown")
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.DMAP,
         mdns_service.port,
@@ -593,7 +593,7 @@ def hscp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new HSCP service."""
     name = mdns_service.properties.get("Machine Name", "Unknown")
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.DMAP,
         port=mdns_service.port,

@@ -13,8 +13,7 @@ from zeroconf import Zeroconf
 
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
-from pyatv.core import mdns
-from pyatv.interface import BaseService
+from pyatv.core import MutableService, mdns
 from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.connection import CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
@@ -52,7 +51,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
         self.protocol = MrpProtocol(
             self.connection,
             SRPAuthHandler(),
-            BaseService(None, Protocol.MRP, port, {}, credentials=credentials),
+            MutableService(None, Protocol.MRP, port, {}, credentials=credentials),
         )
 
     async def start(self):
@@ -164,7 +163,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         self.protocol: CompanionProtocol = CompanionProtocol(
             self.connection,
             SRPAuthHandler(),
-            BaseService(None, Protocol.Companion, port, {}, credentials=credentials),
+            MutableService(None, Protocol.Companion, port, {}, credentials=credentials),
         )
         self._receive_event: asyncio.Event = asyncio.Event()
         self._receive_task: Optional[asyncio.Future] = None

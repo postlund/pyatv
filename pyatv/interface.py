@@ -117,7 +117,7 @@ def retrieve_commands(obj: object):
     return commands
 
 
-class BaseService:
+class BaseService(ABC):
     """Base class for protocol services."""
 
     def __init__(
@@ -130,7 +130,7 @@ class BaseService:
         password: Optional[str] = None,
     ) -> None:
         """Initialize a new BaseService."""
-        self.__identifier = identifier
+        self._identifier = identifier
         self._protocol = protocol
         self._port = port
         self._properties: MutableMapping[str, str] = dict(properties or {})
@@ -140,7 +140,7 @@ class BaseService:
     @property
     def identifier(self) -> Optional[str]:
         """Return unique identifier associated with this service."""
-        return self.__identifier
+        return self._identifier
 
     @property
     def protocol(self) -> Protocol:

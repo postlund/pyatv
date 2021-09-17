@@ -30,6 +30,9 @@ link_group: api
 <h4><code><a title="pyatv.conf.DmapService" href="#pyatv.conf.DmapService">DmapService</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.conf.MrpService" href="#pyatv.conf.MrpService">MrpService</a></code></h4>
 </li>
 <li>
@@ -48,7 +51,7 @@ link_group: api
 <p>A configuration describes a device, e.g. it's name, IP address and credentials. It is
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L157" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L182" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -65,11 +68,13 @@ provide configurations for you.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
+<p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new AirPlayService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L114-L125" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L127-L142" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -94,7 +99,7 @@ provide configurations for you.</p>
 several services depending on the protocols it supports, e.g. DMAP or
 AirPlay.</p>
 <p>Initialize a new AppleTV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L14-L80" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L15-L81" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a></li>
@@ -127,11 +132,13 @@ AirPlay.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a Companion link service.</p>
+<p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new CompaniomService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L129-L139" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L146-L160" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -152,11 +159,39 @@ AirPlay.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
+<p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new DmapService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L84-L95" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L89-L104" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.BaseService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.port" href="interface#pyatv.interface.BaseService.port">port</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="pyatv.conf.ManualService"><code class="flex name class">
+<span>class <span class="ident">ManualService</span></span>
+<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]], credentials: Optional[str] = None, password: Optional[str] = None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Service used when manually creating adding a service.</p>
+<p>Initialize a new BaseService.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L84-L85" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -177,11 +212,13 @@ AirPlay.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
+<p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new MrpService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L99-L110" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L108-L123" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -202,11 +239,13 @@ AirPlay.</p>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an RAOP service.</p>
+<p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new RaopService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L143-L157" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L164-L182" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
+<li>abc.ABC</li>
 </ul>
 <h3>Inherited members</h3>
 <ul class="hlist">

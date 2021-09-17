@@ -17,9 +17,9 @@ from typing import (
     Tuple,
 )
 
-from pyatv import conf, interface
+from pyatv import conf
 from pyatv.const import DeviceModel
-from pyatv.core import mdns
+from pyatv.core import MutableService, mdns
 from pyatv.helpers import get_unique_id
 from pyatv.interface import BaseConfig, DeviceInfo
 from pyatv.support import knock
@@ -28,7 +28,7 @@ from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
 
-ScanHandlerReturn = Tuple[str, interface.BaseService]
+ScanHandlerReturn = Tuple[str, MutableService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
@@ -50,7 +50,7 @@ class FoundDevice(NamedTuple):
     address: IPv4Address
     deep_sleep: bool
     model: DeviceModel
-    services: List[interface.BaseService]
+    services: List[MutableService]
 
 
 def get_unique_identifiers(
