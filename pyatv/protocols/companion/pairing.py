@@ -3,10 +3,10 @@ import asyncio
 import logging
 from typing import Optional, cast
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.conf import CompanionService
-from pyatv.interface import BaseService, PairingHandler
+from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.companion.auth import CompanionPairSetupProcedure
 from pyatv.protocols.companion.connection import CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol
@@ -21,7 +21,7 @@ class CompanionPairingHandler(PairingHandler):
 
     def __init__(
         self,
-        config: conf.AppleTV,
+        config: BaseConfig,
         service: BaseService,
         session: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,

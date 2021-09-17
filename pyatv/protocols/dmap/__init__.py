@@ -25,6 +25,7 @@ from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -511,7 +512,7 @@ class DmapPushUpdater(PushUpdater):
 class DmapFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
-    def __init__(self, config: conf.AppleTV, apple_tv: BaseDmapAppleTV) -> None:
+    def __init__(self, config: BaseConfig, apple_tv: BaseDmapAppleTV) -> None:
         """Initialize a new DmapFeatures instance."""
         self.config = config
         self.apple_tv = apple_tv
@@ -621,7 +622,7 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
 
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -670,7 +671,7 @@ def setup(  # pylint: disable=too-many-locals
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

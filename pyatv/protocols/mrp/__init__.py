@@ -28,6 +28,7 @@ from pyatv.interface import (
     App,
     ArtworkInfo,
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -713,7 +714,7 @@ class MrpAudio(Audio):
 class MrpFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
-    def __init__(self, config: conf.AppleTV, psm: PlayerStateManager, audio: MrpAudio):
+    def __init__(self, config: BaseConfig, psm: PlayerStateManager, audio: MrpAudio):
         """Initialize a new MrpFeatures instance."""
         self.config = config
         self.psm = psm
@@ -820,7 +821,7 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
 
 def create_with_connection(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -887,7 +888,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
 
 def setup(
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -904,7 +905,7 @@ def setup(
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

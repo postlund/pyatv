@@ -13,6 +13,7 @@ from pyatv.core.device_info import lookup_model
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -64,7 +65,7 @@ class AirPlayFeatures(Features):
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config: conf.AppleTV) -> None:
+    def __init__(self, config: BaseConfig) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
         self.service: conf.AirPlayService = cast(
@@ -150,7 +151,7 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
 
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -244,7 +245,7 @@ def setup(  # pylint: disable=too-many-locals
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

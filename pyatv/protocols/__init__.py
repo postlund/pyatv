@@ -2,7 +2,7 @@
 import asyncio
 from typing import Any, Callable, Dict, Generator, Mapping, NamedTuple
 
-from pyatv import conf, interface
+from pyatv import interface
 from pyatv.const import Protocol
 from pyatv.core import SetupData, StateProducer
 from pyatv.core.scan import ScanMethod
@@ -16,7 +16,7 @@ from pyatv.support.http import ClientSessionManager
 SetupMethod = Callable[
     [
         asyncio.AbstractEventLoop,
-        conf.AppleTV,
+        interface.BaseConfig,
         interface.BaseService,
         StateProducer,
         ClientSessionManager,
