@@ -82,11 +82,11 @@ class AppleTV(BaseConfig):
 
 
 class ManualService(BaseService):
-    """Service used when manually creating adding a service."""
+    """Service used when manually creating and adding a service."""
 
 
 # pylint: disable=too-few-public-methods
-class DmapService(BaseService):
+class DmapService(ManualService):
     """Representation of a DMAP service.
 
     **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
@@ -105,7 +105,7 @@ class DmapService(BaseService):
 
 
 # pylint: disable=too-few-public-methods
-class MrpService(BaseService):
+class MrpService(ManualService):
     """Representation of a MediaRemote Protocol (MRP) service.
 
     **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
@@ -124,7 +124,7 @@ class MrpService(BaseService):
 
 
 # pylint: disable=too-few-public-methods
-class AirPlayService(BaseService):
+class AirPlayService(ManualService):
     """Representation of an AirPlay service.
 
     **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
@@ -143,7 +143,7 @@ class AirPlayService(BaseService):
 
 
 # pylint: disable=too-few-public-methods
-class CompanionService(BaseService):
+class CompanionService(ManualService):
     """Representation of a Companion link service.
 
     **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
@@ -161,7 +161,7 @@ class CompanionService(BaseService):
 
 
 # pylint: disable=too-few-public-methods
-class RaopService(BaseService):
+class RaopService(ManualService):
     """Representation of an RAOP service.
 
     **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
