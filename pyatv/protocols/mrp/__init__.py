@@ -20,7 +20,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -784,7 +784,7 @@ def mrp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new MRP service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.MRP,
         mdns_service.port,

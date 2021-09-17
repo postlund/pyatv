@@ -9,6 +9,7 @@ from typing import Dict, List, Mapping, Optional
 
 from pyatv.const import Protocol
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
+from pyatv.support import deprecated
 
 
 class AppleTV(BaseConfig):
@@ -80,10 +81,18 @@ class AppleTV(BaseConfig):
         return self._device_info
 
 
+class ManualService(BaseService):
+    """Service used when manually creating adding a service."""
+
+
 # pylint: disable=too-few-public-methods
 class DmapService(BaseService):
-    """Representation of a DMAP service."""
+    """Representation of a DMAP service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -97,8 +106,12 @@ class DmapService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class MrpService(BaseService):
-    """Representation of a MediaRemote Protocol (MRP) service."""
+    """Representation of a MediaRemote Protocol (MRP) service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -112,8 +125,12 @@ class MrpService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class AirPlayService(BaseService):
-    """Representation of an AirPlay service."""
+    """Representation of an AirPlay service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -127,8 +144,12 @@ class AirPlayService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class CompanionService(BaseService):
-    """Representation of a Companion link service."""
+    """Representation of a Companion link service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         port: int,
@@ -141,8 +162,12 @@ class CompanionService(BaseService):
 
 # pylint: disable=too-few-public-methods
 class RaopService(BaseService):
-    """Representation of an RAOP service."""
+    """Representation of an RAOP service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],

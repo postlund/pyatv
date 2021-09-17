@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.conf import ManualService
 from pyatv.const import Protocol
-from pyatv.interface import BaseService
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import (
     HEARTBEAT_INTERVAL,
@@ -30,7 +30,7 @@ async def mrp_atv(event_loop):
 @pytest.fixture
 async def mrp_protocol(event_loop, mrp_atv):
     port = mrp_atv.get_port(Protocol.MRP)
-    service = BaseService("mrp_id", Protocol.MRP, port, {})
+    service = ManualService("mrp_id", Protocol.MRP, port, {})
     connection = MrpConnection("127.0.0.1", port, event_loop)
     protocol = MrpProtocol(connection, SRPAuthHandler(), service)
     yield protocol

@@ -9,7 +9,7 @@ from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
@@ -322,7 +322,7 @@ def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new Companion service."""
-    service = BaseService(
+    service = MutableService(
         None,
         Protocol.Companion,
         mdns_service.port,

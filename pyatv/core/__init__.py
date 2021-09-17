@@ -3,6 +3,15 @@ import asyncio
 from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Set
 
 from pyatv.const import FeatureName, Protocol
+from pyatv.interface import BaseService
+
+
+class MutableService(BaseService):
+    """Mutable version of BaseService allowing some fields to be changed.
+
+    This is an internal implementation of BaseService that allows protocols to change
+    some fields during set up. The mutable property is not exposed outside of core.
+    """
 
 
 class SetupData(NamedTuple):

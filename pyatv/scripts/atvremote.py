@@ -10,7 +10,7 @@ import sys
 import traceback
 
 from pyatv import connect, const, exceptions, interface, pair, scan
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
@@ -19,7 +19,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.interface import BaseService, retrieve_commands
+from pyatv.interface import retrieve_commands
 from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
 
 _LOGGER = logging.getLogger(__name__)
@@ -544,7 +544,7 @@ async def _autodiscover_device(args, loop):
 
 def _manual_device(args):
     config = AppleTV(IPv4Address(args.address), args.name)
-    service = BaseService(args.id, args.protocol, args.port, {})
+    service = ManualService(args.id, args.protocol, args.port, {})
     service.credentials = getattr(args, f"{args.protocol.name.lower()}_credentials")
     service.password = args.raop_password
     config.add_service(service)

@@ -7,9 +7,9 @@ import pytest
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.interface import App, BaseService, FeatureName, FeatureState
+from pyatv.interface import App, FeatureName, FeatureState
 
 from tests.fake_device import FakeAppleTV
 from tests.utils import until
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_connect_only_companion(event_loop):
-    service = BaseService(None, Protocol.Companion, 0, {})  # connect never happens
+    service = ManualService(None, Protocol.Companion, 0, {})  # connect never happens
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)
 

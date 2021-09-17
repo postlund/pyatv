@@ -2,8 +2,8 @@
 
 import pytest
 
+from pyatv.conf import ManualService
 from pyatv.const import FeatureName, FeatureState, Protocol
-from pyatv.interface import BaseService
 from pyatv.protocols.airplay import AirPlayFeatures
 
 # AirPlayFeatures
@@ -18,6 +18,6 @@ from pyatv.protocols.airplay import AirPlayFeatures
     ],
 )
 def test_feature_play_url(flags, expected_state):
-    service = BaseService("id", Protocol.AirPlay, 0, {"features": flags})
+    service = ManualService("id", Protocol.AirPlay, 0, {"features": flags})
     features = AirPlayFeatures(service)
     assert features.get_feature(FeatureName.PlayUrl).state == expected_state

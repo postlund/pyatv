@@ -9,7 +9,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions, interface
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -20,7 +20,6 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.interface import BaseService
 
 from tests.utils import data_path, faketime, stub_sleep, unstub_sleep, until
 
@@ -86,7 +85,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
-        conf.add_service(BaseService(None, Protocol.Companion, 1234, {}))
+        conf.add_service(ManualService(None, Protocol.Companion, 1234, {}))
 
         with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect(conf, self.loop)

@@ -9,7 +9,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, c
 from pyatv import const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -369,7 +369,7 @@ def raop_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new RAOP service."""
     _, name = mdns_service.name.split("@", maxsplit=1)
-    service = BaseService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.RAOP,
         mdns_service.port,
