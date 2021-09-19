@@ -33,6 +33,7 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     OperatingSystem,
+    PairingRequirement,
     Protocol,
 )
 from pyatv.support.device_info import lookup_version
@@ -158,6 +159,11 @@ class BaseService(ABC):
         """Return if a password is required to access service."""
 
     @property
+    @abstractmethod
+    def pairing(self) -> PairingRequirement:
+        """Return if pairing is required by service."""
+
+    @property
     def properties(self) -> Mapping[str, str]:
         """Return service Zeroconf properties."""
         return self._properties
@@ -174,7 +180,8 @@ class BaseService(ABC):
             f"Port: {self.port}, "
             f"Credentials: {self.credentials}, "
             f"Requires Password: {self.requires_password}, "
-            f"Password: {self.password}"
+            f"Password: {self.password}, "
+            f"Pairing: {self.pairing.name}"
         )
 
 

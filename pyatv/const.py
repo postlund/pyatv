@@ -181,6 +181,25 @@ class InputAction(Enum):
     """Press and hold for one second before releasing."""
 
 
+class PairingRequirement(Enum):
+    """Pairing requirement for a service."""
+
+    Unsupported = 1
+    """Not supported by protocol or not implemented."""
+
+    Disabled = 2
+    """Pairing is disabled by protocol."""
+
+    NotNeeded = 3
+    """Pairing is not needed."""
+
+    Optional = 4
+    """Pairing is supported but not required."""
+
+    Mandatory = 5
+    """Pairing must be performed."""
+
+
 class FeatureState(Enum):
     """State of a particular feature."""
 

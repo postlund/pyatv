@@ -7,7 +7,7 @@ provide configurations for you.
 from ipaddress import IPv4Address
 from typing import Dict, List, Mapping, Optional
 
-from pyatv.const import Protocol
+from pyatv.const import PairingRequirement, Protocol
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import deprecated
 
@@ -93,15 +93,22 @@ class ManualService(BaseService):
         credentials: Optional[str] = None,
         password: Optional[str] = None,
         requires_password: bool = False,
+        pairing_requirement: PairingRequirement = PairingRequirement.Unsupported,
     ) -> None:
         """Initialize a new ManualService."""
         super().__init__(identifier, protocol, port, properties, credentials, password)
         self._requires_password = requires_password
+        self._pairing_requirement = pairing_requirement
 
     @property
     def requires_password(self) -> bool:
         """Return if a password is required to access service."""
         return self._requires_password
+
+    @property
+    def pairing(self) -> PairingRequirement:
+        """Return if pairing is required by service."""
+        return self._pairing_requirement
 
 
 # pylint: disable=too-few-public-methods
