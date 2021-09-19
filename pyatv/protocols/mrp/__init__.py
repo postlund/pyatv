@@ -15,6 +15,7 @@ from pyatv.const import (
     InputAction,
     MediaType,
     OperatingSystem,
+    PairingRequirement,
     PowerState,
     Protocol,
     RepeatState,
@@ -825,7 +826,16 @@ async def service_info(
     devinfo: DeviceInfo,
     services: Mapping[Protocol, BaseService],
 ) -> None:
-    """Update service with additional information."""
+    """Update service with additional information.
+
+    Pairing has never been enforced by MRP (maybe by design), but it is
+    possible to pair if AllowPairing is YES.
+    """
+    service.pairing = (
+        PairingRequirement.Optional
+        if service.properties.get("allowpairing", "no").lower() == "yes"
+        else PairingRequirement.Disabled
+    )
 
 
 def create_with_connection(  # pylint: disable=too-many-locals

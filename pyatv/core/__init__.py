@@ -2,7 +2,7 @@
 import asyncio
 from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional, Set
 
-from pyatv.const import FeatureName, Protocol
+from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.interface import BaseService
 
 
@@ -25,6 +25,7 @@ class MutableService(BaseService):
         """Initialize a new MutableService."""
         super().__init__(identifier, protocol, port, properties, credentials, password)
         self._requires_password = False
+        self._pairing_requirement = PairingRequirement.Unsupported
 
     @property
     def requires_password(self) -> bool:
@@ -35,6 +36,16 @@ class MutableService(BaseService):
     def requires_password(self, value: bool) -> None:
         """Change if password is required or not."""
         self._requires_password = value
+
+    @property
+    def pairing(self) -> PairingRequirement:
+        """Return if pairing is required by service."""
+        return self._pairing_requirement
+
+    @pairing.setter
+    def pairing(self, value: PairingRequirement) -> None:
+        """Change if pairing is required by service."""
+        self._pairing_requirement = value
 
 
 class SetupData(NamedTuple):
