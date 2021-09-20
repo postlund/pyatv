@@ -15,6 +15,7 @@ from pyatv.const import (
     InputAction,
     MediaType,
     OperatingSystem,
+    PairingRequirement,
     Protocol,
     RepeatState,
     ShuffleState,
@@ -627,7 +628,16 @@ async def service_info(
     devinfo: DeviceInfo,
     services: Mapping[Protocol, BaseService],
 ) -> None:
-    """Update service with additional information."""
+    """Update service with additional information.
+
+    If Home Sharing is enabled, then the "hG" property is present and can be used as
+    credentials. If not enabled, then pairing must be performed.
+    """
+    service.pairing = (
+        PairingRequirement.Optional
+        if "hG" in service.properties
+        else PairingRequirement.Mandatory
+    )
 
 
 def setup(  # pylint: disable=too-many-locals

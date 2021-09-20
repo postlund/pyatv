@@ -4,10 +4,10 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import OperatingSystem
-from pyatv.core import mdns
+from pyatv.const import OperatingSystem, PairingRequirement, Protocol
+from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.dmap import device_info, scan
+from pyatv.protocols.dmap import device_info, scan, service_info
 
 HOMESHARING_SERVICE = "_appletv-v2._tcp.local"
 DMAP_SERVICE = "_touch-able._tcp.local"
@@ -60,3 +60,28 @@ def test_dmap_handler_to_service():
 )
 def test_device_info(properties, expected):
     assert not DeepDiff(device_info(properties), expected)
+
+
+@pytest.mark.parametrize(
+    "dmap_props,mrp_props,pairing_req",
+    [
+        ({}, {}, PairingRequirement.Mandatory),
+        ({"hG": "test"}, {}, PairingRequirement.Optional),
+        ({}, {"hG": "test"}, PairingRequirement.Mandatory),
+    ],
+)
+async def test_service_info_pairing(dmap_props, mrp_props, pairing_req):
+    dmap_service = MutableService("id", Protocol.DMAP, 0, dmap_props)
+    mrp_service = MutableService("mrp", Protocol.MRP, 0, mrp_props)
+
+    assert dmap_service.pairing == PairingRequirement.Unsupported
+    assert mrp_service.pairing == PairingRequirement.Unsupported
+
+    await service_info(
+        dmap_service,
+        DeviceInfo({}),
+        {Protocol.MRP: mrp_service, Protocol.DMAP: dmap_service},
+    )
+
+    assert dmap_service.pairing == pairing_req
+    assert mrp_service.pairing == PairingRequirement.Unsupported
