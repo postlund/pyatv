@@ -14,7 +14,12 @@ LEGACY_PAIRING_BIT = 0x200
 
 def _get_flags(properties: Mapping[str, str]) -> int:
     # Flags are either present via "sf" or "flags"
-    return int(properties.get("sf", properties.get("flags", "0x0")), 16)
+    flags = properties.get("sf")
+    if not flags:
+        flags = properties.get("flags")
+        if not flags:
+            flags = properties.get("ft")
+    return int(flags or "0x0", 16)
 
 
 class AirPlayFlags(IntFlag):
@@ -88,7 +93,7 @@ def is_password_required(service: BaseService) -> bool:
 
     A password is required under these conditions:
     - "pw" is true
-    - "sf" or "flags" has bit 0x80 set
+    - "sf", "ft" or "flags" has bit 0x80 set
     """
     # "pw" flag
     if service.properties.get("pw", "false").lower() == "true":
