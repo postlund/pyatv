@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, Protocol
+from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
 from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
@@ -160,6 +160,35 @@ async def service_info(
 ) -> None:
     """Update service with additional information."""
     service.requires_password = is_password_required(service)
+
+    # Legacy "flags" property
+    flags = int(
+        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
+    )
+    if flags & 0x200 == 0:
+        service.pairing = PairingRequirement.NotNeeded
+    else:
+        service.pairing = PairingRequirement.Mandatory
+
+    # Feature flag in AirPlay v2
+    feature_flags = parse_features(service.properties.get("features", "0x0"))
+    if (
+        feature_flags
+        & (
+            AirPlayFlags.SupportsLegacyPairing
+            | AirPlayFlags.SupportsCoreUtilsPairingAndEncryption
+        )
+        != 0
+    ):
+        service.pairing = PairingRequirement.Mandatory
+
+    # Some devices require no pairing at all, so exclude them
+    if devinfo.model in [
+        DeviceModel.AirPortExpressGen2,
+        DeviceModel.HomePod,
+        DeviceModel.HomePodMini,
+    ]:
+        service.pairing = PairingRequirement.NotNeeded
 
 
 def setup(  # pylint: disable=too-many-locals
