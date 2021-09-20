@@ -4,10 +4,11 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel, Protocol
+from pyatv.const import DeviceModel, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.airplay import device_info, scan, service_info
+from pyatv.protocols.airplay.utils import AirPlayFlags
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"
 
@@ -74,3 +75,55 @@ async def test_service_info_password(airplay_props, mrp_props, requires_password
 
     assert airplay_service.requires_password == requires_password
     assert not mrp_service.requires_password
+
+
+@pytest.mark.parametrize(
+    "airplay_props,devinfo,pairing_req",
+    [
+        ({"sf": "0x1"}, {}, PairingRequirement.NotNeeded),
+        ({"sf": "0x200"}, {}, PairingRequirement.Mandatory),
+        ({"flags": "0x1"}, {}, PairingRequirement.NotNeeded),
+        ({"flags": "0x200"}, {}, PairingRequirement.Mandatory),
+        ({"features": "0x1"}, {}, PairingRequirement.NotNeeded),
+        (
+            {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
+            {},
+            PairingRequirement.Mandatory,
+        ),
+        (
+            {"features": "0x00000000,0x10000"},
+            {},
+            PairingRequirement.Mandatory,
+        ),
+        # Special cases for devices only requiring transient pairing, e.g.
+        # HomePod and AirPort Express
+        # AirPort Express gen 1 does not support AirPlay 2 => assume checks above
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.AirPortExpressGen2},
+            PairingRequirement.NotNeeded,
+        ),
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.HomePod},
+            PairingRequirement.NotNeeded,
+        ),
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.HomePodMini},
+            PairingRequirement.NotNeeded,
+        ),
+    ],
+)
+async def test_service_info_pairing(airplay_props, devinfo, pairing_req):
+    airplay_service = MutableService("id", Protocol.AirPlay, 0, airplay_props)
+
+    assert airplay_service.pairing == PairingRequirement.Unsupported
+
+    await service_info(
+        airplay_service,
+        DeviceInfo(devinfo),
+        {Protocol.AirPlay: airplay_service},
+    )
+
+    assert airplay_service.pairing == pairing_req
