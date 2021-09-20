@@ -66,8 +66,8 @@ def test_device_info(properties, expected):
     "dmap_props,mrp_props,pairing_req",
     [
         ({}, {}, PairingRequirement.Mandatory),
-        ({"hG": "test"}, {}, PairingRequirement.Optional),
-        ({}, {"hG": "test"}, PairingRequirement.Mandatory),
+        ({"hg": "test"}, {}, PairingRequirement.Optional),
+        ({}, {"hg": "test"}, PairingRequirement.Mandatory),
     ],
 )
 async def test_service_info_pairing(dmap_props, mrp_props, pairing_req):

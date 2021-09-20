@@ -169,8 +169,12 @@ class BaseService(ABC):
         return self._properties
 
     def merge(self, other) -> None:
-        """Merge with other service of same type."""
+        """Merge with other service of same type.
+
+        Merge will only include credentials, password and properties.
+        """
         self.credentials = other.credentials or self.credentials
+        self.password = other.password or self.password
         self._properties.update(other.properties)
 
     def __str__(self) -> str:

@@ -1,5 +1,6 @@
 """Unit tests for pyatv.conf."""
 
+from deepdiff import DeepDiff
 import pytest
 
 from pyatv import exceptions
@@ -181,3 +182,64 @@ def test_raop_password_in_str(config):
     )
 
     assert PASSWORD_1 in str(config)
+
+
+@pytest.mark.parametrize(
+    "password1,password2,expected",
+    [
+        ("pass1", None, "pass1"),
+        (None, "pass2", "pass2"),
+        ("pass2", "pass1", "pass1"),
+    ],
+)
+def test_service_merge_password(password1, password2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, {})
+    service2 = ManualService("id2", Protocol.DMAP, 0, {})
+
+    service1.password = password1
+    service2.password = password2
+
+    service1.merge(service2)
+
+    assert service1.password == expected
+
+
+@pytest.mark.parametrize(
+    "creds1,creds2,expected",
+    [
+        ("creds1", None, "creds1"),
+        (None, "creds2", "creds2"),
+        ("creds2", "creds1", "creds1"),
+    ],
+)
+def test_service_merge_credentials(creds1, creds2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, {})
+    service2 = ManualService("id2", Protocol.DMAP, 0, {})
+
+    service1.credentials = creds1
+    service2.credentials = creds2
+
+    service1.merge(service2)
+
+    assert service1.credentials == expected
+
+
+@pytest.mark.parametrize(
+    "props1,props2,expected",
+    [
+        ({"foo": "bar"}, None, {"foo": "bar"}),
+        (None, {"foo": "bar"}, {"foo": "bar"}),
+        (
+            {"foo": "bar"},
+            {"foo": "bar2", "test": "dummy"},
+            {"foo": "bar2", "test": "dummy"},
+        ),
+    ],
+)
+def test_service_merge_properties(props1, props2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, props1)
+    service2 = ManualService("id2", Protocol.DMAP, 0, props2)
+
+    service1.merge(service2)
+
+    assert not DeepDiff(service1.properties, expected)

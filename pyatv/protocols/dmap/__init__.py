@@ -635,7 +635,7 @@ async def service_info(
     """
     service.pairing = (
         PairingRequirement.Optional
-        if "hG" in service.properties
+        if "hg" in service.properties
         else PairingRequirement.Mandatory
     )
 

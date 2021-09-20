@@ -16,6 +16,7 @@ from typing import (
     NamedTuple,
     Optional,
     Tuple,
+    cast,
 )
 
 from pyatv import conf
@@ -115,14 +116,6 @@ class BaseScanner(ABC):
         devices = {}
         for address, found_device in self._found_devices.items():
             device_info = self._get_device_info(found_device)
-            properties_map = {
-                service.protocol: service for service in found_device.services
-            }
-
-            for service in found_device.services:
-                await self._service_infos[service.protocol](
-                    service, device_info, properties_map
-                )
 
             devices[address] = conf.AppleTV(
                 address,
@@ -134,6 +127,17 @@ class BaseScanner(ABC):
 
             for service in found_device.services:
                 devices[address].add_service(service)
+
+            properties_map = {
+                service.protocol: service for service in devices[address].services
+            }
+
+            for device_service in devices[address].services:
+                # Apply service_info after adding all services in case a merge happens.
+                # We know services are of type MutableService here.
+                await self._service_infos[device_service.protocol](
+                    cast(MutableService, device_service), device_info, properties_map
+                )
 
         return devices
 
