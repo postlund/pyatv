@@ -1,8 +1,10 @@
 """Unit tests for pyatv.conf."""
 
+from deepdiff import DeepDiff
 import pytest
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
 
 ADDRESS_1 = "127.0.0.1"
@@ -21,17 +23,17 @@ PASSWORD_1 = "password1"
 
 TEST_PROPERTIES = {"_test._tcp.local": {"foo": "bar"}}
 
-DMAP_SERVICE = conf.DmapService(IDENTIFIER_1, None, port=PORT_1)
-MRP_SERVICE = conf.MrpService(IDENTIFIER_2, PORT_2, properties=TEST_PROPERTIES)
-AIRPLAY_SERVICE = conf.AirPlayService(IDENTIFIER_3, PORT_1)
-COMPANION_SERVICE = conf.CompanionService(PORT_3)
-RAOP_SERVICE = conf.RaopService(IDENTIFIER_4, PORT_4)
-AIRPORT_SERVICE = conf.RaopService(IDENTIFIER_1, PORT_1)
+DMAP_SERVICE = ManualService(IDENTIFIER_1, Protocol.DMAP, PORT_1, {})
+MRP_SERVICE = ManualService(IDENTIFIER_2, Protocol.MRP, PORT_2, TEST_PROPERTIES)
+AIRPLAY_SERVICE = ManualService(IDENTIFIER_3, Protocol.AirPlay, PORT_1, {})
+COMPANION_SERVICE = ManualService(None, Protocol.Companion, PORT_3, {})
+RAOP_SERVICE = ManualService(IDENTIFIER_4, Protocol.RAOP, PORT_4, {})
+AIRPORT_SERVICE = ManualService(IDENTIFIER_1, Protocol.RAOP, PORT_1, {})
 
 
 @pytest.fixture
 def config():
-    yield conf.AppleTV(ADDRESS_1, NAME, deep_sleep=True)
+    yield AppleTV(ADDRESS_1, NAME, deep_sleep=True)
 
 
 def test_address_and_name(config):
@@ -42,8 +44,8 @@ def test_address_and_name(config):
 def test_equality(config):
     assert config == config
 
-    atv2 = conf.AppleTV(ADDRESS_1, NAME)
-    atv2.add_service(conf.AirPlayService(IDENTIFIER_1, PORT_1))
+    atv2 = AppleTV(ADDRESS_1, NAME)
+    atv2.add_service(ManualService(IDENTIFIER_1, Protocol.AirPlay, PORT_1, {}))
     assert config != atv2
 
 
@@ -161,8 +163,8 @@ def test_ready(config, service, expected):
 # but it's mainly to exercise string as that is important. Might refactor
 # this in the future.
 def test_to_str(config):
-    config.add_service(conf.DmapService(IDENTIFIER_1, "LOGIN_ID"))
-    config.add_service(conf.MrpService(IDENTIFIER_2, PORT_2))
+    config.add_service(ManualService(IDENTIFIER_1, Protocol.DMAP, 3689, {}, "LOGIN_ID"))
+    config.add_service(ManualService(IDENTIFIER_2, Protocol.MRP, PORT_2, {}))
 
     # Check for some keywords to not lock up format too much
     output = str(config)
@@ -175,6 +177,69 @@ def test_to_str(config):
 
 
 def test_raop_password_in_str(config):
-    config.add_service(conf.RaopService(IDENTIFIER_1, password=PASSWORD_1))
+    config.add_service(
+        ManualService(IDENTIFIER_1, Protocol.RAOP, 1234, {}, password=PASSWORD_1)
+    )
 
     assert PASSWORD_1 in str(config)
+
+
+@pytest.mark.parametrize(
+    "password1,password2,expected",
+    [
+        ("pass1", None, "pass1"),
+        (None, "pass2", "pass2"),
+        ("pass2", "pass1", "pass1"),
+    ],
+)
+def test_service_merge_password(password1, password2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, {})
+    service2 = ManualService("id2", Protocol.DMAP, 0, {})
+
+    service1.password = password1
+    service2.password = password2
+
+    service1.merge(service2)
+
+    assert service1.password == expected
+
+
+@pytest.mark.parametrize(
+    "creds1,creds2,expected",
+    [
+        ("creds1", None, "creds1"),
+        (None, "creds2", "creds2"),
+        ("creds2", "creds1", "creds1"),
+    ],
+)
+def test_service_merge_credentials(creds1, creds2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, {})
+    service2 = ManualService("id2", Protocol.DMAP, 0, {})
+
+    service1.credentials = creds1
+    service2.credentials = creds2
+
+    service1.merge(service2)
+
+    assert service1.credentials == expected
+
+
+@pytest.mark.parametrize(
+    "props1,props2,expected",
+    [
+        ({"foo": "bar"}, None, {"foo": "bar"}),
+        (None, {"foo": "bar"}, {"foo": "bar"}),
+        (
+            {"foo": "bar"},
+            {"foo": "bar2", "test": "dummy"},
+            {"foo": "bar2", "test": "dummy"},
+        ),
+    ],
+)
+def test_service_merge_properties(props1, props2, expected):
+    service1 = ManualService("id1", Protocol.DMAP, 0, props1)
+    service2 = ManualService("id2", Protocol.DMAP, 0, props2)
+
+    service1.merge(service2)
+
+    assert not DeepDiff(service1.properties, expected)

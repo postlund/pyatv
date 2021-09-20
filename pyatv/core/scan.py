@@ -7,6 +7,7 @@ import logging
 import os
 from typing import (
     Any,
+    Awaitable,
     Callable,
     Dict,
     Generator,
@@ -15,24 +16,28 @@ from typing import (
     NamedTuple,
     Optional,
     Tuple,
+    cast,
 )
 
-from pyatv import conf, interface
-from pyatv.const import DeviceModel
-from pyatv.core import mdns
-from pyatv.core.device_info import lookup_internal_name
+from pyatv import conf
+from pyatv.const import DeviceModel, Protocol
+from pyatv.core import MutableService, mdns
 from pyatv.helpers import get_unique_id
-from pyatv.interface import DeviceInfo
+from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import dict_merge
+from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
 
-ScanHandlerReturn = Tuple[str, interface.BaseService]
+ScanHandlerReturn = Tuple[str, MutableService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
 DevInfoExtractor = Callable[[Mapping[str, Any]], Mapping[str, Any]]
+ServiceInfoMethod = Callable[
+    [MutableService, DeviceInfo, Mapping[Protocol, BaseService]], Awaitable[None]
+]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
@@ -50,7 +55,7 @@ class FoundDevice(NamedTuple):
     address: IPv4Address
     deep_sleep: bool
     model: DeviceModel
-    services: List[interface.BaseService]
+    services: List[MutableService]
 
 
 def get_unique_identifiers(
@@ -80,36 +85,59 @@ class BaseScanner(ABC):
             DEVICE_INFO: (_empty_handler, _empty_extractor),
             SLEEP_PROXY: (_empty_handler, _empty_extractor),
         }
+        self._service_infos: Dict[Protocol, ServiceInfoMethod] = {}
         self._found_devices: Dict[IPv4Address, FoundDevice] = {}
         self._properties: Dict[IPv4Address, Dict[str, Mapping[str, str]]] = {}
 
     def add_service(
-        self, service_type: str, handler: ScanHandler, device_info_extractor
+        self,
+        service_type: str,
+        handler: ScanHandler,
+        device_info_extractor: DevInfoExtractor,
     ) -> None:
         """Add service type to discover."""
         self._services[service_type] = (handler, device_info_extractor)
+
+    def add_service_info(
+        self, protocol: Protocol, service_info: ServiceInfoMethod
+    ) -> None:
+        """Add service info updater method."""
+        self._service_infos[protocol] = service_info
 
     @property
     def services(self) -> List[str]:
         """Return list of service types to scan for."""
         return list(self._services.keys())
 
-    async def discover(self, timeout: int) -> Mapping[IPv4Address, conf.AppleTV]:
+    async def discover(self, timeout: int) -> Mapping[IPv4Address, BaseConfig]:
         """Start discovery of devices and services."""
         await self.process(timeout)
 
         devices = {}
         for address, found_device in self._found_devices.items():
+            device_info = self._get_device_info(found_device)
+
             devices[address] = conf.AppleTV(
                 address,
                 found_device.name,
                 deep_sleep=found_device.deep_sleep,
                 properties=self._properties[address],
-                device_info=self._get_device_info(found_device),
+                device_info=device_info,
             )
 
             for service in found_device.services:
                 devices[address].add_service(service)
+
+            properties_map = {
+                service.protocol: service for service in devices[address].services
+            }
+
+            for device_service in devices[address].services:
+                # Apply service_info after adding all services in case a merge happens.
+                # We know services are of type MutableService here.
+                await self._service_infos[device_service.protocol](
+                    cast(MutableService, device_service), device_info, properties_map
+                )
 
         return devices
 

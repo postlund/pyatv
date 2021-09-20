@@ -6,17 +6,23 @@ import logging
 from random import randint
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.conf import AppleTV
-from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
-from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_model
+from pyatv.const import (
+    DeviceModel,
+    FeatureName,
+    FeatureState,
+    InputAction,
+    PairingRequirement,
+    Protocol,
+)
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
     Apps,
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -24,7 +30,6 @@ from pyatv.interface import (
     PairingHandler,
     Power,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.companion.connection import (
     CompanionConnection,
@@ -33,7 +38,9 @@ from pyatv.protocols.companion.connection import (
 )
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.protocols.companion.protocol import CompanionProtocol
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +97,7 @@ class HidCommand(Enum):
 class CompanionAPI(CompanionConnectionListener):
     """Implementation of Companion API."""
 
-    def __init__(self, config: AppleTV, loop: asyncio.AbstractEventLoop):
+    def __init__(self, config: BaseConfig, loop: asyncio.AbstractEventLoop):
         """Initialize a new CompanionAPI instance."""
         self.config = config
         self.loop = loop
@@ -184,7 +191,7 @@ class CompanionAPI(CompanionConnectionListener):
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: conf.CompanionService) -> None:
+    def __init__(self, service: BaseService) -> None:
         """Initialize a new CompanionFeatures instance."""
         super().__init__()
         self.service = service
@@ -322,9 +329,11 @@ def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new Companion service."""
-    service = conf.CompanionService(
+    service = MutableService(
+        None,
+        Protocol.Companion,
         mdns_service.port,
-        properties=mdns_service.properties,
+        mdns_service.properties,
     )
     return mdns_service.name, service
 
@@ -344,9 +353,18 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information."""
+    service.pairing = PairingRequirement.Mandatory
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -360,7 +378,7 @@ def setup(
 
     interfaces = {
         Apps: CompanionApps(api),
-        Features: CompanionFeatures(cast(conf.CompanionService, service)),
+        Features: CompanionFeatures(service),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api),
@@ -386,7 +404,7 @@ def setup(
 
 
 def pair(
-    config: AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

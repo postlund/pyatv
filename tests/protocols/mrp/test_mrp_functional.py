@@ -8,7 +8,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AirPlayService, AppleTV, MrpService
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -51,16 +51,18 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().setUpAsync()
         self.conf = AppleTV(IPv4Address("127.0.0.1"), "Test device")
         self.conf.add_service(
-            MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
-        )
-        self.conf.add_service(
-            AirPlayService(
-                "airplay_id",
-                self.server.port,
-                DEVICE_CREDENTIALS,
-                properties={"features": "0x1"},  # AirPlayVideoV1 supported
+            ManualService(
+                "mrp_id", Protocol.MRP, self.fake_atv.get_port(Protocol.MRP), {}
             )
         )
+        airplay_service = ManualService(
+            "airplay_id",
+            Protocol.AirPlay,
+            self.server.port,
+            properties={"features": "0x1"},  # AirPlayVideoV1 supported
+        )
+        airplay_service.credentials = DEVICE_CREDENTIALS
+        self.conf.add_service(airplay_service)
         self.atv = await self.get_connected_device()
 
     def tearDown(self):

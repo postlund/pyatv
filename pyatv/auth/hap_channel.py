@@ -7,8 +7,8 @@ from typing import Callable, Optional, Tuple, cast
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import PairVerifyProcedure
 from pyatv.auth.hap_session import HAPSession
-from pyatv.core import StateProducer
 from pyatv.support import log_binary
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 

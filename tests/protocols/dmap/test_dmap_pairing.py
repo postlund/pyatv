@@ -5,7 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pyatv import conf
+from pyatv.conf import AppleTV, ManualService
+from pyatv.const import Protocol
 from pyatv.protocols.dmap import pairing, parser, tag_definitions
 from pyatv.support import http
 
@@ -51,8 +52,8 @@ def mock_random():
 async def mock_pairing(event_loop):
     obj = MagicMock()
 
-    service = conf.DmapService(None, None)
-    config = conf.AppleTV("Apple TV", "127.0.0.1")
+    service = ManualService(None, Protocol.DMAP, 0, {})
+    config = AppleTV("Apple TV", "127.0.0.1")
     config.add_service(service)
     zeroconf = zeroconf_stub.stub(pairing)
 

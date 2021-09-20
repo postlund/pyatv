@@ -7,10 +7,10 @@ import netifaces
 import pytest
 
 import pyatv
-from pyatv import conf
 from pyatv.auth.hap_pairing import parse_credentials
-from pyatv.core.net import unused_port
+from pyatv.interface import BaseConfig
 from pyatv.support.http import create_session
+from pyatv.support.net import unused_port
 
 from tests import fake_udns
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 
 #: A type alias for the [multi,uni]cast_scan fixtures.
 # There isn't a way to type-hint optional arguments, so instead we leave it unspecified.
-Scanner = typing.Callable[..., typing.Awaitable[typing.List[conf.AppleTV]]]
+Scanner = typing.Callable[..., typing.Awaitable[typing.List[BaseConfig]]]
 
 
 def pytest_configure(config):
