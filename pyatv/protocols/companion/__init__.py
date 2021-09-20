@@ -8,7 +8,14 @@ from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.const import DeviceModel, FeatureName, FeatureState, InputAction, Protocol
+from pyatv.const import (
+    DeviceModel,
+    FeatureName,
+    FeatureState,
+    InputAction,
+    PairingRequirement,
+    Protocol,
+)
 from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
@@ -352,6 +359,7 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
+    service.pairing = PairingRequirement.Mandatory
 
 
 def setup(
