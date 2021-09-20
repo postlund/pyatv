@@ -32,6 +32,7 @@ from pyatv.protocols.airplay.pairing import (
 from pyatv.protocols.airplay.player import AirPlayPlayer
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
+    get_pairing_requirement,
     is_password_required,
     parse_features,
 )
@@ -161,27 +162,6 @@ async def service_info(
     """Update service with additional information."""
     service.requires_password = is_password_required(service)
 
-    # Legacy "flags" property
-    flags = int(
-        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
-    )
-    if flags & 0x200 == 0:
-        service.pairing = PairingRequirement.NotNeeded
-    else:
-        service.pairing = PairingRequirement.Mandatory
-
-    # Feature flag in AirPlay v2
-    feature_flags = parse_features(service.properties.get("features", "0x0"))
-    if (
-        feature_flags
-        & (
-            AirPlayFlags.SupportsLegacyPairing
-            | AirPlayFlags.SupportsCoreUtilsPairingAndEncryption
-        )
-        != 0
-    ):
-        service.pairing = PairingRequirement.Mandatory
-
     # Some devices require no pairing at all, so exclude them
     if devinfo.model in [
         DeviceModel.AirPortExpressGen2,
@@ -189,6 +169,8 @@ async def service_info(
         DeviceModel.HomePodMini,
     ]:
         service.pairing = PairingRequirement.NotNeeded
+    else:
+        service.pairing = get_pairing_requirement(service)
 
 
 def setup(  # pylint: disable=too-many-locals

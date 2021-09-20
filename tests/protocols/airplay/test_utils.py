@@ -1,10 +1,11 @@
 """Unit tests for pyatv.protocols.airplay.features."""
 import pytest
 
-from pyatv.const import Protocol
+from pyatv.const import PairingRequirement, Protocol
 from pyatv.core import MutableService
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
+    get_pairing_requirement,
     is_password_required,
     parse_features,
 )
@@ -59,3 +60,26 @@ def test_bad_input(value):
 def test_is_password_required(properties, requires_password):
     service = MutableService("id", Protocol.RAOP, 0, properties)
     assert is_password_required(service) == requires_password
+
+
+@pytest.mark.parametrize(
+    "props,expected_req",
+    [
+        ({"sf": "0x1"}, PairingRequirement.NotNeeded),
+        ({"sf": "0x200"}, PairingRequirement.Mandatory),
+        ({"flags": "0x1"}, PairingRequirement.NotNeeded),
+        ({"flags": "0x200"}, PairingRequirement.Mandatory),
+        ({"features": "0x1"}, PairingRequirement.NotNeeded),
+        (
+            {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
+            PairingRequirement.Mandatory,
+        ),
+        (
+            {"features": "0x00000000,0x10000"},
+            PairingRequirement.Mandatory,
+        ),
+    ],
+)
+async def test_get_pairing_requirement(props, expected_req):
+    service = MutableService("id", Protocol.AirPlay, 0, props)
+    assert get_pairing_requirement(service) == expected_req

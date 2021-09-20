@@ -1,10 +1,20 @@
 """Manage announced AirPlay features."""
 from enum import IntFlag
 import re
+from typing import Mapping
 
+from pyatv.const import PairingRequirement
 from pyatv.interface import BaseService
 
 # pylint: disable=invalid-name
+
+PASSWORD_BIT = 0x80
+LEGACY_PAIRING_BIT = 0x200
+
+
+def _get_flags(properties: Mapping[str, str]) -> int:
+    # Flags are either present via "sf" or "flags"
+    return int(properties.get("sf", properties.get("flags", "0x0")), 16)
 
 
 class AirPlayFlags(IntFlag):
@@ -84,11 +94,32 @@ def is_password_required(service: BaseService) -> bool:
     if service.properties.get("pw", "false").lower() == "true":
         return True
 
-    # "sf" and "flags" (treated the same)
-    flags = int(
-        service.properties.get("sf", service.properties.get("flags", "0x0")), 16
-    )
-    if (flags & 0x80) != 0:
+    # Legacy "flags" property
+    if _get_flags(service.properties) & PASSWORD_BIT:
         return True
 
     return False
+
+
+def get_pairing_requirement(service: BaseService) -> PairingRequirement:
+    """Return pairing requirement for service.
+
+    Pairing requirement is Mandatory if:
+    - Bit 0x200 is set in sf (AirPlay v1)/flags (AirPlay v2)
+    - SupportsLegacyPairing or SupportsCoreUtilsPairingAndEncryption set in features
+
+    Other cases are optimistically treated as NotNeeded.
+    """
+    # Legacy "flags" property
+    if _get_flags(service.properties) & LEGACY_PAIRING_BIT:
+        return PairingRequirement.Mandatory
+
+    # Feature flag in AirPlay v2
+    feature_flags = parse_features(service.properties.get("features", "0x0"))
+    if feature_flags & (
+        AirPlayFlags.SupportsLegacyPairing
+        | AirPlayFlags.SupportsCoreUtilsPairingAndEncryption
+    ):
+        return PairingRequirement.Mandatory
+
+    return PairingRequirement.NotNeeded
