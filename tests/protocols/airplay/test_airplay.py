@@ -80,18 +80,10 @@ async def test_service_info_password(airplay_props, mrp_props, requires_password
 @pytest.mark.parametrize(
     "airplay_props,devinfo,pairing_req",
     [
-        ({"sf": "0x1"}, {}, PairingRequirement.NotNeeded),
         ({"sf": "0x200"}, {}, PairingRequirement.Mandatory),
-        ({"flags": "0x1"}, {}, PairingRequirement.NotNeeded),
         ({"flags": "0x200"}, {}, PairingRequirement.Mandatory),
-        ({"features": "0x1"}, {}, PairingRequirement.NotNeeded),
         (
             {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
-            {},
-            PairingRequirement.Mandatory,
-        ),
-        (
-            {"features": "0x00000000,0x10000"},
             {},
             PairingRequirement.Mandatory,
         ),
