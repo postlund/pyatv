@@ -4,9 +4,10 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel, Protocol
+from pyatv.const import DeviceModel, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
+from pyatv.protocols.airplay.utils import AirPlayFlags
 from pyatv.protocols.raop import device_info, scan, service_info
 
 RAOP_SERVICE = "_raop._tcp.local"
@@ -102,3 +103,47 @@ async def test_service_info_password(raop_props, mrp_props, requires_password):
 
     assert raop_service.requires_password == requires_password
     assert not mrp_service.requires_password
+
+
+@pytest.mark.parametrize(
+    "raop_props,devinfo,pairing_req",
+    [
+        ({"sf": "0x200"}, {}, PairingRequirement.Mandatory),
+        ({"flags": "0x200"}, {}, PairingRequirement.Mandatory),
+        (
+            {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
+            {},
+            PairingRequirement.Mandatory,
+        ),
+        # Special cases for devices only requiring transient pairing, e.g.
+        # HomePod and AirPort Express
+        # AirPort Express gen 1 does not support AirPlay 2 => assume checks above
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.AirPortExpressGen2},
+            PairingRequirement.NotNeeded,
+        ),
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.HomePod},
+            PairingRequirement.NotNeeded,
+        ),
+        (
+            {"flags": "0x200"},
+            {DeviceInfo.MODEL: DeviceModel.HomePodMini},
+            PairingRequirement.NotNeeded,
+        ),
+    ],
+)
+async def test_service_info_pairing(raop_props, devinfo, pairing_req):
+    raop_props = MutableService("id", Protocol.AirPlay, 0, raop_props)
+
+    assert raop_props.pairing == PairingRequirement.Unsupported
+
+    await service_info(
+        raop_props,
+        DeviceInfo(devinfo),
+        {Protocol.RAOP: raop_props},
+    )
+
+    assert raop_props.pairing == pairing_req

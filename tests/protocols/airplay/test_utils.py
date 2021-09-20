@@ -67,6 +67,8 @@ def test_is_password_required(properties, requires_password):
     [
         ({"sf": "0x1"}, PairingRequirement.NotNeeded),
         ({"sf": "0x200"}, PairingRequirement.Mandatory),
+        ({"ft": "0x1"}, PairingRequirement.NotNeeded),
+        ({"ft": "0x200"}, PairingRequirement.Mandatory),
         ({"flags": "0x1"}, PairingRequirement.NotNeeded),
         ({"flags": "0x200"}, PairingRequirement.Mandatory),
         ({"features": "0x1"}, PairingRequirement.NotNeeded),

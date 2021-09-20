@@ -26,12 +26,9 @@ from pyatv.interface import (
     RemoteControl,
     Stream,
 )
+from pyatv.protocols.airplay import service_info as airplay_service_info
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
-from pyatv.protocols.airplay.utils import (
-    AirPlayFlags,
-    is_password_required,
-    parse_features,
-)
+from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
 from pyatv.protocols.raop.audio_source import AudioSource, open_source
 from pyatv.protocols.raop.raop import (
     PlaybackInfo,
@@ -419,7 +416,8 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
-    service.requires_password = is_password_required(service)
+    # Same behavior as for AirPlay expected, so re-using that here
+    await airplay_service_info(service, devinfo, services)
 
 
 def setup(
