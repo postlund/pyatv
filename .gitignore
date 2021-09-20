@@ -97,3 +97,6 @@ artwork.png
 .pytest_cache
 .mypy_cache
 coverage.xml
+
+# Temporary stuff can be placed here (logs, credentials, etc.)
+work/

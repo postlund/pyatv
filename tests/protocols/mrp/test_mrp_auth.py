@@ -6,7 +6,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AppleTV, MrpService
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
 from pyatv.protocols.mrp.server_auth import (
     CLIENT_CREDENTIALS,
@@ -21,8 +21,8 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
     def setUp(self):
         AioHTTPTestCase.setUp(self)
 
-        self.service = MrpService(
-            CLIENT_IDENTIFIER, self.fake_atv.get_port(Protocol.MRP)
+        self.service = ManualService(
+            CLIENT_IDENTIFIER, Protocol.MRP, self.fake_atv.get_port(Protocol.MRP), {}
         )
         self.conf = AppleTV("127.0.0.1", "Apple TV")
         self.conf.add_service(self.service)

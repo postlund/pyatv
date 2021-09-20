@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import google.protobuf.descriptor
+import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
@@ -12,16 +13,38 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
+class VolumeCapabilities(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    # This is really a bitmap but protobuf has no type for that, so lets just add a "Both"
+    # option since only two values exist anyway
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
+    class _Enum:
+        V = typing.NewType('V', builtins.int)
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.V], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Relative = VolumeCapabilities.Enum.V(1)
+        Absolute = VolumeCapabilities.Enum.V(2)
+        Both = VolumeCapabilities.Enum.V(3)
+
+    Relative = VolumeCapabilities.Enum.V(1)
+    Absolute = VolumeCapabilities.Enum.V(2)
+    Both = VolumeCapabilities.Enum.V(3)
+
+    def __init__(self,
+        ) -> None: ...
+global___VolumeCapabilities = VolumeCapabilities
+
 class VolumeControlAvailabilityMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     VOLUMECONTROLAVAILABLE_FIELD_NUMBER: builtins.int
     VOLUMECAPABILITIES_FIELD_NUMBER: builtins.int
     volumeControlAvailable: builtins.bool = ...
-    volumeCapabilities: builtins.int = ...
+    volumeCapabilities: global___VolumeCapabilities.Enum.V = ...
     def __init__(self,
         *,
         volumeControlAvailable : typing.Optional[builtins.bool] = ...,
-        volumeCapabilities : typing.Optional[builtins.int] = ...,
+        volumeCapabilities : typing.Optional[global___VolumeCapabilities.Enum.V] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal[u"volumeCapabilities",b"volumeCapabilities",u"volumeControlAvailable",b"volumeControlAvailable"]) -> None: ...

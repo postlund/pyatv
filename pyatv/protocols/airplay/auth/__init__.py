@@ -15,7 +15,6 @@ from pyatv.auth.hap_pairing import (
 from pyatv.auth.hap_session import HAPSession
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.interface import BaseService
-from pyatv.protocols.airplay import features as ft
 from pyatv.protocols.airplay.auth.hap import (
     AirPlayHapPairSetupProcedure,
     AirPlayHapPairVerifyProcedure,
@@ -28,6 +27,7 @@ from pyatv.protocols.airplay.auth.legacy import (
     AirPlayLegacyPairVerifyProcedure,
 )
 from pyatv.protocols.airplay.srp import LegacySRPAuthHandler, new_credentials
+from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
 from pyatv.support.http import HttpConnection
 
 _LOGGER = logging.getLogger(__name__)
@@ -120,10 +120,10 @@ def extract_credentials(service: BaseService) -> HapCredentials:
     if service.credentials is not None:
         return parse_credentials(service.credentials)
 
-    features = ft.parse(service.properties.get("features", "0x0"))
+    flags = parse_features(service.properties.get("features", "0x0"))
     if (
-        ft.AirPlayFeatures.SupportsSystemPairing in features
-        or ft.AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features
+        AirPlayFlags.SupportsSystemPairing in flags
+        or AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in flags
     ):
         return TRANSIENT_CREDENTIALS
 

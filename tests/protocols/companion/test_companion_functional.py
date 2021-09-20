@@ -7,7 +7,7 @@ import pytest
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AppleTV, CompanionService
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
 from pyatv.interface import App, FeatureName, FeatureState
 
@@ -25,7 +25,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_connect_only_companion(event_loop):
-    service = CompanionService(port=0)  # connect never happens
+    service = ManualService(None, Protocol.Companion, 0, {})  # connect never happens
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)
 
@@ -98,4 +98,14 @@ async def test_session_start(companion_client, companion_state):
 )
 async def test_remote_control_buttons(companion_client, companion_state, button):
     await getattr(companion_client.remote_control, button)()
-    await until(lambda: companion_state.latest_button == button)
+    assert companion_state.latest_button == button
+
+
+async def test_audio_volume_up(companion_client, companion_state):
+    await companion_client.audio.volume_up()
+    assert companion_state.latest_button == "volume_up"
+
+
+async def test_audio_volume_down(companion_client, companion_state):
+    await companion_client.audio.volume_down()
+    assert companion_state.latest_button == "volume_down"

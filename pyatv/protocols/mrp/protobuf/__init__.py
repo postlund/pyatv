@@ -54,6 +54,7 @@ from . import UpdateContentItemMessage_pb2
 from . import UpdateEndPointsMessage_pb2
 from . import UpdateOutputDeviceMessage_pb2
 from . import VolumeControlAvailabilityMessage_pb2
+from . import VolumeControlCapabilitiesDidChangeMessage_pb2
 from . import VolumeDidChangeMessage_pb2
 from . import WakeDeviceMessage_pb2
 
@@ -94,6 +95,7 @@ from .GetVolumeMessage_pb2 import GetVolumeMessage
 from .GetVolumeResultMessage_pb2 import GetVolumeResultMessage
 from .KeyboardMessage_pb2 import AutocapitalizationType
 from .KeyboardMessage_pb2 import KeyboardMessage
+from .KeyboardMessage_pb2 import KeyboardState
 from .KeyboardMessage_pb2 import KeyboardType
 from .KeyboardMessage_pb2 import ReturnKeyType
 from .KeyboardMessage_pb2 import TextEditingAttributes
@@ -124,7 +126,11 @@ from .RemovePlayerMessage_pb2 import RemovePlayerMessage
 from .SendButtonEventMessage_pb2 import SendButtonEventMessage
 from .SendCommandMessage_pb2 import SendCommandMessage
 from .SendCommandResultMessage_pb2 import HandlerReturnStatus
+from .SendCommandResultMessage_pb2 import SendCommandResult
 from .SendCommandResultMessage_pb2 import SendCommandResultMessage
+from .SendCommandResultMessage_pb2 import SendCommandResultStatus
+from .SendCommandResultMessage_pb2 import SendCommandResultType
+from .SendCommandResultMessage_pb2 import SendCommandStatusCode
 from .SendCommandResultMessage_pb2 import SendError
 from .SendHIDEventMessage_pb2 import SendHIDEventMessage
 from .SendPackedVirtualTouchEventMessage_pb2 import SendPackedVirtualTouchEventMessage
@@ -160,8 +166,9 @@ from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceSourceInfo
 from .UpdateOutputDeviceMessage_pb2 import UpdateOutputDeviceMessage
 from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
+from .VolumeControlAvailabilityMessage_pb2 import VolumeCapabilities
 from .VolumeControlAvailabilityMessage_pb2 import VolumeControlAvailabilityMessage
-from .VolumeControlCapabilitiesDidChange_pb2 import VolumeControlCapabilitiesDidChangeMessage
+from .VolumeControlCapabilitiesDidChangeMessage_pb2 import VolumeControlCapabilitiesDidChangeMessage
 from .VolumeDidChangeMessage_pb2 import VolumeDidChangeMessage
 from .WakeDeviceMessage_pb2 import WakeDeviceMessage
 
@@ -216,6 +223,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.UPDATE_END_POINTS_MESSAGE: UpdateEndPointsMessage_pb2.updateEndPointsMessage,
     ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE: UpdateOutputDeviceMessage_pb2.updateOutputDeviceMessage,
     ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE: VolumeControlAvailabilityMessage_pb2.volumeControlAvailabilityMessage,
+    ProtocolMessage.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE: VolumeControlCapabilitiesDidChangeMessage_pb2.volumeControlCapabilitiesDidChangeMessage,
     ProtocolMessage.VOLUME_DID_CHANGE_MESSAGE: VolumeDidChangeMessage_pb2.volumeDidChangeMessage,
     ProtocolMessage.WAKE_DEVICE_MESSAGE: WakeDeviceMessage_pb2.wakeDeviceMessage,
 }
@@ -270,6 +278,7 @@ UPDATE_CONTENT_ITEM_MESSAGE = ProtocolMessage.UPDATE_CONTENT_ITEM_MESSAGE
 UPDATE_END_POINTS_MESSAGE = ProtocolMessage.UPDATE_END_POINTS_MESSAGE
 UPDATE_OUTPUT_DEVICE_MESSAGE = ProtocolMessage.UPDATE_OUTPUT_DEVICE_MESSAGE
 VOLUME_CONTROL_AVAILABILITY_MESSAGE = ProtocolMessage.VOLUME_CONTROL_AVAILABILITY_MESSAGE
+VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE = ProtocolMessage.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE
 VOLUME_DID_CHANGE_MESSAGE = ProtocolMessage.VOLUME_DID_CHANGE_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 

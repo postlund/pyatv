@@ -6,15 +6,15 @@ import logging
 import math
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
-from pyatv import conf, const, exceptions
+from pyatv import const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
-from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_model
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -24,11 +24,11 @@ from pyatv.interface import (
     Playing,
     PushUpdater,
     RemoteControl,
-    StateProducer,
     Stream,
 )
-from pyatv.protocols.airplay import features as ap_features
+from pyatv.protocols.airplay import service_info as airplay_service_info
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
+from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
 from pyatv.protocols.raop.audio_source import AudioSource, open_source
 from pyatv.protocols.raop.raop import (
     PlaybackInfo,
@@ -38,9 +38,11 @@ from pyatv.protocols.raop.raop import (
 )
 from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.rtsp import RtspSession
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -262,14 +264,22 @@ class RaopAudio(Audio):
         else:
             self.playback_manager.context.volume = remapped
 
+    async def volume_up(self) -> None:
+        """Increase volume by one step."""
+        await self.set_volume(min(self.volume + 5.0, 100.0))
+
+    async def volume_down(self) -> None:
+        """Decrease volume by one step."""
+        await self.set_volume(max(self.volume - 5.0, 0.0))
+
 
 class RaopStream(Stream):
     """Implementation of stream functionality."""
 
     def __init__(
         self,
-        config: conf.AppleTV,
-        service: conf.RaopService,
+        config: BaseConfig,
+        service: BaseService,
         listener: RaopListener,
         audio: RaopAudio,
         playback_manager: RaopPlaybackManager,
@@ -360,10 +370,11 @@ def raop_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new RAOP service."""
     _, name = mdns_service.name.split("@", maxsplit=1)
-    service = conf.RaopService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.RAOP,
         mdns_service.port,
-        properties=mdns_service.properties,
+        mdns_service.properties,
     )
     return name, service
 
@@ -399,9 +410,19 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information."""
+    # Same behavior as for AirPlay expected, so re-using that here
+    await airplay_service_info(service, devinfo, services)
+
+
 def setup(
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -429,8 +450,6 @@ def setup(
             """Trigger push update."""
             if push_updater.active:
                 asyncio.ensure_future(push_updater.state_updated(), loop=loop)
-
-    service = cast(conf.RaopService, service)
 
     raop_listener = RaopStateListener()
     raop_audio = RaopAudio(playback_manager)
@@ -485,7 +504,7 @@ def setup(
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
@@ -497,8 +516,8 @@ def pair(
         # TODO: Better handle cases like these (provide API)
         raise exceptions.NotSupportedError("pairing not required")
 
-    parsed = ap_features.parse(features)
-    if ap_features.AirPlayFeatures.SupportsLegacyPairing not in parsed:
+    flags = parse_features(features)
+    if AirPlayFlags.SupportsLegacyPairing not in flags:
         raise exceptions.NotSupportedError("legacy pairing not supported")
 
     return AirPlayPairingHandler(

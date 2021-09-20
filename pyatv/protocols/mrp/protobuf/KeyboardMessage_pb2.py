@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n2pyatv/protocols/mrp/protobuf/KeyboardMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"W\n\x16\x41utocapitalizationType\"=\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\t\n\x05Words\x10\x01\x12\r\n\tSentences\x10\x02\x12\x11\n\rAllCharacters\x10\x03\"\xe7\x01\n\x0cKeyboardType\"\xd6\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x11\n\rASCII_Capable\x10\x01\x12\x19\n\x15NumbersAndPunctuation\x10\x02\x12\x07\n\x03URL\x10\x03\x12\r\n\tNumberPad\x10\x04\x12\x0c\n\x08PhonePad\x10\x05\x12\x10\n\x0cNamePhonePad\x10\x06\x12\x10\n\x0c\x45mailAddress\x10\x07\x12\x0e\n\nDecimalPad\x10\x08\x12\x0b\n\x07Twitter\x10\t\x12\r\n\tWebSearch\x10\n\x12\x0c\n\x08\x41lphanet\x10\x0b\x12\x0f\n\x0bPasscodePad\x10\x0c\"\xa4\x01\n\rReturnKeyType\"\x92\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x06\n\x02Go\x10\x01\x12\n\n\x06Google\x10\x02\x12\x08\n\x04Join\x10\x03\x12\x08\n\x04Next\x10\x04\x12\t\n\x05Route\x10\x05\x12\n\n\x06Search\x10\x06\x12\x08\n\x04Send\x10\x07\x12\t\n\x05Yahoo\x10\x08\x12\x08\n\x04\x44one\x10\t\x12\x11\n\rEmergencyCall\x10\n\x12\x0c\n\x08\x43ontinue\x10\x0b\"\xf4\x02\n\x0fTextInputTraits\x12<\n\x16\x61utocapitalizationType\x18\x01 \x01(\x0e\x32\x1c.AutocapitalizationType.Enum\x12(\n\x0ckeyboardType\x18\x02 \x01(\x0e\x32\x12.KeyboardType.Enum\x12*\n\rreturnKeyType\x18\x03 \x01(\x0e\x32\x13.ReturnKeyType.Enum\x12\x16\n\x0e\x61utocorrection\x18\x04 \x01(\x08\x12\x15\n\rspellchecking\x18\x05 \x01(\x08\x12%\n\x1d\x65nablesReturnKeyAutomatically\x18\x06 \x01(\x08\x12\x17\n\x0fsecureTextEntry\x18\x07 \x01(\x08\x12\x1e\n\x16validTextRangeLocation\x18\x08 \x01(\x04\x12\x1c\n\x14validTextRangeLength\x18\t \x01(\x04\x12 \n\x18pINEntrySeparatorIndexes\x18\n \x03(\x04\"]\n\x15TextEditingAttributes\x12\r\n\x05title\x18\x01 \x01(\t\x12\x0e\n\x06prompt\x18\x02 \x01(\t\x12%\n\x0binputTraits\x18\x03 \x01(\x0b\x32\x10.TextInputTraits\"m\n\x0fKeyboardMessage\x12\r\n\x05state\x18\x01 \x01(\x05\x12*\n\nattributes\x18\x03 \x01(\x0b\x32\x16.TextEditingAttributes\x12\x1f\n\x17\x65ncryptedTextCyphertext\x18\x04 \x01(\x0c:;\n\x0fkeyboardMessage\x12\x10.ProtocolMessage\x18\x1c \x01(\x0b\x32\x10.KeyboardMessage'
+  serialized_pb=b'\n2pyatv/protocols/mrp/protobuf/KeyboardMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\x8a\x01\n\rKeyboardState\"y\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\x0e\n\nNotEditing\x10\x01\x12\x13\n\x0f\x44idBeginEditing\x10\x02\x12\x0b\n\x07\x45\x64iting\x10\x03\x12\x11\n\rTextDidChange\x10\x04\x12\x11\n\rDidEndEditing\x10\x05\x12\x0c\n\x08Response\x10\x06\"W\n\x16\x41utocapitalizationType\"=\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\t\n\x05Words\x10\x01\x12\r\n\tSentences\x10\x02\x12\x11\n\rAllCharacters\x10\x03\"\xe7\x01\n\x0cKeyboardType\"\xd6\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x11\n\rASCII_Capable\x10\x01\x12\x19\n\x15NumbersAndPunctuation\x10\x02\x12\x07\n\x03URL\x10\x03\x12\r\n\tNumberPad\x10\x04\x12\x0c\n\x08PhonePad\x10\x05\x12\x10\n\x0cNamePhonePad\x10\x06\x12\x10\n\x0c\x45mailAddress\x10\x07\x12\x0e\n\nDecimalPad\x10\x08\x12\x0b\n\x07Twitter\x10\t\x12\r\n\tWebSearch\x10\n\x12\x0c\n\x08\x41lphanet\x10\x0b\x12\x0f\n\x0bPasscodePad\x10\x0c\"\xa4\x01\n\rReturnKeyType\"\x92\x01\n\x04\x45num\x12\x0b\n\x07\x44\x65\x66\x61ult\x10\x00\x12\x06\n\x02Go\x10\x01\x12\n\n\x06Google\x10\x02\x12\x08\n\x04Join\x10\x03\x12\x08\n\x04Next\x10\x04\x12\t\n\x05Route\x10\x05\x12\n\n\x06Search\x10\x06\x12\x08\n\x04Send\x10\x07\x12\t\n\x05Yahoo\x10\x08\x12\x08\n\x04\x44one\x10\t\x12\x11\n\rEmergencyCall\x10\n\x12\x0c\n\x08\x43ontinue\x10\x0b\"\xf4\x02\n\x0fTextInputTraits\x12<\n\x16\x61utocapitalizationType\x18\x01 \x01(\x0e\x32\x1c.AutocapitalizationType.Enum\x12(\n\x0ckeyboardType\x18\x02 \x01(\x0e\x32\x12.KeyboardType.Enum\x12*\n\rreturnKeyType\x18\x03 \x01(\x0e\x32\x13.ReturnKeyType.Enum\x12\x16\n\x0e\x61utocorrection\x18\x04 \x01(\x08\x12\x15\n\rspellchecking\x18\x05 \x01(\x08\x12%\n\x1d\x65nablesReturnKeyAutomatically\x18\x06 \x01(\x08\x12\x17\n\x0fsecureTextEntry\x18\x07 \x01(\x08\x12\x1e\n\x16validTextRangeLocation\x18\x08 \x01(\x04\x12\x1c\n\x14validTextRangeLength\x18\t \x01(\x04\x12 \n\x18pINEntrySeparatorIndexes\x18\n \x03(\x04\"]\n\x15TextEditingAttributes\x12\r\n\x05title\x18\x01 \x01(\t\x12\x0e\n\x06prompt\x18\x02 \x01(\t\x12%\n\x0binputTraits\x18\x03 \x01(\x0b\x32\x10.TextInputTraits\"\x82\x01\n\x0fKeyboardMessage\x12\"\n\x05state\x18\x01 \x01(\x0e\x32\x13.KeyboardState.Enum\x12*\n\nattributes\x18\x03 \x01(\x0b\x32\x16.TextEditingAttributes\x12\x1f\n\x17\x65ncryptedTextCyphertext\x18\x04 \x01(\x0c:;\n\x0fkeyboardMessage\x12\x10.ProtocolMessage\x18\x1c \x01(\x0b\x32\x10.KeyboardMessage'
   ,
   dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
 
@@ -33,6 +33,56 @@ keyboardMessage = _descriptor.FieldDescriptor(
   message_type=None, enum_type=None, containing_type=None,
   is_extension=True, extension_scope=None,
   serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+
+_KEYBOARDSTATE_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='KeyboardState.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Unknown', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='NotEditing', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='DidBeginEditing', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Editing', index=3, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='TextDidChange', index=4, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='DidEndEditing', index=5, number=5,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Response', index=6, number=6,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=124,
+  serialized_end=245,
+)
+_sym_db.RegisterEnumDescriptor(_KEYBOARDSTATE_ENUM)
 
 _AUTOCAPITALIZATIONTYPE_ENUM = _descriptor.EnumDescriptor(
   name='Enum',
@@ -64,8 +114,8 @@ _AUTOCAPITALIZATIONTYPE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=132,
-  serialized_end=193,
+  serialized_start=273,
+  serialized_end=334,
 )
 _sym_db.RegisterEnumDescriptor(_AUTOCAPITALIZATIONTYPE_ENUM)
 
@@ -144,8 +194,8 @@ _KEYBOARDTYPE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=213,
-  serialized_end=427,
+  serialized_start=354,
+  serialized_end=568,
 )
 _sym_db.RegisterEnumDescriptor(_KEYBOARDTYPE_ENUM)
 
@@ -219,10 +269,36 @@ _RETURNKEYTYPE_ENUM = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=448,
-  serialized_end=594,
+  serialized_start=589,
+  serialized_end=735,
 )
 _sym_db.RegisterEnumDescriptor(_RETURNKEYTYPE_ENUM)
+
+
+_KEYBOARDSTATE = _descriptor.Descriptor(
+  name='KeyboardState',
+  full_name='KeyboardState',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _KEYBOARDSTATE_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=107,
+  serialized_end=245,
+)
 
 
 _AUTOCAPITALIZATIONTYPE = _descriptor.Descriptor(
@@ -246,8 +322,8 @@ _AUTOCAPITALIZATIONTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=106,
-  serialized_end=193,
+  serialized_start=247,
+  serialized_end=334,
 )
 
 
@@ -272,8 +348,8 @@ _KEYBOARDTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=196,
-  serialized_end=427,
+  serialized_start=337,
+  serialized_end=568,
 )
 
 
@@ -298,8 +374,8 @@ _RETURNKEYTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=430,
-  serialized_end=594,
+  serialized_start=571,
+  serialized_end=735,
 )
 
 
@@ -393,8 +469,8 @@ _TEXTINPUTTRAITS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=597,
-  serialized_end=969,
+  serialized_start=738,
+  serialized_end=1110,
 )
 
 
@@ -439,8 +515,8 @@ _TEXTEDITINGATTRIBUTES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=971,
-  serialized_end=1064,
+  serialized_start=1112,
+  serialized_end=1205,
 )
 
 
@@ -454,7 +530,7 @@ _KEYBOARDMESSAGE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='state', full_name='KeyboardMessage.state', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -485,10 +561,11 @@ _KEYBOARDMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1066,
-  serialized_end=1175,
+  serialized_start=1208,
+  serialized_end=1338,
 )
 
+_KEYBOARDSTATE_ENUM.containing_type = _KEYBOARDSTATE
 _AUTOCAPITALIZATIONTYPE_ENUM.containing_type = _AUTOCAPITALIZATIONTYPE
 _KEYBOARDTYPE_ENUM.containing_type = _KEYBOARDTYPE
 _RETURNKEYTYPE_ENUM.containing_type = _RETURNKEYTYPE
@@ -496,7 +573,9 @@ _TEXTINPUTTRAITS.fields_by_name['autocapitalizationType'].enum_type = _AUTOCAPIT
 _TEXTINPUTTRAITS.fields_by_name['keyboardType'].enum_type = _KEYBOARDTYPE_ENUM
 _TEXTINPUTTRAITS.fields_by_name['returnKeyType'].enum_type = _RETURNKEYTYPE_ENUM
 _TEXTEDITINGATTRIBUTES.fields_by_name['inputTraits'].message_type = _TEXTINPUTTRAITS
+_KEYBOARDMESSAGE.fields_by_name['state'].enum_type = _KEYBOARDSTATE_ENUM
 _KEYBOARDMESSAGE.fields_by_name['attributes'].message_type = _TEXTEDITINGATTRIBUTES
+DESCRIPTOR.message_types_by_name['KeyboardState'] = _KEYBOARDSTATE
 DESCRIPTOR.message_types_by_name['AutocapitalizationType'] = _AUTOCAPITALIZATIONTYPE
 DESCRIPTOR.message_types_by_name['KeyboardType'] = _KEYBOARDTYPE
 DESCRIPTOR.message_types_by_name['ReturnKeyType'] = _RETURNKEYTYPE
@@ -505,6 +584,13 @@ DESCRIPTOR.message_types_by_name['TextEditingAttributes'] = _TEXTEDITINGATTRIBUT
 DESCRIPTOR.message_types_by_name['KeyboardMessage'] = _KEYBOARDMESSAGE
 DESCRIPTOR.extensions_by_name['keyboardMessage'] = keyboardMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+KeyboardState = _reflection.GeneratedProtocolMessageType('KeyboardState', (_message.Message,), {
+  'DESCRIPTOR' : _KEYBOARDSTATE,
+  '__module__' : 'pyatv.protocols.mrp.protobuf.KeyboardMessage_pb2'
+  # @@protoc_insertion_point(class_scope:KeyboardState)
+  })
+_sym_db.RegisterMessage(KeyboardState)
 
 AutocapitalizationType = _reflection.GeneratedProtocolMessageType('AutocapitalizationType', (_message.Message,), {
   'DESCRIPTOR' : _AUTOCAPITALIZATIONTYPE,

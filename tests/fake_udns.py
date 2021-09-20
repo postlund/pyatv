@@ -58,7 +58,7 @@ def airplay_service(
         name=atv_name,
         addresses=addresses,
         port=port,
-        properties={"deviceid": deviceid.encode("utf-8")},
+        properties={"deviceid": deviceid.encode("utf-8"), "features": b"0x1"},
         model=model,
     )
     return ("_airplay._tcp.local", service)

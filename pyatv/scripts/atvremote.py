@@ -10,14 +10,7 @@ import sys
 import traceback
 
 from pyatv import connect, const, exceptions, interface, pair, scan
-from pyatv.conf import (
-    AirPlayService,
-    AppleTV,
-    CompanionService,
-    DmapService,
-    MrpService,
-    RaopService,
-)
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
@@ -551,29 +544,10 @@ async def _autodiscover_device(args, loop):
 
 def _manual_device(args):
     config = AppleTV(IPv4Address(args.address), args.name)
-    if args.dmap_credentials or args.protocol == const.Protocol.DMAP:
-        config.add_service(DmapService(args.id, args.dmap_credentials, port=args.port))
-    if args.mrp_credentials or args.protocol == const.Protocol.MRP:
-        config.add_service(
-            MrpService(args.id, args.port, credentials=args.mrp_credentials)
-        )
-    if args.airplay_credentials or args.protocol == const.Protocol.AirPlay:
-        config.add_service(
-            AirPlayService(args.id, credentials=args.airplay_credentials)
-        )
-    if args.companion_credentials or args.protocol == const.Protocol.Companion:
-        config.add_service(
-            CompanionService(args.port, credentials=args.companion_credentials)
-        )
-    if args.raop_credentials or args.protocol == const.Protocol.RAOP:
-        config.add_service(
-            RaopService(
-                args.id,
-                args.port,
-                credentials=args.raop_credentials,
-                password=args.raop_password,
-            )
-        )
+    service = ManualService(args.id, args.protocol, args.port, {})
+    service.credentials = getattr(args, f"{args.protocol.name.lower()}_credentials")
+    service.password = args.raop_password
+    config.add_service(service)
     return config
 
 
@@ -601,6 +575,8 @@ def _extract_command_with_args(cmd):
             return [RepeatState(args[0])]
         if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
             return [InputAction(args[0])]
+        if cmd == "set_volume":
+            return [float(args[0])]
         return args
 
     equal_sign = cmd.find("=")
@@ -654,6 +630,11 @@ async def _handle_device_command(args, cmd, atv, loop):
             DeviceCommands(atv, loop, args), cmd, False, *cmd_args
         )
 
+    # NB: Needs to be above RemoteControl for now as volume_up/down exists in both
+    # but implementations in Audio shall be called
+    if cmd in audio:
+        return await _exec_command(atv.audio, cmd, True, *cmd_args)
+
     if cmd in ctrl:
         return await _exec_command(atv.remote_control, cmd, True, *cmd_args)
 
@@ -675,9 +656,6 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
-
-    if cmd in audio:
-        return await _exec_command(atv.audio, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1

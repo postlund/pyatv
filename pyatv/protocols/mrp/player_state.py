@@ -202,7 +202,6 @@ class PlayerStateManager:
             pb.REMOVE_CLIENT_MESSAGE: self._handle_remove_client,
             pb.REMOVE_PLAYER_MESSAGE: self._handle_remove_player,
             pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: self._handle_set_default_supported_commands,  # pylint: disable=line-too-long # noqa
-            pb.VOLUME_CONTROL_AVAILABILITY_MESSAGE: self._volume_control_availability,
         }
         for message, handler in listeners.items():
             self.protocol.add_listener(handler, message)
@@ -315,14 +314,6 @@ class PlayerStateManager:
         client.update(update_client.client)
 
         await self._state_updated(client=client)
-
-    async def _volume_control_availability(self, message, _):
-        self.volume_controls_available = message.inner().volumeControlAvailable
-        _LOGGER.debug(
-            "Volume control availability is now %s", self.volume_controls_available
-        )
-
-        await self._state_updated()
 
     async def _state_updated(self, client=None, player=None):
         is_active_client = client == self.client

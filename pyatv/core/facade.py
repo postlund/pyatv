@@ -16,10 +16,11 @@ import logging
 from queue import Queue
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
-from pyatv import conf, const, exceptions, interface
+from pyatv import const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import SetupData
 from pyatv.core.relayer import Relayer
+from pyatv.support import deprecated
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
 
@@ -90,10 +91,12 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Press key menu."""
         return await self.relay("menu")(action=action)
 
+    @deprecated
     async def volume_up(self) -> None:
         """Press key volume up."""
         return await self.relay("volume_up")()
 
+    @deprecated
     async def volume_down(self) -> None:
         """Press key volume down."""
         return await self.relay("volume_down")()
@@ -110,10 +113,12 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Go to main menu (long press menu)."""
         return await self.relay("top_menu")()
 
+    @deprecated
     async def suspend(self) -> None:
         """Suspend the device."""
         return await self.relay("suspend")()
 
+    @deprecated
     async def wakeup(self) -> None:
         """Wake up the device."""
         return await self.relay("wakeup")()
@@ -282,9 +287,10 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
 class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public-methods
     """Facade implementation for stream functionality."""
 
-    def __init__(self):
+    def __init__(self, features: interface.Features):
         """Initialize a new FacadeStream instance."""
         super().__init__(interface.Stream, DEFAULT_PRIORITIES)
+        self._features = features
 
     def close(self) -> None:
         """Close connection and release allocated resources."""
@@ -292,6 +298,9 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
 
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
+        if not self._features.in_state(FeatureState.Available, FeatureName.PlayUrl):
+            raise exceptions.NotSupportedError("play_url is not supported")
+
         await self.relay("play_url")(url, **kwargs)
 
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
@@ -325,6 +334,14 @@ class FacadeAudio(Relayer, interface.Audio):
         """Initialize a new FacadeAudio instance."""
         super().__init__(interface.Audio, DEFAULT_PRIORITIES)
 
+    async def volume_up(self) -> None:
+        """Press key volume up."""
+        return await self.relay("volume_up")()
+
+    async def volume_down(self) -> None:
+        """Press key volume down."""
+        return await self.relay("volume_down")()
+
     @property
     def volume(self) -> float:
         """Return current volume level."""
@@ -344,7 +361,9 @@ class FacadeAudio(Relayer, interface.Audio):
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
-    def __init__(self, config: conf.AppleTV, session_manager: ClientSessionManager):
+    def __init__(
+        self, config: interface.BaseConfig, session_manager: ClientSessionManager
+    ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
         self._config = config
@@ -363,7 +382,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Metadata: FacadeMetadata(),
             interface.Power: FacadePower(),
             interface.PushUpdater: self._push_updates,
-            interface.Stream: FacadeStream(),
+            interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
             interface.Audio: FacadeAudio(),
         }

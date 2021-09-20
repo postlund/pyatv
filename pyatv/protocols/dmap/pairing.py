@@ -11,12 +11,11 @@ from aiohttp import web
 import netifaces
 from zeroconf import Zeroconf
 
-from pyatv import conf
 from pyatv.core import mdns
-from pyatv.core.net import unused_port
-from pyatv.interface import BaseService, PairingHandler
+from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.dmap import tags
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +48,7 @@ class DmapPairingHandler(
 
     def __init__(
         self,
-        config: conf.AppleTV,
+        config: BaseConfig,
         service: BaseService,
         session_manager: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,

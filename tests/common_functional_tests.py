@@ -9,7 +9,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 import pyatv
 from pyatv import exceptions, interface
-from pyatv.conf import AirPlayService, AppleTV, CompanionService
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -79,10 +79,13 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await until(lambda: self.state.last_button_pressed == button)
         await until(lambda: self.state.last_button_action == action)
 
+    def supported_volume_controls(self):
+        return [FeatureName.VolumeUp, FeatureName.VolumeDown]
+
     @unittest_run_loop
     async def test_connect_missing_device_id(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
-        conf.add_service(CompanionService(1234))
+        conf.add_service(ManualService(None, Protocol.Companion, 1234, {}))
 
         with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect(conf, self.loop)
@@ -515,9 +518,10 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_features_play_url(self):
-        # TODO: The test always sets up AirPlay, so PlayUrl will always be available.
-        # In the future (after migrating to pytest fixtures), I will add a test where
-        # AirPlay is not available.
+        # TODO: As availability is based on zeroconf properties, this test just
+        # verifies that PlayUrl is available. It's hard to change zeroconf properties
+        # between test runs here, so better tests will be written when dedicated
+        # functional tests for AirPlay are written.
         self.assertFeatures(FeatureState.Available, FeatureName.PlayUrl)
 
     @unittest_run_loop
@@ -536,7 +540,7 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_volume_controls(self):
-        controls = [FeatureName.VolumeUp, FeatureName.VolumeDown]
+        controls = self.supported_volume_controls()
 
         self.assertFeatures(FeatureState.Unavailable, *controls)
 
@@ -551,3 +555,23 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.playing(title="dummy2")
 
         self.assertFeatures(FeatureState.Available, *controls)
+
+    # As DMAP is request based, volume control availability will not be automatically
+    # updated when changed, i.e. it needs to be requested. This is the reason for
+    # retrieving what is playing.
+    @unittest_run_loop
+    async def test_audio_volume_controls(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.metadata.playing()
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.VolumeUp, FeatureName.VolumeDown
+            )
+        )
+
+        await self.atv.audio.volume_up()
+        await until(lambda: self.state.last_button_pressed == "volumeup")
+
+        await self.atv.audio.volume_down()
+        await until(lambda: self.state.last_button_pressed == "volumedown")

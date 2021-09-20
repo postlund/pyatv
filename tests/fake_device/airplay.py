@@ -8,7 +8,7 @@ from typing import Optional
 
 from aiohttp import web
 
-from pyatv.core.net import unused_port
+from pyatv.support.net import unused_port
 
 from tests.utils import simple_get
 

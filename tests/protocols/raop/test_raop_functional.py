@@ -372,28 +372,32 @@ async def test_volume_features(raop_client):
     )
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
-async def test_volume_up_volume_down(raop_client):
+@pytest.mark.parametrize(
+    "raop_properties,iface", [({"et": "0"}, "remote_control"), ({"et": "0"}, "audio")]
+)
+async def test_volume_up_volume_down(raop_client, iface):
     # Only test on the client as other tests should confirm that it is set correctly
     # on the receiver
     await raop_client.audio.set_volume(95.0)
 
+    volume_interface = getattr(raop_client, iface)
+
     # Increase by 5% if volume_up is called
-    await raop_client.remote_control.volume_up()
+    await volume_interface.volume_up()
     assert math.isclose(raop_client.audio.volume, 100.0)
 
     # Stop at max level without any error
-    await raop_client.remote_control.volume_up()
+    await volume_interface.volume_up()
     assert math.isclose(raop_client.audio.volume, 100.0)
 
     await raop_client.audio.set_volume(5.0)
 
     # Decrease by 5% if volume_down is called
-    await raop_client.remote_control.volume_down()
+    await volume_interface.volume_down()
     assert math.isclose(raop_client.audio.volume, 0.0)
 
     # Stop at min level without any error
-    await raop_client.remote_control.volume_down()
+    await volume_interface.volume_down()
     assert math.isclose(raop_client.audio.volume, 0.0)
 
 

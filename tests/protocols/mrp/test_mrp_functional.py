@@ -8,7 +8,7 @@ from aiohttp.test_utils import unittest_run_loop
 
 import pyatv
 from pyatv import exceptions
-from pyatv.conf import AirPlayService, AppleTV, MrpService
+from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -25,7 +25,14 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from tests import common_functional_tests
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
-from tests.fake_device.mrp import APP_NAME, BUILD_NUMBER, OS_VERSION, PLAYER_IDENTIFIER
+from tests.fake_device.mrp import (
+    APP_NAME,
+    BUILD_NUMBER,
+    DEVICE_UID,
+    OS_VERSION,
+    PLAYER_IDENTIFIER,
+    VOLUME_STEP,
+)
 from tests.utils import faketime, stub_sleep, until
 
 _LOGGER = logging.getLogger(__name__)
@@ -44,11 +51,18 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().setUpAsync()
         self.conf = AppleTV(IPv4Address("127.0.0.1"), "Test device")
         self.conf.add_service(
-            MrpService("mrp_id", self.fake_atv.get_port(Protocol.MRP))
+            ManualService(
+                "mrp_id", Protocol.MRP, self.fake_atv.get_port(Protocol.MRP), {}
+            )
         )
-        self.conf.add_service(
-            AirPlayService("airplay_id", self.server.port, DEVICE_CREDENTIALS)
+        airplay_service = ManualService(
+            "airplay_id",
+            Protocol.AirPlay,
+            self.server.port,
+            properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
+        airplay_service.credentials = DEVICE_CREDENTIALS
+        self.conf.add_service(airplay_service)
         self.atv = await self.get_connected_device()
 
     def tearDown(self):
@@ -65,6 +79,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def get_connected_device(self):
         return await pyatv.connect(self.conf, loop=self.loop)
+
+    def supported_volume_controls(self):
+        return [
+            FeatureName.VolumeUp,
+            FeatureName.VolumeDown,
+            FeatureName.Volume,
+            FeatureName.SetVolume,
+        ]
 
     @unittest_run_loop
     async def test_button_up_actions(self):
@@ -489,3 +511,55 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.position, 10)
             self.assertEqual(playing.season_number, 12)
             self.assertEqual(playing.episode_number, 4)
+
+    @unittest_run_loop
+    async def test_volume_change(self):
+        self.usecase.change_volume_control(available=True)
+
+        assert math.isclose(self.atv.audio.volume, 0.0)
+
+        # Manually set a new volume level
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device
+        self.usecase.set_volume(0.3, DEVICE_UID)
+        await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
+
+    @unittest_run_loop
+    async def test_audio_volume_up_increases_volume(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.audio.set_volume(20.0)
+
+        await self.atv.audio.volume_up()
+        assert self.atv.audio.volume == round(20.0 + VOLUME_STEP * 100.0)
+
+        await self.atv.audio.volume_up()
+        assert self.atv.audio.volume == round(20.0 + 2 * VOLUME_STEP * 100.0)
+
+    @unittest_run_loop
+    async def test_audio_volume_down_decreases_volume(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.audio.set_volume(20.0)
+
+        await self.atv.audio.volume_down()
+        assert self.atv.audio.volume == round(20 - VOLUME_STEP * 100.0)
+
+        await self.atv.audio.volume_down()
+        assert self.atv.audio.volume == round(20 - 2 * VOLUME_STEP * 100.0)
+
+    @unittest_run_loop
+    async def test_audio_volume_up_above_max(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.audio.set_volume(100.0)
+
+        # Should not yield a timeout
+        await self.atv.audio.volume_up()
+
+    @unittest_run_loop
+    async def test_audio_volume_down_below_zero(self):
+        self.usecase.change_volume_control(available=True)
+        await self.atv.audio.set_volume(0.0)
+
+        # Should not yield a timeout
+        await self.atv.audio.volume_down()

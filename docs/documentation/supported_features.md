@@ -25,7 +25,7 @@ See this page as informational.
 
 Things change. Constantly. Here are a few things worth knowing about the protocols:
 
-* The DMAP protocol (suite) stems from iTunes and was used on all Apple TVs until tvOS 13, i.e. all versions of Apple TV 3 and earlier as well as Apple TV 4 (and later) until tvOS 13 was released. It means it's not widely used anymore, other than with older devices. It can be used to control the Music app in macOS 11.3 and earlier {% include issue no="1172" %}.
+* The DMAP protocol (suite) stems from iTunes and was used on all Apple TVs until tvOS 13, i.e. all versions of Apple TV 3 and earlier as well as Apple TV 4 (and later) until tvOS 13 was released. It means it's not widely used anymore, other than with older devices. It can be used to control the Music app in macOS {% include issue no="1172" %}.
 * The MRP protocol was introduced in tvOS when the Apple TV 4 was introduced. In tvOS 15, it was demoted from a separate protocol (it used to have it's own Remote app as well as Zeroconf service, `_mediaremotetv._tcp.local`) and moved to a special stream type in AirPlay 2 instead. Devices running tvOS 15 (beta or later) require AirPlay to be set up to function properly.
 * tvOS 10.2 enforced "device authentication" for AirPlay to function. This is referred to as "legacy pairing" and is only used to verify a connection, it does not enforce any encryption. It also works for RAOP. AirPlay 2 however require "HAP" (HomeKit) authentication, which enforce encryption. Only legacy pairing is supported for RAOP in pyatv at the moment (as encryption has not been implemented for HAP based authentication).
 
@@ -167,10 +167,8 @@ Music app in macOS.
   support for this exists in the protocol
 * No support for different tap actions in conjunction with button (e.g. double tap or
   hold) as it's not supported by the protocol
-* It is possible to discover and control a Music app running on macOS, assuming macOS
-  version is at most 11.3. From 11.4, FairPlay authentication is required, which no one
-  has reverse engnieered yet (ar least publicly and not relying on Apple binaries).
-
+* It is possible to discover and control a Music app running on macOS (except for 11.4,
+  likely a bug).
 ## MRP
 
 This protocol was introduced in tvOS and superseeds DMAP. It has the same features as well
@@ -187,7 +185,7 @@ as new ones, like notion of apps and game pad controls.
 * Playing metadata
 * Device and playback state
 * Shuffle and repeat
-* Volume control (volume_up, volume_down)
+* Volume controls
 * Current playing app
 * Power management
 

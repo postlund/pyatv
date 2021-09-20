@@ -19,6 +19,7 @@ message SendError {
     InvalidOptions = 7;
     NoCommandHandlers = 8;
     ApplicationNotInstalled = 9;
+    NotSupported = 10;
   }
 }
 
@@ -35,7 +36,58 @@ message HandlerReturnStatus {
     UserModifiedQueueDisabled = 102;
     UserQueueModificationNotSupportedForCurrentItem = 103;
     SubscriptionRequiredForSharedQueue = 104;
+    InsertionPositionNotSpecified = 105;
+    InvalidInsertionPosition = 106;
+    RequestParametersOutOfBounds = 107;
+    SkipLimitReached = 108;
+    AuthenticationFailure = 401;
+    MediaServiceUnavailable = 501;
   }
+}
+
+message SendCommandStatusCode {
+  enum Enum {
+    Success = 0;
+    NoSuchContent = 1;
+    CommandFailed = 2;
+    NoActionableNowPlayingItem = 10;
+    DeviceNotFound = 20;
+    UIKitLegacy = 3;
+    SkipAdProhibited = 100;
+    QueueIsUserCurated = 101;
+    UserModifiedQueueDisabled = 102;
+    UserQueueModificationNotSupportedForCurrentItem = 103;
+    SubscriptionRequiredForSharedQueue = 104;
+    InsertionPositionNotSpecified = 105;
+    InvalidInsertionPosition = 106;
+    RequestParametersOutOfBounds = 107;
+    SkipLimitReached = 108;
+    AuthenticationFailure = 401;
+    MediaServiceUnavailable = 501;
+  }
+}
+
+message SendCommandResultType {
+  enum Enum {
+    Dialog = 1;
+    Error = 2;
+    Custom = 999;
+  }
+}
+
+message SendCommandResultStatus {
+  optional SendCommandStatusCode.Enum statusCode = 1;
+  optional SendCommandResultType.Enum type = 2;
+  // optional ... dialog = 3;
+  // optional ... error = 4;
+  optional bytes customData = 5;
+  optional string customDataType = 6;
+}
+
+message SendCommandResult {
+  optional PlayerPath playerPath = 1;
+  optional SendError.Enum sendError = 2;
+  repeated SendCommandResultStatus statuses = 3;
 }
 
 message SendCommandResultMessage {
@@ -44,4 +96,5 @@ message SendCommandResultMessage {
   repeated bytes handlerReturnStatusDatas = 3;
   optional string commandID = 4;
   optional PlayerPath playerPath = 5;
+  optional SendCommandResult commandResult = 6;
 }

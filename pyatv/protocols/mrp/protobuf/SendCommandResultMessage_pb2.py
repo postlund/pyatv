@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n;pyatv/protocols/mrp/protobuf/SendCommandResultMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"\xea\x01\n\tSendError\"\xdc\x01\n\x04\x45num\x12\x0b\n\x07NoError\x10\x00\x12\x17\n\x13\x41pplicationNotFound\x10\x01\x12\x14\n\x10\x43onnectionFailed\x10\x02\x12\x0b\n\x07Ignored\x10\x03\x12\x1d\n\x19\x43ouldNotLaunchApplication\x10\x04\x12\x0c\n\x08TimedOut\x10\x05\x12\x16\n\x12OriginDoesNotExist\x10\x06\x12\x12\n\x0eInvalidOptions\x10\x07\x12\x15\n\x11NoCommandHandlers\x10\x08\x12\x1b\n\x17\x41pplicationNotInstalled\x10\t\"\xc0\x02\n\x13HandlerReturnStatus\"\xa8\x02\n\x04\x45num\x12\x0b\n\x07Success\x10\x00\x12\x11\n\rNoSuchContent\x10\x01\x12\x11\n\rCommandFailed\x10\x02\x12\x1e\n\x1aNoActionableNowPlayingItem\x10\n\x12\x12\n\x0e\x44\x65viceNotFound\x10\x14\x12\x0f\n\x0bUIKitLegacy\x10\x03\x12\x14\n\x10SkipAdProhibited\x10\x64\x12\x16\n\x12QueueIsUserCurated\x10\x65\x12\x1d\n\x19UserModifiedQueueDisabled\x10\x66\x12\x33\n/UserQueueModificationNotSupportedForCurrentItem\x10g\x12&\n\"SubscriptionRequiredForSharedQueue\x10h\"\xcc\x01\n\x18SendCommandResultMessage\x12\"\n\tsendError\x18\x01 \x01(\x0e\x32\x0f.SendError.Enum\x12\x36\n\x13handlerReturnStatus\x18\x02 \x01(\x0e\x32\x19.HandlerReturnStatus.Enum\x12 \n\x18handlerReturnStatusDatas\x18\x03 \x03(\x0c\x12\x11\n\tcommandID\x18\x04 \x01(\t\x12\x1f\n\nplayerPath\x18\x05 \x01(\x0b\x32\x0b.PlayerPath:M\n\x18sendCommandResultMessage\x12\x10.ProtocolMessage\x18\x07 \x01(\x0b\x32\x19.SendCommandResultMessage'
+  serialized_pb=b'\n;pyatv/protocols/mrp/protobuf/SendCommandResultMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"\xfc\x01\n\tSendError\"\xee\x01\n\x04\x45num\x12\x0b\n\x07NoError\x10\x00\x12\x17\n\x13\x41pplicationNotFound\x10\x01\x12\x14\n\x10\x43onnectionFailed\x10\x02\x12\x0b\n\x07Ignored\x10\x03\x12\x1d\n\x19\x43ouldNotLaunchApplication\x10\x04\x12\x0c\n\x08TimedOut\x10\x05\x12\x16\n\x12OriginDoesNotExist\x10\x06\x12\x12\n\x0eInvalidOptions\x10\x07\x12\x15\n\x11NoCommandHandlers\x10\x08\x12\x1b\n\x17\x41pplicationNotInstalled\x10\t\x12\x10\n\x0cNotSupported\x10\n\"\xf3\x03\n\x13HandlerReturnStatus\"\xdb\x03\n\x04\x45num\x12\x0b\n\x07Success\x10\x00\x12\x11\n\rNoSuchContent\x10\x01\x12\x11\n\rCommandFailed\x10\x02\x12\x1e\n\x1aNoActionableNowPlayingItem\x10\n\x12\x12\n\x0e\x44\x65viceNotFound\x10\x14\x12\x0f\n\x0bUIKitLegacy\x10\x03\x12\x14\n\x10SkipAdProhibited\x10\x64\x12\x16\n\x12QueueIsUserCurated\x10\x65\x12\x1d\n\x19UserModifiedQueueDisabled\x10\x66\x12\x33\n/UserQueueModificationNotSupportedForCurrentItem\x10g\x12&\n\"SubscriptionRequiredForSharedQueue\x10h\x12!\n\x1dInsertionPositionNotSpecified\x10i\x12\x1c\n\x18InvalidInsertionPosition\x10j\x12 \n\x1cRequestParametersOutOfBounds\x10k\x12\x14\n\x10SkipLimitReached\x10l\x12\x1a\n\x15\x41uthenticationFailure\x10\x91\x03\x12\x1c\n\x17MediaServiceUnavailable\x10\xf5\x03\"\xf5\x03\n\x15SendCommandStatusCode\"\xdb\x03\n\x04\x45num\x12\x0b\n\x07Success\x10\x00\x12\x11\n\rNoSuchContent\x10\x01\x12\x11\n\rCommandFailed\x10\x02\x12\x1e\n\x1aNoActionableNowPlayingItem\x10\n\x12\x12\n\x0e\x44\x65viceNotFound\x10\x14\x12\x0f\n\x0bUIKitLegacy\x10\x03\x12\x14\n\x10SkipAdProhibited\x10\x64\x12\x16\n\x12QueueIsUserCurated\x10\x65\x12\x1d\n\x19UserModifiedQueueDisabled\x10\x66\x12\x33\n/UserQueueModificationNotSupportedForCurrentItem\x10g\x12&\n\"SubscriptionRequiredForSharedQueue\x10h\x12!\n\x1dInsertionPositionNotSpecified\x10i\x12\x1c\n\x18InvalidInsertionPosition\x10j\x12 \n\x1cRequestParametersOutOfBounds\x10k\x12\x14\n\x10SkipLimitReached\x10l\x12\x1a\n\x15\x41uthenticationFailure\x10\x91\x03\x12\x1c\n\x17MediaServiceUnavailable\x10\xf5\x03\"C\n\x15SendCommandResultType\"*\n\x04\x45num\x12\n\n\x06\x44ialog\x10\x01\x12\t\n\x05\x45rror\x10\x02\x12\x0b\n\x06\x43ustom\x10\xe7\x07\"\xa1\x01\n\x17SendCommandResultStatus\x12/\n\nstatusCode\x18\x01 \x01(\x0e\x32\x1b.SendCommandStatusCode.Enum\x12)\n\x04type\x18\x02 \x01(\x0e\x32\x1b.SendCommandResultType.Enum\x12\x12\n\ncustomData\x18\x05 \x01(\x0c\x12\x16\n\x0e\x63ustomDataType\x18\x06 \x01(\t\"\x84\x01\n\x11SendCommandResult\x12\x1f\n\nplayerPath\x18\x01 \x01(\x0b\x32\x0b.PlayerPath\x12\"\n\tsendError\x18\x02 \x01(\x0e\x32\x0f.SendError.Enum\x12*\n\x08statuses\x18\x03 \x03(\x0b\x32\x18.SendCommandResultStatus\"\xf7\x01\n\x18SendCommandResultMessage\x12\"\n\tsendError\x18\x01 \x01(\x0e\x32\x0f.SendError.Enum\x12\x36\n\x13handlerReturnStatus\x18\x02 \x01(\x0e\x32\x19.HandlerReturnStatus.Enum\x12 \n\x18handlerReturnStatusDatas\x18\x03 \x03(\x0c\x12\x11\n\tcommandID\x18\x04 \x01(\t\x12\x1f\n\nplayerPath\x18\x05 \x01(\x0b\x32\x0b.PlayerPath\x12)\n\rcommandResult\x18\x06 \x01(\x0b\x32\x12.SendCommandResult:M\n\x18sendCommandResultMessage\x12\x10.ProtocolMessage\x18\x07 \x01(\x0b\x32\x19.SendCommandResultMessage'
   ,
   dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
 
@@ -92,11 +92,16 @@ _SENDERROR_ENUM = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='NotSupported', index=10, number=10,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=177,
-  serialized_end=397,
+  serialized_end=415,
 )
 _sym_db.RegisterEnumDescriptor(_SENDERROR_ENUM)
 
@@ -162,13 +167,173 @@ _HANDLERRETURNSTATUS_ENUM = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='InsertionPositionNotSpecified', index=11, number=105,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='InvalidInsertionPosition', index=12, number=106,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='RequestParametersOutOfBounds', index=13, number=107,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SkipLimitReached', index=14, number=108,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='AuthenticationFailure', index=15, number=401,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='MediaServiceUnavailable', index=16, number=501,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=424,
-  serialized_end=720,
+  serialized_start=442,
+  serialized_end=917,
 )
 _sym_db.RegisterEnumDescriptor(_HANDLERRETURNSTATUS_ENUM)
+
+_SENDCOMMANDSTATUSCODE_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='SendCommandStatusCode.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Success', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='NoSuchContent', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='CommandFailed', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='NoActionableNowPlayingItem', index=3, number=10,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='DeviceNotFound', index=4, number=20,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='UIKitLegacy', index=5, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SkipAdProhibited', index=6, number=100,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='QueueIsUserCurated', index=7, number=101,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='UserModifiedQueueDisabled', index=8, number=102,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='UserQueueModificationNotSupportedForCurrentItem', index=9, number=103,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SubscriptionRequiredForSharedQueue', index=10, number=104,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='InsertionPositionNotSpecified', index=11, number=105,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='InvalidInsertionPosition', index=12, number=106,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='RequestParametersOutOfBounds', index=13, number=107,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='SkipLimitReached', index=14, number=108,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='AuthenticationFailure', index=15, number=401,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='MediaServiceUnavailable', index=16, number=501,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=442,
+  serialized_end=917,
+)
+_sym_db.RegisterEnumDescriptor(_SENDCOMMANDSTATUSCODE_ENUM)
+
+_SENDCOMMANDRESULTTYPE_ENUM = _descriptor.EnumDescriptor(
+  name='Enum',
+  full_name='SendCommandResultType.Enum',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Dialog', index=0, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Error', index=1, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='Custom', index=2, number=999,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=1448,
+  serialized_end=1490,
+)
+_sym_db.RegisterEnumDescriptor(_SENDCOMMANDRESULTTYPE_ENUM)
 
 
 _SENDERROR = _descriptor.Descriptor(
@@ -193,7 +358,7 @@ _SENDERROR = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=163,
-  serialized_end=397,
+  serialized_end=415,
 )
 
 
@@ -218,8 +383,159 @@ _HANDLERRETURNSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=400,
-  serialized_end=720,
+  serialized_start=418,
+  serialized_end=917,
+)
+
+
+_SENDCOMMANDSTATUSCODE = _descriptor.Descriptor(
+  name='SendCommandStatusCode',
+  full_name='SendCommandStatusCode',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _SENDCOMMANDSTATUSCODE_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=920,
+  serialized_end=1421,
+)
+
+
+_SENDCOMMANDRESULTTYPE = _descriptor.Descriptor(
+  name='SendCommandResultType',
+  full_name='SendCommandResultType',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _SENDCOMMANDRESULTTYPE_ENUM,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1423,
+  serialized_end=1490,
+)
+
+
+_SENDCOMMANDRESULTSTATUS = _descriptor.Descriptor(
+  name='SendCommandResultStatus',
+  full_name='SendCommandResultStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='statusCode', full_name='SendCommandResultStatus.statusCode', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='SendCommandResultStatus.type', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=1,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='customData', full_name='SendCommandResultStatus.customData', index=2,
+      number=5, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='customDataType', full_name='SendCommandResultStatus.customDataType', index=3,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1493,
+  serialized_end=1654,
+)
+
+
+_SENDCOMMANDRESULT = _descriptor.Descriptor(
+  name='SendCommandResult',
+  full_name='SendCommandResult',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='playerPath', full_name='SendCommandResult.playerPath', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sendError', full_name='SendCommandResult.sendError', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='statuses', full_name='SendCommandResult.statuses', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1657,
+  serialized_end=1789,
 )
 
 
@@ -266,6 +582,13 @@ _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='commandResult', full_name='SendCommandResultMessage.commandResult', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -278,17 +601,29 @@ _SENDCOMMANDRESULTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=723,
-  serialized_end=927,
+  serialized_start=1792,
+  serialized_end=2039,
 )
 
 _SENDERROR_ENUM.containing_type = _SENDERROR
 _HANDLERRETURNSTATUS_ENUM.containing_type = _HANDLERRETURNSTATUS
+_SENDCOMMANDSTATUSCODE_ENUM.containing_type = _SENDCOMMANDSTATUSCODE
+_SENDCOMMANDRESULTTYPE_ENUM.containing_type = _SENDCOMMANDRESULTTYPE
+_SENDCOMMANDRESULTSTATUS.fields_by_name['statusCode'].enum_type = _SENDCOMMANDSTATUSCODE_ENUM
+_SENDCOMMANDRESULTSTATUS.fields_by_name['type'].enum_type = _SENDCOMMANDRESULTTYPE_ENUM
+_SENDCOMMANDRESULT.fields_by_name['playerPath'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
+_SENDCOMMANDRESULT.fields_by_name['sendError'].enum_type = _SENDERROR_ENUM
+_SENDCOMMANDRESULT.fields_by_name['statuses'].message_type = _SENDCOMMANDRESULTSTATUS
 _SENDCOMMANDRESULTMESSAGE.fields_by_name['sendError'].enum_type = _SENDERROR_ENUM
 _SENDCOMMANDRESULTMESSAGE.fields_by_name['handlerReturnStatus'].enum_type = _HANDLERRETURNSTATUS_ENUM
 _SENDCOMMANDRESULTMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
+_SENDCOMMANDRESULTMESSAGE.fields_by_name['commandResult'].message_type = _SENDCOMMANDRESULT
 DESCRIPTOR.message_types_by_name['SendError'] = _SENDERROR
 DESCRIPTOR.message_types_by_name['HandlerReturnStatus'] = _HANDLERRETURNSTATUS
+DESCRIPTOR.message_types_by_name['SendCommandStatusCode'] = _SENDCOMMANDSTATUSCODE
+DESCRIPTOR.message_types_by_name['SendCommandResultType'] = _SENDCOMMANDRESULTTYPE
+DESCRIPTOR.message_types_by_name['SendCommandResultStatus'] = _SENDCOMMANDRESULTSTATUS
+DESCRIPTOR.message_types_by_name['SendCommandResult'] = _SENDCOMMANDRESULT
 DESCRIPTOR.message_types_by_name['SendCommandResultMessage'] = _SENDCOMMANDRESULTMESSAGE
 DESCRIPTOR.extensions_by_name['sendCommandResultMessage'] = sendCommandResultMessage
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -306,6 +641,34 @@ HandlerReturnStatus = _reflection.GeneratedProtocolMessageType('HandlerReturnSta
   # @@protoc_insertion_point(class_scope:HandlerReturnStatus)
   })
 _sym_db.RegisterMessage(HandlerReturnStatus)
+
+SendCommandStatusCode = _reflection.GeneratedProtocolMessageType('SendCommandStatusCode', (_message.Message,), {
+  'DESCRIPTOR' : _SENDCOMMANDSTATUSCODE,
+  '__module__' : 'pyatv.protocols.mrp.protobuf.SendCommandResultMessage_pb2'
+  # @@protoc_insertion_point(class_scope:SendCommandStatusCode)
+  })
+_sym_db.RegisterMessage(SendCommandStatusCode)
+
+SendCommandResultType = _reflection.GeneratedProtocolMessageType('SendCommandResultType', (_message.Message,), {
+  'DESCRIPTOR' : _SENDCOMMANDRESULTTYPE,
+  '__module__' : 'pyatv.protocols.mrp.protobuf.SendCommandResultMessage_pb2'
+  # @@protoc_insertion_point(class_scope:SendCommandResultType)
+  })
+_sym_db.RegisterMessage(SendCommandResultType)
+
+SendCommandResultStatus = _reflection.GeneratedProtocolMessageType('SendCommandResultStatus', (_message.Message,), {
+  'DESCRIPTOR' : _SENDCOMMANDRESULTSTATUS,
+  '__module__' : 'pyatv.protocols.mrp.protobuf.SendCommandResultMessage_pb2'
+  # @@protoc_insertion_point(class_scope:SendCommandResultStatus)
+  })
+_sym_db.RegisterMessage(SendCommandResultStatus)
+
+SendCommandResult = _reflection.GeneratedProtocolMessageType('SendCommandResult', (_message.Message,), {
+  'DESCRIPTOR' : _SENDCOMMANDRESULT,
+  '__module__' : 'pyatv.protocols.mrp.protobuf.SendCommandResultMessage_pb2'
+  # @@protoc_insertion_point(class_scope:SendCommandResult)
+  })
+_sym_db.RegisterMessage(SendCommandResult)
 
 SendCommandResultMessage = _reflection.GeneratedProtocolMessageType('SendCommandResultMessage', (_message.Message,), {
   'DESCRIPTOR' : _SENDCOMMANDRESULTMESSAGE,

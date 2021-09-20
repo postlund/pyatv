@@ -2,11 +2,11 @@
 import logging
 from typing import Optional
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_pairing import PairSetupProcedure
-from pyatv.interface import BaseService, PairingHandler
+from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.airplay.auth import AuthenticationType, pair_setup
-from pyatv.protocols.airplay.features import AirPlayFeatures, parse
+from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
 from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 
@@ -17,8 +17,8 @@ def get_preferred_auth_type(service: BaseService) -> AuthenticationType:
     """Return the preferred authentication type depending on what is supported."""
     features_string = service.properties.get("features")
     if features_string:
-        features = parse(features_string)
-        if AirPlayFeatures.SupportsCoreUtilsPairingAndEncryption in features:
+        features = parse_features(features_string)
+        if AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in features:
             return AuthenticationType.HAP
     return AuthenticationType.Legacy
 
@@ -28,7 +28,7 @@ class AirPlayPairingHandler(PairingHandler):
 
     def __init__(
         self,
-        config: conf.AppleTV,
+        config: BaseConfig,
         service: BaseService,
         session_manager: ClientSessionManager,
         auth_type: AuthenticationType,
