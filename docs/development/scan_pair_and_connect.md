@@ -14,28 +14,10 @@ link_group: development
 Finding a device, pairing with it and connecting to it are the basic actions needed
 to control a device.
 
-## Scanning
+# Scan
 
-### API
-
-```python
-async def scan(loop, timeout=5, identifier=None, protocol=None, hosts=None):
-```
-
-**loop:** asyncio event loop (e.g. `asyncio.get_event_loop()`)
-
-**timeout:** how long to scan (in seconds) before returning results
-
-**identifier:** filter to scan for *one* particular device
-
-**protocol:** scan for one or more specific protocols
-({% include api i="const.Protocol" %})
-
-**hosts:** list of hosts to specifically scan for, e.g. `['10.0.0.1', '10.0.0.2']`
-
-### Usage
-
-Scanning for and printing name and address of all devices can be done like this:
+Use {% include api i="pyatv.scan" %} to scan for devices on the local network.
+Scanning for and printing name and address of discovered devices can be done like this:
 
 ```python
 atvs = await pyatv.scan(loop)
@@ -51,10 +33,10 @@ from pyatv import scan
 from pyatv.const import Protocol
 
 # Scan for a specific device
-atvs = scan(loop, identifier='AA:BB:CC:DD:EE:FF')
+atvs = scan(loop, identifier="AA:BB:CC:DD:EE:FF")
 
 # Scan for a specific device by IP (unicast)
-atvs = scan(loop, hosts=['10.0.0.1'])
+atvs = scan(loop, hosts=["10.0.0.1"])
 
 # Only scan for MRP services
 atvs = scan(loop, protocol=Protocol.MRP)
@@ -71,36 +53,46 @@ When scanning for one or more protocols with `protocols`, only the listed
 protocols are added to the configuration regardless if more protocols are
 supported.
 
-## Pairing
-
-### API
-
-```python
-async def pair(config, protocol, loop, session=None, **kwargs):
-```
-
-**config:** configuration for the device of interest
-
-**protocol:** which protocol to pair (service configuration must exist for this protocol)
-
-**loop:** asyncio event loop (e.g. `asyncio.get_event_loop()`)
-
-**session:** optional `aiohtttp.ClientSession` (pyatv will create a new if not provided)
-
-**kwargs:** optional arguments to pairing handler (see specific chapter)
-
-### Usage
+# Pair
 
 Calling {% include api i="pyatv.pair" %} returns a _pairing handler_ conforming to the interface
 {% include api i="interface.PairingHandler" %}. The usage flow is generic in order to support
 protocols that either require a PIN entered on the device (`DMAP`) or in the client
-(`MRP` and `AirPlay`). It looks like this:
+(`MRP` and `AirPlay`).
+
+## Pairing Requirement
+
+Not all protocols support nor require pairing, it is thus necessary to verify if pairing is
+needed before calling {% include api i="pyatv.pair" %}. After performing a scan, the
+{% include api i="interface.BaseService.pairing" %} property return whether pairing is required
+or not. There are five states to consider:
+
+| Requirement | Meaning |
+| ----------- | ------- |
+| {% include api i="const.PairingRequirement.Unsupported" %} | Pairing is either not supported by protocol or not implemented by pyatv.
+| {% include api i="const.PairingRequirement.Disabled" %} | Pairing is generally supported by the protocol, but has been (temporarily) disabled by the device.
+| {% include api i="const.PairingRequirement.NotNeeded" %} | Pairing is not needed, i.e. it is possible to connect without any further action.
+| {% include api i="const.PairingRequirement.Optional" %} | Pairing is not needed but recommended. One example is when Home Sharing is enabled, where credentials are included in the Zeroconf properties.
+| {% include api i="const.PairingRequirement.Mandatory" %} | Pairing must be performed.
+
+The pairing requirement is solely based on what is required by a protocol and does not take
+any provided credentials into account, i.e. {% include api i="interface.BaseService.pairing" %}
+will return {% include api i="const.PairingRequirement.Mandatory" %} even when credentials
+are filled in.
+
+{% include api i="pyatv.pair" %} must only be called if {% include api i="interface.BaseService.pairing" %}
+is either {% include api i="const.PairingRequirement.Optional" %} or
+{% include api i="const.PairingRequirement.Mandatory" %}.
+
+## Pairing Flow
+
+The general flow for pairing looks like this.
 
 1. Start pairing by calling `begin`
 2. Check if device presents a PIN by checking `device_provides_pin`
   * If True: call `pin` with the PIN shown on screen
   * If False: call `pin` with the PIN that must be
-    entered on the device
+    entered on the device and wait for user to enter PIN
 3. Call `finish`
 4. Check if pairing succeeded with `has_paired`
 5. Free resources with `close`
@@ -116,29 +108,40 @@ If an error occurs, e.g. incorrect PIN, {% include api i="exceptions.PairingErro
 Translating the flow above into code looks like this (this is a simplified version of `examples/pairing.py`):
 
 ```python
+import asyncio
 from pyatv import scan, pair
 from pyatv.const import Protocol
 
-atvs = await scan(loop)
+async def main():
+    loop = asyncio.get_event_loop()
 
-pairing = await pair(atvs[0], Protocol.MRP, loop)
-await pairing.begin()
+    atvs = await scan(loop)
 
-pin = int(input("Enter PIN: "))
-pairing.pin(pin)
-await pairing.finish()
+    pairing = await pair(atvs[0], Protocol.MRP, loop)
+    await pairing.begin()
 
-# Give some feedback about the process
-if pairing.has_paired:
-    print('Paired with device!')
-    print('Credentials:', pairing.service.credentials)
-else:
-    print('Did not pair with device!')
+    if pairing.device_provides_pin:
+        pin = int(input("Enter PIN: "))
+        pairing.pin(pin)
+    else:
+        pairing.pin(1234)  # Should be randomized
+        input("Enter this PIN on the device: 1234")
 
-await pairing.close()
+    await pairing.finish()
+
+    # Give some feedback about the process
+    if pairing.has_paired:
+        print("Paired with device!")
+        print("Credentials:", pairing.service.credentials)
+    else:
+        print("Did not pair with device!")
+
+    await pairing.close()
+
+asyncio.run(main())  # asyncio.run requires python 3.7+
 ```
 
-#### Storing credentials
+## Storing credentials
 
 Credentials are not stored persistently by pyatv. It is up to the developer to implement
 a solution for that. After pairing, make sure to save at least one
@@ -158,9 +161,10 @@ for service in config.services:
 
 How to restore credentials is described in [here](#restoring-credentials).
 
-### MRP specifics
+## Protocol specific settings
 
-This protocol does not support any additional settings.
+Some protocols support protocol specific setting, e.g. a special name or identifier.
+This section covers protocol specific settings, which at this time is only supported by `DMAP`.
 
 ### DMAP specifics
 
@@ -175,38 +179,10 @@ The following extra settings are supported by `DMAP`:
 You pass these via `kwargs` to {% include api i="pyatv.pair" %}:
 
 ```python
-pairing = await pyatv.pair(config, Protocol.DMAP, name='my remote')
+pairing = await pyatv.pair(config, Protocol.DMAP, name="my remote")
 ```
 
-### AirPlay specifics
-
-This protocol does not support any additional settings.
-
-### Companion specifics
-
-This protocol does not support any additional settings.
-
-### RAOP specifics
-
-This protocol does not support any additional settings.
-
-## Connecting
-
-### API
-
-```python
-async def connect(config, loop, protocol=None, session=None):
-```
-
-**config:** configuration for the device of interest
-
-**loop:** asyncio event loop (e.g. `asyncio.get_event_loop()`)
-
-**protocol:** override which protocol to use (DEPRECATED: not used in 0.8.0 and later)
-
-**session:** optional `aiohtttp.ClientSession` (pyatv will create a new if not provided)
-
-### Usage
+# Connect
 
 Connecting is simply done by passing a config to {% include api i="pyatv.conncet" %}:
 
@@ -233,14 +209,14 @@ connecting, see next chapter.
 protocol to use. This is no longer needed as the most appropriate protocol
 will be used automatically.*
 
-#### Restoring credentials
+## Restoring credentials
 
 Restoring credentials is performed with {% include api i="conf.AppleTV.set_credentials" %}:
 
 ```python
 # Restored from file
-identifier = '...'
-stored_credentials = {Protocol.MRP: 'xxx'}
+identifier = "..."
+stored_credentials = {Protocol.MRP: "xxx"}
 
 # Find device and restore credentials
 atvs = pyatv.scan(loop, identifier=identifier)
@@ -250,18 +226,20 @@ atvs = pyatv.scan(loop, identifier=identifier)
 atv = atvs[0]
 for protocol, credentials in stored_credentials.items():
     atv.set_credentials(protocol, credentials)
-
 ```
 
 True is returned if credentials were set, otherwise False.
 
-#### Manual configuration
+## Manual configuration
 
 It is possible to bypass the scanning process and manually create a configuration:
 
 ```python
-config = conf.AppleTV('10.0.0.10', 'Living Room')
-config.add_service(conf.DmapService('identifier', '0x123456789ABCDEF0')
+service = conf.ManualService(
+    "identifier", Protocol.DMAP, 3689, {}, credentials="0x123456789ABCDEF0"
+)
+config = conf.AppleTV("10.0.0.10", "Living Room")
+config.add_service(service)
 atv = await pyatv.connect(config, loop)
 ```
 
@@ -269,12 +247,15 @@ Please do note that this is not the recommended way as it has a couple of flaws:
 
 * Name and IP-adress might not match the device you expect
 * The identifier passed to the service does not make any sense and is not unique anymore
-* Dynamic properties, like port numbers, will cause problems (especially for `MRP`)
+* Dynamic properties, like port numbers, will cause problems
 
 It can however be convenient to have if you test things when developing pyatv
 as you can shorten the feedback loop, since scanning can be avoided. But be warned.
 
-#### Closing connection
+*NB: Service specific services, e.g. {% include api i="conf.DmapService" %} is deprecated
+as of 0.9.0. Please use {% include api i="conf.ManualService" %} instead.*
+
+## Closing connection
 
 To close the connection, use {% include api i="interface.AppleTV.close" %}:
 

@@ -7,7 +7,7 @@ import weakref
 
 from aiohttp.client_exceptions import ClientError
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -15,16 +15,18 @@ from pyatv.const import (
     InputAction,
     MediaType,
     OperatingSystem,
+    PairingRequirement,
     Protocol,
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData, mdns
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -34,13 +36,13 @@ from pyatv.interface import (
     Playing,
     PushUpdater,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.dmap import daap, parser, tags
 from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.http import ClientSessionManager, HttpSession
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -511,7 +513,7 @@ class DmapPushUpdater(PushUpdater):
 class DmapFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
-    def __init__(self, config: conf.AppleTV, apple_tv: BaseDmapAppleTV) -> None:
+    def __init__(self, config: BaseConfig, apple_tv: BaseDmapAppleTV) -> None:
         """Initialize a new DmapFeatures instance."""
         self.config = config
         self.apple_tv = apple_tv
@@ -563,12 +565,13 @@ def homesharing_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP (Home Sharing) service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = conf.DmapService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        mdns_service.properties.get("hG"),
-        port=mdns_service.port,
-        properties=mdns_service.properties,
+        Protocol.DMAP,
+        mdns_service.port,
+        mdns_service.properties,
     )
+    service.credentials = mdns_service.properties.get("hG")
     return name, service
 
 
@@ -577,11 +580,11 @@ def dmap_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new DMAP service."""
     name = mdns_service.properties.get("CtlN", "Unknown")
-    service = conf.DmapService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        None,
-        port=mdns_service.port,
-        properties=mdns_service.properties,
+        Protocol.DMAP,
+        mdns_service.port,
+        mdns_service.properties,
     )
     return name, service
 
@@ -591,12 +594,13 @@ def hscp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new HSCP service."""
     name = mdns_service.properties.get("Machine Name", "Unknown")
-    service = conf.DmapService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
-        mdns_service.properties.get("hG"),
+        Protocol.DMAP,
         port=mdns_service.port,
         properties=mdns_service.properties,
     )
+    service.credentials = mdns_service.properties.get("hG")
     return name, service
 
 
@@ -619,9 +623,26 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information.
+
+    If Home Sharing is enabled, then the "hG" property is present and can be used as
+    credentials. If not enabled, then pairing must be performed.
+    """
+    service.pairing = (
+        PairingRequirement.Optional
+        if "hg" in service.properties
+        else PairingRequirement.Mandatory
+    )
+
+
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -670,7 +691,7 @@ def setup(  # pylint: disable=too-many-locals
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

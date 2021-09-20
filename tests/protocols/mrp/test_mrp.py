@@ -4,11 +4,11 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import OperatingSystem
-from pyatv.core import mdns
-from pyatv.core.device_info import lookup_version
+from pyatv.const import OperatingSystem, PairingRequirement, Protocol
+from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.mrp import device_info, scan
+from pyatv.protocols.mrp import device_info, scan, service_info
+from pyatv.support.device_info import lookup_version
 
 MRP_SERVICE = "_mediaremotetv._tcp.local"
 
@@ -63,3 +63,30 @@ def test_mrp_handler_to_service():
 )
 def test_device_info(properties, expected):
     assert not DeepDiff(device_info(properties), expected)
+
+
+@pytest.mark.parametrize(
+    "mrp_props,airplay_props,pairing_req",
+    [
+        ({}, {}, PairingRequirement.Disabled),
+        ({}, {"allowpairing": "YES"}, PairingRequirement.Disabled),
+        ({"allowpairing": "yes"}, {}, PairingRequirement.Optional),
+        ({"allowpairing": "YES"}, {}, PairingRequirement.Optional),
+        ({"allowpairing": "no"}, {}, PairingRequirement.Disabled),
+    ],
+)
+async def test_service_info_pairing(airplay_props, mrp_props, pairing_req):
+    mrp_service = MutableService("mrp", Protocol.MRP, 0, mrp_props)
+    airplay_service = MutableService("id", Protocol.AirPlay, 0, airplay_props)
+
+    assert mrp_service.pairing == PairingRequirement.Unsupported
+    assert airplay_service.pairing == PairingRequirement.Unsupported
+
+    await service_info(
+        mrp_service,
+        DeviceInfo({}),
+        {Protocol.MRP: mrp_service, Protocol.AirPlay: airplay_service},
+    )
+
+    assert mrp_service.pairing == pairing_req
+    assert airplay_service.pairing == PairingRequirement.Unsupported

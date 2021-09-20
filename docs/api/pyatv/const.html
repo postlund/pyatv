@@ -131,6 +131,16 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.const.PairingRequirement" href="#pyatv.const.PairingRequirement">PairingRequirement</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.PairingRequirement.Disabled" href="#pyatv.const.PairingRequirement.Disabled">Disabled</a></code></li>
+<li><code><a title="pyatv.const.PairingRequirement.Mandatory" href="#pyatv.const.PairingRequirement.Mandatory">Mandatory</a></code></li>
+<li><code><a title="pyatv.const.PairingRequirement.NotNeeded" href="#pyatv.const.PairingRequirement.NotNeeded">NotNeeded</a></code></li>
+<li><code><a title="pyatv.const.PairingRequirement.Optional" href="#pyatv.const.PairingRequirement.Optional">Optional</a></code></li>
+<li><code><a title="pyatv.const.PairingRequirement.Unsupported" href="#pyatv.const.PairingRequirement.Unsupported">Unsupported</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.const.PowerState" href="#pyatv.const.PowerState">PowerState</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.const.PowerState.Off" href="#pyatv.const.PowerState.Off">Off</a></code></li>
@@ -174,7 +184,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L346" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L365" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -287,7 +297,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L204-L346" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L223-L365" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -490,7 +500,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>State of a particular feature.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L184-L200" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L203-L219" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -607,6 +617,41 @@ is Apple TV Software (pre-tvOS).</p></section>
 <dt id="pyatv.const.OperatingSystem.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
 <dd>
 <section class="desc"><p>Operating system is not known.</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.PairingRequirement"><code class="flex name class">
+<span>class <span class="ident">PairingRequirement</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Pairing requirement for a service.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L184-L200" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.PairingRequirement.Disabled"><code class="name">var <span class="ident">Disabled</span></code></dt>
+<dd>
+<section class="desc"><p>Pairing is disabled by protocol.</p></section>
+</dd>
+<dt id="pyatv.const.PairingRequirement.Mandatory"><code class="name">var <span class="ident">Mandatory</span></code></dt>
+<dd>
+<section class="desc"><p>Pairing must be performed.</p></section>
+</dd>
+<dt id="pyatv.const.PairingRequirement.NotNeeded"><code class="name">var <span class="ident">NotNeeded</span></code></dt>
+<dd>
+<section class="desc"><p>Pairing is not needed.</p></section>
+</dd>
+<dt id="pyatv.const.PairingRequirement.Optional"><code class="name">var <span class="ident">Optional</span></code></dt>
+<dd>
+<section class="desc"><p>Pairing is supported but not required.</p></section>
+</dd>
+<dt id="pyatv.const.PairingRequirement.Unsupported"><code class="name">var <span class="ident">Unsupported</span></code></dt>
+<dd>
+<section class="desc"><p>Not supported by protocol or not implemented.</p></section>
 </dd>
 </dl>
 </dd>

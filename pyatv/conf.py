@@ -7,13 +7,13 @@ provide configurations for you.
 from ipaddress import IPv4Address
 from typing import Dict, List, Mapping, Optional
 
-from pyatv import exceptions
-from pyatv.const import Protocol
-from pyatv.interface import BaseService, DeviceInfo
+from pyatv.const import PairingRequirement, Protocol
+from pyatv.interface import BaseConfig, BaseService, DeviceInfo
+from pyatv.support import deprecated
 
 
-class AppleTV:
-    """Representation of an Apple TV configuration.
+class AppleTV(BaseConfig):
+    """Representation of a device configuration.
 
     An instance of this class represents a single device. A device can have
     several services depending on the protocols it supports, e.g. DMAP or
@@ -29,12 +29,12 @@ class AppleTV:
         device_info: Optional[DeviceInfo] = None,
     ) -> None:
         """Initialize a new AppleTV."""
+        super().__init__(properties or {})
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
         self._services: Dict[Protocol, BaseService] = {}
         self._device_info = device_info or DeviceInfo({})
-        self.properties: Mapping[str, Mapping[str, str]] = properties or {}
 
     @property
     def address(self) -> IPv4Address:
@@ -50,28 +50,6 @@ class AppleTV:
     def deep_sleep(self) -> bool:
         """If device is in deep sleep."""
         return self._deep_sleep
-
-    @property
-    def ready(self) -> bool:
-        """Return if configuration is ready, (at least one service with identifier)."""
-        for service in self.services:
-            if service.identifier:
-                return True
-        return False
-
-    @property
-    def identifier(self) -> Optional[str]:
-        """Return the main identifier associated with this device."""
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
-            service = self._services.get(prot)
-            if service:
-                return service.identifier
-        return None
-
-    @property
-    def all_identifiers(self) -> List[str]:
-        """Return all unique identifiers for this device."""
-        return [x.identifier for x in self.services if x.identifier is not None]
 
     def add_service(self, service: BaseService) -> None:
         """Add a new service.
@@ -97,62 +75,50 @@ class AppleTV:
         """Return all supported services."""
         return list(self._services.values())
 
-    def main_service(self, protocol: Optional[Protocol] = None) -> BaseService:
-        """Return suggested service used to establish connection."""
-        protocols = (
-            [protocol]
-            if protocol is not None
-            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
-        )
-
-        for prot in protocols:
-            service = self._services.get(prot)
-            if service is not None:
-                return service
-
-        raise exceptions.NoServiceError("no service to connect to")
-
-    def set_credentials(self, protocol: Protocol, credentials: str) -> bool:
-        """Set credentials for a protocol if it exists."""
-        service = self.get_service(protocol)
-        if service:
-            service.credentials = credentials
-            return True
-        return False
-
     @property
     def device_info(self) -> DeviceInfo:
         """Return general device information."""
         return self._device_info
 
-    def __eq__(self, other) -> bool:
-        """Compare instance with another instance."""
-        if isinstance(other, self.__class__):
-            return self.identifier == other.identifier
-        return False
 
-    def __str__(self) -> str:
-        """Return a string representation of this object."""
-        device_info = self.device_info
-        services = "\n".join([f" - {s}" for s in self._services.values()])
-        identifiers = "\n".join([f" - {x}" for x in self.all_identifiers])
-        return (
-            f"       Name: {self.name}\n"
-            f"   Model/SW: {device_info}\n"
-            f"    Address: {self.address}\n"
-            f"        MAC: {self.device_info.mac}\n"
-            f" Deep Sleep: {self.deep_sleep}\n"
-            f"Identifiers:\n"
-            f"{identifiers}\n"
-            f"Services:\n"
-            f"{services}"
-        )
+class ManualService(BaseService):
+    """Service used when manually creating and adding a service."""
+
+    def __init__(
+        self,
+        identifier: Optional[str],
+        protocol: Protocol,
+        port: int,
+        properties: Optional[Mapping[str, str]],
+        credentials: Optional[str] = None,
+        password: Optional[str] = None,
+        requires_password: bool = False,
+        pairing_requirement: PairingRequirement = PairingRequirement.Unsupported,
+    ) -> None:
+        """Initialize a new ManualService."""
+        super().__init__(identifier, protocol, port, properties, credentials, password)
+        self._requires_password = requires_password
+        self._pairing_requirement = pairing_requirement
+
+    @property
+    def requires_password(self) -> bool:
+        """Return if a password is required to access service."""
+        return self._requires_password
+
+    @property
+    def pairing(self) -> PairingRequirement:
+        """Return if pairing is required by service."""
+        return self._pairing_requirement
 
 
 # pylint: disable=too-few-public-methods
-class DmapService(BaseService):
-    """Representation of a DMAP service."""
+class DmapService(ManualService):
+    """Representation of a DMAP service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -161,19 +127,17 @@ class DmapService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new DmapService."""
-        super().__init__(
-            identifier,
-            Protocol.DMAP,
-            port,
-            properties,
-        )
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.DMAP, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
-class MrpService(BaseService):
-    """Representation of a MediaRemote Protocol (MRP) service."""
+class MrpService(ManualService):
+    """Representation of a MediaRemote Protocol (MRP) service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -182,14 +146,17 @@ class MrpService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new MrpService."""
-        super().__init__(identifier, Protocol.MRP, port, properties)
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.MRP, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
-class AirPlayService(BaseService):
-    """Representation of an AirPlay service."""
+class AirPlayService(ManualService):
+    """Representation of an AirPlay service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -198,14 +165,17 @@ class AirPlayService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new AirPlayService."""
-        super().__init__(identifier, Protocol.AirPlay, port, properties)
-        self.credentials = credentials
+        super().__init__(identifier, Protocol.AirPlay, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
-class CompanionService(BaseService):
-    """Representation of a Companion link service."""
+class CompanionService(ManualService):
+    """Representation of a Companion link service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         port: int,
@@ -213,14 +183,17 @@ class CompanionService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new CompaniomService."""
-        super().__init__(None, Protocol.Companion, port, properties)
-        self.credentials = credentials
+        super().__init__(None, Protocol.Companion, port, properties, credentials)
 
 
 # pylint: disable=too-few-public-methods
-class RaopService(BaseService):
-    """Representation of an RAOP service."""
+class RaopService(ManualService):
+    """Representation of an RAOP service.
 
+    **DEPRECATED: Use `pyatv.conf.ManualService` instead.**
+    """
+
+    @deprecated
     def __init__(
         self,
         identifier: Optional[str],
@@ -230,10 +203,6 @@ class RaopService(BaseService):
         properties: Optional[Mapping[str, str]] = None,
     ) -> None:
         """Initialize a new RaopService."""
-        super().__init__(identifier, Protocol.RAOP, port, properties)
-        self.credentials = credentials
-        self.password = password
-
-    def __str__(self) -> str:
-        """Return a string representation of this object."""
-        return super().__str__() + f", Password: {self.password}"
+        super().__init__(
+            identifier, Protocol.RAOP, port, properties, credentials, password=password
+        )

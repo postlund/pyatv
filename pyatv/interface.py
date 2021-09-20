@@ -9,6 +9,7 @@ import asyncio
 import hashlib
 import inspect
 import io
+from ipaddress import IPv4Address
 import re
 from typing import (
     Any,
@@ -32,11 +33,12 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     OperatingSystem,
+    PairingRequirement,
     Protocol,
 )
-from pyatv.core import StateProducer
-from pyatv.core.device_info import lookup_version
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 __pdoc__ = {
     "feature": False,
@@ -116,7 +118,7 @@ def retrieve_commands(obj: object):
     return commands
 
 
-class BaseService:
+class BaseService(ABC):
     """Base class for protocol services."""
 
     def __init__(
@@ -125,28 +127,65 @@ class BaseService:
         protocol: Protocol,
         port: int,
         properties: Optional[Mapping[str, str]],
+        credentials: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """Initialize a new BaseService."""
-        self.__identifier = identifier
-        self.protocol = protocol
-        self.port = port
-        self.credentials: Optional[str] = None
-        self.properties: MutableMapping[str, str] = dict(properties or {})
+        self._identifier = identifier
+        self._protocol = protocol
+        self._port = port
+        self._properties: MutableMapping[str, str] = dict(properties or {})
+        self.credentials: Optional[str] = credentials
+        self.password: Optional[str] = password
 
     @property
     def identifier(self) -> Optional[str]:
         """Return unique identifier associated with this service."""
-        return self.__identifier
+        return self._identifier
+
+    @property
+    def protocol(self) -> Protocol:
+        """Return protocol type."""
+        return self._protocol
+
+    @property
+    def port(self) -> int:
+        """Return service port number."""
+        return self._port
+
+    @property
+    @abstractmethod
+    def requires_password(self) -> bool:
+        """Return if a password is required to access service."""
+
+    @property
+    @abstractmethod
+    def pairing(self) -> PairingRequirement:
+        """Return if pairing is required by service."""
+
+    @property
+    def properties(self) -> Mapping[str, str]:
+        """Return service Zeroconf properties."""
+        return self._properties
 
     def merge(self, other) -> None:
-        """Merge with other service of same type."""
+        """Merge with other service of same type.
+
+        Merge will only include credentials, password and properties.
+        """
         self.credentials = other.credentials or self.credentials
-        self.properties.update(other.properties)
+        self.password = other.password or self.password
+        self._properties.update(other.properties)
 
     def __str__(self) -> str:
         """Return a string representation of this object."""
-        return "Protocol: {0}, Port: {1}, Credentials: {2}".format(
-            convert.protocol_str(self.protocol), self.port, self.credentials
+        return (
+            f"Protocol: {convert.protocol_str(self.protocol)}, "
+            f"Port: {self.port}, "
+            f"Credentials: {self.credentials}, "
+            f"Requires Password: {self.requires_password}, "
+            f"Password: {self.password}, "
+            f"Pairing: {self.pairing.name}"
         )
 
 
@@ -950,6 +989,132 @@ class Audio:
         possible and supported).
         """
         raise exceptions.NotSupportedError()
+
+
+class BaseConfig(ABC):
+    """Representation of a device configuration.
+
+    An instance of this class represents a single device. A device can have
+    several services depending on the protocols it supports, e.g. DMAP or
+    AirPlay.
+    """
+
+    def __init__(self, properties: Mapping[str, Mapping[str, Any]]) -> None:
+        """Initialize a new BaseConfig instance."""
+        self._properties = properties
+
+    @property
+    @abstractmethod
+    def address(self) -> IPv4Address:
+        """IP address of device."""
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Name of device."""
+
+    @property
+    @abstractmethod
+    def deep_sleep(self) -> bool:
+        """If device is in deep sleep."""
+
+    @property
+    @abstractmethod
+    def services(self) -> List[BaseService]:
+        """Return all supported services."""
+
+    @property
+    @abstractmethod
+    def device_info(self) -> DeviceInfo:
+        """Return general device information."""
+
+    @abstractmethod
+    def add_service(self, service: BaseService) -> None:
+        """Add a new service.
+
+        If the service already exists, it will be merged.
+        """
+
+    @abstractmethod
+    def get_service(self, protocol: Protocol) -> Optional[BaseService]:
+        """Look up a service based on protocol.
+
+        If a service with the specified protocol is not available, None is
+        returned.
+        """
+
+    @property
+    def properties(self) -> Mapping[str, Mapping[str, str]]:
+        """Return Zeroconf properties."""
+        return self._properties
+
+    @property
+    def ready(self) -> bool:
+        """Return if configuration is ready, (at least one service with identifier)."""
+        for service in self.services:
+            if service.identifier:
+                return True
+        return False
+
+    @property
+    def identifier(self) -> Optional[str]:
+        """Return the main identifier associated with this device."""
+        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
+            service = self.get_service(prot)
+            if service:
+                return service.identifier
+        return None
+
+    @property
+    def all_identifiers(self) -> List[str]:
+        """Return all unique identifiers for this device."""
+        return [x.identifier for x in self.services if x.identifier is not None]
+
+    def main_service(self, protocol: Optional[Protocol] = None) -> BaseService:
+        """Return suggested service used to establish connection."""
+        protocols = (
+            [protocol]
+            if protocol is not None
+            else [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]
+        )
+
+        for prot in protocols:
+            service = self.get_service(prot)
+            if service is not None:
+                return service
+
+        raise exceptions.NoServiceError("no service to connect to")
+
+    def set_credentials(self, protocol: Protocol, credentials: str) -> bool:
+        """Set credentials for a protocol if it exists."""
+        service = self.get_service(protocol)
+        if service:
+            service.credentials = credentials
+            return True
+        return False
+
+    def __eq__(self, other) -> bool:
+        """Compare instance with another instance."""
+        if isinstance(other, self.__class__):
+            return self.identifier == other.identifier
+        return False
+
+    def __str__(self) -> str:
+        """Return a string representation of this object."""
+        device_info = self.device_info
+        services = "\n".join([f" - {s}" for s in self.services])
+        identifiers = "\n".join([f" - {x}" for x in self.all_identifiers])
+        return (
+            f"       Name: {self.name}\n"
+            f"   Model/SW: {device_info}\n"
+            f"    Address: {self.address}\n"
+            f"        MAC: {self.device_info.mac}\n"
+            f" Deep Sleep: {self.deep_sleep}\n"
+            f"Identifiers:\n"
+            f"{identifiers}\n"
+            f"Services:\n"
+            f"{services}"
+        )
 
 
 class AppleTV(ABC, StateProducer[DeviceListener]):

@@ -3,41 +3,48 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict, Generator, Mapping, Optional, Set, cast
+from typing import Any, Dict, Generator, Mapping, Optional, Set
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, Protocol
-from pyatv.core import SetupData, mdns, net
-from pyatv.core.device_info import lookup_model
+from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
     Features,
     FeatureState,
     PairingHandler,
-    StateProducer,
     Stream,
 )
 from pyatv.protocols import mrp
 from pyatv.protocols.airplay import remote_control
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
-from pyatv.protocols.airplay.features import AirPlayFlags, parse
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
     AirPlayPairingHandler,
     get_preferred_auth_type,
 )
 from pyatv.protocols.airplay.player import AirPlayPlayer
+from pyatv.protocols.airplay.utils import (
+    AirPlayFlags,
+    get_pairing_requirement,
+    is_password_required,
+    parse_features,
+)
+from pyatv.support import net
+from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
     ClientSessionManager,
     HttpConnection,
     StaticFileWebServer,
     http_connect,
 )
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,10 +52,10 @@ _LOGGER = logging.getLogger(__name__)
 class AirPlayFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: conf.AirPlayService) -> None:
+    def __init__(self, service: BaseService) -> None:
         """Initialize a new AirPlayFeatures instance."""
         self.service = service
-        self._features = parse(self.service.properties.get("features", "0x0"))
+        self._features = parse_features(self.service.properties.get("features", "0x0"))
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
@@ -64,12 +71,10 @@ class AirPlayFeatures(Features):
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config: conf.AppleTV) -> None:
+    def __init__(self, config: BaseConfig, service: BaseService) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
         self.config = config
-        self.service: conf.AirPlayService = cast(
-            conf.AirPlayService, self.config.get_service(Protocol.AirPlay)
-        )
+        self.service = service
         self._credentials: HapCredentials = parse_credentials(self.service.credentials)
         self._play_task: Optional[asyncio.Future] = None
 
@@ -121,8 +126,9 @@ def airplay_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> ScanHandlerReturn:
     """Parse and return a new AirPlay service."""
-    service = conf.AirPlayService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.AirPlay,
         mdns_service.port,
         properties=mdns_service.properties,
     )
@@ -148,19 +154,38 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information."""
+    service.requires_password = is_password_required(service)
+
+    # Some devices require no pairing at all, so exclude them
+    if devinfo.model in [
+        DeviceModel.AirPortExpressGen2,
+        DeviceModel.HomePod,
+        DeviceModel.HomePodMini,
+    ]:
+        service.pairing = PairingRequirement.NotNeeded
+    else:
+        service.pairing = get_pairing_requirement(service)
+
+
 def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
-    stream = AirPlayStream(config)
+    stream = AirPlayStream(config, service)
 
     interfaces = {
-        Features: AirPlayFeatures(cast(conf.AirPlayService, service)),
+        Features: AirPlayFeatures(service),
         Stream: stream,
     }
 
@@ -197,7 +222,7 @@ def setup(  # pylint: disable=too-many-locals
         control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
-        mrp_service = conf.MrpService(None, 0)
+        mrp_service = MutableService(None, Protocol.MRP, 0, {})
         config.add_service(mrp_service)
         (
             _,
@@ -244,7 +269,7 @@ def setup(  # pylint: disable=too-many-locals
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,

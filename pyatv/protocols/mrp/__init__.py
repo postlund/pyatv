@@ -6,7 +6,7 @@ import logging
 import math
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 
-from pyatv import conf, exceptions
+from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import (
     DeviceState,
@@ -15,19 +15,20 @@ from pyatv.const import (
     InputAction,
     MediaType,
     OperatingSystem,
+    PairingRequirement,
     PowerState,
     Protocol,
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import SetupData, mdns
-from pyatv.core.device_info import lookup_version
+from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     ArtworkInfo,
     Audio,
+    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -38,7 +39,6 @@ from pyatv.interface import (
     Power,
     PushUpdater,
     RemoteControl,
-    StateProducer,
 )
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.connection import AbstractMrpConnection, MrpConnection
@@ -49,7 +49,9 @@ from pyatv.protocols.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
+from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -713,7 +715,7 @@ class MrpAudio(Audio):
 class MrpFeatures(Features):
     """Implementation of API for supported feature functionality."""
 
-    def __init__(self, config: conf.AppleTV, psm: PlayerStateManager, audio: MrpAudio):
+    def __init__(self, config: BaseConfig, psm: PlayerStateManager, audio: MrpAudio):
         """Initialize a new MrpFeatures instance."""
         self.config = config
         self.psm = psm
@@ -783,8 +785,9 @@ def mrp_service_handler(
 ) -> ScanHandlerReturn:
     """Parse and return a new MRP service."""
     name = mdns_service.properties.get("Name", "Unknown")
-    service = conf.MrpService(
+    service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
+        Protocol.MRP,
         mdns_service.port,
         properties=mdns_service.properties,
     )
@@ -818,9 +821,26 @@ def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
     return devinfo
 
 
+async def service_info(
+    service: MutableService,
+    devinfo: DeviceInfo,
+    services: Mapping[Protocol, BaseService],
+) -> None:
+    """Update service with additional information.
+
+    Pairing has never been enforced by MRP (maybe by design), but it is
+    possible to pair if AllowPairing is YES.
+    """
+    service.pairing = (
+        PairingRequirement.Optional
+        if service.properties.get("allowpairing", "no").lower() == "yes"
+        else PairingRequirement.Disabled
+    )
+
+
 def create_with_connection(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -887,7 +907,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
 
 def setup(
     loop: asyncio.AbstractEventLoop,
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
@@ -904,7 +924,7 @@ def setup(
 
 
 def pair(
-    config: conf.AppleTV,
+    config: BaseConfig,
     service: BaseService,
     session_manager: ClientSessionManager,
     loop: asyncio.AbstractEventLoop,
