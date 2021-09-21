@@ -148,24 +148,24 @@ class DaapRequester:
         if retry:
             return await self._do(action, False, is_login=is_login, is_daap=is_daap)
 
-        raise exceptions.AuthenticationError("failed to login: " + str(status))
+        raise exceptions.AuthenticationError(f"failed to login: {status}")
 
     def _mkurl(self, cmd, *args, session=True, login_id=False):
-        url = "{}".format(cmd.format(*args))
+        url = cmd.format(*args)
         parameters = []
         if login_id:
             if re.match(r"0x[0-9A-Fa-f]{16}", self._login_id):
-                parameters.append("pairing-guid={}".format(self._login_id))
+                parameters.append(f"pairing-guid={self._login_id}")
             elif re.match(
                 r"[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}", self._login_id
             ):
-                parameters.append("hsgid={}".format(self._login_id))
+                parameters.append(f"hsgid={self._login_id}")
             else:
                 raise exceptions.InvalidCredentialsError(
-                    "invalid credentials: " + self._login_id
+                    f"invalid credentials: {self._login_id}"
                 )
         if session:
-            parameters.insert(0, "session-id={}".format(self._session_id))
+            parameters.insert(0, f"session-id={self._session_id}")
         return url.replace("[AUTH]", "&".join(parameters))
 
     async def _assure_logged_in(self):

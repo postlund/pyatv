@@ -26,7 +26,7 @@ class DmapTag(namedtuple("DmapTag", ["type", "name"])):
             type_name = self.type
         else:
             type_name = self.type.__name__[5:]
-        return "[{}, {}]".format(type_name, self.name)
+        return f"[{type_name}, {self.name}]"
 
 
 def _parse(data, data_len, tag_lookup, pos, ctx=None):
@@ -72,13 +72,13 @@ def pprint(data, tag_lookup, indent=0):
         for key, value in data.items():
             tag = tag_lookup(key)
             if isinstance(value, (dict, list)) and tag.type is not read_bplist:
-                output += "{0}{1}: {2}\n".format(indent * " ", key, tag)
+                output += indent * " " + f"{key}: {tag}\n"
                 output += pprint(value, tag_lookup, indent + 2)
             else:
-                output += "{0}{1}: {2} {3}\n".format(indent * " ", key, str(value), tag)
+                output += indent * " " + f"{key}: {value} {tag}\n"
     elif isinstance(data, list):
         for elem in data:
             output += pprint(elem, tag_lookup, indent)
     else:
-        raise exceptions.InvalidDmapDataError("invalid dmap data: " + str(data))
+        raise exceptions.InvalidDmapDataError(f"invalid dmap data: {data}")
     return output

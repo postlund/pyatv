@@ -219,8 +219,7 @@ class BaseDmapAppleTV:
 
     def ctrl_int_cmd(self, cmd):
         """Perform a "ctrl-int" command."""
-        cmd_url = "ctrl-int/1/{}?[AUTH]&prompt-id=0".format(cmd)
-        return self.daap.post(cmd_url)
+        return self.daap.post(f"ctrl-int/1/{cmd}?[AUTH]&prompt-id=0")
 
     def controlprompt_cmd(self, cmd):
         """Perform a "controlpromptentry" command."""
@@ -233,8 +232,7 @@ class BaseDmapAppleTV:
 
     def set_property(self, prop, value):
         """Change value of a DAAP property, e.g. volume or media position."""
-        cmd_url = "ctrl-int/1/setproperty?{}={}&[AUTH]".format(prop, value)
-        return self.daap.post(cmd_url)
+        return self.daap.post(f"ctrl-int/1/setproperty?{prop}={value}&[AUTH]")
 
 
 # pylint: disable=too-many-public-methods
@@ -296,7 +294,7 @@ class DmapRemoteControl(RemoteControl):
 
     @staticmethod
     def _move(direction, time, point1, point2):
-        data = "touch{0}&time={1}&point={2},{3}".format(direction, time, point1, point2)
+        data = f"touch{direction}&time={time}&point={point1},{point2}"
         return tags.uint8_tag("cmcc", 0x30) + tags.string_tag("cmbe", data)
 
     async def _send_commands(self, *cmds) -> None:

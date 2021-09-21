@@ -126,7 +126,7 @@ class DmapPairingHandler(
             self._loop,
             mdns.Service(
                 "_touch-remote._tcp.local",
-                "{0:040d}".format(int(address)),
+                f"{int(address):040d}",
                 address,
                 port,
                 props,

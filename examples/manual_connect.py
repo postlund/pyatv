@@ -20,7 +20,7 @@ async def print_what_is_playing(loop):
         conf.ManualService("some_id", Protocol.DMAP, 3689, {}, credentials=HSGID)
     )
 
-    print("Connecting to {0}".format(config.address))
+    print(f"Connecting to {config.address}")
     atv = await connect(config, loop)
 
     try:

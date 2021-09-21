@@ -18,7 +18,7 @@ async def print_what_is_playing(loop):
         print("No device found", file=sys.stderr)
         return
 
-    print("Connecting to {0}".format(atvs[0].address))
+    print(f"Connecting to {atvs[0].address}")
     atv = await pyatv.connect(atvs[0], loop)
 
     try:
