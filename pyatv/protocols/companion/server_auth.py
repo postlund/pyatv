@@ -106,8 +106,7 @@ class CompanionServerAuth(ABC):
             if frame_type in [FrameType.PV_Start, FrameType.PV_Next]
             else "setup"
         )
-        method = "_m{0}_{1}".format(seqno, suffix)
-        getattr(self, method)(pairing_data)
+        getattr(self, f"_m{seqno}_{suffix}")(pairing_data)
 
     def _m1_verify(self, pairing_data):
         server_pub_key = self.keys.verify_pub.public_bytes(

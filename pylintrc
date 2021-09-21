@@ -35,6 +35,7 @@ disable=
   duplicate-code,
   fixme,
   unused-argument,
+  no-self-use,
   too-few-public-methods,
   too-many-public-methods,
   too-many-arguments,

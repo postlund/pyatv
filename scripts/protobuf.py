@@ -190,28 +190,24 @@ def generate_module_code():
     for info in extract_message_info():
         message_names.add(info.title)
         packages.append("from . import " + info.module)
-        messages.append("from .{0} import {1}".format(info.module, info.title))
+        messages.append(f"from .{info.module} import {info.title}")
         extensions.append(
-            "ProtocolMessage.{0}: {1}.{2},".format(
-                info.const, info.module, info.accessor
-            )
+            f"ProtocolMessage.{info.const}: {info.module}.{info.accessor},"
         )
-        constants.append("{0} = ProtocolMessage.{0}".format(info.const))
+        constants.append(f"{info.const} = ProtocolMessage.{info.const}")
 
         reused = REUSED_MESSAGES.get(info.const)
         if reused:
             extensions.append(
-                "ProtocolMessage.{0}: {1}.{2},".format(
-                    reused, info.module, info.accessor
-                )
+                f"ProtocolMessage.{reused}: {info.module}.{info.accessor},"
             )
-            constants.append("{0} = ProtocolMessage.{0}".format(reused))
+            constants.append(f"{reused} = ProtocolMessage.{reused}")
 
     # Look for remaining messages
     for module_name, message_name in extract_unreferenced_messages():
         if message_name not in message_names:
             message_names.add(message_name)
-            messages.append("from .{0} import {1}".format(module_name, message_name))
+            messages.append(f"from .{module_name} import {message_name}")
 
     return OUTPUT_TEMPLATE.format(
         packages="\n".join(sorted(packages)),
@@ -308,15 +304,13 @@ def _decrypt_chacha20poly1305(data, nounce, key):
     input_nonce = b"\x00\x00\x00\x00" + nounce.to_bytes(length=8, byteorder="little")
     chacha = ChaCha20Poly1305(input_key)
     try:
-        print("Trying key {0} with nounce {1}".format(input_key, input_nonce))
+        print(f"Trying key {input_key} with nounce {input_nonce}")
         decrypted_data = chacha.decrypt(input_nonce, data, None)
         print(
-            "Data decrypted!\n - Nounce : {0}"
-            "\n - Key    : {1}\n - Data   : {2}\n".format(
-                binascii.hexlify(input_nonce).decode(),
-                binascii.hexlify(input_key).decode(),
-                binascii.hexlify(decrypted_data).decode(),
-            )
+            "Data decrypted!"
+            f"\n - Nonce : {binascii.hexlify(input_nonce).decode()}"
+            f"\n - Key   : {binascii.hexlify(input_key).decode()}"
+            f"\n - Data  : {binascii.hexlify(decrypted_data).decode()}\n"
         )
         _print_single_message(decrypted_data, True)
         return True

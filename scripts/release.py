@@ -102,7 +102,7 @@ def update_version(version):
     """Update version constants in const.py."""
     _LOGGER.info("Updating with new version: %s", version)
 
-    output = Path("pyatv/const.py").read_text()
+    output = Path("pyatv/const.py").read_text(encoding="utf-8")
     split = version.split(".")
     for i, component in enumerate(["MAJOR", "MINOR", "PATCH"]):
         output = re.sub(
@@ -122,7 +122,7 @@ def generate_outputs():
 def insert_changes(version, release_name):
     """Insert changelog entry into CHANGES.md."""
     _LOGGER.info("Adding entry to CHANGES.md")
-    changes = Path("CHANGES.md").read_text().split("\n")
+    changes = Path("CHANGES.md").read_text(encoding="utf-8").split("\n")
 
     if changes[2].startswith("## " + version + " "):
         _LOGGER.info("Changelog entry already present")
@@ -189,7 +189,7 @@ def verify_changes(version):
     """Verify that CHANGES.md is valid."""
     _LOGGER.info("Verifying CHANGES.md")
 
-    changes = Path("CHANGES.md").read_text()
+    changes = Path("CHANGES.md").read_text(encoding="utf-8")
     if version not in changes:
         bail("Version {0} not in CHANGES.md", version)
 
@@ -212,7 +212,7 @@ def verify_and_create_commit(version):
     expected_files = ["CHANGES.md", "pyatv/const.py"]
     content = call("git --no-pager show", show_output=False)
     for filename in expected_files:
-        if "+++ b/{0}".format(filename) not in content:
+        if f"+++ b/{filename}" not in content:
             bail("Missing file {0} in commit", filename)
 
 

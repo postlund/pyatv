@@ -429,13 +429,8 @@ class DnsMessage:
     def __str__(self):
         """Return string representation of DnsMessage."""
         return (
-            "MsgId=0x{0:04X}\nFlags=0x{1:04X}\nQuestions={2}\n"
-            "Answers={3}\nAuthorities={4}\nResources={5}".format(
-                self.msg_id,
-                self.flags,
-                self.questions,
-                self.answers,
-                self.authorities,
-                self.resources,
-            )
+            f"MsgId=0x{self.msg_id:04X}\nFlags=0x{self.flags:04X}\n"
+            f"Questions={self.questions}\nAnswers={self.answers}\n"
+            f"Authorities={self.authorities}\n"
+            f"Resources={self.resources}"
         )

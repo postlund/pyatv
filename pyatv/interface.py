@@ -483,9 +483,8 @@ class Playing(ABC):
         total_time = self.total_time
         if position is not None and total_time is not None and total_time != 0:
             output.append(
-                "    Position: {0}/{1}s ({2:.1%})".format(
-                    position, total_time, float(position) / float(total_time)
-                )
+                f"    Position: {position}/{total_time}s "
+                f"({float(position) / float(total_time):.1%})"
             )
         elif position is not None and position != 0:
             output.append(f"    Position: {position}s")
@@ -519,9 +518,7 @@ class Playing(ABC):
         if self._hash:
             return self._hash
 
-        base = "{0}{1}{2}{3}".format(
-            self.title, self.artist, self.album, self.total_time
-        )
+        base = f"{self.title}{self.artist}{self.album}{self.total_time}"
         return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
     @property

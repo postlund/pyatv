@@ -32,7 +32,7 @@ def _print_commands(title, api):
     commands = " - " + "\n - ".join(
         map(lambda x: x[0] + " - " + x[1], sorted(cmd_list.items()))
     )
-    print("{} commands:\n{}\n".format(title, commands))
+    print(f"{title} commands:\n{commands}\n")
 
 
 async def _read_input(loop: asyncio.AbstractEventLoop, prompt: str):
@@ -120,9 +120,7 @@ class GlobalCommands:
                     signature = " (property)"
 
                 print(
-                    "COMMAND:\n>> {0}{1}\n\nHELP:\n{2}".format(
-                        key, signature, inspect.getdoc(value)
-                    )
+                    f"COMMAND:\n>> {key}{signature}\n\nHELP:\n{inspect.getdoc(value)}"
                 )
         return 0
 
@@ -192,15 +190,14 @@ class GlobalCommands:
 
             if self.args.pin_code is None:
                 print(
-                    'Use any pin to pair with "{}"'
-                    " (press ENTER to stop)".format(self.args.remote_name)
+                    f'Use any pin to pair with "{self.args.remote_name}"'
+                    " (press ENTER to stop)"
                 )
             else:
                 print(
-                    'Use pin {} to pair with "{}"'
-                    " (press ENTER to stop)".format(
-                        self.args.pin_code, self.args.remote_name
-                    )
+                    f"Use pin {self.args.pin_code} to pair "
+                    f'with "{self.args.remote_name}"'
+                    " (press ENTER to stop)"
                 )
 
             await self.loop.run_in_executor(None, sys.stdin.readline)
@@ -210,11 +207,7 @@ class GlobalCommands:
         # Give some feedback to the user
         if pairing.has_paired:
             print("Pairing seems to have succeeded, yey!")
-            print(
-                "You may now use these credentials: {0}".format(
-                    pairing.service.credentials
-                )
-            )
+            print(f"You may now use these credentials: {pairing.service.credentials}")
         else:
             print("Pairing failed!")
 
@@ -322,7 +315,7 @@ class PushListener(interface.PushListener):
     @staticmethod
     def playstatus_error(_, exception):
         """Inform about an error and restart push updates."""
-        print("An error occurred (restarting): {0}".format(exception))
+        print(f"An error occurred (restarting): {exception}")
 
 
 class DeviceListener(interface.DeviceListener):
@@ -344,9 +337,7 @@ def _in_range(lower, upper, allow_none=False):
             return None
         if int(value) >= lower and int(value) < upper:
             return int(value)
-        raise argparse.ArgumentTypeError(
-            "Must be greater >= {} and < {}".format(lower, upper)
-        )
+        raise argparse.ArgumentTypeError(f"Must be greater >= {lower} and < {upper}")
 
     return _checker
 
@@ -403,7 +394,7 @@ async def cli_handler(loop):
         "--version",
         action="version",
         help="version of atvremote and pyatv",
-        version="%(prog)s {0}".format(const.__version__),
+        version=f"%(prog)s {const.__version__}",
     )
 
     pairing = parser.add_argument_group("pairing")
