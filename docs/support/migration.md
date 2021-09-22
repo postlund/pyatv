@@ -17,6 +17,22 @@ and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request
 
+# From 0.8.2-0.9.0
+
+## General Changes
+
+* To restore support with tvOS 15, make sure to provide AirPlay credentials. Credentials obtained with earlier versions of pyatv are incompatible (pair again).
+* The `password` property previously present in `conf.RaopService` is now part of `interface.BaseService` instead.
+* Make sure to verify {% include api i="interface.BaseService.pairing" %} before calling {% include api i="pyatv.pair" %} (in case new credentials are needed).
+* Check {% include api i="interface.BaseService.requires_password" %} if a password needs to be provided
+* At least version 3.17.3 of {% include pypi package="protobuf" %} is now required.
+* {% include pypi package="mediafile" %} replaced {% include pypi package="audio-metadata" %} as a dependency
+
+## Deprecations
+
+* Service specific configurations, e.g. {% include api i="conf.MrpService" %}, have been replaced by {% include api i="conf.ManualService" %}. Scheduled for removal in 1.0.0.
+* {% include api i="interface.RemoteControl.volume_up" %} and {% include api i="interface.RemoteControl.volume_down" %} are now replaced by {% include api i="interface.Audio.volume_up" %} and {% include api i="interface.Audio.volume_up" %}. Scheduled for removal in 1.0.0.
+
 # From 0.7.1-... to 0.8.0
 
 ## General Changes
@@ -29,6 +45,7 @@ request
   and {% include pypi package="miniaudio" %} are new dependencies in this
   release (used by RAOP).
 * At least version 3.14 of {% include pypi package="protobuf" %} is now required.
+
 ## Deprecations
 
 * Passing `protocol` to {% include api i="pyatv.connect" %} is no longer
