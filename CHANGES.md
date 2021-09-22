@@ -1,5 +1,267 @@
 # CHANGES
 
+## 0.9.0 JayJay (2021-09-22)
+
+So, what's new? Yeah, right, tvOS 15 was released the day before yesterday
+which broke everything. My intention was to release 0.9.0 before tvOS 15
+dropped, but things kept popping up and I had no choice but to delay. So here
+we are.
+
+The biggest feature in this release is obviously support for tvOS 15. Perhaps
+not the most exciting feature per se, but important as most of the
+functionality in pyatv is lost without it. The gist is that Apple decided to
+drop support for the MRP protocol introduced in tvOS. In practice they didn't
+get rid or it, they just allocated a special stream type in AirPlay (2) and
+decided to tunnel MRP over it. So MRP is still there, it's just carried over
+AirPlay now. As far as I know, this is how they have done it the last couple of
+iOS/tvOS releases. So it's not really new, just something no one looked into.
+The deprecation of the "regular" MRP protocol is reasonable (who uses the
+Remote app nowadays?), so I don't blame Apple for it. Would have been nice to
+have figured this out earlier though, as it required a lot of intense reverse
+engineering to unravel everything. Now it does work though, so totally worth
+it! I have tried to document how it works on the protocols page:
+
+https://pyatv.dev/documentation/protocols/
+
+All needed to get things working again is to provide AirPlay credentials. One
+important thing to note though is that you need to re-pair with this release
+(or later) to get new credentials. The old ones will only work with `play_url`,
+not for tunneling MRP over AirPlay. A small bonus here is that the HomePod
+works in the same way as the Apple TV in this regards, so pyatv can now be used
+to control HomdPods as well. No pairing is needed for that, it's just
+plug-and-play!
+
+Let's leave MRP now... My vision for pyatv is to create a "core", where
+protocols work as plugins to provide functionality. The API used by developers
+is supposed be towards core and not the protocols themselves. This basically
+means that all functions in the API should behave in the same way, no matter
+what protocols are used in regards to arguments, return values, listener
+interfaces, error handling and so on. This release contains a lof of work
+towards realizing that vision. I'm not quite there yet, but it's closer than
+ever. Hopefully, this will only manifest itself through more consistent
+behavior and not much you as a developer need to pay any attention to. But if
+you notice any changes in behavior, this might be the reason. Be sure to report
+anything that you find peculiar, it might need fixing or an explanation.
+
+Another minor new feature is that the Audio interface has been extended to
+include volume_up and volume_down, which also means those methods are
+deprecated in `RemoteControl`. Please update your code for this. Also, all the
+protocol specic service types, e.g. `conf.MrpService` and `conf.AirPlayService`
+have been deprecated in favor of `conf.ManualService`. Update your code for
+this as well, in case you rely on any of them. They will stick around for a few
+releases, so your code won't break because of this. The last minor feature is a
+helper method called `helpers.is_streamable`, which can check if file is
+supported by `Stream.stream_file`.
+
+One last thing... This release fills a big gap that has been present for a long
+time: when do you need to pair? Each service now contains a "pairing" property
+that will tell you of pairing is needed or not. This makes it possible to
+programmatically determine if the pairing procedure needs to to performed,
+something that wasn't clear before. After scanning, just iterate all services
+and pair the ones requiring it. A similar property has been added for passwords
+as well, called `requires_password`. If True, then a password is required to
+connect. Only applicable to RAOP so far (it works for AirPlay as well, but
+there's no support for passwords in AirPlay yet).
+
+To round things up, I just wanted to say that docker images are automatically
+built for new releases as well as the latest commit on master, making it easy
+to test pyatv without having to install any additional software other than
+docker. I still have some areas to improve, but it's a good start. This release
+will be the first release having docker images pre-built as it's tricky to
+backport.
+
+That is it for now. Make sure to check out the migration guide to get some
+hints on what you need to do when upgrading.
+
+Be sure to check out the migration notes before upgrading:
+
+https://pyatv.dev/support/migration/
+
+**Notes:**
+
+* mediafile replaced audio-metadata as a dependency in this release
+* At least version 3.17.3 of protobuf is required
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+```
+099c975 dmap: Add support for pairing requirement
+```
+
+*Protocol: MRP:*
+
+```
+6177e86 mrp: Add support for pairing requirement
+0bdd614 mrp: Add support for Audio interface
+2495e56 mrp: Extract build number from DEVICE_INFO
+```
+
+*Protocol: AirPlay:*
+
+```
+31bf148 airplay: Add support for pairing requirement
+af5c441 airplay: Add support for requires_password
+8c35d1f airplay: Add support for transient pairing
+a407efa airplay: Support MRP tunneling over AirPlay 2
+```
+
+*Protocol: Companion:*
+
+```
+e49b9ef companion: Add support for pairing requirement
+```
+
+*Protocol: RAOP:*
+
+```
+d47924d raop: Send empty audio during latency period
+f075d4d raop: Add support for pairing requirement
+f66563a raop: Add support for requires_password
+```
+
+*Other:*
+
+```
+9339954 if: Add volume_up and volume_down to Audio
+1c11600 gh: Convert issue templates to forms
+8f7f9bd gha: Build and publish Docker containers
+4f76bf3 core: Switch from audio-metadata to mediafile
+33a0d5d deps: Bump protobuf to 3.17.3
+14a35fe helpers: Add is_streamable method
+21dec3e facade: Close connections only once
+09bd203 facade: Close protocols on device update
+f5f84b1 facade: Return remaining tasks in close
+```
+
+**All changes:**
+
+```
+c04e1a5 build(deps): bump pytest-xdist from 2.3.0 to 2.4.0
+d47924d raop: Send empty audio during latency period
+8ecf4b5 http: Handle responses when no receiver exists
+45a4385 build(deps): bump pylint from 2.10.2 to 2.11.1
+07804a0 build(deps): bump mypy-protobuf from 2.9 to 2.10
+52cbe4c build(deps-dev): bump tox from 3.24.3 to 3.24.4
+884edb1 build(deps): bump black from 21.8b0 to 21.9b0
+5b0984c docs: Update scan, pair and connect docs
+f075d4d raop: Add support for pairing requirement
+6318fee airplay: Refactor pairing requirement extraction
+31bf148 airplay: Add support for pairing requirement
+099c975 dmap: Add support for pairing requirement
+b57b2bb dmap: Add support for pairing requirement
+e49b9ef companion: Add support for pairing requirement
+6177e86 mrp: Add support for pairing requirement
+af5c441 airplay: Add support for requires_password
+f66563a raop: Add support for requires_password
+8049c82 if: Add protocol specific methods for service info
+c07cb1c if: Restructure service handling
+3cdb1fb core: Move state_producer to support
+9aeec0a core: Move state_producer to support
+2f84917 core: Move back device_info to support
+da765a3 if: Rely solely on BaseService internally
+b3221a5 conf: Extract BaseConfig interface
+88c66bc docs: Minor updates
+d4163a7 facade: Verify support in play_url
+0ed417e airplay: Base play_url availability on properties
+9339954 if: Add volume_up and volume_down to Audio
+f563eea env: Add work to .gitgnore
+0bdd614 mrp: Add support for Audio interface
+dc247bd mrp: Update some MRP protobuf messages
+7dc7c99 gha: Add workflow_dispatch: to tests workflow
+c7cf760 docs: Various minor updates
+52210b5 if: Keep position within limits
+671c24a core: Move scan to core
+78386f6 core: Move facade to core
+3cba1c4 core: Move net to core
+0227e06 core: Move mdns to core
+743988a core: Move facade to core
+9812b0e core: Move device_info to core
+e53a6c1 core: Move protocol details to protocols module
+63b1d09 core: Move raop to protocols
+b0a780e mrp: Move mrp to protocols
+6f8c90b core: Move dmap to protocols
+9196a88 core: Move companion to protocols
+b0758a9 core: Move airplay to protocols
+8ee902b gh: Fix bad labels for investigation and bugs
+3e01c2e gha: Change tags and labels a bit for containers
+1c11600 gh: Convert issue templates to forms
+c126d77 gha: Fix remaining issues with release workflow
+826bb58 gha: Fix building containers and make releases
+8f7f9bd gha: Build and publish Docker containers
+2495e56 mrp: Extract build number from DEVICE_INFO
+a548587 conf: Move device_info implementations to protocol
+c6bb384 support: Add collection method dict_merge
+8fcca30 devinfo: Add new tvOS build numbers
+bac81ef if: Base DeviceInfo on dict
+f66aa84 raop: Add support for legacy pairing
+7e1ca68 core: Refactor pair to take service
+d974f08 core: Set up protocols independently
+a46c068 docs: Add instructions for close
+4a24ac9 airplay: Various connection robustness changes
+5a6c267 mrp: Add VolumeDidChangeMessage
+8c35d1f airplay: Add support for transient pairing
+61ef4e2 core: Return protocol when setting up protocol
+a407efa airplay: Support MRP tunneling over AirPlay 2
+e060b9e mrp: Generalize set up of MRP
+8a88129 docs: Remove internal things from API docs
+5f1a55e core: Allow setup to yield multiple instances
+384a7a6 mrp: Add new protobuf messages
+0b0648e support: Add length field to packet
+ae5785b raop: Move packets to support
+6bc3cf1 raop: Move metadata to support
+402ae73 raop: Move RTSP implementation to support
+eb71a3d auth: Add abstract class for HAP channels
+d7f6394 raop: Generalize the RTSP implementation
+1da0414 auth: Refactor HAP for generic key derivation
+e04736c airplay: Pick most suitable pairing type
+7c667b9 airplay: Add module to parse features
+e582644 auth: Add HAPSession used for encryption
+b328826 airplay: Add helper verify_connection to auth
+9f81aa9 http: Add pre/post processors to HttpConnection
+a2d0218 airplay: Add HAP auth support
+044aa1d airplay: Add auth type to pair_setup
+7b9dda8 airplay: Generate new credentials for Pair-Setup
+bcdf21b airplay: Refactor auth for multiple types
+9783fea airplay: Add legacy to auth procedure name
+ee6437a auth: Move tlv8 and srp to auth modules
+68ea864 auth: Refactor to general HAP pairing scheme
+eac1428 airplay: Rename auth to auth_legacy
+4f76bf3 core: Switch from audio-metadata to mediafile
+33a0d5d deps: Bump protobuf to 3.17.3
+bca490e build(deps): bump mypy-protobuf from 2.5 to 2.9
+c8e22b6 build(deps): bump pytest from 6.2.4 to 6.2.5
+ae05921 build(deps): bump black from 21.7b0 to 21.8b0
+001d920 scripts: Add support for year, track and genre
+14a35fe helpers: Add is_streamable method
+81739c8 conf: Add password to RAOP output
+c5513b3 docs: Use absolute address to logo in README
+415c8a5 build(deps): bump pdoc3 from 0.9.2 to 0.10.0
+5900c29 build(deps): bump pylint from 2.9.6 to 2.10.2
+46507f3 facade: Return pending tasks from previous close
+21dec3e facade: Close connections only once
+09bd203 facade: Close protocols on device update
+83dfe6b core: Add state_was_updated to StateProducer
+dd15ef9 facade: Only propagate one device update
+9602344 if: Move StateProducer to core and add max_calls
+6a498d7 build(deps): bump pylint from 2.9.6 to 2.10.2
+f5f84b1 facade: Return remaining tasks in close
+b2333d2 docs: Make some clarifications for AirPlay remote
+b2d2b1b build(deps-dev): bump tox from 3.24.0 to 3.24.1
+94f3b88 docs: Fix broken diagram in AP 2
+5c036e9 docs: Add remote control docs for AirPlay 2
+1877f65 build(deps): bump codecov from 2.1.11 to 2.1.12
+e1b5687 build(deps): bump isort from 5.9.2 to 5.9.3
+a9675fd Fix spelling error
+454dcff docs: Add issue regarding cellcomtvappleos
+e36602e docs: Add entry for Illegal instruction
+415ee61 Disable pylint instead of mypy
+075ac89 mrp: Disable some type checking
+1630419 docs: Fix broken links in supported_features
+bbdd88b build(deps): bump pylint from 2.9.5 to 2.9.6
+```
+
 ## 0.8.2 Helpy (2021-07-28)
 
 Time for another minor release! Highlights this time is
@@ -42,24 +304,32 @@ list is below. See you all next time!
 
 *Protocol: DMAP:*
 
+```
 271c319 dmap: Add support for HSCP service
+```
 
 *Protocol: Companion:*
 
+```
 af77f3e companion: Add support for several buttons
 bdaf12a companion: Generalize OPACK error handling
+```
 
 *Protocol: RAOP:*
 
+```
 42a0e58 Add support for password protected RAOP devices
+```
 
 *Other:*
+```
 
 8faa4eb core: Fix potential aiohttp client session leak
 9be93f1 scan: Support scanning for specific protocols
 4d7f5bf debug: Include zeroconf properties in debug log
 2cf35e3 gha: Another attempt to re-run tox on failure
 3b55c6a env: Update metadata in setup.py
+```
 
 **All changes:**
 
@@ -130,11 +400,13 @@ https://pyatv.dev/development/stream/#stream-a-file
 
 *Protocol: RAOP:*
 
+```
 f41d552 raop: Sync sending based on absolute time
 bd15ff2 raop: Use perf_counter instead of monotonic
 4abfc94 raop: Add small buffer to BufferedReaderSource
 ee1ee94 raop: Fix timing when starting to stream
 8096928 raop: Support streaming files from a buffer
+```
 
 **All changes:**
 
@@ -202,39 +474,53 @@ I guess that is it!
 
 *Protocol: DMAP:*
 
+```
 * Reset revision if push update fails (#1004) fixes #1000
+```
 
 *Protocol: MRP:*
 
+```
 * bug: Do not deep copy protobuf messages (#1105) fixes #1038
 * bug: Handle missing artwork gracefully (#1033) fixes #937
 * bug: Implement and enforce internal protocol state (#1009) fixes #1007
+```
 
 *Protocol: AirPlay:*
 
+```
 * General clean up of module but no new features
+```
 
 *Protocol: Companion:*
 
+```
 * Initial release
 * Adds the Apps interface (list and launch apps)
 * Implements turn_on and turn_off in the Power interface
+```
 
 *Protocol: RAOP:*
 
+```
 * Initial release
 * Supports streaming WAV, MP3, OGG and Vorbis files
 * Reads metadata from supported formats (artist, album and title)
 * Supports volume controls
+```
 
 *Script: atvlog:*
 
+```
 * Exit if no output was generated (#1001)
 * Support serving output via web server (#997)
+```
 
 *Script: atvremote:*
 
+```
 * Fix bugs in manual mode (parameters not respected properly)
+```
 
 **Notes:**
 

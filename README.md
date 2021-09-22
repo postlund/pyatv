@@ -59,7 +59,7 @@ docker run -it --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
 ```
 
 The `master` tag points to latest commit on the `master` branch and can
-be changed to a specific version, e.g. `v0.8.2`.
+be changed to a specific version, e.g. `v0.9.0`.
 
 # I need to change something?
 
