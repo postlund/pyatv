@@ -162,12 +162,16 @@ async def service_info(
     """Update service with additional information."""
     service.requires_password = is_password_required(service)
 
-    # Some devices require no pairing at all, so exclude them
-    if devinfo.model in [
+    if service.properties.get("acl", "0") == "1":
+        # Access control might say that pairing is not possible, e.g. only devices
+        # belonging to the same home (not supported by pyatv)
+        service.pairing = PairingRequirement.Disabled
+    elif devinfo.model in [
         DeviceModel.AirPortExpressGen2,
         DeviceModel.HomePod,
         DeviceModel.HomePodMini,
     ]:
+        # Some devices require no pairing at all, so exclude them
         service.pairing = PairingRequirement.NotNeeded
     else:
         service.pairing = get_pairing_requirement(service)
