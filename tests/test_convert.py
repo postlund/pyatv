@@ -1,60 +1,103 @@
 """Unit tests for pyatv.convert."""
 
+import pytest
+
 from pyatv import convert
-from pyatv.const import DeviceState, MediaType, Protocol, RepeatState, ShuffleState
+from pyatv.const import (
+    DeviceModel,
+    DeviceState,
+    MediaType,
+    Protocol,
+    RepeatState,
+    ShuffleState,
+)
 
 
-def test_media_type_to_string():
-    assert "Unknown" == convert.media_type_str(MediaType.Unknown)
-    assert "Video" == convert.media_type_str(MediaType.Video)
-    assert "Music" == convert.media_type_str(MediaType.Music)
-    assert "TV" == convert.media_type_str(MediaType.TV)
+@pytest.mark.parametrize(
+    "media_type,output",
+    [
+        (MediaType.Unknown, "Unknown"),
+        (MediaType.Video, "Video"),
+        (MediaType.Music, "Music"),
+        (MediaType.TV, "TV"),
+        (99, "Unsupported"),
+    ],
+)
+def test_media_type_to_string(media_type, output):
+    assert convert.media_type_str(media_type) == output
 
 
-def test_unknown_media_type_to_str():
-    assert "Unsupported" == convert.media_type_str(999)
+@pytest.mark.parametrize(
+    "device_state,output",
+    [
+        (DeviceState.Idle, "Idle"),
+        (DeviceState.Loading, "Loading"),
+        (DeviceState.Stopped, "Stopped"),
+        (DeviceState.Paused, "Paused"),
+        (DeviceState.Playing, "Playing"),
+        (DeviceState.Seeking, "Seeking"),
+        (999, "Unsupported"),
+    ],
+)
+def test_device_state_str(device_state, output):
+    assert convert.device_state_str(device_state) == output
 
 
-def test_device_state_str():
-    assert "Idle" == convert.device_state_str(DeviceState.Idle)
-    assert "Loading" == convert.device_state_str(DeviceState.Loading)
-    assert "Stopped" == convert.device_state_str(DeviceState.Stopped)
-    assert "Paused" == convert.device_state_str(DeviceState.Paused)
-    assert "Playing" == convert.device_state_str(DeviceState.Playing)
-    assert "Seeking" == convert.device_state_str(DeviceState.Seeking)
+@pytest.mark.parametrize(
+    "repeat,output",
+    [
+        (RepeatState.Off, "Off"),
+        (RepeatState.Track, "Track"),
+        (RepeatState.All, "All"),
+        (1234, "Unsupported"),
+    ],
+)
+def test_repeat_str(repeat, output):
+    assert convert.repeat_str(repeat) == output
 
 
-def test_unsupported_device_state_str():
-    assert "Unsupported" == convert.device_state_str(999)
+@pytest.mark.parametrize(
+    "shuffle,output",
+    [
+        (ShuffleState.Off, "Off"),
+        (ShuffleState.Albums, "Albums"),
+        (ShuffleState.Songs, "Songs"),
+        (1234, "Unsupported"),
+    ],
+)
+def test_shuffle_str(shuffle, output):
+    assert convert.shuffle_str(shuffle) == output
 
 
-def test_repeat_str():
-    assert "Off" == convert.repeat_str(RepeatState.Off)
-    assert "Track" == convert.repeat_str(RepeatState.Track)
-    assert "All" == convert.repeat_str(RepeatState.All)
+@pytest.mark.parametrize(
+    "protocol,output",
+    [
+        (Protocol.MRP, "MRP"),
+        (Protocol.DMAP, "DMAP"),
+        (Protocol.AirPlay, "AirPlay"),
+        (Protocol.Companion, "Companion"),
+        (Protocol.RAOP, "RAOP"),
+        (1234, "Unknown"),
+    ],
+)
+def test_protocol_str(protocol, output):
+    assert convert.protocol_str(protocol) == output
 
 
-def test_unknown_repeat_to_str():
-    assert "Unsupported" == convert.repeat_str(1234)
-
-
-def test_shuffle_str():
-    assert "Off" == convert.shuffle_str(ShuffleState.Off)
-    assert "Albums" == convert.shuffle_str(ShuffleState.Albums)
-    assert "Songs" == convert.shuffle_str(ShuffleState.Songs)
-
-
-def test_unknown_shuffle_to_str():
-    assert "Unsupported" == convert.shuffle_str(1234)
-
-
-def test_protocol_str():
-    assert "MRP" == convert.protocol_str(Protocol.MRP)
-    assert "DMAP" == convert.protocol_str(Protocol.DMAP)
-    assert "AirPlay" == convert.protocol_str(Protocol.AirPlay)
-    assert "Companion" == convert.protocol_str(Protocol.Companion)
-    assert "RAOP" == convert.protocol_str(Protocol.RAOP)
-
-
-def test_unknown_protocol_str():
-    assert "Unknown" == convert.protocol_str("invalid")
+@pytest.mark.parametrize(
+    "model,output",
+    [
+        (DeviceModel.Gen2, "Apple TV 2"),
+        (DeviceModel.Gen3, "Apple TV 3"),
+        (DeviceModel.Gen4, "Apple TV 4"),
+        (DeviceModel.Gen4K, "Apple TV 4K"),
+        (DeviceModel.HomePod, "HomePod"),
+        (DeviceModel.HomePodMini, "HomePod Mini"),
+        (DeviceModel.AirPortExpress, "AirPort Express (gen 1)"),
+        (DeviceModel.AirPortExpressGen2, "AirPort Express (gen 2)"),
+        (DeviceModel.AppleTV4KGen2, "Apple TV 4K (gen2)"),
+        (1234, "Unknown"),
+    ],
+)
+def test_model_str(model, output):
+    assert convert.model_str(model) == output
