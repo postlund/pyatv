@@ -268,6 +268,11 @@ class FakeMrpState:
         msg.inner().volumeControlAvailable = available
         self._send(msg)
 
+        msg = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
+        msg.inner().capabilities.volumeControlAvailable = available
+        msg.inner().outputDeviceUID = DEVICE_UID
+        self._send(msg)
+
     def default_supported_commands(self, commands):
         msg = messages.create(protobuf.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
         supported_commands = msg.inner().supportedCommands.supportedCommands

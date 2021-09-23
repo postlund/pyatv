@@ -632,10 +632,16 @@ class MrpAudio(Audio):
     def __init__(self, protocol: MrpProtocol):
         """Initialize a new MrpAudio instance."""
         self.protocol: MrpProtocol = protocol
-        self.volume_controls_available: bool = False
+        self._volume_controls_available: bool = False
+        self._output_device_uid: Optional[str] = None
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
+
+    @property
+    def is_available(self):
+        """Return if audio controls are available."""
+        return self._volume_controls_available and self._output_device_uid is not None
 
     def _add_listeners(self):
         self.protocol.add_listener(
@@ -656,23 +662,22 @@ class MrpAudio(Audio):
     async def _volume_control_changed(self, message, _) -> None:
         inner = message.inner()
 
-        # Make sure update is for our device (in case it changed for someone else)
-        if inner.outputDeviceUID == self.protocol.device_info.inner().deviceUID:
-            self._update_volume_controls(inner.capabilities)
+        self._output_device_uid = inner.outputDeviceUID
+        self._update_volume_controls(inner.capabilities)
 
     def _update_volume_controls(
         self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
     ) -> None:
-        self.volume_controls_available = availabilty_message.volumeControlAvailable
+        self._volume_controls_available = availabilty_message.volumeControlAvailable
         _LOGGER.debug(
-            "Volume control availability changed to %s", self.volume_controls_available
+            "Volume control availability changed to %s", self._volume_controls_available
         )
 
     async def _volume_did_change(self, message, _) -> None:
         inner = message.inner()
 
         # Make sure update is for our device (in case it changed for someone else)
-        if inner.outputDeviceUID == self.protocol.device_info.inner().deviceUID:
+        if inner.outputDeviceUID == self._output_device_uid:
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
@@ -693,11 +698,15 @@ class MrpAudio(Audio):
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
-        await self.protocol.send_and_receive(
-            messages.set_volume(
-                self.protocol.device_info.inner().deviceUID, level / 100.0
-            )
+        if self._output_device_uid is None:
+            raise exceptions.ProtocolError("no output device")
+
+        await self.protocol.send(
+            messages.set_volume(self._output_device_uid, level / 100.0)
         )
+
+        if self._volume != level:
+            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
@@ -773,7 +782,7 @@ class MrpFeatures(Features):
             FeatureName.Volume,
             FeatureName.SetVolume,
         ]:
-            if self.audio.volume_controls_available:
+            if self.audio.is_available:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
