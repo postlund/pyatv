@@ -81,12 +81,11 @@ async def connect(
     atv = FacadeAppleTV(config, session_manager)
 
     try:
-        for service in config.services:
-            proto_methods = PROTOCOLS.get(service.protocol)
-            if not proto_methods:
-                raise RuntimeError(
-                    f"missing implementation for protocol {service.protocol}"
-                )
+        # for service in config.services:
+        for proto, proto_methods in PROTOCOLS.items():
+            service = config.get_service(proto)
+            if service is None:
+                continue
 
             for setup_data in proto_methods.setup(
                 loop, config, service, atv, session_manager
