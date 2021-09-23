@@ -136,14 +136,27 @@ async def test_service_info_password(raop_props, mrp_props, requires_password):
     ],
 )
 async def test_service_info_pairing(raop_props, devinfo, pairing_req):
-    raop_props = MutableService("id", Protocol.AirPlay, 0, raop_props)
+    raop_service = MutableService("id", Protocol.RAOP, 0, raop_props)
 
-    assert raop_props.pairing == PairingRequirement.Unsupported
+    assert raop_service.pairing == PairingRequirement.Unsupported
 
     await service_info(
-        raop_props,
+        raop_service,
         DeviceInfo(devinfo),
-        {Protocol.RAOP: raop_props},
+        {Protocol.RAOP: raop_service},
     )
 
-    assert raop_props.pairing == pairing_req
+    assert raop_service.pairing == pairing_req
+
+
+async def test_service_info_pairing_acl():
+    raop_service = MutableService("id", Protocol.RAOP, 0, {})
+    airplay_props = MutableService("id", Protocol.AirPlay, 0, {"acl": "1"})
+
+    await service_info(
+        raop_service,
+        DeviceInfo({}),
+        {Protocol.RAOP: raop_service, Protocol.AirPlay: airplay_props},
+    )
+
+    assert raop_service.pairing == PairingRequirement.Disabled
