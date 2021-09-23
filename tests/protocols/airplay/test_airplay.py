@@ -87,6 +87,8 @@ async def test_service_info_password(airplay_props, mrp_props, requires_password
             {},
             PairingRequirement.Mandatory,
         ),
+        ({"acl": "1"}, {}, PairingRequirement.Disabled),
+        ({"acl": "1", "sf": "0x200"}, {}, PairingRequirement.Disabled),
         # Special cases for devices only requiring transient pairing, e.g.
         # HomePod and AirPort Express
         # AirPort Express gen 1 does not support AirPlay 2 => assume checks above
