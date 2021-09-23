@@ -44,6 +44,13 @@ from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
+# Observed values of rpfl (zeroconf):
+# 0x62792 -> All on the same network (Unsupported/Mandatory)
+# 0x627B6 -> Only devices in same home (Disabled)
+# Mask = 0x62792 & ~0x627B6 = 0x24
+PAIRING_DISABLED_MASK = 0x24
+
+
 SUPPORTED_FEATURES = set(
     [
         FeatureName.AppList,
@@ -359,7 +366,12 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
-    service.pairing = PairingRequirement.Mandatory
+    if devinfo.model in [DeviceModel.HomePod, DeviceModel.HomePodMini]:
+        service.pairing = PairingRequirement.Unsupported
+    elif int(service.properties.get("rpfl", "0x0"), 16) & PAIRING_DISABLED_MASK:
+        service.pairing = PairingRequirement.Disabled
+    else:
+        service.pairing = PairingRequirement.Mandatory
 
 
 def setup(
