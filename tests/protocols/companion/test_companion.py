@@ -44,9 +44,32 @@ def test_device_info(properties, expected):
     assert not DeepDiff(device_info(properties), expected)
 
 
-async def test_service_info_pairing():
-    service = MutableService(None, Protocol.Companion, 0, {})
+@pytest.mark.parametrize(
+    "properties,devinfo,expected",
+    [
+        ({}, {}, PairingRequirement.Mandatory),
+        ({"rpfl": "0x627B6"}, {}, PairingRequirement.Disabled),
+        ({"rpfl": "0x62792"}, {}, PairingRequirement.Mandatory),
+        (
+            {},
+            {DeviceInfo.MODEL: DeviceModel.HomePod},
+            PairingRequirement.Unsupported,
+        ),
+        (
+            {},
+            {DeviceInfo.MODEL: DeviceModel.HomePodMini},
+            PairingRequirement.Unsupported,
+        ),
+        (
+            {"rpfl": "0x627B6"},
+            {DeviceInfo.MODEL: DeviceModel.HomePod},
+            PairingRequirement.Unsupported,
+        ),
+    ],
+)
+async def test_service_info_pairing(properties, devinfo, expected):
+    service = MutableService(None, Protocol.Companion, 0, properties)
 
     assert service.pairing == PairingRequirement.Unsupported
-    await service_info(service, DeviceInfo({}), {Protocol.Companion: service})
-    assert service.pairing == PairingRequirement.Mandatory
+    await service_info(service, DeviceInfo(devinfo), {Protocol.Companion: service})
+    assert service.pairing == expected
