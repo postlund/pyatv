@@ -518,6 +518,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         assert math.isclose(self.atv.audio.volume, 0.0)
 
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
+
         # Manually set a new volume level
         await self.atv.audio.set_volume(20.0)
         await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
@@ -529,7 +535,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_audio_volume_up_increases_volume(self):
         self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
         await self.atv.audio.set_volume(20.0)
+        assert math.isclose(self.atv.audio.volume, 20.0)
 
         await self.atv.audio.volume_up()
         assert self.atv.audio.volume == round(20.0 + VOLUME_STEP * 100.0)
@@ -540,7 +553,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_audio_volume_down_decreases_volume(self):
         self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
         await self.atv.audio.set_volume(20.0)
+        assert math.isclose(self.atv.audio.volume, 20.0)
 
         await self.atv.audio.volume_down()
         assert self.atv.audio.volume == round(20 - VOLUME_STEP * 100.0)
@@ -551,7 +571,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_audio_volume_up_above_max(self):
         self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
         await self.atv.audio.set_volume(100.0)
+        assert math.isclose(self.atv.audio.volume, 100.0)
 
         # Should not yield a timeout
         await self.atv.audio.volume_up()
@@ -559,7 +586,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     @unittest_run_loop
     async def test_audio_volume_down_below_zero(self):
         self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
         await self.atv.audio.set_volume(0.0)
+        assert math.isclose(self.atv.audio.volume, 0.0)
 
         # Should not yield a timeout
         await self.atv.audio.volume_down()
