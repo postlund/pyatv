@@ -1,5 +1,52 @@
 # CHANGES
 
+## 0.9.1 Lolbit (2021-09-23)
+
+Minor bug fix release coming up! Should fix connection issues when a stale
+MRP service is present after upgrading to tvOS 15. Also improves pairing requirement
+handling for AirPlay and RAOP in case access control is set to "Only devices in
+my home" (will now report as Disabled). Companion is also reported as Unsupported
+for HomePods as pyatv cannot pair with them.
+
+A new convert method to convert a `DeviceModel` to string has been added.
+
+**Changes:**
+
+*Protocol: AirPlay:*
+
+```
+2558a89 airplay: Support Disabled pairing requirement
+```
+
+*Protocol: Companion:*
+
+```
+6cb7269 companion: Better support for pairing requirement
+```
+
+*Protocol: RAOP:*
+
+```
+d257378 raop: Support Disabled pairing requirement
+```
+
+*Other:*
+
+```
+70b4992 convert: Add model_str method
+535b56b core: Use connect order based on protocol
+```
+
+**All changes:**
+
+```
+6cb7269 companion: Better support for pairing requirement
+d257378 raop: Support Disabled pairing requirement
+2558a89 airplay: Support Disabled pairing requirement
+70b4992 convert: Add model_str method
+535b56b core: Use connect order based on protocol
+```
+
 ## 0.9.0 JayJay (2021-09-22)
 
 So, what's new? Yeah, right, tvOS 15 was released the day before yesterday

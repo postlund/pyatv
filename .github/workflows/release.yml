@@ -19,6 +19,14 @@ jobs:
       packages: write
 
     steps:
+      - name: Cargo download work-around
+        run: |
+          mkdir -p ~/.cargo
+          cat <<EOF > ~/.cargo/config.toml
+          [net]
+          git-fetch-with-cli = true
+          EOF
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -90,7 +98,7 @@ jobs:
             dist
 
   make_release:
-    if: github.event_name =='create' && github.event.ref_type == 'tag'
+    if: ${{ startsWith('refs/tags/v', github.ref) }}
     needs: build_containers
     runs-on: ubuntu-latest
 
