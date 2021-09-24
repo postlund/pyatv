@@ -1,6 +1,13 @@
 """Various types of extraction and conversion functions."""
 
-from pyatv.const import DeviceState, MediaType, Protocol, RepeatState, ShuffleState
+from pyatv.const import (
+    DeviceModel,
+    DeviceState,
+    MediaType,
+    Protocol,
+    RepeatState,
+    ShuffleState,
+)
 
 
 def device_state_str(state: DeviceState) -> str:
@@ -53,3 +60,18 @@ def protocol_str(protocol: Protocol) -> str:
         Protocol.Companion: "Companion",
         Protocol.RAOP: "RAOP",
     }.get(protocol, "Unknown")
+
+
+def model_str(device_model: DeviceModel) -> str:
+    """Convert device model to string."""
+    return {
+        DeviceModel.Gen2: "Apple TV 2",
+        DeviceModel.Gen3: "Apple TV 3",
+        DeviceModel.Gen4: "Apple TV 4",
+        DeviceModel.Gen4K: "Apple TV 4K",
+        DeviceModel.HomePod: "HomePod",
+        DeviceModel.HomePodMini: "HomePod Mini",
+        DeviceModel.AirPortExpress: "AirPort Express (gen 1)",
+        DeviceModel.AirPortExpressGen2: "AirPort Express (gen 2)",
+        DeviceModel.AppleTV4KGen2: "Apple TV 4K (gen2)",
+    }.get(device_model, "Unknown")

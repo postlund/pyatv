@@ -8,7 +8,13 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, c
 
 from pyatv import const, exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, FeatureState, Protocol
+from pyatv.const import (
+    DeviceModel,
+    FeatureName,
+    FeatureState,
+    PairingRequirement,
+    Protocol,
+)
 from pyatv.core import MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
@@ -416,8 +422,14 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
-    # Same behavior as for AirPlay expected, so re-using that here
-    await airplay_service_info(service, devinfo, services)
+    airplay_service = services.get(Protocol.AirPlay)
+    if airplay_service and airplay_service.properties.get("acl", "0") == "1":
+        # Access control might say that pairing is not possible, e.g. only devices
+        # belonging to the same home (not supported by pyatv)
+        service.pairing = PairingRequirement.Disabled
+    else:
+        # Same behavior as for AirPlay expected, so re-using that here
+        await airplay_service_info(service, devinfo, services)
 
 
 def setup(
