@@ -15,7 +15,9 @@ from typing import (
     Mapping,
     NamedTuple,
     Optional,
+    Set,
     Tuple,
+    Union,
     cast,
 )
 
@@ -258,12 +260,16 @@ class MulticastMdnsScanner(BaseScanner):
     """Service discovery based on multicast MDNS."""
 
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, identifier: Optional[str] = None
+        self,
+        loop: asyncio.AbstractEventLoop,
+        identifier: Optional[Union[str, Set[str]]] = None,
     ):
         """Initialize a new MulticastMdnsScanner."""
         super().__init__()
         self.loop = loop
-        self.identifier = identifier
+        self.identifier: Optional[Set[str]] = (
+            {identifier} if isinstance(identifier, str) else identifier
+        )
 
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
@@ -277,4 +283,6 @@ class MulticastMdnsScanner(BaseScanner):
             self.handle_response(response)
 
     def _end_if_identifier_found(self, response: mdns.Response):
-        return self.identifier in get_unique_identifiers(response)
+        return self.identifier and not self.identifier.isdisjoint(
+            set(get_unique_identifiers(response))
+        )

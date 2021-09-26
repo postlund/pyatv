@@ -68,3 +68,17 @@ class TransformOutput(argparse.Action):
             setattr(namespace, self.dest, json.dumps)
         else:
             raise argparse.ArgumentTypeError("Valid formats are: json")
+
+
+# pylint: disable=too-few-public-methods
+class TransformIdentifiers(argparse.Action):
+    """Transform identifiers into array if multiple."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Split identifiers and save as array if more than one."""
+        identifiers_split = values.split(",")
+
+        if len(identifiers_split) == 1:
+            setattr(namespace, self.dest, values)
+        else:
+            setattr(namespace, self.dest, set(identifiers_split))

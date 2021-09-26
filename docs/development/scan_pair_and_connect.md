@@ -53,6 +53,17 @@ When scanning for one or more protocols with `protocols`, only the listed
 protocols are added to the configuration regardless if more protocols are
 supported.
 
+It is possible to provide a `set` of identifiers to scan for:
+
+```python
+atvs = scan(loop, identifier={"id1", "id2"})
+```
+
+The first device responding to either of the identifiers will be returned.
+This is useful when re-discovering a previous known device. Scanning for
+all identifiers used by a device will work even if a service is no longer
+present, e.g. when disabling AirPlay.
+
 # Pair
 
 Calling {% include api i="pyatv.pair" %} returns a _pairing handler_ conforming to the interface

@@ -29,6 +29,22 @@ class AtvremoteTest(ScriptTest):
         self.exit(0)
 
     @unittest_run_loop
+    async def test_scan_single_identifier(self):
+        await self.atvremote("--id", MRP_ID, "scan")
+        self.has_output("Apple TV 2", IP_2, MRP_ID, AIRPLAY_ID)
+        self.exit(0)
+
+    @unittest_run_loop
+    async def test_scan_multiple_identifier(self):
+        await self.atvremote("--id", f"bad_id,{DMAP_ID}", "scan")
+        self.has_output(
+            "Apple TV 1",
+            IP_1,
+            DMAP_ID,
+        )
+        self.exit(0)
+
+    @unittest_run_loop
     async def test_pair_airplay(self):
         self.user_input(str(DEVICE_PIN))
         await self.atvremote(

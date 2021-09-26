@@ -62,6 +62,17 @@ async def test_multicast_scan_no_device_found(multicast_scan: Scanner):
 
 async def test_multicast_scan_for_particular_device(udns_server, multicast_scan):
     udns_server.add_service(service1())
+    udns_server.add_service(service2(address=SERVICE_1_IP))
+    udns_server.add_service(service3())
+
+    atvs = await multicast_scan(identifier={SERVICE_1_ID, SERVICE_2_ID})
+    assert len(atvs) == 1
+
+    assert atvs[0].name == SERVICE_2_NAME
+
+
+async def test_multicast_scan_for_specific_devices(udns_server, multicast_scan):
+    udns_server.add_service(service1())
     udns_server.add_service(service2(address=SERVICE_2_IP))
 
     atvs = await multicast_scan(identifier=SERVICE_2_ID)

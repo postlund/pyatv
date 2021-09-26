@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 async def scan(
     loop: asyncio.AbstractEventLoop,
     timeout: int = 5,
-    identifier: str = None,
+    identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
     hosts: List[str] = None,
 ) -> List[interface.BaseConfig]:
@@ -31,8 +31,9 @@ async def scan(
         if not atv.ready:
             return False
 
-        if identifier and identifier not in atv.all_identifiers:
-            return False
+        if identifier:
+            target = identifier if isinstance(identifier, set) else {identifier}
+            return not target.isdisjoint(atv.all_identifiers)
 
         return True
 
