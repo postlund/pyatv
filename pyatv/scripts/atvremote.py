@@ -20,7 +20,12 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.interface import retrieve_commands
-from pyatv.scripts import TransformProtocol, VerifyScanHosts, VerifyScanProtocols
+from pyatv.scripts import (
+    TransformIdentifiers,
+    TransformProtocol,
+    VerifyScanHosts,
+    VerifyScanProtocols,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,6 +136,7 @@ class GlobalCommands:
             hosts=self.args.scan_hosts,
             timeout=self.args.scan_timeout,
             protocol=self.args.scan_protocols,
+            identifier=self.args.id,
         )
         _print_found_apple_tvs(atvs, sys.stdout)
 
@@ -347,7 +353,14 @@ async def cli_handler(loop):
     parser = argparse.ArgumentParser()
 
     parser.add_argument("command", nargs="+", help="commands, help, ...")
-    parser.add_argument("-i", "--id", help="device identifier", dest="id", default=None)
+    parser.add_argument(
+        "-i",
+        "--id",
+        help="device identifier",
+        dest="id",
+        action=TransformIdentifiers,
+        default=None,
+    )
     parser.add_argument("-n", "--name", help="apple tv name", dest="name", default=None)
     parser.add_argument(
         "--address", help="device ip address or hostname", dest="address", default=None
@@ -461,6 +474,9 @@ async def cli_handler(loop):
     )
 
     args = parser.parse_args()
+    if args.manual and isinstance(args.id, list):
+        parser.error("--manual only supports one identifier to --id")
+
     loglevel = logging.WARNING
     if args.verbose:
         loglevel = logging.INFO
