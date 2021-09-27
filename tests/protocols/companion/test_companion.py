@@ -54,7 +54,7 @@ def test_device_info(service_type, properties, expected):
         ({}, PairingRequirement.Unsupported),
         ({"rpfl": "0x627B6"}, PairingRequirement.Disabled),
         ({"rpfl": "0x36782"}, PairingRequirement.Mandatory),
-        # ({"rpfl": "0x0"}, PairingRequirement.Unsupported),
+        ({"rpfl": "0x0"}, PairingRequirement.Unsupported),
     ],
 )
 async def test_service_info_pairing(properties, expected):
