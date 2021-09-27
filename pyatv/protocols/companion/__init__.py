@@ -373,6 +373,7 @@ def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, A
     devinfo: Dict[str, Any] = {}
     if "rpmd" in properties:
         model = lookup_model(properties["rpmd"])
+        devinfo[DeviceInfo.RAW_MODEL] = properties["rpmd"]
         if model != DeviceModel.Unknown:
             devinfo[DeviceInfo.MODEL] = model
     return devinfo

@@ -36,11 +36,11 @@ def test_companion_handler_to_service():
 @pytest.mark.parametrize(
     "service_type,properties,expected",
     [
-        ("_dummy._tcp.local", {"rpmd": "unknown"}, {}),
+        ("_dummy._tcp.local", {"rpmd": "unknown"}, {DeviceInfo.RAW_MODEL: "unknown"}),
         (
             "_dummy._tcp.local",
             {"rpmd": "AppleTV6,2"},
-            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K, DeviceInfo.RAW_MODEL: "AppleTV6,2"},
         ),
     ],
 )

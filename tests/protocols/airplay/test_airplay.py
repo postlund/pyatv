@@ -37,11 +37,11 @@ def test_airplay_handler_to_service():
 @pytest.mark.parametrize(
     "service_type,properties,expected",
     [
-        ("_dummy._tcp.local", {"model": "unknown"}, {}),
+        ("_dummy._tcp.local", {"model": "unknown"}, {DeviceInfo.RAW_MODEL: "unknown"}),
         (
             "_dummy._tcp.local",
             {"model": "AppleTV6,2"},
-            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K, DeviceInfo.RAW_MODEL: "AppleTV6,2"},
         ),
         ("_dummy._tcp.local", {"osvers": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
         (

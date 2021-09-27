@@ -332,6 +332,10 @@ def test_device_info_resolve_version_from_build_number(properties, expected):
     assert DeviceInfo(properties).version == expected
 
 
+def test_device_info_raw_model():
+    assert DeviceInfo({DeviceInfo.RAW_MODEL: "raw"}).raw_model == "raw"
+
+
 def test_device_info_apple_tv_3_str():
     dev_info = DeviceInfo(
         {
@@ -364,6 +368,12 @@ def test_device_info_unknown_str():
     dev_info = DeviceInfo({})
 
     assert str(dev_info) == "Unknown, Unknown OS"
+
+
+def test_device_info_raw_model_str():
+    dev_info = DeviceInfo({DeviceInfo.RAW_MODEL: "raw"})
+
+    assert str(dev_info) == "raw, Unknown OS"
 
 
 # FEATURES

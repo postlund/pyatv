@@ -73,6 +73,7 @@ DEFAULT_PLAYER_NAME = "Default Player"
 
 BUILD_NUMBER = "18M60"
 OS_VERSION = "14.7"  # Must match BUILD_NUMBER (take from device_info.py)
+DEVICE_MODEL = "AppleTV6,2"
 
 DEVICE_UID = "E510C430-B01D-45DF-B558-6EA6F8251069"
 
@@ -370,6 +371,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         resp.inner().systemBuildVersion = BUILD_NUMBER
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
         resp.inner().deviceUID = DEVICE_UID
+        resp.inner().modelID = DEVICE_MODEL
         self.send_to_client(resp)
 
     def data_received(self, data):
