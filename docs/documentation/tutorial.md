@@ -348,7 +348,7 @@ async def remote_control(request):
     device_id = request.match_info["id"]
     atv = request.app["atv"].get(device_id)
     if not atv:
-        return web.Response(text=f"Not connected to {device_id}", code=500)
+        return web.Response(text=f"Not connected to {device_id}", status=500)
 
     ...
 ```
