@@ -45,31 +45,17 @@ def test_device_info(properties, expected):
 
 
 @pytest.mark.parametrize(
-    "properties,devinfo,expected",
+    "properties,expected",
     [
-        ({}, {}, PairingRequirement.Mandatory),
-        ({"rpfl": "0x627B6"}, {}, PairingRequirement.Disabled),
-        ({"rpfl": "0x62792"}, {}, PairingRequirement.Mandatory),
-        (
-            {},
-            {DeviceInfo.MODEL: DeviceModel.HomePod},
-            PairingRequirement.Unsupported,
-        ),
-        (
-            {},
-            {DeviceInfo.MODEL: DeviceModel.HomePodMini},
-            PairingRequirement.Unsupported,
-        ),
-        (
-            {"rpfl": "0x627B6"},
-            {DeviceInfo.MODEL: DeviceModel.HomePod},
-            PairingRequirement.Unsupported,
-        ),
+        ({}, PairingRequirement.Unsupported),
+        ({"rpfl": "0x627B6"}, PairingRequirement.Disabled),
+        ({"rpfl": "0x36782"}, PairingRequirement.Mandatory),
+        # ({"rpfl": "0x0"}, PairingRequirement.Unsupported),
     ],
 )
-async def test_service_info_pairing(properties, devinfo, expected):
+async def test_service_info_pairing(properties, expected):
     service = MutableService(None, Protocol.Companion, 0, properties)
 
     assert service.pairing == PairingRequirement.Unsupported
-    await service_info(service, DeviceInfo(devinfo), {Protocol.Companion: service})
+    await service_info(service, DeviceInfo({}), {Protocol.Companion: service})
     assert service.pairing == expected
