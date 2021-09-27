@@ -393,7 +393,7 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
-def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:
     """Return device information from zeroconf properties."""
     devinfo: Dict[str, Any] = {}
     if "am" in properties:
@@ -488,7 +488,7 @@ def setup(
         for service_type in scan():
             properties = config.properties.get(service_type)
             if properties:
-                dict_merge(devinfo, device_info(properties))
+                dict_merge(devinfo, device_info(service_type, properties))
         return devinfo
 
     yield SetupData(

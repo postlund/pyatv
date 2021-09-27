@@ -26,7 +26,7 @@ SetupMethod = Callable[
     Generator[SetupData, None, None],
 ]
 PairMethod = Callable[..., interface.PairingHandler]
-DeviceInfoMethod = Callable[[Mapping[str, Any]], Dict[str, Any]]
+DeviceInfoMethod = Callable[[str, Mapping[str, Any]], Dict[str, Any]]
 ServiceInfoMethod = Callable[
     [MutableService, DeviceInfo, Mapping[Protocol, BaseService]], Awaitable[None]
 ]

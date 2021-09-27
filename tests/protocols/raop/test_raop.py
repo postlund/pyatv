@@ -47,13 +47,18 @@ def test_airport_handler():
 
 
 @pytest.mark.parametrize(
-    "properties,expected",
+    "service_type,properties,expected",
     [
-        ({"am": "unknown"}, {}),
-        ({"am": "AppleTV6,2"}, {DeviceInfo.MODEL: DeviceModel.Gen4K}),
-        ({"ov": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
+        ("_dummy._tcp.local", {"am": "unknown"}, {}),
+        (
+            "_dummy._tcp.local",
+            {"am": "AppleTV6,2"},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+        ),
+        ("_dummy._tcp.local", {"ov": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
         # Special case for resolving MAC address and version on AirPort Express
         (
+            "_dummy._tcp.local",
             {
                 "wama": (
                     "AA-AA-AA-AA-AA-AA,"
@@ -71,8 +76,8 @@ def test_airport_handler():
         ),
     ],
 )
-def test_device_info(properties, expected):
-    assert not DeepDiff(device_info(properties), expected)
+def test_device_info(service_type, properties, expected):
+    assert not DeepDiff(device_info(service_type, properties), expected)
 
 
 @pytest.mark.parametrize(

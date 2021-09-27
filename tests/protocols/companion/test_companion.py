@@ -34,14 +34,18 @@ def test_companion_handler_to_service():
 
 
 @pytest.mark.parametrize(
-    "properties,expected",
+    "service_type,properties,expected",
     [
-        ({"rpmd": "unknown"}, {}),
-        ({"rpmd": "AppleTV6,2"}, {DeviceInfo.MODEL: DeviceModel.Gen4K}),
+        ("_dummy._tcp.local", {"rpmd": "unknown"}, {}),
+        (
+            "_dummy._tcp.local",
+            {"rpmd": "AppleTV6,2"},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+        ),
     ],
 )
-def test_device_info(properties, expected):
-    assert not DeepDiff(device_info(properties), expected)
+def test_device_info(service_type, properties, expected):
+    assert not DeepDiff(device_info(service_type, properties), expected)
 
 
 @pytest.mark.parametrize(

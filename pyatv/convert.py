@@ -74,4 +74,5 @@ def model_str(device_model: DeviceModel) -> str:
         DeviceModel.AirPortExpress: "AirPort Express (gen 1)",
         DeviceModel.AirPortExpressGen2: "AirPort Express (gen 2)",
         DeviceModel.AppleTV4KGen2: "Apple TV 4K (gen2)",
+        DeviceModel.Music: "Music/iTunes",
     }.get(device_model, "Unknown")

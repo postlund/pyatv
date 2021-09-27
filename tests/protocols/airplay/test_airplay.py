@@ -35,16 +35,24 @@ def test_airplay_handler_to_service():
 
 
 @pytest.mark.parametrize(
-    "properties,expected",
+    "service_type,properties,expected",
     [
-        ({"model": "unknown"}, {}),
-        ({"model": "AppleTV6,2"}, {DeviceInfo.MODEL: DeviceModel.Gen4K}),
-        ({"osvers": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
-        ({"deviceid": "aa:bb:cc:dd:ee:ff"}, {DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff"}),
+        ("_dummy._tcp.local", {"model": "unknown"}, {}),
+        (
+            "_dummy._tcp.local",
+            {"model": "AppleTV6,2"},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+        ),
+        ("_dummy._tcp.local", {"osvers": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
+        (
+            "_dummy._tcp.local",
+            {"deviceid": "aa:bb:cc:dd:ee:ff"},
+            {DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff"},
+        ),
     ],
 )
-def test_device_info(properties, expected):
-    assert not DeepDiff(device_info(properties), expected)
+def test_device_info(service_type, properties, expected):
+    assert not DeepDiff(device_info(service_type, properties), expected)
 
 
 @pytest.mark.parametrize(
