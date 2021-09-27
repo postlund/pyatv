@@ -98,7 +98,7 @@ jobs:
             dist
 
   make_release:
-    if: ${{ startsWith('refs/tags/v', github.ref) }}
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs: build_containers
     runs-on: ubuntu-latest
 

@@ -1,5 +1,65 @@
 # CHANGES
 
+## 0.9.2 Lefty (2021-09-27)
+
+What? Another release? Already? Suure... So, I am integrating pyatv 0.9.x with
+Home Assistant and I find these small annoyances or missing pieces along the way,
+fixing them one by one as I go. This release is thus a micro-update, but it
+contains a few nuggets.
+
+A `Music` device model has been added that represents the Music app/iTunes. In
+the same department I've added a property called `raw_model` to `DeviceInfo`,
+returning a raw model string in case it's not a model known by pyatv. This is
+very useful for AirPlay receivers as `raw_model` will usually contain the device
+manufacturer and hardware model.
+
+It is now possible to pass a set of identifiers to `pyatv.scan`. The intended
+use case is to pass all identifiers belonging to a device to handle cases where a
+service is missing or getting deprecated (like MRP).
+
+Making this release from my phone. In bed. So I will stop there and go to sleep...
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+```
+180acab dmap: Avoid unnecessary creation of Zeroconf
+2e32274 dmap: Add device model Music for Music/iTunes
+```
+
+*Protocol: MRP:*
+
+```
+7a8b86a mrp: Updates to volume management
+```
+
+*Protocol: Companion:*
+
+```
+b28a01e companion: Improve pairing requirement detection
+```
+
+*Other:*
+
+```
+ce90dd6 core: Add raw_model to DeviceInfo
+e063ffb scan: Support scanning for multiple identifiers
+```
+
+**All changes:**
+
+```
+22bf5f2 companion: Enable test that should be enabled
+180acab dmap: Avoid unnecessary creation of Zeroconf
+ce90dd6 core: Add raw_model to DeviceInfo
+2e32274 dmap: Add device model Music for Music/iTunes
+3623287 fix wrong param
+b28a01e companion: Improve pairing requirement detection
+e063ffb scan: Support scanning for multiple identifiers
+7a8b86a mrp: Updates to volume management
+```
+
 ## 0.9.1 Lolbit (2021-09-23)
 
 Minor bug fix release coming up! Should fix connection issues when a stale
