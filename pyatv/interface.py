@@ -884,11 +884,8 @@ class DeviceInfo:
     def __str__(self) -> str:
         """Convert device info to readable string."""
         output = (
-            self.model.name if self.model != DeviceModel.Unknown else "Unknown Model"
-        )
-
-        output += (
-            " "
+            convert.model_str(self.model)
+            + ", "
             + {
                 OperatingSystem.Legacy: "ATV SW",
                 OperatingSystem.TvOS: "tvOS",

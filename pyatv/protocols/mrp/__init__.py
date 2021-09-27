@@ -810,7 +810,7 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
-def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:
     """Return device information from zeroconf properties."""
     devinfo: Dict[str, Any] = {}
     if "systembuildversion" in properties:
@@ -887,7 +887,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        devinfo = device_info(service.properties)
+        devinfo = device_info(list(scan().keys())[0], service.properties)
 
         # Extract build number from DEVICE_INFO_MESSAGE from device
         if protocol.device_info:

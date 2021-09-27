@@ -4,7 +4,7 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import OperatingSystem, PairingRequirement, Protocol
+from pyatv.const import DeviceModel, OperatingSystem, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.dmap import device_info, scan, service_info
@@ -53,13 +53,21 @@ def test_dmap_handler_to_service():
 
 
 @pytest.mark.parametrize(
-    "properties,expected",
+    "service_type,properties,expected",
     [
-        ({}, {DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy}),
+        ("_foo._tcp.local", {}, {DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy}),
+        (
+            "_hscp._tcp.local",
+            {},
+            {
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy,
+                DeviceInfo.MODEL: DeviceModel.Music,
+            },
+        ),
     ],
 )
-def test_device_info(properties, expected):
-    assert not DeepDiff(device_info(properties), expected)
+def test_device_info(service_type, properties, expected):
+    assert not DeepDiff(device_info(service_type, properties), expected)
 
 
 @pytest.mark.parametrize(

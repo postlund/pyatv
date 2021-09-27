@@ -84,7 +84,11 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
         self.airplay_service.credentials = DEVICE_CREDENTIALS
-        self.conf = AppleTV(ipaddress.IPv4Address("127.0.0.1"), "Apple TV")
+        self.conf = AppleTV(
+            ipaddress.IPv4Address("127.0.0.1"),
+            "Apple TV",
+            properties={"_appletv-v2._tcp.local": {}},
+        )
         self.conf.add_service(self.dmap_service)
         self.conf.add_service(self.airplay_service)
         return await connect(self.conf, self.loop)

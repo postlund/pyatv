@@ -167,6 +167,9 @@ class DeviceModel(Enum):
     AppleTV4KGen2 = 9
     """Device model is sixth generation Apple TV (Apple TV 4K gen 2)."""
 
+    Music = 10
+    """Music app (or iTunes) running on a desktop computer."""
+
 
 class InputAction(Enum):
     """Type of input when pressing a button."""

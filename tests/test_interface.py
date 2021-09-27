@@ -332,7 +332,7 @@ def test_device_info_resolve_version_from_build_number(properties, expected):
     assert DeviceInfo(properties).version == expected
 
 
-def test_device_info_apple_tv_software_str():
+def test_device_info_apple_tv_3_str():
     dev_info = DeviceInfo(
         {
             DeviceInfo.OPERATING_SYSTEM: OperatingSystem.Legacy,
@@ -343,27 +343,27 @@ def test_device_info_apple_tv_software_str():
         }
     )
 
-    assert str(dev_info) == "Gen3 ATV SW 2.2.3 build 13D333"
+    assert str(dev_info) == "Apple TV 3, ATV SW 2.2.3 build 13D333"
 
 
-def test_device_info_tvos_str():
+def test_device_info_homepod_mini_str():
     dev_info = DeviceInfo(
         {
             DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
             DeviceInfo.VERSION: "1.2.3",
             DeviceInfo.BUILD_NUMBER: "19A123",
-            DeviceInfo.MODEL: DeviceModel.Gen4K,
+            DeviceInfo.MODEL: DeviceModel.HomePodMini,
             DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff",
         }
     )
 
-    assert str(dev_info) == "Gen4K tvOS 1.2.3 build 19A123"
+    assert str(dev_info) == "HomePod Mini, tvOS 1.2.3 build 19A123"
 
 
 def test_device_info_unknown_str():
     dev_info = DeviceInfo({})
 
-    assert str(dev_info) == "Unknown Model Unknown OS"
+    assert str(dev_info) == "Unknown, Unknown OS"
 
 
 # FEATURES

@@ -9,6 +9,7 @@ from aiohttp.client_exceptions import ClientError
 
 from pyatv import exceptions
 from pyatv.const import (
+    DeviceModel,
     DeviceState,
     FeatureName,
     FeatureState,
@@ -41,6 +42,7 @@ from pyatv.protocols.dmap import daap, parser, tags
 from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
+from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager, HttpSession
 from pyatv.support.state_producer import StateProducer
 
@@ -611,12 +613,15 @@ def scan() -> Mapping[str, ScanHandler]:
     }
 
 
-def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:
     """Return device information from zeroconf properties."""
     devinfo: Dict[str, Any] = {}
 
     # Like with MRP, this is also border line OK, but will do for now
     devinfo[DeviceInfo.OPERATING_SYSTEM] = OperatingSystem.Legacy
+
+    if service_type == "_hscp._tcp.local":
+        devinfo[DeviceInfo.MODEL] = DeviceModel.Music
 
     return devinfo
 
@@ -677,7 +682,13 @@ def setup(  # pylint: disable=too-many-locals
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        return device_info(service.properties)
+        devinfo: Dict[str, Any] = {}
+        for service_type in scan():
+            if service_type in config.properties:
+                dict_merge(
+                    devinfo, device_info(service_type, config.properties[service_type])
+                )
+        return devinfo
 
     # Features managed by this protocol
     features = set([FeatureName.VolumeDown, FeatureName.VolumeUp])

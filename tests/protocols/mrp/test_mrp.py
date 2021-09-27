@@ -35,9 +35,10 @@ def test_mrp_handler_to_service():
 
 
 @pytest.mark.parametrize(
-    "properties,expected",
+    "service_type,properties,expected",
     [
         (
+            "_dummy._tcp.local",
             {"systembuildversion": "unknown"},
             {
                 DeviceInfo.BUILD_NUMBER: "unknown",
@@ -45,6 +46,7 @@ def test_mrp_handler_to_service():
             },
         ),
         (
+            "_dummy._tcp.local",
             {"systembuildversion": "18M60"},
             {
                 DeviceInfo.BUILD_NUMBER: "18M60",
@@ -53,6 +55,7 @@ def test_mrp_handler_to_service():
             },
         ),
         (
+            "_dummy._tcp.local",
             {"macaddress": "aa:bb:cc:dd:ee:ff"},
             {
                 DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff",
@@ -61,8 +64,8 @@ def test_mrp_handler_to_service():
         ),
     ],
 )
-def test_device_info(properties, expected):
-    assert not DeepDiff(device_info(properties), expected)
+def test_device_info(service_type, properties, expected):
+    assert not DeepDiff(device_info(service_type, properties), expected)
 
 
 @pytest.mark.parametrize(

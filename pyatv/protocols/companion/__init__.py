@@ -368,7 +368,7 @@ def scan() -> Mapping[str, ScanHandler]:
     return {"_companion-link._tcp.local": companion_service_handler}
 
 
-def device_info(properties: Mapping[str, Any]) -> Dict[str, Any]:
+def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:
     """Return device information from zeroconf properties."""
     devinfo: Dict[str, Any] = {}
     if "rpmd" in properties:
@@ -422,7 +422,7 @@ def setup(
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        return device_info(service.properties)
+        return device_info(list(scan().keys())[0], service.properties)
 
     yield SetupData(
         Protocol.Companion,

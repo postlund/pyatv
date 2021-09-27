@@ -36,7 +36,7 @@ ScanHandlerReturn = Tuple[str, MutableService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
-DevInfoExtractor = Callable[[Mapping[str, Any]], Mapping[str, Any]]
+DevInfoExtractor = Callable[[str, Mapping[str, Any]], Mapping[str, Any]]
 ServiceInfoMethod = Callable[
     [MutableService, DeviceInfo, Mapping[Protocol, BaseService]], Awaitable[None]
 ]
@@ -74,7 +74,9 @@ def _empty_handler(service: mdns.Service, response: mdns.Response) -> None:
     pass
 
 
-def _empty_extractor(properties: Mapping[str, Any]) -> Mapping[str, Any]:
+def _empty_extractor(
+    service_type: str, properties: Mapping[str, Any]
+) -> Mapping[str, Any]:
     return {}
 
 
@@ -206,7 +208,7 @@ class BaseScanner(ABC):
             service_info = self._services.get(service_name)
             if service_info:
                 _, extractor = service_info
-                dict_merge(device_info, extractor(service_properties))
+                dict_merge(device_info, extractor(service_name, service_properties))
 
         # If model was discovered via _device-info._tcp.local, manually add that
         # to the device info
