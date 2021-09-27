@@ -50,6 +50,24 @@ _LOGGER = logging.getLogger(__name__)
 # Mask = 0x62792 & ~0x627B6 = 0x24
 PAIRING_DISABLED_MASK = 0x24
 
+# Pairing with PIN seems to be supported according to this pattern
+# (again, observed from values of rpfl):
+#
+# Not pairable:
+# 0010 0000 0000 0000 0000 = 0x20000 (Mac Mini, MacBook)
+# 0110 0010 0111 1011 0010 = 0x627B2 (HomePod, HomePod mini)
+# 0110 0010 0111 1001 0010 = 0x62792 (HomePod mini)
+# 0011 0000 0000 0000 0000 = 0x30000 (iPad)
+#
+# Pairable:
+# 0011 0110 0111 1010 0010 = 0x367A2 (Apple TV 4K)
+# 0011 0110 0111 1000 0010 = 0x36782 (Apple TV 4K)
+# ===
+# 0000 0100 0000 0000 0000 = 0x04000
+#
+# So masking 0x40000 should tell if pairing is supported or not (in a way
+# that pyatv supports).
+PAIRING_WITH_PIN_SUPPORTED_MASK = 0x4000
 
 SUPPORTED_FEATURES = set(
     [
@@ -366,12 +384,13 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
-    if devinfo.model in [DeviceModel.HomePod, DeviceModel.HomePodMini]:
-        service.pairing = PairingRequirement.Unsupported
-    elif int(service.properties.get("rpfl", "0x0"), 16) & PAIRING_DISABLED_MASK:
+    flags = int(service.properties.get("rpfl", "0x0"), 16)
+    if flags & PAIRING_DISABLED_MASK:
         service.pairing = PairingRequirement.Disabled
-    else:
+    elif flags & PAIRING_WITH_PIN_SUPPORTED_MASK:
         service.pairing = PairingRequirement.Mandatory
+    else:
+        service.pairing = PairingRequirement.Unsupported
 
 
 def setup(
