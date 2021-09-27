@@ -812,6 +812,7 @@ class DeviceInfo:
     VERSION = "version"
     BUILD_NUMBER = "build_number"
     MODEL = "model"
+    RAW_MODEL = "raw_model"
     MAC = "mac"
 
     def __init__(self, device_info: Mapping[str, Any]) -> None:
@@ -877,14 +878,30 @@ class DeviceInfo:
         return self._model
 
     @property
+    def raw_model(self) -> Optional[str]:
+        """Return raw model description.
+
+        If `pyatv.interface.DeviceInfo.model` returns `pyatv.const.DeviceModel.Unknown`
+        then this property contains the raw model string (if any is available).
+        """
+        return self._devinfo.get(DeviceInfo.RAW_MODEL)
+
+    @property
     def mac(self) -> Optional[str]:
         """Device MAC address."""
         return self._mac
 
     def __str__(self) -> str:
         """Convert device info to readable string."""
+        # If no model is available but raw_model is, use that. Otherwise fall back
+        # to whatever model_str returns.
+        if self.model == DeviceModel.Unknown and self.raw_model:
+            model = self.raw_model
+        else:
+            model = convert.model_str(self.model)
+
         output = (
-            convert.model_str(self.model)
+            model
             + ", "
             + {
                 OperatingSystem.Legacy: "ATV SW",

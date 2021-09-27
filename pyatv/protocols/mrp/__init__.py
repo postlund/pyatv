@@ -49,7 +49,7 @@ from pyatv.protocols.mrp.protobuf import ContentItemMetadata as cim
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
-from pyatv.support.device_info import lookup_version
+from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
 
@@ -891,8 +891,11 @@ def create_with_connection(  # pylint: disable=too-many-locals
 
         # Extract build number from DEVICE_INFO_MESSAGE from device
         if protocol.device_info:
-            build_number = protocol.device_info.inner().systemBuildVersion
-            devinfo[DeviceInfo.BUILD_NUMBER] = build_number
+            info = protocol.device_info.inner()
+            devinfo[DeviceInfo.BUILD_NUMBER] = info.systemBuildVersion
+            if info.modelID:
+                devinfo[DeviceInfo.RAW_MODEL] = info.modelID
+                devinfo[DeviceInfo.MODEL] = lookup_model(info.modelID)
 
         return devinfo
 

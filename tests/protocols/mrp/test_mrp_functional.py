@@ -10,6 +10,7 @@ import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
+    DeviceModel,
     DeviceState,
     FeatureName,
     FeatureState,
@@ -28,6 +29,7 @@ from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests.fake_device.mrp import (
     APP_NAME,
     BUILD_NUMBER,
+    DEVICE_MODEL,
     DEVICE_UID,
     OS_VERSION,
     PLAYER_IDENTIFIER,
@@ -315,6 +317,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
         self.assertEqual(self.atv.device_info.build_number, BUILD_NUMBER)
         self.assertEqual(self.atv.device_info.version, OS_VERSION)
+        self.assertEqual(self.atv.device_info.raw_model, DEVICE_MODEL)
+        self.assertEqual(self.atv.device_info.model, DeviceModel.Gen4K)
 
     @unittest_run_loop
     async def test_always_available_features(self):

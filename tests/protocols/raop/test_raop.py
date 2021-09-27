@@ -49,11 +49,11 @@ def test_airport_handler():
 @pytest.mark.parametrize(
     "service_type,properties,expected",
     [
-        ("_dummy._tcp.local", {"am": "unknown"}, {}),
+        ("_dummy._tcp.local", {"am": "unknown"}, {DeviceInfo.RAW_MODEL: "unknown"}),
         (
             "_dummy._tcp.local",
             {"am": "AppleTV6,2"},
-            {DeviceInfo.MODEL: DeviceModel.Gen4K},
+            {DeviceInfo.MODEL: DeviceModel.Gen4K, DeviceInfo.RAW_MODEL: "AppleTV6,2"},
         ),
         ("_dummy._tcp.local", {"ov": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
         # Special case for resolving MAC address and version on AirPort Express

@@ -145,8 +145,9 @@ def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, A
     devinfo: Dict[str, Any] = {}
     if "model" in properties:
         model = lookup_model(properties["model"])
+        devinfo[DeviceInfo.RAW_MODEL] = properties["model"]
         if model != DeviceModel.Unknown:
-            devinfo[DeviceInfo.MODEL] = lookup_model(properties["model"])
+            devinfo[DeviceInfo.MODEL] = model
     if "osvers" in properties:
         devinfo[DeviceInfo.VERSION] = properties["osvers"]
     if "deviceid" in properties:
