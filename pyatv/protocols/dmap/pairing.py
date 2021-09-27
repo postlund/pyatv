@@ -57,7 +57,7 @@ class DmapPairingHandler(
         """Initialize a new instance."""
         super().__init__(session_manager, service)
         self._loop = loop
-        self._zeroconf = kwargs.get("zeroconf", Zeroconf())
+        self._zeroconf = kwargs.get("zeroconf") or Zeroconf()
         self._name = kwargs.get("name", "pyatv")
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
