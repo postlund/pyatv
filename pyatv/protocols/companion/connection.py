@@ -166,12 +166,12 @@ class CompanionConnection(asyncio.Protocol):
         data = self._buffer[0:payload_length]
         self._buffer = self._buffer[payload_length:]
 
-        if self._queue:
+        if self._queue and data[0] != 0x01:
             receiver = self._queue[0]
             receiver[0] = data
             receiver[3].release()
         else:
-            log_binary(_LOGGER, "Received data with not receiver", Data=data)
+            log_binary(_LOGGER, "Received data with no receiver", Data=data)
 
     @staticmethod
     def error_received(exc):

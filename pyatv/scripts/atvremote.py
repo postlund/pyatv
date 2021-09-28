@@ -728,6 +728,7 @@ async def appstart(loop):
         return 1
 
     try:
+        print("Never gonna give you up, never gonna let you down")
         return await _run_application(loop)
     except KeyboardInterrupt:
         pass
