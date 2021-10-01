@@ -22,7 +22,6 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.protocols import mrp
-from pyatv.protocols.airplay import remote_control
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
@@ -30,10 +29,12 @@ from pyatv.protocols.airplay.pairing import (
     get_preferred_auth_type,
 )
 from pyatv.protocols.airplay.player import AirPlayPlayer
+from pyatv.protocols.airplay.remote_control import RemoteControl
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     get_pairing_requirement,
     is_password_required,
+    is_remote_control_supported,
     parse_features,
 )
 from pyatv.support import net
@@ -216,14 +217,14 @@ def setup(  # pylint: disable=too-many-locals
     credentials = extract_credentials(service)
 
     # Set up remote control channel if it is supported
-    if not remote_control.is_supported(service):
+    if not is_remote_control_supported(service):
         _LOGGER.debug("Remote control not supported by device")
     elif credentials.type not in [AuthenticationType.HAP, AuthenticationType.Transient]:
         _LOGGER.debug("%s not supported by remote control channel", credentials.type)
     else:
         _LOGGER.debug("Remote control channel is supported")
 
-        control = remote_control.RemoteControl(device_listener)
+        control = RemoteControl(device_listener)
         control_port = service.port
 
         # When tunneling, we don't have any identifier or port available at this stage
