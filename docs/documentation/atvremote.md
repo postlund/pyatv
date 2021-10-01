@@ -332,6 +332,19 @@ $ atvremote --id 00:11:22:33:44:54 app
 App: Musik (com.apple.TVMusic)
 ```
 
+List installed apps:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 --companion-credentials `cat companion_credentials` app_list
+App: Podcaster (com.apple.podcasts), App: Filmer (com.apple.TVMovies), App: TV (com.apple.TVWatchList), App: Bilder (com.apple.TVPhotos), App: App Store (com.apple.TVAppStore), App: C More (se.cmore.CMore2), App: Arcade (com.apple.Arcade), App: Sök (com.apple.TVSearch), App: Emby (emby.media.emby-tvos), App: TV4 Play (se.tv4.tv4play), App: Datorer (com.apple.TVHomeSharing), App: YouTube (com.google.ios.youtube), App: Test (in.staahl.TvOS), App: SVT Play (se.svtplay.mobil), App: Plex (com.plexapp.plex), App: Viafree (com.MTGx.ViaFree.se), App: Inställningar (com.apple.TVSettings), App: Apple Events (com.apple.appleevents), App: discovery+ (com.kanal5.play), App: Netflix (com.netflix.Netflix), App: Viaplay (se.harbourfront.viasatondemand), App: Musik (com.apple.TVMusic)
+```
+
+Launching an app:
+
+```shell
+$ atvremote -s 10.0.10.81 --companion-credentials `cat companion_credentials` launch_app=com.netflix.Netflix
+```
+
 ## Streaming
 
 Play a video via AirPlay:
