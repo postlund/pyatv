@@ -7,6 +7,7 @@ from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     get_pairing_requirement,
     is_password_required,
+    is_remote_control_supported,
     parse_features,
 )
 
@@ -85,3 +86,19 @@ def test_is_password_required(properties, requires_password):
 async def test_get_pairing_requirement(props, expected_req):
     service = MutableService("id", Protocol.AirPlay, 0, props)
     assert get_pairing_requirement(service) == expected_req
+
+
+@pytest.mark.parametrize(
+    "props,expected_supported",
+    [
+        ({}, False),
+        ({"model": "AudioAccessory1,2"}, True),
+        ({"model": "Foo"}, False),
+        ({"osvers": "13.0"}, False),
+        ({"osvers": "13.0", "model": "AppleTV5,6"}, True),
+        ({"osvers": "8.4.4", "model": "AppleTV5,6"}, False),
+    ],
+)
+def test_is_remote_control_supported(props, expected_supported):
+    service = MutableService("id", Protocol.AirPlay, 0, props)
+    assert is_remote_control_supported(service) == expected_supported

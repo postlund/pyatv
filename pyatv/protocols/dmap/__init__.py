@@ -562,7 +562,7 @@ class DmapAudio(Audio):
 
 def homesharing_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new DMAP (Home Sharing) service."""
     name = mdns_service.properties.get("Name", "Unknown")
     service = MutableService(
@@ -577,7 +577,7 @@ def homesharing_service_handler(
 
 def dmap_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new DMAP service."""
     name = mdns_service.properties.get("CtlN", "Unknown")
     service = MutableService(
@@ -591,7 +591,7 @@ def dmap_service_handler(
 
 def hscp_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new HSCP service."""
     name = mdns_service.properties.get("Machine Name", "Unknown")
     service = MutableService(

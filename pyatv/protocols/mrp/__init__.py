@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import logging
 import math
+import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 
 from pyatv import exceptions
@@ -791,8 +792,17 @@ class MrpFeatures(Features):
 
 def mrp_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new MRP service."""
+    # Ignore this service if tvOS version is >= 15 as it doesn't work anymore
+    build = mdns_service.properties.get("SystemBuildVersion", "")
+    match = re.match(r"^(\d+)[A-Z]", build)
+    if match:
+        base = int(match.groups()[0])
+        if base >= 19:
+            _LOGGER.debug("Ignoring MRP service since tvOS >= 15")
+            return None
+
     name = mdns_service.properties.get("Name", "Unknown")
     service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),

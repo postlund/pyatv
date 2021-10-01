@@ -373,7 +373,7 @@ class RaopRemoteControl(RemoteControl):
 
 def raop_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new RAOP service."""
     _, name = mdns_service.name.split("@", maxsplit=1)
     service = MutableService(
