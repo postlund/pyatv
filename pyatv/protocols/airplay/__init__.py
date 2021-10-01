@@ -124,7 +124,7 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
 
 def airplay_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new AirPlay service."""
     service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),

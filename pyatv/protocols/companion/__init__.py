@@ -352,7 +352,7 @@ class CompanionAudio(Audio):
 
 def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
-) -> ScanHandlerReturn:
+) -> Optional[ScanHandlerReturn]:
     """Parse and return a new Companion service."""
     service = MutableService(
         None,
