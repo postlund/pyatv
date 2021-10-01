@@ -128,3 +128,21 @@ def get_pairing_requirement(service: BaseService) -> PairingRequirement:
         return PairingRequirement.Mandatory
 
     return PairingRequirement.NotNeeded
+
+
+# TODO: It is not fully understood how to determine if a device supports remote control
+# over AirPlay, so this method makes a pure guess. We know that Apple TVs running tvOS
+# X (X>=13?) support it as well as HomePods, something we can identify from the model
+# string. This implementation should however be improved when it's properly known how
+# to check for support.
+def is_remote_control_supported(service: BaseService) -> bool:
+    """Return if device supports remote control tunneling."""
+    model = service.properties.get("model", "")
+    if model.startswith("AudioAccessory"):
+        return True
+
+    if not model.startswith("AppleTV"):
+        return False
+
+    version = service.properties.get("osvers", "0.0").split(".", maxsplit=1)[0]
+    return float(version) >= 13.0
