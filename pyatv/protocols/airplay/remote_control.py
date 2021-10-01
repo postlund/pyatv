@@ -9,7 +9,6 @@ from uuid import uuid4
 from pyatv.auth.hap_channel import setup_channel
 from pyatv.auth.hap_pairing import HapCredentials, PairVerifyProcedure
 from pyatv.core.protocol import heartbeater
-from pyatv.interface import BaseService
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
 from pyatv.support.http import HttpConnection, http_connect
@@ -28,24 +27,6 @@ EVENTS_READ_INFO = "Events-Read-Encryption-Key"
 DATASTREAM_SALT = "DataStream-Salt"  # seed must be appended
 DATASTREAM_OUTPUT_INFO = "DataStream-Output-Encryption-Key"
 DATASTREAM_INPUT_INFO = "DataStream-Input-Encryption-Key"
-
-
-# TODO: It is not fully understood how to determine if a device supports remote control
-# over AirPlay, so this method makes a pure guess. We know that Apple TVs running tvOS
-# X (X>=13?) support it as well as HomePods, something we can identify from the model
-# string. This implementation should however be improved when it's properly known how
-# to check for support.
-def is_supported(service: BaseService) -> bool:
-    """Return if device supports remote control tunneling."""
-    model = service.properties.get("model", "")
-    if model.startswith("AudioAccessory"):
-        return True
-
-    if not model.startswith("AppleTV"):
-        return False
-
-    version = service.properties.get("osvers", "0.0")
-    return float(version) >= 13.0
 
 
 class RemoteControl:
