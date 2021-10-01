@@ -55,6 +55,16 @@ def service3():
     )
 
 
+def mrp_service_tvos_15():
+    return fake_udns.mrp_service(
+        SERVICE_1_SERVICE_NAME,
+        SERVICE_1_NAME,
+        SERVICE_1_ID,
+        addresses=[SERVICE_1_IP],
+        version="19J346",
+    )
+
+
 async def test_multicast_scan_no_device_found(multicast_scan: Scanner):
     atvs = await multicast_scan()
     assert len(atvs) == 0
@@ -130,6 +140,13 @@ async def test_multicast_filter_multiple_protocols(
     assert atv.get_service(Protocol.RAOP) is not None
 
 
+async def test_multicast_ignore_mrp_tvos15(udns_server, multicast_scan: Scanner):
+    udns_server.add_service(mrp_service_tvos_15())
+
+    atvs = await multicast_scan()
+    assert len(atvs) == 0
+
+
 async def test_unicast_scan_no_results(unicast_scan: Scanner):
     atvs = await unicast_scan()
     assert len(atvs) == 0
@@ -192,3 +209,10 @@ async def test_unicast_filter_multiple_protocols(udns_server, unicast_scan: Scan
     assert len(atv.services) == 2
     assert atv.get_service(Protocol.MRP) is not None
     assert atv.get_service(Protocol.RAOP) is not None
+
+
+async def test_unicast_ignore_mrp_tvos15(udns_server, unicast_scan: Scanner):
+    udns_server.add_service(mrp_service_tvos_15())
+
+    atvs = await unicast_scan()
+    assert len(atvs) == 0

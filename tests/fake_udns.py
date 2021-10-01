@@ -33,6 +33,7 @@ def mrp_service(
     addresses: List[str] = ["127.0.0.1"],
     port: int = 49152,
     model: Optional[str] = None,
+    version: str = "18M60",
 ) -> Tuple[str, FakeDnsService]:
     service = FakeDnsService(
         name=service_name,
@@ -41,6 +42,7 @@ def mrp_service(
         properties={
             "Name": atv_name.encode("utf-8"),
             "UniqueIdentifier": identifier.encode("utf-8"),
+            "SystemBuildVersion": version.encode("utf-8"),
         },
         model=model,
     )
