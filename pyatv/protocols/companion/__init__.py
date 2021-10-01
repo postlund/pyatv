@@ -331,6 +331,7 @@ class CompanionRemoteControl(RemoteControl):
     ) -> None:
         if action != InputAction.SingleTap:
             raise NotImplementedError(f"{action} not supported for {command} (yet)")
+        await self.api.hid_command(True, command)
         await self.api.hid_command(False, command)
 
 
