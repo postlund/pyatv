@@ -516,6 +516,7 @@ class CompanionRemoteControl(RemoteControl):
     ) -> None:
         if action != InputAction.SingleTap:
             raise NotImplementedError(f"{action} not supported for {command} (yet)")
+        await self.api.hid_command(True, command)
         await self.api.hid_command(False, command)
 
 
@@ -536,11 +537,10 @@ class CompanionAudio(Audio):
             resp = await self.api.mediacontrol_command(MediaControlCommand.GetVolume)
             self._volume = resp["_c"]["_vol"] * 100.0
             _LOGGER.debug("Volume changed to %f", self._volume)
+            self._volume_event.set()
         else:
             # No volume control means we know nothing about the volume
             self._volume = 0.0
-
-        self._volume_event.set()
 
     @property
     def volume(self) -> float:
@@ -565,12 +565,14 @@ class CompanionAudio(Audio):
     async def volume_up(self) -> None:
         """Increase volume by one step."""
         self._volume_event.clear()
+        await self.api.hid_command(True, HidCommand.VolumeUp)
         await self.api.hid_command(False, HidCommand.VolumeUp)
         await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
         self._volume_event.clear()
+        await self.api.hid_command(True, HidCommand.VolumeDown)
         await self.api.hid_command(False, HidCommand.VolumeDown)
         await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
