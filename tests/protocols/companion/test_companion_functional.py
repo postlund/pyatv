@@ -45,6 +45,14 @@ async def test_connect_only_companion(event_loop):
         await pyatv.connect(conf, loop=event_loop)
 
 
+async def test_subscribe_unsubscribe_media_control(companion_client, companion_state):
+    await until(lambda: "_iMC" in companion_state.interests)
+
+    await asyncio.gather(*companion_client.close())
+
+    await until(lambda: "_iMC" not in companion_state.interests)
+
+
 async def test_launch_app(companion_client, companion_state):
     await companion_client.apps.launch_app(TEST_APP)
     await until(lambda: companion_state.active_app == TEST_APP)
@@ -105,9 +113,13 @@ async def test_power_functions(companion_client, companion_state):
     assert companion_state.powered_on
 
 
-async def test_session_start(companion_client, companion_state):
+async def test_session_start_and_stop(companion_client, companion_state):
     assert companion_state.sid != 0
     assert companion_state.service_type == "com.apple.tvremoteservices"
+
+    await asyncio.gather(*companion_client.close())
+
+    assert companion_state.sid == 0
 
 
 @pytest.mark.parametrize(

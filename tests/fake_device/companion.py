@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Set
 
 from pyatv.protocols.companion import HidCommand, opack
 from pyatv.protocols.companion.connection import FrameType
@@ -45,6 +45,7 @@ class FakeCompanionState:
         self.service_type: Optional[str] = None
         self.latest_button: Optional[str] = None
         self.media_control_flags: int = 0
+        self.interests: Set[str] = set()
 
 
 class FakeCompanionServiceFactory:
@@ -159,7 +160,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             {
                 "_i": request["_i"],
                 "_x": request["_x"],
-                "_t": 3 if request["_t"] == 2 else 1,
+                "_t": 3,
                 "_c": content,
             },
         )
@@ -172,6 +173,19 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
                 "_x": xid,
                 "_t": 1,
                 "_c": content,
+            },
+        )
+
+    def send_error(self, request, message):
+        self.send_to_client(
+            FrameType.E_OPACK,
+            {
+                "_i": request["_i"],
+                "_x": request["_x"],
+                "_t": 3,
+                "_ec": 1337,
+                "_ed": "RPErrorDomain",
+                "_em": message,
             },
         )
 
@@ -206,14 +220,29 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.state.service_type = message["_c"]["_srvT"]
         self.send_response(message, {"_sid": 5555})
 
+    def handle__sessionstop(self, message):
+
+        if message["_c"]["_sid"] == (5555 << 32 | self.state.sid):
+            self.state.sid = 0
+            self.send_response(message, {})
+        else:
+            self.send_error(message, "Invalid SID")
+
     def handle__systeminfo(self, message):
         self.send_response(message, {})
 
     def handle__interest(self, message):
-        if "_iMC" in message["_c"]["_regEvents"]:
-            self.send_event(
-                "_iMC", message["_x"], {"_mcF": self.state.media_control_flags}
-            )
+        content = message["_c"]
+        if "_regEvents" in content:
+            self.state.interests.update(content["_regEvents"])
+            if "_iMC" in self.state.interests:
+                self.send_event(
+                    "_iMC", message["_x"], {"_mcF": self.state.media_control_flags}
+                )
+        elif "_deregEvents" in content:
+            for event in content["_deregEvents"]:
+                if event in self.state.interests:
+                    self.state.interests.remove(event)
 
 
 class FakeCompanionUseCases:

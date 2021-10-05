@@ -158,4 +158,7 @@ class CompanionConnection(asyncio.Protocol):
         _LOGGER.debug("Connection lost to remote device: %s", exc)
         self.transport = None
         if self._device_listener is not None:
-            self._device_listener.listener.connection_lost(exc)
+            if exc:
+                self._device_listener.listener.connection_lost(exc)
+            else:
+                self._device_listener.listener.connection_closed()
