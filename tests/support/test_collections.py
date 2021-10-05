@@ -1,10 +1,11 @@
 """Unit tests for pyatv.support.collections"""
+import asyncio
 import typing
 from unittest.mock import sentinel
 
 import pytest
 
-from pyatv.support.collections import CaseInsensitiveDict, dict_merge
+from pyatv.support.collections import CaseInsensitiveDict, SharedData, dict_merge
 
 # CaseInsentitiveDict
 
@@ -104,3 +105,23 @@ def test_dict_merge_returns_dict_a():
     dict_b = {"b": 2}
     merged = dict_merge(dict_a, dict_b)
     assert merged is dict_a
+
+
+# SharedData
+
+
+async def test_shared_data(event_loop):
+    async def _waiter(shared_data: SharedData[int], future: asyncio.Future):
+        result = await shared_data.wait()
+        future.set_result(result)
+
+    fut = asyncio.Future()
+    shared: SharedData[int] = SharedData()
+
+    asyncio.ensure_future(_waiter(shared, fut))
+
+    shared.set(1234)
+
+    await fut
+
+    assert fut.result() == 1234
