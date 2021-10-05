@@ -102,6 +102,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.buffer = b""
         self.chacha = None
         self.transport = None
+        self._pressed_buttons: Set[HidCommand] = set()
 
     def connection_made(self, transport):
         _LOGGER.debug("Client connected")
@@ -227,14 +228,23 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         button_state = message["_c"]["_hBtS"]
         button_code = HidCommand(message["_c"]["_hidC"])
 
-        if button_state == 2 and button_code == HidCommand.Sleep:
+        if button_state == 1:
+            _LOGGER.debug("Button %s pressed DOWN", button_code)
+            self._pressed_buttons.add(button_code)
+        elif button_state == 2 and button_code == HidCommand.Sleep:
             _LOGGER.debug("Putting device to sleep")
             self.state.powered_on = False
         elif button_state == 2 and button_code == HidCommand.Wake:
             _LOGGER.debug("Waking up device")
             self.state.powered_on = True
-        elif button_state == 2 and button_code in HID_BUTTON_MAP:
+        elif button_code in HID_BUTTON_MAP:
+            if button_code not in self._pressed_buttons:
+                _LOGGER.warning("Button UP with no DOWN action for %s", button_code)
+                self.send_error(message, f"Missing button DOWN for {button_code}")
+                return
+
             _LOGGER.debug("Button pressed: %s", HID_BUTTON_MAP[button_code])
+            self._pressed_buttons.remove(button_code)
             self.state.latest_button = HID_BUTTON_MAP[button_code]
 
             # Buttons that change volume
