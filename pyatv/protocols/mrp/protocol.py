@@ -8,7 +8,7 @@ import uuid
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
-from pyatv.core.protocol import heartbeater
+from pyatv.core.protocol import MessageDispatcher, heartbeater
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.auth import MrpPairVerifyProcedure
 
@@ -78,7 +78,7 @@ async def heartbeat_loop(protocol):
 
 
 # pylint: disable=too-many-instance-attributes
-class MrpProtocol:
+class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
     """Protocol logic related to MRP.
 
     This class wraps an MrpConnection instance and will automatically:
@@ -91,6 +91,7 @@ class MrpProtocol:
 
     def __init__(self, connection, srp, service):
         """Initialize a new MrpProtocol."""
+        super().__init__()
         self.connection = connection
         self.connection.listener = self
         self.srp = srp
@@ -100,13 +101,6 @@ class MrpProtocol:
         self._outstanding = {}
         self._listeners = {}
         self._state = ProtocolState.NOT_CONNECTED
-
-    def add_listener(self, listener, message_type, data=None):
-        """Add a listener that will receice incoming messages."""
-        if message_type not in self._listeners:
-            self._listeners[message_type] = []
-
-        self._listeners[message_type].append(Listener(listener, data))
 
     async def start(self, skip_initial_messages=False):
         """Connect to device and listen to incoming messages."""
@@ -241,7 +235,7 @@ class MrpProtocol:
             # The connection instance will dispatch the message
             await asyncio.wait_for(semaphore.acquire(), timeout)
 
-        except:  # noqa
+        except Exception:
             del self._outstanding[identifier]
             raise
 
@@ -261,24 +255,4 @@ class MrpProtocol:
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
         else:
-            self._dispatch(message)
-
-    def _dispatch(self, message):
-        async def _call_listener(func):
-            # Make sure to catch any exceptions caused by the listener so we don't get
-            # unfished tasks laying around
-            try:
-                await func
-            except asyncio.CancelledError:
-                pass
-            except Exception:
-                _LOGGER.exception("error during dispatch")
-
-        for listener in self._listeners.get(message.type, []):
-            _LOGGER.debug(
-                "Dispatching message with type %d (%s) to %s",
-                message.type,
-                type(message.inner()).__name__,
-                listener,
-            )
-            asyncio.ensure_future(_call_listener(listener.func(message, listener.data)))
+            self.dispatch(message.type, message)
