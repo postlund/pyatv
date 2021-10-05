@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import math
 
 from deepdiff import DeepDiff
 import pytest
@@ -13,6 +14,7 @@ from pyatv.const import Protocol
 from pyatv.interface import App, FeatureName, FeatureState
 
 from tests.fake_device import FakeAppleTV
+from tests.fake_device.companion import INITIAL_VOLUME, VOLUME_STEP
 from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,7 +95,7 @@ async def test_app_features(companion_client):
 async def test_media_control_features(
     companion_conf, event_loop, companion_usecase, features, expected_state
 ):
-    companion_usecase.set_control_flags(0xFFFF)
+    companion_usecase.set_control_flags(features)
 
     atv = await pyatv.connect(companion_conf, loop=event_loop)
 
@@ -125,6 +127,7 @@ async def test_session_start_and_stop(companion_client, companion_state):
 @pytest.mark.parametrize(
     "button",
     [
+        # HID
         "up",
         "down",
         "left",
@@ -135,6 +138,11 @@ async def test_session_start_and_stop(companion_client, companion_state):
         "volume_down",
         "volume_up",
         "play_pause",
+        # Media Control
+        "play",
+        "pause",
+        "next",
+        "previous",
     ],
 )
 async def test_remote_control_buttons(companion_client, companion_state, button):
@@ -142,11 +150,25 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     assert companion_state.latest_button == button
 
 
+async def test_audio_set_volume(companion_client, companion_state, companion_usecase):
+    await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
+
+    await companion_client.audio.set_volume(INITIAL_VOLUME + 1.0)
+    assert math.isclose(companion_client.audio.volume, INITIAL_VOLUME + 1.0)
+    await until(lambda: math.isclose(companion_state.volume, INITIAL_VOLUME + 1.0))
+
+
 async def test_audio_volume_up(companion_client, companion_state):
+    await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
+
     await companion_client.audio.volume_up()
+    assert companion_client.audio.volume == INITIAL_VOLUME + VOLUME_STEP
     assert companion_state.latest_button == "volume_up"
 
 
 async def test_audio_volume_down(companion_client, companion_state):
+    await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
+
     await companion_client.audio.volume_down()
+    assert companion_client.audio.volume == INITIAL_VOLUME - VOLUME_STEP
     assert companion_state.latest_button == "volume_down"

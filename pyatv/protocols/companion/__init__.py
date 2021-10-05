@@ -18,6 +18,7 @@ from pyatv.const import (
     Protocol,
 )
 from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
@@ -114,6 +115,24 @@ class HidCommand(Enum):
     PageDown = 19
 
 
+class MediaControlCommand(Enum):
+    """Media Control command constants."""
+
+    Play = 1
+    Pause = 2
+    NextTrack = 3
+    PreviousTrack = 4
+    GetVolume = 5
+    SetVolume = 6
+    SkipBy = 7
+    FastForwardBegin = 8
+    FastForwardEnd = 9
+    RewindBegin = 10
+    RewindEnd = 11
+    GetCaptionSettings = 12
+    SetCaptionSettings = 13
+
+
 # pylint: enable=invalid-name
 
 MEDIA_CONTROL_MAP = {
@@ -129,10 +148,13 @@ MEDIA_CONTROL_MAP = {
 
 SUPPORTED_FEATURES = set(
     [
+        # App interface
         FeatureName.AppList,
         FeatureName.LaunchApp,
+        # Power interface
         FeatureName.TurnOn,
         FeatureName.TurnOff,
+        # Remote control (navigation, i.e. HID)
         FeatureName.Up,
         FeatureName.Down,
         FeatureName.Left,
@@ -144,12 +166,15 @@ SUPPORTED_FEATURES = set(
         FeatureName.VolumeDown,
         FeatureName.PlayPause,
     ]
+    # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
 )
 
 
 # TODO: Maybe move to separate file?
-class CompanionAPI(CompanionProtocolListener):
+class CompanionAPI(
+    MessageDispatcher[str, Mapping[str, Any]], CompanionProtocolListener
+):
     """Implementation of Companion API."""
 
     def __init__(
@@ -160,14 +185,15 @@ class CompanionAPI(CompanionProtocolListener):
         loop: asyncio.AbstractEventLoop,
     ):
         """Initialize a new CompanionAPI instance."""
+        super().__init__()
         self.config = config
         self.service = service
         self.loop = loop
         self._device_listener = device_listener
         self._connection: Optional[CompanionConnection] = None
         self._protocol: Optional[CompanionProtocol] = None
+        self._initial_event_recevied: asyncio.Event = asyncio.Event()
         self.sid: int = 0
-        self.control_flags: MediaControlFlags = MediaControlFlags.NoControls
 
     async def disconnect(self):
         """Disconnect from companion device."""
@@ -187,11 +213,19 @@ class CompanionAPI(CompanionProtocolListener):
 
     def event_received(self, event_name: str, data: Dict[str, Any]) -> None:
         """Event was received."""
-        if event_name == "_iMC":
-            self.control_flags = MediaControlFlags(data["_mcF"])
-            _LOGGER.debug("Updated media control flags to %s", self.control_flags)
+
+        async def _initial_dispatch():
+            await asyncio.gather(*self.dispatch(event_name, data))
+            self._initial_event_recevied.set()
+
+        _LOGGER.debug("Got event %s from device: %s", event_name, data)
+        if self._initial_event_recevied.is_set():
+            self.dispatch(event_name, data)
         else:
-            _LOGGER.debug("Got event %s from device: %s", event_name, data)
+            # If this is the first event, synchronize with all receivers in order to
+            # reach a "good state" before connect returns. The idea is to update things
+            # like supported features and current volume before connect returns.
+            asyncio.ensure_future(_initial_dispatch())
 
     async def connect(self):
         """Connect to remote host."""
@@ -215,12 +249,16 @@ class CompanionAPI(CompanionProtocolListener):
         await self._session_start()
         await self.subscribe_event("_iMC")
 
+        # Wait for initial media control event to be received, to ensure
+        # at least the basic information is in place (e.g. available controls)
+        await asyncio.wait_for(self._initial_event_recevied.wait(), timeout=5.0)
+
     async def _send_command(
         self,
         identifier: str,
         content: Dict[str, object],
         message_type: MessageType = MessageType.Request,
-    ) -> Dict[str, object]:
+    ) -> Mapping[str, Any]:
         """Send a command to the device and return response."""
         await self.connect()
         if self._protocol is None:
@@ -318,7 +356,7 @@ class CompanionAPI(CompanionProtocolListener):
         """Launch an app on the remote device."""
         await self._send_command("_launchApp", {"_bundleID": bundle_identifier})
 
-    async def app_list(self) -> Dict[str, object]:
+    async def app_list(self) -> Mapping[str, Any]:
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
@@ -328,6 +366,12 @@ class CompanionAPI(CompanionProtocolListener):
             "_hidC", {"_hBtS": 1 if down else 2, "_hidC": command.value}
         )
 
+    async def mediacontrol_command(
+        self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None
+    ) -> Mapping[str, Any]:
+        """Send a HID command."""
+        return await self._send_command("_mcc", {"_mcc": command.value, **(args or {})})
+
 
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
@@ -335,12 +379,17 @@ class CompanionFeatures(Features):
     def __init__(self, api: CompanionAPI) -> None:
         """Initialize a new CompanionFeatures instance."""
         super().__init__()
-        self.api: CompanionAPI = api
+        api.listen_to("_iMC", self._handle_control_flag_update)
+        self._control_flags = MediaControlFlags.NoControls
+
+    async def _handle_control_flag_update(self, data: Mapping[str, Any]) -> None:
+        self._control_flags = MediaControlFlags(data["_mcF"])
+        _LOGGER.debug("Updated media control flags to %s", self._control_flags)
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
         if feature_name in MEDIA_CONTROL_MAP:
-            is_available = MEDIA_CONTROL_MAP[feature_name] & self.api.control_flags
+            is_available = MEDIA_CONTROL_MAP[feature_name] & self._control_flags
             return FeatureInfo(
                 FeatureState.Available if is_available else FeatureState.Unavailable
             )
@@ -446,6 +495,22 @@ class CompanionRemoteControl(RemoteControl):
         """Toggle between play and pause."""
         await self._press_button(HidCommand.PlayPause)
 
+    async def play(self) -> None:
+        """Press key play."""
+        await self.api.mediacontrol_command(MediaControlCommand.Play)
+
+    async def pause(self) -> None:
+        """Press key play."""
+        await self.api.mediacontrol_command(MediaControlCommand.Pause)
+
+    async def next(self) -> None:
+        """Press key next."""
+        await self.api.mediacontrol_command(MediaControlCommand.NextTrack)
+
+    async def previous(self) -> None:
+        """Press key previous."""
+        await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
+
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap
     ) -> None:
@@ -460,14 +525,54 @@ class CompanionAudio(Audio):
     def __init__(self, api: CompanionAPI) -> None:
         """Initialize a new CompanionAudio instance."""
         self.api = api
+        self.api.listen_to("_iMC", self._handle_control_flag_update)
+        self._volume_event: asyncio.Event = asyncio.Event()
+        self._volume = 0.0
+
+    async def _handle_control_flag_update(self, data: Mapping[str, Any]) -> None:
+        if data["_mcF"] & MediaControlFlags.Volume:
+            _LOGGER.debug("Volume control changed, updating volume")
+
+            resp = await self.api.mediacontrol_command(MediaControlCommand.GetVolume)
+            self._volume = resp["_c"]["_vol"] * 100.0
+            _LOGGER.debug("Volume changed to %f", self._volume)
+        else:
+            # No volume control means we know nothing about the volume
+            self._volume = 0.0
+
+        self._volume_event.set()
+
+    @property
+    def volume(self) -> float:
+        """Return current volume level.
+
+        Range is in percent, i.e. [0.0-100.0].
+        """
+        return self._volume
+
+    async def set_volume(self, level: float) -> None:
+        """Change current volume level.
+
+        Range is in percent, i.e. [0.0-100.0].
+        """
+        self._volume_event.clear()
+        await self.api.mediacontrol_command(
+            MediaControlCommand.SetVolume, {"_vol": level / 100.0}
+        )
+
+        await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
+        self._volume_event.clear()
         await self.api.hid_command(False, HidCommand.VolumeUp)
+        await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
+        self._volume_event.clear()
         await self.api.hid_command(False, HidCommand.VolumeDown)
+        await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
 
 def companion_service_handler(

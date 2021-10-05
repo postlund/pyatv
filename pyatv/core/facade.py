@@ -468,6 +468,7 @@ class FacadeAppleTV(interface.AppleTV):
 
             _LOGGER.debug("Connecting to protocol: %s", setup_data.protocol)
             if await setup_data.connect():
+                _LOGGER.debug("Connected to protocol: %s", setup_data.protocol)
                 self._protocol_handlers[setup_data.protocol] = setup_data
 
                 for iface, instance in setup_data.interfaces.items():
