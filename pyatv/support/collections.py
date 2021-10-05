@@ -1,8 +1,10 @@
 """Collections for pyatv."""
+import asyncio
 import collections.abc
 import typing
 
 T = typing.TypeVar("T")
+SharedType = typing.TypeVar("SharedType")
 
 
 def dict_merge(
@@ -113,3 +115,24 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
     def __repr__(self) -> str:
         """Return representation of instance."""
         return repr(self._data)
+
+
+class SharedData(typing.Generic[SharedType]):
+    """Synchronization barrier used to synchronization data transfer between tasks."""
+
+    def __init__(self):
+        """Initialize a new SharedData instance."""
+        self._event: asyncio.Event = asyncio.Event()
+        self._data: typing.Optional[SharedType] = None
+
+    async def wait(self, timeout: float = 5.0) -> SharedType:
+        """Wait for shared data to arrive."""
+        await asyncio.wait_for(self._event.wait(), timeout)
+
+        # We know self._data has a value here
+        return typing.cast(SharedType, self._data)
+
+    def set(self, data: SharedType) -> None:
+        """Signal that shared data has arrived."""
+        self._data = data
+        self._event.set()
