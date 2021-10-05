@@ -171,9 +171,19 @@ class CompanionAPI(CompanionProtocolListener):
 
     async def disconnect(self):
         """Disconnect from companion device."""
-        # TODO: Should send _sessionStop
-        if self._protocol:
+        if self._protocol is None:
+            return
+
+        try:
+            # Sometimes unsubscribe fails for an unknown reason, but we are no
+            # going to bother with that and just swallow the error.
+            await self.unsubscribe_event("_iMC")
+            await self._session_stop()
+        except Exception as ex:
+            _LOGGER.debug("Ignoring error during disconnect: %s", ex)
+        finally:
             self._protocol.stop()
+            self._protocol = None
 
     def event_received(self, event_name: str, data: Dict[str, Any]) -> None:
         """Event was received."""
@@ -255,17 +265,27 @@ class CompanionAPI(CompanionProtocolListener):
             },
         )
 
-    async def _session_start(self):
+    async def _session_start(self) -> None:
         local_sid = randint(0, 2 ** 32 - 1)
         resp = await self._send_command(
             "_sessionStart", {"_srvT": "com.apple.tvremoteservices", "_sid": local_sid}
         )
 
-        remote_sid = resp["_c"]["_sid"]
+        content = resp.get("_c")
+        if content is None:
+            raise exceptions.ProtocolError("missing content")
+
+        remote_sid = cast(Mapping[str, Any], resp["_c"])["_sid"]
         self.sid = (remote_sid << 32) | local_sid
         _LOGGER.debug("Started session with SID 0x%X", self.sid)
 
-    async def subscribe_event(self, event: str) -> None:
+    async def _session_stop(self) -> None:
+        await self._send_command(
+            "_sessionStop", {"_srvT": "com.apple.tvremoteservices", "_sid": self.sid}
+        )
+        _LOGGER.debug("Stopped session with SID 0x%X", self.sid)
+
+    async def _send_event(self, identifier: str, content: Mapping[str, Any]) -> None:
         """Subscribe to updates to an event."""
         await self.connect()
         if self._protocol is None:
@@ -275,16 +295,24 @@ class CompanionAPI(CompanionProtocolListener):
             self._protocol.send_opack(
                 FrameType.E_OPACK,
                 {
-                    "_i": "_interest",
+                    "_i": identifier,
                     "_x": 1234,  # Dummy XID, not sure what to use
-                    "_t": "1",  # MessageType.Event.value,
-                    "_c": {"_regEvents": [event]},
+                    "_t": MessageType.Event.value,
+                    "_c": content,
                 },
             )
         except exceptions.ProtocolError:
             raise
         except Exception as ex:
-            raise exceptions.ProtocolError(f"Subscribe to {event} failed") from ex
+            raise exceptions.ProtocolError("Send event failed") from ex
+
+    async def subscribe_event(self, event: str) -> None:
+        """Subscribe to updates to an event."""
+        await self._send_event("_interest", {"_regEvents": [event]})
+
+    async def unsubscribe_event(self, event: str) -> None:
+        """Subscribe to updates to an event."""
+        await self._send_event("_interest", {"_deregEvents": [event]})
 
     async def launch_app(self, bundle_identifier: str) -> None:
         """Launch an app on the remote device."""
@@ -514,7 +542,7 @@ def setup(
         return True
 
     def _close() -> Set[asyncio.Task]:
-        return set()
+        return set([asyncio.ensure_future(api.disconnect())])
 
     def _device_info() -> Dict[str, Any]:
         return device_info(list(scan().keys())[0], service.properties)
