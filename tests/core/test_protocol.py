@@ -5,11 +5,13 @@ from typing import Any, Optional
 
 import pytest
 
-from pyatv.core.protocol import heartbeater
+from pyatv.core.protocol import MessageDispatcher, heartbeater
 
 from tests.utils import total_sleep_time, until
 
 pytestmark = pytest.mark.asyncio
+
+# heartbeat
 
 
 class HeartbeatMonitor:
@@ -128,3 +130,33 @@ async def test_message_is_passed_to_send(monitor):
 
     await until(lambda: monitor.send_call_count == 1)
     assert monitor.send_message is message
+
+
+# MessageDispatcher
+
+
+async def test_simple_dispatch():
+    dispatched_msg1 = None
+    dispatched_msg2 = None
+
+    async def dispatch_func1(message: bytes) -> None:
+        nonlocal dispatched_msg1
+        dispatched_msg1 = message
+
+    async def dispatch_func2(message: bytes) -> None:
+        nonlocal dispatched_msg2
+        dispatched_msg2 = message
+
+    dispatcher = MessageDispatcher[int, bytes]()
+    dispatcher.listen_to(1, dispatch_func1)
+    dispatcher.listen_to(2, dispatch_func2)
+
+    await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(1, b"123")), 5.0)
+    assert dispatched_msg1 == b"123"
+    assert dispatched_msg2 is None
+
+    dispatched_msg1 = None
+
+    await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(2, b"456")), 5.0)
+    assert dispatched_msg1 is None
+    assert dispatched_msg2 == b"456"
