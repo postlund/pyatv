@@ -1,4 +1,5 @@
 """Shared test code for Companiom test cases."""
+import asyncio
 from typing import cast
 
 import pytest
@@ -49,4 +50,6 @@ def companion_conf_fixture(companion_device):
 
 @pytest.fixture(name="companion_client")
 async def companion_client_fixture(companion_conf, event_loop):
-    yield await connect(companion_conf, loop=event_loop)
+    atv = await connect(companion_conf, loop=event_loop)
+    yield atv
+    await asyncio.gather(*atv.close())

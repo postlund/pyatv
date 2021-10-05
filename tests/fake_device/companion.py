@@ -44,6 +44,7 @@ class FakeCompanionState:
         self.sid: int = 0
         self.service_type: Optional[str] = None
         self.latest_button: Optional[str] = None
+        self.media_control_flags: int = 256
 
 
 class FakeCompanionServiceFactory:
@@ -62,6 +63,7 @@ class FakeCompanionServiceFactory:
 
         coro = self.loop.create_server(_server_factory, "0.0.0.0")
         self.server = await self.loop.create_task(coro)
+
         _LOGGER.info("Started Companion server at port %d", self.port)
 
     async def cleanup(self):
@@ -114,39 +116,40 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def data_received(self, data):
         self.buffer += data
 
-        payload_length = 4 + int.from_bytes(self.buffer[1:4], byteorder="big")
-        if len(self.buffer) < payload_length:
-            _LOGGER.debug(
-                "Expect %d bytes, have %d bytes", payload_length, len(self.buffer)
-            )
-            return
+        while self.buffer:
+            payload_length = 4 + int.from_bytes(self.buffer[1:4], byteorder="big")
+            if len(self.buffer) < payload_length:
+                _LOGGER.debug(
+                    "Expect %d bytes, have %d bytes", payload_length, len(self.buffer)
+                )
+                break
 
-        frame_type = FrameType(self.buffer[0])
-        header = self.buffer[0:4]
-        data = self.buffer[4:payload_length]
-        self.buffer = self.buffer[payload_length:]
+            frame_type = FrameType(self.buffer[0])
+            header = self.buffer[0:4]
+            data = self.buffer[4:payload_length]
+            self.buffer = self.buffer[payload_length:]
 
-        if self.chacha:
-            data = self.chacha.decrypt(data, aad=header)
+            if self.chacha:
+                data = self.chacha.decrypt(data, aad=header)
 
-        unpacked, _ = opack.unpack(data)
+            unpacked, _ = opack.unpack(data)
 
-        try:
-            if frame_type in COMPANION_AUTH_FRAMES:
-                self.handle_auth_frame(frame_type, unpacked)
-            else:
-                if not self.chacha:
-                    raise Exception("client has not authenticated")
-
-                _LOGGER.debug("Rreceived OPACK: %s", unpacked)
-                handler_method_name = f"handle_{unpacked['_i'].lower()}"
-                if hasattr(self, handler_method_name):
-                    getattr(self, handler_method_name)(unpacked)
+            try:
+                if frame_type in COMPANION_AUTH_FRAMES:
+                    self.handle_auth_frame(frame_type, unpacked)
                 else:
-                    _LOGGER.warning("No handler for type %s", unpacked["_i"])
+                    if not self.chacha:
+                        raise Exception("client has not authenticated")
 
-        except Exception:
-            _LOGGER.exception("failed to handle incoming data")
+                    _LOGGER.debug("Received OPACK: %s", unpacked)
+                    handler_method_name = f"handle_{unpacked['_i'].lower()}"
+                    if hasattr(self, handler_method_name):
+                        getattr(self, handler_method_name)(unpacked)
+                    else:
+                        _LOGGER.warning("No handler for type %s", unpacked["_i"])
+
+            except Exception:
+                _LOGGER.exception("failed to handle incoming data")
 
     def send_response(self, request, content):
         self.send_to_client(
@@ -154,7 +157,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             {
                 "_i": request["_i"],
                 "_x": request["_x"],
-                "_t": 3,
+                "_t": 3 if request["_t"] == 2 else 1,
                 "_c": content,
             },
         )
@@ -189,6 +192,12 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.state.sid = message["_c"]["_sid"]
         self.state.service_type = message["_c"]["_srvT"]
         self.send_response(message, {"_sid": 5555})
+
+    def handle__systeminfo(self, message):
+        self.send_response(message, {})
+
+    def handle__interest(self, message):
+        self.send_response(message, {"_mcF": self.state.media_control_flags})
 
 
 class FakeCompanionUseCases:

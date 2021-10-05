@@ -4,10 +4,11 @@ import asyncio
 from collections import deque
 from enum import Enum
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 from pyatv import exceptions
 from pyatv.support import chacha20, log_binary
+from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,6 +45,9 @@ class FrameType(Enum):
 class CompanionConnectionListener(ABC):
     """Listener interface for a Companion connection."""
 
+    def frame_received(self, frame_type: FrameType, data: bytes) -> None:
+        """Frame was received from remote device."""
+
     def disconnected(self) -> None:
         """Disconnect from companion device."""
 
@@ -56,13 +60,14 @@ class CompanionConnection(asyncio.Protocol):
         loop: asyncio.AbstractEventLoop,
         host: str,
         port: int,
-        listener: Optional[CompanionConnectionListener] = None,
+        device_listener: Optional[StateProducer] = None,
     ) -> None:
         """Initialize a new CompanionConnection instance."""
         self.loop = loop
         self.host = host
         self.port = port
-        self.listener: Optional[CompanionConnectionListener] = listener
+        self.listener: Optional[CompanionConnectionListener] = None
+        self._device_listener = device_listener
         self.transport = None
         self._buffer: bytes = b""
         self._chacha: Optional[chacha20.Chacha20Cipher] = None
@@ -88,55 +93,20 @@ class CompanionConnection(asyncio.Protocol):
         """Enable encryption with the specified keys."""
         self._chacha = chacha20.Chacha20Cipher(output_key, input_key, nonce_length=12)
 
-    async def exchange(
-        self, frame_type: FrameType, data: bytes, timeout: int
-    ) -> Tuple[bytes, bytes]:
-        """Send message and wait for response."""
-        semaphore = asyncio.Semaphore(value=0)
-        self._queue.append([None, frame_type, data, semaphore])
-
-        if len(self._queue) == 1:
-            self._send_first_in_queue()
-
-        try:
-            await asyncio.wait_for(semaphore.acquire(), timeout)
-        except Exception:
-            # Note here: This will break if the response is just late, not sure how to
-            # deal with that as there are no identifier in the message that can be used
-            # to match response
-            self._queue.popleft()
-            self._send_first_in_queue()
-            raise
-
-        response = self._queue.popleft()[0]
-        log_binary(_LOGGER, "Recv data", Data=response)
-
-        header, data = response[0:4], response[4:]
-
-        if self._chacha:
-            data = self._chacha.decrypt(data, aad=header)
-            log_binary(_LOGGER, "<< Receive data", Header=header, Decrypted=data)
-
-        # If anyone has a pending request, make sure to send it
-        self._send_first_in_queue()
-
-        return header, data
-
-    def _send_first_in_queue(self) -> None:
+    def send(self, frame_type: FrameType, data: bytes) -> None:
+        """Send message without waiting for a response."""
         if self.transport is None:
             raise exceptions.InvalidStateError("not connected")
 
-        if not self._queue:
-            return
-
-        _, frame_type, data, _ = self._queue[0]
-
-        log_binary(
-            _LOGGER, ">> Send data", FrameType=bytes([frame_type.value]), Data=data
-        )
-
         payload_length = len(data) + (AUTH_TAG_LENGTH if self._chacha else 0)
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
+
+        log_binary(
+            _LOGGER,
+            ">> Send data",
+            FrameType=bytes([frame_type.value]),
+            Data=data,
+        )
 
         if self._chacha:
             data = self._chacha.encrypt(data, aad=header)
@@ -154,24 +124,29 @@ class CompanionConnection(asyncio.Protocol):
         self._buffer += data
         log_binary(_LOGGER, "Received data", Data=data)
 
-        payload_length = HEADER_LENGTH + int.from_bytes(data[1:4], byteorder="big")
-        if len(self._buffer) < payload_length:
-            _LOGGER.debug(
-                "Require %d bytes but only %d in buffer",
-                len(self._buffer),
-                payload_length,
+        while len(self._buffer) >= HEADER_LENGTH:
+            payload_length = HEADER_LENGTH + int.from_bytes(
+                self._buffer[1:HEADER_LENGTH], byteorder="big"
             )
-            return
+            if len(self._buffer) < payload_length:
+                _LOGGER.debug(
+                    "Require %d bytes but only %d in buffer",
+                    payload_length,
+                    len(self._buffer),
+                )
+                break
 
-        data = self._buffer[0:payload_length]
-        self._buffer = self._buffer[payload_length:]
+            header = self._buffer[0:HEADER_LENGTH]
+            payload = self._buffer[HEADER_LENGTH:payload_length]
+            self._buffer = self._buffer[payload_length:]
 
-        if self._queue:
-            receiver = self._queue[0]
-            receiver[0] = data
-            receiver[3].release()
-        else:
-            log_binary(_LOGGER, "Received data with not receiver", Data=data)
+            try:
+                if self._chacha:
+                    payload = self._chacha.decrypt(payload, aad=header)
+
+                self.listener.frame_received(FrameType(header[0]), payload)
+            except Exception:
+                _LOGGER.exception("failed to handle frame")
 
     @staticmethod
     def error_received(exc):
@@ -182,6 +157,5 @@ class CompanionConnection(asyncio.Protocol):
         """Handle that connection was lost from companion."""
         _LOGGER.debug("Connection lost to remote device: %s", exc)
         self.transport = None
-        if self.listener:
-            self.listener.disconnected()
-            self.listener = None
+        if self._device_listener is not None:
+            self._device_listener.listener.connection_lost(exc)
