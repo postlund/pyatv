@@ -1,5 +1,6 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import asyncio
 import logging
 
 from deepdiff import DeepDiff
@@ -20,6 +21,17 @@ TEST_APP: str = "com.test.Test"
 TEST_APP_NAME: str = "Test"
 TEST_APP2: str = "com.test.Test2"
 TEST_APP_NAME2: str = "Test2"
+
+MEDIA_CONTROL_FEATURES = [
+    FeatureName.Play,
+    FeatureName.Pause,
+    FeatureName.Next,
+    FeatureName.Previous,
+    FeatureName.SkipForward,
+    FeatureName.SkipBackward,
+    FeatureName.Volume,
+    FeatureName.SetVolume,
+]
 
 pytestmark = pytest.mark.asyncio
 
@@ -52,7 +64,7 @@ async def test_app_list(companion_client, companion_usecase):
     assert not DeepDiff(expected_apps, apps)
 
 
-async def test_features(companion_client):
+async def test_app_features(companion_client):
     assert (
         companion_client.features.get_feature(FeatureName.LaunchApp).state
         == FeatureState.Available
@@ -61,6 +73,26 @@ async def test_features(companion_client):
         companion_client.features.get_feature(FeatureName.AppList).state
         == FeatureState.Available
     )
+
+
+@pytest.mark.parametrize(
+    "features,expected_state",
+    [
+        (0x0000, FeatureState.Unavailable),
+        (0xFFFF, FeatureState.Available),
+    ],
+)
+async def test_media_control_features(
+    companion_conf, event_loop, companion_usecase, features, expected_state
+):
+    companion_usecase.set_control_flags(0xFFFF)
+
+    atv = await pyatv.connect(companion_conf, loop=event_loop)
+
+    for feature in MEDIA_CONTROL_FEATURES:
+        await until(lambda: atv.features.get_feature(feature).state == expected_state)
+
+    await asyncio.gather(*atv.close())
 
 
 async def test_power_functions(companion_client, companion_state):
@@ -74,9 +106,6 @@ async def test_power_functions(companion_client, companion_state):
 
 
 async def test_session_start(companion_client, companion_state):
-    # All commands should trigger a session start, so just use one and verify
-    assert companion_state.sid == 0
-    await companion_client.power.turn_off()
     assert companion_state.sid != 0
     assert companion_state.service_type == "com.apple.tvremoteservices"
 

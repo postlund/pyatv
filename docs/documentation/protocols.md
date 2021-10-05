@@ -946,6 +946,65 @@ Once a command has been called, it will be cached making it possible to call it 
 sending `_sessionStart` again. This is probably why `_launchApp` keeps working after
 requesting the list from Shortcuts (as it will set up a new session).
 
+#### Events
+
+It is possible to subscribe to events using `_interest`:
+
+
+```javascript
+{
+    '_i': '_interest',
+    '_x': 123,
+    '_t': '1,
+    '_c': {
+        '_regEvents: ['_iMC']
+    }
+}
+```
+
+No explicit response is sent to the request, other than an event update. So far `_iMC`
+(Media Control) is the only known event type. An event update might look like this:
+
+```javascript
+{
+    '_i': '_iMC',
+    '_x': 123,
+    '_c': {
+        '_mcF': 256
+    },
+    '_t': 1}
+```
+
+The Media Control Flags (`mcF`) is a bitmask with the following bits (not fully reverse
+engineered yet):
+
+| Bitmask | Purpose |
+| ------- | ------- |
+| 0x0001  | Play
+| 0x0002  | Pause
+| 0x0004  | Previous track
+| 0x0008  | Next track
+| 0x0010  | Fast forward
+| 0x0020  | Rewind
+| 0x0040  | ?
+| 0x0080  | ?
+| 0x0100  | Volume
+| 0x0200  | Skip forward (e.g. 30 seconds, defined by player)
+| 0x0400  | Skip backward (e.g. 30 seconds, defined by player)
+
+To unsubscribe, instead use `_deregEvents`:
+
+```javascript
+{
+    '_i': '_interest',
+    '_x': 123,
+    '_t': 1,
+    '_c': {
+        '_deregEvents': ['_iMC']
+    }
+}
+```
+
 #### Launch Application (_launchApp)
 
 ```javascript
