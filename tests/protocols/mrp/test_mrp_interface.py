@@ -4,56 +4,36 @@ import math
 import pytest
 
 from pyatv import exceptions
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.mrp import MrpAudio, messages, protobuf
+
+from tests.utils import until
 
 DEVICE_UID = "F2204E63-BCAB-4941-80A0-06C46CB71391"
 
 
-# This mock is _extremely_ basic, so needs to be adjusted heavily when adding
-# new tests
-class MrpProtocolMock:
-    def __init__(self):
-        self._listeners = {}
-        self.sent_messages = []
-
-    def add_listener(self, listener, message_type, data=None):
-        self._listeners[message_type] = listener
-
-    async def send(self, message):
-        self.sent_messages.append(message)
-
-    async def inject(self, message):
-        await self._listeners[message.type](message, None)
-
-    async def volume_controls_changed(self, device_uid, controls_available):
-        message = messages.create(
-            protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE
-        )
-        message.inner().outputDeviceUID = device_uid
-        message.inner().capabilities.volumeControlAvailable = controls_available
-        await self.inject(message)
-
-
-@pytest.fixture(name="protocol")
-def protocol_fixture(event_loop):
-    yield MrpProtocolMock()
+async def volume_controls_changed(protocol, device_uid, controls_available):
+    message = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
+    message.inner().outputDeviceUID = device_uid
+    message.inner().capabilities.volumeControlAvailable = controls_available
+    await protocol.inject(message)
 
 
 # MrpAudio
 
 
 @pytest.fixture(name="audio")
-def audio_fixture(protocol):
-    yield MrpAudio(protocol)
+def audio_fixture(protocol_mock):
+    yield MrpAudio(protocol_mock)
 
 
-async def test_audio_volume_control_availability(protocol, audio):
+async def test_audio_volume_control_availability(protocol_mock, audio):
     assert not audio.is_available
 
-    await protocol.volume_controls_changed(DEVICE_UID, True)
+    await volume_controls_changed(protocol_mock, DEVICE_UID, True)
     assert audio.is_available
 
-    await protocol.volume_controls_changed(DEVICE_UID, False)
+    await volume_controls_changed(protocol_mock, DEVICE_UID, False)
     assert not audio.is_available
 
 
@@ -64,10 +44,10 @@ async def test_audio_volume_control_availability(protocol, audio):
     ],
 )
 async def test_audio_volume_control_capabilities_changed(
-    protocol, audio, device_uid, controls_available, controls_expected
+    protocol_mock, audio, device_uid, controls_available, controls_expected
 ):
     assert not audio.is_available
-    await protocol.volume_controls_changed(device_uid, controls_available)
+    await volume_controls_changed(protocol_mock, device_uid, controls_available)
     assert audio.is_available == controls_expected
 
 
@@ -79,27 +59,30 @@ async def test_audio_volume_control_capabilities_changed(
     ],
 )
 async def test_audio_volume_did_change(
-    protocol, audio, device_uid, volume, expected_volume
+    protocol_mock, audio, device_uid, volume, expected_volume
 ):
-    await protocol.volume_controls_changed(DEVICE_UID, True)
+    await volume_controls_changed(protocol_mock, DEVICE_UID, True)
+    assert audio.is_available
 
     assert math.isclose(audio.volume, 0.0)
 
     message = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
     message.inner().outputDeviceUID = device_uid
     message.inner().volume = volume
-    await protocol.inject(message)
+    await protocol_mock.inject(message)
+
     assert math.isclose(audio.volume, expected_volume)
 
 
-async def test_audio_set_volume(protocol, audio):
-    await protocol.volume_controls_changed(DEVICE_UID, True)
+async def test_audio_set_volume(protocol_mock, audio):
+    await volume_controls_changed(protocol_mock, DEVICE_UID, True)
+    assert audio.is_available
 
     await audio.set_volume(0.0)
 
-    assert len(protocol.sent_messages) == 1
+    assert len(protocol_mock.sent_messages) == 1
 
-    message = protocol.sent_messages.pop()
+    message = protocol_mock.sent_messages.pop()
     assert message.type == protobuf.SET_VOLUME_MESSAGE
     assert message.inner().outputDeviceUID == DEVICE_UID
     assert math.isclose(message.inner().volume, 0.0, rel_tol=1e-02)

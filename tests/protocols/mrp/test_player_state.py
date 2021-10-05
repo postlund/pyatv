@@ -50,23 +50,6 @@ def add_metadata_item(msg, location=0, identifier=None, **metadata_fields):
     return msg
 
 
-class ProtocolMock:
-    def __init__(self):
-        self.listeners = {}
-
-    def add_listener(self, handler, message):
-        self.listeners[message] = handler
-
-    async def inject(self, message):
-        assert message.type in self.listeners, f"unhandled type: {message.type}"
-        await self.listeners[message.type](message, None)
-
-
-@pytest.fixture
-def protocol():
-    yield ProtocolMock()
-
-
 @pytest.fixture
 def listener(psm):
     class _StubListener:
@@ -82,13 +65,13 @@ def listener(psm):
 
 
 @pytest.fixture
-def psm(protocol):
-    yield player_state.PlayerStateManager(protocol)
+def psm(protocol_mock):
+    yield player_state.PlayerStateManager(protocol_mock)
 
 
-async def test_get_client_and_player(psm, protocol):
+async def test_get_client_and_player(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.identifier == PLAYER_ID_1
@@ -99,151 +82,151 @@ async def test_get_client_and_player(psm, protocol):
     assert client.display_name == CLIENT_NAME_1
 
 
-async def test_no_metadata(psm, protocol):
+async def test_no_metadata(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.metadata is None
 
 
-async def test_metadata_single_item(psm, protocol):
+async def test_metadata_single_item(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item")
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.metadata.title == "item"
 
 
-async def test_metadata_multiple_items(psm, protocol):
+async def test_metadata_multiple_items(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item1")
     msg = add_metadata_item(msg, location=1, title="item2")
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.metadata.title == "item2"
 
 
-async def test_metadata_no_item_identifier(psm, protocol):
+async def test_metadata_no_item_identifier(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.item_identifier is None
 
 
-async def test_metadata_item_identifier(psm, protocol):
+async def test_metadata_item_identifier(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, identifier="id1", title="item1")
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.item_identifier == "id1"
 
     msg = add_metadata_item(msg, location=1, identifier="id2", title="item2")
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.item_identifier == "id2"
 
 
-async def test_get_metadata_field(psm, protocol):
+async def test_get_metadata_field(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, title="item", playCount=123)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.metadata_field("title") == "item"
     assert player.metadata_field("playCount") == 123
 
 
-async def test_content_item_update(psm, protocol):
+async def test_content_item_update(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg = add_metadata_item(msg, identifier="id", title="item", playCount=123)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = set_path(messages.create(pb.UPDATE_CONTENT_ITEM_MESSAGE))
     item = msg.inner().contentItems.add()
     item.identifier = "id"
     item.metadata.title = "new title"
     item.metadata.playCount = 1111
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.metadata_field("title") == "new title"
     assert player.metadata_field("playCount") == 1111
 
 
-async def test_get_command_info(psm, protocol):
+async def test_get_command_info(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     info = msg.inner().supportedCommands.supportedCommands.add()
     info.command = pb.CommandInfo_pb2.Pause
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.command_info(pb.CommandInfo_pb2.Play) is None
     assert player.command_info(pb.CommandInfo_pb2.Pause) is not None
 
 
-async def test_playback_state_without_rate(psm, protocol):
+async def test_playback_state_without_rate(psm, protocol_mock):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
     msg.inner().playbackState = pb.PlaybackState.Paused
     msg = add_metadata_item(msg)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.playback_state is pb.PlaybackState.Paused
 
     msg.inner().playbackState = pb.PlaybackState.Playing
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.playback_state is pb.PlaybackState.Playing
 
 
-async def test_playback_state_playing(psm, protocol):
+async def test_playback_state_playing(psm, protocol_mock):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
     set_state.inner().playbackState = pb.PlaybackState.Playing
     msg = add_metadata_item(set_state, playbackRate=1.0)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.playback_state == pb.PlaybackState.Playing
 
 
-async def test_playback_state_seeking(psm, protocol):
+async def test_playback_state_seeking(psm, protocol_mock):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
     set_state.inner().playbackState = pb.PlaybackState.Playing
     msg = add_metadata_item(set_state, playbackRate=2.0)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     player = psm.get_player(msg.inner().playerPath)
     assert player.playback_state == pb.PlaybackState.Seeking
 
 
-async def test_change_listener(psm, protocol, listener):
+async def test_change_listener(psm, listener):
     assert psm.listener == listener
 
     psm.listener = None
     assert psm.listener is None
 
 
-async def test_set_now_playing_client(psm, protocol, listener):
+async def test_set_now_playing_client(psm, protocol_mock, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 1
 
     assert psm.client.bundle_identifier == CLIENT_ID_1
 
 
-async def test_set_now_playing_player_when_no_client(psm, protocol, listener):
+async def test_set_now_playing_player_when_no_client(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 0
 
@@ -251,14 +234,14 @@ async def test_set_now_playing_player_when_no_client(psm, protocol, listener):
     assert not psm.playing.display_name
 
 
-async def test_set_now_playing_player_for_active_client(psm, protocol, listener):
+async def test_set_now_playing_player_for_active_client(psm, protocol_mock, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 2
 
@@ -266,82 +249,82 @@ async def test_set_now_playing_player_for_active_client(psm, protocol, listener)
     assert psm.playing.display_name == PLAYER_NAME_1
 
 
-async def test_default_player_when_only_client_set(psm, protocol, listener):
+async def test_default_player_when_only_client_set(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
     msg = set_path(
         messages.create(pb.SET_STATE_MESSAGE),
         player_id=DEFAULT_PLAYER,
         player_name="Default Name",
     )
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert psm.playing.identifier == DEFAULT_PLAYER
     assert psm.playing.display_name == "Default Name"
 
 
-async def test_set_state_calls_active_listener(psm, protocol, listener):
+async def test_set_state_calls_active_listener(psm, protocol_mock, listener):
     set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(set_state)
+    await protocol_mock.inject(set_state)
 
     assert listener.call_count == 1
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 2
 
     now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(now_playing)
+    await protocol_mock.inject(now_playing)
 
     assert listener.call_count == 3
 
-    await protocol.inject(set_state)
+    await protocol_mock.inject(set_state)
 
     assert listener.call_count == 4
 
 
-async def test_content_item_update_calls_active_listener(psm, protocol, listener):
+async def test_content_item_update_calls_active_listener(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 1
 
     update_item = set_path(messages.create(pb.UPDATE_CONTENT_ITEM_MESSAGE))
     item = update_item.inner().contentItems.add()
-    await protocol.inject(update_item)
+    await protocol_mock.inject(update_item)
 
     assert listener.call_count == 2
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 3
 
     now_playing = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(now_playing)
+    await protocol_mock.inject(now_playing)
 
     assert listener.call_count == 4
 
-    await protocol.inject(update_item)
+    await protocol_mock.inject(update_item)
 
     assert listener.call_count == 5
 
 
-async def test_update_client(psm, protocol, listener):
+async def test_update_client(psm, protocol_mock, listener):
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 1
     assert psm.client.display_name is None
@@ -350,20 +333,20 @@ async def test_update_client(psm, protocol, listener):
     client = update.inner().client
     client.bundleIdentifier = CLIENT_ID_1
     client.displayName = CLIENT_NAME_1
-    await protocol.inject(update)
+    await protocol_mock.inject(update)
 
     assert listener.call_count == 2
     assert psm.client.display_name == CLIENT_NAME_1
 
 
-async def test_remove_active_client(psm, protocol, listener):
+async def test_remove_active_client(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 2
     assert psm.client.bundle_identifier == CLIENT_ID_1
@@ -371,20 +354,20 @@ async def test_remove_active_client(psm, protocol, listener):
     remove = messages.create(pb.REMOVE_CLIENT_MESSAGE)
     client = remove.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(remove)
+    await protocol_mock.inject(remove)
 
     assert listener.call_count == 3
     assert psm.client is None
 
 
-async def test_remove_not_active_client(psm, protocol, listener):
+async def test_remove_not_active_client(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 2
     assert psm.client.bundle_identifier == CLIENT_ID_1
@@ -392,67 +375,67 @@ async def test_remove_not_active_client(psm, protocol, listener):
     remove = messages.create(pb.REMOVE_CLIENT_MESSAGE)
     client = remove.inner().client
     client.bundleIdentifier = CLIENT_ID_2
-    await protocol.inject(remove)
+    await protocol_mock.inject(remove)
 
     assert listener.call_count == 2
     assert psm.client.bundle_identifier == CLIENT_ID_1
 
 
-async def test_remove_active_player(psm, protocol, listener):
+async def test_remove_active_player(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert psm.playing.identifier == PLAYER_ID_1
 
     remove = set_path(messages.create(pb.REMOVE_PLAYER_MESSAGE))
-    await protocol.inject(remove)
+    await protocol_mock.inject(remove)
 
     assert listener.call_count == 4
     assert not psm.playing.is_valid
 
 
-async def test_remove_active_player_reverts_to_default(psm, protocol, listener):
+async def test_remove_active_player_reverts_to_default(psm, protocol_mock, listener):
     msg = set_path(messages.create(pb.SET_STATE_MESSAGE), player_id=DEFAULT_PLAYER)
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     assert listener.call_count == 2
     assert psm.playing.identifier == PLAYER_ID_1
 
     remove = set_path(messages.create(pb.REMOVE_PLAYER_MESSAGE))
-    await protocol.inject(remove)
+    await protocol_mock.inject(remove)
 
     assert listener.call_count == 3
     assert psm.playing.identifier == DEFAULT_PLAYER
 
 
-async def test_set_default_supported_commands(psm, protocol, listener):
+async def test_set_default_supported_commands(psm, protocol_mock, listener):
     msg = messages.create(pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
     supported_commands = msg.inner().supportedCommands.supportedCommands
     command = supported_commands.add()
     command.command = pb.CommandInfo_pb2.Play
     msg.inner().playerPath.client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
     client = msg.inner().client
     client.bundleIdentifier = CLIENT_ID_1
-    await protocol.inject(msg)
+    await protocol_mock.inject(msg)
 
     # Default commands are set on client, so any player belonging to that client
     # should have the supported command

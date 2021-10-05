@@ -531,8 +531,8 @@ class MrpPower(Power):
         self.device_info = None
         self._waiters: Dict[PowerState, asyncio.Event] = {}
 
-        self.protocol.add_listener(
-            self._update_power_state, protobuf.DEVICE_INFO_UPDATE_MESSAGE
+        self.protocol.listen_to(
+            protobuf.DEVICE_INFO_UPDATE_MESSAGE, self._update_power_state
         )
 
     def _get_current_power_state(self) -> PowerState:
@@ -561,7 +561,7 @@ class MrpPower(Power):
         if await_new_state and self.power_state != PowerState.Off:
             await self._waiters.setdefault(PowerState.Off, asyncio.Event()).wait()
 
-    async def _update_power_state(self, message, _):
+    async def _update_power_state(self, message):
         old_state = self.power_state
         new_state = self._get_power_state(message)
         self.device_info = message
@@ -645,22 +645,22 @@ class MrpAudio(Audio):
         return self._volume_controls_available and self._output_device_uid is not None
 
     def _add_listeners(self):
-        self.protocol.add_listener(
-            self._volume_control_availability,
+        self.protocol.listen_to(
             protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE,
+            self._volume_control_availability,
         )
-        self.protocol.add_listener(
-            self._volume_control_changed,
+        self.protocol.listen_to(
             protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE,
+            self._volume_control_changed,
         )
-        self.protocol.add_listener(
-            self._volume_did_change, protobuf.VOLUME_DID_CHANGE_MESSAGE
+        self.protocol.listen_to(
+            protobuf.VOLUME_DID_CHANGE_MESSAGE, self._volume_did_change
         )
 
-    async def _volume_control_availability(self, message, _) -> None:
+    async def _volume_control_availability(self, message) -> None:
         self._update_volume_controls(message.inner())
 
-    async def _volume_control_changed(self, message, _) -> None:
+    async def _volume_control_changed(self, message) -> None:
         inner = message.inner()
 
         self._output_device_uid = inner.outputDeviceUID
@@ -674,7 +674,7 @@ class MrpAudio(Audio):
             "Volume control availability changed to %s", self._volume_controls_available
         )
 
-    async def _volume_did_change(self, message, _) -> None:
+    async def _volume_did_change(self, message) -> None:
         inner = message.inner()
 
         # Make sure update is for our device (in case it changed for someone else)

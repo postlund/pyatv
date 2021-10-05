@@ -204,7 +204,7 @@ class PlayerStateManager:
             pb.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: self._handle_set_default_supported_commands,  # pylint: disable=line-too-long # noqa
         }
         for message, handler in listeners.items():
-            self.protocol.add_listener(handler, message)
+            self.protocol.listen_to(message, handler)
 
     def get_client(self, client: pb.NowPlayingClient) -> Client:
         """Return client based on player path."""
@@ -244,7 +244,7 @@ class PlayerStateManager:
             return self._active_client.active_player
         return PlayerState(Client(pb.NowPlayingClient()), pb.NowPlayingPlayer())
 
-    async def _handle_set_state(self, message, _):
+    async def _handle_set_state(self, message):
         setstate = message.inner()
 
         player = self.get_player(setstate.playerPath)
@@ -252,7 +252,7 @@ class PlayerStateManager:
 
         await self._state_updated(player=player)
 
-    async def _handle_content_item_update(self, message, _):
+    async def _handle_content_item_update(self, message):
         item_update = message.inner()
 
         player = self.get_player(item_update.playerPath)
@@ -260,14 +260,14 @@ class PlayerStateManager:
 
         await self._state_updated(player=player)
 
-    async def _handle_set_now_playing_client(self, message, _):
+    async def _handle_set_now_playing_client(self, message):
         self._active_client = self.get_client(message.inner().client)
 
         _LOGGER.debug("Active client is now %s", self._active_client.bundle_identifier)
 
         await self._state_updated()
 
-    async def _handle_set_now_playing_player(self, message, _):
+    async def _handle_set_now_playing_player(self, message):
         set_now_playing = message.inner()
 
         client = self.get_client(set_now_playing.playerPath.client)
@@ -275,7 +275,7 @@ class PlayerStateManager:
 
         await self._state_updated(client=client)
 
-    async def _handle_remove_client(self, message, _):
+    async def _handle_remove_client(self, message):
         client_to_remove = message.inner().client
 
         if client_to_remove.bundleIdentifier in self._clients:
@@ -286,7 +286,7 @@ class PlayerStateManager:
                 self._active_client = None
                 await self._state_updated()
 
-    async def _handle_remove_player(self, message, _):
+    async def _handle_remove_player(self, message):
         player_to_remove = message.inner().playerPath
 
         player = self.get_player(player_to_remove)
@@ -299,7 +299,7 @@ class PlayerStateManager:
                 client.active_player = None
                 await self._state_updated(client=client)
 
-    async def _handle_set_default_supported_commands(self, message, _):
+    async def _handle_set_default_supported_commands(self, message):
         supported_commands = message.inner()
 
         client = self.get_client(supported_commands.playerPath.client)
@@ -307,7 +307,7 @@ class PlayerStateManager:
 
         await self._state_updated()
 
-    async def _handle_update_client(self, message, _):
+    async def _handle_update_client(self, message):
         update_client = message.inner()
 
         client = self.get_client(update_client.client)
