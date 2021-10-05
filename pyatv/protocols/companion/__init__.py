@@ -7,6 +7,7 @@ from random import randint
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import (
     DeviceModel,
@@ -31,13 +32,13 @@ from pyatv.interface import (
     Power,
     RemoteControl,
 )
-from pyatv.protocols.companion.connection import (
-    CompanionConnection,
-    CompanionConnectionListener,
-    FrameType,
-)
+from pyatv.protocols.companion.connection import CompanionConnection, FrameType
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
-from pyatv.protocols.companion.protocol import CompanionProtocol
+from pyatv.protocols.companion.protocol import (
+    CompanionProtocol,
+    CompanionProtocolListener,
+    MessageType,
+)
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
@@ -119,13 +120,21 @@ class HidCommand(Enum):
 
 
 # TODO: Maybe move to separate file?
-class CompanionAPI(CompanionConnectionListener):
+class CompanionAPI(CompanionProtocolListener):
     """Implementation of Companion API."""
 
-    def __init__(self, config: BaseConfig, loop: asyncio.AbstractEventLoop):
+    def __init__(
+        self,
+        config: BaseConfig,
+        service: BaseService,
+        device_listener: StateProducer,
+        loop: asyncio.AbstractEventLoop,
+    ):
         """Initialize a new CompanionAPI instance."""
         self.config = config
+        self.service = service
         self.loop = loop
+        self._device_listener = device_listener
         self._connection: Optional[CompanionConnection] = None
         self._protocol: Optional[CompanionProtocol] = None
         self.sid: int = 0
@@ -136,38 +145,39 @@ class CompanionAPI(CompanionConnectionListener):
         if self._protocol:
             self._protocol.stop()
 
-    async def _connect(self):
+    def event_received(self, event_name: str, data: Dict[str, Any]) -> None:
+        """Event was received."""
+        _LOGGER.debug("Got event %s from device: %s", event_name, data)
+
+    async def connect(self):
         if self._protocol:
             return
 
-        service = self.config.get_service(Protocol.Companion)
-        if service is None:
-            raise exceptions.NoCredentialsError("No Companion credentials loaded")
-
         _LOGGER.debug("Connect to Companion from API")
-        connection = CompanionConnection(
-            self.loop, str(self.config.address), service.port, self
+        self._connection = CompanionConnection(
+            self.loop,
+            str(self.config.address),
+            self.service.port,
+            self._device_listener,
         )
+        self._protocol = CompanionProtocol(
+            self._connection, SRPAuthHandler(), self.service
+        )
+        self._protocol.listener = self
+        await self._protocol.start()
 
-        protocol = CompanionProtocol(connection, SRPAuthHandler(), service)
-        await protocol.start()
-
-        self._connection = connection
-        self._protocol = protocol
-
+        await self.system_info()
         await self._session_start()
-
-    def disconnected(self) -> None:
-        """Call back when disconnected from companion device."""
-        _LOGGER.debug("API got disconnected from Companion device")
-        self._connection = None
-        self._protocol = None
+        await self.subscribe_event("_iMC")
 
     async def _send_command(
-        self, identifier: str, content: Dict[str, object]
+        self,
+        identifier: str,
+        content: Dict[str, object],
+        message_type: MessageType = MessageType.Request,
     ) -> Dict[str, object]:
         """Send a command to the device and return response."""
-        await self._connect()
+        await self.connect()
         if self._protocol is None:
             raise RuntimeError("not connected to companion")
 
@@ -176,8 +186,8 @@ class CompanionAPI(CompanionConnectionListener):
                 FrameType.E_OPACK,
                 {
                     "_i": identifier,
-                    "_x": 12356,  # Dummy XID, not sure what to use
-                    "_t": "2",  # Request
+                    "_x": 1234,  # Dummy XID, not sure what to use
+                    "_t": message_type.value,
                     "_c": content,
                 },
             )
@@ -188,6 +198,28 @@ class CompanionAPI(CompanionConnectionListener):
         else:
             return resp
 
+    async def system_info(self):
+        """Send system information to device."""
+        _LOGGER.debug("Sending system information")
+        creds = parse_credentials(self.service.credentials)
+
+        # Bunch of semi-random values here...
+        await self._send_command(
+            "_systemInfo",
+            {
+                "_bf": 0,
+                "_cf": 512,
+                "_clFl": 128,
+                "_i": "cafecafecafe",  # TODO: Figure out what to put here
+                "_idsID": creds.client_id,
+                "_pubID": "aa:bb:cc:dd:ee:ff",
+                "_sf": 256,  # Status flags?
+                "_sv": "170.18",  # Software Version (I guess?)
+                "model": "iPhone14,3",
+                "name": "pyatv",
+            },
+        )
+
     async def _session_start(self):
         local_sid = randint(0, 2 ** 32 - 1)
         resp = await self._send_command(
@@ -197,6 +229,27 @@ class CompanionAPI(CompanionConnectionListener):
         remote_sid = resp["_c"]["_sid"]
         self.sid = (remote_sid << 32) | local_sid
         _LOGGER.debug("Started session with SID 0x%X", self.sid)
+
+    async def subscribe_event(self, event: str) -> None:
+        """Subscribe to updates to an event."""
+        await self.connect()
+        if self._protocol is None:
+            raise RuntimeError("not connected to companion")
+
+        try:
+            self._protocol.send_opack(
+                FrameType.E_OPACK,
+                {
+                    "_i": "_interest",
+                    "_x": 1234,  # Dummy XID, not sure what to use
+                    "_t": "1",  # MessageType.Event.value,
+                    "_c": {"_regEvents": [event]},
+                },
+            )
+        except exceptions.ProtocolError:
+            raise
+        except Exception as ex:
+            raise exceptions.ProtocolError(f"Subscribe to {event} failed") from ex
 
     async def launch_app(self, bundle_identifier: str) -> None:
         """Launch an app on the remote device."""
@@ -407,7 +460,7 @@ def setup(
     if not service.credentials:
         return None
 
-    api = CompanionAPI(config, loop)
+    api = CompanionAPI(config, service, device_listener, loop)
 
     interfaces = {
         Apps: CompanionApps(api),
@@ -418,6 +471,7 @@ def setup(
     }
 
     async def _connect() -> bool:
+        await api.connect()
         return True
 
     def _close() -> Set[asyncio.Task]:

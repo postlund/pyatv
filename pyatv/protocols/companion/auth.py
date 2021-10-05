@@ -59,6 +59,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
                 ),
                 "_pwTy": 1,
             },
+            response_type=FrameType.PS_Next,
         )
 
         pairing_data = _get_pairing_data(resp)
@@ -151,6 +152,7 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
                 ),
                 "_auTy": 4,
             },
+            response_type=FrameType.PV_Next,
         )
 
         pairing_data = _get_pairing_data(resp)
