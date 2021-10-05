@@ -4,7 +4,12 @@ import asyncio
 import logging
 from typing import Dict, Optional, Set
 
-from pyatv.protocols.companion import HidCommand, opack
+from pyatv.protocols.companion import (
+    HidCommand,
+    MediaControlCommand,
+    MediaControlFlags,
+    opack,
+)
 from pyatv.protocols.companion.connection import FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.support import chacha20, log_binary
@@ -12,6 +17,8 @@ from pyatv.support import chacha20, log_binary
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Fake Companion ATV"
+INITIAL_VOLUME = 10.0
+VOLUME_STEP = 5.0
 
 COMPANION_AUTH_FRAMES = [
     FrameType.PS_Start,
@@ -20,7 +27,7 @@ COMPANION_AUTH_FRAMES = [
     FrameType.PV_Next,
 ]
 
-BUTTON_MAP = {
+HID_BUTTON_MAP = {
     HidCommand.Up: "up",
     HidCommand.Down: "down",
     HidCommand.Left: "left",
@@ -31,6 +38,14 @@ BUTTON_MAP = {
     HidCommand.VolumeDown: "volume_down",
     HidCommand.VolumeUp: "volume_up",
     HidCommand.PlayPause: "play_pause",
+}
+
+MEDIA_CONTROL_MAP = {
+    MediaControlCommand.Play: "play",
+    MediaControlCommand.Pause: "pause",
+    MediaControlCommand.NextTrack: "next",
+    MediaControlCommand.PreviousTrack: "previous",
+    MediaControlCommand.SetVolume: "set_volume",
 }
 
 
@@ -44,8 +59,9 @@ class FakeCompanionState:
         self.sid: int = 0
         self.service_type: Optional[str] = None
         self.latest_button: Optional[str] = None
-        self.media_control_flags: int = 0
+        self.media_control_flags: int = MediaControlFlags.Volume
         self.interests: Set[str] = set()
+        self.volume: float = INITIAL_VOLUME
 
 
 class FakeCompanionServiceFactory:
@@ -81,6 +97,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
 
     def __init__(self, state):
         super().__init__(DEVICE_NAME)
+        self.loop = asyncio.get_event_loop()
         self.state = state
         self.buffer = b""
         self.chacha = None
@@ -189,6 +206,16 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             },
         )
 
+    def volume_changed(self, new_volume: float):
+        self.state.volume = min(max(new_volume, 0.0), 100.0)
+        _LOGGER.debug("Volume changed to %f", self.state.volume)
+
+        self.send_event(
+            "_iMC",
+            1234,
+            {"_mcF": self.state.media_control_flags | MediaControlFlags.Volume},
+        )
+
     def handle__launchapp(self, message):
         self.state.active_app = message["_c"]["_bundleID"]
         self.send_response(message, {})
@@ -206,14 +233,38 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         elif button_state == 2 and button_code == HidCommand.Wake:
             _LOGGER.debug("Waking up device")
             self.state.powered_on = True
-        elif button_state == 2 and button_code in BUTTON_MAP:
-            _LOGGER.debug("Button pressed: %s", BUTTON_MAP[button_code])
-            self.state.latest_button = BUTTON_MAP[button_code]
+        elif button_state == 2 and button_code in HID_BUTTON_MAP:
+            _LOGGER.debug("Button pressed: %s", HID_BUTTON_MAP[button_code])
+            self.state.latest_button = HID_BUTTON_MAP[button_code]
+
+            # Buttons that change volume
+            if button_code == HidCommand.VolumeUp:
+                self.volume_changed(self.state.volume + VOLUME_STEP)
+            elif button_code == HidCommand.VolumeDown:
+                self.volume_changed(self.state.volume - VOLUME_STEP)
         else:
             _LOGGER.warning("Unhandled command: %d %s", button_state, button_code)
             return  # Would be good to send error message here
 
         self.send_response(message, {})
+
+    def handle__mcc(self, message):
+        args = {}
+        mcc = MediaControlCommand(message["_c"]["_mcc"])
+
+        if mcc == MediaControlCommand.SetVolume:
+            # Make sure we send response before triggering event with volume update
+            self.loop.call_soon(self.volume_changed(message["_c"]["_vol"] * 100.0))
+        if mcc == MediaControlCommand.GetVolume:
+            args["_vol"] = self.state.volume / 100.0
+        elif mcc in MEDIA_CONTROL_MAP:
+            _LOGGER.debug("Activated Media Control Command %s", mcc)
+            self.state.latest_button = MEDIA_CONTROL_MAP[mcc]
+        else:
+            _LOGGER.warning("Unsupported Media Control Code: %s", mcc)
+            return
+
+        self.send_response(message, args)
 
     def handle__sessionstart(self, message):
         self.state.sid = message["_c"]["_sid"]
@@ -221,7 +272,6 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.send_response(message, {"_sid": 5555})
 
     def handle__sessionstop(self, message):
-
         if message["_c"]["_sid"] == (5555 << 32 | self.state.sid):
             self.state.sid = 0
             self.send_response(message, {})
