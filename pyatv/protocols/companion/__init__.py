@@ -1,7 +1,7 @@
 """PoC code for Companion protocol."""
 
 import asyncio
-from enum import Enum
+from enum import Enum, IntFlag
 import logging
 from random import randint
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
@@ -70,26 +70,24 @@ PAIRING_DISABLED_MASK = 0x24
 # that pyatv supports).
 PAIRING_WITH_PIN_SUPPORTED_MASK = 0x4000
 
-SUPPORTED_FEATURES = set(
-    [
-        FeatureName.AppList,
-        FeatureName.LaunchApp,
-        FeatureName.TurnOn,
-        FeatureName.TurnOff,
-        FeatureName.Up,
-        FeatureName.Down,
-        FeatureName.Left,
-        FeatureName.Right,
-        FeatureName.Select,
-        FeatureName.Menu,
-        FeatureName.Home,
-        FeatureName.VolumeUp,
-        FeatureName.VolumeDown,
-        FeatureName.PlayPause,
-    ]
-)
-
 # pylint: disable=invalid-name
+
+
+class MediaControlFlags(IntFlag):
+    """Media control flags used to indicate available controls."""
+
+    NoControls = 0x0000
+    Play = 0x0001
+    Pause = 0x0002
+    NextTrack = 0x0004
+    PreviousTrack = 0x0008
+    FastForward = 0x0010
+    Rewind = 0x0020
+    # ? = 0x0040
+    # ? = 0x0080
+    Volume = 0x0100
+    SkipForward = 0x0200
+    SkipBackward = 0x0400
 
 
 class HidCommand(Enum):
@@ -118,6 +116,37 @@ class HidCommand(Enum):
 
 # pylint: enable=invalid-name
 
+MEDIA_CONTROL_MAP = {
+    FeatureName.Play: MediaControlFlags.Play,
+    FeatureName.Pause: MediaControlFlags.Pause,
+    FeatureName.Next: MediaControlFlags.NextTrack,
+    FeatureName.Previous: MediaControlFlags.PreviousTrack,
+    FeatureName.Volume: MediaControlFlags.Volume,
+    FeatureName.SetVolume: MediaControlFlags.Volume,
+    FeatureName.SkipForward: MediaControlFlags.SkipForward,
+    FeatureName.SkipBackward: MediaControlFlags.SkipBackward,
+}
+
+SUPPORTED_FEATURES = set(
+    [
+        FeatureName.AppList,
+        FeatureName.LaunchApp,
+        FeatureName.TurnOn,
+        FeatureName.TurnOff,
+        FeatureName.Up,
+        FeatureName.Down,
+        FeatureName.Left,
+        FeatureName.Right,
+        FeatureName.Select,
+        FeatureName.Menu,
+        FeatureName.Home,
+        FeatureName.VolumeUp,
+        FeatureName.VolumeDown,
+        FeatureName.PlayPause,
+    ]
+    + list(MEDIA_CONTROL_MAP.keys())
+)
+
 
 # TODO: Maybe move to separate file?
 class CompanionAPI(CompanionProtocolListener):
@@ -138,6 +167,7 @@ class CompanionAPI(CompanionProtocolListener):
         self._connection: Optional[CompanionConnection] = None
         self._protocol: Optional[CompanionProtocol] = None
         self.sid: int = 0
+        self.control_flags: MediaControlFlags = MediaControlFlags.NoControls
 
     async def disconnect(self):
         """Disconnect from companion device."""
@@ -147,9 +177,14 @@ class CompanionAPI(CompanionProtocolListener):
 
     def event_received(self, event_name: str, data: Dict[str, Any]) -> None:
         """Event was received."""
-        _LOGGER.debug("Got event %s from device: %s", event_name, data)
+        if event_name == "_iMC":
+            self.control_flags = MediaControlFlags(data["_mcF"])
+            _LOGGER.debug("Updated media control flags to %s", self.control_flags)
+        else:
+            _LOGGER.debug("Got event %s from device: %s", event_name, data)
 
     async def connect(self):
+        """Connect to remote host."""
         if self._protocol:
             return
 
@@ -269,19 +304,23 @@ class CompanionAPI(CompanionProtocolListener):
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: BaseService) -> None:
+    def __init__(self, api: CompanionAPI) -> None:
         """Initialize a new CompanionFeatures instance."""
         super().__init__()
-        self.service = service
+        self.api: CompanionAPI = api
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
-        # Credentials are needed, so cannot be available without them
-        if self.service.credentials is not None:
-            # Just assume these are available for now if the protocol is configured,
-            # we don't have any way to verify it anyways.
-            if feature_name in SUPPORTED_FEATURES:
-                return FeatureInfo(FeatureState.Available)
+        if feature_name in MEDIA_CONTROL_MAP:
+            is_available = MEDIA_CONTROL_MAP[feature_name] & self.api.control_flags
+            return FeatureInfo(
+                FeatureState.Available if is_available else FeatureState.Unavailable
+            )
+
+        # Just assume these are available for now if the protocol is configured,
+        # we don't have any way to verify it anyways.
+        if feature_name in SUPPORTED_FEATURES:
+            return FeatureInfo(FeatureState.Available)
 
         return FeatureInfo(FeatureState.Unavailable)
 
@@ -464,7 +503,7 @@ def setup(
 
     interfaces = {
         Apps: CompanionApps(api),
-        Features: CompanionFeatures(service),
+        Features: CompanionFeatures(api),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api),

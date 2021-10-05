@@ -44,7 +44,7 @@ class FakeCompanionState:
         self.sid: int = 0
         self.service_type: Optional[str] = None
         self.latest_button: Optional[str] = None
-        self.media_control_flags: int = 256
+        self.media_control_flags: int = 0
 
 
 class FakeCompanionServiceFactory:
@@ -102,6 +102,8 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.state.has_paired = True
 
     def send_to_client(self, frame_type: FrameType, data: object) -> None:
+        _LOGGER.debug("Send %s with data: %s", frame_type, data)
+
         data = opack.pack(data)
 
         payload_length = len(data) + (16 if self.chacha else 0)
@@ -162,6 +164,17 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             },
         )
 
+    def send_event(self, identifier, xid, content):
+        self.send_to_client(
+            FrameType.E_OPACK,
+            {
+                "_i": identifier,
+                "_x": xid,
+                "_t": 1,
+                "_c": content,
+            },
+        )
+
     def handle__launchapp(self, message):
         self.state.active_app = message["_c"]["_bundleID"]
         self.send_response(message, {})
@@ -197,7 +210,10 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         self.send_response(message, {})
 
     def handle__interest(self, message):
-        self.send_response(message, {"_mcF": self.state.media_control_flags})
+        if "_iMC" in message["_c"]["_regEvents"]:
+            self.send_event(
+                "_iMC", message["_x"], {"_mcF": self.state.media_control_flags}
+            )
 
 
 class FakeCompanionUseCases:
@@ -210,3 +226,7 @@ class FakeCompanionUseCases:
     def set_installed_apps(self, apps: Dict[str, str]):
         """Set which apps that are currently installed."""
         self.state.installed_apps = apps
+
+    def set_control_flags(self, flags: int) -> None:
+        """Set media control flags."""
+        self.state.media_control_flags = flags
