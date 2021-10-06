@@ -540,12 +540,9 @@ class RaopClient:
 
             # Send progress if supported by receiver
             if MetadataType.Progress in self._metadata_types:
-                start = self.context.start_ts
+                start = self.context.rtptime
                 now = self.context.rtptime
-                end = (
-                    self.context.start_ts
-                    + wave_file.duration * self.context.sample_rate
-                )
+                end = start + wave_file.duration * self.context.sample_rate
                 await self.rtsp.set_parameter("progress", f"{start}/{now}/{end}")
 
             # Apply text metadata if it is supported
