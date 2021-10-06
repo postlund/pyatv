@@ -88,5 +88,19 @@ class ProtocolError(Exception):
     """
 
 
+class HttpError(ProtocolError):
+    """Thrown when a HTTP error occurs."""
+
+    def __init__(self, message: str, status_code: int) -> None:
+        """Initialize a new HttpError."""
+        super().__init__(message)
+        self._status_code = status_code
+
+    @property
+    def status_code(self) -> int:
+        """Return status code that triggered the error."""
+        return self._status_code
+
+
 class InvalidConfigError(Exception):
     """Thrown when something is wrong or missing in the config."""

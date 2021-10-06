@@ -251,12 +251,19 @@ def setup(  # pylint: disable=too-many-locals
             try:
 
                 await control.start(str(config.address), control_port, credentials)
-            except Exception as ex:
-                _LOGGER.warning("Failed to set up remote control channel: %s", ex)
-                return False
+            except exceptions.HttpError as ex:
+                if ex.status_code == 470:
+                    _LOGGER.debug(
+                        "Remote control authorization failed, missing credentials"
+                    )
+                else:
+                    _LOGGER.exception("Failed to set up remote control channel")
+            except Exception:
+                _LOGGER.exception("Failed to set up remote control channel")
             else:
                 await mrp_connect()
-            return True
+                return True
+            return False
 
         def _close_rc() -> Set[asyncio.Task]:
             tasks = set()

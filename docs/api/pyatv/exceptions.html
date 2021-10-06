@@ -33,6 +33,12 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.DeviceIdMissingError" href="#pyatv.exceptions.DeviceIdMissingError">DeviceIdMissingError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.HttpError" href="#pyatv.exceptions.HttpError">HttpError</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.exceptions.HttpError.status_code" href="#pyatv.exceptions.HttpError.status_code">status_code</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.InvalidConfigError" href="#pyatv.exceptions.InvalidConfigError">InvalidConfigError</a></code></h4>
 </li>
 <li>
@@ -87,7 +93,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L92" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L106" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -163,13 +169,36 @@ link_group: api
 <li>builtins.BaseException</li>
 </ul>
 </dd>
+<dt id="pyatv.exceptions.HttpError"><code class="flex name class">
+<span>class <span class="ident">HttpError</span></span>
+<span>(</span><span>message: str, status_code: int)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when a HTTP error occurs.</p>
+<p>Initialize a new HttpError.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L91-L102" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="pyatv.exceptions.ProtocolError" href="#pyatv.exceptions.ProtocolError">ProtocolError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.exceptions.HttpError.status_code"><code class="name">var <span class="ident">status_code</span> -> int</code></dt>
+<dd>
+<section class="desc"><p>Return status code that triggered the error.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L99-L102" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+</dd>
 <dt id="pyatv.exceptions.InvalidConfigError"><code class="flex name class">
 <span>class <span class="ident">InvalidConfigError</span></span>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when something is wrong or missing in the config.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L91-L92" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L105-L106" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -323,6 +352,10 @@ that is not covered by another exception is covered by this exception.</p></sect
 <ul class="hlist">
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="pyatv.exceptions.HttpError" href="#pyatv.exceptions.HttpError">HttpError</a></li>
 </ul>
 </dd>
 <dt id="pyatv.exceptions.UnknownMediaKindError"><code class="flex name class">
