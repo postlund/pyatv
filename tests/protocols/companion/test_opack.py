@@ -8,7 +8,9 @@ from uuid import UUID
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.protocols.companion.opack import pack, unpack
+from pyatv.protocols.companion.opack import UID, pack, unpack
+
+# pack
 
 
 def test_pack_unsupported_type():
@@ -108,6 +110,16 @@ def test_pack_ptr():
         pack({"a": "b", "c": {"d": "a"}, "d": True})
         == b"\xE3\x41\x61\x41\x62\x41\x63\xE1\x41\x64\xA0\xA3\x01"
     )
+
+
+def test_pack_uid():
+    assert pack(UID(0x01)) == b"\xC1\x01"
+    assert pack(UID(0x0102)) == b"\xC2\x01\x02"
+    assert pack(UID(0x010203)) == b"\xC3\x01\x02\x03"
+    assert pack(UID(0x01020304)) == b"\xC4\x01\x02\x03\x04"
+
+
+# unpack
 
 
 def test_unpack_unsupported_type():
@@ -216,6 +228,13 @@ def test_unpack_ptr():
     )
 
 
+def test_unpack_uid():
+    assert unpack(b"\xC1\x01") == (UID(0x01), b"")
+    assert unpack(b"\xC2\x01\x02") == (UID(0x0102), b"")
+    assert unpack(b"\xC3\x01\x02\x03") == (UID(0x010203), b"")
+    assert unpack(b"\xC4\x01\x02\x03\x04") == (UID(0x01020304), b"")
+
+
 def test_golden():
     data = {
         "_i": "_systemInfo",
@@ -246,6 +265,7 @@ def test_golden():
             "_sf": 256,
             "model": "iPhone10,6",
             "name": "iPhone",
+            "uid": UID(0x11223344),
         },
         "_t": 2,
     }
