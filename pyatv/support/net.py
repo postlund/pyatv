@@ -37,6 +37,9 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
             socket.SOL_SOCKET, socket.SO_REUSEPORT, 1  # pylint: disable=no-member
         )
 
+    _LOGGER.debug("Binding on %s:%d", address or "*", port)
+    sock.bind((address or "", port))
+
     if address is not None:
         sock.setsockopt(
             socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(address)
@@ -47,8 +50,6 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
         except OSError:
             _LOGGER.exception("failed to join")
 
-    _LOGGER.debug("Binding on %s:%d", address or "*", port)
-    sock.bind((address or "", port))
     return sock
 
 
