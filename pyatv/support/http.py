@@ -409,9 +409,10 @@ class HttpConnection(asyncio.Protocol):
         if 200 <= response.code < 300 or allow_error:
             return response
 
-        raise exceptions.ProtocolError(
+        raise exceptions.HttpError(
             f"{protocol} method {method} failed with code "
-            f"{response.code}: {response.message}"
+            f"{response.code}: {response.message}",
+            response.code,
         )
 
 
