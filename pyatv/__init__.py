@@ -85,7 +85,7 @@ async def connect(
         # for service in config.services:
         for proto, proto_methods in PROTOCOLS.items():
             service = config.get_service(proto)
-            if service is None:
+            if service is None or service.port == 0:
                 continue
 
             for setup_data in proto_methods.setup(
