@@ -14,7 +14,7 @@ import asyncio
 import io
 import logging
 from queue import Queue
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
@@ -376,7 +376,7 @@ class FacadeAppleTV(interface.AppleTV):
         self._features = FacadeFeatures(self._push_updates)
         self._pending_tasks: Optional[set] = None
         self._device_info = interface.DeviceInfo({})
-        self._interfacea = {
+        self._interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
@@ -426,7 +426,7 @@ class FacadeAppleTV(interface.AppleTV):
                 self._protocol_handlers[setup_data.protocol] = setup_data
 
                 for iface, instance in setup_data.interfaces.items():
-                    self._interfacea[iface].register(instance, setup_data.protocol)
+                    self._interfaces[iface].register(instance, setup_data.protocol)
 
                 self._features.add_mapping(setup_data.protocol, setup_data.features)
                 dict_merge(devinfo, setup_data.device_info())
@@ -436,9 +436,9 @@ class FacadeAppleTV(interface.AppleTV):
         # Forward power events in case an interface exists for it
         try:
             power = cast(
-                interface.Power, self._interfacea[interface.Power].main_instance
+                interface.Power, self._interfaces[interface.Power].main_instance
             )
-            power.listener = self._interfacea[interface.Power]
+            power.listener = self._interfaces[interface.Power]
         except exceptions.NotSupportedError:
             _LOGGER.debug("Power management not supported by any protocols")
 
@@ -453,6 +453,35 @@ class FacadeAppleTV(interface.AppleTV):
         for setup_data in self._protocol_handlers.values():
             self._pending_tasks.update(setup_data.close())
         return self._pending_tasks
+
+    def takeover(self, protocol: Protocol, *interfaces: Any) -> Callable[[], None]:
+        """Perform takeover of one of one or more protocol.
+
+        Returns a function, that when called, returns the protocols taken over.
+        """
+        taken_over: List[Relayer] = []
+
+        def _release() -> None:
+            _LOGGER.debug("Release %s by %s", interfaces, protocol)
+            for relayer in taken_over:
+                relayer.release()
+
+        _LOGGER.debug("Takeover %s by %s", interfaces, protocol)
+
+        for iface in interfaces:
+            relayer = self._interfaces.get(iface)
+            if relayer is None:
+                continue
+
+            try:
+                relayer.takeover(protocol)
+            except exceptions.InvalidStateError:
+                _release()
+                raise
+            else:
+                taken_over.append(relayer)
+
+        return _release
 
     @property
     def device_info(self) -> interface.DeviceInfo:
@@ -472,42 +501,42 @@ class FacadeAppleTV(interface.AppleTV):
     @property
     def remote_control(self) -> interface.RemoteControl:
         """Return API for controlling the Apple TV."""
-        return cast(interface.RemoteControl, self._interfacea[interface.RemoteControl])
+        return cast(interface.RemoteControl, self._interfaces[interface.RemoteControl])
 
     @property
     def metadata(self) -> interface.Metadata:
         """Return API for retrieving metadata from the Apple TV."""
-        return cast(interface.Metadata, self._interfacea[interface.Metadata])
+        return cast(interface.Metadata, self._interfaces[interface.Metadata])
 
     @property
     def push_updater(self) -> interface.PushUpdater:
         """Return API for handling push update from the Apple TV."""
-        return self._interfacea[interface.PushUpdater].main_instance  # type: ignore
+        return self._interfaces[interface.PushUpdater].main_instance  # type: ignore
 
     @property
     def stream(self) -> interface.Stream:
         """Return API for streaming media."""
-        return cast(interface.Stream, self._interfacea[interface.Stream])
+        return cast(interface.Stream, self._interfaces[interface.Stream])
 
     @property
     def power(self) -> interface.Power:
         """Return API for power management."""
-        return cast(interface.Power, self._interfacea[interface.Power])
+        return cast(interface.Power, self._interfaces[interface.Power])
 
     @property
     def features(self) -> interface.Features:
         """Return features interface."""
-        return cast(interface.Features, self._interfacea[interface.Features])
+        return cast(interface.Features, self._interfaces[interface.Features])
 
     @property
     def apps(self) -> interface.Apps:
         """Return apps interface."""
-        return cast(interface.Apps, self._interfacea[interface.Apps])
+        return cast(interface.Apps, self._interfaces[interface.Apps])
 
     @property
     def audio(self) -> interface.Audio:
         """Return audio interface."""
-        return cast(interface.Audio, self._interfacea[interface.Audio])
+        return cast(interface.Audio, self._interfaces[interface.Audio])
 
     def state_was_updated(self) -> None:
         """Call when state was updated.

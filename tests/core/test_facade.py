@@ -2,6 +2,7 @@
 import asyncio
 import inspect
 from ipaddress import IPv4Address
+import math
 from typing import Any, Dict, Set
 from unittest.mock import MagicMock
 
@@ -450,3 +451,56 @@ async def test_stream_play_url_available(facade_dummy, register_interface):
     await facade_dummy.stream.play_url(TEST_URL)
 
     assert stream.url == TEST_URL
+
+
+async def test_takeover_and_release(facade_dummy, register_interface):
+    register_interface(FeatureName.Volume, DummyAudio(100.0), Protocol.RAOP)
+    register_interface(FeatureName.Volume, DummyAudio(0.0), Protocol.MRP)
+
+    await facade_dummy.connect()
+    audio = facade_dummy.audio
+
+    # MRP has priority, so should return that volume
+    assert math.isclose(audio.volume, 0.0)
+
+    takeover_release = facade_dummy.takeover(Protocol.RAOP, Audio)
+
+    # RAOP has performed takeover, so should return volume from there
+    assert math.isclose(audio.volume, 100.0)
+
+    takeover_release()
+
+    # Back to MRP again
+    assert math.isclose(audio.volume, 0.0)
+
+
+def register_basic_interfaces(reg_interface, protocol: Protocol) -> None:
+    _, sdg = reg_interface(
+        FeatureName.PlayUrl, DummyFeatures(FeatureName.PlayUrl), protocol
+    )
+    sdg.interfaces[Audio] = DummyAudio(0.0)
+    sdg.interfaces[Stream] = DummyStream()
+    return sdg
+
+
+async def test_takeover_failure_restores(facade_dummy, register_interface):
+    register_basic_interfaces(register_interface, Protocol.RAOP)
+    register_basic_interfaces(register_interface, Protocol.DMAP)
+    sdg_mrp = register_basic_interfaces(register_interface, Protocol.MRP)
+
+    await facade_dummy.connect()
+    audio = facade_dummy.audio
+
+    # RAOP takes over Audio
+    facade_dummy.takeover(Protocol.RAOP, Audio)
+
+    with pytest.raises(exceptions.InvalidStateError):
+        # DMAP tries to take over Stream and Audio, but fails since Audio has
+        # already been taken over by RAOP (so entire takeover is rolled back)
+        facade_dummy.takeover(Protocol.DMAP, Stream, Audio)
+
+    # Play something via Stream, which uses regular priority
+    await facade_dummy.stream.play_url("test")
+
+    # MRP has highest priority, so it should be used
+    assert sdg_mrp.interfaces[Stream].url == "test"
