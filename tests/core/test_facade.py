@@ -10,7 +10,7 @@ import pytest
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV
-from pyatv.const import FeatureName, OperatingSystem, Protocol
+from pyatv.const import DeviceState, FeatureName, MediaType, OperatingSystem, Protocol
 from pyatv.core import SetupData
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
@@ -20,10 +20,14 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     FeatureState,
+    Playing,
     Power,
+    PushListener,
     PushUpdater,
     Stream,
 )
+
+from tests.utils import until
 
 TEST_URL = "http://test"
 
@@ -139,6 +143,35 @@ class DummyStream(Stream):
 
     async def play_url(self, url: str, **kwargs) -> None:
         self.url = url
+
+
+class DummyPushUpdater(PushUpdater):
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        super().__init__(loop)
+        self._active = False
+
+    @property
+    def active(self) -> bool:
+        return self._active
+
+    def start(self, initial_delay: int = 0) -> None:
+        self._active = True
+
+    def stop(self) -> None:
+        self._active = False
+
+
+class SavingPushListener(PushListener):
+    def __init__(self):
+        self.last_update = None
+        self.no_of_updates = 0
+
+    def playstatus_update(self, updater, playstatus: Playing) -> None:
+        self.last_update = playstatus
+        self.no_of_updates += 1
+
+    def playstatus_error(self, updater, exception: Exception) -> None:
+        pass
 
 
 @pytest.fixture(name="register_interface")
@@ -504,3 +537,72 @@ async def test_takeover_failure_restores(facade_dummy, register_interface):
 
     # MRP has highest priority, so it should be used
     assert sdg_mrp.interfaces[Stream].url == "test"
+
+
+async def test_takeover_push_updates(facade_dummy, register_interface, event_loop):
+    listener = SavingPushListener()
+
+    async def _perform_update(expected_updates, expected_protocol):
+        raop_pusher.post_update(
+            Playing(MediaType.Music, DeviceState.Idle, title=f"raop_{expected_updates}")
+        )
+        mrp_pusher.post_update(
+            Playing(MediaType.Music, DeviceState.Idle, title=f"mrp_{expected_updates}")
+        )
+
+        await until(lambda: listener.no_of_updates == expected_updates)
+        assert listener.last_update.title == f"{expected_protocol}_{expected_updates}"
+
+    raop_pusher = DummyPushUpdater(event_loop)
+    mrp_pusher = DummyPushUpdater(event_loop)
+
+    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
+
+    await facade_dummy.connect()
+    push_updater = facade_dummy.push_updater
+    push_updater.listener = listener
+    push_updater.start()
+
+    # Trigger push updates from both protocols without any takeover. In this case only
+    # priority is used, so update from MRP should be delivered.
+    await _perform_update(1, "mrp")
+
+    takeover_release = facade_dummy.takeover(Protocol.RAOP, PushUpdater)
+
+    # After takeover, push update from RAOP should be delivered instead
+    await _perform_update(2, "raop")
+
+    takeover_release()
+
+    # Back to MRP again
+    await _perform_update(3, "mrp")
+
+
+# All push updaters must be started and stopped in parallel, otherwise updates will
+# not be pushed when performing a takeover (as the protocol taken over was never
+# started)
+async def test_start_stop_all_push_updaters(
+    facade_dummy, register_interface, event_loop
+):
+    raop_pusher = DummyPushUpdater(event_loop)
+    mrp_pusher = DummyPushUpdater(event_loop)
+
+    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
+
+    await facade_dummy.connect()
+    push_updater = facade_dummy.push_updater
+
+    assert not raop_pusher.active
+    assert not mrp_pusher.active
+
+    push_updater.start()
+
+    assert raop_pusher.active
+    assert mrp_pusher.active
+
+    push_updater.stop()
+
+    assert not raop_pusher.active
+    assert not mrp_pusher.active
