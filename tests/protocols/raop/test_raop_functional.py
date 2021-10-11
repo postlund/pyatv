@@ -18,7 +18,7 @@ from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Proto
 from pyatv.exceptions import AuthenticationError
 from pyatv.interface import FeatureInfo, Playing, PushListener
 
-from tests.utils import data_path, until
+from tests.utils import data_path, stub_sleep, until
 
 pytestmark = pytest.mark.asyncio
 
@@ -31,6 +31,8 @@ SAMPLE_WIDTH = 2  # bytes
 # Number of frames per audio packet in RAOP
 FRAMES_PER_PACKET = 352
 
+ONE_FRAME_IN_BYTES = FRAMES_PER_PACKET * CHANNELS * SAMPLE_WIDTH
+
 METADATA_FIELDS = [FeatureName.Title, FeatureName.Artist, FeatureName.Album]
 PROGRESS_FIELDS = [FeatureName.Position, FeatureName.TotalTime]
 VOLUME_FIELDS = [
@@ -39,6 +41,7 @@ VOLUME_FIELDS = [
     FeatureName.VolumeUp,
     FeatureName.VolumeDown,
 ]
+REMOTE_CONTROL_FIELDS = [FeatureName.Stop]
 
 
 @pytest.fixture(name="playing_listener")
@@ -322,6 +325,37 @@ async def test_metadata_features(raop_client, playing_listener):
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_remote_control_features(raop_client, playing_listener):
+    assert_features_in_state(
+        raop_client.features.all_features(),
+        REMOTE_CONTROL_FIELDS,
+        FeatureState.Unavailable,
+    )
+
+    # Start playback in the background
+    future = asyncio.ensure_future(
+        raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
+    )
+
+    # Wait for device to move to playing state and verify feature state
+    await playing_listener.playing_event.wait()
+    assert_features_in_state(
+        raop_client.features.all_features(),
+        REMOTE_CONTROL_FIELDS,
+        FeatureState.Available,
+    )
+
+    await future
+
+    # Playback finished so no controls should be available
+    assert_features_in_state(
+        raop_client.features.all_features(),
+        REMOTE_CONTROL_FIELDS,
+        FeatureState.Unavailable,
+    )
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
 async def test_sync_packets(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
@@ -508,3 +542,22 @@ async def test_stream_from_buffer(raop_client, raop_state):
 
     # TODO: stability problems here, need to look into it
     # assert await audio_matches(raop_state.raw_audio, frames=FRAMES_PER_PACKET)
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+async def test_stop_playback(raop_client, raop_state):
+    async def _fake_sleep(time: float = None, loop=None):
+        async def dummy():
+            pass
+
+        await raop_client.remote_control.stop()
+        await asyncio.ensure_future(dummy())
+
+    # The idea here is to simulate calling "stop" after the first frame has been sent,
+    # i.e. after the first "sleep" has been made. It's a bit tied to implementation
+    # details but good enough.
+    stub_sleep(fn=_fake_sleep)
+
+    await raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
+
+    assert len(raop_state.raw_audio) == ONE_FRAME_IN_BYTES

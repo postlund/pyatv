@@ -1,4 +1,5 @@
 """Shared test code for RAOP test cases."""
+import asyncio
 from typing import cast
 
 import pytest
@@ -42,4 +43,6 @@ def raop_conf_fixture(raop_device, raop_properties):
 
 @pytest.fixture(name="raop_client")
 async def raop_client_fixture(raop_conf, event_loop):
-    yield await connect(raop_conf, loop=event_loop)
+    client = await connect(raop_conf, loop=event_loop)
+    yield client
+    await asyncio.gather(*client.close())

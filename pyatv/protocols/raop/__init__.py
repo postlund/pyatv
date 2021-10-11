@@ -210,11 +210,16 @@ class RaopFeatures(Features):
         if feature_name in [
             FeatureName.SetVolume,
             FeatureName.Volume,
-            FeatureName,
             FeatureName.VolumeDown,
             FeatureName.VolumeUp,
         ]:
             return FeatureInfo(FeatureState.Available)
+
+        if feature_name == FeatureName.Stop:
+            is_streaming = self.playback_manager.raop is not None
+            return FeatureInfo(
+                FeatureState.Available if is_streaming else FeatureState.Unavailable
+            )
 
         return FeatureInfo(FeatureState.Unavailable)
 
@@ -289,6 +294,7 @@ class RaopStream(Stream):
         listener: RaopListener,
         audio: RaopAudio,
         playback_manager: RaopPlaybackManager,
+        takeover: TakeoverMethod,
     ) -> None:
         """Initialize a new RaopStream instance."""
         self.config = config
@@ -296,6 +302,7 @@ class RaopStream(Stream):
         self.listener = listener
         self.audio = audio
         self.playback_manager = playback_manager
+        self.takeover = takeover
 
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local file to device.
@@ -304,6 +311,7 @@ class RaopStream(Stream):
         """
         self.playback_manager.acquire()
         audio_file: Optional[AudioSource] = None
+        takeover_release = self.takeover(Audio, Metadata, PushUpdater, RemoteControl)
         try:
             client, _, context = await self.playback_manager.setup()
             client.credentials = parse_credentials(self.service.credentials)
@@ -350,6 +358,7 @@ class RaopStream(Stream):
 
             await client.send_audio(audio_file, metadata)
         finally:
+            takeover_release()
             if audio_file:
                 await audio_file.close()
             await self.playback_manager.teardown()
@@ -358,9 +367,15 @@ class RaopStream(Stream):
 class RaopRemoteControl(RemoteControl):
     """Implementation of remote control functionality."""
 
-    def __init__(self, audio: RaopAudio):
+    def __init__(self, audio: RaopAudio, playback_manager: RaopPlaybackManager):
         """Initialize a new RaopRemoteControl instance."""
         self.audio = audio
+        self.playback_manager = playback_manager
+
+    async def stop(self) -> None:
+        """Press key stop."""
+        if self.playback_manager.raop:
+            self.playback_manager.raop.stop()
 
     async def volume_up(self) -> None:
         """Press key volume up."""
@@ -470,13 +485,13 @@ def setup(  # pylint: disable=too-many-locals
 
     interfaces = {
         Stream: RaopStream(
-            config, service, raop_listener, raop_audio, playback_manager
+            config, service, raop_listener, raop_audio, playback_manager, takeover
         ),
         Features: RaopFeatures(playback_manager),
         PushUpdater: push_updater,
         Metadata: metadata,
         Audio: raop_audio,
-        RemoteControl: RaopRemoteControl(raop_audio),
+        RemoteControl: RaopRemoteControl(raop_audio, playback_manager),
     }
 
     async def _connect() -> bool:
@@ -512,6 +527,7 @@ def setup(  # pylint: disable=too-many-locals
                 FeatureName.Volume,
                 FeatureName.VolumeUp,
                 FeatureName.VolumeDown,
+                FeatureName.Stop,
             ]
         ),
     )
