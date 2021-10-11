@@ -71,6 +71,14 @@ class SubClass3(BaseClass):
         return kwargs["a"] - kwargs["b"]
 
 
+class SubClass4(BaseClass):
+    def __init__(self, ret_string):
+        self.ret_string = ret_string
+
+    def no_args(self):
+        return self.ret_string
+
+
 @pytest.mark.asyncio
 async def test_base_cases(relay_base_only):
     assert relay_base_only.relay("no_args")() == "subclass1"
@@ -159,3 +167,43 @@ def test_get_instance_of_type():
     assert relayer.get(Protocol.MRP) == instance1
     assert relayer.get(Protocol.DMAP) == instance2
     assert relayer.get(Protocol.AirPlay) is None
+
+
+def test_takeover_and_release():
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay])
+    relayer.register(SubClass4("airplay"), Protocol.AirPlay)
+    relayer.register(SubClass4("mrp"), Protocol.MRP)
+    relayer.register(SubClass4("dmap"), Protocol.DMAP)
+
+    assert relayer.relay("no_args")() == "mrp"
+
+    relayer.takeover(Protocol.AirPlay)
+
+    assert relayer.relay("no_args")() == "airplay"
+
+    relayer.release()
+
+    assert relayer.relay("no_args")() == "mrp"
+
+
+def test_takeover_while_takeover_raises():
+    relayer = Relayer(BaseClass, [Protocol.AirPlay])
+    relayer.register(SubClass4("airplay"), Protocol.AirPlay)
+    relayer.takeover(Protocol.DMAP)
+
+    with pytest.raises(exceptions.InvalidStateError):
+        relayer.takeover(Protocol.DMAP)
+
+
+def test_takeover_overrides_manual_priority():
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay])
+    relayer.register(SubClass4("airplay"), Protocol.AirPlay)
+    relayer.register(SubClass4("mrp"), Protocol.MRP)
+    relayer.register(SubClass4("dmap"), Protocol.DMAP)
+
+    relayer.takeover(Protocol.AirPlay)
+
+    assert (
+        relayer.relay("no_args", [Protocol.DMAP, Protocol.MRP, Protocol.AirPlay])()
+        == "airplay"
+    )

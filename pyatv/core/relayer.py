@@ -45,6 +45,7 @@ class Relayer:
         self._base_interface = base_interface
         self._priorities = protocol_priority
         self._interfaces: Dict[Protocol, T] = {}
+        self._takeover_protocol: List[Protocol] = []
 
     @property
     def count(self):
@@ -72,7 +73,9 @@ class Relayer:
 
     def relay(self, target: str, priority: List[Protocol] = None):
         """Return method (or property value) of target instance based on priority."""
-        instance = self._find_instance(target, priority or self._priorities)
+        instance = self._find_instance(
+            target, self._takeover_protocol or priority or self._priorities
+        )
         return getattr(instance, target)
 
     def _find_instance(self, target: str, priority):
@@ -95,3 +98,15 @@ class Relayer:
 
         # An existing method not implemented by any instance is "not supported"
         raise exceptions.NotSupportedError(f"{target} is not supported")
+
+    def takeover(self, protocol: Protocol) -> None:
+        """Temporary override priority list with a specific protocol."""
+        if self._takeover_protocol:
+            raise exceptions.InvalidStateError(
+                f"{self._takeover_protocol[0]} has already done takeover"
+            )
+        self._takeover_protocol = [protocol]
+
+    def release(self) -> None:
+        """Release temporary takeover."""
+        self._takeover_protocol = []
