@@ -358,6 +358,50 @@ class FacadeAudio(Relayer, interface.Audio):
             raise exceptions.ProtocolError(f"volume {level} is out of range")
 
 
+class FacadePushUpdater(
+    Relayer[interface.PushUpdater], interface.PushUpdater, interface.PushListener
+):
+    """Base class for push/async updates from an Apple TV.
+
+    Listener interface: `pyatv.interface.PushListener`
+    """
+
+    def __init__(self):
+        """Initialize a new PushUpdater."""
+        Relayer.__init__(self, interface.PushUpdater, DEFAULT_PRIORITIES)
+        interface.PushUpdater.__init__(self, asyncio.get_event_loop())
+
+    @property
+    def active(self) -> bool:
+        """Return if push updater has been started."""
+        return self.relay("active")
+
+    def start(self, initial_delay: int = 0) -> None:
+        """Begin to listen to updates.
+
+        If an error occurs, start must be called again.
+        """
+        for instance in self.instances:
+            instance.listener = self
+            instance.start(initial_delay)
+
+    def stop(self) -> None:
+        """No longer forward updates to listener."""
+        for instance in self.instances:
+            instance.listener = None
+            instance.stop()
+
+    def playstatus_update(self, updater, playstatus: interface.Playing) -> None:
+        """Inform about changes to what is currently playing."""
+        if updater == self.main_instance:
+            self.listener.playstatus_update(updater, playstatus)
+
+    def playstatus_error(self, updater, exception: Exception) -> None:
+        """Inform about an error when updating play status."""
+        if updater == self.main_instance:
+            self.listener.playstatus_error(updater, exception)
+
+
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
@@ -370,9 +414,7 @@ class FacadeAppleTV(interface.AppleTV):
         self._session_manager = session_manager
         self._protocols_to_setup: Queue[SetupData] = Queue()
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
-        self._push_updates = Relayer(
-            interface.PushUpdater, DEFAULT_PRIORITIES  # type: ignore
-        )
+        self._push_updates = FacadePushUpdater()
         self._features = FacadeFeatures(self._push_updates)
         self._pending_tasks: Optional[set] = None
         self._device_info = interface.DeviceInfo({})
@@ -511,7 +553,7 @@ class FacadeAppleTV(interface.AppleTV):
     @property
     def push_updater(self) -> interface.PushUpdater:
         """Return API for handling push update from the Apple TV."""
-        return self._interfaces[interface.PushUpdater].main_instance  # type: ignore
+        return cast(interface.PushUpdater, self._interfaces[interface.PushUpdater])
 
     @property
     def stream(self) -> interface.Stream:
