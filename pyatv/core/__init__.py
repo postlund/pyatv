@@ -5,6 +5,11 @@ from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.interface import BaseService
 
+TakeoverMethod = Callable[
+    [Any],
+    Callable[[], None],
+]
+
 
 class MutableService(BaseService):
     """Mutable version of BaseService allowing some fields to be changed.

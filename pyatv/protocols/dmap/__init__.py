@@ -21,7 +21,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import MutableService, SetupData, mdns
+from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -649,6 +649,7 @@ def setup(  # pylint: disable=too-many-locals
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
+    takeover: TakeoverMethod,
 ) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
     daap_http = HttpSession(

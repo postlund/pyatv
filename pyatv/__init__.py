@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime  # noqa
+from functools import partial
 from ipaddress import IPv4Address
 import logging
 from typing import List, Optional, Set, Union
@@ -88,8 +89,12 @@ async def connect(
             if service is None or service.port == 0:
                 continue
 
+            # Lock protocol argument so protocol does not have to deal
+            # with that
+            takeover_method = partial(atv.takeover, protocol=proto)
+
             for setup_data in proto_methods.setup(
-                loop, config, service, atv, session_manager
+                loop, config, service, atv, session_manager, takeover_method
             ):
                 atv.add_protocol(setup_data)
 
