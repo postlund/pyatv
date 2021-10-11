@@ -8,7 +8,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
-from pyatv.core import MutableService, SetupData, mdns
+from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -185,6 +185,7 @@ def setup(  # pylint: disable=too-many-locals
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
+    takeover: TakeoverMethod,
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
@@ -243,6 +244,7 @@ def setup(  # pylint: disable=too-many-locals
             mrp_service,
             device_listener,
             session_manager,
+            takeover,
             AirPlayMrpConnection(control, device_listener),
             requires_heatbeat=False,  # Already have heartbeat on control channel
         )

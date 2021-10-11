@@ -22,7 +22,7 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import MutableService, SetupData, mdns
+from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -863,6 +863,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
+    takeover: TakeoverMethod,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> SetupData:
@@ -933,6 +934,7 @@ def setup(
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
+    takeover: TakeoverMethod,
 ) -> Generator[SetupData, None, None]:
     """Set up a new MRP service."""
     yield create_with_connection(
@@ -941,6 +943,7 @@ def setup(
         service,
         device_listener,
         session_manager,
+        takeover,
         MrpConnection(config.address, service.port, loop, atv=device_listener),
     )
 

@@ -15,7 +15,7 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
 )
-from pyatv.core import MutableService, SetupData, mdns
+from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -433,12 +433,13 @@ async def service_info(
         await airplay_service_info(service, devinfo, services)
 
 
-def setup(
+def setup(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     config: BaseConfig,
     service: BaseService,
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
+    takeover: TakeoverMethod,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
     playback_manager = RaopPlaybackManager(str(config.address), service.port)
