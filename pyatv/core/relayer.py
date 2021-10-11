@@ -27,7 +27,8 @@ relayer.register(CompanionMetadata())
 relayer.register(AirPlayMetadata())
 artwork = await relayer.relay("artwork")(width=640)
 """
-from typing import Dict, List, Optional, Type, TypeVar
+from itertools import chain
+from typing import Dict, Generic, List, Optional, Sequence, Type, TypeVar
 
 from pyatv import exceptions
 from pyatv.const import Protocol
@@ -35,7 +36,7 @@ from pyatv.const import Protocol
 T = TypeVar("T")
 
 
-class Relayer:
+class Relayer(Generic[T]):
     """Relay method calls to instances based on priority."""
 
     def __init__(
@@ -55,10 +56,15 @@ class Relayer:
     @property
     def main_instance(self) -> T:
         """Return main instance based on priority."""
-        for priority in self._priorities:
+        for priority in chain(self._takeover_protocol, self._priorities):
             if priority in self._interfaces:
                 return self._interfaces[priority]
         raise exceptions.NotSupportedError()
+
+    @property
+    def instances(self) -> Sequence[T]:
+        """Return all instances added to this relayer."""
+        return list(self._interfaces.values())
 
     def register(self, instance: T, protocol: Protocol) -> None:
         """Register a new instance for an interface."""

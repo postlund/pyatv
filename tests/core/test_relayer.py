@@ -207,3 +207,30 @@ def test_takeover_overrides_manual_priority():
         relayer.relay("no_args", [Protocol.DMAP, Protocol.MRP, Protocol.AirPlay])()
         == "airplay"
     )
+
+
+def test_takeover_overrides_main_instance():
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP])
+    relayer.register(SubClass4("mrp"), Protocol.MRP)
+    relayer.register(SubClass4("dmap"), Protocol.DMAP)
+
+    relayer.takeover(Protocol.DMAP)
+
+    assert relayer.main_instance.no_args() == "dmap"
+
+
+def test_get_all_instances():
+    mrp = SubClass4("mrp")
+    dmap = SubClass4("dmap")
+    airplay = SubClass4("airplay")
+
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay])
+    relayer.register(mrp, Protocol.MRP)
+    relayer.register(dmap, Protocol.DMAP)
+    relayer.register(airplay, Protocol.AirPlay)
+
+    instances = relayer.instances
+    assert len(instances) == 3
+    assert mrp in instances
+    assert dmap in instances
+    assert airplay in instances
