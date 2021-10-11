@@ -355,6 +355,7 @@ class RaopClient:
         self._listener: Optional[weakref.ReferenceType[Any]] = None
         self._info: Dict[str, object] = {}
         self._properties: Mapping[str, str] = {}
+        self._is_playing: bool = False
 
     @property
     def listener(self):
@@ -513,6 +514,11 @@ class RaopClient:
             and model_name.startswith("AirPort")
         )
 
+    def stop(self):
+        """Stop what is currently playing."""
+        _LOGGER.debug("Stopping audio playback")
+        self._is_playing = False
+
     async def set_volume(self, volume: float) -> None:
         """Change volume on the receiver."""
         await self.rtsp.set_parameter("volume", str(volume))
@@ -607,7 +613,8 @@ class RaopClient:
         stats = Statistics(self.context.sample_rate)
 
         initial_time = perf_counter()
-        while True:
+        self._is_playing = True
+        while self._is_playing:
             num_sent = await self._send_packet(
                 source, stats.total_frames == 0, transport
             )

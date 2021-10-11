@@ -91,7 +91,7 @@ async def connect(
 
             # Lock protocol argument so protocol does not have to deal
             # with that
-            takeover_method = partial(atv.takeover, protocol=proto)
+            takeover_method = partial(atv.takeover, proto)
 
             for setup_data in proto_methods.setup(
                 loop, config, service, atv, session_manager, takeover_method

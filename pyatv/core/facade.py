@@ -368,7 +368,10 @@ class FacadePushUpdater(
 
     def __init__(self):
         """Initialize a new PushUpdater."""
-        Relayer.__init__(self, interface.PushUpdater, DEFAULT_PRIORITIES)
+        # TODO: python 3.6 seems to have problem with this sometimes
+        Relayer.__init__(  # pylint: disable=non-parent-init-called
+            self, interface.PushUpdater, DEFAULT_PRIORITIES
+        )
         interface.PushUpdater.__init__(self, asyncio.get_event_loop())
 
     @property
