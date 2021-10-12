@@ -164,13 +164,19 @@ def insert_changes(version, release_name):
                 grouped_changes.setdefault("_", []).append(change)
 
         for name, section_type in all_sections.items():
+            section_changes = grouped_changes.get(name.lower(), [])
+            if not section_changes:
+                continue
+
             sections += (
                 f"*{section_type}: {name}:*\n\n"
-                + "\n".join(grouped_changes.get(name.lower(), []))
+                + "```\n"
+                + "\n".join(section_changes)
+                + "\n```"
                 + "\n\n"
             )
 
-        sections += "*Other:*\n\n" + "\n".join(grouped_changes.get("_", [])) + "\n\n"
+        sections += "*Other:*\n\n```\n" + "\n".join(grouped_changes.get("_", [])) + "\n```\n\n"
 
         with open("CHANGES.md", encoding="utf-8", mode="w") as f:
             f.write(
