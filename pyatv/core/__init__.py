@@ -2,13 +2,11 @@
 import asyncio
 from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional, Set
 
-from mypy_extensions import VarArg
-
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.interface import BaseService
 
 TakeoverMethod = Callable[
-    [VarArg(Any)],
+    ...,
     Callable[[], None],
 ]
 
