@@ -1,5 +1,73 @@
 # CHANGES
 
+## 0.9.3 Moondrop (2021-10-12)
+
+Time for another drop with a few fixes and enhancements:
+
+* Official support for python 3.10
+* The MRP service is now ignored for tvOS 15 devices
+* osvers is handled properly in AirPlay which previously caused an
+  exception when connecting to Apple TV 3 (or older) devices
+* Stop is now supported in RAOP
+
+No biggies this time, but should make for a smoooother experience!
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+89c9f2f mrp: Ignore service during scan for tvOS >= 15
+```
+
+*Protocol: AirPlay:*
+
+```
+5a1f482 airplay: Quiet log of remote control setup failure
+a069208 airplay: Handle semver version in osvers
+```
+
+*Protocol: RAOP:*
+
+```
+5781665 raop: Add support for stop
+0ef3232 raop: Report correct progress values
+```
+
+*Other:*
+
+```
+2d16f1d gha: Run tests on python 3.10
+62c29a1 docs: Add docs for app_list and launch_app
+```
+
+
+**All changes:**
+
+```
+5781665 raop: Add support for stop
+107a692 facade: Support takeover for PushUpdater
+536f241 cq: Remove stream.py
+2afdad8 relayer: Fix main_instance and add instances
+b6165b0 core: Pass takeover method to protocols
+99ed67d facade: Support for protocol takeover
+9f93f0e core: Add takeover support to relayer
+836aa62 docs: Add tvOS 15 to README description
+16c22f0 build(deps): bump flake8 from 4.0.0 to 4.0.1
+255c96b build(deps): bump pytest-timeout from 2.0.0 to 2.0.1
+b881c32 build(deps): bump pytest-timeout from 1.4.2 to 2.0.0
+dd38f63 build(deps): bump flake8 from 3.9.2 to 4.0.0
+2d16f1d gha: Run tests on python 3.10
+0ef3232 raop: Report correct progress values
+5a1f482 airplay: Quiet log of remote control setup failure
+4f7fe97 core: Don't connect to dummy services
+67ae1b8 build(deps): bump pytest-cov from 2.12.1 to 3.0.0
+62c29a1 docs: Add docs for app_list and launch_app
+89c9f2f mrp: Ignore service during scan for tvOS >= 15
+a069208 airplay: Handle semver version in osvers
+65b40bd build(deps): bump mediafile from 0.8.0 to 0.8.1
+```
+
 ## 0.9.2 Lefty (2021-09-27)
 
 What? Another release? Already? Suure... So, I am integrating pyatv 0.9.x with
