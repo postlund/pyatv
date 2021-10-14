@@ -47,6 +47,7 @@ __pdoc__ = {
     "DeviceInfo.BUILD_NUMBER": False,
     "DeviceInfo.MODEL": False,
     "DeviceInfo.MAC": False,
+    "DeviceInfo.RAW_MODEL": False,
 }
 
 _ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
