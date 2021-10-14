@@ -77,3 +77,4 @@ To save you some time, here are some shortcuts:
 * [Development](https://pyatv.dev/development)
 * [API Reference](https://pyatv.dev/api)
 * [Support](https://pyatv.dev/support)
+## Copyright
