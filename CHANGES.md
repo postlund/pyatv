@@ -1,5 +1,33 @@
 # CHANGES
 
+## 0.9.5 Oscar (2021-10-15)
+
+The releases are pouring down right now! Two more bug fixes to smoothen the experience:
+
+* Fix relay bug which could result in methods being reported as unsupported
+* Add some missing DMAP tags (removes warnings)
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+```
+436ba7b dmap: Add missing tags aelb and casa
+```
+
+*Other:*
+
+```
+5170edd core: Fix relayer fallback bug
+```
+
+**All changes:**
+
+```
+436ba7b dmap: Add missing tags aelb and casa
+5170edd core: Fix relayer fallback bug
+```
+
 ## 0.9.4 Nightmare (2021-10-15)
 
 This release just contains two minor bug fixes:
