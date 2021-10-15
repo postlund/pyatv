@@ -22,6 +22,7 @@ def _read_unknown(data, start, length):
 
 # These are the tags that we know about so far
 _TAGS = {
+    "aelb": DmapTag(read_bool, "com.apple.itunes.like-button"),
     "aels": DmapTag(read_uint, "com.apple.itunes.liked-state"),
     "aeFP": DmapTag(read_uint, "com.apple.itunes.req-fplay"),
     "aeGs": DmapTag(read_bool, "com.apple.itunes.can-be-genius-seed"),
@@ -100,6 +101,7 @@ _TAGS = {
     "caks": DmapTag(read_uint, "unknown tag"),
     "caov": DmapTag(read_uint, "unknown tag"),
     "capl": DmapTag(read_bytes, "unknown tag"),
+    "casa": DmapTag(read_uint, "unknown tag"),
     "casc": DmapTag(read_uint, "unknown tag"),
     "cass": DmapTag(read_uint, "unknown tag"),
     "ceQA": DmapTag(read_uint, "unknown tag"),
