@@ -80,7 +80,7 @@ class Relayer(Generic[T]):
     def relay(self, target: str, priority: List[Protocol] = None):
         """Return method (or property value) of target instance based on priority."""
         instance = self._find_instance(
-            target, self._takeover_protocol or priority or self._priorities
+            target, chain(self._takeover_protocol, priority or self._priorities)
         )
         return getattr(instance, target)
 
