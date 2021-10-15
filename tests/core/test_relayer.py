@@ -209,6 +209,16 @@ def test_takeover_overrides_manual_priority():
     )
 
 
+def test_takeover_with_missing_implementation():
+    relayer = Relayer(BaseClass, [Protocol.AirPlay, Protocol.DMAP])
+    relayer.register(SubClass1(), Protocol.AirPlay)
+    relayer.register(BaseClass(), Protocol.DMAP)
+
+    relayer.takeover(Protocol.DMAP)
+
+    assert relayer.relay("no_args")() == "subclass1"
+
+
 def test_takeover_overrides_main_instance():
     relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP])
     relayer.register(SubClass4("mrp"), Protocol.MRP)
