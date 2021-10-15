@@ -1,5 +1,38 @@
 # CHANGES
 
+## 0.9.4 Nightmare (2021-10-15)
+
+This release just contains two minor bug fixes:
+
+* Removal of need for `mypy_extensions` which was never added as an explicit dependency
+  but was required in the previous release
+* Support for the UID type in OPACK used by Companion, which caused an exception when
+  pairing (Companion) for some people
+
+**Changes:**
+
+*Protocol: Companion:*
+
+```
+f99bad0 companion: Add support for UID in OPACK
+```
+
+*Other:*
+
+```
+954f3dd core: Remove need for mypy_extensions
+```
+
+**All changes:**
+
+```
+f99bad0 companion: Add support for UID in OPACK
+0cf4055 docs: Hide internal DeviceInfo.RAW_MODEL
+954f3dd core: Remove need for mypy_extensions
+41ff2c8 build(deps): bump types-protobuf from 3.17.4 to 3.18.0
+8c9f2d9 build(deps): bump deepdiff from 5.5.0 to 5.6.0
+```
+
 ## 0.9.3 Moondrop (2021-10-12)
 
 Time for another drop with a few fixes and enhancements:
