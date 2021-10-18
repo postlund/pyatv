@@ -13,6 +13,6 @@ pytest-aiohttp==0.3.0
 pytest-xdist==2.4.0
 pydocstyle==6.1.1
 mypy==0.910
-mypy-protobuf==2.10
+mypy-protobuf==3.0.0
 typed-ast==1.4.3
 types-protobuf==3.18.0
