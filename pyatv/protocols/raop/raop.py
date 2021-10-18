@@ -508,11 +508,12 @@ class RaopClient:
         # at least for now, only do this for AirPort Express as some receivers
         # won't play audio if setup process isn't finished:
         # https://github.com/postlund/pyatv/issues/1134
-        model_name = self._properties.get("am", "")
-        return (
-            EncryptionType.MFiSAP in self._encryption_types
-            and model_name.startswith("AirPort")
-        )
+        # model_name = self._properties.get("am", "")
+        # return (
+        #     EncryptionType.MFiSAP in self._encryption_types
+        #     and model_name.startswith("AirPort")
+        # )
+        return True
 
     def stop(self):
         """Stop what is currently playing."""
