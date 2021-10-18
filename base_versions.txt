@@ -2,7 +2,7 @@ aiohttp==3.1.0,<5
 bitarray==2.1.2
 cryptography==2.6
 mediafile==0.8.1
-miniaudio==1.44
+miniaudio==1.45
 netifaces==0.10.0
 protobuf==3.17.3,<4
 srptools==0.2.0
