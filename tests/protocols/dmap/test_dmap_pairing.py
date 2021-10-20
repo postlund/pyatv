@@ -34,6 +34,8 @@ RANDOM_128_BITS = 6558272190156386627
 RANDOM_PAIRING_GUID = "0x5B03A9CF4A983143"
 RANDOM_PAIRING_CODE = "7AF2D0B8629DE3C704D40A14C9E8CB93"
 
+pytestmark = pytest.mark.asyncio
+
 
 def pairing_url(zeroconf, pairing_code):
     service = zeroconf.registered_services[0]
@@ -57,12 +59,16 @@ async def mock_pairing(event_loop):
     config.add_service(service)
     zeroconf = zeroconf_stub.stub(pairing)
 
-    async def _start(pin_code=PIN_CODE, pairing_guid=PAIRING_GUID, name=REMOTE_NAME):
+    async def _start(
+        pin_code=PIN_CODE, pairing_guid=PAIRING_GUID, name=REMOTE_NAME, addresses=None
+    ):
         options = {"zeroconf": zeroconf}
         if pairing_guid:
             options["pairing_guid"] = pairing_guid
         if name:
             options["name"] = name
+        if addresses:
+            options["addresses"] = addresses
 
         obj.pairing = pairing.DmapPairingHandler(
             config, service, await http.create_session(), event_loop, **options
@@ -76,17 +82,27 @@ async def mock_pairing(event_loop):
     await obj.pairing.close()
 
 
-@pytest.mark.asyncio
 async def test_zeroconf_service_published(mock_pairing):
-    _, zeroconf, service = await mock_pairing()
+    _, zeroconf, _ = await mock_pairing()
 
     assert len(zeroconf.registered_services) == 1, "no zeroconf service registered"
 
     service = zeroconf.registered_services[0]
     assert service.properties["DvNm"] == REMOTE_NAME, "remote name does not match"
+    assert [ipaddress.ip_address("10.0.10.1").packed] == service.addresses
 
 
-@pytest.mark.asyncio
+@pytest.mark.parametrize("addresses", [(["1.2.3.4"])])
+async def test_zeroconf_custom_addresses(mock_pairing, addresses):
+    _, zeroconf, _ = await mock_pairing(addresses=addresses)
+
+    assert len(zeroconf.registered_services) == len(addresses)
+
+    service = zeroconf.registered_services[0]
+    for address in addresses:
+        assert ipaddress.ip_address(address).packed in service.addresses
+
+
 async def test_succesful_pairing(mock_pairing):
     pairing, zeroconf, service = await mock_pairing()
 
@@ -104,7 +120,6 @@ async def test_succesful_pairing(mock_pairing):
     assert service.credentials == PAIRING_GUID
 
 
-@pytest.mark.asyncio
 async def test_successful_pairing_random_pairing_guid_generated(
     mock_random, mock_pairing
 ):
@@ -118,7 +133,6 @@ async def test_successful_pairing_random_pairing_guid_generated(
     assert service.credentials == RANDOM_PAIRING_GUID
 
 
-@pytest.mark.asyncio
 async def test_succesful_pairing_with_any_pin(mock_pairing):
     _, zeroconf, _ = await mock_pairing(pin_code=None)
 
@@ -128,7 +142,6 @@ async def test_succesful_pairing_with_any_pin(mock_pairing):
     assert status == 200
 
 
-@pytest.mark.asyncio
 async def test_succesful_pairing_with_pin_leadering_zeros(mock_pairing):
     _, zeroconf, _ = await mock_pairing(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
 
@@ -138,7 +151,6 @@ async def test_succesful_pairing_with_pin_leadering_zeros(mock_pairing):
     assert status == 200
 
 
-@pytest.mark.asyncio
 async def test_pair_custom_pairing_guid(mock_pairing):
     pairing, zeroconf, service = await mock_pairing(
         pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2
@@ -156,7 +168,6 @@ async def test_pair_custom_pairing_guid(mock_pairing):
     assert service.credentials == PAIRING_GUID2
 
 
-@pytest.mark.asyncio
 async def test_failed_pairing(mock_pairing):
     _, zeroconf, _ = await mock_pairing()
 
