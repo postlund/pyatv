@@ -192,7 +192,6 @@ class CompanionAPI(
         self._device_listener = device_listener
         self._connection: Optional[CompanionConnection] = None
         self._protocol: Optional[CompanionProtocol] = None
-        self._initial_event_recevied: asyncio.Event = asyncio.Event()
         self.sid: int = 0
 
     async def disconnect(self):
@@ -213,19 +212,8 @@ class CompanionAPI(
 
     def event_received(self, event_name: str, data: Dict[str, Any]) -> None:
         """Event was received."""
-
-        async def _initial_dispatch():
-            await asyncio.gather(*self.dispatch(event_name, data))
-            self._initial_event_recevied.set()
-
         _LOGGER.debug("Got event %s from device: %s", event_name, data)
-        if self._initial_event_recevied.is_set():
-            self.dispatch(event_name, data)
-        else:
-            # If this is the first event, synchronize with all receivers in order to
-            # reach a "good state" before connect returns. The idea is to update things
-            # like supported features and current volume before connect returns.
-            asyncio.ensure_future(_initial_dispatch())
+        self.dispatch(event_name, data)
 
     async def connect(self):
         """Connect to remote host."""
@@ -248,10 +236,6 @@ class CompanionAPI(
         await self.system_info()
         await self._session_start()
         await self.subscribe_event("_iMC")
-
-        # Wait for initial media control event to be received, to ensure
-        # at least the basic information is in place (e.g. available controls)
-        await asyncio.wait_for(self._initial_event_recevied.wait(), timeout=5.0)
 
     async def _send_command(
         self,
@@ -632,6 +616,7 @@ def setup(
     """Set up a new Companion service."""
     # Companion doesn't work without credentials, so don't setup if none exists
     if not service.credentials:
+        _LOGGER.debug("Not adding Companion as credentials are missing")
         return None
 
     api = CompanionAPI(config, service, device_listener, loop)
