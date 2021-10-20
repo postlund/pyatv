@@ -186,6 +186,7 @@ The following extra settings are supported by `DMAP`:
 | name | Name of the device that is exposed on the network (what you see on your Apple TV). |
 | pairing_guid | Custom value for `pairing_guid` (credentials) with format `0xXXXXXXXXXXXXXXXX`. |
 | zeroconf | If you want to use a custom `zeroconf.Zeroconf` instance, you can pass it here. |
+| addresses | List of local addresses to broadcast Zeroconf service on, e.g. `["10.0.0.1", "192.168.1.2"]`.
 
 You pass these via `kwargs` to {% include api i="pyatv.pair" %}:
 
