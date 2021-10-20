@@ -25,6 +25,7 @@ from pyatv.scripts import (
     TransformProtocol,
     VerifyScanHosts,
     VerifyScanProtocols,
+    log_current_version,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -490,6 +491,8 @@ async def cli_handler(loop):
         format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
     )
     logging.getLogger("requests").setLevel(logging.WARNING)
+
+    log_current_version()
 
     if args.mdns_debug:
         # logging.TRAFFIC is set in runtime by support.mdns
