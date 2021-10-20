@@ -21,7 +21,12 @@ from pyatv.interface import (
     RemoteControl,
     retrieve_commands,
 )
-from pyatv.scripts import TransformOutput, TransformProtocol, VerifyScanHosts
+from pyatv.scripts import (
+    TransformOutput,
+    TransformProtocol,
+    VerifyScanHosts,
+    log_current_version,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -278,6 +283,8 @@ async def appstart(loop):
             format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
+
+    log_current_version()
 
     def _handle_exception(_, context):
         kwargs = {"error": context["message"]}

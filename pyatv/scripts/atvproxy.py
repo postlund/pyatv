@@ -22,6 +22,7 @@ from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
+from pyatv.scripts import log_current_version
 from pyatv.support import chacha20, log_binary, net, variant
 
 _LOGGER = logging.getLogger(__name__)
@@ -520,6 +521,8 @@ async def appstart(loop):
         datefmt="%Y-%m-%d %H:%M:%S",
         format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
     )
+
+    log_current_version()
 
     zconf = Zeroconf()
     if args.command == "mrp":
