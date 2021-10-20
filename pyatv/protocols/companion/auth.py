@@ -51,7 +51,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
         self.srp.initialize()
         await self.protocol.start()
 
-        resp = await self.protocol.exchange_opack(
+        resp = await self.protocol.exchange_auth(
             FrameType.PS_Start,
             {
                 PAIRING_DATA_KEY: write_tlv(
@@ -59,7 +59,6 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
                 ),
                 "_pwTy": 1,
             },
-            response_type=FrameType.PS_Next,
         )
 
         pairing_data = _get_pairing_data(resp)
@@ -78,7 +77,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
 
         pub_key, proof = self.srp.step2(self._atv_pub_key, self._atv_salt)
 
-        resp = await self.protocol.exchange_opack(
+        resp = await self.protocol.exchange_auth(
             FrameType.PS_Next,
             {
                 PAIRING_DATA_KEY: write_tlv(
@@ -110,7 +109,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
             additional_data={17: opack.pack(additional_data)}
         )
 
-        resp = await self.protocol.exchange_opack(
+        resp = await self.protocol.exchange_auth(
             FrameType.PS_Next,
             {
                 PAIRING_DATA_KEY: write_tlv(
@@ -144,7 +143,7 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
         """Verify credentials with device."""
         _, public_key = self.srp.initialize()
 
-        resp = await self.protocol.exchange_opack(
+        resp = await self.protocol.exchange_auth(
             FrameType.PV_Start,
             {
                 PAIRING_DATA_KEY: write_tlv(
@@ -152,7 +151,6 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
                 ),
                 "_auTy": 4,
             },
-            response_type=FrameType.PV_Next,
         )
 
         pairing_data = _get_pairing_data(resp)
@@ -162,7 +160,7 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
 
         encrypted_data = self.srp.verify1(self.credentials, server_pub_key, encrypted)
 
-        await self.protocol.exchange_opack(
+        await self.protocol.exchange_auth(
             FrameType.PV_Next,
             {
                 PAIRING_DATA_KEY: write_tlv(

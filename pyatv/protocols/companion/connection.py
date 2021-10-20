@@ -48,9 +48,6 @@ class CompanionConnectionListener(ABC):
     def frame_received(self, frame_type: FrameType, data: bytes) -> None:
         """Frame was received from remote device."""
 
-    def disconnected(self) -> None:
-        """Disconnect from companion device."""
-
 
 class CompanionConnection(asyncio.Protocol):
     """Remote connection to a Companion device."""

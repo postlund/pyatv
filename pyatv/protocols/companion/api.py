@@ -151,7 +151,6 @@ class CompanionAPI(
                 FrameType.E_OPACK,
                 {
                     "_i": identifier,
-                    "_x": 1234,  # Dummy XID, not sure what to use
                     "_t": message_type.value,
                     "_c": content,
                 },
@@ -216,7 +215,6 @@ class CompanionAPI(
                 FrameType.E_OPACK,
                 {
                     "_i": identifier,
-                    "_x": 1234,  # Dummy XID, not sure what to use
                     "_t": MessageType.Event.value,
                     "_c": content,
                 },

@@ -6,7 +6,7 @@ import asyncio
 from ipaddress import IPv4Address
 import logging
 import sys
-from typing import Optional
+from typing import Any, Dict, Optional, cast
 
 from google.protobuf.message import Message as ProtobufMessage
 from zeroconf import Zeroconf
@@ -247,7 +247,9 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             data = self.chacha.decrypt(data, aad=header)
             log_binary(_LOGGER, "<<(DECRYPTED)", Message=data)
 
-        unpacked = opack.unpack(data)[0]
+        unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
+        if frame_type in COMPANION_AUTH_FRAMES:
+            return await self.protocol.exchange_auth(frame_type, unpacked)
         return await self.protocol.exchange_opack(frame_type, unpacked)
 
     def send_to_client(self, frame_type: FrameType, data: object) -> None:
