@@ -848,7 +848,7 @@ There's a lot of information stuffed in there, but the main elements are these o
 | _i | ID | Identifier for the message request or event, e.g. `_systemInfo` or `_launchApp`. |
 | _c | Content | Additional data/arguments passed to whatever is specified in `_i`. |
 | _t | Type | Type of message: 1=event, 2=request, 3=response |
-| _x | XID | Some kind of identifier, maybe related to XPC? Still unknown. |
+| _x | XID | Likely "transfer id". The response will contain the same XID as was specified in the request. Not used by all frame types (e.g. not by authentication frames). Integer with unknown range. |
 | _sid | Session ID | Identifier used by sessions. |
 
 Most messages seems to include the tags above. Here are a few other tags seen as well:

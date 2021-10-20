@@ -1,9 +1,9 @@
 """Implementation of the Companion protocol."""
 from abc import ABC
-import asyncio
 from enum import Enum
 import logging
-from typing import Any, Dict, Optional
+from random import randint
+from typing import Any, Dict, Union
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
@@ -21,11 +21,14 @@ from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
-_OPACK_FRAMES = [
+_AUTH_FRAMES = [
     FrameType.PS_Start,
     FrameType.PS_Next,
     FrameType.PV_Start,
     FrameType.PV_Next,
+]
+
+_OPACK_FRAMES = [
     FrameType.U_OPACK,
     FrameType.E_OPACK,
     FrameType.P_OPACK,
@@ -37,6 +40,12 @@ SRP_SALT = ""
 SRP_OUTPUT_INFO = "ClientEncrypt-main"
 SRP_INPUT_INFO = "ServerEncrypt-main"
 
+# Either an XID (int) or the frame type (FrameType) is used as an identifier when
+# dispatching responses depending on what is supported by a frame. Authentication
+# frames never have an XID as multiple authentication attempts cannot be made in
+# parallel. Regular OPACK message are however asynchronous and can arrive in any
+# order.
+FrameIdType = Union[int, FrameType]
 
 # pylint: disable=invalid-name
 
@@ -76,20 +85,12 @@ class CompanionProtocol(
         self.connection.listener = self
         self.srp = srp
         self.service = service
-        self._queues: Dict[FrameType, asyncio.Queue[SharedData[Any]]] = {}
+        self._xid: int = randint(
+            0, 2 ** 16
+        )  # Don't know range here, just use something
+        self._queues: Dict[FrameIdType, SharedData[Any]] = {}
         self._chacha = None
         self._is_started = False
-
-    def _allocate_shared_data(
-        self, frame_type: FrameType, recv_type: FrameType
-    ) -> SharedData:
-        target_type = recv_type or frame_type
-        if target_type not in self._queues:
-            self._queues[target_type] = asyncio.Queue()
-
-        shared_data: SharedData[Any] = SharedData()
-        self._queues[target_type].put_nowait(shared_data)
-        return shared_data
 
     async def start(self):
         """Connect to device and listen to incoming messages."""
@@ -108,6 +109,7 @@ class CompanionProtocol(
 
     def stop(self):
         """Disconnect from device."""
+        self._queues = {}
         self.connection.close()
 
     async def _setup_encryption(self):
@@ -124,21 +126,48 @@ class CompanionProtocol(
             except Exception as ex:
                 raise exceptions.AuthenticationError(str(ex)) from ex
 
+    async def exchange_auth(
+        self,
+        frame_type: FrameType,
+        data: Dict[str, Any],
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> Dict[str, object]:
+        """Exchange an auth frame (PS_* or PV_*)."""
+        # Authentication frames have strange logic as *_Start is only used for first
+        # message, then *_Next is used for remaining message (even response to first
+        # message)
+        if frame_type == FrameType.PS_Start:
+            identifier = FrameType.PS_Next
+        elif frame_type == FrameType.PV_Start:
+            identifier = FrameType.PV_Next
+        else:
+            identifier = frame_type
+        return await self._exchange_generic_opack(frame_type, data, identifier, timeout)
+
     async def exchange_opack(
         self,
         frame_type: FrameType,
-        data: object,
+        data: Dict[str, Any],
         timeout: float = DEFAULT_TIMEOUT,
-        response_type: Optional[FrameType] = None,
     ) -> Dict[str, object]:
         """Send data as OPACK and decode result as OPACK."""
+        data["_x"] = self._xid
+        identifier = self._xid
+        self._xid += 1
+        return await self._exchange_generic_opack(frame_type, data, identifier, timeout)
+
+    async def _exchange_generic_opack(
+        self,
+        frame_type: FrameType,
+        data: Dict[str, Any],
+        identifier: FrameIdType,
+        timeout: float,
+    ) -> Dict[str, object]:
         _LOGGER.debug("Exchange OPACK: %s", data)
 
-        shared_data = self._allocate_shared_data(
-            frame_type, response_type or frame_type
-        )
         self.send_opack(frame_type, data)
-        unpacked_object = await shared_data.wait(timeout)
+        self._queues[identifier] = SharedData()
+        unpacked_object = await self._queues[identifier].wait(timeout)
 
         if not isinstance(unpacked_object, dict):
             raise exceptions.ProtocolError(
@@ -150,8 +179,13 @@ class CompanionProtocol(
 
         return unpacked_object
 
-    def send_opack(self, frame_type: FrameType, data: object) -> None:
+    def send_opack(self, frame_type: FrameType, data: Dict[str, Any]) -> None:
         """Send data encoded with OPACK."""
+        # Add XID if not present
+        if "_x" not in data:
+            data["_x"] = self._xid
+            self._xid += 1
+
         _LOGGER.debug("Send OPACK: %s", data)
         self.connection.send(frame_type, opack.pack(data))
 
@@ -159,22 +193,33 @@ class CompanionProtocol(
         """Frame was received from remote device."""
         _LOGGER.debug("Received frame %s: %s", frame_type, data)
 
-        if frame_type in _OPACK_FRAMES:
+        if frame_type in _OPACK_FRAMES or frame_type in _AUTH_FRAMES:
             try:
-                # Different handlers can be set up here to deal with other frame
-                # formats in the future (if ever needed)
-                self._handle_opack(frame_type, data)
+                opack_data, _ = opack.unpack(data)
+
+                if not isinstance(opack_data, dict):
+                    _LOGGER.debug("Unsupported OPACK base type: %s", type(opack_data))
+                    return
+
+                if frame_type in _AUTH_FRAMES:
+                    self._handle_auth(frame_type, opack_data)
+                else:
+                    self._handle_opack(frame_type, opack_data)
             except Exception:
                 _LOGGER.exception("failed to process frame")
+        else:
+            _LOGGER.debug("Received unsupported frame type: %s", frame_type)
 
-    def _handle_opack(self, frame_type: FrameType, data: bytes) -> None:
-        opack_data, _ = opack.unpack(data)
+    def _handle_auth(self, frame_type: FrameType, opack_data: Dict[str, Any]) -> None:
+        _LOGGER.debug("Process incoming auth frame (%s): %s", frame_type, opack_data)
+        try:
+            shared_data = self._queues.pop(frame_type)
+            shared_data.set(opack_data)
+        except KeyError:
+            _LOGGER.warning("No receiver for auth frame %s", frame_type)
 
+    def _handle_opack(self, frame_type: FrameType, opack_data: Dict[str, Any]) -> None:
         _LOGGER.debug("Process incoming OPACK frame (%s): %s", frame_type, opack_data)
-
-        if not isinstance(opack_data, dict):
-            _LOGGER.debug("Unsupported OPACK base type: %s", type(opack_data))
-            return
 
         message_type = opack_data.get("_t")
         if message_type == MessageType.Event.value:
@@ -182,14 +227,12 @@ class CompanionProtocol(
             self.listener.event_received(  # pylint: disable=no-member
                 opack_data["_i"], opack_data["_c"]
             )
-        elif message_type is None or message_type == MessageType.Response.value:
-            if not self._queues[frame_type].empty():
-                shared_data = self._queues[frame_type].get_nowait()
+        elif message_type == MessageType.Response.value:
+            xid = opack_data.get("_x")
+            if xid in self._queues:
+                shared_data = self._queues.pop(xid)
                 shared_data.set(opack_data)
             else:
-                _LOGGER.debug("No receiver for frame type %s", frame_type)
+                _LOGGER.debug("No receiver for XID %s", xid)
         else:
             _LOGGER.warning("Got OPACK frame with unsupported type: %s", message_type)
-
-    def disconnected(self) -> None:
-        """Disconnect from companion device."""
