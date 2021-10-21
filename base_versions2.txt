@@ -1,0 +1,9 @@
+aiohttp>=3.1.0,<5
+bitarray>=2.1.2
+cryptography>=2.6
+mediafile>=0.8.1
+miniaudio>=1.45
+netifaces>=0.10.0
+protobuf>=3.18.0,<4
+srptools>=0.2.0
+zeroconf>=0.28.2

@@ -13,6 +13,8 @@ jobs:
       ${{ matrix.python-version }}
       /
       ${{ matrix.platform }}
+      /
+      (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
@@ -27,6 +29,12 @@ jobs:
           - 3.8
           - 3.9
           - "3.10"
+        regression:
+          - false
+        #include:
+        #  - platform: ubuntu-latest
+        #    python-version: 3.8
+        #    regression: true
     steps:
     - uses: actions/checkout@v2
       with:
@@ -63,15 +71,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade setuptools pip wheel
-        python -m pip install tox-gh-actions
+        python -m pip install tox-gh-actions tox-current-env
     - name: Test with tox
       # Run once and if that fails, run again but force to re-download packages again.
       # For some reason the cache breaks sometimes, see https://github.com/postlund/pyatv/issues/1174
       run: ./scripts/tox.sh
       shell: bash
+      if: matrix.regression == false
     - name: Regression
-      run: tox -q -p auto -e regression
-      if: matrix.python-version == '3.8' && runner.os == 'Linux'
+      run: ./scripts/tox.sh regression
+      if: matrix.regression == true
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
