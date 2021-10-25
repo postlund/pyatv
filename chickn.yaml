@@ -26,6 +26,8 @@ pipeline:
      run:
        - black .
        - isort {code_dirs}
+       - ./scripts/api.py generate
+       - ./scripts/protobuf.py generate
   validate:
     - name: pylint
       run: pylint -j 0 {pydirs}

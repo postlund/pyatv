@@ -36,10 +36,12 @@ class ErrorCode(google.protobuf.message.Message):
         OperationRequiresAClientCallbackToHaveBeenRegistered = ErrorCode.Enum.V(14)
         OperationRequiresAClientDataSourceToHaveBeenRegistered = ErrorCode.Enum.V(15)
         RequestedDataIsOutOfDateAndShouldBeRequestedAgain = ErrorCode.Enum.V(16)
-        # The system will ignore the volume adjustment until overridden.
         TheDevicesEnforcedVolumeLimitHasBeenExceeded = ErrorCode.Enum.V(17)
-        # between 0.0 and 1.0, where 1.0 is the loudest
+        """The system will ignore the volume adjustment until overridden."""
+
         VolumeValueIsOutOfRange = ErrorCode.Enum.V(18)
+        """between 0.0 and 1.0, where 1.0 is the loudest"""
+
         VolumeIsAlreadyAtTheMaximumValue = ErrorCode.Enum.V(19)
         VolumeIsAlreadyMuted = ErrorCode.Enum.V(20)
         VoiceInputEndpointDoesNotExist = ErrorCode.Enum.V(21)
@@ -101,10 +103,12 @@ class ErrorCode(google.protobuf.message.Message):
     OperationRequiresAClientCallbackToHaveBeenRegistered = ErrorCode.Enum.V(14)
     OperationRequiresAClientDataSourceToHaveBeenRegistered = ErrorCode.Enum.V(15)
     RequestedDataIsOutOfDateAndShouldBeRequestedAgain = ErrorCode.Enum.V(16)
-    # The system will ignore the volume adjustment until overridden.
     TheDevicesEnforcedVolumeLimitHasBeenExceeded = ErrorCode.Enum.V(17)
-    # between 0.0 and 1.0, where 1.0 is the loudest
+    """The system will ignore the volume adjustment until overridden."""
+
     VolumeValueIsOutOfRange = ErrorCode.Enum.V(18)
+    """between 0.0 and 1.0, where 1.0 is the loudest"""
+
     VolumeIsAlreadyAtTheMaximumValue = ErrorCode.Enum.V(19)
     VolumeIsAlreadyMuted = ErrorCode.Enum.V(20)
     VoiceInputEndpointDoesNotExist = ErrorCode.Enum.V(21)
@@ -226,8 +230,9 @@ class ProtocolMessage(google.protobuf.message.Message):
         REMOVE_OUTPUT_DEVICES_MESSAGE = ProtocolMessage.Type.V(66)
         REMOTE_TEXT_INPUT_MESSAGE = ProtocolMessage.Type.V(67)
         GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE = ProtocolMessage.Type.V(68)
-        # Same as 66?
         REMOVE_OUTPUT_DEVICES_MESSAGE2 = ProtocolMessage.Type.V(69)
+        """Same as 66?"""
+
         PLAYBACK_SESSION_REQUEST_MESSAGE = ProtocolMessage.Type.V(70)
         PLAYBACK_SESSION_RESPONSE_MESSAGE = ProtocolMessage.Type.V(71)
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = ProtocolMessage.Type.V(72)
@@ -309,8 +314,9 @@ class ProtocolMessage(google.protobuf.message.Message):
     REMOVE_OUTPUT_DEVICES_MESSAGE = ProtocolMessage.Type.V(66)
     REMOTE_TEXT_INPUT_MESSAGE = ProtocolMessage.Type.V(67)
     GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE = ProtocolMessage.Type.V(68)
-    # Same as 66?
     REMOVE_OUTPUT_DEVICES_MESSAGE2 = ProtocolMessage.Type.V(69)
+    """Same as 66?"""
+
     PLAYBACK_SESSION_REQUEST_MESSAGE = ProtocolMessage.Type.V(70)
     PLAYBACK_SESSION_RESPONSE_MESSAGE = ProtocolMessage.Type.V(71)
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE = ProtocolMessage.Type.V(72)
@@ -334,8 +340,9 @@ class ProtocolMessage(google.protobuf.message.Message):
     TIMESTAMP_FIELD_NUMBER: builtins.int
     ERRORDESCRIPTION_FIELD_NUMBER: builtins.int
     UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    # Identifies which underlying message is filled in.
     type: global___ProtocolMessage.Type.V = ...
+    """Identifies which underlying message is filled in."""
+
     identifier: typing.Text = ...
     authenticationToken: typing.Text = ...
     errorCode: global___ErrorCode.Enum.V = ...
@@ -352,6 +359,6 @@ class ProtocolMessage(google.protobuf.message.Message):
         errorDescription : typing.Optional[typing.Text] = ...,
         uniqueIdentifier : typing.Optional[typing.Text] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"errorDescription",b"errorDescription",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type",u"uniqueIdentifier",b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"authenticationToken",b"authenticationToken",u"errorCode",b"errorCode",u"errorDescription",b"errorDescription",u"identifier",b"identifier",u"timestamp",b"timestamp",u"type",b"type",u"uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
 global___ProtocolMessage = ProtocolMessage

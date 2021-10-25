@@ -408,9 +408,10 @@ class Playing(ABC):
         "series_name",
         "season_number",
         "episode_number",
+        "content_identifier",
     ]
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-locals
         self,
         media_type: const.MediaType = const.MediaType.Unknown,
         device_state: const.DeviceState = const.DeviceState.Idle,
@@ -426,6 +427,7 @@ class Playing(ABC):
         series_name: Optional[str] = None,
         season_number: Optional[int] = None,
         episode_number: Optional[int] = None,
+        content_identifier: Optional[str] = None,
     ) -> None:
         """Initialize a new Playing instance."""
         self._media_type = media_type
@@ -442,6 +444,7 @@ class Playing(ABC):
         self._series_name = series_name
         self._season_number = season_number
         self._episode_number = episode_number
+        self._content_identifier = content_identifier
         self._post_process()
 
     def _post_process(self):
@@ -453,7 +456,7 @@ class Playing(ABC):
             if self._total_time:
                 self._position = min(self._position, self._total_time)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pylint: disable=too-many-branches
         """Convert this playing object to a readable string."""
         output = []
         output.append(f"  Media type: {convert.media_type_str(self.media_type)}")
@@ -479,6 +482,9 @@ class Playing(ABC):
 
         if self.episode_number is not None:
             output.append(f"     Episode: {self.episode_number}")
+
+        if self.content_identifier:
+            output.append(f"  Identifier: {self.content_identifier}")
 
         position = self.position
         total_time = self.total_time
@@ -597,6 +603,12 @@ class Playing(ABC):
     def episode_number(self) -> Optional[int]:
         """Episode number of TV series."""
         return self._episode_number
+
+    @property  # type: ignore
+    @feature(47, "ContentIdentifier", "Identifier for Content")
+    def content_identifier(self) -> Optional[str]:
+        """Content identifier (app specific)."""
+        return self._content_identifier
 
 
 class App:

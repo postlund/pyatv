@@ -83,6 +83,7 @@ class AtvscriptTest(ScriptTest):
                 "series_name": None,
                 "season_number": None,
                 "episode_number": None,
+                "content_identifier": None,
             }
         )
         self.exit(0)
