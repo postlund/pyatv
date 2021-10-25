@@ -45,7 +45,7 @@ setup(
     test_suite="tests",
     keywords=["apple", "tv", "airplay", "raop", "companion", "dmap", "dacp"],
     setup_requires=["pytest-runner"],
-    tests_require=["tox==3.24.4", "pytest==6.2.5", "pytest-xdist==2.4.0"],
+    tests_require=["pytest==6.2.5", "pytest-xdist==2.4.0"],
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [

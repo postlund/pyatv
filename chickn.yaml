@@ -1,0 +1,62 @@
+variables:
+  code_dirs:
+    - pyatv
+    - tests
+    - examples
+    - scripts
+  pydirs:
+    - pyatv
+    - scripts
+    - examples
+  cs_exclude_words: cann,cant,asai
+  requirements_file: requirements/requirements.txt
+
+dependencies:
+  files:
+    - "{requirements_file}"
+    - requirements/requirements_docs.txt
+    - requirements/requirements_test.txt
+
+pipeline:
+  pre:
+   - name: clean
+     run: coverage erase
+   - name: fixup
+     tags: [all, fixup]
+     run:
+       - black .
+       - isort {code_dirs}
+  validate:
+    - name: pylint
+      run: pylint -j 0 {pydirs}
+    - name: api
+      run: python scripts/api.py verify
+      tags: [all, py3.8]
+    - name: protobuf
+      run: python scripts/protobuf.py --download verify
+    - name: flake8
+      run: flake8 --exclude=pyatv/protocols/mrp/protobuf {pydirs}
+    - name: black
+      run: black --fast --check .
+    - name: pydocstyle
+      run: pydocstyle -v --match='(?!test_).*[^pb2]\.py' {pydirs}
+    - name: isort
+      run: isort -c --diff {code_dirs}
+    - name: cs_docs
+      run: codespell -q 6 -L {cs_exclude_words} -S "lib,vendor,_site,api,assets,*~,.sass-cache,*.lock" docs
+    - name: cs_code
+      run: codespell -q 4 -L {cs_exclude_words} --skip="*.pyc,*.pyi,*~,tests/data" {pydirs} tests
+    - name: typing
+      run: mypy --ignore-missing-imports --follow-imports=skip pyatv
+    - name: pytest
+      run: pytest -n auto --log-level=debug -q -d --timeout=30 --durations=10 --cov --cov-report=term-missing --cov-report=xml tests
+      retries: 1
+  post:
+    - name: report
+      run:
+        - coverage report
+        - coverage html
+  package:
+    - name: dist
+      run: python setup.py sdist bdist_wheel
+      tags: [all, package]

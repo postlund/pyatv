@@ -8,10 +8,10 @@ link_group: internals
 
 * Fork this repository
 * Make changes and push to fork
-  * Make sure that tests, linting, etc. pass by running `tox` locally
+  * Make sure that tests, linting, etc. pass by running `chickn` locally
   * New code shall have [type hints](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html)
   * Update documentation if needed
-  * PR cannot be merged if any check in `tox` fails
+  * PR cannot be merged if any check in `chickn` fails
 * Open a new PR
   * If you are fixing a bug, please reference it with "Fixes #xxx" (alternatively "Relates
     to #xxx") in commit message or pull request message to connect them

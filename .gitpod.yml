@@ -3,7 +3,7 @@ tasks:
   - name: Documentation
     command: ./scripts/build_docs.sh
   - name: Development
-    init: ./scripts/setup_dev_env.sh && source bin/activate; tox -p auto
+    init: ./scripts/setup_dev_env.sh && source bin/activate; python scripts/chickn.py
     command: source bin/activate
 
 ports:

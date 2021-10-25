@@ -14,6 +14,271 @@ link_group: internals
 A few tools are shipped with pyatv that are only used internally or serving as help during
 development. This page gives a brief introduction to them.
 
+# chickn
+
+Historically pyatv has always used [tox](https://tox.wiki/) as an automation tool to run tests, linters and
+so on. It is a great piece of software but has proven to be a bit slow and complex for the use case of
+pyatv. From this, a tool named `chickn` emerged (yes, [Not invented here](https://en.wikipedia.org/wiki/Not_invented_here)).
+This was seen as an opportunity to learn more about simple command automation and has no goal whatsoever
+to compete with `tox`. At this point `chickn` is only distributed with pyatv, but will hopefully move to
+a separate project at some point.
+
+## The idea behind chickn
+
+The idea behind `chickn` is very simple: allow shell commands to be run in sequence and parallel according
+to a specification. The specification in this case is a `chickn.yml` file. Commands to be run are added as
+steps inside a stage, which forms a pipeline. Stages are run sequentially and steps within a stage are run
+in parallel.
+
+For the sake of simplicity, only one pipeline is supported per file. There is no concept of tool versions
+in `chickn` either, like which python version to use. It is up to the runner to make sure the expected
+version is available, which is the normal case when running in a container (the way `chickn` is intended
+to run).
+
+### Pipeline, stages and steps
+
+Here's a simple example:
+
+```yaml
+pipeline:
+  stage1:
+    - name: foobar
+      run: ls /
+  stage2:
+    - name: hello
+      run: echo helloe
+    - name: world
+      run: echo world
+```
+
+This pipeline consists of two stages. First, all steps in `stage1` are run in parallel (only "foobar" in this case).
+Once all steps have finished, the next stage is started and all steps within `stage2` are also run in
+parallel. Each step needs a unique name, which can be used to run individual steps from the command line.
+
+### Variables
+
+It is possible to define variables as inputs to a command, which can be altered from the command line. Here
+is a simple example of using a variable
+
+```yaml
+variables:
+  args: -k foobar
+
+pipeline:
+  test:
+    - name: pytest
+      run: pytest {args}
+```
+
+This would run the command `pytest -k foobar`, but the arguments can be easily be changed afterwards. Variables
+cannot depend on other variables (they will not be resolved).
+
+It is possible to specify variables as lists:
+
+```yaml
+variables:
+  args:
+    - -k
+    - foobar
+
+pipeline:
+  test:
+    - name: pytest
+      run: pytest {args}
+```
+
+Internally, `chickn` will join all elements of the list with a space, i.e. `args=-k foobar` before
+inserting the value into a command.
+
+### Requirements
+
+There is builtin support for installing python packages with pip (this is the only python specific feature
+of `chickn`) like this:
+
+```yaml
+# chickn.yml
+dependencies:
+  files:
+    - requirements.txt
+
+pipeline:
+  pre:
+   - name: clean
+     run: coverage erase
+
+# requirements.txt
+coverage==6.0.2
+```
+
+It is not possible to specify individual packages, only requirement files containing packages. Installed
+packages will be compared with expected versions and re-installed when needed. This speeds up installation
+dramatically, but is also considered "optimistic" (if a package is installed but broken, that will not be
+discovered). It's a tradeoff for speed.
+
+*It is assumed that package versions are pinned to a specific version!*
+
+### Tags
+
+Tags can be added to a step, making it possible to enable it when needed on the command line. A step
+marked with at least one tag will never run unless one of its tags are provided on the command line!
+This can be useful for steps that are not generally run during development, like packaging, but needed
+during delivery or in CI.
+
+```yaml
+pipeline:
+  stages:
+    - name: hello
+      run: echo helloe
+      tags: [test, dummy]
+    - name: world
+      run: echo world
+```
+
+## Using chickn
+
+Currently, `chickn` lives in `scripts/chickn.py` and requires pyyaml to run (as it uses YAML as
+configuration format). It must also run in a virtual environment (check can be disabled). To get
+going, this is what you need to do:
+
+```shell
+$ python -m venv venv
+$ source venv/bin/activate  # venv/scripts/activate.bat on Windows
+$ pip install pyyaml
+$ ./scripts/chickn.py
+```
+
+This should run `chickn` and give you output similar to this:
+
+```raw
+$ ./scripts/chickn.py
+2021-10-24 10:36:01 [INFO] Installing dependencies
+2021-10-24 10:36:02 [INFO] All packages are up-to-date
+2021-10-24 10:36:02 [INFO] Step install_deps finished in 0.52s
+2021-10-24 10:36:02 [INFO] Running pre with 1 steps
+2021-10-24 10:36:02 [INFO] Running step clean
+2021-10-24 10:36:02 [INFO] Step clean finished in 0.09s
+2021-10-24 10:36:02 [INFO] Running validate with 10 steps
+2021-10-24 10:36:02 [INFO] Running step pylint
+2021-10-24 10:36:02 [INFO] Running step protobuf
+2021-10-24 10:36:02 [INFO] Running step flake8
+2021-10-24 10:36:02 [INFO] Running step black
+2021-10-24 10:36:02 [INFO] Running step pydocstyle
+2021-10-24 10:36:02 [INFO] Running step isort
+2021-10-24 10:36:02 [INFO] Running step cs_docs
+2021-10-24 10:36:02 [INFO] Running step cs_code
+2021-10-24 10:36:02 [INFO] Running step typing
+2021-10-24 10:36:02 [INFO] Running step pytest
+2021-10-24 10:36:03 [INFO] Step protobuf finished in 0.66s
+2021-10-24 10:36:03 [INFO] Step cs_docs finished in 0.78s
+2021-10-24 10:36:03 [INFO] Step typing finished in 1.00s
+2021-10-24 10:36:03 [INFO] Step black finished in 1.10s
+2021-10-24 10:36:03 [INFO] Step cs_code finished in 1.39s
+2021-10-24 10:36:05 [INFO] Step isort finished in 2.55s
+2021-10-24 10:36:10 [INFO] Step flake8 finished in 7.97s
+2021-10-24 10:36:18 [INFO] Step pydocstyle finished in 15.86s
+2021-10-24 10:36:35 [INFO] Step pylint finished in 33.01s
+2021-10-24 10:36:36 [INFO] Step pytest finished in 33.91s
+2021-10-24 10:36:36 [INFO] Running post with 1 steps
+2021-10-24 10:36:36 [INFO] Running step report
+2021-10-24 10:36:41 [INFO] Step report finished in 5.01s
+2021-10-24 10:36:41 [INFO] Running package with 0 steps
+2021-10-24 10:36:41 [INFO] Finished in 39.64!
+```
+
+There is very little error handling in `chickn`, so things will break whenever something
+is a little bit off. Improvements will be made over time,
+
+### Running individual steps
+
+To run one or more steps, pass their names as arguments:
+
+```raw
+$ ./scripts/chickn.py -- protobuf isort
+2021-10-24 10:38:09 [INFO] Installing dependencies
+2021-10-24 10:38:09 [INFO] All packages are up-to-date
+2021-10-24 10:38:09 [INFO] Step install_deps finished in 0.47s
+2021-10-24 10:38:09 [INFO] Running pre with 0 steps
+2021-10-24 10:38:09 [INFO] Running validate with 2 steps
+2021-10-24 10:38:09 [INFO] Running step protobuf
+2021-10-24 10:38:09 [INFO] Running step isort
+2021-10-24 10:38:09 [INFO] Step protobuf finished in 0.19s
+2021-10-24 10:38:10 [INFO] Step isort finished in 0.65s
+2021-10-24 10:38:10 [INFO] Running post with 0 steps
+2021-10-24 10:38:10 [INFO] Running package with 0 steps
+2021-10-24 10:38:10 [INFO] Finished in 1.13!
+```
+
+Make it a custom to use `--` as you might run into problems when using tags or variables
+otherwise.
+
+### Overriding variables
+
+One or more variables can be overridden like this:
+
+```raw
+$ ./scripts/chickn.py -v myvar=123 -v another_var=456 -- protobuf isort
+```
+
+### Failing steps
+
+If a step fails, all currently running steps will be cancelled while printing out stderr and
+stdout of the failing step:
+
+```raw
+$ ./scripts/chickn.py -t fixup
+2021-10-24 11:23:12 [INFO] Installing dependencies
+2021-10-24 11:23:13 [INFO] All packages are up-to-date
+2021-10-24 11:23:13 [INFO] Step install_deps finished in 1.37s
+2021-10-24 11:23:13 [INFO] Running pre with 2 steps
+2021-10-24 11:23:13 [INFO] Running step clean
+2021-10-24 11:23:13 [INFO] Running step fixup
+2021-10-24 11:23:13 [INFO] Step clean finished in 0.28s
+2021-10-24 11:23:17 [INFO] Step fixup finished in 3.96s
+2021-10-24 11:23:17 [INFO] Running validate with 10 steps
+2021-10-24 11:23:17 [INFO] Running step pylint
+2021-10-24 11:23:17 [INFO] Running step protobuf
+2021-10-24 11:23:17 [INFO] Running step flake8
+2021-10-24 11:23:17 [INFO] Running step black
+2021-10-24 11:23:17 [INFO] Running step pydocstyle
+2021-10-24 11:23:17 [INFO] Running step isort
+2021-10-24 11:23:17 [INFO] Running step cs_docs
+2021-10-24 11:23:17 [INFO] Running step cs_code
+2021-10-24 11:23:17 [INFO] Running step typing
+2021-10-24 11:23:17 [INFO] Running step pytest
+2021-10-24 11:23:18 [INFO] Step protobuf finished in 0.88s
+2021-10-24 11:23:18 [INFO] Step cs_docs finished in 1.21s
+2021-10-24 11:23:18 [INFO] Step black finished in 1.41s
+2021-10-24 11:23:19 [INFO] Step cs_code finished in 1.88s
+2021-10-24 11:23:20 [INFO] Step isort finished in 3.43s
+2021-10-24 11:23:21 [INFO] Step typing finished in 4.20s
+2021-10-24 11:23:27 [ERROR] At least one task failed
+2021-10-24 11:23:27 [ERROR] Task 'flake8' failed (InternalError): Command failed: flake8 --exclude=pyatv/protocols/mrp/protobuf pyatv scripts examples
+[STDOUT]
+pyatv/scripts/atvremote.py:355:5: F841 local variable 'test' is assigned to but never used
+
+
+[STDERR]
+None
+2021-10-24 11:23:27 [ERROR] Tasks failed: flake8
+```
+
+### Specifying tags
+
+One or more tags can be set like this:
+
+```raw
+$ ./scripts/chickn.py -t tag1 -t tag2 -- all
+```
+
+### Some other things
+
+A few other useful things:
+
+* Do not install any packages: `--no-install` (or `-n`)
+* Force re-install of packages even if versions match: `--force-pip` (or `-f`)
+* Allow running without venv: `--no-venv`
+* List all avavilable steps: `--list` (or `-l`)
+
 # Protobuf
 
 This section describes how to work with [Google Protobuf](https://developers.google.com/protocol-buffers/) in pyatv. Protobuf is used by the `MRP` protocol only.
@@ -62,7 +327,7 @@ Not downloading protoc (already exists)
 Generated code is up-to-date!
 ```
 
-Running `tox -e generated` will ensure that this file is up-to-date. It is always run when checking in code.
+Running `./scripts/chickn.py protobuf` will ensure that this file is up-to-date. It is always run when checking in code.
 
 See [Protobuf Compiler](#the-protobuf-compiler) for more details.
 
