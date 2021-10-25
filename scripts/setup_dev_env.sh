@@ -3,7 +3,7 @@
 # Set in GitPod which breaks installation in venv
 unset PIP_USER
 
-VERSIONS="3.9 3.8 3.7 3.6"
+VERSIONS="3.10 3.9 3.8 3.7 3.6"
 
 found_version=
 for p in $VERSIONS
@@ -41,8 +41,7 @@ echo "-> Installing protobuf-setuptools..."
 pip install protobuf-setuptools
 
 echo "-> Installing dependencies..."
-pip install --upgrade -r requirements_test.txt -r requirements_docs.txt
-pip install tox
+pip install --upgrade pyyaml -r requirements/requirements_test.txt -r requirements/requirements_docs.txt
 
 if [[ $GITPOD_INSTANCE_ID ]]; then
   echo "> Re-installing netifaces in GitPod due to bug"
@@ -65,9 +64,9 @@ To run tests, run any of:
   python setup.py test
   pytest tests/test_conf.py  # Single test
 
-Test everything with tox:
+Test everything with chickn:
 
-  tox -p auto
+  ./scripts/chickn.py
 
 To re-generate protobuf messages:
 

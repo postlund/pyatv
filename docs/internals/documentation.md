@@ -79,6 +79,6 @@ Unfortunately there are no API reference libraries for Jekyll (at least not that
 $ ./scripts/api.py generate
 ```
 
-Calling with `verify` instead will check if it is already up-to-date. This check is done by `tox` and it will fail the build in case something has changed. So if you forget to update the API, you will be notified of this (your PR will not be possible to merge).
+Calling with `verify` instead will check if it is already up-to-date. This check is done by `chickn` and it will fail the build in case something has changed. So if you forget to update the API, you will be notified of this (your PR will not be possible to merge).
 
 The API reference is generated using [pdoc3](https://pdoc3.github.io/pdoc/). To make it work with the rest of the site, the default HTML template has been modified to add some frontmatter (for `permalinks` and those parts) as well as not adding default HTML tags, like `<html>`. The pdoc specific parts can be found [here](https://github.com/postlund/pyatv/tree/master/docs/pdoc_templates). Some of the CSS and Javascript parts that are required are available [here](https://github.com/postlund/pyatv/tree/master/docs/assets).

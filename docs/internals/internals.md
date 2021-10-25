@@ -21,10 +21,11 @@ migrated from the wiki.
 
 ## Linux/macOS/*NIX
 
-You can run the script `scripts/setup_dev_env.sh` to set up a complete development environment. It will make sure that everything works as expected by running `tox`, building documentation (with docker), etc.
+You can run the script `scripts/setup_dev_env.sh` to set up a complete development environment. It will make sure that everything works as expected by running `chickn`, building documentation (with docker), etc.
 
 ```shell
 $ ./scripts/setup_dev_env.sh
+$ ./scripts/chickn.py
 ```
 
 ## Windows
@@ -37,46 +38,61 @@ $ cd pyatv
 $ python3 -m venv venv
 $ source venv/Scripts/activate
 $ python setup.py develop
-$ pip install tox
-$ pip install -r requirements_test.txt
-$ tox
+$ pip install pyyaml -r requirements/requirements_test.txt -r requirements/requirements_docs.txt
+$ python scripts/chickn.py
 ```
 
 # Testing Changes
 
 If you followed the instructions above, then pyatv will be installed as "develop". This means that you can keep doing updates without having to do `python setup.py install` between changes.
 
-## Testing with tox
+## Testing with chickn
 
-To test everything, just run `tox`:
+To test everything, just run `./scripts/chickn.py`:
 
 ```shell
-$ tox -p auto
+$ ./scripts/chickn.py
 ```
 
-This will make sure that tests pass, you have followed coding guidelines (pylint, flake8, etc), verify protobuf messages and generate coverage data. You can run steps individually as well:
+This will make sure that tests pass, you have followed coding guidelines (pylint, flake8, etc), verify protobuf messages and generate coverage data. `chickn` is developed for pyatv and the documentation for it is
+[here](tools/#chickn). The configuration file is [here](https://github.com/postlund/pyatv/blob/master/pyatv/chickn.yaml)
+
+You can run steps individually as well:
 
 | What | Command |
 | ---- | ------- |
-| Unit tests | tox -e py{35,36,37,38}
-| Code style | tox -e codestyle
-| pylint | tox -e pylint
-| Generated Code | tox -e generated
-| Documentation | tox -e docs
+| tests | ./scripts/chickn.py pytest
+| pylint | ./scripts/chickn.py pylint
+| protobuf | ./scripts/chickn.py protobuf
+| api | ./scripts/chickn.py api
 
-*Note: `pylint` should technically be part of `codestyle` but has been extracted to its own
-environment to increase parallelization.*
+All available steps can be listed with `./scripts/chickn.py -l`:
 
-If you change required version for, add or remove a dependency you should pass `-r` to `tox`
-to force it to re-create the environment (once). Otherwise your changes will not be reflected.
+```raw
+$ ./scripts/chickn.py -l
+clean, fixup, pylint, api, protobuf, flake8, black, pydocstyle, isort, cs_docs, cs_code, typing, pytest, report, dist
+```
 
-Generally, `tox` will install the latest version of all dependencies when setting up new
-environments. There's however a special environment called `regression`, which will install
-the "lowest versions" of all dependencies (that pyatv is supposed to work with) and run
-checks with those. Generally you will not need to run that by yourself, but sometimes you
-might find that it breaks when GitHub Actions runs it.
+The `fixup` will run black and isort to clean up basic mistakes before running rest of the commands.
+So it can be convenient to enable that step with the `fixup` tag:
 
-Base versions used by `regression` are in {% include code file="../base_versions.txt" %}.
+```raw
+./scripts/chickn.py -t fixup
+```
+
+Generally, `chickn` will install the latest version of all dependencies. There's however a
+wish to verify that everything works the lowest version that pyatv supports. This is denoted
+as "regression" in GitHub actions. These versions are listed in {% include code file="../base_versions.txt" %}
+and can be manually overridden when needed:
+
+```raw
+$ ./scripts/chickn.py -v requirements_file=base_versions.txt
+2021-10-24 11:16:19 [INFO] Installing dependencies
+2021-10-24 11:16:19 [INFO] Re-installing packages with mismatching versions: aiohttp==3.1.0 (3.7.4), bitarray==2.1.2 (2.3.4), cryptography==2.6 (35.0.0), netifaces==0.10.0 (0.11.0), protobuf==3.18.0 (3.19.0), srptools==0.2.0 (1.0.1), zeroconf==0.28.2 (0.36.8)
+...
+```
+
+You generally do not need to do this yourself as it is tested automatically by GitHub Actions.
 
 ## Updating protobuf Definitions
 
@@ -94,6 +110,7 @@ Recommended way to run unit tests:
 
 ```shell
 $ pytest --log-level=debug --disable-warnings
+$ ./scripts/chickn.py pytests  # Can be run via chickn
 ```
 
 Warnings are disabled because of deprecated `loop` argument in lots of places. This flag will be lifted eventually. See [Testing](testing) for details regarding tests.
@@ -108,7 +125,7 @@ All done! ✨ 🍰 ✨
 77 files left unchanged.
 ```
 
-Code formatting is checked by `tox`, so it's not possible to check in code if it doesn't comply with black.
+Code formatting is checked by `chickn`, so it's not possible to check in code if it doesn't comply with black.
 
 ## Documentation
 
@@ -123,7 +140,8 @@ $ ./scripts/build_doc.sh
 
 Navigate to [http://localhost:4000](http://localhost:4000) to see the result.
 
-The `lint` environment (`tox -e lint`) will do basic spell checking of the documentation (and code) using [codespell](https://github.com/codespell-project/codespell).
+The `cs_docs` step (`./scripts/chickn.py cs_docs`) will do basic spell checking of the documentation
+using [codespell](https://github.com/codespell-project/codespell).
 
 # Cheat Sheet
 

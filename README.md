@@ -4,6 +4,7 @@ A client library for Apple TV and AirPlay devices
 <img src="https://raw.githubusercontent.com/postlund/pyatv/master/docs/assets/img/logo.svg?raw=true" width="150">
 
 ![Tests](https://github.com/postlund/pyatv/workflows/Tests/badge.svg)
+![pyatv Actions](https://api.meercode.io/badge/postlund/pyatv?type=ci-success-rate&branch=master&lastDay=30)
 [![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
