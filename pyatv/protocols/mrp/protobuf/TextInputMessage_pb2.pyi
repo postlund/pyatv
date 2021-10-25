@@ -25,15 +25,17 @@ class ActionType(google.protobuf.message.Message):
         Insert = ActionType.Enum.V(1)
         Set = ActionType.Enum.V(2)
         Delete = ActionType.Enum.V(3)
-        # "Clear" clashes with something, making mypy unhappy
         ClearAction = ActionType.Enum.V(4)
+        """"Clear" clashes with something, making mypy unhappy"""
+
 
     Unknown = ActionType.Enum.V(0)
     Insert = ActionType.Enum.V(1)
     Set = ActionType.Enum.V(2)
     Delete = ActionType.Enum.V(3)
-    # "Clear" clashes with something, making mypy unhappy
     ClearAction = ActionType.Enum.V(4)
+    """"Clear" clashes with something, making mypy unhappy"""
+
 
     def __init__(self,
         ) -> None: ...
@@ -53,8 +55,8 @@ class TextInputMessage(google.protobuf.message.Message):
         text : typing.Optional[typing.Text] = ...,
         actionType : typing.Optional[global___ActionType.Enum.V] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"actionType",b"actionType",u"text",b"text",u"timestamp",b"timestamp"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> None: ...
 global___TextInputMessage = TextInputMessage
 
 textInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___TextInputMessage] = ...
