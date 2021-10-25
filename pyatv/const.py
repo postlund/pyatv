@@ -331,6 +331,9 @@ class FeatureName(Enum):
     EpisodeNumber = 42
     """Episode number of TV series."""
 
+    ContentIdentifier = 47
+    """Identifier for Content"""
+
     AppList = 38
     """List of launchable apps."""
 

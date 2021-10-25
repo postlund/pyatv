@@ -504,6 +504,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             position=10,
             season_number=12,
             episode_number=4,
+            content_identifier="identifier",
         )
 
         with faketime("pyatv", 0):
@@ -515,6 +516,17 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.position, 10)
             self.assertEqual(playing.season_number, 12)
             self.assertEqual(playing.episode_number, 4)
+            self.assertEqual(playing.content_identifier, "identifier")
+
+        self.assertFeatures(
+            FeatureState.Available,
+            FeatureName.SeriesName,
+            FeatureName.TotalTime,
+            FeatureName.Position,
+            FeatureName.SeasonNumber,
+            FeatureName.EpisodeNumber,
+            FeatureName.ContentIdentifier,
+        )
 
     @unittest_run_loop
     async def test_volume_change(self):
