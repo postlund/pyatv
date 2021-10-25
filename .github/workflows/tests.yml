@@ -102,5 +102,5 @@ jobs:
         fail_ci_if_error: false
 
     - name: Mark build as successful
-      if: steps.run_result.outputs.run_result != 'success'
+      if: steps.run_result.outputs.run_result == 'success'
       run: echo "::set-output name=run_result::success" > run_result
