@@ -116,7 +116,11 @@ _FIELD_FEATURES: Dict[FeatureName, str] = {
     FeatureName.Album: "albumName",
     FeatureName.Genre: "genre",
     FeatureName.TotalTime: "duration",
+    FeatureName.SeriesName: "seriesName",
     FeatureName.Position: "elapsedTimeTimestamp",
+    FeatureName.SeasonNumber: "seasonNumber",
+    FeatureName.EpisodeNumber: "episodeNumber",
+    FeatureName.ContentIdentifier: "contentIdentifier",
 }
 
 DELAY_BETWEEN_COMMANDS = 0.1
@@ -128,7 +132,9 @@ def _cocoa_to_timestamp(time):
     return datetime.datetime.fromtimestamp(time_seconds)
 
 
-def build_playing_instance(state: PlayerState) -> Playing:
+def build_playing_instance(  # pylint: disable=too-many-locals
+    state: PlayerState,
+) -> Playing:
     """Build a Playing instance from play state."""
 
     def media_type() -> MediaType:
@@ -233,6 +239,10 @@ def build_playing_instance(state: PlayerState) -> Playing:
         """Episode number."""
         return state.metadata_field("episodeNumber")
 
+    def content_identifier() -> str:
+        """Content identifier."""
+        return state.metadata_field("contentIdentifier")
+
     return Playing(
         media_type=media_type(),
         device_state=device_state(),
@@ -248,6 +258,7 @@ def build_playing_instance(state: PlayerState) -> Playing:
         series_name=series_name(),
         season_number=season_number(),
         episode_number=episode_number(),
+        content_identifier=content_identifier(),
     )
 
 

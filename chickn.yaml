@@ -33,7 +33,7 @@ pipeline:
       run: pylint -j 0 {pydirs}
     - name: api
       run: python scripts/api.py verify
-      tags: [all, py3.8]
+      tags: [all, py3.8, api]
     - name: protobuf
       run: python scripts/protobuf.py --download verify
     - name: flake8

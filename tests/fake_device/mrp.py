@@ -113,6 +113,8 @@ def _fill_item(item, metadata):
         md.seasonNumber = metadata.season_number
     if metadata.episode_number:
         md.episodeNumber = metadata.episode_number
+    if metadata.content_identifier:
+        md.contentIdentifier = metadata.content_identifier
 
 
 def _set_state_message(metadata, identifier):
@@ -187,6 +189,7 @@ class PlayingState:
         self.artwork_height = kwargs.get("artwork_height")
         self.skip_time = kwargs.get("skip_time")
         self.app_name = kwargs.get("app_name")
+        self.content_identifier = kwargs.get("content_identifier")
 
 
 class FakeMrpState:
