@@ -1,5 +1,59 @@
 # CHANGES
 
+## 0.9.6 Plushtrap (2021-10-27)
+
+It's time for another minor release (nothing fancy, I promise):
+
+* Addresses that are broadcasted when pairing DMAP can be manually set
+* A `content_identifier` (app specific) is available in the Playing interface.
+  Only some apps provides this.
+* Removed unnecessary exception log in the `heartbeater` module which polluted
+  the log in some cases.
+
+**Notes:**
+
+`protobuf` version 3.18.0 or later is now required.
+
+**Changes:**
+
+*Protocol: DMAP:*
+
+```
+4094699 dmap: Support custom addresses during pairing
+```
+
+*Protocol: MRP:*
+
+```
+260b006 mrp: Add support for content_identifier
+```
+
+*Other:*
+
+```
+ee8c23d if: Add content_identifier to Playing
+8885662 env: Re-work test environment
+6d47d0b scripts: Log current version of pyatv
+70b235e core: Do not log exception in heartbeater
+```
+
+**All changes:**
+
+```
+260b006 mrp: Add support for content_identifier
+ee8c23d if: Add content_identifier to Playing
+4177295 build(deps): update aiohttp requirement in /requirements
+6e04896 build(deps): bump zeroconf from 0.36.8 to 0.36.9 in /requirements
+8885662 env: Re-work test environment
+6d47d0b scripts: Log current version of pyatv
+70b235e core: Do not log exception in heartbeater
+4094699 dmap: Support custom addresses during pairing
+a5f1515 dep: Require protobuf 3.18.0
+973b884 build(deps): bump mypy-protobuf from 2.10 to 3.0.0
+4e0a0f6 build(deps): bump pytest-asyncio from 0.15.1 to 0.16.0
+656f1d9 build(deps): bump miniaudio from 1.44 to 1.45
+```
+
 ## 0.9.5 Oscar (2021-10-15)
 
 The releases are pouring down right now! Two more bug fixes to smoothen the experience:
