@@ -3,9 +3,10 @@
 import asyncio
 import hashlib
 from io import StringIO
-import ipaddress
+from ipaddress import IPv4Address, ip_address
 import logging
 import random
+from typing import List, Optional
 
 from aiohttp import web
 import netifaces
@@ -28,9 +29,16 @@ def _get_private_ip_addresses():
             continue
 
         for addr in addresses[netifaces.AF_INET]:
-            ipaddr = ipaddress.ip_address(addr["addr"])
+            ipaddr = ip_address(addr["addr"])
             if ipaddr.is_private and not ipaddr.is_loopback:
                 yield ipaddr
+
+
+def _get_zeroconf_addresses(addresses: Optional[List[str]]) -> List[IPv4Address]:
+    if addresses is None:
+        return list(_get_private_ip_addresses())
+
+    return [IPv4Address(address) for address in addresses]
 
 
 def _generate_random_guid():
@@ -53,37 +61,40 @@ class DmapPairingHandler(
         session_manager: ClientSessionManager,
         loop: asyncio.AbstractEventLoop,
         **kwargs
-    ):
+    ) -> None:
         """Initialize a new instance."""
         super().__init__(session_manager, service)
         self._loop = loop
-        self._zeroconf = kwargs.get("zeroconf") or Zeroconf()
-        self._name = kwargs.get("name", "pyatv")
+        self._zeroconf: Zeroconf = kwargs.get("zeroconf") or Zeroconf()
+        self._name: str = kwargs.get("name", "pyatv")
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
-        self.runner = web.AppRunner(self.app)
-        self.site = None
-        self._pin_code = None
-        self._has_paired = False
-        self._pairing_guid = (
+        self.runner: web.AppRunner = web.AppRunner(self.app)
+        self.site: Optional[web.TCPSite] = None
+        self._pin_code: Optional[int] = None
+        self._has_paired: bool = False
+        self._pairing_guid: str = (
             kwargs.get("pairing_guid", None) or _generate_random_guid()
         )[2:].upper()
+        self._addresses: List[IPv4Address] = _get_zeroconf_addresses(
+            kwargs.get("addresses")
+        )
 
-    async def close(self):
+    async def close(self) -> None:
         """Call to free allocated resources after pairing."""
         self._zeroconf.close()
         await self.runner.cleanup()
         await super().close()
 
     @property
-    def has_paired(self):
+    def has_paired(self) -> bool:
         """If a successful pairing has been performed.
 
         The value will be reset when stop() is called.
         """
         return self._has_paired
 
-    async def begin(self):
+    async def begin(self) -> None:
         """Start the pairing server and publish service."""
         port = unused_port()
 
@@ -93,26 +104,26 @@ class DmapPairingHandler(
 
         _LOGGER.debug("Started pairing web server at port %d", port)
 
-        for ipaddr in _get_private_ip_addresses():
+        for ipaddr in self._addresses:
             await self._publish_service(ipaddr, port)
 
-    async def finish(self):
+    async def finish(self) -> None:
         """Stop pairing server and unpublish service."""
         if self._has_paired:
             _LOGGER.debug("Saving updated credentials")
             self.service.credentials = "0x" + self._pairing_guid
 
-    def pin(self, pin):
+    def pin(self, pin: int) -> None:
         """Pin code used for pairing."""
         self._pin_code = pin
         _LOGGER.debug("DMAP PIN changed to %s", self._pin_code)
 
     @property
-    def device_provides_pin(self):
+    def device_provides_pin(self) -> bool:
         """Return True if remote device presents PIN code, else False."""
         return False
 
-    async def _publish_service(self, address, port):
+    async def _publish_service(self, address: IPv4Address, port: int) -> None:
         props = {
             "DvNm": self._name,
             "RemV": "10000",
@@ -134,7 +145,7 @@ class DmapPairingHandler(
             self._zeroconf,
         )
 
-    async def handle_request(self, request):
+    async def handle_request(self, request) -> None:
         """Respond to request if PIN is correct."""
         service_name = request.rel_url.query["servicename"]
         received_code = request.rel_url.query["pairingcode"].lower()
@@ -153,7 +164,7 @@ class DmapPairingHandler(
         # Code did not match, generate an error
         return web.Response(status=500)
 
-    def _verify_pin(self, received_code):
+    def _verify_pin(self, received_code: str) -> bool:
         # If no particular pin code is specified, allow any pin
         if self._pin_code is None:
             return True

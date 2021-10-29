@@ -5,7 +5,7 @@ from enum import Enum
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "9"
-PATCH_VERSION = "5"
+PATCH_VERSION = "6"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 
@@ -330,6 +330,9 @@ class FeatureName(Enum):
 
     EpisodeNumber = 42
     """Episode number of TV series."""
+
+    ContentIdentifier = 47
+    """Identifier for Content"""
 
     AppList = 38
     """List of launchable apps."""

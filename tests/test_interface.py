@@ -34,6 +34,7 @@ eq_test_cases = [
     ("series_name", "show1", "show2"),
     ("season_number", 1, 20),
     ("episode_number", 13, 24),
+    ("content_identifier", "abc", "def"),
 ]
 
 
@@ -143,6 +144,7 @@ def test_playing_basic_fields():
             series_name="myseries",
             season_number=1245,
             episode_number=2468,
+            content_identifier="content_id",
         )
     )
     assert "mytitle" in out
@@ -152,6 +154,7 @@ def test_playing_basic_fields():
     assert "myseries" in out
     assert "1245" in out
     assert "2468" in out
+    assert "content_id" in out
 
 
 @pytest.mark.parametrize(
@@ -211,7 +214,7 @@ def test_playing_custom_hash():
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(Playing().__dict__) == 14
+    assert len(Playing().__dict__) == 15
 
 
 @pytest.mark.parametrize(

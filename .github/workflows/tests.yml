@@ -13,6 +13,8 @@ jobs:
       ${{ matrix.python-version }}
       /
       ${{ matrix.platform }}
+      /
+      (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
@@ -27,55 +29,78 @@ jobs:
           - 3.8
           - 3.9
           - "3.10"
+        chickn-args:
+          - "--no-venv"
+        regression:
+          - false
+        include:
+          - platform: ubuntu-latest
+            python-version: 3.8
+            chickn-args: "--no-venv -v requirements_file=base_versions.txt"
+            regression: true
+        exclude:
+          # TODO: Fails a _lot_ due to "Illegal instruction", likely has to do with
+          # cffi and pyminiaudio. Not sure if this is fixable with reasonable effort,
+          # so disabling until support for python 3.6 is dropped. Most issues with 3.6
+          # should be picked up on other platforms.
+          - platform: ubuntu-latest
+            python-version: 3.6
     steps:
+    # Receipe for not running jobs again when re-running workflow
+    # https://medium.com/xcnotes/how-to-re-run-only-failed-jobs-on-github-actions-b79b13d1ceb2
+    - id: timestamp
+      shell: bash
+      run: echo "::set-output name=timestamp::$(timestamp +%s)"
+    - name: Restore the previous run result
+      uses: actions/cache@v2
+      with:
+        path: |
+          run_result
+        key: ${{ github.run_id }}-${{ github.job }}-${{ steps.timestamp.outputs.timestamp }}
+        restore-keys: |
+          ${{ github.run_id }}-${{ github.job }}-
+    - id: run_result
+      shell: bash
+      run: cat run_result 2>/dev/null || echo 'default'
+
+    # Regular flow continues here
     - uses: actions/checkout@v2
+      if: steps.run_result.outputs.run_result != 'success'
       with:
         fetch-depth: 2
     - name: Set up Python ${{ matrix.python-version }}
+      if: steps.run_result.outputs.run_result != 'success'
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: RC.exe  # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
-      if: runner.os == 'Windows'
-      run: |
-        function Invoke-VSDevEnvironment {
-        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-            $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
-            $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
-          & "${env:COMSPEC}" /s /c "`"$Command`" -no_logo && set" | Foreach-Object {
-                if ($_ -match '^([^=]+)=(.*)') {
-                    [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-                }
-            }
-        }
-        Invoke-VSDevEnvironment
-        Get-Command rc.exe | Format-Table -AutoSize
-    - name: Install openssl dev (Windows)
-      uses: crazy-max/ghaction-chocolatey@v1
+    - uses: syphar/restore-virtualenv@v1
+      if: steps.run_result.outputs.run_result != 'success'
+      id: cache-virtualenv
       with:
-        args: install openssl --no-progress
-      if: matrix.python-version == '3.9' && runner.os == 'Windows'
-    - name: Adding openssl to environment (windows)
-      run: |
-        echo 'INCLUDE=c:\program files\openssl-win64\include' >> $GITHUB_ENV
-        echo 'LIB=c:\program files\openssl-win64\lib' >> $GITHUB_ENV
-      if: matrix.python-version == '3.9' && runner.os == 'Windows'
+        requirement_files: |
+          **/*.txt
+          **/requirements/**.txt
+
+    - uses: syphar/restore-pip-download-cache@v1
+      if: steps.run_result.outputs.run_result != 'success' && steps.cache-virtualenv.outputs.cache-hit != 'true'
+
     - name: Install dependencies
+      if: steps.run_result.outputs.run_result != 'success'
       run: |
-        python -m pip install --upgrade setuptools pip wheel
-        python -m pip install tox-gh-actions
-    - name: Test with tox
-      # Run once and if that fails, run again but force to re-download packages again.
-      # For some reason the cache breaks sometimes, see https://github.com/postlund/pyatv/issues/1174
-      run: ./scripts/tox.sh
+        python -m pip install --upgrade setuptools pip pyyaml
+    - name: Test with chickn
+      if: steps.run_result.outputs.run_result != 'success'
+      run: python ./scripts/chickn.py -t ${{ matrix.python-version }} ${{ matrix.chickn-args }}
       shell: bash
-    - name: Regression
-      run: tox -q -p auto -e regression
-      if: matrix.python-version == '3.8' && runner.os == 'Linux'
     - name: Upload coverage to Codecov
+      if: steps.run_result.outputs.run_result != 'success'
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         name: pyatv
         fail_ci_if_error: false
+
+    - name: Mark build as successful
+      if: steps.run_result.outputs.run_result != 'success'
+      run: echo "::set-output name=run_result::success" > run_result

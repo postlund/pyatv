@@ -82,3 +82,8 @@ class TransformIdentifiers(argparse.Action):
             setattr(namespace, self.dest, values)
         else:
             setattr(namespace, self.dest, set(identifiers_split))
+
+
+def log_current_version():
+    """Log current version of pyatv."""
+    _LOGGER.debug("Running with pyatv %s", const.__version__)

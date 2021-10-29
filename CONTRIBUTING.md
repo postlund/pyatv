@@ -47,11 +47,11 @@ Getting started with development is quite simple:
 4. ./setup_dev_env.sh
 ```
 
-This will set everything up. To run tests, linting, etc. just run activate the virtual environment and run tox:
+This will set everything up. To run tests, linting, etc. just run activate the virtual environment and run chickn:
 
 ```shell
 $ source bin/activate
-(pyatv)$ tox
+(pyatv)$ ./scripts/chickn.py
 ```
 
 ### Pull Requests (PR)
@@ -62,7 +62,7 @@ When submitting changes, create a PR and make sure:
 * All tests must pass
 * Do not decrease code coverage
 * Add pydoc documentation and update `docs/`
-* Linting passes (just run tox)
+* Linting passes (just run chickn)
 
 PRs will not be merged unless all criterias are met. If you are unsure about anything, just push a PR and ask
 for help in the PR itself :smile:

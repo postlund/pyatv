@@ -43,6 +43,17 @@ $ docker run --rm --network=host -v $PWD:/app ghcr.io/postlund/pyatv:v0.9.0 pyth
 Note that network must be used in `host` mode, otherwise pyatv will not be able to find your
 devices when scanning.
 
+## System dependencies
+
+You might need some additional packages to compile the dependencies. On a debian based system
+(e.g. Debian itself or Ubuntu), you can just run:
+
+```shell
+sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+```
+
+This is not needed when running in a container.
+
 ## Virtual Environment
 
 It is recommended to install pyatv in a virtual environment rather than
@@ -54,13 +65,6 @@ system-wide. To create a new virtual environment:
 This creates a virtual environment in a directory called `pyatv_venv`. The
 second command activates the virtual environment and must be done every
 time a new shell is started.
-
-You might need some additional packages to compile the dependencies. On a debian based system
-(e.g. Debian itself or Ubuntu), you can just run:
-
-```shell
-sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-```
 
 Now you can continue by installing the version of pyatv you want.
 

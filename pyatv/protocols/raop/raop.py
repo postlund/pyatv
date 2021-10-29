@@ -203,7 +203,7 @@ class ControlClient(asyncio.Protocol):
         else:
             _LOGGER.debug("Received unhandled control data from %s: %s", addr, data)
 
-    def _retransmit_lost_packets(self, request: RetransmitReqeust, addr):
+    def _retransmit_lost_packets(self, request, addr):
         _LOGGER.debug("%s from %s", request, addr)
 
         for i in range(request.lost_packets):

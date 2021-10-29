@@ -44,7 +44,7 @@ async def heartbeater(
         except Exception as exc:
             attempts += 1
             if attempts > retries:
-                _LOGGER.exception(
+                _LOGGER.debug(
                     "Heartbeat %d failed after %d tries (%s)", count, attempts, name
                 )
                 failure_func(exc)
