@@ -7,6 +7,8 @@ link_group: development
 files:
   - name: auto_connect.py
     description: Demonstrates the simple `auto_connect` helper.
+  - name: connect_with_credentials.py
+    name: Restores credentials for a device before connecting.
   - name: manual_connect.py
     description: Manual creation of a configuration used to connect to a device.
   - name: pairing.py
