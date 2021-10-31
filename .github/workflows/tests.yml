@@ -16,6 +16,8 @@ jobs:
       /
       (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
+    env:
+      CACHE_KEY: ${{ github.run_id }}-${{ github.job }}-${{ matrix.python-version }}-${{ matrix.platform }}-${{ matrix.regression }}-
     strategy:
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
@@ -56,9 +58,9 @@ jobs:
       with:
         path: |
           run_result
-        key: ${{ github.run_id }}-${{ github.job }}-${{ steps.timestamp.outputs.timestamp }}
+        key: ${{ env.CACHE_KEY }}-${{ steps.timestamp.outputs.timestamp }}
         restore-keys: |
-          ${{ github.run_id }}-${{ github.job }}-
+          ${{ env.CACHE_KEY }}-
     - id: run_result
       shell: bash
       run: cat run_result 2>/dev/null || echo 'default'
