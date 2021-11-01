@@ -16,6 +16,7 @@ from tests.fake_device import FakeAppleTV
 
 class CompanionAuthFunctionalTest(AioHTTPTestCase):
     async def setUpAsync(self):
+        await super().setUpAsync()
         self.service = ManualService(
             None, Protocol.Companion, self.fake_atv.get_port(Protocol.Companion), {}
         )
