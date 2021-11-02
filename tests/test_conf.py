@@ -91,6 +91,13 @@ def test_identifier_order(config):
     assert config.identifier == IDENTIFIER_2
 
 
+def test_identifier_missing_for_service(config):
+    config.add_service(DMAP_SERVICE)
+    config.add_service(ManualService(None, Protocol.MRP, 0, {}))
+
+    assert config.identifier == DMAP_SERVICE.identifier
+
+
 def test_add_airplay_service(config):
     config.add_service(AIRPLAY_SERVICE)
 
