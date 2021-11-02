@@ -1144,6 +1144,10 @@ class BaseConfig(ABC):
             f"{services}"
         )
 
+    @abstractmethod
+    def __deepcopy__(self, memo) -> "BaseConfig":
+        """Return deep-copy of instance."""
+
 
 class AppleTV(ABC, StateProducer[DeviceListener]):
     """Base class representing an Apple TV.
