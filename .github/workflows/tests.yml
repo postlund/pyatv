@@ -92,7 +92,7 @@ jobs:
         python -m pip install --upgrade setuptools pip pyyaml
     - name: Test with chickn
       if: steps.run_result.outputs.run_result != 'success'
-      run: python ./scripts/chickn.py -t ${{ matrix.python-version }} ${{ matrix.chickn-args }}
+      run: python ./scripts/chickn.py -t miniaudio -t ${{ matrix.python-version }} ${{ matrix.chickn-args }}
       shell: bash
     - name: Upload coverage to Codecov
       if: steps.run_result.outputs.run_result != 'success'
