@@ -38,7 +38,7 @@ jobs:
         include:
           - platform: ubuntu-latest
             python-version: 3.8
-            chickn-args: "--no-venv -v requirements_file=base_versions.txt"
+            chickn-args: "-t miniaudio --no-venv -v requirements_file=base_versions.txt"
             regression: true
         exclude:
           # TODO: Fails a _lot_ due to "Illegal instruction", likely has to do with
