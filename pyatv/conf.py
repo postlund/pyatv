@@ -4,6 +4,7 @@ A configuration describes a device, e.g. it's name, IP address and credentials. 
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.
 """
+from copy import deepcopy
 from ipaddress import IPv4Address
 from typing import Dict, List, Mapping, Optional
 
@@ -79,6 +80,19 @@ class AppleTV(BaseConfig):
     def device_info(self) -> DeviceInfo:
         """Return general device information."""
         return self._device_info
+
+    def __deepcopy__(self, memo) -> "BaseConfig":
+        """Return deep-copy of instance."""
+        copy = AppleTV(
+            self._address,
+            self._name,
+            self._deep_sleep,
+            self._properties,
+            self._device_info,
+        )
+        for service in self.services:
+            copy.add_service(deepcopy(service))
+        return copy
 
 
 class ManualService(BaseService):
