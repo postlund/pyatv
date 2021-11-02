@@ -19,15 +19,26 @@ dependencies:
 
 pipeline:
   pre:
-   - name: clean
-     run: coverage erase
-   - name: fixup
-     tags: [all, fixup]
-     run:
-       - black .
-       - isort {code_dirs}
-       - ./scripts/api.py generate
-       - ./scripts/protobuf.py generate
+    - name: clean
+      run: coverage erase
+    - name: fixup
+      tags: [all, fixup]
+      run:
+        - black .
+        - isort {code_dirs}
+        - ./scripts/api.py generate
+        - ./scripts/protobuf.py generate
+  rebuild_miniaudio:
+    # A lot of builds on GitHub Actions result in "Illegal Instruction"
+    # when calling functions in miniaudio. Seemingly random and not
+    # always. Likely has to do with some instruction set mismatch, but
+    # not sure. Rebuilding miniaudio seems to improve the situation,
+    # so this optional step is used by the tests workflow to do that.
+    - name: miniaudio
+      tags: [all, miniaudio]
+      run:
+        - "pip uninstall -y miniaudio"
+        - "pip install --no-binary :all: miniaudio"
   validate:
     - name: pylint
       run: pylint -j 0 {pydirs}
