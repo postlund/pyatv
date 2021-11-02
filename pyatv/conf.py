@@ -110,6 +110,19 @@ class ManualService(BaseService):
         """Return if pairing is required by service."""
         return self._pairing_requirement
 
+    def __deepcopy__(self, memo) -> "BaseService":
+        """Return deep-copy of instance."""
+        return ManualService(
+            self.identifier,
+            self.protocol,
+            self.port,
+            self.properties,
+            self.credentials,
+            self.password,
+            self.requires_password,
+            self.pairing,
+        )
+
 
 # pylint: disable=too-few-public-methods
 class DmapService(ManualService):

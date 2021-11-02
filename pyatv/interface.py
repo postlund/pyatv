@@ -189,6 +189,10 @@ class BaseService(ABC):
             f"Pairing: {self.pairing.name}"
         )
 
+    @abstractmethod
+    def __deepcopy__(self, memo) -> "BaseService":
+        """Return deep-copy of instance."""
+
 
 class PairingHandler(ABC):
     """Base class for API used to pair with an Apple TV."""
