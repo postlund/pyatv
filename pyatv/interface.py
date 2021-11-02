@@ -1085,7 +1085,7 @@ class BaseConfig(ABC):
         """Return the main identifier associated with this device."""
         for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
             service = self.get_service(prot)
-            if service:
+            if service and service.identifier is not None:
                 return service.identifier
         return None
 
