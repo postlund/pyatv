@@ -112,6 +112,22 @@ class CommonFunctionalTests(AioHTTPTestCase):
             await pyatv.connect(self.conf, loop=self.loop)
 
     @unittest_run_loop
+    async def test_conf_is_a_copy(self):
+        protocol = self.conf.main_service().protocol
+
+        # Update credentials in the config passed to connect
+        self.conf.get_service(protocol).merge(
+            ManualService("test", protocol, 0, {}, credentials="1234")
+        )
+
+        # This should not result in a change to the service within the connected object
+        # TODO: This test should not be part of a protocol test, rather a generic test
+        # in core. Move this once core and protocols have been separated further.
+        service = self.atv.service
+        assert service.protocol == protocol
+        assert service.credentials != "1234"
+
+    @unittest_run_loop
     async def test_invalid_airplay_credentials_format(self):
         self.conf.get_service(Protocol.AirPlay).credentials = "bad"
         self.airplay_usecase.airplay_require_authentication()

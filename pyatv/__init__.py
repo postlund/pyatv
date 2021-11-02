@@ -1,6 +1,7 @@
 """Main routines for interacting with an Apple TV."""
 
 import asyncio
+from copy import deepcopy
 import datetime  # noqa
 from functools import partial
 from ipaddress import IPv4Address
@@ -79,13 +80,14 @@ async def connect(
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
+    config_copy = deepcopy(config)
     session_manager = await http.create_session(session)
-    atv = FacadeAppleTV(config, session_manager)
+    atv = FacadeAppleTV(config_copy, session_manager)
 
     try:
         # for service in config.services:
         for proto, proto_methods in PROTOCOLS.items():
-            service = config.get_service(proto)
+            service = config_copy.get_service(proto)
             if service is None or service.port == 0:
                 continue
 
@@ -94,7 +96,7 @@ async def connect(
             takeover_method = partial(atv.takeover, proto)
 
             for setup_data in proto_methods.setup(
-                loop, config, service, atv, session_manager, takeover_method
+                loop, config_copy, service, atv, session_manager, takeover_method
             ):
                 atv.add_protocol(setup_data)
 

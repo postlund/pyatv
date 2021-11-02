@@ -13,7 +13,7 @@ from typing import Dict, List
 
 import pytest
 
-from pyatv import exceptions
+from pyatv import connect, exceptions
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
 from pyatv.exceptions import AuthenticationError
 from pyatv.interface import FeatureInfo, Playing, PushListener
@@ -195,12 +195,12 @@ async def test_stream_complete_legacy_auth(
     ],
 )
 async def test_stream_with_password(
-    raop_client,
     raop_state,
     raop_usecase,
     raop_conf,
     raop_server_password,
     raop_client_password,
+    event_loop,
 ):
     raop_usecase.password(raop_server_password)
 
@@ -210,13 +210,16 @@ async def test_stream_with_password(
 
     expect_error = raop_server_password != raop_client_password
 
+    client = await connect(raop_conf, loop=event_loop)
     try:
-        await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
+        await client.stream.stream_file(data_path("audio_10_frames.wav"))
         assert not expect_error
     except AuthenticationError as e:
         assert expect_error
     except Exception as e:
         assert False
+    finally:
+        await asyncio.gather(*client.close())
 
 
 @pytest.mark.parametrize(
