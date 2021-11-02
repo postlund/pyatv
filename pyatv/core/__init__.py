@@ -52,6 +52,20 @@ class MutableService(BaseService):
         """Change if pairing is required by service."""
         self._pairing_requirement = value
 
+    def __deepcopy__(self, memo) -> "BaseService":
+        """Return deep-copy of instance."""
+        copy = MutableService(
+            self.identifier,
+            self.protocol,
+            self.port,
+            self.properties,
+            self.credentials,
+            self.password,
+        )
+        copy.pairing = self.pairing
+        copy.requires_password = self.requires_password
+        return copy
+
 
 class SetupData(NamedTuple):
     """Information for setting up a protocol."""
