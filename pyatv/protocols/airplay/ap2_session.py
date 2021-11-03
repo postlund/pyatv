@@ -1,13 +1,20 @@
-"""Implementation of Remote Control (channel) in AirPlay 2."""
+"""Implementation of "high-level" support for an AirPlay 2 session.
+
+This code is pretty messy right now and needs some re-structuring. The intention is
+however to set up a connection to an AirPlay 2 receiver and ensure encryption and
+most low-level stuff is taken care of.
+"""
 import asyncio
 import logging
 from random import randint
 from typing import Any, Dict, List, Optional, Set, cast
 from uuid import uuid4
 
+from pyatv import exceptions
 from pyatv.auth.hap_channel import setup_channel
 from pyatv.auth.hap_pairing import HapCredentials, PairVerifyProcedure
 from pyatv.core.protocol import heartbeater
+from pyatv.interface import DeviceListener
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
 from pyatv.support.http import HttpConnection, decode_bplist_from_body, http_connect
@@ -28,55 +35,64 @@ DATASTREAM_OUTPUT_INFO = "DataStream-Output-Encryption-Key"
 DATASTREAM_INPUT_INFO = "DataStream-Input-Encryption-Key"
 
 
-class RemoteControl:
-    """MRP remote control session over AirPlay."""
+class AP2Session:
+    """High-level session for AirPlay 2."""
 
-    def __init__(self, device_listener: StateProducer) -> None:
-        """Initialize a new RemoteControl instance."""
+    def __init__(
+        self, address: str, control_port: int, credentials: HapCredentials
+    ) -> None:
+        """Initialize a new AP2Session instance."""
+        self._address = address
+        self._control_port = control_port
+        self._credentials = credentials
         self.connection: Optional[HttpConnection] = None
         self.verifier: Optional[PairVerifyProcedure] = None
         self.rtsp: Optional[RtspSession] = None
-        self.device_listener = device_listener
         self.data_channel: Optional[DataStreamChannel] = None
         self._channels: List[asyncio.BaseTransport] = []
         self._feedback_task: Optional[asyncio.Task] = None
 
-    async def start(
-        self, address: str, control_port: int, credentials: HapCredentials
-    ) -> None:
-        """Open remote control connection."""
+    async def connect(self) -> None:
+        """Open connection to receiver."""
         _LOGGER.debug(
-            "Setting up remote control connection to %s:%d",
-            address,
-            control_port,
+            "Setting up remote connection to %s:%d",
+            self._address,
+            self._control_port,
         )
 
-        self.connection = await http_connect(address, control_port)
-        self.verifier = await verify_connection(credentials, self.connection)
+        self.connection = await http_connect(self._address, self._control_port)
+        self.verifier = await verify_connection(self._credentials, self.connection)
 
         self.rtsp = RtspSession(self.connection)
 
-        await self._setup_event_channel(self.connection.remote_ip, self.verifier)
+    async def setup_remote_control(self) -> None:
+        """Set up remote control session over the data channel."""
+        if self.connection is None or self.rtsp is None:
+            raise exceptions.InvalidStateError("not connected to remote")
 
+        await self._setup_event_channel(self.connection.remote_ip)
         await self.rtsp.record()
-        await self._setup_data_channel(self.connection.remote_ip, self.verifier)
+        await self._setup_data_channel(self.connection.remote_ip)
 
-        # Lambdas as needed here as accessing a method in the device listener will
-        # cause the device listener to handle that as a connection error happened
-        # and tear everything down. This is by design.
+    def start_keep_alive(self, device_listener: StateProducer[DeviceListener]) -> None:
+        """Start sending keep alive messages."""
+
         def _finish_func() -> None:
-            self.device_listener.listener.connection_closed()
+            device_listener.listener.connection_closed()
 
         def _failure_func(exc: Exception) -> None:
-            self.device_listener.listener.connection_lost(exc)
+            device_listener.listener.connection_lost(exc)
 
         async def _send_feedback(message: Optional[Any]) -> None:
             if self.rtsp:
                 await self.rtsp.feedback()
 
+        # Lambdas as needed here as accessing a method in the device listener will
+        # cause the device listener to handle that as a connection error happened
+        # and tear everything down. This is by design.
         self._feedback_task = asyncio.ensure_future(
             heartbeater(
-                name=f"AirPlay:{address}",
+                name=f"AirPlay:{self._address}",
                 sender_func=_send_feedback,
                 finish_func=_finish_func,
                 failure_func=_failure_func,
@@ -89,9 +105,10 @@ class RemoteControl:
         resp = await self.rtsp.setup(body=body)
         return decode_bplist_from_body(resp)
 
-    async def _setup_event_channel(
-        self, address: str, verifier: PairVerifyProcedure
-    ) -> None:
+    async def _setup_event_channel(self, address: str) -> None:
+        if self.verifier is None:
+            raise exceptions.InvalidStateError("not in connected state")
+
         resp = await self._setup(
             {
                 "isRemoteControlOnly": True,
@@ -115,7 +132,7 @@ class RemoteControl:
         # Note: Read/Write info reversed here as connection originates from receiver!
         transport, _ = await setup_channel(
             EventChannel,
-            verifier,
+            self.verifier,
             address,
             event_port,
             EVENTS_SALT,
@@ -124,9 +141,10 @@ class RemoteControl:
         )
         self._channels.append(transport)
 
-    async def _setup_data_channel(
-        self, address: str, verifier: PairVerifyProcedure
-    ) -> None:
+    async def _setup_data_channel(self, address: str) -> None:
+        if self.verifier is None:
+            raise exceptions.InvalidStateError("not in connected state")
+
         # A 64 bit random seed is included and used as part of the salt in encryption
         seed = randint(0, 2**64)
 
@@ -150,7 +168,7 @@ class RemoteControl:
 
         transport, protocol = await setup_channel(
             DataStreamChannel,
-            verifier,
+            self.verifier,
             address,
             data_port,
             DATASTREAM_SALT + str(seed),
