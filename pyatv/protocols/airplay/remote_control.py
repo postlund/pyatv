@@ -1,7 +1,6 @@
 """Implementation of Remote Control (channel) in AirPlay 2."""
 import asyncio
 import logging
-import plistlib
 from random import randint
 from typing import Any, Dict, List, Optional, Set, cast
 from uuid import uuid4
@@ -11,7 +10,7 @@ from pyatv.auth.hap_pairing import HapCredentials, PairVerifyProcedure
 from pyatv.core.protocol import heartbeater
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
-from pyatv.support.http import HttpConnection, http_connect
+from pyatv.support.http import HttpConnection, decode_bplist_from_body, http_connect
 from pyatv.support.rtsp import RtspSession
 from pyatv.support.state_producer import StateProducer
 
@@ -87,17 +86,8 @@ class RemoteControl:
 
     async def _setup(self, body: Dict[str, Any]) -> Dict[str, Any]:
         assert self.rtsp
-
-        resp = await self.rtsp.setup(
-            headers={"Content-Type": "application/x-apple-binary-plist"},
-            body=plistlib.dumps(
-                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
-            ),
-        )
-        resp_body = (
-            resp.body if isinstance(resp.body, bytes) else resp.body.encode("utf-8")
-        )
-        return plistlib.loads(resp_body)
+        resp = await self.rtsp.setup(body=body)
+        return decode_bplist_from_body(resp)
 
     async def _setup_event_channel(
         self, address: str, verifier: PairVerifyProcedure

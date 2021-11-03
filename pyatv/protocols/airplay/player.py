@@ -6,7 +6,7 @@ import plistlib
 from uuid import uuid4
 
 from pyatv import exceptions
-from pyatv.support.http import HttpConnection
+from pyatv.support.http import HttpConnection, decode_bplist_from_body
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -76,11 +76,7 @@ class AirPlayPlayer:
             _LOGGER.debug("Playback-info: %s", resp)
 
             if resp.body:
-                parsed = plistlib.loads(
-                    resp.body.encode("utf-8")
-                    if isinstance(resp.body, str)
-                    else resp.body
-                )
+                parsed = decode_bplist_from_body(resp)
             else:
                 parsed = {}
                 _LOGGER.debug("Got playback-info response without content")

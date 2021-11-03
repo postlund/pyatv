@@ -3,7 +3,7 @@ from enum import IntFlag
 import logging
 import plistlib
 import re
-from typing import Any, Mapping, Union
+from typing import Any, Dict, Mapping, Union
 
 from pyatv.auth.hap_pairing import (
     TRANSIENT_CREDENTIALS,
@@ -157,9 +157,11 @@ def encode_plist_body(data: Any):
     )
 
 
-def decode_plist_body(body: Union[str, bytes]) -> Any:
+def decode_plist_body(body: Union[str, bytes, Dict[Any, Any]]) -> Any:
     """Decode a binary plist payload."""
     try:
+        if isinstance(body, Dict):
+            return body
         return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
     except plistlib.InvalidFileException:
         return None

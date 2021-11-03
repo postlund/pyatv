@@ -4,9 +4,20 @@ import asyncio
 from collections import deque
 import logging
 import pathlib
+import plistlib
 from queue import Queue
 import re
-from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
@@ -77,7 +88,7 @@ class HttpResponse(NamedTuple):
     code: int
     message: str
     headers: Mapping[str, str]
-    body: Union[str, bytes]
+    body: Union[str, bytes, dict]
 
 
 class HttpRequest(NamedTuple):
@@ -145,7 +156,12 @@ def format_response(response: HttpResponse) -> bytes:
 
     body = response.body or b""
     if body:
-        body = body.encode("utf-8") if isinstance(body, str) else body
+        if isinstance(body, str):
+            body = body.encode("utf-8")
+        elif isinstance(body, dict):
+            body = plistlib.dumps(
+                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+            )
         output += f"Content-Length: {len(body)}\r\n"
 
     return output.encode("utf-8") + b"\r\n" + body
@@ -200,6 +216,17 @@ def parse_request(request: bytes) -> Tuple[Optional[HttpRequest], bytes]:
         HttpRequest(method, path, protocol, version, msg_headers, msg_body),
         rest,
     )
+
+
+def decode_bplist_from_body(response: HttpResponse) -> Dict[str, Any]:
+    """Decode a binary property list in a response."""
+    if not isinstance(response.body, (bytes, str)):
+        raise exceptions.ProtocolError(
+            f"expected bytes or str but got {type(response.body).__name__}"
+        )
+
+    body = response.body
+    return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
 
 
 class ClientSessionManager:

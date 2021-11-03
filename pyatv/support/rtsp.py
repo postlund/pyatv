@@ -13,7 +13,7 @@ from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 import async_timeout
 
 from pyatv.protocols.dmap import tags
-from pyatv.support.http import HttpConnection, HttpResponse
+from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
 from pyatv.support.metadata import MediaMetadata
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +47,8 @@ CURVE25519_PUB_KEY = (
     b"\xa9\x4d\xbd\x50\xd8\xaa\x46\x5b"
     b"\x5d\x8c\x01\x2a\x0c\x7e\x1d\x4e"
 )
+
+BPLIST_CONTENT_TYPE = "application/x-apple-binary-plist"
 
 
 class DigestInfo(NamedTuple):
@@ -105,12 +107,7 @@ class RtspSession:
             _LOGGER.debug("Device does not support /info")
             return {}
 
-        body = (
-            device_info.body
-            if isinstance(device_info.body, bytes)
-            else device_info.body.encode("utf-8")
-        )
-        return plistlib.loads(body)
+        return decode_bplist_from_body(device_info)
 
     async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
@@ -173,7 +170,7 @@ class RtspSession:
     async def setup(
         self,
         headers: Optional[Dict[str, Any]] = None,
-        body: Optional[Union[str, bytes]] = None,
+        body: Optional[Union[str, bytes, dict]] = None,
     ) -> HttpResponse:
         """Send SETUP message."""
         return await self.exchange("SETUP", headers=headers, body=body)
@@ -234,7 +231,7 @@ class RtspSession:
         uri: Optional[str] = None,
         content_type: Optional[str] = None,
         headers: Optional[Mapping[str, object]] = None,
-        body: Optional[Union[str, bytes]] = None,
+        body: Optional[Union[str, bytes, dict]] = None,
         allow_error: bool = False,
         protocol: str = "RTSP/1.0",
     ) -> HttpResponse:
@@ -257,6 +254,13 @@ class RtspSession:
 
         if headers:
             hdrs.update(headers)
+
+        # If body is a dict, assume that payload should be sent as a binary plist
+        if isinstance(body, dict):
+            hdrs["Content-Type"] = BPLIST_CONTENT_TYPE
+            body = plistlib.dumps(
+                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+            )
 
         # Map an asyncio Event to current CSeq and make the request
         self.requests[cseq] = (asyncio.Event(), None)
