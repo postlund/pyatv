@@ -26,6 +26,7 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.protocols import mrp
+from pyatv.protocols.airplay.ap2_session import AP2Session
 from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
@@ -33,7 +34,6 @@ from pyatv.protocols.airplay.pairing import (
     get_preferred_auth_type,
 )
 from pyatv.protocols.airplay.player import AirPlayPlayer
-from pyatv.protocols.airplay.remote_control import RemoteControl
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     get_pairing_requirement,
@@ -221,14 +221,13 @@ def setup(  # pylint: disable=too-many-locals
     else:
         _LOGGER.debug("Remote control channel is supported")
 
-        control = RemoteControl(core.device_listener)
-        control_port = core.service.port
+        session = AP2Session(str(core.config.address), core.service.port, credentials)
 
-        # A protocol requires its correaponding service to function, so add a
+        # A protocol requires its corresponding service to function, so add a
         # dummy one if we don't have one yet
         mrp_service = core.config.get_service(Protocol.MRP)
         if mrp_service is None:
-            mrp_service = MutableService(None, Protocol.MRP, control_port, {})
+            mrp_service = MutableService(None, Protocol.MRP, core.service.port, {})
             core.config.add_service(mrp_service)
 
         (
@@ -248,13 +247,15 @@ def setup(  # pylint: disable=too-many-locals
                 core.takeover,
                 core.state_dispatcher.create_copy(Protocol.MRP),
             ),
-            AirPlayMrpConnection(control, core.device_listener),
+            AirPlayMrpConnection(session, core.device_listener),
             requires_heatbeat=False,  # Already have heartbeat on control channel
         )
 
         async def _connect_rc() -> bool:
             try:
-                await control.start(str(core.config.address), control_port, credentials)
+                await session.connect()
+                await session.setup_remote_control()
+                session.start_keep_alive(core.device_listener)
             except exceptions.HttpError as ex:
                 if ex.status_code == 470:
                     _LOGGER.debug(
@@ -272,7 +273,7 @@ def setup(  # pylint: disable=too-many-locals
         def _close_rc() -> Set[asyncio.Task]:
             tasks = set()
             tasks.update(mrp_close())
-            tasks.update(control.stop())
+            tasks.update(session.stop())
             return tasks
 
         yield SetupData(

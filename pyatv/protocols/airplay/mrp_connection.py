@@ -3,8 +3,8 @@ import logging
 from typing import Optional
 
 from pyatv import exceptions
+from pyatv.protocols.airplay.ap2_session import AP2Session
 from pyatv.protocols.airplay.channels import DataStreamChannel, DataStreamListener
-from pyatv.protocols.airplay.remote_control import RemoteControl
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import AbstractMrpConnection
 from pyatv.support import log_protobuf
@@ -17,13 +17,11 @@ class AirPlayMrpConnection(AbstractMrpConnection, DataStreamListener):
     """Transparent connection/channel for transporting MRP messages."""
 
     def __init__(
-        self,
-        remote_control: RemoteControl,
-        device_listener: Optional[StateProducer] = None,
+        self, session: AP2Session, device_listener: Optional[StateProducer] = None
     ):
         """Initialize a new MrpConnection."""
         super().__init__()
-        self.remote_control = remote_control
+        self.session = session
         self.data_channel: Optional[DataStreamChannel] = None
         self.device_listener = device_listener
 
@@ -33,10 +31,10 @@ class AirPlayMrpConnection(AbstractMrpConnection, DataStreamListener):
 
     async def connect(self) -> None:
         """Connect to device."""
-        if self.remote_control.data_channel is None:
+        if self.session.data_channel is None:
             raise exceptions.InvalidStateError("remote control channel not connected")
 
-        self.data_channel = self.remote_control.data_channel
+        self.data_channel = self.session.data_channel
         self.data_channel.listener = self
 
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
