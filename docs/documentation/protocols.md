@@ -1415,11 +1415,13 @@ All channels described here are encrypted using Chacha20Poly1305. The session ke
 derived (with HKDF) from the shared secret agreed upon during authentication. Salt and info
 values varies depending on channel.
 
-Data is encrypted in blocks of at most 1024 bytes, with a two bytes (little-endian) size
-field prepended to it and as well as a 16 byte auth tag appended:
+Data is encrypted in blocks, with a two bytes (little-endian) size field prepended to it
+as well as a 16 byte auth tag appended:
 
 | **Size (2 bytes)** | **Data (n bytes)** | **Auth tag (16 bytes)** |
 
+HomeKit madates a block size of maximum 1024 byte. This is not the case here as any block
+size (that fits length tag) can be used.
 
 This is also described in the HAP specification, section 5.2.2 (Release R1).
 
@@ -1725,9 +1727,8 @@ this format (others might exist, but not seen so far):
 {"params": {"data": xxx}}
 ```
 
-Where `xxx` is the transported message. It is actually a
-[varint](https://developers.google.com/protocol-buffers/docs/encoding#varints) with the
-message size followed by a message.
+Where `xxx` is one or more transported messages. Each message is prepended with the message
+size encoded as a [varint](https://developers.google.com/protocol-buffers/docs/encoding#varints), 
 
 One example looks like this:
 

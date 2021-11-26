@@ -108,8 +108,9 @@ def tcp_keepalive(sock) -> None:
         try:
             sock.setsockopt(socket.IPPROTO_TCP, option, value)
         except OSError as ex:
-            raise exceptions.NotSupportedError(
-                f"Unable to set {option_name} ({option:#x}) on {sock}: {ex}"
+            # Warn here instead of raising exception (we just try to do our best)
+            _LOGGER.warning(
+                "Unable to set %s (0x%x) on %s: %s", option_name, option, sock, ex
             )
 
     _LOGGER.debug("Configured keep-alive on %s (%s)", sock, current_platform)
