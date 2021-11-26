@@ -1,4 +1,4 @@
-aiohttp==3.8.0
+aiohttp==3.8.1
 bitarray==2.3.4
 cryptography==36.0.0
 mediafile==0.8.1
