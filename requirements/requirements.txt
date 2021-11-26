@@ -1,6 +1,6 @@
 aiohttp==3.8.0
 bitarray==2.3.4
-cryptography==35.0.0
+cryptography==36.0.0
 mediafile==0.8.1
 miniaudio==1.45
 netifaces==0.11.0
