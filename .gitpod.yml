@@ -3,6 +3,7 @@ tasks:
   - name: Documentation
     command: ./scripts/build_docs.sh
   - name: Development
+    before: "echo 'export PIP_USER=no' >> ~/.bashrc && export PIP_USER=no"
     init: ./scripts/setup_dev_env.sh && source bin/activate; python scripts/chickn.py
     command: source bin/activate
 
@@ -14,6 +15,8 @@ ports:
 vscode:
   extensions:
     - ms-python.python
+    - hbenl.test-adapter-converter
+    - hbenl.vscode-test-explorer
 
 github:
   prebuilds:

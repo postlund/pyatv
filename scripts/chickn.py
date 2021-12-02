@@ -216,6 +216,7 @@ async def appstart(  # pylint: disable=too-many-locals
         name: " ".join(value) if isinstance(value, list) else value
         for name, value in chickn_file["variables"].items()
     }
+    variables["python_executable"] = sys.executable
     _LOGGER.debug("Variables: %s", variables)
 
     if not args.no_install:

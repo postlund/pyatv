@@ -90,6 +90,14 @@ pipeline:
 Internally, `chickn` will join all elements of the list with a space, i.e. `args=-k foobar` before
 inserting the value into a command.
 
+#### Special variables
+
+These are "special" variables that are automatically set by `chickn`:
+
+| Variable | Value |
+| -------- | ----- |
+| python_executable | Absolute path to python binary that runs `chickn`, e.g. */workspace/pyatv/bin/python*. |
+
 ### Requirements
 
 There is builtin support for installing python packages with pip (this is the only python specific feature
