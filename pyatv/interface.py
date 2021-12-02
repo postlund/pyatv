@@ -1027,9 +1027,10 @@ class BaseConfig(ABC):
     AirPlay.
     """
 
-    def __init__(self, properties: Mapping[str, Mapping[str, Any]]) -> None:
+    def __init__(self, properties: Mapping[str, Mapping[str, Any]], identifiers: Set[str]) -> None:
         """Initialize a new BaseConfig instance."""
         self._properties = properties
+        self._identifiers = identifiers
 
     @property
     @abstractmethod

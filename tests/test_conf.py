@@ -1,11 +1,13 @@
 """Unit tests for pyatv.conf."""
 
+from unittest.mock import patch
 from deepdiff import DeepDiff
 import pytest
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import DeviceModel, OperatingSystem, Protocol
+from deepdiff import DeepDiff
 
 ADDRESS_1 = "127.0.0.1"
 ADDRESS_2 = "192.168.0.1"
@@ -250,3 +252,18 @@ def test_service_merge_properties(props1, props2, expected):
     service1.merge(service2)
 
     assert not DeepDiff(service1.properties, expected)
+
+
+@pytest.mark.parametrize("indata,services,output",
+    [
+        (["test", "test2"], [], ["test", "test2"]),
+        (["test", "test"], [], ["test"]),
+        (["test"], [ManualService("test", Protocol.DMAP, 0, {})], ["test"]),
+        (["test"], [ManualService("test2", Protocol.DMAP, 0, {})], ["test", "test2"])
+    ]
+)
+def test_identifiers_from_constructor(indata, services, output):
+    conf = AppleTV(ADDRESS_1, NAME, identifiers=indata)
+    for service in services:
+        conf.add_service(service)
+    assert not DeepDiff(conf.all_identifiers, output)

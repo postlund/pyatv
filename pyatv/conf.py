@@ -6,7 +6,7 @@ provide configurations for you.
 """
 from copy import deepcopy
 from ipaddress import IPv4Address
-from typing import Dict, List, Mapping, Optional
+from typing import Dict, List, Mapping, Optional, Set
 
 from pyatv.const import PairingRequirement, Protocol
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
@@ -28,9 +28,10 @@ class AppleTV(BaseConfig):
         deep_sleep: bool = False,
         properties: Optional[Mapping[str, Mapping[str, str]]] = None,
         device_info: Optional[DeviceInfo] = None,
+        identifiers: Optional[Set[str]] = None
     ) -> None:
         """Initialize a new AppleTV."""
-        super().__init__(properties or {})
+        super().__init__(properties or {}, identifiers or set())
         self._address = address
         self._name = name
         self._deep_sleep = deep_sleep
