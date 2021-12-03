@@ -75,7 +75,7 @@ stream = ...
 await stream.stream_file("sample.mp3")
 ```
 
-Files in MP3, wav, FLAC and ogg format are supported and will be automatically converted
+Files in MP3, WAV, FLAC and OGG format are supported and will be automatically converted
 to a format the receiving device supports. Metadata is also extracted from files
 of these types and sent to the receiver.
 
@@ -108,6 +108,15 @@ the beginning of file again before playback.
 
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
+
+### Stream from HTTP(S)
+
+There is experimental support for streaming directly from HTTP or HTTPS. A URL can
+be passed instead of a file path:
+
+```python
+await stream.stream_file("https://foo.bar/test.mp3")
+```
 
 #### File Compatibility
 
