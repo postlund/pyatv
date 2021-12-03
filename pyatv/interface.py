@@ -779,7 +779,9 @@ class Stream:  # pylint: disable=too-few-public-methods
 
     @feature(44, "StreamFile", "Stream local file to device.")
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
-        """Stream local file to device.
+        """Stream local or remote file to device.
+
+        Supports either local file paths or a HTTP(s) address.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """

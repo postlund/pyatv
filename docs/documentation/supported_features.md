@@ -45,7 +45,9 @@ This is the general feature list provided by the external interface.
 | --------------------------------------------------------------- | --------- |
 | List supported features                                         | [Concept](../concepts/#features), [Doc](../../development/features), {% include api i="interface.Features" %}
 | --------------------------------------------------------------- | --------- |
-| AirPlay stream URL (including local files)                      | [Doc](../../development/stream), {% include api i="interface.Stream" %}
+| AirPlay play URL (including local files)                        | [Doc](../../development/stream), {% include api i="interface.Stream" %}
+| --------------------------------------------------------------- | --------- |
+| AirPlay stream files and from HTTP(s)                           | [Doc](../../development/stream), {% include api i="interface.Stream" %}
 | --------------------------------------------------------------- | --------- |
 | Playback controls (play, pause, next, stop, etc.)               | [Doc](../../development/control), {% include api i="interface.RemoteControl" %}
 | --------------------------------------------------------------- | --------- |
@@ -203,6 +205,7 @@ AirTunes).
 ### Supported Features
 
 * Stream files with {% include api i="interface.Stream.stream_file" %}
+* Basic support to stream from http(s) via {% include api i="interface.Stream.stream_file" %}
 * Metadata is read from file and sent to receiver (artist, album and title)
 * Supports WAV, MP3, FLAG and OGG as file format (also for metadata)
 * Metadata (device state, media type, title, artist, album, position, total_time)

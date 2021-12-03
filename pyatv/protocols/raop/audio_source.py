@@ -1,11 +1,15 @@
 """Audio sources that can provide raw PCM frames that pyatv can stream."""
 from abc import ABC, abstractmethod
+import array
 import asyncio
 from contextlib import suppress
 from functools import partial
 import io
 import logging
-from typing import Optional, Union
+import re
+import time
+from typing import Generator, Optional, Union
+from urllib import request
 
 import miniaudio
 from miniaudio import SampleFormat
@@ -31,6 +35,8 @@ def _int2sf(sample_size: int) -> SampleFormat:
 
 class AudioSource(ABC):
     """Audio source that returns raw PCM frames."""
+
+    NO_FRAMES = b""
 
     async def close(self) -> None:
         """Close underlying resources."""
@@ -232,6 +238,152 @@ class BufferedReaderSource(AudioSource):
         return 0  # We don't know the duration
 
 
+# TODO: This code has been copied directly from the miniaudio project with minor
+# modifications to not block in read when all data has been read. It shall be
+# re-written to use asyncio in due time.
+class PatchedIceCastClient(miniaudio.IceCastClient):
+    """Patched version of IceCastClient that breaks when all data has been read."""
+
+    _buffer: bytes
+    _stop_stream: bool
+
+    def read(self, num_bytes: int) -> bytes:
+        """Read a chunk of data from the stream."""
+        while len(self._buffer) < num_bytes and not self._stop_stream:
+            time.sleep(0.1)
+        with self._buffer_lock:
+            chunk = self._buffer[:num_bytes]
+            self._buffer = self._buffer[num_bytes:]
+            return chunk
+
+    def _download_stream(self) -> None:  # pylint: disable=too-many-branches
+        req = request.Request(self.url, headers={"icy-metadata": "1"})
+        with request.urlopen(req) as result:
+            self.station_genre = result.headers["icy-genre"]
+            self.station_name = result.headers["icy-name"]
+            stream_format = result.headers["Content-Type"]
+            if stream_format:
+                self.audio_format = self.determine_audio_format(stream_format)
+            self.audio_info = result.headers.get("ice-audio-info", "")
+            if "icy-metaint" in result.headers:
+                meta_interval = int(result.headers["icy-metaint"])
+            else:
+                meta_interval = 0
+            if meta_interval:
+                # note: the meta_interval is fixed for the entire stream, so just
+                # use that as chunk size
+                while not self._stop_stream:
+                    while len(self._buffer) >= self.BUFFER_SIZE:
+                        time.sleep(0.2)
+                        if self._stop_stream:
+                            return
+                    chunk = self._readall(result, meta_interval)
+                    with self._buffer_lock:
+                        self._buffer += chunk
+                    meta_size = 16 * self._readall(result, 1)[0]
+                    metadata = str(
+                        self._readall(result, meta_size).strip(b"\0"),
+                        "utf-8",
+                        errors="replace",
+                    )
+                    if metadata:
+                        meta = self.parse_metadata(metadata)
+                        stream_title = meta.get("StreamTitle")
+                        if stream_title:
+                            self.stream_title = stream_title
+                            if self._update_title:
+                                self._update_title(self, stream_title)
+            else:
+                while not self._stop_stream:
+                    while len(self._buffer) >= self.BUFFER_SIZE:
+                        time.sleep(0.2)
+                        if self._stop_stream:
+                            return
+                    chunk = result.read(self.BLOCK_SIZE)
+                    if chunk == b"":
+                        _LOGGER.debug("HTTP streaming ended")
+                        self._stop_stream = True
+                    with self._buffer_lock:
+                        self._buffer += chunk
+
+
+class InternetSource(AudioSource):
+    """Audio source used to stream from an Internet source (HTTP)."""
+
+    def __init__(
+        self,
+        source: miniaudio.StreamableSource,
+        stream_generator: Generator[array.array, int, None],
+        sample_rate: int,
+        channels: int,
+        sample_size: int,
+    ):
+        """Initialize a new InternetSource instance."""
+        self.source = source
+        self.stream_generator = stream_generator
+        self.loop = asyncio.get_event_loop()
+        self._sample_rate = sample_rate
+        self._channels = channels
+        self._sample_size = sample_size
+
+    @classmethod
+    async def open(
+        cls,
+        url: str,
+        sample_rate: int,
+        channels: int,
+        sample_size: int,
+    ) -> "InternetSource":
+        """Return a new AudioSource instance playing from the provided URL."""
+        loop = asyncio.get_event_loop()
+        source = await loop.run_in_executor(None, PatchedIceCastClient, url)
+        stream_generator = await loop.run_in_executor(
+            None,
+            partial(
+                miniaudio.stream_any,
+                source,
+                frames_to_read=FRAMES_PER_PACKET,
+                output_format=_int2sf(sample_size),
+                nchannels=channels,
+                sample_rate=sample_rate,
+            ),
+        )
+        return cls(source, stream_generator, sample_rate, channels, sample_size)
+
+    async def close(self) -> None:
+        """Close underlying resources."""
+        await self.loop.run_in_executor(None, self.source.close)
+
+    async def readframes(self, nframes: int) -> bytes:
+        """Read number of frames and advance in stream."""
+        try:
+            frames = next(self.stream_generator)
+        except StopIteration:
+            return AudioSource.NO_FRAMES
+        else:
+            return frames.tobytes()
+
+    @property
+    def sample_rate(self) -> int:
+        """Return sample rate."""
+        return self._sample_rate
+
+    @property
+    def channels(self) -> int:
+        """Return number of audio channels."""
+        return self._channels
+
+    @property
+    def sample_size(self) -> int:
+        """Return number of bytes per sample."""
+        return self._sample_size
+
+    @property
+    def duration(self) -> int:
+        """Return duration in seconds."""
+        return 0  # We don't know this
+
+
 class FileSource(AudioSource):
     """Audio source used to play a local audio file."""
 
@@ -262,7 +414,7 @@ class FileSource(AudioSource):
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
         if self.pos >= len(self.samples):
-            return b""
+            return AudioSource.NO_FRAMES
 
         bytes_to_read = (self.sample_size * self.channels) * nframes
         data = self.samples[self.pos : min(len(self.samples), self.pos + bytes_to_read)]
@@ -297,6 +449,10 @@ async def open_source(
     sample_size: int,
 ) -> AudioSource:
     """Create an AudioSource from given input source."""
-    if isinstance(source, str):
-        return await FileSource.open(source, sample_rate, channels, sample_size)
-    return await BufferedReaderSource.open(source, sample_rate, channels, sample_size)
+    if not isinstance(source, str):
+        return await BufferedReaderSource.open(
+            source, sample_rate, channels, sample_size
+        )
+    if re.match("^http(|s)://", source):
+        return await InternetSource.open(source, sample_rate, channels, sample_size)
+    return await FileSource.open(source, sample_rate, channels, sample_size)

@@ -4,6 +4,7 @@ import asyncio
 import io
 import logging
 import math
+from os import path
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions
@@ -305,7 +306,9 @@ class RaopStream(Stream):
         self.takeover = takeover
 
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
-        """Stream local file to device.
+        """Stream local or remote file to device.
+
+        Supports either local file paths or a HTTP(s) address.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
@@ -324,7 +327,9 @@ class RaopStream(Stream):
             metadata: AudioMetadata = EMPTY_METADATA
             try:
                 # Source must support seeking to read metadata (or point to file)
-                if isinstance(file, str) or file.seekable:
+                if (
+                    isinstance(file, io.BufferedReader) and file.seekable
+                ) or path.exists(file):
                     metadata = await get_metadata(file)
                 else:
                     _LOGGER.debug(
