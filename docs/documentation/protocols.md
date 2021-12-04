@@ -466,15 +466,15 @@ An object is encoded or decoded according to this table:
 | 0x64 | string 4 byte length | 0x6303000000666F6F = "foo"
 | 0x6F | null terminated string | 0x6F666F6F00 = "foo"
 | 0x70-0x90 | raw bytes (0-32 bytes) | 0x72AABB = b"\xAA\xBB"
-| 0xA0-0xBF | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
 | 0x91 | data 1 byte length | 0x9102AABB = b"\xAA\xBB"
 | 0x92 | data 2 byte length | 0x920200AABB = b"\xAA\xBB"
 | 0x93 | data 3 byte length | 0x93020000AABB = b"\xAA\xBB"
 | 0x94 | data 4 byte length | 0x9402000000AABB = b"\xAA\xBB"
-| 0xC1 | UID 1 bytes length | 0xC102 = 2
-| 0xC2 | UID 2 bytes length | 0xC20002 = 2
-| 0xC2 | UID 3 bytes length | 0xC3000002 = 2
-| 0xC4 | UID 4 bytes length | 0xC400000003 = 2
+| 0xA0-0xC0 | pointer | 0xD443666F6F43626172A0A1 = ["foo", "bar", "foo", "bar"] (see [Pointers](#pointers))
+| 0xC1 | pointer 1 bytes length | 0xC102 = 2 (see [Pointers](#pointers))
+| 0xC2 | pointer 2 bytes length | 0xC20002 = 2 (see [Pointers](#pointers))
+| 0xC2 | pointer 3 bytes length | 0xC3000002 = 2 (see [Pointers](#pointers))
+| 0xC4 | pointer 4 bytes length | 0xC400000003 = 2 (see [Pointers](#pointers))
 | 0xDv | array with *v* elements | 0xD2016103666F6F = [True, "foo"]
 | 0xEv | dictionary with *v* entries | 0xE16103666F6F0x17 = {"foo": 15}
 
@@ -539,6 +539,10 @@ A2          : Pointer, index=2
 As single byte objects are ignored, the constructed index list looks
 like `[a, b, test, c]`. Index 2 translates to `"test"` and  `0xA2` is simply
 replaced by that value.
+
+The range `0xA0-0xC0` can be used to reference an object using a single byte.
+It is also possible to use `0xC1-0xC4` to address objects beyond that. The lower
+nibble (1-4) indicates how many bytes are used for the index.
 
 ### Reference Decoding
 To play around with various OPACK input, this example application can be used (only on macOS):
