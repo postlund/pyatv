@@ -130,12 +130,14 @@ class BaseService(ABC):
         properties: Optional[Mapping[str, str]],
         credentials: Optional[str] = None,
         password: Optional[str] = None,
+        enabled: bool = True,
     ) -> None:
         """Initialize a new BaseService."""
         self._identifier = identifier
         self._protocol = protocol
         self._port = port
         self._properties: MutableMapping[str, str] = dict(properties or {})
+        self._enabled = enabled
         self.credentials: Optional[str] = credentials
         self.password: Optional[str] = password
 
@@ -153,6 +155,16 @@ class BaseService(ABC):
     def port(self) -> int:
         """Return service port number."""
         return self._port
+
+    @property
+    def enabled(self) -> bool:
+        """Return True if service is enabled."""
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, value: bool) -> None:
+        """Change whether the service is enabled or not."""
+        self._enabled = value
 
     @property
     @abstractmethod
@@ -187,7 +199,7 @@ class BaseService(ABC):
             f"Requires Password: {self.requires_password}, "
             f"Password: {self.password}, "
             f"Pairing: {self.pairing.name}"
-        )
+        ) + (" (Disabled)" if not self.enabled else "")
 
     @abstractmethod
     def __deepcopy__(self, memo) -> "BaseService":

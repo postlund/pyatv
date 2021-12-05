@@ -805,14 +805,16 @@ def mrp_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> Optional[ScanHandlerReturn]:
     """Parse and return a new MRP service."""
-    # Ignore this service if tvOS version is >= 15 as it doesn't work anymore
+    enabled = True
+
+    # Disable this service if tvOS version is >= 15 as it doesn't work anymore
     build = mdns_service.properties.get("SystemBuildVersion", "")
     match = re.match(r"^(\d+)[A-Z]", build)
     if match:
         base = int(match.groups()[0])
         if base >= 19:
-            _LOGGER.debug("Ignoring MRP service since tvOS >= 15")
-            return None
+            _LOGGER.debug("Disabling MRP service since tvOS >= 15")
+            enabled = False
 
     name = mdns_service.properties.get("Name", "Unknown")
     service = MutableService(
@@ -820,6 +822,7 @@ def mrp_service_handler(
         Protocol.MRP,
         mdns_service.port,
         properties=mdns_service.properties,
+        enabled=enabled,
     )
     return name, service
 

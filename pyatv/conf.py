@@ -108,9 +108,12 @@ class ManualService(BaseService):
         password: Optional[str] = None,
         requires_password: bool = False,
         pairing_requirement: PairingRequirement = PairingRequirement.Unsupported,
+        enabled: bool = True,
     ) -> None:
         """Initialize a new ManualService."""
-        super().__init__(identifier, protocol, port, properties, credentials, password)
+        super().__init__(
+            identifier, protocol, port, properties, credentials, password, enabled
+        )
         self._requires_password = requires_password
         self._pairing_requirement = pairing_requirement
 
@@ -135,6 +138,7 @@ class ManualService(BaseService):
             self.password,
             self.requires_password,
             self.pairing,
+            self.enabled,
         )
 
 

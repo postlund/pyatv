@@ -140,11 +140,14 @@ async def test_multicast_filter_multiple_protocols(
     assert atv.get_service(Protocol.RAOP) is not None
 
 
-async def test_multicast_ignore_mrp_tvos15(udns_server, multicast_scan: Scanner):
+async def test_multicast_mrp_tvos15_disabled(udns_server, multicast_scan: Scanner):
     udns_server.add_service(mrp_service_tvos_15())
 
     atvs = await multicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+
+    atv = atvs[0]
+    assert not atv.get_service(Protocol.MRP).enabled
 
 
 async def test_unicast_scan_no_results(unicast_scan: Scanner):
@@ -211,8 +214,11 @@ async def test_unicast_filter_multiple_protocols(udns_server, unicast_scan: Scan
     assert atv.get_service(Protocol.RAOP) is not None
 
 
-async def test_unicast_ignore_mrp_tvos15(udns_server, unicast_scan: Scanner):
+async def test_unicast_mrp_tvos15_disabled(udns_server, unicast_scan: Scanner):
     udns_server.add_service(mrp_service_tvos_15())
 
     atvs = await unicast_scan()
-    assert len(atvs) == 0
+    assert len(atvs) == 1
+
+    atv = atvs[0]
+    assert not atv.get_service(Protocol.MRP).enabled
