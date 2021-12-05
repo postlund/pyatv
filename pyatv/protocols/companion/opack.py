@@ -2,23 +2,15 @@
 
 Notes:
  * Absolute time (0x06) is not implemented (can unpack as integer, not pack)
+ * Pack implementation does not implement UID referencing
  * Likely other cases missing
 """
 from datetime import datetime
 
 # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
 import struct
-from typing import NamedTuple, Tuple
+from typing import Tuple
 from uuid import UUID
-
-
-class UID(NamedTuple):
-    """Type for UID encoded data.
-
-    Either 1, 2, 3 or 4 bytes (bit endian).
-    """
-
-    value: int
 
 
 def pack(data: object) -> bytes:
@@ -100,15 +92,6 @@ def _pack(data, object_list):
         )
         if len(data) >= 0xF:
             packed_bytes += b"\x03"
-    elif isinstance(data, UID):
-        if data.value <= 0xFF:
-            packed_bytes = bytes([0xC1]) + data.value.to_bytes(1, byteorder="big")
-        elif data.value <= 0xFFFF:
-            packed_bytes = bytes([0xC2]) + data.value.to_bytes(2, byteorder="big")
-        elif data.value <= 0xFFFFFF:
-            packed_bytes = bytes([0xC3]) + data.value.to_bytes(3, byteorder="big")
-        elif data.value <= 0xFFFFFFFF:
-            packed_bytes = bytes([0xC4]) + data.value.to_bytes(4, byteorder="big")
     else:
         raise TypeError(str(type(data)))
 
@@ -210,14 +193,15 @@ def _unpack(data, object_list):
                 output[key] = value
         value, remaining = output, ptr
         add_to_object_list = False
-    elif 0xA0 <= data[0] <= 0xBF:
+    elif 0xA0 <= data[0] <= 0xC0:
         value, remaining = object_list[data[0] - 0xA0], data[1:]
     elif 0xC1 <= data[0] <= 0xC4:
         length = data[0] - 0xC0
-        value, remaining = (
-            UID(int.from_bytes(data[1 : 1 + length], byteorder="big")),
+        uid, remaining = (
+            int.from_bytes(data[1 : 1 + length], byteorder="little"),
             data[1 + length :],
         )
+        value = object_list[uid]
     else:
         raise TypeError(hex(data[0]))
 
