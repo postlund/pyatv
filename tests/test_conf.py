@@ -183,6 +183,14 @@ def test_to_str(config):
     assert "Deep Sleep: True" in output
 
 
+def test_str_service_disabled(config):
+    config.add_service(
+        ManualService(IDENTIFIER_2, Protocol.MRP, PORT_2, {}, enabled=False)
+    )
+
+    assert "(Disabled)" in str(config)
+
+
 def test_raop_password_in_str(config):
     config.add_service(
         ManualService(IDENTIFIER_1, Protocol.RAOP, 1234, {}, password=PASSWORD_1)

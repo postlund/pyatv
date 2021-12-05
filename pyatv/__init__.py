@@ -85,10 +85,9 @@ async def connect(
     atv = FacadeAppleTV(config_copy, session_manager)
 
     try:
-        # for service in config.services:
         for proto, proto_methods in PROTOCOLS.items():
             service = config_copy.get_service(proto)
-            if service is None or service.port == 0:
+            if service is None or not service.enabled:
                 continue
 
             # Lock protocol argument so protocol does not have to deal

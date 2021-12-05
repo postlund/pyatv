@@ -26,9 +26,12 @@ class MutableService(BaseService):
         properties: Optional[Mapping[str, str]],
         credentials: Optional[str] = None,
         password: Optional[str] = None,
+        enabled: bool = True,
     ) -> None:
         """Initialize a new MutableService."""
-        super().__init__(identifier, protocol, port, properties, credentials, password)
+        super().__init__(
+            identifier, protocol, port, properties, credentials, password, enabled
+        )
         self._requires_password = False
         self._pairing_requirement = PairingRequirement.Unsupported
 
@@ -61,6 +64,7 @@ class MutableService(BaseService):
             self.properties,
             self.credentials,
             self.password,
+            self.enabled,
         )
         copy.pairing = self.pairing
         copy.requires_password = self.requires_password

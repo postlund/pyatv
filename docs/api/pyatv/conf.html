@@ -51,7 +51,7 @@ link_group: api
 <p>A configuration describes a device, e.g. it's name, IP address and credentials. It is
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L235" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L1-L239" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -70,7 +70,7 @@ provide configurations for you.</p>
 <section class="desc"><p>Representation of an AirPlay service.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new AirPlayService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L180-L195" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L184-L199" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></li>
@@ -81,6 +81,7 @@ provide configurations for you.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>
@@ -137,7 +138,7 @@ AirPlay.</p>
 <section class="desc"><p>Representation of a Companion link service.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new CompaniomService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L199-L213" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L203-L217" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></li>
@@ -148,6 +149,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>
@@ -167,7 +169,7 @@ AirPlay.</p>
 <section class="desc"><p>Representation of a DMAP service.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new DmapService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L142-L157" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L146-L161" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></li>
@@ -178,6 +180,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>
@@ -191,12 +194,12 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.ManualService"><code class="flex name class">
 <span>class <span class="ident">ManualService</span></span>
-<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]], credentials: Optional[str] = None, password: Optional[str] = None, requires_password: bool = False, pairing_requirement: <a title="pyatv.const.PairingRequirement" href="const#pyatv.const.PairingRequirement">PairingRequirement</a> = PairingRequirement.Unsupported)</span>
+<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]], credentials: Optional[str] = None, password: Optional[str] = None, requires_password: bool = False, pairing_requirement: <a title="pyatv.const.PairingRequirement" href="const#pyatv.const.PairingRequirement">PairingRequirement</a> = PairingRequirement.Unsupported, enabled: bool = True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Service used when manually creating and adding a service.</p>
 <p>Initialize a new ManualService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L98-L138" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L98-L142" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></li>
@@ -214,6 +217,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.interface.BaseService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>
@@ -233,7 +237,7 @@ AirPlay.</p>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new MrpService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L161-L176" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L165-L180" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></li>
@@ -244,6 +248,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>
@@ -263,7 +268,7 @@ AirPlay.</p>
 <section class="desc"><p>Representation of an RAOP service.</p>
 <p><strong>DEPRECATED: Use <code><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></code> instead.</strong></p>
 <p>Initialize a new RaopService.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L217-L235" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/conf.py#L221-L239" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></li>
@@ -274,6 +279,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.pairing" href="interface#pyatv.interface.BaseService.pairing">pairing</a></code></li>

@@ -64,6 +64,15 @@ This is useful when re-discovering a previous known device. Scanning for
 all identifiers used by a device will work even if a service is no longer
 present, e.g. when disabling AirPlay.
 
+## Enabled and disabled services
+
+Each service has an *enabled* flag, indicating if pyatv should connect to the
+service or not. The main reason for adding a disabled service in contrast to
+ignoring it is that pyatv can extract device information from that service,
+e.g. unique identifiers. This is for instance the case with MRP on tvOS 15,
+where MRP no longer can be connected to but we still want to collect its
+unique identifier.
+
 # Pair
 
 Calling {% include api i="pyatv.pair" %} returns a _pairing handler_ conforming to the interface
@@ -263,6 +272,19 @@ Please do note that this is not the recommended way as it has a couple of flaws:
 
 It can however be convenient to have if you test things when developing pyatv
 as you can shorten the feedback loop, since scanning can be avoided. But be warned.
+
+A service is by default *enabled*, meaning that pyatv will try to connect to the
+service when {% include api i="pyatv.conncet" %} is called. It is possible to add
+a service but not connect to it by setting `enabled` to `False`:
+
+```python
+service = conf.ManualService(
+    "identifier", Protocol.DMAP, 3689, {}, enabled=False
+)
+config = conf.AppleTV("10.0.0.10", "Living Room")
+config.add_service(service)
+atv = await pyatv.connect(config, loop)
+```
 
 *NB: Service specific services, e.g. {% include api i="conf.DmapService" %} is deprecated
 as of 0.9.0. Please use {% include api i="conf.ManualService" %} instead.*

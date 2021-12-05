@@ -228,9 +228,14 @@ def setup(  # pylint: disable=too-many-locals
         control = RemoteControl(device_listener)
         control_port = service.port
 
-        # When tunneling, we don't have any identifier or port available at this stage
-        mrp_service = MutableService(None, Protocol.MRP, 0, {})
-        config.add_service(mrp_service)
+        # A protocol requires its correaponding service to function, so add a
+        # dummy one if we don't have one yet
+        mrp_service = config.get_service(Protocol.MRP)
+        if mrp_service is None:
+            mrp_service = MutableService(None, Protocol.MRP, 0, {})
+            config.add_service(mrp_service)
+        mrp_service.enabled = False
+
         (
             _,
             mrp_connect,
