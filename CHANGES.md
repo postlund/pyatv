@@ -1,5 +1,103 @@
 # CHANGES
 
+## 0.9.7 Springtrap (2021-12-05)
+
+It's already Decemeber, how did that happen? Not sure... Anyways, I've
+prepared a small update with few neat things:
+
+* Implemented a missing type in OPACK that raised an exception when
+  connecting to Companion for some people (`TypeError: 0xc0`)
+* More buttons are supported by Companion as we as proper feature reporting
+  for some of them
+* A persistent connection is now set up to Companion. The active device listener
+  is called if connection is lost.
+* A copy is now made of the configuration passed to `pyatv.connect` which
+  means a config cannot be modified after connecting anymore
+* Experimental support for streaming via HTTP(S) has been added to `stream_file`
+
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+f6a8973 mrp: Migrate protocol to MessageDispatcher
+```
+
+*Protocol: Companion:*
+
+```
+dd44437 companion: Use XID for message dispatch
+825912d companion: Move CompanionAPI to separate module
+a02b3b9 companion: Do not wait for initial event update
+5a765bc companion: Fix button presses for HID buttons
+ceddc9f companion: Add support for additional commands
+8c7ed2f companion: Improve tests for sessions and events
+5f0cb39 companion: Support playback control availability
+b3d69a7 companion: Events and persistent connection
+4b7e832 opack: Handle pointers properly
+```
+
+*Protocol: RAOP:*
+
+```
+cf11b42 raop: Support streaming from HTTP(s)
+```
+
+*Other:*
+
+```
+a1a357a core: Add enabled state to services
+
+8b0c82e env: Fix broken GitPod integration
+5eb4152 core: Create copy of config in connect
+0227529 docs: Add example connect_with_credentials.py
+```
+
+**All changes:**
+
+```
+cf11b42 raop: Support streaming from HTTP(s)
+a1a357a core: Add enabled state to services
+4b7e832 opack: Handle pointers properly
+8b0c82e env: Fix broken GitPod integration
+f1a2b79 build(deps): bump types-protobuf from 3.18.1 to 3.18.2 in /requirements
+1b18cd3 build(deps): bump mediafile from 0.8.1 to 0.9.0 in /requirements
+0c4ced5 build(deps): bump aiohttp from 3.8.0 to 3.8.1 in /requirements
+e328417 build(deps): bump black from 21.10b0 to 21.11b1 in /requirements
+c4fc994 build(deps): bump zeroconf from 0.36.11 to 0.37.0 in /requirements
+9ec3559 build(deps): bump cryptography from 35.0.0 to 36.0.0 in /requirements
+e8ae699 build(deps): bump types-protobuf from 3.18.0 to 3.18.1 in /requirements
+a70609d build(deps): bump pylint from 2.11.1 to 2.12.1 in /requirements
+6d50e0c docs: Clarifications for data channel payload
+d1bc5ee cq: Remove unwanted files
+c623b39 net: Log instead of raise in tcp_keepalive
+721872d build(deps): bump isort from 5.10.0 to 5.10.1 in /requirements
+486dbcf build(deps): bump isort from 5.9.3 to 5.10.0 in /requirements
+5eb4152 core: Create copy of config in connect
+34e9c67 conf: Implement __deepcopy__ in BaseConfig
+98abc57 conf: Implement __deepcopy__ in BaseConfig
+b71a415 build(deps): bump aiohttp from 3.7.4.post0 to 3.8.0 in /requirements
+b478c9d env: Rebuild miniaudio in tests workflow
+70a6f94 conf: Ignore services with missing identifier
+9393873 build(deps): bump black from 21.9b0 to 21.10b0 in /requirements
+e73f256 build(deps): bump zeroconf from 0.36.9 to 0.36.11 in /requirements
+dd44437 companion: Use XID for message dispatch
+825912d companion: Move CompanionAPI to separate module
+a02b3b9 companion: Do not wait for initial event update
+5a765bc companion: Fix button presses for HID buttons
+ceddc9f companion: Add support for additional commands
+f6a8973 mrp: Migrate protocol to MessageDispatcher
+d1332e8 core: Add generic MessageDispatcher
+8c7ed2f companion: Improve tests for sessions and events
+5f0cb39 companion: Support playback control availability
+b3d69a7 companion: Events and persistent connection
+e956d79 collection: Add SharedData type
+ef2ffe8 gha: Fix caching issue for finished job
+0227529 docs: Add example connect_with_credentials.py
+931acf6 build(deps): update protobuf requirement in /requirements
+```
+
 ## 0.9.6 Plushtrap (2021-10-27)
 
 It's time for another minor release (nothing fancy, I promise):

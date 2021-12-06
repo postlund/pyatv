@@ -140,9 +140,6 @@ app and power related functions.
 ### Limitations and notes
 
 * Early stage of development - not many features supported
-* No persistent connection at the moment, so events are not supported
-* Does not implement support for {% include api i="interface.DeviceListener" %} and will
-  *not* trigger `connection_lost` or `connection_closed` when used stand-alone.
 
 ## DMAP
 
@@ -171,6 +168,7 @@ Music app in macOS.
   hold) as it's not supported by the protocol
 * It is possible to discover and control a Music app running on macOS (except for 11.4,
   likely a bug).
+
 ## MRP
 
 This protocol was introduced in tvOS and superseeds DMAP. It has the same features as well
