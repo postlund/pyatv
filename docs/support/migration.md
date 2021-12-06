@@ -17,6 +17,18 @@ and might be incomplete or missing some details. If you find something
 to be unclear, please help out by writing an issue or creating a pull
 request
 
+# From 0.9.0-0.9.7
+
+## General Changes
+
+* Each service now has {% include api i="interface.BaseService.enabled" %}, indicating if pyatv
+  should connect to the service or not. Generally this is of little importance, but it must be
+  verified before initiaing pairing. Pairing should never be initiated for disabled services.
+
+## Deprecations
+
+None
+
 # From 0.8.2-0.9.0
 
 ## General Changes
