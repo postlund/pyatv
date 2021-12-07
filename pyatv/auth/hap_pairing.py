@@ -108,7 +108,7 @@ class PairVerifyProcedure:
 
     def encryption_keys(
         self, salt: str, output_info: str, input_info: str
-    ) -> Tuple[str, str]:
+    ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
 
 

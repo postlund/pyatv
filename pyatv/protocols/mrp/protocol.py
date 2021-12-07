@@ -4,13 +4,17 @@ import asyncio
 from collections import namedtuple
 from enum import Enum
 import logging
+from typing import Dict, NamedTuple, Optional
 import uuid
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
+from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.core.protocol import MessageDispatcher, heartbeater
+from pyatv.interface import BaseService
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.auth import MrpPairVerifyProcedure
+from pyatv.protocols.mrp.connection import AbstractMrpConnection
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +26,13 @@ SRP_OUTPUT_INFO = "MediaRemote-Write-Encryption-Key"
 SRP_INPUT_INFO = "MediaRemote-Read-Encryption-Key"
 
 Listener = namedtuple("Listener", "func data")
-OutstandingMessage = namedtuple("OutstandingMessage", "semaphore response")
+
+
+class OutstandingMessage(NamedTuple):
+    """Sent message waiting for response."""
+
+    semaphore: asyncio.Semaphore
+    response: protobuf.ProtocolMessage
 
 
 class ProtocolState(Enum):
@@ -89,20 +99,24 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
     It provides an API for sending and receiving messages.
     """
 
-    def __init__(self, connection, srp, service):
+    def __init__(
+        self,
+        connection: AbstractMrpConnection,
+        srp: SRPAuthHandler,
+        service: BaseService,
+    ) -> None:
         """Initialize a new MrpProtocol."""
         super().__init__()
         self.connection = connection
         self.connection.listener = self
         self.srp = srp
         self.service = service
-        self.device_info = None
-        self._heartbeat_task = None
-        self._outstanding = {}
-        self._listeners = {}
-        self._state = ProtocolState.NOT_CONNECTED
+        self.device_info: Optional[protobuf.ProtocolMessage] = None
+        self._heartbeat_task: Optional[asyncio.Task] = None
+        self._outstanding: Dict[str, OutstandingMessage] = {}
+        self._state: ProtocolState = ProtocolState.NOT_CONNECTED
 
-    async def start(self, skip_initial_messages=False):
+    async def start(self, skip_initial_messages: bool = False) -> None:
         """Connect to device and listen to incoming messages."""
         if self._state != ProtocolState.NOT_CONNECTED:
             raise exceptions.InvalidStateError(self._state.name)
@@ -149,7 +163,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
             # We're now ready
             self._state = ProtocolState.READY
 
-    def stop(self):
+    def stop(self) -> None:
         """Disconnect from device."""
         if self._outstanding:
             _LOGGER.warning(
@@ -165,16 +179,24 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
     def enable_heartbeat(self) -> None:
         """Enable sending periodic heartbeat messages."""
+
+        async def _sender_func(message: Optional[protobuf.ProtocolMessage]) -> None:
+            if message is not None:
+                await self.send_and_receive(message)
+
+        def _failure_func(exc: Exception):
+            self.connection.close()
+
         self._heartbeat_task = asyncio.ensure_future(
             heartbeater(
                 name=str(self.connection),
-                sender_func=self.send_and_receive,
-                failure_func=lambda exc: self.connection.close,
+                sender_func=_sender_func,
+                failure_func=_failure_func,
                 message_factory=lambda: messages.create(protobuf.GENERIC_MESSAGE),
             )
         )
 
-    async def _enable_encryption(self):
+    async def _enable_encryption(self) -> None:
         # Encryption can be enabled whenever credentials are available but only
         # after DEVICE_INFORMATION has been sent
         if self.service.credentials is None:
@@ -193,7 +215,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         except Exception as ex:
             raise exceptions.AuthenticationError(str(ex)) from ex
 
-    async def send(self, message):
+    async def send(self, message: protobuf.ProtocolMessage) -> None:
         """Send a message and expect no response."""
         if self._state not in [
             ProtocolState.CONNECTED,
@@ -203,7 +225,12 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
         self.connection.send(message)
 
-    async def send_and_receive(self, message, generate_identifier=True, timeout=5):
+    async def send_and_receive(
+        self,
+        message: protobuf.ProtocolMessage,
+        generate_identifier: bool = True,
+        timeout: float = 5.0,
+    ) -> protobuf.ProtocolMessage:
         """Send a message and wait for a response."""
         if self._state not in [
             ProtocolState.CONNECTED,
@@ -227,9 +254,13 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         self.connection.send(message)
         return await self._receive(identifier, timeout)
 
-    async def _receive(self, identifier, timeout):
+    async def _receive(
+        self, identifier: str, timeout: float
+    ) -> protobuf.ProtocolMessage:
         semaphore = asyncio.Semaphore(value=0)
-        self._outstanding[identifier] = OutstandingMessage(semaphore, None)
+        self._outstanding[identifier] = OutstandingMessage(
+            semaphore, protobuf.ProtocolMessage()
+        )
 
         try:
             # The connection instance will dispatch the message
@@ -243,7 +274,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         del self._outstanding[identifier]
         return response
 
-    def message_received(self, message, _):
+    def message_received(self, message: protobuf.ProtocolMessage, _) -> None:
         """Message was received from device."""
         # If the message identifier is outstanding, then someone is
         # waiting for the respone so we save it here

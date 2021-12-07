@@ -4,6 +4,7 @@ import binascii
 import hashlib
 import logging
 import os
+from typing import Tuple
 import uuid
 
 from cryptography.exceptions import InvalidSignature
@@ -28,7 +29,7 @@ from pyatv.support import chacha20, log_binary
 _LOGGER = logging.getLogger(__name__)
 
 
-def hkdf_expand(salt, info, shared_secret):
+def hkdf_expand(salt: str, info: str, shared_secret: bytes) -> bytes:
     """Derive encryption keys from shared secret."""
     hkdf = HKDF(
         algorithm=hashes.SHA512(),
@@ -122,7 +123,9 @@ class SRPAuthHandler:
 
         return chacha.encrypt(tlv, nounce="PV-Msg03".encode())
 
-    def verify2(self, salt, output_info, input_info):
+    def verify2(
+        self, salt: str, output_info: str, input_info: str
+    ) -> Tuple[bytes, bytes]:
         """Last verification step.
 
         The derived keys (output, input) are returned here.

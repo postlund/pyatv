@@ -21,6 +21,10 @@ class AbstractMrpConnection(asyncio.Protocol, StateProducer):
     async def connect(self) -> None:
         """Connect to device."""
 
+    @abstractmethod
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        """Enable encryption with the specified keys."""
+
     @property
     @abstractmethod
     def connected(self) -> bool:
@@ -86,7 +90,7 @@ class MrpConnection(
             self._transport.write_eof()
         self._transport.close()
 
-    def enable_encryption(self, output_key, input_key):
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with the specified keys."""
         self._chacha = chacha20.Chacha20Cipher(output_key, input_key)
 
