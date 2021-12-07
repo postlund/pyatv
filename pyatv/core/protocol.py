@@ -1,5 +1,6 @@
 """Generic functions for protocol logic."""
 import asyncio
+import inspect
 import logging
 from typing import Awaitable, Callable, Dict, Generic, List, Optional, TypeVar
 
@@ -86,12 +87,15 @@ class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
                 _LOGGER.exception("error during dispatch")
 
         tasks = []
+        loop = asyncio.get_event_loop()
         for func in self.__listeners.get(dispatch_type, []):
             _LOGGER.debug(
                 "Dispatching message with type %s to %s",
                 dispatch_type,
                 func,
             )
-            tasks.append(asyncio.ensure_future(_call_listener(func(message))))
-
+            if inspect.iscoroutinefunction(func):
+                tasks.append(asyncio.ensure_future(_call_listener(func(message))))
+            else:
+                loop.call_soon(func, message)
         return tasks
