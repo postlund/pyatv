@@ -41,7 +41,7 @@ VOLUME_FIELDS = [
     FeatureName.VolumeUp,
     FeatureName.VolumeDown,
 ]
-REMOTE_CONTROL_FIELDS = [FeatureName.Stop]
+REMOTE_CONTROL_FIELDS = [FeatureName.Stop, FeatureName.Pause]
 
 
 @pytest.fixture(name="playing_listener")
@@ -547,13 +547,16 @@ async def test_stream_from_buffer(raop_client, raop_state):
     # assert await audio_matches(raop_state.raw_audio, frames=FRAMES_PER_PACKET)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
-async def test_stop_playback(raop_client, raop_state):
+@pytest.mark.parametrize(
+    "raop_properties,button",
+    [({"et": "0"}, "stop"), ({"et": "0"}, "pause")],  # We treat pause as stop for now
+)
+async def test_stop_playback(raop_client, raop_state, button):
     async def _fake_sleep(time: float = None, loop=None):
         async def dummy():
             pass
 
-        await raop_client.remote_control.stop()
+        await getattr(raop_client.remote_control, button)()
         await asyncio.ensure_future(dummy())
 
     # The idea here is to simulate calling "stop" after the first frame has been sent,
