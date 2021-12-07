@@ -37,6 +37,9 @@ class AirPlayMrpConnection(AbstractMrpConnection, DataStreamListener):
         self.data_channel = self.remote_control.data_channel
         self.data_channel.listener = self
 
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        """Enable encryption with the specified keys."""
+
     @property
     def connected(self) -> bool:
         """If a connection is open or not."""

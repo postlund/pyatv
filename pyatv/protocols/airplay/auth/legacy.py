@@ -108,7 +108,7 @@ class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
     @staticmethod
     def encryption_keys(
         salt: str, output_info: str, input_info: str
-    ) -> Tuple[str, str]:
+    ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
         raise exceptions.NotSupportedError(
             "encryption keys not supported by legacy auth"

@@ -916,7 +916,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
 
         # Extract build number from DEVICE_INFO_MESSAGE from device
         if protocol.device_info:
-            info = protocol.device_info.inner()
+            info = protocol.device_info.inner()  # type: ignore
             devinfo[DeviceInfo.BUILD_NUMBER] = info.systemBuildVersion
             if info.modelID:
                 devinfo[DeviceInfo.RAW_MODEL] = info.modelID
