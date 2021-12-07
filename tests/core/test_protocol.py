@@ -143,7 +143,7 @@ async def test_simple_dispatch():
         nonlocal dispatched_msg1
         dispatched_msg1 = message
 
-    async def dispatch_func2(message: bytes) -> None:
+    def dispatch_func2(message: bytes) -> None:
         nonlocal dispatched_msg2
         dispatched_msg2 = message
 
