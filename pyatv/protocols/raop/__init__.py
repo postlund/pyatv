@@ -216,7 +216,7 @@ class RaopFeatures(Features):
         ]:
             return FeatureInfo(FeatureState.Available)
 
-        if feature_name == FeatureName.Stop:
+        if feature_name in [FeatureName.Stop, FeatureName.Pause]:
             is_streaming = self.playback_manager.raop is not None
             return FeatureInfo(
                 FeatureState.Available if is_streaming else FeatureState.Unavailable
@@ -377,6 +377,13 @@ class RaopRemoteControl(RemoteControl):
         self.audio = audio
         self.playback_manager = playback_manager
 
+    # At the moment, pause will stop playback until it is properly implemented. This
+    # gives a better experience in Home Assistant.
+    async def pause(self) -> None:
+        """Press key pause."""
+        if self.playback_manager.raop:
+            self.playback_manager.raop.stop()
+
     async def stop(self) -> None:
         """Press key stop."""
         if self.playback_manager.raop:
@@ -533,6 +540,7 @@ def setup(  # pylint: disable=too-many-locals
                 FeatureName.VolumeUp,
                 FeatureName.VolumeDown,
                 FeatureName.Stop,
+                FeatureName.Pause,
             ]
         ),
     )
