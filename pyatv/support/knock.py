@@ -35,6 +35,11 @@ async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> No
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
+    # We want to leave the sock open as long as possible
+    # to give the underlying TCP connection time to setup
+    # and hopefully wake the device so we sleep based on
+    # how much of the timeout we can have to wait for the
+    # connection to setup to the port we are knocking on
     sleep_time = (len(ports) / timeout) - 0.1
     for port in ports:
         if not await _async_knock(address, port, sleep_time):
