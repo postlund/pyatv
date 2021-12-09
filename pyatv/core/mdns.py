@@ -3,7 +3,6 @@ import asyncio
 from ipaddress import IPv4Address
 import logging
 import time
-from typing import Union, Optional, List, Dict, Callable, Set
 import typing
 from zeroconf import Zeroconf, ServiceListener, DNSQuestionType
 from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo, AsyncZeroconf
@@ -18,6 +17,8 @@ _LOGGER = logging.getLogger(__name__)
 SERVICES_PER_MSG = 3
 
 SLEEP_PROXY_SERVICE = "_sleep-proxy._udp.local"
+DEVICE_INFO_SERVICE = "_device-info._tcp.local"
+ROAP_SERVICE = "_raop._tcp.local"
 
 # This module produces a lot of debug output, use a dedicated log level.
 # Maybe move this to top-level support later?
@@ -42,9 +43,6 @@ class Response(typing.NamedTuple):
     services: typing.List[Service]
     deep_sleep: bool
     model: typing.Optional[str]  # Comes from _device-info._tcp.local
-
-
-DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
 def _atv_service_to_zc_service(service: str) -> str:
@@ -85,7 +83,7 @@ def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
     return None
 
 
-def _response_from_services(services: List[Service]) -> Response:
+def _response_from_services(services: typing.List[Service]) -> Response:
     return Response(
         services=services,
         deep_sleep=all(service.port == 0 for service in services),
@@ -95,10 +93,10 @@ def _response_from_services(services: List[Service]) -> Response:
 
 def _base_name(name: str, type_: str) -> str:
     base_name = name[: -len(type_) - 1]
-    if type_ == "_raop._tcp.local.":
+    if type_ == f"{ROAP_SERVICE}.":
         if "@" in base_name:
             return base_name.split("@")[1]
-    if type_ == "_sleep-proxy._udp.local.":
+    if type_ == f"{SLEEP_PROXY_SERVICE}.":
         if " " in base_name:
             return base_name.split(" ", 2)[1]
     return base_name
@@ -109,9 +107,9 @@ class ATVServiceListener(ServiceListener):
 
     def __init__(
         self,
-        services: List[str],
+        services: typing.List[str],
         timeout: int = 4,
-        end_condition: Optional[Callable[[Response], bool]] = None,
+        end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
     ) -> None:
         """Init the listener."""
         self._services = set(services)
@@ -119,9 +117,9 @@ class ATVServiceListener(ServiceListener):
         self._finish = time.monotonic() + timeout
         self._end_condition = end_condition
         self._end_condition_met = asyncio.Event()
-        self._services_by_address: Dict[str, List[Service]] = {}
-        self._responses_by_address: Dict[str, Response] = {}
-        self._probed_device_info: Set[str] = set()
+        self._services_by_address: typing.Dict[str, typing.List[Service]] = {}
+        self._responses_by_address: typing.Dict[str, Response] = {}
+        self._probed_device_info: typing.Set[str] = set()
         self._seen = set()
 
     @property
@@ -171,7 +169,7 @@ class ATVServiceListener(ServiceListener):
         zc: Zeroconf,
         type_: str,
         name: str,
-        address: Optional[str] = None,
+        address: typing.Optional[str] = None,
     ):
         info = AsyncServiceInfo(type_, name)
         await info.async_request(
@@ -209,8 +207,8 @@ async def unicast(
 async def multicast(  # pylint: disable=too-many-arguments
     aiozc: AsyncZeroconf,
     services: typing.List[str],
-    address: Optional[str] = None,
-    port: Optional[int] = None,
+    address: typing.Optional[str] = None,
+    port: typing.Optional[int] = None,
     timeout: int = 4,
     end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
 ) -> typing.List[Response]:
@@ -222,11 +220,11 @@ async def multicast(  # pylint: disable=too-many-arguments
 async def _find_with_zeroconf(  # pylint: disable=too-many-arguments
     aiozc: AsyncZeroconf,
     services: typing.List[str],
-    address: Optional[str] = None,
-    port: Optional[int] = None,
+    address: typing.Optional[str] = None,
+    port: typing.Optional[int] = None,
     timeout: int = 4,
     end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
-    question_type: Optional[DNSQuestionType] = None,
+    question_type: typing.Optional[DNSQuestionType] = None,
 ) -> typing.List[Response]:
     """Send multicast request for services."""
     zc_services = [_atv_service_to_zc_service(service) for service in services]
@@ -247,7 +245,7 @@ async def _find_with_zeroconf(  # pylint: disable=too-many-arguments
 async def publish(
     loop: asyncio.AbstractEventLoop,
     service: Service,
-    zconf: Union[AsyncZeroconf, Zeroconf],
+    zconf: typing.Union[AsyncZeroconf, Zeroconf],
 ):
     """Publish an MDNS service on the network."""
     if service.address is None:
