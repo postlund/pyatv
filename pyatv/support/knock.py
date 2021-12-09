@@ -21,10 +21,13 @@ SEND_INTERVAL = 2.0
 
 async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> None:
     """Open a connection to the device to wake a given host."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as knock_sock:
-        knock_sock.setblocking(False)  # must be non-blocking for async
-        knock_sock.connect_ex((str(address), port))  # we don't care about errors
+    try:
+        _, writer = await asyncio.open_connection(str(address), port)
+    except (OSError, asyncio.CancelledError):
+        pass
+    else:
         await asyncio.sleep(sleep_time)
+        writer.close()
 
 
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
