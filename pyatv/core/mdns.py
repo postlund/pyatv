@@ -123,7 +123,7 @@ class ATVServiceListener(ServiceListener):
         self._seen = set()
 
     @property
-    def responses(self) -> list[Response]:
+    def responses(self) -> typing.List[Response]:
         """Generate response object from services."""
         return list(self._responses_by_address.values())
 
