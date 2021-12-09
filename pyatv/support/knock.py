@@ -22,13 +22,10 @@ async def _async_knock(address: IPv4Address, port: int):
     knock_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     knock_sock.setblocking(False)  # must be non-blocking for async
     try:
-        knock_sock.connect((str(address), port))
+        with knock_sock.connect((str(address), port)):
+            await asyncio.sleep(0.1)
     except OSError:
         pass
-    else:
-        await asyncio.sleep(0.1)
-    finally:
-        knock_sock.close()
 
 
 async def knock(
