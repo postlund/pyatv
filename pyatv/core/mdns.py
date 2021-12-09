@@ -141,6 +141,7 @@ class ATVServiceListener(ServiceListener):
         return True
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
+        _LOGGER.debug("add_service: %s", name)
         asyncio.create_task(self._async_service_info(zc, type_, name))
 
     def remove_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
