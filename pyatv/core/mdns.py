@@ -216,6 +216,7 @@ async def unicast(
         end_condition=end_condition,
         question_type=DNSQuestionType.QU,
     )
+    _LOGGER.debug("Finished unicast scan with responses: %s", responses)
     if responses:
         return responses[0]
     return Response([], False, None)
