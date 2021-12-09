@@ -7,6 +7,7 @@ from functools import partial
 from ipaddress import IPv4Address
 import logging
 from typing import List, Optional, Set, Union
+from zeroconf import Zeroconf
 from zeroconf.asyncio import AsyncZeroconf
 
 import aiohttp
@@ -33,6 +34,7 @@ async def scan(
     created_zc = False
     if not aiozc:
         aiozc = AsyncZeroconf()
+        await aiozc.zeroconf.async_wait_for_start()
         created_zc = True
 
     def _should_include(atv):
