@@ -20,11 +20,12 @@ SEND_INTERVAL = 2.0
 
 
 async def _async_knock(address: IPv4Address, port: int):
-    knock_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    knock_sock.setblocking(False)  # must be non-blocking for async
+    """Open a connection to the device to wake a given host."""
     with contextlib.suppress(
         (OSError, BlockingIOError, InterruptedError)
-    ), knock_sock.connect((str(address), port)):
+    ), socket.socket(socket.AF_INET, socket.SOCK_STREAM) as knock_sock:
+        knock_sock.setblocking(False)  # must be non-blocking for async
+        knock_sock.connect((str(address), port))
         await asyncio.sleep(0.1)
 
 
