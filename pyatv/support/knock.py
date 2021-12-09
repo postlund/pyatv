@@ -7,11 +7,14 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
+import errno
 from ipaddress import IPv4Address
 import logging
 from typing import List
 
 _LOGGER = logging.getLogger(__name__)
+
+_ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
 
 
 async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> None:
@@ -21,8 +24,8 @@ async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> No
     except asyncio.CancelledError:
         pass
     except OSError as ex:
-        _LOGGER.critical("Got OSError while connecting to %s: %s", address, ex)
-        return False
+        if ex.errno in _ABORT_KNOCK_ERRNOS:
+            return False
     else:
         await asyncio.sleep(sleep_time)
         writer.close()
