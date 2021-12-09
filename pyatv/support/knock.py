@@ -24,6 +24,9 @@ async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> No
     except asyncio.CancelledError:
         pass
     except OSError as ex:
+        # If we get EHOSTDOWN or EHOSTUNREACH we
+        # can give up as its not going to wake
+        # a device that is not there
         if ex.errno in _ABORT_KNOCK_ERRNOS:
             return False
     else:
