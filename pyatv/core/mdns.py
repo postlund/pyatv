@@ -152,9 +152,7 @@ class ATVServiceListener(ServiceListener):
 
     async def _async_service_info(self, zc: Zeroconf, type_: str, name: str):
         base_name = _base_name(name, type_)
-        service = await self._async_get_single_service_info(
-            zc, type_, name, self._address
-        )
+        service = await self._async_get_single_service_info(zc, type_, name)
         address = str(service.address)
         services = self._services_by_address.setdefault(str(service.address), [])
         services.append(service)
@@ -162,7 +160,7 @@ class ATVServiceListener(ServiceListener):
         if base_name not in self._probed_device_info:
             self._probed_device_info.add(base_name)
             device_info_service = await self._async_get_single_service_info(
-                zc, type_, name, address
+                zc, type_, name
             )
             services.append(device_info_service)
 
