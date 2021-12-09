@@ -7,7 +7,6 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
-import contextlib
 from ipaddress import IPv4Address
 import logging
 import math
