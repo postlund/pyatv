@@ -7,6 +7,7 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
+from asyncio.tasks import FIRST_EXCEPTION
 import errno
 from ipaddress import IPv4Address
 import logging
@@ -17,8 +18,9 @@ _LOGGER = logging.getLogger(__name__)
 _ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
 
 
-async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> None:
+async def _async_knock(address: IPv4Address, port: int, timeout: float) -> bool:
     """Open a connection to the device to wake a given host."""
+    writer = None
     try:
         _, writer = await asyncio.open_connection(str(address), port)
     except asyncio.CancelledError:
@@ -28,26 +30,29 @@ async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> No
         # can give up as its not going to wake
         # a device that is not there
         if ex.errno in _ABORT_KNOCK_ERRNOS:
-            return False
+            raise
     else:
-        await asyncio.sleep(sleep_time)
-        writer.close()
-    return True
+        await asyncio.sleep(timeout)
+    finally:
+        if writer:
+            writer.close()
 
 
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    # We want to leave the sock open as long as possible
-    # to give the underlying TCP connection time to setup
-    # and hopefully wake the device so we sleep based on
-    # how much of the timeout we can have to wait for the
-    # connection to setup to the port we are knocking on
-    sleep_time = (len(ports) / timeout) - 0.1
-    for port in ports:
-        if not await _async_knock(address, port, sleep_time):
-            # If the host host is down don't try the other ports
-            return
+    _LOGGER.critical("Knocking at ports %s on %s", ports, address)
+
+    tasks = [asyncio.Task(_async_knock(address, port, timeout - 0.1)) for port in ports]
+    try:
+        await asyncio.wait(
+            *tasks,
+            return_when=FIRST_EXCEPTION,
+        )
+    except Exception:  # pylint: disable=broad-except
+        for task in tasks:
+            if not task.done():
+                task.cancel()
 
 
 async def knocker(
