@@ -109,10 +109,13 @@ class ATVServiceListener(ServiceListener):
         self,
         services: typing.List[str],
         timeout: int = 4,
+        address: typing.Optional[str] = None,
         end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
+        question_type: typing.Optional[DNSQuestionType] = None,
     ) -> None:
         """Init the listener."""
         self._services = set(services)
+        self._address = address
         self._timeout = timeout
         self._finish = time.monotonic() + timeout
         self._end_condition = end_condition
@@ -120,6 +123,7 @@ class ATVServiceListener(ServiceListener):
         self._services_by_address: typing.Dict[str, typing.List[Service]] = {}
         self._responses_by_address: typing.Dict[str, Response] = {}
         self._probed_device_info: typing.Set[str] = set()
+        self._question_type = question_type
         self._seen = set()
 
     @property
@@ -147,7 +151,9 @@ class ATVServiceListener(ServiceListener):
 
     async def _async_service_info(self, zc: Zeroconf, type_: str, name: str):
         base_name = _base_name(name, type_)
-        service = await self._async_get_single_service_info(zc, type_, name)
+        service = await self._async_get_single_service_info(
+            zc, type_, name, self._address
+        )
         address = str(service.address)
         services = self._services_by_address.setdefault(str(service.address), [])
         services.append(service)
@@ -175,12 +181,13 @@ class ATVServiceListener(ServiceListener):
         await info.async_request(
             zc,
             (self._finish - time.monotonic()) * 1000,
-            question_type=DNSQuestionType.QU,
+            question_type=self._question_type,
         )
-        for addr in [IPv4Address(address) for address in info.addresses]:
-            if not addr.is_link_local:
-                address = addr
-                break
+        if not address:
+            for addr in [IPv4Address(address) for address in info.addresses]:
+                if not addr.is_link_local:
+                    address = addr
+                    break
         return Service(
             _zc_service_to_atv_service(type_),
             name[: -len(type_) - 1],
@@ -199,9 +206,17 @@ async def unicast(
 ) -> Response:
     """Send request for services to a host."""
     responses = await _find_with_zeroconf(
-        aiozc, services, address, port, timeout, question_type=DNSQuestionType.QU
+        aiozc,
+        services,
+        address,
+        port,
+        timeout,
+        end_condition=None,
+        question_type=DNSQuestionType.QU,
     )
-    return responses[0]
+    if responses:
+        return responses[0]
+    return Response([], False, None)
 
 
 async def multicast(  # pylint: disable=too-many-arguments
@@ -228,7 +243,9 @@ async def _find_with_zeroconf(  # pylint: disable=too-many-arguments
 ) -> typing.List[Response]:
     """Send multicast request for services."""
     zc_services = [_atv_service_to_zc_service(service) for service in services]
-    update_listener = ATVServiceListener(zc_services, timeout, end_condition)
+    update_listener = ATVServiceListener(
+        zc_services, timeout, address, end_condition, question_type
+    )
     browser = AsyncServiceBrowser(
         aiozc.zeroconf,
         zc_services,
