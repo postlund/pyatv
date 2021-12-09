@@ -3,7 +3,7 @@ import asyncio
 from ipaddress import IPv4Address
 import logging
 import time
-from typing import Union, Optional, List, Dict, Callable
+from typing import Union, Optional, List, Dict, Callable, Set
 import typing
 from zeroconf import Zeroconf, ServiceListener, DNSQuestionType
 from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo, AsyncZeroconf
@@ -106,14 +106,18 @@ class ATVServiceListener(ServiceListener):
         self._finish = time.monotonic() + timeout
         self._end_condition = end_condition
         self._end_condition_met = asyncio.Event()
-        self._services_by_address: Dict[str, List[Service]] = {}
-        self._responses_by_address: Dict[str, Response] = {}
+        self._services_by_base_name: Dict[str, List[Service]] = {}
+        self._responses_by_base_name: Dict[str, Response] = {}
+        self._probed_device_info: Set[str] = set()
         self._seen = set()
 
     @property
     def responses(self) -> list[Response]:
         """Generate response object from services."""
-        return list(self._responses_by_address.values())
+        import pprint
+
+        pprint.pprint(self._responses_by_base_name)
+        return list(self._responses_by_base_name.values())
 
     async def async_wait(self) -> None:
         try:
@@ -125,7 +129,7 @@ class ATVServiceListener(ServiceListener):
         return True
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
-        asyncio.create_task(self._async_service_info(zc, type_, name))
+        asyncio.create_task(self._async_probe_service(zc, type_, name))
 
     def remove_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         pass
@@ -133,28 +137,66 @@ class ATVServiceListener(ServiceListener):
     def update_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         pass
 
-    async def _async_service_info(self, zc: Zeroconf, type_: str, name: str):
+    async def _async_probe_service(self, zc: Zeroconf, type_: str, name: str):
+        base_name = name[: -len(type_) - 1]
+        tasks = [self._async_service_info(zc, base_name, type_, name)]
+        if base_name not in self._probed_device_info:
+            self._probed_device_info.add(base_name)
+            tasks.append(
+                self._async_service_info(
+                    zc,
+                    base_name,
+                    f"{DEVICE_INFO_SERVICE}.",
+                    f"{base_name}.{DEVICE_INFO_SERVICE}.",
+                )
+            )
+        await asyncio.gather(*tasks)
+
+    async def _async_service_info(
+        self, zc: Zeroconf, base_name: str, type_: str, name: str
+    ):
+        service = await self._async_get_service_info(zc, base_name, type_, name)
+        services = self._services_by_base_name.setdefault(base_name, [])
+        services.append(service)
+
+        if base_name not in self._probed_device_info:
+            self._probed_device_info.add(base_name)
+            device_info_service = await self._async_get_service_info(
+                zc, base_name, type_, name, str(service.address)
+            )
+            services.append(device_info_service)
+
+        response = _response_from_services(services)
+        self._responses_by_base_name[base_name] = response
+        if self._end_condition and self._end_condition(response):
+            self._end_condition_met.set()
+
+    async def _async_get_single_service_info(
+        self,
+        zc: Zeroconf,
+        base_name: str,
+        type_: str,
+        name: str,
+        address: Optional[str] = None,
+    ):
         info = AsyncServiceInfo(type_, name)
-        if not await info.async_request(zc, (self._finish - time.monotonic()) * 1000):
-            return
+        await info.async_request(
+            zc,
+            (self._finish - time.monotonic()) * 1000,
+            question_type=DNSQuestionType.QU,
+        )
         address = None
         for addr in [IPv4Address(address) for address in info.addresses]:
             if not addr.is_link_local:
                 address = addr
                 break
-        service = Service(
+        return Service(
             _zc_service_to_atv_service(type_),
             name[: -len(type_) - 1],
             address,
             info.port,
             _decode_properties(info.properties),
         )
-        services = self._services_by_address.setdefault(address, [])
-        services.append(service)
-        response = _response_from_services(services)
-        self._responses_by_address[address] = response
-        if self._end_condition and self._end_condition(response):
-            self._end_condition_met.set()
 
 
 async def unicast(

@@ -37,6 +37,9 @@ class AppleTV(BaseConfig):
         self._services: Dict[Protocol, BaseService] = {}
         self._device_info = device_info or DeviceInfo({})
 
+    def __repr__(self) -> str:
+        return f"<AppleTV {self._name}@{self._address} device_info={self._device_info} services={self._services} deep_sleep={self._deep_sleep}>"
+
     @property
     def address(self) -> IPv4Address:
         """IP address of device."""
