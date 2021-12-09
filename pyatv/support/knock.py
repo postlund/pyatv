@@ -7,6 +7,7 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
+from asyncio.tasks import sleep
 from ipaddress import IPv4Address
 import logging
 import math
@@ -26,10 +27,10 @@ async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> No
         await asyncio.sleep(sleep_time)
 
 
-async def knock(address: IPv4Address, ports: List[int]) -> None:
+async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    sleep_time = SEND_INTERVAL / len(ports)
+    sleep_time = (len(ports) / timeout) - 0.1
     for port in ports:
         await _async_knock(address, port, sleep_time)
 
@@ -45,6 +46,4 @@ async def knocker(
     New port knocks are sent every two seconds, so a timeout of 4 seconds will result in
     two knocks.
     """
-    no_of_sends = math.ceil(timeout / SEND_INTERVAL)
-    for _ in range(no_of_sends):
-        await knock(address, ports)
+    await knock(address, ports, timeout)
