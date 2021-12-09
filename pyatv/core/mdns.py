@@ -144,7 +144,7 @@ class ATVServiceListener(ServiceListener):
                 break
         service = Service(
             _zc_service_to_atv_service(type_),
-            _zc_service_to_atv_service(name),
+            name[: -len(type_) - 1],
             address,
             info.port,
             _decode_properties(info.properties),
