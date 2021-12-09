@@ -18,22 +18,20 @@ _LOGGER = logging.getLogger(__name__)
 SEND_INTERVAL = 2.0
 
 
-async def _async_knock(address: IPv4Address, port: int):
+async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> None:
     """Open a connection to the device to wake a given host."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as knock_sock:
         knock_sock.setblocking(False)  # must be non-blocking for async
         knock_sock.connect_ex((str(address), port))  # we don't care about errors
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(sleep_time)
 
 
-async def knock(
-    address: IPv4Address, ports: List[int], loop: asyncio.AbstractEventLoop
-):
+async def knock(address: IPv4Address, ports: List[int]) -> None:
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
+    sleep_time = SEND_INTERVAL / len(ports)
     for port in ports:
-        # Do one at a time so we yield to the event loop between connect() calls
-        await _async_knock(address, port)
+        await _async_knock(address, port, sleep_time)
 
 
 async def knocker(
@@ -48,15 +46,5 @@ async def knocker(
     two knocks.
     """
     no_of_sends = math.ceil(timeout / SEND_INTERVAL)
-
-    async def _repeat():
-        for _ in range(no_of_sends):
-            try:
-                await knock(address, ports, loop)
-                await asyncio.sleep(SEND_INTERVAL)
-            except asyncio.CancelledError:
-                break
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("failed to port knock")
-
-    return asyncio.ensure_future(_repeat())
+    for _ in range(no_of_sends):
+        await knock(address, ports)
