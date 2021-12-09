@@ -75,7 +75,7 @@ async def scan(
         devices = (await scanner.discover(timeout)).values()
     finally:
         if created_zc:
-            await aiozc.async_close()
+            aiozc.zeroconf.close()
 
     return [device for device in devices if _should_include(device)]
 
