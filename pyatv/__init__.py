@@ -49,7 +49,9 @@ async def scan(
 
     scanner: BaseScanner
     if hosts:
-        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], aiozc)
+        scanner = UnicastMdnsScanner(
+            aiozc, [IPv4Address(host) for host in hosts], identifier
+        )
     else:
         scanner = MulticastMdnsScanner(aiozc, identifier)
 

@@ -223,11 +223,19 @@ class BaseScanner(ABC):
 class UnicastMdnsScanner(BaseScanner):
     """Service discovery based on unicast MDNS."""
 
-    def __init__(self, hosts: List[IPv4Address], aiozc: AsyncZeroconf) -> None:
+    def __init__(
+        self,
+        aiozc: AsyncZeroconf,
+        hosts: List[IPv4Address],
+        identifier: Optional[Union[str, Set[str]]] = None,
+    ):
         """Initialize a new UnicastMdnsScanner."""
         super().__init__()
         self.hosts = hosts
         self.aiozc = aiozc
+        self.identifier: Optional[Set[str]] = (
+            {identifier} if isinstance(identifier, str) else identifier
+        )
 
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
@@ -251,6 +259,9 @@ class UnicastMdnsScanner(BaseScanner):
                 self.services,
                 port=port,
                 timeout=timeout,
+                end_condition=self._end_if_identifier_found
+                if self.identifier
+                else None,
             )
         except asyncio.TimeoutError:
             return mdns.Response([], False, None)
@@ -258,6 +269,11 @@ class UnicastMdnsScanner(BaseScanner):
             if knocker:
                 knocker.cancel()
         return response
+
+    def _end_if_identifier_found(self, response: mdns.Response):
+        return self.identifier and not self.identifier.isdisjoint(
+            set(get_unique_identifiers(response))
+        )
 
 
 class MulticastMdnsScanner(BaseScanner):

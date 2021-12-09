@@ -203,6 +203,7 @@ async def unicast(
     services: typing.List[str],
     port: int = 5353,
     timeout: int = 4,
+    end_condition: typing.Optional[typing.Callable[[Response], bool]] = None,
 ) -> Response:
     """Send request for services to a host."""
     responses = await _find_with_zeroconf(
@@ -211,7 +212,7 @@ async def unicast(
         address,
         port,
         timeout,
-        end_condition=None,
+        end_condition=end_condition,
         question_type=DNSQuestionType.QU,
     )
     if responses:
