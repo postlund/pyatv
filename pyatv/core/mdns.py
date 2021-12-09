@@ -153,6 +153,8 @@ class ATVServiceListener(ServiceListener):
     async def _async_service_info(self, zc: Zeroconf, type_: str, name: str):
         base_name = _base_name(name, type_)
         service = await self._async_get_single_service_info(zc, type_, name)
+        if not service:
+            return
         address = str(service.address)
         services = self._services_by_address.setdefault(str(service.address), [])
         services.append(service)
@@ -162,6 +164,8 @@ class ATVServiceListener(ServiceListener):
             device_info_service = await self._async_get_single_service_info(
                 zc, type_, name
             )
+            if not device_info_service:
+                return
             services.append(device_info_service)
 
         response = _response_from_services(services)
@@ -182,11 +186,18 @@ class ATVServiceListener(ServiceListener):
             (self._finish - time.monotonic()) * 1000,
             question_type=self._question_type,
         )
-        address = None
-        for addr in [IPv4Address(address) for address in info.addresses]:
-            if not addr.is_link_local:
-                address = addr
-                break
+
+        addresses = {IPv4Address(address) for address in info.addresses}
+        if self._address:
+            if IPv4Address(self._address) not in addresses:
+                return
+            address = self._address
+        else:
+            address = None
+            for addr in addresses:
+                if not addr.is_link_local:
+                    address = addr
+                    break
         return Service(
             _zc_service_to_atv_service(type_),
             name[: -len(type_) - 1],
