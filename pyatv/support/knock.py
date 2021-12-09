@@ -7,6 +7,7 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
+import contextlib
 from ipaddress import IPv4Address
 import logging
 import math
@@ -21,11 +22,10 @@ SEND_INTERVAL = 2.0
 async def _async_knock(address: IPv4Address, port: int):
     knock_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     knock_sock.setblocking(False)  # must be non-blocking for async
-    try:
-        with knock_sock.connect((str(address), port)):
-            await asyncio.sleep(0.1)
-    except OSError:
-        pass
+    with contextlib.suppress(
+        (OSError, BlockingIOError, InterruptedError)
+    ), knock_sock.connect((str(address), port)):
+        await asyncio.sleep(0.1)
 
 
 async def knock(
@@ -33,9 +33,9 @@ async def knock(
 ):
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    await asyncio.gather(
-        *[_async_knock(address, port) for port in ports], return_exceptions=True
-    )
+    for port in ports:
+        # Do one at a time so we yield to the event loop between connect() calls
+        await _async_knock(address, port)
 
 
 async def knocker(
