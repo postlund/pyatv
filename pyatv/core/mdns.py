@@ -102,6 +102,13 @@ def _base_name(name: str, type_: str) -> str:
     return base_name
 
 
+def _address_in_addresses(address: IPv4Address, addresses: typing.Iterable[bytes]):
+    for addr in addresses:
+        if IPv4Address(addr) == address:
+            return True
+    return False
+
+
 class ATVServiceListener(ServiceListener):
     """A RecordUpdateListener that does not implement update_records."""
 
@@ -115,7 +122,9 @@ class ATVServiceListener(ServiceListener):
     ) -> None:
         """Init the listener."""
         self._services = set(services)
-        self._address = address
+        self._address: typing.Optional[IPv4Address] = (
+            IPv4Address(address) if address else None
+        )
         self._timeout = timeout
         self._finish = time.monotonic() + timeout
         self._end_condition = end_condition
@@ -142,6 +151,15 @@ class ATVServiceListener(ServiceListener):
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
         _LOGGER.debug("add_service: %s", name)
+        if self._address:
+            # Don't bother to scan a host if we already have it in the cache
+            # and the address does not match
+            service_info = AsyncServiceInfo(type_, name)
+            service_info.load_from_cache(zc)
+            addreses = service_info.addresses
+            if addreses and not _address_in_addresses(self._address, addreses):
+                return
+        _LOGGER.debug("add_service (scan): %s", name)
         asyncio.create_task(self._async_service_info(zc, type_, name))
 
     def remove_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
@@ -162,7 +180,7 @@ class ATVServiceListener(ServiceListener):
         if base_name not in self._probed_device_info:
             self._probed_device_info.add(base_name)
             device_info_service = await self._async_get_single_service_info(
-                zc, type_, name
+                zc, type_, name, False
             )
             if not device_info_service:
                 return
@@ -174,10 +192,7 @@ class ATVServiceListener(ServiceListener):
             self._end_condition_met.set()
 
     async def _async_get_single_service_info(
-        self,
-        zc: Zeroconf,
-        type_: str,
-        name: str,
+        self, zc: Zeroconf, type_: str, name: str, check_address: bool = True
     ):
         info = AsyncServiceInfo(type_, name)
         # TODO: should we unicast the request to the specific host?
@@ -187,15 +202,14 @@ class ATVServiceListener(ServiceListener):
             question_type=self._question_type,
         )
 
-        addresses = {IPv4Address(address) for address in info.addresses}
-        if self._address:
-            if IPv4Address(self._address) not in addresses:
+        if check_address and self._address:
+            if not _address_in_addresses(self._address, info.addresses):
                 return
             address = self._address
         else:
             address = None
-            for addr in addresses:
-                if not addr.is_link_local:
+            for addr in info.addresses:
+                if not IPv4Address(addr).is_link_local:
                     address = addr
                     break
         return Service(
