@@ -176,19 +176,19 @@ class ATVServiceListener(ServiceListener):
         zc: Zeroconf,
         type_: str,
         name: str,
-        address: typing.Optional[str] = None,
     ):
         info = AsyncServiceInfo(type_, name)
+        # TODO: should we unicast the request to the specific host?
         await info.async_request(
             zc,
             (self._finish - time.monotonic()) * 1000,
             question_type=self._question_type,
         )
-        if not address:
-            for addr in [IPv4Address(address) for address in info.addresses]:
-                if not addr.is_link_local:
-                    address = addr
-                    break
+        address = None
+        for addr in [IPv4Address(address) for address in info.addresses]:
+            if not addr.is_link_local:
+                address = addr
+                break
         return Service(
             _zc_service_to_atv_service(type_),
             name[: -len(type_) - 1],
