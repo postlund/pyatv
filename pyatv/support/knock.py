@@ -7,27 +7,26 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
-from asyncio.tasks import sleep
 from ipaddress import IPv4Address
 import logging
-import math
-import socket
 from typing import List
 
 _LOGGER = logging.getLogger(__name__)
-
-SEND_INTERVAL = 2.0
 
 
 async def _async_knock(address: IPv4Address, port: int, sleep_time: float) -> None:
     """Open a connection to the device to wake a given host."""
     try:
         _, writer = await asyncio.open_connection(str(address), port)
-    except (OSError, asyncio.CancelledError):
+    except asyncio.CancelledError:
         pass
+    except OSError as ex:
+        _LOGGER.critical("Got OSError while connecting to %s: %s", address, ex)
+        return False
     else:
         await asyncio.sleep(sleep_time)
         writer.close()
+    return True
 
 
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
@@ -35,7 +34,9 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
     sleep_time = (len(ports) / timeout) - 0.1
     for port in ports:
-        await _async_knock(address, port, sleep_time)
+        if not await _async_knock(address, port, sleep_time):
+            # If the host host is down don't try the other ports
+            return
 
 
 async def knocker(
@@ -49,4 +50,4 @@ async def knocker(
     New port knocks are sent every two seconds, so a timeout of 4 seconds will result in
     two knocks.
     """
-    await knock(address, ports, timeout)
+    return asyncio.ensure_future(knock(address, ports, timeout))
