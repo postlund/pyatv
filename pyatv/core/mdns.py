@@ -73,7 +73,9 @@ def _decode_properties(
         except Exception:  # pylint: disable=broad-except
             return str(value)
 
-    return CaseInsensitiveDict({k: _decode(v) for k, v in properties.items()})
+    return CaseInsensitiveDict(
+        {k.decode("utf-8"): _decode(v) for k, v in properties.items()}
+    )
 
 
 def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
@@ -91,6 +93,17 @@ def _response_from_services(services: List[Service]) -> Response:
     )
 
 
+def _base_name(name: str, type_: str) -> str:
+    base_name = name[: -len(type_) - 1]
+    if type_ == "_raop._tcp.local.":
+        if "@" in base_name:
+            return base_name.split("@")[1]
+    if type_ == "_sleep-proxy._udp.local.":
+        if " " in base_name:
+            return base_name.split(" ", 2)[1]
+    return base_name
+
+
 class ATVServiceListener(ServiceListener):
     """A RecordUpdateListener that does not implement update_records."""
 
@@ -106,18 +119,15 @@ class ATVServiceListener(ServiceListener):
         self._finish = time.monotonic() + timeout
         self._end_condition = end_condition
         self._end_condition_met = asyncio.Event()
-        self._services_by_base_name: Dict[str, List[Service]] = {}
-        self._responses_by_base_name: Dict[str, Response] = {}
+        self._services_by_address: Dict[str, List[Service]] = {}
+        self._responses_by_address: Dict[str, Response] = {}
         self._probed_device_info: Set[str] = set()
         self._seen = set()
 
     @property
     def responses(self) -> list[Response]:
         """Generate response object from services."""
-        import pprint
-
-        pprint.pprint(self._responses_by_base_name)
-        return list(self._responses_by_base_name.values())
+        return list(self._responses_by_address.values())
 
     async def async_wait(self) -> None:
         try:
@@ -129,7 +139,7 @@ class ATVServiceListener(ServiceListener):
         return True
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
-        asyncio.create_task(self._async_probe_service(zc, type_, name))
+        asyncio.create_task(self._async_service_info(zc, type_, name))
 
     def remove_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         pass
@@ -137,37 +147,22 @@ class ATVServiceListener(ServiceListener):
     def update_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         pass
 
-    async def _async_probe_service(self, zc: Zeroconf, type_: str, name: str):
-        base_name = name[: -len(type_) - 1]
-        tasks = [self._async_service_info(zc, base_name, type_, name)]
-        if base_name not in self._probed_device_info:
-            self._probed_device_info.add(base_name)
-            tasks.append(
-                self._async_service_info(
-                    zc,
-                    base_name,
-                    f"{DEVICE_INFO_SERVICE}.",
-                    f"{base_name}.{DEVICE_INFO_SERVICE}.",
-                )
-            )
-        await asyncio.gather(*tasks)
-
-    async def _async_service_info(
-        self, zc: Zeroconf, base_name: str, type_: str, name: str
-    ):
+    async def _async_service_info(self, zc: Zeroconf, type_: str, name: str):
+        base_name = _base_name(name, type_)
         service = await self._async_get_single_service_info(zc, type_, name)
-        services = self._services_by_base_name.setdefault(base_name, [])
+        address = str(service.address)
+        services = self._services_by_address.setdefault(str(service.address), [])
         services.append(service)
 
         if base_name not in self._probed_device_info:
             self._probed_device_info.add(base_name)
             device_info_service = await self._async_get_single_service_info(
-                zc, type_, name, str(service.address)
+                zc, type_, name, address
             )
             services.append(device_info_service)
 
         response = _response_from_services(services)
-        self._responses_by_base_name[base_name] = response
+        self._responses_by_address[address] = response
         if self._end_condition and self._end_condition(response):
             self._end_condition_met.set()
 
@@ -184,7 +179,6 @@ class ATVServiceListener(ServiceListener):
             (self._finish - time.monotonic()) * 1000,
             question_type=DNSQuestionType.QU,
         )
-        address = None
         for addr in [IPv4Address(address) for address in info.addresses]:
             if not addr.is_link_local:
                 address = addr

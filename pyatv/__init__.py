@@ -77,7 +77,7 @@ async def scan(
         if created_zc:
             aiozc.zeroconf.close()
 
-    _LOGGER.warning("Discovered: %s", devices)
+    _LOGGER.debug("Discovered: %s", devices)
     return [device for device in devices if _should_include(device)]
 
 
