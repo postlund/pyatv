@@ -7,10 +7,10 @@ from functools import partial
 from ipaddress import IPv4Address
 import logging
 from typing import List, Optional, Set, Union
-from zeroconf import Zeroconf
-from zeroconf.asyncio import AsyncZeroconf
 
 import aiohttp
+from zeroconf import Zeroconf
+from zeroconf.asyncio import AsyncZeroconf
 
 from pyatv import exceptions, interface
 from pyatv.const import Protocol

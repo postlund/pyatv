@@ -4,12 +4,12 @@ from ipaddress import IPv4Address
 import logging
 import time
 import typing
-from zeroconf import Zeroconf, ServiceListener, DNSQuestionType
+
+from zeroconf import DNSQuestionType, ServiceListener, Zeroconf
 from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo, AsyncZeroconf
 
 from pyatv import exceptions
 from pyatv.support.collections import CaseInsensitiveDict
-
 
 _LOGGER = logging.getLogger(__name__)
 
