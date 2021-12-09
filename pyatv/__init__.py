@@ -7,6 +7,7 @@ from functools import partial
 from ipaddress import IPv4Address
 import logging
 from typing import List, Optional, Set, Union
+from zeroconf.asyncio import AsyncZeroconf
 
 import aiohttp
 
@@ -26,8 +27,13 @@ async def scan(
     identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
     hosts: List[str] = None,
+    aiozc: Optional[AsyncZeroconf] = None,
 ) -> List[interface.BaseConfig]:
     """Scan for Apple TVs on network and return their configurations."""
+    created_zc = False
+    if not aiozc:
+        aiozc = AsyncZeroconf()
+        created_zc = True
 
     def _should_include(atv):
         if not atv.ready:
@@ -41,9 +47,9 @@ async def scan(
 
     scanner: BaseScanner
     if hosts:
-        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
+        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], aiozc)
     else:
-        scanner = MulticastMdnsScanner(loop, identifier)
+        scanner = MulticastMdnsScanner(aiozc, identifier)
 
     protocols = set()
     if protocol:
@@ -63,7 +69,12 @@ async def scan(
                 proto_methods.device_info,
             )
 
-    devices = (await scanner.discover(timeout)).values()
+    try:
+        devices = (await scanner.discover(timeout)).values()
+    finally:
+        if created_zc:
+            await aiozc.async_close()
+
     return [device for device in devices if _should_include(device)]
 
 

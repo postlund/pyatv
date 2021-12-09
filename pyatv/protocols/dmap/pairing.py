@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from aiohttp import web
 import netifaces
-from zeroconf import Zeroconf
+from zeroconf.asyncio import AsyncZeroconf
 
 from pyatv.core import mdns
 from pyatv.interface import BaseConfig, BaseService, PairingHandler
@@ -54,6 +54,8 @@ class DmapPairingHandler(
     that responds to pairing requests.
     """
 
+    _zeroconf: AsyncZeroconf
+
     def __init__(
         self,
         config: BaseConfig,
@@ -65,7 +67,14 @@ class DmapPairingHandler(
         """Initialize a new instance."""
         super().__init__(session_manager, service)
         self._loop = loop
-        self._zeroconf: Zeroconf = kwargs.get("zeroconf") or Zeroconf()
+        zeroconf = kwargs.get("zeroconf")
+        if zeroconf:
+            if isinstance(zeroconf, AsyncZeroconf):
+                self._zeroconf = zeroconf
+            else:
+                self._zeroconf = AsyncZeroconf(zc=zeroconf)
+        else:
+            self._zeroconf = AsyncZeroconf()
         self._name: str = kwargs.get("name", "pyatv")
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
@@ -82,7 +91,7 @@ class DmapPairingHandler(
 
     async def close(self) -> None:
         """Call to free allocated resources after pairing."""
-        self._zeroconf.close()
+        await self._zeroconf.async_close()
         await self.runner.cleanup()
         await super().close()
 

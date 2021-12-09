@@ -21,6 +21,8 @@ from typing import (
     cast,
 )
 
+from zeroconf.asyncio import AsyncZeroconf
+
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
 from pyatv.core import MutableService, mdns
@@ -221,13 +223,11 @@ class BaseScanner(ABC):
 class UnicastMdnsScanner(BaseScanner):
     """Service discovery based on unicast MDNS."""
 
-    def __init__(
-        self, hosts: List[IPv4Address], loop: asyncio.AbstractEventLoop
-    ) -> None:
+    def __init__(self, hosts: List[IPv4Address], aiozc: AsyncZeroconf) -> None:
         """Initialize a new UnicastMdnsScanner."""
         super().__init__()
         self.hosts = hosts
-        self.loop = loop
+        self.aiozc = aiozc
 
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
@@ -242,9 +242,11 @@ class UnicastMdnsScanner(BaseScanner):
         port = int(os.environ.get("PYATV_UDNS_PORT", 5353))  # For testing purposes
         knocker = None
         try:
-            knocker = await knock.knocker(host, KNOCK_PORTS, self.loop, timeout=timeout)
+            knocker = await knock.knocker(
+                host, KNOCK_PORTS, asyncio.get_event_loop(), timeout=timeout
+            )
             response = await mdns.unicast(
-                self.loop,
+                self.aiozc,
                 str(host),
                 self.services,
                 port=port,
@@ -263,12 +265,12 @@ class MulticastMdnsScanner(BaseScanner):
 
     def __init__(
         self,
-        loop: asyncio.AbstractEventLoop,
+        aiozc: AsyncZeroconf,
         identifier: Optional[Union[str, Set[str]]] = None,
     ):
         """Initialize a new MulticastMdnsScanner."""
         super().__init__()
-        self.loop = loop
+        self.aiozc = aiozc
         self.identifier: Optional[Set[str]] = (
             {identifier} if isinstance(identifier, str) else identifier
         )
@@ -276,7 +278,7 @@ class MulticastMdnsScanner(BaseScanner):
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
         responses = await mdns.multicast(
-            self.loop,
+            self.aiozc,
             self.services,
             timeout=timeout,
             end_condition=self._end_if_identifier_found if self.identifier else None,
