@@ -3,40 +3,26 @@
 import asyncio
 import hashlib
 from io import StringIO
-from ipaddress import IPv4Address, ip_address
+from ipaddress import IPv4Address
 import logging
 import random
 from typing import List, Optional
 
 from aiohttp import web
-import netifaces
 from zeroconf import Zeroconf
 
 from pyatv.core import mdns
 from pyatv.interface import BaseConfig, BaseService, PairingHandler
 from pyatv.protocols.dmap import tags
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.net import unused_port
+from pyatv.support.net import get_private_addresses, unused_port
 
 _LOGGER = logging.getLogger(__name__)
 
 
-# Maybe replace with pyatv.net.get_local_address_reaching?
-def _get_private_ip_addresses():
-    for iface in netifaces.interfaces():
-        addresses = netifaces.ifaddresses(iface)
-        if netifaces.AF_INET not in addresses:
-            continue
-
-        for addr in addresses[netifaces.AF_INET]:
-            ipaddr = ip_address(addr["addr"])
-            if ipaddr.is_private and not ipaddr.is_loopback:
-                yield ipaddr
-
-
 def _get_zeroconf_addresses(addresses: Optional[List[str]]) -> List[IPv4Address]:
     if addresses is None:
-        return list(_get_private_ip_addresses())
+        return list(get_private_addresses(include_loopback=False))
 
     return [IPv4Address(address) for address in addresses]
 

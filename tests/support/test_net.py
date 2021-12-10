@@ -7,7 +7,7 @@ import sys
 from typing import Dict, List
 from unittest.mock import patch
 
-import netifaces
+from ifaddr import IP, Adapter
 import pytest
 
 from pyatv.exceptions import NotSupportedError
@@ -34,26 +34,15 @@ def skip_before_win_build(build_number: int):
 
 @pytest.fixture(autouse=True)
 def mock_address():
+    adapters: List[Adapter] = []
     addresses: Dict[str, List[str]] = {}
 
-    def _add(interface: str, address: IPv4Address):
-        addresses.setdefault(interface, []).append(address)
+    def _add(interface: str, address: str):
+        adapters.append(Adapter(interface, interface, [IP(address, 32, interface)]))
 
-    def _ifaddresses(interface: str):
-        iface_addresses = addresses.get(interface)
-        if not iface_addresses:
-            return {}
-
-        inet_addresses = [
-            {"addr": str(addr), "netmask": "255.255.255.0"} for addr in iface_addresses
-        ]
-        return {netifaces.AF_INET: inet_addresses}
-
-    with patch("netifaces.interfaces") as mock_interfaces:
-        with patch("netifaces.ifaddresses") as mock_ifaddr:
-            mock_interfaces.side_effect = lambda: list(addresses.keys())
-            mock_ifaddr.side_effect = _ifaddresses
-            yield _add
+    with patch("pyatv.support.net.get_adapters") as mock_adapters:
+        mock_adapters.side_effect = lambda: adapters
+        yield _add
 
 
 @pytest.fixture
@@ -87,6 +76,15 @@ def test_private_addresses(mock_address):
         ip_address("10.0.0.1"),
         ip_address("192.168.0.1"),
         ip_address("172.16.0.1"),
+    ]
+
+
+def test_private_addresses(mock_address):
+    mock_address("wlan0", "10.0.0.1")
+    mock_address("lo", "127.0.0.1")
+
+    assert get_private_addresses(include_loopback=False) == [
+        ip_address("10.0.0.1"),
     ]
 
 
