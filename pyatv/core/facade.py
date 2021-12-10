@@ -25,7 +25,8 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import SetupData, StateDispatcher, StateMessage, UpdatedState
+from pyatv.core import SetupData, StateMessage, UpdatedState
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.core.relayer import Relayer
 from pyatv.support import deprecated
 from pyatv.support.collections import dict_merge
@@ -258,13 +259,15 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
         Protocol.RAOP,
     ]
 
-    def __init__(self, state_dispatcher: StateDispatcher):
+    def __init__(
+        self, message_dispatcher: MessageDispatcher[UpdatedState, StateMessage]
+    ):
         """Initialize a new FacadePower instance."""
         # This is border line, maybe need another structure to support this
         Relayer.__init__(self, interface.Power, DEFAULT_PRIORITIES)
         interface.Power.__init__(self)
         self._is_playing: Optional[bool] = None
-        state_dispatcher.listen_to(
+        message_dispatcher.listen_to(
             UpdatedState.Playing,
             self._playing_changed,
             message_filter=lambda message: message.protocol == self.main_protocol,
@@ -447,7 +450,7 @@ class FacadeAppleTV(interface.AppleTV):
         self,
         config: interface.BaseConfig,
         session_manager: ClientSessionManager,
-        state_dispatcher: StateDispatcher,
+        message_dispatcher: MessageDispatcher[UpdatedState, StateMessage],
     ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
@@ -457,14 +460,13 @@ class FacadeAppleTV(interface.AppleTV):
         self._protocol_handlers: Dict[Protocol, SetupData] = {}
         self._push_updates = FacadePushUpdater()
         self._features = FacadeFeatures(self._push_updates)
-        self._state_dispatcher = state_dispatcher
         self._pending_tasks: Optional[set] = None
         self._device_info = interface.DeviceInfo({})
         self._interfaces = {
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
-            interface.Power: FacadePower(self._state_dispatcher),
+            interface.Power: FacadePower(message_dispatcher),
             interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
