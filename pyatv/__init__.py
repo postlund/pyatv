@@ -84,7 +84,7 @@ async def connect(
     config_copy = deepcopy(config)
     session_manager = await http.create_session(session)
     state_dispatcher = StateDispatcher()
-    atv = FacadeAppleTV(config_copy, session_manager)
+    atv = FacadeAppleTV(config_copy, session_manager, state_dispatcher)
 
     try:
         for proto, proto_methods in PROTOCOLS.items():

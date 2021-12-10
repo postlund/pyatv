@@ -31,11 +31,14 @@ class StateMessage(NamedTuple):
 
     protocol: Protocol
     state: UpdatedState
-    new_value: Any
+
+    # Type depending on value of state:
+    # - UpdatedState.Playing -> interface.Playing
+    value: Any
 
     def __str__(self):
         """Return string representation of object."""
-        return f"[{self.protocol.name}.{self.state.name} -> {self.new_value}]"
+        return f"[{self.protocol.name}.{self.state.name} -> {self.value}]"
 
 
 StateDispatcher = MessageDispatcher[UpdatedState, StateMessage]
