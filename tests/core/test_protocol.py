@@ -160,3 +160,22 @@ async def test_simple_dispatch():
     await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(2, b"456")), 5.0)
     assert dispatched_msg1 is None
     assert dispatched_msg2 == b"456"
+
+
+async def test_dispatch_with_filter():
+    dispatched_value = None
+
+    async def dispatch_func(value: int) -> None:
+        nonlocal dispatched_value
+        dispatched_value = value
+
+    dispatcher = MessageDispatcher[int, int]()
+    dispatcher.listen_to(
+        1, dispatch_func, message_filter=lambda message: (message % 2) == 0
+    )
+
+    await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(1, 1)), 5.0)
+    assert dispatched_value == None
+
+    await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(1, 2)), 5.0)
+    assert dispatched_value == 2

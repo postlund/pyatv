@@ -2,7 +2,17 @@
 import asyncio
 import inspect
 import logging
-from typing import Awaitable, Callable, Dict, Generic, List, Optional, TypeVar
+from typing import (
+    Awaitable,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +23,12 @@ MessageType = TypeVar("MessageType")
 
 DispatchType = TypeVar("DispatchType")
 DispatchMessage = TypeVar("DispatchMessage")
-DispatchFunc = Callable[[DispatchMessage], Awaitable[None]]
+DispatchFunc = Callable[[DispatchMessage], Union[None, Awaitable[None]]]
+DispatchFilterFunc = Callable[[DispatchMessage], bool]
+
+
+def _no_filter(message: MessageType) -> bool:
+    return True
 
 
 async def heartbeater(
@@ -65,11 +80,18 @@ class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
 
     def __init__(self):
         """Initialize a new MessageDispatcher instance."""
-        self.__listeners: Dict[DispatchType, List[DispatchFunc]] = {}
+        self.__listeners: Dict[
+            DispatchType, List[Tuple[DispatchFilterFunc, DispatchFunc]]
+        ] = {}
 
-    def listen_to(self, dispatch_type: DispatchType, func: DispatchFunc) -> None:
+    def listen_to(
+        self,
+        dispatch_type: DispatchType,
+        func: DispatchFunc,
+        message_filter: DispatchFilterFunc = _no_filter,
+    ) -> None:
         """Listen to a specific type of message type."""
-        self.__listeners.setdefault(dispatch_type, []).append(func)
+        self.__listeners.setdefault(dispatch_type, []).append((message_filter, func))
 
     def dispatch(
         self, dispatch_type: DispatchType, message: DispatchMessage
@@ -88,7 +110,8 @@ class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
 
         tasks = []
         loop = asyncio.get_event_loop()
-        for func in self.__listeners.get(dispatch_type, []):
+        listeners = self.__listeners.get(dispatch_type, [])
+        for func in [func for filter_func, func in listeners if filter_func(message)]:
             _LOGGER.debug(
                 "Dispatching message with type %s to %s",
                 dispatch_type,
