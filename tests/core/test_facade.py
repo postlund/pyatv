@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core.facade."""
+from abc import ABC
 import asyncio
 import inspect
 from ipaddress import IPv4Address
@@ -18,7 +19,13 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import SetupData, StateDispatcher, StateMessage, UpdatedState
+from pyatv.core import (
+    AbstractPushUpdater,
+    SetupData,
+    StateDispatcher,
+    StateMessage,
+    UpdatedState,
+)
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     Audio,
@@ -148,9 +155,9 @@ class DummyStream(Stream):
         self.url = url
 
 
-class DummyPushUpdater(PushUpdater):
-    def __init__(self):
-        super().__init__()
+class DummyPushUpdater(AbstractPushUpdater):
+    def __init__(self, state_dispatcher, protocol):
+        super().__init__(state_dispatcher, protocol)
         self._active = False
 
     @property
@@ -191,7 +198,12 @@ class SavingPowerListener(PowerListener):
 @pytest.fixture(name="register_interface")
 def register_interface_fixture(facade_dummy):
     def _register_func(feature: FeatureName, instance, protocol: Protocol):
-        interface = inspect.getmro(type(instance))[1]
+        # Find the first derived interface from pyatv.interface module
+        interface = next(
+            iface
+            for iface in inspect.getmro(type(instance))
+            if iface.__module__ == "pyatv.interface"
+        )
         sdg = SetupDataGenerator(protocol, feature)
         sdg.interfaces[interface] = instance
         facade_dummy.add_protocol(sdg.get_setup_data())
@@ -283,12 +295,18 @@ async def test_features_feature_overlap_uses_priority(facade_dummy, register_int
     )
 
 
-async def test_features_push_updates(facade_dummy, register_interface):
+async def test_features_push_updates(
+    facade_dummy, register_interface, state_dispatcher
+):
     feat = facade_dummy.features
 
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Unsupported
 
-    register_interface(FeatureName.PushUpdates, DummyPushUpdater(), Protocol.MRP)
+    register_interface(
+        FeatureName.PushUpdates,
+        DummyPushUpdater(state_dispatcher, Protocol.MRP),
+        Protocol.MRP,
+    )
 
     await facade_dummy.connect()
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Available
@@ -537,7 +555,9 @@ async def test_takeover_failure_restores(facade_dummy, register_interface):
     assert sdg_mrp.interfaces[Stream].url == "test"
 
 
-async def test_takeover_push_updates(facade_dummy, register_interface):
+async def test_takeover_push_updates(
+    facade_dummy, register_interface, state_dispatcher
+):
     listener = SavingPushListener()
 
     async def _perform_update(expected_updates, expected_protocol):
@@ -551,8 +571,8 @@ async def test_takeover_push_updates(facade_dummy, register_interface):
         await until(lambda: listener.no_of_updates == expected_updates)
         assert listener.last_update.title == f"{expected_protocol}_{expected_updates}"
 
-    raop_pusher = DummyPushUpdater()
-    mrp_pusher = DummyPushUpdater()
+    raop_pusher = DummyPushUpdater(state_dispatcher, Protocol.RAOP)
+    mrp_pusher = DummyPushUpdater(state_dispatcher, Protocol.MRP)
 
     register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
@@ -580,9 +600,11 @@ async def test_takeover_push_updates(facade_dummy, register_interface):
 # All push updaters must be started and stopped in parallel, otherwise updates will
 # not be pushed when performing a takeover (as the protocol taken over was never
 # started)
-async def test_start_stop_all_push_updaters(facade_dummy, register_interface):
-    raop_pusher = DummyPushUpdater()
-    mrp_pusher = DummyPushUpdater()
+async def test_start_stop_all_push_updaters(
+    facade_dummy, register_interface, state_dispatcher
+):
+    raop_pusher = DummyPushUpdater(state_dispatcher, Protocol.RAOP)
+    mrp_pusher = DummyPushUpdater(state_dispatcher, Protocol.MRP)
 
     register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
