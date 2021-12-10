@@ -1,14 +1,44 @@
 """Core module of pyatv."""
 import asyncio
+from enum import Enum
 from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional, Set
 
 from pyatv.const import FeatureName, PairingRequirement, Protocol
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.interface import BaseService
 
 TakeoverMethod = Callable[
     ...,
     Callable[[], None],
 ]
+
+
+# pylint: disable=invalid-name
+
+
+class UpdatedState(Enum):
+    """Name of states that can be updated."""
+
+    Playing = 1
+    """Playing state in metadata was updated."""
+
+
+# pylint: enable=invalid-name
+
+
+class StateMessage(NamedTuple):
+    """Message sent when state of something changed."""
+
+    protocol: Protocol
+    state: UpdatedState
+    new_value: Any
+
+    def __str__(self):
+        """Return string representation of object."""
+        return f"[{self.protocol.name}.{self.state.name} -> {self.new_value}]"
+
+
+StateDispatcher = MessageDispatcher[UpdatedState, StateMessage]
 
 
 class MutableService(BaseService):
