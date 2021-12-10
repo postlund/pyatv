@@ -81,23 +81,6 @@ class FeaturesDummy(interface.Features):
         return FeatureInfo(state=state)
 
 
-class PushUpdaterDummy(interface.PushUpdater):
-    def active(self) -> bool:
-        """Return if push updater has been started."""
-        raise exceptions.NotSupportedError()
-
-    def start(self, initial_delay: int = 0) -> None:
-        """Begin to listen to updates.
-
-        If an error occurs, start must be called again.
-        """
-        raise exceptions.NotSupportedError()
-
-    def stop(self) -> None:
-        """No longer forward updates to listener."""
-        raise exceptions.NotSupportedError()
-
-
 @pytest.fixture
 def methods():
     yield interface.retrieve_commands(TestClass)
@@ -444,23 +427,3 @@ def test_app_equality():
     assert App(None, "test") != App(None, None)
     assert App(None, "test") == App(None, "test")
     assert App("test", "test2") == App("test", "test2")
-
-
-# PUSH UPDATER
-
-
-@pytest.mark.parametrize("updates", [1, 2, 3])
-def test_post_ignore_duplicate_update(event_loop, updates):
-    listener = MagicMock()
-    playing = Playing()
-
-    async def _post_updates(repeats: int):
-        updater = PushUpdaterDummy()
-        updater.listener = listener
-        for _ in range(repeats):
-            updater.post_update(playing)
-
-    event_loop.run_until_complete(_post_updates(updates))
-
-    assert listener.playstatus_update.call_count == 1
-    listener.playstatus_update.assert_called_once_with(ANY, playing)

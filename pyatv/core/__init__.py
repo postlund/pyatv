@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional
 
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.core.protocol import MessageDispatcher
-from pyatv.interface import BaseService
+from pyatv.interface import BaseService, Playing, PushUpdater
 
 TakeoverMethod = Callable[
     ...,
@@ -102,6 +102,37 @@ class MutableService(BaseService):
         copy.pairing = self.pairing
         copy.requires_password = self.requires_password
         return copy
+
+
+class AbstractPushUpdater(PushUpdater):
+    """Abstract push updater class.
+
+    This class adds a `post_update` method that will publishes a new state, but only
+    if it has been updated.
+    """
+
+    def __init__(self, state_dispatcher: StateDispatcher, protocol: Protocol):
+        """Initialize a new AbstractPushUpdater."""
+        super().__init__()
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.state_dispatcher = state_dispatcher
+        self._protocol = protocol
+        self._previous_state: Optional[Playing] = None
+
+    def post_update(self, playing: Playing) -> None:
+        """Post an update to listener."""
+        if playing != self._previous_state:
+            # Dispatch message using message dispatcher
+            self.state_dispatcher.dispatch(
+                UpdatedState.Playing,
+                StateMessage(self._protocol, UpdatedState.Playing, playing),
+            )
+
+            # Publish using regular (external) interface. This shall be removed at
+            # some point in time.
+            self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+        self._previous_state = playing
 
 
 class SetupData(NamedTuple):

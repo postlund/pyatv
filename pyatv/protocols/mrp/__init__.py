@@ -22,7 +22,14 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import MutableService, SetupData, StateDispatcher, TakeoverMethod, mdns
+from pyatv.core import (
+    AbstractPushUpdater,
+    MutableService,
+    SetupData,
+    StateDispatcher,
+    TakeoverMethod,
+    mdns,
+)
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -595,12 +602,17 @@ class MrpPower(Power):
         return PowerState.Unknown
 
 
-class MrpPushUpdater(PushUpdater):
+class MrpPushUpdater(AbstractPushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, metadata: MrpMetadata, psm: PlayerStateManager) -> None:
+    def __init__(
+        self,
+        metadata: MrpMetadata,
+        psm: PlayerStateManager,
+        state_dispatcher: StateDispatcher,
+    ) -> None:
         """Initialize a new MrpPushUpdater instance."""
-        super().__init__()
+        super().__init__(state_dispatcher, Protocol.MRP)
         self.metadata = metadata
         self.psm = psm
 
@@ -889,7 +901,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     remote_control = MrpRemoteControl(loop, psm, protocol)
     metadata = MrpMetadata(protocol, psm, config.identifier)
     power = MrpPower(loop, protocol, remote_control)
-    push_updater = MrpPushUpdater(metadata, psm)
+    push_updater = MrpPushUpdater(metadata, psm, state_dispatcher)
     audio = MrpAudio(protocol)
 
     interfaces = {
