@@ -25,8 +25,8 @@ from pyatv.const import (
 from pyatv.core import (
     AbstractPushUpdater,
     MutableService,
+    ProtocolStateDispatcher,
     SetupData,
-    StateDispatcher,
     TakeoverMethod,
     mdns,
 )
@@ -609,10 +609,10 @@ class MrpPushUpdater(AbstractPushUpdater):
         self,
         metadata: MrpMetadata,
         psm: PlayerStateManager,
-        state_dispatcher: StateDispatcher,
+        state_dispatcher: ProtocolStateDispatcher,
     ) -> None:
         """Initialize a new MrpPushUpdater instance."""
-        super().__init__(state_dispatcher, Protocol.MRP)
+        super().__init__(state_dispatcher)
         self.metadata = metadata
         self.psm = psm
 
@@ -890,7 +890,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
-    state_dispatcher: StateDispatcher,
+    state_dispatcher: ProtocolStateDispatcher,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> SetupData:
@@ -962,7 +962,7 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
-    state_dispatcher: StateDispatcher,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new MRP service."""
     yield create_with_connection(

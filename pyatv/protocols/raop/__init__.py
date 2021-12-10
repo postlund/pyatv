@@ -19,8 +19,8 @@ from pyatv.const import (
 from pyatv.core import (
     AbstractPushUpdater,
     MutableService,
+    ProtocolStateDispatcher,
     SetupData,
-    StateDispatcher,
     TakeoverMethod,
     mdns,
 )
@@ -71,9 +71,9 @@ PERCENTAGE_MAX = 100.0
 class RaopPushUpdater(AbstractPushUpdater):
     """Implementation of push update support for RAOP."""
 
-    def __init__(self, metadata: Metadata, state_dispatcher: StateDispatcher):
+    def __init__(self, metadata: Metadata, state_dispatcher: ProtocolStateDispatcher):
         """Initialize a new RaopPushUpdater instance."""
-        super().__init__(state_dispatcher, Protocol.RAOP)
+        super().__init__(state_dispatcher)
         self._activated = False
         self.metadata = metadata
 
@@ -474,7 +474,7 @@ def setup(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
-    state_dispatcher: StateDispatcher,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
     playback_manager = RaopPlaybackManager(str(config.address), service.port)
