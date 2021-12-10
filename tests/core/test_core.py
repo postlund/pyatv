@@ -4,13 +4,15 @@ from unittest.mock import ANY, MagicMock
 import pytest
 
 from pyatv.const import Protocol
-from pyatv.core import AbstractPushUpdater, StateDispatcher, UpdatedState
+from pyatv.core import AbstractPushUpdater, StateDispatcher, StateMessage, UpdatedState
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.interface import Playing
 
 
 @pytest.fixture(name="state_dispatcher")
 def state_dispatcher_fixture():
-    yield StateDispatcher()
+    message_dispatcher = MessageDispatcher[UpdatedState, StateMessage]()
+    yield StateDispatcher(Protocol.MRP, message_dispatcher)
 
 
 class PushUpdaterDummy(AbstractPushUpdater):

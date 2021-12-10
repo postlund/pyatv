@@ -1,7 +1,18 @@
 """Core module of pyatv."""
 import asyncio
 from enum import Enum
-from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional, Set
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    Union,
+)
 
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.core.protocol import MessageDispatcher
@@ -41,7 +52,36 @@ class StateMessage(NamedTuple):
         return f"[{self.protocol.name}.{self.state.name} -> {self.value}]"
 
 
-StateDispatcher = MessageDispatcher[UpdatedState, StateMessage]
+def _no_filter(message: StateMessage) -> bool:
+    return True
+
+
+class StateDispatcher:
+    """Dispatch internal state updates to listeners."""
+
+    def __init__(
+        self,
+        protocol: Protocol,
+        dispatcher: MessageDispatcher[UpdatedState, StateMessage],
+    ) -> None:
+        """Initialize a new StateDispatcher instance."""
+        self._protocol = protocol
+        self._dispatcher = dispatcher
+
+    def listen_to(
+        self,
+        state: UpdatedState,
+        func: Callable[[StateMessage], Union[None, Awaitable[None]]],
+        message_filter: Callable[[StateMessage], bool] = _no_filter,
+    ) -> None:
+        """Listen to a specific type of message type."""
+        return self._dispatcher.listen_to(state, func, message_filter)
+
+    def dispatch(self, state: UpdatedState, value: Any) -> List[asyncio.Task]:
+        """Dispatch a message to listeners."""
+        return self._dispatcher.dispatch(
+            state, StateMessage(self._protocol, state, value)
+        )
 
 
 class MutableService(BaseService):
@@ -123,10 +163,7 @@ class AbstractPushUpdater(PushUpdater):
         """Post an update to listener."""
         if playing != self._previous_state:
             # Dispatch message using message dispatcher
-            self.state_dispatcher.dispatch(
-                UpdatedState.Playing,
-                StateMessage(self._protocol, UpdatedState.Playing, playing),
-            )
+            self.state_dispatcher.dispatch(UpdatedState.Playing, playing)
 
             # Publish using regular (external) interface. This shall be removed at
             # some point in time.

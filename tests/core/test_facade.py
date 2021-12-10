@@ -27,6 +27,7 @@ from pyatv.core import (
     UpdatedState,
 )
 from pyatv.core.facade import FacadeAppleTV, SetupData
+from pyatv.core.protocol import MessageDispatcher
 from pyatv.interface import (
     Audio,
     DeviceInfo,
@@ -49,15 +50,25 @@ TEST_URL = "http://test"
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture(name="state_dispatcher")
-def state_dispatcher_fixture():
-    yield StateDispatcher()
+@pytest.fixture(name="message_dispatcher")
+def message_dispatcher():
+    yield MessageDispatcher[UpdatedState, StateMessage]()
+
+
+@pytest.fixture(name="mrp_state_dispatcher")
+def mrp_state_dispatcher_fixture(message_dispatcher):
+    yield StateDispatcher(Protocol.MRP, message_dispatcher)
+
+
+@pytest.fixture(name="dmap_state_dispatcher")
+def dmap_state_dispatcher_fixture(message_dispatcher):
+    yield StateDispatcher(Protocol.DMAP, message_dispatcher)
 
 
 @pytest.fixture(name="facade_dummy")
-def facade_dummy_fixture(session_manager, state_dispatcher):
+def facade_dummy_fixture(session_manager, message_dispatcher):
     conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
-    facade = FacadeAppleTV(conf, session_manager, state_dispatcher)
+    facade = FacadeAppleTV(conf, session_manager, message_dispatcher)
     yield facade
 
 
@@ -296,7 +307,7 @@ async def test_features_feature_overlap_uses_priority(facade_dummy, register_int
 
 
 async def test_features_push_updates(
-    facade_dummy, register_interface, state_dispatcher
+    facade_dummy, register_interface, mrp_state_dispatcher
 ):
     feat = facade_dummy.features
 
@@ -304,7 +315,7 @@ async def test_features_push_updates(
 
     register_interface(
         FeatureName.PushUpdates,
-        DummyPushUpdater(state_dispatcher, Protocol.MRP),
+        DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP),
         Protocol.MRP,
     )
 
@@ -556,13 +567,16 @@ async def test_takeover_failure_restores(facade_dummy, register_interface):
 
 
 async def test_takeover_push_updates(
-    facade_dummy, register_interface, state_dispatcher
+    facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
 ):
     listener = SavingPushListener()
 
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher, Protocol.DMAP)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP)
+
     async def _perform_update(expected_updates, expected_protocol):
-        raop_pusher.post_update(
-            Playing(MediaType.Music, DeviceState.Idle, title=f"raop_{expected_updates}")
+        dmap_pusher.post_update(
+            Playing(MediaType.Music, DeviceState.Idle, title=f"dmap_{expected_updates}")
         )
         mrp_pusher.post_update(
             Playing(MediaType.Music, DeviceState.Idle, title=f"mrp_{expected_updates}")
@@ -571,10 +585,7 @@ async def test_takeover_push_updates(
         await until(lambda: listener.no_of_updates == expected_updates)
         assert listener.last_update.title == f"{expected_protocol}_{expected_updates}"
 
-    raop_pusher = DummyPushUpdater(state_dispatcher, Protocol.RAOP)
-    mrp_pusher = DummyPushUpdater(state_dispatcher, Protocol.MRP)
-
-    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
 
     await facade_dummy.connect()
@@ -586,10 +597,10 @@ async def test_takeover_push_updates(
     # priority is used, so update from MRP should be delivered.
     await _perform_update(1, "mrp")
 
-    takeover_release = facade_dummy.takeover(Protocol.RAOP, PushUpdater)
+    takeover_release = facade_dummy.takeover(Protocol.DMAP, PushUpdater)
 
     # After takeover, push update from RAOP should be delivered instead
-    await _perform_update(2, "raop")
+    await _perform_update(2, "dmap")
 
     takeover_release()
 
@@ -601,28 +612,28 @@ async def test_takeover_push_updates(
 # not be pushed when performing a takeover (as the protocol taken over was never
 # started)
 async def test_start_stop_all_push_updaters(
-    facade_dummy, register_interface, state_dispatcher
+    facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
 ):
-    raop_pusher = DummyPushUpdater(state_dispatcher, Protocol.RAOP)
-    mrp_pusher = DummyPushUpdater(state_dispatcher, Protocol.MRP)
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher, Protocol.DMAP)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP)
 
-    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
 
     await facade_dummy.connect()
     push_updater = facade_dummy.push_updater
 
-    assert not raop_pusher.active
+    assert not dmap_pusher.active
     assert not mrp_pusher.active
 
     push_updater.start()
 
-    assert raop_pusher.active
+    assert dmap_pusher.active
     assert mrp_pusher.active
 
     push_updater.stop()
 
-    assert not raop_pusher.active
+    assert not dmap_pusher.active
     assert not mrp_pusher.active
 
 
@@ -660,106 +671,107 @@ async def power_setup_fixture(facade_dummy, register_interface, power_instance):
     yield facade_dummy.power
 
 
-async def dispatch_device_state(state_dispatcher, state, protocol=Protocol.MRP):
+async def dispatch_device_state(mrp_state_dispatcher, state, protocol=Protocol.MRP):
     event = asyncio.Event()
 
     # Add a listener last in the last and make it set an asyncio.Event. That way we
     # can synchronize and know that all other listeners have been called.
-    state_dispatcher.listen_to(UpdatedState.Playing, lambda message: event.set())
-    state_dispatcher.dispatch(
-        UpdatedState.Playing,
-        StateMessage(
-            protocol,
-            UpdatedState.Playing,
-            Playing(MediaType.Unknown, state),
-        ),
+    mrp_state_dispatcher.listen_to(UpdatedState.Playing, lambda message: event.set())
+    mrp_state_dispatcher.dispatch(
+        UpdatedState.Playing, Playing(MediaType.Unknown, state)
     )
 
     await event.wait()
 
 
-async def test_power_state_respect_playing_state(state_dispatcher, power_setup):
+async def test_power_state_respect_playing_state(mrp_state_dispatcher, power_setup):
     assert power_setup.power_state == PowerState.Off
 
     # Trigger something to play (but keep power state off) changes it to On
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     power_setup.listener.last_update == PowerState.On
     power_setup.power_state == PowerState.On
 
     # Trigger back to idle shall give power state Off again
-    await dispatch_device_state(state_dispatcher, DeviceState.Idle)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
     power_setup.listener.last_update == PowerState.Off
     power_setup.power_state == PowerState.Off
 
 
 async def test_power_state_defaults_to_derived_power_state_from_off(
-    state_dispatcher, power_setup, power_instance
+    mrp_state_dispatcher, power_setup, power_instance
 ):
     assert power_setup.power_state == PowerState.Off
 
     # Trigger something to play (but keep power state off) changes it to On
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     power_setup.listener.last_update == PowerState.On
 
     # Change derived power state to On
     power_instance.current_state = PowerState.On
 
     # Trigger back to idle shall give power state On as derived state is On
-    await dispatch_device_state(state_dispatcher, DeviceState.Idle)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
     power_setup.power_state == PowerState.On
 
 
 async def test_power_state_defaults_to_derived_power_state_from_on(
-    state_dispatcher, power_setup, power_instance
+    mrp_state_dispatcher, power_setup, power_instance
 ):
     power_instance.current_state = PowerState.On
 
     # Trigger something to play (but keep power state off) changes it to On
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     power_setup.listener.last_update == PowerState.On
 
     # Trigger back to idle shall give power state On as derived state is On
-    await dispatch_device_state(state_dispatcher, DeviceState.Idle)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
     power_setup.power_state == PowerState.On
 
 
-async def test_power_play_state_only_from_main_protocol(state_dispatcher, power_setup):
+async def test_power_play_state_only_from_main_protocol(
+    mrp_state_dispatcher, dmap_state_dispatcher, power_setup
+):
     assert power_setup.power_state == PowerState.Off
 
     # The initial Playing (DMAP) shall be ignored so we should only get On state
     # since duplicates are not propagated
     await dispatch_device_state(
-        state_dispatcher, DeviceState.Playing, protocol=Protocol.DMAP
+        dmap_state_dispatcher, DeviceState.Playing, protocol=Protocol.DMAP
     )
     assert power_setup.listener.last_update is None
     await dispatch_device_state(
-        state_dispatcher, DeviceState.Idle, protocol=Protocol.MRP
+        mrp_state_dispatcher, DeviceState.Idle, protocol=Protocol.MRP
     )
     assert power_setup.listener.last_update is None
     await dispatch_device_state(
-        state_dispatcher, DeviceState.Playing, protocol=Protocol.MRP
+        mrp_state_dispatcher, DeviceState.Playing, protocol=Protocol.MRP
     )
     assert power_setup.listener.last_update == PowerState.On
 
 
-async def test_power_play_state_no_dispatcher_duplicates(state_dispatcher, power_setup):
+async def test_power_play_state_no_dispatcher_duplicates(
+    mrp_state_dispatcher, power_setup
+):
     assert power_setup.power_state == PowerState.Off
 
     # Dispatch two "On" and one "Off". On shall only be registered once.
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
-    await dispatch_device_state(state_dispatcher, DeviceState.Idle)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
     assert power_setup.listener.last_update == PowerState.Off
 
     assert len(power_setup.listener.all_updates) == 2
 
 
-async def test_power_play_state_no_listener_duplicates(state_dispatcher, power_setup):
+async def test_power_play_state_no_listener_duplicates(
+    mrp_state_dispatcher, power_setup
+):
     assert power_setup.power_state == PowerState.Off
 
     # Dispatch "On" and then trigger a listener update with "On", which should not
     # yield any additional update
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     power_setup.powerstate_update(PowerState.Off, PowerState.On)
 
     assert len(power_setup.listener.all_updates) == 1
@@ -767,7 +779,7 @@ async def test_power_play_state_no_listener_duplicates(state_dispatcher, power_s
 
 
 async def test_power_no_updates_without_power_instance(
-    state_dispatcher, facade_dummy, register_interface
+    mrp_state_dispatcher, facade_dummy, register_interface
 ):
     listener = SavingPowerListener()
 
@@ -781,5 +793,5 @@ async def test_power_no_updates_without_power_instance(
     with pytest.raises(exceptions.NotSupportedError):
         facade_dummy.power.power_state
 
-    await dispatch_device_state(state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     assert listener.last_update is None
