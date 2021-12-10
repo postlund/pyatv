@@ -16,7 +16,7 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
 )
-from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
+from pyatv.core import MutableService, SetupData, StateDispatcher, TakeoverMethod, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -467,6 +467,7 @@ def setup(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
+    state_dispatcher: StateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
     playback_manager = RaopPlaybackManager(str(config.address), service.port)
