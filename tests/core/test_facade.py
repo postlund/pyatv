@@ -21,13 +21,13 @@ from pyatv.const import (
 )
 from pyatv.core import (
     AbstractPushUpdater,
+    CoreStateDispatcher,
+    ProtocolStateDispatcher,
     SetupData,
-    StateDispatcher,
     StateMessage,
     UpdatedState,
 )
 from pyatv.core.facade import FacadeAppleTV, SetupData
-from pyatv.core.protocol import MessageDispatcher
 from pyatv.interface import (
     Audio,
     DeviceInfo,
@@ -50,25 +50,25 @@ TEST_URL = "http://test"
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture(name="message_dispatcher")
-def message_dispatcher():
-    yield MessageDispatcher[UpdatedState, StateMessage]()
+@pytest.fixture(name="core_dispatcher")
+def core_dispatcher():
+    yield CoreStateDispatcher()
 
 
 @pytest.fixture(name="mrp_state_dispatcher")
-def mrp_state_dispatcher_fixture(message_dispatcher):
-    yield StateDispatcher(Protocol.MRP, message_dispatcher)
+def mrp_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.MRP, core_dispatcher)
 
 
 @pytest.fixture(name="dmap_state_dispatcher")
-def dmap_state_dispatcher_fixture(message_dispatcher):
-    yield StateDispatcher(Protocol.DMAP, message_dispatcher)
+def dmap_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)
 
 
 @pytest.fixture(name="facade_dummy")
-def facade_dummy_fixture(session_manager, message_dispatcher):
+def facade_dummy_fixture(session_manager, core_dispatcher):
     conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
-    facade = FacadeAppleTV(conf, session_manager, message_dispatcher)
+    facade = FacadeAppleTV(conf, session_manager, core_dispatcher)
     yield facade
 
 
@@ -167,8 +167,8 @@ class DummyStream(Stream):
 
 
 class DummyPushUpdater(AbstractPushUpdater):
-    def __init__(self, state_dispatcher, protocol):
-        super().__init__(state_dispatcher, protocol)
+    def __init__(self, state_dispatcher):
+        super().__init__(state_dispatcher)
         self._active = False
 
     @property
@@ -315,7 +315,7 @@ async def test_features_push_updates(
 
     register_interface(
         FeatureName.PushUpdates,
-        DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP),
+        DummyPushUpdater(mrp_state_dispatcher),
         Protocol.MRP,
     )
 
@@ -571,8 +571,8 @@ async def test_takeover_push_updates(
 ):
     listener = SavingPushListener()
 
-    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher, Protocol.DMAP)
-    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP)
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher)
 
     async def _perform_update(expected_updates, expected_protocol):
         dmap_pusher.post_update(
@@ -614,8 +614,8 @@ async def test_takeover_push_updates(
 async def test_start_stop_all_push_updaters(
     facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
 ):
-    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher, Protocol.DMAP)
-    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher, Protocol.MRP)
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher)
 
     register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)

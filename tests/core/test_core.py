@@ -4,15 +4,20 @@ from unittest.mock import ANY, MagicMock
 import pytest
 
 from pyatv.const import Protocol
-from pyatv.core import AbstractPushUpdater, StateDispatcher, StateMessage, UpdatedState
-from pyatv.core.protocol import MessageDispatcher
+from pyatv.core import (
+    AbstractPushUpdater,
+    CoreStateDispatcher,
+    ProtocolStateDispatcher,
+    StateMessage,
+    UpdatedState,
+)
 from pyatv.interface import Playing
 
 
 @pytest.fixture(name="state_dispatcher")
 def state_dispatcher_fixture():
-    message_dispatcher = MessageDispatcher[UpdatedState, StateMessage]()
-    yield StateDispatcher(Protocol.MRP, message_dispatcher)
+    core_dispatcher = CoreStateDispatcher()
+    yield ProtocolStateDispatcher(Protocol.MRP, core_dispatcher)
 
 
 class PushUpdaterDummy(AbstractPushUpdater):
@@ -43,7 +48,7 @@ def test_post_ignore_duplicate_update(event_loop, state_dispatcher, updates):
         listener.state_updated(message.value)
 
     async def _post_updates(repeats: int):
-        updater = PushUpdaterDummy(state_dispatcher, Protocol.MRP)
+        updater = PushUpdaterDummy(state_dispatcher)
         updater.listener = listener
         state_dispatcher.listen_to(UpdatedState.Playing, _state_changed)
         for _ in range(repeats):

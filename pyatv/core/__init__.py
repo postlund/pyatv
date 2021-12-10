@@ -56,17 +56,20 @@ def _no_filter(message: StateMessage) -> bool:
     return True
 
 
-class StateDispatcher:
-    """Dispatch internal state updates to listeners."""
+CoreStateDispatcher = MessageDispatcher[UpdatedState, StateMessage]
+
+
+class ProtocolStateDispatcher:
+    """Dispatch internal protocol state updates to listeners."""
 
     def __init__(
         self,
         protocol: Protocol,
-        dispatcher: MessageDispatcher[UpdatedState, StateMessage],
+        core_dispatcher: CoreStateDispatcher,
     ) -> None:
-        """Initialize a new StateDispatcher instance."""
+        """Initialize a new ProtocolStateDispatcher instance."""
         self._protocol = protocol
-        self._dispatcher = dispatcher
+        self._core_dispatcher = core_dispatcher
 
     def listen_to(
         self,
@@ -75,11 +78,11 @@ class StateDispatcher:
         message_filter: Callable[[StateMessage], bool] = _no_filter,
     ) -> None:
         """Listen to a specific type of message type."""
-        return self._dispatcher.listen_to(state, func, message_filter)
+        return self._core_dispatcher.listen_to(state, func, message_filter)
 
     def dispatch(self, state: UpdatedState, value: Any) -> List[asyncio.Task]:
         """Dispatch a message to listeners."""
-        return self._dispatcher.dispatch(
+        return self._core_dispatcher.dispatch(
             state, StateMessage(self._protocol, state, value)
         )
 
@@ -151,12 +154,11 @@ class AbstractPushUpdater(PushUpdater):
     if it has been updated.
     """
 
-    def __init__(self, state_dispatcher: StateDispatcher, protocol: Protocol):
+    def __init__(self, state_dispatcher: ProtocolStateDispatcher):
         """Initialize a new AbstractPushUpdater."""
         super().__init__()
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         self.state_dispatcher = state_dispatcher
-        self._protocol = protocol
         self._previous_state: Optional[Playing] = None
 
     def post_update(self, playing: Playing) -> None:

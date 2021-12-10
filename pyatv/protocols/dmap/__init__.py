@@ -24,8 +24,8 @@ from pyatv.const import (
 from pyatv.core import (
     AbstractPushUpdater,
     MutableService,
+    ProtocolStateDispatcher,
     SetupData,
-    StateDispatcher,
     TakeoverMethod,
     mdns,
 )
@@ -443,9 +443,11 @@ class DmapMetadata(Metadata):
 class DmapPushUpdater(AbstractPushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, apple_tv, state_dispatcher: StateDispatcher, listener) -> None:
+    def __init__(
+        self, apple_tv, state_dispatcher: ProtocolStateDispatcher, listener
+    ) -> None:
         """Initialize a new DmapPushUpdater instance."""
-        super().__init__(state_dispatcher, Protocol.DMAP)
+        super().__init__(state_dispatcher)
         self._atv = apple_tv
         self._listener = weakref.ref(listener)
         self._future = None
@@ -657,7 +659,7 @@ def setup(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
-    state_dispatcher: StateDispatcher,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
     daap_http = HttpSession(
