@@ -1,6 +1,5 @@
 [MASTER]
 reports=no
-extension-pkg-whitelist=netifaces
 
 [BASIC]
 good-names=
