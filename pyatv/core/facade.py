@@ -407,7 +407,7 @@ class FacadePushUpdater(
         Relayer.__init__(  # pylint: disable=non-parent-init-called
             self, interface.PushUpdater, DEFAULT_PRIORITIES
         )
-        interface.PushUpdater.__init__(self, asyncio.get_event_loop())
+        interface.PushUpdater.__init__(self)
 
     @property
     def active(self) -> bool:

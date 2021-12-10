@@ -99,21 +99,6 @@ class DummyFeatures(Features):
         )
 
 
-class DummyPushUpdater(PushUpdater):
-    def __init__(self, loop):
-        super().__init__(loop)
-
-    @property
-    def active(self) -> bool:
-        return False
-
-    def start(self, initial_delay: int = 0) -> None:
-        raise exceptions.NotSupportedError
-
-    def stop(self) -> None:
-        raise exceptions.NotSupportedError
-
-
 class DummyPower(Power):
     def __init__(self) -> None:
         self.current_state = PowerState.Off
@@ -164,8 +149,8 @@ class DummyStream(Stream):
 
 
 class DummyPushUpdater(PushUpdater):
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        super().__init__(loop)
+    def __init__(self):
+        super().__init__()
         self._active = False
 
     @property
@@ -298,14 +283,12 @@ async def test_features_feature_overlap_uses_priority(facade_dummy, register_int
     )
 
 
-async def test_features_push_updates(facade_dummy, event_loop, register_interface):
+async def test_features_push_updates(facade_dummy, register_interface):
     feat = facade_dummy.features
 
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Unsupported
 
-    register_interface(
-        FeatureName.PushUpdates, DummyPushUpdater(event_loop), Protocol.MRP
-    )
+    register_interface(FeatureName.PushUpdates, DummyPushUpdater(), Protocol.MRP)
 
     await facade_dummy.connect()
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Available
@@ -554,7 +537,7 @@ async def test_takeover_failure_restores(facade_dummy, register_interface):
     assert sdg_mrp.interfaces[Stream].url == "test"
 
 
-async def test_takeover_push_updates(facade_dummy, register_interface, event_loop):
+async def test_takeover_push_updates(facade_dummy, register_interface):
     listener = SavingPushListener()
 
     async def _perform_update(expected_updates, expected_protocol):
@@ -568,8 +551,8 @@ async def test_takeover_push_updates(facade_dummy, register_interface, event_loo
         await until(lambda: listener.no_of_updates == expected_updates)
         assert listener.last_update.title == f"{expected_protocol}_{expected_updates}"
 
-    raop_pusher = DummyPushUpdater(event_loop)
-    mrp_pusher = DummyPushUpdater(event_loop)
+    raop_pusher = DummyPushUpdater()
+    mrp_pusher = DummyPushUpdater()
 
     register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
@@ -597,11 +580,9 @@ async def test_takeover_push_updates(facade_dummy, register_interface, event_loo
 # All push updaters must be started and stopped in parallel, otherwise updates will
 # not be pushed when performing a takeover (as the protocol taken over was never
 # started)
-async def test_start_stop_all_push_updaters(
-    facade_dummy, register_interface, event_loop
-):
-    raop_pusher = DummyPushUpdater(event_loop)
-    mrp_pusher = DummyPushUpdater(event_loop)
+async def test_start_stop_all_push_updaters(facade_dummy, register_interface):
+    raop_pusher = DummyPushUpdater()
+    mrp_pusher = DummyPushUpdater()
 
     register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)

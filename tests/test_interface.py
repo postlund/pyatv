@@ -455,7 +455,7 @@ def test_post_ignore_duplicate_update(event_loop, updates):
     playing = Playing()
 
     async def _post_updates(repeats: int):
-        updater = PushUpdaterDummy(event_loop)
+        updater = PushUpdaterDummy()
         updater.listener = listener
         for _ in range(repeats):
             updater.post_update(playing)

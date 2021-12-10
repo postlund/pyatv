@@ -731,10 +731,10 @@ class PushUpdater(ABC, StateProducer):
     Listener interface: `pyatv.interface.PushListener`
     """
 
-    def __init__(self, loop: asyncio.AbstractEventLoop):
+    def __init__(self):
         """Initialize a new PushUpdater."""
         super().__init__()
-        self.loop = loop
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         self._previous_state: Optional[Playing] = None
 
     @property
