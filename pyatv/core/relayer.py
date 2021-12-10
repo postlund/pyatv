@@ -62,6 +62,14 @@ class Relayer(Generic[T]):
         raise exceptions.NotSupportedError()
 
     @property
+    def main_protocol(self) -> Optional[Protocol]:
+        """Return Protocol for main instance."""
+        for priority in chain(self._takeover_protocol, self._priorities):
+            if priority in self._interfaces:
+                return priority
+        return None
+
+    @property
     def instances(self) -> Sequence[T]:
         """Return all instances added to this relayer."""
         return list(self._interfaces.values())

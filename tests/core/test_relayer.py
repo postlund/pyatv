@@ -157,6 +157,34 @@ def test_main_instance_missing_instance_for_priority():
         relayer.main_instance
 
 
+def test_main_protocol():
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay])
+
+    relayer.register(SubClass1(), Protocol.AirPlay)
+    assert relayer.main_protocol == Protocol.AirPlay
+
+    relayer.register(SubClass1(), Protocol.DMAP)
+    assert relayer.main_protocol == Protocol.DMAP
+
+    relayer.register(SubClass1(), Protocol.MRP)
+    assert relayer.main_protocol == Protocol.MRP
+
+
+def test_main_protocol_with_no_instance():
+    relayer = Relayer(BaseClass, [Protocol.MRP])
+    assert relayer.main_protocol is None
+
+
+def test_takeover_overrides_main_protocol():
+    relayer = Relayer(BaseClass, [Protocol.MRP, Protocol.DMAP])
+    relayer.register(SubClass4("mrp"), Protocol.MRP)
+    relayer.register(SubClass4("dmap"), Protocol.DMAP)
+
+    relayer.takeover(Protocol.DMAP)
+
+    assert relayer.main_protocol == Protocol.DMAP
+
+
 def test_get_instance_of_type():
     instance1 = SubClass1()
     instance2 = SubClass2()
