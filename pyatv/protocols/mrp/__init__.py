@@ -598,9 +598,9 @@ class MrpPower(Power):
 class MrpPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, metadata, psm):
+    def __init__(self, metadata: MrpMetadata, psm: PlayerStateManager) -> None:
         """Initialize a new MrpPushUpdater instance."""
-        super().__init__(loop)
+        super().__init__()
         self.metadata = metadata
         self.psm = psm
 
@@ -889,7 +889,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     remote_control = MrpRemoteControl(loop, psm, protocol)
     metadata = MrpMetadata(protocol, psm, config.identifier)
     power = MrpPower(loop, protocol, remote_control)
-    push_updater = MrpPushUpdater(loop, metadata, psm)
+    push_updater = MrpPushUpdater(metadata, psm)
     audio = MrpAudio(protocol)
 
     interfaces = {

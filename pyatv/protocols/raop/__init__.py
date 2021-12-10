@@ -64,9 +64,9 @@ PERCENTAGE_MAX = 100.0
 class RaopPushUpdater(PushUpdater):
     """Implementation of push update support for RAOP."""
 
-    def __init__(self, metadata: Metadata, loop: asyncio.AbstractEventLoop):
+    def __init__(self, metadata: Metadata):
         """Initialize a new RaopPushUpdater instance."""
-        super().__init__(loop)
+        super().__init__()
         self._activated = False
         self.metadata = metadata
 
@@ -472,7 +472,7 @@ def setup(  # pylint: disable=too-many-locals
     """Set up a new RAOP service."""
     playback_manager = RaopPlaybackManager(str(config.address), service.port)
     metadata = RaopMetadata(playback_manager)
-    push_updater = RaopPushUpdater(metadata, loop)
+    push_updater = RaopPushUpdater(metadata)
 
     class RaopStateListener(RaopListener):
         """Listener for RAOP state changes."""

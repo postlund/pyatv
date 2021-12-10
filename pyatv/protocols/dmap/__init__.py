@@ -436,9 +436,9 @@ class DmapMetadata(Metadata):
 class DmapPushUpdater(PushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, apple_tv, listener):
+    def __init__(self, apple_tv, listener) -> None:
         """Initialize a new DmapPushUpdater instance."""
-        super().__init__(loop)
+        super().__init__()
         self._atv = apple_tv
         self._listener = weakref.ref(listener)
         self._future = None
@@ -659,7 +659,7 @@ def setup(  # pylint: disable=too-many-locals
     )
     requester = DaapRequester(daap_http, service.credentials)
     apple_tv = BaseDmapAppleTV(requester)
-    push_updater = DmapPushUpdater(loop, apple_tv, device_listener)
+    push_updater = DmapPushUpdater(apple_tv, device_listener)
     metadata = DmapMetadata(config.identifier, apple_tv)
     audio = DmapAudio(apple_tv)
 
