@@ -269,7 +269,9 @@ def build_playing_instance(  # pylint: disable=too-many-locals
     )
 
 
-async def _send_hid_key(protocol: MrpProtocol, key: str, action: InputAction) -> None:
+async def _send_hid_key(
+    protocol: MrpProtocol, key: str, action: InputAction, flush: bool = True
+) -> None:
     async def _do_press(keycode: Tuple[int, int], hold: bool):
         await protocol.send(messages.send_hid_event(keycode[0], keycode[1], True))
 
@@ -278,6 +280,10 @@ async def _send_hid_key(protocol: MrpProtocol, key: str, action: InputAction) ->
             await asyncio.sleep(1)
 
         await protocol.send(messages.send_hid_event(keycode[0], keycode[1], False))
+
+        # Send and receive a generic message as some kind of "flush" mechanism
+        if flush:
+            await protocol.send_and_receive(messages.create(protobuf.GENERIC_MESSAGE))
 
     keycode = _KEY_LOOKUP.get(key)
     if not keycode:
@@ -735,13 +741,17 @@ class MrpAudio(Audio):
     async def volume_up(self) -> None:
         """Increase volume by one step."""
         if self._volume < 100.0:
-            await _send_hid_key(self.protocol, "volume_up", InputAction.SingleTap)
+            await _send_hid_key(
+                self.protocol, "volume_up", InputAction.SingleTap, flush=False
+            )
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
         if self._volume > 0.0:
-            await _send_hid_key(self.protocol, "volume_down", InputAction.SingleTap)
+            await _send_hid_key(
+                self.protocol, "volume_down", InputAction.SingleTap, flush=False
+            )
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
 
