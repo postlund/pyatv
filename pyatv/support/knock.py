@@ -18,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 _ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
 
 _SLEEP_AFTER_CONNECT = 0.1
+_KNOCK_TIMEOUT_BUFFER = _SLEEP_AFTER_CONNECT * 2
 
 
 async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
@@ -45,15 +46,12 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
     tasks = []
+    knock_runtime = timeout - _KNOCK_TIMEOUT_BUFFER
     for port in ports:
         # yield to the event loop to ensure we do not block
         await asyncio.sleep(0)
         _LOGGER.debug("Knocking at port %s on %s", port, address)
-        tasks.append(
-            asyncio.ensure_future(
-                _async_knock(address, port, timeout - (_SLEEP_AFTER_CONNECT * 2))
-            )
-        )
+        tasks.append(asyncio.ensure_future(_async_knock(address, port, knock_runtime)))
     try:
         await asyncio.wait(
             tasks,
