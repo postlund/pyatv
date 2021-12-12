@@ -21,7 +21,6 @@ forced_separate = [
 module = [
     "miniaudio",
     "audio_metadata",
-    "netifaces",
     "srptools",
     "bitarray",
 ]

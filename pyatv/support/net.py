@@ -7,7 +7,7 @@ import socket
 import struct
 from typing import List, Optional
 
-import netifaces
+from ifaddr import get_adapters
 
 from pyatv import exceptions
 
@@ -54,22 +54,25 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
 
 def get_local_address_reaching(dest_ip: IPv4Address) -> Optional[IPv4Address]:
     """Get address of a local interface within same subnet as provided address."""
-    for iface in netifaces.interfaces():
-        for addr in netifaces.ifaddresses(iface).get(netifaces.AF_INET, []):
-            iface = IPv4Interface(addr["addr"] + "/" + addr["netmask"])
+    for adapter in get_adapters():
+        for addr in [addr for addr in adapter.ips if addr.is_IPv4]:
+            iface = IPv4Interface(f"{addr.ip}/{addr.network_prefix}")
             if dest_ip in iface.network:
                 return iface.ip
     return None
 
 
-def get_private_addresses() -> List[IPv4Address]:
+def get_private_addresses(include_loopback=True) -> List[IPv4Address]:
     """Get private (RFC1918 + loopback) addresses from all interfaces."""
     addresses: List[IPv4Address] = []
-    for iface in netifaces.interfaces():
-        for addr in netifaces.ifaddresses(iface).get(netifaces.AF_INET, []):
-            ipaddr = IPv4Address(addr["addr"])
+    for adapter in get_adapters():
+        for addr in [addr for addr in adapter.ips if addr.is_IPv4]:
+            ipaddr = IPv4Address(addr.ip)
+            if ipaddr.is_loopback and not include_loopback:
+                continue
             if ipaddr.is_private:
                 addresses.append(ipaddr)
+
     return addresses
 
 

@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import typing
 from unittest.mock import Mock, patch
 
-import netifaces
+from ifaddr import IP, Adapter
 import pytest
 
 import pyatv
@@ -29,27 +29,17 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True)
-def stub_netifaces():
+def stub_ifaddr():
     methods = {
-        "interfaces": Mock(return_value=["eth0"]),
-        "ifaddresses": Mock(
-            return_value={
-                netifaces.AF_INET: [
-                    {
-                        "addr": "10.0.10.1",
-                        "netmask": "255.255.255.0",
-                        "broadcast": "10.0.10.255",
-                    },
-                    {
-                        "addr": "127.0.0.1",
-                        "netmask": "255.0.0.0",
-                    },
-                ]
-            }
-        ),
+        "get_adapters": Mock(
+            return_value=[
+                Adapter("eth0", "eth0", [IP("10.0.10.1", 24, "eth0")]),
+                Adapter("lo", "lo", [IP("127.0.0.1", 8, "lo")]),
+            ]
+        )
     }
-
-    with patch.multiple("netifaces", **methods):
+    with patch.multiple("pyatv.support.net", **methods):
+        print("patch")
         yield
 
 
