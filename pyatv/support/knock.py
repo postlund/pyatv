@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 _ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
 
 
-async def _async_knock(address: IPv4Address, port: int, timeout: float) -> bool:
+async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
     """Open a connection to the device to wake a given host."""
     writer = None
     try:
