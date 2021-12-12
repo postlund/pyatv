@@ -32,6 +32,10 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
         if ex.errno in _ABORT_KNOCK_ERRNOS:
             raise
     else:
+        # Leave the connection open for the timeout
+        # to ensure the underlying stack has a chance
+        # to connect to the device which will hopefully
+        # wake it
         await asyncio.sleep(timeout)
     finally:
         if writer:
