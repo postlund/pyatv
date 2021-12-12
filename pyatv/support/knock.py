@@ -52,10 +52,9 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
         await asyncio.sleep(0)
         _LOGGER.debug("Knocking at port %s on %s", port, address)
         tasks.append(asyncio.ensure_future(_async_knock(address, port, knock_runtime)))
-    await asyncio.wait(tasks, return_when=FIRST_EXCEPTION)
-    for task in tasks:
-        if not task.done():
-            task.cancel()
+    _, pending = await asyncio.wait(tasks, return_when=FIRST_EXCEPTION)
+    for task in pending:
+        task.cancel()
 
 
 async def knocker(
