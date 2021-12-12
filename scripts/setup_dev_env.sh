@@ -43,12 +43,6 @@ pip install protobuf-setuptools
 echo "-> Installing dependencies..."
 pip install --upgrade pyyaml -r requirements/requirements_test.txt -r requirements/requirements_docs.txt
 
-if [[ $GITPOD_INSTANCE_ID ]]; then
-  echo "> Re-installing netifaces in GitPod due to bug"
-  pip uninstall -y netifaces
-  pip install netifaces
-fi
-
 echo "-> Running tests as verification..."
 python setup.py test
 
