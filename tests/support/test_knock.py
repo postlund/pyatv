@@ -2,6 +2,7 @@
 
 import asyncio
 from ipaddress import ip_address
+import time
 
 import pytest
 
@@ -13,6 +14,8 @@ from tests.utils import until
 
 LOCALHOST = ip_address("127.0.0.1")
 LINK_LOCAL = ip_address("169.254.0.0")
+MULTICAST_IP = ip_address("224.0.0.251")
+
 
 @pytest.mark.asyncio
 async def test_single_port_knock(event_loop, knock_server):
@@ -52,3 +55,20 @@ async def test_knock_times_out(event_loop):
     task = await knocker(LINK_LOCAL, [1], event_loop, timeout=0.3)
     # Knocking on link-local will timeout and should not raise
     await task
+
+
+@pytest.mark.asyncio
+async def test_abort_knock_timeout_host(event_loop):
+    task = await knocker(LINK_LOCAL, [1], event_loop, timeout=0.3)
+    # Knocking on link-local will timeout and should not raise
+    await task
+
+
+@pytest.mark.asyncio
+async def test_abort_knock_unreachable_host(event_loop):
+    start = time.monotonic()
+    task = await knocker(MULTICAST_IP, [1], event_loop, timeout=5)
+    # Knocking on the multicast ip will raise Network unreachable and should abort right away
+    await task
+    end = time.monotonic()
+    assert (end - start) < 1
