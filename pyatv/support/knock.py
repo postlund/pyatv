@@ -22,8 +22,10 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
     """Open a connection to the device to wake a given host."""
     writer = None
     try:
-        _, writer = await asyncio.open_connection(str(address), port)
-    except asyncio.CancelledError:
+        _, writer = await asyncio.wait_for(
+            asyncio.open_connection(str(address), port), timeout=timeout
+        )
+    except asyncio.TimeoutError:
         pass
     except OSError as ex:
         # If we get EHOSTDOWN or EHOSTUNREACH we
@@ -31,12 +33,6 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
         # a device that is not there
         if ex.errno in _ABORT_KNOCK_ERRNOS:
             raise
-    else:
-        # Leave the connection open for the timeout
-        # to ensure the underlying stack has a chance
-        # to connect to the device which will hopefully
-        # wake it
-        await asyncio.sleep(timeout)
     finally:
         if writer:
             writer.close()
@@ -44,8 +40,12 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
 
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
-    _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    tasks = [asyncio.Task(_async_knock(address, port, timeout - 0.1)) for port in ports]
+    tasks = []
+    for port in ports:
+        # yield to the event loop to ensure we do not block
+        await asyncio.sleep(0)
+        _LOGGER.debug("Knocking at port %s on %s", port, address)
+        tasks.append(asyncio.ensure_future(_async_knock(address, port, timeout - 0.1)))
     try:
         await asyncio.wait(
             tasks,
