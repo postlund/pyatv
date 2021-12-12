@@ -41,8 +41,6 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
 async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
     _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    _LOGGER.critical("Knocking at ports %s on %s", ports, address)
-
     tasks = [asyncio.Task(_async_knock(address, port, timeout - 0.1)) for port in ports]
     try:
         await asyncio.wait(
