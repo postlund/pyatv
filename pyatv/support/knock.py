@@ -48,7 +48,7 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     tasks = [asyncio.Task(_async_knock(address, port, timeout - 0.1)) for port in ports]
     try:
         await asyncio.wait(
-            *tasks,
+            tasks,
             return_when=FIRST_EXCEPTION,
         )
     except Exception:  # pylint: disable=broad-except
