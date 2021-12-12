@@ -45,3 +45,10 @@ async def test_knock_does_not_raise(event_loop, knock_server):
     task = await knocker(LOCALHOST, [server.port + 1], event_loop, timeout=0.5)
     # Knocking on a non-listening port should not raise
     await task
+
+
+@pytest.mark.asyncio
+async def test_knock_times_out(event_loop):
+    task = await knocker("169.254.0.0", [1], event_loop, timeout=0.3)
+    # Knocking on link-local will timeout and should not raise
+    await task
