@@ -17,6 +17,8 @@ _LOGGER = logging.getLogger(__name__)
 
 _ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
 
+_SLEEP_AFTER_CONNECT = 0.1
+
 
 async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
     """Open a connection to the device to wake a given host."""
@@ -33,6 +35,8 @@ async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
         # a device that is not there
         if ex.errno in _ABORT_KNOCK_ERRNOS:
             raise
+    else:
+        await asyncio.sleep(_SLEEP_AFTER_CONNECT)
     finally:
         if writer:
             writer.close()
@@ -45,7 +49,11 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
         # yield to the event loop to ensure we do not block
         await asyncio.sleep(0)
         _LOGGER.debug("Knocking at port %s on %s", port, address)
-        tasks.append(asyncio.ensure_future(_async_knock(address, port, timeout - 0.1)))
+        tasks.append(
+            asyncio.ensure_future(
+                _async_knock(address, port, timeout - (_SLEEP_AFTER_CONNECT * 2))
+            )
+        )
     try:
         await asyncio.wait(
             tasks,
