@@ -58,16 +58,9 @@ async def test_knock_times_out(event_loop):
 
 
 @pytest.mark.asyncio
-async def test_abort_knock_timeout_host(event_loop):
-    task = await knocker(LINK_LOCAL, [1], event_loop, timeout=0.3)
-    # Knocking on link-local will timeout and should not raise
-    await task
-
-
-@pytest.mark.asyncio
 async def test_abort_knock_unreachable_host(event_loop):
     start = time.monotonic()
-    task = await knocker(MULTICAST_IP, [1], event_loop, timeout=5)
+    task = await knocker(MULTICAST_IP, [1], event_loop, timeout=3)
     # Knocking on the multicast ip will raise Network unreachable and should abort right away
     await task
     end = time.monotonic()
