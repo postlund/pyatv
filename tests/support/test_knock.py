@@ -12,7 +12,7 @@ from tests.fake_knock import create_knock_server
 from tests.utils import until
 
 LOCALHOST = ip_address("127.0.0.1")
-
+LINK_LOCAL = ip_address("169.254.0.0")
 
 @pytest.mark.asyncio
 async def test_single_port_knock(event_loop, knock_server):
@@ -42,13 +42,13 @@ async def test_continuous_knocking(event_loop, knock_server):
 @pytest.mark.asyncio
 async def test_knock_does_not_raise(event_loop, knock_server):
     server = await knock_server()
-    task = await knocker(LOCALHOST, [server.port + 1], event_loop, timeout=0.5)
+    task = await knocker(LOCALHOST, [1], event_loop, timeout=0.5)
     # Knocking on a non-listening port should not raise
     await task
 
 
 @pytest.mark.asyncio
 async def test_knock_times_out(event_loop):
-    task = await knocker("169.254.0.0", [1], event_loop, timeout=0.3)
+    task = await knocker(LINK_LOCAL, [1], event_loop, timeout=0.3)
     # Knocking on link-local will timeout and should not raise
     await task
