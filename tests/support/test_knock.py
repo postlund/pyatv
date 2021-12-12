@@ -37,3 +37,11 @@ async def test_continuous_knocking(event_loop, knock_server):
     # Knocking once should be enough as long as we let the connection
     # try to complete for a long enough time
     await until(lambda: server.count == 1)
+
+
+@pytest.mark.asyncio
+async def test_knock_does_not_raise(event_loop, knock_server):
+    server = await knock_server()
+    task = await knocker(LOCALHOST, [server.port + 1], event_loop, timeout=0.5)
+    # Knocking on a non-listening port should not raise
+    await task
