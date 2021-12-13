@@ -104,3 +104,12 @@ class HttpError(ProtocolError):
 
 class InvalidConfigError(Exception):
     """Thrown when something is wrong or missing in the config."""
+
+
+class BlockedStateError(Exception):
+    """Thrown when calling a blocked method.
+
+    Typically, public interface methods (e.g. any method available via the object
+    returned by `pyatv.connect`) becomes blocked after either calling close or because
+    the connection was closed for some other reason.
+    """
