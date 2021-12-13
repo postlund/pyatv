@@ -8,6 +8,7 @@ import difflib
 import glob
 from io import BytesIO
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -17,8 +18,6 @@ import cryptography
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from google.protobuf.text_format import MessageToString
 import requests
-
-PROTOBUF_VERSION = "3.17.3"
 
 # New messages re-using inner message of another type
 REUSED_MESSAGES = {"DEVICE_INFO_MESSAGE": "DEVICE_INFO_UPDATE_MESSAGE"}
@@ -60,7 +59,7 @@ ProtocolMessage.inner = _inner_message  # type: ignore
 MessageInfo = namedtuple("MessageInfo", ["module", "title", "accessor", "const"])
 
 
-def _protobuf_url():
+def _protobuf_url(version):
     base_url = (
         "https://github.com/protocolbuffers/protobuf/"
         + "releases/download/v{version}/protoc-{version}-{platform}.zip"
@@ -76,7 +75,16 @@ def _protobuf_url():
         print("Unsupported platform: " + sys.platform, file=sys.stderr)
         sys.exit(1)
 
-    return base_url.format(version=PROTOBUF_VERSION, platform=platform)
+    return base_url.format(version=version, platform=platform)
+
+
+def _get_protobuf_version():
+    with open("base_versions.txt", encoding="utf-8") as file:
+        for line in file:
+            match = re.match(r"protobuf==(\d+\.\d+\.\d+)[^0-9,]*", line)
+            if match:
+                return match.group(1)
+    raise Exception("failed to determine protobuf version")
 
 
 def _download_protoc(force=False):
@@ -84,7 +92,9 @@ def _download_protoc(force=False):
         print("Not downloading protoc (already exists)")
         return
 
-    url = _protobuf_url()
+    version = _get_protobuf_version()
+    url = _protobuf_url(version)
+    output_file = f"bin/protoc-{version}"
 
     print("Downloading", url)
 
@@ -93,6 +103,7 @@ def _download_protoc(force=False):
         for zip_info in zip_file.infolist():
             if zip_info.filename.startswith("bin/protoc"):
                 print("Extracting", zip_info.filename)
+                zip_info.filename = output_file
                 zip_file.extract(zip_info)
                 break
 
@@ -105,6 +116,7 @@ def _download_protoc(force=False):
 
 
 def _verify_protoc_version():
+    expected_version = _get_protobuf_version()
     try:
         ret = subprocess.run(
             [protoc_path(), "--version"],
@@ -113,10 +125,10 @@ def _verify_protoc_version():
             check=False,
         )
         installed_version = ret.stdout.decode("utf-8").split(" ")[1].rstrip()
-        if installed_version != PROTOBUF_VERSION:
+        if installed_version != expected_version:
             print(
                 "Expected protobuf",
-                PROTOBUF_VERSION,
+                expected_version,
                 "but found",
                 installed_version,
                 file=sys.stderr,
@@ -128,11 +140,15 @@ def _verify_protoc_version():
             file=sys.stderr,
         )
         sys.exit(1)
+    else:
+        print(f"Using protobuf version {expected_version}")
 
 
 def protoc_path():
     """Return path to protoc binary."""
-    binary = "protoc" + (".exe" if sys.platform == "win32" else "")
+    binary = f"protoc-{_get_protobuf_version()}" + (
+        ".exe" if sys.platform == "win32" else ""
+    )
     return os.path.join("bin", binary)
 
 
