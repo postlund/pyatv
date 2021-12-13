@@ -39,7 +39,6 @@ def stub_ifaddr():
         )
     }
     with patch.multiple("pyatv.support.net", **methods):
-        print("patch")
         yield
 
 

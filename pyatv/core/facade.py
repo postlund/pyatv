@@ -27,7 +27,7 @@ from pyatv.const import (
 )
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
-from pyatv.support import deprecated
+from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
 
@@ -50,86 +50,106 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         super().__init__(interface.RemoteControl, DEFAULT_PRIORITIES)
 
     # pylint: disable=invalid-name
+    @shield.guard
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         return await self.relay("up")(action=action)
 
+    @shield.guard
     async def down(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key down."""
         return await self.relay("down")(action=action)
 
+    @shield.guard
     async def left(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key left."""
         return await self.relay("left")(action=action)
 
+    @shield.guard
     async def right(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key right."""
         return await self.relay("right")(action=action)
 
+    @shield.guard
     async def play(self) -> None:
         """Press key play."""
         return await self.relay("play")()
 
+    @shield.guard
     async def play_pause(self) -> None:
         """Toggle between play and pause."""
         return await self.relay("play_pause")()
 
+    @shield.guard
     async def pause(self) -> None:
         """Press key play."""
         return await self.relay("pause")()
 
+    @shield.guard
     async def stop(self) -> None:
         """Press key stop."""
         return await self.relay("stop")()
 
+    @shield.guard
     async def next(self) -> None:
         """Press key next."""
         return await self.relay("next")()
 
+    @shield.guard
     async def previous(self) -> None:
         """Press key previous."""
         return await self.relay("previous")()
 
+    @shield.guard
     async def select(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key select."""
         return await self.relay("select")(action=action)
 
+    @shield.guard
     async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key menu."""
         return await self.relay("menu")(action=action)
 
     @deprecated
+    @shield.guard
     async def volume_up(self) -> None:
         """Press key volume up."""
         return await self.relay("volume_up")()
 
     @deprecated
+    @shield.guard
     async def volume_down(self) -> None:
         """Press key volume down."""
         return await self.relay("volume_down")()
 
+    @shield.guard
     async def home(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key home."""
         return await self.relay("home")(action=action)
 
+    @shield.guard
     async def home_hold(self) -> None:
         """Hold key home."""
         return await self.relay("home_hold")()
 
+    @shield.guard
     async def top_menu(self) -> None:
         """Go to main menu (long press menu)."""
         return await self.relay("top_menu")()
 
     @deprecated
+    @shield.guard
     async def suspend(self) -> None:
         """Suspend the device."""
         return await self.relay("suspend")()
 
     @deprecated
+    @shield.guard
     async def wakeup(self) -> None:
         """Wake up the device."""
         return await self.relay("wakeup")()
 
+    @shield.guard
     async def skip_forward(self) -> None:
         """Skip forward a time interval.
 
@@ -137,6 +157,7 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """
         return await self.relay("skip_forward")()
 
+    @shield.guard
     async def skip_backward(self) -> None:
         """Skip backwards a time interval.
 
@@ -144,14 +165,17 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """
         return await self.relay("skip_backward")()
 
+    @shield.guard
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         return await self.relay("set_position")(pos=pos)
 
+    @shield.guard
     async def set_shuffle(self, shuffle_state: const.ShuffleState) -> None:
         """Change shuffle mode to on or off."""
         return await self.relay("set_shuffle")(shuffle_state=shuffle_state)
 
+    @shield.guard
     async def set_repeat(self, repeat_state: const.RepeatState) -> None:
         """Change repeat state."""
         return await self.relay("set_repeat")(repeat_state=repeat_state)
@@ -164,11 +188,13 @@ class FacadeMetadata(Relayer, interface.Metadata):
         """Initialize a new FacadeMetadata instance."""
         super().__init__(interface.Metadata, DEFAULT_PRIORITIES)
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def device_id(self) -> Optional[str]:
         """Return a unique identifier for current device."""
         return self.relay("device_id")
 
+    @shield.guard
     async def artwork(self, width=512, height=None) -> Optional[interface.ArtworkInfo]:
         """Return artwork for what is currently playing (or None).
 
@@ -180,16 +206,19 @@ class FacadeMetadata(Relayer, interface.Metadata):
         """
         return await self.relay("artwork")(width=width, height=height)
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def artwork_id(self) -> str:
         """Return a unique identifier for current artwork."""
         return self.relay("artwork_id")
 
+    @shield.guard
     async def playing(self) -> interface.Playing:
         """Return what is currently playing."""
         return await self.relay("playing")()
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def app(self) -> Optional[interface.App]:
         """Return information about current app playing something.
 
@@ -225,6 +254,7 @@ class FacadeFeatures(Relayer, interface.Features):
                 ):
                     self._feature_map[feature] = (protocol, instance)
 
+    @shield.guard
     def get_feature(self, feature_name: FeatureName) -> interface.FeatureInfo:
         """Return current state of a feature."""
         if feature_name == FeatureName.PushUpdates:
@@ -298,7 +328,8 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
         if not self._is_playing:
             self.listener.powerstate_update(old_state, new_state)
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def power_state(self) -> const.PowerState:
         """Return device power state."""
         # Override power state in case something is playing
@@ -306,12 +337,14 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
             return const.PowerState.On
         return self.relay("power_state")
 
+    @shield.guard
     async def turn_on(self, await_new_state: bool = False) -> None:
         """Turn device on."""
         await self.relay("turn_on", priority=self.OVERRIDE_PRIORITIES)(
             await_new_state=await_new_state
         )
 
+    @shield.guard
     async def turn_off(self, await_new_state: bool = False) -> None:
         """Turn device off."""
         await self.relay("turn_off", priority=self.OVERRIDE_PRIORITIES)(
@@ -327,10 +360,12 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         super().__init__(interface.Stream, DEFAULT_PRIORITIES)
         self._features = features
 
+    @shield.guard
     def close(self) -> None:
         """Close connection and release allocated resources."""
         self.relay("close")()
 
+    @shield.guard
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device."""
         if not self._features.in_state(FeatureState.Available, FeatureName.PlayUrl):
@@ -338,6 +373,7 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
 
         await self.relay("play_url")(url, **kwargs)
 
+    @shield.guard
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local file to device.
 
@@ -353,10 +389,12 @@ class FacadeApps(Relayer, interface.Apps):
         """Initialize a new FacadeApps instance."""
         super().__init__(interface.Apps, DEFAULT_PRIORITIES)
 
+    @shield.guard
     async def app_list(self) -> List[interface.App]:
         """Fetch a list of apps that can be launched."""
         return await self.relay("app_list")()
 
+    @shield.guard
     async def launch_app(self, bundle_id: str) -> None:
         """Launch an app based on bundle ID."""
         await self.relay("launch_app")(bundle_id)
@@ -369,15 +407,18 @@ class FacadeAudio(Relayer, interface.Audio):
         """Initialize a new FacadeAudio instance."""
         super().__init__(interface.Audio, DEFAULT_PRIORITIES)
 
+    @shield.guard
     async def volume_up(self) -> None:
         """Press key volume up."""
         return await self.relay("volume_up")()
 
+    @shield.guard
     async def volume_down(self) -> None:
         """Press key volume down."""
         return await self.relay("volume_down")()
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def volume(self) -> float:
         """Return current volume level."""
         volume = self.relay("volume")
@@ -385,6 +426,7 @@ class FacadeAudio(Relayer, interface.Audio):
             return volume
         raise exceptions.ProtocolError(f"volume {volume} is out of range")
 
+    @shield.guard
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
         if 0.0 <= level <= 100.0:
@@ -409,11 +451,13 @@ class FacadePushUpdater(
         )
         interface.PushUpdater.__init__(self)
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def active(self) -> bool:
         """Return if push updater has been started."""
         return self.relay("active")
 
+    @shield.guard
     def start(self, initial_delay: int = 0) -> None:
         """Begin to listen to updates.
 
@@ -423,6 +467,7 @@ class FacadePushUpdater(
             instance.listener = self
             instance.start(initial_delay)
 
+    @shield.guard
     def stop(self) -> None:
         """No longer forward updates to listener."""
         for instance in self.instances:
@@ -469,6 +514,17 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Apps: FacadeApps(),
             interface.Audio: FacadeAudio(),
         }
+        self._shield_everything()
+
+    def _shield_everything(self):
+        shield.shield(self)
+        for instance in self._interfaces.values():
+            shield.shield(instance)
+
+    def _block_everything(self):
+        shield.block(self)
+        for instance in self._interfaces.values():
+            shield.block(instance)
 
     def add_protocol(self, setup_data: SetupData):
         """Add a new protocol to the relay."""
@@ -482,6 +538,7 @@ class FacadeAppleTV(interface.AppleTV):
         _LOGGER.debug("Adding handler for protocol %s", setup_data.protocol)
         self._protocols_to_setup.put(setup_data)
 
+    @shield.guard
     async def connect(self) -> None:
         """Initiate connection to device."""
         # No protocols to setup + no protocols previously set up => no service
@@ -536,6 +593,10 @@ class FacadeAppleTV(interface.AppleTV):
         asyncio.ensure_future(self._session_manager.close())
         for setup_data in self._protocol_handlers.values():
             self._pending_tasks.update(setup_data.close())
+
+        # Block access to everything in the public interface
+        self._block_everything()
+
         return self._pending_tasks
 
     def takeover(self, protocol: Protocol, *interfaces: Any) -> Callable[[], None]:
@@ -567,12 +628,14 @@ class FacadeAppleTV(interface.AppleTV):
 
         return _release
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def device_info(self) -> interface.DeviceInfo:
         """Return API for device information."""
         return self._device_info
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def service(self) -> interface.BaseService:
         """Return main service used to connect to the Apple TV."""
         for protocol in DEFAULT_PRIORITIES:
@@ -582,42 +645,50 @@ class FacadeAppleTV(interface.AppleTV):
 
         raise RuntimeError("no service (bug)")
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def remote_control(self) -> interface.RemoteControl:
         """Return API for controlling the Apple TV."""
         return cast(interface.RemoteControl, self._interfaces[interface.RemoteControl])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def metadata(self) -> interface.Metadata:
         """Return API for retrieving metadata from the Apple TV."""
         return cast(interface.Metadata, self._interfaces[interface.Metadata])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def push_updater(self) -> interface.PushUpdater:
         """Return API for handling push update from the Apple TV."""
         return cast(interface.PushUpdater, self._interfaces[interface.PushUpdater])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def stream(self) -> interface.Stream:
         """Return API for streaming media."""
         return cast(interface.Stream, self._interfaces[interface.Stream])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def power(self) -> interface.Power:
         """Return API for power management."""
         return cast(interface.Power, self._interfaces[interface.Power])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def features(self) -> interface.Features:
         """Return features interface."""
         return cast(interface.Features, self._interfaces[interface.Features])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def apps(self) -> interface.Apps:
         """Return apps interface."""
         return cast(interface.Apps, self._interfaces[interface.Apps])
 
-    @property
+    @property  # type: ignore
+    @shield.guard
     def audio(self) -> interface.Audio:
         """Return audio interface."""
         return cast(interface.Audio, self._interfaces[interface.Audio])

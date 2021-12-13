@@ -24,6 +24,9 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.BackOffError" href="#pyatv.exceptions.BackOffError">BackOffError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.BlockedStateError" href="#pyatv.exceptions.BlockedStateError">BlockedStateError</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.CommandError" href="#pyatv.exceptions.CommandError">CommandError</a></code></h4>
 </li>
 <li>
@@ -93,7 +96,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L106" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L115" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -124,6 +127,22 @@ link_group: api
 <dd>
 <section class="desc"><p>Thrown when device mandates a backoff period.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L59-L60" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.BlockedStateError"><code class="flex name class">
+<span>class <span class="ident">BlockedStateError</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when calling a blocked method.</p>
+<p>Typically, public interface methods (e.g. any method available via the object
+returned by <code><a title="pyatv.connect" href="index#pyatv.connect">connect()</a></code>) becomes blocked after either calling close or because
+the connection was closed for some other reason.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L109-L115" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
