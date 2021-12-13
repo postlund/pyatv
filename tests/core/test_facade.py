@@ -3,6 +3,7 @@ from abc import ABC
 import asyncio
 import inspect
 from ipaddress import IPv4Address
+import logging
 import math
 from typing import Any, Dict, Set
 from unittest.mock import MagicMock
@@ -10,7 +11,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from pyatv import exceptions
-from pyatv.conf import AppleTV
+from pyatv.conf import AppleTV as AppleTVConf
 from pyatv.const import (
     DeviceState,
     FeatureName,
@@ -29,21 +30,27 @@ from pyatv.core import (
 )
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
+    AppleTV,
+    Apps,
     Audio,
     DeviceInfo,
     DeviceListener,
     FeatureInfo,
     Features,
     FeatureState,
+    Metadata,
     Playing,
     Power,
     PowerListener,
     PushListener,
     PushUpdater,
+    RemoteControl,
     Stream,
 )
 
 from tests.utils import until
+
+_LOGGER = logging.getLogger(__name__)
 
 TEST_URL = "http://test"
 
@@ -67,7 +74,7 @@ def dmap_state_dispatcher_fixture(core_dispatcher):
 
 @pytest.fixture(name="facade_dummy")
 def facade_dummy_fixture(session_manager, core_dispatcher):
-    conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
+    conf = AppleTVConf(IPv4Address("127.0.0.1"), "Test")
     facade = FacadeAppleTV(conf, session_manager, core_dispatcher)
     yield facade
 
@@ -795,3 +802,75 @@ async def test_power_no_updates_without_power_instance(
 
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     assert listener.last_update is None
+
+
+# GUARD CALLS AFTER CLOSE
+
+# Retrieve method names of all methods (and properties) in an interface but exclude
+# members inherited from super classes.
+def get_interface_methods(iface, base_methods=None):
+    if base_methods is None:
+        base_methods = set(dir(iface))
+
+    for base in iface.__bases__:
+        # Remove objects that comes from current super class
+        base_methods.difference_update(set(dir(base)) & base_methods)
+        get_interface_methods(base, base_methods)
+    return set(method for method in base_methods if not method.startswith("_"))
+
+
+def assert_interface_guarded(obj, iface, exclude=None):
+    # All methods and properties in the base object should be properly guarded
+    for method_name in get_interface_methods(iface) - (exclude or set()):
+        with pytest.raises(exceptions.BlockedStateError):
+            try:
+                method = getattr(obj, method_name)
+                if inspect.ismethod(method):
+                    method()
+            except exceptions.BlockedStateError:
+                _LOGGER.debug(
+                    "Method %s in %s is properly guarded", method_name, iface.__name__
+                )
+                raise
+            else:
+                raise Exception(
+                    f"method {method_name} in {iface.__name__} is not guarded"
+                )
+
+
+async def test_base_methods_guarded_after_close(facade_dummy, register_interface):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    await facade_dummy.connect()
+    facade_dummy.close()
+    assert_interface_guarded(facade_dummy, AppleTV, exclude={"close"})
+
+
+@pytest.mark.parametrize(
+    "iface,member,exclude",
+    [
+        (RemoteControl, "remote_control", {}),
+        (Metadata, "metadata", {}),
+        (PushUpdater, "push_updater", {}),
+        (Stream, "stream", {}),
+        (Power, "power", {}),
+        # in_states is not abstract but uses get_features, will which will raise
+        (Features, "features", {"in_state"}),
+        (Apps, "apps", {}),
+        (Audio, "audio", {}),
+    ],
+)
+async def test_interface_methods_guarded_after_close(
+    facade_dummy, register_interface, iface, member, exclude
+):
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+    await facade_dummy.connect()
+
+    # Store reference to interface prior to closing to simulate something like this:
+    # atv = await connect(...)
+    # rc = atv.remote_control
+    # atv.close()
+    # await rc.left()
+    instance = getattr(facade_dummy, member)
+    facade_dummy.close()
+
+    assert_interface_guarded(instance, iface, exclude=exclude)
