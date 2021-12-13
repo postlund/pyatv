@@ -22,7 +22,14 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
+from pyatv.core import (
+    AbstractPushUpdater,
+    MutableService,
+    ProtocolStateDispatcher,
+    SetupData,
+    TakeoverMethod,
+    mdns,
+)
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -595,12 +602,17 @@ class MrpPower(Power):
         return PowerState.Unknown
 
 
-class MrpPushUpdater(PushUpdater):
+class MrpPushUpdater(AbstractPushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, metadata, psm):
+    def __init__(
+        self,
+        metadata: MrpMetadata,
+        psm: PlayerStateManager,
+        state_dispatcher: ProtocolStateDispatcher,
+    ) -> None:
         """Initialize a new MrpPushUpdater instance."""
-        super().__init__(loop)
+        super().__init__(state_dispatcher)
         self.metadata = metadata
         self.psm = psm
 
@@ -878,6 +890,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
+    state_dispatcher: ProtocolStateDispatcher,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> SetupData:
@@ -888,7 +901,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     remote_control = MrpRemoteControl(loop, psm, protocol)
     metadata = MrpMetadata(protocol, psm, config.identifier)
     power = MrpPower(loop, protocol, remote_control)
-    push_updater = MrpPushUpdater(loop, metadata, psm)
+    push_updater = MrpPushUpdater(metadata, psm, state_dispatcher)
     audio = MrpAudio(protocol)
 
     interfaces = {
@@ -949,6 +962,7 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new MRP service."""
     yield create_with_connection(
@@ -958,6 +972,7 @@ def setup(
         device_listener,
         session_manager,
         takeover,
+        state_dispatcher,
         MrpConnection(config.address, service.port, loop, atv=device_listener),
     )
 

@@ -14,7 +14,13 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
 )
-from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
+from pyatv.core import (
+    MutableService,
+    ProtocolStateDispatcher,
+    SetupData,
+    TakeoverMethod,
+    mdns,
+)
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
@@ -375,6 +381,7 @@ def setup(
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new Companion service."""
     # Companion doesn't work without credentials, so don't setup if none exists

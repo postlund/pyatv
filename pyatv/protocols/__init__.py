@@ -4,7 +4,12 @@ from typing import Any, Awaitable, Callable, Dict, Generator, Mapping, NamedTupl
 
 from pyatv import interface
 from pyatv.const import Protocol
-from pyatv.core import MutableService, SetupData, TakeoverMethod
+from pyatv.core import (
+    MutableService,
+    ProtocolStateDispatcher,
+    SetupData,
+    TakeoverMethod,
+)
 from pyatv.core.scan import ScanMethod
 from pyatv.interface import BaseService, DeviceInfo
 from pyatv.protocols import airplay as airplay_proto
@@ -23,6 +28,7 @@ SetupMethod = Callable[
         StateProducer,
         ClientSessionManager,
         TakeoverMethod,
+        ProtocolStateDispatcher,
     ],
     Generator[SetupData, None, None],
 ]

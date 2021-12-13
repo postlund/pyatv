@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core.facade."""
+from abc import ABC
 import asyncio
 import inspect
 from ipaddress import IPv4Address
@@ -10,8 +11,22 @@ import pytest
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV
-from pyatv.const import DeviceState, FeatureName, MediaType, OperatingSystem, Protocol
-from pyatv.core import SetupData
+from pyatv.const import (
+    DeviceState,
+    FeatureName,
+    MediaType,
+    OperatingSystem,
+    PowerState,
+    Protocol,
+)
+from pyatv.core import (
+    AbstractPushUpdater,
+    CoreStateDispatcher,
+    ProtocolStateDispatcher,
+    SetupData,
+    StateMessage,
+    UpdatedState,
+)
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     Audio,
@@ -22,6 +37,7 @@ from pyatv.interface import (
     FeatureState,
     Playing,
     Power,
+    PowerListener,
     PushListener,
     PushUpdater,
     Stream,
@@ -34,10 +50,25 @@ TEST_URL = "http://test"
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.fixture(name="core_dispatcher")
+def core_dispatcher():
+    yield CoreStateDispatcher()
+
+
+@pytest.fixture(name="mrp_state_dispatcher")
+def mrp_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.MRP, core_dispatcher)
+
+
+@pytest.fixture(name="dmap_state_dispatcher")
+def dmap_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)
+
+
 @pytest.fixture(name="facade_dummy")
-def facade_dummy_fixture(session_manager):
+def facade_dummy_fixture(session_manager, core_dispatcher):
     conf = AppleTV(IPv4Address("127.0.0.1"), "Test")
-    facade = FacadeAppleTV(conf, session_manager)
+    facade = FacadeAppleTV(conf, session_manager, core_dispatcher)
     yield facade
 
 
@@ -86,25 +117,15 @@ class DummyFeatures(Features):
         )
 
 
-class DummyPushUpdater(PushUpdater):
-    def __init__(self, loop):
-        super().__init__(loop)
-
-    @property
-    def active(self) -> bool:
-        return False
-
-    def start(self, initial_delay: int = 0) -> None:
-        raise exceptions.NotSupportedError
-
-    def stop(self) -> None:
-        raise exceptions.NotSupportedError
-
-
 class DummyPower(Power):
     def __init__(self) -> None:
+        self.current_state = PowerState.Off
         self.turn_on_called = False
         self.turn_off_called = False
+
+    @property
+    def power_state(self):
+        return self.current_state
 
     async def turn_on(self, await_new_state: bool = False) -> None:
         self.turn_on_called = True
@@ -145,9 +166,9 @@ class DummyStream(Stream):
         self.url = url
 
 
-class DummyPushUpdater(PushUpdater):
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        super().__init__(loop)
+class DummyPushUpdater(AbstractPushUpdater):
+    def __init__(self, state_dispatcher):
+        super().__init__(state_dispatcher)
         self._active = False
 
     @property
@@ -174,10 +195,26 @@ class SavingPushListener(PushListener):
         pass
 
 
+class SavingPowerListener(PowerListener):
+    def __init__(self):
+        self.last_update = None
+        self.all_updates = []
+
+    def powerstate_update(self, old_state: PowerState, new_state: PowerState):
+        """Device power state was updated."""
+        self.last_update = new_state
+        self.all_updates.append(new_state)
+
+
 @pytest.fixture(name="register_interface")
 def register_interface_fixture(facade_dummy):
     def _register_func(feature: FeatureName, instance, protocol: Protocol):
-        interface = inspect.getmro(type(instance))[1]
+        # Find the first derived interface from pyatv.interface module
+        interface = next(
+            iface
+            for iface in inspect.getmro(type(instance))
+            if iface.__module__ == "pyatv.interface"
+        )
         sdg = SetupDataGenerator(protocol, feature)
         sdg.interfaces[interface] = instance
         facade_dummy.add_protocol(sdg.get_setup_data())
@@ -269,31 +306,21 @@ async def test_features_feature_overlap_uses_priority(facade_dummy, register_int
     )
 
 
-async def test_features_push_updates(facade_dummy, event_loop, register_interface):
+async def test_features_push_updates(
+    facade_dummy, register_interface, mrp_state_dispatcher
+):
     feat = facade_dummy.features
 
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Unsupported
 
     register_interface(
-        FeatureName.PushUpdates, DummyPushUpdater(event_loop), Protocol.MRP
+        FeatureName.PushUpdates,
+        DummyPushUpdater(mrp_state_dispatcher),
+        Protocol.MRP,
     )
 
     await facade_dummy.connect()
     assert feat.get_feature(FeatureName.PushUpdates).state == FeatureState.Available
-
-
-@pytest.mark.parametrize(
-    "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
-)
-async def test_power_prefer_companion(feature, func, facade_dummy, register_interface):
-    power_mrp, _ = register_interface(feature, DummyPower(), Protocol.MRP)
-    power_comp, _ = register_interface(feature, DummyPower(), Protocol.Companion)
-
-    await facade_dummy.connect()
-    await getattr(facade_dummy.power, func)()
-
-    assert not getattr(power_mrp, f"{func}_called")
-    assert getattr(power_comp, f"{func}_called")
 
 
 @pytest.mark.parametrize("volume", [-0.1, 100.1])
@@ -539,12 +566,17 @@ async def test_takeover_failure_restores(facade_dummy, register_interface):
     assert sdg_mrp.interfaces[Stream].url == "test"
 
 
-async def test_takeover_push_updates(facade_dummy, register_interface, event_loop):
+async def test_takeover_push_updates(
+    facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
+):
     listener = SavingPushListener()
 
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher)
+
     async def _perform_update(expected_updates, expected_protocol):
-        raop_pusher.post_update(
-            Playing(MediaType.Music, DeviceState.Idle, title=f"raop_{expected_updates}")
+        dmap_pusher.post_update(
+            Playing(MediaType.Music, DeviceState.Idle, title=f"dmap_{expected_updates}")
         )
         mrp_pusher.post_update(
             Playing(MediaType.Music, DeviceState.Idle, title=f"mrp_{expected_updates}")
@@ -553,10 +585,7 @@ async def test_takeover_push_updates(facade_dummy, register_interface, event_loo
         await until(lambda: listener.no_of_updates == expected_updates)
         assert listener.last_update.title == f"{expected_protocol}_{expected_updates}"
 
-    raop_pusher = DummyPushUpdater(event_loop)
-    mrp_pusher = DummyPushUpdater(event_loop)
-
-    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
 
     await facade_dummy.connect()
@@ -568,10 +597,10 @@ async def test_takeover_push_updates(facade_dummy, register_interface, event_loo
     # priority is used, so update from MRP should be delivered.
     await _perform_update(1, "mrp")
 
-    takeover_release = facade_dummy.takeover(Protocol.RAOP, PushUpdater)
+    takeover_release = facade_dummy.takeover(Protocol.DMAP, PushUpdater)
 
     # After takeover, push update from RAOP should be delivered instead
-    await _perform_update(2, "raop")
+    await _perform_update(2, "dmap")
 
     takeover_release()
 
@@ -583,26 +612,186 @@ async def test_takeover_push_updates(facade_dummy, register_interface, event_loo
 # not be pushed when performing a takeover (as the protocol taken over was never
 # started)
 async def test_start_stop_all_push_updaters(
-    facade_dummy, register_interface, event_loop
+    facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
 ):
-    raop_pusher = DummyPushUpdater(event_loop)
-    mrp_pusher = DummyPushUpdater(event_loop)
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher)
 
-    register_interface(FeatureName.PushUpdates, raop_pusher, Protocol.RAOP)
+    register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
     register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
 
     await facade_dummy.connect()
     push_updater = facade_dummy.push_updater
 
-    assert not raop_pusher.active
+    assert not dmap_pusher.active
     assert not mrp_pusher.active
 
     push_updater.start()
 
-    assert raop_pusher.active
+    assert dmap_pusher.active
     assert mrp_pusher.active
 
     push_updater.stop()
 
-    assert not raop_pusher.active
+    assert not dmap_pusher.active
     assert not mrp_pusher.active
+
+
+# POWER RELATED TESTS
+
+
+@pytest.mark.parametrize(
+    "feature,func", [(FeatureName.TurnOn, "turn_on"), (FeatureName.TurnOff, "turn_off")]
+)
+async def test_power_prefer_companion(feature, func, facade_dummy, register_interface):
+    power_mrp, _ = register_interface(feature, DummyPower(), Protocol.MRP)
+    power_comp, _ = register_interface(feature, DummyPower(), Protocol.Companion)
+
+    await facade_dummy.connect()
+    await getattr(facade_dummy.power, func)()
+
+    assert not getattr(power_mrp, f"{func}_called")
+    assert getattr(power_comp, f"{func}_called")
+
+
+@pytest.fixture(name="power_instance")
+async def power_instance_fixture():
+    yield DummyPower()
+
+
+@pytest.fixture(name="power_setup")
+async def power_setup_fixture(facade_dummy, register_interface, power_instance):
+    listener = SavingPowerListener()
+
+    register_interface(FeatureName.PowerState, power_instance, Protocol.MRP)
+
+    await facade_dummy.connect()
+    facade_dummy.power.listener = listener
+
+    yield facade_dummy.power
+
+
+async def dispatch_device_state(mrp_state_dispatcher, state, protocol=Protocol.MRP):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    mrp_state_dispatcher.listen_to(UpdatedState.Playing, lambda message: event.set())
+    mrp_state_dispatcher.dispatch(
+        UpdatedState.Playing, Playing(MediaType.Unknown, state)
+    )
+
+    await event.wait()
+
+
+async def test_power_state_respect_playing_state(mrp_state_dispatcher, power_setup):
+    assert power_setup.power_state == PowerState.Off
+
+    # Trigger something to play (but keep power state off) changes it to On
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    power_setup.listener.last_update == PowerState.On
+    power_setup.power_state == PowerState.On
+
+    # Trigger back to idle shall give power state Off again
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
+    power_setup.listener.last_update == PowerState.Off
+    power_setup.power_state == PowerState.Off
+
+
+async def test_power_state_defaults_to_derived_power_state_from_off(
+    mrp_state_dispatcher, power_setup, power_instance
+):
+    assert power_setup.power_state == PowerState.Off
+
+    # Trigger something to play (but keep power state off) changes it to On
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    power_setup.listener.last_update == PowerState.On
+
+    # Change derived power state to On
+    power_instance.current_state = PowerState.On
+
+    # Trigger back to idle shall give power state On as derived state is On
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
+    power_setup.power_state == PowerState.On
+
+
+async def test_power_state_defaults_to_derived_power_state_from_on(
+    mrp_state_dispatcher, power_setup, power_instance
+):
+    power_instance.current_state = PowerState.On
+
+    # Trigger something to play (but keep power state off) changes it to On
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    power_setup.listener.last_update == PowerState.On
+
+    # Trigger back to idle shall give power state On as derived state is On
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
+    power_setup.power_state == PowerState.On
+
+
+async def test_power_play_state_only_from_main_protocol(
+    mrp_state_dispatcher, dmap_state_dispatcher, power_setup
+):
+    assert power_setup.power_state == PowerState.Off
+
+    # The initial Playing (DMAP) shall be ignored so we should only get On state
+    # since duplicates are not propagated
+    await dispatch_device_state(
+        dmap_state_dispatcher, DeviceState.Playing, protocol=Protocol.DMAP
+    )
+    assert power_setup.listener.last_update is None
+    await dispatch_device_state(
+        mrp_state_dispatcher, DeviceState.Idle, protocol=Protocol.MRP
+    )
+    assert power_setup.listener.last_update is None
+    await dispatch_device_state(
+        mrp_state_dispatcher, DeviceState.Playing, protocol=Protocol.MRP
+    )
+    assert power_setup.listener.last_update == PowerState.On
+
+
+async def test_power_play_state_no_dispatcher_duplicates(
+    mrp_state_dispatcher, power_setup
+):
+    assert power_setup.power_state == PowerState.Off
+
+    # Dispatch two "On" and one "Off". On shall only be registered once.
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
+    assert power_setup.listener.last_update == PowerState.Off
+
+    assert len(power_setup.listener.all_updates) == 2
+
+
+async def test_power_play_state_no_listener_duplicates(
+    mrp_state_dispatcher, power_setup
+):
+    assert power_setup.power_state == PowerState.Off
+
+    # Dispatch "On" and then trigger a listener update with "On", which should not
+    # yield any additional update
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    power_setup.powerstate_update(PowerState.Off, PowerState.On)
+
+    assert len(power_setup.listener.all_updates) == 1
+    assert power_setup.listener.last_update == PowerState.On
+
+
+async def test_power_no_updates_without_power_instance(
+    mrp_state_dispatcher, facade_dummy, register_interface
+):
+    listener = SavingPowerListener()
+
+    # Some kind of interface is needed to connect (arbitrary but not Power)
+    register_interface(FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP)
+
+    await facade_dummy.connect()
+    facade_dummy.power.listener = listener
+
+    # Defensive to make sure we have no instance
+    with pytest.raises(exceptions.NotSupportedError):
+        facade_dummy.power.power_state
+
+    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
+    assert listener.last_update is None

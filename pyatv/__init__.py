@@ -12,6 +12,7 @@ import aiohttp
 
 from pyatv import exceptions, interface
 from pyatv.const import Protocol
+from pyatv.core import CoreStateDispatcher, ProtocolStateDispatcher
 from pyatv.core.facade import FacadeAppleTV
 from pyatv.core.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 from pyatv.protocols import PROTOCOLS
@@ -82,7 +83,8 @@ async def connect(
 
     config_copy = deepcopy(config)
     session_manager = await http.create_session(session)
-    atv = FacadeAppleTV(config_copy, session_manager)
+    core_dispatcher = CoreStateDispatcher()
+    atv = FacadeAppleTV(config_copy, session_manager, core_dispatcher)
 
     try:
         for proto, proto_methods in PROTOCOLS.items():
@@ -95,7 +97,13 @@ async def connect(
             takeover_method = partial(atv.takeover, proto)
 
             for setup_data in proto_methods.setup(
-                loop, config_copy, service, atv, session_manager, takeover_method
+                loop,
+                config_copy,
+                service,
+                atv,
+                session_manager,
+                takeover_method,
+                ProtocolStateDispatcher(proto, core_dispatcher),
             ):
                 atv.add_protocol(setup_data)
 

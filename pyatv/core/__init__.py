@@ -1,14 +1,90 @@
 """Core module of pyatv."""
 import asyncio
-from typing import Any, Awaitable, Callable, Dict, Mapping, NamedTuple, Optional, Set
+from enum import Enum
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Set,
+    Union,
+)
 
 from pyatv.const import FeatureName, PairingRequirement, Protocol
-from pyatv.interface import BaseService
+from pyatv.core.protocol import MessageDispatcher
+from pyatv.interface import BaseService, Playing, PushUpdater
 
 TakeoverMethod = Callable[
     ...,
     Callable[[], None],
 ]
+
+
+# pylint: disable=invalid-name
+
+
+class UpdatedState(Enum):
+    """Name of states that can be updated."""
+
+    Playing = 1
+    """Playing state in metadata was updated."""
+
+
+# pylint: enable=invalid-name
+
+
+class StateMessage(NamedTuple):
+    """Message sent when state of something changed."""
+
+    protocol: Protocol
+    state: UpdatedState
+
+    # Type depending on value of state:
+    # - UpdatedState.Playing -> interface.Playing
+    value: Any
+
+    def __str__(self):
+        """Return string representation of object."""
+        return f"[{self.protocol.name}.{self.state.name} -> {self.value}]"
+
+
+def _no_filter(message: StateMessage) -> bool:
+    return True
+
+
+CoreStateDispatcher = MessageDispatcher[UpdatedState, StateMessage]
+
+
+class ProtocolStateDispatcher:
+    """Dispatch internal protocol state updates to listeners."""
+
+    def __init__(
+        self,
+        protocol: Protocol,
+        core_dispatcher: CoreStateDispatcher,
+    ) -> None:
+        """Initialize a new ProtocolStateDispatcher instance."""
+        self._protocol = protocol
+        self._core_dispatcher = core_dispatcher
+
+    def listen_to(
+        self,
+        state: UpdatedState,
+        func: Callable[[StateMessage], Union[None, Awaitable[None]]],
+        message_filter: Callable[[StateMessage], bool] = _no_filter,
+    ) -> None:
+        """Listen to a specific type of message type."""
+        return self._core_dispatcher.listen_to(state, func, message_filter)
+
+    def dispatch(self, state: UpdatedState, value: Any) -> List[asyncio.Task]:
+        """Dispatch a message to listeners."""
+        return self._core_dispatcher.dispatch(
+            state, StateMessage(self._protocol, state, value)
+        )
 
 
 class MutableService(BaseService):
@@ -69,6 +145,33 @@ class MutableService(BaseService):
         copy.pairing = self.pairing
         copy.requires_password = self.requires_password
         return copy
+
+
+class AbstractPushUpdater(PushUpdater):
+    """Abstract push updater class.
+
+    This class adds a `post_update` method that will publishes a new state, but only
+    if it has been updated.
+    """
+
+    def __init__(self, state_dispatcher: ProtocolStateDispatcher):
+        """Initialize a new AbstractPushUpdater."""
+        super().__init__()
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.state_dispatcher = state_dispatcher
+        self._previous_state: Optional[Playing] = None
+
+    def post_update(self, playing: Playing) -> None:
+        """Post an update to listener."""
+        if playing != self._previous_state:
+            # Dispatch message using message dispatcher
+            self.state_dispatcher.dispatch(UpdatedState.Playing, playing)
+
+            # Publish using regular (external) interface. This shall be removed at
+            # some point in time.
+            self.loop.call_soon(self.listener.playstatus_update, self, playing)
+
+        self._previous_state = playing
 
 
 class SetupData(NamedTuple):

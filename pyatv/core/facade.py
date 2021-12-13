@@ -17,8 +17,15 @@ from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
-from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
-from pyatv.core import SetupData
+from pyatv.const import (
+    DeviceState,
+    FeatureName,
+    FeatureState,
+    InputAction,
+    PowerState,
+    Protocol,
+)
+from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
 from pyatv.support import deprecated
 from pyatv.support.collections import dict_merge
@@ -251,11 +258,35 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
         Protocol.RAOP,
     ]
 
-    def __init__(self):
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
         """Initialize a new FacadePower instance."""
         # This is border line, maybe need another structure to support this
         Relayer.__init__(self, interface.Power, DEFAULT_PRIORITIES)
         interface.Power.__init__(self)
+        self._is_playing: Optional[bool] = None
+        core_dispatcher.listen_to(
+            UpdatedState.Playing,
+            self._playing_changed,
+            message_filter=lambda message: message.protocol == self.main_protocol,
+        )
+
+    def _playing_changed(self, message: StateMessage) -> None:
+        """State of something changed."""
+        playing = cast(interface.Playing, message.value)
+
+        # Initially we must ask the protocol about power state so we don't send
+        # duplicate updates
+        if self._is_playing is None:
+            self._is_playing = self.relay("power_state") == PowerState.On
+
+        # Computer new state so we can know if we should update or not
+        old_state = self.power_state
+        self._is_playing = playing.device_state != DeviceState.Idle
+        new_state = self.power_state
+
+        # Do not update state in case it didn't change
+        if new_state != old_state:
+            self.listener.powerstate_update(old_state, new_state)
 
     def powerstate_update(
         self, old_state: const.PowerState, new_state: const.PowerState
@@ -264,11 +295,15 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
 
         Forward power state updates from protocol implementations to actual listener.
         """
-        self.listener.powerstate_update(old_state, new_state)
+        if not self._is_playing:
+            self.listener.powerstate_update(old_state, new_state)
 
     @property
     def power_state(self) -> const.PowerState:
         """Return device power state."""
+        # Override power state in case something is playing
+        if self._is_playing:
+            return const.PowerState.On
         return self.relay("power_state")
 
     async def turn_on(self, await_new_state: bool = False) -> None:
@@ -372,7 +407,7 @@ class FacadePushUpdater(
         Relayer.__init__(  # pylint: disable=non-parent-init-called
             self, interface.PushUpdater, DEFAULT_PRIORITIES
         )
-        interface.PushUpdater.__init__(self, asyncio.get_event_loop())
+        interface.PushUpdater.__init__(self)
 
     @property
     def active(self) -> bool:
@@ -409,7 +444,10 @@ class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
     def __init__(
-        self, config: interface.BaseConfig, session_manager: ClientSessionManager
+        self,
+        config: interface.BaseConfig,
+        session_manager: ClientSessionManager,
+        core_dispatcher: CoreStateDispatcher,
     ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
@@ -425,7 +463,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Features: self._features,
             interface.RemoteControl: FacadeRemoteControl(),
             interface.Metadata: FacadeMetadata(),
-            interface.Power: FacadePower(),
+            interface.Power: FacadePower(core_dispatcher),
             interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),

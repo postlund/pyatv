@@ -728,14 +728,11 @@ class PushListener(ABC):
 class PushUpdater(ABC, StateProducer):
     """Base class for push/async updates from an Apple TV.
 
-    Listener interface: `pyatv.interface.PushListener`
-    """
+    A `pyatv.interface.PushUpdater` shall only publish update in case the state
+    actually changes.
 
-    def __init__(self, loop: asyncio.AbstractEventLoop):
-        """Initialize a new PushUpdater."""
-        super().__init__()
-        self.loop = loop
-        self._previous_state: Optional[Playing] = None
+    Listener interface: `pyatv.interface.PushListener`.
+    """
 
     @property
     @abstractmethod
@@ -756,13 +753,6 @@ class PushUpdater(ABC, StateProducer):
     def stop(self) -> None:
         """No longer forward updates to listener."""
         raise NotImplementedError
-
-    def post_update(self, playing: Playing) -> None:
-        """Post an update to listener."""
-        if playing != self._previous_state:
-            self.loop.call_soon(self.listener.playstatus_update, self, playing)
-
-        self._previous_state = playing
 
 
 class Stream:  # pylint: disable=too-few-public-methods

@@ -21,7 +21,14 @@ from pyatv.const import (
     RepeatState,
     ShuffleState,
 )
-from pyatv.core import MutableService, SetupData, TakeoverMethod, mdns
+from pyatv.core import (
+    AbstractPushUpdater,
+    MutableService,
+    ProtocolStateDispatcher,
+    SetupData,
+    TakeoverMethod,
+    mdns,
+)
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -433,12 +440,14 @@ class DmapMetadata(Metadata):
         return await self.apple_tv.playstatus()
 
 
-class DmapPushUpdater(PushUpdater):
+class DmapPushUpdater(AbstractPushUpdater):
     """Implementation of API for handling push update from an Apple TV."""
 
-    def __init__(self, loop, apple_tv, listener):
+    def __init__(
+        self, apple_tv, state_dispatcher: ProtocolStateDispatcher, listener
+    ) -> None:
         """Initialize a new DmapPushUpdater instance."""
-        super().__init__(loop)
+        super().__init__(state_dispatcher)
         self._atv = apple_tv
         self._listener = weakref.ref(listener)
         self._future = None
@@ -650,6 +659,7 @@ def setup(  # pylint: disable=too-many-locals
     device_listener: StateProducer,
     session_manager: ClientSessionManager,
     takeover: TakeoverMethod,
+    state_dispatcher: ProtocolStateDispatcher,
 ) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
     daap_http = HttpSession(
@@ -658,7 +668,7 @@ def setup(  # pylint: disable=too-many-locals
     )
     requester = DaapRequester(daap_http, service.credentials)
     apple_tv = BaseDmapAppleTV(requester)
-    push_updater = DmapPushUpdater(loop, apple_tv, device_listener)
+    push_updater = DmapPushUpdater(apple_tv, state_dispatcher, device_listener)
     metadata = DmapMetadata(config.identifier, apple_tv)
     audio = DmapAudio(apple_tv)
 
