@@ -136,6 +136,16 @@ def send_hid_event(use_page, usage, down):
     return message
 
 
+def send_button(usage_page, usage, button_down):
+    """Create a new SEND_BUTTON_EVENT_MESSAGE.."""
+    message = create(protobuf.SEND_BUTTON_EVENT_MESSAGE)
+    inner = message.inner()
+    inner.usagePage = usage_page
+    inner.usage = usage
+    inner.buttonDown = button_down
+    return message
+
+
 def command(cmd, **kwargs):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_MESSAGE)

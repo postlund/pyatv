@@ -31,6 +31,7 @@ from . import RemoveClientMessage_pb2
 from . import RemoveEndpointsMessage_pb2
 from . import RemoveOutputDevicesMessage_pb2
 from . import RemovePlayerMessage_pb2
+from . import SendButtonEventMessage_pb2
 from . import SendCommandMessage_pb2
 from . import SendCommandResultMessage_pb2
 from . import SendHIDEventMessage_pb2
@@ -200,6 +201,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE: RemoveEndpointsMessage_pb2.removeEndpointsMessage,
     ProtocolMessage.REMOVE_OUTPUT_DEVICES_MESSAGE: RemoveOutputDevicesMessage_pb2.removeOutputDevicesMessage,
     ProtocolMessage.REMOVE_PLAYER_MESSAGE: RemovePlayerMessage_pb2.removePlayerMessage,
+    ProtocolMessage.SEND_BUTTON_EVENT_MESSAGE: SendButtonEventMessage_pb2.sendButtonEventMessage,
     ProtocolMessage.SEND_COMMAND_MESSAGE: SendCommandMessage_pb2.sendCommandMessage,
     ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE: SendCommandResultMessage_pb2.sendCommandResultMessage,
     ProtocolMessage.SEND_HID_EVENT_MESSAGE: SendHIDEventMessage_pb2.sendHIDEventMessage,
@@ -255,6 +257,7 @@ REMOVE_CLIENT_MESSAGE = ProtocolMessage.REMOVE_CLIENT_MESSAGE
 REMOVE_ENDPOINTS_MESSAGE = ProtocolMessage.REMOVE_ENDPOINTS_MESSAGE
 REMOVE_OUTPUT_DEVICES_MESSAGE = ProtocolMessage.REMOVE_OUTPUT_DEVICES_MESSAGE
 REMOVE_PLAYER_MESSAGE = ProtocolMessage.REMOVE_PLAYER_MESSAGE
+SEND_BUTTON_EVENT_MESSAGE = ProtocolMessage.SEND_BUTTON_EVENT_MESSAGE
 SEND_COMMAND_MESSAGE = ProtocolMessage.SEND_COMMAND_MESSAGE
 SEND_COMMAND_RESULT_MESSAGE = ProtocolMessage.SEND_COMMAND_RESULT_MESSAGE
 SEND_HID_EVENT_MESSAGE = ProtocolMessage.SEND_HID_EVENT_MESSAGE
