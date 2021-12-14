@@ -2,6 +2,7 @@
 
 import asyncio
 from ipaddress import ip_address
+import time
 
 import pytest
 
@@ -12,12 +13,14 @@ from tests.fake_knock import create_knock_server
 from tests.utils import until
 
 LOCALHOST = ip_address("127.0.0.1")
+LINK_LOCAL = ip_address("169.254.0.0")
+MULTICAST_IP = ip_address("224.0.0.251")
 
 
 @pytest.mark.asyncio
 async def test_single_port_knock(event_loop, knock_server):
     server = await knock_server()
-    await knock(LOCALHOST, [server.port], event_loop)
+    await knock(LOCALHOST, [server.port], 1)
     await until(lambda: server.got_knock)
 
 
@@ -25,7 +28,7 @@ async def test_single_port_knock(event_loop, knock_server):
 async def test_multi_port_knock(event_loop, knock_server):
     server1 = await knock_server()
     server2 = await knock_server()
-    await knock(LOCALHOST, [server1.port, server2.port], event_loop)
+    await knock(LOCALHOST, [server1.port, server2.port], 1)
     await until(lambda: server1.got_knock)
     await until(lambda: server2.got_knock)
 
@@ -34,4 +37,31 @@ async def test_multi_port_knock(event_loop, knock_server):
 async def test_continuous_knocking(event_loop, knock_server):
     server = await knock_server()
     await knocker(LOCALHOST, [server.port], event_loop, timeout=6)
-    await until(lambda: server.count == 3)
+    # Knocking once should be enough as long as we let the connection
+    # try to complete for a long enough time
+    await until(lambda: server.count == 1)
+
+
+@pytest.mark.asyncio
+async def test_knock_does_not_raise(event_loop, knock_server):
+    server = await knock_server()
+    task = await knocker(LOCALHOST, [1], event_loop, timeout=0.5)
+    # Knocking on a non-listening port should not raise
+    await task
+
+
+@pytest.mark.asyncio
+async def test_knock_times_out(event_loop):
+    task = await knocker(LINK_LOCAL, [1], event_loop, timeout=0.3)
+    # Knocking on link-local will timeout and should not raise
+    await task
+
+
+@pytest.mark.asyncio
+async def test_abort_knock_unreachable_host(event_loop):
+    start = time.monotonic()
+    task = await knocker(MULTICAST_IP, [1], event_loop, timeout=3)
+    # Knocking on the multicast ip will raise Network unreachable and should abort right away
+    await task
+    end = time.monotonic()
+    assert (end - start) < 1
