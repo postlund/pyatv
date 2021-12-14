@@ -549,6 +549,7 @@ class MrpPower(Power):
         self.device_info = None
         self._waiters: Dict[PowerState, asyncio.Event] = {}
 
+        self.protocol.listen_to(protobuf.DEVICE_INFO_MESSAGE, self._update_power_state)
         self.protocol.listen_to(
             protobuf.DEVICE_INFO_UPDATE_MESSAGE, self._update_power_state
         )
