@@ -241,7 +241,6 @@ def setup(  # pylint: disable=too-many-locals
         if mrp_service is None:
             mrp_service = MutableService(None, Protocol.MRP, 0, {})
             config.add_service(mrp_service)
-        mrp_service.enabled = False
 
         (
             _,
