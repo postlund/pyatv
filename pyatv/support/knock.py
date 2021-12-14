@@ -7,34 +7,54 @@ are accessed, something this module will try to emulate.
 """
 
 import asyncio
+from asyncio.tasks import FIRST_EXCEPTION
+import errno
 from ipaddress import IPv4Address
 import logging
-import math
 from typing import List
 
 _LOGGER = logging.getLogger(__name__)
 
-SEND_INTERVAL = 2.0
+_ABORT_KNOCK_ERRNOS = {errno.EHOSTDOWN, errno.EHOSTUNREACH}
+
+_SLEEP_AFTER_CONNECT = 0.1
+_KNOCK_TIMEOUT_BUFFER = _SLEEP_AFTER_CONNECT * 2
 
 
-async def _async_knock(address: IPv4Address, port: int):
+async def _async_knock(address: IPv4Address, port: int, timeout: float) -> None:
+    """Open a connection to the device to wake a given host."""
+    writer = None
     try:
-        _, writer = await asyncio.open_connection(str(address), port)
-    except (OSError, asyncio.CancelledError):
+        _, writer = await asyncio.wait_for(
+            asyncio.open_connection(str(address), port), timeout=timeout
+        )
+    except asyncio.TimeoutError:
         pass
+    except OSError as ex:
+        # If we get EHOSTDOWN or EHOSTUNREACH we
+        # can give up as its not going to wake
+        # a device that is not there
+        if ex.errno in _ABORT_KNOCK_ERRNOS:
+            raise
     else:
-        await asyncio.sleep(0.1)
-        writer.close()
+        await asyncio.sleep(_SLEEP_AFTER_CONNECT)
+    finally:
+        if writer:
+            writer.close()
 
 
-async def knock(
-    address: IPv4Address, ports: List[int], loop: asyncio.AbstractEventLoop
-):
+async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
     """Knock on a set of ports for a given host."""
-    _LOGGER.debug("Knocking at ports %s on %s", ports, address)
-    await asyncio.wait(
-        [asyncio.ensure_future(_async_knock(address, port)) for port in ports]
-    )
+    tasks = []
+    knock_runtime = timeout - _KNOCK_TIMEOUT_BUFFER
+    for port in ports:
+        # yield to the event loop to ensure we do not block
+        await asyncio.sleep(0)
+        _LOGGER.debug("Knocking at port %s on %s", port, address)
+        tasks.append(asyncio.ensure_future(_async_knock(address, port, knock_runtime)))
+    _, pending = await asyncio.wait(tasks, return_when=FIRST_EXCEPTION)
+    for task in pending:
+        task.cancel()
 
 
 async def knocker(
@@ -48,16 +68,4 @@ async def knocker(
     New port knocks are sent every two seconds, so a timeout of 4 seconds will result in
     two knocks.
     """
-    no_of_sends = math.ceil(timeout / SEND_INTERVAL)
-
-    async def _repeat():
-        for _ in range(no_of_sends):
-            try:
-                await knock(address, ports, loop)
-                await asyncio.sleep(SEND_INTERVAL)
-            except asyncio.CancelledError:
-                break
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("failed to port knock")
-
-    return asyncio.ensure_future(_repeat())
+    return asyncio.ensure_future(knock(address, ports, timeout))
