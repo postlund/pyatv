@@ -3,6 +3,11 @@ from enum import IntFlag
 import re
 from typing import Mapping
 
+from pyatv.auth.hap_pairing import (
+    TRANSIENT_CREDENTIALS,
+    AuthenticationType,
+    HapCredentials,
+)
 from pyatv.const import PairingRequirement
 from pyatv.interface import BaseService
 
@@ -135,14 +140,19 @@ def get_pairing_requirement(service: BaseService) -> PairingRequirement:
 # X (X>=13?) support it as well as HomePods, something we can identify from the model
 # string. This implementation should however be improved when it's properly known how
 # to check for support.
-def is_remote_control_supported(service: BaseService) -> bool:
+def is_remote_control_supported(
+    service: BaseService, credentials: HapCredentials
+) -> bool:
     """Return if device supports remote control tunneling."""
     model = service.properties.get("model", "")
+
+    # HomePod supports remote control but only with transient credentials
     if model.startswith("AudioAccessory"):
-        return True
+        return credentials == TRANSIENT_CREDENTIALS
 
     if not model.startswith("AppleTV"):
         return False
 
+    # tvOS must be at least version 13 and HAP credentials are required by Apple TV
     version = service.properties.get("osvers", "0.0").split(".", maxsplit=1)[0]
-    return float(version) >= 13.0
+    return float(version) >= 13.0 and credentials.type == AuthenticationType.HAP

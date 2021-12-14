@@ -225,7 +225,7 @@ def setup(  # pylint: disable=too-many-locals
     credentials = extract_credentials(service)
 
     # Set up remote control channel if it is supported
-    if not is_remote_control_supported(service):
+    if not is_remote_control_supported(service, credentials):
         _LOGGER.debug("Remote control not supported by device")
     elif credentials.type not in [AuthenticationType.HAP, AuthenticationType.Transient]:
         _LOGGER.debug("%s not supported by remote control channel", credentials.type)

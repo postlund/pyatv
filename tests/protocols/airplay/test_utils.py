@@ -1,6 +1,11 @@
 """Unit tests for pyatv.protocols.airplay.features."""
 import pytest
 
+from pyatv.auth.hap_pairing import (
+    NO_CREDENTIALS,
+    TRANSIENT_CREDENTIALS,
+    parse_credentials,
+)
 from pyatv.const import PairingRequirement, Protocol
 from pyatv.core import MutableService
 from pyatv.protocols.airplay.utils import (
@@ -10,6 +15,10 @@ from pyatv.protocols.airplay.utils import (
     is_remote_control_supported,
     parse_features,
 )
+
+# These are not really valid credentials but parse_credentials accepts them (for now)
+HAP_CREDS = parse_credentials("aa:bb:cc:dd")
+LEGACY_CREDS = parse_credentials(":aa::bb")
 
 
 @pytest.mark.parametrize(
@@ -89,16 +98,20 @@ async def test_get_pairing_requirement(props, expected_req):
 
 
 @pytest.mark.parametrize(
-    "props,expected_supported",
+    "props,credentials,expected_supported",
     [
-        ({}, False),
-        ({"model": "AudioAccessory1,2"}, True),
-        ({"model": "Foo"}, False),
-        ({"osvers": "13.0"}, False),
-        ({"osvers": "13.0", "model": "AppleTV5,6"}, True),
-        ({"osvers": "8.4.4", "model": "AppleTV5,6"}, False),
+        ({}, NO_CREDENTIALS, False),
+        ({"model": "AudioAccessory1,2"}, NO_CREDENTIALS, False),
+        ({"model": "AudioAccessory1,2"}, TRANSIENT_CREDENTIALS, True),
+        ({"model": "Foo"}, NO_CREDENTIALS, False),
+        ({"osvers": "13.0"}, NO_CREDENTIALS, False),
+        ({"osvers": "13.0", "model": "AppleTV5,6"}, NO_CREDENTIALS, False),
+        ({"osvers": "13.0", "model": "AppleTV5,6"}, TRANSIENT_CREDENTIALS, False),
+        ({"osvers": "13.0", "model": "AppleTV5,6"}, LEGACY_CREDS, False),
+        ({"osvers": "13.0", "model": "AppleTV5,6"}, HAP_CREDS, True),
+        ({"osvers": "8.4.4", "model": "AppleTV5,6"}, NO_CREDENTIALS, False),
     ],
 )
-def test_is_remote_control_supported(props, expected_supported):
+def test_is_remote_control_supported(props, credentials, expected_supported):
     service = MutableService("id", Protocol.AirPlay, 0, props)
-    assert is_remote_control_supported(service) == expected_supported
+    assert is_remote_control_supported(service, credentials) == expected_supported
