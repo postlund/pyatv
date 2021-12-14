@@ -521,7 +521,7 @@ async def multicast(  # pylint: disable=too-many-arguments
         try:
             await protocol.add_socket(net.mcast_socket(str(addr)))
         except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("failed to add listener for %s", addr)
+            _LOGGER.debug("Failed to add listener for %s (ignoring)", addr)
 
     return await typing.cast(MulticastDnsSdClientProtocol, protocol).get_response(
         timeout
