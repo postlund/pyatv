@@ -94,7 +94,6 @@ def _download_protoc(force=False):
 
     version = _get_protobuf_version()
     url = _protobuf_url(version)
-    output_file = f"bin/protoc-{version}"
 
     print("Downloading", url)
 
@@ -103,7 +102,8 @@ def _download_protoc(force=False):
         for zip_info in zip_file.infolist():
             if zip_info.filename.startswith("bin/protoc"):
                 print("Extracting", zip_info.filename)
-                zip_info.filename = output_file
+                basename, extension = os.path.splitext(zip_info.filename)
+                zip_info.filename = f"{basename}-{version}{extension}"
                 zip_file.extract(zip_info)
                 break
 
