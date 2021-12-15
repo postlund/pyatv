@@ -1,5 +1,84 @@
 # CHANGES
 
+## 0.9.8 Vanny (2021-12-15)
+
+Here is yet another release with a bunch of bug fixes and improvements:
+
+* Calling public interface methods after disconnecting now results
+  in `BlockedStateError` being raised
+* `power_state` now depends on `device_state`. Because of the unreliable
+  method used to derive `power_state`, a device could be reported as
+  powered off while playing some media, which doesn't make sense. As
+  long as `device_state` is not `idle`, the power state will be reported
+  as on.
+* Button presses in MRP should be more reliable and not skipped or
+  repeated now.
+* `netifaces` has been replaced by `ifaddr` due to lack of a maintainer.
+* A few fixes have been made for MRP on devices running tvOS <= 14.
+* The pause `pause` in RAOP will now stops playback. This is merely
+  because it's not implemented yet and aligns better with Home
+  Assistant for now.
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+18d7a6e mrp: Do not disable MRP service for older tvOS
+9541d21 mrp: Fix erroneous button press behavior (#1521)
+74d38b2 mrp: Add enable_encryption to connection
+```
+
+*Protocol: AirPlay:*
+
+```
+3065d6c airplay: Be stricter when setting up remotecontrol
+```
+
+*Protocol: RAOP:*
+
+```
+f0c4c33 raop: Let pause button stop playback
+```
+
+*Other:*
+
+```
+6540c49 facade: Block calls to public methods after close
+c6e9466 facade: Make Power interface respect play status
+4b0136b dep: Migrate from netifaces to ifaddr
+```
+
+**All changes:**
+
+```
+732339f protobuf: Fix support on Windows
+ba5e6bb protobuf: Use version from base_versions.txt
+4d565d8 gh: Update question issue
+23be7cb build(deps): bump cryptography from 36.0.0 to 36.0.1 in /requirements
+ff13e68 mdns: Quiet error log if address cannot be added
+3065d6c airplay: Be stricter when setting up remotecontrol
+18d7a6e mrp: Do not disable MRP service for older tvOS
+9541d21 mrp: Fix erroneous button press behavior (#1521)
+6713225 build(deps): bump pytest-timeout from 2.0.1 to 2.0.2 in /requirements (#1529)
+2009c18 knock Ensure knock yields to the event loop often enough to avoid blocking (#1515)
+6540c49 facade: Block calls to public methods after close
+2d4d526 support: Add shield module
+b00dbf4 build(deps): bump pytest-xdist from 2.4.0 to 2.5.0 in /requirements
+f555e46 core: Clean up dispatchers
+67fcb09 core: Specialize StateDispatcher in protcols
+a72947d core: Prevent duplicates from state producer
+f27c5a4 if: Remove loop argument to PushUpdater
+c6e9466 facade: Make Power interface respect play status
+c67819b core: Add main_protocol to Relayer
+c84bf4a core: Add base support for internal state updates
+605b1a6 core: Add filtering to MessageDispatcher
+2d0a1ca core: Support plain functions in MessageDispatcher
+4b0136b dep: Migrate from netifaces to ifaddr
+f0c4c33 raop: Let pause button stop playback
+74d38b2 mrp: Add enable_encryption to connection
+```
+
 ## 0.9.7 Springtrap (2021-12-05)
 
 It's already Decemeber, how did that happen? Not sure... Anyways, I've
