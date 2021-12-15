@@ -1,11 +1,11 @@
-name: Question or idea
-description: Ask a question or leave an idea
+name: Question or support
+description: If you are using `pyatv` and have questions regarding how to use it in any way (e.g. development), use this template.
 labels: [question]
 body:
   - type: textarea
-    id: question-idea
+    id: question-support
     attributes:
-      label: What's on your mind?
-      description: Please enter your question or idea below. Make sure to include software versions, error logs, etc. when applicable.
+      label: What do you need help with?
+      description: Please enter your question below. Make sure to include software versions, error logs, etc. when applicable. The more information you provide, the easier it will be to help.
     validations:
       required: true
