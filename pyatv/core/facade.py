@@ -589,6 +589,9 @@ class FacadeAppleTV(interface.AppleTV):
         if self._pending_tasks is not None:
             return self._pending_tasks
 
+        # Stop all push updaters otherwise they might continue in the background
+        self.push_updater.stop()
+
         self._pending_tasks = set()
         asyncio.ensure_future(self._session_manager.close())
         for setup_data in self._protocol_handlers.values():
