@@ -42,6 +42,9 @@ PACKET_BACKLOG_SIZE = 1000
 
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
+# Number of "too slow to keep up" warnings to suppress before warning about them
+SLOW_WARNING_THRESHOLD = 3
+
 # Metadata used when no metadata is present
 MISSING_METADATA = AudioMetadata(
     title="Streaming with pyatv", artist="pyatv", album="RAOP", duration=0.0
@@ -609,12 +612,18 @@ class RaopClient:
             if listener:
                 listener.stopped()
 
-    async def _stream_data(self, source: AudioSource, transport):
+    async def _stream_data(  # pylint: disable=too-many-locals
+        self, source: AudioSource, transport
+    ):
         stats = Statistics(self.context.sample_rate)
 
         initial_time = perf_counter()
         self._is_playing = True
+        prev_slow_seqno = None
+        number_slow_seqno = 0
         while self._is_playing:
+            current_seqno = self.context.rtpseq - 1
+
             num_sent = await self._send_packet(
                 source, stats.total_frames == 0, transport
             )
@@ -660,15 +669,27 @@ class RaopClient:
             rel_to_start = perf_counter() - initial_time
             diff = abs_time_stream - rel_to_start
             if diff > 0:
+                number_slow_seqno = 0
                 await asyncio.sleep(diff)
             else:
-                _LOGGER.warning(
+                # Increase number of consecutive frames that we are late
+                if prev_slow_seqno == current_seqno - 1:
+                    number_slow_seqno += 1
+
+                # Log warning if we reached threshold value
+                if number_slow_seqno >= SLOW_WARNING_THRESHOLD:
+                    log_method = _LOGGER.warning
+                else:
+                    log_method = _LOGGER.debug
+
+                log_method(
                     "Too slow to keep up for seqno %d (%f vs %f => %f)",
-                    self.context.rtpseq - 1,
+                    current_seqno,
                     abs_time_stream,
                     rel_to_start,
                     diff,
                 )
+                prev_slow_seqno = current_seqno
 
         _LOGGER.debug(
             "Audio finished sending in %fs",
