@@ -28,6 +28,7 @@ from pyatv.core import (
     ProtocolStateDispatcher,
     SetupData,
     TakeoverMethod,
+    UpdatedState,
     mdns,
 )
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
@@ -660,9 +661,12 @@ class MrpPushUpdater(AbstractPushUpdater):
 class MrpAudio(Audio):
     """Implementation of audio functionality."""
 
-    def __init__(self, protocol: MrpProtocol):
+    def __init__(
+        self, protocol: MrpProtocol, state_dispatcher: ProtocolStateDispatcher
+    ):
         """Initialize a new MrpAudio instance."""
         self.protocol: MrpProtocol = protocol
+        self.state_dispatcher = state_dispatcher
         self._volume_controls_available: bool = False
         self._output_device_uid: Optional[str] = None
         self._volume: float = 0.0
@@ -711,6 +715,8 @@ class MrpAudio(Audio):
         if inner.outputDeviceUID == self._output_device_uid:
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
+
+            self.state_dispatcher.dispatch(UpdatedState.Volume, self._volume)
 
             # There are no responses to the volume_up/down commands sent to the device.
             # So when calling volume_up/down here, they will wait for the volume to
@@ -913,7 +919,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     metadata = MrpMetadata(protocol, psm, config.identifier)
     power = MrpPower(loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, state_dispatcher)
-    audio = MrpAudio(protocol)
+    audio = MrpAudio(protocol, state_dispatcher)
 
     interfaces = {
         RemoteControl: remote_control,
