@@ -256,7 +256,7 @@ def setup(  # pylint: disable=too-many-locals
             device_listener,
             session_manager,
             takeover,
-            state_dispatcher,
+            state_dispatcher.create_copy(Protocol.MRP),
             AirPlayMrpConnection(control, device_listener),
             requires_heatbeat=False,  # Already have heartbeat on control channel
         )

@@ -137,9 +137,13 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
             # The first message must always be DEVICE_INFORMATION, otherwise the
             # device will not respond with anything
-            msg = messages.device_information("pyatv", self.srp.pairing_id.decode())
+            self.device_info = await self.send_and_receive(
+                messages.device_information("pyatv", self.srp.pairing_id.decode())
+            )
 
-            self.device_info = await self.send_and_receive(msg)
+            # Distribute the device information to all listeners (as the
+            # send_and_receive will stop that propagation).
+            self.dispatch(protobuf.DEVICE_INFO_MESSAGE, self.device_info)
 
             # This is a hack to support re-use of a protocol object in
             # proxy (will be removed/refactored later)
