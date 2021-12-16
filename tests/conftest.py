@@ -8,6 +8,8 @@ import pytest
 
 import pyatv
 from pyatv.auth.hap_pairing import parse_credentials
+from pyatv.const import Protocol
+from pyatv.core import CoreStateDispatcher, ProtocolStateDispatcher
 from pyatv.interface import BaseConfig
 from pyatv.support.http import create_session
 from pyatv.support.net import unused_port
@@ -149,3 +151,18 @@ def airplay_creds_fixture():
     with patch("pyatv.protocols.airplay.auth.new_credentials") as new_credentials:
         new_credentials.return_value = parse_credentials(DEVICE_CREDENTIALS)
         yield
+
+
+@pytest.fixture(name="core_dispatcher")
+def core_dispatcher():
+    yield CoreStateDispatcher()
+
+
+@pytest.fixture(name="mrp_state_dispatcher")
+def mrp_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.MRP, core_dispatcher)
+
+
+@pytest.fixture(name="dmap_state_dispatcher")
+def dmap_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)

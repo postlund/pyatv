@@ -33,6 +33,9 @@ class UpdatedState(Enum):
     Playing = 1
     """Playing state in metadata was updated."""
 
+    Volume = 2
+    """Volume was updated."""
+
 
 # pylint: enable=invalid-name
 
@@ -45,6 +48,7 @@ class StateMessage(NamedTuple):
 
     # Type depending on value of state:
     # - UpdatedState.Playing -> interface.Playing
+    # - UpdatedState.Volume -> float
     value: Any
 
     def __str__(self):

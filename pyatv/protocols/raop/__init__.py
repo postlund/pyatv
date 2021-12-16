@@ -22,6 +22,7 @@ from pyatv.core import (
     ProtocolStateDispatcher,
     SetupData,
     TakeoverMethod,
+    UpdatedState,
     mdns,
 )
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
@@ -241,9 +242,14 @@ class RaopFeatures(Features):
 class RaopAudio(Audio):
     """Implementation of audio functionality."""
 
-    def __init__(self, playback_manager: RaopPlaybackManager):
+    def __init__(
+        self,
+        playback_manager: RaopPlaybackManager,
+        state_dispatcher: ProtocolStateDispatcher,
+    ):
         """Initialize a new RaopAudio instance."""
         self.playback_manager = playback_manager
+        self.state_dispatcher = state_dispatcher
 
     @property
     def has_changed_volume(self) -> bool:
@@ -282,6 +288,8 @@ class RaopAudio(Audio):
             await raop.set_volume(remapped)
         else:
             self.playback_manager.context.volume = remapped
+
+        self.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
@@ -501,7 +509,7 @@ def setup(  # pylint: disable=too-many-locals
                 asyncio.ensure_future(push_updater.state_updated())
 
     raop_listener = RaopStateListener()
-    raop_audio = RaopAudio(playback_manager)
+    raop_audio = RaopAudio(playback_manager, state_dispatcher)
 
     interfaces = {
         Stream: RaopStream(

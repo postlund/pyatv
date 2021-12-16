@@ -23,8 +23,8 @@ async def volume_controls_changed(protocol, device_uid, controls_available):
 
 
 @pytest.fixture(name="audio")
-def audio_fixture(protocol_mock):
-    yield MrpAudio(protocol_mock)
+def audio_fixture(protocol_mock, mrp_state_dispatcher):
+    yield MrpAudio(protocol_mock, mrp_state_dispatcher)
 
 
 async def test_audio_volume_control_availability(protocol_mock, audio):

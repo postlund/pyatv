@@ -19,6 +19,7 @@ from pyatv.core import (
     ProtocolStateDispatcher,
     SetupData,
     TakeoverMethod,
+    UpdatedState,
     mdns,
 )
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
@@ -276,10 +277,13 @@ class CompanionRemoteControl(RemoteControl):
 class CompanionAudio(Audio):
     """Implementation of audio API."""
 
-    def __init__(self, api: CompanionAPI) -> None:
+    def __init__(
+        self, api: CompanionAPI, state_dispatcher: ProtocolStateDispatcher
+    ) -> None:
         """Initialize a new CompanionAudio instance."""
         self.api = api
         self.api.listen_to("_iMC", self._handle_control_flag_update)
+        self.state_dispatcher = state_dispatcher
         self._volume_event: asyncio.Event = asyncio.Event()
         self._volume = 0.0
 
@@ -294,6 +298,8 @@ class CompanionAudio(Audio):
         else:
             # No volume control means we know nothing about the volume
             self._volume = 0.0
+
+        self.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
 
     @property
     def volume(self) -> float:
@@ -396,7 +402,7 @@ def setup(
         Features: CompanionFeatures(api),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
-        Audio: CompanionAudio(api),
+        Audio: CompanionAudio(api, state_dispatcher),
     }
 
     async def _connect() -> bool:

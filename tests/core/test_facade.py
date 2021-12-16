@@ -20,14 +20,7 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import (
-    AbstractPushUpdater,
-    CoreStateDispatcher,
-    ProtocolStateDispatcher,
-    SetupData,
-    StateMessage,
-    UpdatedState,
-)
+from pyatv.core import AbstractPushUpdater, SetupData, StateMessage, UpdatedState
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     AppleTV,
@@ -55,21 +48,6 @@ _LOGGER = logging.getLogger(__name__)
 TEST_URL = "http://test"
 
 pytestmark = pytest.mark.asyncio
-
-
-@pytest.fixture(name="core_dispatcher")
-def core_dispatcher():
-    yield CoreStateDispatcher()
-
-
-@pytest.fixture(name="mrp_state_dispatcher")
-def mrp_state_dispatcher_fixture(core_dispatcher):
-    yield ProtocolStateDispatcher(Protocol.MRP, core_dispatcher)
-
-
-@pytest.fixture(name="dmap_state_dispatcher")
-def dmap_state_dispatcher_fixture(core_dispatcher):
-    yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)
 
 
 @pytest.fixture(name="facade_dummy")
