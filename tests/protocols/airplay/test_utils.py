@@ -78,18 +78,12 @@ def test_is_password_required(properties, requires_password):
         ({"sf": "0x1"}, PairingRequirement.NotNeeded),
         ({"sf": "0x200"}, PairingRequirement.Mandatory),
         ({"ft": "0x1"}, PairingRequirement.NotNeeded),
-        ({"ft": "0x200"}, PairingRequirement.Mandatory),
         ({"flags": "0x1"}, PairingRequirement.NotNeeded),
         ({"flags": "0x200"}, PairingRequirement.Mandatory),
         ({"features": "0x1"}, PairingRequirement.NotNeeded),
-        (
-            {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
-            PairingRequirement.Mandatory,
-        ),
-        (
-            {"features": "0x00000000,0x10000"},
-            PairingRequirement.Mandatory,
-        ),
+        ({"sf": "0x8"}, PairingRequirement.Mandatory),
+        ({"flags": "0x8"}, PairingRequirement.Mandatory),
+        ({"flags": "0x0"}, PairingRequirement.NotNeeded),
     ],
 )
 async def test_get_pairing_requirement(props, expected_req):
