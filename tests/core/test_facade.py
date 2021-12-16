@@ -622,6 +622,24 @@ async def test_start_stop_all_push_updaters(
     assert not mrp_pusher.active
 
 
+async def test_push_updaters_stop_on_close(
+    facade_dummy, register_interface, mrp_state_dispatcher, dmap_state_dispatcher
+):
+    dmap_pusher = DummyPushUpdater(dmap_state_dispatcher)
+    mrp_pusher = DummyPushUpdater(mrp_state_dispatcher)
+
+    register_interface(FeatureName.PushUpdates, dmap_pusher, Protocol.DMAP)
+    register_interface(FeatureName.PushUpdates, mrp_pusher, Protocol.MRP)
+
+    await facade_dummy.connect()
+    push_updater = facade_dummy.push_updater
+    push_updater.start()
+    facade_dummy.close()
+
+    assert not dmap_pusher.active
+    assert not mrp_pusher.active
+
+
 # POWER RELATED TESTS
 
 
