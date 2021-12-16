@@ -21,6 +21,7 @@ from pyatv.core import (
     MutableService,
     ProtocolStateDispatcher,
     SetupData,
+    StateMessage,
     TakeoverMethod,
     UpdatedState,
     mdns,
@@ -250,6 +251,16 @@ class RaopAudio(Audio):
         """Initialize a new RaopAudio instance."""
         self.playback_manager = playback_manager
         self.state_dispatcher = state_dispatcher
+        self.state_dispatcher.listen_to(UpdatedState.Volume, self._volume_changed)
+
+    # Intercept volume changes by other protocols and update accordingly. We blindly
+    # blindly trust any volume we see here as it's a much better guess than we have.
+    def _volume_changed(self, message: StateMessage) -> None:
+        """State of something changed."""
+        volume = cast(float, message.value)
+
+        _LOGGER.debug("Protocol %s changed volume to %f", message.protocol.name, volume)
+        self.playback_manager.context.volume = RaopAudio._pct_to_dbfs(volume)
 
     @property
     def has_changed_volume(self) -> bool:
@@ -274,20 +285,12 @@ class RaopAudio(Audio):
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
         raop = self.playback_manager.raop
-
-        # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
-        if math.isclose(level, 0.0):
-            remapped = -144.0
-        else:
-            # Map percentage to dBFS
-            remapped = map_range(
-                level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX
-            )
+        dbfs_volume = RaopAudio._pct_to_dbfs(level)
 
         if raop:
-            await raop.set_volume(remapped)
+            await raop.set_volume(dbfs_volume)
         else:
-            self.playback_manager.context.volume = remapped
+            self.playback_manager.context.volume = dbfs_volume
 
         self.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
 
@@ -298,6 +301,15 @@ class RaopAudio(Audio):
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
         await self.set_volume(max(self.volume - 5.0, 0.0))
+
+    @staticmethod
+    def _pct_to_dbfs(level: float) -> float:
+        # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
+        if math.isclose(level, 0.0):
+            return -144.0
+
+        # Map percentage to dBFS
+        return map_range(level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX)
 
 
 class RaopStream(Stream):

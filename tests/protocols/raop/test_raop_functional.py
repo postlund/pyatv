@@ -4,6 +4,7 @@ TODO: Things to improve:
 
 * Add tests for timing server
 * Improve sync tests
+* Volume changed by other protocol (multi-protocol test)
 """
 import asyncio
 import io
