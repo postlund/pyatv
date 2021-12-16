@@ -113,31 +113,10 @@ async def test_service_info_password(raop_props, mrp_props, requires_password):
 @pytest.mark.parametrize(
     "raop_props,devinfo,pairing_req",
     [
+        ({"sf": "0x0"}, {}, PairingRequirement.NotNeeded),
+        ({"sf": "0x8"}, {}, PairingRequirement.Mandatory),
         ({"sf": "0x200"}, {}, PairingRequirement.Mandatory),
         ({"flags": "0x200"}, {}, PairingRequirement.Mandatory),
-        (
-            {"features": hex(AirPlayFlags.SupportsLegacyPairing)},
-            {},
-            PairingRequirement.Mandatory,
-        ),
-        # Special cases for devices only requiring transient pairing, e.g.
-        # HomePod and AirPort Express
-        # AirPort Express gen 1 does not support AirPlay 2 => assume checks above
-        (
-            {"flags": "0x200"},
-            {DeviceInfo.MODEL: DeviceModel.AirPortExpressGen2},
-            PairingRequirement.NotNeeded,
-        ),
-        (
-            {"flags": "0x200"},
-            {DeviceInfo.MODEL: DeviceModel.HomePod},
-            PairingRequirement.NotNeeded,
-        ),
-        (
-            {"flags": "0x200"},
-            {DeviceInfo.MODEL: DeviceModel.HomePodMini},
-            PairingRequirement.NotNeeded,
-        ),
     ],
 )
 async def test_service_info_pairing(raop_props, devinfo, pairing_req):

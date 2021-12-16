@@ -174,13 +174,6 @@ async def service_info(
         # Access control might say that pairing is not possible, e.g. only devices
         # belonging to the same home (not supported by pyatv)
         service.pairing = PairingRequirement.Disabled
-    elif devinfo.model in [
-        DeviceModel.AirPortExpressGen2,
-        DeviceModel.HomePod,
-        DeviceModel.HomePodMini,
-    ]:
-        # Some devices require no pairing at all, so exclude them
-        service.pairing = PairingRequirement.NotNeeded
     else:
         service.pairing = get_pairing_requirement(service)
 
