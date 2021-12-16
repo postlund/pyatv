@@ -75,6 +75,10 @@ class ProtocolStateDispatcher:
         self._protocol = protocol
         self._core_dispatcher = core_dispatcher
 
+    def create_copy(self, protocol: Protocol) -> "ProtocolStateDispatcher":
+        """Create a copy of this instance but with a new protocol."""
+        return ProtocolStateDispatcher(protocol, self._core_dispatcher)
+
     def listen_to(
         self,
         state: UpdatedState,

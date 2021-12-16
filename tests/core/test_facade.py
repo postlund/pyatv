@@ -674,13 +674,13 @@ async def test_power_state_respect_playing_state(mrp_state_dispatcher, power_set
 
     # Trigger something to play (but keep power state off) changes it to On
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    power_setup.listener.last_update == PowerState.On
-    power_setup.power_state == PowerState.On
+    assert power_setup.listener.last_update == PowerState.On
+    assert power_setup.power_state == PowerState.On
 
     # Trigger back to idle shall give power state Off again
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    power_setup.listener.last_update == PowerState.Off
-    power_setup.power_state == PowerState.Off
+    assert power_setup.listener.last_update == PowerState.Off
+    assert power_setup.power_state == PowerState.Off
 
 
 async def test_power_state_defaults_to_derived_power_state_from_off(
@@ -690,14 +690,14 @@ async def test_power_state_defaults_to_derived_power_state_from_off(
 
     # Trigger something to play (but keep power state off) changes it to On
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    power_setup.listener.last_update == PowerState.On
+    assert power_setup.listener.last_update == PowerState.On
 
     # Change derived power state to On
     power_instance.current_state = PowerState.On
 
     # Trigger back to idle shall give power state On as derived state is On
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    power_setup.power_state == PowerState.On
+    assert power_setup.power_state == PowerState.On
 
 
 async def test_power_state_defaults_to_derived_power_state_from_on(
@@ -707,11 +707,12 @@ async def test_power_state_defaults_to_derived_power_state_from_on(
 
     # Trigger something to play (but keep power state off) changes it to On
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    power_setup.listener.last_update == PowerState.On
+    assert power_setup.listener.last_update is None
 
     # Trigger back to idle shall give power state On as derived state is On
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    power_setup.power_state == PowerState.On
+    assert power_setup.power_state == PowerState.On
+    assert power_setup.listener.last_update is None
 
 
 async def test_power_play_state_only_from_main_protocol(
