@@ -14,14 +14,7 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
 )
-from pyatv.core import (
-    MutableService,
-    ProtocolStateDispatcher,
-    SetupData,
-    TakeoverMethod,
-    UpdatedState,
-    mdns,
-)
+from pyatv.core import Core, MutableService, SetupData, UpdatedState, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.interface import (
     App,
@@ -40,7 +33,6 @@ from pyatv.protocols.companion.api import CompanionAPI, HidCommand, MediaControl
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -277,13 +269,11 @@ class CompanionRemoteControl(RemoteControl):
 class CompanionAudio(Audio):
     """Implementation of audio API."""
 
-    def __init__(
-        self, api: CompanionAPI, state_dispatcher: ProtocolStateDispatcher
-    ) -> None:
+    def __init__(self, api: CompanionAPI, core: Core) -> None:
         """Initialize a new CompanionAudio instance."""
         self.api = api
         self.api.listen_to("_iMC", self._handle_control_flag_update)
-        self.state_dispatcher = state_dispatcher
+        self.core = core
         self._volume_event: asyncio.Event = asyncio.Event()
         self._volume = 0.0
 
@@ -299,7 +289,7 @@ class CompanionAudio(Audio):
             # No volume control means we know nothing about the volume
             self._volume = 0.0
 
-        self.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
+        self.core.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
 
     @property
     def volume(self) -> float:
@@ -380,29 +370,21 @@ async def service_info(
         service.pairing = PairingRequirement.Unsupported
 
 
-def setup(
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
-) -> Generator[SetupData, None, None]:
+def setup(core: Core) -> Generator[SetupData, None, None]:
     """Set up a new Companion service."""
     # Companion doesn't work without credentials, so don't setup if none exists
-    if not service.credentials:
+    if not core.service.credentials:
         _LOGGER.debug("Not adding Companion as credentials are missing")
         return None
 
-    api = CompanionAPI(config, service, device_listener, loop)
+    api = CompanionAPI(core)
 
     interfaces = {
         Apps: CompanionApps(api),
         Features: CompanionFeatures(api),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
-        Audio: CompanionAudio(api, state_dispatcher),
+        Audio: CompanionAudio(api, core),
     }
 
     async def _connect() -> bool:
@@ -413,7 +395,7 @@ def setup(
         return set([asyncio.ensure_future(api.disconnect())])
 
     def _device_info() -> Dict[str, Any]:
-        return device_info(list(scan().keys())[0], service.properties)
+        return device_info(list(scan().keys())[0], core.service.properties)
 
     yield SetupData(
         Protocol.Companion,

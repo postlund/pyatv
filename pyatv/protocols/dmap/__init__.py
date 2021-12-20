@@ -23,10 +23,10 @@ from pyatv.const import (
 )
 from pyatv.core import (
     AbstractPushUpdater,
+    Core,
     MutableService,
     ProtocolStateDispatcher,
     SetupData,
-    TakeoverMethod,
     mdns,
 )
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
@@ -51,7 +51,6 @@ from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager, HttpSession
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -653,30 +652,26 @@ async def service_info(
 
 
 def setup(  # pylint: disable=too-many-locals
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
+    core: Core,
 ) -> Generator[SetupData, None, None]:
     """Set up a new DMAP service."""
     daap_http = HttpSession(
-        session_manager.session,
-        f"http://{config.address}:{service.port}/",
+        core.session_manager.session,
+        f"http://{core.config.address}:{core.service.port}/",
     )
-    requester = DaapRequester(daap_http, service.credentials)
+    requester = DaapRequester(daap_http, core.service.credentials)
     apple_tv = BaseDmapAppleTV(requester)
-    push_updater = DmapPushUpdater(apple_tv, state_dispatcher, device_listener)
-    metadata = DmapMetadata(config.identifier, apple_tv)
+    push_updater = DmapPushUpdater(
+        apple_tv, core.state_dispatcher, core.device_listener
+    )
+    metadata = DmapMetadata(core.config.identifier, apple_tv)
     audio = DmapAudio(apple_tv)
 
     interfaces = {
         RemoteControl: DmapRemoteControl(apple_tv),
         Metadata: metadata,
         PushUpdater: push_updater,
-        Features: DmapFeatures(config, apple_tv),
+        Features: DmapFeatures(core.config, apple_tv),
         Audio: audio,
     }
 
@@ -689,15 +684,16 @@ def setup(  # pylint: disable=too-many-locals
 
     def _close() -> Set[asyncio.Task]:
         push_updater.stop()
-        device_listener.listener.connection_closed()
+        core.device_listener.listener.connection_closed()
         return set()
 
     def _device_info() -> Dict[str, Any]:
         devinfo: Dict[str, Any] = {}
         for service_type in scan():
-            if service_type in config.properties:
+            if service_type in core.config.properties:
                 dict_merge(
-                    devinfo, device_info(service_type, config.properties[service_type])
+                    devinfo,
+                    device_info(service_type, core.config.properties[service_type]),
                 )
         return devinfo
 
