@@ -1,6 +1,5 @@
 """High level implementation of Companion API."""
 
-import asyncio
 from enum import Enum
 import logging
 from random import randint
@@ -9,15 +8,14 @@ from typing import Any, Dict, Mapping, Optional, cast
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
-from pyatv.interface import BaseConfig, BaseService
 from pyatv.protocols.companion.connection import CompanionConnection, FrameType
 from pyatv.protocols.companion.protocol import (
     CompanionProtocol,
     CompanionProtocolListener,
     MessageType,
 )
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,19 +73,10 @@ class CompanionAPI(
 ):
     """Implementation of Companion API."""
 
-    def __init__(
-        self,
-        config: BaseConfig,
-        service: BaseService,
-        device_listener: StateProducer,
-        loop: asyncio.AbstractEventLoop,
-    ):
+    def __init__(self, core: Core):
         """Initialize a new CompanionAPI instance."""
         super().__init__()
-        self.config = config
-        self.service = service
-        self.loop = loop
-        self._device_listener = device_listener
+        self.core = core
         self._connection: Optional[CompanionConnection] = None
         self._protocol: Optional[CompanionProtocol] = None
         self.sid: int = 0
@@ -120,13 +109,13 @@ class CompanionAPI(
 
         _LOGGER.debug("Connect to Companion from API")
         self._connection = CompanionConnection(
-            self.loop,
-            str(self.config.address),
-            self.service.port,
-            self._device_listener,
+            self.core.loop,
+            str(self.core.config.address),
+            self.core.service.port,
+            self.core.device_listener,
         )
         self._protocol = CompanionProtocol(
-            self._connection, SRPAuthHandler(), self.service
+            self._connection, SRPAuthHandler(), self.core.service
         )
         self._protocol.listener = self
         await self._protocol.start()
@@ -165,7 +154,7 @@ class CompanionAPI(
     async def system_info(self):
         """Send system information to device."""
         _LOGGER.debug("Sending system information")
-        creds = parse_credentials(self.service.credentials)
+        creds = parse_credentials(self.core.service.credentials)
 
         # Bunch of semi-random values here...
         await self._send_command(

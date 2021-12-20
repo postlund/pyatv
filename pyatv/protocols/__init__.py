@@ -1,15 +1,10 @@
 """Module containing all protocol logic."""
-import asyncio
+
 from typing import Any, Awaitable, Callable, Dict, Generator, Mapping, NamedTuple
 
 from pyatv import interface
 from pyatv.const import Protocol
-from pyatv.core import (
-    MutableService,
-    ProtocolStateDispatcher,
-    SetupData,
-    TakeoverMethod,
-)
+from pyatv.core import Core, MutableService, SetupData
 from pyatv.core.scan import ScanMethod
 from pyatv.interface import BaseService, DeviceInfo
 from pyatv.protocols import airplay as airplay_proto
@@ -17,19 +12,9 @@ from pyatv.protocols import companion as companion_proto
 from pyatv.protocols import dmap as dmap_proto
 from pyatv.protocols import mrp as mrp_proto
 from pyatv.protocols import raop as raop_proto
-from pyatv.support.http import ClientSessionManager
-from pyatv.support.state_producer import StateProducer
 
 SetupMethod = Callable[
-    [
-        asyncio.AbstractEventLoop,
-        interface.BaseConfig,
-        interface.BaseService,
-        StateProducer,
-        ClientSessionManager,
-        TakeoverMethod,
-        ProtocolStateDispatcher,
-    ],
+    [Core],
     Generator[SetupData, None, None],
 ]
 PairMethod = Callable[..., interface.PairingHandler]

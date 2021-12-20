@@ -8,13 +8,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
-from pyatv.core import (
-    MutableService,
-    ProtocolStateDispatcher,
-    SetupData,
-    TakeoverMethod,
-    mdns,
-)
+from pyatv.core import Core, MutableService, SetupData, mdns
 from pyatv.core.scan import ScanHandler, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
@@ -51,7 +45,6 @@ from pyatv.support.http import (
     StaticFileWebServer,
     http_connect,
 )
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -179,20 +172,14 @@ async def service_info(
 
 
 def setup(  # pylint: disable=too-many-locals
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
+    core: Core,
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
-    stream = AirPlayStream(config, service)
+    stream = AirPlayStream(core.config, core.service)
 
     interfaces = {
-        Features: AirPlayFeatures(service),
+        Features: AirPlayFeatures(core.service),
         Stream: stream,
     }
 
@@ -204,7 +191,7 @@ def setup(  # pylint: disable=too-many-locals
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        return device_info(list(scan().keys())[0], service.properties)
+        return device_info(list(scan().keys())[0], core.service.properties)
 
     yield SetupData(
         Protocol.AirPlay,
@@ -215,25 +202,25 @@ def setup(  # pylint: disable=too-many-locals
         set([FeatureName.PlayUrl]),
     )
 
-    credentials = extract_credentials(service)
+    credentials = extract_credentials(core.service)
 
     # Set up remote control channel if it is supported
-    if not is_remote_control_supported(service, credentials):
+    if not is_remote_control_supported(core.service, credentials):
         _LOGGER.debug("Remote control not supported by device")
     elif credentials.type not in [AuthenticationType.HAP, AuthenticationType.Transient]:
         _LOGGER.debug("%s not supported by remote control channel", credentials.type)
     else:
         _LOGGER.debug("Remote control channel is supported")
 
-        control = RemoteControl(device_listener)
-        control_port = service.port
+        control = RemoteControl(core.device_listener)
+        control_port = core.service.port
 
         # A protocol requires its correaponding service to function, so add a
         # dummy one if we don't have one yet
-        mrp_service = config.get_service(Protocol.MRP)
+        mrp_service = core.config.get_service(Protocol.MRP)
         if mrp_service is None:
-            mrp_service = MutableService(None, Protocol.MRP, 0, {})
-            config.add_service(mrp_service)
+            mrp_service = MutableService(None, Protocol.MRP, control_port, {})
+            core.config.add_service(mrp_service)
 
         (
             _,
@@ -243,21 +230,23 @@ def setup(  # pylint: disable=too-many-locals
             mrp_interfaces,
             mrp_features,
         ) = mrp.create_with_connection(
-            loop,
-            config,
-            mrp_service,
-            device_listener,
-            session_manager,
-            takeover,
-            state_dispatcher.create_copy(Protocol.MRP),
-            AirPlayMrpConnection(control, device_listener),
+            Core(
+                core.loop,
+                core.config,
+                mrp_service,
+                core.device_listener,
+                core.session_manager,
+                core.takeover,
+                core.state_dispatcher.create_copy(Protocol.MRP),
+            ),
+            AirPlayMrpConnection(control, core.device_listener),
             requires_heatbeat=False,  # Already have heartbeat on control channel
         )
 
         async def _connect_rc() -> bool:
             try:
 
-                await control.start(str(config.address), control_port, credentials)
+                await control.start(str(core.config.address), control_port, credentials)
             except exceptions.HttpError as ex:
                 if ex.status_code == 470:
                     _LOGGER.debug(

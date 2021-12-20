@@ -16,7 +16,9 @@ from typing import (
 
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.core.protocol import MessageDispatcher
-from pyatv.interface import BaseService, Playing, PushUpdater
+from pyatv.interface import BaseConfig, BaseService, Playing, PushUpdater
+from pyatv.support.http import ClientSessionManager
+from pyatv.support.state_producer import StateProducer
 
 TakeoverMethod = Callable[
     ...,
@@ -191,3 +193,26 @@ class SetupData(NamedTuple):
     device_info: Callable[[], Dict[str, Any]]
     interfaces: Mapping[Any, Any]
     features: Set[FeatureName]
+
+
+class Core:
+    """Instance for protocols to access core features."""
+
+    def __init__(
+        self,
+        loop: asyncio.AbstractEventLoop,
+        config: BaseConfig,
+        service: BaseService,
+        device_listener: StateProducer,
+        session_manager: ClientSessionManager,
+        takeover: TakeoverMethod,
+        state_dispatcher: ProtocolStateDispatcher,
+    ) -> None:
+        """Initialize a new Core instance."""
+        self.loop = loop
+        self.config = config
+        self.service = service
+        self.device_listener = device_listener
+        self.session_manager = session_manager
+        self.takeover = takeover
+        self.state_dispatcher = state_dispatcher
