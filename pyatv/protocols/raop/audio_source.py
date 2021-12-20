@@ -7,14 +7,15 @@ from functools import partial
 import io
 import logging
 import re
+import threading
 import time
 from typing import Generator, Optional, Union
-from urllib import request
 
 import miniaudio
 from miniaudio import SampleFormat
+import requests
 
-from pyatv.exceptions import NotSupportedError
+from pyatv.exceptions import NotSupportedError, ProtocolError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -238,14 +239,28 @@ class BufferedReaderSource(AudioSource):
         return 0  # We don't know the duration
 
 
-# TODO: This code has been copied directly from the miniaudio project with minor
-# modifications to not block in read when all data has been read. It shall be
-# re-written to use asyncio in due time.
-class PatchedIceCastClient(miniaudio.IceCastClient):
+# This is a "patched" version of the IceCastClient from pyminiaudio, but everything
+# not used by pyatv has been ripped out and urllib is replaced by requests. Apparently
+# Cloudflare is blocking requests by urllib, so better to use requests instead which
+# is better anyway. See #1546 for details.
+# NB: This is not a perfect implementation in any way, improvements are welcome!
+class PatchedIceCastClient(miniaudio.StreamableSource):
     """Patched version of IceCastClient that breaks when all data has been read."""
 
-    _buffer: bytes
-    _stop_stream: bool
+    BLOCK_SIZE = 8 * 1024
+    BUFFER_SIZE = 64 * 1024
+
+    def __init__(self, url: str) -> None:
+        """Initialize a new PatchedIceCastClient instance."""
+        self.url = url
+        self.error_message: Optional[str] = None
+        self._stop_stream: bool = False
+        self._buffer: bytes = b""
+        self._buffer_lock = threading.Lock()
+        self._download_thread = threading.Thread(
+            target=self._stream_wrapper, daemon=True
+        )
+        self._download_thread.start()
 
     def read(self, num_bytes: int) -> bytes:
         """Read a chunk of data from the stream."""
@@ -256,16 +271,33 @@ class PatchedIceCastClient(miniaudio.IceCastClient):
             self._buffer = self._buffer[num_bytes:]
             return chunk
 
+    def close(self) -> None:
+        """Stop the stream, aborting the background downloading."""
+        self._stop_stream = True
+        self._download_thread.join()
+
+    def _readall(self, fileobject, size: int) -> bytes:
+        buffer = b""
+        while len(buffer) < size:
+            buffer += fileobject.read(size)
+        return buffer
+
+    def _stream_wrapper(self) -> None:
+        try:
+            self._download_stream()
+        except Exception as ex:
+            self.error_message = str(ex)
+            _LOGGER.debug("Error during streaming: %s", self.error_message)
+        self._stop_stream = True
+
     def _download_stream(self) -> None:  # pylint: disable=too-many-branches
-        req = request.Request(self.url, headers={"icy-metadata": "1"})
-        with request.urlopen(req) as result:
-            self.station_genre = result.headers["icy-genre"]
-            self.station_name = result.headers["icy-name"]
-            stream_format = result.headers["Content-Type"]
-            if stream_format:
-                self.audio_format = self.determine_audio_format(stream_format)
-            self.audio_info = result.headers.get("ice-audio-info", "")
-            if "icy-metaint" in result.headers:
+        with requests.get(self.url, stream=True) as handle:
+            if handle.status_code < 200 or handle.status_code >= 300:
+                raise Exception(
+                    f"Got status {handle.status_code} with message: {handle.reason}"
+                )
+            result = handle.raw
+            if "icy-metaint" in handle.headers:
                 meta_interval = int(result.headers["icy-metaint"])
             else:
                 meta_interval = 0
@@ -281,18 +313,7 @@ class PatchedIceCastClient(miniaudio.IceCastClient):
                     with self._buffer_lock:
                         self._buffer += chunk
                     meta_size = 16 * self._readall(result, 1)[0]
-                    metadata = str(
-                        self._readall(result, meta_size).strip(b"\0"),
-                        "utf-8",
-                        errors="replace",
-                    )
-                    if metadata:
-                        meta = self.parse_metadata(metadata)
-                        stream_title = meta.get("StreamTitle")
-                        if stream_title:
-                            self.stream_title = stream_title
-                            if self._update_title:
-                                self._update_title(self, stream_title)
+                    self._readall(result, meta_size)
             else:
                 while not self._stop_stream:
                     while len(self._buffer) >= self.BUFFER_SIZE:
@@ -337,17 +358,22 @@ class InternetSource(AudioSource):
         """Return a new AudioSource instance playing from the provided URL."""
         loop = asyncio.get_event_loop()
         source = await loop.run_in_executor(None, PatchedIceCastClient, url)
-        stream_generator = await loop.run_in_executor(
-            None,
-            partial(
-                miniaudio.stream_any,
-                source,
-                frames_to_read=FRAMES_PER_PACKET,
-                output_format=_int2sf(sample_size),
-                nchannels=channels,
-                sample_rate=sample_rate,
-            ),
-        )
+        try:
+            stream_generator = await loop.run_in_executor(
+                None,
+                partial(
+                    miniaudio.stream_any,
+                    source,
+                    frames_to_read=FRAMES_PER_PACKET,
+                    output_format=_int2sf(sample_size),
+                    nchannels=channels,
+                    sample_rate=sample_rate,
+                ),
+            )
+        except miniaudio.DecodeError as ex:
+            if source.error_message is not None:
+                raise ProtocolError(source.error_message) from ex
+            raise
         return cls(source, stream_generator, sample_rate, channels, sample_size)
 
     async def close(self) -> None:
