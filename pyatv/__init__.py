@@ -12,7 +12,7 @@ import aiohttp
 
 from pyatv import exceptions, interface
 from pyatv.const import Protocol
-from pyatv.core import CoreStateDispatcher, ProtocolStateDispatcher
+from pyatv.core import Core, CoreStateDispatcher, ProtocolStateDispatcher
 from pyatv.core.facade import FacadeAppleTV
 from pyatv.core.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
 from pyatv.protocols import PROTOCOLS
@@ -91,12 +91,16 @@ async def connect(
             service = config_copy.get_service(proto)
             if service is None or not service.enabled:
                 continue
+            if not service.enabled:
+                _LOGGER.debug("Ignore %s as it is disabled", proto.name)
+                continue
 
             # Lock protocol argument so protocol does not have to deal
             # with that
             takeover_method = partial(atv.takeover, proto)
 
-            for setup_data in proto_methods.setup(
+            # Core provides core access with a protocol specific twist
+            core = Core(
                 loop,
                 config_copy,
                 service,
@@ -104,7 +108,9 @@ async def connect(
                 session_manager,
                 takeover_method,
                 ProtocolStateDispatcher(proto, core_dispatcher),
-            ):
+            )
+
+            for setup_data in proto_methods.setup(core):
                 atv.add_protocol(setup_data)
 
         await atv.connect()

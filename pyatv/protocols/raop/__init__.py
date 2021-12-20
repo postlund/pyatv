@@ -18,11 +18,11 @@ from pyatv.const import (
 )
 from pyatv.core import (
     AbstractPushUpdater,
+    Core,
     MutableService,
     ProtocolStateDispatcher,
     SetupData,
     StateMessage,
-    TakeoverMethod,
     UpdatedState,
     mdns,
 )
@@ -58,7 +58,6 @@ from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata, get_metadata
 from pyatv.support.rtsp import RtspSession
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -317,20 +316,16 @@ class RaopStream(Stream):
 
     def __init__(
         self,
-        config: BaseConfig,
-        service: BaseService,
+        core: Core,
         listener: RaopListener,
         audio: RaopAudio,
         playback_manager: RaopPlaybackManager,
-        takeover: TakeoverMethod,
     ) -> None:
         """Initialize a new RaopStream instance."""
-        self.config = config
-        self.service = service
+        self.core = core
         self.listener = listener
         self.audio = audio
         self.playback_manager = playback_manager
-        self.takeover = takeover
 
     async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
         """Stream local or remote file to device.
@@ -341,14 +336,16 @@ class RaopStream(Stream):
         """
         self.playback_manager.acquire()
         audio_file: Optional[AudioSource] = None
-        takeover_release = self.takeover(Audio, Metadata, PushUpdater, RemoteControl)
+        takeover_release = self.core.takeover(
+            Audio, Metadata, PushUpdater, RemoteControl
+        )
         try:
             client, _, context = await self.playback_manager.setup()
-            client.credentials = parse_credentials(self.service.credentials)
-            client.password = self.service.password
+            client.credentials = parse_credentials(self.core.service.credentials)
+            client.password = self.core.service.password
 
             client.listener = self.listener
-            await client.initialize(self.service.properties)
+            await client.initialize(self.core.service.properties)
 
             # Try to load metadata and pass it along if it succeeds
             metadata: AudioMetadata = EMPTY_METADATA
@@ -488,18 +485,12 @@ async def service_info(
 
 
 def setup(  # pylint: disable=too-many-locals
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
+    core: Core,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
-    playback_manager = RaopPlaybackManager(str(config.address), service.port)
+    playback_manager = RaopPlaybackManager(str(core.config.address), core.service.port)
     metadata = RaopMetadata(playback_manager)
-    push_updater = RaopPushUpdater(metadata, state_dispatcher)
+    push_updater = RaopPushUpdater(metadata, core.state_dispatcher)
 
     class RaopStateListener(RaopListener):
         """Listener for RAOP state changes."""
@@ -521,12 +512,10 @@ def setup(  # pylint: disable=too-many-locals
                 asyncio.ensure_future(push_updater.state_updated())
 
     raop_listener = RaopStateListener()
-    raop_audio = RaopAudio(playback_manager, state_dispatcher)
+    raop_audio = RaopAudio(playback_manager, core.state_dispatcher)
 
     interfaces = {
-        Stream: RaopStream(
-            config, service, raop_listener, raop_audio, playback_manager, takeover
-        ),
+        Stream: RaopStream(core, raop_listener, raop_audio, playback_manager),
         Features: RaopFeatures(playback_manager),
         PushUpdater: push_updater,
         Metadata: metadata,
@@ -543,7 +532,7 @@ def setup(  # pylint: disable=too-many-locals
     def _device_info() -> Dict[str, Any]:
         devinfo: Dict[str, Any] = {}
         for service_type in scan():
-            properties = config.properties.get(service_type)
+            properties = core.config.properties.get(service_type)
             if properties:
                 dict_merge(devinfo, device_info(service_type, properties))
         return devinfo

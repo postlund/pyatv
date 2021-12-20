@@ -24,10 +24,10 @@ from pyatv.const import (
 )
 from pyatv.core import (
     AbstractPushUpdater,
+    Core,
     MutableService,
     ProtocolStateDispatcher,
     SetupData,
-    TakeoverMethod,
     UpdatedState,
     mdns,
 )
@@ -60,7 +60,6 @@ from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
 from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.support.http import ClientSessionManager
-from pyatv.support.state_producer import StateProducer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -901,32 +900,26 @@ async def service_info(
 
 
 def create_with_connection(  # pylint: disable=too-many-locals
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
+    core: Core,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
 ) -> SetupData:
     """Set up a new MRP service from a connection."""
-    protocol = MrpProtocol(connection, SRPAuthHandler(), service)
+    protocol = MrpProtocol(connection, SRPAuthHandler(), core.service)
     psm = PlayerStateManager(protocol)
 
-    remote_control = MrpRemoteControl(loop, psm, protocol)
-    metadata = MrpMetadata(protocol, psm, config.identifier)
-    power = MrpPower(loop, protocol, remote_control)
-    push_updater = MrpPushUpdater(metadata, psm, state_dispatcher)
-    audio = MrpAudio(protocol, state_dispatcher)
+    remote_control = MrpRemoteControl(core.loop, psm, protocol)
+    metadata = MrpMetadata(protocol, psm, core.config.identifier)
+    power = MrpPower(core.loop, protocol, remote_control)
+    push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
+    audio = MrpAudio(protocol, core.state_dispatcher)
 
     interfaces = {
         RemoteControl: remote_control,
         Metadata: metadata,
         Power: power,
         PushUpdater: push_updater,
-        Features: MrpFeatures(config, psm, audio),
+        Features: MrpFeatures(core.config, psm, audio),
         Audio: audio,
     }
 
@@ -942,7 +935,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
         return set()
 
     def _device_info() -> Dict[str, Any]:
-        devinfo = device_info(list(scan().keys())[0], service.properties)
+        devinfo = device_info(list(scan().keys())[0], core.service.properties)
 
         # Extract build number from DEVICE_INFO_MESSAGE from device
         if protocol.device_info:
@@ -972,25 +965,13 @@ def create_with_connection(  # pylint: disable=too-many-locals
     return SetupData(Protocol.MRP, _connect, _close, _device_info, interfaces, features)
 
 
-def setup(
-    loop: asyncio.AbstractEventLoop,
-    config: BaseConfig,
-    service: BaseService,
-    device_listener: StateProducer,
-    session_manager: ClientSessionManager,
-    takeover: TakeoverMethod,
-    state_dispatcher: ProtocolStateDispatcher,
-) -> Generator[SetupData, None, None]:
+def setup(core: Core) -> Generator[SetupData, None, None]:
     """Set up a new MRP service."""
     yield create_with_connection(
-        loop,
-        config,
-        service,
-        device_listener,
-        session_manager,
-        takeover,
-        state_dispatcher,
-        MrpConnection(config.address, service.port, loop, atv=device_listener),
+        core,
+        MrpConnection(
+            core.config.address, core.service.port, core.loop, atv=core.device_listener
+        ),
     )
 
 
