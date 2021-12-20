@@ -1,6 +1,6 @@
 black==21.12b0
 codecov==2.1.12
-deepdiff==5.6.0
+deepdiff==5.7.0
 flake8==4.0.1
 isort==5.10.1
 mutagen==1.45.1
