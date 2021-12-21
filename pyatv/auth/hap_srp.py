@@ -193,7 +193,7 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
-    def step4(self, encrypted_data):
+    def step4(self, encrypted_data) -> HapCredentials:
         """Last pairing step."""
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
         decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nounce="PS-Msg06".encode())

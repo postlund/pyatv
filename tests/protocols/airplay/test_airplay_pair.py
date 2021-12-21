@@ -56,7 +56,7 @@ async def test_pairing_exception_invalid_pin(airplay_conf):
 
 
 async def test_pairing_exception_no_pin(airplay_conf):
-    with pytest.raises(exceptions.PairingError):
+    with pytest.raises(exceptions.InvalidStateError):
         await perform_pairing(airplay_conf, None)
 
 
