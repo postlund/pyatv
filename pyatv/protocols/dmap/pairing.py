@@ -6,7 +6,7 @@ from io import StringIO
 from ipaddress import IPv4Address
 import logging
 import random
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from aiohttp import web
 from zeroconf import Zeroconf
@@ -57,7 +57,7 @@ class DmapPairingHandler(
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
         self.runner: web.AppRunner = web.AppRunner(self.app)
         self.site: Optional[web.TCPSite] = None
-        self._pin_code: Optional[int] = None
+        self._pin_code: Optional[str] = None
         self._has_paired: bool = False
         self._pairing_guid: str = (
             kwargs.get("pairing_guid", None) or _generate_random_guid()
@@ -99,9 +99,9 @@ class DmapPairingHandler(
             _LOGGER.debug("Saving updated credentials")
             self.service.credentials = "0x" + self._pairing_guid
 
-    def pin(self, pin: int) -> None:
+    def pin(self, pin: Union[str, int]) -> None:
         """Pin code used for pairing."""
-        self._pin_code = pin
+        self._pin_code = str(pin)
         _LOGGER.debug("DMAP PIN changed to %s", self._pin_code)
 
     @property
@@ -151,10 +151,6 @@ class DmapPairingHandler(
         return web.Response(status=500)
 
     def _verify_pin(self, received_code: str) -> bool:
-        # If no particular pin code is specified, allow any pin
-        if self._pin_code is None:
-            return True
-
         merged = StringIO()
         merged.write(self._pairing_guid)
         for char in str(self._pin_code).zfill(4):

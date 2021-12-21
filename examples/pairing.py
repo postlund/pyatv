@@ -1,29 +1,31 @@
 """Simple example showing of pairing."""
-
 import asyncio
 import sys
 
 from pyatv import pair, scan
-from pyatv.const import Protocol
-
-LOOP = asyncio.get_event_loop()
+from pyatv.const import PairingRequirement, Protocol
 
 
-# Method that is dispatched by the asyncio event loop
-async def pair_with_device(loop):
-    """Make it possible to pair with device."""
-    atvs = await scan(loop, timeout=5, protocol=Protocol.MRP)
+async def pair_protocol(atv, service):
+    """Perform pairing for a single protocol."""
+    print(f"Starting to pair protocol {service.protocol.name}")
+    pairing = await pair(atv, Protocol.AirPlay, asyncio.get_event_loop())
+    try:
+        await pairing.begin()
 
-    if not atvs:
-        print("No device found", file=sys.stderr)
-        return
+        if pairing.device_provides_pin:
+            pin = int(input("Enter PIN: "))
+            pairing.pin(pin)
+        else:
+            pairing.pin(1234)  # Should be randomized
+            input("Enter this PIN on the device: 1234")
 
-    pairing = await pair(atvs[0], Protocol.MRP, loop)
-    await pairing.begin()
+        await pairing.finish()
 
-    pin = int(input("Enter PIN: "))
-    pairing.pin(pin)
-    await pairing.finish()
+    except Exception as ex:  # Check more specific exceptions here
+        print("Pairing failed:", ex, file=sys.stderr)
+    finally:
+        await pairing.close()
 
     # Give some feedback about the process
     if pairing.has_paired:
@@ -32,9 +34,18 @@ async def pair_with_device(loop):
     else:
         print("Did not pair with device!")
 
-    await pairing.close()
+
+async def main():
+    """Script starts here."""
+    confs = await scan(asyncio.get_event_loop(), hosts=["10.0.10.81"])
+    if not confs:
+        print("Did not find device!", file=sys.stderr)
+
+    for service in confs[0].services:
+        if service.pairing == PairingRequirement.Mandatory:
+            await pair_protocol(confs[0], service)
+        else:
+            print(f"Protocol {service.protocol.name} does not require pairing")
 
 
-if __name__ == "__main__":
-    # Setup event loop and connect
-    LOOP.run_until_complete(pair_with_device(LOOP))
+asyncio.run(main())  # asyncio.run requires python 3.7+

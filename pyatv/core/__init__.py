@@ -1,6 +1,8 @@
 """Core module of pyatv."""
+from abc import abstractmethod
 import asyncio
 from enum import Enum
+import logging
 from typing import (
     Any,
     Awaitable,
@@ -14,11 +16,21 @@ from typing import (
     Union,
 )
 
-from pyatv.const import FeatureName, PairingRequirement, Protocol
+from pyatv import exceptions
+from pyatv.const import FeatureName, PairingRequirement, PairingState, Protocol
 from pyatv.core.protocol import MessageDispatcher
-from pyatv.interface import BaseConfig, BaseService, Playing, PushUpdater
+from pyatv.interface import (
+    BaseConfig,
+    BaseService,
+    PairingHandler,
+    Playing,
+    PushUpdater,
+)
+from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
+
+_LOGGER = logging.getLogger(__name__)
 
 TakeoverMethod = Callable[
     ...,
@@ -182,6 +194,103 @@ class AbstractPushUpdater(PushUpdater):
             self.loop.call_soon(self.listener.playstatus_update, self, playing)
 
         self._previous_state = playing
+
+
+class AbstractPairingHandler(PairingHandler):
+    """Abstract pairing handler class.
+
+    This class add an internal state to ensure methods are called in the correct order.
+    """
+
+    def __init__(
+        self,
+        session_manager: ClientSessionManager,
+        service: BaseService,
+        device_provides_pin: bool,
+    ) -> None:
+        """Initialize a new instance of AbstractPairingHandler."""
+        super().__init__(session_manager, service)
+        self.session_manager = session_manager
+        self._device_provides_pin = device_provides_pin
+        self._pin: Optional[str] = None
+        self._state: PairingState = PairingState.NotStarted
+
+    @property
+    def state(self) -> PairingState:
+        """Return current state of pairing process."""
+        return self._state
+
+    @property
+    def device_provides_pin(self) -> bool:
+        """Return True if remote device presents PIN code, else False."""
+        return self._device_provides_pin
+
+    @property
+    def has_paired(self) -> bool:
+        """If a successful pairing has been performed."""
+        return self._state == PairingState.Finished
+
+    def pin(self, pin: Union[str, int]) -> None:
+        """Pin code used for pairing."""
+        self._pin = str(pin).zfill(4)
+        _LOGGER.debug(
+            "Changing PIN for %s to %s", self.service.protocol.name, self._pin
+        )
+
+    async def begin(self) -> None:
+        """Start pairing process."""
+        _LOGGER.debug("Start pairing %s", self.service.protocol.name)
+
+        if self.state != PairingState.NotStarted:
+            raise exceptions.InvalidStateError("pairing process has already started")
+
+        # If a PIN is supposed to be entered on the device, that PIN must be set here
+        if not self.device_provides_pin and self._pin is None:
+            self._state = PairingState.Failed
+            raise exceptions.InvalidStateError("no pin code set")
+
+        self._state = PairingState.Started
+        try:
+            await error_handler(self._pair_begin, exceptions.PairingError)
+        except Exception:
+            self._state = PairingState.Failed
+            raise
+
+    async def finish(self) -> None:
+        """Stop pairing process."""
+        _LOGGER.debug("Finish pairing %s", self.service.protocol.name)
+
+        if self.state != PairingState.Started:
+            raise exceptions.InvalidStateError("pairing process has not started")
+        if self.device_provides_pin and self._pin is None:
+            self._state = PairingState.Failed
+            raise exceptions.InvalidStateError("no pin code")
+
+        try:
+            self.service.credentials = await error_handler(
+                self._pair_finish, exceptions.PairingError
+            )
+        except Exception:
+            self._state = PairingState.Failed
+            raise
+        else:
+            self._state = PairingState.Finished
+
+    @abstractmethod
+    async def _pair_begin(self) -> None:
+        """Start pairing process.
+
+        This must be implemented by the protocol.
+        """
+        raise exceptions.NotSupportedError()
+
+    @abstractmethod
+    async def _pair_finish(self) -> str:
+        """Stop pairing process.
+
+        This must be implemented by the protocol.
+        """
+        raise exceptions.NotSupportedError()
 
 
 class SetupData(NamedTuple):

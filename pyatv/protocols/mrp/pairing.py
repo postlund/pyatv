@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from typing import Optional, Union
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
@@ -33,7 +34,7 @@ class MrpPairingHandler(PairingHandler):
         self.srp = SRPAuthHandler()
         self.protocol = MrpProtocol(self.connection, self.srp, self.service)
         self.pairing_procedure = MrpPairSetupProcedure(self.protocol, self.srp)
-        self.pin_code = None
+        self.pin_code: Optional[str] = None
         self._has_paired = False
 
     async def close(self):
@@ -81,7 +82,7 @@ class MrpPairingHandler(PairingHandler):
         """Return True if remote device presents PIN code, else False."""
         return True
 
-    def pin(self, pin):
+    def pin(self, pin: Union[str, int]) -> None:
         """Pin code used for pairing."""
         self.pin_code = str(pin).zfill(4)
         _LOGGER.debug("MRP PIN changed to %s", self.pin_code)

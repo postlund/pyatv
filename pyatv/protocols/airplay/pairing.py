@@ -1,6 +1,6 @@
 """Device pairing and derivation of encryption keys."""
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import PairSetupProcedure
@@ -80,7 +80,7 @@ class AirPlayPairingHandler(PairingHandler):
         )
         self._has_paired = True
 
-    def pin(self, pin: int) -> None:
+    def pin(self, pin: Union[str, int]) -> None:
         """Pin code used for pairing."""
         self.pin_code = str(pin).zfill(4)
         _LOGGER.debug("AirPlay PIN changed to %s", self.pin_code)

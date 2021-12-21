@@ -34,6 +34,7 @@ from pyatv.const import (
     InputAction,
     OperatingSystem,
     PairingRequirement,
+    PairingState,
     Protocol,
 )
 from pyatv.support.device_info import lookup_version
@@ -221,12 +222,17 @@ class PairingHandler(ABC):
         """Return service used for pairing."""
         return self._service
 
+    @property
+    def state(self) -> PairingState:
+        """Return current state of pairing process."""
+        return PairingState.NotStarted
+
     async def close(self) -> None:
         """Call to free allocated resources after pairing."""
         await self.session_manager.close()
 
     @abstractmethod
-    def pin(self, pin) -> None:
+    def pin(self, pin: Union[str, int]) -> None:
         """Pin code used for pairing."""
         raise exceptions.NotSupportedError()
 
@@ -239,10 +245,7 @@ class PairingHandler(ABC):
     @property
     @abstractmethod
     def has_paired(self) -> bool:
-        """If a successful pairing has been performed.
-
-        The value will be reset when stop() is called.
-        """
+        """If a successful pairing has been performed."""
         raise exceptions.NotSupportedError()
 
     @abstractmethod

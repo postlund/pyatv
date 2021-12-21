@@ -133,15 +133,6 @@ async def test_successful_pairing_random_pairing_guid_generated(
     assert service.credentials == RANDOM_PAIRING_GUID
 
 
-async def test_succesful_pairing_with_any_pin(mock_pairing):
-    _, zeroconf, _ = await mock_pairing(pin_code=None)
-
-    url = pairing_url(zeroconf, "invalid_pairing_code")
-    _, status = await utils.simple_get(url)
-
-    assert status == 200
-
-
 async def test_succesful_pairing_with_pin_leadering_zeros(mock_pairing):
     _, zeroconf, _ = await mock_pairing(pin_code=PIN_CODE3, pairing_guid=PAIRING_GUID3)
 

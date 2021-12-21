@@ -1,7 +1,7 @@
 """Device pairing and derivation of encryption keys."""
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -75,7 +75,7 @@ class CompanionPairingHandler(PairingHandler):
         """Return True if remote device presents PIN code, else False."""
         return True
 
-    def pin(self, pin: int) -> None:
+    def pin(self, pin: Union[str, int]) -> None:
         """Pin code used for pairing."""
         self.pin_code = str(pin).zfill(4)
         _LOGGER.debug("Companion PIN changed to %s", self.pin_code)

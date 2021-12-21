@@ -184,6 +184,22 @@ class InputAction(Enum):
     """Press and hold for one second before releasing."""
 
 
+class PairingState(Enum):
+    """State during pairing process."""
+
+    NotStarted = 1
+    """Pairing process har not yet started."""
+
+    Started = 2
+    """Pairing has started and PIN code must be entered."""
+
+    Finished = 3
+    """Pairing has finished successfully."""
+
+    Failed = 4
+    """Pairing process has failed."""
+
+
 class PairingRequirement(Enum):
     """Pairing requirement for a service."""
 
