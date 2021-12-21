@@ -73,12 +73,11 @@ async def mock_pairing(event_loop):
         obj.pairing = pairing.DmapPairingHandler(
             config, service, await http.create_session(), event_loop, **options
         )
-        await obj.pairing.begin()
         obj.pairing.pin(pin_code)
+        await obj.pairing.begin()
         return obj.pairing, zeroconf, service
 
     yield _start
-    await obj.pairing.finish()
     await obj.pairing.close()
 
 
@@ -108,6 +107,8 @@ async def test_succesful_pairing(mock_pairing):
 
     url = pairing_url(zeroconf, PAIRING_CODE)
     data, _ = await utils.simple_get(url)
+
+    assert service.credentials is None
 
     await pairing.finish()
 

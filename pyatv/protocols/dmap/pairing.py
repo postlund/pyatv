@@ -6,13 +6,14 @@ from io import StringIO
 from ipaddress import IPv4Address
 import logging
 import random
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from aiohttp import web
 from zeroconf import Zeroconf
 
-from pyatv.core import mdns
-from pyatv.interface import BaseConfig, BaseService, PairingHandler
+from pyatv import exceptions
+from pyatv.core import AbstractPairingHandler, mdns
+from pyatv.interface import BaseConfig, BaseService
 from pyatv.protocols.dmap import tags
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.net import get_private_addresses, unused_port
@@ -31,9 +32,7 @@ def _generate_random_guid():
     return hex(random.getrandbits(64)).upper()
 
 
-class DmapPairingHandler(
-    PairingHandler
-):  # pylint: disable=too-many-instance-attributes  # noqa
+class DmapPairingHandler(AbstractPairingHandler):
     """Handle the pairing process.
 
     This class will publish a bonjour service and configure a webserver
@@ -49,18 +48,16 @@ class DmapPairingHandler(
         **kwargs
     ) -> None:
         """Initialize a new instance."""
-        super().__init__(session_manager, service)
+        super().__init__(session_manager, service, device_provides_pin=False)
         self._loop = loop
         self._zeroconf: Zeroconf = kwargs.get("zeroconf") or Zeroconf()
         self._name: str = kwargs.get("name", "pyatv")
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
         self.runner: web.AppRunner = web.AppRunner(self.app)
-        self.site: Optional[web.TCPSite] = None
-        self._pin_code: Optional[str] = None
-        self._has_paired: bool = False
+        self._got_valid_response: bool = False
         self._pairing_guid: str = (
-            kwargs.get("pairing_guid", None) or _generate_random_guid()
+            kwargs.get("pairing_guid") or _generate_random_guid()
         )[2:].upper()
         self._addresses: List[IPv4Address] = _get_zeroconf_addresses(
             kwargs.get("addresses")
@@ -72,42 +69,24 @@ class DmapPairingHandler(
         await self.runner.cleanup()
         await super().close()
 
-    @property
-    def has_paired(self) -> bool:
-        """If a successful pairing has been performed.
-
-        The value will be reset when stop() is called.
-        """
-        return self._has_paired
-
-    async def begin(self) -> None:
+    async def _pair_begin(self) -> None:
         """Start the pairing server and publish service."""
         port = unused_port()
 
         await self.runner.setup()
-        self.site = web.TCPSite(self.runner, "0.0.0.0", port)
-        await self.site.start()
+        site = web.TCPSite(self.runner, "0.0.0.0", port)
+        await site.start()
 
         _LOGGER.debug("Started pairing web server at port %d", port)
 
         for ipaddr in self._addresses:
             await self._publish_service(ipaddr, port)
 
-    async def finish(self) -> None:
+    async def _pair_finish(self) -> str:
         """Stop pairing server and unpublish service."""
-        if self._has_paired:
-            _LOGGER.debug("Saving updated credentials")
-            self.service.credentials = "0x" + self._pairing_guid
-
-    def pin(self, pin: Union[str, int]) -> None:
-        """Pin code used for pairing."""
-        self._pin_code = str(pin)
-        _LOGGER.debug("DMAP PIN changed to %s", self._pin_code)
-
-    @property
-    def device_provides_pin(self) -> bool:
-        """Return True if remote device presents PIN code, else False."""
-        return False
+        if self._got_valid_response:
+            return f"0x{self._pairing_guid}"
+        raise exceptions.PairingError("pairing failed")
 
     async def _publish_service(self, address: IPv4Address, port: int) -> None:
         props = {
@@ -144,7 +123,7 @@ class DmapPairingHandler(
             cmnm = tags.string_tag("cmnm", self._name)
             cmty = tags.string_tag("cmty", "iPhone")
             response = tags.container_tag("cmpa", cmpg + cmnm + cmty)
-            self._has_paired = True
+            self._got_valid_response = True
             return web.Response(body=response)
 
         # Code did not match, generate an error
@@ -153,7 +132,7 @@ class DmapPairingHandler(
     def _verify_pin(self, received_code: str) -> bool:
         merged = StringIO()
         merged.write(self._pairing_guid)
-        for char in str(self._pin_code).zfill(4):
+        for char in str(self._pin or 0).zfill(4):
             merged.write(char)
             merged.write("\x00")
 
