@@ -351,9 +351,9 @@ class RaopStream(Stream):
             metadata: AudioMetadata = EMPTY_METADATA
             try:
                 # Source must support seeking to read metadata (or point to file)
-                if (
-                    isinstance(file, io.BufferedReader) and file.seekable
-                ) or path.exists(file):
+                if (isinstance(file, io.BufferedReader) and file.seekable()) or (
+                    isinstance(file, str) and path.exists(file)
+                ):
                     metadata = await get_metadata(file)
                 else:
                     _LOGGER.debug(
