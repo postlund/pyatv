@@ -78,7 +78,7 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
 
         await self.handle.begin()
-        with self.assertRaises(exceptions.PairingError):
+        with self.assertRaises(exceptions.InvalidStateError):
             await self.handle.finish()
 
     @unittest_run_loop

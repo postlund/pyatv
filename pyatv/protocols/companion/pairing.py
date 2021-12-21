@@ -1,21 +1,19 @@
 """Device pairing and derivation of encryption keys."""
 import asyncio
 import logging
-from typing import Optional, Union
 
-from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.interface import BaseConfig, BaseService, PairingHandler
+from pyatv.core import AbstractPairingHandler
+from pyatv.interface import BaseConfig, BaseService
 from pyatv.protocols.companion.auth import CompanionPairSetupProcedure
 from pyatv.protocols.companion.connection import CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol
-from pyatv.support import error_handler
 from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class CompanionPairingHandler(PairingHandler):
+class CompanionPairingHandler(AbstractPairingHandler):
     """Pairing handler used to pair the Companion link protocol."""
 
     def __init__(
@@ -27,55 +25,23 @@ class CompanionPairingHandler(PairingHandler):
         **kwargs
     ):
         """Initialize a new CompanionPairingHandler."""
-        super().__init__(session, service)
+        super().__init__(session, service, device_provides_pin=True)
         self.connection = CompanionConnection(
             loop, str(config.address), self.service.port, None
         )
         self.srp = SRPAuthHandler()
         self.protocol = CompanionProtocol(self.connection, self.srp, self.service)
         self.pairing_procedure = CompanionPairSetupProcedure(self.protocol, self.srp)
-        self.pin_code: Optional[str] = None
-        self._has_paired: bool = False
 
     async def close(self) -> None:
         """Call to free allocated resources after pairing."""
         self.protocol.stop()
         await super().close()
 
-    @property
-    def has_paired(self) -> bool:
-        """If a successful pairing has been performed."""
-        return self._has_paired
-
-    async def begin(self) -> None:
+    async def _pair_begin(self) -> None:
         """Start pairing process."""
-        _LOGGER.debug("Start pairing Companion")
-        await error_handler(
-            self.pairing_procedure.start_pairing, exceptions.PairingError
-        )
+        await self.pairing_procedure.start_pairing()
 
-    async def finish(self) -> None:
+    async def _pair_finish(self) -> str:
         """Stop pairing process."""
-        _LOGGER.debug("Finish pairing Companion")
-        if not self.pin_code:
-            raise exceptions.PairingError("no pin given")
-
-        self.service.credentials = str(
-            await error_handler(
-                self.pairing_procedure.finish_pairing,
-                exceptions.PairingError,
-                "",  # username required but not used
-                self.pin_code,
-            )
-        )
-        self._has_paired = True
-
-    @property
-    def device_provides_pin(self) -> bool:
-        """Return True if remote device presents PIN code, else False."""
-        return True
-
-    def pin(self, pin: Union[str, int]) -> None:
-        """Pin code used for pairing."""
-        self.pin_code = str(pin).zfill(4)
-        _LOGGER.debug("Companion PIN changed to %s", self.pin_code)
+        return await self.pairing_procedure.finish_pairing("", int(self._pin or "0000"))
