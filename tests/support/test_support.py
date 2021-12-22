@@ -75,6 +75,15 @@ async def test_error_handler_other_exception():
         await error_handler(doraise, DummyException, Exception)
 
 
+async def test_error_handler_fallback_passthrough():
+    exception = DummyException()
+
+    with pytest.raises(DummyException) as ex:
+        await error_handler(doraise, DummyException, lambda: exception)
+
+    assert ex.value == exception
+
+
 def test_log_binary_no_log_if_not_debug(logger):
     logger.isEnabledFor.return_value = False
     log_binary(logger, "test")

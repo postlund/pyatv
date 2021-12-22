@@ -31,6 +31,9 @@ async def error_handler(func, fallback, *args, **kwargs):
     """Call a function and re-map exceptions to match pyatv interface."""
     try:
         return await func(*args, **kwargs)
+    except fallback:
+        # Exception of the fallback type just fall through
+        raise
     except (OSError, asyncio.TimeoutError) as ex:
         raise exceptions.ConnectionFailedError(str(ex)) from ex
     except exceptions.BackOffError:
