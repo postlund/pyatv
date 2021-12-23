@@ -3,7 +3,6 @@ from unittest.mock import ANY, MagicMock
 
 import pytest
 
-from pyatv import exceptions
 from pyatv.conf import ManualService
 from pyatv.const import PairingState, Protocol
 from pyatv.core import (
@@ -14,6 +13,12 @@ from pyatv.core import (
     StateMessage,
     UpdatedState,
 )
+from pyatv.exceptions import (
+    InvalidStateError,
+    NotSupportedError,
+    PairingError,
+    PairingFailureReason,
+)
 from pyatv.interface import Playing
 
 # PUSH UPDATER
@@ -22,18 +27,18 @@ from pyatv.interface import Playing
 class PushUpdaterDummy(AbstractPushUpdater):
     def active(self) -> bool:
         """Return if push updater has been started."""
-        raise exceptions.NotSupportedError()
+        raise NotSupportedError()
 
     def start(self, initial_delay: int = 0) -> None:
         """Begin to listen to updates.
 
         If an error occurs, start must be called again.
         """
-        raise exceptions.NotSupportedError()
+        raise NotSupportedError()
 
     def stop(self) -> None:
         """No longer forward updates to listener."""
-        raise exceptions.NotSupportedError()
+        raise NotSupportedError()
 
 
 @pytest.mark.parametrize("updates", [1, 2, 3])
@@ -115,7 +120,7 @@ async def test_pairing_begin_starts_pairing_process(pairing_handler):
 async def test_pairing_begin_can_only_be_called_once(pairing_handler):
     await pairing_handler.begin()
 
-    with pytest.raises(exceptions.InvalidStateError):
+    with pytest.raises(InvalidStateError):
         await pairing_handler.begin()
 
     assert pairing_handler.begin_call_count == 1
@@ -128,7 +133,7 @@ async def test_pairing_begin_can_only_be_called_once(pairing_handler):
 async def test_pairing_begin_sets_error_state_on_exception(pairing_handler):
     pairing_handler.begin_error = Exception("fail")
 
-    with pytest.raises(exceptions.PairingError):
+    with pytest.raises(PairingError):
         await pairing_handler.begin()
 
     assert pairing_handler.state == PairingState.Failed
@@ -138,7 +143,7 @@ async def test_pairing_begin_sets_error_state_on_exception(pairing_handler):
 async def test_pairing_finish_if_not_started(pairing_handler):
     assert pairing_handler.state == PairingState.NotStarted
 
-    with pytest.raises(exceptions.InvalidStateError):
+    with pytest.raises(InvalidStateError):
         await pairing_handler.finish()
 
     assert pairing_handler.state == PairingState.NotStarted
@@ -147,7 +152,7 @@ async def test_pairing_finish_if_not_started(pairing_handler):
 @pytest.mark.parametrize("device_provides_pin", [True])
 async def test_pairing_finish_raises_on_missing_pin(pairing_handler):
     await pairing_handler.begin()
-    with pytest.raises(exceptions.InvalidStateError):
+    with pytest.raises(InvalidStateError):
         await pairing_handler.finish()
 
     # Calling without PIN makes process fail
@@ -176,7 +181,7 @@ async def test_pairing_finish_can_only_be_called_once(pairing_handler):
     pairing_handler.pin("1234")
     await pairing_handler.finish()
 
-    with pytest.raises(exceptions.InvalidStateError):
+    with pytest.raises(InvalidStateError):
         await pairing_handler.finish()
 
     assert pairing_handler.finish_call_count == 1
@@ -185,11 +190,41 @@ async def test_pairing_finish_can_only_be_called_once(pairing_handler):
     assert pairing_handler.state == PairingState.Finished
 
 
+@pytest.mark.parametrize("device_provides_pin", [True])
+async def test_pairing_finish_raises_with_custom_reason(pairing_handler):
+    await pairing_handler.begin()
+    pairing_handler.finish_error = PairingError("fail", PairingFailureReason.Timeout)
+
+    pairing_handler.pin(1234)
+
+    with pytest.raises(PairingError) as ex:
+        await pairing_handler.finish()
+
+    assert pairing_handler.state == PairingState.Failed
+    assert pairing_handler.failure_reason == PairingFailureReason.Timeout
+
+
+@pytest.mark.parametrize("device_provides_pin", [True])
+async def test_pairing_set_failure(pairing_handler):
+    await pairing_handler.begin()
+
+    # Simulate internal behavior that results in a "timeout" error
+    pairing_handler._set_failure(PairingFailureReason.Timeout)
+
+    assert pairing_handler.state == PairingState.Failed
+    assert pairing_handler.failure_reason == PairingFailureReason.Timeout
+
+    with pytest.raises(PairingError) as ex:
+        await pairing_handler.finish()
+
+    assert ex.value.failure_reason == PairingFailureReason.Timeout
+
+
 @pytest.mark.parametrize("device_provides_pin", [False])
 async def test_pairing_begin_raises_missing_pin_when_device_does_not_provide(
     pairing_handler,
 ):
-    with pytest.raises(exceptions.InvalidStateError):
+    with pytest.raises(InvalidStateError):
         await pairing_handler.begin()
 
     assert pairing_handler.state == PairingState.Failed

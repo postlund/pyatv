@@ -16,9 +16,14 @@ from typing import (
     Union,
 )
 
-from pyatv import exceptions
 from pyatv.const import FeatureName, PairingRequirement, PairingState, Protocol
 from pyatv.core.protocol import MessageDispatcher
+from pyatv.exceptions import (
+    InvalidStateError,
+    NotSupportedError,
+    PairingError,
+    PairingFailureReason,
+)
 from pyatv.interface import (
     BaseConfig,
     BaseService,
@@ -214,11 +219,20 @@ class AbstractPairingHandler(PairingHandler):
         self._device_provides_pin = device_provides_pin
         self._pin: Optional[str] = None
         self._state: PairingState = PairingState.NotStarted
+        self._reason: PairingFailureReason = PairingFailureReason.Unspecified
 
     @property
     def state(self) -> PairingState:
         """Return current state of pairing process."""
         return self._state
+
+    @property
+    def failure_reason(self) -> PairingFailureReason:
+        """If pairing has failed, return the reason for doing so.
+
+        The value of this property is only valid if `state` is `PairingState.Failed`.
+        """
+        return self._reason
 
     @property
     def device_provides_pin(self) -> bool:
@@ -242,16 +256,16 @@ class AbstractPairingHandler(PairingHandler):
         _LOGGER.debug("Start pairing %s", self.service.protocol.name)
 
         if self.state != PairingState.NotStarted:
-            raise exceptions.InvalidStateError("pairing process has already started")
+            raise InvalidStateError("pairing process has already started")
 
         # If a PIN is supposed to be entered on the device, that PIN must be set here
         if not self.device_provides_pin and self._pin is None:
             self._state = PairingState.Failed
-            raise exceptions.InvalidStateError("no pin code set")
+            raise InvalidStateError("no pin code set")
 
         self._state = PairingState.Started
         try:
-            await error_handler(self._pair_begin, exceptions.PairingError)
+            await error_handler(self._pair_begin, PairingError)
         except Exception:
             self._state = PairingState.Failed
             raise
@@ -260,18 +274,25 @@ class AbstractPairingHandler(PairingHandler):
         """Stop pairing process."""
         _LOGGER.debug("Finish pairing %s", self.service.protocol.name)
 
+        if self.state == PairingState.Failed:
+            raise PairingError(
+                f"pairing failed with reason: {self.failure_reason.name}",
+                self.failure_reason,
+            )
         if self.state != PairingState.Started:
-            raise exceptions.InvalidStateError("pairing process has not started")
+            raise InvalidStateError("pairing process has not started")
         if self.device_provides_pin and self._pin is None:
             self._state = PairingState.Failed
-            raise exceptions.InvalidStateError("no pin code")
+            raise InvalidStateError("no pin code")
 
         try:
             self.service.credentials = await error_handler(
-                self._pair_finish, exceptions.PairingError
+                self._pair_finish, PairingError
             )
-        except Exception:
+        except Exception as ex:
             self._state = PairingState.Failed
+            if isinstance(ex, PairingError):
+                self._reason = ex.failure_reason
             raise
         else:
             self._state = PairingState.Finished
@@ -282,7 +303,7 @@ class AbstractPairingHandler(PairingHandler):
 
         This must be implemented by the protocol.
         """
-        raise exceptions.NotSupportedError()
+        raise NotSupportedError()
 
     @abstractmethod
     async def _pair_finish(self) -> str:
@@ -290,7 +311,15 @@ class AbstractPairingHandler(PairingHandler):
 
         This must be implemented by the protocol.
         """
-        raise exceptions.NotSupportedError()
+        raise NotSupportedError()
+
+    def _set_failure(self, reason: PairingFailureReason) -> None:
+        """Change pairing state to Failed with provided reason.
+
+        Only to be called from subclasses.
+        """
+        self._state = PairingState.Failed
+        self._reason = reason
 
 
 class SetupData(NamedTuple):

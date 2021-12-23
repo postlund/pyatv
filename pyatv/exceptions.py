@@ -1,4 +1,26 @@
 """Local exceptions used by library."""
+from enum import Enum
+
+# pylint: disable=invalid-name
+
+
+class PairingFailureReason(Enum):
+    """Reason why pairing failed."""
+
+    Succeeded = 1
+    """Pairing succeeded, i.e. no error."""
+
+    Unspecified = 2
+    """Reason not known."""
+
+    NoPinCode = 3
+    """PIN code was not provided when it was expected."""
+
+    Timeout = 4
+    """Connection timed out while waiting for input."""
+
+
+# pylint: enable=invalid-name
 
 
 class NoServiceError(Exception):
@@ -18,6 +40,20 @@ class ConnectionFailedError(Exception):
 
 class PairingError(Exception):
     """Thrown when pairing fails."""
+
+    def __init__(
+        self,
+        message: str,
+        reason: PairingFailureReason = PairingFailureReason.Unspecified,
+    ) -> None:
+        """Initialize a new PairingError instance."""
+        super().__init__(message)
+        self._reason = reason
+
+    @property
+    def failure_reason(self) -> PairingFailureReason:
+        """Return reason why pairing failed."""
+        return self._reason
 
 
 class AuthenticationError(Exception):

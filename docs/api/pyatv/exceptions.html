@@ -70,6 +70,17 @@ link_group: api
 </li>
 <li>
 <h4><code><a title="pyatv.exceptions.PairingError" href="#pyatv.exceptions.PairingError">PairingError</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.exceptions.PairingError.failure_reason" href="#pyatv.exceptions.PairingError.failure_reason">failure_reason</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.exceptions.PairingFailureReason" href="#pyatv.exceptions.PairingFailureReason">PairingFailureReason</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.exceptions.PairingFailureReason.Succeeded" href="#pyatv.exceptions.PairingFailureReason.Succeeded">Succeeded</a></code></li>
+<li><code><a title="pyatv.exceptions.PairingFailureReason.Timeout" href="#pyatv.exceptions.PairingFailureReason.Timeout">Timeout</a></code></li>
+<li><code><a title="pyatv.exceptions.PairingFailureReason.Unspecified" href="#pyatv.exceptions.PairingFailureReason.Unspecified">Unspecified</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="pyatv.exceptions.PlaybackError" href="#pyatv.exceptions.PlaybackError">PlaybackError</a></code></h4>
@@ -96,7 +107,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L115" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L148" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -113,7 +124,7 @@ link_group: api
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when authentication fails.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L23-L24" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L56-L57" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -126,7 +137,7 @@ link_group: api
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device mandates a backoff period.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L59-L60" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L92-L93" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -142,7 +153,7 @@ link_group: api
 <p>Typically, public interface methods (e.g. any method available via the object
 returned by <code><a title="pyatv.connect" href="index#pyatv.connect">connect()</a></code>) becomes blocked after either calling close or because
 the connection was closed for some other reason.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L109-L115" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L142-L148" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -155,7 +166,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when a command (e.g. play or pause) failed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L67-L68" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L100-L101" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -168,7 +179,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connection fails, e.g. refused or timed out.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L15-L16" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L34-L35" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -181,7 +192,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when device id is missing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L55-L56" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L88-L89" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -195,7 +206,7 @@ the connection was closed for some other reason.</p></section>
 <dd>
 <section class="desc"><p>Thrown when a HTTP error occurs.</p>
 <p>Initialize a new HttpError.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L91-L102" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L124-L135" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.exceptions.ProtocolError" href="#pyatv.exceptions.ProtocolError">ProtocolError</a></li>
@@ -207,7 +218,7 @@ the connection was closed for some other reason.</p></section>
 <dt id="pyatv.exceptions.HttpError.status_code"><code class="name">var <span class="ident">status_code</span> -> int</code></dt>
 <dd>
 <section class="desc"><p>Return status code that triggered the error.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L99-L102" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L132-L135" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </dd>
@@ -217,7 +228,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when something is wrong or missing in the config.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L105-L106" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L138-L139" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -230,7 +241,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are invalid.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L51-L52" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L84-L85" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -243,7 +254,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when invalid DMAP data is parsed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L31-L32" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L64-L65" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -256,7 +267,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when trying to perform an action not possible in the current state.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L78-L79" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L111-L112" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -269,7 +280,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when starting AsyncUpdater with no listener.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L43-L44" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L76-L77" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -282,7 +293,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown if credentials are missing.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L47-L48" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L80-L81" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -295,7 +306,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when connecting to a device with no usable service.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L4-L5" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L23-L24" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -309,7 +320,7 @@ the connection was closed for some other reason.</p></section>
 <dd>
 <section class="desc"><p>Thrown when address it not in any local subnet.</p>
 <p>DEPRECATED: Not used since 0.7.1. Will be removed in 0.9.0!</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L71-L75" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L104-L108" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -322,7 +333,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when trying to perform an action that is not supported.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L27-L28" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L60-L61" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.NotImplementedError</li>
@@ -333,16 +344,52 @@ the connection was closed for some other reason.</p></section>
 </dd>
 <dt id="pyatv.exceptions.PairingError"><code class="flex name class">
 <span>class <span class="ident">PairingError</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>message: str, reason: <a title="pyatv.exceptions.PairingFailureReason" href="#pyatv.exceptions.PairingFailureReason">PairingFailureReason</a> = PairingFailureReason.Unspecified)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Thrown when pairing fails.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L19-L20" class="git-link">Browse git</a></div>
+<section class="desc"><p>Thrown when pairing fails.</p>
+<p>Initialize a new PairingError instance.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L38-L53" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.exceptions.PairingError.failure_reason"><code class="name">var <span class="ident">failure_reason</span> -> <a title="pyatv.exceptions.PairingFailureReason" href="#pyatv.exceptions.PairingFailureReason">PairingFailureReason</a></code></dt>
+<dd>
+<section class="desc"><p>Return reason why pairing failed.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L50-L53" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.exceptions.PairingFailureReason"><code class="flex name class">
+<span>class <span class="ident">PairingFailureReason</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Reason why pairing failed.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L7-L17" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.exceptions.PairingFailureReason.Succeeded"><code class="name">var <span class="ident">Succeeded</span></code></dt>
+<dd>
+<section class="desc"><p>Pairing succeeded, i.e. no error.</p></section>
+</dd>
+<dt id="pyatv.exceptions.PairingFailureReason.Timeout"><code class="name">var <span class="ident">Timeout</span></code></dt>
+<dd>
+<section class="desc"><p>Connection timed out while waiting for input.</p></section>
+</dd>
+<dt id="pyatv.exceptions.PairingFailureReason.Unspecified"><code class="name">var <span class="ident">Unspecified</span></code></dt>
+<dd>
+<section class="desc"><p>Reason not known.</p></section>
+</dd>
+</dl>
 </dd>
 <dt id="pyatv.exceptions.PlaybackError"><code class="flex name class">
 <span>class <span class="ident">PlaybackError</span></span>
@@ -350,7 +397,7 @@ the connection was closed for some other reason.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when media playback failed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L63-L64" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L96-L97" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -366,7 +413,7 @@ the connection was closed for some other reason.</p></section>
 <p>Generic protocol errors includes for instance missing fields, incorrect or
 unexpected types, etc. Any error that can happen when communicating with a device
 that is not covered by another exception is covered by this exception.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L82-L88" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L115-L121" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -383,7 +430,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown media kind is found.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L35-L36" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L68-L69" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -396,7 +443,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 </code></dt>
 <dd>
 <section class="desc"><p>Thrown when an unknown play state is found.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L39-L40" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L72-L73" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>
@@ -410,7 +457,7 @@ that is not covered by another exception is covered by this exception.</p></sect
 <dd>
 <section class="desc"><p>Thrown when an unsupported protocol was requested.</p>
 <p>DEPRECATED: Not used since 0.8.0. Will be removed in 0.10.0!</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L8-L12" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L27-L31" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>

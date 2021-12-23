@@ -37,6 +37,7 @@ from pyatv.const import (
     PairingState,
     Protocol,
 )
+from pyatv.exceptions import PairingFailureReason
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
@@ -226,6 +227,14 @@ class PairingHandler(ABC):
     def state(self) -> PairingState:
         """Return current state of pairing process."""
         return PairingState.NotStarted
+
+    @property
+    def failure_reason(self) -> PairingFailureReason:
+        """If pairing has failed, return the reason for doing so.
+
+        The value of this property is only valid if `state` is `PairingState.Failed`.
+        """
+        return PairingFailureReason.Unspecified
 
     async def close(self) -> None:
         """Call to free allocated resources after pairing."""
