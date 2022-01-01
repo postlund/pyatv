@@ -3,8 +3,8 @@
 import asyncio
 import errno
 from ipaddress import ip_address
-import time
 import sys
+import time
 import unittest
 from unittest.mock import MagicMock, patch
 
