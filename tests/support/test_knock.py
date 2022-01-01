@@ -86,7 +86,6 @@ async def test_abort_knock_down_host(event_loop, caplog):
     assert (end - start) < 1
     await asyncio.sleep(0)
     event_loop.set_debug(False)
-    await asyncio.sleep(0)
     assert "Task exception was never retrieved" not in caplog.text
 
 
@@ -103,5 +102,4 @@ async def test_abort_knock_unhandled_exception(event_loop, caplog):
     assert (end - start) < 1
     await asyncio.sleep(0)
     event_loop.set_debug(False)
-    await asyncio.sleep(0)
     assert "Task exception was never retrieved" not in caplog.text
