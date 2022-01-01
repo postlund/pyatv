@@ -81,7 +81,6 @@ async def test_abort_knock_down_host(event_loop, caplog):
         ],
     ):
         task = await knocker("127.0.0.1", [1, 2, 3, 4], event_loop, timeout=3)
-        # Knocking on the multicast ip will raise Network unreachable and should abort right away
         await task
     end = time.monotonic()
     assert (end - start) < 1
@@ -97,7 +96,7 @@ async def test_abort_knock_unhandled_exception(event_loop, caplog):
     start = time.monotonic()
     with patch("pyatv.support.knock.asyncio.open_connection", side_effect=ValueError):
         task = await knocker("127.0.0.1", [1, 2, 3, 4], event_loop, timeout=3)
-        # Knocking on the multicast ip will raise Network unreachable and should abort right away
+        # For unknown exeptions we want to still raise them
         with pytest.raises(ValueError):
             await task
     end = time.monotonic()
