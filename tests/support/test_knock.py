@@ -1,15 +1,15 @@
 """Unit tests for port knocker module."""
 
 import asyncio
+import errno
 from ipaddress import ip_address
 import time
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from pyatv.support.knock import knock, knocker
-from pyatv.support.net import unused_port
 
-from tests.fake_knock import create_knock_server
 from tests.utils import until
 
 LOCALHOST = ip_address("127.0.0.1")
@@ -65,3 +65,44 @@ async def test_abort_knock_unreachable_host(event_loop):
     await task
     end = time.monotonic()
     assert (end - start) < 1
+
+
+@pytest.mark.asyncio
+async def test_abort_knock_down_host(event_loop, caplog):
+    event_loop.set_debug(True)
+    start = time.monotonic()
+    with patch(
+        "pyatv.support.knock.asyncio.open_connection",
+        side_effect=[
+            (MagicMock(), MagicMock()),
+            (MagicMock(), MagicMock()),
+            OSError(errno.EHOSTDOWN, None),
+            (MagicMock(), MagicMock()),
+        ],
+    ):
+        task = await knocker("127.0.0.1", [1, 2, 3, 4], event_loop, timeout=3)
+        # Knocking on the multicast ip will raise Network unreachable and should abort right away
+        await task
+    end = time.monotonic()
+    assert (end - start) < 1
+    await asyncio.sleep(0)
+    event_loop.set_debug(False)
+    await asyncio.sleep(0)
+    assert "Task exception was never retrieved" not in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_abort_knock_unhandled_exception(event_loop, caplog):
+    event_loop.set_debug(True)
+    start = time.monotonic()
+    with patch("pyatv.support.knock.asyncio.open_connection", side_effect=ValueError):
+        task = await knocker("127.0.0.1", [1, 2, 3, 4], event_loop, timeout=3)
+        # Knocking on the multicast ip will raise Network unreachable and should abort right away
+        with pytest.raises(ValueError):
+            await task
+    end = time.monotonic()
+    assert (end - start) < 1
+    await asyncio.sleep(0)
+    event_loop.set_debug(False)
+    await asyncio.sleep(0)
+    assert "Task exception was never retrieved" not in caplog.text
