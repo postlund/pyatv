@@ -53,9 +53,12 @@ async def scan(
 
     scanner: BaseScanner
     if async_zeroconf:
-        scanner = ZeroconfScanner(
-            async_zeroconf, hosts=[IPv4Address(host) for host in hosts]
-        )
+        if hosts:
+            scanner = ZeroconfScanner(
+                async_zeroconf, hosts=[IPv4Address(host) for host in hosts]
+            )
+        else:
+            scanner = ZeroconfScanner(async_zeroconf)
     else:
         if hosts:
             scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
