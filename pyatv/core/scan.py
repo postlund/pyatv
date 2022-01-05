@@ -461,7 +461,7 @@ class ZeroconfScanner(BaseScanner):
                     mdns.Service(
                         atv_type,
                         _extract_service_name(service),
-                        address,
+                        IPv4Address(address),
                         service.port,
                         CaseInsensitiveDict(
                             {
