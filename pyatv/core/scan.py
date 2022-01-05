@@ -385,7 +385,8 @@ class ZeroconfScanner(BaseScanner):
         )
         services_by_address: dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
-            if address := _first_non_link_local_or_v6_address(info.addresses):
+            address = _first_non_link_local_or_v6_address(info.addresses)
+            if address:
                 services_by_address.setdefault(address, []).append(info)
         return services_by_address
 
@@ -409,7 +410,8 @@ class ZeroconfScanner(BaseScanner):
             ]
         )
         for name, info in device_infos.items():
-            if possible_model := info.properties.get(b"model"):
+            possible_model = info.properties.get(b"model")
+            if possible_model:
                 with contextlib.suppress(UnicodeDecodeError):
                     name_to_model[name] = possible_model.decode("utf-8")
         return name_to_model
@@ -423,8 +425,10 @@ class ZeroconfScanner(BaseScanner):
         """Process and callback each aggregated response to the base handler."""
         for address, atv_services in atv_services_by_address.items():
             model = None
-            if (name_for_address := name_by_address.get(address)) is not None:
-                if possible_model := name_to_model.get(name_for_address):
+            name_for_address = name_by_address.get(address)
+            if name_for_address is not None:
+                possible_model = name_to_model.get(name_for_address)
+                if possible_model:
                     model = possible_model
             self.handle_response(
                 mdns.Response(
@@ -449,10 +453,10 @@ class ZeroconfScanner(BaseScanner):
             atv_services = []
             for service in services:
                 atv_type = service.type[:-1]
-                if address not in name_by_address and (
-                    device_info_name := _device_info_name(service)
-                ):
-                    name_by_address[address] = device_info_name
+                if address not in name_by_address:
+                    device_info_name = _device_info_name(service)
+                    if device_info_name:
+                        name_by_address[address] = device_info_name
                 atv_services.append(
                     mdns.Service(
                         atv_type,
