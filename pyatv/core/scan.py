@@ -364,7 +364,7 @@ class ZeroconfScanner(BaseScanner):
         """Initialize a new scanner."""
         super().__init__()
         self.aiozc = aiozc
-        self.zc = aiozc.zeroconf
+        self.zeroconf = aiozc.zeroconf
         self.hosts: Set[str] = set(hosts) if hosts else set()
 
     async def _async_services_by_addresses(
@@ -376,12 +376,12 @@ class ZeroconfScanner(BaseScanner):
         infos = [
             AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias)
             for zc_type in zc_types
-            for record in self.zc.cache.async_all_by_details(
+            for record in self.zeroconf.cache.async_all_by_details(
                 zc_type, _TYPE_PTR, _CLASS_IN
             )
         ]
         await asyncio.gather(
-            *[info.async_request(self.zc, zc_timeout) for info in infos]
+            *[info.async_request(self.zeroconf, zc_timeout) for info in infos]
         )
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
@@ -404,7 +404,7 @@ class ZeroconfScanner(BaseScanner):
         await asyncio.gather(
             *[
                 info.async_request(
-                    self.zc, zc_timeout, question_type=DNSQuestionType.QU
+                    self.zeroconf, zc_timeout, question_type=DNSQuestionType.QU
                 )
                 for info in device_infos.values()
             ]
