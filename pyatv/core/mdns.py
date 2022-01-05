@@ -57,8 +57,8 @@ DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
 def decode_value(value: bytes):
+    """Decode a bytes value by removing non-breaking-spaces (0xA2A0, 0x00A0) before decoding."""
     try:
-        # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
         return (
             value.replace(b"\xC2\xA0", b" ").replace(b"\x00\xA0", b" ").decode("utf-8")
         )
