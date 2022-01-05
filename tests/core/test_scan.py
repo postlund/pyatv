@@ -216,7 +216,8 @@ async def test_scan_with_zeroconf():
             device_info_txt_record,
         ]
     )
-    results = await scan(asyncio.get_event_loop(), timeout=0.1, async_zeroconf=aiozc)
+    await aiozc.zeroconf.async_wait_for_start()
+    results = await scan(asyncio.get_event_loop(), timeout=0.25, async_zeroconf=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
     assert "_sleep-proxy._udp.local" in atv.properties
