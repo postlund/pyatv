@@ -17,6 +17,7 @@ from zeroconf.asyncio import AsyncServiceBrowser, AsyncZeroconf
 
 from pyatv import scan
 from pyatv.conf import AppleTV
+from pyatv.const import DeviceModel
 from pyatv.core.mdns import Response, Service
 from pyatv.core.scan import BaseScanner, get_unique_identifiers
 
@@ -186,20 +187,12 @@ async def test_scan_with_zeroconf():
         const._DNS_OTHER_TTL,
         b"",
     )
-
-    device_info_record = DNSPointer(
-        "_device-info._tcp.local.",
-        const._TYPE_PTR,
-        const._CLASS_IN,
-        const._DNS_OTHER_TTL,
-        "Ohana._device-info._tcp.local.",
-    )
     device_info_txt_record = DNSText(
         "Ohana._device-info._tcp.local.",
         const._TYPE_TXT,
         const._CLASS_IN,
         const._DNS_OTHER_TTL,
-        b"",
+        b"\x0Cmodel=J305AP",
     )
 
     aiozc.zeroconf.cache.async_add_records(
@@ -217,7 +210,6 @@ async def test_scan_with_zeroconf():
             companion_link_ptr_record,
             companion_link_service_record,
             companion_link_txt_record,
-            device_info_record,
             device_info_txt_record,
         ]
     )
@@ -228,6 +220,7 @@ async def test_scan_with_zeroconf():
     assert "_airplay._tcp.local" in atv.properties
     assert "_raop._tcp.local" in atv.properties
     assert "_companion-link._tcp.local" in atv.properties
-
+    assert atv.deep_sleep is False
+    assert atv.device_info.model == DeviceModel.AppleTV4KGen2
     await browser.async_cancel()
     await aiozc.async_close()
