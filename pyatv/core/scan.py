@@ -365,7 +365,7 @@ class ZeroconfScanner(BaseScanner):
         super().__init__()
         self.aiozc = aiozc
         self.zeroconf = aiozc.zeroconf
-        self.hosts: Set[str] = set([str(host) for host in hosts]) if hosts else set()
+        self.hosts: Set[str] = set(str(host) for host in hosts) if hosts else set()
 
     async def _async_services_by_addresses(
         self, zc_timeout: float
