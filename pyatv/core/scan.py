@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 import asyncio
-from collections.abc import Iterable
 import contextlib
 from ipaddress import IPv4Address, ip_address
 import logging
@@ -13,6 +12,7 @@ from typing import (
     Callable,
     Dict,
     Generator,
+    Iterable,
     List,
     Mapping,
     NamedTuple,
