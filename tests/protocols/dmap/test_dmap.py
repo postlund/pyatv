@@ -23,7 +23,7 @@ def test_dmap_scan_handlers_present():
 
 
 def test_homesharing_handler_to_service():
-    handler = scan()[HOMESHARING_SERVICE]
+    handler, _ = scan()[HOMESHARING_SERVICE]
 
     mdns_service = mdns.Service(
         HOMESHARING_SERVICE, "foo", ip_address("127.0.0.1"), 1234, {"Name": "bar"}
@@ -37,8 +37,13 @@ def test_homesharing_handler_to_service():
     assert not DeepDiff(service.properties, {"Name": "bar"})
 
 
+def test_homesharing_device_info_name():
+    _, device_info_name = scan()[HOMESHARING_SERVICE]
+    assert device_info_name("ANY") is None
+
+
 def test_dmap_handler_to_service():
-    handler = scan()[DMAP_SERVICE]
+    handler, _ = scan()[DMAP_SERVICE]
 
     mdns_service = mdns.Service(
         DMAP_SERVICE, "foo", ip_address("127.0.0.1"), 1234, {"CtlN": "bar"}
@@ -50,6 +55,11 @@ def test_dmap_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"CtlN": "bar"})
+
+
+def test_dmap_device_info_name():
+    _, device_info_name = scan()[DMAP_SERVICE]
+    assert device_info_name("ANY") is None
 
 
 @pytest.mark.parametrize(

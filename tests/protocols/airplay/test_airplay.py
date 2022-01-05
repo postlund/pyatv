@@ -20,7 +20,7 @@ def test_airplay_scan_handlers_present():
 
 
 def test_airplay_handler_to_service():
-    handler = scan()[AIRPLAY_SERVICE]
+    handler, _ = scan()[AIRPLAY_SERVICE]
 
     mdns_service = mdns.Service(
         AIRPLAY_SERVICE, "foo", ip_address("127.0.0.1"), 1234, {"foo": "bar"}
@@ -32,6 +32,11 @@ def test_airplay_handler_to_service():
     assert service.port == 1234
     assert service.credentials is None
     assert not DeepDiff(service.properties, {"foo": "bar"})
+
+
+def test_airplay_device_info_name():
+    _, device_info_name = scan()[AIRPLAY_SERVICE]
+    assert device_info_name("Ohana") == "Ohana"
 
 
 @pytest.mark.parametrize(

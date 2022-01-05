@@ -21,7 +21,7 @@ def test_raop_scan_handlers_present():
 
 
 def test_raop_handler_to_service():
-    handler = scan()[RAOP_SERVICE]
+    handler, _ = scan()[RAOP_SERVICE]
 
     mdns_service = mdns.Service(
         RAOP_SERVICE, "foo@bar", ip_address("127.0.0.1"), 1234, {"foo": "bar"}
@@ -35,8 +35,13 @@ def test_raop_handler_to_service():
     assert not DeepDiff(service.properties, {"foo": "bar"})
 
 
+def test_raop_device_info_name():
+    _, device_info_name = scan()[RAOP_SERVICE]
+    assert device_info_name("ANY@Ohana") == "Ohana"
+
+
 def test_airport_handler():
-    handler = scan()[AIRPORT_SERVICE]
+    handler, _ = scan()[AIRPORT_SERVICE]
 
     mdns_service = mdns.Service(
         RAOP_SERVICE, "foo@bar", ip_address("127.0.0.1"), 1234, {"foo": "bar"}
@@ -44,6 +49,11 @@ def test_airport_handler():
     mdns_response = mdns.Response([], False, None)
 
     assert not handler(mdns_service, mdns_response)
+
+
+def test_airport_info_name():
+    _, device_info_name = scan()[AIRPORT_SERVICE]
+    assert device_info_name("Ohana") == "Ohana"
 
 
 @pytest.mark.parametrize(

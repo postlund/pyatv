@@ -56,21 +56,23 @@ class Response(typing.NamedTuple):
 DEVICE_INFO_SERVICE = "_device-info._tcp.local"
 
 
+def decode_value(value: bytes):
+    """Decode a bytes value and convert non-breaking-spaces.
+
+    (0xA2A0, 0x00A0) are converted to spaces before decoding.
+    """
+    try:
+        return (
+            value.replace(b"\xC2\xA0", b" ").replace(b"\x00\xA0", b" ").decode("utf-8")
+        )
+    except Exception:  # pylint: disable=broad-except
+        return str(value)
+
+
 def _decode_properties(
     properties: typing.Mapping[str, bytes],
 ) -> CaseInsensitiveDict[str]:
-    def _decode(value: bytes):
-        try:
-            # Remove non-breaking-spaces (0xA2A0, 0x00A0) before decoding
-            return (
-                value.replace(b"\xC2\xA0", b" ")
-                .replace(b"\x00\xA0", b" ")
-                .decode("utf-8")
-            )
-        except Exception:  # pylint: disable=broad-except
-            return str(value)
-
-    return CaseInsensitiveDict({k: _decode(v) for k, v in properties.items()})
+    return CaseInsensitiveDict({k: decode_value(v) for k, v in properties.items()})
 
 
 def create_service_queries(

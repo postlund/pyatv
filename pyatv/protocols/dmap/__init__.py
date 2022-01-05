@@ -29,7 +29,7 @@ from pyatv.core import (
     SetupData,
     mdns,
 )
-from pyatv.core.scan import ScanHandler, ScanHandlerReturn
+from pyatv.core.scan import ScanHandlerDeviceInfoName, ScanHandlerReturn
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     ArtworkInfo,
@@ -612,12 +612,12 @@ def hscp_service_handler(
     return name, service
 
 
-def scan() -> Mapping[str, ScanHandler]:
+def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:
     """Return handlers used for scanning."""
     return {
-        "_appletv-v2._tcp.local": homesharing_service_handler,
-        "_touch-able._tcp.local": dmap_service_handler,
-        "_hscp._tcp.local": hscp_service_handler,
+        "_appletv-v2._tcp.local": (homesharing_service_handler, lambda _: None),
+        "_touch-able._tcp.local": (dmap_service_handler, lambda _: None),
+        "_hscp._tcp.local": (hscp_service_handler, lambda _: None),
     }
 
 
