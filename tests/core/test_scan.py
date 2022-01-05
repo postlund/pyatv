@@ -190,6 +190,13 @@ async def test_scan_with_zeroconf():
         const._DNS_OTHER_TTL,
         b"",
     )
+    device_info_ptr_record = DNSPointer(
+        "_device-info._tcp.local.",
+        const._TYPE_PTR,
+        const._CLASS_IN,
+        const._DNS_OTHER_TTL,
+        "Ohana._device-info._tcp.local.",
+    )    
     device_info_txt_record = DNSText(
         "Ohana._device-info._tcp.local.",
         const._TYPE_TXT,
@@ -213,11 +220,12 @@ async def test_scan_with_zeroconf():
             companion_link_ptr_record,
             companion_link_service_record,
             companion_link_txt_record,
+            device_info_ptr_record,
             device_info_txt_record,
         ]
     )
     await aiozc.zeroconf.async_wait_for_start()
-    results = await scan(asyncio.get_event_loop(), timeout=1, async_zeroconf=aiozc)
+    results = await scan(asyncio.get_event_loop(), timeout=0.1, async_zeroconf=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
     assert "_sleep-proxy._udp.local" in atv.properties
