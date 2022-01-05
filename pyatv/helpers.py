@@ -73,9 +73,11 @@ def get_unique_id(
         return raop_name_from_service_name(service_name)
     return None
 
+
 def raop_name_from_service_name(service_name: str) -> str:
     """Converts an raop service name to a name."""
     return service_name.split("@", maxsplit=1)[0]
+
 
 def sleep_proxy_name_from_service_name(service_name: str) -> str:
     """Converts an sleep proxy service name to a name."""

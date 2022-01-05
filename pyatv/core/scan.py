@@ -359,7 +359,7 @@ class ZeroconfScanner(BaseScanner):
     def __init__(
         self,
         aiozc: AsyncZeroconf,
-        hosts: Optional[List[IPv4Address]] = None,
+        hosts: Optional[List[str]] = None,
     ) -> None:
         """Initialize a new scanner."""
         super().__init__()
