@@ -394,9 +394,6 @@ class ZeroconfScanner(BaseScanner):
         self, names: Iterable[str], zc_timeout: float
     ) -> Dict[str, str]:
         """Probe the DEVICE_INFO_TYPE."""
-        _LOGGER.warning(
-            "Probing _async_models_by_name: %s with timeout %s", names, zc_timeout
-        )
         name_to_model: Dict[str, str] = {}
         device_infos = {
             name: AsyncDeviceInfoServiceInfo(
@@ -426,12 +423,6 @@ class ZeroconfScanner(BaseScanner):
         name_by_address: Dict[str, str],
     ):
         """Process and callback each aggregated response to the base handler."""
-        _LOGGER.warning(
-            "Probing _async_process_responses: %s %s %s",
-            atv_services_by_address,
-            name_to_model,
-            name_by_address,
-        )
         for address, atv_services in atv_services_by_address.items():
             model = None
             name_for_address = name_by_address.get(address)
