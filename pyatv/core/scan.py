@@ -359,13 +359,13 @@ class ZeroconfScanner(BaseScanner):
     def __init__(
         self,
         aiozc: AsyncZeroconf,
-        hosts: Optional[list[IPv4Address]] = None,
+        hosts: Optional[List[IPv4Address]] = None,
     ) -> None:
         """Initialize a new scanner."""
         super().__init__()
         self.aiozc = aiozc
         self.zc = aiozc.zeroconf
-        self.hosts: set[str] = set(hosts) if hosts else set()
+        self.hosts: Set[str] = set(hosts) if hosts else set()
 
     async def _async_services_by_addresses(
         self, zc_timeout: float
@@ -385,7 +385,7 @@ class ZeroconfScanner(BaseScanner):
         await asyncio.gather(
             *[info.async_request(self.zc, zc_timeout) for info in infos]
         )
-        services_by_address: dict[str, list[AsyncServiceInfo]] = {}
+        services_by_address: dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
             if address := _first_non_link_local_or_v6_address(info.addresses):
                 services_by_address.setdefault(address, []).append(info)
