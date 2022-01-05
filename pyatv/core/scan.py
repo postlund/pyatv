@@ -383,7 +383,7 @@ class ZeroconfScanner(BaseScanner):
         await asyncio.gather(
             *[info.async_request(self.zc, zc_timeout) for info in infos]
         )
-        services_by_address: dict[str, List[AsyncServiceInfo]] = {}
+        services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
             address = _first_non_link_local_or_v6_address(info.addresses)
             if address:
@@ -418,7 +418,7 @@ class ZeroconfScanner(BaseScanner):
 
     def _async_process_responses(
         self,
-        atv_services_by_address: Dict[str, mdns.Service],
+        atv_services_by_address: Dict[str, List[mdns.Service]],
         name_to_model: Dict[str, str],
         name_by_address: Dict[str, str],
     ):
@@ -445,7 +445,7 @@ class ZeroconfScanner(BaseScanner):
         """Start to process devices and services."""
         zc_timeout = timeout * 1000
         services_by_address = await self._async_services_by_addresses(zc_timeout)
-        atv_services_by_address: Dict[str, mdns.Service] = {}
+        atv_services_by_address: Dict[str, List[mdns.Service]] = {}
         name_by_address: Dict[str, str] = {}
         for address, services in services_by_address.items():
             if self.hosts and address not in self.hosts:
