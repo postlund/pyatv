@@ -196,7 +196,7 @@ async def test_scan_with_zeroconf():
         const._CLASS_IN,
         const._DNS_OTHER_TTL,
         "Ohana._device-info._tcp.local.",
-    )    
+    )
     device_info_txt_record = DNSText(
         "Ohana._device-info._tcp.local.",
         const._TYPE_TXT,
