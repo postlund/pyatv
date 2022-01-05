@@ -353,7 +353,7 @@ class AsyncDeviceInfoServiceInfo(AsyncServiceInfo):
 class ZeroconfScanner(BaseScanner):
     """Service discovery using zeroconf.
 
-    A ServiceBrowser must be running for all the types we are browsing
+    A ServiceBrowser must be running for all the types we are browsing.
     """
 
     def __init__(
@@ -373,8 +373,6 @@ class ZeroconfScanner(BaseScanner):
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
         zc_types = {SLEEP_PROXY_TYPE, *(f"{service}." for service in self._services)}
-        # Note this only works if a ServiceBrowser is already
-        # running for the given type (since its in the manifest this is ok)
         infos = [
             AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias)
             for zc_type in zc_types
