@@ -23,8 +23,6 @@ from typing import (
     cast,
 )
 
-from pyatv.support.collections import CaseInsensitiveDict
-
 from zeroconf import DNSPointer, DNSQuestionType
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _TYPE_PTR
@@ -41,7 +39,7 @@ from pyatv.helpers import (
 )
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import knock
-from pyatv.support.collections import dict_merge
+from pyatv.support.collections import CaseInsensitiveDict, dict_merge
 from pyatv.support.device_info import lookup_internal_name
 
 _LOGGER = logging.getLogger(__name__)
