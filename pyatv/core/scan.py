@@ -23,6 +23,8 @@ from typing import (
     cast,
 )
 
+from pyatv.support.collections import CaseInsensitiveDict
+
 from zeroconf import DNSPointer, DNSQuestionType
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _TYPE_PTR
@@ -463,10 +465,12 @@ class ZeroconfScanner(BaseScanner):
                         _extract_service_name(service),
                         address,
                         service.port,
-                        {
-                            k.decode("ascii"): mdns.decode_value(v)
-                            for k, v in service.properties.items()
-                        },
+                        CaseInsensitiveDict(
+                            {
+                                k.decode("ascii"): mdns.decode_value(v)
+                                for k, v in service.properties.items()
+                            }
+                        ),
                     )
                 )
             atv_services_by_address[address] = atv_services
