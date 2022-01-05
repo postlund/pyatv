@@ -358,33 +358,32 @@ class ZeroconfScanner(BaseScanner):
 
     def __init__(
         self,
-        zc: AsyncZeroconf,
+        aiozc: AsyncZeroconf,
         hosts: Optional[list[IPv4Address]] = None,
     ) -> None:
         """Initialize a new scanner."""
         super().__init__()
-        self.zc = zc
+        self.aiozc = aiozc
+        self.zc = aiozc.zeroconf
         self.hosts: set[str] = set(hosts) if hosts else set()
 
     async def _async_services_by_addresses(
-        self, timeout: int
+        self, zc_timeout: float
     ) -> Dict[str, List[AsyncServiceInfo]]:
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
-        zc_timeout = timeout * 1000
-        zeroconf = self.zc.zeroconf
         zc_types = {SLEEP_PROXY_TYPE, *(f"{service}." for service in self._services)}
         # Note this only works if a ServiceBrowser is already
         # running for the given type (since its in the manifest this is ok)
         infos = [
             AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias)
             for zc_type in zc_types
-            for record in zeroconf.cache.async_all_by_details(
+            for record in self.zc.cache.async_all_by_details(
                 zc_type, _TYPE_PTR, _CLASS_IN
             )
         ]
         await asyncio.gather(
-            *[info.async_request(zeroconf, zc_timeout) for info in infos]
+            *[info.async_request(self.zc, zc_timeout) for info in infos]
         )
         services_by_address: dict[str, list[AsyncServiceInfo]] = {}
         for info in infos:
@@ -393,11 +392,9 @@ class ZeroconfScanner(BaseScanner):
         return services_by_address
 
     async def _async_models_by_name(
-        self, names: Iterable[str], timeout: int
+        self, names: Iterable[str], zc_timeout: float
     ) -> Dict[str, str]:
         """Probe the DEVICE_INFO_TYPE."""
-        zc_timeout = timeout * 1000
-        zeroconf = self.zc.zeroconf
         name_to_model: Dict[str, str] = {}
         device_infos = {
             name: AsyncDeviceInfoServiceInfo(
@@ -408,7 +405,7 @@ class ZeroconfScanner(BaseScanner):
         await asyncio.gather(
             *[
                 info.async_request(
-                    zeroconf, zc_timeout, question_type=DNSQuestionType.QU
+                    self.zc, zc_timeout, question_type=DNSQuestionType.QU
                 )
                 for info in device_infos.values()
             ]
@@ -444,7 +441,8 @@ class ZeroconfScanner(BaseScanner):
 
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
-        services_by_address = await self._async_services_by_addresses(timeout)
+        zc_timeout = timeout * 1000
+        services_by_address = await self._async_services_by_addresses(zc_timeout)
         atv_services_by_address: Dict[str, mdns.Service] = {}
         name_by_address: Dict[str, str] = {}
         for address, services in services_by_address.items():
@@ -473,7 +471,7 @@ class ZeroconfScanner(BaseScanner):
         if not atv_services_by_address:
             return
         name_to_model = await self._async_models_by_name(
-            name_by_address.values(), timeout
+            name_by_address.values(), zc_timeout
         )
         self._async_process_responses(
             atv_services_by_address, name_to_model, name_by_address
