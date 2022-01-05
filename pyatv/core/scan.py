@@ -2,7 +2,9 @@
 
 from abc import ABC, abstractmethod
 import asyncio
-from ipaddress import IPv4Address
+from collections.abc import Iterable
+import contextlib
+from ipaddress import IPv4Address, ip_address
 import logging
 import os
 from typing import (
@@ -21,10 +23,20 @@ from typing import (
     cast,
 )
 
+from zeroconf import DNSPointer, DNSQuestionType
+from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
+from zeroconf.const import _CLASS_IN, _TYPE_PTR
+
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.helpers import get_unique_id
+from pyatv.helpers import (
+    AIRPLAY_SERVICE,
+    RAOP_SERVICE,
+    get_unique_id,
+    raop_name_from_service_name,
+    sleep_proxy_name_from_service_name,
+)
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import dict_merge
@@ -42,7 +54,18 @@ ServiceInfoMethod = Callable[
 ]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
+DEVICE_INFO_TYPE: str = f"{DEVICE_INFO}."
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
+SLEEP_PROXY_TYPE: str = f"{SLEEP_PROXY}."
+RAOP_TYPE: str = f"{RAOP_SERVICE}."
+AIRPLAY_TYPE: str = f"{AIRPLAY_SERVICE}."
+COMPANION_LINK_TYPE: str = "_companion-link._tcp.local."
+NAME_USED_FOR_DEVICE_INFO = {
+    COMPANION_LINK_TYPE,
+    AIRPLAY_TYPE,
+    RAOP_TYPE,
+    SLEEP_PROXY_TYPE,
+}
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
@@ -287,4 +310,171 @@ class MulticastMdnsScanner(BaseScanner):
     def _end_if_identifier_found(self, response: mdns.Response):
         return self.identifier and not self.identifier.isdisjoint(
             set(get_unique_identifiers(response))
+        )
+
+
+def _extract_service_name(info: AsyncServiceInfo) -> str:
+    return info.name[: -(len(info.type) + 1)]
+
+
+def _device_info_name(info: AsyncServiceInfo) -> Optional[str]:
+    if info.type not in NAME_USED_FOR_DEVICE_INFO:
+        return None
+    short_name = _extract_service_name(info)
+    if info.type == RAOP_TYPE:
+        return raop_name_from_service_name(short_name)
+    if info.type == SLEEP_PROXY_TYPE:
+        return sleep_proxy_name_from_service_name(short_name)
+    return short_name
+
+
+def _first_non_link_local_or_v6_address(addresses: List[bytes]) -> Optional[str]:
+    """Return the first ipv6 or non-link local ipv4 address."""
+    for address in addresses:
+        ip_addr = ip_address(address)
+        if not ip_addr.is_link_local or ip_addr.version == 6:
+            return str(ip_addr)
+    return None
+
+
+class AsyncDeviceInfoServiceInfo(AsyncServiceInfo):
+    """A version of AsyncServiceInfo that does not expect addresses."""
+
+    @property
+    def _is_complete(self) -> bool:
+        """Check if ServiceInfo has all expected properties.
+
+        The _device-info._tcp.local. does not return an address
+        so do not wait for it.
+        """
+        return self.text is not None
+
+
+class ZeroconfScanner(BaseScanner):
+    """Service discovery using zeroconf.
+
+    A ServiceBrowser must be running for all the types we are browsing
+    """
+
+    def __init__(
+        self,
+        zc: AsyncZeroconf,
+        hosts: Optional[list[IPv4Address]] = None,
+    ) -> None:
+        """Initialize a new scanner."""
+        super().__init__()
+        self.zc = zc
+        self.hosts: set[str] = set(hosts) if hosts else set()
+
+    async def _async_services_by_addresses(
+        self, timeout: int
+    ) -> Dict[str, List[AsyncServiceInfo]]:
+        """Lookup services and aggregate them by address."""
+        infos: List[AsyncServiceInfo] = []
+        zc_timeout = timeout * 1000
+        zeroconf = self.zc.zeroconf
+        zc_types = {SLEEP_PROXY_TYPE, *(f"{service}." for service in self._services)}
+        # Note this only works if a ServiceBrowser is already
+        # running for the given type (since its in the manifest this is ok)
+        infos = [
+            AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias)
+            for zc_type in zc_types
+            for record in zeroconf.cache.async_all_by_details(
+                zc_type, _TYPE_PTR, _CLASS_IN
+            )
+        ]
+        await asyncio.gather(
+            *[info.async_request(zeroconf, zc_timeout) for info in infos]
+        )
+        services_by_address: dict[str, list[AsyncServiceInfo]] = {}
+        for info in infos:
+            if address := _first_non_link_local_or_v6_address(info.addresses):
+                services_by_address.setdefault(address, []).append(info)
+        return services_by_address
+
+    async def _async_models_by_name(
+        self, names: Iterable[str], timeout: int
+    ) -> Dict[str, str]:
+        """Probe the DEVICE_INFO_TYPE."""
+        zc_timeout = timeout * 1000
+        zeroconf = self.zc.zeroconf
+        name_to_model: Dict[str, str] = {}
+        device_infos = {
+            name: AsyncDeviceInfoServiceInfo(
+                DEVICE_INFO_TYPE, f"{name}.{DEVICE_INFO_TYPE}"
+            )
+            for name in names
+        }
+        await asyncio.gather(
+            *[
+                info.async_request(
+                    zeroconf, zc_timeout, question_type=DNSQuestionType.QU
+                )
+                for info in device_infos.values()
+            ]
+        )
+        for name, info in device_infos.items():
+            if possible_model := info.properties.get(b"model"):
+                with contextlib.suppress(UnicodeDecodeError):
+                    name_to_model[name] = possible_model.decode("utf-8")
+        return name_to_model
+
+    def _async_process_responses(
+        self,
+        atv_services_by_address: Dict[str, mdns.Service],
+        name_to_model: Dict[str, str],
+        name_by_address: Dict[str, str],
+    ):
+        """Process and callback each aggregated response to the base handler."""
+        for address, atv_services in atv_services_by_address.items():
+            model = None
+            if (name_for_address := name_by_address.get(address)) is not None:
+                if possible_model := name_to_model.get(name_for_address):
+                    model = possible_model
+            self.handle_response(
+                mdns.Response(
+                    services=atv_services,
+                    deep_sleep=all(
+                        service.port == 0 and service.type != SLEEP_PROXY_TYPE
+                        for service in atv_services
+                    ),
+                    model=model,
+                )
+            )
+
+    async def process(self, timeout: int) -> None:
+        """Start to process devices and services."""
+        services_by_address = await self._async_services_by_addresses(timeout)
+        atv_services_by_address: Dict[str, mdns.Service] = {}
+        name_by_address: Dict[str, str] = {}
+        for address, services in services_by_address.items():
+            if self.hosts and address not in self.hosts:
+                continue
+            atv_services = []
+            for service in services:
+                atv_type = service.type[:-1]
+                if address not in name_by_address and (
+                    device_info_name := _device_info_name(service)
+                ):
+                    name_by_address[address] = device_info_name
+                atv_services.append(
+                    mdns.Service(
+                        atv_type,
+                        _extract_service_name(service),
+                        address,
+                        service.port,
+                        {
+                            k.decode("ascii"): mdns.decode_value(v)
+                            for k, v in service.properties.items()
+                        },
+                    )
+                )
+            atv_services_by_address[address] = atv_services
+        if not atv_services_by_address:
+            return
+        name_to_model = await self._async_models_by_name(
+            name_by_address.values(), timeout
+        )
+        self._async_process_responses(
+            atv_services_by_address, name_to_model, name_by_address
         )
