@@ -52,6 +52,9 @@ def test_unique_identifiers(unique_id_mock, response):
 
 @pytest.mark.asyncio
 async def test_scan_with_zeroconf():
+    if not hasattr(asyncio, "get_running_loop"):
+        # until python 3.6 is removed, its EOL anyways
+        asyncio.get_running_loop = asyncio.get_event_loop
     aiozc = AsyncZeroconf(interfaces=["127.0.0.1"])
 
     class DummyListener(ServiceListener):
