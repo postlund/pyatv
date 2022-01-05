@@ -472,11 +472,10 @@ class ZeroconfScanner(BaseScanner):
                     )
                 )
             atv_services_by_address[address] = atv_services
-        if not atv_services_by_address:
-            return
-        name_to_model = await self._async_models_by_name(
-            name_by_address.values(), zc_timeout
-        )
-        self._async_process_responses(
-            atv_services_by_address, name_to_model, name_by_address
-        )
+        if atv_services_by_address:
+            name_to_model = await self._async_models_by_name(
+                name_by_address.values(), zc_timeout
+            )
+            self._async_process_responses(
+                atv_services_by_address, name_to_model, name_by_address
+            )
