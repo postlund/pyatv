@@ -40,6 +40,8 @@ _LOGGER = logging.getLogger(__name__)
 
 ScanHandlerReturn = Tuple[str, MutableService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
+DeviceInfoNameFromShortName = Callable[[str], Optional[str]]
+ScanHandlerDeviceInfoName = Tuple[ScanHandler, DeviceInfoNameFromShortName]
 ScanMethod = Callable[[], Mapping[str, ScanHandler]]
 
 DevInfoExtractor = Callable[[str, Mapping[str, Any]], Mapping[str, Any]]
@@ -51,15 +53,7 @@ DEVICE_INFO: str = "_device-info._tcp.local"
 DEVICE_INFO_TYPE: str = f"{DEVICE_INFO}."
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
 SLEEP_PROXY_TYPE: str = f"{SLEEP_PROXY}."
-RAOP_TYPE: str = f"{RAOP_SERVICE}."
-AIRPLAY_TYPE: str = f"{AIRPLAY_SERVICE}."
-COMPANION_LINK_TYPE: str = "_companion-link._tcp.local."
-NAME_USED_FOR_DEVICE_INFO = {
-    COMPANION_LINK_TYPE,
-    AIRPLAY_TYPE,
-    RAOP_TYPE,
-    SLEEP_PROXY_TYPE,
-}
+
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
@@ -75,6 +69,16 @@ class FoundDevice(NamedTuple):
     deep_sleep: bool
     model: DeviceModel
     services: List[MutableService]
+
+
+def device_info_name_from_unique_short_name(service_name: str) -> str:
+    """Used for mapping the device info when the name is unique."""
+    return service_name
+
+
+def _sleep_proxy_device_info_name_from_short_name(service_name: str) -> str:
+    """Convert an sleep proxy service name to a name."""
+    return service_name.split(" ", maxsplit=1)[1]
 
 
 def get_unique_identifiers(
@@ -106,6 +110,9 @@ class BaseScanner(ABC):
             DEVICE_INFO: (_empty_handler, _empty_extractor),
             SLEEP_PROXY: (_empty_handler, _empty_extractor),
         }
+        self._device_info_name: Dict[str, Callable[[str], Optional[str]]] = {
+            SLEEP_PROXY: _sleep_proxy_device_info_name_from_short_name
+        }
         self._service_infos: Dict[Protocol, ServiceInfoMethod] = {}
         self._found_devices: Dict[IPv4Address, FoundDevice] = {}
         self._properties: Dict[IPv4Address, Dict[str, Mapping[str, str]]] = {}
@@ -113,10 +120,12 @@ class BaseScanner(ABC):
     def add_service(
         self,
         service_type: str,
-        handler: ScanHandler,
+        handler_device_info_name: ScanHandlerDeviceInfoName,
         device_info_extractor: DevInfoExtractor,
     ) -> None:
         """Add service type to discover."""
+        handler, device_info_name = handler_device_info_name
+        self._device_info_name[service_type] = device_info_name
         self._services[service_type] = (handler, device_info_extractor)
 
     def add_service_info(
@@ -307,29 +316,8 @@ class MulticastMdnsScanner(BaseScanner):
         )
 
 
-def _raop_name_from_service_name(service_name: str) -> str:
-    """Convert an raop service name to a name."""
-    return service_name.split("@", maxsplit=1)[1]
-
-
-def _sleep_proxy_name_from_service_name(service_name: str) -> str:
-    """Convert an sleep proxy service name to a name."""
-    return service_name.split(" ", maxsplit=1)[1]
-
-
 def _extract_service_name(info: AsyncServiceInfo) -> str:
     return info.name[: -(len(info.type) + 1)]
-
-
-def _device_info_name(info: AsyncServiceInfo) -> Optional[str]:
-    if info.type not in NAME_USED_FOR_DEVICE_INFO:
-        return None
-    short_name = _extract_service_name(info)
-    if info.type == RAOP_TYPE:
-        return _raop_name_from_service_name(short_name)
-    if info.type == SLEEP_PROXY_TYPE:
-        return _sleep_proxy_name_from_service_name(short_name)
-    return short_name
 
 
 def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[str]:
@@ -449,26 +437,35 @@ class ZeroconfScanner(BaseScanner):
         services_by_address = await self._services_by_addresses(zc_timeout)
         dev_services_by_address: Dict[str, List[mdns.Service]] = {}
         name_by_address: Dict[str, str] = {}
-        for address, services in services_by_address.items():
+        for address, service_infos in services_by_address.items():
             if self.hosts and address not in self.hosts:
                 continue
             dev_services = []
-            for service in services:
-                service_type = service.type[:-1]
+            for service_info in service_infos:
+                service_type = service_info.type[:-1]
                 if address not in name_by_address:
-                    device_info_name = _device_info_name(service)
+                    short_name = _extract_service_name(service_info)
+                    device_info_name_from_short_name = self._device_info_name[
+                        service_type
+                    ]
+                    import pprint
+
+                    device_info_name = device_info_name_from_short_name(short_name)
+                    pprint.pprint(
+                        [short_name, device_info_name_from_short_name, device_info_name]
+                    )
                     if device_info_name:
                         name_by_address[address] = device_info_name
                 dev_services.append(
                     mdns.Service(
                         service_type,
-                        _extract_service_name(service),
+                        _extract_service_name(service_info),
                         IPv4Address(address),
-                        service.port,
+                        service_info.port,
                         CaseInsensitiveDict(
                             {
                                 k.decode("ascii"): mdns.decode_value(v)
-                                for k, v in service.properties.items()
+                                for k, v in service_info.properties.items()
                             }
                         ),
                     )
