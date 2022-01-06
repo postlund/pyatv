@@ -437,9 +437,7 @@ class ZeroconfScanner(BaseScanner):
             model = None
             name_for_address = name_by_address.get(address)
             if name_for_address is not None:
-                possible_model = name_to_model.get(name_for_address)
-                if possible_model:
-                    model = possible_model
+                model = name_to_model.get(name_for_address)
             self.handle_response(
                 mdns.Response(
                     services=dev_services,
