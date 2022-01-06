@@ -100,20 +100,3 @@ def test_get_unique_id_(service_type, service_name, properties, expected_id):
 )
 async def test_is_streamable_supported_file(test_file, streamable):
     assert await helpers.is_streamable(data_path(test_file)) == streamable
-
-
-def test_raop_unique_id_from_service_name():
-    """Test we can get the unique id from the raop service name."""
-    assert (
-        helpers.raop_unique_id_from_service_name("54E61BF2ED74@Ohana") == "54E61BF2ED74"
-    )
-
-
-def test_raop_name_from_service_name():
-    """Test we can get the name from the raop service name."""
-    assert helpers.raop_name_from_service_name("54E61BF2ED74@Ohana") == "Ohana"
-
-
-def test_rsleep_proxy_name_from_service_name():
-    """Test we can get the name from the raop service name."""
-    assert helpers.sleep_proxy_name_from_service_name("70-35-60-63.1 Ohana") == "Ohana"

@@ -19,7 +19,12 @@ from pyatv import scan
 from pyatv.conf import AppleTV
 from pyatv.const import DeviceModel
 from pyatv.core.mdns import Response, Service
-from pyatv.core.scan import BaseScanner, get_unique_identifiers
+from pyatv.core.scan import (
+    BaseScanner,
+    get_unique_identifiers,
+    _raop_name_from_service_name,
+    _sleep_proxy_name_from_service_name,
+)
 
 TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})
 TEST_SERVICE2 = Service("_service2._tcp.local", "service2", None, 0, {"c": "d"})
@@ -360,3 +365,13 @@ async def test_scan_with_zeroconf_missing_companion_link_only():
     assert atv.device_info.model == DeviceModel.AppleTV4KGen2
     await browser.async_cancel()
     await aiozc.async_close()
+
+
+def test_raop_name_from_service_name():
+    """Test we can get the name from the raop service name."""
+    assert _raop_name_from_service_name("54E61BF2ED74@Ohana") == "Ohana"
+
+
+def test_sleep_proxy_name_from_service_name():
+    """Test we can get the name from the raop service name."""
+    assert _sleep_proxy_name_from_service_name("70-35-60-63.1 Ohana") == "Ohana"
