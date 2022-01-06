@@ -30,7 +30,7 @@ from zeroconf.const import _CLASS_IN, _TYPE_PTR
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.helpers import AIRPLAY_SERVICE, RAOP_SERVICE, get_unique_id
+from pyatv.helpers import get_unique_id
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import CaseInsensitiveDict, dict_merge
@@ -383,11 +383,14 @@ class ZeroconfScanner(BaseScanner):
     async def _models_by_name(
         self, names: Iterable[str], zc_timeout: float
     ) -> Dict[str, str]:
-        """Probe the DEVICE_INFO_TYPE."""
+        """Probe the _device_info since it does not have PTR we need to query.
+
+        If we asked recently its already in the cache.
+        """
         name_to_model: Dict[str, str] = {}
         device_infos = {
             name: AsyncDeviceInfoServiceInfo(
-                f"{DEVICE_INFO}.", f"{name}.{DEVICE_INFO_TYPE}."
+                f"{DEVICE_INFO}.", f"{name}.{DEVICE_INFO}."
             )
             for name in names
         }
