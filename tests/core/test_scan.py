@@ -21,9 +21,9 @@ from pyatv.const import DeviceModel
 from pyatv.core.mdns import Response, Service
 from pyatv.core.scan import (
     BaseScanner,
-    get_unique_identifiers,
     _raop_name_from_service_name,
     _sleep_proxy_name_from_service_name,
+    get_unique_identifiers,
 )
 
 TEST_SERVICE1 = Service("_service1._tcp.local", "service1", None, 0, {"a": "b"})
