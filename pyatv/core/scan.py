@@ -322,7 +322,7 @@ def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[
     """Return the first ipv6 or non-link local ipv4 address."""
     for address in addresses:
         ip_addr = ip_address(address)
-        if not ip_addr.is_link_local or ip_addr.version == 6:
+        if not (ip_addr.is_link_local or ip_addr.version == 6):
             return str(ip_addr)
     return None
 
