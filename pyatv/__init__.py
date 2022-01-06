@@ -33,11 +33,11 @@ async def scan(
     identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
     hosts: List[str] = None,
-    async_zeroconf: Optional[AsyncZeroconf] = None,
+    aiozc: Optional[AsyncZeroconf] = None,
 ) -> List[interface.BaseConfig]:
     """Scan for Apple TVs on network and return their configurations.
 
-    When passing in an async_zeroconf instance, a ServiceBrowser must
+    When passing in an aiozc instance, a ServiceBrowser must
     be running for all the types in the protocols that being scanned for.
     """
 
@@ -52,13 +52,13 @@ async def scan(
         return True
 
     scanner: BaseScanner
-    if async_zeroconf:
+    if aiozc:
         if hosts:
             scanner = ZeroconfScanner(
-                async_zeroconf, hosts=[IPv4Address(host) for host in hosts]
+                aiozc, hosts=[IPv4Address(host) for host in hosts]
             )
         else:
-            scanner = ZeroconfScanner(async_zeroconf)
+            scanner = ZeroconfScanner(aiozc)
     else:
         if hosts:
             scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)

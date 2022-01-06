@@ -261,7 +261,7 @@ async def test_scan_with_zeroconf_complete_and_device_info():
     aiozc, browser = await _async_create_zc_with_cache(
         COMPLETE_RECORD_SET_WITH_DEVICE_INFO
     )
-    results = await scan(asyncio.get_event_loop(), timeout=0, async_zeroconf=aiozc)
+    results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
     assert "_sleep-proxy._udp.local" in atv.properties
@@ -286,7 +286,7 @@ async def test_scan_with_zeroconf_complete_and_device_info_specific_host_matchin
         asyncio.get_event_loop(),
         hosts=["192.168.107.184"],
         timeout=0,
-        async_zeroconf=aiozc,
+        aiozc=aiozc,
     )
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
@@ -309,7 +309,7 @@ async def test_scan_with_zeroconf_complete_and_device_info_specific_host_not_mat
         COMPLETE_RECORD_SET_WITH_DEVICE_INFO
     )
     results = await scan(
-        asyncio.get_event_loop(), hosts=["192.168.1.1"], timeout=0, async_zeroconf=aiozc
+        asyncio.get_event_loop(), hosts=["192.168.1.1"], timeout=0, aiozc=aiozc
     )
     assert len(results) == 0
     await browser.async_cancel()
@@ -322,7 +322,7 @@ async def test_scan_with_zeroconf_complete():
         # until python 3.6 is removed, its EOL anyways
         asyncio.get_running_loop = asyncio.get_event_loop
     aiozc, browser = await _async_create_zc_with_cache(COMPLETE_RECORD_SET)
-    results = await scan(asyncio.get_event_loop(), timeout=0, async_zeroconf=aiozc)
+    results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
     assert "_sleep-proxy._udp.local" in atv.properties
@@ -341,7 +341,7 @@ async def test_scan_with_zeroconf_partial():
         # until python 3.6 is removed, its EOL anyways
         asyncio.get_running_loop = asyncio.get_event_loop
     aiozc, browser = await _async_create_zc_with_cache(PARTIAL_RECORD_SET)
-    results = await scan(asyncio.get_event_loop(), timeout=0, async_zeroconf=aiozc)
+    results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
     assert len(results) == 0
     await browser.async_cancel()
     await aiozc.async_close()
@@ -355,7 +355,7 @@ async def test_scan_with_zeroconf_missing_companion_link_only():
     aiozc, browser = await _async_create_zc_with_cache(
         RECORD_SET_WITH_DEVICE_INFO_MISSING_COMPANION_LINK
     )
-    results = await scan(asyncio.get_event_loop(), timeout=0, async_zeroconf=aiozc)
+    results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
     assert "_sleep-proxy._udp.local" in atv.properties
