@@ -50,9 +50,7 @@ ServiceInfoMethod = Callable[
 ]
 
 DEVICE_INFO: str = "_device-info._tcp.local"
-DEVICE_INFO_TYPE: str = f"{DEVICE_INFO}."
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
-SLEEP_PROXY_TYPE: str = f"{SLEEP_PROXY}."
 
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
@@ -364,7 +362,7 @@ class ZeroconfScanner(BaseScanner):
     ) -> Dict[str, List[AsyncServiceInfo]]:
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
-        zc_types = {SLEEP_PROXY_TYPE, *(f"{service}." for service in self._services)}
+        zc_types = {f"{SLEEP_PROXY}.", *(f"{service}." for service in self._services)}
         infos = [
             AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias)
             for zc_type in zc_types
@@ -389,7 +387,7 @@ class ZeroconfScanner(BaseScanner):
         name_to_model: Dict[str, str] = {}
         device_infos = {
             name: AsyncDeviceInfoServiceInfo(
-                DEVICE_INFO_TYPE, f"{name}.{DEVICE_INFO_TYPE}"
+                f"{DEVICE_INFO}.", f"{name}.{DEVICE_INFO_TYPE}."
             )
             for name in names
         }
@@ -424,7 +422,7 @@ class ZeroconfScanner(BaseScanner):
                 mdns.Response(
                     services=dev_services,
                     deep_sleep=all(
-                        service.port == 0 and service.type != SLEEP_PROXY_TYPE
+                        service.port == 0 and service.type != f"{SLEEP_PROXY}."
                         for service in dev_services
                     ),
                     model=model,
@@ -448,12 +446,7 @@ class ZeroconfScanner(BaseScanner):
                     device_info_name_from_short_name = self._device_info_name[
                         service_type
                     ]
-                    import pprint
-
                     device_info_name = device_info_name_from_short_name(short_name)
-                    pprint.pprint(
-                        [short_name, device_info_name_from_short_name, device_info_name]
-                    )
                     if device_info_name:
                         name_by_address[address] = device_info_name
                 dev_services.append(

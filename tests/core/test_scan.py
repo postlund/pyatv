@@ -360,4 +360,3 @@ async def test_scan_with_zeroconf_missing_companion_link_only():
     assert atv.device_info.model == DeviceModel.AppleTV4KGen2
     await browser.async_cancel()
     await aiozc.async_close()
-
