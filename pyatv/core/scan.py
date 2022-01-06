@@ -443,19 +443,16 @@ class ZeroconfScanner(BaseScanner):
                 continue
             dev_services = []
             for service_info in service_infos:
+                short_name = _extract_service_name(service_info)
                 service_type = service_info.type[:-1]
                 if address not in name_by_address:
-                    short_name = _extract_service_name(service_info)
-                    device_info_name_from_short_name = self._device_info_name[
-                        service_type
-                    ]
-                    device_info_name = device_info_name_from_short_name(short_name)
+                    device_info_name = self._device_info_name[service_type](short_name)
                     if device_info_name:
                         name_by_address[address] = device_info_name
                 dev_services.append(
                     mdns.Service(
                         service_type,
-                        _extract_service_name(service_info),
+                        short_name,
                         IPv4Address(address),
                         service_info.port,
                         CaseInsensitiveDict(
