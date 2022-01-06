@@ -70,7 +70,7 @@ class FoundDevice(NamedTuple):
 
 
 def device_info_name_from_unique_short_name(service_name: str) -> str:
-    """Used for mapping the device info when the name is unique."""
+    """Return the service name for device info when it is unique."""
     return service_name
 
 
