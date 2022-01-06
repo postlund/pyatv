@@ -428,12 +428,12 @@ class ZeroconfScanner(BaseScanner):
 
     def _process_responses(
         self,
-        atv_services_by_address: Dict[str, List[mdns.Service]],
+        dev_services_by_address: Dict[str, List[mdns.Service]],
         name_to_model: Dict[str, str],
         name_by_address: Dict[str, str],
     ):
         """Process and callback each aggregated response to the base handler."""
-        for address, atv_services in atv_services_by_address.items():
+        for address, dev_services in dev_services_by_address.items():
             model = None
             name_for_address = name_by_address.get(address)
             if name_for_address is not None:
@@ -442,10 +442,10 @@ class ZeroconfScanner(BaseScanner):
                     model = possible_model
             self.handle_response(
                 mdns.Response(
-                    services=atv_services,
+                    services=dev_services,
                     deep_sleep=all(
                         service.port == 0 and service.type != SLEEP_PROXY_TYPE
-                        for service in atv_services
+                        for service in dev_services
                     ),
                     model=model,
                 )
@@ -455,19 +455,19 @@ class ZeroconfScanner(BaseScanner):
         """Start to process devices and services."""
         zc_timeout = timeout * 1000
         services_by_address = await self._services_by_addresses(zc_timeout)
-        atv_services_by_address: Dict[str, List[mdns.Service]] = {}
+        dev_services_by_address: Dict[str, List[mdns.Service]] = {}
         name_by_address: Dict[str, str] = {}
         for address, services in services_by_address.items():
             if self.hosts and address not in self.hosts:
                 continue
-            atv_services = []
+            dev_services = []
             for service in services:
                 atv_type = service.type[:-1]
                 if address not in name_by_address:
                     device_info_name = _device_info_name(service)
                     if device_info_name:
                         name_by_address[address] = device_info_name
-                atv_services.append(
+                dev_services.append(
                     mdns.Service(
                         atv_type,
                         _extract_service_name(service),
@@ -481,11 +481,11 @@ class ZeroconfScanner(BaseScanner):
                         ),
                     )
                 )
-            atv_services_by_address[address] = atv_services
-        if atv_services_by_address:
+            dev_services_by_address[address] = dev_services
+        if dev_services_by_address:
             name_to_model = await self._models_by_name(
                 name_by_address.values(), zc_timeout
             )
             self._process_responses(
-                atv_services_by_address, name_to_model, name_by_address
+                dev_services_by_address, name_to_model, name_by_address
             )
