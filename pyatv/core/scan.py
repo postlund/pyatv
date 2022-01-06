@@ -454,7 +454,7 @@ class ZeroconfScanner(BaseScanner):
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
         zc_timeout = timeout * 1000
-        services_by_address = await self._async_services_by_addresses(zc_timeout)
+        services_by_address = await self._services_by_addresses(zc_timeout)
         atv_services_by_address: Dict[str, List[mdns.Service]] = {}
         name_by_address: Dict[str, str] = {}
         for address, services in services_by_address.items():
@@ -483,9 +483,9 @@ class ZeroconfScanner(BaseScanner):
                 )
             atv_services_by_address[address] = atv_services
         if atv_services_by_address:
-            name_to_model = await self._async_models_by_name(
+            name_to_model = await self._models_by_name(
                 name_by_address.values(), zc_timeout
             )
-            self._async_process_responses(
+            self._process_responses(
                 atv_services_by_address, name_to_model, name_by_address
             )
