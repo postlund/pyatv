@@ -42,7 +42,7 @@ ScanHandlerReturn = Tuple[str, MutableService]
 ScanHandler = Callable[[mdns.Service, mdns.Response], Optional[ScanHandlerReturn]]
 DeviceInfoNameFromShortName = Callable[[str], Optional[str]]
 ScanHandlerDeviceInfoName = Tuple[ScanHandler, DeviceInfoNameFromShortName]
-ScanMethod = Callable[[], Mapping[str, ScanHandler]]
+ScanMethod = Callable[[], Mapping[str, ScanHandlerDeviceInfoName]]
 
 DevInfoExtractor = Callable[[str, Mapping[str, Any]], Mapping[str, Any]]
 ServiceInfoMethod = Callable[
