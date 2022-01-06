@@ -462,14 +462,14 @@ class ZeroconfScanner(BaseScanner):
                 continue
             dev_services = []
             for service in services:
-                atv_type = service.type[:-1]
+                service_type = service.type[:-1]
                 if address not in name_by_address:
                     device_info_name = _device_info_name(service)
                     if device_info_name:
                         name_by_address[address] = device_info_name
                 dev_services.append(
                     mdns.Service(
-                        atv_type,
+                        service_type,
                         _extract_service_name(service),
                         IPv4Address(address),
                         service.port,
