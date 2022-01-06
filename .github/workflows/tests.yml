@@ -26,7 +26,6 @@ jobs:
           - macos-latest
           - windows-latest
         python-version:
-          - 3.6
           - 3.7
           - 3.8
           - 3.9
@@ -40,13 +39,6 @@ jobs:
             python-version: 3.8
             chickn-args: "--no-venv -v requirements_file=base_versions.txt"
             regression: true
-        exclude:
-          # TODO: Fails a _lot_ due to "Illegal instruction", likely has to do with
-          # cffi and pyminiaudio. Not sure if this is fixable with reasonable effort,
-          # so disabling until support for python 3.6 is dropped. Most issues with 3.6
-          # should be picked up on other platforms.
-          - platform: ubuntu-latest
-            python-version: 3.6
     steps:
     # Receipe for not running jobs again when re-running workflow
     # https://medium.com/xcnotes/how-to-re-run-only-failed-jobs-on-github-actions-b79b13d1ceb2
