@@ -377,7 +377,7 @@ class ZeroconfScanner(BaseScanner):
         self.zeroconf = aiozc.zeroconf
         self.hosts: Set[str] = set(str(host) for host in hosts) if hosts else set()
 
-    async def _async_services_by_addresses(
+    async def _services_by_addresses(
         self, zc_timeout: float
     ) -> Dict[str, List[AsyncServiceInfo]]:
         """Lookup services and aggregate them by address."""
@@ -400,7 +400,7 @@ class ZeroconfScanner(BaseScanner):
                 services_by_address.setdefault(address, []).append(info)
         return services_by_address
 
-    async def _async_models_by_name(
+    async def _models_by_name(
         self, names: Iterable[str], zc_timeout: float
     ) -> Dict[str, str]:
         """Probe the DEVICE_INFO_TYPE."""
@@ -426,7 +426,7 @@ class ZeroconfScanner(BaseScanner):
                     name_to_model[name] = possible_model.decode("utf-8")
         return name_to_model
 
-    def _async_process_responses(
+    def _process_responses(
         self,
         atv_services_by_address: Dict[str, List[mdns.Service]],
         name_to_model: Dict[str, str],

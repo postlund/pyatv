@@ -202,7 +202,7 @@ from typing import List, Tuple
 from zeroconf import DNSRecord
 
 
-async def _async_create_zc_with_cache(
+async def _create_zc_with_cache(
     records: List[DNSRecord],
 ) -> Tuple[AsyncZeroconf, AsyncServiceBrowser]:
     aiozc = AsyncZeroconf(interfaces=["127.0.0.1"])
