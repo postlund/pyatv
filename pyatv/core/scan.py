@@ -313,6 +313,16 @@ class MulticastMdnsScanner(BaseScanner):
         )
 
 
+def _raop_name_from_service_name(service_name: str) -> str:
+    """Convert an raop service name to a name."""
+    return service_name.split("@", maxsplit=1)[1]
+
+
+def _sleep_proxy_name_from_service_name(service_name: str) -> str:
+    """Convert an sleep proxy service name to a name."""
+    return service_name.split(" ", maxsplit=1)[1]
+
+
 def _extract_service_name(info: AsyncServiceInfo) -> str:
     return info.name[: -(len(info.type) + 1)]
 
@@ -322,9 +332,9 @@ def _device_info_name(info: AsyncServiceInfo) -> Optional[str]:
         return None
     short_name = _extract_service_name(info)
     if info.type == RAOP_TYPE:
-        return raop_name_from_service_name(short_name)
+        return _raop_name_from_service_name(short_name)
     if info.type == SLEEP_PROXY_TYPE:
-        return sleep_proxy_name_from_service_name(short_name)
+        return _sleep_proxy_name_from_service_name(short_name)
     return short_name
 
 
