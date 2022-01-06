@@ -319,7 +319,7 @@ def _extract_service_name(info: AsyncServiceInfo) -> str:
 
 
 def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[str]:
-    """Return the first ipv6 or non-link local ipv4 address."""
+    """Return the first non ipv6 or non-link local ipv4 address."""
     for address in addresses:
         ip_addr = ip_address(address)
         if not (ip_addr.is_link_local or ip_addr.version == 6):
