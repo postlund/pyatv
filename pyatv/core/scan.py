@@ -30,13 +30,7 @@ from zeroconf.const import _CLASS_IN, _TYPE_PTR
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.helpers import (
-    AIRPLAY_SERVICE,
-    RAOP_SERVICE,
-    get_unique_id,
-    raop_name_from_service_name,
-    sleep_proxy_name_from_service_name,
-)
+from pyatv.helpers import AIRPLAY_SERVICE, RAOP_SERVICE, get_unique_id
 from pyatv.interface import BaseConfig, BaseService, DeviceInfo
 from pyatv.support import knock
 from pyatv.support.collections import CaseInsensitiveDict, dict_merge

@@ -258,9 +258,7 @@ async def test_scan_with_zeroconf_complete_and_device_info():
     if not hasattr(asyncio, "get_running_loop"):
         # until python 3.6 is removed, its EOL anyways
         asyncio.get_running_loop = asyncio.get_event_loop
-    aiozc, browser = await _create_zc_with_cache(
-        COMPLETE_RECORD_SET_WITH_DEVICE_INFO
-    )
+    aiozc, browser = await _create_zc_with_cache(COMPLETE_RECORD_SET_WITH_DEVICE_INFO)
     results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
     atv: AppleTV = results[0]
     assert isinstance(atv, AppleTV)
@@ -279,9 +277,7 @@ async def test_scan_with_zeroconf_complete_and_device_info_specific_host_matchin
     if not hasattr(asyncio, "get_running_loop"):
         # until python 3.6 is removed, its EOL anyways
         asyncio.get_running_loop = asyncio.get_event_loop
-    aiozc, browser = await _create_zc_with_cache(
-        COMPLETE_RECORD_SET_WITH_DEVICE_INFO
-    )
+    aiozc, browser = await _create_zc_with_cache(COMPLETE_RECORD_SET_WITH_DEVICE_INFO)
     results = await scan(
         asyncio.get_event_loop(),
         hosts=["192.168.107.184"],
@@ -305,9 +301,7 @@ async def test_scan_with_zeroconf_complete_and_device_info_specific_host_not_mat
     if not hasattr(asyncio, "get_running_loop"):
         # until python 3.6 is removed, its EOL anyways
         asyncio.get_running_loop = asyncio.get_event_loop
-    aiozc, browser = await _create_zc_with_cache(
-        COMPLETE_RECORD_SET_WITH_DEVICE_INFO
-    )
+    aiozc, browser = await _create_zc_with_cache(COMPLETE_RECORD_SET_WITH_DEVICE_INFO)
     results = await scan(
         asyncio.get_event_loop(), hosts=["192.168.1.1"], timeout=0, aiozc=aiozc
     )

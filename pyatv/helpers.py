@@ -70,23 +70,8 @@ def get_unique_id(
     if service_type == AIRPLAY_SERVICE:
         return properties.get("deviceid")
     if service_type == RAOP_SERVICE:
-        return raop_unique_id_from_service_name(service_name)
+        return service_name.split("@", maxsplit=1)[0]
     return None
-
-
-def raop_unique_id_from_service_name(service_name: str) -> str:
-    """Convert an raop service name to a unique id."""
-    return service_name.split("@", maxsplit=1)[0]
-
-
-def raop_name_from_service_name(service_name: str) -> str:
-    """Convert an raop service name to a name."""
-    return service_name.split("@", maxsplit=1)[1]
-
-
-def sleep_proxy_name_from_service_name(service_name: str) -> str:
-    """Convert an sleep proxy service name to a name."""
-    return service_name.split(" ", maxsplit=1)[1]
 
 
 async def is_streamable(filename: str) -> bool:
