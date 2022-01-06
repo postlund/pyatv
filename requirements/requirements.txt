@@ -3,8 +3,8 @@ bitarray==2.3.4
 cryptography==36.0.1
 ifaddr==0.1.7
 mediafile==0.9.0
-miniaudio==1.45
+miniaudio==1.46
 protobuf==3.19.1
-requests==2.27.0
+requests==2.27.1
 srptools==1.0.1
 zeroconf==0.38.1
