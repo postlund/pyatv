@@ -338,7 +338,7 @@ def _device_info_name(info: AsyncServiceInfo) -> Optional[str]:
     return short_name
 
 
-def _first_non_link_local_or_v6_address(addresses: List[bytes]) -> Optional[str]:
+def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[str]:
     """Return the first ipv6 or non-link local ipv4 address."""
     for address in addresses:
         ip_addr = ip_address(address)
@@ -395,7 +395,7 @@ class ZeroconfScanner(BaseScanner):
         )
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
-            address = _first_non_link_local_or_v6_address(info.addresses)
+            address = _first_non_link_local_or_non_v6_address(info.addresses)
             if address:
                 services_by_address.setdefault(address, []).append(info)
         return services_by_address
