@@ -10,7 +10,6 @@ from typing import (
     Any,
     Awaitable,
     Callable,
-    Coroutine,
     Dict,
     Generator,
     List,
@@ -23,7 +22,7 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSPointer, DNSQuestionType
+from zeroconf import DNSPointer
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _TYPE_PTR
 
@@ -362,12 +361,11 @@ class ZeroconfScanner(BaseScanner):
         self.zeroconf = aiozc.zeroconf
         self.hosts: Set[str] = set(str(host) for host in hosts) if hosts else set()
 
-    async def _lookup_services(
-        self, zc_timeout: float
-    ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
-        """Lookup services and aggregate them by address."""
+    def _build_service_info_queries(
+        self,
+    ) -> List[Union[AsyncServiceInfo, AsyncDeviceInfoServiceInfo]]:
+        """Build AsyncServiceInfo queries from the requested types."""
         infos: List[Union[AsyncServiceInfo, AsyncDeviceInfoServiceInfo]] = []
-        tasks: List[Coroutine[Any, Any, bool]] = []
         device_names = set()
         for type_ in (SLEEP_PROXY, *self._services):
             zc_type = f"{type_}."
@@ -376,7 +374,6 @@ class ZeroconfScanner(BaseScanner):
             ):
                 ptr_name = cast(DNSPointer, record).alias
                 service_info = AsyncServiceInfo(zc_type, ptr_name)
-                tasks.append(service_info.async_request(self.zeroconf, zc_timeout))
                 infos.append(service_info)
                 name = _name_without_type(ptr_name, zc_type)
                 device_name = self._device_info_name[type_](name)
@@ -386,12 +383,16 @@ class ZeroconfScanner(BaseScanner):
                         DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
                     )
                     infos.append(device_service_info)
-                    tasks.append(
-                        device_service_info.async_request(
-                            self.zeroconf, zc_timeout, question_type=DNSQuestionType.QU
-                        )
-                    )
-        await asyncio.gather(*tasks)
+        return infos
+
+    async def _lookup_services(
+        self, zc_timeout: float
+    ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
+        """Lookup services and aggregate them by address."""
+        infos = self._build_service_info_queries(zc_timeout)
+        await asyncio.gather(
+            *[info.async_request(self.zeroconf, zc_timeout) for info in infos]
+        )
         name_to_model: Dict[str, str] = {}
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
