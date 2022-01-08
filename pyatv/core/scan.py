@@ -375,14 +375,15 @@ class ZeroconfScanner(BaseScanner):
                 ptr_name = cast(DNSPointer, record).alias
                 service_info = AsyncServiceInfo(zc_type, ptr_name)
                 infos.append(service_info)
-                name = _name_without_type(ptr_name, zc_type)
-                device_name = self._device_info_name[type_](name)
-                if device_name is not None and device_name not in device_names:
-                    device_names.add(device_name)
-                    device_service_info = AsyncDeviceInfoServiceInfo(
-                        DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
-                    )
-                    infos.append(device_service_info)
+                if type_ != DEVICE_INFO:
+                    name = _name_without_type(ptr_name, zc_type)
+                    device_name = self._device_info_name[type_](name)
+                    if device_name is not None and device_name not in device_names:
+                        device_names.add(device_name)
+                        device_service_info = AsyncDeviceInfoServiceInfo(
+                            DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
+                        )
+                        infos.append(device_service_info)
         return infos
 
     async def _lookup_services_and_models(
