@@ -385,7 +385,7 @@ class ZeroconfScanner(BaseScanner):
                     infos.append(device_service_info)
         return infos
 
-    async def _lookup_services(
+    async def _lookup_services_and_models(
         self, zc_timeout: float
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
@@ -429,7 +429,7 @@ class ZeroconfScanner(BaseScanner):
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
         zc_timeout = timeout * 1000
-        services_by_address, name_to_model = await self._lookup_services(zc_timeout)
+        services_by_address, name_to_model = await self._lookup_services_and_models(zc_timeout)
         dev_services_by_address: Dict[str, List[mdns.Service]] = {}
         model_by_address: Dict[str, str] = {}
         for address, service_infos in services_by_address.items():
