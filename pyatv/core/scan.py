@@ -460,7 +460,6 @@ class ZeroconfScanner(BaseScanner):
                     )
                 )
             dev_services_by_address[address] = dev_services
-        if dev_services_by_address:
-            self._process_responses(
-                dev_services_by_address, name_to_model, name_by_address
-            )
+        self._process_responses(
+            dev_services_by_address, name_to_model, name_by_address
+        )
