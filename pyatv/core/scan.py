@@ -397,9 +397,9 @@ class ZeroconfScanner(BaseScanner):
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
             if info.type == DEVICE_INFO_TYPE:
-                name = _name_without_type(info.name, info.type)
                 model = info.properties.get(b"model")
                 if model:
+                    name = _name_without_type(info.name, info.type)
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = model.decode("utf-8")
             else:
