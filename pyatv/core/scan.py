@@ -399,9 +399,10 @@ class ZeroconfScanner(BaseScanner):
                 if possible_model:
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = possible_model.decode("utf-8")
-            address = _first_non_link_local_or_non_v6_address(info.addresses)
-            if address:
-                services_by_address.setdefault(address, []).append(info)
+            else:
+                address = _first_non_link_local_or_non_v6_address(info.addresses)
+                if address:
+                    services_by_address.setdefault(address, []).append(info)
         return services_by_address, name_to_model
 
     def _process_responses(
