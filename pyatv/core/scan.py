@@ -368,7 +368,7 @@ class ZeroconfScanner(BaseScanner):
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
         infos = []
-        device_info_names = set()
+        device_names = set()
         for type_ in (SLEEP_PROXY, *self._services):
             zc_type = f"{type_}."
             for record in self.zeroconf.cache.async_all_by_details(
@@ -378,8 +378,8 @@ class ZeroconfScanner(BaseScanner):
                 infos.append(AsyncServiceInfo(zc_type, ptr_name))
                 name = _name_without_type(ptr_name, zc_type)
                 device_name = self._device_info_name[type_](name)
-                if device_name is not None and device_name not in device_info_names:
-                    device_info_names.add(device_name)
+                if device_name is not None and device_name not in device_names:
+                    device_names.add(device_name)
                     infos.append(
                         AsyncDeviceInfoServiceInfo(
                             DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
