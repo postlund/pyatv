@@ -433,7 +433,7 @@ class ZeroconfScanner(BaseScanner):
             zc_timeout
         )
         dev_services_by_address: Dict[str, List[mdns.Service]] = {}
-        model_by_address: Dict[str, str] = {}
+        model_by_address: Dict[str, Optional[str]] = {}
         for address, service_infos in services_by_address.items():
             if self.hosts and address not in self.hosts:
                 continue
