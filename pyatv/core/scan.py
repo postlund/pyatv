@@ -367,10 +367,12 @@ class ZeroconfScanner(BaseScanner):
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
-        zc_types = {f"{SLEEP_PROXY}.", *(f"{service}." for service in self._services)}
         infos = []
         device_info_names = set()
-        for zc_type in zc_types:
+        for zc_type in (
+            f"{SLEEP_PROXY}.",
+            *(f"{service}." for service in self._services),
+        ):
             internal_type = zc_type[:-1]
             for record in self.zeroconf.cache.async_all_by_details(
                 zc_type, _TYPE_PTR, _CLASS_IN
