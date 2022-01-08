@@ -10,6 +10,7 @@ from typing import (
     Any,
     Awaitable,
     Callable,
+    Coroutine,
     Dict,
     Generator,
     List,
@@ -365,9 +366,8 @@ class ZeroconfScanner(BaseScanner):
         self, zc_timeout: float
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
-        infos: List[AsyncServiceInfo] = []
-        infos = []
-        tasks = []
+        infos: List[Union[AsyncServiceInfo, AsyncDeviceInfoServiceInfo]] = []
+        tasks: List[Coroutine[Any, Any, bool]] = []
         device_names = set()
         for type_ in (SLEEP_PROXY, *self._services):
             zc_type = f"{type_}."
