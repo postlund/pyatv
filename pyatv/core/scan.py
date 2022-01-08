@@ -411,7 +411,7 @@ class ZeroconfScanner(BaseScanner):
     def _process_responses(
         self,
         dev_services_by_address: Dict[str, List[mdns.Service]],
-        model_by_address: Dict[str, str],
+        model_by_address: Dict[str, Optional[str]],
     ):
         """Process and callback each aggregated response to the base handler."""
         for address, dev_services in dev_services_by_address.items():
