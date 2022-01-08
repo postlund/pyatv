@@ -51,7 +51,7 @@ ServiceInfoMethod = Callable[
 DEVICE_INFO: str = "_device-info._tcp.local"
 DEVICE_INFO_TYPE: str = f"{DEVICE_INFO}."
 SLEEP_PROXY: str = "_sleep-proxy._udp.local"
-
+SLEEP_PROXY_TYPE: str = f"{SLEEP_PROXY}."
 
 # These ports have been "arbitrarily" chosen (see issue #580) because a device normally
 # listen on them (more or less). They are used as best-effort when for unicast scanning
@@ -419,7 +419,7 @@ class ZeroconfScanner(BaseScanner):
                 mdns.Response(
                     services=dev_services,
                     deep_sleep=all(
-                        service.port == 0 and service.type != f"{SLEEP_PROXY}."
+                        service.port == 0 and service.type != SLEEP_PROXY_TYPE
                         for service in dev_services
                     ),
                     model=model_by_address.get(address),
