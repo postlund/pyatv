@@ -439,16 +439,16 @@ class ZeroconfScanner(BaseScanner):
                 continue
             dev_services = []
             for service_info in service_infos:
-                short_name = _extract_service_name(service_info)
+                name = _extract_service_name(service_info)
                 service_type = service_info.type[:-1]
                 if address not in model_by_address:
-                    device_name = self._device_info_name[service_type](short_name)
+                    device_name = self._device_info_name[service_type](name)
                     if device_name:
                         model_by_address[address] = name_to_model.get(device_name)
                 dev_services.append(
                     mdns.Service(
                         service_type,
-                        short_name,
+                        name,
                         IPv4Address(address),
                         service_info.port,
                         CaseInsensitiveDict(
