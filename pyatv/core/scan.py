@@ -389,7 +389,7 @@ class ZeroconfScanner(BaseScanner):
         self, zc_timeout: float
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
-        infos = self._build_service_info_queries(zc_timeout)
+        infos = self._build_service_info_queries()
         await asyncio.gather(
             *[info.async_request(self.zeroconf, zc_timeout) for info in infos]
         )
@@ -411,15 +411,10 @@ class ZeroconfScanner(BaseScanner):
     def _process_responses(
         self,
         dev_services_by_address: Dict[str, List[mdns.Service]],
-        name_to_model: Dict[str, str],
-        name_by_address: Dict[str, str],
+        model_by_address: Dict[str, str],
     ):
         """Process and callback each aggregated response to the base handler."""
         for address, dev_services in dev_services_by_address.items():
-            model = None
-            name_for_address = name_by_address.get(address)
-            if name_for_address is not None:
-                model = name_to_model.get(name_for_address)
             self.handle_response(
                 mdns.Response(
                     services=dev_services,
@@ -427,7 +422,7 @@ class ZeroconfScanner(BaseScanner):
                         service.port == 0 and service.type != f"{SLEEP_PROXY}."
                         for service in dev_services
                     ),
-                    model=model,
+                    model=model_by_address.get(address),
                 )
             )
 
@@ -436,7 +431,7 @@ class ZeroconfScanner(BaseScanner):
         zc_timeout = timeout * 1000
         services_by_address, name_to_model = await self._lookup_services(zc_timeout)
         dev_services_by_address: Dict[str, List[mdns.Service]] = {}
-        name_by_address: Dict[str, str] = {}
+        model_by_address: Dict[str, str] = {}
         for address, service_infos in services_by_address.items():
             if self.hosts and address not in self.hosts:
                 continue
@@ -444,10 +439,10 @@ class ZeroconfScanner(BaseScanner):
             for service_info in service_infos:
                 short_name = _extract_service_name(service_info)
                 service_type = service_info.type[:-1]
-                if address not in name_by_address:
-                    device_info_name = self._device_info_name[service_type](short_name)
-                    if device_info_name:
-                        name_by_address[address] = device_info_name
+                if address not in model_by_address:
+                    device_name = self._device_info_name[service_type](short_name)
+                    if device_name:
+                        model_by_address[address] = name_to_model.get(device_name)
                 dev_services.append(
                     mdns.Service(
                         service_type,
@@ -463,4 +458,4 @@ class ZeroconfScanner(BaseScanner):
                     )
                 )
             dev_services_by_address[address] = dev_services
-        self._process_responses(dev_services_by_address, name_to_model, name_by_address)
+        self._process_responses(dev_services_by_address, model_by_address)
