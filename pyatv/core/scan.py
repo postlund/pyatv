@@ -398,10 +398,10 @@ class ZeroconfScanner(BaseScanner):
         for info in infos:
             if info.type == DEVICE_INFO_TYPE:
                 name = _name_without_type(info.name, info.type)
-                possible_model = info.properties.get(b"model")
-                if possible_model:
+                model = info.properties.get(b"model")
+                if model:
                     with contextlib.suppress(UnicodeDecodeError):
-                        name_to_model[name] = possible_model.decode("utf-8")
+                        name_to_model[name] = model.decode("utf-8")
             else:
                 address = _first_non_link_local_or_non_v6_address(info.addresses)
                 if address:
