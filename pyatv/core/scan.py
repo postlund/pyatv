@@ -371,20 +371,19 @@ class ZeroconfScanner(BaseScanner):
         infos = []
         device_info_names = set()
         for zc_type in zc_types:
+            internal_type = zc_type[:-1]
             for record in self.zeroconf.cache.async_all_by_details(
                 zc_type, _TYPE_PTR, _CLASS_IN
             ):
-                infos.append(AsyncServiceInfo(zc_type, cast(DNSPointer, record).alias))
-                name = _name_without_type(record.alias, zc_type)
-                device_info_name = self._device_info_name[zc_type[:-1]](name)
-                if (
-                    device_info_name is not None
-                    and device_info_name not in device_info_names
-                ):
-                    device_info_names.add(device_info_name)
+                ptr_name = cast(DNSPointer, record).alias
+                infos.append(AsyncServiceInfo(zc_type, ptr_name))
+                name = _name_without_type(ptr_name, zc_type)
+                device_name = self._device_info_name[internal_type](name)
+                if device_name is not None and device_name not in device_info_names:
+                    device_info_names.add(device_name)
                     infos.append(
                         AsyncDeviceInfoServiceInfo(
-                            DEVICE_INFO_TYPE, f"{device_info_name}.{DEVICE_INFO_TYPE}"
+                            DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
                         )
                     )
         await asyncio.gather(
