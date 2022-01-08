@@ -368,6 +368,7 @@ class ZeroconfScanner(BaseScanner):
         """Lookup services and aggregate them by address."""
         infos: List[AsyncServiceInfo] = []
         infos = []
+        tasks = []
         device_names = set()
         for type_ in (SLEEP_PROXY, *self._services):
             zc_type = f"{type_}."
@@ -375,19 +376,23 @@ class ZeroconfScanner(BaseScanner):
                 zc_type, _TYPE_PTR, _CLASS_IN
             ):
                 ptr_name = cast(DNSPointer, record).alias
-                infos.append(AsyncServiceInfo(zc_type, ptr_name))
+                service_info = AsyncServiceInfo(zc_type, ptr_name)
+                tasks.append(service_info.async_request(self.zeroconf, zc_timeout))
+                infos.append(service_info)
                 name = _name_without_type(ptr_name, zc_type)
                 device_name = self._device_info_name[type_](name)
                 if device_name is not None and device_name not in device_names:
                     device_names.add(device_name)
-                    infos.append(
-                        AsyncDeviceInfoServiceInfo(
-                            DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
+                    device_service_info = AsyncDeviceInfoServiceInfo(
+                        DEVICE_INFO_TYPE, f"{device_name}.{DEVICE_INFO_TYPE}"
+                    )
+                    infos.append(device_service_info)
+                    tasks.append(
+                        device_service_info.async_request(
+                            self.zeroconf, zc_timeout, question_type=DNSQuestionType.QU
                         )
                     )
-        await asyncio.gather(
-            *[info.async_request(self.zeroconf, zc_timeout) for info in infos]
-        )
+        await asyncio.gather(*tasks)
         name_to_model: Dict[str, str] = {}
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
