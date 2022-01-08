@@ -12,7 +12,6 @@ from typing import (
     Callable,
     Dict,
     Generator,
-    Iterable,
     List,
     Mapping,
     NamedTuple,
