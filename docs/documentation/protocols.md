@@ -14,20 +14,20 @@ link_group: documentation
 
 If you want to extend pyatv, a basic understanding of the used protocols helps a lot. This
 page aims to give a summary of the protocols and how they work (to the extent we know, since
-they are reverse engineered). Focus are on the parts the are relevant and implemented in
+they are reverse engineered). Focus are on the parts that are relevant and implemented in
 pyatv.
 
 # Digital Media Access Protocol (DMAP)
 
 DMAP covers the suite of protocols used by various Apple software (e.g. iTunes)
-to share for instance music. There are already a bunch of sites and libraries describing
-and implementing these protocol, please see the reference further down. This section will
+to share, for instance, music. There are already a bunch of sites and libraries describing
+and implementing these protocols. Please see the reference further down. This section will
 focus on the technical aspects used to implement DMAP/DACP/DAAP in pyatv.
 
 At its core, DMAP is basically a HTTP server (running on port 3689) that responds to specific
-commands and streams events back to the client. Data is requested using GET and POST with
-special URLs. Data in the responses is usually in a specific binary format, but depending on
-the request it can also be something else (like a PNG file for artwork). The
+commands and streams events back to the client. Data is requested using GET and POST methods with
+special URLs. Data in the responses is usually in a specific binary format, whose format can depend on
+the request (like a PNG file for artwork). The
 binary protocol will be explained first, as that makes it easier to understand
 the requests.
 
@@ -35,13 +35,13 @@ the requests.
 
 The binary format is basically TLV data where the tag is a 4 byte ASCII-string,
 the length is a four byte unsigned integer and the data is, well, data. Type
-and meaning of a specific TLV is derived from the tag. So we must know which
+and meaning of a specific TLV are derived from the tag. So one must know which
 tags are used, how large they are and what they mean. Please note that Length
 is length of the data, so key and length are not included in this size.
 
 A TLV looks like this:
 
-| Key (4 bytes) | Length (4 bytes) | Data (Length bytes |
+| Key (4 bytes) | Length (4 bytes) | Data (Length) bytes |
 
 Multiple TLVs are usually embedded in one DMAP data stream and TLVs may also
 be nested, to form a tree:
@@ -59,9 +59,9 @@ be nested, to form a tree:
 As stated earlier, we must already know if a tag is a "container" (that
 contains other TLVs) or not. It cannot easily be seen on the data itself.
 A container usually has more resemblance to an array than a dictionary
-since multiple TLVs with the same key often occurs.
+since multiple TLVs with the same key often occur.
 
-All tags currently known by pyatv is defined in `pyatv.dmap.tag_definitions`.
+All tags currently known by pyatv are defined in `pyatv.dmap.tag_definitions`.
 
 ## Decoding Example
 
@@ -139,18 +139,18 @@ For `POST`-request, the following header must be present as well:
 | Content-Type | application/x-www-form-urlencoded |
 
 There are a lot of different requests that can be sent and this library
-implements far from all of them. Fact is that there is support for things that
+implements far from all of them. There is actually support for things that
 aren't implemented by the native Remote app, like scrubbing (changing absolute
 position in the stream). Since it's the same commands as used by iTunes, we can
 probably assume that it's the same software implementation used in both
 products. Enough on that matter... All the requests that are used by this
-library is described in its own chapter a bit further down.
+library is described in their own chapter a bit further down.
 
 ## Authentication
 
 Some commands can be queried freely by anyone on the same network as the Apple TV,
 like the server-info command. But most commands require a "session id". The
-session id is obtained by doing login and extracting the `mlid` key. Session id
+session id is obtained by doing a login and extracting the `mlid` key. Session id
 is then included in all requests, e.g.
 
     ctrl-int/1/playstatusupdate?session-id=<session id>&revision-number=0
@@ -159,8 +159,7 @@ The device will respond with an error (503?) if the authentication fails.
 
 ## Supported Requests
 
-This list is only covers the requests performed by pyatv and is thus not
-complete.
+This list only covers the requests performed by pyatv and is incomplete.
 
 ### server-info
 
@@ -275,8 +274,8 @@ number 0 will never block and can be used to poll current playstatus.
 
 Returns a PNG image for what is currently playing, like a poster or album art.
 If not present, an empty response is returned. Width and height of image can be
-altered with `mw` and `mh`, but will be ignored if available image is smaller
-then the requested size.
+altered with `mw` and `mh`, but will be ignored if the available image is smaller
+than the requested size.
 
 ### ctrl-int
 
@@ -337,17 +336,17 @@ http://stackoverflow.com/questions/35355807/has-anyone-reversed-engineered-the-p
 
 # Media Remote Protocol (MRP)
 
-The Media Remote Protocol (MRP) was introduced somewhere along the line of when Apple TV 4
+The Media Remote Protocol (MRP) was introduced some time when Apple TV 4
 and tvOS was launched. It is the protocol used by the Remote App as well as the Control
-Center widget in iOS. It is also the reason why devices not running tvOS (e.g. Apple TV 3)
+Center widget in iOS before iOS13. It is also the reason devices not running tvOS (e.g. Apple TV 3)
 cannot be controlled from Control Center.
 
 From a protocol point-of-view, it is based on Protocol Buffers
 [(protobuf)](https://developers.google.com/protocol-buffers), developed by Google.
 Every message is prefixed with a variant (in protobuf terminology), since protobuf
-messages doesn't have lengths themselves. Service discovery is done with Zeroconf
+messages don't have lengths themselves. Service discovery is done with Zeroconf
 using service `_mediaremotetv._tcp.local.`. The service contains some basic information,
-like device name, but also which port that is used for communication. The port can
+like device name, but also which port is used for communication. The port can
 change at any time (e.g. after reboot, but also at more random times) and usually
 start with 49152 - the first ephemeral port.
 
@@ -357,26 +356,26 @@ This is currently TBD, but you can can the code under `pyatv/mrp`.
 
 ## References
 
-In order to not duplicate information, please read more about the protocol
+In order not to duplicate information, please read more about the protocol
 [here](https://github.com/jeanregisser/mediaremotetv-protocol).
 
 # Companion Link
 
 The Companion Link protocol is yet another protocol used to communicate between Apple
-devices. Its full purpose is not yet fully understood, so what is written here are
-mostly speculations and guesses. If you feel that something is wrong or have more details,
+devices. Its purpose is not yet fully understood, so what is written here is
+mostly speculation and guesses. If you feel that something is wrong or have more details,
 please let me know.
 
-Main driver for reverse engineering this protocol was to be able to launch apps in the
+The main driver for reverse engineering this protocol was to be able to launch apps in the
 same way as the Shortcuts app, which was introduced in iOS 13. In iOS 13 Apple also
 decided to switch from MRP to Companion Link in the remote widget found in action center.
 Adding server-side support for Companion Link to the proxy would be a nice feature.
 Guesses are that Continuity and Handoff are also built on top of this protocol, but that
-is so far just speculations.
+is so far just speculation.
 
 ## Service Discovery
 
-Like with  most Apple services, Zeroconf is used for service discovery. More precisely,
+Like with most Apple services, Zeroconf is used for service discovery. More precisely,
 `_companion-link._tcp.local.` is the used service type. Here's a list of the properties
 included in this service and typical values:
 
@@ -392,7 +391,7 @@ included in this service and typical values:
 | rpBA | E1:B2:E3:BB:11:FF | Bluetooth Address (can rotate)
 
 Most values (except for rpVr, rpMd and rpFl) change every now and then (rotating encryption
-scheme), likely for privacy reasons. It is still not known how these values are to be used.
+scheme), likely for privacy reasons. It is still not known how these values are consumed.
 
 ## Binary Format
 
@@ -425,8 +424,8 @@ frame. The following frame types are currently known:
 | 0x22 | FamilyIdentityUpdate |
 
 The length field determines the size of the following payload in bytes (stored as
-big endian). So far only responses with frame type `E_OPACK` has been seen. The payload
-in these frames are encoded with OPACK (described below), which should also be the
+big endian). So far, only responses with frame type `E_OPACK` has been seen. The payload
+in these frames is encoded with OPACK (described below), which should also be the
 case for `U_OPACK` and `P_OPACK`.
 
 ## OPACK
@@ -436,7 +435,7 @@ It can serialize basic data types, like integers, strings, lists and dictionarie
 in an efficient way. In some instances (like booleans and small numbers), a single
 byte is sufficient. In other cases dynamic length fields are used to encode data size. Data is encoded using little endian where applicable and unless stated otherwise.
 
-Most parts of this format has been reverse engineered, but it's not complete or
+Most parts of this format have been reverse engineered, but it's not complete or
 verified to be correct. If any discrepancies are found, please report them or open a PR.
 
 An object is encoded or decoded according to this table:
@@ -480,7 +479,7 @@ An object is encoded or decoded according to this table:
 
 ### Endless Collections
 
-Dictionaries and lists supports up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
+Dictionaries and lists support up to 14 elements when including number of elements in a single byte, e.g. `0xE3` corresponds to a
 dictionary with three elements. It is however possible to represent lists, dictionaries and data objects with an endless amount of items
 using `F` as count, i.e. `0xDF`, `0xEF` or `0x9F`. A byte with value `0x03` indicates end of a list, dictionary or data object.
 
@@ -523,7 +522,7 @@ The above data structure would serialize to:
 E3416102416244746573744163A2
 ```
 
-Break down of the data:
+Break-down of the data:
 
 ```raw
 E3          : Dictionary with three items
@@ -595,10 +594,10 @@ This excellent example comes straight from [fabianfreyer/opack-tools](https://gi
 
 Devices are paired and data encrypted according to HAP (HomeKit). You can refer to that specification
 for further details (available [here](https://developer.apple.com/homekit/specification/),
-but requires an Apple ID).
+but it requires an Apple ID, except for the Non-Commercial vevsion, free to download).
 
-Messages will be presented in hex and a decoded format, based on the implementation in
-pyatv. So beware that it will be somewhat python-inspired.
+Messages are presented in hex and a decoded format, based on the implementation in
+pyatv. So beware that it will be somewhat python-oriented.
 
 ### Pairing
 
@@ -622,7 +621,7 @@ sequenceDiagram
     Note over ATV,Client: _pd: State=M6, Encrypted Data
 </code>
 
-The content of each frame is OPACK data containing a dictionary. The `_pd` key (*pairing data*) is TLV8 data according to HAP and should be decoded according to that specification. Next follows more details for each message.
+The content of each frame is OPACK data containing a dictionary. The `_pd` key (*pairing data*) is TLV8 data according to HAP, and should be decoded according to that specification. Next follows more details for each message.
 
 #### Client -> ATV: M1: Pair-Setup Start (0x03)
 A client initiates a pairing request by sending a `PS_Start` message (M1).
@@ -852,7 +851,7 @@ There's a lot of information stuffed in there, but the main elements are these o
 | _i | ID | Identifier for the message request or event, e.g. `_systemInfo` or `_launchApp`. |
 | _c | Content | Additional data/arguments passed to whatever is specified in `_i`. |
 | _t | Type | Type of message: 1=event, 2=request, 3=response |
-| _x | XID | Likely "transfer id". The response will contain the same XID as was specified in the request. Not used by all frame types (e.g. not by authentication frames). Integer with unknown range. |
+| _x | XID | Likely "transfer ID". The response will contain the same XID as was specified in the request. Not used by all frame types (e.g. not by authentication frames). Integer with unknown range. |
 | _sid | Session ID | Identifier used by sessions. |
 
 Most messages seems to include the tags above. Here are a few other tags seen as well:
@@ -865,7 +864,7 @@ Most messages seems to include the tags above. Here are a few other tags seen as
 #### Sessions (_sessionStart, _sessionStop)
 
 When a client connects, it can establish a new session by sending `_sessionStart`. It
-includes a 32 bit session id called `_sid` (assumed to be randomized by the client) and a
+includes a 32 bit session ID called `_sid` (assumed to be randomized by the client) and a
 service type called `_srvT` (endpoint the client wants to talk to):
 
 ```javascript
@@ -892,7 +891,7 @@ The server will respond with a remote `_sid` upon success:
 }
 ```
 
-A final 64 bit session id is then created by shifting up the received `_sid` 32 bits
+A final 64 bit session ID is then created by shifting up the received `_sid` 32 bits
 and OR'ing it with the randomized `_sid`:
 
 ```python
@@ -926,7 +925,7 @@ reasons.
 
 Some commands will not work until a session has been started. One example is `_launchApp`,
 which won't work after the Apple TV has been restarted until the app list has been requested
-by for instance the shortcuts app. The theory is that the `rapportd` process (implementing
+by, e.g., the shortcuts app. The theory is that the `rapportd` process (implementing
 the Companion protocol) acts like a proxy between clients and processes on the system.
 When a client wants to call a function (e.g. `_launchApp`) handled by another process,
 `_sessionStart` will make sure that function is available to call by setting up a session
@@ -979,8 +978,8 @@ No explicit response is sent to the request, other than an event update. So far 
     '_t': 1}
 ```
 
-The Media Control Flags (`mcF`) is a bitmask with the following bits (not fully reverse
-engineered yet):
+The Media Control Flags (`mcF`) chunk is a bitmask with the following bits (not fully reversed
+ yet):
 
 | Bitmask | Purpose |
 | ------- | ------- |
@@ -1031,7 +1030,7 @@ To unsubscribe, instead use `_deregEvents`:
 
 #### Buttons/Commands (_hidC)
 
-Identifier shall be set to *_hidC* and content (*_c*) to the following:
+Identifier shall be set to *_hidC* and content (*_c*), to the following:
 
 | **Tag** | **Name** | **Value** |
 | _hBtS | Button state | 1=Down/pressed, 2=Up/released |
@@ -1066,7 +1065,7 @@ graph LR
     APS2[AirPlay v2, 2018]
 </code>
 
-AirTunes is usually announced as *Remote Audio Output Protocol*, e.g. when looking at Zeroconf
+AirTunes (i.e. Airplay v1) is announced as *Remote Audio Output Protocol*, e.g. when looking at Zeroconf
 services. That's also what it will be referred to here.
 
 As the AirPlay protocol is covered a lot elsewhere, I will update here when I'm bored. Please
@@ -1081,22 +1080,28 @@ AirPlay uses two services, one for audio and one for video. They are described h
 | **Property** | **Example value** | **Meaning** |
 | ------------ | ----------------- | ----------- |
 | et           | 0,4               | Encryption type: 0=unencrypted, 1=RSA (AirPort Express), 3=FairPlay, 4=MFiSAP, 5=FairPlay SAPv2.5
-| da           | true              | ?
+| da           | true              | Digest Authentication
 | ss           | 16                | Audio sample size in bits
-| am           | AppleTV6,2        | Device model
-| tp           | TCP,UDP           | Transport protocol
+| am           | AppleTV6,2        | Apple (device) Model
+| tp           | TCP,UDP           | Supported transport protocols for media streams
 | pw           | false             | Password protected
-| fv           | s8927.1096.0      | Some kind of firmware version? (non-Apple)
+| fv           | s8927.1096.0      | Firmware version (non-Apple)
 | txtvers      | 1                 | TXT record version 1
-| vn           | 65537             | ?
-| md           | 0,1,2             | Supported metadata: 0=text, 1=artwork, 2=progress
+| vn           | 65537             | Version Number (uint16.uint16, e.g. 1.1 = 65537)
+| md           | 0,1,2             | Supported metadata: 0=text, 1=artwork, 2=progress (only for pre iOS7 senders)
 | vs           | 103.2             | Server version
-| sv           | false             | ?
+| sv           | false             | Software Volume, whether receiver needs sender to adjust their volume.
+| sm           | false             | Software Mute, (as above).
 | ch           | 2                 | Number of audio channels
 | sr           | 44100             | Audio sample rate
-| cn           | 0,1               | Audio codecs: 0=PCM, 1=AppleLossless (ALAC), 2=AAC, 3=AAC ELD
+| cn           | 0,1               | Audio codecs: 0=PCM, 1=AppleLossless (ALAC), 2=AAC, 3=AAC ELD, 4=OPUS
 | ov           | 8.4.4             | Operating system version? (seen on ATV 3)
 | pk           | 38fd7e...         | Public key
+| pw           | false             | Whether password (PIN) auth is required. Triggers Method POST Path /pair-pin-start from sender
+| ft           | 0x8074...         | Supported Features (hex integer bitmask)
+| sf           | 0x387e...         | System Flags (hex integer bitmask)
+
+
 
 ### AirPlay
 
@@ -1131,7 +1136,7 @@ that is done.
 
 #### OPTIONS
 
-Ask receiver what methods it supports.
+Sender asks receiver what methods it supports:
 
 **Sender -> Receiver:**
 ```raw
@@ -1155,7 +1160,7 @@ CSeq: 0
 
 #### ANNOUNCE
 
-Tell the receiver about properties for an upcoming stream.
+Sender tells the receiver about properties for an upcoming stream.
 
 **Sender -> Receiver:**
 ```raw
@@ -1183,7 +1188,7 @@ Some observations (might not be true):
 * ID in `o=` property (`4018537194`) seems to match what is used for rtsp endpoint (`rtsp://xxx/4018537194`)
 * Address in `o=` corresponds to IP address of the sender
 * Address in `c=` is address of the receiver
-* Configuration for ALAC is used here. Format for `fmtp` is `a=fmtp:96 <frames per packet> 0 <sample size> 40 10 14 <channels> 255 0 0 <sample rate>` (other values are unknown)
+* Configuration for ALAC is used here. Format for `fmtp` is `a=fmtp:96 <frames per packet> <ALAC version, 0> <ALAC sample size> <ALAC history mult> <ALAC initial history> <ALAC rice limit> <ALAC channel count> <ALAC max run> <ALAC max coded frame size, 0 for auto/unknown> <ALAC average bitrate, 0 for auto> <ALAC sample rate>`
 
 **Receiver -> Sender:**
 ```raw
@@ -1196,7 +1201,7 @@ CSeq: 0
 
 #### SETUP
 
-Request initialization of a session (but does not start it). Sets up three different UDP channels:
+Sender requests initialization of a (Airplay v1) session (but does not start it). Sets up three different UDP channels:
 
 | Channel | Description |
 | ------- | ----------- |
@@ -1229,11 +1234,22 @@ CSeq: 2
 
 #### SETPEERS
 
-Unknown
+Describes PTP timing peers to the receiver.
+
+```raw
+...
+Content-Type: /peer-list-changed
+
+        Contains [] array of IP{4|6}addrs e.g.:
+        ['::',
+         '::',
+         '127.0.0.1']
+```
 
 #### RECORD
 
-Request to start the stream at a particular point. Initially, a randomized sequence (16bit) number and start time (32bit) is included in `RTP-Info`.
+Requests to start the stream at a particular point. Initially, a sequence (16bit) number and start time (32bit) are included in `RTP-Info` which correspond to those in the first RTP packet. These values are
+randomized.
 
 **Sender -> Receiver:**
 ```raw
@@ -1260,7 +1276,7 @@ CSeq: 6
 
 #### FLUSH
 
-Stops the streaming, e.g. pause what is playing.
+Requests to flush the receivers buffer and pause/stop what is playing.
 
 **Sender -> Receiver:**
 ```raw
@@ -1283,7 +1299,7 @@ CSeq: 7
 
 #### TEARDOWN
 
-End the RTSP session.
+End the active session.
 
 **Sender -> Receiver:**
 ```raw
@@ -1333,7 +1349,7 @@ CSeq: 3
 
 ## AirPlay
 
-This section deals with "video part" of AirPlay. TBD
+This section deals with the "video part" of AirPlay. TBD
 
 ### Commands
 
@@ -1397,9 +1413,9 @@ CSeq: 0
 # AirPlay 2
 
 In reality, AirPlay 2 has a lot in common with its predecessor, but a lot also differs
-so it deserves it's own capter.
+so it deserves its own capter.
 
-For now, main focus here is to describe how AirPlay can be setup for remote control
+For now, the main focus here is to describe how AirPlay can be set up for remote control
 only, i.e. how to get metadata for what is playing. Other parts will be added later.
 
 ## Service Discovery
@@ -1417,21 +1433,21 @@ be found [here](https://github.com/ejurgensen/pair_ap).
 ### Encryption
 All channels described here are encrypted using Chacha20Poly1305. The session key is always
 derived (with HKDF) from the shared secret agreed upon during authentication. Salt and info
-values varies depending on channel.
+values vary depending on channel.
 
-Data is encrypted in blocks, with a two bytes (little-endian) size field prepended to it
+Data is encrypted in blocks, with a two byte (little-endian) size field prepended to it
 as well as a 16 byte auth tag appended:
 
 | **Size (2 bytes)** | **Data (n bytes)** | **Auth tag (16 bytes)** |
 
-HomeKit madates a block size of maximum 1024 byte. This is not the case here as any block
+HomeKit madates a maximum block size of 1024 bytes. This is not the case here as any block
 size (that fits length tag) can be used.
 
 This is also described in the HAP specification, section 5.2.2 (Release R1).
 
 ## Remote Control
 
-*NB: This is WIP. Far from everything is understood yet, so take this part with a grain
+*NB: This is a WIP. Far from everything is understood yet, so take this part with a pinch
 of salt.*
 
 Setting up a remote control session works more or less like setting up a regular audio
@@ -1514,7 +1530,7 @@ Which decodes to:
 
 At this stage, the receiver expects the sender to establish a TCP connection to the port specified
 by `eventPort`. This connection will be used for regular AirPlay events, i.e. RTSP messages
-are exchanged here. See next chapter for more details.
+are exchanged here. See the next chapter for more details.
 
 After the sender has connected to the event port, it shall start the stream using `RECORD`
 (iOS seems to request `/info` before doing this, that's why CSeq 8 is skipped):
@@ -1540,7 +1556,7 @@ CSeq: 9
 
 Now the receiver will send a "system info update" on the event channel.
 
-Next step is to set up a channel for the actual remote control messages:
+The next step is to set up a channel for the actual remote control messages:
 
 **Sender -> Receiver:**
 ```raw
@@ -1562,10 +1578,10 @@ Which decodes to:
 Some things to note here:
 
 * `channelID` and `clientUUID` change each time, so they are likely randomized
-* `clientTypeUUID` must be hardcoded to `1910A70F-DBC0-4242-AF95-115DB30604E1` (there
-  are a few other values used under other circumstances)
-* `type` 130 represents remote control type
-* `seed` is used when deriving encryption keys for the channel
+* `clientTypeUUID` of `1910A70F-DBC0-4242-AF95-115DB30604E1` means Media Remote (there
+  are a few other values used under other circumstances, like `8186BE43-A39A-4C42-9D0E-60BDB9CE1FE3`).
+* `type` 130 represents the Remote Control type
+* `seed` is used when deriving encryption keys for the channel, if encryption is mandated.
 
 The response looks like this:
 
@@ -1588,7 +1604,7 @@ Which decodes to:
 ```
 
 Like with the event channel, the sender is expected to establish a TCP connection to
-`dataPort` and enable encryption. Remote control messages are from now on exchanged on the
+`dataPort` and enable encryption. Remote control messages should from now on be exchanged on the
 data channel.
 
 The sender shall continuously send feedback updates to the receiver on the control channel:
@@ -1618,23 +1634,22 @@ Which decodes to this:
 {'streams': []}
 ```
 
-It seems iOS is doing this every two seconds. If that frequence is needed or not has not been
-investigated.
+iOS sends this every two seconds as a keep-alive.
 
 **Now it's done!**
 
 ### Event Channel
 The event channel is initiated by the sender to the port returned in the response to `SETUP`.
 After `SETUP` has finished, the sender shall connect to this port (TCP) and enable encryption.
-The following paramers are used to derive encryption keys:
+The following parameters are used to derive encryption keys:
 
 | Direction | Salt | Info |
 | --------- | ---- | ---- |
 | Output    | Events-Salt | Events-Write-Encryption-Key |
 | Input     | Events-Salt | Events-Read-Encryption-Key |
 
-Even though the channel set up is initiated by the sender, the channel should be treated as
-originating from the receiver. This means that input and output keys shall be switched on
+Even though the channel setup is initiated by the sender, the channel should be treated as
+originating from the receiver. This means that input and output keys shall be reversed on
 the sender side (use `Output` as `Input` and `Input` as `Output` to SRP).
 
 After the stream has been started using `RECORD`, the receiver will send a "system info update",
@@ -1656,8 +1671,8 @@ Which decodes to this (identifiers replaced with random values):
 {'type': 'updateInfo', 'value': {'psi': '6EE2C905-874B-4B4B-A50B-0F06B1800A17', 'vv': 2, 'playbackCapabilities': {'supportsInterstitials': True, 'supportsFPSSecureStop': True, 'supportsUIForAudioOnlyContent': True}, 'canRecordScreenStream': False, 'statusFlags': 580, 'keepAliveSendStatsAsBody': True, 'name': 'Vardagsrum', 'protocolVersion': '1.1', 'volumeControlType': 4, 'senderAddress': '10.0.10.254:46164', 'deviceID': 'AA:BB:CC:DD:EE:FF', 'pi': 'de7562c4-7bd2-4005-a8e4-d584bf63161a', 'screenDemoMode': False, 'initialVolume': -20.0, 'featuresEx': '1d9/St5fFTw', 'txtAirPlay': b"\x05acl=0\x18btaddr=FF:EE:DD:CC:BB:AA\x1adeviceid=AA:BB:CC:DD:EE:FF\x0ffex=1d9/St5fFTw\x1efeatures=0x4A7FDFD5,0x3C155FDE\x0bflags=0x244(gid=4D826039-0F40-4605-AD11-A6516183BAA6\x05igl=1\x06gcgl=1\x10model=AppleTV6,2\rprotovers=1.1'pi=de7562c4-7bd2-4005-a8e4-d584bf63161a(psi=6EE2C905-874B-4B4B-A50B-0F06B1800A17Cpk=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x0esrcvers=550.10\x0bosvers=14.7\x04vv=2", 'supportedFormats': {'lowLatencyAudioStream': 0, 'screenStream': 21235712, 'audioStream': 21235712, 'bufferStream': 14680064}, 'sourceVersion': '550.10', 'hasUDPMirroringSupport': True, 'model': 'AppleTV6,2', 'pk': b'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa', 'macAddress': 'AA:BB:CC:DD:EE:FF', 'receiverHDRCapability': '4k30', 'features': 4329472025123872725}}
 ```
 
-It is important to send a response to this request, otherwise the connection will timeout after
-30 seconds and closed by the receiver:
+It is important to send a response to this request, otherwise the connection will time out after
+30 seconds and be closed by the receiver:
 
 ```raw
 RTSP/1.0 200 OK
@@ -1671,12 +1686,12 @@ No other message has been seen on this channel with regards to remote control su
 
 ### Data Channel
 The data channel carries messages related to the remote control. In reality, it's MRP messages
-(so protobuf). The same message definitions used by Media Remote Protocol is also valid
+(so protobuf). The same message definitions used by Media Remote Protocol are also valid
 here.
 
 #### Encryption
 
-The following paramers are used to derive encryption keys:
+The following parameters are used to derive encryption keys:
 
 | Direction | Salt | Info |
 | --------- | ---- | ---- |
@@ -1690,7 +1705,7 @@ treated as an unsigned integer (`%llu`), so `-3431997079003895594` would be
 
 #### Message format
 
-The format of the data sent on the data channel is still a bit "hazy", so this is mostly
+The format of the data sent on the data channel is still unclear, so this is mostly
 educated guesses. Each message includes a 32 byte header where the first four bytes are
 the message size. Messages can be segmented over several packets, so it's necessary to
 put data in a buffer and decode from that. The message format looks like this:
@@ -1725,7 +1740,7 @@ size=74  sync                              sequence number   padding   payload
 ```
 
 If payload is included with a message, it's serialized as a binary property list and has
-this format (others might exist, but not seen so far):
+this format (others might exist, but have not been seen yet):
 
 ```javascript
 {"params": {"data": xxx}}
@@ -1758,7 +1773,7 @@ From here on, protobuf messages are exchanged in a similar manner to how
 the MRP protocol works. They are encapsulated as previously described. One
 thing to note is that the sender sets *Command* to `comm`. The receiver on
 the other hand sets *Command* to `cmnd`. The reason or importance of this
-is yet unknown.
+is not yet known.
 
 As an example, here is the initial `DEVICE_INFO_MESSAGE` message sent by
 the sender and the answer:
@@ -1846,7 +1861,7 @@ Bytes:
 \x00\x00\x00Jrply\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01aU\xc3\xe0\x00\x00\x00\x00bplist00\xd0\x08\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\t
 ```
 
-Which just decodes to an empty dict (`{}`).
+Which decodes to an empty dict (`{}`).
 
 It is important to include `uniqueIdentifier` in the "envelope message" (`ProtocolMessage`) as
 the device doesn't seem to respond otherwise. It shall be set to a random UUID4 string.
