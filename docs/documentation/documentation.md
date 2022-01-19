@@ -115,7 +115,7 @@ your own computer and works across operating systems and web browsers. Really co
 
 # Dependencies
 
-At least python 3.6 is required to run pyatv. A few additional libraries
+At least python 3.7 is required to run pyatv. A few additional libraries
 are needed as well. An updated list is available
 [here](https://github.com/postlund/pyatv/blob/master/base_versions.txt).
 
