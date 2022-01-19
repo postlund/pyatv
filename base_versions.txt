@@ -4,7 +4,7 @@ cryptography==2.6
 ifaddr==0.1.7
 mediafile==0.8.1
 miniaudio==1.45
-protobuf==3.18.0,<4
+protobuf==3.19.1,<4
 requests==2.23.0
 srptools==0.2.0
 zeroconf==0.28.2

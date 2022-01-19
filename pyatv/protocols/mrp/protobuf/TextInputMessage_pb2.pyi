@@ -15,25 +15,26 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class ActionType(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
-        pass
     class _Enum:
-        V = typing.NewType('V', builtins.int)
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.V], builtins.type):
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown = ActionType.Enum.V(0)
-        Insert = ActionType.Enum.V(1)
-        Set = ActionType.Enum.V(2)
-        Delete = ActionType.Enum.V(3)
-        ClearAction = ActionType.Enum.V(4)
+        Unknown: ActionType.Enum.ValueType = ...  # 0
+        Insert: ActionType.Enum.ValueType = ...  # 1
+        Set: ActionType.Enum.ValueType = ...  # 2
+        Delete: ActionType.Enum.ValueType = ...  # 3
+        ClearAction: ActionType.Enum.ValueType = ...  # 4
         """"Clear" clashes with something, making mypy unhappy"""
 
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
 
-    Unknown = ActionType.Enum.V(0)
-    Insert = ActionType.Enum.V(1)
-    Set = ActionType.Enum.V(2)
-    Delete = ActionType.Enum.V(3)
-    ClearAction = ActionType.Enum.V(4)
+    Unknown: ActionType.Enum.ValueType = ...  # 0
+    Insert: ActionType.Enum.ValueType = ...  # 1
+    Set: ActionType.Enum.ValueType = ...  # 2
+    Delete: ActionType.Enum.ValueType = ...  # 3
+    ClearAction: ActionType.Enum.ValueType = ...  # 4
     """"Clear" clashes with something, making mypy unhappy"""
 
 
@@ -48,12 +49,12 @@ class TextInputMessage(google.protobuf.message.Message):
     ACTIONTYPE_FIELD_NUMBER: builtins.int
     timestamp: builtins.float = ...
     text: typing.Text = ...
-    actionType: global___ActionType.Enum.V = ...
+    actionType: global___ActionType.Enum.ValueType = ...
     def __init__(self,
         *,
         timestamp : typing.Optional[builtins.float] = ...,
         text : typing.Optional[typing.Text] = ...,
-        actionType : typing.Optional[global___ActionType.Enum.V] = ...,
+        actionType : typing.Optional[global___ActionType.Enum.ValueType] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> None: ...

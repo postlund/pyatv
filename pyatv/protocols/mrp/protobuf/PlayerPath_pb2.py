@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/PlayerPath.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -16,70 +17,11 @@ from pyatv.protocols.mrp.protobuf import NowPlayingClient_pb2 as pyatv_dot_proto
 from pyatv.protocols.mrp.protobuf import NowPlayingPlayer_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_NowPlayingPlayer__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/PlayerPath.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n-pyatv/protocols/mrp/protobuf/PlayerPath.proto\x1a)pyatv/protocols/mrp/protobuf/Origin.proto\x1a\x33pyatv/protocols/mrp/protobuf/NowPlayingClient.proto\x1a\x33pyatv/protocols/mrp/protobuf/NowPlayingPlayer.proto\"k\n\nPlayerPath\x12\x17\n\x06origin\x18\x01 \x01(\x0b\x32\x07.Origin\x12!\n\x06\x63lient\x18\x02 \x01(\x0b\x32\x11.NowPlayingClient\x12!\n\x06player\x18\x03 \x01(\x0b\x32\x11.NowPlayingPlayer'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_Origin__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_NowPlayingClient__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_NowPlayingPlayer__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n-pyatv/protocols/mrp/protobuf/PlayerPath.proto\x1a)pyatv/protocols/mrp/protobuf/Origin.proto\x1a\x33pyatv/protocols/mrp/protobuf/NowPlayingClient.proto\x1a\x33pyatv/protocols/mrp/protobuf/NowPlayingPlayer.proto\"k\n\nPlayerPath\x12\x17\n\x06origin\x18\x01 \x01(\x0b\x32\x07.Origin\x12!\n\x06\x63lient\x18\x02 \x01(\x0b\x32\x11.NowPlayingClient\x12!\n\x06player\x18\x03 \x01(\x0b\x32\x11.NowPlayingPlayer')
 
 
 
-
-_PLAYERPATH = _descriptor.Descriptor(
-  name='PlayerPath',
-  full_name='PlayerPath',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='origin', full_name='PlayerPath.origin', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='client', full_name='PlayerPath.client', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='player', full_name='PlayerPath.player', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=198,
-  serialized_end=305,
-)
-
-_PLAYERPATH.fields_by_name['origin'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_Origin__pb2._ORIGIN
-_PLAYERPATH.fields_by_name['client'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_NowPlayingClient__pb2._NOWPLAYINGCLIENT
-_PLAYERPATH.fields_by_name['player'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_NowPlayingPlayer__pb2._NOWPLAYINGPLAYER
-DESCRIPTOR.message_types_by_name['PlayerPath'] = _PLAYERPATH
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_PLAYERPATH = DESCRIPTOR.message_types_by_name['PlayerPath']
 PlayerPath = _reflection.GeneratedProtocolMessageType('PlayerPath', (_message.Message,), {
   'DESCRIPTOR' : _PLAYERPATH,
   '__module__' : 'pyatv.protocols.mrp.protobuf.PlayerPath_pb2'
@@ -87,5 +29,9 @@ PlayerPath = _reflection.GeneratedProtocolMessageType('PlayerPath', (_message.Me
   })
 _sym_db.RegisterMessage(PlayerPath)
 
+if _descriptor._USE_C_DESCRIPTORS == False:
 
+  DESCRIPTOR._options = None
+  _PLAYERPATH._serialized_start=198
+  _PLAYERPATH._serialized_end=305
 # @@protoc_insertion_point(module_scope)

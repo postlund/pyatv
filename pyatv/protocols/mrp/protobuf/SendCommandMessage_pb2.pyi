@@ -20,14 +20,14 @@ class SendCommandMessage(google.protobuf.message.Message):
     COMMAND_FIELD_NUMBER: builtins.int
     OPTIONS_FIELD_NUMBER: builtins.int
     PLAYERPATH_FIELD_NUMBER: builtins.int
-    command: pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.V = ...
+    command: pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType = ...
     @property
     def options(self) -> pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions: ...
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     def __init__(self,
         *,
-        command : typing.Optional[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.V] = ...,
+        command : typing.Optional[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType] = ...,
         options : typing.Optional[pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions] = ...,
         playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
         ) -> None: ...
