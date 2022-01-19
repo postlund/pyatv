@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/RegisterHIDDeviceMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -15,63 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 from pyatv.protocols.mrp.protobuf import VirtualTouchDeviceDescriptorMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/RegisterHIDDeviceMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n;pyatv/protocols/mrp/protobuf/RegisterHIDDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x46pyatv/protocols/mrp/protobuf/VirtualTouchDeviceDescriptorMessage.proto\"S\n\x18RegisterHIDDeviceMessage\x12\x37\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1d.VirtualTouchDeviceDescriptor:M\n\x18registerHIDDeviceMessage\x12\x10.ProtocolMessage\x18\x0b \x01(\x0b\x32\x19.RegisterHIDDeviceMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n;pyatv/protocols/mrp/protobuf/RegisterHIDDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x46pyatv/protocols/mrp/protobuf/VirtualTouchDeviceDescriptorMessage.proto\"S\n\x18RegisterHIDDeviceMessage\x12\x37\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1d.VirtualTouchDeviceDescriptor:M\n\x18registerHIDDeviceMessage\x12\x10.ProtocolMessage\x18\x0b \x01(\x0b\x32\x19.RegisterHIDDeviceMessage')
 
 
 REGISTERHIDDEVICEMESSAGE_FIELD_NUMBER = 11
-registerHIDDeviceMessage = _descriptor.FieldDescriptor(
-  name='registerHIDDeviceMessage', full_name='registerHIDDeviceMessage', index=0,
-  number=11, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+registerHIDDeviceMessage = DESCRIPTOR.extensions_by_name['registerHIDDeviceMessage']
 
-
-_REGISTERHIDDEVICEMESSAGE = _descriptor.Descriptor(
-  name='RegisterHIDDeviceMessage',
-  full_name='RegisterHIDDeviceMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='deviceDescriptor', full_name='RegisterHIDDeviceMessage.deviceDescriptor', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=187,
-  serialized_end=270,
-)
-
-_REGISTERHIDDEVICEMESSAGE.fields_by_name['deviceDescriptor'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_VirtualTouchDeviceDescriptorMessage__pb2._VIRTUALTOUCHDEVICEDESCRIPTOR
-DESCRIPTOR.message_types_by_name['RegisterHIDDeviceMessage'] = _REGISTERHIDDEVICEMESSAGE
-DESCRIPTOR.extensions_by_name['registerHIDDeviceMessage'] = registerHIDDeviceMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_REGISTERHIDDEVICEMESSAGE = DESCRIPTOR.message_types_by_name['RegisterHIDDeviceMessage']
 RegisterHIDDeviceMessage = _reflection.GeneratedProtocolMessageType('RegisterHIDDeviceMessage', (_message.Message,), {
   'DESCRIPTOR' : _REGISTERHIDDEVICEMESSAGE,
   '__module__' : 'pyatv.protocols.mrp.protobuf.RegisterHIDDeviceMessage_pb2'
@@ -79,7 +30,10 @@ RegisterHIDDeviceMessage = _reflection.GeneratedProtocolMessageType('RegisterHID
   })
 _sym_db.RegisterMessage(RegisterHIDDeviceMessage)
 
-registerHIDDeviceMessage.message_type = _REGISTERHIDDEVICEMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(registerHIDDeviceMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(registerHIDDeviceMessage)
 
+  DESCRIPTOR._options = None
+  _REGISTERHIDDEVICEMESSAGE._serialized_start=187
+  _REGISTERHIDDEVICEMESSAGE._serialized_end=270
 # @@protoc_insertion_point(module_scope)

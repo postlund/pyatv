@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/CryptoPairingMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,90 +15,13 @@ _sym_db = _symbol_database.Default()
 from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/CryptoPairingMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n7pyatv/protocols/mrp/protobuf/CryptoPairingMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"|\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x01(\x0c\x12\x0e\n\x06status\x18\x02 \x01(\x05\x12\x12\n\nisRetrying\x18\x03 \x01(\x08\x12\x1c\n\x14isUsingSystemPairing\x18\x04 \x01(\x08\x12\r\n\x05state\x18\x05 \x01(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n7pyatv/protocols/mrp/protobuf/CryptoPairingMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"|\n\x14\x43ryptoPairingMessage\x12\x13\n\x0bpairingData\x18\x01 \x01(\x0c\x12\x0e\n\x06status\x18\x02 \x01(\x05\x12\x12\n\nisRetrying\x18\x03 \x01(\x08\x12\x1c\n\x14isUsingSystemPairing\x18\x04 \x01(\x08\x12\r\n\x05state\x18\x05 \x01(\x05:E\n\x14\x63ryptoPairingMessage\x12\x10.ProtocolMessage\x18\' \x01(\x0b\x32\x15.CryptoPairingMessage')
 
 
 CRYPTOPAIRINGMESSAGE_FIELD_NUMBER = 39
-cryptoPairingMessage = _descriptor.FieldDescriptor(
-  name='cryptoPairingMessage', full_name='cryptoPairingMessage', index=0,
-  number=39, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+cryptoPairingMessage = DESCRIPTOR.extensions_by_name['cryptoPairingMessage']
 
-
-_CRYPTOPAIRINGMESSAGE = _descriptor.Descriptor(
-  name='CryptoPairingMessage',
-  full_name='CryptoPairingMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='pairingData', full_name='CryptoPairingMessage.pairingData', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='CryptoPairingMessage.status', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='isRetrying', full_name='CryptoPairingMessage.isRetrying', index=2,
-      number=3, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='isUsingSystemPairing', full_name='CryptoPairingMessage.isUsingSystemPairing', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='state', full_name='CryptoPairingMessage.state', index=4,
-      number=5, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=111,
-  serialized_end=235,
-)
-
-DESCRIPTOR.message_types_by_name['CryptoPairingMessage'] = _CRYPTOPAIRINGMESSAGE
-DESCRIPTOR.extensions_by_name['cryptoPairingMessage'] = cryptoPairingMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_CRYPTOPAIRINGMESSAGE = DESCRIPTOR.message_types_by_name['CryptoPairingMessage']
 CryptoPairingMessage = _reflection.GeneratedProtocolMessageType('CryptoPairingMessage', (_message.Message,), {
   'DESCRIPTOR' : _CRYPTOPAIRINGMESSAGE,
   '__module__' : 'pyatv.protocols.mrp.protobuf.CryptoPairingMessage_pb2'
@@ -105,7 +29,10 @@ CryptoPairingMessage = _reflection.GeneratedProtocolMessageType('CryptoPairingMe
   })
 _sym_db.RegisterMessage(CryptoPairingMessage)
 
-cryptoPairingMessage.message_type = _CRYPTOPAIRINGMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(cryptoPairingMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(cryptoPairingMessage)
 
+  DESCRIPTOR._options = None
+  _CRYPTOPAIRINGMESSAGE._serialized_start=111
+  _CRYPTOPAIRINGMESSAGE._serialized_end=235
 # @@protoc_insertion_point(module_scope)

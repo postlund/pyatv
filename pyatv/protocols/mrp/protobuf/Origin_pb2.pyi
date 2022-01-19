@@ -14,32 +14,33 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class Origin(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _Type:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Type.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Unknown: Origin.Type.ValueType = ...  # 0
+        Local: Origin.Type.ValueType = ...  # 1
+        Custom: Origin.Type.ValueType = ...  # 2
     class Type(_Type, metaclass=_TypeEnumTypeWrapper):
         pass
-    class _Type:
-        V = typing.NewType('V', builtins.int)
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Type.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown = Origin.Type.V(0)
-        Local = Origin.Type.V(1)
-        Custom = Origin.Type.V(2)
 
-    Unknown = Origin.Type.V(0)
-    Local = Origin.Type.V(1)
-    Custom = Origin.Type.V(2)
+    Unknown: Origin.Type.ValueType = ...  # 0
+    Local: Origin.Type.ValueType = ...  # 1
+    Custom: Origin.Type.ValueType = ...  # 2
 
     TYPE_FIELD_NUMBER: builtins.int
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     IDENTIFIER_FIELD_NUMBER: builtins.int
     DEVICEINFO_FIELD_NUMBER: builtins.int
-    type: global___Origin.Type.V = ...
+    type: global___Origin.Type.ValueType = ...
     displayName: typing.Text = ...
     identifier: builtins.int = ...
     @property
     def deviceInfo(self) -> pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage: ...
     def __init__(self,
         *,
-        type : typing.Optional[global___Origin.Type.V] = ...,
+        type : typing.Optional[global___Origin.Type.ValueType] = ...,
         displayName : typing.Optional[typing.Text] = ...,
         identifier : typing.Optional[builtins.int] = ...,
         deviceInfo : typing.Optional[pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage] = ...,

@@ -15,25 +15,26 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class SetConnectionStateMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _ConnectionState:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _ConnectionStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ConnectionState.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Connecting: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 1
+        Connected: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 2
+        Disconnected: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 3
     class ConnectionState(_ConnectionState, metaclass=_ConnectionStateEnumTypeWrapper):
         pass
-    class _ConnectionState:
-        V = typing.NewType('V', builtins.int)
-    class _ConnectionStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ConnectionState.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Connecting = SetConnectionStateMessage.ConnectionState.V(1)
-        Connected = SetConnectionStateMessage.ConnectionState.V(2)
-        Disconnected = SetConnectionStateMessage.ConnectionState.V(3)
 
-    Connecting = SetConnectionStateMessage.ConnectionState.V(1)
-    Connected = SetConnectionStateMessage.ConnectionState.V(2)
-    Disconnected = SetConnectionStateMessage.ConnectionState.V(3)
+    Connecting: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 1
+    Connected: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 2
+    Disconnected: SetConnectionStateMessage.ConnectionState.ValueType = ...  # 3
 
     STATE_FIELD_NUMBER: builtins.int
-    state: global___SetConnectionStateMessage.ConnectionState.V = ...
+    state: global___SetConnectionStateMessage.ConnectionState.ValueType = ...
     def __init__(self,
         *,
-        state : typing.Optional[global___SetConnectionStateMessage.ConnectionState.V] = ...,
+        state : typing.Optional[global___SetConnectionStateMessage.ConnectionState.ValueType] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["state",b"state"]) -> None: ...

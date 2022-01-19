@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/GetRemoteTextInputSessionMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,55 +15,13 @@ _sym_db = _symbol_database.Default()
 from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/GetRemoteTextInputSessionMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\nCpyatv/protocols/mrp/protobuf/GetRemoteTextInputSessionMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\"\n GetRemoteTextInputSessionMessage:]\n getRemoteTextInputSessionMessage\x12\x10.ProtocolMessage\x18H \x01(\x0b\x32!.GetRemoteTextInputSessionMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nCpyatv/protocols/mrp/protobuf/GetRemoteTextInputSessionMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\"\n GetRemoteTextInputSessionMessage:]\n getRemoteTextInputSessionMessage\x12\x10.ProtocolMessage\x18H \x01(\x0b\x32!.GetRemoteTextInputSessionMessage')
 
 
 GETREMOTETEXTINPUTSESSIONMESSAGE_FIELD_NUMBER = 72
-getRemoteTextInputSessionMessage = _descriptor.FieldDescriptor(
-  name='getRemoteTextInputSessionMessage', full_name='getRemoteTextInputSessionMessage', index=0,
-  number=72, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+getRemoteTextInputSessionMessage = DESCRIPTOR.extensions_by_name['getRemoteTextInputSessionMessage']
 
-
-_GETREMOTETEXTINPUTSESSIONMESSAGE = _descriptor.Descriptor(
-  name='GetRemoteTextInputSessionMessage',
-  full_name='GetRemoteTextInputSessionMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=123,
-  serialized_end=157,
-)
-
-DESCRIPTOR.message_types_by_name['GetRemoteTextInputSessionMessage'] = _GETREMOTETEXTINPUTSESSIONMESSAGE
-DESCRIPTOR.extensions_by_name['getRemoteTextInputSessionMessage'] = getRemoteTextInputSessionMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_GETREMOTETEXTINPUTSESSIONMESSAGE = DESCRIPTOR.message_types_by_name['GetRemoteTextInputSessionMessage']
 GetRemoteTextInputSessionMessage = _reflection.GeneratedProtocolMessageType('GetRemoteTextInputSessionMessage', (_message.Message,), {
   'DESCRIPTOR' : _GETREMOTETEXTINPUTSESSIONMESSAGE,
   '__module__' : 'pyatv.protocols.mrp.protobuf.GetRemoteTextInputSessionMessage_pb2'
@@ -70,7 +29,10 @@ GetRemoteTextInputSessionMessage = _reflection.GeneratedProtocolMessageType('Get
   })
 _sym_db.RegisterMessage(GetRemoteTextInputSessionMessage)
 
-getRemoteTextInputSessionMessage.message_type = _GETREMOTETEXTINPUTSESSIONMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(getRemoteTextInputSessionMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(getRemoteTextInputSessionMessage)
 
+  DESCRIPTOR._options = None
+  _GETREMOTETEXTINPUTSESSIONMESSAGE._serialized_start=123
+  _GETREMOTETEXTINPUTSESSIONMESSAGE._serialized_end=157
 # @@protoc_insertion_point(module_scope)

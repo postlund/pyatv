@@ -13,143 +13,145 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
+class _Command:
+    ValueType = typing.NewType('ValueType', builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
+class _CommandEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Command.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+    Unknown: Command.ValueType = ...  # 0
+    Play: Command.ValueType = ...  # 1
+    Pause: Command.ValueType = ...  # 2
+    TogglePlayPause: Command.ValueType = ...  # 3
+    Stop: Command.ValueType = ...  # 4
+    NextTrack: Command.ValueType = ...  # 5
+    PreviousTrack: Command.ValueType = ...  # 6
+    AdvanceShuffleMode: Command.ValueType = ...  # 7
+    AdvanceRepeatMode: Command.ValueType = ...  # 8
+    BeginFastForward: Command.ValueType = ...  # 9
+    EndFastForward: Command.ValueType = ...  # 10
+    BeginRewind: Command.ValueType = ...  # 11
+    EndRewind: Command.ValueType = ...  # 12
+    Rewind15Seconds: Command.ValueType = ...  # 13
+    FastForward15Seconds: Command.ValueType = ...  # 14
+    Rewind30Seconds: Command.ValueType = ...  # 15
+    FastForward30Seconds: Command.ValueType = ...  # 16
+    SkipForward: Command.ValueType = ...  # 18
+    SkipBackward: Command.ValueType = ...  # 19
+    ChangePlaybackRate: Command.ValueType = ...  # 20
+    RateTrack: Command.ValueType = ...  # 21
+    LikeTrack: Command.ValueType = ...  # 22
+    DislikeTrack: Command.ValueType = ...  # 23
+    BookmarkTrack: Command.ValueType = ...  # 24
+    SeekToPlaybackPosition: Command.ValueType = ...  # 45
+    ChangeRepeatMode: Command.ValueType = ...  # 46
+    ChangeShuffleMode: Command.ValueType = ...  # 47
+    EnableLanguageOption: Command.ValueType = ...  # 53
+    DisableLanguageOption: Command.ValueType = ...  # 54
+    NextChapter: Command.ValueType = ...  # 25
+    PreviousChapter: Command.ValueType = ...  # 26
+    NextAlbum: Command.ValueType = ...  # 27
+    PreviousAlbum: Command.ValueType = ...  # 28
+    NextPlaylist: Command.ValueType = ...  # 29
+    PreviousPlaylist: Command.ValueType = ...  # 30
+    BanTrack: Command.ValueType = ...  # 31
+    AddTrackToWishList: Command.ValueType = ...  # 32
+    RemoveTrackFromWishList: Command.ValueType = ...  # 33
+    NextInContext: Command.ValueType = ...  # 34
+    PreviousInContext: Command.ValueType = ...  # 35
+    ResetPlaybackTimeout: Command.ValueType = ...  # 41
+    SetPlaybackQueue: Command.ValueType = ...  # 48
+    AddNowPlayingItemToLibrary: Command.ValueType = ...  # 49
+    CreateRadioStation: Command.ValueType = ...  # 50
+    AddItemToLibrary: Command.ValueType = ...  # 51
+    InsertIntoPlaybackQueue: Command.ValueType = ...  # 52
+    ReorderPlaybackQueue: Command.ValueType = ...  # 55
+    RemoveFromPlaybackQueue: Command.ValueType = ...  # 56
+    PlayItemInPlaybackQueue: Command.ValueType = ...  # 57
+    PrepareForSetQueue: Command.ValueType = ...  # 58
+    SetPlaybackSession: Command.ValueType = ...  # 59
+    PreloadedPlaybackSession: Command.ValueType = ...  # 60
+    SetPriorityForPlaybackSession: Command.ValueType = ...  # 61
+    DiscardPlaybackSession: Command.ValueType = ...  # 62
+    Reshuffle: Command.ValueType = ...  # 63
+    ChangeQueueEndAction: Command.ValueType = ...  # 135
 class Command(_Command, metaclass=_CommandEnumTypeWrapper):
     pass
-class _Command:
-    V = typing.NewType('V', builtins.int)
-class _CommandEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Command.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    Unknown = Command.V(0)
-    Play = Command.V(1)
-    Pause = Command.V(2)
-    TogglePlayPause = Command.V(3)
-    Stop = Command.V(4)
-    NextTrack = Command.V(5)
-    PreviousTrack = Command.V(6)
-    AdvanceShuffleMode = Command.V(7)
-    AdvanceRepeatMode = Command.V(8)
-    BeginFastForward = Command.V(9)
-    EndFastForward = Command.V(10)
-    BeginRewind = Command.V(11)
-    EndRewind = Command.V(12)
-    Rewind15Seconds = Command.V(13)
-    FastForward15Seconds = Command.V(14)
-    Rewind30Seconds = Command.V(15)
-    FastForward30Seconds = Command.V(16)
-    SkipForward = Command.V(18)
-    SkipBackward = Command.V(19)
-    ChangePlaybackRate = Command.V(20)
-    RateTrack = Command.V(21)
-    LikeTrack = Command.V(22)
-    DislikeTrack = Command.V(23)
-    BookmarkTrack = Command.V(24)
-    SeekToPlaybackPosition = Command.V(45)
-    ChangeRepeatMode = Command.V(46)
-    ChangeShuffleMode = Command.V(47)
-    EnableLanguageOption = Command.V(53)
-    DisableLanguageOption = Command.V(54)
-    NextChapter = Command.V(25)
-    PreviousChapter = Command.V(26)
-    NextAlbum = Command.V(27)
-    PreviousAlbum = Command.V(28)
-    NextPlaylist = Command.V(29)
-    PreviousPlaylist = Command.V(30)
-    BanTrack = Command.V(31)
-    AddTrackToWishList = Command.V(32)
-    RemoveTrackFromWishList = Command.V(33)
-    NextInContext = Command.V(34)
-    PreviousInContext = Command.V(35)
-    ResetPlaybackTimeout = Command.V(41)
-    SetPlaybackQueue = Command.V(48)
-    AddNowPlayingItemToLibrary = Command.V(49)
-    CreateRadioStation = Command.V(50)
-    AddItemToLibrary = Command.V(51)
-    InsertIntoPlaybackQueue = Command.V(52)
-    ReorderPlaybackQueue = Command.V(55)
-    RemoveFromPlaybackQueue = Command.V(56)
-    PlayItemInPlaybackQueue = Command.V(57)
-    PrepareForSetQueue = Command.V(58)
-    SetPlaybackSession = Command.V(59)
-    PreloadedPlaybackSession = Command.V(60)
-    SetPriorityForPlaybackSession = Command.V(61)
-    DiscardPlaybackSession = Command.V(62)
-    Reshuffle = Command.V(63)
-    ChangeQueueEndAction = Command.V(135)
 
-Unknown = Command.V(0)
-Play = Command.V(1)
-Pause = Command.V(2)
-TogglePlayPause = Command.V(3)
-Stop = Command.V(4)
-NextTrack = Command.V(5)
-PreviousTrack = Command.V(6)
-AdvanceShuffleMode = Command.V(7)
-AdvanceRepeatMode = Command.V(8)
-BeginFastForward = Command.V(9)
-EndFastForward = Command.V(10)
-BeginRewind = Command.V(11)
-EndRewind = Command.V(12)
-Rewind15Seconds = Command.V(13)
-FastForward15Seconds = Command.V(14)
-Rewind30Seconds = Command.V(15)
-FastForward30Seconds = Command.V(16)
-SkipForward = Command.V(18)
-SkipBackward = Command.V(19)
-ChangePlaybackRate = Command.V(20)
-RateTrack = Command.V(21)
-LikeTrack = Command.V(22)
-DislikeTrack = Command.V(23)
-BookmarkTrack = Command.V(24)
-SeekToPlaybackPosition = Command.V(45)
-ChangeRepeatMode = Command.V(46)
-ChangeShuffleMode = Command.V(47)
-EnableLanguageOption = Command.V(53)
-DisableLanguageOption = Command.V(54)
-NextChapter = Command.V(25)
-PreviousChapter = Command.V(26)
-NextAlbum = Command.V(27)
-PreviousAlbum = Command.V(28)
-NextPlaylist = Command.V(29)
-PreviousPlaylist = Command.V(30)
-BanTrack = Command.V(31)
-AddTrackToWishList = Command.V(32)
-RemoveTrackFromWishList = Command.V(33)
-NextInContext = Command.V(34)
-PreviousInContext = Command.V(35)
-ResetPlaybackTimeout = Command.V(41)
-SetPlaybackQueue = Command.V(48)
-AddNowPlayingItemToLibrary = Command.V(49)
-CreateRadioStation = Command.V(50)
-AddItemToLibrary = Command.V(51)
-InsertIntoPlaybackQueue = Command.V(52)
-ReorderPlaybackQueue = Command.V(55)
-RemoveFromPlaybackQueue = Command.V(56)
-PlayItemInPlaybackQueue = Command.V(57)
-PrepareForSetQueue = Command.V(58)
-SetPlaybackSession = Command.V(59)
-PreloadedPlaybackSession = Command.V(60)
-SetPriorityForPlaybackSession = Command.V(61)
-DiscardPlaybackSession = Command.V(62)
-Reshuffle = Command.V(63)
-ChangeQueueEndAction = Command.V(135)
+Unknown: Command.ValueType = ...  # 0
+Play: Command.ValueType = ...  # 1
+Pause: Command.ValueType = ...  # 2
+TogglePlayPause: Command.ValueType = ...  # 3
+Stop: Command.ValueType = ...  # 4
+NextTrack: Command.ValueType = ...  # 5
+PreviousTrack: Command.ValueType = ...  # 6
+AdvanceShuffleMode: Command.ValueType = ...  # 7
+AdvanceRepeatMode: Command.ValueType = ...  # 8
+BeginFastForward: Command.ValueType = ...  # 9
+EndFastForward: Command.ValueType = ...  # 10
+BeginRewind: Command.ValueType = ...  # 11
+EndRewind: Command.ValueType = ...  # 12
+Rewind15Seconds: Command.ValueType = ...  # 13
+FastForward15Seconds: Command.ValueType = ...  # 14
+Rewind30Seconds: Command.ValueType = ...  # 15
+FastForward30Seconds: Command.ValueType = ...  # 16
+SkipForward: Command.ValueType = ...  # 18
+SkipBackward: Command.ValueType = ...  # 19
+ChangePlaybackRate: Command.ValueType = ...  # 20
+RateTrack: Command.ValueType = ...  # 21
+LikeTrack: Command.ValueType = ...  # 22
+DislikeTrack: Command.ValueType = ...  # 23
+BookmarkTrack: Command.ValueType = ...  # 24
+SeekToPlaybackPosition: Command.ValueType = ...  # 45
+ChangeRepeatMode: Command.ValueType = ...  # 46
+ChangeShuffleMode: Command.ValueType = ...  # 47
+EnableLanguageOption: Command.ValueType = ...  # 53
+DisableLanguageOption: Command.ValueType = ...  # 54
+NextChapter: Command.ValueType = ...  # 25
+PreviousChapter: Command.ValueType = ...  # 26
+NextAlbum: Command.ValueType = ...  # 27
+PreviousAlbum: Command.ValueType = ...  # 28
+NextPlaylist: Command.ValueType = ...  # 29
+PreviousPlaylist: Command.ValueType = ...  # 30
+BanTrack: Command.ValueType = ...  # 31
+AddTrackToWishList: Command.ValueType = ...  # 32
+RemoveTrackFromWishList: Command.ValueType = ...  # 33
+NextInContext: Command.ValueType = ...  # 34
+PreviousInContext: Command.ValueType = ...  # 35
+ResetPlaybackTimeout: Command.ValueType = ...  # 41
+SetPlaybackQueue: Command.ValueType = ...  # 48
+AddNowPlayingItemToLibrary: Command.ValueType = ...  # 49
+CreateRadioStation: Command.ValueType = ...  # 50
+AddItemToLibrary: Command.ValueType = ...  # 51
+InsertIntoPlaybackQueue: Command.ValueType = ...  # 52
+ReorderPlaybackQueue: Command.ValueType = ...  # 55
+RemoveFromPlaybackQueue: Command.ValueType = ...  # 56
+PlayItemInPlaybackQueue: Command.ValueType = ...  # 57
+PrepareForSetQueue: Command.ValueType = ...  # 58
+SetPlaybackSession: Command.ValueType = ...  # 59
+PreloadedPlaybackSession: Command.ValueType = ...  # 60
+SetPriorityForPlaybackSession: Command.ValueType = ...  # 61
+DiscardPlaybackSession: Command.ValueType = ...  # 62
+Reshuffle: Command.ValueType = ...  # 63
+ChangeQueueEndAction: Command.ValueType = ...  # 135
 global___Command = Command
 
 
 class QueueEndAction(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _Enum:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        ClearAction: QueueEndAction.Enum.ValueType = ...  # 0
+        Reset: QueueEndAction.Enum.ValueType = ...  # 2
+        AutoPlay: QueueEndAction.Enum.ValueType = ...  # 3
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
-    class _Enum:
-        V = typing.NewType('V', builtins.int)
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        ClearAction = QueueEndAction.Enum.V(0)
-        Reset = QueueEndAction.Enum.V(2)
-        AutoPlay = QueueEndAction.Enum.V(3)
 
-    ClearAction = QueueEndAction.Enum.V(0)
-    Reset = QueueEndAction.Enum.V(2)
-    AutoPlay = QueueEndAction.Enum.V(3)
+    ClearAction: QueueEndAction.Enum.ValueType = ...  # 0
+    Reset: QueueEndAction.Enum.ValueType = ...  # 2
+    AutoPlay: QueueEndAction.Enum.ValueType = ...  # 3
 
     def __init__(self,
         ) -> None: ...
@@ -157,19 +159,20 @@ global___QueueEndAction = QueueEndAction
 
 class DisableReason(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _Enum:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Unknown: DisableReason.Enum.ValueType = ...  # 0
+        AdPlayback: DisableReason.Enum.ValueType = ...  # 1
+        SkipLimitReached: DisableReason.Enum.ValueType = ...  # 2
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
-    class _Enum:
-        V = typing.NewType('V', builtins.int)
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown = DisableReason.Enum.V(0)
-        AdPlayback = DisableReason.Enum.V(1)
-        SkipLimitReached = DisableReason.Enum.V(2)
 
-    Unknown = DisableReason.Enum.V(0)
-    AdPlayback = DisableReason.Enum.V(1)
-    SkipLimitReached = DisableReason.Enum.V(2)
+    Unknown: DisableReason.Enum.ValueType = ...  # 0
+    AdPlayback: DisableReason.Enum.ValueType = ...  # 1
+    SkipLimitReached: DisableReason.Enum.ValueType = ...  # 2
 
     def __init__(self,
         ) -> None: ...
@@ -224,7 +227,7 @@ class CommandInfo(google.protobuf.message.Message):
     SUPPORTEDENDQUEUEACTIONS_FIELD_NUMBER: builtins.int
     DISABLEREASON_FIELD_NUMBER: builtins.int
     SUPPORTEDPLAYBACKSESSIONIDENTIFIERS_FIELD_NUMBER: builtins.int
-    command: global___Command.V = ...
+    command: global___Command.ValueType = ...
     enabled: builtins.bool = ...
     active: builtins.bool = ...
     @property
@@ -235,8 +238,8 @@ class CommandInfo(google.protobuf.message.Message):
     @property
     def supportedRates(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
     localizedShortTitle: typing.Text = ...
-    repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.V = ...
-    shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.V = ...
+    repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType = ...
+    shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType = ...
     presentationStyle: builtins.int = ...
     skipInterval: builtins.int = ...
     numAvailableSkips: builtins.int = ...
@@ -256,15 +259,15 @@ class CommandInfo(google.protobuf.message.Message):
     @property
     def currentPlaybackSessionTypes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     playbackSessionIdentifier: typing.Text = ...
-    currentQueueEndAction: global___QueueEndAction.Enum.V = ...
+    currentQueueEndAction: global___QueueEndAction.Enum.ValueType = ...
     @property
-    def supportedEndQueueActions(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[global___QueueEndAction.Enum.V]: ...
-    disableReason: global___DisableReason.Enum.V = ...
+    def supportedEndQueueActions(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[global___QueueEndAction.Enum.ValueType]: ...
+    disableReason: global___DisableReason.Enum.ValueType = ...
     @property
     def supportedPlaybackSessionIdentifiers(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___PreloadedPlaybackSessionInfo]: ...
     def __init__(self,
         *,
-        command : typing.Optional[global___Command.V] = ...,
+        command : typing.Optional[global___Command.ValueType] = ...,
         enabled : typing.Optional[builtins.bool] = ...,
         active : typing.Optional[builtins.bool] = ...,
         preferredIntervals : typing.Optional[typing.Iterable[builtins.float]] = ...,
@@ -273,8 +276,8 @@ class CommandInfo(google.protobuf.message.Message):
         maximumRating : typing.Optional[builtins.float] = ...,
         supportedRates : typing.Optional[typing.Iterable[builtins.float]] = ...,
         localizedShortTitle : typing.Optional[typing.Text] = ...,
-        repeatMode : typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.V] = ...,
-        shuffleMode : typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.V] = ...,
+        repeatMode : typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType] = ...,
+        shuffleMode : typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType] = ...,
         presentationStyle : typing.Optional[builtins.int] = ...,
         skipInterval : typing.Optional[builtins.int] = ...,
         numAvailableSkips : typing.Optional[builtins.int] = ...,
@@ -289,9 +292,9 @@ class CommandInfo(google.protobuf.message.Message):
         supportedPlaybackSessionTypes : typing.Optional[typing.Iterable[typing.Text]] = ...,
         currentPlaybackSessionTypes : typing.Optional[typing.Iterable[typing.Text]] = ...,
         playbackSessionIdentifier : typing.Optional[typing.Text] = ...,
-        currentQueueEndAction : typing.Optional[global___QueueEndAction.Enum.V] = ...,
-        supportedEndQueueActions : typing.Optional[typing.Iterable[global___QueueEndAction.Enum.V]] = ...,
-        disableReason : typing.Optional[global___DisableReason.Enum.V] = ...,
+        currentQueueEndAction : typing.Optional[global___QueueEndAction.Enum.ValueType] = ...,
+        supportedEndQueueActions : typing.Optional[typing.Iterable[global___QueueEndAction.Enum.ValueType]] = ...,
+        disableReason : typing.Optional[global___DisableReason.Enum.ValueType] = ...,
         supportedPlaybackSessionIdentifiers : typing.Optional[typing.Iterable[global___PreloadedPlaybackSessionInfo]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["active",b"active","canScrub",b"canScrub","command",b"command","currentQueueEndAction",b"currentQueueEndAction","disableReason",b"disableReason","enabled",b"enabled","localizedShortTitle",b"localizedShortTitle","localizedTitle",b"localizedTitle","maximumRating",b"maximumRating","minimumRating",b"minimumRating","numAvailableSkips",b"numAvailableSkips","playbackSessionIdentifier",b"playbackSessionIdentifier","preferredPlaybackRate",b"preferredPlaybackRate","presentationStyle",b"presentationStyle","repeatMode",b"repeatMode","shuffleMode",b"shuffleMode","skipFrequency",b"skipFrequency","skipInterval",b"skipInterval","supportsSharedQueue",b"supportsSharedQueue","upNextItemCount",b"upNextItemCount"]) -> builtins.bool: ...

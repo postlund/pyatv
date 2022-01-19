@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/WakeDeviceMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,55 +15,13 @@ _sym_db = _symbol_database.Default()
 from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/WakeDeviceMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n4pyatv/protocols/mrp/protobuf/WakeDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\x13\n\x11WakeDeviceMessage:?\n\x11wakeDeviceMessage\x12\x10.ProtocolMessage\x18- \x01(\x0b\x32\x12.WakeDeviceMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4pyatv/protocols/mrp/protobuf/WakeDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\x13\n\x11WakeDeviceMessage:?\n\x11wakeDeviceMessage\x12\x10.ProtocolMessage\x18- \x01(\x0b\x32\x12.WakeDeviceMessage')
 
 
 WAKEDEVICEMESSAGE_FIELD_NUMBER = 45
-wakeDeviceMessage = _descriptor.FieldDescriptor(
-  name='wakeDeviceMessage', full_name='wakeDeviceMessage', index=0,
-  number=45, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+wakeDeviceMessage = DESCRIPTOR.extensions_by_name['wakeDeviceMessage']
 
-
-_WAKEDEVICEMESSAGE = _descriptor.Descriptor(
-  name='WakeDeviceMessage',
-  full_name='WakeDeviceMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=108,
-  serialized_end=127,
-)
-
-DESCRIPTOR.message_types_by_name['WakeDeviceMessage'] = _WAKEDEVICEMESSAGE
-DESCRIPTOR.extensions_by_name['wakeDeviceMessage'] = wakeDeviceMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_WAKEDEVICEMESSAGE = DESCRIPTOR.message_types_by_name['WakeDeviceMessage']
 WakeDeviceMessage = _reflection.GeneratedProtocolMessageType('WakeDeviceMessage', (_message.Message,), {
   'DESCRIPTOR' : _WAKEDEVICEMESSAGE,
   '__module__' : 'pyatv.protocols.mrp.protobuf.WakeDeviceMessage_pb2'
@@ -70,7 +29,10 @@ WakeDeviceMessage = _reflection.GeneratedProtocolMessageType('WakeDeviceMessage'
   })
 _sym_db.RegisterMessage(WakeDeviceMessage)
 
-wakeDeviceMessage.message_type = _WAKEDEVICEMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(wakeDeviceMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(wakeDeviceMessage)
 
+  DESCRIPTOR._options = None
+  _WAKEDEVICEMESSAGE._serialized_start=108
+  _WAKEDEVICEMESSAGE._serialized_end=127
 # @@protoc_insertion_point(module_scope)
