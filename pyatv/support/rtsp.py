@@ -18,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 FRAMES_PER_PACKET = 352
 USER_AGENT = "AirPlay/540.31"
+HTTP_PROTOCOL = "HTTP/1.1"
 
 ANNOUNCE_PAYLOAD = (
     "v=0\r\n"
@@ -95,7 +96,9 @@ class RtspSession:
 
     async def info(self) -> Dict[str, object]:
         """Return device information."""
-        device_info = await self.exchange("GET", "/info", allow_error=True)
+        device_info = await self.exchange(
+            "GET", "/info", allow_error=True, protocol=HTTP_PROTOCOL
+        )
 
         # If not supported, just return an empty dict
         if device_info.code != 200:
@@ -119,6 +122,7 @@ class RtspSession:
             "/auth-setup",
             content_type="application/octet-stream",
             body=body,
+            protocol=HTTP_PROTOCOL,
         )
 
     # This method is only used by AirPlay 1 and is very specific (e.g. does not support
@@ -224,7 +228,7 @@ class RtspSession:
         """Send TEARDOWN message."""
         return await self.exchange("TEARDOWN", headers={"Session": rtsp_session})
 
-    async def exchange(
+    async def exchange(  # pylint: disable=too-many-locals
         self,
         method: str,
         uri: Optional[str] = None,
@@ -232,6 +236,7 @@ class RtspSession:
         headers: Mapping[str, object] = None,
         body: Union[str, bytes] = None,
         allow_error: bool = False,
+        protocol: str = "RTSP/1.0",
     ) -> HttpResponse:
         """Send a RTSP message and return response."""
         cseq = self.cseq
@@ -258,7 +263,7 @@ class RtspSession:
         resp = await self.connection.send_and_receive(
             method,
             uri or self.uri,
-            protocol="RTSP/1.0",
+            protocol=protocol,
             user_agent=USER_AGENT,
             content_type=content_type,
             headers=hdrs,
