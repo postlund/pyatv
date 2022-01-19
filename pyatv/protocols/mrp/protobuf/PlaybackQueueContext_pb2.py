@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -13,52 +14,11 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n7pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto\"(\n\x14PlaybackQueueContext\x12\x10\n\x08revision\x18\x01 \x01(\t'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n7pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto\"(\n\x14PlaybackQueueContext\x12\x10\n\x08revision\x18\x01 \x01(\t')
 
 
 
-
-_PLAYBACKQUEUECONTEXT = _descriptor.Descriptor(
-  name='PlaybackQueueContext',
-  full_name='PlaybackQueueContext',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='revision', full_name='PlaybackQueueContext.revision', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=59,
-  serialized_end=99,
-)
-
-DESCRIPTOR.message_types_by_name['PlaybackQueueContext'] = _PLAYBACKQUEUECONTEXT
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_PLAYBACKQUEUECONTEXT = DESCRIPTOR.message_types_by_name['PlaybackQueueContext']
 PlaybackQueueContext = _reflection.GeneratedProtocolMessageType('PlaybackQueueContext', (_message.Message,), {
   'DESCRIPTOR' : _PLAYBACKQUEUECONTEXT,
   '__module__' : 'pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2'
@@ -66,5 +26,9 @@ PlaybackQueueContext = _reflection.GeneratedProtocolMessageType('PlaybackQueueCo
   })
 _sym_db.RegisterMessage(PlaybackQueueContext)
 
+if _descriptor._USE_C_DESCRIPTORS == False:
 
+  DESCRIPTOR._options = None
+  _PLAYBACKQUEUECONTEXT._serialized_start=59
+  _PLAYBACKQUEUECONTEXT._serialized_end=99
 # @@protoc_insertion_point(module_scope)

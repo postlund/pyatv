@@ -15,25 +15,26 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class RegisterForGameControllerEventsMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _InputModeFlags:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _InputModeFlagsEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_InputModeFlags.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Motion: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 1
+        Buttons: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 2
+        Digitizer: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 3
     class InputModeFlags(_InputModeFlags, metaclass=_InputModeFlagsEnumTypeWrapper):
         pass
-    class _InputModeFlags:
-        V = typing.NewType('V', builtins.int)
-    class _InputModeFlagsEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_InputModeFlags.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Motion = RegisterForGameControllerEventsMessage.InputModeFlags.V(1)
-        Buttons = RegisterForGameControllerEventsMessage.InputModeFlags.V(2)
-        Digitizer = RegisterForGameControllerEventsMessage.InputModeFlags.V(3)
 
-    Motion = RegisterForGameControllerEventsMessage.InputModeFlags.V(1)
-    Buttons = RegisterForGameControllerEventsMessage.InputModeFlags.V(2)
-    Digitizer = RegisterForGameControllerEventsMessage.InputModeFlags.V(3)
+    Motion: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 1
+    Buttons: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 2
+    Digitizer: RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...  # 3
 
     INPUTMODEFLAGS_FIELD_NUMBER: builtins.int
-    inputModeFlags: global___RegisterForGameControllerEventsMessage.InputModeFlags.V = ...
+    inputModeFlags: global___RegisterForGameControllerEventsMessage.InputModeFlags.ValueType = ...
     def __init__(self,
         *,
-        inputModeFlags : typing.Optional[global___RegisterForGameControllerEventsMessage.InputModeFlags.V] = ...,
+        inputModeFlags : typing.Optional[global___RegisterForGameControllerEventsMessage.InputModeFlags.ValueType] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["inputModeFlags",b"inputModeFlags"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["inputModeFlags",b"inputModeFlags"]) -> None: ...

@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,133 +15,15 @@ _sym_db = _symbol_database.Default()
 from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\nCpyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"L\n\x12VolumeCapabilities\"6\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\x0c\n\x08Relative\x10\x01\x12\x0c\n\x08\x41\x62solute\x10\x02\x12\x08\n\x04\x42oth\x10\x03\"x\n VolumeControlAvailabilityMessage\x12\x1e\n\x16volumeControlAvailable\x18\x01 \x01(\x08\x12\x34\n\x12volumeCapabilities\x18\x02 \x01(\x0e\x32\x18.VolumeCapabilities.Enum:]\n volumeControlAvailabilityMessage\x12\x10.ProtocolMessage\x18\x16 \x01(\x0b\x32!.VolumeControlAvailabilityMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nCpyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"L\n\x12VolumeCapabilities\"6\n\x04\x45num\x12\x08\n\x04None\x10\x00\x12\x0c\n\x08Relative\x10\x01\x12\x0c\n\x08\x41\x62solute\x10\x02\x12\x08\n\x04\x42oth\x10\x03\"x\n VolumeControlAvailabilityMessage\x12\x1e\n\x16volumeControlAvailable\x18\x01 \x01(\x08\x12\x34\n\x12volumeCapabilities\x18\x02 \x01(\x0e\x32\x18.VolumeCapabilities.Enum:]\n volumeControlAvailabilityMessage\x12\x10.ProtocolMessage\x18\x16 \x01(\x0b\x32!.VolumeControlAvailabilityMessage')
 
 
 VOLUMECONTROLAVAILABILITYMESSAGE_FIELD_NUMBER = 22
-volumeControlAvailabilityMessage = _descriptor.FieldDescriptor(
-  name='volumeControlAvailabilityMessage', full_name='volumeControlAvailabilityMessage', index=0,
-  number=22, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+volumeControlAvailabilityMessage = DESCRIPTOR.extensions_by_name['volumeControlAvailabilityMessage']
 
-_VOLUMECAPABILITIES_ENUM = _descriptor.EnumDescriptor(
-  name='Enum',
-  full_name='VolumeCapabilities.Enum',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='None', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Relative', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Absolute', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='Both', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=145,
-  serialized_end=199,
-)
-_sym_db.RegisterEnumDescriptor(_VOLUMECAPABILITIES_ENUM)
-
-
-_VOLUMECAPABILITIES = _descriptor.Descriptor(
-  name='VolumeCapabilities',
-  full_name='VolumeCapabilities',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _VOLUMECAPABILITIES_ENUM,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=123,
-  serialized_end=199,
-)
-
-
-_VOLUMECONTROLAVAILABILITYMESSAGE = _descriptor.Descriptor(
-  name='VolumeControlAvailabilityMessage',
-  full_name='VolumeControlAvailabilityMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='volumeControlAvailable', full_name='VolumeControlAvailabilityMessage.volumeControlAvailable', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volumeCapabilities', full_name='VolumeControlAvailabilityMessage.volumeCapabilities', index=1,
-      number=2, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=201,
-  serialized_end=321,
-)
-
-_VOLUMECAPABILITIES_ENUM.containing_type = _VOLUMECAPABILITIES
-_VOLUMECONTROLAVAILABILITYMESSAGE.fields_by_name['volumeCapabilities'].enum_type = _VOLUMECAPABILITIES_ENUM
-DESCRIPTOR.message_types_by_name['VolumeCapabilities'] = _VOLUMECAPABILITIES
-DESCRIPTOR.message_types_by_name['VolumeControlAvailabilityMessage'] = _VOLUMECONTROLAVAILABILITYMESSAGE
-DESCRIPTOR.extensions_by_name['volumeControlAvailabilityMessage'] = volumeControlAvailabilityMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_VOLUMECAPABILITIES = DESCRIPTOR.message_types_by_name['VolumeCapabilities']
+_VOLUMECONTROLAVAILABILITYMESSAGE = DESCRIPTOR.message_types_by_name['VolumeControlAvailabilityMessage']
+_VOLUMECAPABILITIES_ENUM = _VOLUMECAPABILITIES.enum_types_by_name['Enum']
 VolumeCapabilities = _reflection.GeneratedProtocolMessageType('VolumeCapabilities', (_message.Message,), {
   'DESCRIPTOR' : _VOLUMECAPABILITIES,
   '__module__' : 'pyatv.protocols.mrp.protobuf.VolumeControlAvailabilityMessage_pb2'
@@ -155,7 +38,14 @@ VolumeControlAvailabilityMessage = _reflection.GeneratedProtocolMessageType('Vol
   })
 _sym_db.RegisterMessage(VolumeControlAvailabilityMessage)
 
-volumeControlAvailabilityMessage.message_type = _VOLUMECONTROLAVAILABILITYMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(volumeControlAvailabilityMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(volumeControlAvailabilityMessage)
 
+  DESCRIPTOR._options = None
+  _VOLUMECAPABILITIES._serialized_start=123
+  _VOLUMECAPABILITIES._serialized_end=199
+  _VOLUMECAPABILITIES_ENUM._serialized_start=145
+  _VOLUMECAPABILITIES_ENUM._serialized_end=199
+  _VOLUMECONTROLAVAILABILITYMESSAGE._serialized_start=201
+  _VOLUMECONTROLAVAILABILITYMESSAGE._serialized_end=321
 # @@protoc_insertion_point(module_scope)

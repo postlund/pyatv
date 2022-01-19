@@ -43,8 +43,9 @@ _LOGGER = logging.getLogger(__name__)
 # Observed values of rpfl (zeroconf):
 # 0x62792 -> All on the same network (Unsupported/Mandatory)
 # 0x627B6 -> Only devices in same home (Disabled)
-# Mask = 0x62792 & ~0x627B6 = 0x24
-PAIRING_DISABLED_MASK = 0x24
+# 0xB67A2 -> Same as above
+# Mask = 0x62792 & ~0xB67A2 & ~0x627B6 & ~0xB67A2 = 0x20
+PAIRING_DISABLED_MASK = 0x04
 
 # Pairing with PIN seems to be supported according to this pattern
 # (again, observed from values of rpfl):

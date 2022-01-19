@@ -15,24 +15,25 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class SendPackedVirtualTouchEventMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    class _Phase:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _PhaseEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Phase.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
+        Began: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 1
+        Moved: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 2
+        Stationary: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 3
+        Ended: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 4
+        Cancelled: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 5
     class Phase(_Phase, metaclass=_PhaseEnumTypeWrapper):
         """Corresponds to "phase" in data"""
         pass
-    class _Phase:
-        V = typing.NewType('V', builtins.int)
-    class _PhaseEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Phase.V], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Began = SendPackedVirtualTouchEventMessage.Phase.V(1)
-        Moved = SendPackedVirtualTouchEventMessage.Phase.V(2)
-        Stationary = SendPackedVirtualTouchEventMessage.Phase.V(3)
-        Ended = SendPackedVirtualTouchEventMessage.Phase.V(4)
-        Cancelled = SendPackedVirtualTouchEventMessage.Phase.V(5)
 
-    Began = SendPackedVirtualTouchEventMessage.Phase.V(1)
-    Moved = SendPackedVirtualTouchEventMessage.Phase.V(2)
-    Stationary = SendPackedVirtualTouchEventMessage.Phase.V(3)
-    Ended = SendPackedVirtualTouchEventMessage.Phase.V(4)
-    Cancelled = SendPackedVirtualTouchEventMessage.Phase.V(5)
+    Began: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 1
+    Moved: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 2
+    Stationary: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 3
+    Ended: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 4
+    Cancelled: SendPackedVirtualTouchEventMessage.Phase.ValueType = ...  # 5
 
     DATA_FIELD_NUMBER: builtins.int
     data: builtins.bytes = ...

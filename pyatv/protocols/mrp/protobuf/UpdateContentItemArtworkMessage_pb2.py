@@ -3,6 +3,7 @@
 # source: pyatv/protocols/mrp/protobuf/UpdateContentItemArtworkMessage.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -16,71 +17,13 @@ from pyatv.protocols.mrp.protobuf import ContentItem_pb2 as pyatv_dot_protocols_
 from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='pyatv/protocols/mrp/protobuf/UpdateContentItemArtworkMessage.proto',
-  package='',
-  syntax='proto2',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\nBpyatv/protocols/mrp/protobuf/UpdateContentItemArtworkMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a.pyatv/protocols/mrp/protobuf/ContentItem.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"f\n\x1fUpdateContentItemArtworkMessage\x12\"\n\x0c\x63ontentItems\x18\x01 \x03(\x0b\x32\x0c.ContentItem\x12\x1f\n\nplayerPath\x18\x02 \x01(\x0b\x32\x0b.PlayerPath:[\n\x1fupdateContentItemArtworkMessage\x12\x10.ProtocolMessage\x18= \x01(\x0b\x32 .UpdateContentItemArtworkMessage'
-  ,
-  dependencies=[pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ContentItem__pb2.DESCRIPTOR,pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nBpyatv/protocols/mrp/protobuf/UpdateContentItemArtworkMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a.pyatv/protocols/mrp/protobuf/ContentItem.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"f\n\x1fUpdateContentItemArtworkMessage\x12\"\n\x0c\x63ontentItems\x18\x01 \x03(\x0b\x32\x0c.ContentItem\x12\x1f\n\nplayerPath\x18\x02 \x01(\x0b\x32\x0b.PlayerPath:[\n\x1fupdateContentItemArtworkMessage\x12\x10.ProtocolMessage\x18= \x01(\x0b\x32 .UpdateContentItemArtworkMessage')
 
 
 UPDATECONTENTITEMARTWORKMESSAGE_FIELD_NUMBER = 61
-updateContentItemArtworkMessage = _descriptor.FieldDescriptor(
-  name='updateContentItemArtworkMessage', full_name='updateContentItemArtworkMessage', index=0,
-  number=61, type=11, cpp_type=10, label=1,
-  has_default_value=False, default_value=None,
-  message_type=None, enum_type=None, containing_type=None,
-  is_extension=True, extension_scope=None,
-  serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key)
+updateContentItemArtworkMessage = DESCRIPTOR.extensions_by_name['updateContentItemArtworkMessage']
 
-
-_UPDATECONTENTITEMARTWORKMESSAGE = _descriptor.Descriptor(
-  name='UpdateContentItemArtworkMessage',
-  full_name='UpdateContentItemArtworkMessage',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='contentItems', full_name='UpdateContentItemArtworkMessage.contentItems', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='playerPath', full_name='UpdateContentItemArtworkMessage.playerPath', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto2',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=217,
-  serialized_end=319,
-)
-
-_UPDATECONTENTITEMARTWORKMESSAGE.fields_by_name['contentItems'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ContentItem__pb2._CONTENTITEM
-_UPDATECONTENTITEMARTWORKMESSAGE.fields_by_name['playerPath'].message_type = pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_PlayerPath__pb2._PLAYERPATH
-DESCRIPTOR.message_types_by_name['UpdateContentItemArtworkMessage'] = _UPDATECONTENTITEMARTWORKMESSAGE
-DESCRIPTOR.extensions_by_name['updateContentItemArtworkMessage'] = updateContentItemArtworkMessage
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_UPDATECONTENTITEMARTWORKMESSAGE = DESCRIPTOR.message_types_by_name['UpdateContentItemArtworkMessage']
 UpdateContentItemArtworkMessage = _reflection.GeneratedProtocolMessageType('UpdateContentItemArtworkMessage', (_message.Message,), {
   'DESCRIPTOR' : _UPDATECONTENTITEMARTWORKMESSAGE,
   '__module__' : 'pyatv.protocols.mrp.protobuf.UpdateContentItemArtworkMessage_pb2'
@@ -88,7 +31,10 @@ UpdateContentItemArtworkMessage = _reflection.GeneratedProtocolMessageType('Upda
   })
 _sym_db.RegisterMessage(UpdateContentItemArtworkMessage)
 
-updateContentItemArtworkMessage.message_type = _UPDATECONTENTITEMARTWORKMESSAGE
-pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(updateContentItemArtworkMessage)
+if _descriptor._USE_C_DESCRIPTORS == False:
+  pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(updateContentItemArtworkMessage)
 
+  DESCRIPTOR._options = None
+  _UPDATECONTENTITEMARTWORKMESSAGE._serialized_start=217
+  _UPDATECONTENTITEMARTWORKMESSAGE._serialized_end=319
 # @@protoc_insertion_point(module_scope)
