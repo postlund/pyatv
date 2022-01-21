@@ -9,12 +9,18 @@ import logging
 from typing import List, Optional, Set, Union
 
 import aiohttp
+from zeroconf.asyncio import AsyncZeroconf
 
 from pyatv import exceptions, interface
 from pyatv.const import Protocol
 from pyatv.core import Core, CoreStateDispatcher, ProtocolStateDispatcher
 from pyatv.core.facade import FacadeAppleTV
-from pyatv.core.scan import BaseScanner, MulticastMdnsScanner, UnicastMdnsScanner
+from pyatv.core.scan import (
+    BaseScanner,
+    MulticastMdnsScanner,
+    UnicastMdnsScanner,
+    ZeroconfScanner,
+)
 from pyatv.protocols import PROTOCOLS
 from pyatv.support import http
 
@@ -27,8 +33,13 @@ async def scan(
     identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
     hosts: List[str] = None,
+    aiozc: Optional[AsyncZeroconf] = None,
 ) -> List[interface.BaseConfig]:
-    """Scan for Apple TVs on network and return their configurations."""
+    """Scan for Apple TVs on network and return their configurations.
+
+    When passing in an aiozc instance, a ServiceBrowser must
+    be running for all the types in the protocols that being scanned for.
+    """
 
     def _should_include(atv):
         if not atv.ready:
@@ -41,10 +52,18 @@ async def scan(
         return True
 
     scanner: BaseScanner
-    if hosts:
-        scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
+    if aiozc:
+        if hosts:
+            scanner = ZeroconfScanner(
+                aiozc, hosts=[IPv4Address(host) for host in hosts]
+            )
+        else:
+            scanner = ZeroconfScanner(aiozc)
     else:
-        scanner = MulticastMdnsScanner(loop, identifier)
+        if hosts:
+            scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
+        else:
+            scanner = MulticastMdnsScanner(loop, identifier)
 
     protocols = set()
     if protocol:

@@ -26,7 +26,11 @@ from pyatv.core import (
     UpdatedState,
     mdns,
 )
-from pyatv.core.scan import ScanHandler, ScanHandlerReturn
+from pyatv.core.scan import (
+    ScanHandlerDeviceInfoName,
+    ScanHandlerReturn,
+    device_info_name_from_unique_short_name,
+)
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
@@ -436,11 +440,19 @@ def raop_service_handler(
     return name, service
 
 
-def scan() -> Mapping[str, ScanHandler]:
+def raop_name_from_service_name(service_name: str) -> str:
+    """Convert an raop service name to a name."""
+    return service_name.split("@", maxsplit=1)[1]
+
+
+def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:
     """Return handlers used for scanning."""
     return {
-        "_raop._tcp.local": raop_service_handler,
-        "_airport._tcp.local": lambda service, response: None,
+        "_raop._tcp.local": (raop_service_handler, raop_name_from_service_name),
+        "_airport._tcp.local": (
+            lambda service, response: None,
+            device_info_name_from_unique_short_name,
+        ),
     }
 
 

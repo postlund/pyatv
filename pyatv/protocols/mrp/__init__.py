@@ -31,7 +31,11 @@ from pyatv.core import (
     UpdatedState,
     mdns,
 )
-from pyatv.core.scan import ScanHandler, ScanHandlerReturn
+from pyatv.core.scan import (
+    ScanHandlerDeviceInfoName,
+    ScanHandlerReturn,
+    device_info_name_from_unique_short_name,
+)
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
@@ -855,10 +859,13 @@ def mrp_service_handler(
     return name, service
 
 
-def scan() -> Mapping[str, ScanHandler]:
+def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:
     """Return handlers used for scanning."""
     return {
-        "_mediaremotetv._tcp.local": mrp_service_handler,
+        "_mediaremotetv._tcp.local": (
+            mrp_service_handler,
+            device_info_name_from_unique_short_name,
+        )
     }
 
 

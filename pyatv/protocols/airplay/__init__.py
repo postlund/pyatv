@@ -9,7 +9,11 @@ from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
 from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
 from pyatv.core import Core, MutableService, SetupData, mdns
-from pyatv.core.scan import ScanHandler, ScanHandlerReturn
+from pyatv.core.scan import (
+    ScanHandlerDeviceInfoName,
+    ScanHandlerReturn,
+    device_info_name_from_unique_short_name,
+)
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     BaseConfig,
@@ -135,9 +139,14 @@ def airplay_service_handler(
     return mdns_service.name, service
 
 
-def scan() -> Mapping[str, ScanHandler]:
+def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:
     """Return handlers used for scanning."""
-    return {"_airplay._tcp.local": airplay_service_handler}
+    return {
+        "_airplay._tcp.local": (
+            airplay_service_handler,
+            device_info_name_from_unique_short_name,
+        )
+    }
 
 
 def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:

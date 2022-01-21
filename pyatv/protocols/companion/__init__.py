@@ -15,7 +15,11 @@ from pyatv.const import (
     Protocol,
 )
 from pyatv.core import Core, MutableService, SetupData, UpdatedState, mdns
-from pyatv.core.scan import ScanHandler, ScanHandlerReturn
+from pyatv.core.scan import (
+    ScanHandlerDeviceInfoName,
+    ScanHandlerReturn,
+    device_info_name_from_unique_short_name,
+)
 from pyatv.interface import (
     App,
     Apps,
@@ -340,9 +344,14 @@ def companion_service_handler(
     return mdns_service.name, service
 
 
-def scan() -> Mapping[str, ScanHandler]:
+def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:
     """Return handlers used for scanning."""
-    return {"_companion-link._tcp.local": companion_service_handler}
+    return {
+        "_companion-link._tcp.local": (
+            companion_service_handler,
+            device_info_name_from_unique_short_name,
+        )
+    }
 
 
 def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, Any]:
