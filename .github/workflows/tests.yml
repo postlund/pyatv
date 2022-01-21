@@ -17,7 +17,8 @@ jobs:
       (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
     env:
-      CACHE_KEY: ${{ github.run_id }}-${{ github.job }}-${{ matrix.python-version }}-${{ matrix.platform }}-${{ matrix.regression }}-
+      CACHE_INVALIDATE: "v2"
+      CACHE_KEY: ${{ github.run_id }}-${{ github.job }}-${{ matrix.python-version }}-${{ matrix.platform }}-${{ matrix.regression }}
     strategy:
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
@@ -71,6 +72,7 @@ jobs:
       if: steps.run_result.outputs.run_result != 'success'
       id: cache-virtualenv
       with:
+        custom_cache_key_element: ${{ env.CACHE_INVALIDATE }}
         requirement_files: |
           **/*.txt
           **/requirements/**.txt
