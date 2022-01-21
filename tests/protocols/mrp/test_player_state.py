@@ -206,6 +206,16 @@ async def test_playback_state_seeking(psm, protocol_mock):
     assert player.playback_state == pb.PlaybackState.Seeking
 
 
+async def test_playback_state_playing_with_zero_playbac_rate(psm, protocol_mock):
+    set_state = set_path(messages.create(pb.SET_STATE_MESSAGE))
+    set_state.inner().playbackState = pb.PlaybackState.Playing
+    msg = add_metadata_item(set_state, playbackRate=0.0)
+    await protocol_mock.inject(msg)
+
+    player = psm.get_player(msg.inner().playerPath)
+    assert player.playback_state == pb.PlaybackState.Playing
+
+
 async def test_change_listener(psm, listener):
     assert psm.listener == listener
 

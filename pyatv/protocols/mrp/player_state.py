@@ -62,6 +62,8 @@ class PlayerState:
             return self._playback_state
 
         if math.isclose(playback_rate, 0.0):
+            if self._playback_state == pb.PlaybackState.Playing:
+                return pb.PlaybackState.Playing
             return pb.PlaybackState.Paused
         if math.isclose(playback_rate, 1.0):
             return pb.PlaybackState.Playing
