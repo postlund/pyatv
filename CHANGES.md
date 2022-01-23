@@ -1,5 +1,111 @@
 # CHANGES
 
+## 0.10.0 XOR (2022-01-23)
+
+It's a new year and time for a new release with a few bug fixes:
+
+* Play state was reported inconsistently with iOS (MRP) and is now fixed
+* Pairing requirement was incorrectly reported as mandatory for Companion
+  and AirPlay in some cases
+* All internal resources are now de-allocated when a connection is closed or
+  lost, so no need to call for instance push_updater.stop
+* Initial support to scan with python-zeroconf. Internal multicast and unicast
+  methods will be ported to this over time.
+
+This release drops support for python 3.6, mainly due to python-zeroconf not
+supporting that version. My intention is to not support EOL versions of python
+in the future.
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+02202ff mrp: Fix play state bug
+```
+
+*Protocol: AirPlay:*
+
+```
+da51ff4 airplay: Fix pairing requirement bug
+```
+
+*Protocol: Companion:*
+
+```
+baf4a9f companion: Fix pairing requirement flag
+```
+
+*Protocol: RAOP:*
+
+```
+c74e710 raop: Fix stream from buffer bug
+e7afb7e raop: Use requests instead of urllib in web stream
+0db2447 raop: Override volume from other protocols
+```
+
+*Other:*
+
+```
+52a0f03 scan: Add support for scanning with AsyncZeroconf
+55ef75c deps: Deprecate python 3.6
+204049b Ensure knock exceptions are retrieved
+df6047a deps: Add requests as dependency
+b099169 gha: Don't build for armv7
+d6ffbd2 facade: Stop push updaters on close
+37f6a1a core: Dispatch volume changes in protocols
+```
+
+**All changes:**
+
+```
+02202ff mrp: Fix play state bug
+52a0f03 scan: Add support for scanning with AsyncZeroconf
+4d3687e build(deps): bump types-protobuf from 3.19.4 to 3.19.5 in /requirements
+3e90c65 build(deps): bump mypy-protobuf from 3.0.0 to 3.1.0 in /requirements
+6c58037 build(deps): bump pytest-asyncio from 0.16.0 to 0.17.2 in /requirements
+55ef75c deps: Deprecate python 3.6
+baf4a9f companion: Fix pairing requirement flag
+261cbb6 build(deps): bump types-requests from 2.27.5 to 2.27.7 in /requirements
+c7c40c8 Fixes and amendments to protocols doc.
+1b3e09e build(deps): bump pytest-timeout from 2.0.2 to 2.1.0 in /requirements
+ef88032 build(deps): bump types-protobuf from 3.19.0 to 3.19.4 in /requirements
+b386ae0 build(deps): bump protobuf from 3.19.1 to 3.19.3 in /requirements
+6b50822 build(deps): bump types-protobuf from 3.18.4 to 3.19.0 in /requirements
+4ed1f55 build(deps): bump types-protobuf from 3.18.3 to 3.18.4 in /requirements
+e40be8d build(deps): bump bitarray from 2.3.4 to 2.3.5 in /requirements
+bb79792 build(deps): bump mypy from 0.930 to 0.931 in /requirements
+182ffdd build(deps): bump types-requests from 2.26.3 to 2.27.5 in /requirements
+8a7ec5d build(deps): bump requests from 2.27.0 to 2.27.1 in /requirements
+0217895 build(deps): bump miniaudio from 1.45 to 1.46 in /requirements
+d9cdad9 build(deps): bump types-protobuf from 3.18.2 to 3.18.3 in /requirements
+cb05378 build(deps): bump requests from 2.26.0 to 2.27.0 in /requirements
+01cbdf6 skip test on legacy 3.7
+b2960bf skip test on legacy 3.7
+fed3288 skip test on legacy 3.7
+a9373e4 Ensure knock exceptions are retrieved
+18d523d Ensure knock exceptions are retrieved
+1b01ab4 Ensure knock exceptions are retrieved
+204049b Ensure knock exceptions are retrieved
+c2c5436 build(deps): bump types-requests from 2.26.2 to 2.26.3 in /requirements
+f4cd28f build(deps): bump mypy from 0.921 to 0.930 in /requirements
+b18b0f0 build(deps): bump zeroconf from 0.37.0 to 0.38.1 in /requirements
+5a67911 build(deps): bump mypy from 0.920 to 0.921 in /requirements
+df6047a deps: Add requests as dependency
+c74e710 raop: Fix stream from buffer bug
+b099169 gha: Don't build for armv7
+e7afb7e raop: Use requests instead of urllib in web stream
+09e7076 core: Introduce Core in protocols
+28ec1f7 build(deps): bump deepdiff from 5.6.0 to 5.7.0 in /requirements
+da51ff4 airplay: Fix pairing requirement bug
+d6ffbd2 facade: Stop push updaters on close
+0db2447 raop: Override volume from other protocols
+37f6a1a core: Dispatch volume changes in protocols
+18decdf mrp: Fix protocol bug in state dispatcher
+6918c11 build(deps): bump typed-ast from 1.4.3 to 1.5.1 in /requirements
+f514e43 build(deps): bump mypy from 0.910 to 0.920 in /requirements
+```
+
 ## 0.9.8 Vanny (2021-12-15)
 
 Here is yet another release with a bunch of bug fixes and improvements:
