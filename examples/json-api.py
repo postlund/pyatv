@@ -73,41 +73,39 @@ class PushPrinter(DeviceListener, PushListener, PowerListener):
     def connection_lost(self, exception: Exception) -> None:
         """Call when connection was lost."""
         self._remove()
+        payload = output(False, exception=exception, values={"connection": "lost"})
+        self._send_json(payload)
 
     def connection_closed(self) -> None:
         """Call when connection was closed."""
         self._remove()
+        payload = output(True, values={"connection": "closed"})
+        self._send_json(payload)
 
     def _remove(self):
         self.app["atv"].pop(self.identifier)
         self.app["listeners"].remove(self)
 
+    def _send_json(self, payload):
+        clients = self.app["clients"].get(self.identifier, [])
+        for client in clients:
+            asyncio.ensure_future(client.send_json(payload))
+
     def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Call when play status was updated."""
-        clients = self.app["clients"].get(self.identifier, [])
         atv = self.app["atv"][self.identifier]
-        for client in clients:
-            asyncio.ensure_future(
-                client.send_json(
-                    output_playing(playstatus, atv.metadata.app)
-                )
-            )
+        payload = output_playing(playstatus, atv.metadata.app)
+        self._send_json(payload)
 
     def playstatus_error(self, updater, exception: Exception) -> None:
         """Call when an error occurred."""
+        payload = output(False, exception=exception)
+        self._send_json(payload)
 
     def powerstate_update(self, old_state, new_state):
         """Call when power state was updated."""
-        clients = self.app["clients"].get(self.identifier, [])
-        for client in clients:
-            asyncio.ensure_future(
-                client.send_json(
-                    output(
-                        True,
-                        values={"power_state": new_state.name.lower()},
-                    )
-                )
-            )
+        payload = output(True, values={"power_state": new_state.name.lower()})
+        self._send_json(payload)
 
 
 def output(success: bool, error=None, exception=None, values=None):
@@ -155,7 +153,11 @@ def web_command(method):
         atv = request.app["atv"].get(device_id)
         if not atv:
             return web.json_response(
-                output(False, error=f"Not connected to {device_id}")
+                output(
+                    False,
+                    error=f"Not connected to {device_id}",
+                    values={"connection": "empty"}
+                )
             )
         return await method(request, atv)
 
@@ -263,14 +265,14 @@ async def connect(request):
 
     if not add_credentials(results[0], request.query):
       return web.json_response(
-          output(False, error="Failed to connect to device, empty Credentials")
+          output(False, error="Failed to connect device, empty Credentials")
       )
 
     try:
         atv = await pyatv.connect(results[0], loop=loop)
     except Exception as ex:
         return web.json_response(
-            output(False, error="Failed to connect to device", exception=ex)
+            output(False, error="Failed to connect device", exception=ex)
         )
 
     push_listener  = PushPrinter(request.app, device_id)
@@ -289,30 +291,38 @@ async def connect(request):
 @web_command
 async def command(request, atv):
     """Handle remote command request."""
-    ctrl = retrieve_commands(RemoteControl)
-    power = retrieve_commands(Power)
-    stream = retrieve_commands(Stream)
-    apps = retrieve_commands(Apps)
-    audio = retrieve_commands(Audio)
+
+    def _command(command):
+        ctrl = retrieve_commands(RemoteControl)
+        power = retrieve_commands(Power)
+        stream = retrieve_commands(Stream)
+        apps = retrieve_commands(Apps)
+        audio = retrieve_commands(Audio)
+        if command in audio:
+            return atv.audio
+        if command in ctrl:
+            return atv.remote_control
+        if command in power:
+            return atv.power
+        if command in stream:
+            return atv.stream
+        if command in apps:
+            return atv.apps
+        return None
 
     command = request.match_info["command"]
 
     try:
-        if command in audio:
-            await getattr(atv.audio, command)()
-        if command in ctrl:
-            await getattr(atv.remote_control, command)()
-        if command in power:
-            await getattr(atv.power, command)()
-        if command in stream:
-            await getattr(atv.stream, command)()
-        if command in apps:
-            await getattr(atv.apps, command)()
+        object = _command(command=command)
+        if object:
+            await getattr(object, command)()
+            return web.json_response(output(True, values={"command": command}))
     except Exception as ex:
         return web.json_response(
-            output(False, error="Remote control command failed", exception=ex)
+            output(False, error="failed_command", exception=ex)
         )
-    return web.json_response(output(True, values={"command": command}))
+
+    return web.json_response(output(False, error="unsupported_command"))
 
 
 @routes.get("/playing/{id}")
