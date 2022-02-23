@@ -264,13 +264,13 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.example_video(paused=False, playback_rate=0.0)
 
         playing = await self.playing(title="dummy")
-        self.assertEqual(playing.device_state, DeviceState.Paused)
+        self.assertEqual(playing.device_state, DeviceState.Playing)
 
         self.usecase.change_metadata(title="dummy2", playback_rate=1.0)
         playing = await self.playing(title="dummy2")
         self.assertEqual(playing.device_state, DeviceState.Playing)
 
-        self.usecase.change_metadata(title="dummy3", playback_rate=0.0)
+        self.usecase.example_video(paused=True, title="dummy3", playback_rate=0.0)
         playing = await self.playing(title="dummy3")
         self.assertEqual(playing.device_state, DeviceState.Paused)
 
