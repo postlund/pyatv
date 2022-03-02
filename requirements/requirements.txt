@@ -1,5 +1,5 @@
 aiohttp==3.8.1
-bitarray==2.3.7
+bitarray==2.4.0
 cryptography==36.0.1
 ifaddr==0.1.7
 mediafile==0.9.0
