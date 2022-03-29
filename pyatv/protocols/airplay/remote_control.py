@@ -133,7 +133,7 @@ class RemoteControl:
 
     async def _setup_data_channel(self, address: str) -> None:
         # A 64 bit random seed is included and used as part of the salt in encryption
-        seed = randint(0, 2 ** 64)
+        seed = randint(0, 2**64)
 
         resp = await self._setup(
             {
