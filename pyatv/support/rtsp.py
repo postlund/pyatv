@@ -79,9 +79,9 @@ class RtspSession:
 
         self.digest_info: Optional[DigestInfo] = None  # Password authentication
         self.cseq = 0
-        self.session_id: int = randrange(2 ** 32)
+        self.session_id: int = randrange(2**32)
         self.dacp_id: str = f"{randrange(2 ** 64):X}"
-        self.active_remote: int = randrange(2 ** 32)
+        self.active_remote: int = randrange(2**32)
 
     @property
     def uri(self) -> str:
