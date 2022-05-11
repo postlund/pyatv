@@ -4,7 +4,7 @@ import collections.abc
 import typing
 
 T = typing.TypeVar("T")
-SharedType = typing.TypeVar("SharedType")
+SharedType = typing.TypeVar("SharedType")  # pylint: disable=invalid-name
 
 
 def dict_merge(
