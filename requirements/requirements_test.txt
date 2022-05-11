@@ -1,4 +1,4 @@
-black==21.12b0
+black==22.3.0
 codecov==2.1.12
 deepdiff==5.7.0
 flake8==4.0.1
@@ -12,7 +12,7 @@ pytest-timeout==2.1.0
 pytest-aiohttp==1.0.2
 pytest-xdist==2.5.0
 pydocstyle==6.1.1
-mypy==0.931
+mypy==0.950
 mypy-protobuf==3.1.0
 typed-ast==1.5.2
 types-protobuf==3.19.12
