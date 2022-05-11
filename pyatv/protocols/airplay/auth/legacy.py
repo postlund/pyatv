@@ -105,9 +105,8 @@ class AirPlayLegacyPairVerifyProcedure(PairVerifyProcedure):
         headers["Content-Type"] = "application/octet-stream"
         return await self.http.post("/pair-verify", headers=headers, body=data)
 
-    @staticmethod
     def encryption_keys(
-        salt: str, output_info: str, input_info: str
+        self, salt: str, output_info: str, input_info: str
     ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
         raise exceptions.NotSupportedError(

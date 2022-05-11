@@ -19,9 +19,9 @@ _LOGGER = logging.getLogger(__name__)
 HEARTBEAT_INTERVAL = 30
 HEARTBEAT_RETRIES = 1  # One regular attempt + retries
 
-MessageType = TypeVar("MessageType")
+MessageType = TypeVar("MessageType")  # pylint: disable=invalid-name
 
-DispatchType = TypeVar("DispatchType")
+DispatchType = TypeVar("DispatchType")  # pylint: disable=invalid-name
 DispatchMessage = TypeVar("DispatchMessage")
 DispatchFunc = Callable[[DispatchMessage], Union[None, Awaitable[None]]]
 DispatchFilterFunc = Callable[[DispatchMessage], bool]

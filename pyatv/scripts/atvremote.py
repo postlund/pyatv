@@ -313,14 +313,12 @@ class DeviceCommands:
 class PushListener(interface.PushListener):
     """Internal listener for push updates."""
 
-    @staticmethod
-    def playstatus_update(_, playstatus):
+    def playstatus_update(self, _, playstatus):
         """Print what is currently playing when it changes."""
         print(str(playstatus), flush=True)
         print(20 * "-", flush=True)
 
-    @staticmethod
-    def playstatus_error(_, exception):
+    def playstatus_error(self, _, exception):
         """Inform about an error and restart push updates."""
         print(f"An error occurred (restarting): {exception}")
 
