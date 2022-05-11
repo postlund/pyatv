@@ -52,7 +52,9 @@ __pdoc__ = {
 
 _ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
 
-ReturnType = TypeVar("ReturnType", bound=Callable[..., Any])
+ReturnType = TypeVar(  # pylint: disable=invalid-name
+    "ReturnType", bound=Callable[..., Any]
+)
 
 
 class ArtworkInfo(NamedTuple):

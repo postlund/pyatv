@@ -67,7 +67,7 @@ def ms_to_s(time):
         return 0
 
     # Happens in some special cases, just return 0
-    if time >= (2 ** 32 - 1):
+    if time >= (2**32 - 1):
         return 0
     return round(time / 1000.0)
 
