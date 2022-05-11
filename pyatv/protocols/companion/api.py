@@ -174,7 +174,7 @@ class CompanionAPI(
         )
 
     async def _session_start(self) -> None:
-        local_sid = randint(0, 2 ** 32 - 1)
+        local_sid = randint(0, 2**32 - 1)
         resp = await self._send_command(
             "_sessionStart", {"_srvT": "com.apple.tvremoteservices", "_sid": local_sid}
         )

@@ -128,4 +128,4 @@ def test_time_in_seconds():
 def test_invalid_time():
     # Sometimes really large times are reported during buffering == this test
     # handles those special cases.
-    assert 0 == ms_to_s(2 ** 32 - 1)
+    assert 0 == ms_to_s(2**32 - 1)
