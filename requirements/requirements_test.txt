@@ -5,7 +5,7 @@ flake8==4.0.1
 isort==5.10.1
 mutagen==1.45.1
 pylint==2.12.2
-pytest==7.0.1
+pytest==7.1.2
 pytest-asyncio==0.18.3
 pytest-cov==3.0.0
 pytest-timeout==2.1.0
