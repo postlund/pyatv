@@ -29,7 +29,7 @@ $found_version -m venv .
 
 echo "-> Activating virtual environment..."
 source bin/activate
-sed -i 's/false/true/' pyvenv.cfg
+sed -i '' 's/false/true/' pyvenv.cfg
 
 echo "-> Upgrading pip..."
 pip install --upgrade pip
