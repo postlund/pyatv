@@ -80,7 +80,7 @@ class RaopContext:
 
         Must be done when sample rate changes.
         """
-        self.rtpseq = randrange(2 ** 16)
+        self.rtpseq = randrange(2**16)
         self.start_ts = timing.ntp2ts(timing.ntp_now(), self.sample_rate)
         self.head_ts = self.start_ts
         self.latency = 22050 + self.sample_rate
@@ -693,7 +693,7 @@ class RaopClient:
 
         _LOGGER.debug(
             "Audio finished sending in %fs",
-            (timing.perf_counter_ns() - stats.start_time_ns) / 10 ** 9,
+            (timing.perf_counter_ns() - stats.start_time_ns) / 10**9,
         )
 
     async def _send_packet(
@@ -741,7 +741,7 @@ class RaopClient:
         self._packet_backlog[self.context.rtpseq] = packet
         transport.sendto(packet)
 
-        self.context.rtpseq = (self.context.rtpseq + 1) % (2 ** 16)
+        self.context.rtpseq = (self.context.rtpseq + 1) % (2**16)
         self.context.head_ts += int(len(frames) / self.context.frame_size)
 
         return int(len(frames) / self.context.frame_size)
@@ -778,7 +778,7 @@ class Statistics:
         """Number of frames expected to be sent at current time."""
         return int(
             (timing.perf_counter_ns() - self.start_time_ns)
-            / (10 ** 9 / self.sample_rate)
+            / (10**9 / self.sample_rate)
         )
 
     @property
