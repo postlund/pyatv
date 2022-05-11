@@ -275,6 +275,9 @@ class FakeUdns(asyncio.Protocol):
         self.transport.sendto(resp.pack(), addr)
         self.request_count += 1
 
+    def error_received(self, exc):
+        _LOGGER.error("Got an error: %s", exc)
+
 
 @contextmanager
 def stub_multicast(udns_server, loop):

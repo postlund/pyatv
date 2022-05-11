@@ -11,7 +11,7 @@ from typing import Tuple
 # TODO: Replace with time.perf_counter_ns when python 3.6 is dropped
 def perf_counter_ns():
     """Return a perf_counter time in nanoseconds."""
-    return int(perf_counter() * 10 ** 9)
+    return int(perf_counter() * 10**9)
 
 
 def ntp_now() -> int:

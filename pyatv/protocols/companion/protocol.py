@@ -86,7 +86,7 @@ class CompanionProtocol(
         self.srp = srp
         self.service = service
         self._xid: int = randint(
-            0, 2 ** 16
+            0, 2**16
         )  # Don't know range here, just use something
         self._queues: Dict[FrameIdType, SharedData[Any]] = {}
         self._chacha = None
