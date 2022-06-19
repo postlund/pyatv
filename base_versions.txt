@@ -1,6 +1,7 @@
 aiohttp==3.1.0
 bitarray==2.1.2
-cryptography==2.6
+cryptography==37.0.2
+chacha20poly1305-reuseable==0.0.3
 ifaddr==0.1.7
 mediafile==0.8.1
 miniaudio==1.45
