@@ -16,4 +16,4 @@ mypy==0.961
 mypy-protobuf==3.2.0
 typed-ast==1.5.4
 types-protobuf==3.19.20
-types-requests==2.27.31
+types-requests==2.28.0
