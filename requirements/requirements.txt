@@ -9,4 +9,4 @@ miniaudio==1.51
 protobuf==3.20.1
 requests==2.27.1
 srptools==1.0.1
-zeroconf==0.38.6
+zeroconf==0.38.7
