@@ -262,6 +262,14 @@ class CompanionRemoteControl(RemoteControl):
         """Press key previous."""
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
 
+    async def channel_up(self) -> None:
+        """Select next channel."""
+        await self._press_button(HidCommand.ChannelIncrement)
+
+    async def channel_down(self) -> None:
+        """Select previous channel."""
+        await self._press_button(HidCommand.ChannelDecrement)
+
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap
     ) -> None:
