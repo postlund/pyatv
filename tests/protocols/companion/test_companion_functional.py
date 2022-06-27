@@ -138,6 +138,8 @@ async def test_session_start_and_stop(companion_client, companion_state):
         "volume_down",
         "volume_up",
         "play_pause",
+        "channel_up",
+        "channel_down",
         # Media Control
         "play",
         "pause",

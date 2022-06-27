@@ -38,6 +38,8 @@ HID_BUTTON_MAP = {
     HidCommand.VolumeDown: "volume_down",
     HidCommand.VolumeUp: "volume_up",
     HidCommand.PlayPause: "play_pause",
+    HidCommand.ChannelIncrement: "channel_up",
+    HidCommand.ChannelDecrement: "channel_down",
 }
 
 MEDIA_CONTROL_MAP = {
