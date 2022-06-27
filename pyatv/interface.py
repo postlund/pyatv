@@ -406,6 +406,16 @@ class RemoteControl:
         """Change repeat state."""
         raise exceptions.NotSupportedError()
 
+    @feature(48, "ChannelUp", "Select next channel.")
+    async def channel_up(self) -> None:
+        """Select next channel."""
+        raise exceptions.NotSupportedError()
+
+    @feature(49, "ChannelDown", "Select previous channel.")
+    async def channel_down(self) -> None:
+        """Select previous channel."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
