@@ -118,6 +118,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.VolumeUp,
         FeatureName.VolumeDown,
         FeatureName.PlayPause,
+        FeatureName.ChannelUp,
+        FeatureName.ChannelDown,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
