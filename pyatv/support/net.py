@@ -1,5 +1,6 @@
 """Various network utility helpers."""
 
+from contextlib import suppress
 from ipaddress import IPv4Address, IPv4Interface
 import logging
 import platform
@@ -38,14 +39,14 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
         )
 
     if address is not None:
-        sock.setsockopt(
-            socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(address)
-        )
-        try:
+        with suppress(OSError):
+            sock.setsockopt(
+                socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(address)
+            )
+
+        with suppress(OSError):
             membership = socket.inet_aton("224.0.0.251") + socket.inet_aton(address)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
-        except OSError:
-            _LOGGER.exception("failed to join")
 
     _LOGGER.debug("Binding on %s:%d", address or "*", port)
     sock.bind((address or "", port))
