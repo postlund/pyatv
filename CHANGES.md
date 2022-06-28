@@ -1,5 +1,103 @@
 # CHANGES
 
+## 0.10.1 Yenndo (2022-06-28)
+
+This is a minor bug fix release, taking care of some nasty stuff:
+
+* Do not block event loop when streaming audio from a network source
+* Support RAOP devices with invalid names
+* Add support for `channel_up` and `channel_down` (only Companion so far)
+* Increase encryption performance with `ChaCha20Poly1305Reusable`
+* Discovery should work better on Windows now
+
+Have a splendid summer!
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+4c3ef81 raop: Fallback to pk as unique id (#1777)
+5805f2c raop: Not do blocking I/O while streaming (#1776)
+da184b9 raop: Increase late warning to five frames (#1775)
+6195324 raop: Harmonize protocol string in requests
+```
+
+*Other:*
+
+```
+31de26a Implement channel_up and channel_down (#1769)
+d69554e protobuf: Add more fields to DeviceInfoMessage (#1778)
+36261f1 mdns: Suppress exceptions properly (#1774)
+5ba0e24 Switch to using ChaCha20Poly1305Reusable for encryption (#1756)
+3c69600 Fix sed command in setup_dev_env.sh for macOS
+9c15fd7 Fix path to setup_dev_env.sh in CONTRIBUTING.md
+ccc5a94 Adding a project to the list
+e694a21 docs: Update list with projects using pyatv
+```
+
+**All changes:**
+
+```
+31de26a Implement channel_up and channel_down (#1769)
+89b8988 build(deps): bump pytest-aiohttp from 0.3.0 to 1.0.2 in /requirements (#1623)
+e272858 build(deps): bump pylint from 2.13.9 to 2.14.3 in /requirements (#1757)
+d69554e protobuf: Add more fields to DeviceInfoMessage (#1778)
+2179c12 build(deps): bump types-protobuf in /requirements (#1767)
+4c3ef81 raop: Fallback to pk as unique id (#1777)
+5805f2c raop: Not do blocking I/O while streaming (#1776)
+36261f1 mdns: Suppress exceptions properly (#1774)
+da184b9 raop: Increase late warning to five frames (#1775)
+f424d7c build(deps): bump black from 22.3.0 to 22.6.0 in /requirements (#1770)
+8d69f68 build(deps): bump types-protobuf in /requirements (#1738)
+c885a43 build(deps): bump requests from 2.27.1 to 2.28.0 in /requirements (#1750)
+9859fdb build(deps): bump ifaddr from 0.1.7 to 0.2.0 in /requirements (#1766)
+cbd1305 build(deps): bump zeroconf from 0.38.6 to 0.38.7 in /requirements (#1751)
+5ba0e24 Switch to using ChaCha20Poly1305Reusable for encryption (#1756)
+2f8af90 build(deps): bump types-requests from 2.27.31 to 2.28.0 in /requirements
+4d321b4 build(deps): bump ifaddr from 0.1.7 to 0.2.0 in /requirements
+e4279be build(deps): bump miniaudio from 1.46 to 1.51 in /requirements
+043ca4c build(deps): bump types-requests in /requirements
+68d02f2 build(deps): bump mypy from 0.960 to 0.961 in /requirements
+be1b68e build(deps): bump types-requests in /requirements
+93f7904 build(deps): bump mypy from 0.950 to 0.960 in /requirements
+d43e4a3 build(deps): bump typed-ast from 1.5.3 to 1.5.4 in /requirements
+5e362be build(deps): bump types-requests in /requirements
+ec086ad build(deps): bump pylint from 2.13.8 to 2.13.9 in /requirements
+c5dd9c1 build(deps): bump deepdiff from 5.8.0 to 5.8.1 in /requirements
+c9ae1e3 build(deps): bump mypy-protobuf from 3.1.0 to 3.2.0 in /requirements
+3c69600 Fix sed command in setup_dev_env.sh for macOS
+9c15fd7 Fix path to setup_dev_env.sh in CONTRIBUTING.md
+72ea8ea build(deps): bump types-requests in /requirements
+3422693 build(deps): bump protobuf from 3.19.4 to 3.20.1 in /requirements
+97cacda build(deps): bump pylint from 2.12.2 to 2.13.8 in /requirements
+6c4c1c2 build(deps): bump zeroconf from 0.38.3 to 0.38.6 in /requirements
+40f170e build(deps): bump bitarray from 2.3.7 to 2.5.1 in /requirements
+6195324 raop: Harmonize protocol string in requests
+43aa905 build(deps): bump deepdiff from 5.7.0 to 5.8.0 in /requirements
+62a037a build(deps): bump typed-ast from 1.5.2 to 1.5.3 in /requirements
+6975543 build(deps): bump pytest from 7.0.1 to 7.1.2 in /requirements
+6690c59 build(deps): bump types-protobuf in /requirements
+b62d488 build(deps): bump pytest-asyncio from 0.18.1 to 0.18.3 in /requirements
+4fb2bb8 build(deps): bump mypy from 0.931 to 0.950 in /requirements
+f52df10 build(deps): bump cryptography from 36.0.1 to 37.0.2 in /requirements
+a741e48 build(deps): bump black from 21.12b0 to 22.3.0 in /requirements
+b63b449 build(deps): bump types-requests in /requirements
+8ac3844 build(deps): bump bitarray from 2.3.6 to 2.3.7 in /requirements
+8741f19 build(deps): bump pytest-asyncio from 0.17.2 to 0.18.1 in /requirements
+4092f6e build(deps): bump types-protobuf from 3.19.8 to 3.19.12 in /requirements
+d365cda build(deps): bump pytest from 6.2.5 to 7.0.1 in /requirements
+d821548 build(deps): bump types-requests from 2.27.8 to 2.27.10 in /requirements
+8a53693 build(deps): bump bitarray from 2.3.5 to 2.3.6 in /requirements
+ccc5a94 Adding a project to the list
+e694a21 docs: Update list with projects using pyatv
+4a0f940 build(deps): bump types-protobuf from 3.19.5 to 3.19.8 in /requirements
+a790bd4 build(deps): bump types-requests from 2.27.7 to 2.27.8 in /requirements
+bb36796 build(deps): bump protobuf from 3.19.3 to 3.19.4 in /requirements
+995ee6b build(deps): bump zeroconf from 0.38.1 to 0.38.3 in /requirements
+735faa0 build(deps): bump typed-ast from 1.5.1 to 1.5.2 in /requirements
+```
+
 ## 0.10.0 XOR (2022-01-23)
 
 It's a new year and time for a new release with a few bug fixes:
