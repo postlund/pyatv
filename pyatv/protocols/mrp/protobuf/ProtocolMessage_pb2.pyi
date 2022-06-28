@@ -9,331 +9,331 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class ErrorCode(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        NoError: ErrorCode.Enum.ValueType = ...  # 0
-        UnknownError: ErrorCode.Enum.ValueType = ...  # 1
-        InvalidOperation: ErrorCode.Enum.ValueType = ...  # 2
-        OperationNotPermitted: ErrorCode.Enum.ValueType = ...  # 3
-        ClientDoesNotExist: ErrorCode.Enum.ValueType = ...  # 4
-        OriginDoesNotExist: ErrorCode.Enum.ValueType = ...  # 5
-        UnsupportedOperation: ErrorCode.Enum.ValueType = ...  # 6
-        FailedToSetPickedRoute: ErrorCode.Enum.ValueType = ...  # 7
-        FailedToRegisterCustomOrigin: ErrorCode.Enum.ValueType = ...  # 8
-        FailedToRemoveCustomOrigin: ErrorCode.Enum.ValueType = ...  # 9
-        TheApplicationActivityDoesNotExist: ErrorCode.Enum.ValueType = ...  # 10
-        TheAppHasNotSetupABrowsableContentEndpoint: ErrorCode.Enum.ValueType = ...  # 11
-        TheRequestedBrowsableContentApiIsNotSupportedByTheApplication: ErrorCode.Enum.ValueType = ...  # 12
-        TheNotficationHasNotBeenWhitelistedByTheServer: ErrorCode.Enum.ValueType = ...  # 13
-        OperationRequiresAClientCallbackToHaveBeenRegistered: ErrorCode.Enum.ValueType = ...  # 14
-        OperationRequiresAClientDataSourceToHaveBeenRegistered: ErrorCode.Enum.ValueType = ...  # 15
-        RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode.Enum.ValueType = ...  # 16
-        TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode.Enum.ValueType = ...  # 17
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ErrorCode._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        NoError: ErrorCode._Enum.ValueType  # 0
+        UnknownError: ErrorCode._Enum.ValueType  # 1
+        InvalidOperation: ErrorCode._Enum.ValueType  # 2
+        OperationNotPermitted: ErrorCode._Enum.ValueType  # 3
+        ClientDoesNotExist: ErrorCode._Enum.ValueType  # 4
+        OriginDoesNotExist: ErrorCode._Enum.ValueType  # 5
+        UnsupportedOperation: ErrorCode._Enum.ValueType  # 6
+        FailedToSetPickedRoute: ErrorCode._Enum.ValueType  # 7
+        FailedToRegisterCustomOrigin: ErrorCode._Enum.ValueType  # 8
+        FailedToRemoveCustomOrigin: ErrorCode._Enum.ValueType  # 9
+        TheApplicationActivityDoesNotExist: ErrorCode._Enum.ValueType  # 10
+        TheAppHasNotSetupABrowsableContentEndpoint: ErrorCode._Enum.ValueType  # 11
+        TheRequestedBrowsableContentApiIsNotSupportedByTheApplication: ErrorCode._Enum.ValueType  # 12
+        TheNotficationHasNotBeenWhitelistedByTheServer: ErrorCode._Enum.ValueType  # 13
+        OperationRequiresAClientCallbackToHaveBeenRegistered: ErrorCode._Enum.ValueType  # 14
+        OperationRequiresAClientDataSourceToHaveBeenRegistered: ErrorCode._Enum.ValueType  # 15
+        RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode._Enum.ValueType  # 16
+        TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode._Enum.ValueType  # 17
         """The system will ignore the volume adjustment until overridden."""
 
-        VolumeValueIsOutOfRange: ErrorCode.Enum.ValueType = ...  # 18
+        VolumeValueIsOutOfRange: ErrorCode._Enum.ValueType  # 18
         """between 0.0 and 1.0, where 1.0 is the loudest"""
 
-        VolumeIsAlreadyAtTheMaximumValue: ErrorCode.Enum.ValueType = ...  # 19
-        VolumeIsAlreadyMuted: ErrorCode.Enum.ValueType = ...  # 20
-        VoiceInputEndpointDoesNotExist: ErrorCode.Enum.ValueType = ...  # 21
-        TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist: ErrorCode.Enum.ValueType = ...  # 22
-        EncryptionFailure: ErrorCode.Enum.ValueType = ...  # 23
-        EndpointDoesNotExist: ErrorCode.Enum.ValueType = ...  # 24
-        TheClientsApplicationCancelledTheOperation: ErrorCode.Enum.ValueType = ...  # 25
-        TheOperationTimedOut: ErrorCode.Enum.ValueType = ...  # 26
-        TheSpecifiedPlayerPathObjectWasInvalid: ErrorCode.Enum.ValueType = ...  # 27
-        AddingOrRemovingDevicesFromTheAvOutputContextHasFailed: ErrorCode.Enum.ValueType = ...  # 28
-        CouldNotFindTheSpecifiedNowPlayingPlayer: ErrorCode.Enum.ValueType = ...  # 29
-        TheSpecifiedContentItemDoesNotExist: ErrorCode.Enum.ValueType = ...  # 30
-        TheSpecifiedOffsetIsInvalid: ErrorCode.Enum.ValueType = ...  # 31
-        TheSpecifiedOutputContextIsInvalid: ErrorCode.Enum.ValueType = ...  # 32
-        OneOrMoreSpecifiedOutputDevicesAreNotGroupable: ErrorCode.Enum.ValueType = ...  # 33
-        TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice: ErrorCode.Enum.ValueType = ...  # 34
-        CouldNotFindTheSpecifiedNowPlayingClient: ErrorCode.Enum.ValueType = ...  # 35
-        EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType = ...  # 36
-        OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType = ...  # 37
-        CoderMustSupportKeyValueCoding: ErrorCode.Enum.ValueType = ...  # 38
-        CouldNotFindTheGivenOutputdevice: ErrorCode.Enum.ValueType = ...  # 39
-        FailedToConnectToRemoteDevice: ErrorCode.Enum.ValueType = ...  # 100
-        AuthenticationTokenIsInvalid: ErrorCode.Enum.ValueType = ...  # 101
-        RecordingSessionIsAlreadyInProgressOnThisDevice: ErrorCode.Enum.ValueType = ...  # 102
-        TheDeviceIsNotCurrentlyRecording: ErrorCode.Enum.ValueType = ...  # 103
-        TheClientHasDisconnected: ErrorCode.Enum.ValueType = ...  # 104
-        TheServerHasDisconnected: ErrorCode.Enum.ValueType = ...  # 105
-        TheConnectionHasBeenCancelledByTheClient: ErrorCode.Enum.ValueType = ...  # 106
-        PairingFunctionalityIsLockedDueToSecurityReasons: ErrorCode.Enum.ValueType = ...  # 107
-        TheClientsOperatingSystemVersionIsTooOld: ErrorCode.Enum.ValueType = ...  # 108
-        TheClientsApplicationVersionIsTooOld: ErrorCode.Enum.ValueType = ...  # 109
-        TheDeviceIsNotPaired: ErrorCode.Enum.ValueType = ...  # 110
-        ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured: ErrorCode.Enum.ValueType = ...  # 111
-        ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured: ErrorCode.Enum.ValueType = ...  # 112
-        TheConnectionTimedout: ErrorCode.Enum.ValueType = ...  # 113
-        PairingWithThisDeviceIsBlocked: ErrorCode.Enum.ValueType = ...  # 114
-        TheDeviceIsGoingToSleep: ErrorCode.Enum.ValueType = ...  # 115
-        ConnectionBlockedByServer: ErrorCode.Enum.ValueType = ...  # 116
-        MravendpointWasDeallocatedWhileWaitingForDeviceToConnect: ErrorCode.Enum.ValueType = ...  # 117
-        OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer: ErrorCode.Enum.ValueType = ...  # 200
-        OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer: ErrorCode.Enum.ValueType = ...  # 201
-        OutputContextModificationRequestedNoTopologyChange: ErrorCode.Enum.ValueType = ...  # 202
-        OtherUnknownError: ErrorCode.Enum.ValueType = ...  # 299
+        VolumeIsAlreadyAtTheMaximumValue: ErrorCode._Enum.ValueType  # 19
+        VolumeIsAlreadyMuted: ErrorCode._Enum.ValueType  # 20
+        VoiceInputEndpointDoesNotExist: ErrorCode._Enum.ValueType  # 21
+        TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist: ErrorCode._Enum.ValueType  # 22
+        EncryptionFailure: ErrorCode._Enum.ValueType  # 23
+        EndpointDoesNotExist: ErrorCode._Enum.ValueType  # 24
+        TheClientsApplicationCancelledTheOperation: ErrorCode._Enum.ValueType  # 25
+        TheOperationTimedOut: ErrorCode._Enum.ValueType  # 26
+        TheSpecifiedPlayerPathObjectWasInvalid: ErrorCode._Enum.ValueType  # 27
+        AddingOrRemovingDevicesFromTheAvOutputContextHasFailed: ErrorCode._Enum.ValueType  # 28
+        CouldNotFindTheSpecifiedNowPlayingPlayer: ErrorCode._Enum.ValueType  # 29
+        TheSpecifiedContentItemDoesNotExist: ErrorCode._Enum.ValueType  # 30
+        TheSpecifiedOffsetIsInvalid: ErrorCode._Enum.ValueType  # 31
+        TheSpecifiedOutputContextIsInvalid: ErrorCode._Enum.ValueType  # 32
+        OneOrMoreSpecifiedOutputDevicesAreNotGroupable: ErrorCode._Enum.ValueType  # 33
+        TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice: ErrorCode._Enum.ValueType  # 34
+        CouldNotFindTheSpecifiedNowPlayingClient: ErrorCode._Enum.ValueType  # 35
+        EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode._Enum.ValueType  # 36
+        OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode._Enum.ValueType  # 37
+        CoderMustSupportKeyValueCoding: ErrorCode._Enum.ValueType  # 38
+        CouldNotFindTheGivenOutputdevice: ErrorCode._Enum.ValueType  # 39
+        FailedToConnectToRemoteDevice: ErrorCode._Enum.ValueType  # 100
+        AuthenticationTokenIsInvalid: ErrorCode._Enum.ValueType  # 101
+        RecordingSessionIsAlreadyInProgressOnThisDevice: ErrorCode._Enum.ValueType  # 102
+        TheDeviceIsNotCurrentlyRecording: ErrorCode._Enum.ValueType  # 103
+        TheClientHasDisconnected: ErrorCode._Enum.ValueType  # 104
+        TheServerHasDisconnected: ErrorCode._Enum.ValueType  # 105
+        TheConnectionHasBeenCancelledByTheClient: ErrorCode._Enum.ValueType  # 106
+        PairingFunctionalityIsLockedDueToSecurityReasons: ErrorCode._Enum.ValueType  # 107
+        TheClientsOperatingSystemVersionIsTooOld: ErrorCode._Enum.ValueType  # 108
+        TheClientsApplicationVersionIsTooOld: ErrorCode._Enum.ValueType  # 109
+        TheDeviceIsNotPaired: ErrorCode._Enum.ValueType  # 110
+        ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured: ErrorCode._Enum.ValueType  # 111
+        ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured: ErrorCode._Enum.ValueType  # 112
+        TheConnectionTimedout: ErrorCode._Enum.ValueType  # 113
+        PairingWithThisDeviceIsBlocked: ErrorCode._Enum.ValueType  # 114
+        TheDeviceIsGoingToSleep: ErrorCode._Enum.ValueType  # 115
+        ConnectionBlockedByServer: ErrorCode._Enum.ValueType  # 116
+        MravendpointWasDeallocatedWhileWaitingForDeviceToConnect: ErrorCode._Enum.ValueType  # 117
+        OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer: ErrorCode._Enum.ValueType  # 200
+        OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer: ErrorCode._Enum.ValueType  # 201
+        OutputContextModificationRequestedNoTopologyChange: ErrorCode._Enum.ValueType  # 202
+        OtherUnknownError: ErrorCode._Enum.ValueType  # 299
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    NoError: ErrorCode.Enum.ValueType = ...  # 0
-    UnknownError: ErrorCode.Enum.ValueType = ...  # 1
-    InvalidOperation: ErrorCode.Enum.ValueType = ...  # 2
-    OperationNotPermitted: ErrorCode.Enum.ValueType = ...  # 3
-    ClientDoesNotExist: ErrorCode.Enum.ValueType = ...  # 4
-    OriginDoesNotExist: ErrorCode.Enum.ValueType = ...  # 5
-    UnsupportedOperation: ErrorCode.Enum.ValueType = ...  # 6
-    FailedToSetPickedRoute: ErrorCode.Enum.ValueType = ...  # 7
-    FailedToRegisterCustomOrigin: ErrorCode.Enum.ValueType = ...  # 8
-    FailedToRemoveCustomOrigin: ErrorCode.Enum.ValueType = ...  # 9
-    TheApplicationActivityDoesNotExist: ErrorCode.Enum.ValueType = ...  # 10
-    TheAppHasNotSetupABrowsableContentEndpoint: ErrorCode.Enum.ValueType = ...  # 11
-    TheRequestedBrowsableContentApiIsNotSupportedByTheApplication: ErrorCode.Enum.ValueType = ...  # 12
-    TheNotficationHasNotBeenWhitelistedByTheServer: ErrorCode.Enum.ValueType = ...  # 13
-    OperationRequiresAClientCallbackToHaveBeenRegistered: ErrorCode.Enum.ValueType = ...  # 14
-    OperationRequiresAClientDataSourceToHaveBeenRegistered: ErrorCode.Enum.ValueType = ...  # 15
-    RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode.Enum.ValueType = ...  # 16
-    TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode.Enum.ValueType = ...  # 17
+    NoError: ErrorCode.Enum.ValueType  # 0
+    UnknownError: ErrorCode.Enum.ValueType  # 1
+    InvalidOperation: ErrorCode.Enum.ValueType  # 2
+    OperationNotPermitted: ErrorCode.Enum.ValueType  # 3
+    ClientDoesNotExist: ErrorCode.Enum.ValueType  # 4
+    OriginDoesNotExist: ErrorCode.Enum.ValueType  # 5
+    UnsupportedOperation: ErrorCode.Enum.ValueType  # 6
+    FailedToSetPickedRoute: ErrorCode.Enum.ValueType  # 7
+    FailedToRegisterCustomOrigin: ErrorCode.Enum.ValueType  # 8
+    FailedToRemoveCustomOrigin: ErrorCode.Enum.ValueType  # 9
+    TheApplicationActivityDoesNotExist: ErrorCode.Enum.ValueType  # 10
+    TheAppHasNotSetupABrowsableContentEndpoint: ErrorCode.Enum.ValueType  # 11
+    TheRequestedBrowsableContentApiIsNotSupportedByTheApplication: ErrorCode.Enum.ValueType  # 12
+    TheNotficationHasNotBeenWhitelistedByTheServer: ErrorCode.Enum.ValueType  # 13
+    OperationRequiresAClientCallbackToHaveBeenRegistered: ErrorCode.Enum.ValueType  # 14
+    OperationRequiresAClientDataSourceToHaveBeenRegistered: ErrorCode.Enum.ValueType  # 15
+    RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode.Enum.ValueType  # 16
+    TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode.Enum.ValueType  # 17
     """The system will ignore the volume adjustment until overridden."""
 
-    VolumeValueIsOutOfRange: ErrorCode.Enum.ValueType = ...  # 18
+    VolumeValueIsOutOfRange: ErrorCode.Enum.ValueType  # 18
     """between 0.0 and 1.0, where 1.0 is the loudest"""
 
-    VolumeIsAlreadyAtTheMaximumValue: ErrorCode.Enum.ValueType = ...  # 19
-    VolumeIsAlreadyMuted: ErrorCode.Enum.ValueType = ...  # 20
-    VoiceInputEndpointDoesNotExist: ErrorCode.Enum.ValueType = ...  # 21
-    TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist: ErrorCode.Enum.ValueType = ...  # 22
-    EncryptionFailure: ErrorCode.Enum.ValueType = ...  # 23
-    EndpointDoesNotExist: ErrorCode.Enum.ValueType = ...  # 24
-    TheClientsApplicationCancelledTheOperation: ErrorCode.Enum.ValueType = ...  # 25
-    TheOperationTimedOut: ErrorCode.Enum.ValueType = ...  # 26
-    TheSpecifiedPlayerPathObjectWasInvalid: ErrorCode.Enum.ValueType = ...  # 27
-    AddingOrRemovingDevicesFromTheAvOutputContextHasFailed: ErrorCode.Enum.ValueType = ...  # 28
-    CouldNotFindTheSpecifiedNowPlayingPlayer: ErrorCode.Enum.ValueType = ...  # 29
-    TheSpecifiedContentItemDoesNotExist: ErrorCode.Enum.ValueType = ...  # 30
-    TheSpecifiedOffsetIsInvalid: ErrorCode.Enum.ValueType = ...  # 31
-    TheSpecifiedOutputContextIsInvalid: ErrorCode.Enum.ValueType = ...  # 32
-    OneOrMoreSpecifiedOutputDevicesAreNotGroupable: ErrorCode.Enum.ValueType = ...  # 33
-    TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice: ErrorCode.Enum.ValueType = ...  # 34
-    CouldNotFindTheSpecifiedNowPlayingClient: ErrorCode.Enum.ValueType = ...  # 35
-    EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType = ...  # 36
-    OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType = ...  # 37
-    CoderMustSupportKeyValueCoding: ErrorCode.Enum.ValueType = ...  # 38
-    CouldNotFindTheGivenOutputdevice: ErrorCode.Enum.ValueType = ...  # 39
-    FailedToConnectToRemoteDevice: ErrorCode.Enum.ValueType = ...  # 100
-    AuthenticationTokenIsInvalid: ErrorCode.Enum.ValueType = ...  # 101
-    RecordingSessionIsAlreadyInProgressOnThisDevice: ErrorCode.Enum.ValueType = ...  # 102
-    TheDeviceIsNotCurrentlyRecording: ErrorCode.Enum.ValueType = ...  # 103
-    TheClientHasDisconnected: ErrorCode.Enum.ValueType = ...  # 104
-    TheServerHasDisconnected: ErrorCode.Enum.ValueType = ...  # 105
-    TheConnectionHasBeenCancelledByTheClient: ErrorCode.Enum.ValueType = ...  # 106
-    PairingFunctionalityIsLockedDueToSecurityReasons: ErrorCode.Enum.ValueType = ...  # 107
-    TheClientsOperatingSystemVersionIsTooOld: ErrorCode.Enum.ValueType = ...  # 108
-    TheClientsApplicationVersionIsTooOld: ErrorCode.Enum.ValueType = ...  # 109
-    TheDeviceIsNotPaired: ErrorCode.Enum.ValueType = ...  # 110
-    ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured: ErrorCode.Enum.ValueType = ...  # 111
-    ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured: ErrorCode.Enum.ValueType = ...  # 112
-    TheConnectionTimedout: ErrorCode.Enum.ValueType = ...  # 113
-    PairingWithThisDeviceIsBlocked: ErrorCode.Enum.ValueType = ...  # 114
-    TheDeviceIsGoingToSleep: ErrorCode.Enum.ValueType = ...  # 115
-    ConnectionBlockedByServer: ErrorCode.Enum.ValueType = ...  # 116
-    MravendpointWasDeallocatedWhileWaitingForDeviceToConnect: ErrorCode.Enum.ValueType = ...  # 117
-    OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer: ErrorCode.Enum.ValueType = ...  # 200
-    OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer: ErrorCode.Enum.ValueType = ...  # 201
-    OutputContextModificationRequestedNoTopologyChange: ErrorCode.Enum.ValueType = ...  # 202
-    OtherUnknownError: ErrorCode.Enum.ValueType = ...  # 299
+    VolumeIsAlreadyAtTheMaximumValue: ErrorCode.Enum.ValueType  # 19
+    VolumeIsAlreadyMuted: ErrorCode.Enum.ValueType  # 20
+    VoiceInputEndpointDoesNotExist: ErrorCode.Enum.ValueType  # 21
+    TheVoiceInputDeviceIsNotRegisteredOrDoesNotExist: ErrorCode.Enum.ValueType  # 22
+    EncryptionFailure: ErrorCode.Enum.ValueType  # 23
+    EndpointDoesNotExist: ErrorCode.Enum.ValueType  # 24
+    TheClientsApplicationCancelledTheOperation: ErrorCode.Enum.ValueType  # 25
+    TheOperationTimedOut: ErrorCode.Enum.ValueType  # 26
+    TheSpecifiedPlayerPathObjectWasInvalid: ErrorCode.Enum.ValueType  # 27
+    AddingOrRemovingDevicesFromTheAvOutputContextHasFailed: ErrorCode.Enum.ValueType  # 28
+    CouldNotFindTheSpecifiedNowPlayingPlayer: ErrorCode.Enum.ValueType  # 29
+    TheSpecifiedContentItemDoesNotExist: ErrorCode.Enum.ValueType  # 30
+    TheSpecifiedOffsetIsInvalid: ErrorCode.Enum.ValueType  # 31
+    TheSpecifiedOutputContextIsInvalid: ErrorCode.Enum.ValueType  # 32
+    OneOrMoreSpecifiedOutputDevicesAreNotGroupable: ErrorCode.Enum.ValueType  # 33
+    TheSpecifiedOutputContextDoesNotSupportAddingMoreThanOneOutputDevice: ErrorCode.Enum.ValueType  # 34
+    CouldNotFindTheSpecifiedNowPlayingClient: ErrorCode.Enum.ValueType  # 35
+    EndpointVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType  # 36
+    OutputDeviceVolumeControlIsOnlyPossibleIfTheEndpointIsPickedOrRemoteControllable: ErrorCode.Enum.ValueType  # 37
+    CoderMustSupportKeyValueCoding: ErrorCode.Enum.ValueType  # 38
+    CouldNotFindTheGivenOutputdevice: ErrorCode.Enum.ValueType  # 39
+    FailedToConnectToRemoteDevice: ErrorCode.Enum.ValueType  # 100
+    AuthenticationTokenIsInvalid: ErrorCode.Enum.ValueType  # 101
+    RecordingSessionIsAlreadyInProgressOnThisDevice: ErrorCode.Enum.ValueType  # 102
+    TheDeviceIsNotCurrentlyRecording: ErrorCode.Enum.ValueType  # 103
+    TheClientHasDisconnected: ErrorCode.Enum.ValueType  # 104
+    TheServerHasDisconnected: ErrorCode.Enum.ValueType  # 105
+    TheConnectionHasBeenCancelledByTheClient: ErrorCode.Enum.ValueType  # 106
+    PairingFunctionalityIsLockedDueToSecurityReasons: ErrorCode.Enum.ValueType  # 107
+    TheClientsOperatingSystemVersionIsTooOld: ErrorCode.Enum.ValueType  # 108
+    TheClientsApplicationVersionIsTooOld: ErrorCode.Enum.ValueType  # 109
+    TheDeviceIsNotPaired: ErrorCode.Enum.ValueType  # 110
+    ThePinPairingDialogWasRemovedByTheUserBeforePairingOccoured: ErrorCode.Enum.ValueType  # 111
+    ThePinPairingDialogWasRemovedByATimeoutBeforePairingOccoured: ErrorCode.Enum.ValueType  # 112
+    TheConnectionTimedout: ErrorCode.Enum.ValueType  # 113
+    PairingWithThisDeviceIsBlocked: ErrorCode.Enum.ValueType  # 114
+    TheDeviceIsGoingToSleep: ErrorCode.Enum.ValueType  # 115
+    ConnectionBlockedByServer: ErrorCode.Enum.ValueType  # 116
+    MravendpointWasDeallocatedWhileWaitingForDeviceToConnect: ErrorCode.Enum.ValueType  # 117
+    OutputContextModificationCausedADeviceToNoLongerBeAProxyGroupPlayer: ErrorCode.Enum.ValueType  # 200
+    OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer: ErrorCode.Enum.ValueType  # 201
+    OutputContextModificationRequestedNoTopologyChange: ErrorCode.Enum.ValueType  # 202
+    OtherUnknownError: ErrorCode.Enum.ValueType  # 299
 
     def __init__(self,
         ) -> None: ...
 global___ErrorCode = ErrorCode
 
 class ProtocolMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Type:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Type.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        UNKNOWN_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 0
-        SEND_COMMAND_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 1
-        SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 2
-        GET_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 3
-        SET_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 4
-        SET_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 5
-        REGISTER_HID_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 6
-        REGISTER_HID_DEVICE_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 7
-        SEND_HID_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 8
-        SEND_HID_REPORT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 9
-        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 10
-        NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 11
-        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 12
-        DEVICE_INFO_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 15
-        CLIENT_UPDATES_CONFIG_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 16
-        VOLUME_CONTROL_AVAILABILITY_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 17
-        GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 18
-        REGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 19
-        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 20
-        UNREGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 21
-        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 22
-        KEYBOARD_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 23
-        GET_KEYBOARD_SESSION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 24
-        TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 25
-        GET_VOICE_INPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 26
-        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 27
-        REGISTER_VOICE_INPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 28
-        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 29
-        SET_RECORDING_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 30
-        SEND_VOICE_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 31
-        PLAYBACK_QUEUE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 32
-        TRANSACTION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 33
-        CRYPTO_PAIRING_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 34
-        GAME_CONTROLLER_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 35
-        SET_READY_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 36
-        DEVICE_INFO_UPDATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 37
-        SET_CONNECTION_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 38
-        SEND_BUTTON_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 39
-        SET_HILITE_MODE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 40
-        WAKE_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 41
-        GENERIC_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 42
-        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 43
-        SEND_LYRICS_EVENT: ProtocolMessage.Type.ValueType = ...  # 44
-        SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 46
-        SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 47
-        GET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 49
-        GET_VOLUME_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 50
-        SET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 51
-        VOLUME_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 52
-        REMOVE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 53
-        REMOVE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 54
-        UPDATE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 55
-        UPDATE_CONTENT_ITEM_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 56
-        UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 57
-        UPDATE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 58
-        PROMPT_FOR_ROUTE_AUTHORIZATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 59
-        PROMPT_FOR_ROUTE_AUTHORIZATION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 60
-        PRESENT_ROUTE_AUTHORIZATION_STATUS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 61
-        GET_VOLUME_CONTROL_CAPABILITIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 62
-        GET_VOLUME_CONTROL_CAPABILITIES_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 63
-        VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 64
-        UPDATE_OUTPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 65
-        REMOVE_OUTPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 66
-        REMOTE_TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 67
-        GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 68
-        REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage.Type.ValueType = ...  # 69
+    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ProtocolMessage._Type.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        UNKNOWN_MESSAGE: ProtocolMessage._Type.ValueType  # 0
+        SEND_COMMAND_MESSAGE: ProtocolMessage._Type.ValueType  # 1
+        SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 2
+        GET_STATE_MESSAGE: ProtocolMessage._Type.ValueType  # 3
+        SET_STATE_MESSAGE: ProtocolMessage._Type.ValueType  # 4
+        SET_ARTWORK_MESSAGE: ProtocolMessage._Type.ValueType  # 5
+        REGISTER_HID_DEVICE_MESSAGE: ProtocolMessage._Type.ValueType  # 6
+        REGISTER_HID_DEVICE_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 7
+        SEND_HID_EVENT_MESSAGE: ProtocolMessage._Type.ValueType  # 8
+        SEND_HID_REPORT_MESSAGE: ProtocolMessage._Type.ValueType  # 9
+        SEND_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage._Type.ValueType  # 10
+        NOTIFICATION_MESSAGE: ProtocolMessage._Type.ValueType  # 11
+        CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE: ProtocolMessage._Type.ValueType  # 12
+        DEVICE_INFO_MESSAGE: ProtocolMessage._Type.ValueType  # 15
+        CLIENT_UPDATES_CONFIG_MESSAGE: ProtocolMessage._Type.ValueType  # 16
+        VOLUME_CONTROL_AVAILABILITY_MESSAGE: ProtocolMessage._Type.ValueType  # 17
+        GAME_CONTROLLER_MESSAGE: ProtocolMessage._Type.ValueType  # 18
+        REGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage._Type.ValueType  # 19
+        REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 20
+        UNREGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage._Type.ValueType  # 21
+        REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE: ProtocolMessage._Type.ValueType  # 22
+        KEYBOARD_MESSAGE: ProtocolMessage._Type.ValueType  # 23
+        GET_KEYBOARD_SESSION_MESSAGE: ProtocolMessage._Type.ValueType  # 24
+        TEXT_INPUT_MESSAGE: ProtocolMessage._Type.ValueType  # 25
+        GET_VOICE_INPUT_DEVICES_MESSAGE: ProtocolMessage._Type.ValueType  # 26
+        GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 27
+        REGISTER_VOICE_INPUT_DEVICE_MESSAGE: ProtocolMessage._Type.ValueType  # 28
+        REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 29
+        SET_RECORDING_STATE_MESSAGE: ProtocolMessage._Type.ValueType  # 30
+        SEND_VOICE_INPUT_MESSAGE: ProtocolMessage._Type.ValueType  # 31
+        PLAYBACK_QUEUE_REQUEST_MESSAGE: ProtocolMessage._Type.ValueType  # 32
+        TRANSACTION_MESSAGE: ProtocolMessage._Type.ValueType  # 33
+        CRYPTO_PAIRING_MESSAGE: ProtocolMessage._Type.ValueType  # 34
+        GAME_CONTROLLER_PROPERTIES_MESSAGE: ProtocolMessage._Type.ValueType  # 35
+        SET_READY_STATE_MESSAGE: ProtocolMessage._Type.ValueType  # 36
+        DEVICE_INFO_UPDATE_MESSAGE: ProtocolMessage._Type.ValueType  # 37
+        SET_CONNECTION_STATE_MESSAGE: ProtocolMessage._Type.ValueType  # 38
+        SEND_BUTTON_EVENT_MESSAGE: ProtocolMessage._Type.ValueType  # 39
+        SET_HILITE_MODE_MESSAGE: ProtocolMessage._Type.ValueType  # 40
+        WAKE_DEVICE_MESSAGE: ProtocolMessage._Type.ValueType  # 41
+        GENERIC_MESSAGE: ProtocolMessage._Type.ValueType  # 42
+        SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage._Type.ValueType  # 43
+        SEND_LYRICS_EVENT: ProtocolMessage._Type.ValueType  # 44
+        SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage._Type.ValueType  # 46
+        SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage._Type.ValueType  # 47
+        GET_VOLUME_MESSAGE: ProtocolMessage._Type.ValueType  # 49
+        GET_VOLUME_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 50
+        SET_VOLUME_MESSAGE: ProtocolMessage._Type.ValueType  # 51
+        VOLUME_DID_CHANGE_MESSAGE: ProtocolMessage._Type.ValueType  # 52
+        REMOVE_CLIENT_MESSAGE: ProtocolMessage._Type.ValueType  # 53
+        REMOVE_PLAYER_MESSAGE: ProtocolMessage._Type.ValueType  # 54
+        UPDATE_CLIENT_MESSAGE: ProtocolMessage._Type.ValueType  # 55
+        UPDATE_CONTENT_ITEM_MESSAGE: ProtocolMessage._Type.ValueType  # 56
+        UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE: ProtocolMessage._Type.ValueType  # 57
+        UPDATE_PLAYER_MESSAGE: ProtocolMessage._Type.ValueType  # 58
+        PROMPT_FOR_ROUTE_AUTHORIZATION_MESSAGE: ProtocolMessage._Type.ValueType  # 59
+        PROMPT_FOR_ROUTE_AUTHORIZATION_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 60
+        PRESENT_ROUTE_AUTHORIZATION_STATUS_MESSAGE: ProtocolMessage._Type.ValueType  # 61
+        GET_VOLUME_CONTROL_CAPABILITIES_MESSAGE: ProtocolMessage._Type.ValueType  # 62
+        GET_VOLUME_CONTROL_CAPABILITIES_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 63
+        VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE: ProtocolMessage._Type.ValueType  # 64
+        UPDATE_OUTPUT_DEVICE_MESSAGE: ProtocolMessage._Type.ValueType  # 65
+        REMOVE_OUTPUT_DEVICES_MESSAGE: ProtocolMessage._Type.ValueType  # 66
+        REMOTE_TEXT_INPUT_MESSAGE: ProtocolMessage._Type.ValueType  # 67
+        GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage._Type.ValueType  # 68
+        REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage._Type.ValueType  # 69
         """Same as 66?"""
 
-        PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 70
-        PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 71
-        SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 72
-        PLAYBACK_SESSION_MIGRATE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 73
-        PLAYBACK_SESSION_MIGRATE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 74
-        PLAYBACK_SESSION_MIGRATE_BEGIN_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 75
-        PLAYBACK_SESSION_MIGRATE_END_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 76
-        UPDATE_ACTIVE_SYSTEM_ENDPOINT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 77
-        SET_DISCOVERY_MODE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 101
-        UPDATE_END_POINTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 102
-        REMOVE_ENDPOINTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 103
-        PLAYER_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 104
-        ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 105
-        AUDIO_FADE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 106
-        AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 107
+        PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage._Type.ValueType  # 70
+        PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 71
+        SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage._Type.ValueType  # 72
+        PLAYBACK_SESSION_MIGRATE_REQUEST_MESSAGE: ProtocolMessage._Type.ValueType  # 73
+        PLAYBACK_SESSION_MIGRATE_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 74
+        PLAYBACK_SESSION_MIGRATE_BEGIN_MESSAGE: ProtocolMessage._Type.ValueType  # 75
+        PLAYBACK_SESSION_MIGRATE_END_MESSAGE: ProtocolMessage._Type.ValueType  # 76
+        UPDATE_ACTIVE_SYSTEM_ENDPOINT_MESSAGE: ProtocolMessage._Type.ValueType  # 77
+        SET_DISCOVERY_MODE_MESSAGE: ProtocolMessage._Type.ValueType  # 101
+        UPDATE_END_POINTS_MESSAGE: ProtocolMessage._Type.ValueType  # 102
+        REMOVE_ENDPOINTS_MESSAGE: ProtocolMessage._Type.ValueType  # 103
+        PLAYER_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage._Type.ValueType  # 104
+        ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage._Type.ValueType  # 105
+        AUDIO_FADE_MESSAGE: ProtocolMessage._Type.ValueType  # 106
+        AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 107
     class Type(_Type, metaclass=_TypeEnumTypeWrapper):
         pass
 
-    UNKNOWN_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 0
-    SEND_COMMAND_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 1
-    SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 2
-    GET_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 3
-    SET_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 4
-    SET_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 5
-    REGISTER_HID_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 6
-    REGISTER_HID_DEVICE_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 7
-    SEND_HID_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 8
-    SEND_HID_REPORT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 9
-    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 10
-    NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 11
-    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 12
-    DEVICE_INFO_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 15
-    CLIENT_UPDATES_CONFIG_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 16
-    VOLUME_CONTROL_AVAILABILITY_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 17
-    GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 18
-    REGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 19
-    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 20
-    UNREGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 21
-    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 22
-    KEYBOARD_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 23
-    GET_KEYBOARD_SESSION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 24
-    TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 25
-    GET_VOICE_INPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 26
-    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 27
-    REGISTER_VOICE_INPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 28
-    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 29
-    SET_RECORDING_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 30
-    SEND_VOICE_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 31
-    PLAYBACK_QUEUE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 32
-    TRANSACTION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 33
-    CRYPTO_PAIRING_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 34
-    GAME_CONTROLLER_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 35
-    SET_READY_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 36
-    DEVICE_INFO_UPDATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 37
-    SET_CONNECTION_STATE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 38
-    SEND_BUTTON_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 39
-    SET_HILITE_MODE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 40
-    WAKE_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 41
-    GENERIC_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 42
-    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 43
-    SEND_LYRICS_EVENT: ProtocolMessage.Type.ValueType = ...  # 44
-    SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 46
-    SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 47
-    GET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 49
-    GET_VOLUME_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 50
-    SET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 51
-    VOLUME_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 52
-    REMOVE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 53
-    REMOVE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 54
-    UPDATE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 55
-    UPDATE_CONTENT_ITEM_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 56
-    UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 57
-    UPDATE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 58
-    PROMPT_FOR_ROUTE_AUTHORIZATION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 59
-    PROMPT_FOR_ROUTE_AUTHORIZATION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 60
-    PRESENT_ROUTE_AUTHORIZATION_STATUS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 61
-    GET_VOLUME_CONTROL_CAPABILITIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 62
-    GET_VOLUME_CONTROL_CAPABILITIES_RESULT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 63
-    VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 64
-    UPDATE_OUTPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 65
-    REMOVE_OUTPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 66
-    REMOTE_TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 67
-    GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 68
-    REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage.Type.ValueType = ...  # 69
+    UNKNOWN_MESSAGE: ProtocolMessage.Type.ValueType  # 0
+    SEND_COMMAND_MESSAGE: ProtocolMessage.Type.ValueType  # 1
+    SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 2
+    GET_STATE_MESSAGE: ProtocolMessage.Type.ValueType  # 3
+    SET_STATE_MESSAGE: ProtocolMessage.Type.ValueType  # 4
+    SET_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType  # 5
+    REGISTER_HID_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType  # 6
+    REGISTER_HID_DEVICE_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 7
+    SEND_HID_EVENT_MESSAGE: ProtocolMessage.Type.ValueType  # 8
+    SEND_HID_REPORT_MESSAGE: ProtocolMessage.Type.ValueType  # 9
+    SEND_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType  # 10
+    NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType  # 11
+    CONTENT_ITEMS_CHANGED_NOTIFICATION_MESSAGE: ProtocolMessage.Type.ValueType  # 12
+    DEVICE_INFO_MESSAGE: ProtocolMessage.Type.ValueType  # 15
+    CLIENT_UPDATES_CONFIG_MESSAGE: ProtocolMessage.Type.ValueType  # 16
+    VOLUME_CONTROL_AVAILABILITY_MESSAGE: ProtocolMessage.Type.ValueType  # 17
+    GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType  # 18
+    REGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType  # 19
+    REGISTER_GAME_CONTROLLER_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 20
+    UNREGISTER_GAME_CONTROLLER_MESSAGE: ProtocolMessage.Type.ValueType  # 21
+    REGISTER_FOR_GAME_CONTROLLER_EVENTS_MESSAGE: ProtocolMessage.Type.ValueType  # 22
+    KEYBOARD_MESSAGE: ProtocolMessage.Type.ValueType  # 23
+    GET_KEYBOARD_SESSION_MESSAGE: ProtocolMessage.Type.ValueType  # 24
+    TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType  # 25
+    GET_VOICE_INPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType  # 26
+    GET_VOICE_INPUT_DEVICES_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 27
+    REGISTER_VOICE_INPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType  # 28
+    REGISTER_VOICE_INPUT_DEVICE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 29
+    SET_RECORDING_STATE_MESSAGE: ProtocolMessage.Type.ValueType  # 30
+    SEND_VOICE_INPUT_MESSAGE: ProtocolMessage.Type.ValueType  # 31
+    PLAYBACK_QUEUE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType  # 32
+    TRANSACTION_MESSAGE: ProtocolMessage.Type.ValueType  # 33
+    CRYPTO_PAIRING_MESSAGE: ProtocolMessage.Type.ValueType  # 34
+    GAME_CONTROLLER_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType  # 35
+    SET_READY_STATE_MESSAGE: ProtocolMessage.Type.ValueType  # 36
+    DEVICE_INFO_UPDATE_MESSAGE: ProtocolMessage.Type.ValueType  # 37
+    SET_CONNECTION_STATE_MESSAGE: ProtocolMessage.Type.ValueType  # 38
+    SEND_BUTTON_EVENT_MESSAGE: ProtocolMessage.Type.ValueType  # 39
+    SET_HILITE_MODE_MESSAGE: ProtocolMessage.Type.ValueType  # 40
+    WAKE_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType  # 41
+    GENERIC_MESSAGE: ProtocolMessage.Type.ValueType  # 42
+    SEND_PACKED_VIRTUAL_TOUCH_EVENT_MESSAGE: ProtocolMessage.Type.ValueType  # 43
+    SEND_LYRICS_EVENT: ProtocolMessage.Type.ValueType  # 44
+    SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType  # 46
+    SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType  # 47
+    GET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType  # 49
+    GET_VOLUME_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 50
+    SET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType  # 51
+    VOLUME_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType  # 52
+    REMOVE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType  # 53
+    REMOVE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType  # 54
+    UPDATE_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType  # 55
+    UPDATE_CONTENT_ITEM_MESSAGE: ProtocolMessage.Type.ValueType  # 56
+    UPDATE_CONTENT_ITEM_ARTWORK_MESSAGE: ProtocolMessage.Type.ValueType  # 57
+    UPDATE_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType  # 58
+    PROMPT_FOR_ROUTE_AUTHORIZATION_MESSAGE: ProtocolMessage.Type.ValueType  # 59
+    PROMPT_FOR_ROUTE_AUTHORIZATION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 60
+    PRESENT_ROUTE_AUTHORIZATION_STATUS_MESSAGE: ProtocolMessage.Type.ValueType  # 61
+    GET_VOLUME_CONTROL_CAPABILITIES_MESSAGE: ProtocolMessage.Type.ValueType  # 62
+    GET_VOLUME_CONTROL_CAPABILITIES_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 63
+    VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE: ProtocolMessage.Type.ValueType  # 64
+    UPDATE_OUTPUT_DEVICE_MESSAGE: ProtocolMessage.Type.ValueType  # 65
+    REMOVE_OUTPUT_DEVICES_MESSAGE: ProtocolMessage.Type.ValueType  # 66
+    REMOTE_TEXT_INPUT_MESSAGE: ProtocolMessage.Type.ValueType  # 67
+    GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage.Type.ValueType  # 68
+    REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage.Type.ValueType  # 69
     """Same as 66?"""
 
-    PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 70
-    PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 71
-    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 72
-    PLAYBACK_SESSION_MIGRATE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 73
-    PLAYBACK_SESSION_MIGRATE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 74
-    PLAYBACK_SESSION_MIGRATE_BEGIN_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 75
-    PLAYBACK_SESSION_MIGRATE_END_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 76
-    UPDATE_ACTIVE_SYSTEM_ENDPOINT_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 77
-    SET_DISCOVERY_MODE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 101
-    UPDATE_END_POINTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 102
-    REMOVE_ENDPOINTS_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 103
-    PLAYER_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 104
-    ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 105
-    AUDIO_FADE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 106
-    AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType = ...  # 107
+    PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType  # 70
+    PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 71
+    SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage.Type.ValueType  # 72
+    PLAYBACK_SESSION_MIGRATE_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType  # 73
+    PLAYBACK_SESSION_MIGRATE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 74
+    PLAYBACK_SESSION_MIGRATE_BEGIN_MESSAGE: ProtocolMessage.Type.ValueType  # 75
+    PLAYBACK_SESSION_MIGRATE_END_MESSAGE: ProtocolMessage.Type.ValueType  # 76
+    UPDATE_ACTIVE_SYSTEM_ENDPOINT_MESSAGE: ProtocolMessage.Type.ValueType  # 77
+    SET_DISCOVERY_MODE_MESSAGE: ProtocolMessage.Type.ValueType  # 101
+    UPDATE_END_POINTS_MESSAGE: ProtocolMessage.Type.ValueType  # 102
+    REMOVE_ENDPOINTS_MESSAGE: ProtocolMessage.Type.ValueType  # 103
+    PLAYER_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType  # 104
+    ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType  # 105
+    AUDIO_FADE_MESSAGE: ProtocolMessage.Type.ValueType  # 106
+    AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 107
 
     TYPE_FIELD_NUMBER: builtins.int
     IDENTIFIER_FIELD_NUMBER: builtins.int
@@ -342,24 +342,24 @@ class ProtocolMessage(google.protobuf.message.Message):
     TIMESTAMP_FIELD_NUMBER: builtins.int
     ERRORDESCRIPTION_FIELD_NUMBER: builtins.int
     UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    type: global___ProtocolMessage.Type.ValueType = ...
+    type: global___ProtocolMessage.Type.ValueType
     """Identifies which underlying message is filled in."""
 
-    identifier: typing.Text = ...
-    authenticationToken: typing.Text = ...
-    errorCode: global___ErrorCode.Enum.ValueType = ...
-    timestamp: builtins.int = ...
-    errorDescription: typing.Text = ...
-    uniqueIdentifier: typing.Text = ...
+    identifier: typing.Text
+    authenticationToken: typing.Text
+    errorCode: global___ErrorCode.Enum.ValueType
+    timestamp: builtins.int
+    errorDescription: typing.Text
+    uniqueIdentifier: typing.Text
     def __init__(self,
         *,
-        type : typing.Optional[global___ProtocolMessage.Type.ValueType] = ...,
-        identifier : typing.Optional[typing.Text] = ...,
-        authenticationToken : typing.Optional[typing.Text] = ...,
-        errorCode : typing.Optional[global___ErrorCode.Enum.ValueType] = ...,
-        timestamp : typing.Optional[builtins.int] = ...,
-        errorDescription : typing.Optional[typing.Text] = ...,
-        uniqueIdentifier : typing.Optional[typing.Text] = ...,
+        type: typing.Optional[global___ProtocolMessage.Type.ValueType] = ...,
+        identifier: typing.Optional[typing.Text] = ...,
+        authenticationToken: typing.Optional[typing.Text] = ...,
+        errorCode: typing.Optional[global___ErrorCode.Enum.ValueType] = ...,
+        timestamp: typing.Optional[builtins.int] = ...,
+        errorDescription: typing.Optional[typing.Text] = ...,
+        uniqueIdentifier: typing.Optional[typing.Text] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...

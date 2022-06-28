@@ -38,7 +38,7 @@ message DeviceInfoMessage {
   optional bool isGroupLeader = 29;
   optional bool isAirplayActive = 30;
   optional string systemPodcastApplication = 31;
-  optional string enderDefaultGroupUID = 32;
+  optional string senderDefaultGroupUID = 32;
   repeated string airplayReceivers = 33;
   optional string linkAgent = 34;
   optional string clusterID = 35;
@@ -46,4 +46,8 @@ message DeviceInfoMessage {
   optional uint32 clusterType = 37;
   optional bool isClusterAware = 38;
   optional string modelID = 39;
+  optional bool supportsMultiplayer = 40;
+  optional string routingContextID = 41; // Example: 577E1BCA-2D9B-41C2-A8F8-C515CE8072D4
+  optional string airPlayGroupID = 42; // Example: 6E0ED14E-0BA4-4A84-AF30-9EB080E7AA73
+  optional string systemBooksApplication = 43; // Example: com.apple.iBooks
 }

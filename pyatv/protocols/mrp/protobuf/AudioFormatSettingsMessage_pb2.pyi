@@ -8,15 +8,15 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class AudioFormatSettings(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     FORMATSETTINGSPLISTDATA_FIELD_NUMBER: builtins.int
-    formatSettingsPlistData: builtins.bytes = ...
+    formatSettingsPlistData: builtins.bytes
     def __init__(self,
         *,
-        formatSettingsPlistData : typing.Optional[builtins.bytes] = ...,
+        formatSettingsPlistData: typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["formatSettingsPlistData",b"formatSettingsPlistData"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["formatSettingsPlistData",b"formatSettingsPlistData"]) -> None: ...

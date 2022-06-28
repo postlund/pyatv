@@ -11,33 +11,34 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SetRecordingStateMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _RecordingState:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _RecordingStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RecordingState.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: SetRecordingStateMessage.RecordingState.ValueType = ...  # 0
-        Recording: SetRecordingStateMessage.RecordingState.ValueType = ...  # 1
-        NotRecording: SetRecordingStateMessage.RecordingState.ValueType = ...  # 2
+    class _RecordingStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SetRecordingStateMessage._RecordingState.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: SetRecordingStateMessage._RecordingState.ValueType  # 0
+        Recording: SetRecordingStateMessage._RecordingState.ValueType  # 1
+        NotRecording: SetRecordingStateMessage._RecordingState.ValueType  # 2
     class RecordingState(_RecordingState, metaclass=_RecordingStateEnumTypeWrapper):
         pass
 
-    Unknown: SetRecordingStateMessage.RecordingState.ValueType = ...  # 0
-    Recording: SetRecordingStateMessage.RecordingState.ValueType = ...  # 1
-    NotRecording: SetRecordingStateMessage.RecordingState.ValueType = ...  # 2
+    Unknown: SetRecordingStateMessage.RecordingState.ValueType  # 0
+    Recording: SetRecordingStateMessage.RecordingState.ValueType  # 1
+    NotRecording: SetRecordingStateMessage.RecordingState.ValueType  # 2
 
     STATE_FIELD_NUMBER: builtins.int
-    state: global___SetRecordingStateMessage.RecordingState.ValueType = ...
+    state: global___SetRecordingStateMessage.RecordingState.ValueType
     def __init__(self,
         *,
-        state : typing.Optional[global___SetRecordingStateMessage.RecordingState.ValueType] = ...,
+        state: typing.Optional[global___SetRecordingStateMessage.RecordingState.ValueType] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["state",b"state"]) -> None: ...
 global___SetRecordingStateMessage = SetRecordingStateMessage
 
-setRecordingStateMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetRecordingStateMessage] = ...
+SETRECORDINGSTATEMESSAGE_FIELD_NUMBER: builtins.int
+setRecordingStateMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetRecordingStateMessage]

@@ -12,10 +12,10 @@ import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PlaybackQueue(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     LOCATION_FIELD_NUMBER: builtins.int
     CONTENTITEMS_FIELD_NUMBER: builtins.int
     CONTEXT_FIELD_NUMBER: builtins.int
@@ -23,25 +23,25 @@ class PlaybackQueue(google.protobuf.message.Message):
     RESOLVEDPLAYERPATH_FIELD_NUMBER: builtins.int
     SENDINGPLAYBACKQUEUETRANSACTION_FIELD_NUMBER: builtins.int
     QUEUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    location: builtins.int = ...
+    location: builtins.int
     @property
     def contentItems(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]: ...
     @property
     def context(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext: ...
-    requestId: typing.Text = ...
+    requestId: typing.Text
     @property
     def resolvedPlayerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    sendingPlaybackQueueTransaction: builtins.bool = ...
-    queueIdentifier: typing.Text = ...
+    sendingPlaybackQueueTransaction: builtins.bool
+    queueIdentifier: typing.Text
     def __init__(self,
         *,
-        location : typing.Optional[builtins.int] = ...,
-        contentItems : typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]] = ...,
-        context : typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext] = ...,
-        requestId : typing.Optional[typing.Text] = ...,
-        resolvedPlayerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        sendingPlaybackQueueTransaction : typing.Optional[builtins.bool] = ...,
-        queueIdentifier : typing.Optional[typing.Text] = ...,
+        location: typing.Optional[builtins.int] = ...,
+        contentItems: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]] = ...,
+        context: typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext] = ...,
+        requestId: typing.Optional[typing.Text] = ...,
+        resolvedPlayerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        sendingPlaybackQueueTransaction: typing.Optional[builtins.bool] = ...,
+        queueIdentifier: typing.Optional[typing.Text] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["context",b"context","location",b"location","queueIdentifier",b"queueIdentifier","requestId",b"requestId","resolvedPlayerPath",b"resolvedPlayerPath","sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["contentItems",b"contentItems","context",b"context","location",b"location","queueIdentifier",b"queueIdentifier","requestId",b"requestId","resolvedPlayerPath",b"resolvedPlayerPath","sendingPlaybackQueueTransaction",b"sendingPlaybackQueueTransaction"]) -> None: ...
