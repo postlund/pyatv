@@ -1,4 +1,4 @@
-black==22.3.0
+black==22.6.0
 codecov==2.1.12
 deepdiff==5.8.1
 flake8==4.0.1
