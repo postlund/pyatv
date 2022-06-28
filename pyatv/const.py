@@ -298,6 +298,12 @@ class FeatureName(Enum):
     SetRepeat = 21
     """Change repeat state."""
 
+    ChannelUp = 48
+    """Select next channel."""
+
+    ChannelDown = 49
+    """Select previous channel."""
+
     Title = 22
     """Title of playing media."""
 

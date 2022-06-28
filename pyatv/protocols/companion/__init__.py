@@ -118,6 +118,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.VolumeUp,
         FeatureName.VolumeDown,
         FeatureName.PlayPause,
+        FeatureName.ChannelUp,
+        FeatureName.ChannelDown,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -261,6 +263,14 @@ class CompanionRemoteControl(RemoteControl):
     async def previous(self) -> None:
         """Press key previous."""
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
+
+    async def channel_up(self) -> None:
+        """Select next channel."""
+        await self._press_button(HidCommand.ChannelIncrement)
+
+    async def channel_down(self) -> None:
+        """Select previous channel."""
+        await self._press_button(HidCommand.ChannelDecrement)
 
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap

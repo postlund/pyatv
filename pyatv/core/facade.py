@@ -180,6 +180,16 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Change repeat state."""
         return await self.relay("set_repeat")(repeat_state=repeat_state)
 
+    @shield.guard
+    async def channel_up(self) -> None:
+        """Select next channel."""
+        return await self.relay("channel_up")()
+
+    @shield.guard
+    async def channel_down(self) -> None:
+        """Select previous channel."""
+        return await self.relay("channel_down")()
+
 
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""
