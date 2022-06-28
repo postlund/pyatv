@@ -10,21 +10,22 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RegisterHIDDeviceResultMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     ERRORCODE_FIELD_NUMBER: builtins.int
     DEVICEIDENTIFIER_FIELD_NUMBER: builtins.int
-    errorCode: builtins.int = ...
-    deviceIdentifier: builtins.int = ...
+    errorCode: builtins.int
+    deviceIdentifier: builtins.int
     def __init__(self,
         *,
-        errorCode : typing.Optional[builtins.int] = ...,
-        deviceIdentifier : typing.Optional[builtins.int] = ...,
+        errorCode: typing.Optional[builtins.int] = ...,
+        deviceIdentifier: typing.Optional[builtins.int] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["deviceIdentifier",b"deviceIdentifier","errorCode",b"errorCode"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["deviceIdentifier",b"deviceIdentifier","errorCode",b"errorCode"]) -> None: ...
 global___RegisterHIDDeviceResultMessage = RegisterHIDDeviceResultMessage
 
-registerHIDDeviceResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RegisterHIDDeviceResultMessage] = ...
+REGISTERHIDDEVICERESULTMESSAGE_FIELD_NUMBER: builtins.int
+registerHIDDeviceResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RegisterHIDDeviceResultMessage]

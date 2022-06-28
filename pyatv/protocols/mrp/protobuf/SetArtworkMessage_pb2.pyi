@@ -10,18 +10,19 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SetArtworkMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     JPEGDATA_FIELD_NUMBER: builtins.int
-    jpegData: builtins.bytes = ...
+    jpegData: builtins.bytes
     def __init__(self,
         *,
-        jpegData : typing.Optional[builtins.bytes] = ...,
+        jpegData: typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["jpegData",b"jpegData"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["jpegData",b"jpegData"]) -> None: ...
 global___SetArtworkMessage = SetArtworkMessage
 
-setArtworkMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetArtworkMessage] = ...
+SETARTWORKMESSAGE_FIELD_NUMBER: builtins.int
+setArtworkMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetArtworkMessage]

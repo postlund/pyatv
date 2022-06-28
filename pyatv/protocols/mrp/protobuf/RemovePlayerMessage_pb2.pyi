@@ -11,19 +11,20 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RemovePlayerMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PLAYERPATH_FIELD_NUMBER: builtins.int
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     def __init__(self,
         *,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath"]) -> None: ...
 global___RemovePlayerMessage = RemovePlayerMessage
 
-removePlayerMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemovePlayerMessage] = ...
+REMOVEPLAYERMESSAGE_FIELD_NUMBER: builtins.int
+removePlayerMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemovePlayerMessage]
