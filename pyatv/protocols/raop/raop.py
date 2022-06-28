@@ -43,7 +43,7 @@ PACKET_BACKLOG_SIZE = 1000
 KEEP_ALIVE_INTERVAL = 25  # Seconds
 
 # Number of "too slow to keep up" warnings to suppress before warning about them
-SLOW_WARNING_THRESHOLD = 3
+SLOW_WARNING_THRESHOLD = 5
 
 # Metadata used when no metadata is present
 MISSING_METADATA = AudioMetadata(

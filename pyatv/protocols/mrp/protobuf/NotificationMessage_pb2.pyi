@@ -11,10 +11,10 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class NotificationMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NOTIFICATION_FIELD_NUMBER: builtins.int
     USERINFO_FIELD_NUMBER: builtins.int
     @property
@@ -23,10 +23,11 @@ class NotificationMessage(google.protobuf.message.Message):
     def userInfo(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
     def __init__(self,
         *,
-        notification : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        userInfo : typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+        notification: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        userInfo: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["notification",b"notification","userInfo",b"userInfo"]) -> None: ...
 global___NotificationMessage = NotificationMessage
 
-notificationMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___NotificationMessage] = ...
+NOTIFICATIONMESSAGE_FIELD_NUMBER: builtins.int
+notificationMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___NotificationMessage]

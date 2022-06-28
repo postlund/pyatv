@@ -11,22 +11,23 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PlayerClientPropertiesMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PLAYERPATH_FIELD_NUMBER: builtins.int
     LASTPLAYINGTIMESTAMP_FIELD_NUMBER: builtins.int
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    lastPlayingTimestamp: builtins.float = ...
+    lastPlayingTimestamp: builtins.float
     def __init__(self,
         *,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        lastPlayingTimestamp : typing.Optional[builtins.float] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        lastPlayingTimestamp: typing.Optional[builtins.float] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp","playerPath",b"playerPath"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp","playerPath",b"playerPath"]) -> None: ...
 global___PlayerClientPropertiesMessage = PlayerClientPropertiesMessage
 
-playerClientPropertiesMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___PlayerClientPropertiesMessage] = ...
+PLAYERCLIENTPROPERTIESMESSAGE_FIELD_NUMBER: builtins.int
+playerClientPropertiesMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___PlayerClientPropertiesMessage]

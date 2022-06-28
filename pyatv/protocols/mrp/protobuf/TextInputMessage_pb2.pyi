@@ -11,30 +11,30 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class ActionType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: ActionType.Enum.ValueType = ...  # 0
-        Insert: ActionType.Enum.ValueType = ...  # 1
-        Set: ActionType.Enum.ValueType = ...  # 2
-        Delete: ActionType.Enum.ValueType = ...  # 3
-        ClearAction: ActionType.Enum.ValueType = ...  # 4
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ActionType._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: ActionType._Enum.ValueType  # 0
+        Insert: ActionType._Enum.ValueType  # 1
+        Set: ActionType._Enum.ValueType  # 2
+        Delete: ActionType._Enum.ValueType  # 3
+        ClearAction: ActionType._Enum.ValueType  # 4
         """"Clear" clashes with something, making mypy unhappy"""
 
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Unknown: ActionType.Enum.ValueType = ...  # 0
-    Insert: ActionType.Enum.ValueType = ...  # 1
-    Set: ActionType.Enum.ValueType = ...  # 2
-    Delete: ActionType.Enum.ValueType = ...  # 3
-    ClearAction: ActionType.Enum.ValueType = ...  # 4
+    Unknown: ActionType.Enum.ValueType  # 0
+    Insert: ActionType.Enum.ValueType  # 1
+    Set: ActionType.Enum.ValueType  # 2
+    Delete: ActionType.Enum.ValueType  # 3
+    ClearAction: ActionType.Enum.ValueType  # 4
     """"Clear" clashes with something, making mypy unhappy"""
 
 
@@ -43,21 +43,22 @@ class ActionType(google.protobuf.message.Message):
 global___ActionType = ActionType
 
 class TextInputMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TIMESTAMP_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     ACTIONTYPE_FIELD_NUMBER: builtins.int
-    timestamp: builtins.float = ...
-    text: typing.Text = ...
-    actionType: global___ActionType.Enum.ValueType = ...
+    timestamp: builtins.float
+    text: typing.Text
+    actionType: global___ActionType.Enum.ValueType
     def __init__(self,
         *,
-        timestamp : typing.Optional[builtins.float] = ...,
-        text : typing.Optional[typing.Text] = ...,
-        actionType : typing.Optional[global___ActionType.Enum.ValueType] = ...,
+        timestamp: typing.Optional[builtins.float] = ...,
+        text: typing.Optional[typing.Text] = ...,
+        actionType: typing.Optional[global___ActionType.Enum.ValueType] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["actionType",b"actionType","text",b"text","timestamp",b"timestamp"]) -> None: ...
 global___TextInputMessage = TextInputMessage
 
-textInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___TextInputMessage] = ...
+TEXTINPUTMESSAGE_FIELD_NUMBER: builtins.int
+textInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___TextInputMessage]

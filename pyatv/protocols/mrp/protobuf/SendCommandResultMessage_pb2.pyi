@@ -13,241 +13,242 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SendError(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        NoError: SendError.Enum.ValueType = ...  # 0
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendError._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        NoError: SendError._Enum.ValueType  # 0
         """This is None in original message definitions (no-go with python)"""
 
-        ApplicationNotFound: SendError.Enum.ValueType = ...  # 1
-        ConnectionFailed: SendError.Enum.ValueType = ...  # 2
-        Ignored: SendError.Enum.ValueType = ...  # 3
-        CouldNotLaunchApplication: SendError.Enum.ValueType = ...  # 4
-        TimedOut: SendError.Enum.ValueType = ...  # 5
-        OriginDoesNotExist: SendError.Enum.ValueType = ...  # 6
-        InvalidOptions: SendError.Enum.ValueType = ...  # 7
-        NoCommandHandlers: SendError.Enum.ValueType = ...  # 8
-        ApplicationNotInstalled: SendError.Enum.ValueType = ...  # 9
-        NotSupported: SendError.Enum.ValueType = ...  # 10
+        ApplicationNotFound: SendError._Enum.ValueType  # 1
+        ConnectionFailed: SendError._Enum.ValueType  # 2
+        Ignored: SendError._Enum.ValueType  # 3
+        CouldNotLaunchApplication: SendError._Enum.ValueType  # 4
+        TimedOut: SendError._Enum.ValueType  # 5
+        OriginDoesNotExist: SendError._Enum.ValueType  # 6
+        InvalidOptions: SendError._Enum.ValueType  # 7
+        NoCommandHandlers: SendError._Enum.ValueType  # 8
+        ApplicationNotInstalled: SendError._Enum.ValueType  # 9
+        NotSupported: SendError._Enum.ValueType  # 10
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    NoError: SendError.Enum.ValueType = ...  # 0
+    NoError: SendError.Enum.ValueType  # 0
     """This is None in original message definitions (no-go with python)"""
 
-    ApplicationNotFound: SendError.Enum.ValueType = ...  # 1
-    ConnectionFailed: SendError.Enum.ValueType = ...  # 2
-    Ignored: SendError.Enum.ValueType = ...  # 3
-    CouldNotLaunchApplication: SendError.Enum.ValueType = ...  # 4
-    TimedOut: SendError.Enum.ValueType = ...  # 5
-    OriginDoesNotExist: SendError.Enum.ValueType = ...  # 6
-    InvalidOptions: SendError.Enum.ValueType = ...  # 7
-    NoCommandHandlers: SendError.Enum.ValueType = ...  # 8
-    ApplicationNotInstalled: SendError.Enum.ValueType = ...  # 9
-    NotSupported: SendError.Enum.ValueType = ...  # 10
+    ApplicationNotFound: SendError.Enum.ValueType  # 1
+    ConnectionFailed: SendError.Enum.ValueType  # 2
+    Ignored: SendError.Enum.ValueType  # 3
+    CouldNotLaunchApplication: SendError.Enum.ValueType  # 4
+    TimedOut: SendError.Enum.ValueType  # 5
+    OriginDoesNotExist: SendError.Enum.ValueType  # 6
+    InvalidOptions: SendError.Enum.ValueType  # 7
+    NoCommandHandlers: SendError.Enum.ValueType  # 8
+    ApplicationNotInstalled: SendError.Enum.ValueType  # 9
+    NotSupported: SendError.Enum.ValueType  # 10
 
     def __init__(self,
         ) -> None: ...
 global___SendError = SendError
 
 class HandlerReturnStatus(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Success: HandlerReturnStatus.Enum.ValueType = ...  # 0
-        NoSuchContent: HandlerReturnStatus.Enum.ValueType = ...  # 1
-        CommandFailed: HandlerReturnStatus.Enum.ValueType = ...  # 2
-        NoActionableNowPlayingItem: HandlerReturnStatus.Enum.ValueType = ...  # 10
-        DeviceNotFound: HandlerReturnStatus.Enum.ValueType = ...  # 20
-        UIKitLegacy: HandlerReturnStatus.Enum.ValueType = ...  # 3
-        SkipAdProhibited: HandlerReturnStatus.Enum.ValueType = ...  # 100
-        QueueIsUserCurated: HandlerReturnStatus.Enum.ValueType = ...  # 101
-        UserModifiedQueueDisabled: HandlerReturnStatus.Enum.ValueType = ...  # 102
-        UserQueueModificationNotSupportedForCurrentItem: HandlerReturnStatus.Enum.ValueType = ...  # 103
-        SubscriptionRequiredForSharedQueue: HandlerReturnStatus.Enum.ValueType = ...  # 104
-        InsertionPositionNotSpecified: HandlerReturnStatus.Enum.ValueType = ...  # 105
-        InvalidInsertionPosition: HandlerReturnStatus.Enum.ValueType = ...  # 106
-        RequestParametersOutOfBounds: HandlerReturnStatus.Enum.ValueType = ...  # 107
-        SkipLimitReached: HandlerReturnStatus.Enum.ValueType = ...  # 108
-        AuthenticationFailure: HandlerReturnStatus.Enum.ValueType = ...  # 401
-        MediaServiceUnavailable: HandlerReturnStatus.Enum.ValueType = ...  # 501
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[HandlerReturnStatus._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Success: HandlerReturnStatus._Enum.ValueType  # 0
+        NoSuchContent: HandlerReturnStatus._Enum.ValueType  # 1
+        CommandFailed: HandlerReturnStatus._Enum.ValueType  # 2
+        NoActionableNowPlayingItem: HandlerReturnStatus._Enum.ValueType  # 10
+        DeviceNotFound: HandlerReturnStatus._Enum.ValueType  # 20
+        UIKitLegacy: HandlerReturnStatus._Enum.ValueType  # 3
+        SkipAdProhibited: HandlerReturnStatus._Enum.ValueType  # 100
+        QueueIsUserCurated: HandlerReturnStatus._Enum.ValueType  # 101
+        UserModifiedQueueDisabled: HandlerReturnStatus._Enum.ValueType  # 102
+        UserQueueModificationNotSupportedForCurrentItem: HandlerReturnStatus._Enum.ValueType  # 103
+        SubscriptionRequiredForSharedQueue: HandlerReturnStatus._Enum.ValueType  # 104
+        InsertionPositionNotSpecified: HandlerReturnStatus._Enum.ValueType  # 105
+        InvalidInsertionPosition: HandlerReturnStatus._Enum.ValueType  # 106
+        RequestParametersOutOfBounds: HandlerReturnStatus._Enum.ValueType  # 107
+        SkipLimitReached: HandlerReturnStatus._Enum.ValueType  # 108
+        AuthenticationFailure: HandlerReturnStatus._Enum.ValueType  # 401
+        MediaServiceUnavailable: HandlerReturnStatus._Enum.ValueType  # 501
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Success: HandlerReturnStatus.Enum.ValueType = ...  # 0
-    NoSuchContent: HandlerReturnStatus.Enum.ValueType = ...  # 1
-    CommandFailed: HandlerReturnStatus.Enum.ValueType = ...  # 2
-    NoActionableNowPlayingItem: HandlerReturnStatus.Enum.ValueType = ...  # 10
-    DeviceNotFound: HandlerReturnStatus.Enum.ValueType = ...  # 20
-    UIKitLegacy: HandlerReturnStatus.Enum.ValueType = ...  # 3
-    SkipAdProhibited: HandlerReturnStatus.Enum.ValueType = ...  # 100
-    QueueIsUserCurated: HandlerReturnStatus.Enum.ValueType = ...  # 101
-    UserModifiedQueueDisabled: HandlerReturnStatus.Enum.ValueType = ...  # 102
-    UserQueueModificationNotSupportedForCurrentItem: HandlerReturnStatus.Enum.ValueType = ...  # 103
-    SubscriptionRequiredForSharedQueue: HandlerReturnStatus.Enum.ValueType = ...  # 104
-    InsertionPositionNotSpecified: HandlerReturnStatus.Enum.ValueType = ...  # 105
-    InvalidInsertionPosition: HandlerReturnStatus.Enum.ValueType = ...  # 106
-    RequestParametersOutOfBounds: HandlerReturnStatus.Enum.ValueType = ...  # 107
-    SkipLimitReached: HandlerReturnStatus.Enum.ValueType = ...  # 108
-    AuthenticationFailure: HandlerReturnStatus.Enum.ValueType = ...  # 401
-    MediaServiceUnavailable: HandlerReturnStatus.Enum.ValueType = ...  # 501
+    Success: HandlerReturnStatus.Enum.ValueType  # 0
+    NoSuchContent: HandlerReturnStatus.Enum.ValueType  # 1
+    CommandFailed: HandlerReturnStatus.Enum.ValueType  # 2
+    NoActionableNowPlayingItem: HandlerReturnStatus.Enum.ValueType  # 10
+    DeviceNotFound: HandlerReturnStatus.Enum.ValueType  # 20
+    UIKitLegacy: HandlerReturnStatus.Enum.ValueType  # 3
+    SkipAdProhibited: HandlerReturnStatus.Enum.ValueType  # 100
+    QueueIsUserCurated: HandlerReturnStatus.Enum.ValueType  # 101
+    UserModifiedQueueDisabled: HandlerReturnStatus.Enum.ValueType  # 102
+    UserQueueModificationNotSupportedForCurrentItem: HandlerReturnStatus.Enum.ValueType  # 103
+    SubscriptionRequiredForSharedQueue: HandlerReturnStatus.Enum.ValueType  # 104
+    InsertionPositionNotSpecified: HandlerReturnStatus.Enum.ValueType  # 105
+    InvalidInsertionPosition: HandlerReturnStatus.Enum.ValueType  # 106
+    RequestParametersOutOfBounds: HandlerReturnStatus.Enum.ValueType  # 107
+    SkipLimitReached: HandlerReturnStatus.Enum.ValueType  # 108
+    AuthenticationFailure: HandlerReturnStatus.Enum.ValueType  # 401
+    MediaServiceUnavailable: HandlerReturnStatus.Enum.ValueType  # 501
 
     def __init__(self,
         ) -> None: ...
 global___HandlerReturnStatus = HandlerReturnStatus
 
 class SendCommandStatusCode(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Success: SendCommandStatusCode.Enum.ValueType = ...  # 0
-        NoSuchContent: SendCommandStatusCode.Enum.ValueType = ...  # 1
-        CommandFailed: SendCommandStatusCode.Enum.ValueType = ...  # 2
-        NoActionableNowPlayingItem: SendCommandStatusCode.Enum.ValueType = ...  # 10
-        DeviceNotFound: SendCommandStatusCode.Enum.ValueType = ...  # 20
-        UIKitLegacy: SendCommandStatusCode.Enum.ValueType = ...  # 3
-        SkipAdProhibited: SendCommandStatusCode.Enum.ValueType = ...  # 100
-        QueueIsUserCurated: SendCommandStatusCode.Enum.ValueType = ...  # 101
-        UserModifiedQueueDisabled: SendCommandStatusCode.Enum.ValueType = ...  # 102
-        UserQueueModificationNotSupportedForCurrentItem: SendCommandStatusCode.Enum.ValueType = ...  # 103
-        SubscriptionRequiredForSharedQueue: SendCommandStatusCode.Enum.ValueType = ...  # 104
-        InsertionPositionNotSpecified: SendCommandStatusCode.Enum.ValueType = ...  # 105
-        InvalidInsertionPosition: SendCommandStatusCode.Enum.ValueType = ...  # 106
-        RequestParametersOutOfBounds: SendCommandStatusCode.Enum.ValueType = ...  # 107
-        SkipLimitReached: SendCommandStatusCode.Enum.ValueType = ...  # 108
-        AuthenticationFailure: SendCommandStatusCode.Enum.ValueType = ...  # 401
-        MediaServiceUnavailable: SendCommandStatusCode.Enum.ValueType = ...  # 501
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandStatusCode._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Success: SendCommandStatusCode._Enum.ValueType  # 0
+        NoSuchContent: SendCommandStatusCode._Enum.ValueType  # 1
+        CommandFailed: SendCommandStatusCode._Enum.ValueType  # 2
+        NoActionableNowPlayingItem: SendCommandStatusCode._Enum.ValueType  # 10
+        DeviceNotFound: SendCommandStatusCode._Enum.ValueType  # 20
+        UIKitLegacy: SendCommandStatusCode._Enum.ValueType  # 3
+        SkipAdProhibited: SendCommandStatusCode._Enum.ValueType  # 100
+        QueueIsUserCurated: SendCommandStatusCode._Enum.ValueType  # 101
+        UserModifiedQueueDisabled: SendCommandStatusCode._Enum.ValueType  # 102
+        UserQueueModificationNotSupportedForCurrentItem: SendCommandStatusCode._Enum.ValueType  # 103
+        SubscriptionRequiredForSharedQueue: SendCommandStatusCode._Enum.ValueType  # 104
+        InsertionPositionNotSpecified: SendCommandStatusCode._Enum.ValueType  # 105
+        InvalidInsertionPosition: SendCommandStatusCode._Enum.ValueType  # 106
+        RequestParametersOutOfBounds: SendCommandStatusCode._Enum.ValueType  # 107
+        SkipLimitReached: SendCommandStatusCode._Enum.ValueType  # 108
+        AuthenticationFailure: SendCommandStatusCode._Enum.ValueType  # 401
+        MediaServiceUnavailable: SendCommandStatusCode._Enum.ValueType  # 501
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Success: SendCommandStatusCode.Enum.ValueType = ...  # 0
-    NoSuchContent: SendCommandStatusCode.Enum.ValueType = ...  # 1
-    CommandFailed: SendCommandStatusCode.Enum.ValueType = ...  # 2
-    NoActionableNowPlayingItem: SendCommandStatusCode.Enum.ValueType = ...  # 10
-    DeviceNotFound: SendCommandStatusCode.Enum.ValueType = ...  # 20
-    UIKitLegacy: SendCommandStatusCode.Enum.ValueType = ...  # 3
-    SkipAdProhibited: SendCommandStatusCode.Enum.ValueType = ...  # 100
-    QueueIsUserCurated: SendCommandStatusCode.Enum.ValueType = ...  # 101
-    UserModifiedQueueDisabled: SendCommandStatusCode.Enum.ValueType = ...  # 102
-    UserQueueModificationNotSupportedForCurrentItem: SendCommandStatusCode.Enum.ValueType = ...  # 103
-    SubscriptionRequiredForSharedQueue: SendCommandStatusCode.Enum.ValueType = ...  # 104
-    InsertionPositionNotSpecified: SendCommandStatusCode.Enum.ValueType = ...  # 105
-    InvalidInsertionPosition: SendCommandStatusCode.Enum.ValueType = ...  # 106
-    RequestParametersOutOfBounds: SendCommandStatusCode.Enum.ValueType = ...  # 107
-    SkipLimitReached: SendCommandStatusCode.Enum.ValueType = ...  # 108
-    AuthenticationFailure: SendCommandStatusCode.Enum.ValueType = ...  # 401
-    MediaServiceUnavailable: SendCommandStatusCode.Enum.ValueType = ...  # 501
+    Success: SendCommandStatusCode.Enum.ValueType  # 0
+    NoSuchContent: SendCommandStatusCode.Enum.ValueType  # 1
+    CommandFailed: SendCommandStatusCode.Enum.ValueType  # 2
+    NoActionableNowPlayingItem: SendCommandStatusCode.Enum.ValueType  # 10
+    DeviceNotFound: SendCommandStatusCode.Enum.ValueType  # 20
+    UIKitLegacy: SendCommandStatusCode.Enum.ValueType  # 3
+    SkipAdProhibited: SendCommandStatusCode.Enum.ValueType  # 100
+    QueueIsUserCurated: SendCommandStatusCode.Enum.ValueType  # 101
+    UserModifiedQueueDisabled: SendCommandStatusCode.Enum.ValueType  # 102
+    UserQueueModificationNotSupportedForCurrentItem: SendCommandStatusCode.Enum.ValueType  # 103
+    SubscriptionRequiredForSharedQueue: SendCommandStatusCode.Enum.ValueType  # 104
+    InsertionPositionNotSpecified: SendCommandStatusCode.Enum.ValueType  # 105
+    InvalidInsertionPosition: SendCommandStatusCode.Enum.ValueType  # 106
+    RequestParametersOutOfBounds: SendCommandStatusCode.Enum.ValueType  # 107
+    SkipLimitReached: SendCommandStatusCode.Enum.ValueType  # 108
+    AuthenticationFailure: SendCommandStatusCode.Enum.ValueType  # 401
+    MediaServiceUnavailable: SendCommandStatusCode.Enum.ValueType  # 501
 
     def __init__(self,
         ) -> None: ...
 global___SendCommandStatusCode = SendCommandStatusCode
 
 class SendCommandResultType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Dialog: SendCommandResultType.Enum.ValueType = ...  # 1
-        Error: SendCommandResultType.Enum.ValueType = ...  # 2
-        Custom: SendCommandResultType.Enum.ValueType = ...  # 999
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandResultType._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Dialog: SendCommandResultType._Enum.ValueType  # 1
+        Error: SendCommandResultType._Enum.ValueType  # 2
+        Custom: SendCommandResultType._Enum.ValueType  # 999
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Dialog: SendCommandResultType.Enum.ValueType = ...  # 1
-    Error: SendCommandResultType.Enum.ValueType = ...  # 2
-    Custom: SendCommandResultType.Enum.ValueType = ...  # 999
+    Dialog: SendCommandResultType.Enum.ValueType  # 1
+    Error: SendCommandResultType.Enum.ValueType  # 2
+    Custom: SendCommandResultType.Enum.ValueType  # 999
 
     def __init__(self,
         ) -> None: ...
 global___SendCommandResultType = SendCommandResultType
 
 class SendCommandResultStatus(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     STATUSCODE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     CUSTOMDATA_FIELD_NUMBER: builtins.int
     CUSTOMDATATYPE_FIELD_NUMBER: builtins.int
-    statusCode: global___SendCommandStatusCode.Enum.ValueType = ...
-    type: global___SendCommandResultType.Enum.ValueType = ...
-    customData: builtins.bytes = ...
+    statusCode: global___SendCommandStatusCode.Enum.ValueType
+    type: global___SendCommandResultType.Enum.ValueType
+    customData: builtins.bytes
     """optional ... dialog = 3;
     optional ... error = 4;
     """
 
-    customDataType: typing.Text = ...
+    customDataType: typing.Text
     def __init__(self,
         *,
-        statusCode : typing.Optional[global___SendCommandStatusCode.Enum.ValueType] = ...,
-        type : typing.Optional[global___SendCommandResultType.Enum.ValueType] = ...,
-        customData : typing.Optional[builtins.bytes] = ...,
-        customDataType : typing.Optional[typing.Text] = ...,
+        statusCode: typing.Optional[global___SendCommandStatusCode.Enum.ValueType] = ...,
+        type: typing.Optional[global___SendCommandResultType.Enum.ValueType] = ...,
+        customData: typing.Optional[builtins.bytes] = ...,
+        customDataType: typing.Optional[typing.Text] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["customData",b"customData","customDataType",b"customDataType","statusCode",b"statusCode","type",b"type"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["customData",b"customData","customDataType",b"customDataType","statusCode",b"statusCode","type",b"type"]) -> None: ...
 global___SendCommandResultStatus = SendCommandResultStatus
 
 class SendCommandResult(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PLAYERPATH_FIELD_NUMBER: builtins.int
     SENDERROR_FIELD_NUMBER: builtins.int
     STATUSES_FIELD_NUMBER: builtins.int
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    sendError: global___SendError.Enum.ValueType = ...
+    sendError: global___SendError.Enum.ValueType
     @property
     def statuses(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SendCommandResultStatus]: ...
     def __init__(self,
         *,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        sendError : typing.Optional[global___SendError.Enum.ValueType] = ...,
-        statuses : typing.Optional[typing.Iterable[global___SendCommandResultStatus]] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        sendError: typing.Optional[global___SendError.Enum.ValueType] = ...,
+        statuses: typing.Optional[typing.Iterable[global___SendCommandResultStatus]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath","sendError",b"sendError"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath","sendError",b"sendError","statuses",b"statuses"]) -> None: ...
 global___SendCommandResult = SendCommandResult
 
 class SendCommandResultMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     SENDERROR_FIELD_NUMBER: builtins.int
     HANDLERRETURNSTATUS_FIELD_NUMBER: builtins.int
     HANDLERRETURNSTATUSDATAS_FIELD_NUMBER: builtins.int
     COMMANDID_FIELD_NUMBER: builtins.int
     PLAYERPATH_FIELD_NUMBER: builtins.int
     COMMANDRESULT_FIELD_NUMBER: builtins.int
-    sendError: global___SendError.Enum.ValueType = ...
-    handlerReturnStatus: global___HandlerReturnStatus.Enum.ValueType = ...
+    sendError: global___SendError.Enum.ValueType
+    handlerReturnStatus: global___HandlerReturnStatus.Enum.ValueType
     @property
     def handlerReturnStatusDatas(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-    commandID: typing.Text = ...
+    commandID: typing.Text
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     @property
     def commandResult(self) -> global___SendCommandResult: ...
     def __init__(self,
         *,
-        sendError : typing.Optional[global___SendError.Enum.ValueType] = ...,
-        handlerReturnStatus : typing.Optional[global___HandlerReturnStatus.Enum.ValueType] = ...,
-        handlerReturnStatusDatas : typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-        commandID : typing.Optional[typing.Text] = ...,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        commandResult : typing.Optional[global___SendCommandResult] = ...,
+        sendError: typing.Optional[global___SendError.Enum.ValueType] = ...,
+        handlerReturnStatus: typing.Optional[global___HandlerReturnStatus.Enum.ValueType] = ...,
+        handlerReturnStatusDatas: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+        commandID: typing.Optional[typing.Text] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        commandResult: typing.Optional[global___SendCommandResult] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["commandID",b"commandID","commandResult",b"commandResult","handlerReturnStatus",b"handlerReturnStatus","playerPath",b"playerPath","sendError",b"sendError"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["commandID",b"commandID","commandResult",b"commandResult","handlerReturnStatus",b"handlerReturnStatus","handlerReturnStatusDatas",b"handlerReturnStatusDatas","playerPath",b"playerPath","sendError",b"sendError"]) -> None: ...
 global___SendCommandResultMessage = SendCommandResultMessage
 
-sendCommandResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendCommandResultMessage] = ...
+SENDCOMMANDRESULTMESSAGE_FIELD_NUMBER: builtins.int
+sendCommandResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendCommandResultMessage]

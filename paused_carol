@@ -1,0 +1,1005 @@
+2021-12-15 20:52:26 DEBUG [pyatv.scripts]: Running with pyatv 0.9.8
+2021-12-15 20:52:26 DEBUG [pyatv.support.knock]: Knocking at port 3689 on 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.support.knock]: Knocking at port 7000 on 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.support.knock]: Knocking at port 49152 on 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.support.knock]: Knocking at port 32498 on 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.core.scan]: Auto-discovered Vardagsrum at 10.0.10.81:49152 via Protocol.Companion ({'rpmac': '1', 'rphn': 'db1d647bb297', 'rpfl': '0xB6782', 'rpha': 'be0a96b6fe4f', 'rpmd': 'AppleTV6,2', 'rpvr': '310.7', 'rpad': '74f51f650202', 'rphi': '599efc7fd563', 'rpba': '21:07:80:7F:23:C0', 'rpmrtid': '7C78689F-9AC2-4C41-852E-A91312B9148B'})
+2021-12-15 20:52:26 DEBUG [pyatv.core.scan]: Auto-discovered Vardagsrum at 10.0.10.81:7000 via Protocol.AirPlay ({'acl': '0', 'btaddr': '40:CB:C0:A8:DE:99', 'deviceid': '40:CB:C0:A8:DE:9A', 'fex': '1d9/St5/FbwI', 'features': '0x4A7FDFD5,0xBC157FDE', 'flags': '0x244', 'gid': '6CBBEB73-98B1-45E8-903F-784EF24AAF19', 'igl': '1', 'gcgl': '1', 'model': 'AppleTV6,2', 'protovers': '1.1', 'pi': '8c056c4a-0ef9-4610-b408-4d6686507b18', 'psi': '7C78689F-9AC2-4C41-852E-A91312B9148B', 'pk': 'e314d956c3d4c7d333b5f88458b26570ccfb3d60b9ffe871ee494d34399d4b5b', 'srcvers': '595.15.41', 'osvers': '15.1.1', 'vv': '2'})
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.mrp]: Disabling MRP service since tvOS >= 15
+2021-12-15 20:52:26 DEBUG [pyatv.core.scan]: Auto-discovered Vardagsrum at 10.0.10.81:49153 via Protocol.MRP ({'modelname': 'Apple TV', 'allowpairing': 'YES', 'bluetoothaddress': "b'@\\xcb\\xc0\\xa8\\xde\\x99'", 'macaddress': '40:cb:c0:a8:de:9a', 'name': 'Vardagsrum', 'uniqueidentifier': '46CE04F7-3B9F-48EF-9169-1052F67C672F', 'systembuildversion': '19J581', 'localairplayreceiverpairingidentity': '7C78689F-9AC2-4C41-852E-A91312B9148B'})
+2021-12-15 20:52:26 DEBUG [pyatv.core.scan]: Auto-discovered 40CBC0A8DE9A@Vardagsrum at 10.0.10.81:7000 via Protocol.RAOP ({'cn': '0,1,2,3', 'da': 'true', 'et': '0,3,5', 'ft': '0x4A7FDFD5,0xBC157FDE', 'sf': '0x244', 'md': '0,1,2', 'am': 'AppleTV6,2', 'pk': 'e314d956c3d4c7d333b5f88458b26570ccfb3d60b9ffe871ee494d34399d4b5b', 'tp': 'UDP', 'vn': '65537', 'vs': '595.15.41', 'ov': '15.1.1', 'vv': '2'})
+2021-12-15 20:52:26 INFO [pyatv.scripts.atvremote]: Auto-discovered Vardagsrum at 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Adding handler for protocol Protocol.AirPlay
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay]: Remote control channel is supported
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Adding handler for protocol Protocol.MRP
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.companion]: Not adding Companion as credentials are missing
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Adding handler for protocol Protocol.RAOP
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connecting to protocol: Protocol.AirPlay
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connected to protocol: Protocol.AirPlay
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connecting to protocol: Protocol.MRP
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.remote_control]: Setting up remote control connection to 10.0.10.81:7000
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Connected to 10.0.10.81
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.auth]: Setting up new AirPlay Pair-Verify procedure with type AuthenticationType.HAP
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Sending HTTP/1.1 message: b'POST /pair-verify HTTP/1.1\r\nContent-Length: 37\r\nUser-Agent: AirPlay/320.20\r\nConnection: keep-alive\r\nX-Apple-HKP: 3\r\nContent-Type: application/octet-stream\r\n\r\n\x06\x01\x01\x03 |,\x13kH\nhc}\xda_\x97=\xa8ORR\xe9g\xf1=\x02?\xe3cz\x80\x99\xbf\xe0M\x16'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Received: b'HTTP/1.1 200 OK\r\nDate: Wed, 15 Dec 2021 19:52:26 GMT\r\nContent-Length: 159\r\nContent-Type: application/octet-stream\r\nServer: AirTunes/595.15.41\r\n\r\n\x05xE\x0cE\xc2\xba\n\x19)j\x08}O=\xde=\xe5\xbeSU\xe1\xf6\xb1\x08\xf3zLb\xd9\xd4\xa5\x7fd\xdc[Z\xdd}\xdf\x88\xd4\x8d\xb4,\xc1a\x81l\xaf\x99\xfb\xcf\x0c\xeft\x14\x8e\x8fK\xe7\xcc]>\xb5j\xbc\xcdE5:<\x9b\xd1\xc8\xf0\x9ea\xf4\xc4z\xdd{H\x81\xef#I\r\x95-M\x0c\xd5\x11F\xc5k%\xf3,K\xca\xf4\x90{\xee\xed\xcf\x1f\xee=\xfeD\x06c\xa3ih.pg\x06\x01\x02\x03 \xb702=\xb7\x01\xed\xed1j=\xdd\xcf\x9bs\xdcz\x9a\n\xd6?\xe1}\xc4\xc4%q\xd5\x16\xea\xd0^'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Got HTTP response: HttpResponse(protocol='HTTP', version='1.1', code=200, message='OK', headers={'date': 'Wed, 15 Dec 2021 19:52:26 GMT', 'content-length': '159', 'content-type': 'application/octet-stream', 'server': 'AirTunes/595.15.41'}, body=b'\x05xE\x0cE\xc2\xba\n\x19)j\x08}O=\xde=\xe5\xbeSU\xe1\xf6\xb1\x08\xf3zLb\xd9\xd4\xa5\x7fd\xdc[Z\xdd}\xdf\x88\xd4\x8d\xb4,\xc1a\x81l\xaf\x99\xfb\xcf\x0c\xeft\x14\x8e\x8fK\xe7\xcc]>\xb5j\xbc\xcdE5:<\x9b\xd1\xc8\xf0\x9ea\xf4\xc4z\xdd{H\x81\xef#I\r\x95-M\x0c\xd5\x11F\xc5k%\xf3,K\xca\xf4\x90{\xee\xed\xcf\x1f\xee=\xfeD\x06c\xa3ih.pg\x06\x01\x02\x03 \xb702=\xb7\x01\xed\xed1j=\xdd\xcf\x9bs\xdcz\x9a\n\xd6?\xe1}\xc4\xc4%q\xd5\x16\xea\xd0^'):
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.auth.hap]: Device (Encrypted=450c45c2ba0a19296a087d4f3dde3de5be5355e1f6b108f37a4c62d9d4a57f64dc5b5add7ddf88d48db42cc161816caf99fbcf0cef74148e8f4be7cc5d3eb56abccd45353a3c9bd1c8f09e61f4c47add7b4881ef23490d952d4d0cd51146c56b25f32c4bcaf4907beeedcf1fee3dfe440663a369682e7067, Public=866003f76d2415cd38ee88a9f39e480c623b2fa582b21bd8d06773f07ea2aee6)
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Sending HTTP/1.1 message: b'POST /pair-verify HTTP/1.1\r\nContent-Length: 125\r\nUser-Agent: AirPlay/320.20\r\nConnection: keep-alive\r\nX-Apple-HKP: 3\r\nContent-Type: application/octet-stream\r\n\r\n\x06\x01\x03\x05x\x99[\xa9\xce-\xe6\xc4\x90\xbf\xcd\xbf\xa6\xdds\xf2j\xedZ\xa8y\xe9\xa2J\xbf\x87\x00\x1a\xc3=\x1f\xf1\xee\xb3\xe4\x0b"\xb6pW7\xdb(R"mF\xb5O\xd5p}]Zd6\xbb\x95\x13y3\x86\x82v\xba\xf1\xbfcP.\x83\x83\xc5\x83%\x92\x1f!\x93S*[\x8aL c\x04H\x1c\xc3\xcb\xad\xf8,\xdd\x12\x07\xe0\xbal\x9c\xe3Nk\xdb"W\xf3\x93i\x18j\x85\xc6\xef\xe2\xcd\x88~\xcd\x8e'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Received: b'HTTP/1.1 200 OK\r\nDate: Wed, 15 Dec 2021 19:52:26 GMT\r\nContent-Length: 3\r\nContent-Type: application/octet-stream\r\nServer: AirTunes/595.15.41\r\n\r\n\x06\x01\x04'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Got HTTP response: HttpResponse(protocol='HTTP', version='1.1', code=200, message='OK', headers={'date': 'Wed, 15 Dec 2021 19:52:26 GMT', 'content-length': '3', 'content-type': 'application/octet-stream', 'server': 'AirTunes/595.15.41'}, body=b'\x06\x01\x04'):
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_srp]: Keys (Input=42d554747e48a774bfa79e07e96c19814e916daef01b983f65c7c9829b66ecc0, Output=3b3305fc9202f21b20bc263fbdc90bcc55a798d8dfd5868083ef35807e247613)
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Sending RTSP/1.0 message: b'SETUP rtsp://10.0.10.254/1787510039 RTSP/1.0\r\nUser-Agent: AirPlay/540.31\r\nContent-Length: 367\r\nCSeq: 0\r\nDACP-ID: 999A6C896522E73B\r\nActive-Remote: 3391977212\r\nClient-Instance: 999A6C896522E73B\r\nContent-Type: application/x-apple-binary-plist\r\n\r\nbplist00\xdb\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16XdeviceID_\x10\x13isRemoteControlOnlyZmacAddressUmodelTname^osBuildVersionVosNameYosVersion[sessionUUID]sourceVersion^timingProtocol_\x10\x11FF:EE:DD:CC:BB:AA\t_\x10\x11AA:BB:CC:DD:EE:FFZiPhone10,6UpyatvU18G82YiPhone OSV14.7.1_\x10$AD538CE1-BB84-4A22-AC78-5DBD323DA55BV550.10TNone\x00\x08\x00\x1f\x00(\x00>\x00I\x00O\x00T\x00c\x00j\x00t\x00\x80\x00\x8e\x00\x9d\x00\xb1\x00\xb2\x00\xc6\x00\xd1\x00\xd7\x00\xdd\x00\xe7\x00\xee\x01\x15\x01\x1c\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00\x17\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01!'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Received: b'RTSP/1.0 200 OK\r\nDate: Wed, 15 Dec 2021 19:52:26 GMT\r\nContent-Length: 59\r\nContent-Type: application/x-apple-binary-plist\r\nServer: AirTunes/595.15.41\r\nCSeq: 0\r\n\r\nbplist00\xd1\x01\x02YeventPort\x11\xc1Q\x08\x0b\x15\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Got RTSP response: HttpResponse(protocol='RTSP', version='1.0', code=200, message='OK', headers={'date': 'Wed, 15 Dec 2021 19:52:26 GMT', 'content-length': '59', 'content-type': 'application/x-apple-binary-plist', 'server': 'AirTunes/595.15.41', 'cseq': '0'}, body=b'bplist00\xd1\x01\x02YeventPort\x11\xc1Q\x08\x0b\x15\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18'):
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_srp]: Keys (Input=3d9cbc8001dc91920783ba0fa5340042f5356935a4ed815372ac88931d54a59c, Output=a8d89bedf271954aa4d27d434ae968c2f0bb0f0c2f6763ceb6bef93cb9965884)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Connected to 10.0.10.81:49489
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Sending RTSP/1.0 message: b'RECORD rtsp://10.0.10.254/1787510039 RTSP/1.0\r\nUser-Agent: AirPlay/540.31\r\nCSeq: 1\r\nDACP-ID: 999A6C896522E73B\r\nActive-Remote: 3391977212\r\nClient-Instance: 999A6C896522E73B\r\n\r\n'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Received: b'RTSP/1.0 200 OK\r\nDate: Wed, 15 Dec 2021 19:52:26 GMT\r\nContent-Length: 0\r\nAudio-Latency: 0\r\nServer: AirTunes/595.15.41\r\nCSeq: 1\r\n\r\n'
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=0004532518764b25f6206137833346a4befaa99dcbb44d790f76bfb43678597f6a39e699ba207ede3d2d3ce1e3f1099ad2410eb8a97cece4b600997950269ecd6db5b5d272a56a76a8a8b12a77ceae7ca0e48ccf32ab6d37d187918223ba5d769bb0f98bdfe2e718c3698660fd6b986b961ed19fe82fba001b7af31977deab7fcf1dc50e7b18ab3cda88ecada919d55004b713099ce4d0349fc91754e85aedbdf71c861fe596110735763f7494b09c8eaadc7f99fb72d774f074cc0f013e9a53249fce37bdefbfb52cf30258bac7416dc8d56274553370326509d9ec7956a6ae8f4f741b7c0dd6817159e6fd0c0553d86632f24ba7d8fab3712ca7ec5c9b1...)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.channels]: Got message on event channel: HttpRequest(method='POST', path='/command', protocol='RTSP', version='1.0', headers={'cseq': '0', 'content-length': '1396', 'content-type': 'application/x-apple-binary-plist'}, body=b'bplist00\xd2\x01\x02\x03\x04TtypeUvalueZupdateInfo\xdf\x10\x18\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f&\'#)*+,-.&0123;#=>?@ASpsiRvv_\x10\x14playbackCapabilities_\x10\x15canRecordScreenStream[statusFlags_\x10\x18keepAliveSendStatsAsBodyTname_\x10\x0fprotocolVersion_\x10\x11volumeControlType]senderAddressXdeviceIDRpi^screenDemoMode]initialVolumeZfeaturesExZtxtAirPlay_\x10\x10supportedFormats]sourceVersion_\x10\x16hasUDPMirroringSupportUmodelRpkZmacAddress_\x10\x15receiverHDRCapabilityXfeatures_\x10$7C78689F-9AC2-4C41-852E-A91312B9148B\x10\x02\xd3 !"###_\x10\x15supportsInterstitials_\x10\x15supportsFPSSecureStop_\x10\x1dsupportsUIForAudioOnlyContent\t\t\t\x08\x11\x02D\tZVardagsrumS1.1\x10\x04_\x10\x1110.0.10.254:40054_\x10\x1140:CB:C0:A8:DE:9A_\x10$8c056c4a-0ef9-4610-b408-4d6686507b18\x08#\xc0>\x00\x00\x00\x00\x00\x00\\1d9/St5/FbwIO\x11\x01\x85\x05acl=0\x18btaddr=40:CB:C0:A8:DE:99\x1adeviceid=40:CB:C0:A8:DE:9A\x10fex=1d9/St5/FbwI\x1efeatures=0x4A7FDFD5,0xBC157FDE\x0bflags=0x244(gid=6CBBEB73-98B1-45E8-903F-784EF24AAF19\x05igl=1\x06gcgl=1\x10model=AppleTV6,2\rprotovers=1.1\'pi=8c056c4a-0ef9-4610-b408-4d6686507b18(psi=7C78689F-9AC2-4C41-852E-A91312B9148BCpk=e314d956c3d4c7d333b5f88458b26570ccfb3d60b9ffe871ee494d34399d4b5b\x11srcvers=595.15.41\rosvers=15.1.1\x04vv=2\xd44567899:_\x10\x15lowLatencyAudioStream\\screenStream[audioStream\\bufferStream\x10\x00\x12\x01D\x08\x00\x12\x00\xe0\x00\x00Y595.15.41\tZAppleTV6,2O\x10 \xe3\x14\xd9V\xc3\xd4\xc7\xd33\xb5\xf8\x84X\xb2ep\xcc\xfb=`\xb9\xff\xe8q\xeeIM49\x9dK[_\x10\x1140:CB:C0:A8:DE:9AT4k30\x13\xbc\x15\x7f\xdeJ\x7f\xdf\xd5\x00\x08\x00\r\x00\x12\x00\x18\x00#\x00V\x00Z\x00]\x00t\x00\x8c\x00\x98\x00\xb3\x00\xb8\x00\xca\x00\xde\x00\xec\x00\xf5\x00\xf8\x01\x07\x01\x15\x01 \x01+\x01>\x01L\x01e\x01k\x01n\x01y\x01\x91\x01\x9a\x01\xc1\x01\xc3\x01\xca\x01\xe2\x01\xfa\x02\x1a\x02\x1b\x02\x1c\x02\x1d\x02\x1e\x02!\x02"\x02-\x021\x023\x02G\x02[\x02\x82\x02\x83\x02\x8c\x02\x99\x04"\x04+\x04C\x04P\x04\\\x04i\x04k\x04p\x04u\x04\x7f\x04\x80\x04\x8b\x04\xae\x04\xc2\x04\xc7\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00B\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x04\xd0')
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=4f00ec1218764936cd40c6ad5fda217cb33b8efcc75073d8707ae52c77cbf7ee013f271514128d84b06c74007b9df5832fd604f3fcd9bef59b817b3f24cf25a1c573fe07a302c30442c9bf3c4194b060fd34e900af194bbb41975a466801c2cf41)
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Got RTSP response: HttpResponse(protocol='RTSP', version='1.0', code=200, message='OK', headers={'date': 'Wed, 15 Dec 2021 19:52:26 GMT', 'content-length': '0', 'audio-latency': '0', 'server': 'AirTunes/595.15.41', 'cseq': '1'}, body=''):
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Sending RTSP/1.0 message: b'SETUP rtsp://10.0.10.254/1787510039 RTSP/1.0\r\nUser-Agent: AirPlay/540.31\r\nContent-Length: 324\r\nCSeq: 2\r\nDACP-ID: 999A6C896522E73B\r\nActive-Remote: 3391977212\r\nClient-Instance: 999A6C896522E73B\r\nContent-Type: application/x-apple-binary-plist\r\n\r\nbplist00\xd1\x01\x02Wstreams\xa1\x03\xd7\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11YchannelID^clientTypeUUIDZclientUUID[controlTypeTseedTtype_\x10\x14wantsDedicatedSocket_\x10$8859D5D1-963D-4541-BB38-8B85660CACB9_\x10$1910A70F-DBC0-4242-AF95-115DB30604E1_\x10$C7F17DE5-7E14-4EFA-A66D-A4BFCDE98C05\x10\x02\x14\x00\x00\x00\x00\x00\x00\x00\x00\x8e&\xdb\x88\x08\x19%\x03\x10\x82\t\x00\x08\x00\x0b\x00\x13\x00\x15\x00$\x00.\x00=\x00H\x00T\x00Y\x00^\x00u\x00\x9c\x00\xc3\x00\xea\x00\xec\x00\xfd\x00\xff\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00\x12\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Received: b'RTSP/1.0 200 OK\r\nDate: Wed, 15 Dec 2021 19:52:26 GMT\r\nContent-Length: 100\r\nContent-Type: application/x-apple-binary-plist\r\nServer: AirTunes/595.15.41\r\nCSeq: 2\r\n\r\nbplist00\xd1\x01\x02Wstreams\xa1\x03\xd3\x04\x05\x06\x07\x08\tTtypeXstreamIDXdataPort\x10\x82\x10\x01\x11\xc1R\x08\x0b\x13\x15\x1c!*357\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00:'
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Got RTSP response: HttpResponse(protocol='RTSP', version='1.0', code=200, message='OK', headers={'date': 'Wed, 15 Dec 2021 19:52:26 GMT', 'content-length': '100', 'content-type': 'application/x-apple-binary-plist', 'server': 'AirTunes/595.15.41', 'cseq': '2'}, body=b'bplist00\xd1\x01\x02Wstreams\xa1\x03\xd3\x04\x05\x06\x07\x08\tTtypeXstreamIDXdataPort\x10\x82\x10\x01\x11\xc1R\x08\x0b\x13\x15\x1c!*357\x00\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00:'):
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_srp]: Keys (Input=19b8b1631b50f36bc74e1e77464501f4fb4cba04c84836e9b5ceb8d21d82a05e, Output=66389d986ef24b6c2c781b8c8439dfa62b9eb2564187fbf8ffd4b4722472d459)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Connected to 10.0.10.81:49490
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=3c01f2d1ebd4f7a3af548c296747e4476e5e36bf364e7d3aed6ab921be64ddb69bda406a2b63149a03a455ff375782b5e8abe7c087e02d5b8396cd55b77c7628b3c5b0931bd0e9c3566dd4829e0fc7dd324194851aba16f4ce99c62cafe552e56a3adb6f02d2d6f7ec92de785c55f46ba37c3f81a42254be89cba0e6d23cc59072ce346cd2c6f271cefb37d2135d42b1ffedc5f56a9db621785b5c2e3befc53fb8961af36842176ea6553a56efb2ee66b99c8f9459011f32b8ccc6c6d59c1c542e0858cf65544f8f5fa2b3b87cd11fbb7dd73381ddebf59e2a59a7da5f69c572033f7a4fa3252b2fa3c4d378d1cd3b0b3b96c7486142f48172a77349ce177...)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: >> Send: Protobuf: type: DEVICE_INFO_MESSAGE
+identifier: "36E143D9-18C4-4061-A579-55657EE1EB33"
+errorCode: NoError
+[deviceInfoMessage] {
+  uniqueIdentifier: "b036e4f2-2a01-4015-ba9d-d120ac93470a"
+  name: "pyatv"
+  localizedModelName: "iPhone"
+  systemBuildVersion: "18A393"
+  applicationBundleIdentifier: "com.apple.TVRemote"
+  applicationBundleVersion: "344.28"
+  protocolVersion: 1
+  lastSupportedMessageType: 108
+  supportsSystemPairing: true
+  allowsPairing: true
+  systemMediaApplication: "com.apple.TVMusic"
+  supportsACL: true
+  supportsSharedQueue: true
+  supportsExtendedMotion: true
+  sharedQueueVersion: 2
+  deviceClass: iPhone
+  logicalDeviceCount: 1
+}
+uniqueIdentifier: "8FF40515-2150-4565-9E3E-98121716DABB"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Starting heartbeat loop (AirPlay:10.0.10.81)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=20005516045f456a800cf686d7da90c6c8386f13633a53992154e9ba52266bb535348a4b835f6ea22bb4078ebbb55dfa0fea2a00966d30348f14ebe1ea193f234e85eead882002d68e6ddacb53c5604ab2055f93d24c26a6929bde6faffc178f67c9c98babed409d815c262d9710)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=2000a5f45a465caa090b5cb597406ff1abe2530b073d4669d18b1d725a58185a7bc143d81a5c8712352e047f60cf68f0e2d64f023455ffe1a6f0d0a6072448af82713b79e55bf3fa952013fed49b7cc950ff73bee25363db2078fc956e08b55a6b62fb5faccc6d34bd4397e13069618da818b2ee09553f469507236689879f21ed8ab4598849541ace29cfba95a0b7e412736cbeb28a1ee66c8b54500f0c2ab43a3084e112e03f3459b587d78a08b394966db4aec4a67e179c641322c87c89e0113335791af2eb28fd4d98cea40d126df307679752a7c2caa4a921ea272c0f9691fe355f3648820112e778c92cc1a9573eff22ee66005303c35eb92fb372d...)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: DEVICE_INFO_MESSAGE
+identifier: "36E143D9-18C4-4061-A579-55657EE1EB33"
+[deviceInfoMessage] {
+  uniqueIdentifier: "46CE04F7-3B9F-48EF-9169-1052F67C672F"
+  name: "Vardagsrum"
+  localizedModelName: "Apple\302\240TV"
+  systemBuildVersion: "19J581"
+  applicationBundleIdentifier: "com.apple.mediaremoted"
+  protocolVersion: 1
+  lastSupportedMessageType: 121
+  supportsSystemPairing: true
+  allowsPairing: true
+  systemMediaApplication: "com.apple.TVMusic"
+  supportsACL: true
+  supportsSharedQueue: true
+  supportsExtendedMotion: true
+  sharedQueueVersion: 3
+  deviceUID: "7C78689F-9AC2-4C41-852E-A91312B9148B"
+  managedConfigDeviceID: "40:cb:c0:a8:de:9a"
+  deviceClass: AppleTV
+  logicalDeviceCount: 1
+  isProxyGroupPlayer: false
+  groupUID: "6CBBEB73-98B1-45E8-903F-784EF24AAF19"
+  isGroupLeader: true
+  isAirplayActive: false
+  systemPodcastApplication: "com.apple.podcasts"
+  enderDefaultGroupUID: "6CBBEB73-98B1-45E8-903F-784EF24AAF19"
+  airplayReceivers: "TVAirPlay"
+  clusterType: 0
+  isClusterAware: true
+  modelID: "AppleTV6,2"
+  40: 0
+  41: "577E1BCA-2D9B-41C2-A8F8-C515CE8072D4"
+  42: "6CBBEB73-98B1-45E8-903F-784EF24AAF19"
+  43: "com.apple.TVBooks"
+}
+uniqueIdentifier: "1651DBF2-0527-46E0-BCE3-B66F900D0A74"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=200006bffe5e28b03b3705078ff26e1fda8d312ecde2c5399880c4435af0d2738a836b26edfba23a4027825fd05f264425a2)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=93003b6b0238bcd5ced111004f1130f0bdbde6b7305100e96828d0f9bb90c63156ccc4a67f38bb13826a907d86252c203f048b51399d67427f505e47f0969a2dc3dea1514ee543b530f58a8342b5cf9b2ee84edd5422ad9ce521e2715f789819c89645897323964ea932978a2f79c53b184a760d1d9cfa4cbac5a717f2c9a5c45c47adfd6920058175d4ed7d9bd764f3341bb0fba9b3ae7dff40ffab5bc4e5690d9bc46405)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: >> Send: Protobuf: type: SET_CONNECTION_STATE_MESSAGE
+errorCode: NoError
+[setConnectionStateMessage] {
+  state: Connected
+}
+uniqueIdentifier: "9D9B17D5-42E9-4C43-B7E3-1B3CF25A1B91"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=c1000414ef350002f4b200b0d8254ae1b74160d50a2afb9fb5a79efb80ac93b23b30357d08acac38899ab45da6c8554eeda1702e7d2a5c94d15666768e6a8be7262db3d2816a9b0c91f9b99459e1ad2671c2e27a271b936369c5bf1ae86eb4f158fc45e4f97e5f267bcd2473c142a4ce35c02de56e29f06fa1ff034450fbf47e6349a8c69a2e5f19aafc100488c9c68b2d84baf7f2b18fc021bc66eb87910296f4764d319e21bd7f523096632fde25f5b8e5076cf425c8b99dc583203bce24b43c286d1254734ab5363cf15e7bbdb77ec8d782)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: >> Send: Protobuf: type: CLIENT_UPDATES_CONFIG_MESSAGE
+identifier: "0B2BCA1E-A94D-47CB-8657-6293336D8FBB"
+errorCode: NoError
+[clientUpdatesConfigMessage] {
+  artworkUpdates: true
+  nowPlayingUpdates: false
+  volumeUpdates: true
+  keyboardUpdates: true
+  outputDeviceUpdates: true
+}
+uniqueIdentifier: "F553290B-66B3-431A-82F4-F22FB0EFA8B2"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=20004248efc5e5192ceca4b6101b5e7a70b22f1327082f387d291f343ae3510a4b616c2a50adb31e2bdfbeb9f2d3d0590a372a0035d30b4171247d8e26e987422ce2c31d7f485deb354a426cbfb60510aee299faa53fd8f43811cc7d4ce0756b7b7ee0e613f2caea1ba574c278b0)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=2000cd9318a98d28a50af5399d581f67559c3dcefc3b669999a773ab954134d60afd83da8046f0af2b25c146ee410d0f4875)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.channels]: Not enough data on data channel (has 32, expects 74)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=2a00654173ade4cd800be670f9a858898791bbd8f581f181ba66cf676f51172af790f9ea56dac2720f275744202b47b42db718c80f9aca5ec028d8ee)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=200056026ecc66948ee2bb68780e4424fc59732bf340d37f5ed6085f312799ba5975a663c51c46bd5ca850f12d5b921cad2a)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.channels]: Not enough data on data channel (has 32, expects 6745)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=391a4c2ffbd0301abeb710f84b23a35e3730465dc20bc272d5d50ea15eed5bf899d01bfc9151876df2415c7f871249035d2e6eaec0927ee3e29980eaea0745c49c4f927dda83c40ec1acac6f51b7e1036342c424f2cac39bbf138b93bd6eb6df03c309abf9f711705b17f15f51091debbf08c5ec88f9d02da0d7f6a90f546023b0392ec5859e88e6faebf64916b2297c34e726a4a559fa0986d58120e39225e94ab84b0f66a610fb4341927ac1d99528030ca16b896297d0efda0c3a0ca1f9ebfaab5c05eaebea424e14d0c226a729a7cf63e76331f5cab17857b4aefda6765d06a2d6cb5b5d330c88ad9036fdb3005196226741bf45c24f7debbc8d7d500...)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_OUTPUT_DEVICE_MESSAGE
+[updateOutputDeviceMessage] {
+  outputDevices {
+    name: "Vardagsrum"
+    uniqueIdentifier: "7C78689F-9AC2-4C41-852E-A91312B9148B"
+    canAccessRemoteAssets: false
+    isRemoteControllable: false
+    isGroupLeader: false
+    isGroupable: true
+    deviceType: Wired
+    deviceSubType: HDMI
+    modelSpecificInfoData: "bplist00\324\001\002\003\004\005\006\007\nX$versionY$archiverT$topX$objects\022\000\001\206\240_\020\017NSKeyedArchiver...
+    isLocalDevice: true
+    supportsExternalScreen: false
+    requiresAuthorization: true
+    sourceInfo {
+      routingContextUID: "577E1BCA-2D9B-41C2-A8F8-C515CE8072D4"
+      multipleBuiltInDevices: false
+    }
+    isDeviceGroupable: true
+    canRelayCommunicationChannel: false
+    isProxyGroupPlayer: false
+    canAccessAppleMusic: false
+    canAccessiCloudMusicLibrary: false
+    groupContainsGroupLeader: false
+    supportsBufferedAirPlay: false
+    canPlayEncryptedProgressiveDownloadAssets: true
+    canFetchMediaDataFromSender: true
+    resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets: true
+    isAirPlayReceiverSessionActive: false
+    parentGroupContainsDiscoverableLeader: false
+    isAddedToHomeKit: false
+    volumeCapabilities: 0
+    supportsHAP: false
+    usingJSONProtocol: false
+    clusterType: 0
+    primaryUID: "7C78689F-9AC2-4C41-852E-A91312B9148B"
+    configuredClusterSize: 0
+    producesLowFidelityAudio: false
+    45: 0
+    47: "AVOutputDeviceBluetoothListeningModeNormal"
+    48: 0
+    50: -1
+    52: 1
+  }
+  clusterAwareOutputDevices {
+    name: "Vardagsrum"
+    uniqueIdentifier: "7C78689F-9AC2-4C41-852E-A91312B9148B"
+    canAccessRemoteAssets: false
+    isRemoteControllable: false
+    isGroupLeader: false
+    isGroupable: true
+    deviceType: Wired
+    deviceSubType: HDMI
+    modelSpecificInfoData: "bplist00\324\001\002\003\004\005\006\007\nX$versionY$archiverT$topX$objects\022\000\001\206\240_\020\017NSKeyedArchiver...
+    isLocalDevice: true
+    supportsExternalScreen: false
+    requiresAuthorization: true
+    sourceInfo {
+      routingContextUID: "577E1BCA-2D9B-41C2-A8F8-C515CE8072D4"
+      multipleBuiltInDevices: false
+    }
+    isDeviceGroupable: true
+    canRelayCommunicationChannel: false
+    isProxyGroupPlayer: false
+    canAccessAppleMusic: false
+    canAccessiCloudMusicLibrary: false
+    groupContainsGroupLeader: false
+    supportsBufferedAirPlay: false
+    canPlayEncryptedProgressiveDownloadAssets: true
+    canFetchMediaDataFromSender: true
+    resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets: true
+    isAirPlayReceiverSessionActive: false
+    parentGroupContainsDiscoverableLeader: false
+    isAddedToHomeKit: false
+    volumeCapabilities: 0
+    supportsHAP: false
+    usingJSONProtocol: false
+    clusterType: 0
+    primaryUID: "7C78689F-9AC2-4C41-852E-A91312B9148B"
+    configuredClusterSize: 0
+    producesLowFidelityAudio: false
+    45: 0
+    47: "AVOutputDeviceBluetoothListeningModeNormal"
+    48: 0
+    50: -1
+    52: 1
+  }
+}
+uniqueIdentifier: "4F962BD6-663A-44D1-8BF7-EAD22A2F3D95"
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE
+[setDefaultSupportedCommandsMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: Play
+      enabled: true
+    }
+    supportedCommands {
+      command: PrepareForSetQueue
+      enabled: true
+    }
+    supportedCommands {
+      command: SetPlaybackQueue
+      enabled: true
+      supportedPlaybackQueueTypes: 7
+      supportedPlaybackQueueTypes: 3
+      supportedPlaybackQueueTypes: 6
+      supportedPlaybackQueueTypes: 2
+      supportedPlaybackQueueTypes: 5
+      supportedPlaybackQueueTypes: 1
+      supportedPlaybackQueueTypes: 8
+      supportedCustomQueueIdentifiers: "com.apple.music.playbackqueue.radio"
+      supportedCustomQueueIdentifiers: "com.apple.music.playbackqueue.tracklist"
+      supportedCustomQueueIdentifiers: "com.apple.MediaPlaybackCore.playbackContextArchive-v1.opack"
+      supportedCustomQueueIdentifiers: "com.apple.mediaplayer.playbackcontext"
+    }
+    supportedCommands {
+      command: SetPlaybackSession
+    }
+    supportedCommands {
+      command: PreloadedPlaybackSession
+    }
+  }
+  displayID: "com.apple.TVMusic"
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    client {
+      bundleIdentifier: "com.apple.TVMusic"
+    }
+  }
+}
+uniqueIdentifier: "32B63CB8-4132-45F6-A7B8-2EA4779B2F71"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 72 to <bound method PlayerStateManager._handle_set_default_supported_commands of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE
+[setDefaultSupportedCommandsMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: Play
+      enabled: true
+    }
+    supportedCommands {
+      command: SetPlaybackQueue
+      enabled: true
+      supportedPlaybackQueueTypes: 3
+      supportedPlaybackQueueTypes: 6
+      supportedPlaybackQueueTypes: 2
+      supportedPlaybackQueueTypes: 5
+      supportedPlaybackQueueTypes: 1
+    }
+    supportedCommands {
+      command: SetPlaybackSession
+      enabled: true
+      supportedPlaybackSessionTypes: "com.apple.podcasts.MTPlaybackQueueController.GenericQueue"
+      currentPlaybackSessionTypes: "com.apple.podcasts.MTPlaybackQueueController.GenericQueue"
+    }
+  }
+  displayID: "com.apple.podcasts"
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    client {
+      bundleIdentifier: "com.apple.podcasts"
+    }
+  }
+}
+uniqueIdentifier: "0579F51B-9AC4-49F1-88C0-50B035F046E3"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 72 to <bound method PlayerStateManager._handle_set_default_supported_commands of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: ORIGIN_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "7C026402-73C8-49E9-A2BA-283D06DB332D"
+[originClientPropertiesMessage] {
+  lastPlayingTimestamp: 661290746.891731
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_NOW_PLAYING_CLIENT_MESSAGE
+[setNowPlayingClientMessage] {
+  client {
+    processIdentifier: 2872
+    bundleIdentifier: "com.hbo.hbonow"
+  }
+}
+uniqueIdentifier: "C07F807E-B526-4358-BB91-DF80ADDBCB65"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 46 to <bound method PlayerStateManager._handle_set_now_playing_client of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_CLIENT_MESSAGE
+[updateClientMessage] {
+  client {
+    processIdentifier: 2732
+    bundleIdentifier: "com.netflix.Netflix"
+    processUserIdentifier: 501
+    displayName: "Netflix"
+  }
+}
+uniqueIdentifier: "C07D241B-DCC1-4792-B3F4-42DCD0C5E355"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 55 to <bound method PlayerStateManager._handle_update_client of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_STATE_MESSAGE
+[setStateMessage] {
+  displayName: "Netflix"
+  playbackState: Paused
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 2732
+      bundleIdentifier: "com.netflix.Netflix"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  playbackStateTimestamp: 661031757.867511
+}
+uniqueIdentifier: "5ACBBB26-0C8B-4D4E-BD7C-05C8AA704FB5"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 4 to <bound method PlayerStateManager._handle_set_state of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: PLAYER_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "2B8C0BE4-3139-4075-BEC5-FF240D0ABB40"
+[playerClientPropertiesMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+      5: 1
+    }
+    client {
+      processIdentifier: 2732
+      bundleIdentifier: "com.netflix.Netflix"
+      processUserIdentifier: 501
+      displayName: "Netflix"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  lastPlayingTimestamp: 661031767.519886
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_CLIENT_MESSAGE
+[updateClientMessage] {
+  client {
+    processIdentifier: 2872
+    bundleIdentifier: "com.hbo.hbonow"
+    processUserIdentifier: 501
+    displayName: "HBO Max"
+  }
+}
+uniqueIdentifier: "406DFCA4-B8C2-41FD-AFD4-4FB0ADCBC782"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 55 to <bound method PlayerStateManager._handle_update_client of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_NOW_PLAYING_PLAYER_MESSAGE
+[setNowPlayingPlayerMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 2872
+      bundleIdentifier: "com.hbo.hbonow"
+    }
+    player {
+      identifier: "avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67"
+      displayName: "player-7"
+      6: 0
+    }
+  }
+}
+uniqueIdentifier: "A58C3F69-511D-4A0E-BAE7-29EC666EC3E5"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 47 to <bound method PlayerStateManager._handle_set_now_playing_player of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_STATE_MESSAGE
+[setStateMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: Play
+      enabled: true
+    }
+    supportedCommands {
+      command: Pause
+      enabled: true
+    }
+  }
+  playbackQueue {
+    location: 0
+    contentItems {
+      identifier: "urn:hbo:episode:GYT-ASwbB0bmxHQEAAAAF"
+      metadata {
+        title: "Episode 3"
+        playbackProgress: 0.0
+        albumName: "A Christmas Carol"
+        duration: 3452.120117187
+        artworkAvailable: true
+        artworkMIMEType: "image/jpeg"
+        elapsedTime: 0.0
+        playbackRate: 1.0
+        contentIdentifier: "urn:hbo:episode:GYT-ASwbB0bmxHQEAAAAF"
+        nowPlayingInfoData: "bplist00\324\001\002\003\004\005\006\007\nX$versionY$archiverT$topX$objects\022\000\001\206\240_\020\017NSKeyedArchive...
+        elapsedTimeTimestamp: 661289640.727075
+        artworkIdentifier: "84AEAD70-2F4F-4DD1-8732-F94553FEC9E0"
+      }
+    }
+  }
+  displayName: "HBO Max"
+  playbackState: Paused
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 2872
+      bundleIdentifier: "com.hbo.hbonow"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  playbackStateTimestamp: 661288838.51567
+}
+uniqueIdentifier: "D99D795A-B47F-423F-9FD3-0D9C0AD6E4D7"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 4 to <bound method PlayerStateManager._handle_set_state of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: PLAYER_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "DBF63BEE-0602-4891-B151-9A706F516DCC"
+[playerClientPropertiesMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+      5: 1
+    }
+    client {
+      processIdentifier: 2872
+      bundleIdentifier: "com.hbo.hbonow"
+      processUserIdentifier: 501
+      displayName: "HBO Max"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  lastPlayingTimestamp: 661288838.515714
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_STATE_MESSAGE
+[setStateMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: Play
+      enabled: true
+    }
+    supportedCommands {
+      command: Pause
+      enabled: true
+    }
+    supportedCommands {
+      command: TogglePlayPause
+      enabled: true
+    }
+    supportedCommands {
+      command: EnableLanguageOption
+      enabled: true
+    }
+    supportedCommands {
+      command: DisableLanguageOption
+      enabled: true
+    }
+    supportedCommands {
+      command: Stop
+      enabled: true
+    }
+    supportedCommands {
+      command: SkipForward
+      enabled: true
+      preferredIntervals: 10.0
+    }
+    supportedCommands {
+      command: SkipBackward
+      enabled: true
+      preferredIntervals: 10.0
+    }
+    supportedCommands {
+      command: BeginFastForward
+      enabled: true
+    }
+    supportedCommands {
+      command: EndFastForward
+      enabled: true
+    }
+    supportedCommands {
+      command: BeginRewind
+      enabled: true
+    }
+    supportedCommands {
+      command: EndRewind
+      enabled: true
+    }
+    supportedCommands {
+      command: ChangePlaybackRate
+      enabled: true
+    }
+    supportedCommands {
+      command: SeekToPlaybackPosition
+      enabled: true
+      canScrub: 0
+    }
+    supportedCommands {
+      command: NextInContext
+      enabled: true
+    }
+    supportedCommands {
+      command: PreviousInContext
+      enabled: true
+    }
+  }
+  playbackQueue {
+    location: 0
+    contentItems {
+      identifier: "com.apple.avkit.2872.d8982c2e"
+      metadata {
+        title: "A Christmas Carol: Episode 3"
+        playbackProgress: 0.0
+        duration: 3452.12
+        artworkAvailable: true
+        infoAvailable: true
+        languageOptionsAvailable: true
+        numberOfSections: 0
+        elapsedTime: 5.935134918
+        isAlwaysLive: false
+        playbackRate: 0.0
+        contentIdentifier: "urn:hbo:episode:GYT-ASwbB0bmxHQEAAAAF"
+        mediaType: Video
+        nowPlayingInfoData: "bplist00\324\001\002\003\004\005\006\007\nX$versionY$archiverT$topX$objects\022\000\001\206\240_\020\017NSKeyedArchive...
+        elapsedTimeTimestamp: 661289651.566197
+        inferredTimestamp: 661289641.210208
+        legacyUniqueIdentifier: -661115858
+      }
+      availableLanguageOptions {
+        allowEmptySelection: false
+        languageOptions {
+          type: 0
+          languageTag: "en-GB"
+          characteristics: "public.main-program-content"
+          displayName: "Engelska (Storbritannien)"
+          identifier: "en-GB-en-GB-Engelska (Storbritannien)"
+        }
+      }
+      availableLanguageOptions {
+        allowEmptySelection: true
+        languageOptions {
+          type: 1
+          languageTag: "__AUTO__"
+        }
+        languageOptions {
+          type: 1
+          languageTag: "sv"
+          characteristics: "public.main-program-content"
+          characteristics: "public.accessibility.transcribes-spoken-dialog"
+          displayName: "Svenska"
+          identifier: "sv-sv-Svenska"
+        }
+        languageOptions {
+          type: 1
+          languageTag: "da"
+          characteristics: "public.main-program-content"
+          characteristics: "public.accessibility.transcribes-spoken-dialog"
+          displayName: "Danska"
+          identifier: "da-da-Danska"
+        }
+        languageOptions {
+          type: 1
+          languageTag: "en-US"
+          characteristics: "public.main-program-content"
+          characteristics: "public.accessibility.transcribes-spoken-dialog"
+          displayName: "Engelska (USA)"
+          identifier: "en-US-en-US-Engelska (USA)"
+        }
+        languageOptions {
+          type: 1
+          languageTag: "fi"
+          characteristics: "public.main-program-content"
+          characteristics: "public.accessibility.transcribes-spoken-dialog"
+          displayName: "Finska"
+          identifier: "fi-fi-Finska"
+        }
+        languageOptions {
+          type: 1
+          languageTag: "no"
+          characteristics: "public.main-program-content"
+          characteristics: "public.accessibility.transcribes-spoken-dialog"
+          displayName: "Norska"
+          identifier: "no-no-Norska"
+        }
+      }
+      currentLanguageOptions {
+        type: 0
+        languageTag: "en-GB"
+        characteristics: "public.main-program-content"
+        displayName: "Engelska (Storbritannien)"
+        identifier: "en-GB-en-GB-Engelska (Storbritannien)"
+      }
+      currentLanguageOptions {
+        type: 1
+        languageTag: "sv"
+        characteristics: "public.main-program-content"
+        characteristics: "public.accessibility.transcribes-spoken-dialog"
+        displayName: "Svenska"
+        identifier: "sv-sv-Svenska"
+      }
+    }
+    requestId: "PlaybackQueueInvalidation-27149184-0C96-4831-BF1F-DE50A16966D9"
+    resolvedPlayerPath {
+      origin {
+        displayName: "Vardagsrum"
+        identifier: 1280262988
+        5: 1
+      }
+      client {
+        processIdentifier: 2872
+        bundleIdentifier: "com.hbo.hbonow"
+      }
+      player {
+        identifier: "avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67"
+        displayName: "player-7"
+        5: 1258
+        6: 0
+      }
+    }
+  }
+  displayName: "HBO Max"
+  playbackState: Playing
+  playbackQueueCapabilities {
+    requestByRange: true
+  }
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 2872
+      bundleIdentifier: "com.hbo.hbonow"
+    }
+    player {
+      identifier: "avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67"
+      displayName: "player-7"
+      6: 0
+    }
+  }
+  playbackStateTimestamp: 661289641.705409
+}
+uniqueIdentifier: "C3451F7A-CDA8-44B1-BC97-156BFD5F7304"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 4 to <bound method PlayerStateManager._handle_set_state of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: PLAYER_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "D807FCDA-C804-448E-99C9-E82E99C60063"
+[playerClientPropertiesMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+      5: 1
+    }
+    client {
+      processIdentifier: 2872
+      bundleIdentifier: "com.hbo.hbonow"
+      processUserIdentifier: 501
+      displayName: "HBO Max"
+    }
+    player {
+      identifier: "avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67"
+      displayName: "player-7"
+      5: 1258
+      6: 0
+    }
+  }
+  lastPlayingTimestamp: -63114076800.0
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_PLAYER_MESSAGE
+uniqueIdentifier: "D3C61C00-FA04-4FB0-855F-5C460086E7D5"
+62 {
+  1 {
+    1 {
+      2: "Vardagsrum"
+      3: 1280262988
+    }
+    2 {
+      1: 2872
+      2: "com.hbo.hbonow"
+    }
+    3 {
+      1: "avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67"
+      2: "player-7"
+      5: 1258
+      6: 0
+    }
+  }
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_CLIENT_MESSAGE
+[updateClientMessage] {
+  client {
+    processIdentifier: 150
+    bundleIdentifier: "com.apple.TVAirPlay"
+    processUserIdentifier: 501
+    displayName: "Spotify"
+    bundleIdentifierHierarchys: "com.spotify.client"
+  }
+}
+uniqueIdentifier: "2557EC4D-6E30-47F8-990A-9536AD203DD5"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 55 to <bound method PlayerStateManager._handle_update_client of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_STATE_MESSAGE
+[setStateMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: TogglePlayPause
+      enabled: true
+    }
+    supportedCommands {
+      command: Play
+      enabled: true
+    }
+    supportedCommands {
+      command: Pause
+      enabled: true
+    }
+    supportedCommands {
+      command: Stop
+      enabled: true
+    }
+    supportedCommands {
+      command: ChangeRepeatMode
+      repeatMode: Off
+    }
+    supportedCommands {
+      command: ChangeShuffleMode
+      shuffleMode: Off
+    }
+    supportedCommands {
+      command: NextTrack
+      enabled: true
+    }
+    supportedCommands {
+      command: PreviousTrack
+      enabled: true
+    }
+    supportedCommands {
+      command: SkipBackward
+    }
+    supportedCommands {
+      command: SkipForward
+    }
+    supportedCommands {
+      command: BeginFastForward
+      enabled: true
+    }
+    supportedCommands {
+      command: EndFastForward
+      enabled: true
+    }
+    supportedCommands {
+      command: BeginRewind
+      enabled: true
+    }
+    supportedCommands {
+      command: EndRewind
+      enabled: true
+    }
+    supportedCommands {
+      command: SeekToPlaybackPosition
+      enabled: true
+      canScrub: 0
+    }
+  }
+  playbackQueue {
+    location: 0
+  }
+  displayName: "Spotify"
+  playbackState: Stopped
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 150
+      bundleIdentifier: "com.apple.TVAirPlay"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  playbackStateTimestamp: 661265982.482582
+}
+uniqueIdentifier: "98E0D713-8E27-4D31-9949-009216E610CC"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 4 to <bound method PlayerStateManager._handle_set_state of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: PLAYER_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "335F8FC3-47E6-4ECF-99CB-8FDB3F535436"
+[playerClientPropertiesMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+      5: 1
+    }
+    client {
+      processIdentifier: 150
+      bundleIdentifier: "com.apple.TVAirPlay"
+      processUserIdentifier: 501
+      displayName: "Spotify"
+      bundleIdentifierHierarchys: "com.spotify.client"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  lastPlayingTimestamp: 661265494.608866
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UPDATE_CLIENT_MESSAGE
+[updateClientMessage] {
+  client {
+    processIdentifier: 2275
+    bundleIdentifier: "com.google.ios.youtube"
+    processUserIdentifier: 501
+    displayName: "YouTube"
+  }
+}
+uniqueIdentifier: "FB83574F-C342-4C4E-825B-1FD8A2D3B7C7"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 55 to <bound method PlayerStateManager._handle_update_client of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: SET_STATE_MESSAGE
+[setStateMessage] {
+  supportedCommands {
+    supportedCommands {
+      command: NextTrack
+    }
+    supportedCommands {
+      command: PreviousTrack
+    }
+    supportedCommands {
+      command: Pause
+    }
+    supportedCommands {
+      command: Play
+    }
+    supportedCommands {
+      command: SeekToPlaybackPosition
+      canScrub: 0
+    }
+    supportedCommands {
+      command: SkipBackward
+      preferredIntervals: 10.0
+    }
+    supportedCommands {
+      command: SkipForward
+      preferredIntervals: 10.0
+    }
+  }
+  playbackQueue {
+    location: 0
+  }
+  displayName: "YouTube"
+  playbackState: Paused
+  playbackQueueCapabilities {
+  }
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+    }
+    client {
+      processIdentifier: 2275
+      bundleIdentifier: "com.google.ios.youtube"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  playbackStateTimestamp: 661283408.99237
+}
+uniqueIdentifier: "04D446F0-4804-4284-8863-C63BD7ACE968"
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Dispatching message with type 4 to <bound method PlayerStateManager._handle_set_state of <pyatv.protocols.mrp.player_state.PlayerStateManager object at 0x7f2742329fa0>>
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: PLAYER_CLIENT_PROPERTIES_MESSAGE
+uniqueIdentifier: "2E4D2A52-D9E0-41AA-87A9-4F9F71AED414"
+[playerClientPropertiesMessage] {
+  playerPath {
+    origin {
+      displayName: "Vardagsrum"
+      identifier: 1280262988
+      5: 1
+    }
+    client {
+      processIdentifier: 2275
+      bundleIdentifier: "com.google.ios.youtube"
+      processUserIdentifier: 501
+      displayName: "YouTube"
+    }
+    player {
+      identifier: "MediaRemote-DefaultPlayer"
+      displayName: "Default Player"
+      6: 0
+    }
+  }
+  lastPlayingTimestamp: 661283408.992433
+}
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: UNKNOWN_MESSAGE
+identifier: "0B2BCA1E-A94D-47CB-8657-6293336D8FBB"
+uniqueIdentifier: "3A0C8FB7-F69D-404C-8F71-D9F69D47D592"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=2000b187020050e51e2290088de38e79d6d88685da655b09e4106335e19d8d5b69ec04c18631999a0fc1cda7477da9602024)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.mrp.player_state]: Active client is now com.hbo.hbonow
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.mrp.player_state]: Active player is now avkit-932845E7-5258-47C4-B3D3-1EC0B7519F67 (player-7)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=b400346e80b9de9576c5df3b63788d4ec5497fe25ee2ec9ba43e53e0501abdfccc12f6e6d551d942dc615eed84cc28a1d1f03a85d83328438e65090e426ce0262bddabfbf0f69a25be74fe3f7aa921de43feb81fc1740f6bd5f6c09ccfaa49010ce954b0c652831e57cddea249171a3318d058389eb6cbf868eda0a72032ecc9c08182001d784926c2c478f955455438d94d68155538482e04c685808d0109d5c6d2266616b197829b9c220842902debaa100b35e00990e591031a03b67447c2d7d884e38231)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: >> Send: Protobuf: type: GET_KEYBOARD_SESSION_MESSAGE
+identifier: "56D7ADBB-402D-4603-8BFC-8767256A8141"
+errorCode: NoError
+uniqueIdentifier: "AE08333A-E8A5-419F-A538-71F2B87A70CF"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=200075f7bd3be9e813cf693f492807af194fe326715b6fc4c37c5e6bcee0c90825325c9b0a3c7bf3eb1beb514a3b935d90e3)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.channels]: Not enough data on data channel (has 32, expects 74)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=2a00d54f18327f9668c5cf4f3b53d0ce25a8f80ecd7536ac1670f781e44fb23ac807357b48650863abc18cc6e1048c4a6ca1b9b456368b8d9d2df9f2)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=2000f6556da9527411aa172f76adc71e532e86d6e5784c0cecd0373235ea8f4aee6b6dcdde5953571c06ab33603f762725f8)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.channels]: Not enough data on data channel (has 32, expects 201)
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Received data (Data=a900d61e57bc705c10c4c4107a48e513d238d745b0de4f986076ca50e4438710a485f8166a7728ac85fa9460db9ab0c2e92e9f052a9fb15a0955d8510bbbddff7c7f42b7b8ca92fa3c8b08f5dea2458904c52a6eb4e31367000283d5941a56b7571ec0644c837b2e13a05bb5f0d93fac994fa08a588ef81bcf1cf47ebfe4e6975df3aac6e07dcf04d037bcf90484bd9091c5ae70c780d49d32ab26d87bf1dc4fff87c5ed68fb72a8cc8c57ea0fed582ccbdd06e74683cff3eb372f)
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: << Receive: Protobuf: type: KEYBOARD_MESSAGE
+identifier: "56D7ADBB-402D-4603-8BFC-8767256A8141"
+[keyboardMessage] {
+  state: Unknown
+  attributes {
+    inputTraits {
+      autocapitalizationType: None
+      keyboardType: Default
+      returnKeyType: Default
+      enablesReturnKeyAutomatically: false
+      secureTextEntry: false
+      validTextRangeLocation: 0
+      validTextRangeLength: 0
+    }
+  }
+}
+uniqueIdentifier: "DB0E574B-717D-47EF-B246-C797E2B94FD1"
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Sending data (Encrypted=2000fbbdd282b1d86e5f61935e2a3a2f469043994c97c1af34cedf0cbfa4bdb3af1dcb310c6141e888540c188c1d3523317d)
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connected to protocol: Protocol.MRP
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connecting to protocol: Protocol.RAOP
+2021-12-15 20:52:26 DEBUG [pyatv.core.facade]: Connected to protocol: Protocol.RAOP
+  Media type: Video
+Device state: Paused
+       Title: A Christmas Carol: Episode 3
+  Identifier: urn:hbo:episode:GYT-ASwbB0bmxHQEAAAAF
+    Position: 5/3452s (0.1%)
+      Repeat: Off
+     Shuffle: Off
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: Closing connection
+2021-12-15 20:52:26 DEBUG [pyatv.scripts.atvremote]: Waiting for 1 remaining tasks
+2021-12-15 20:52:26 DEBUG [pyatv.protocols.airplay.mrp_connection]: Disconnected from device: None
+2021-12-15 20:52:26 DEBUG [pyatv.scripts.atvremote]: Connection was closed properly
+2021-12-15 20:52:26 DEBUG [pyatv.core.protocol]: Stopping heartbeat loop at 1 (AirPlay:10.0.10.81)
+2021-12-15 20:52:26 DEBUG [pyatv.support.http]: Connection closed
+2021-12-15 20:52:26 DEBUG [pyatv.auth.hap_channel]: Connection was lost to remote
