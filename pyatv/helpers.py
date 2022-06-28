@@ -50,7 +50,7 @@ async def auto_connect(
     await _handle(loop)
 
 
-def get_unique_id(
+def get_unique_id(  # pylint: disable=too-many-return-statements
     service_type: str, service_name: str, properties: Mapping[str, str]
 ) -> Optional[str]:
     """Return unique identifier from a Zeroconf service.
@@ -70,7 +70,15 @@ def get_unique_id(
     if service_type == AIRPLAY_SERVICE:
         return properties.get("deviceid")
     if service_type == RAOP_SERVICE:
-        return service_name.split("@", maxsplit=1)[0]
+        split = service_name.split("@", maxsplit=1)
+
+        # Normally a RAOP devices announces with "id@name" as zeroconf name. But some
+        # devices seems to break from this behavior and just use "name", thus leaving
+        # out the id. Some of these devices however have the public key ("pk")
+        # available as an attribute so that can be used as an identifier in that case.
+        if len(split) == 2:
+            return split[0]
+        return properties.get("pk")
     return None
 
 

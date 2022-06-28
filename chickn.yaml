@@ -63,7 +63,6 @@ pipeline:
       run: mypy --python-executable "{python_executable}" --ignore-missing-imports --follow-imports=skip pyatv
     - name: pytest
       run: pytest -n auto --log-level=debug -q -d --timeout=30 --durations=10 --cov --cov-report=term-missing --cov-report=xml tests
-      retries: 1
   post:
     - name: report
       run:
