@@ -44,7 +44,7 @@ Getting started with development is quite simple:
 1. Fork this project on GitHub
 2. git clone https://github.com/<username>/pyatv.git
 3. cd pyatv
-4. ./setup_dev_env.sh
+4. ./scripts/setup_dev_env.sh
 ```
 
 This will set everything up. To run tests, linting, etc. just run activate the virtual environment and run chickn:

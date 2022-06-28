@@ -9,189 +9,189 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RepeatMode(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: RepeatMode.Enum.ValueType = ...  # 0
-        Off: RepeatMode.Enum.ValueType = ...  # 1
-        One: RepeatMode.Enum.ValueType = ...  # 2
-        All: RepeatMode.Enum.ValueType = ...  # 3
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[RepeatMode._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: RepeatMode._Enum.ValueType  # 0
+        Off: RepeatMode._Enum.ValueType  # 1
+        One: RepeatMode._Enum.ValueType  # 2
+        All: RepeatMode._Enum.ValueType  # 3
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Unknown: RepeatMode.Enum.ValueType = ...  # 0
-    Off: RepeatMode.Enum.ValueType = ...  # 1
-    One: RepeatMode.Enum.ValueType = ...  # 2
-    All: RepeatMode.Enum.ValueType = ...  # 3
+    Unknown: RepeatMode.Enum.ValueType  # 0
+    Off: RepeatMode.Enum.ValueType  # 1
+    One: RepeatMode.Enum.ValueType  # 2
+    All: RepeatMode.Enum.ValueType  # 3
 
     def __init__(self,
         ) -> None: ...
 global___RepeatMode = RepeatMode
 
 class ShuffleMode(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: ShuffleMode.Enum.ValueType = ...  # 0
-        Off: ShuffleMode.Enum.ValueType = ...  # 1
-        Albums: ShuffleMode.Enum.ValueType = ...  # 2
-        Songs: ShuffleMode.Enum.ValueType = ...  # 3
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ShuffleMode._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: ShuffleMode._Enum.ValueType  # 0
+        Off: ShuffleMode._Enum.ValueType  # 1
+        Albums: ShuffleMode._Enum.ValueType  # 2
+        Songs: ShuffleMode._Enum.ValueType  # 3
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Unknown: ShuffleMode.Enum.ValueType = ...  # 0
-    Off: ShuffleMode.Enum.ValueType = ...  # 1
-    Albums: ShuffleMode.Enum.ValueType = ...  # 2
-    Songs: ShuffleMode.Enum.ValueType = ...  # 3
+    Unknown: ShuffleMode.Enum.ValueType  # 0
+    Off: ShuffleMode.Enum.ValueType  # 1
+    Albums: ShuffleMode.Enum.ValueType  # 2
+    Songs: ShuffleMode.Enum.ValueType  # 3
 
     def __init__(self,
         ) -> None: ...
 global___ShuffleMode = ShuffleMode
 
 class DeviceClass(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Invalid: DeviceClass.Enum.ValueType = ...  # 0
-        iPhone: DeviceClass.Enum.ValueType = ...  # 1
-        iPod: DeviceClass.Enum.ValueType = ...  # 2
-        iPad: DeviceClass.Enum.ValueType = ...  # 3
-        AppleTV: DeviceClass.Enum.ValueType = ...  # 4
-        iFPGA: DeviceClass.Enum.ValueType = ...  # 5
-        Watch: DeviceClass.Enum.ValueType = ...  # 6
-        Accessory: DeviceClass.Enum.ValueType = ...  # 7
-        Bridge: DeviceClass.Enum.ValueType = ...  # 8
-        Mac: DeviceClass.Enum.ValueType = ...  # 9
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DeviceClass._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Invalid: DeviceClass._Enum.ValueType  # 0
+        iPhone: DeviceClass._Enum.ValueType  # 1
+        iPod: DeviceClass._Enum.ValueType  # 2
+        iPad: DeviceClass._Enum.ValueType  # 3
+        AppleTV: DeviceClass._Enum.ValueType  # 4
+        iFPGA: DeviceClass._Enum.ValueType  # 5
+        Watch: DeviceClass._Enum.ValueType  # 6
+        Accessory: DeviceClass._Enum.ValueType  # 7
+        Bridge: DeviceClass._Enum.ValueType  # 8
+        Mac: DeviceClass._Enum.ValueType  # 9
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Invalid: DeviceClass.Enum.ValueType = ...  # 0
-    iPhone: DeviceClass.Enum.ValueType = ...  # 1
-    iPod: DeviceClass.Enum.ValueType = ...  # 2
-    iPad: DeviceClass.Enum.ValueType = ...  # 3
-    AppleTV: DeviceClass.Enum.ValueType = ...  # 4
-    iFPGA: DeviceClass.Enum.ValueType = ...  # 5
-    Watch: DeviceClass.Enum.ValueType = ...  # 6
-    Accessory: DeviceClass.Enum.ValueType = ...  # 7
-    Bridge: DeviceClass.Enum.ValueType = ...  # 8
-    Mac: DeviceClass.Enum.ValueType = ...  # 9
+    Invalid: DeviceClass.Enum.ValueType  # 0
+    iPhone: DeviceClass.Enum.ValueType  # 1
+    iPod: DeviceClass.Enum.ValueType  # 2
+    iPad: DeviceClass.Enum.ValueType  # 3
+    AppleTV: DeviceClass.Enum.ValueType  # 4
+    iFPGA: DeviceClass.Enum.ValueType  # 5
+    Watch: DeviceClass.Enum.ValueType  # 6
+    Accessory: DeviceClass.Enum.ValueType  # 7
+    Bridge: DeviceClass.Enum.ValueType  # 8
+    Mac: DeviceClass.Enum.ValueType  # 9
 
     def __init__(self,
         ) -> None: ...
 global___DeviceClass = DeviceClass
 
 class DeviceType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: DeviceType.Enum.ValueType = ...  # 0
-        AirPlay: DeviceType.Enum.ValueType = ...  # 1
-        Bluetooth: DeviceType.Enum.ValueType = ...  # 2
-        CarPlay: DeviceType.Enum.ValueType = ...  # 3
-        BuiltIn: DeviceType.Enum.ValueType = ...  # 4
-        Wired: DeviceType.Enum.ValueType = ...  # 5
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DeviceType._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: DeviceType._Enum.ValueType  # 0
+        AirPlay: DeviceType._Enum.ValueType  # 1
+        Bluetooth: DeviceType._Enum.ValueType  # 2
+        CarPlay: DeviceType._Enum.ValueType  # 3
+        BuiltIn: DeviceType._Enum.ValueType  # 4
+        Wired: DeviceType._Enum.ValueType  # 5
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Unknown: DeviceType.Enum.ValueType = ...  # 0
-    AirPlay: DeviceType.Enum.ValueType = ...  # 1
-    Bluetooth: DeviceType.Enum.ValueType = ...  # 2
-    CarPlay: DeviceType.Enum.ValueType = ...  # 3
-    BuiltIn: DeviceType.Enum.ValueType = ...  # 4
-    Wired: DeviceType.Enum.ValueType = ...  # 5
+    Unknown: DeviceType.Enum.ValueType  # 0
+    AirPlay: DeviceType.Enum.ValueType  # 1
+    Bluetooth: DeviceType.Enum.ValueType  # 2
+    CarPlay: DeviceType.Enum.ValueType  # 3
+    BuiltIn: DeviceType.Enum.ValueType  # 4
+    Wired: DeviceType.Enum.ValueType  # 5
 
     def __init__(self,
         ) -> None: ...
 global___DeviceType = DeviceType
 
 class DeviceSubType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Default: DeviceSubType.Enum.ValueType = ...  # 0
-        Speaker: DeviceSubType.Enum.ValueType = ...  # 1
-        Headphones: DeviceSubType.Enum.ValueType = ...  # 2
-        Headset: DeviceSubType.Enum.ValueType = ...  # 3
-        Receiver: DeviceSubType.Enum.ValueType = ...  # 4
-        LineOut: DeviceSubType.Enum.ValueType = ...  # 5
-        USB: DeviceSubType.Enum.ValueType = ...  # 6
-        DisplayPort: DeviceSubType.Enum.ValueType = ...  # 7
-        HDMI: DeviceSubType.Enum.ValueType = ...  # 8
-        LowEnergy: DeviceSubType.Enum.ValueType = ...  # 9
-        SPDIF: DeviceSubType.Enum.ValueType = ...  # 10
-        TV: DeviceSubType.Enum.ValueType = ...  # 11
-        HomePod: DeviceSubType.Enum.ValueType = ...  # 12
-        AppleTV: DeviceSubType.Enum.ValueType = ...  # 13
-        Vehicle: DeviceSubType.Enum.ValueType = ...  # 14
-        Cluster: DeviceSubType.Enum.ValueType = ...  # 15
-        SetTopBox: DeviceSubType.Enum.ValueType = ...  # 16
-        TVStick: DeviceSubType.Enum.ValueType = ...  # 17
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DeviceSubType._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Default: DeviceSubType._Enum.ValueType  # 0
+        Speaker: DeviceSubType._Enum.ValueType  # 1
+        Headphones: DeviceSubType._Enum.ValueType  # 2
+        Headset: DeviceSubType._Enum.ValueType  # 3
+        Receiver: DeviceSubType._Enum.ValueType  # 4
+        LineOut: DeviceSubType._Enum.ValueType  # 5
+        USB: DeviceSubType._Enum.ValueType  # 6
+        DisplayPort: DeviceSubType._Enum.ValueType  # 7
+        HDMI: DeviceSubType._Enum.ValueType  # 8
+        LowEnergy: DeviceSubType._Enum.ValueType  # 9
+        SPDIF: DeviceSubType._Enum.ValueType  # 10
+        TV: DeviceSubType._Enum.ValueType  # 11
+        HomePod: DeviceSubType._Enum.ValueType  # 12
+        AppleTV: DeviceSubType._Enum.ValueType  # 13
+        Vehicle: DeviceSubType._Enum.ValueType  # 14
+        Cluster: DeviceSubType._Enum.ValueType  # 15
+        SetTopBox: DeviceSubType._Enum.ValueType  # 16
+        TVStick: DeviceSubType._Enum.ValueType  # 17
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Default: DeviceSubType.Enum.ValueType = ...  # 0
-    Speaker: DeviceSubType.Enum.ValueType = ...  # 1
-    Headphones: DeviceSubType.Enum.ValueType = ...  # 2
-    Headset: DeviceSubType.Enum.ValueType = ...  # 3
-    Receiver: DeviceSubType.Enum.ValueType = ...  # 4
-    LineOut: DeviceSubType.Enum.ValueType = ...  # 5
-    USB: DeviceSubType.Enum.ValueType = ...  # 6
-    DisplayPort: DeviceSubType.Enum.ValueType = ...  # 7
-    HDMI: DeviceSubType.Enum.ValueType = ...  # 8
-    LowEnergy: DeviceSubType.Enum.ValueType = ...  # 9
-    SPDIF: DeviceSubType.Enum.ValueType = ...  # 10
-    TV: DeviceSubType.Enum.ValueType = ...  # 11
-    HomePod: DeviceSubType.Enum.ValueType = ...  # 12
-    AppleTV: DeviceSubType.Enum.ValueType = ...  # 13
-    Vehicle: DeviceSubType.Enum.ValueType = ...  # 14
-    Cluster: DeviceSubType.Enum.ValueType = ...  # 15
-    SetTopBox: DeviceSubType.Enum.ValueType = ...  # 16
-    TVStick: DeviceSubType.Enum.ValueType = ...  # 17
+    Default: DeviceSubType.Enum.ValueType  # 0
+    Speaker: DeviceSubType.Enum.ValueType  # 1
+    Headphones: DeviceSubType.Enum.ValueType  # 2
+    Headset: DeviceSubType.Enum.ValueType  # 3
+    Receiver: DeviceSubType.Enum.ValueType  # 4
+    LineOut: DeviceSubType.Enum.ValueType  # 5
+    USB: DeviceSubType.Enum.ValueType  # 6
+    DisplayPort: DeviceSubType.Enum.ValueType  # 7
+    HDMI: DeviceSubType.Enum.ValueType  # 8
+    LowEnergy: DeviceSubType.Enum.ValueType  # 9
+    SPDIF: DeviceSubType.Enum.ValueType  # 10
+    TV: DeviceSubType.Enum.ValueType  # 11
+    HomePod: DeviceSubType.Enum.ValueType  # 12
+    AppleTV: DeviceSubType.Enum.ValueType  # 13
+    Vehicle: DeviceSubType.Enum.ValueType  # 14
+    Cluster: DeviceSubType.Enum.ValueType  # 15
+    SetTopBox: DeviceSubType.Enum.ValueType  # 16
+    TVStick: DeviceSubType.Enum.ValueType  # 17
 
     def __init__(self,
         ) -> None: ...
 global___DeviceSubType = DeviceSubType
 
 class PlaybackState(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class _Enum:
         ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-        Unknown: PlaybackState.Enum.ValueType = ...  # 0
-        Playing: PlaybackState.Enum.ValueType = ...  # 1
-        Paused: PlaybackState.Enum.ValueType = ...  # 2
-        Stopped: PlaybackState.Enum.ValueType = ...  # 3
-        Interrupted: PlaybackState.Enum.ValueType = ...  # 4
-        Seeking: PlaybackState.Enum.ValueType = ...  # 5
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[PlaybackState._Enum.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        Unknown: PlaybackState._Enum.ValueType  # 0
+        Playing: PlaybackState._Enum.ValueType  # 1
+        Paused: PlaybackState._Enum.ValueType  # 2
+        Stopped: PlaybackState._Enum.ValueType  # 3
+        Interrupted: PlaybackState._Enum.ValueType  # 4
+        Seeking: PlaybackState._Enum.ValueType  # 5
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
         pass
 
-    Unknown: PlaybackState.Enum.ValueType = ...  # 0
-    Playing: PlaybackState.Enum.ValueType = ...  # 1
-    Paused: PlaybackState.Enum.ValueType = ...  # 2
-    Stopped: PlaybackState.Enum.ValueType = ...  # 3
-    Interrupted: PlaybackState.Enum.ValueType = ...  # 4
-    Seeking: PlaybackState.Enum.ValueType = ...  # 5
+    Unknown: PlaybackState.Enum.ValueType  # 0
+    Playing: PlaybackState.Enum.ValueType  # 1
+    Paused: PlaybackState.Enum.ValueType  # 2
+    Stopped: PlaybackState.Enum.ValueType  # 3
+    Interrupted: PlaybackState.Enum.ValueType  # 4
+    Seeking: PlaybackState.Enum.ValueType  # 5
 
     def __init__(self,
         ) -> None: ...

@@ -11,22 +11,23 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class AudioFadeMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PLAYERPATH_FIELD_NUMBER: builtins.int
     FADETYPE_FIELD_NUMBER: builtins.int
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    fadeType: builtins.int = ...
+    fadeType: builtins.int
     def __init__(self,
         *,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        fadeType : typing.Optional[builtins.int] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        fadeType: typing.Optional[builtins.int] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["fadeType",b"fadeType","playerPath",b"playerPath"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["fadeType",b"fadeType","playerPath",b"playerPath"]) -> None: ...
 global___AudioFadeMessage = AudioFadeMessage
 
-audioFadeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___AudioFadeMessage] = ...
+AUDIOFADEMESSAGE_FIELD_NUMBER: builtins.int
+audioFadeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___AudioFadeMessage]

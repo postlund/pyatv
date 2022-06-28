@@ -10,12 +10,12 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SendHIDEventMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     HIDEVENTDATA_FIELD_NUMBER: builtins.int
-    hidEventData: builtins.bytes = ...
+    hidEventData: builtins.bytes
     """This data corresponds to a "keyboardEvent" in IOHIDEvent.h encoded as raw
     data. Here is one source:
 
@@ -50,10 +50,11 @@ class SendHIDEventMessage(google.protobuf.message.Message):
 
     def __init__(self,
         *,
-        hidEventData : typing.Optional[builtins.bytes] = ...,
+        hidEventData: typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["hidEventData",b"hidEventData"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["hidEventData",b"hidEventData"]) -> None: ...
 global___SendHIDEventMessage = SendHIDEventMessage
 
-sendHIDEventMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendHIDEventMessage] = ...
+SENDHIDEVENTMESSAGE_FIELD_NUMBER: builtins.int
+sendHIDEventMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendHIDEventMessage]

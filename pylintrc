@@ -1,4 +1,5 @@
 [MASTER]
+load-plugins=pylint.extensions.no_self_use
 reports=no
 
 [BASIC]
@@ -30,6 +31,7 @@ ignored-classes=
 
 disable=
   broad-except,
+  cyclic-import,  # TODO: Bug in pylint?
   locally-disabled,
   duplicate-code,
   fixme,

@@ -426,11 +426,17 @@ class RaopRemoteControl(RemoteControl):
         await self.audio.set_volume(max(self.audio.volume - 5.0, 0.0))
 
 
+def raop_name_from_service_name(service_name: str) -> str:
+    """Convert an raop service name to a name."""
+    split = service_name.split("@", maxsplit=1)
+    return split[1] if len(split) == 2 else split[0]
+
+
 def raop_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> Optional[ScanHandlerReturn]:
     """Parse and return a new RAOP service."""
-    _, name = mdns_service.name.split("@", maxsplit=1)
+    name = raop_name_from_service_name(mdns_service.name)
     service = MutableService(
         get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.RAOP,
@@ -438,11 +444,6 @@ def raop_service_handler(
         mdns_service.properties,
     )
     return name, service
-
-
-def raop_name_from_service_name(service_name: str) -> str:
-    """Convert an raop service name to a name."""
-    return service_name.split("@", maxsplit=1)[1]
 
 
 def scan() -> Mapping[str, ScanHandlerDeviceInfoName]:

@@ -11,19 +11,20 @@ import pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RegisterVoiceInputDeviceMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DEVICEDESCRIPTOR_FIELD_NUMBER: builtins.int
     @property
     def deviceDescriptor(self) -> pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor: ...
     def __init__(self,
         *,
-        deviceDescriptor : typing.Optional[pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor] = ...,
+        deviceDescriptor: typing.Optional[pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["deviceDescriptor",b"deviceDescriptor"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["deviceDescriptor",b"deviceDescriptor"]) -> None: ...
 global___RegisterVoiceInputDeviceMessage = RegisterVoiceInputDeviceMessage
 
-registerVoiceInputDeviceMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RegisterVoiceInputDeviceMessage] = ...
+REGISTERVOICEINPUTDEVICEMESSAGE_FIELD_NUMBER: builtins.int
+registerVoiceInputDeviceMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RegisterVoiceInputDeviceMessage]

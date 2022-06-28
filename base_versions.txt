@@ -1,10 +1,11 @@
 aiohttp==3.8.1,<5
 bitarray==2.1.2
-cryptography==2.6
+cryptography==37.0.2
+chacha20poly1305-reuseable==0.0.3
 ifaddr==0.1.7
 mediafile==0.8.1
 miniaudio==1.45
-protobuf==3.19.1,<4
+protobuf==3.19.3
 requests==2.23.0
 srptools==0.2.0
 zeroconf==0.38.1

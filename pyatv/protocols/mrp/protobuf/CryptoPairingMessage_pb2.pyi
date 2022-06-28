@@ -10,34 +10,35 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class CryptoPairingMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PAIRINGDATA_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     ISRETRYING_FIELD_NUMBER: builtins.int
     ISUSINGSYSTEMPAIRING_FIELD_NUMBER: builtins.int
     STATE_FIELD_NUMBER: builtins.int
-    pairingData: builtins.bytes = ...
+    pairingData: builtins.bytes
     """Example: <00010006 0101>"""
 
-    status: builtins.int = ...
+    status: builtins.int
     """Example: 0"""
 
-    isRetrying: builtins.bool = ...
-    isUsingSystemPairing: builtins.bool = ...
-    state: builtins.int = ...
+    isRetrying: builtins.bool
+    isUsingSystemPairing: builtins.bool
+    state: builtins.int
     def __init__(self,
         *,
-        pairingData : typing.Optional[builtins.bytes] = ...,
-        status : typing.Optional[builtins.int] = ...,
-        isRetrying : typing.Optional[builtins.bool] = ...,
-        isUsingSystemPairing : typing.Optional[builtins.bool] = ...,
-        state : typing.Optional[builtins.int] = ...,
+        pairingData: typing.Optional[builtins.bytes] = ...,
+        status: typing.Optional[builtins.int] = ...,
+        isRetrying: typing.Optional[builtins.bool] = ...,
+        isUsingSystemPairing: typing.Optional[builtins.bool] = ...,
+        state: typing.Optional[builtins.int] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["isRetrying",b"isRetrying","isUsingSystemPairing",b"isUsingSystemPairing","pairingData",b"pairingData","state",b"state","status",b"status"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["isRetrying",b"isRetrying","isUsingSystemPairing",b"isUsingSystemPairing","pairingData",b"pairingData","state",b"state","status",b"status"]) -> None: ...
 global___CryptoPairingMessage = CryptoPairingMessage
 
-cryptoPairingMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___CryptoPairingMessage] = ...
+CRYPTOPAIRINGMESSAGE_FIELD_NUMBER: builtins.int
+cryptoPairingMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___CryptoPairingMessage]

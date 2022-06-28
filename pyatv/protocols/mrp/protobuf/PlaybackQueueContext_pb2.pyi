@@ -8,15 +8,15 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PlaybackQueueContext(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     REVISION_FIELD_NUMBER: builtins.int
-    revision: typing.Text = ...
+    revision: typing.Text
     def __init__(self,
         *,
-        revision : typing.Optional[typing.Text] = ...,
+        revision: typing.Optional[typing.Text] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["revision",b"revision"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["revision",b"revision"]) -> None: ...

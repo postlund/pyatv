@@ -10,10 +10,10 @@ import pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class VoiceInputDeviceDescriptor(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     DEFAULTFORMAT_FIELD_NUMBER: builtins.int
     SUPPORTEDFORMATS_FIELD_NUMBER: builtins.int
     @property
@@ -22,8 +22,8 @@ class VoiceInputDeviceDescriptor(google.protobuf.message.Message):
     def supportedFormats(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]: ...
     def __init__(self,
         *,
-        defaultFormat : typing.Optional[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings] = ...,
-        supportedFormats : typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]] = ...,
+        defaultFormat: typing.Optional[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings] = ...,
+        supportedFormats: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["defaultFormat",b"defaultFormat"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["defaultFormat",b"defaultFormat","supportedFormats",b"supportedFormats"]) -> None: ...

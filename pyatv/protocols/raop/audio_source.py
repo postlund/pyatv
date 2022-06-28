@@ -382,12 +382,12 @@ class InternetSource(AudioSource):
 
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
-        try:
-            frames = next(self.stream_generator)
-        except StopIteration:
-            return AudioSource.NO_FRAMES
-        else:
+        frames: Optional[array.array] = await self.loop.run_in_executor(
+            None, next, self.stream_generator, None
+        )
+        if frames:
             return frames.tobytes()
+        return AudioSource.NO_FRAMES
 
     @property
     def sample_rate(self) -> int:

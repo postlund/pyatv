@@ -11,18 +11,19 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RemoveEndpointsMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     ENDPOINTUIDS_FIELD_NUMBER: builtins.int
     @property
     def endpointUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
-        endpointUIDs : typing.Optional[typing.Iterable[typing.Text]] = ...,
+        endpointUIDs: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["endpointUIDs",b"endpointUIDs"]) -> None: ...
 global___RemoveEndpointsMessage = RemoveEndpointsMessage
 
-removeEndpointsMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoveEndpointsMessage] = ...
+REMOVEENDPOINTSMESSAGE_FIELD_NUMBER: builtins.int
+removeEndpointsMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoveEndpointsMessage]
