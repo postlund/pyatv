@@ -1,4 +1,4 @@
-aiohttp==3.1.0,<5
+aiohttp==3.8.1,<5
 bitarray==2.1.2
 cryptography==2.6
 ifaddr==0.1.7
