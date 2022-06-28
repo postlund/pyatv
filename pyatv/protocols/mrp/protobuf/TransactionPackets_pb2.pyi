@@ -10,16 +10,16 @@ import pyatv.protocols.mrp.protobuf.TransactionPacket_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class TransactionPackets(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     PACKETS_FIELD_NUMBER: builtins.int
     @property
     def packets(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]: ...
     def __init__(self,
         *,
-        packets : typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]] = ...,
+        packets: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["packets",b"packets"]) -> None: ...
 global___TransactionPackets = TransactionPackets

@@ -8,21 +8,21 @@ import google.protobuf.message
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class NowPlayingPlayer(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     IDENTIFIER_FIELD_NUMBER: builtins.int
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     ISDEFAULTPLAYER_FIELD_NUMBER: builtins.int
-    identifier: typing.Text = ...
-    displayName: typing.Text = ...
-    isDefaultPlayer: builtins.bool = ...
+    identifier: typing.Text
+    displayName: typing.Text
+    isDefaultPlayer: builtins.bool
     def __init__(self,
         *,
-        identifier : typing.Optional[typing.Text] = ...,
-        displayName : typing.Optional[typing.Text] = ...,
-        isDefaultPlayer : typing.Optional[builtins.bool] = ...,
+        identifier: typing.Optional[typing.Text] = ...,
+        displayName: typing.Optional[typing.Text] = ...,
+        isDefaultPlayer: typing.Optional[builtins.bool] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["displayName",b"displayName","identifier",b"identifier","isDefaultPlayer",b"isDefaultPlayer"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["displayName",b"displayName","identifier",b"identifier","isDefaultPlayer",b"isDefaultPlayer"]) -> None: ...

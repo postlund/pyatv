@@ -10,21 +10,22 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class GenericMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     KEY_FIELD_NUMBER: builtins.int
     VALUE_FIELD_NUMBER: builtins.int
-    key: typing.Text = ...
-    value: builtins.bytes = ...
+    key: typing.Text
+    value: builtins.bytes
     def __init__(self,
         *,
-        key : typing.Optional[typing.Text] = ...,
-        value : typing.Optional[builtins.bytes] = ...,
+        key: typing.Optional[typing.Text] = ...,
+        value: typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 global___GenericMessage = GenericMessage
 
-genericMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___GenericMessage] = ...
+GENERICMESSAGE_FIELD_NUMBER: builtins.int
+genericMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___GenericMessage]

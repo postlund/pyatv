@@ -13,10 +13,10 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class PlaybackQueueRequestMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     LOCATION_FIELD_NUMBER: builtins.int
     LENGTH_FIELD_NUMBER: builtins.int
     INCLUDEMETADATA_FIELD_NUMBER: builtins.int
@@ -34,48 +34,49 @@ class PlaybackQueueRequestMessage(google.protobuf.message.Message):
     CACHINGPOLICY_FIELD_NUMBER: builtins.int
     LABEL_FIELD_NUMBER: builtins.int
     ISLEGACYNOWPLAYINGINFOREQUEST_FIELD_NUMBER: builtins.int
-    location: builtins.int = ...
-    length: builtins.int = ...
-    includeMetadata: builtins.bool = ...
-    artworkWidth: builtins.float = ...
-    artworkHeight: builtins.float = ...
-    includeLyrics: builtins.bool = ...
-    includeSections: builtins.bool = ...
-    includeInfo: builtins.bool = ...
-    includeLanguageOptions: builtins.bool = ...
+    location: builtins.int
+    length: builtins.int
+    includeMetadata: builtins.bool
+    artworkWidth: builtins.float
+    artworkHeight: builtins.float
+    includeLyrics: builtins.bool
+    includeSections: builtins.bool
+    includeInfo: builtins.bool
+    includeLanguageOptions: builtins.bool
     @property
     def context(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext: ...
-    requestID: typing.Text = ...
+    requestID: typing.Text
     @property
     def contentItemIdentifiers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    returnContentItemAssetsInUserCompletion: builtins.bool = ...
+    returnContentItemAssetsInUserCompletion: builtins.bool
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    cachingPolicy: builtins.int = ...
-    label: typing.Text = ...
-    isLegacyNowPlayingInfoRequest: builtins.bool = ...
+    cachingPolicy: builtins.int
+    label: typing.Text
+    isLegacyNowPlayingInfoRequest: builtins.bool
     def __init__(self,
         *,
-        location : typing.Optional[builtins.int] = ...,
-        length : typing.Optional[builtins.int] = ...,
-        includeMetadata : typing.Optional[builtins.bool] = ...,
-        artworkWidth : typing.Optional[builtins.float] = ...,
-        artworkHeight : typing.Optional[builtins.float] = ...,
-        includeLyrics : typing.Optional[builtins.bool] = ...,
-        includeSections : typing.Optional[builtins.bool] = ...,
-        includeInfo : typing.Optional[builtins.bool] = ...,
-        includeLanguageOptions : typing.Optional[builtins.bool] = ...,
-        context : typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext] = ...,
-        requestID : typing.Optional[typing.Text] = ...,
-        contentItemIdentifiers : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        returnContentItemAssetsInUserCompletion : typing.Optional[builtins.bool] = ...,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
-        cachingPolicy : typing.Optional[builtins.int] = ...,
-        label : typing.Optional[typing.Text] = ...,
-        isLegacyNowPlayingInfoRequest : typing.Optional[builtins.bool] = ...,
+        location: typing.Optional[builtins.int] = ...,
+        length: typing.Optional[builtins.int] = ...,
+        includeMetadata: typing.Optional[builtins.bool] = ...,
+        artworkWidth: typing.Optional[builtins.float] = ...,
+        artworkHeight: typing.Optional[builtins.float] = ...,
+        includeLyrics: typing.Optional[builtins.bool] = ...,
+        includeSections: typing.Optional[builtins.bool] = ...,
+        includeInfo: typing.Optional[builtins.bool] = ...,
+        includeLanguageOptions: typing.Optional[builtins.bool] = ...,
+        context: typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext] = ...,
+        requestID: typing.Optional[typing.Text] = ...,
+        contentItemIdentifiers: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        returnContentItemAssetsInUserCompletion: typing.Optional[builtins.bool] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        cachingPolicy: typing.Optional[builtins.int] = ...,
+        label: typing.Optional[typing.Text] = ...,
+        isLegacyNowPlayingInfoRequest: typing.Optional[builtins.bool] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["artworkHeight",b"artworkHeight","artworkWidth",b"artworkWidth","cachingPolicy",b"cachingPolicy","context",b"context","includeInfo",b"includeInfo","includeLanguageOptions",b"includeLanguageOptions","includeLyrics",b"includeLyrics","includeMetadata",b"includeMetadata","includeSections",b"includeSections","isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest","label",b"label","length",b"length","location",b"location","playerPath",b"playerPath","requestID",b"requestID","returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["artworkHeight",b"artworkHeight","artworkWidth",b"artworkWidth","cachingPolicy",b"cachingPolicy","contentItemIdentifiers",b"contentItemIdentifiers","context",b"context","includeInfo",b"includeInfo","includeLanguageOptions",b"includeLanguageOptions","includeLyrics",b"includeLyrics","includeMetadata",b"includeMetadata","includeSections",b"includeSections","isLegacyNowPlayingInfoRequest",b"isLegacyNowPlayingInfoRequest","label",b"label","length",b"length","location",b"location","playerPath",b"playerPath","requestID",b"requestID","returnContentItemAssetsInUserCompletion",b"returnContentItemAssetsInUserCompletion"]) -> None: ...
 global___PlaybackQueueRequestMessage = PlaybackQueueRequestMessage
 
-playbackQueueRequestMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___PlaybackQueueRequestMessage] = ...
+PLAYBACKQUEUEREQUESTMESSAGE_FIELD_NUMBER: builtins.int
+playbackQueueRequestMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___PlaybackQueueRequestMessage]

@@ -10,16 +10,16 @@ import pyatv.protocols.mrp.protobuf.CommandInfo_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SupportedCommands(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     SUPPORTEDCOMMANDS_FIELD_NUMBER: builtins.int
     @property
     def supportedCommands(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.CommandInfo]: ...
     def __init__(self,
         *,
-        supportedCommands : typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.CommandInfo]] = ...,
+        supportedCommands: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.CommandInfo]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["supportedCommands",b"supportedCommands"]) -> None: ...
 global___SupportedCommands = SupportedCommands

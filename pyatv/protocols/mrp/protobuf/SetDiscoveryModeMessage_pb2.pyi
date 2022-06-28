@@ -10,21 +10,22 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class SetDiscoveryModeMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     MODE_FIELD_NUMBER: builtins.int
     FEATURES_FIELD_NUMBER: builtins.int
-    mode: builtins.int = ...
-    features: builtins.int = ...
+    mode: builtins.int
+    features: builtins.int
     def __init__(self,
         *,
-        mode : typing.Optional[builtins.int] = ...,
-        features : typing.Optional[builtins.int] = ...,
+        mode: typing.Optional[builtins.int] = ...,
+        features: typing.Optional[builtins.int] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["features",b"features","mode",b"mode"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["features",b"features","mode",b"mode"]) -> None: ...
 global___SetDiscoveryModeMessage = SetDiscoveryModeMessage
 
-setDiscoveryModeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetDiscoveryModeMessage] = ...
+SETDISCOVERYMODEMESSAGE_FIELD_NUMBER: builtins.int
+setDiscoveryModeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetDiscoveryModeMessage]

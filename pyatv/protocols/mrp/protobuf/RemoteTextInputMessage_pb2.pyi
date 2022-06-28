@@ -10,24 +10,25 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class RemoteTextInputMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TIMESTAMP_FIELD_NUMBER: builtins.int
     VERSION_FIELD_NUMBER: builtins.int
     DATA_FIELD_NUMBER: builtins.int
-    timestamp: builtins.float = ...
-    version: builtins.int = ...
-    data: builtins.bytes = ...
+    timestamp: builtins.float
+    version: builtins.int
+    data: builtins.bytes
     def __init__(self,
         *,
-        timestamp : typing.Optional[builtins.float] = ...,
-        version : typing.Optional[builtins.int] = ...,
-        data : typing.Optional[builtins.bytes] = ...,
+        timestamp: typing.Optional[builtins.float] = ...,
+        version: typing.Optional[builtins.int] = ...,
+        data: typing.Optional[builtins.bytes] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["data",b"data","timestamp",b"timestamp","version",b"version"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data","timestamp",b"timestamp","version",b"version"]) -> None: ...
 global___RemoteTextInputMessage = RemoteTextInputMessage
 
-remoteTextInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoteTextInputMessage] = ...
+REMOTETEXTINPUTMESSAGE_FIELD_NUMBER: builtins.int
+remoteTextInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoteTextInputMessage]

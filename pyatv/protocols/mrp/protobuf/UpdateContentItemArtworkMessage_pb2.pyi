@@ -13,10 +13,10 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class UpdateContentItemArtworkMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     CONTENTITEMS_FIELD_NUMBER: builtins.int
     PLAYERPATH_FIELD_NUMBER: builtins.int
     @property
@@ -25,11 +25,12 @@ class UpdateContentItemArtworkMessage(google.protobuf.message.Message):
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     def __init__(self,
         *,
-        contentItems : typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]] = ...,
-        playerPath : typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        contentItems: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["contentItems",b"contentItems","playerPath",b"playerPath"]) -> None: ...
 global___UpdateContentItemArtworkMessage = UpdateContentItemArtworkMessage
 
-updateContentItemArtworkMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___UpdateContentItemArtworkMessage] = ...
+UPDATECONTENTITEMARTWORKMESSAGE_FIELD_NUMBER: builtins.int
+updateContentItemArtworkMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___UpdateContentItemArtworkMessage]

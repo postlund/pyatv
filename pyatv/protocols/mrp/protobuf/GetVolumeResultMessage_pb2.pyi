@@ -10,18 +10,19 @@ import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import typing
 import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class GetVolumeResultMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
     VOLUME_FIELD_NUMBER: builtins.int
-    volume: builtins.float = ...
+    volume: builtins.float
     def __init__(self,
         *,
-        volume : typing.Optional[builtins.float] = ...,
+        volume: typing.Optional[builtins.float] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["volume",b"volume"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["volume",b"volume"]) -> None: ...
 global___GetVolumeResultMessage = GetVolumeResultMessage
 
-getVolumeResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___GetVolumeResultMessage] = ...
+GETVOLUMERESULTMESSAGE_FIELD_NUMBER: builtins.int
+getVolumeResultMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___GetVolumeResultMessage]
