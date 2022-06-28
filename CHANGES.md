@@ -1,5 +1,24 @@
 # CHANGES
 
+## 0.10.2 Bonnet (2022-06-28)
+
+This release just lowers the required version of cryptography
+to 36.0.2 or higher.
+
+**Changes:**
+
+*Other:*
+
+```
+ecada17 deps: Require cryptography >= 36.0.2 (#1780)
+```
+
+**All changes:**
+
+```
+ecada17 deps: Require cryptography >= 36.0.2 (#1780)
+```
+
 ## 0.10.1 Yenndo (2022-06-28)
 
 This is a minor bug fix release, taking care of some nasty stuff:
