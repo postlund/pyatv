@@ -920,21 +920,27 @@ class DeviceInfo:
         return self._devinfo.get(DeviceInfo.RAW_MODEL)
 
     @property
+    def model_str(self) -> str:
+        """Return model name as string.
+
+        This property will return the model name as a string and fallback to `raw_model`
+        if it is not available.
+        """
+        return (
+            self.raw_model
+            if self.model == DeviceModel.Unknown and self.raw_model
+            else convert.model_str(self.model)
+        )
+
+    @property
     def mac(self) -> Optional[str]:
         """Device MAC address."""
         return self._mac
 
     def __str__(self) -> str:
         """Convert device info to readable string."""
-        # If no model is available but raw_model is, use that. Otherwise fall back
-        # to whatever model_str returns.
-        if self.model == DeviceModel.Unknown and self.raw_model:
-            model = self.raw_model
-        else:
-            model = convert.model_str(self.model)
-
         output = (
-            model
+            self.model_str
             + ", "
             + {
                 OperatingSystem.Legacy: "ATV SW",
