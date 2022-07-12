@@ -362,6 +362,20 @@ def test_device_info_raw_model_str():
     assert str(dev_info) == "raw, Unknown OS"
 
 
+@pytest.mark.parametrize(
+    "model,raw_model,expected",
+    [(DeviceModel.Unknown, "raw", "raw"), (DeviceModel.Gen3, "raw", "Apple TV 3")],
+)
+def test_model_str(model, raw_model, expected):
+    info = {}
+    if model is not None:
+        info[DeviceInfo.MODEL] = model
+    if raw_model is not None:
+        info[DeviceInfo.RAW_MODEL] = raw_model
+    dev_info = DeviceInfo(info)
+    assert dev_info.model_str == expected
+
+
 # FEATURES
 
 
