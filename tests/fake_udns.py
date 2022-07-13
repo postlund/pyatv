@@ -56,11 +56,14 @@ def airplay_service(
     port: int = 7000,
     model: Optional[str] = None,
 ) -> Tuple[str, FakeDnsService]:
+    properties = {"deviceid": deviceid.encode("utf-8"), "features": b"0x1"}
+    if model:
+        properties["model"] = model.encode("utf-8")
     service = FakeDnsService(
         name=atv_name,
         addresses=addresses,
         port=port,
-        properties={"deviceid": deviceid.encode("utf-8"), "features": b"0x1"},
+        properties=properties,
         model=model,
     )
     return ("_airplay._tcp.local", service)

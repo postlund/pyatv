@@ -154,6 +154,8 @@ async def _scan_devices(loop, hosts):
                 "name": atv.name,
                 "address": str(atv.address),
                 "identifier": atv.identifier,
+                "model": atv.device_info.model.name,
+                "model_str": atv.device_info.model_str,
                 "services": services,
             }
         )

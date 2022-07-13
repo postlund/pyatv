@@ -71,7 +71,11 @@ class ScriptTest(AioHTTPTestCase):
         )
         self.fake_udns.add_service(
             fake_udns.airplay_service(
-                "Apple TV 2", AIRPLAY_ID, addresses=[IP_2], port=airplay_port
+                "Apple TV 2",
+                AIRPLAY_ID,
+                addresses=[IP_2],
+                port=airplay_port,
+                model="pyatv",
             )
         )
 
