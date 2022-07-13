@@ -42,12 +42,16 @@ class AtvscriptTest(ScriptTest):
                         "name": "Apple TV 1",
                         "address": IP_1,
                         "identifier": DMAP_ID,
+                        "model": "Unknown",
+                        "model_str": "Unknown",
                         "services": [{"protocol": "dmap", "port": 3689}],
                     },
                     {
                         "name": "Apple TV 2",
                         "address": IP_2,
                         "identifier": MRP_ID,
+                        "model": "Unknown",
+                        "model_str": "pyatv",
                         "services": [
                             {
                                 "protocol": "mrp",
