@@ -45,6 +45,8 @@ class AtvscriptTest(ScriptTest):
                         "device_info": {
                             "model": "Unknown",
                             "model_str": "Unknown",
+                            "operating_system": "Legacy",
+                            "version": None,
                         },
                         "services": [{"protocol": "dmap", "port": 3689}],
                     },
@@ -55,6 +57,8 @@ class AtvscriptTest(ScriptTest):
                         "device_info": {
                             "model": "Unknown",
                             "model_str": "pyatv",
+                            "operating_system": "TvOS",
+                            "version": "14.7",
                         },
                         "services": [
                             {

@@ -75,7 +75,9 @@ $ atvscript scan
       "identifier": "xxx",
       {
         "model": "Gen4K",
-        "model_str": "Apple TV 4K"
+        "model_str": "Apple TV 4K",
+        "operating_system": "TvOS",
+        "version": "15.5.1"
       },
       "services": [
         {
@@ -94,7 +96,9 @@ $ atvscript scan
       "identifier": "xxx",
       "device_info": {
         "model": "Gen3",
-        "model_str": "Apple TV 3"
+        "model_str": "Apple TV 3",
+        "operating_system": "Legacy",
+        "version": "8.6.1"
       }
       "services": [
         {
@@ -113,7 +117,9 @@ $ atvscript scan
       "identifier": "xxx",
       "device_info": {
         "model": "Unknown",
-        "model_str": "Unknown"
+        "model_str": "Unknown",
+        "operating_system": "Unknown",
+        "version": null
       },
       "services": [
         {
@@ -141,7 +147,9 @@ $ atvscript -s 10.0.10.81 scan
       "identifier": "xxx",
       "device_info": {
         "model": "Gen4K",
-        "model_str": "Apple TV 4K"
+        "model_str": "Apple TV 4K",
+        "operating_system": "TvOS",
+        "version": "15.5.1"
       },
       "services": [
         {
