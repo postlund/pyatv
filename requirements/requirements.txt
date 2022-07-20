@@ -1,5 +1,5 @@
 aiohttp==3.8.1
-bitarray==2.5.1
+bitarray==2.6.0
 cryptography==37.0.4
 chacha20poly1305-reuseable==0.0.4
 ifaddr==0.2.0
