@@ -284,10 +284,12 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         # waiting for the respone so we save it here
         identifier = message.identifier or "type_" + str(message.type)
         if identifier in self._outstanding:
+            _LOGGER.error("OUTSTANDING: %s", message)
             outstanding = OutstandingMessage(
                 self._outstanding[identifier].semaphore, message
             )
             self._outstanding[identifier] = outstanding
             self._outstanding[identifier].semaphore.release()
         else:
+            _LOGGER.error("DISPATCH %s: %s", message.type, message)
             self.dispatch(message.type, message)

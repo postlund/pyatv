@@ -111,6 +111,7 @@ class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
         tasks = []
         loop = asyncio.get_event_loop()
         listeners = self.__listeners.get(dispatch_type, [])
+        _LOGGER.error("LISTENERS: %s", self.__listeners)
         for func in [func for filter_func, func in listeners if filter_func(message)]:
             _LOGGER.debug(
                 "Dispatching message with type %s to %s",
