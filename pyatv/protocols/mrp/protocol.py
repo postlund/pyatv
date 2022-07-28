@@ -7,6 +7,8 @@ import logging
 from typing import Dict, NamedTuple, Optional
 import uuid
 
+import async_timeout
+
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -268,7 +270,8 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
         try:
             # The connection instance will dispatch the message
-            await asyncio.wait_for(semaphore.acquire(), timeout)
+            async with async_timeout.timeout(timeout):
+                await semaphore.acquire()
 
         except Exception:
             del self._outstanding[identifier]
