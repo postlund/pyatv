@@ -10,6 +10,7 @@ from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, 
 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
+import async_timeout
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
@@ -385,7 +386,8 @@ class HttpConnection(asyncio.Protocol):
         event = asyncio.Event()
         self._requests.appendleft(event)
         try:
-            await asyncio.wait_for(event.wait(), timeout=4)
+            async with async_timeout.timeout(4):
+                await event.wait()
             response = cast(HttpResponse, self._responses.get())
         except asyncio.TimeoutError as ex:
             raise TimeoutError(f"no response to {method} {uri} ({protocol})") from ex
