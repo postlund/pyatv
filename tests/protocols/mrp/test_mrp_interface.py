@@ -74,6 +74,21 @@ async def test_audio_volume_did_change(
     assert math.isclose(audio.volume, expected_volume)
 
 
+async def test_audio_set_volume_only_device_info(protocol_mock, audio):
+    device_info = messages.device_information("test", "id")
+    device_info.inner().deviceUID = DEVICE_UID
+    protocol_mock.device_info = device_info
+
+    await audio.set_volume(0.0)
+
+    assert len(protocol_mock.sent_messages) == 1
+
+    message = protocol_mock.sent_messages.pop()
+    assert message.type == protobuf.SET_VOLUME_MESSAGE
+    assert message.inner().outputDeviceUID == DEVICE_UID
+    assert math.isclose(message.inner().volume, 0.0, rel_tol=1e-02)
+
+
 async def test_audio_set_volume(protocol_mock, audio):
     await volume_controls_changed(protocol_mock, DEVICE_UID, True)
     assert audio.is_available

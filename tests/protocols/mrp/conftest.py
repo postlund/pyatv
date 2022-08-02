@@ -13,6 +13,7 @@ class MrpProtocolMock(MessageDispatcher[int, protobuf.ProtocolMessage]):
     def __init__(self):
         super().__init__()
         self.sent_messages = []
+        self.device_info = None
 
     async def send(self, message):
         self.sent_messages.append(message)

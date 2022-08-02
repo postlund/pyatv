@@ -677,9 +677,18 @@ class MrpAudio(Audio):
         self._add_listeners()
 
     @property
+    def device_uid(self) -> Optional[str]:
+        """Return device UID for current active output device."""
+        if self._output_device_uid is not None:
+            return self._output_device_uid
+        if self.protocol.device_info is not None:
+            return self.protocol.device_info.inner().deviceUID  # type: ignore
+        return None
+
+    @property
     def is_available(self):
         """Return if audio controls are available."""
-        return self._volume_controls_available and self._output_device_uid is not None
+        return self._volume_controls_available and self.device_uid is not None
 
     def _add_listeners(self):
         self.protocol.listen_to(
@@ -738,12 +747,10 @@ class MrpAudio(Audio):
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
-        if self._output_device_uid is None:
+        if self.device_uid is None:
             raise exceptions.ProtocolError("no output device")
 
-        await self.protocol.send(
-            messages.set_volume(self._output_device_uid, level / 100.0)
-        )
+        await self.protocol.send(messages.set_volume(self.device_uid, level / 100.0))
 
         if self._volume != level:
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
