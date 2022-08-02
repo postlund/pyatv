@@ -1,5 +1,58 @@
 # CHANGES
 
+## 0.10.3 Chica (2022-08-02)
+
+This is another minor release:
+
+* Adds device info and operating system to atvscript
+* Fixes a bug in set_volume on some devices, e.g. HomePod
+* Use async_timeout instead of asyncio.wait_for
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+88547ac mrp: Fix set_volume bug
+```
+
+*Script: atvscript:*
+
+```
+5edeeb8 atvscript: Add operating_system and version
+fdae0b7 atvscript: Add device_info section
+7704faa atvscript: Add model and model_str to scan
+```
+
+*Other:*
+
+```
+d9e1cc5 Switch out asyncio.wait_for with async_timeout
+5a20486 conf: Add model_str property
+0e03ad5 cq: Remove cruft files
+```
+
+**All changes:**
+
+```
+88547ac mrp: Fix set_volume bug
+d9e1cc5 Switch out asyncio.wait_for with async_timeout
+ddba0fb build(deps): Bump types-requests from 2.28.1 to 2.28.3 in /requirements
+951ea53 build(deps): Bump bitarray from 2.5.1 to 2.6.0 in /requirements
+4e4b695 build(deps): Bump types-requests from 2.28.0 to 2.28.1 in /requirements
+522ebe7 build(deps): Bump pylint from 2.14.4 to 2.14.5 in /requirements
+5edeeb8 atvscript: Add operating_system and version
+fdae0b7 atvscript: Add device_info section
+7704faa atvscript: Add model and model_str to scan
+5a20486 conf: Add model_str property
+0e03ad5 cq: Remove cruft files
+6492aa9 build(deps): Bump pytest-aiohttp from 1.0.2 to 1.0.4 in /requirements (#1782)
+fe2515c build(deps): Bump pylint from 2.14.3 to 2.14.4 in /requirements (#1783)
+c1b03df build(deps): Bump cryptography from 37.0.2 to 37.0.4 in /requirements (#1788)
+cf49456 build(deps): Bump requests from 2.28.0 to 2.28.1 in /requirements (#1784)
+46922dd build(deps): Bump chacha20poly1305-reuseable in /requirements (#1787)
+```
+
 ## 0.10.2 Bonnet (2022-06-28)
 
 This release just lowers the required version of cryptography
