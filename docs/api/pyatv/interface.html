@@ -426,7 +426,7 @@ all its features.</p>
 </dd>
 <dt id="pyatv.interface.Apps.launch_app">
 <code class="name flex">
-<span>async def <span class="ident">launch_app</span></span>(<span>self, bundle_id: str) -> None</span>
+<span>async def <span class="ident">launch_app</span></span>(<span>self, bundle_id: Optional[str], url: Optional[str]) -> None</span>
 </code>
 </dt>
 <dd>
@@ -434,7 +434,7 @@ all its features.</p>
 <span>Feature: <a title="pyatv.const.FeatureName.LaunchApp" href="const#pyatv.const.FeatureName.LaunchApp">FeatureName.LaunchApp</a>,</span>
 <span>Supported by: <a title="pyatv.const.Protocol.Companion" href="const#pyatv.const.Protocol.Companion">Protocol.Companion</a></span>
 </div>
-<section class="desc"><p>Launch an app based on bundle ID.</p></section>
+<section class="desc"><p>Launch an app based on bundle ID or URL.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L679-L682" class="git-link">Browse git</a></div>
 </dd>
 </dl>

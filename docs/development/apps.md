@@ -32,3 +32,9 @@ To launch an app, use its bundle identifier when calling {% include api i="inter
  ```python
 await apps.launch_app("com.netflix.Netflix")
  ```
+
+To launch an app with a URL, pass the URL when calling {% include api i="interface.Apps.launch_app" %}
+
+ ```python
+await apps.launch_app(url="com.apple.tv://tv.apple.com/show/marvels-spidey-and-his-amazing-friends/umc.cmc.3ambs8tqwzphbn0u8e9g76x7m?profile=kids&action=play")
+ ```

@@ -221,9 +221,17 @@ class CompanionAPI(
         """Subscribe to updates to an event."""
         await self._send_event("_interest", {"_deregEvents": [event]})
 
-    async def launch_app(self, bundle_identifier: str) -> None:
+    async def launch_app(
+        self, bundle_identifier: Optional[str] = None, url: Optional[str] = None
+    ) -> None:
         """Launch an app on the remote device."""
-        await self._send_command("_launchApp", {"_bundleID": bundle_identifier})
+        await self._send_command(
+            "_launchApp",
+            {
+                "_bundleID": bundle_identifier if bundle_identifier else None,
+                "_urlS": url if url else None,
+            },
+        )
 
     async def app_list(self) -> Mapping[str, Any]:
         """Return list of launchable apps on remote device."""

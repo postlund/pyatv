@@ -172,9 +172,11 @@ class CompanionApps(Apps):
         content = cast(dict, app_list["_c"])
         return [App(name, bundle_id) for bundle_id, name in content.items()]
 
-    async def launch_app(self, bundle_id: str) -> None:
-        """Launch an app based on bundle ID."""
-        await self.api.launch_app(bundle_id)
+    async def launch_app(
+        self, bundle_id: Optional[str] = None, url: Optional[str] = None
+    ) -> None:
+        """Launch an app based on bundle ID or URL."""
+        await self.api.launch_app(bundle_id, url)
 
 
 class CompanionPower(Power):

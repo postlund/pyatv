@@ -55,6 +55,7 @@ class FakeCompanionState:
     def __init__(self):
         """State of a fake Companion device."""
         self.active_app: Optional[str] = None
+        self.open_url: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
         self.has_paired: bool = False
         self.powered_on: bool = True
@@ -220,7 +221,12 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         )
 
     def handle__launchapp(self, message):
-        self.state.active_app = message["_c"]["_bundleID"]
+        bundle_id = message["_c"]["_bundleID"]
+        url = message["_c"]["_urlS"]
+        if bundle_id:
+            self.state.active_app = bundle_id
+        elif url:
+            self.state.open_url = url
         self.send_response(message, {})
 
     def handle_fetchlaunchableapplicationsevent(self, message):

@@ -21,8 +21,10 @@ _LOGGER = logging.getLogger(__name__)
 
 TEST_APP: str = "com.test.Test"
 TEST_APP_NAME: str = "Test"
+TEST_APP_URL: str = "com.test.Test://test/url?param0=value0"
 TEST_APP2: str = "com.test.Test2"
 TEST_APP_NAME2: str = "Test2"
+TEST_APP_URL2: str = "com.test.Test2://test/url?param0=value0"
 
 MEDIA_CONTROL_FEATURES = [
     FeatureName.Play,
@@ -58,6 +60,23 @@ async def test_subscribe_unsubscribe_media_control(companion_client, companion_s
 async def test_launch_app(companion_client, companion_state):
     await companion_client.apps.launch_app(TEST_APP)
     await until(lambda: companion_state.active_app == TEST_APP)
+
+
+async def test_launch_app_with_url(companion_client, companion_state):
+    await companion_client.apps.launch_app(url=TEST_APP_URL)
+    await until(lambda: companion_state.open_url == TEST_APP_URL)
+
+
+async def test_launch_app_with_bundle_id_and_url(companion_client, companion_state):
+    await companion_client.apps.launch_app(TEST_APP, TEST_APP_URL2)
+    await until(lambda: companion_state.active_app == TEST_APP)
+    assert not companion_state.open_url
+
+
+async def test_launch_app_no_params(companion_client, companion_state):
+    await companion_client.apps.launch_app()
+    assert not companion_state.active_app
+    assert not companion_state.open_url
 
 
 async def test_app_list(companion_client, companion_usecase):
