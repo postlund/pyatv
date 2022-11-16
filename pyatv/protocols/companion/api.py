@@ -225,6 +225,10 @@ class CompanionAPI(
         """Launch an app on the remote device."""
         await self._send_command("_launchApp", {"_bundleID": bundle_identifier})
 
+    async def open_url(self, url: str) -> None:
+        """Ask the remote device to open an URL."""
+        await self._send_command("_launchApp", {"_urlS": url})
+
     async def app_list(self) -> Mapping[str, Any]:
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})

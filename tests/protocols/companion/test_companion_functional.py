@@ -59,6 +59,10 @@ async def test_launch_app(companion_client, companion_state):
     await companion_client.apps.launch_app(TEST_APP)
     await until(lambda: companion_state.active_app == TEST_APP)
 
+async def test_open_url(companion_client, companion_state):
+    await companion_client.apps.open_url(TEST_APP)
+    await until(lambda: companion_state.active_app == TEST_APP)
+
 
 async def test_app_list(companion_client, companion_usecase):
     companion_usecase.set_installed_apps(

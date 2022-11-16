@@ -681,6 +681,10 @@ class Apps:
         """Launch an app based on bundle ID."""
         raise exceptions.NotSupportedError()
 
+    @feature(50, "OpenURL", "Open a URL.")
+    async def open_url(self, url: str) -> None:
+        """Open a URL."""
+        raise exceptions.NotSupportedError()
 
 class Metadata:
     """Base class for retrieving metadata from an Apple TV."""

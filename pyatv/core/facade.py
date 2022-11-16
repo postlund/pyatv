@@ -409,6 +409,11 @@ class FacadeApps(Relayer, interface.Apps):
         """Launch an app based on bundle ID."""
         await self.relay("launch_app")(bundle_id)
 
+    @shield.guard
+    async def open_url(self, url: str) -> None:
+        """Open a URL."""
+        await self.relay("open_url")(url)
+
 
 class FacadeAudio(Relayer, interface.Audio):
     """Facade implementation for audio functionality."""

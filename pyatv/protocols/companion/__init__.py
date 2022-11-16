@@ -176,6 +176,9 @@ class CompanionApps(Apps):
         """Launch an app based on bundle ID."""
         await self.api.launch_app(bundle_id)
 
+    async def open_url(self, url: str) -> None:
+        """Open a URL."""
+        await self.api.open_url(url)
 
 class CompanionPower(Power):
     """Implementation of power management API."""
