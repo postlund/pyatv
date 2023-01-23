@@ -125,6 +125,10 @@ SUPPORTED_FEATURES = set(
         FeatureName.PlayPause,
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
+        FeatureName.TextGet,
+        FeatureName.TextClear,
+        FeatureName.TextAppend,
+        FeatureName.TextSet,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -298,6 +302,22 @@ class CompanionRemoteControl(RemoteControl):
     async def channel_down(self) -> None:
         """Select previous channel."""
         await self._press_button(HidCommand.ChannelDecrement)
+
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.api.text_input_command("", clear_previous_input=False)
+
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        await self.api.text_input_command("", clear_previous_input=True)
+
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=False)
+
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=True)
 
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap

@@ -190,6 +190,26 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Select previous channel."""
         return await self.relay("channel_down")()
 
+    @shield.guard
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.relay("text_get")()
+
+    @shield.guard
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        return await self.relay("text_clear")()
+
+    @shield.guard
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        return await self.relay("text_append")(text=text)
+
+    @shield.guard
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        return await self.relay("text_set")(text=text)
+
 
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""

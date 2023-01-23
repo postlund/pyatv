@@ -304,6 +304,18 @@ class FeatureName(Enum):
     ChannelDown = 49
     """Select previous channel."""
 
+    TextGet = 51
+    """Get current virtual keyboard text."""
+
+    TextClear = 52
+    """Clear virtual keyboard text."""
+
+    TextAppend = 53
+    """Input text into virtual keyboard."""
+
+    TextSet = 54
+    """Replace text in virtual keyboard."""
+
     Title = 22
     """Title of playing media."""
 

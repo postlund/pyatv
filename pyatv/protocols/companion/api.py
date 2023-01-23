@@ -10,7 +10,12 @@ from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
+from pyatv.protocols.companion import keyed_archiver
 from pyatv.protocols.companion.connection import CompanionConnection, FrameType
+from pyatv.protocols.companion.plist_payloads import (
+    get_rti_clear_text_payload,
+    get_rti_input_text_payload,
+)
 from pyatv.protocols.companion.protocol import (
     CompanionProtocol,
     CompanionProtocolListener,
@@ -249,3 +254,47 @@ class CompanionAPI(
     ) -> Mapping[str, Any]:
         """Send a HID command."""
         return await self._send_command("_mcc", {"_mcc": command.value, **(args or {})})
+
+    async def text_input_command(
+        self,
+        text: str,
+        clear_previous_input: bool = False,
+    ) -> Optional[str]:
+        """Send a text input command."""
+        response = await self._send_command("_tiStart", {})
+        ti_data = response.get("_c", {}).get("_tiD")
+
+        if ti_data is None:
+            return None
+
+        session_uuid, current_text = keyed_archiver.read_archive_properties(
+            ti_data,
+            ["sessionUUID"],
+            ["documentState", "docSt", "contextBeforeInput"],
+        )
+        session_uuid = cast(bytes, session_uuid)
+        if current_text is None:
+            current_text = ""
+
+        if clear_previous_input:
+            await self._send_event(
+                "_tiC",
+                {
+                    "_tiV": 1,
+                    "_tiD": get_rti_clear_text_payload(session_uuid),
+                },
+            )
+            current_text = ""
+
+        if text:
+            await self._send_event(
+                "_tiC",
+                {
+                    "_tiV": 1,
+                    "_tiD": get_rti_input_text_payload(session_uuid, text),
+                },
+            )
+            current_text += text
+
+        await self._send_command("_tiStop", {})
+        return current_text
