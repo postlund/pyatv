@@ -4,7 +4,7 @@ import binascii
 import hashlib
 import logging
 import os
-from typing import Tuple
+from typing import Any, Dict, Tuple
 import uuid
 
 from cryptography.exceptions import InvalidSignature
@@ -24,6 +24,7 @@ from srptools import SRPClientSession, SRPContext, constants
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, write_tlv
+from pyatv.protocols.companion import opack
 from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)
@@ -162,7 +163,7 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Client", Public=pub_key, Proof=proof)
         return pub_key, proof
 
-    def step3(self, additional_data=None):
+    def step3(self, name: str = None, additional_data: Dict[int, Any] = None):
         """Third pairing step."""
         ios_device_x = hkdf_expand(
             "Pair-Setup-Controller-Sign-Salt",
@@ -184,6 +185,13 @@ class SRPAuthHandler:
             TlvValue.PublicKey: self._auth_public,
             TlvValue.Signature: device_signature,
         }
+
+        if name:
+            tlv[17] = opack.pack(
+                {
+                    "name": name,
+                }
+            )
 
         if additional_data:
             tlv.update(additional_data)

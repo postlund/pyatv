@@ -1,6 +1,6 @@
 """Device pairing and derivation of encryption keys."""
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import (
@@ -10,7 +10,6 @@ from pyatv.auth.hap_pairing import (
 )
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, stringify, write_tlv
-from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.connection import FrameType
 from pyatv.support import log_binary
 
@@ -71,7 +70,9 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
             PubKey=self._atv_pub_key,
         )
 
-    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
+    async def finish_pairing(
+        self, username: str, pin_code: int, display_name: Optional[str]
+    ) -> HapCredentials:
         """Finish pairing process."""
         self.srp.step1(pin_code)
 
@@ -95,19 +96,7 @@ class CompanionPairSetupProcedure(PairSetupProcedure):
         atv_proof = pairing_data[TlvValue.Proof]
         log_binary(_LOGGER, "Device", Proof=atv_proof)
 
-        # TODO: Dummy data: what to set? needed at all?
-        additional_data = {
-            "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
-            "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
-            "model": "AppleTV6,2",
-            "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
-            "name": "Living Room",
-            "mac": b"@\xc4\xff\x8f\xb1\x99",
-        }
-
-        encrypted_data = self.srp.step3(
-            additional_data={17: opack.pack(additional_data)}
-        )
+        encrypted_data = self.srp.step3(name=display_name)
 
         resp = await self.protocol.exchange_auth(
             FrameType.PS_Next,
