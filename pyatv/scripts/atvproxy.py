@@ -14,7 +14,6 @@ from zeroconf import Zeroconf
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.connection import CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
@@ -23,7 +22,7 @@ from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
 from pyatv.scripts import log_current_version
-from pyatv.support import chacha20, log_binary, net, variant
+from pyatv.support import chacha20, log_binary, net, opack, variant
 
 _LOGGER = logging.getLogger(__name__)
 

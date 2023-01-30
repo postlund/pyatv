@@ -8,7 +8,7 @@ from uuid import UUID
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.protocols.companion.opack import pack, unpack
+from pyatv.support.opack import pack, unpack
 
 # pack
 

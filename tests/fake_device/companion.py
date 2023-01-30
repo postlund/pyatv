@@ -4,15 +4,10 @@ import asyncio
 import logging
 from typing import Dict, Optional, Set
 
-from pyatv.protocols.companion import (
-    HidCommand,
-    MediaControlCommand,
-    MediaControlFlags,
-    opack,
-)
+from pyatv.protocols.companion import HidCommand, MediaControlCommand, MediaControlFlags
 from pyatv.protocols.companion.connection import FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
-from pyatv.support import chacha20, log_binary
+from pyatv.support import chacha20, log_binary, opack
 
 _LOGGER = logging.getLogger(__name__)
 
