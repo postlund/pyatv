@@ -63,6 +63,7 @@ class MrpPairingHandler(PairingHandler):
                 exceptions.PairingError,
                 "",  # username required but not used
                 self.pin_code,
+                None,
             )
         )
 

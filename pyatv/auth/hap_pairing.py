@@ -93,7 +93,9 @@ class PairSetupProcedure:
         This method will show the expected PIN on screen.
         """
 
-    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
+    async def finish_pairing(
+        self, username: str, pin_code: int, display_name: Optional[str]
+    ) -> HapCredentials:
         """Finish pairing process.
 
         A username and the PIN code (usually shown on screen) must be provided.

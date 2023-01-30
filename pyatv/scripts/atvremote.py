@@ -157,7 +157,9 @@ class GlobalCommands:
         if not conf:
             return 2
 
-        options = {}
+        options = {
+            "name": self.args.remote_name,
+        }
 
         # Inject user provided credentials
         for proto in Protocol:
@@ -170,7 +172,6 @@ class GlobalCommands:
             options.update(
                 {
                     "pairing_guid": self.args.pairing_guid,
-                    "remote_name": self.args.remote_name,
                 }
             )
 

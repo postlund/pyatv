@@ -36,6 +36,7 @@ class AirPlayPairingHandler(PairingHandler):
     ) -> None:
         """Initialize a new MrpPairingHandler."""
         super().__init__(session_manager, service)
+        self._name: str = kwargs.get("name", "pyatv")
         self.auth_type = auth_type
         self.http: Optional[HttpConnection] = None
         self.address: str = str(config.address)
@@ -76,6 +77,7 @@ class AirPlayPairingHandler(PairingHandler):
                 exceptions.PairingError,
                 "",
                 self.pin_code,
+                self._name,
             )
         )
         self._has_paired = True

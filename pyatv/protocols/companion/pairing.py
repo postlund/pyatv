@@ -28,6 +28,7 @@ class CompanionPairingHandler(PairingHandler):
     ):
         """Initialize a new CompanionPairingHandler."""
         super().__init__(session, service)
+        self._name: str = kwargs.get("name", "pyatv")
         self.connection = CompanionConnection(
             loop, str(config.address), self.service.port, None
         )
@@ -66,6 +67,7 @@ class CompanionPairingHandler(PairingHandler):
                 exceptions.PairingError,
                 "",  # username required but not used
                 self.pin_code,
+                self._name,
             )
         )
         self._has_paired = True
