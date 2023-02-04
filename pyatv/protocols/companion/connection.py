@@ -95,7 +95,9 @@ class CompanionConnection(asyncio.Protocol):
         if self.transport is None:
             raise exceptions.InvalidStateError("not connected")
 
-        payload_length = len(data) + (AUTH_TAG_LENGTH if self._chacha else 0)
+        payload_length = len(data)
+        if self._chacha and payload_length > 0:
+            payload_length += AUTH_TAG_LENGTH
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
 
         log_binary(
@@ -105,7 +107,7 @@ class CompanionConnection(asyncio.Protocol):
             Data=data,
         )
 
-        if self._chacha:
+        if self._chacha and len(data) > 0:
             data = self._chacha.encrypt(data, aad=header)
             log_binary(_LOGGER, ">> Send", Header=header, Encrypted=data)
 
@@ -138,7 +140,7 @@ class CompanionConnection(asyncio.Protocol):
             self._buffer = self._buffer[payload_length:]
 
             try:
-                if self._chacha:
+                if self._chacha and len(payload) > 0:
                     payload = self._chacha.decrypt(payload, aad=header)
 
                 self.listener.frame_received(FrameType(header[0]), payload)

@@ -14,7 +14,7 @@ from zeroconf import Zeroconf
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.protocols.companion.connection import CompanionConnection
+from pyatv.protocols.companion.connection import AUTH_TAG_LENGTH, CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.protocols.mrp import protobuf
@@ -242,7 +242,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         """Send data to remote device (ATV)."""
         log_binary(_LOGGER, f">>(ENCRYPTED) FrameType={frame_type}", Message=data)
 
-        if self.chacha:
+        if self.chacha and len(data) > 0:
             header = bytes([frame_type.value]) + len(data).to_bytes(3, byteorder="big")
             data = self.chacha.decrypt(data, aad=header)
             log_binary(_LOGGER, "<<(DECRYPTED)", Message=data)
@@ -260,10 +260,12 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
 
         payload = opack.pack(data)
 
-        payload_length = len(payload) + (16 if self.chacha else 0)
+        payload_length = len(payload)
+        if self.chacha and payload_length > 0:
+            payload_length += AUTH_TAG_LENGTH
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
 
-        if self.chacha:
+        if self.chacha and len(payload) > 0:
             payload = self.chacha.encrypt(payload, aad=header)
             log_binary(_LOGGER, ">> Send", Header=header, Encrypted=payload)
 
