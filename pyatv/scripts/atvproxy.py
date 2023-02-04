@@ -36,8 +36,22 @@ from pyatv.support import chacha20, log_binary, net, opack, variant
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Proxy"
+BLUETOOTH_ADDRESS = "DA:97:7C:BA:A3:7A"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
+MEDIA_REMOTE_ROUTE_IDENTIFIER = "DA4A238E-EE6C-4F5B-9691-4D0A8FC03532"
 
+PROPERTY_CASE_MAP = {
+    "rpad": "rpAD",
+    "rpba": "rpBA",
+    "rpfl": "rpFl",
+    "rpha": "rpHA",
+    "rphi": "rpHI",
+    "rphn": "rpHN",
+    "rpmac": "rpMac",
+    "rpmd": "rpMd",
+    "rpmrtid": "rpMRtID",
+    "rpvr": "rpVr",
+}
 COMPANION_AUTH_FRAMES = [
     FrameType.PS_Start,
     FrameType.PS_Next,
@@ -380,18 +394,18 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
     )
 
 
-async def publish_companion_service(zconf: Zeroconf, address: str, port: int):
+async def publish_companion_service(
+    zconf: Zeroconf, address: str, port: int, target_properties: Dict[str, str]
+):
     """Publish zeroconf service for ATV Companion proxy instance."""
     properties = {
-        "rpMac": "1",
+        **target_properties,
         "rpHA": "9948cfb6da55",
-        "rpHN": "88f979f04023",
-        "rpVr": "230.1",
-        "rpMd": "AppleTV6,2",
-        "rpFl": "0x36782",
-        "rpAD": "657c1b9d3484",
+        "rpHN": "cef88e5db6fa",
+        "rpAD": "3b2210518c58",
         "rpHI": "91756a18d8e5",
-        "rpBA": "9D:19:F9:74:65:EA",
+        "rpBA": BLUETOOTH_ADDRESS,
+        "rpMRtID": MEDIA_REMOTE_ROUTE_IDENTIFIER,
     }
 
     return await mdns.publish(
@@ -471,17 +485,21 @@ async def _start_companion_proxy(loop, args, zconf):
 
     _LOGGER.debug("Binding to local address %s", args.local_ip)
 
-    if not args.remote_port:
-        resp = await mdns.unicast(loop, args.remote_ip, ["_companion-link._tcp.local"])
+    service_type = "_companion-link._tcp.local"
+    resp = await mdns.unicast(loop, args.remote_ip, [service_type])
+    service = next((s for s in resp.services if s.type == service_type), None)
 
-        if not args.remote_port:
-            args.remote_port = resp.services[0].port
+    if not args.remote_port:
+        args.remote_port = service.port
 
     server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started Companion server at port %d", port)
 
-    unpublisher = await publish_companion_service(zconf, args.local_ip, port)
+    properties = {PROPERTY_CASE_MAP.get(k, k): v for k, v in service.properties.items()}
+    unpublisher = await publish_companion_service(
+        zconf, args.local_ip, port, properties
+    )
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)
