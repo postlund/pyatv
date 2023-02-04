@@ -90,6 +90,10 @@ class CompanionConnection(asyncio.Protocol):
         """Enable encryption with the specified keys."""
         self._chacha = chacha20.Chacha20Cipher(output_key, input_key, nonce_length=12)
 
+    def set_listener(self, listener: CompanionConnectionListener) -> None:
+        """Set the CompanionConnectionListener in a way that doesn't break pylint."""
+        self.listener = listener
+
     def send(self, frame_type: FrameType, data: bytes) -> None:
         """Send message without waiting for a response."""
         if self.transport is None:

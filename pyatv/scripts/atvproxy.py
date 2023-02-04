@@ -14,8 +14,17 @@ from zeroconf import Zeroconf
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.protocols.companion.connection import AUTH_TAG_LENGTH, CompanionConnection
-from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
+from pyatv.protocols.companion.connection import (
+    AUTH_TAG_LENGTH,
+    CompanionConnection,
+    CompanionConnectionListener,
+)
+from pyatv.protocols.companion.protocol import (
+    _AUTH_FRAMES,
+    _OPACK_FRAMES,
+    CompanionProtocol,
+    FrameType,
+)
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import MrpConnection
@@ -145,7 +154,9 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
 
-class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
+class CompanionAppleTVProxy(
+    CompanionServerAuth, CompanionConnectionListener, asyncio.Protocol
+):
     """Implementation of a fake Companion device."""
 
     def __init__(
@@ -157,7 +168,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         self.buffer: bytes = b""
         self.transport = None
         self.chacha: Optional[chacha20.Chacha20Cipher] = None
-        self.connection: Optional[CompanionConnection] = CompanionConnection(
+        self.connection: CompanionConnection = CompanionConnection(
             self.loop, address, port
         )
         self.protocol: CompanionProtocol = CompanionProtocol(
@@ -165,6 +176,8 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             SRPAuthHandler(),
             MutableService(None, Protocol.Companion, port, {}, credentials=credentials),
         )
+        # CompanionProtocol sets listener, override it now
+        self.connection.set_listener(self)
         self._receive_event: asyncio.Event = asyncio.Event()
         self._receive_task: Optional[asyncio.Future] = None
 
@@ -213,8 +226,7 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
                 _LOGGER.exception("failed to handle auth frame")
         else:
             try:
-                resp = await self.send_to_atv(frame_type, data)
-                self.send_to_client(frame_type, resp)
+                self.send_bytes_to_atv(frame_type, data)
             except Exception:
                 _LOGGER.exception("data exchange failed")
 
@@ -238,8 +250,8 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         if self.connection.connected:
             self._receive_event.set()
 
-    async def send_to_atv(self, frame_type: FrameType, data: bytes):
-        """Send data to remote device (ATV)."""
+    def send_bytes_to_atv(self, frame_type: FrameType, data: bytes):
+        """Send encoded data to remote device (ATV)."""
         log_binary(_LOGGER, f">>(ENCRYPTED) FrameType={frame_type}", Message=data)
 
         if self.chacha and len(data) > 0:
@@ -247,29 +259,48 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             data = self.chacha.decrypt(data, aad=header)
             log_binary(_LOGGER, "<<(DECRYPTED)", Message=data)
 
-        unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
-        if frame_type in COMPANION_AUTH_FRAMES:
-            return await self.protocol.exchange_auth(frame_type, unpacked)
-        return await self.protocol.exchange_opack(frame_type, unpacked)
+        if frame_type != FrameType.E_OPACK:
+            self.connection.send(frame_type, data)
+            return
 
-    def send_to_client(self, frame_type: FrameType, data: object) -> None:
-        """Send data to client device (iOS)."""
+        unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
+        self.protocol.send_opack(frame_type, unpacked)
+
+    def frame_received(self, frame_type: FrameType, data: bytes) -> None:
+        """Frame was received from remote device."""
+        if frame_type in _AUTH_FRAMES:
+            # do not override authentication
+            self.protocol.frame_received(frame_type, data)
+            return
+
+        _LOGGER.debug("Received frame %s: %s", frame_type, data)
+        if frame_type in _OPACK_FRAMES:
+            opack_data, _ = opack.unpack(data)
+            _LOGGER.debug("Received OPACK: %s", opack_data)
+            self.send_to_client(frame_type, opack_data)
+        else:
+            self.send_bytes_to_client(frame_type, data)
+
+    def send_bytes_to_client(self, frame_type: FrameType, data: bytes) -> None:
+        """Send encoded data to client device (iOS)."""
         if not self.transport:
             _LOGGER.error("Tried to send to client, but not connected")
             return
 
-        payload = opack.pack(data)
-
-        payload_length = len(payload)
+        payload_length = len(data)
         if self.chacha and payload_length > 0:
             payload_length += AUTH_TAG_LENGTH
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
 
-        if self.chacha and len(payload) > 0:
-            payload = self.chacha.encrypt(payload, aad=header)
-            log_binary(_LOGGER, ">> Send", Header=header, Encrypted=payload)
+        if self.chacha and len(data) > 0:
+            data = self.chacha.encrypt(data, aad=header)
+            log_binary(_LOGGER, ">> Send", Header=header, Encrypted=data)
 
-        self.transport.write(header + payload)
+        self.transport.write(header + data)
+
+    def send_to_client(self, frame_type: FrameType, data: object) -> None:
+        """Send data to client device (iOS)."""
+        self.send_bytes_to_client(frame_type, opack.pack(data))
 
 
 class RemoteConnection(asyncio.Protocol):
