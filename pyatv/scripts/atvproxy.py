@@ -226,6 +226,8 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
     def connection_lost(self, exc):
         """Handle that connection was lost to client."""
         _LOGGER.debug("Connection lost to client device: %s", exc)
+        if self.connection.connected:
+            self.connection.close()
         if self._receive_task is not None:
             self._receive_task.cancel()
 
