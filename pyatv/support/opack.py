@@ -97,7 +97,17 @@ def _pack(data, object_list):
 
     # Re-use if in object list, otherwise add it to list
     if packed_bytes in object_list:
-        packed_bytes = bytes([0xA0 + object_list.index(packed_bytes)])
+        object_index = object_list.index(packed_bytes)
+        if object_index < 0x21:
+            packed_bytes = bytes([0xA0 + object_index])
+        elif object_index <= 0xFF:
+            packed_bytes = bytes([0xC1]) + object_index.to_bytes(1, byteorder="little")
+        elif object_index <= 0xFFFF:
+            packed_bytes = bytes([0xC2]) + object_index.to_bytes(2, byteorder="little")
+        elif object_index <= 0xFFFFFFFF:
+            packed_bytes = bytes([0xC3]) + object_index.to_bytes(4, byteorder="little")
+        elif object_index <= 0xFFFFFFFFFFFFFFFF:
+            packed_bytes = bytes([0xC4]) + object_index.to_bytes(8, byteorder="little")
     elif len(packed_bytes) > 1:
         object_list.append(packed_bytes)
 
