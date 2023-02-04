@@ -218,8 +218,6 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             except Exception:
                 _LOGGER.exception("data exchange failed")
 
-        self._receive_event.clear()
-
     def connection_made(self, transport):
         """Client did connect to proxy."""
         _LOGGER.debug("Client connected to Companion proxy")
