@@ -98,3 +98,13 @@ def map_range(
     if value < in_min or value > in_max:
         raise ValueError("input value out of range")
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+
+def shift_hex_identifier(identifier: str) -> str:
+    """Repeatably modify a unique identifier to avoid collisions."""
+    assert len(identifier) > 0
+    first, rest = identifier[:2], identifier[2:]
+    shifted = f"{(int(first, 16) + 1) % 256:02x}"
+    if first.isupper():
+        shifted = shifted.upper()
+    return shifted + rest

@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional, cast
 from google.protobuf.message import Message as ProtobufMessage
 from zeroconf import Zeroconf
 
+from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
@@ -24,14 +25,26 @@ from pyatv.protocols.companion.protocol import (
     _OPACK_FRAMES,
     CompanionProtocol,
     FrameType,
+    MessageType,
+)
+from pyatv.protocols.companion.server_auth import (
+    SERVER_IDENTIFIER as COMPANION_SERVER_IDENTIFIER,
 )
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
-from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
+from pyatv.protocols.mrp.server_auth import MrpServerAuth
+from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER as MRP_SERVER_IDENTIFIER
 from pyatv.scripts import log_current_version
-from pyatv.support import chacha20, log_binary, net, opack, variant
+from pyatv.support import (
+    chacha20,
+    log_binary,
+    net,
+    opack,
+    shift_hex_identifier,
+    variant,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -180,6 +193,7 @@ class CompanionAppleTVProxy(
         super().__init__(DEVICE_NAME)
         self.loop = loop
         self.buffer: bytes = b""
+        self.credentials: str = credentials
         self.transport = None
         self.chacha: Optional[chacha20.Chacha20Cipher] = None
         self.connection: CompanionConnection = CompanionConnection(
@@ -192,6 +206,7 @@ class CompanionAppleTVProxy(
         )
         # CompanionProtocol sets listener, override it now
         self.connection.set_listener(self)
+        self.system_info_xid = None
         self._receive_event: asyncio.Event = asyncio.Event()
         self._receive_task: Optional[asyncio.Future] = None
 
@@ -278,6 +293,7 @@ class CompanionAppleTVProxy(
             return
 
         unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
+        self.process_outgoing_data(frame_type, unpacked)
         self.protocol.send_opack(frame_type, unpacked)
 
     def frame_received(self, frame_type: FrameType, data: bytes) -> None:
@@ -314,7 +330,76 @@ class CompanionAppleTVProxy(
 
     def send_to_client(self, frame_type: FrameType, data: object) -> None:
         """Send data to client device (iOS)."""
+        self.process_incoming_data(frame_type, cast(Dict[str, Any], data))
         self.send_bytes_to_client(frame_type, opack.pack(data))
+
+    def process_outgoing_data(self, frame_type: FrameType, data: Dict[str, Any]):
+        """Apply any required modifications to outgoing data."""
+        if frame_type != FrameType.E_OPACK:
+            return
+
+        data_type = data.get("_i")
+        if data_type == "_systemInfo":
+            self.system_info_xid = data.get("_x")
+            creds = parse_credentials(self.credentials)
+            payload = data["_c"]
+            payload.update(
+                {
+                    # The server will drop older connections with the same
+                    # identifier, so mangle them here to prevent disconnects if
+                    # the client device is also directly connected to the
+                    # server.
+                    "_i": shift_hex_identifier(payload["_i"]),
+                    "_idsID": creds.client_id.upper(),
+                    "_pubID": shift_hex_identifier(payload["_pubID"]),
+                }
+            )
+
+    def process_incoming_data(self, frame_type: FrameType, data: Dict[str, Any]):
+        """Apply any required modifications to incoming data."""
+        if frame_type != FrameType.E_OPACK:
+            return
+
+        message_type = data.get("_t")
+        xid = data.get("_x")
+        if message_type == MessageType.Response.value and xid == self.system_info_xid:
+            self.system_info_xid = None
+            payload = data["_c"]
+            payload.update(
+                {
+                    "name": DEVICE_NAME,
+                    "_i": "cafecafecafe",
+                    "_idsID": COMPANION_SERVER_IDENTIFIER,
+                    "_pubID": BLUETOOTH_ADDRESS,
+                }
+            )
+            if "_mrID" in payload:
+                payload["_mrID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            if "_mRtID" in payload:
+                payload["_mRtID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            if "_siriInfo" in payload:
+                siri_info = payload["_siriInfo"]
+                if "peerData" in siri_info:
+                    peer_data = siri_info["peerData"]
+                    peer_data.update(
+                        {
+                            "userAssignedDeviceName": DEVICE_NAME,
+                        }
+                    )
+                    if "homeAccessoryInfo" in peer_data:
+                        peer_data["homeAccessoryInfo"].update(
+                            {
+                                "name": DEVICE_NAME,
+                            }
+                        )
+                if "audio-session-coordination.system-info" in siri_info:
+                    audio_system_info = siri_info[
+                        "audio-session-coordination.system-info"
+                    ]
+                    if "mediaRemoteRouteIdentifier" in audio_system_info:
+                        audio_system_info[
+                            "mediaRemoteRouteIdentifier"
+                        ] = MEDIA_REMOTE_ROUTE_IDENTIFIER
 
 
 class RemoteConnection(asyncio.Protocol):
@@ -380,7 +465,7 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
         "macAddress": "40:cb:c0:12:34:56",
         "BluetoothAddress": "False",
         "Name": name,
-        "UniqueIdentifier": SERVER_IDENTIFIER,
+        "UniqueIdentifier": MRP_SERVER_IDENTIFIER,
         "SystemBuildVersion": "17K499",
         "LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER,
     }
