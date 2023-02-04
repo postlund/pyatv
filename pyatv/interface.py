@@ -1152,7 +1152,13 @@ class BaseConfig(ABC):
     @property
     def identifier(self) -> Optional[str]:
         """Return the main identifier associated with this device."""
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
+        for prot in [
+            Protocol.MRP,
+            Protocol.DMAP,
+            Protocol.AirPlay,
+            Protocol.RAOP,
+            Protocol.Companion,
+        ]:
             service = self.get_service(prot)
             if service and service.identifier is not None:
                 return service.identifier
