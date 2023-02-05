@@ -11,7 +11,7 @@ import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.interface import App, FeatureName, FeatureState
+from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.companion import INITIAL_VOLUME, VOLUME_STEP
@@ -23,6 +23,10 @@ TEST_APP: str = "com.test.Test"
 TEST_APP_NAME: str = "Test"
 TEST_APP2: str = "com.test.Test2"
 TEST_APP_NAME2: str = "Test2"
+TEST_ACCOUNT: str = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"
+TEST_ACCOUNT_NAME: str = "Alice"
+TEST_ACCOUNT2: str = "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB"
+TEST_ACCOUNT_NAME2: str = "Bob"
 
 MEDIA_CONTROL_FEATURES = [
     FeatureName.Play,
@@ -72,6 +76,28 @@ async def test_app_list(companion_client, companion_usecase):
 
     expected_apps = [App(TEST_APP_NAME, TEST_APP), App(TEST_APP_NAME2, TEST_APP2)]
     assert not DeepDiff(expected_apps, apps)
+
+
+async def test_switch_account(companion_client, companion_state):
+    await companion_client.user_accounts.switch_account(TEST_ACCOUNT)
+    await until(lambda: companion_state.active_account == TEST_ACCOUNT)
+
+
+async def test_account_list(companion_client, companion_usecase):
+    companion_usecase.set_available_accounts(
+        {
+            TEST_ACCOUNT: TEST_ACCOUNT_NAME,
+            TEST_ACCOUNT2: TEST_ACCOUNT_NAME2,
+        }
+    )
+
+    accounts = await companion_client.user_accounts.account_list()
+
+    expected_apps = [
+        UserAccount(TEST_ACCOUNT_NAME, TEST_ACCOUNT),
+        UserAccount(TEST_ACCOUNT_NAME2, TEST_ACCOUNT2),
+    ]
+    assert not DeepDiff(expected_apps, accounts)
 
 
 async def test_app_features(companion_client):

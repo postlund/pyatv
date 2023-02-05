@@ -346,6 +346,12 @@ class FeatureName(Enum):
     LaunchApp = 39
     """Launch an app."""
 
+    AccountList = 55
+    """List of user accounts."""
+
+    SwitchAccount = 56
+    """Switch user account."""
+
     Artwork = 30
     """Playing media artwork."""
 

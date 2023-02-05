@@ -32,6 +32,8 @@ from pyatv.interface import (
     PairingHandler,
     Power,
     RemoteControl,
+    UserAccount,
+    UserAccounts,
 )
 from pyatv.protocols.companion.api import CompanionAPI, HidCommand, MediaControlCommand
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
@@ -104,6 +106,9 @@ SUPPORTED_FEATURES = set(
         # App interface
         FeatureName.AppList,
         FeatureName.LaunchApp,
+        # User account interface
+        FeatureName.AccountList,
+        FeatureName.SwitchAccount,
         # Power interface
         FeatureName.TurnOn,
         FeatureName.TurnOff,
@@ -175,6 +180,28 @@ class CompanionApps(Apps):
     async def launch_app(self, bundle_id: str) -> None:
         """Launch an app based on bundle ID."""
         await self.api.launch_app(bundle_id)
+
+
+class CompanionUserAccounts(UserAccounts):
+    """Implementation of API for account handling."""
+
+    def __init__(self, api: CompanionAPI):
+        """Initialize a new instance of CompanionUserAccounts."""
+        super().__init__()
+        self.api = api
+
+    async def account_list(self) -> List[UserAccount]:
+        """Fetch a list of user accounts that can be switched."""
+        account_list = await self.api.account_list()
+        if "_c" not in account_list:
+            raise exceptions.ProtocolError("missing content in response")
+
+        content = cast(dict, account_list["_c"])
+        return [UserAccount(name, account_id) for account_id, name in content.items()]
+
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account by account ID."""
+        await self.api.switch_account(account_id)
 
 
 class CompanionPower(Power):
@@ -401,6 +428,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
 
     interfaces = {
         Apps: CompanionApps(api),
+        UserAccounts: CompanionUserAccounts(api),
         Features: CompanionFeatures(api),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),

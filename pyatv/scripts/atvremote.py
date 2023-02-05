@@ -93,6 +93,7 @@ class GlobalCommands:
         _print_commands("Device Info", interface.DeviceInfo)
         _print_commands("Device", DeviceCommands)
         _print_commands("Apps", interface.Apps)
+        _print_commands("User Accounts", interface.UserAccounts)
         _print_commands("Global", self.__class__)
 
         return 0
@@ -619,7 +620,7 @@ async def _handle_commands(args, config, loop):
     return 0
 
 
-# pylint: disable=too-many-return-statements
+# pylint: disable=too-many-return-statements disable=too-many-locals
 async def _handle_device_command(args, cmd, atv, loop):
     device = retrieve_commands(DeviceCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
@@ -629,6 +630,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
     apps = retrieve_commands(interface.Apps)
+    user_accounts = retrieve_commands(interface.UserAccounts)
     audio = retrieve_commands(interface.Audio)
 
     # Parse input command and argument from user
@@ -664,6 +666,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
+
+    if cmd in user_accounts:
+        return await _exec_command(atv.user_accounts, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1
