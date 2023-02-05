@@ -56,6 +56,8 @@ class FakeCompanionState:
         """State of a fake Companion device."""
         self.active_app: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
+        self.active_account: Optional[str] = None
+        self.available_accounts: Dict[str, str] = {}
         self.has_paired: bool = False
         self.powered_on: bool = True
         self.sid: int = 0
@@ -226,6 +228,14 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def handle_fetchlaunchableapplicationsevent(self, message):
         self.send_response(message, self.state.installed_apps)
 
+    def handle_switchuseraccountevent(self, message):
+        payload = message["_c"]
+        self.state.active_account = payload.get("SwitchAccountID")
+        self.send_response(message, {})
+
+    def handle_fetchuseraccountsevent(self, message):
+        self.send_response(message, self.state.available_accounts)
+
     def handle__hidc(self, message):
         button_state = message["_c"]["_hBtS"]
         button_code = HidCommand(message["_c"]["_hidC"])
@@ -317,6 +327,10 @@ class FakeCompanionUseCases:
     def set_installed_apps(self, apps: Dict[str, str]):
         """Set which apps that are currently installed."""
         self.state.installed_apps = apps
+
+    def set_available_accounts(self, accounts: Dict[str, str]):
+        """Set which user accounts are available."""
+        self.state.available_accounts = accounts
 
     def set_control_flags(self, flags: int) -> None:
         """Set media control flags."""
