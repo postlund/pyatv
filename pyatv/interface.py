@@ -294,7 +294,7 @@ class RemoteControl:
 
     @feature(6, "Pause", "Pause playing media.")
     async def pause(self) -> None:
-        """Press key play."""
+        """Press key pause."""
         raise exceptions.NotSupportedError()
 
     @feature(7, "Stop", "Stop playing media.")
