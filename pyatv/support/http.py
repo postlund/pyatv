@@ -386,7 +386,7 @@ class HttpConnection(asyncio.Protocol):
         event = asyncio.Event()
         self._requests.appendleft(event)
         try:
-            async with async_timeout.timeout(4):
+            async with async_timeout.timeout(10):
                 await event.wait()
             response = cast(HttpResponse, self._responses.get())
         except asyncio.TimeoutError as ex:
