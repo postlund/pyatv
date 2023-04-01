@@ -1,5 +1,8 @@
 # CHANGES
 
+Fix http timeout error, noted with OS16.4 upgrade
+Fix Pause/Play button mis-labelled
+
 ## 0.10.3 Chica (2022-08-02)
 
 This is another minor release:
