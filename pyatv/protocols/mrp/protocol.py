@@ -284,7 +284,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
     def message_received(self, message: protobuf.ProtocolMessage, _) -> None:
         """Message was received from device."""
         # If the message identifier is outstanding, then someone is
-        # waiting for the respone so we save it here
+        # waiting for the response so we save it here
         identifier = message.identifier or "type_" + str(message.type)
         if identifier in self._outstanding:
             outstanding = OutstandingMessage(

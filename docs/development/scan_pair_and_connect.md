@@ -168,7 +168,7 @@ a solution for that. After pairing, make sure to save at least one
 identifier and credentials for all services somewhere:
 
 ```python
-identifier = const.identfier
+identifier = const.identifier
 
 # Save identifier
 

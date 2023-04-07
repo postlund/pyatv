@@ -443,6 +443,6 @@ class FakeDmapUseCases:
         """Act on available Bonjour services.
 
         This will make the device look at published services and perform
-        actions base on these. Most imporant for the pairing process.
+        actions base on these. Most important for the pairing process.
         """
         await self.state.trigger_bonjour(stubbed_zeroconf)
