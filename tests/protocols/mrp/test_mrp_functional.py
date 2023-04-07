@@ -249,7 +249,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
     async def test_item_id_hash(self):
         initial_hash = (await self.atv.metadata.playing()).hash
 
-        # Verify thar content identifier is used as hash
+        # Verify that content identifier is used as hash
         self.usecase.example_video(identifier="some_id")
         playing = await self.playing(title="dummy")
         self.assertEqual(playing.hash, "some_id")

@@ -241,7 +241,7 @@ class FakeUdns(asyncio.Protocol):
         self.loop = loop
         self.server = None
         self.services: Dict[str, FakeDnsService] = services or {}
-        self.skip_count: int = 0  # Ignore sending respone to this many requests
+        self.skip_count: int = 0  # Ignore sending response to this many requests
         self.ip_filter = None
         self.sleep_proxy: bool = False
         self.request_count: int = 0
