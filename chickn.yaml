@@ -8,7 +8,7 @@ variables:
     - pyatv
     - scripts
     - examples
-  cs_exclude_words: cann,cant,asai
+  cs_exclude_words: cann,cant,asai,,cafs
   requirements_file: requirements/requirements.txt
 
 dependencies:

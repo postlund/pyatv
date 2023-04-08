@@ -119,7 +119,7 @@ TRANSIENT_CREDENTIALS = HapCredentials(b"transient")
 
 
 def parse_credentials(detail_string: Optional[str]) -> HapCredentials:
-    """Parse a string represention of HapCredentials."""
+    """Parse a string representation of HapCredentials."""
     if detail_string is None:
         return NO_CREDENTIALS
 

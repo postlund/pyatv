@@ -1,7 +1,7 @@
 black==22.6.0
 codecov==2.1.12
-deepdiff==5.8.1
-flake8==4.0.1
+deepdiff==6.3.0
+flake8==5.0.3
 isort==5.10.1
 mutagen==1.45.1
 pylint==2.14.5
