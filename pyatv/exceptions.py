@@ -113,3 +113,7 @@ class BlockedStateError(Exception):
     returned by `pyatv.connect`) becomes blocked after either calling close or because
     the connection was closed for some other reason.
     """
+
+
+class InvalidResponseError(Exception):
+    """Thrown when a remote sends an invalid response."""

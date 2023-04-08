@@ -349,7 +349,7 @@ class DnsResource(typing.NamedTuple):
 class DnsMessage:
     """Represent a DNS message."""
 
-    def __init__(self, msg_id=0, flags=0x0120):
+    def __init__(self, msg_id=0, flags=0x0120) -> None:
         """Initialize a new DnsMessage."""
         self.msg_id = msg_id
         self.flags = flags

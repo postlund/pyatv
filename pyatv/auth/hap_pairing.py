@@ -1,4 +1,5 @@
 """Abstraction for authentication based on HAP/SRP."""
+from abc import ABC, abstractmethod
 import binascii
 from enum import Enum, auto
 from typing import Optional, Tuple
@@ -84,15 +85,17 @@ class HapCredentials:
         )
 
 
-class PairSetupProcedure:
+class PairSetupProcedure(ABC):
     """Perform pair setup procedure to authenticate a new device."""
 
+    @abstractmethod
     async def start_pairing(self) -> None:
         """Start the pairing process.
 
         This method will show the expected PIN on screen.
         """
 
+    @abstractmethod
     async def finish_pairing(
         self, username: str, pin_code: int, display_name: Optional[str]
     ) -> HapCredentials:
@@ -102,12 +105,14 @@ class PairSetupProcedure:
         """
 
 
-class PairVerifyProcedure:
+class PairVerifyProcedure(ABC):
     """Verify if credentials are valid and derive encryption keys."""
 
+    @abstractmethod
     async def verify_credentials(self) -> bool:
         """Verify if credentials are valid and returns True if keys are generated."""
 
+    @abstractmethod
     def encryption_keys(
         self, salt: str, output_info: str, input_info: str
     ) -> Tuple[bytes, bytes]:

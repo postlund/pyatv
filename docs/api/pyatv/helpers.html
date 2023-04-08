@@ -41,7 +41,7 @@ link_group: api
 <dl>
 <dt id="pyatv.helpers.auto_connect">
 <code class="name flex">
-<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Callable[[], None] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None</span>
+<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Optional[Callable[[], None]] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None</span>
 </code>
 </dt>
 <dd>

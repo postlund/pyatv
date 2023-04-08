@@ -85,7 +85,7 @@ class Relayer(Generic[T]):
         """Return instance for protocol if available."""
         return self._interfaces.get(protocol)
 
-    def relay(self, target: str, priority: List[Protocol] = None):
+    def relay(self, target: str, priority: Optional[List[Protocol]] = None):
         """Return method (or property value) of target instance based on priority."""
         instance = self._find_instance(
             target, chain(self._takeover_protocol, priority or self._priorities)
