@@ -235,8 +235,8 @@ class RtspSession:
         method: str,
         uri: Optional[str] = None,
         content_type: Optional[str] = None,
-        headers: Mapping[str, object] = None,
-        body: Union[str, bytes] = None,
+        headers: Optional[Mapping[str, object]] = None,
+        body: Optional[Union[str, bytes]] = None,
         allow_error: bool = False,
         protocol: str = "RTSP/1.0",
     ) -> HttpResponse:

@@ -37,7 +37,7 @@ CONTROL_OUTPUT_INFO = "Control-Write-Encryption-Key"
 CONTROL_INPUT_INFO = "Control-Read-Encryption-Key"
 
 
-class NullPairVerifyProcedure:
+class NullPairVerifyProcedure(PairVerifyProcedure):
     """Null implementation for Pair-Verify when no verification is needed."""
 
     async def verify_credentials(self) -> bool:
@@ -45,8 +45,9 @@ class NullPairVerifyProcedure:
         _LOGGER.debug("Performing null Pair-Verify")
         return False
 
-    @staticmethod
-    def encryption_keys(salt: str, output_info: str, input_key: str) -> Tuple[str, str]:
+    def encryption_keys(
+        self, salt: str, output_info: str, input_info: str
+    ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
         raise exceptions.NotSupportedError(
             "encryption keys not supported by null implementation"
@@ -60,9 +61,9 @@ def pair_setup(
     _LOGGER.debug("Setting up new AirPlay Pair-Setup procedure with type %s", auth_type)
 
     if auth_type == AuthenticationType.Legacy:
-        srp = LegacySRPAuthHandler(new_credentials())
-        srp.initialize()
-        return AirPlayLegacyPairSetupProcedure(connection, srp)
+        legacy_srp = LegacySRPAuthHandler(new_credentials())
+        legacy_srp.initialize()
+        return AirPlayLegacyPairSetupProcedure(connection, legacy_srp)
     if auth_type == AuthenticationType.HAP:
         srp = SRPAuthHandler()
         srp.initialize()
@@ -84,9 +85,9 @@ def pair_verify(
     if credentials.type == AuthenticationType.Null:
         return NullPairVerifyProcedure()
     if credentials.type == AuthenticationType.Legacy:
-        srp = LegacySRPAuthHandler(credentials)
-        srp.initialize()
-        return AirPlayLegacyPairVerifyProcedure(connection, srp)
+        legacy_srp = LegacySRPAuthHandler(credentials)
+        legacy_srp.initialize()
+        return AirPlayLegacyPairVerifyProcedure(connection, legacy_srp)
 
     srp = SRPAuthHandler()
     srp.initialize()
@@ -97,7 +98,7 @@ def pair_verify(
 
 async def verify_connection(
     credentials: HapCredentials, connection: HttpConnection
-) -> None:
+) -> PairVerifyProcedure:
     """Perform Pair-Verify on a connection and enable encryption."""
     verifier = pair_verify(credentials, connection)
     has_encryption_keys = await verifier.verify_credentials()
