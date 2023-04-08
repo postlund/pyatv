@@ -410,6 +410,24 @@ class FacadeApps(Relayer, interface.Apps):
         await self.relay("launch_app")(bundle_id)
 
 
+class FacadeUserAccounts(Relayer, interface.UserAccounts):
+    """Facade implementation for account handling."""
+
+    def __init__(self):
+        """Initialize a new FacadeUserAccounts instance."""
+        super().__init__(interface.UserAccounts, DEFAULT_PRIORITIES)
+
+    @shield.guard
+    async def account_list(self) -> List[interface.UserAccount]:
+        """Fetch a list of user accounts that can be switched."""
+        return await self.relay("account_list")()
+
+    @shield.guard
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account by account ID."""
+        await self.relay("switch_account")(account_id)
+
+
 class FacadeAudio(Relayer, interface.Audio):
     """Facade implementation for audio functionality."""
 
@@ -522,6 +540,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
+            interface.UserAccounts: FacadeUserAccounts(),
             interface.Audio: FacadeAudio(),
         }
         self._shield_everything()
@@ -699,6 +718,12 @@ class FacadeAppleTV(interface.AppleTV):
     def apps(self) -> interface.Apps:
         """Return apps interface."""
         return cast(interface.Apps, self._interfaces[interface.Apps])
+
+    @property  # type: ignore
+    @shield.guard
+    def user_accounts(self) -> interface.UserAccounts:
+        """Return user accounts interface."""
+        return cast(interface.UserAccounts, self._interfaces[interface.UserAccounts])
 
     @property  # type: ignore
     @shield.guard

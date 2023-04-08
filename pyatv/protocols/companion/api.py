@@ -229,6 +229,16 @@ class CompanionAPI(
         """Return list of launchable apps on remote device."""
         return await self._send_command("FetchLaunchableApplicationsEvent", {})
 
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account on the remote device."""
+        await self._send_command(
+            "SwitchUserAccountEvent", {"SwitchAccountID": account_id}
+        )
+
+    async def account_list(self) -> Mapping[str, Any]:
+        """Return list of user accounts on remote device."""
+        return await self._send_command("FetchUserAccountsEvent", {})
+
     async def hid_command(self, down: bool, command: HidCommand) -> None:
         """Send a HID command."""
         await self._send_command(
