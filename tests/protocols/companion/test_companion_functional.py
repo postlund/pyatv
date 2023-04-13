@@ -202,11 +202,11 @@ async def test_audio_volume_down(companion_client, companion_state):
 
 
 async def test_text_input_text_get(companion_client, companion_usecase):
-    text = await companion_client.remote_control.text_get()
+    text = await companion_client.keyboard.text_get()
     assert text == INITIAL_RTI_TEXT
 
     companion_usecase.set_rti_text("test")
-    text = await companion_client.remote_control.text_get()
+    text = await companion_client.keyboard.text_get()
     assert text == "test"
 
 
@@ -214,20 +214,20 @@ async def test_text_input_text_get_when_no_keyboard(
     companion_client, companion_usecase
 ):
     companion_usecase.set_rti_text(None)
-    text = await companion_client.remote_control.text_get()
+    text = await companion_client.keyboard.text_get()
     assert text is None
 
 
 async def test_text_input_text_clear(companion_client, companion_state):
-    await companion_client.remote_control.text_clear()
+    await companion_client.keyboard.text_clear()
     assert companion_state.rti_text == ""
 
 
 async def test_text_input_text_append(companion_client, companion_state):
-    await companion_client.remote_control.text_append("test")
+    await companion_client.keyboard.text_append("test")
     assert companion_state.rti_text == INITIAL_RTI_TEXT + "test"
 
 
 async def test_text_input_text_set(companion_client, companion_state):
-    await companion_client.remote_control.text_set("test")
+    await companion_client.keyboard.text_set("test")
     assert companion_state.rti_text == "test"

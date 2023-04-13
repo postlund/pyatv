@@ -29,6 +29,7 @@ from pyatv.interface import (
     DeviceInfo,
     FeatureInfo,
     Features,
+    Keyboard,
     PairingHandler,
     Power,
     RemoteControl,
@@ -125,6 +126,7 @@ SUPPORTED_FEATURES = set(
         FeatureName.PlayPause,
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
+        # Keyboard interface
         FeatureName.TextGet,
         FeatureName.TextClear,
         FeatureName.TextAppend,
@@ -303,22 +305,6 @@ class CompanionRemoteControl(RemoteControl):
         """Select previous channel."""
         await self._press_button(HidCommand.ChannelDecrement)
 
-    async def text_get(self) -> Optional[str]:
-        """Get current virtual keyboard text."""
-        return await self.api.text_input_command("", clear_previous_input=False)
-
-    async def text_clear(self) -> None:
-        """Clear virtual keyboard text."""
-        await self.api.text_input_command("", clear_previous_input=True)
-
-    async def text_append(self, text: str) -> None:
-        """Input text into virtual keyboard."""
-        await self.api.text_input_command(text, clear_previous_input=False)
-
-    async def text_set(self, text: str) -> None:
-        """Replace text in virtual keyboard."""
-        await self.api.text_input_command(text, clear_previous_input=True)
-
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap
     ) -> None:
@@ -388,6 +374,31 @@ class CompanionAudio(Audio):
         await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
 
+class CompanionKeyboard(Keyboard):
+    """Implementation of API for keyboard handling."""
+
+    def __init__(self, api: CompanionAPI):
+        """Initialize a new instance of CompanionKeyboard."""
+        super().__init__()
+        self.api = api
+
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.api.text_input_command("", clear_previous_input=False)
+
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        await self.api.text_input_command("", clear_previous_input=True)
+
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=False)
+
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=True)
+
+
 def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> Optional[ScanHandlerReturn]:
@@ -453,6 +464,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
+        Keyboard: CompanionKeyboard(api),
     }
 
     async def _connect() -> bool:
