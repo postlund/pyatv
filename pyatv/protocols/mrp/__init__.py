@@ -6,6 +6,9 @@ import logging
 import math
 import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
+from urllib.parse import urlparse
+
+import aiohttp
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -502,6 +505,58 @@ class MrpMetadata(Metadata):
         return artwork
 
     async def _fetch_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        return await self._fetch_remote_artwork(
+            width, height
+        ) or await self._fetch_local_artwork(width, height)
+
+    async def _fetch_remote_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch external artwork from a URL."""
+        metadata = self.psm.playing.metadata
+        if not metadata:
+            return None
+
+        urls = []
+
+        if metadata.HasField("artworkIdentifier"):
+            # appears to be a template to itunes artwork, but let's validate
+            url_template = metadata.artworkIdentifier
+            try:
+                url = url_template.format(
+                    # the itunes image server preserves aspect ratio
+                    w=999999 if width < 1 else width,
+                    h=999999 if height < 1 else height,
+                    c="bb",
+                    f="png",
+                )
+            except KeyError:
+                url = None
+            url_parts = urlparse(url)
+            if url_parts.scheme and url_parts.netloc:
+                urls.append(url)
+
+        if metadata.HasField("artworkURL"):
+            # artworkURL has fixed size and format, use it as a fallback
+            urls.append(metadata.artworkURL)
+
+        async with aiohttp.ClientSession() as session:
+            for url in urls:
+                try:
+                    async with session.get(url) as response:
+                        if response.status == 200:
+                            return ArtworkInfo(
+                                bytes=await response.read(),
+                                mimetype=response.headers.get("content-type"),
+                                # TODO: get actual image size
+                                width=width,
+                                height=height,
+                            )
+                except aiohttp.ClientError:
+                    pass
+
+        return None
+
+    async def _fetch_local_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch artwork over MRP."""
         playing = self.psm.playing
         resp = await self.psm.protocol.send_and_receive(
             messages.playback_queue_request(playing.location, width, height)
@@ -521,7 +576,7 @@ class MrpMetadata(Metadata):
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
         metadata = self.psm.playing.metadata
-        if metadata and metadata.artworkAvailable:
+        if metadata and (metadata.artworkAvailable or metadata.HasField("artworkURL")):
             if metadata.HasField("artworkIdentifier"):
                 return metadata.artworkIdentifier
             if metadata.HasField("contentIdentifier"):
