@@ -2,6 +2,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.conf import ManualService
@@ -18,7 +19,7 @@ from tests.fake_device import FakeAppleTV
 from tests.utils import total_sleep_time, until
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mrp_atv(event_loop):
     atv = FakeAppleTV(event_loop)
     atv.add_service(Protocol.MRP)
@@ -28,7 +29,7 @@ async def mrp_atv(event_loop):
 
 
 @pytest.fixture
-async def mrp_protocol(event_loop, mrp_atv):
+def mrp_protocol(event_loop, mrp_atv):
     port = mrp_atv.get_port(Protocol.MRP)
     service = ManualService("mrp_id", Protocol.MRP, port, {})
     connection = MrpConnection("127.0.0.1", port, event_loop)

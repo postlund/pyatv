@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 from ifaddr import IP, Adapter
 import pytest
+import pytest_asyncio
 
 import pyatv
 from pyatv.auth.hap_pairing import parse_credentials
@@ -69,14 +70,14 @@ def stub_heartbeat_loop(request):
         yield
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session_manager():
     session_manager = await create_session()
     yield session_manager
     await session_manager.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def knock_server(event_loop):
     servers = []
 
@@ -91,7 +92,7 @@ async def knock_server(event_loop):
         server.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def stub_knock_server():
     with patch("pyatv.support.knock.knock") as knock:
         info = SimpleNamespace(ports=set(), knock_count=0)
@@ -106,7 +107,7 @@ def stub_knock_server():
 
 # stub_knock_server is added here to make sure all UDNS tests uses a stubbed
 # knock server
-@pytest.fixture
+@pytest_asyncio.fixture
 async def udns_server(event_loop, stub_knock_server):
     server = fake_udns.FakeUdns(event_loop)
     await server.start()
@@ -114,7 +115,7 @@ async def udns_server(event_loop, stub_knock_server):
     server.close()
 
 
-@pytest.fixture(name="multicast_scan")
+@pytest_asyncio.fixture(name="multicast_scan")
 async def multicast_scan_fixture(event_loop, udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None):
         with fake_udns.stub_multicast(udns_server, event_loop):
@@ -125,7 +126,7 @@ async def multicast_scan_fixture(event_loop, udns_server):
     yield _scan
 
 
-@pytest.fixture(name="unicast_scan")
+@pytest_asyncio.fixture(name="unicast_scan")
 async def unicast_scan_fixture(event_loop, udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None):
         port = str(udns_server.port)
