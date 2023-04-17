@@ -3,6 +3,7 @@ import asyncio
 from typing import cast
 
 import pytest
+import pytest_asyncio
 
 from pyatv import connect
 from pyatv.conf import AppleTV, ManualService
@@ -13,7 +14,7 @@ from tests.fake_device import FakeAppleTV, companion
 from tests.fake_device.companion import FakeCompanionUseCases
 
 
-@pytest.fixture(name="companion_device")
+@pytest_asyncio.fixture(name="companion_device")
 async def companion_device_fixture(event_loop):
     fake_atv = FakeAppleTV(event_loop, test_mode=False)
     fake_atv.add_service(Protocol.Companion)
@@ -23,12 +24,12 @@ async def companion_device_fixture(event_loop):
 
 
 @pytest.fixture(name="companion_state")
-async def companion_state_fixture(companion_device):
+def companion_state_fixture(companion_device):
     yield companion_device.get_state(Protocol.Companion)
 
 
 @pytest.fixture(name="companion_usecase")
-async def companion_usecase_fixture(companion_device) -> FakeCompanionUseCases:
+def companion_usecase_fixture(companion_device) -> FakeCompanionUseCases:
     yield cast(FakeCompanionUseCases, companion_device.get_usecase(Protocol.Companion))
 
 
@@ -48,7 +49,7 @@ def companion_conf_fixture(companion_device):
     yield conf
 
 
-@pytest.fixture(name="companion_client")
+@pytest_asyncio.fixture(name="companion_client")
 async def companion_client_fixture(companion_conf, event_loop):
     atv = await connect(companion_conf, loop=event_loop)
     yield atv
