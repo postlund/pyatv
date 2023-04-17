@@ -371,6 +371,7 @@ class HttpConnection(asyncio.Protocol):
         headers: Optional[Mapping[str, object]] = None,
         body: Optional[Union[str, bytes]] = None,
         allow_error: bool = False,
+        timeout: int = 10,
     ) -> HttpResponse:
         """Send a HTTP message and return response."""
         output = _format_message(
@@ -386,7 +387,7 @@ class HttpConnection(asyncio.Protocol):
         event = asyncio.Event()
         self._requests.appendleft(event)
         try:
-            async with async_timeout.timeout(10):
+            async with async_timeout.timeout(timeout):
                 await event.wait()
             response = cast(HttpResponse, self._responses.get())
         except asyncio.TimeoutError as ex:
