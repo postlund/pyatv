@@ -4,6 +4,7 @@ import ipaddress
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
@@ -50,7 +51,7 @@ def mock_random():
     pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mock_pairing(event_loop):
     obj = MagicMock()
 

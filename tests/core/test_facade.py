@@ -9,6 +9,7 @@ from typing import Any, Dict, Set
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV as AppleTVConf
@@ -128,7 +129,7 @@ class DummyAudio(Audio):
         return self._volume
 
     async def set_volume(self, level: float) -> None:
-        self._volume = volume
+        self._volume = level
 
 
 class DummyDeviceListener(DeviceListener):
@@ -657,12 +658,12 @@ async def test_power_prefer_companion(feature, func, facade_dummy, register_inte
     assert getattr(power_comp, f"{func}_called")
 
 
-@pytest.fixture(name="power_instance")
+@pytest_asyncio.fixture(name="power_instance")
 async def power_instance_fixture():
     yield DummyPower()
 
 
-@pytest.fixture(name="power_setup")
+@pytest_asyncio.fixture(name="power_setup")
 async def power_setup_fixture(facade_dummy, register_interface, power_instance):
     listener = SavingPowerListener()
 

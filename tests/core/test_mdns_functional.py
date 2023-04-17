@@ -7,6 +7,7 @@ import typing
 from unittest.mock import MagicMock, patch
 
 import pytest
+import pytest_asyncio
 
 from pyatv.core import mdns
 from pyatv.support import net
@@ -61,7 +62,7 @@ def stub_ip_address():
 
 # Hack-ish fixture to make sure multicast does not listen on any global port,
 # i.e. 5353 since data from other places can leak into the test
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 def redirect_mcast(udns_server):
     udns_server.services = TEST_SERVICES
     real_mcast_socket = net.mcast_socket
@@ -75,7 +76,7 @@ def redirect_mcast(udns_server):
 # This is a very complex fixture that will hook into the receiver of multicast
 # responses and abort the "waiting" period whenever all responses or a certain amount
 # of requests have been received. Mainly this is for not slowing down tests.
-@pytest.fixture
+@pytest_asyncio.fixture
 async def multicast_fastexit(event_loop, monkeypatch, udns_server):
     clients: typing.List[asyncio.Future] = []
 
@@ -119,6 +120,7 @@ async def unicast(event_loop, udns_server, service_names, timeout=1):
     )
 
 
+@pytest.mark.asyncio
 async def test_unicast_has_valid_service(event_loop, udns_server):
     resp, service = await unicast(event_loop, udns_server, [MEDIAREMOTE_SERVICE])
     assert len(resp.services) == 1
