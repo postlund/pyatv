@@ -1,5 +1,6 @@
 """Shared test code for AirPlay test cases."""
 import pytest
+import pytest_asyncio
 
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
@@ -8,7 +9,7 @@ from pyatv.support.http import http_connect
 from tests.fake_device import FakeAppleTV
 
 
-@pytest.fixture(name="airplay_device")
+@pytest_asyncio.fixture(name="airplay_device")
 async def airplay_device_fixture(event_loop):
     fake_atv = FakeAppleTV(event_loop, test_mode=False)
     fake_atv.add_service(Protocol.AirPlay)
@@ -17,7 +18,7 @@ async def airplay_device_fixture(event_loop):
     await fake_atv.stop()
 
 
-@pytest.fixture(name="client_connection")
+@pytest_asyncio.fixture(name="client_connection")
 async def client_connection_fixture(airplay_device, event_loop):
     yield await http_connect("127.0.0.1", airplay_device.get_port(Protocol.AirPlay))
 

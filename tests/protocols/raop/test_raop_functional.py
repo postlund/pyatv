@@ -13,6 +13,7 @@ import math
 from typing import Dict, List
 
 import pytest
+import pytest_asyncio
 
 from pyatv import connect, exceptions
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
@@ -45,7 +46,7 @@ VOLUME_FIELDS = [
 REMOTE_CONTROL_FIELDS = [FeatureName.Stop, FeatureName.Pause]
 
 
-@pytest.fixture(name="playing_listener")
+@pytest_asyncio.fixture(name="playing_listener")
 async def playing_listener_fixture(raop_client):
     class PlayingListener(PushListener):
         def __init__(self):

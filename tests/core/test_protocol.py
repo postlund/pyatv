@@ -4,6 +4,7 @@ import math
 from typing import Any, Optional
 
 import pytest
+import pytest_asyncio
 
 from pyatv.core.protocol import MessageDispatcher, heartbeater
 
@@ -61,7 +62,7 @@ class HeartbeatMonitor:
         self.failure_called = True
 
 
-@pytest.fixture(name="monitor")
+@pytest_asyncio.fixture(name="monitor")
 async def monitor_fixture():
     monitor = HeartbeatMonitor()
     yield monitor
