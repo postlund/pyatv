@@ -3,6 +3,7 @@
 from ipaddress import IPv4Address
 import logging
 import math
+from typing import Optional
 
 from aiohttp.test_utils import unittest_run_loop
 
@@ -22,6 +23,13 @@ from pyatv.const import (
     ShuffleState,
 )
 from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
+from pyatv.support.http import (
+    BasicHttpServer,
+    HttpRequest,
+    HttpResponse,
+    HttpSimpleRouter,
+    http_server,
+)
 
 from tests import common_functional_tests
 from tests.fake_device import FakeAppleTV
@@ -66,9 +74,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         airplay_service.credentials = DEVICE_CREDENTIALS
         self.conf.add_service(airplay_service)
         self.atv = await self.get_connected_device()
+        self.artwork_server = None
 
     def tearDown(self):
         self.atv.close()
+        if self.artwork_server is not None:
+            self.artwork_server.close()
         super().tearDown()
 
     async def get_application(self, loop=None):
@@ -89,6 +100,27 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.Volume,
             FeatureName.SetVolume,
         ]
+
+    async def serve_artwork(self, path: str) -> int:
+        class ArtworkHandler(HttpSimpleRouter):
+            def __init__(self, path: str):
+                super().__init__()
+                self.add_route("GET", path, self.handle_artwork)
+
+            def handle_artwork(self, request: HttpRequest) -> Optional[HttpResponse]:
+                return HttpResponse(
+                    "HTTP",
+                    "1.0",
+                    200,
+                    "OK",
+                    {"Content-Type": ARTWORK_MIMETYPE},
+                    ARTWORK_BYTES,
+                )
+
+        self.artwork_server, port = await http_server(
+            lambda: BasicHttpServer(ArtworkHandler(path))
+        )
+        return port
 
     @unittest_run_loop
     async def test_button_up_actions(self):
@@ -225,6 +257,37 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         artwork = await self.atv.metadata.artwork(width=123, height=456)
         self.assertEqual(artwork.width, 111)
         self.assertEqual(artwork.height, 222)
+
+    @unittest_run_loop
+    async def test_metadata_artwork_url(self):
+        port = await self.serve_artwork("/test")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(b"", "", url=f"http://localhost:{port}/test")
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
+    @unittest_run_loop
+    async def test_metadata_artwork_url_in_identifier(self):
+        port = await self.serve_artwork("/test/123x456bb.png")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            b"",
+            "",
+            identifier=f"http://localhost:{port}/test/{{w}}x{{h}}{{c}}.{{f}}",
+            url=f"http://localhost:{port}/test/1200x1200bb.heic",
+        )
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
 
     @unittest_run_loop
     async def test_item_updates(self):

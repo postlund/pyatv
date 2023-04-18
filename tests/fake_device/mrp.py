@@ -105,8 +105,10 @@ def _fill_item(item, metadata):
     if metadata.artwork_mimetype:
         md.artworkAvailable = True
         md.artworkMIMEType = metadata.artwork_mimetype
-        if metadata.artwork_identifier:
-            md.artworkIdentifier = metadata.artwork_identifier
+    if hasattr(metadata, "artwork_url"):
+        md.artworkURL = metadata.artwork_url
+    if metadata.artwork_identifier:
+        md.artworkIdentifier = metadata.artwork_identifier
     if metadata.series_name:
         md.seriesName = metadata.series_name
     if metadata.season_number:
@@ -184,6 +186,7 @@ class PlayingState:
         self.playback_rate = kwargs.get("playback_rate")
         self.supported_commands = kwargs.get("supported_commands")
         self.artwork = kwargs.get("artwork")
+        self.artwork_identifier = kwargs.get("artwork_identifier")
         self.artwork_mimetype = kwargs.get("artwork_mimetype")
         self.artwork_width = kwargs.get("artwork_width")
         self.artwork_height = kwargs.get("artwork_height")
@@ -589,7 +592,7 @@ class FakeMrpUseCases:
             self.state.set_volume(self.state.volume, DEVICE_UID)
 
     def change_artwork(
-        self, artwork, mimetype, identifier="artwork", width=None, height=None
+        self, artwork, mimetype, identifier="artwork", width=None, height=None, url=None
     ):
         """Call to change artwork response."""
         metadata = self.state.get_player_state(PLAYER_IDENTIFIER)
@@ -598,6 +601,8 @@ class FakeMrpUseCases:
         metadata.artwork_identifier = identifier
         metadata.artwork_width = width
         metadata.artwork_height = height
+        if url is not None:
+            metadata.artwork_url = url
         self.state.update_state(PLAYER_IDENTIFIER)
 
     def change_metadata(self, **kwargs):
