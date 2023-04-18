@@ -148,8 +148,7 @@ class CompanionAPI(
             raise
         except Exception as ex:
             raise exceptions.ProtocolError(f"Command {identifier} failed") from ex
-        else:
-            return resp
+        return resp
 
     async def system_info(self):
         """Send system information to device."""

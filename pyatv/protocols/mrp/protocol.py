@@ -165,9 +165,9 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
             # Something went wrong, let's do cleanup
             self.stop()
             raise
-        else:
-            # We're now ready
-            self._state = ProtocolState.READY
+
+        # We're now ready
+        self._state = ProtocolState.READY
 
     def stop(self) -> None:
         """Disconnect from device."""

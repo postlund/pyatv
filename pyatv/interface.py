@@ -85,7 +85,7 @@ def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnTyp
             setattr(func, "_feature_name", name)
             return func
 
-        raise Exception(
+        raise RuntimeError(
             f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
         )
 

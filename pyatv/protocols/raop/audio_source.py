@@ -291,9 +291,9 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
         self._stop_stream = True
 
     def _download_stream(self) -> None:  # pylint: disable=too-many-branches
-        with requests.get(self.url, stream=True) as handle:
+        with requests.get(self.url, stream=True, timeout=10.0) as handle:
             if handle.status_code < 200 or handle.status_code >= 300:
-                raise Exception(
+                raise ProtocolError(
                     f"Got status {handle.status_code} with message: {handle.reason}"
                 )
             result = handle.raw
