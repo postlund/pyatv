@@ -9,11 +9,13 @@ import json
 import logging
 import sys
 import traceback
+from typing import Optional
 
 from pyatv import connect, const, scan
-from pyatv.const import Protocol
+from pyatv.const import FeatureState, Protocol
 from pyatv.interface import (
     App,
+    AppleTV,
     DeviceListener,
     Playing,
     PowerListener,
@@ -34,15 +36,20 @@ _LOGGER = logging.getLogger(__name__)
 class PushPrinter(PushListener):
     """Listen for push updates and print changes."""
 
-    def __init__(self, formatter, atv):
+    def __init__(self, formatter, atv: AppleTV):
         """Initialize a new PushPrinter."""
         self.formatter = formatter
         self.atv = atv
 
     def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Inform about changes to what is currently playing."""
+        app = (
+            self.atv.metadata.app
+            if not self.atv.features.in_state(FeatureState.Unavailable)
+            else None
+        )
         print(
-            self.formatter(output_playing(playstatus, self.atv.metadata.app)),
+            self.formatter(output_playing(playstatus, app)),
             flush=True,
         )
 
@@ -122,7 +129,7 @@ def output(success: bool, error=None, exception=None, values=None):
     return result
 
 
-def output_playing(playing: Playing, app: App):
+def output_playing(playing: Playing, app: Optional[App]):
     """Produce output for what is currently playing."""
 
     def _convert(field):
