@@ -43,8 +43,7 @@ def get_audio_properties(properties: Mapping[str, str]) -> Tuple[int, int, int]:
         sample_size = int(int(properties.get("ss", DEFAULT_SAMPLE_SIZE)) / 8)
     except Exception as ex:
         raise exceptions.ProtocolError("invalid audio property") from ex
-    else:
-        return sample_rate, channels, sample_size
+    return sample_rate, channels, sample_size
 
 
 def get_encryption_types(properties: Mapping[str, str]) -> EncryptionType:
@@ -62,15 +61,14 @@ def get_encryption_types(properties: Mapping[str, str]) -> EncryptionType:
     except (KeyError, ValueError):
         return output
 
-    else:
-        for enc_type in enc_types:
-            output |= {
-                0: EncryptionType.Unencrypted,
-                1: EncryptionType.RSA,
-                3: EncryptionType.FairPlay,
-                4: EncryptionType.MFiSAP,
-                5: EncryptionType.FairPlaySAPv25,
-            }.get(enc_type, EncryptionType.Unknown)
+    for enc_type in enc_types:
+        output |= {
+            0: EncryptionType.Unencrypted,
+            1: EncryptionType.RSA,
+            3: EncryptionType.FairPlay,
+            4: EncryptionType.MFiSAP,
+            5: EncryptionType.FairPlaySAPv25,
+        }.get(enc_type, EncryptionType.Unknown)
     return output
 
 
@@ -88,11 +86,11 @@ def get_metadata_types(properties: Mapping[str, str]) -> MetadataType:
         md_types = [int(x) for x in properties["md"].split(",")]
     except (KeyError, ValueError):
         return output
-    else:
-        for md_type in md_types:
-            output |= {
-                0: MetadataType.Text,
-                1: MetadataType.Artwork,
-                2: MetadataType.Progress,
-            }.get(md_type, MetadataType.NotSupported)
+
+    for md_type in md_types:
+        output |= {
+            0: MetadataType.Text,
+            1: MetadataType.Artwork,
+            2: MetadataType.Progress,
+        }.get(md_type, MetadataType.NotSupported)
     return output
