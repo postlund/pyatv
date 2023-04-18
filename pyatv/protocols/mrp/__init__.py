@@ -8,7 +8,7 @@ import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 from urllib.parse import urlparse
 
-import aiohttp
+from aiohttp import ClientError, ClientSession
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -462,11 +462,12 @@ class MrpRemoteControl(RemoteControl):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, psm, identifier):
+    def __init__(self, protocol, psm, identifier, client_session: ClientSession):
         """Initialize a new MrpPlaying."""
         self.protocol = protocol
         self.psm = psm
         self.identifier = identifier
+        self.client_session = client_session
         self.artwork_cache = Cache(limit=4)
 
     @property
@@ -538,20 +539,19 @@ class MrpMetadata(Metadata):
             # artworkURL has fixed size and format, use it as a fallback
             urls.append(metadata.artworkURL)
 
-        async with aiohttp.ClientSession() as session:
-            for url in urls:
-                try:
-                    async with session.get(url) as response:
-                        if response.status == 200:
-                            return ArtworkInfo(
-                                bytes=await response.read(),
-                                mimetype=response.headers.get("content-type"),
-                                # TODO: get actual image size
-                                width=width,
-                                height=height,
-                            )
-                except aiohttp.ClientError:
-                    pass
+        for url in urls:
+            try:
+                async with self.client_session.get(url) as response:
+                    if response.status == 200:
+                        return ArtworkInfo(
+                            bytes=await response.read(),
+                            mimetype=response.headers.get("content-type"),
+                            # TODO: get actual image size
+                            width=width,
+                            height=height,
+                        )
+            except ClientError:
+                pass
 
         return None
 
@@ -978,7 +978,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
     psm = PlayerStateManager(protocol)
 
     remote_control = MrpRemoteControl(core.loop, psm, protocol)
-    metadata = MrpMetadata(protocol, psm, core.config.identifier)
+    metadata = MrpMetadata(
+        protocol, psm, core.config.identifier, core.session_manager.session
+    )
     power = MrpPower(core.loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
     audio = MrpAudio(protocol, core.state_dispatcher)
