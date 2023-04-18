@@ -94,5 +94,4 @@ async def is_streamable(filename: str) -> bool:
         await loop.run_in_executor(None, miniaudio.get_file_info, filename)
     except Exception:
         return False
-    else:
-        return True
+    return True

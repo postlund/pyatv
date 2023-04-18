@@ -84,7 +84,7 @@ def _get_protobuf_version():
             match = re.match(r"protobuf==(\d+\.\d+\.\d+)[^0-9,]*", line)
             if match:
                 return match.group(1)
-    raise Exception("failed to determine protobuf version")
+    raise RuntimeError("failed to determine protobuf version")
 
 
 def _download_protoc(force=False):
@@ -97,7 +97,7 @@ def _download_protoc(force=False):
 
     print("Downloading", url)
 
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=10)
     with zipfile.ZipFile(BytesIO(resp.content)) as zip_file:
         for zip_info in zip_file.infolist():
             if zip_info.filename.startswith("bin/protoc"):

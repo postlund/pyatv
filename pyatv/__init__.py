@@ -136,8 +136,7 @@ async def connect(
     except Exception:
         await session_manager.close()
         raise
-    else:
-        return atv
+    return atv
 
 
 async def pair(

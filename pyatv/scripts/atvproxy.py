@@ -387,8 +387,7 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
-        else:
-            return proxy
+        return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
@@ -432,8 +431,7 @@ async def _start_companion_proxy(loop, args, zconf):
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
-        else:
-            return proxy
+        return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
