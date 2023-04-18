@@ -4,7 +4,7 @@ import binascii
 import hashlib
 import logging
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 import uuid
 
 from cryptography.exceptions import InvalidSignature
@@ -162,7 +162,11 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Client", Public=pub_key, Proof=proof)
         return pub_key, proof
 
-    def step3(self, name: str = None, additional_data: Dict[int, Any] = None):
+    def step3(
+        self,
+        name: Optional[str] = None,
+        additional_data: Optional[Dict[TlvValue, Any]] = None,
+    ):
         """Third pairing step."""
         ios_device_x = hkdf_expand(
             "Pair-Setup-Controller-Sign-Salt",
@@ -179,14 +183,14 @@ class SRPAuthHandler:
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
-        tlv = {
+        tlv: Dict[TlvValue, Any] = {
             TlvValue.Identifier: self.pairing_id,
             TlvValue.PublicKey: self._auth_public,
             TlvValue.Signature: device_signature,
         }
 
         if name:
-            tlv[17] = opack.pack(
+            tlv[TlvValue.Name] = opack.pack(
                 {
                     "name": name,
                 }

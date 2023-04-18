@@ -51,6 +51,9 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.InvalidDmapDataError" href="#pyatv.exceptions.InvalidDmapDataError">InvalidDmapDataError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.InvalidResponseError" href="#pyatv.exceptions.InvalidResponseError">InvalidResponseError</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.InvalidStateError" href="#pyatv.exceptions.InvalidStateError">InvalidStateError</a></code></h4>
 </li>
 <li>
@@ -96,7 +99,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L115" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L119" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -244,6 +247,19 @@ the connection was closed for some other reason.</p></section>
 <dd>
 <section class="desc"><p>Thrown when invalid DMAP data is parsed.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L31-L32" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.InvalidResponseError"><code class="flex name class">
+<span>class <span class="ident">InvalidResponseError</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Thrown when a remote sends an invalid response.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L118-L119" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.Exception</li>

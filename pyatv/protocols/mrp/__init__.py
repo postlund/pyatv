@@ -6,6 +6,9 @@ import logging
 import math
 import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
+from urllib.parse import urlparse
+
+from aiohttp import ClientError, ClientSession
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -459,11 +462,12 @@ class MrpRemoteControl(RemoteControl):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, psm, identifier):
+    def __init__(self, protocol, psm, identifier, client_session: ClientSession):
         """Initialize a new MrpPlaying."""
         self.protocol = protocol
         self.psm = psm
         self.identifier = identifier
+        self.client_session = client_session
         self.artwork_cache = Cache(limit=4)
 
     @property
@@ -502,6 +506,57 @@ class MrpMetadata(Metadata):
         return artwork
 
     async def _fetch_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        return await self._fetch_remote_artwork(
+            width, height
+        ) or await self._fetch_local_artwork(width, height)
+
+    async def _fetch_remote_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch external artwork from a URL."""
+        metadata = self.psm.playing.metadata
+        if not metadata:
+            return None
+
+        urls = []
+
+        if metadata.HasField("artworkIdentifier"):
+            # appears to be a template to itunes artwork, but let's validate
+            url_template = metadata.artworkIdentifier
+            try:
+                url = url_template.format(
+                    # the itunes image server preserves aspect ratio
+                    w=999999 if width < 1 else width,
+                    h=999999 if height < 1 else height,
+                    c="bb",
+                    f="png",
+                )
+            except KeyError:
+                url = None
+            url_parts = urlparse(url)
+            if url_parts.scheme and url_parts.netloc:
+                urls.append(url)
+
+        if metadata.HasField("artworkURL"):
+            # artworkURL has fixed size and format, use it as a fallback
+            urls.append(metadata.artworkURL)
+
+        for url in urls:
+            try:
+                async with self.client_session.get(url) as response:
+                    if response.status == 200:
+                        return ArtworkInfo(
+                            bytes=await response.read(),
+                            mimetype=response.headers.get("content-type"),
+                            # TODO: get actual image size
+                            width=width,
+                            height=height,
+                        )
+            except ClientError:
+                pass
+
+        return None
+
+    async def _fetch_local_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch artwork over MRP."""
         playing = self.psm.playing
         resp = await self.psm.protocol.send_and_receive(
             messages.playback_queue_request(playing.location, width, height)
@@ -521,7 +576,7 @@ class MrpMetadata(Metadata):
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
         metadata = self.psm.playing.metadata
-        if metadata and metadata.artworkAvailable:
+        if metadata and (metadata.artworkAvailable or metadata.HasField("artworkURL")):
             if metadata.HasField("artworkIdentifier"):
                 return metadata.artworkIdentifier
             if metadata.HasField("contentIdentifier"):
@@ -923,7 +978,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
     psm = PlayerStateManager(protocol)
 
     remote_control = MrpRemoteControl(core.loop, psm, protocol)
-    metadata = MrpMetadata(protocol, psm, core.config.identifier)
+    metadata = MrpMetadata(
+        protocol, psm, core.config.identifier, core.session_manager.session
+    )
     power = MrpPower(core.loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
     audio = MrpAudio(protocol, core.state_dispatcher)
