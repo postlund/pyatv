@@ -1,4 +1,4 @@
-aiohttp==3.8.3
+aiohttp==3.8.4
 async_timeout==4.0.2
 bitarray==2.7.3
 cryptography==40.0.1
