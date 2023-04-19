@@ -39,7 +39,6 @@ eq_test_cases = [
 
 
 class TestClass:
-
     variable = 1234
 
     def test_method(self):

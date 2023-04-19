@@ -30,7 +30,7 @@ async def auto_connect(
 
     Note: both handler and not_found must be coroutines
     """
-    # Scan and do connect in the event loop
+
     async def _handle(loop):
         atvs = await pyatv.scan(loop, timeout=timeout)
 

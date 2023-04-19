@@ -58,7 +58,6 @@ async def simple_get(url: str) -> Tuple[bytes, int]:
     """Perform a GET-request to a specified URL."""
     async with ClientSession() as session:
         async with session.get(url) as response:
-
             if response.status < 200 or response.status >= 300:
                 return None, response.status
 
