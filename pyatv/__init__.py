@@ -32,7 +32,7 @@ async def scan(
     timeout: int = 5,
     identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
-    hosts: List[str] = None,
+    hosts: Optional[List[str]] = None,
     aiozc: Optional[AsyncZeroconf] = None,
 ) -> List[interface.BaseConfig]:
     """Scan for Apple TVs on network and return their configurations.
@@ -90,8 +90,8 @@ async def scan(
 async def connect(
     config: interface.BaseConfig,
     loop: asyncio.AbstractEventLoop,
-    protocol: Protocol = None,
-    session: aiohttp.ClientSession = None,
+    protocol: Optional[Protocol] = None,
+    session: Optional[aiohttp.ClientSession] = None,
 ) -> interface.AppleTV:
     """Connect to a device based on a configuration."""
     if not config.services:
@@ -136,8 +136,7 @@ async def connect(
     except Exception:
         await session_manager.close()
         raise
-    else:
-        return atv
+    return atv
 
 
 async def pair(

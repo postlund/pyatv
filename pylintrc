@@ -44,4 +44,4 @@ disable=
   too-many-lines
 
 [EXCEPTIONS]
-overgeneral-exceptions=Exception
+overgeneral-exceptions=builtins.Exception

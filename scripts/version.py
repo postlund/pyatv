@@ -53,7 +53,7 @@ def update_sha1() -> None:
     current_sha1 = call("git rev-parse --short HEAD").replace("\n", "")
     patch_ver = re.match(r"(\d+).*", get_patch_version())
     if not patch_ver:
-        raise Exception(f"Invalid patch version found: {get_patch_version()}")
+        raise RuntimeError(f"Invalid patch version found: {get_patch_version()}")
 
     set_patch_version(f"{patch_ver.group(1)}g{current_sha1}")
 

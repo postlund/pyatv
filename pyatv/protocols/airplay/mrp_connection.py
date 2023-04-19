@@ -17,7 +17,9 @@ class AirPlayMrpConnection(AbstractMrpConnection, DataStreamListener):
     """Transparent connection/channel for transporting MRP messages."""
 
     def __init__(
-        self, remote_control: RemoteControl, device_listener: StateProducer = None
+        self,
+        remote_control: RemoteControl,
+        device_listener: Optional[StateProducer] = None,
     ):
         """Initialize a new MrpConnection."""
         super().__init__()

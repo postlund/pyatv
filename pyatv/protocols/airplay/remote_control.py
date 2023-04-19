@@ -57,9 +57,10 @@ class RemoteControl:
 
         self.rtsp = RtspSession(self.connection)
 
-        await self._setup_event_channel(self.connection.remote_ip)
+        await self._setup_event_channel(self.connection.remote_ip, self.verifier)
+
         await self.rtsp.record()
-        await self._setup_data_channel(self.connection.remote_ip)
+        await self._setup_data_channel(self.connection.remote_ip, self.verifier)
 
         # Lambdas as needed here as accessing a method in the device listener will
         # cause the device listener to handle that as a connection error happened
@@ -98,7 +99,9 @@ class RemoteControl:
         )
         return plistlib.loads(resp_body)
 
-    async def _setup_event_channel(self, address: str) -> None:
+    async def _setup_event_channel(
+        self, address: str, verifier: PairVerifyProcedure
+    ) -> None:
         resp = await self._setup(
             {
                 "isRemoteControlOnly": True,
@@ -122,7 +125,7 @@ class RemoteControl:
         # Note: Read/Write info reversed here as connection originates from receiver!
         transport, _ = await setup_channel(
             EventChannel,
-            self.verifier,
+            verifier,
             address,
             event_port,
             EVENTS_SALT,
@@ -131,7 +134,9 @@ class RemoteControl:
         )
         self._channels.append(transport)
 
-    async def _setup_data_channel(self, address: str) -> None:
+    async def _setup_data_channel(
+        self, address: str, verifier: PairVerifyProcedure
+    ) -> None:
         # A 64 bit random seed is included and used as part of the salt in encryption
         seed = randint(0, 2**64)
 
@@ -155,7 +160,7 @@ class RemoteControl:
 
         transport, protocol = await setup_channel(
             DataStreamChannel,
-            self.verifier,
+            verifier,
             address,
             data_port,
             DATASTREAM_SALT + str(seed),

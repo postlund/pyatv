@@ -13,6 +13,7 @@ from typing import Any, Dict, Tuple
 from pyatv.auth import hap_tlv8
 from pyatv.auth.hap_pairing import PairVerifyProcedure
 from pyatv.auth.hap_srp import SRPAuthHandler, hkdf_expand
+from pyatv.exceptions import InvalidResponseError
 from pyatv.support import log_binary
 from pyatv.support.http import HttpConnection, HttpResponse
 
@@ -50,6 +51,10 @@ class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
         resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )
+
+        if not isinstance(resp.body, bytes):
+            raise InvalidResponseError(f"got unexpected response: {resp.body}")
+
         pairing_data = hap_tlv8.read_tlv(resp.body)
 
         atv_salt = pairing_data[hap_tlv8.TlvValue.Salt]
@@ -78,7 +83,7 @@ class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
 
     def encryption_keys(
         self, salt: str, output_info: str, input_info: str
-    ) -> Tuple[str, str]:
+    ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
         shared = binascii.unhexlify(self.srp.shared_key)
         output_key = hkdf_expand(salt, output_info, shared)

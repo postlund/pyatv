@@ -102,7 +102,7 @@ class AtvremoteTest(ScriptTest):
             "--id", MRP_ID, "--mrp-credentials", "30:31:32:33", "playing"
         )
         self.assertFalse(self.state.has_authenticated)
-        self.has_error("AuthenticationError:")
+        self.has_error("AuthenticationError")
         self.exit(1)
 
     @unittest_run_loop

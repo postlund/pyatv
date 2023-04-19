@@ -532,7 +532,7 @@ class RaopClient:
     ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
-            raise Exception("not initialized")  # TODO: better exception
+            raise RuntimeError("not initialized")
 
         self.context.reset()
 
