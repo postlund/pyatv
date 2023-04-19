@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Dict, Generator, List, Mapping, Optional, Set
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -63,7 +63,7 @@ _ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw={width}&mh={height}&[AUTH]"
 _CTRL_PROMPT_CMD = "ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0"
 
 # Features that are always considered to be available
-_AVAILABLE_FEATURES = [
+_AVAILABLE_FEATURES: List[FeatureName] = [
     FeatureName.Down,
     FeatureName.Left,
     FeatureName.Menu,
@@ -71,10 +71,10 @@ _AVAILABLE_FEATURES = [
     FeatureName.Select,
     FeatureName.TopMenu,
     FeatureName.Up,
-]  # type: List[FeatureName]
+]
 
 # Features that are supported by the device but we don't now if available
-_UNKNOWN_FEATURES = [
+_UNKNOWN_FEATURES: List[FeatureName] = [
     FeatureName.Artwork,
     FeatureName.Next,
     FeatureName.Pause,
@@ -87,10 +87,10 @@ _UNKNOWN_FEATURES = [
     FeatureName.Stop,
     FeatureName.SkipForward,
     FeatureName.SkipBackward,
-]  # type: List[FeatureName]
+]
 
 # Features that are considered available if corresponding field is present
-_FIELD_FEATURES = {
+_FIELD_FEATURES: Dict[FeatureName, Tuple[str, str]] = {
     FeatureName.Title: ("cmst", "caps"),
     FeatureName.Artist: ("cmst", "cann"),
     FeatureName.Album: ("cmst", "canl"),
@@ -99,7 +99,7 @@ _FIELD_FEATURES = {
     FeatureName.Position: ("cmst", "cant"),
     FeatureName.Shuffle: ("cmst", "cash"),
     FeatureName.Repeat: ("cmst", "carp"),
-}  # type: Dict[FeatureName, tuple]
+}
 
 
 def build_playing_instance(playstatus) -> Playing:

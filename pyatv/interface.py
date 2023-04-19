@@ -50,7 +50,7 @@ __pdoc__ = {
     "DeviceInfo.RAW_MODEL": False,
 }
 
-_ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
+_ALL_FEATURES: Dict[int, Tuple[str, str]] = {}
 
 ReturnType = TypeVar(  # pylint: disable=invalid-name
     "ReturnType", bound=Callable[..., Any]
@@ -109,7 +109,7 @@ def _get_first_sentence_in_pydoc(obj):
 
 def retrieve_commands(obj: object):
     """Retrieve all commands and help texts from an API object."""
-    commands = {}  # type: Dict[str, str]
+    commands: Dict[str, str] = {}
     for func in obj.__dict__:
         if not inspect.isfunction(obj.__dict__[func]) and not isinstance(
             obj.__dict__[func], property
