@@ -13,7 +13,6 @@ from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
 from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 
-from tests.fake_device import FakeAppleTV
 from tests.fake_device.companion import INITIAL_VOLUME, VOLUME_STEP
 from tests.utils import until
 

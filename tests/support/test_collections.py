@@ -110,6 +110,7 @@ def test_dict_merge_returns_dict_a():
 # SharedData
 
 
+@pytest.mark.asyncio
 async def test_shared_data(event_loop):
     async def _waiter(shared_data: SharedData[int], future: asyncio.Future):
         result = await shared_data.wait()

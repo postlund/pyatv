@@ -26,8 +26,8 @@ pipeline:
       run:
         - black .
         - isort {code_dirs}
-        - ./scripts/api.py generate
-        - ./scripts/protobuf.py --download generate
+        - python scripts/api.py generate
+        - python scripts/protobuf.py --download generate
   rebuild_miniaudio:
     # A lot of builds on GitHub Actions result in "Illegal Instruction"
     # when calling functions in miniaudio. Seemingly random and not

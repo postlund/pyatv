@@ -4,8 +4,6 @@ import asyncio
 import ipaddress
 import logging
 
-from aiohttp.test_utils import unittest_run_loop
-
 from pyatv import connect, exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
@@ -13,14 +11,12 @@ from pyatv.const import (
     FeatureState,
     InputAction,
     OperatingSystem,
-    PowerState,
     Protocol,
     RepeatState,
     ShuffleState,
 )
-from pyatv.protocols.dmap import pairing
 
-from tests import common_functional_tests, zeroconf_stub
+from tests import common_functional_tests
 from tests.common_functional_tests import DummyDeviceListener
 from tests.fake_device import FakeAppleTV
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
@@ -93,12 +89,10 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.conf.add_service(self.airplay_service)
         return await connect(self.conf, self.loop)
 
-    @unittest_run_loop
     async def test_app_not_supported(self):
         with self.assertRaises(exceptions.NotSupportedError):
             self.atv.metadata.app
 
-    @unittest_run_loop
     async def test_connect_failed(self):
         # Twice since the client will retry one time
         self.usecase.make_login_fail()
@@ -109,7 +103,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     # This test verifies issue #2 (automatic re-login). It uses the artwork
     # API, but it could have been any API since the login code is the same.
-    @unittest_run_loop
     async def test_relogin_if_session_expired(self):
         # Here, we are logged in and currently have a asession id. These
         # usescases will result in being logged out (HTTP 403) and forcing a
@@ -122,7 +115,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         artwork = await self.atv.metadata.artwork()
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
 
-    @unittest_run_loop
     async def test_metadata_artwork_size(self):
         self.usecase.example_video()
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
@@ -139,14 +131,12 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.state.last_artwork_width, 123)
         self.assertEqual(self.state.last_artwork_height, 456)
 
-    @unittest_run_loop
     async def test_login_with_pairing_guid_succeed(self):
         self.atv.close()
 
         # This call will connect and trigger re-login
         await self.get_connected_device(PAIRING_GUID)
 
-    @unittest_run_loop
     async def test_connection_lost(self):
         self.usecase.server_closes_connection()
 
@@ -160,24 +150,20 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # to synchronize with the loop
         await asyncio.wait_for(device_listener.lost_sem.acquire(), timeout=3.0)
 
-    @unittest_run_loop
     async def test_button_unsupported_raises(self):
         buttons = ["home", "suspend", "wakeup"]
         for button in buttons:
             with self.assertRaises(exceptions.NotSupportedError):
                 await getattr(self.atv.remote_control, button)()
 
-    @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
         await self.wait_for_button_press("topmenu", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_play_pause(self):
         await self.atv.remote_control.play_pause()
         await until(lambda: self.state.last_button_pressed == "playpause")
 
-    @unittest_run_loop
     async def test_shuffle_state_albums(self):
         # DMAP does not support "albums" as shuffle state, so it is
         # mapped to "songs"
@@ -185,7 +171,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         playing = await self.playing(shuffle=ShuffleState.Songs)
         self.assertEqual(playing.shuffle, ShuffleState.Songs)
 
-    @unittest_run_loop
     async def test_set_shuffle_albums(self):
         self.usecase.example_video()
 
@@ -195,7 +180,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         playing = await self.playing(shuffle=ShuffleState.Songs)
         self.assertEqual(playing.shuffle, ShuffleState.Songs)
 
-    @unittest_run_loop
     async def test_play_url_no_service(self):
         conf = AppleTV("127.0.0.1", "Apple TV")
         conf.add_service(self.dmap_service)
@@ -207,11 +191,9 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         atv.close()
 
-    @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.Legacy)
 
-    @unittest_run_loop
     async def test_always_available_features(self):
         self.assertFeatures(
             FeatureState.Available,
@@ -224,7 +206,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.Up,
         )
 
-    @unittest_run_loop
     async def test_unsupported_features(self):
         self.assertFeatures(
             FeatureState.Unsupported,
@@ -238,7 +219,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.App,
         )
 
-    @unittest_run_loop
     async def test_always_unknown_features(self):
         self.assertFeatures(
             FeatureState.Unknown,
@@ -256,7 +236,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.SkipBackward,  # Depends on SetPosition
         )
 
-    @unittest_run_loop
     async def test_features_shuffle_repeat(self):
         self.usecase.nothing_playing()
         await self.playing()
@@ -278,7 +257,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.Repeat,
         )
 
-    @unittest_run_loop
     async def test_skip_forward_backward(self):
         self.usecase.example_video()
 
@@ -293,7 +271,6 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         metadata = await self.playing()
         self.assertEqual(metadata.position, prev_position - SKIP_TIME)
 
-    @unittest_run_loop
     async def test_reset_revision_if_push_updates_fail(self):
         """Test that revision is reset when an error occurs during push update.
 
