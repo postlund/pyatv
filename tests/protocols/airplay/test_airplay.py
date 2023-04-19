@@ -60,6 +60,7 @@ def test_device_info(service_type, properties, expected):
     assert not DeepDiff(device_info(service_type, properties), expected)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "airplay_props,mrp_props,requires_password",
     [
@@ -90,6 +91,7 @@ async def test_service_info_password(airplay_props, mrp_props, requires_password
     assert not mrp_service.requires_password
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "airplay_props,devinfo,pairing_req",
     [

@@ -3,7 +3,7 @@
 import inspect
 from ipaddress import IPv4Address
 
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
 from pyatv import exceptions
@@ -38,7 +38,6 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         self.state, self.usecase = self.fake_atv.add_service(Protocol.Companion)
         return self.fake_atv.app
 
-    @unittest_run_loop
     async def test_pairing_with_device(self):
         self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
 
@@ -54,7 +53,6 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         self.assertTrue(self.state.has_paired)
         self.assertIsNotNone(self.service.credentials)
 
-    @unittest_run_loop
     async def test_pairing_with_existing_credentials(self):
         self.service.credentials = CLIENT_CREDENTIALS
 
@@ -73,7 +71,6 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         self.assertTrue(self.state.has_paired)
         self.assertIsNotNone(self.service.credentials)
 
-    @unittest_run_loop
     async def test_pairing_no_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
 
@@ -81,7 +78,6 @@ class CompanionAuthFunctionalTest(AioHTTPTestCase):
         with self.assertRaises(exceptions.PairingError):
             await self.handle.finish()
 
-    @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.Companion, self.loop)
 
