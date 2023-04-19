@@ -804,6 +804,7 @@ async def test_power_no_updates_without_power_instance(
 
 # GUARD CALLS AFTER CLOSE
 
+
 # Retrieve method names of all methods (and properties) in an interface but exclude
 # members inherited from super classes.
 def get_interface_methods(iface, base_methods=None):

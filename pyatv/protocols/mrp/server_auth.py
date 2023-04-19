@@ -201,7 +201,6 @@ class MrpServerAuth(ABC):
 
         proof = binascii.unhexlify(self.session.key_proof_hash)
         if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
-
             msg = messages.crypto_pairing(
                 {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
             )

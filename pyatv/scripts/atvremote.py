@@ -716,8 +716,7 @@ def _pretty_print(data):
 
 async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
-    # Helper method so that the coroutine exits cleanly if an exception
-    # happens (which would leave resources dangling)
+
     async def _run_application(loop):
         try:
             return await cli_handler(loop)
