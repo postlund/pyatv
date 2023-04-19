@@ -254,7 +254,6 @@ def setup(  # pylint: disable=too-many-locals
 
         async def _connect_rc() -> bool:
             try:
-
                 await control.start(str(core.config.address), control_port, credentials)
             except exceptions.HttpError as ex:
                 if ex.status_code == 470:
