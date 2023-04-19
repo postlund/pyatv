@@ -43,6 +43,7 @@ def _debug_string(logger):
     return formatting % args
 
 
+@pytest.mark.asyncio
 async def test_error_handler_return_value():
     async def _returns():
         return 123
@@ -50,26 +51,31 @@ async def test_error_handler_return_value():
     assert await error_handler(_returns, DummyException) == 123
 
 
+@pytest.mark.asyncio
 async def test_error_handleroserror():
     with pytest.raises(exceptions.ConnectionFailedError):
         await error_handler(doraise, DummyException, OSError)
 
 
+@pytest.mark.asyncio
 async def test_error_handler_timeout():
     with pytest.raises(exceptions.ConnectionFailedError):
         await error_handler(doraise, DummyException, asyncio.TimeoutError)
 
 
+@pytest.mark.asyncio
 async def test_error_handler_backoff():
     with pytest.raises(exceptions.BackOffError):
         await error_handler(doraise, DummyException, exceptions.BackOffError)
 
 
+@pytest.mark.asyncio
 async def test_error_handler_no_credentials():
     with pytest.raises(exceptions.NoCredentialsError):
         await error_handler(doraise, DummyException, exceptions.NoCredentialsError)
 
 
+@pytest.mark.asyncio
 async def test_error_handler_other_exception():
     with pytest.raises(DummyException):
         await error_handler(doraise, DummyException, Exception)
