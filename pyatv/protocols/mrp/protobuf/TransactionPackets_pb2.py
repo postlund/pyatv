@@ -16,11 +16,12 @@ from pyatv.protocols.mrp.protobuf import TransactionPacket_pb2 as pyatv_dot_prot
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n5pyatv/protocols/mrp/protobuf/TransactionPackets.proto\x1a\x34pyatv/protocols/mrp/protobuf/TransactionPacket.proto\"9\n\x12TransactionPackets\x12#\n\x07packets\x18\x01 \x03(\x0b\x32\x12.TransactionPacket')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionPackets_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionPackets_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _TRANSACTIONPACKETS._serialized_start=111
-  _TRANSACTIONPACKETS._serialized_end=168
+  _globals['_TRANSACTIONPACKETS']._serialized_start=111
+  _globals['_TRANSACTIONPACKETS']._serialized_end=168
 # @@protoc_insertion_point(module_scope)

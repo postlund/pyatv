@@ -17,12 +17,13 @@ from pyatv.protocols.mrp.protobuf import VoiceInputDeviceDescriptorMessage_pb2 a
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nBpyatv/protocols/mrp/protobuf/RegisterVoiceInputDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x44pyatv/protocols/mrp/protobuf/VoiceInputDeviceDescriptorMessage.proto\"X\n\x1fRegisterVoiceInputDeviceMessage\x12\x35\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1b.VoiceInputDeviceDescriptor:[\n\x1fregisterVoiceInputDeviceMessage\x12\x10.ProtocolMessage\x18! \x01(\x0b\x32 .RegisterVoiceInputDeviceMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RegisterVoiceInputDeviceMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RegisterVoiceInputDeviceMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(registerVoiceInputDeviceMessage)
 
   DESCRIPTOR._options = None
-  _REGISTERVOICEINPUTDEVICEMESSAGE._serialized_start=192
-  _REGISTERVOICEINPUTDEVICEMESSAGE._serialized_end=280
+  _globals['_REGISTERVOICEINPUTDEVICEMESSAGE']._serialized_start=192
+  _globals['_REGISTERVOICEINPUTDEVICEMESSAGE']._serialized_end=280
 # @@protoc_insertion_point(module_scope)

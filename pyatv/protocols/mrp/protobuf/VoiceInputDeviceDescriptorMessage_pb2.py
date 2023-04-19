@@ -16,11 +16,12 @@ from pyatv.protocols.mrp.protobuf import AudioFormatSettingsMessage_pb2 as pyatv
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nDpyatv/protocols/mrp/protobuf/VoiceInputDeviceDescriptorMessage.proto\x1a=pyatv/protocols/mrp/protobuf/AudioFormatSettingsMessage.proto\"y\n\x1aVoiceInputDeviceDescriptor\x12+\n\rdefaultFormat\x18\x01 \x01(\x0b\x32\x14.AudioFormatSettings\x12.\n\x10supportedFormats\x18\x02 \x03(\x0b\x32\x14.AudioFormatSettings')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _VOICEINPUTDEVICEDESCRIPTOR._serialized_start=135
-  _VOICEINPUTDEVICEDESCRIPTOR._serialized_end=256
+  _globals['_VOICEINPUTDEVICEDESCRIPTOR']._serialized_start=135
+  _globals['_VOICEINPUTDEVICEDESCRIPTOR']._serialized_end=256
 # @@protoc_insertion_point(module_scope)

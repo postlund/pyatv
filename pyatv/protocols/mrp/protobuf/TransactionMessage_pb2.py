@@ -18,12 +18,13 @@ from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_protocols_d
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n5pyatv/protocols/mrp/protobuf/TransactionMessage.proto\x1a\x35pyatv/protocols/mrp/protobuf/TransactionPackets.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"i\n\x12TransactionMessage\x12\x0c\n\x04name\x18\x01 \x01(\x04\x12$\n\x07packets\x18\x02 \x01(\x0b\x32\x13.TransactionPackets\x12\x1f\n\nplayerPath\x18\x03 \x01(\x0b\x32\x0b.PlayerPath:A\n\x12transactionMessage\x12\x10.ProtocolMessage\x18& \x01(\x0b\x32\x13.TransactionMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(transactionMessage)
 
   DESCRIPTOR._options = None
-  _TRANSACTIONMESSAGE._serialized_start=211
-  _TRANSACTIONMESSAGE._serialized_end=316
+  _globals['_TRANSACTIONMESSAGE']._serialized_start=211
+  _globals['_TRANSACTIONMESSAGE']._serialized_end=316
 # @@protoc_insertion_point(module_scope)

@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n:pyatv/protocols/mrp/protobuf/SetDiscoveryModeMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"9\n\x17SetDiscoveryModeMessage\x12\x0c\n\x04mode\x18\x01 \x01(\x05\x12\x10\n\x08\x66\x65\x61tures\x18\x02 \x01(\x05:K\n\x17setDiscoveryModeMessage\x12\x10.ProtocolMessage\x18R \x01(\x0b\x32\x18.SetDiscoveryModeMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.SetDiscoveryModeMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.SetDiscoveryModeMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(setDiscoveryModeMessage)
 
   DESCRIPTOR._options = None
-  _SETDISCOVERYMODEMESSAGE._serialized_start=114
-  _SETDISCOVERYMODEMESSAGE._serialized_end=171
+  _globals['_SETDISCOVERYMODEMESSAGE']._serialized_start=114
+  _globals['_SETDISCOVERYMODEMESSAGE']._serialized_end=171
 # @@protoc_insertion_point(module_scope)

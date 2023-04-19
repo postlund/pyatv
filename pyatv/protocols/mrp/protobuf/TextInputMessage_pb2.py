@@ -16,16 +16,17 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n3pyatv/protocols/mrp/protobuf/TextInputMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"S\n\nActionType\"E\n\x04\x45num\x12\x0b\n\x07Unknown\x10\x00\x12\n\n\x06Insert\x10\x01\x12\x07\n\x03Set\x10\x02\x12\n\n\x06\x44\x65lete\x10\x03\x12\x0f\n\x0b\x43learAction\x10\x04\"Y\n\x10TextInputMessage\x12\x11\n\ttimestamp\x18\x01 \x01(\x01\x12\x0c\n\x04text\x18\x02 \x01(\t\x12$\n\nactionType\x18\x03 \x01(\x0e\x32\x10.ActionType.Enum:=\n\x10textInputMessage\x12\x10.ProtocolMessage\x18\x1e \x01(\x0b\x32\x11.TextInputMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TextInputMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TextInputMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(textInputMessage)
 
   DESCRIPTOR._options = None
-  _ACTIONTYPE._serialized_start=107
-  _ACTIONTYPE._serialized_end=190
-  _ACTIONTYPE_ENUM._serialized_start=121
-  _ACTIONTYPE_ENUM._serialized_end=190
-  _TEXTINPUTMESSAGE._serialized_start=192
-  _TEXTINPUTMESSAGE._serialized_end=281
+  _globals['_ACTIONTYPE']._serialized_start=107
+  _globals['_ACTIONTYPE']._serialized_end=190
+  _globals['_ACTIONTYPE_ENUM']._serialized_start=121
+  _globals['_ACTIONTYPE_ENUM']._serialized_end=190
+  _globals['_TEXTINPUTMESSAGE']._serialized_start=192
+  _globals['_TEXTINPUTMESSAGE']._serialized_end=281
 # @@protoc_insertion_point(module_scope)

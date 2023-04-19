@@ -15,11 +15,12 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n7pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto\"(\n\x14PlaybackQueueContext\x12\x10\n\x08revision\x18\x01 \x01(\t')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _PLAYBACKQUEUECONTEXT._serialized_start=59
-  _PLAYBACKQUEUECONTEXT._serialized_end=99
+  _globals['_PLAYBACKQUEUECONTEXT']._serialized_start=59
+  _globals['_PLAYBACKQUEUECONTEXT']._serialized_end=99
 # @@protoc_insertion_point(module_scope)

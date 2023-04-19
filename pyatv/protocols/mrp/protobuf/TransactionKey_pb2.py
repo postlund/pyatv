@@ -15,11 +15,12 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n1pyatv/protocols/mrp/protobuf/TransactionKey.proto\"6\n\x0eTransactionKey\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x10\n\x08userData\x18\x02 \x01(\x0c')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionKey_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.TransactionKey_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _TRANSACTIONKEY._serialized_start=53
-  _TRANSACTIONKEY._serialized_end=107
+  _globals['_TRANSACTIONKEY']._serialized_start=53
+  _globals['_TRANSACTIONKEY']._serialized_end=107
 # @@protoc_insertion_point(module_scope)

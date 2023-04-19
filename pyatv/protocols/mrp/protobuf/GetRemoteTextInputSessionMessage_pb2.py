@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nCpyatv/protocols/mrp/protobuf/GetRemoteTextInputSessionMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\"\n GetRemoteTextInputSessionMessage:]\n getRemoteTextInputSessionMessage\x12\x10.ProtocolMessage\x18H \x01(\x0b\x32!.GetRemoteTextInputSessionMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.GetRemoteTextInputSessionMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.GetRemoteTextInputSessionMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(getRemoteTextInputSessionMessage)
 
   DESCRIPTOR._options = None
-  _GETREMOTETEXTINPUTSESSIONMESSAGE._serialized_start=123
-  _GETREMOTETEXTINPUTSESSIONMESSAGE._serialized_end=157
+  _globals['_GETREMOTETEXTINPUTSESSIONMESSAGE']._serialized_start=123
+  _globals['_GETREMOTETEXTINPUTSESSIONMESSAGE']._serialized_end=157
 # @@protoc_insertion_point(module_scope)

@@ -17,12 +17,13 @@ from pyatv.protocols.mrp.protobuf import VolumeControlAvailabilityMessage_pb2 as
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nLpyatv/protocols/mrp/protobuf/VolumeControlCapabilitiesDidChangeMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x43pyatv/protocols/mrp/protobuf/VolumeControlAvailabilityMessage.proto\"\x92\x01\n)VolumeControlCapabilitiesDidChangeMessage\x12\x37\n\x0c\x63\x61pabilities\x18\x01 \x01(\x0b\x32!.VolumeControlAvailabilityMessage\x12\x13\n\x0b\x65ndpointUID\x18\x03 \x01(\t\x12\x17\n\x0foutputDeviceUID\x18\x04 \x01(\t:o\n)volumeControlCapabilitiesDidChangeMessage\x12\x10.ProtocolMessage\x18\x44 \x01(\x0b\x32*.VolumeControlCapabilitiesDidChangeMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VolumeControlCapabilitiesDidChangeMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VolumeControlCapabilitiesDidChangeMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(volumeControlCapabilitiesDidChangeMessage)
 
   DESCRIPTOR._options = None
-  _VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE._serialized_start=202
-  _VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE._serialized_end=348
+  _globals['_VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE']._serialized_start=202
+  _globals['_VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE']._serialized_end=348
 # @@protoc_insertion_point(module_scope)

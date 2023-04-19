@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4pyatv/protocols/mrp/protobuf/WakeDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"\x13\n\x11WakeDeviceMessage:?\n\x11wakeDeviceMessage\x12\x10.ProtocolMessage\x18- \x01(\x0b\x32\x12.WakeDeviceMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.WakeDeviceMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.WakeDeviceMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(wakeDeviceMessage)
 
   DESCRIPTOR._options = None
-  _WAKEDEVICEMESSAGE._serialized_start=108
-  _WAKEDEVICEMESSAGE._serialized_end=127
+  _globals['_WAKEDEVICEMESSAGE']._serialized_start=108
+  _globals['_WAKEDEVICEMESSAGE']._serialized_end=127
 # @@protoc_insertion_point(module_scope)

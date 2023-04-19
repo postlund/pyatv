@@ -18,12 +18,13 @@ from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_protocols_d
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n>pyatv/protocols/mrp/protobuf/PlaybackQueueRequestMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x37pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"\xe4\x03\n\x1bPlaybackQueueRequestMessage\x12\x10\n\x08location\x18\x01 \x01(\x05\x12\x0e\n\x06length\x18\x02 \x01(\x05\x12\x17\n\x0fincludeMetadata\x18\x03 \x01(\x08\x12\x14\n\x0c\x61rtworkWidth\x18\x04 \x01(\x01\x12\x15\n\rartworkHeight\x18\x05 \x01(\x01\x12\x15\n\rincludeLyrics\x18\x06 \x01(\x08\x12\x17\n\x0fincludeSections\x18\x07 \x01(\x08\x12\x13\n\x0bincludeInfo\x18\x08 \x01(\x08\x12\x1e\n\x16includeLanguageOptions\x18\t \x01(\x08\x12&\n\x07\x63ontext\x18\n \x01(\x0b\x32\x15.PlaybackQueueContext\x12\x11\n\trequestID\x18\x0b \x01(\t\x12\x1e\n\x16\x63ontentItemIdentifiers\x18\x0c \x03(\t\x12/\n\'returnContentItemAssetsInUserCompletion\x18\r \x01(\x08\x12\x1f\n\nplayerPath\x18\x0e \x01(\x0b\x32\x0b.PlayerPath\x12\x15\n\rcachingPolicy\x18\x0f \x01(\x05\x12\r\n\x05label\x18\x10 \x01(\t\x12%\n\x1disLegacyNowPlayingInfoRequest\x18\x11 \x01(\x08:S\n\x1bplaybackQueueRequestMessage\x12\x10.ProtocolMessage\x18% \x01(\x0b\x32\x1c.PlaybackQueueRequestMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueueRequestMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueueRequestMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(playbackQueueRequestMessage)
 
   DESCRIPTOR._options = None
-  _PLAYBACKQUEUEREQUESTMESSAGE._serialized_start=223
-  _PLAYBACKQUEUEREQUESTMESSAGE._serialized_end=707
+  _globals['_PLAYBACKQUEUEREQUESTMESSAGE']._serialized_start=223
+  _globals['_PLAYBACKQUEUEREQUESTMESSAGE']._serialized_end=707
 # @@protoc_insertion_point(module_scope)

@@ -17,12 +17,13 @@ from pyatv.protocols.mrp.protobuf import VirtualTouchDeviceDescriptorMessage_pb2
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n;pyatv/protocols/mrp/protobuf/RegisterHIDDeviceMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x46pyatv/protocols/mrp/protobuf/VirtualTouchDeviceDescriptorMessage.proto\"S\n\x18RegisterHIDDeviceMessage\x12\x37\n\x10\x64\x65viceDescriptor\x18\x01 \x01(\x0b\x32\x1d.VirtualTouchDeviceDescriptor:M\n\x18registerHIDDeviceMessage\x12\x10.ProtocolMessage\x18\x0b \x01(\x0b\x32\x19.RegisterHIDDeviceMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RegisterHIDDeviceMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RegisterHIDDeviceMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(registerHIDDeviceMessage)
 
   DESCRIPTOR._options = None
-  _REGISTERHIDDEVICEMESSAGE._serialized_start=187
-  _REGISTERHIDDEVICEMESSAGE._serialized_end=270
+  _globals['_REGISTERHIDDEVICEMESSAGE']._serialized_start=187
+  _globals['_REGISTERHIDDEVICEMESSAGE']._serialized_end=270
 # @@protoc_insertion_point(module_scope)

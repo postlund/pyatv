@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n@pyatv/protocols/mrp/protobuf/OriginClientPropertiesMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"=\n\x1dOriginClientPropertiesMessage\x12\x1c\n\x14lastPlayingTimestamp\x18\x01 \x01(\x01:W\n\x1doriginClientPropertiesMessage\x12\x10.ProtocolMessage\x18W \x01(\x0b\x32\x1e.OriginClientPropertiesMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.OriginClientPropertiesMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.OriginClientPropertiesMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(originClientPropertiesMessage)
 
   DESCRIPTOR._options = None
-  _ORIGINCLIENTPROPERTIESMESSAGE._serialized_start=120
-  _ORIGINCLIENTPROPERTIESMESSAGE._serialized_end=181
+  _globals['_ORIGINCLIENTPROPERTIESMESSAGE']._serialized_start=120
+  _globals['_ORIGINCLIENTPROPERTIESMESSAGE']._serialized_end=181
 # @@protoc_insertion_point(module_scope)

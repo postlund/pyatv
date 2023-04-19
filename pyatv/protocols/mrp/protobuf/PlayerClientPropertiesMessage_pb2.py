@@ -17,12 +17,13 @@ from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_protocols_d
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n@pyatv/protocols/mrp/protobuf/PlayerClientPropertiesMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"^\n\x1dPlayerClientPropertiesMessage\x12\x1f\n\nplayerPath\x18\x01 \x01(\x0b\x32\x0b.PlayerPath\x12\x1c\n\x14lastPlayingTimestamp\x18\x02 \x01(\x01:W\n\x1dplayerClientPropertiesMessage\x12\x10.ProtocolMessage\x18V \x01(\x0b\x32\x1e.PlayerClientPropertiesMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlayerClientPropertiesMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlayerClientPropertiesMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(playerClientPropertiesMessage)
 
   DESCRIPTOR._options = None
-  _PLAYERCLIENTPROPERTIESMESSAGE._serialized_start=167
-  _PLAYERCLIENTPROPERTIESMESSAGE._serialized_end=261
+  _globals['_PLAYERCLIENTPROPERTIESMESSAGE']._serialized_start=167
+  _globals['_PLAYERCLIENTPROPERTIESMESSAGE']._serialized_end=261
 # @@protoc_insertion_point(module_scope)
