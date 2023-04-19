@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
 from pyatv import exceptions, interface
@@ -82,7 +82,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
     def supported_volume_controls(self):
         return [FeatureName.VolumeUp, FeatureName.VolumeDown]
 
-    @unittest_run_loop
     async def test_connect_missing_device_id(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
         conf.add_service(ManualService(None, Protocol.Companion, 1234, {}))
@@ -90,28 +89,24 @@ class CommonFunctionalTests(AioHTTPTestCase):
         with self.assertRaises(exceptions.DeviceIdMissingError):
             await pyatv.connect(conf, self.loop)
 
-    @unittest_run_loop
     async def test_connect_no_service(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
 
         with self.assertRaises(exceptions.NoServiceError):
             await pyatv.connect(conf, self.loop, protocol=Protocol.AirPlay)
 
-    @unittest_run_loop
     async def test_pair_missing_service(self):
         conf = AppleTV("1.2.3.4", "Apple TV")
 
         with self.assertRaises(exceptions.NoServiceError):
             await pyatv.pair(conf, Protocol.DMAP, self.loop)
 
-    @unittest_run_loop
     async def test_invalid_credentials_format(self):
         self.conf.main_service().credentials = "bad"
 
         with self.assertRaises(exceptions.InvalidCredentialsError):
             await pyatv.connect(self.conf, loop=self.loop)
 
-    @unittest_run_loop
     async def test_conf_is_a_copy(self):
         protocol = self.conf.main_service().protocol
 
@@ -127,7 +122,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         assert service.protocol == protocol
         assert service.credentials != "1234"
 
-    @unittest_run_loop
     async def test_invalid_airplay_credentials_format(self):
         self.conf.get_service(Protocol.AirPlay).credentials = "bad"
         self.airplay_usecase.airplay_require_authentication()
@@ -135,7 +129,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         with self.assertRaises(exceptions.InvalidCredentialsError):
             await pyatv.connect(self.conf, loop=self.loop)
 
-    @unittest_run_loop
     async def test_play_url(self):
         self.airplay_usecase.airplay_playback_idle()
         self.airplay_usecase.airplay_playback_playing()
@@ -147,7 +140,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         self.atv.stream.close()
 
-    @unittest_run_loop
     async def test_play_url_not_authenticated_error(self):
         self.conf.get_service(Protocol.AirPlay).credentials = None
         self.airplay_usecase.airplay_always_fail_authentication()
@@ -155,7 +147,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         with self.assertRaises(exceptions.AuthenticationError):
             await self.atv.stream.play_url(EXAMPLE_STREAM, port=self.server.port)
 
-    @unittest_run_loop
     async def test_play_url_authenticated(self):
         self.airplay_usecase.airplay_require_authentication()
         self.airplay_usecase.airplay_playback_idle()
@@ -168,7 +159,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
     # This is not a very good test as it doesn't really test that much. Once I get
     # around improving the AirPlay testing situation this should be improved.
-    @unittest_run_loop
     async def test_play_local_file(self):
         self.airplay_usecase.airplay_playback_idle()
         self.airplay_usecase.airplay_playback_playing()
@@ -183,67 +173,54 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertIsNotNone(self.airplay_state.last_airplay_uuid)
         self.assertEqual(self.airplay_state.last_airplay_content, b"a file for testing")
 
-    @unittest_run_loop
     async def test_button_up(self):
         await self.atv.remote_control.up()
         await self.wait_for_button_press("up", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_down(self):
         await self.atv.remote_control.down()
         await self.wait_for_button_press("down", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_left(self):
         await self.atv.remote_control.left()
         await self.wait_for_button_press("left", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_right(self):
         await self.atv.remote_control.right()
         await self.wait_for_button_press("right", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_select(self):
         await self.atv.remote_control.select()
         await self.wait_for_button_press("select", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_menu(self):
         await self.atv.remote_control.menu()
         await self.wait_for_button_press("menu", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_play(self):
         await self.atv.remote_control.play()
         await self.wait_for_button_press("play", None)
 
-    @unittest_run_loop
     async def test_button_pause(self):
         await self.atv.remote_control.pause()
         await self.wait_for_button_press("pause", None)
 
-    @unittest_run_loop
     async def test_button_stop(self):
         await self.atv.remote_control.stop()
         await self.wait_for_button_press("stop", None)
 
-    @unittest_run_loop
     async def test_button_next(self):
         await self.atv.remote_control.next()
         await self.wait_for_button_press("nextitem", None)
 
-    @unittest_run_loop
     async def test_button_previous(self):
         await self.atv.remote_control.previous()
         await self.wait_for_button_press("previtem", None)
 
-    @unittest_run_loop
     async def test_button_volume_up(self):
         await self.atv.remote_control.volume_up()
         await until(lambda: self.state.last_button_pressed == "volumeup")
 
-    @unittest_run_loop
     async def test_button_volume_down(self):
         await self.atv.remote_control.volume_down()
         await until(lambda: self.state.last_button_pressed == "volumedown")
@@ -251,7 +228,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
     def test_metadata_device_id(self):
         self.assertIn(self.atv.metadata.device_id, self.conf.all_identifiers)
 
-    @unittest_run_loop
     async def test_close_connection(self):
         listener = DummyDeviceListener()
         self.atv.listener = listener
@@ -259,7 +235,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
 
         await asyncio.wait_for(listener.closed_sem.acquire(), timeout=3.0)
 
-    @unittest_run_loop
     async def test_metadata_video_paused(self):
         self.usecase.video_playing(
             paused=True, title="dummy", total_time=100, position=3
@@ -273,7 +248,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
             self.assertEqual(playing.total_time, 100)
             self.assertEqual(playing.position, 3)
 
-    @unittest_run_loop
     async def test_metadata_video_playing(self):
         self.usecase.video_playing(
             paused=False, title="video", total_time=40, position=10
@@ -287,7 +261,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
             self.assertEqual(playing.total_time, 40)
             self.assertEqual(playing.position, 10)
 
-    @unittest_run_loop
     async def test_metadata_music_paused(self):
         self.usecase.music_playing(
             paused=True,
@@ -310,7 +283,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
             self.assertEqual(playing.total_time, 222)
             self.assertEqual(playing.position, 49)
 
-    @unittest_run_loop
     async def test_metadata_music_playing(self):
         self.usecase.music_playing(
             paused=False,
@@ -333,7 +305,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
             self.assertEqual(playing.total_time, 2)
             self.assertEqual(playing.position, 1)
 
-    @unittest_run_loop
     async def test_seek_in_playing_media(self):
         self.usecase.video_playing(
             paused=False, title="dummy", total_time=40, position=10
@@ -344,7 +315,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
             playing = await self.playing(position=30)
             self.assertEqual(playing.position, 30)
 
-    @unittest_run_loop
     async def test_metadata_artwork(self):
         self.usecase.example_video()
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE)
@@ -355,7 +325,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
         self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
 
-    @unittest_run_loop
     async def test_metadata_artwork_cache(self):
         self.usecase.example_video()
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE, ARTWORK_ID)
@@ -379,7 +348,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         # Artwork identifier should be the same before as after
         self.assertEqual(self.atv.metadata.artwork_id, artwork_id)
 
-    @unittest_run_loop
     async def test_push_updates(self):
         class PushListener:
             def __init__(self):
@@ -414,7 +382,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await until(lambda: listener.playing and listener.playing.title == "video2")
         self.assertEqual(listener.playing.title, "video2")
 
-    @unittest_run_loop
     async def test_push_updater_active(self):
         class DummyPushListener:
             @staticmethod
@@ -439,7 +406,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.atv.push_updater.stop()
         self.assertFalse(self.atv.push_updater.active)
 
-    @unittest_run_loop
     async def test_metadata_artwork_none_if_not_available(self):
         self.usecase.example_video()
         self.usecase.change_artwork(b"", None)
@@ -448,7 +414,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         artwork = await self.atv.metadata.artwork()
         self.assertIsNone(artwork)
 
-    @unittest_run_loop
     async def test_metadata_none_type_when_not_playing(self):
         self.usecase.nothing_playing()
 
@@ -456,14 +421,12 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertEqual(playing.media_type, MediaType.Unknown)
         self.assertEqual(playing.device_state, DeviceState.Idle)
 
-    @unittest_run_loop
     async def test_repeat_state(self):
         for repeat in RepeatState:
             self.usecase.example_video(repeat=repeat)
             playing = await self.playing(repeat=repeat)
             self.assertEqual(playing.repeat, repeat)
 
-    @unittest_run_loop
     async def test_set_repeat(self):
         self.usecase.video_playing(
             paused=False, title="video", total_time=40, position=10
@@ -473,14 +436,12 @@ class CommonFunctionalTests(AioHTTPTestCase):
             playing = await self.playing(repeat=repeat)
             self.assertEqual(playing.repeat, repeat)
 
-    @unittest_run_loop
     async def test_shuffle_state_common(self):
         for shuffle in [ShuffleState.Off, ShuffleState.Songs]:
             self.usecase.example_video(shuffle=shuffle)
             playing = await self.playing(shuffle=shuffle)
             self.assertEqual(playing.shuffle, shuffle)
 
-    @unittest_run_loop
     async def test_set_shuffle_common(self):
         self.usecase.example_video()
 
@@ -489,14 +450,12 @@ class CommonFunctionalTests(AioHTTPTestCase):
             playing = await self.playing(shuffle=shuffle)
             self.assertEqual(playing.shuffle, shuffle)
 
-    @unittest_run_loop
     async def test_metadata_loading(self):
         self.usecase.media_is_loading()
 
         playing = await self.playing(device_state=DeviceState.Loading)
         self.assertEqual(playing.device_state, DeviceState.Loading)
 
-    @unittest_run_loop
     async def test_metadata_seeking(self):
         self.usecase.example_video(paused=False, playback_rate=2.0)
 
@@ -511,7 +470,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         playing = await self.playing(title="dummy3")
         self.assertEqual(playing.device_state, DeviceState.Seeking)
 
-    @unittest_run_loop
     async def test_features_when_playing(self):
         feature_list = [
             FeatureName.Title,
@@ -532,7 +490,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         await self.playing(title="music")
         self.assertFeatures(FeatureState.Available, *feature_list)
 
-    @unittest_run_loop
     async def test_features_play_url(self):
         # TODO: As availability is based on zeroconf properties, this test just
         # verifies that PlayUrl is available. It's hard to change zeroconf properties
@@ -540,7 +497,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         # functional tests for AirPlay are written.
         self.assertFeatures(FeatureState.Available, FeatureName.PlayUrl)
 
-    @unittest_run_loop
     async def test_playing_immutable(self):
         self.usecase.example_video()
         playing = await self.playing(title="dummy")
@@ -554,7 +510,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
         self.assertEqual(playing.total_time, 123)
         self.assertEqual(playing.position, 3)
 
-    @unittest_run_loop
     async def test_volume_controls(self):
         controls = self.supported_volume_controls()
 
@@ -575,7 +530,6 @@ class CommonFunctionalTests(AioHTTPTestCase):
     # As DMAP is request based, volume control availability will not be automatically
     # updated when changed, i.e. it needs to be requested. This is the reason for
     # retrieving what is playing.
-    @unittest_run_loop
     async def test_audio_volume_controls(self):
         self.usecase.change_volume_control(available=True)
         await self.atv.metadata.playing()

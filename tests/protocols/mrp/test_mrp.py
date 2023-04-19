@@ -73,6 +73,7 @@ def test_device_info(service_type, properties, expected):
     assert not DeepDiff(device_info(service_type, properties), expected)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "mrp_props,airplay_props,pairing_req",
     [
