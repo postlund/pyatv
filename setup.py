@@ -46,7 +46,7 @@ setup(
     keywords=["apple", "tv", "airplay", "raop", "companion", "dmap", "dacp"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest==6.2.5", "pytest-xdist==2.4.0"],
-    python_requires=">=3.7.0",
+    python_requires=">=3.8.1",
     entry_points={
         "console_scripts": [
             "atvremote = pyatv.scripts.atvremote:main",
@@ -60,7 +60,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
