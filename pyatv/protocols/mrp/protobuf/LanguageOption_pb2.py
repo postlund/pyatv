@@ -15,11 +15,12 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n1pyatv/protocols/mrp/protobuf/LanguageOption.proto\"u\n\x0eLanguageOption\x12\x0c\n\x04type\x18\x01 \x01(\x05\x12\x13\n\x0blanguageTag\x18\x02 \x01(\t\x12\x17\n\x0f\x63haracteristics\x18\x03 \x03(\t\x12\x13\n\x0b\x64isplayName\x18\x04 \x01(\t\x12\x12\n\nidentifier\x18\x05 \x01(\t')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.LanguageOption_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.LanguageOption_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _LANGUAGEOPTION._serialized_start=53
-  _LANGUAGEOPTION._serialized_end=170
+  _globals['_LANGUAGEOPTION']._serialized_start=53
+  _globals['_LANGUAGEOPTION']._serialized_end=170
 # @@protoc_insertion_point(module_scope)

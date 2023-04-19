@@ -16,11 +16,12 @@ from pyatv.protocols.mrp.protobuf import Common_pb2 as pyatv_dot_protocols_dot_m
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n1pyatv/protocols/mrp/protobuf/NowPlayingInfo.proto\x1a)pyatv/protocols/mrp/protobuf/Common.proto\"\xc1\x03\n\x0eNowPlayingInfo\x12\r\n\x05\x61lbum\x18\x01 \x01(\t\x12\x0e\n\x06\x61rtist\x18\x02 \x01(\t\x12\x10\n\x08\x64uration\x18\x03 \x01(\x01\x12\x13\n\x0b\x65lapsedTime\x18\x04 \x01(\x01\x12\x14\n\x0cplaybackRate\x18\x05 \x01(\x02\x12$\n\nrepeatMode\x18\x06 \x01(\x0e\x32\x10.RepeatMode.Enum\x12&\n\x0bshuffleMode\x18\x07 \x01(\x0e\x32\x11.ShuffleMode.Enum\x12\x11\n\ttimestamp\x18\x08 \x01(\x01\x12\r\n\x05title\x18\t \x01(\t\x12\x18\n\x10uniqueIdentifier\x18\n \x01(\x04\x12\x17\n\x0fisExplicitTrack\x18\x0b \x01(\x08\x12\x12\n\nisMusicApp\x18\x0c \x01(\x08\x12\x1e\n\x16radioStationIdentifier\x18\r \x01(\x03\x12\x18\n\x10radioStationHash\x18\x0e \x01(\t\x12\x18\n\x10radioStationName\x18\x0f \x01(\t\x12\x19\n\x11\x61rtworkDataDigest\x18\x10 \x01(\x0c\x12\x14\n\x0cisAlwaysLive\x18\x11 \x01(\x08\x12\x17\n\x0fisAdvertisement\x18\x12 \x01(\x08')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.NowPlayingInfo_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.NowPlayingInfo_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _NOWPLAYINGINFO._serialized_start=97
-  _NOWPLAYINGINFO._serialized_end=546
+  _globals['_NOWPLAYINGINFO']._serialized_start=97
+  _globals['_NOWPLAYINGINFO']._serialized_end=546
 # @@protoc_insertion_point(module_scope)

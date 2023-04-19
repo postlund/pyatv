@@ -15,11 +15,12 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n=pyatv/protocols/mrp/protobuf/AudioFormatSettingsMessage.proto\"6\n\x13\x41udioFormatSettings\x12\x1f\n\x17\x66ormatSettingsPlistData\x18\x01 \x01(\x0c')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _AUDIOFORMATSETTINGS._serialized_start=65
-  _AUDIOFORMATSETTINGS._serialized_end=119
+  _globals['_AUDIOFORMATSETTINGS']._serialized_start=65
+  _globals['_AUDIOFORMATSETTINGS']._serialized_end=119
 # @@protoc_insertion_point(module_scope)

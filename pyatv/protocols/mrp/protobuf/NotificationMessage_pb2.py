@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n6pyatv/protocols/mrp/protobuf/NotificationMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"=\n\x13NotificationMessage\x12\x14\n\x0cnotification\x18\x01 \x03(\t\x12\x10\n\x08userInfo\x18\x02 \x03(\x0c:C\n\x13notificationMessage\x12\x10.ProtocolMessage\x18\x10 \x01(\x0b\x32\x14.NotificationMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.NotificationMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.NotificationMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(notificationMessage)
 
   DESCRIPTOR._options = None
-  _NOTIFICATIONMESSAGE._serialized_start=110
-  _NOTIFICATIONMESSAGE._serialized_end=171
+  _globals['_NOTIFICATIONMESSAGE']._serialized_start=110
+  _globals['_NOTIFICATIONMESSAGE']._serialized_end=171
 # @@protoc_insertion_point(module_scope)

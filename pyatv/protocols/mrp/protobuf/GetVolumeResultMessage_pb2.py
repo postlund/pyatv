@@ -16,12 +16,13 @@ from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as pyatv_dot_protoc
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n9pyatv/protocols/mrp/protobuf/GetVolumeResultMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\"(\n\x16GetVolumeResultMessage\x12\x0e\n\x06volume\x18\x01 \x01(\x02:I\n\x16getVolumeResultMessage\x12\x10.ProtocolMessage\x18\x36 \x01(\x0b\x32\x17.GetVolumeResultMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.GetVolumeResultMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.GetVolumeResultMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(getVolumeResultMessage)
 
   DESCRIPTOR._options = None
-  _GETVOLUMERESULTMESSAGE._serialized_start=113
-  _GETVOLUMERESULTMESSAGE._serialized_end=153
+  _globals['_GETVOLUMERESULTMESSAGE']._serialized_start=113
+  _globals['_GETVOLUMERESULTMESSAGE']._serialized_end=153
 # @@protoc_insertion_point(module_scope)

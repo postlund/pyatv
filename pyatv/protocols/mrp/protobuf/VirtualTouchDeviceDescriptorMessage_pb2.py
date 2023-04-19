@@ -15,11 +15,12 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nFpyatv/protocols/mrp/protobuf/VirtualTouchDeviceDescriptorMessage.proto\"~\n\x1cVirtualTouchDeviceDescriptor\x12\x10\n\x08\x61\x62solute\x18\x01 \x01(\x08\x12\x19\n\x11integratedDisplay\x18\x02 \x01(\x08\x12\x17\n\x0fscreenSizeWidth\x18\x03 \x01(\x02\x12\x18\n\x10screenSizeHeight\x18\x04 \x01(\x02')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VirtualTouchDeviceDescriptorMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.VirtualTouchDeviceDescriptorMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _VIRTUALTOUCHDEVICEDESCRIPTOR._serialized_start=74
-  _VIRTUALTOUCHDEVICEDESCRIPTOR._serialized_end=200
+  _globals['_VIRTUALTOUCHDEVICEDESCRIPTOR']._serialized_start=74
+  _globals['_VIRTUALTOUCHDEVICEDESCRIPTOR']._serialized_end=200
 # @@protoc_insertion_point(module_scope)

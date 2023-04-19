@@ -18,11 +18,12 @@ from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as pyatv_dot_protocols_d
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n0pyatv/protocols/mrp/protobuf/PlaybackQueue.proto\x1a.pyatv/protocols/mrp/protobuf/ContentItem.proto\x1a\x37pyatv/protocols/mrp/protobuf/PlaybackQueueContext.proto\x1a-pyatv/protocols/mrp/protobuf/PlayerPath.proto\"\xeb\x01\n\rPlaybackQueue\x12\x10\n\x08location\x18\x01 \x01(\x05\x12\"\n\x0c\x63ontentItems\x18\x02 \x03(\x0b\x32\x0c.ContentItem\x12&\n\x07\x63ontext\x18\x03 \x01(\x0b\x32\x15.PlaybackQueueContext\x12\x11\n\trequestId\x18\x04 \x01(\t\x12\'\n\x12resolvedPlayerPath\x18\x05 \x01(\x0b\x32\x0b.PlayerPath\x12\'\n\x1fsendingPlaybackQueueTransaction\x18\x06 \x01(\x08\x12\x17\n\x0fqueueIdentifier\x18\x07 \x01(\t')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _PLAYBACKQUEUE._serialized_start=205
-  _PLAYBACKQUEUE._serialized_end=440
+  _globals['_PLAYBACKQUEUE']._serialized_start=205
+  _globals['_PLAYBACKQUEUE']._serialized_end=440
 # @@protoc_insertion_point(module_scope)

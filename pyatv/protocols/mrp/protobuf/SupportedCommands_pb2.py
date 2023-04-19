@@ -16,11 +16,12 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2 as pyatv_dot_protocols_
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n4pyatv/protocols/mrp/protobuf/SupportedCommands.proto\x1a.pyatv/protocols/mrp/protobuf/CommandInfo.proto\"<\n\x11SupportedCommands\x12\'\n\x11supportedCommands\x18\x01 \x03(\x0b\x32\x0c.CommandInfo')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.SupportedCommands_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.SupportedCommands_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _SUPPORTEDCOMMANDS._serialized_start=104
-  _SUPPORTEDCOMMANDS._serialized_end=164
+  _globals['_SUPPORTEDCOMMANDS']._serialized_start=104
+  _globals['_SUPPORTEDCOMMANDS']._serialized_end=164
 # @@protoc_insertion_point(module_scope)

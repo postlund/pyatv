@@ -17,12 +17,13 @@ from pyatv.protocols.mrp.protobuf import NowPlayingClient_pb2 as pyatv_dot_proto
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n6pyatv/protocols/mrp/protobuf/RemoveClientMessage.proto\x1a\x32pyatv/protocols/mrp/protobuf/ProtocolMessage.proto\x1a\x33pyatv/protocols/mrp/protobuf/NowPlayingClient.proto\"8\n\x13RemoveClientMessage\x12!\n\x06\x63lient\x18\x01 \x01(\x0b\x32\x11.NowPlayingClient:C\n\x13removeClientMessage\x12\x10.ProtocolMessage\x18\x39 \x01(\x0b\x32\x14.RemoveClientMessage')
 
-_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RemoveClientMessage_pb2', globals())
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobuf.RemoveClientMessage_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_ProtocolMessage__pb2.ProtocolMessage.RegisterExtension(removeClientMessage)
 
   DESCRIPTOR._options = None
-  _REMOVECLIENTMESSAGE._serialized_start=163
-  _REMOVECLIENTMESSAGE._serialized_end=219
+  _globals['_REMOVECLIENTMESSAGE']._serialized_start=163
+  _globals['_REMOVECLIENTMESSAGE']._serialized_end=219
 # @@protoc_insertion_point(module_scope)
