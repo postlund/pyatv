@@ -655,8 +655,7 @@ class FacadeAppleTV(interface.AppleTV):
             except exceptions.InvalidStateError:
                 _release()
                 raise
-            else:
-                taken_over.append(relayer)
+            taken_over.append(relayer)
 
         return _release
 

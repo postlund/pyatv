@@ -4,12 +4,11 @@ import math
 import pytest
 
 from pyatv import exceptions
-from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.mrp import MrpAudio, messages, protobuf
 
-from tests.utils import until
-
 DEVICE_UID = "F2204E63-BCAB-4941-80A0-06C46CB71391"
+
+pytestmark = pytest.mark.asyncio
 
 
 async def volume_controls_changed(protocol, device_uid, controls_available):

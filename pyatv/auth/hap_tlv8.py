@@ -12,6 +12,7 @@ from typing import List
 class TlvValue(IntEnum):
     """Correspond to TLV values in HAP specification."""
 
+    # Standardized keys
     Method = 0x00
     Identifier = 0x01
     Salt = 0x02
@@ -26,6 +27,9 @@ class TlvValue(IntEnum):
     Permissions = 0x0B
     FragmentData = 0x0C
     FragmentLast = 0x0D
+
+    # Apple internal(?)
+    Name = 0x11
 
 
 class ErrorCode(IntEnum):

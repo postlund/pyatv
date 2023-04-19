@@ -120,7 +120,7 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
 class SharedData(typing.Generic[SharedType]):
     """Synchronization barrier used to synchronization data transfer between tasks."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new SharedData instance."""
         self._event: asyncio.Event = asyncio.Event()
         self._data: typing.Optional[SharedType] = None

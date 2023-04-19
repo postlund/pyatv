@@ -72,6 +72,7 @@ def test_is_password_required(properties, requires_password):
     assert is_password_required(service) == requires_password
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "props,expected_req",
     [

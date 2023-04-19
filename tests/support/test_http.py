@@ -7,9 +7,7 @@ from unittest.mock import MagicMock
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv import const
 from pyatv.support.http import (
-    AbstractHttpServerHandler,
     BasicHttpServer,
     HttpRequest,
     HttpResponse,
@@ -162,6 +160,7 @@ async def serve_and_connect(
     return client, server
 
 
+@pytest.mark.asyncio
 async def test_server_request_unhandled_resource():
     client, server = await serve_and_connect(lambda req: False)
 
@@ -176,6 +175,7 @@ async def test_server_request_unhandled_resource():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_server_request_single_file():
     def _handle_page(request: HttpRequest):
         assert request.protocol == "HTTP"
@@ -204,6 +204,7 @@ async def test_server_request_single_file():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_server_bad_handler_gives_error():
     def _handle_page(request: HttpRequest):
         raise Exception("fail")
@@ -232,6 +233,7 @@ class DummyRouter(HttpSimpleRouter):
         return HttpResponse("HTTP", "1.1", 123, "dummy", {}, request.body)
 
 
+@pytest.mark.asyncio
 async def test_simple_router():
     router = DummyRouter()
     resp = router.handle_request(
@@ -243,6 +245,7 @@ async def test_simple_router():
     assert resp.body == "foobar"
 
 
+@pytest.mark.asyncio
 async def test_simple_router_method():
     router = DummyRouter()
     resp = router.handle_request(
@@ -251,6 +254,7 @@ async def test_simple_router_method():
     assert resp is None
 
 
+@pytest.mark.asyncio
 async def test_server_with_router():
     client, server = await serve_and_connect(DummyRouter())
 
@@ -263,6 +267,7 @@ async def test_server_with_router():
 # HTTP CONNECTION
 
 
+@pytest.mark.asyncio
 async def test_connection_send_processor():
     def send_processor(data: bytes) -> bytes:
         return data.replace(b"/foo", b"/bar")
@@ -277,6 +282,7 @@ async def test_connection_send_processor():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_connection_receive_processor():
     def receive_processor(data: bytes) -> bytes:
         return data.replace(b"foo", b"something else")

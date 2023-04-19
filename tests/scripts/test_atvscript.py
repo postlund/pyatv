@@ -3,7 +3,6 @@
 import json
 import logging
 
-from aiohttp.test_utils import unittest_run_loop
 from deepdiff import DeepDiff
 
 from pyatv.const import Protocol
@@ -31,7 +30,6 @@ class AtvscriptTest(ScriptTest):
 
         self.assertEqual(DeepDiff(actual, expected, ignore_order=True), {})
 
-    @unittest_run_loop
     async def test_scan_devices(self):
         await self.atvscript("scan")
         self.assertJsonOutput(
@@ -73,7 +71,6 @@ class AtvscriptTest(ScriptTest):
         )
         self.exit(0)
 
-    @unittest_run_loop
     async def test_mrp_idle(self):
         await self.atvscript("--id", MRP_ID, "playing")
         self.assertJsonOutput(

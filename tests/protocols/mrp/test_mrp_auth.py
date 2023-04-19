@@ -2,7 +2,7 @@
 
 import inspect
 
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+from aiohttp.test_utils import AioHTTPTestCase
 
 import pyatv
 from pyatv import exceptions
@@ -18,8 +18,8 @@ from tests.fake_device import FakeAppleTV
 
 
 class MrpAuthFunctionalTest(AioHTTPTestCase):
-    def setUp(self):
-        AioHTTPTestCase.setUp(self)
+    async def setUpAsync(self):
+        await super().setUpAsync()
 
         self.service = ManualService(
             CLIENT_IDENTIFIER, Protocol.MRP, self.fake_atv.get_port(Protocol.MRP), {}
@@ -34,12 +34,11 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
             self.handle.close()
         await super().tearDownAsync()
 
-    async def get_application(self, loop=None):
+    async def get_application(self):
         self.fake_atv = FakeAppleTV(self.loop)
         self.state, self.usecase = self.fake_atv.add_service(Protocol.MRP)
         return self.fake_atv.app
 
-    @unittest_run_loop
     async def test_pairing_with_device(self):
         self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
@@ -58,7 +57,6 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         # Client should verify keys after pairing, needed from tvOS 14
         self.assertTrue(self.state.has_authenticated)
 
-    @unittest_run_loop
     async def test_pairing_with_existing_credentials(self):
         self.service.credentials = CLIENT_CREDENTIALS
 
@@ -80,7 +78,6 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         # Client should verify keys after pairing, needed from tvOS 14
         self.assertTrue(self.state.has_authenticated)
 
-    @unittest_run_loop
     async def test_pairing_with_bad_pin(self):
         self.handle = await pyatv.pair(self.conf, Protocol.MRP, self.loop)
 
@@ -98,7 +95,6 @@ class MrpAuthFunctionalTest(AioHTTPTestCase):
         self.assertIsNone(self.service.credentials)
         self.assertFalse(self.state.has_authenticated)
 
-    @unittest_run_loop
     async def test_authentication(self):
         self.service.credentials = CLIENT_CREDENTIALS
 
