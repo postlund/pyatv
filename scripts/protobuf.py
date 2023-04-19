@@ -78,7 +78,6 @@ def _protobuf_url(version):
 
 
 def _get_protobuf_version():
-    # TODO: Version does not match python package version anymore
     return "22.3"
 
 
