@@ -1,6 +1,6 @@
 black==22.6.0
 deepdiff==6.3.0
-flake8==5.0.3
+flake8==6.0.0
 isort==5.10.1
 mutagen==1.46.0
 pylint==2.17.2
