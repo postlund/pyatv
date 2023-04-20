@@ -10,7 +10,7 @@ pytest-cov==3.0.0
 pytest-timeout==2.1.0
 pytest-aiohttp==1.0.4
 pytest-xdist==2.5.0
-pydocstyle==6.1.1
+pydocstyle==6.3.0
 mypy==1.2.0
 mypy-protobuf==3.4.0
 typed-ast==1.5.4
