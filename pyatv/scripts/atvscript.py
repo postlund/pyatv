@@ -16,6 +16,7 @@ from pyatv.const import FeatureState, Protocol
 from pyatv.interface import (
     App,
     AppleTV,
+    AudioListener,
     DeviceListener,
     Playing,
     PowerListener,
@@ -73,6 +74,21 @@ class PowerPrinter(PowerListener):
             self.formatter(
                 output(True, values={"power_state": new_state.name.lower()})
             ),
+            flush=True,
+        )
+
+
+class AudioPrinter(AudioListener):
+    """Listen for audio updates and print changes."""
+
+    def __init__(self, formatter):
+        """Initialize a new AudioPrinter."""
+        self.formatter = formatter
+
+    def volume_update(self, old_level: float, new_level: float):
+        """Device volume level was updated."""
+        print(
+            self.formatter(output(True, values={"volume": new_level})),
             flush=True,
         )
 
@@ -219,10 +235,12 @@ async def _run_command(atv, args, abort_sem, loop):
 
     if args.command == "push_updates":
         power_listener = PowerPrinter(args.output)
+        audio_listener = AudioPrinter(args.output)
         device_listener = DevicePrinter(args.output, abort_sem)
         push_listener = PushPrinter(args.output, atv)
 
         atv.power.listener = power_listener
+        atv.audio.listener = audio_listener
         atv.listener = device_listener
         atv.push_updater.listener = push_listener
         atv.push_updater.start()
