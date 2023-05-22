@@ -331,7 +331,11 @@ class RaopStream(Stream):
         self.audio = audio
         self.playback_manager = playback_manager
 
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(
+        self,
+        file: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+        **kwargs
+    ) -> None:
         """Stream local or remote file to device.
 
         Supports either local file paths or a HTTP(s) address.

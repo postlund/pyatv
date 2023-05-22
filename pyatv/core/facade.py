@@ -384,7 +384,11 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         await self.relay("play_url")(url, **kwargs)
 
     @shield.guard
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(
+        self,
+        file: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+        **kwargs
+    ) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
