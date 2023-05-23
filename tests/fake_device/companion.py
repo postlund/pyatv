@@ -227,11 +227,11 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         )
 
     def handle__launchapp(self, message):
-        bundle_id = message["_c"]["_bundleID"]
-        url = message["_c"]["_urlS"]
-        if bundle_id:
+        bundle_id = message["_c"].get("_bundleID")
+        url = message["_c"].get("_urlS")
+        if bundle_id is not None:
             self.state.active_app = bundle_id
-        elif url:
+        elif url is not None:
             self.state.open_url = url
         self.send_response(message, {})
 

@@ -688,9 +688,7 @@ class Apps:
         raise exceptions.NotSupportedError()
 
     @feature(39, "LaunchApp", "Launch an app.")
-    async def launch_app(
-        self, bundle_id: Optional[str] = None, url: Optional[str] = None
-    ) -> None:
+    async def launch_app(self, bundle_id_or_url: str) -> None:
         """Launch an app based on bundle ID or URL."""
         raise exceptions.NotSupportedError()
 

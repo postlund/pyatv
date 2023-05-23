@@ -6,7 +6,6 @@ import logging
 import math
 import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
-from urllib.parse import urlparse
 
 from aiohttp import ClientError, ClientSession
 
@@ -67,6 +66,7 @@ from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
 from pyatv.support.device_info import lookup_model, lookup_version
 from pyatv.support.http import ClientSessionManager
+from pyatv.support.url import is_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -531,8 +531,7 @@ class MrpMetadata(Metadata):
                 )
             except KeyError:
                 url = None
-            url_parts = urlparse(url)
-            if url_parts.scheme and url_parts.netloc:
+            if is_url(url):
                 urls.append(url)
 
         if metadata.HasField("artworkURL"):

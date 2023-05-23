@@ -21,6 +21,7 @@ from pyatv.protocols.companion.protocol import (
     CompanionProtocolListener,
     MessageType,
 )
+from pyatv.support.url import is_url_or_scheme
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -225,15 +226,15 @@ class CompanionAPI(
         """Subscribe to updates to an event."""
         await self._send_event("_interest", {"_deregEvents": [event]})
 
-    async def launch_app(
-        self, bundle_identifier: Optional[str] = None, url: Optional[str] = None
-    ) -> None:
+    async def launch_app(self, bundle_identifier_or_url: str) -> None:
         """Launch an app on the remote device."""
+        launch_command_key = (
+            "_urlS" if is_url_or_scheme(bundle_identifier_or_url) else "_bundleID"
+        )
         await self._send_command(
             "_launchApp",
             {
-                "_bundleID": bundle_identifier if bundle_identifier else None,
-                "_urlS": url if url else None,
+                launch_command_key: bundle_identifier_or_url,
             },
         )
 
