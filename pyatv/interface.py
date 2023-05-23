@@ -1036,10 +1036,22 @@ class Features:
         return True
 
 
-class Audio:
+class AudioListener(ABC):  # pylint: disable=too-few-public-methods
+    """Listener interface for audio updates."""
+
+    @abstractmethod
+    def volume_update(self, old_level: float, new_level: float):
+        """Device volume was updated."""
+        raise NotImplementedError()
+
+
+class Audio(ABC, StateProducer):
     """Base class for audio functionality.
 
     Volume level is managed in percent where 0 is muted and 100 is max volume.
+
+
+    Listener interface: `pyatv.interfaces.AudioListener`
     """
 
     @property  # type: ignore
