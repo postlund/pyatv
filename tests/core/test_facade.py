@@ -27,6 +27,7 @@ from pyatv.interface import (
     AppleTV,
     Apps,
     Audio,
+    AudioListener,
     DeviceInfo,
     DeviceListener,
     FeatureInfo,
@@ -190,6 +191,17 @@ class SavingPowerListener(PowerListener):
         """Device power state was updated."""
         self.last_update = new_state
         self.all_updates.append(new_state)
+
+
+class SavingAudioListener(AudioListener):
+    def __init__(self):
+        self.last_update = None
+        self.all_updates = []
+
+    def volume_update(self, old_level: float, new_level: float):
+        """Device volume was updated."""
+        self.last_update = new_level
+        self.all_updates.append(new_level)
 
 
 @pytest.fixture(name="register_interface")
@@ -800,6 +812,46 @@ async def test_power_no_updates_without_power_instance(
 
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
     assert listener.last_update is None
+
+
+# AUDIO RELATED TESTS
+
+
+@pytest_asyncio.fixture(name="audio_setup")
+async def audio_setup_fixture(facade_dummy, register_interface):
+    listener = SavingAudioListener()
+
+    register_basic_interfaces(register_interface, Protocol.MRP)
+
+    await facade_dummy.connect()
+    facade_dummy.audio.listener = listener
+
+    yield facade_dummy.audio
+
+
+async def dispatch_volume_update(mrp_state_dispatcher, level, protocol=Protocol.MRP):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    mrp_state_dispatcher.listen_to(UpdatedState.Volume, lambda message: event.set())
+    mrp_state_dispatcher.dispatch(UpdatedState.Volume, level)
+
+    await event.wait()
+
+
+async def test_audio_listener_updates(mrp_state_dispatcher, audio_setup):
+    await dispatch_volume_update(mrp_state_dispatcher, 10.0)
+    assert audio_setup.listener.last_update == 10.0
+    await dispatch_volume_update(mrp_state_dispatcher, 20.0)
+    assert audio_setup.listener.last_update == 20.0
+
+
+async def test_audio_no_listener_duplicates(mrp_state_dispatcher, audio_setup):
+    await dispatch_volume_update(mrp_state_dispatcher, 10.0)
+    await dispatch_volume_update(mrp_state_dispatcher, 10.0)
+    assert len(audio_setup.listener.all_updates) == 1
+    assert audio_setup.listener.last_update == 10.0
 
 
 # GUARD CALLS AFTER CLOSE

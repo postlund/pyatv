@@ -431,9 +431,24 @@ class FacadeUserAccounts(Relayer, interface.UserAccounts):
 class FacadeAudio(Relayer, interface.Audio):
     """Facade implementation for audio functionality."""
 
-    def __init__(self):
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
         """Initialize a new FacadeAudio instance."""
-        super().__init__(interface.Audio, DEFAULT_PRIORITIES)
+        Relayer.__init__(self, interface.Audio, DEFAULT_PRIORITIES)
+        interface.Audio.__init__(self)
+        self._volume = 0.0
+        core_dispatcher.listen_to(UpdatedState.Volume, self._volume_changed)
+
+    def _volume_changed(self, message: StateMessage) -> None:
+        """State of something changed."""
+        volume = cast(float, message.value)
+
+        # Compute new state so we can know if we should update or not
+        old_level = self._volume
+        new_level = self._volume = volume
+
+        # Do not update state in case it didn't change
+        if new_level != old_level:
+            self.listener.volume_update(old_level, new_level)
 
     @shield.guard
     async def volume_up(self) -> None:
@@ -541,7 +556,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
             interface.UserAccounts: FacadeUserAccounts(),
-            interface.Audio: FacadeAudio(),
+            interface.Audio: FacadeAudio(core_dispatcher),
         }
         self._shield_everything()
 
