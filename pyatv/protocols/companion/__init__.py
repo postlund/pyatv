@@ -20,6 +20,7 @@ from pyatv.core.scan import (
     ScanHandlerReturn,
     device_info_name_from_unique_short_name,
 )
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     Apps,
@@ -404,7 +405,7 @@ def companion_service_handler(
 ) -> Optional[ScanHandlerReturn]:
     """Parse and return a new Companion service."""
     service = MutableService(
-        None,
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.Companion,
         mdns_service.port,
         mdns_service.properties,

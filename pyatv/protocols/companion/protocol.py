@@ -82,7 +82,7 @@ class CompanionProtocol(
         """Initialize a new CompanionProtocol."""
         super().__init__()
         self.connection = connection
-        self.connection.listener = self
+        self.connection.set_listener(self)
         self.srp = srp
         self.service = service
         self._xid: int = randint(

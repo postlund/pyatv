@@ -1,9 +1,11 @@
 """Unit tests for interface implementations in pyatv.protocols.mrp."""
 import math
+from unittest.mock import Mock
 
 import pytest
 
 from pyatv import exceptions
+from pyatv.core import UpdatedState
 from pyatv.protocols.mrp import MrpAudio, messages, protobuf
 
 DEVICE_UID = "F2204E63-BCAB-4941-80A0-06C46CB71391"
@@ -71,6 +73,41 @@ async def test_audio_volume_did_change(
     await protocol_mock.inject(message)
 
     assert math.isclose(audio.volume, expected_volume)
+
+
+@pytest.mark.parametrize(
+    "device_uid,volume,expect_called,expected_volume",
+    [
+        ("foo", 0.2, False, None),  # deviceUID mismatch => no update
+        (DEVICE_UID, 0.2, True, 20.0),  # deviceUID matches => update
+    ],
+)
+async def test_audio_volume_did_change_dispatches(
+    protocol_mock,
+    audio,
+    mrp_state_dispatcher,
+    device_uid,
+    volume,
+    expect_called,
+    expected_volume,
+):
+    await volume_controls_changed(protocol_mock, DEVICE_UID, True)
+    assert audio.is_available
+
+    assert math.isclose(audio.volume, 0.0)
+
+    callback = Mock()
+    mrp_state_dispatcher.listen_to(UpdatedState.Volume, callback)
+
+    message = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
+    message.inner().outputDeviceUID = device_uid
+    message.inner().volume = volume
+    await protocol_mock.inject(message)
+
+    assert callback.called == expect_called
+    if expected_volume is not None:
+        message = callback.call_args.args[0]
+        assert math.isclose(message.value, expected_volume)
 
 
 async def test_audio_set_volume_only_device_info(protocol_mock, audio):
