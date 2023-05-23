@@ -63,7 +63,7 @@ class CompanionConnection(asyncio.Protocol):
         self.loop = loop
         self.host = host
         self.port = port
-        self.listener: Optional[CompanionConnectionListener] = None
+        self._listener: Optional[CompanionConnectionListener] = None
         self._device_listener = device_listener
         self.transport = None
         self._buffer: bytes = b""
@@ -92,7 +92,7 @@ class CompanionConnection(asyncio.Protocol):
 
     def set_listener(self, listener: CompanionConnectionListener) -> None:
         """Set the CompanionConnectionListener in a way that doesn't break pylint."""
-        self.listener = listener
+        self._listener = listener
 
     def send(self, frame_type: FrameType, data: bytes) -> None:
         """Send message without waiting for a response."""
@@ -147,7 +147,7 @@ class CompanionConnection(asyncio.Protocol):
                 if self._chacha and len(payload) > 0:
                     payload = self._chacha.decrypt(payload, aad=header)
 
-                self.listener.frame_received(FrameType(header[0]), payload)
+                self._listener.frame_received(FrameType(header[0]), payload)
             except Exception:
                 _LOGGER.exception("failed to handle frame")
 
