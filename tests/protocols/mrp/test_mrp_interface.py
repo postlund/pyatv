@@ -25,6 +25,9 @@ async def volume_controls_changed(protocol, device_uid, controls_available):
 
 @pytest.fixture(name="audio")
 def audio_fixture(protocol_mock, mrp_state_dispatcher):
+    device_info = messages.device_information("test", "id")
+    device_info.inner().deviceUID = DEVICE_UID
+    protocol_mock.device_info = device_info
     yield MrpAudio(protocol_mock, mrp_state_dispatcher)
 
 
@@ -41,6 +44,7 @@ async def test_audio_volume_control_availability(protocol_mock, audio):
 @pytest.mark.parametrize(
     "device_uid,controls_available,controls_expected",
     [
+        ("foo", True, False),
         (DEVICE_UID, True, True),
     ],
 )
@@ -110,21 +114,6 @@ async def test_audio_volume_did_change_dispatches(
         assert math.isclose(message.value, expected_volume)
 
 
-async def test_audio_set_volume_only_device_info(protocol_mock, audio):
-    device_info = messages.device_information("test", "id")
-    device_info.inner().deviceUID = DEVICE_UID
-    protocol_mock.device_info = device_info
-
-    await audio.set_volume(0.0)
-
-    assert len(protocol_mock.sent_messages) == 1
-
-    message = protocol_mock.sent_messages.pop()
-    assert message.type == protobuf.SET_VOLUME_MESSAGE
-    assert message.inner().outputDeviceUID == DEVICE_UID
-    assert math.isclose(message.inner().volume, 0.0, rel_tol=1e-02)
-
-
 async def test_audio_set_volume(protocol_mock, audio):
     await volume_controls_changed(protocol_mock, DEVICE_UID, True)
     assert audio.is_available
@@ -139,6 +128,7 @@ async def test_audio_set_volume(protocol_mock, audio):
     assert math.isclose(message.inner().volume, 0.0, rel_tol=1e-02)
 
 
-async def test_audio_set_volume_no_output_device(audio):
+async def test_audio_set_volume_no_output_device(protocol_mock, audio):
+    protocol_mock.device_info = None
     with pytest.raises(exceptions.ProtocolError):
         await audio.set_volume(10)

@@ -726,16 +726,13 @@ class MrpAudio(Audio):
         self.protocol: MrpProtocol = protocol
         self.state_dispatcher = state_dispatcher
         self._volume_controls_available: bool = False
-        self._output_device_uid: Optional[str] = None
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
 
     @property
     def device_uid(self) -> Optional[str]:
-        """Return device UID for current active output device."""
-        if self._output_device_uid is not None:
-            return self._output_device_uid
+        """Return the UID of our device."""
         if self.protocol.device_info is not None:
             return self.protocol.device_info.inner().deviceUID  # type: ignore
         return None
@@ -764,8 +761,9 @@ class MrpAudio(Audio):
     async def _volume_control_changed(self, message) -> None:
         inner = message.inner()
 
-        self._output_device_uid = inner.outputDeviceUID
-        self._update_volume_controls(inner.capabilities)
+        # Make sure update is for our device (in case it changed for someone else)
+        if inner.outputDeviceUID == self.device_uid:
+            self._update_volume_controls(inner.capabilities)
 
     def _update_volume_controls(
         self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
@@ -779,7 +777,7 @@ class MrpAudio(Audio):
         inner = message.inner()
 
         # Make sure update is for our device (in case it changed for someone else)
-        if inner.outputDeviceUID == self._output_device_uid:
+        if inner.outputDeviceUID == self.device_uid:
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
