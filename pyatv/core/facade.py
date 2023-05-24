@@ -478,6 +478,34 @@ class FacadeAudio(Relayer, interface.Audio):
             raise exceptions.ProtocolError(f"volume {level} is out of range")
 
 
+class FacadeKeyboard(Relayer, interface.Keyboard):
+    """Facade implementation for keyboard handling."""
+
+    def __init__(self):
+        """Initialize a new FacadeKeyboard instance."""
+        super().__init__(interface.Keyboard, DEFAULT_PRIORITIES)
+
+    @shield.guard
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.relay("text_get")()
+
+    @shield.guard
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        return await self.relay("text_clear")()
+
+    @shield.guard
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        return await self.relay("text_append")(text=text)
+
+    @shield.guard
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        return await self.relay("text_set")(text=text)
+
+
 class FacadePushUpdater(
     Relayer[interface.PushUpdater], interface.PushUpdater, interface.PushListener
 ):
@@ -557,6 +585,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Apps: FacadeApps(),
             interface.UserAccounts: FacadeUserAccounts(),
             interface.Audio: FacadeAudio(core_dispatcher),
+            interface.Keyboard: FacadeKeyboard(),
         }
         self._shield_everything()
 
@@ -744,6 +773,12 @@ class FacadeAppleTV(interface.AppleTV):
     def audio(self) -> interface.Audio:
         """Return audio interface."""
         return cast(interface.Audio, self._interfaces[interface.Audio])
+
+    @property  # type: ignore
+    @shield.guard
+    def keyboard(self) -> interface.Keyboard:
+        """Return keyboard interface."""
+        return cast(interface.Keyboard, self._interfaces[interface.Keyboard])
 
     def state_was_updated(self) -> None:
         """Call when state was updated.
