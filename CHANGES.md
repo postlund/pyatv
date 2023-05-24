@@ -1,5 +1,42 @@
 # CHANGES
 
+## 0.12.0 Edna (2023-05-24)
+
+@michalmo has been working hard to bring you this release.
+It featuers the following:
+
+* Text/keyboard input API (get and alter current text)
+* Listener interface for volume updates (+ bug fix for MRP)
+* Updates to make atvproxy work with Companion (for devs)
+
+Thanks for your hard work @michalmo, it's really great to get
+some help since I don't have much time for pyatv right now. I
+know a lot of people are waiting for these features.
+
+**Changes:**
+
+*Other:*
+
+```
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+ccf8a8c Fix companion proxy (#1912)
+7c3707b added listener interface to Audio for volume updates
+```
+
+**All changes:**
+
+```
+931b808 build(deps): Bump types-requests in /requirements (#2004)
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+0028ce2 build(deps): Bump protobuf from 4.23.0 to 4.23.1 in /requirements (#2000)
+ccf8a8c Fix companion proxy (#1912)
+e7ac293 build(deps): Bump pytest-xdist from 3.2.1 to 3.3.1 in /requirements
+5749656 build(deps): Bump requests from 2.30.0 to 2.31.0 in /requirements
+7c3707b added listener interface to Audio for volume updates
+```
+
 ## 0.11.0 Duffman (2023-05-15)
 
 Wow, it has been a long time since the last release. Unfortunately
