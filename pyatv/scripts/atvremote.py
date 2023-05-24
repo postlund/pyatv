@@ -90,6 +90,7 @@ class GlobalCommands:
         _print_commands("Power", interface.Power)
         _print_commands("Playing", interface.Playing)
         _print_commands("AirPlay", interface.Stream)
+        _print_commands("Keyboard", interface.Keyboard)
         _print_commands("Device Info", interface.DeviceInfo)
         _print_commands("Device", DeviceCommands)
         _print_commands("Apps", interface.Apps)
@@ -633,6 +634,7 @@ async def _handle_device_command(args, cmd, atv, loop):
     apps = retrieve_commands(interface.Apps)
     user_accounts = retrieve_commands(interface.UserAccounts)
     audio = retrieve_commands(interface.Audio)
+    keyboard = retrieve_commands(interface.Keyboard)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -661,6 +663,9 @@ async def _handle_device_command(args, cmd, atv, loop):
 
     if cmd in stream:
         return await _exec_command(atv.stream, cmd, True, *cmd_args)
+
+    if cmd in keyboard:
+        return await _exec_command(atv.keyboard, cmd, True, *cmd_args)
 
     if cmd in device_info:
         return await _exec_command(atv.device_info, cmd, True, *cmd_args)

@@ -1096,6 +1096,30 @@ class Audio(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
 
+class Keyboard:
+    """Base class for keyboard handling."""
+
+    @feature(51, "TextGet", "Get current virtual keyboard text.")
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        raise exceptions.NotSupportedError()
+
+    @feature(52, "TextClear", "Clear virtual keyboard text.")
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        raise exceptions.NotSupportedError()
+
+    @feature(53, "TextAppend", "Input text into virtual keyboard.")
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        raise exceptions.NotSupportedError()
+
+    @feature(54, "TextSet", "Replace text in virtual keyboard.")
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        raise exceptions.NotSupportedError()
+
+
 class BaseConfig(ABC):
     """Representation of a device configuration.
 
@@ -1303,3 +1327,8 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def audio(self) -> Audio:
         """Return audio interface."""
+
+    @property
+    @abstractmethod
+    def keyboard(self) -> Keyboard:
+        """Return keyboard interface."""
