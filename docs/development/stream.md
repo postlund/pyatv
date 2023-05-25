@@ -98,6 +98,21 @@ await stream.stream_file(sys.stdin.buffer)
 
 As `stdin` is a text stream, the underlying binary buffer must be retrieved and used.
 
+It is also possible to use an asyncio
+[StreamReader](https://docs.python.org/3/library/asyncio-stream.html#streamreader) as
+input. Here is an example piping output from ffmpeg:
+
+```python
+import asyncio.subprocess as asp
+
+process = await asp.create_subprocess_exec(
+    "ffmpeg", "-i", "file.mp3", "-f", "mp3", "-",
+    stdin=None, stdout=asp.PIPE, stderr=None,
+)
+
+await self.atv.stream.stream_file(process.stdout)
+```
+
 When streaming from a buffer, it's important to know that some audio formats are
 not suitable for that. MP3 works fine, WAV and OGG does not. The reason is that
 seeking is done in the stream and `stdin` does for instance not support that. If
