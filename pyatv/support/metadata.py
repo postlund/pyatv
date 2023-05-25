@@ -1,21 +1,13 @@
 """Convenience methods for extracting metadata from an audio file."""
 import asyncio
 import io
-from typing import NamedTuple, Optional, Union
+from typing import Union
 
 from mediafile import MediaFile
 
+from pyatv.interface import MediaMetadata
 
-class AudioMetadata(NamedTuple):
-    """Audio metadata."""
-
-    title: Optional[str]
-    artist: Optional[str]
-    album: Optional[str]
-    duration: Optional[float]
-
-
-EMPTY_METADATA = AudioMetadata(None, None, None, None)
+EMPTY_METADATA = MediaMetadata(None, None, None, None)
 
 
 def _open_file(file: io.BufferedReader) -> MediaFile:
@@ -25,7 +17,7 @@ def _open_file(file: io.BufferedReader) -> MediaFile:
     return in_file
 
 
-async def get_metadata(file: Union[str, io.BufferedReader]) -> AudioMetadata:
+async def get_metadata(file: Union[str, io.BufferedReader]) -> MediaMetadata:
     """Extract metadata from a file and return it."""
     loop = asyncio.get_event_loop()
 
@@ -34,7 +26,7 @@ async def get_metadata(file: Union[str, io.BufferedReader]) -> AudioMetadata:
     else:
         in_file = await loop.run_in_executor(None, MediaFile, file)
 
-    return AudioMetadata(
+    return MediaMetadata(
         in_file.title,
         in_file.artist,
         in_file.album,

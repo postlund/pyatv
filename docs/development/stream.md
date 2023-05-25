@@ -124,7 +124,26 @@ the beginning of file again before playback.
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
 
-### Stream from HTTP(S)
+#### Custom Metadata
+
+By default, pyatv will try to extract metadata from whatever content you are playing.
+This however requires the input to be seekable, usually not possible with streaming
+content. It is possible to provide custom metadata in these cases (or if you just
+want to replace whatever metadata is inside a file) by passing a
+{% include api i="interface.MediaMetadata" %} instance when starting to stream:
+
+```python
+from pyatv.interface import MediaMetadata
+
+metadata = MediaMetadata(artist="pyatv", title="Look at me, I'm streaming")
+await stream.stream_file("myfile.mp3", metadata=metadata)
+```
+
+Do note that custom metadata will override any metadata extraction from the file,
+i.e. it is not possible to load metadata from a file and override just certain
+fields. It's one way or the other.
+
+#### Stream from HTTP(S)
 
 There is experimental support for streaming directly from HTTP or HTTPS. A URL can
 be passed instead of a file path:
