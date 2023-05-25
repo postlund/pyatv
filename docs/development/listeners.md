@@ -4,6 +4,11 @@ title: Listeners
 permalink: /development/listeners/
 link_group: development
 ---
+ Table of Contents
+{:.no_toc}
+* TOC
+{:toc}
+
 # Listeners
 
 In some cases it's not appropriate to contiuously poll the device for information.

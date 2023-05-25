@@ -67,7 +67,7 @@ class AudioSource(ABC):
         """Return duration in seconds."""
 
 
-class ReaderWrapper(miniaudio.StreamableSource):
+class BufferedReaderWrapper(miniaudio.StreamableSource):
     """Wraps a reader into a StreamableSource that miniaudio can consume."""
 
     def __init__(self, reader: io.BufferedReader) -> None:
@@ -88,6 +88,25 @@ class ReaderWrapper(miniaudio.StreamableSource):
         return True
 
 
+class StreamReaderWrapper(miniaudio.StreamableSource):
+    """Wraps a reader into a StreamableSource that miniaudio can consume."""
+
+    def __init__(self, reader: asyncio.streams.StreamReader) -> None:
+        """Initialize a new ReaderWrapper instance."""
+        self.reader: asyncio.streams.StreamReader = reader
+        self.loop = asyncio.get_event_loop()
+
+    def read(self, num_bytes: int) -> Union[bytes, memoryview]:
+        """Read and return data from buffer."""
+        return asyncio.run_coroutine_threadsafe(
+            self.reader.read(num_bytes), self.loop
+        ).result()
+
+    def seek(self, offset: int, origin: miniaudio.SeekOrigin) -> bool:
+        """Seek in stream."""
+        return False
+
+
 class BufferedReaderSource(AudioSource):
     """Audio source used to play a file from a buffer.
 
@@ -100,7 +119,7 @@ class BufferedReaderSource(AudioSource):
     def __init__(
         self,
         reader: miniaudio.WavFileReadStream,
-        wrapper: ReaderWrapper,
+        source: miniaudio.StreamableSource,
         sample_rate: int,
         channels: int,
         sample_size: int,
@@ -108,7 +127,7 @@ class BufferedReaderSource(AudioSource):
         """Initialize a new MiniaudioWrapper instance."""
         self.loop = asyncio.get_event_loop()
         self.reader: miniaudio.WavFileReadStream = reader
-        self.wrapper: ReaderWrapper = wrapper
+        self.source: miniaudio.StreamableSource = reader
         self._buffer_task: Optional[asyncio.Task] = asyncio.ensure_future(
             self._buffering_task()
         )
@@ -123,19 +142,18 @@ class BufferedReaderSource(AudioSource):
     @classmethod
     async def open(
         cls,
-        buffered_reader: io.BufferedReader,
+        source: miniaudio.StreamableSource,
         sample_rate: int,
         channels: int,
         sample_size: int,
     ) -> "BufferedReaderSource":
         """Return a new AudioSource instance playing from the provided buffer."""
-        wrapper = ReaderWrapper(buffered_reader)
         loop = asyncio.get_event_loop()
         src = await loop.run_in_executor(
             None,
             partial(
                 miniaudio.stream_any,
-                wrapper,
+                source,
                 output_format=_int2sf(sample_size),
                 nchannels=channels,
                 sample_rate=sample_rate,
@@ -153,7 +171,7 @@ class BufferedReaderSource(AudioSource):
         await loop.run_in_executor(None, reader.read, 44)
 
         # The source stream is passed here and saved to not be garbage collected
-        instance = cls(reader, wrapper, sample_rate, channels, sample_size)
+        instance = cls(reader, source, sample_rate, channels, sample_size)
         return instance
 
     async def close(self) -> None:
@@ -195,7 +213,7 @@ class BufferedReaderSource(AudioSource):
                 # Read a chunk and add it to the internal buffer. If no data as read,
                 # just break out.
                 chunk = await self.loop.run_in_executor(
-                    None, self.reader.read, self.CHUNK_SIZE
+                    None, self.source.read, self.CHUNK_SIZE
                 )
                 if not chunk:
                     break
@@ -469,16 +487,23 @@ class FileSource(AudioSource):
 
 
 async def open_source(
-    source: Union[str, io.BufferedReader],
+    source: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
     sample_rate: int,
     channels: int,
     sample_size: int,
 ) -> AudioSource:
     """Create an AudioSource from given input source."""
-    if not isinstance(source, str):
-        return await BufferedReaderSource.open(
-            source, sample_rate, channels, sample_size
-        )
-    if re.match("^http(|s)://", source):
-        return await InternetSource.open(source, sample_rate, channels, sample_size)
-    return await FileSource.open(source, sample_rate, channels, sample_size)
+    if isinstance(source, str):
+        if re.match("^http(|s)://", source):
+            return await InternetSource.open(source, sample_rate, channels, sample_size)
+        return await FileSource.open(source, sample_rate, channels, sample_size)
+
+    # Use correct wrapper when streaming from buffer
+    if isinstance(source, io.BufferedReader):
+        wrapped_source = BufferedReaderWrapper(source)
+    elif isinstance(source, asyncio.streams.StreamReader):
+        wrapped_source = StreamReaderWrapper(source)
+
+    return await BufferedReaderSource.open(
+        wrapped_source, sample_rate, channels, sample_size
+    )
