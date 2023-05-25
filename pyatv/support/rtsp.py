@@ -14,7 +14,7 @@ import async_timeout
 
 from pyatv.protocols.dmap import tags
 from pyatv.support.http import HttpConnection, HttpResponse
-from pyatv.support.metadata import AudioMetadata
+from pyatv.support.metadata import MediaMetadata
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -201,7 +201,7 @@ class RtspSession:
         rtsp_session: int,
         rtpseq: int,
         rtptime: int,
-        metadata: AudioMetadata,
+        metadata: MediaMetadata,
     ) -> HttpResponse:
         """Change metadata for what is playing."""
         payload = b""

@@ -17,7 +17,7 @@ jobs:
       (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
     env:
-      CACHE_INVALIDATE: "v2"
+      CACHE_INVALIDATE: "v4"
       CACHE_KEY: ${{ github.run_id }}-${{ github.job }}-${{ matrix.python-version }}-${{ matrix.platform }}-${{ matrix.regression }}
     strategy:
       matrix:
