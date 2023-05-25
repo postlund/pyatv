@@ -10,7 +10,7 @@ import re
 import sys
 import time
 import traceback
-from typing import Tuple
+from typing import Sequence, Tuple, Union
 
 import yaml
 
@@ -133,6 +133,18 @@ async def step_runner(name, coro) -> float:
     return run_time
 
 
+async def parse_variable_value(value: Union[str, Sequence[str]]) -> str:
+    """Parse value of a variable."""
+    if isinstance(value, list):
+        return " ".join([await parse_variable_value(x) for x in value])
+
+    # Execute command and use stdout as value if format is $(command)
+    if value.startswith("$(") and value.endswith(")"):
+        return (await _exec(value[2:-1]))[0].rstrip()  # Only stdout
+
+    return value
+
+
 # pylint: disable=too-few-public-methods
 class TransformVariables(argparse.Action):
     """Transform variable overrides to internal representation."""
@@ -213,7 +225,7 @@ async def appstart(  # pylint: disable=too-many-locals
     all_variables = chickn_file["variables"]
     all_variables.update(args.variables)
     variables = {
-        name: " ".join(value) if isinstance(value, list) else value
+        name: await parse_variable_value(value)
         for name, value in chickn_file["variables"].items()
     }
     variables["python_executable"] = sys.executable

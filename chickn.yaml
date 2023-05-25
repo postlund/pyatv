@@ -8,8 +8,9 @@ variables:
     - pyatv
     - scripts
     - examples
-  cs_exclude_words: cann,cant,asai,,cafs
+  cs_exclude_words: cann,cant,asai,cafs
   requirements_file: requirements/requirements.txt
+  miniaudio_package: $(grep miniaudio= requirements/requirements.txt)
 
 dependencies:
   files:
@@ -38,7 +39,7 @@ pipeline:
       tags: [all, miniaudio]
       run:
         - "pip uninstall -y miniaudio"
-        - "pip install --no-binary :all: miniaudio"
+        - "pip install --no-binary :all: {miniaudio_package}"
   validate:
     - name: pylint
       run: pylint -j 0 {pydirs}
