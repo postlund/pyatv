@@ -6,6 +6,7 @@ all its features.
 
 from abc import ABC, abstractmethod
 import asyncio
+from dataclasses import dataclass
 import hashlib
 import inspect
 import io
@@ -64,6 +65,16 @@ class ArtworkInfo(NamedTuple):
     mimetype: str
     width: int
     height: int
+
+
+@dataclass
+class MediaMetadata:
+    """Container for media (e.g. audio or video) metadata."""
+
+    title: Optional[str] = None
+    artist: Optional[str] = None
+    album: Optional[str] = None
+    duration: Optional[float] = None
 
 
 class FeatureInfo(NamedTuple):
@@ -826,6 +837,8 @@ class Stream:  # pylint: disable=too-few-public-methods
     async def stream_file(
         self,
         file: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+        /,
+        metadata: Optional[MediaMetadata] = None,
         **kwargs
     ) -> None:
         """Stream local or remote file to device.
@@ -930,6 +943,7 @@ class DeviceInfo:
             DeviceModel.Gen4,
             DeviceModel.Gen4K,
             DeviceModel.AppleTV4KGen2,
+            DeviceModel.AppleTV4KGen3,
         ]:
             return OperatingSystem.TvOS
 
