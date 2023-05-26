@@ -14,6 +14,7 @@ _MODEL_LIST: Dict[str, DeviceModel] = {
     "AppleTV5,3": DeviceModel.Gen4,
     "AppleTV6,2": DeviceModel.Gen4K,
     "AppleTV11,1": DeviceModel.AppleTV4KGen2,
+    "AppleTV14,1": DeviceModel.AppleTV4KGen3,
     "AudioAccessory1,1": DeviceModel.HomePod,
     "AudioAccessory1,2": DeviceModel.HomePod,
     "AudioAccessory5,1": DeviceModel.HomePodMini,
@@ -27,6 +28,7 @@ _INTERNAL_NAME_LIST: Dict[str, DeviceModel] = {
     "J42dAP": DeviceModel.Gen4,
     "J105aAP": DeviceModel.Gen4K,
     "J305AP": DeviceModel.AppleTV4KGen2,
+    "J255AP": DeviceModel.AppleTV4KGen3,
 }
 
 # Incomplete list here! Only Apple TV version numbers for now.
@@ -48,6 +50,27 @@ _VERSION_LIST: Dict[str, str] = {
     "18L204": "14.5",
     "18L569": "14.6",
     "18M60": "14.7",
+    "19J346": "15.0",
+    "19J572": "15.1",
+    "19J581": "15.1.1",
+    "19K53": "15.2",
+    "19K547": "15.3",
+    "19L440": "15.4",
+    "19L452": "15.4.1",
+    "19L570": "15.5",
+    "19L580": "15.5.1",
+    "19M65": "15.6",
+    "20J373": "16.0",
+    "20K71": "16.1",
+    "20K80": "16.1.1",
+    "20K362": "16.2",
+    "20K650": "16.3",
+    "20K661": "16.3.1",
+    "20K672": "16.3.2",
+    "20K680": "16.3.3",
+    "20L497": "16.4",
+    "20L498": "16.4.1",
+    "20L563": "16.5",
 }
 
 
