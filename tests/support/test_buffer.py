@@ -219,6 +219,18 @@ def test_disable_protected_headroom_after_using_it(protected):
     assert protected.position == 5
 
 
+def test_protected_headroom_constructor():
+    buffer = buf.SemiSeekableBuffer(
+        BUFFER_SIZE, seekable_headroom=HEADROOM, protected_headroom=True
+    )
+    buffer.add(b"abcde")
+
+    assert buffer.get(HEADROOM) == b"ab"
+    assert buffer.position == 2
+    assert buffer.seek(0)
+    assert buffer.position == 0
+
+
 @pytest.mark.parametrize(
     "data, expected",
     [
@@ -239,3 +251,12 @@ def test_fits_with_headroom_present(buffer):
     buffer.add(BUFFER_SIZE * b"a")
     buffer.get(1)
     assert not buffer.fits(2)
+
+
+def test_seek_current_position_ok(buffer):
+    assert buffer.seek(0)
+
+    buffer.add(b"a" * BUFFER_SIZE)
+    buffer.get(HEADROOM)
+    assert not buffer.seek(1)
+    assert buffer.seek(2)

@@ -16,6 +16,7 @@ from miniaudio import SampleFormat
 import requests
 
 from pyatv.exceptions import NotSupportedError, ProtocolError
+from pyatv.support.buffer import SemiSeekableBuffer
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -273,21 +274,29 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
         self.url = url
         self.error_message: Optional[str] = None
         self._stop_stream: bool = False
-        self._buffer: bytes = b""
+        self._buffer: SemiSeekableBuffer = SemiSeekableBuffer(
+            self.BUFFER_SIZE, seekable_headroom=2 * self.BLOCK_SIZE
+        )
         self._buffer_lock = threading.Lock()
         self._download_thread = threading.Thread(
             target=self._stream_wrapper, daemon=True
         )
         self._download_thread.start()
 
+    def seek(self, offset: int, origin: miniaudio.SeekOrigin) -> bool:
+        """Seek in current audio stream."""
+        # SemiSeekableBuffer only supports seeking from start
+        if origin == miniaudio.SeekOrigin.START:
+            return self._buffer.seek(offset)
+        return False
+
     def read(self, num_bytes: int) -> bytes:
         """Read a chunk of data from the stream."""
+        # TODO: Should not be based on polling
         while len(self._buffer) < num_bytes and not self._stop_stream:
             time.sleep(0.1)
         with self._buffer_lock:
-            chunk = self._buffer[:num_bytes]
-            self._buffer = self._buffer[num_bytes:]
-            return chunk
+            return self._buffer.get(num_bytes)
 
     def close(self) -> None:
         """Stop the stream, aborting the background downloading."""
@@ -319,31 +328,29 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
                 meta_interval = int(result.headers["icy-metaint"])
             else:
                 meta_interval = 0
-            if meta_interval:
-                # note: the meta_interval is fixed for the entire stream, so just
-                # use that as chunk size
-                while not self._stop_stream:
-                    while len(self._buffer) >= self.BUFFER_SIZE:
-                        time.sleep(0.2)
-                        if self._stop_stream:
-                            return
+
+            while not self._stop_stream:
+                # Wait for space in buffer
+                # TODO: Should be lock-based instead of polling
+                while not self._buffer.fits(self.BLOCK_SIZE):
+                    time.sleep(0.1)
+                    if self._stop_stream:
+                        return
+
+                # Read data from response
+                if meta_interval:
                     chunk = self._readall(result, meta_interval)
-                    with self._buffer_lock:
-                        self._buffer += chunk
                     meta_size = 16 * self._readall(result, 1)[0]
                     self._readall(result, meta_size)
-            else:
-                while not self._stop_stream:
-                    while len(self._buffer) >= self.BUFFER_SIZE:
-                        time.sleep(0.2)
-                        if self._stop_stream:
-                            return
+                else:
                     chunk = result.read(self.BLOCK_SIZE)
                     if chunk == b"":
                         _LOGGER.debug("HTTP streaming ended")
                         self._stop_stream = True
-                    with self._buffer_lock:
-                        self._buffer += chunk
+
+                # Add produced chunk to internal buffer
+                with self._buffer_lock:
+                    self._buffer.add(chunk)
 
 
 class InternetSource(AudioSource):
