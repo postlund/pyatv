@@ -98,9 +98,7 @@ class RtspSession:
 
     async def info(self) -> Dict[str, object]:
         """Return device information."""
-        device_info = await self.exchange(
-            "GET", "/info", allow_error=True, protocol=HTTP_PROTOCOL
-        )
+        device_info = await self.exchange("GET", "/info", allow_error=True)
 
         # If not supported, just return an empty dict
         if device_info.code != 200:
