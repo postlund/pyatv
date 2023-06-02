@@ -235,7 +235,7 @@ Audio streaming has been verified to work with these devices:
 
 The following 3rd party software receivers have also been verified to work:
 
-* [shairport-sync](https://github.com/mikebrady/shairport-sync) (v3.3.8)
+* [shairport-sync](https://github.com/mikebrady/shairport-sync) (v4.2)
 
 If you have verified another device or receiver, please update the list by pressing
 *Edit this page* below and opening a pull request.
