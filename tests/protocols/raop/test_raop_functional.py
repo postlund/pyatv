@@ -13,11 +13,12 @@ import math
 from typing import Dict, List
 
 import pytest
+import pytest_asyncio
 
 from pyatv import connect, exceptions
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
 from pyatv.exceptions import AuthenticationError
-from pyatv.interface import FeatureInfo, Playing, PushListener
+from pyatv.interface import FeatureInfo, MediaMetadata, Playing, PushListener
 
 from tests.utils import data_path, stub_sleep, until
 
@@ -45,7 +46,7 @@ VOLUME_FIELDS = [
 REMOTE_CONTROL_FIELDS = [FeatureName.Stop, FeatureName.Pause]
 
 
-@pytest.fixture(name="playing_listener")
+@pytest_asyncio.fixture(name="playing_listener")
 async def playing_listener_fixture(raop_client):
     class PlayingListener(PushListener):
         def __init__(self):
@@ -533,6 +534,20 @@ async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
 async def test_teardown_called_after_playback(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
     assert raop_state.teardown_called
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+async def test_custom_metadata(raop_client, raop_state):
+    metadata = MediaMetadata(title="A", artist="B", album="C")
+
+    await raop_client.stream.stream_file(
+        data_path("only_metadata.wav"), metadata=metadata
+    )
+
+    # Note: duration cannot be changed here
+    assert raop_state.metadata.title == "A"
+    assert raop_state.metadata.artist == "B"
+    assert raop_state.metadata.album == "C"
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])

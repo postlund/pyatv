@@ -17,7 +17,7 @@ jobs:
       (regression: ${{ matrix.regression }})
     runs-on: ${{ matrix.platform }}
     env:
-      CACHE_INVALIDATE: "v2"
+      CACHE_INVALIDATE: "v4"
       CACHE_KEY: ${{ github.run_id }}-${{ github.job }}-${{ matrix.python-version }}-${{ matrix.platform }}-${{ matrix.regression }}
     strategy:
       matrix:
@@ -27,10 +27,10 @@ jobs:
           - macos-latest
           - windows-latest
         python-version:
-          - 3.7
           - 3.8
           - 3.9
           - "3.10"
+          - "3.11"
         chickn-args:
           - "--no-venv"
         regression:

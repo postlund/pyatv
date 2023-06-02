@@ -20,6 +20,7 @@ from pyatv.core.scan import (
     ScanHandlerReturn,
     device_info_name_from_unique_short_name,
 )
+from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     App,
     Apps,
@@ -29,9 +30,12 @@ from pyatv.interface import (
     DeviceInfo,
     FeatureInfo,
     Features,
+    Keyboard,
     PairingHandler,
     Power,
     RemoteControl,
+    UserAccount,
+    UserAccounts,
 )
 from pyatv.protocols.companion.api import CompanionAPI, HidCommand, MediaControlCommand
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
@@ -104,6 +108,9 @@ SUPPORTED_FEATURES = set(
         # App interface
         FeatureName.AppList,
         FeatureName.LaunchApp,
+        # User account interface
+        FeatureName.AccountList,
+        FeatureName.SwitchAccount,
         # Power interface
         FeatureName.TurnOn,
         FeatureName.TurnOff,
@@ -120,6 +127,11 @@ SUPPORTED_FEATURES = set(
         FeatureName.PlayPause,
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
+        # Keyboard interface
+        FeatureName.TextGet,
+        FeatureName.TextClear,
+        FeatureName.TextAppend,
+        FeatureName.TextSet,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -177,6 +189,28 @@ class CompanionApps(Apps):
     ) -> None:
         """Launch an app based on bundle ID or URL."""
         await self.api.launch_app(bundle_id, url)
+
+
+class CompanionUserAccounts(UserAccounts):
+    """Implementation of API for account handling."""
+
+    def __init__(self, api: CompanionAPI):
+        """Initialize a new instance of CompanionUserAccounts."""
+        super().__init__()
+        self.api = api
+
+    async def account_list(self) -> List[UserAccount]:
+        """Fetch a list of user accounts that can be switched."""
+        account_list = await self.api.account_list()
+        if "_c" not in account_list:
+            raise exceptions.ProtocolError("missing content in response")
+
+        content = cast(dict, account_list["_c"])
+        return [UserAccount(name, account_id) for account_id, name in content.items()]
+
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account by account ID."""
+        await self.api.switch_account(account_id)
 
 
 class CompanionPower(Power):
@@ -343,12 +377,37 @@ class CompanionAudio(Audio):
         await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
 
+class CompanionKeyboard(Keyboard):
+    """Implementation of API for keyboard handling."""
+
+    def __init__(self, api: CompanionAPI):
+        """Initialize a new instance of CompanionKeyboard."""
+        super().__init__()
+        self.api = api
+
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.api.text_input_command("", clear_previous_input=False)
+
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        await self.api.text_input_command("", clear_previous_input=True)
+
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=False)
+
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        await self.api.text_input_command(text, clear_previous_input=True)
+
+
 def companion_service_handler(
     mdns_service: mdns.Service, response: mdns.Response
 ) -> Optional[ScanHandlerReturn]:
     """Parse and return a new Companion service."""
     service = MutableService(
-        None,
+        get_unique_id(mdns_service.type, mdns_service.name, mdns_service.properties),
         Protocol.Companion,
         mdns_service.port,
         mdns_service.properties,
@@ -403,10 +462,12 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
 
     interfaces = {
         Apps: CompanionApps(api),
+        UserAccounts: CompanionUserAccounts(api),
         Features: CompanionFeatures(api),
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
+        Keyboard: CompanionKeyboard(api),
     }
 
     async def _connect() -> bool:

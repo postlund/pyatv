@@ -16,9 +16,8 @@ from srptools import SRPContext, SRPServerSession, constants
 
 from pyatv.auth.hap_srp import hkdf_expand
 from pyatv.auth.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
-from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.connection import FrameType
-from pyatv.support import chacha20, log_binary
+from pyatv.support import chacha20, log_binary, opack
 
 _LOGGER = logging.getLogger(__name__)
 

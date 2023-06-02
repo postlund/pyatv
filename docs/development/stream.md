@@ -98,6 +98,21 @@ await stream.stream_file(sys.stdin.buffer)
 
 As `stdin` is a text stream, the underlying binary buffer must be retrieved and used.
 
+It is also possible to use an asyncio
+[StreamReader](https://docs.python.org/3/library/asyncio-stream.html#streamreader) as
+input. Here is an example piping output from ffmpeg:
+
+```python
+import asyncio.subprocess as asp
+
+process = await asp.create_subprocess_exec(
+    "ffmpeg", "-i", "file.mp3", "-f", "mp3", "-",
+    stdin=None, stdout=asp.PIPE, stderr=None,
+)
+
+await self.atv.stream.stream_file(process.stdout)
+```
+
 When streaming from a buffer, it's important to know that some audio formats are
 not suitable for that. MP3 works fine, WAV and OGG does not. The reason is that
 seeking is done in the stream and `stdin` does for instance not support that. If
@@ -109,7 +124,26 @@ the beginning of file again before playback.
 Note that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
 
-### Stream from HTTP(S)
+#### Custom Metadata
+
+By default, pyatv will try to extract metadata from whatever content you are playing.
+This however requires the input to be seekable, usually not possible with streaming
+content. It is possible to provide custom metadata in these cases (or if you just
+want to replace whatever metadata is inside a file) by passing a
+{% include api i="interface.MediaMetadata" %} instance when starting to stream:
+
+```python
+from pyatv.interface import MediaMetadata
+
+metadata = MediaMetadata(artist="pyatv", title="Look at me, I'm streaming")
+await stream.stream_file("myfile.mp3", metadata=metadata)
+```
+
+Do note that custom metadata will override any metadata extraction from the file,
+i.e. it is not possible to load metadata from a file and override just certain
+fields. It's one way or the other.
+
+#### Stream from HTTP(S)
 
 There is experimental support for streaming directly from HTTP or HTTPS. A URL can
 be passed instead of a file path:

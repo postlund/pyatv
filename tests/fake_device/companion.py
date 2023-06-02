@@ -2,23 +2,25 @@
 
 import asyncio
 import logging
+import plistlib
 from typing import Dict, Optional, Set
 
 from pyatv.protocols.companion import (
     HidCommand,
     MediaControlCommand,
     MediaControlFlags,
-    opack,
+    keyed_archiver,
 )
 from pyatv.protocols.companion.connection import FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
-from pyatv.support import chacha20, log_binary
+from pyatv.support import chacha20, log_binary, opack
 
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Fake Companion ATV"
 INITIAL_VOLUME = 10.0
 VOLUME_STEP = 5.0
+INITIAL_RTI_TEXT = "Fake Companion Keyboard Text"
 
 COMPANION_AUTH_FRAMES = [
     FrameType.PS_Start,
@@ -57,6 +59,8 @@ class FakeCompanionState:
         self.active_app: Optional[str] = None
         self.open_url: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
+        self.active_account: Optional[str] = None
+        self.available_accounts: Dict[str, str] = {}
         self.has_paired: bool = False
         self.powered_on: bool = True
         self.sid: int = 0
@@ -65,6 +69,8 @@ class FakeCompanionState:
         self.media_control_flags: int = MediaControlFlags.Volume
         self.interests: Set[str] = set()
         self.volume: float = INITIAL_VOLUME
+        self.rti_text: Optional[str] = INITIAL_RTI_TEXT
+        self.rti_session_uuid: Optional[bytes] = None
 
 
 class FakeCompanionServiceFactory:
@@ -232,6 +238,14 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def handle_fetchlaunchableapplicationsevent(self, message):
         self.send_response(message, self.state.installed_apps)
 
+    def handle_switchuseraccountevent(self, message):
+        payload = message["_c"]
+        self.state.active_account = payload.get("SwitchAccountID")
+        self.send_response(message, {})
+
+    def handle_fetchuseraccountsevent(self, message):
+        self.send_response(message, self.state.available_accounts)
+
     def handle__hidc(self, message):
         button_state = message["_c"]["_hBtS"]
         button_code = HidCommand(message["_c"]["_hidC"])
@@ -312,6 +326,76 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
                 if event in self.state.interests:
                     self.state.interests.remove(event)
 
+    def handle__tistart(self, message):
+        if message["_t"] != 2:
+            return
+        elif self.state.rti_text is None:
+            self.send_response(message, {})
+        elif self.state.rti_session_uuid is not None:
+            _LOGGER.warning("RTI session already started")
+        else:
+            self.state.rti_session_uuid = b"0123456789abcdef"
+            self.send_response(
+                message,
+                {
+                    "_tiD": plistlib.dumps(
+                        {
+                            "$top": {
+                                "sessionUUID": plistlib.UID(1),
+                                "documentState": plistlib.UID(2),
+                            },
+                            "$objects": [
+                                "$null",
+                                self.state.rti_session_uuid,
+                                {
+                                    "docSt": plistlib.UID(3),
+                                },
+                                {
+                                    "contextBeforeInput": plistlib.UID(4),
+                                },
+                                self.state.rti_text,
+                            ],
+                        },
+                        fmt=plistlib.PlistFormat.FMT_BINARY,
+                        sort_keys=False,
+                    )
+                },
+            )
+
+    def handle__tistop(self, message):
+        if message["_t"] != 2:
+            return
+        elif self.state.rti_session_uuid is not None:
+            self.state.rti_session_uuid = None
+            self.send_response(message, {})
+        else:
+            _LOGGER.warning("No RTI session")
+
+    def handle__tic(self, message):
+        if message["_t"] != 1:
+            return
+
+        content = message["_c"]["_tiD"]
+        (
+            session_uuid,
+            text_to_assert,
+            insertion_text,
+        ) = keyed_archiver.read_archive_properties(
+            content,
+            ["textOperations", "targetSessionUUID", "NS.uuidbytes"],
+            ["textOperations", "textToAssert"],
+            ["textOperations", "keyboardOutput", "insertionText"],
+        )
+
+        if session_uuid != self.state.rti_session_uuid:
+            return
+
+        if text_to_assert == "":
+            self.state.rti_text = ""
+
+        if insertion_text is not None:
+            self.state.rti_text += insertion_text
+
 
 class FakeCompanionUseCases:
     """Wrapper for altering behavior of a FakeCompanionService instance."""
@@ -324,6 +408,13 @@ class FakeCompanionUseCases:
         """Set which apps that are currently installed."""
         self.state.installed_apps = apps
 
+    def set_available_accounts(self, accounts: Dict[str, str]):
+        """Set which user accounts are available."""
+        self.state.available_accounts = accounts
+
     def set_control_flags(self, flags: int) -> None:
         """Set media control flags."""
         self.state.media_control_flags = flags
+
+    def set_rti_text(self, text: Optional[str]) -> None:
+        self.state.rti_text = text

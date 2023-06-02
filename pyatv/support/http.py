@@ -201,7 +201,7 @@ class HttpSession:
     async def get_data(
         self,
         path: str,
-        headers: Mapping[str, object] = None,
+        headers: Optional[Mapping[str, object]] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> Tuple[bytes, int]:
         """Perform a GET request."""
@@ -230,8 +230,8 @@ class HttpSession:
     async def post_data(
         self,
         path: str,
-        data: bytes = None,
-        headers: Mapping[str, object] = None,
+        data: Optional[bytes] = None,
+        headers: Optional[Mapping[str, object]] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> Tuple[bytes, int]:
         """Perform a POST request."""
@@ -371,6 +371,7 @@ class HttpConnection(asyncio.Protocol):
         headers: Optional[Mapping[str, object]] = None,
         body: Optional[Union[str, bytes]] = None,
         allow_error: bool = False,
+        timeout: int = 10,
     ) -> HttpResponse:
         """Send a HTTP message and return response."""
         output = _format_message(
@@ -386,7 +387,7 @@ class HttpConnection(asyncio.Protocol):
         event = asyncio.Event()
         self._requests.appendleft(event)
         try:
-            async with async_timeout.timeout(4):
+            async with async_timeout.timeout(timeout):
                 await event.wait()
             response = cast(HttpResponse, self._responses.get())
         except asyncio.TimeoutError as ex:
@@ -429,7 +430,7 @@ class AbstractHttpServerHandler(ABC):
 class HttpSimpleRouter(AbstractHttpServerHandler):
     """Simple router that routes method and path to handler function."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new HttpSimpleRouter instance."""
         super().__init__()
         # method -> path -> handler

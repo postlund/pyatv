@@ -8,7 +8,6 @@ import difflib
 import glob
 from io import BytesIO
 import os
-import re
 import stat
 import subprocess
 import sys
@@ -79,12 +78,7 @@ def _protobuf_url(version):
 
 
 def _get_protobuf_version():
-    with open("base_versions.txt", encoding="utf-8") as file:
-        for line in file:
-            match = re.match(r"protobuf==(\d+\.\d+\.\d+)[^0-9,]*", line)
-            if match:
-                return match.group(1)
-    raise Exception("failed to determine protobuf version")
+    return "22.3"
 
 
 def _download_protoc(force=False):
@@ -97,7 +91,7 @@ def _download_protoc(force=False):
 
     print("Downloading", url)
 
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=10)
     with zipfile.ZipFile(BytesIO(resp.content)) as zip_file:
         for zip_info in zip_file.infolist():
             if zip_info.filename.startswith("bin/protoc"):

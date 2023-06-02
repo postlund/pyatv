@@ -16,7 +16,7 @@ from .tags import read_bplist, read_str, read_uint
 
 
 class DmapTag(namedtuple("DmapTag", ["type", "name"])):
-    """Represention of a DMAP tag used when defining a protocol."""
+    """Representation of a DMAP tag used when defining a protocol."""
 
     __slots__ = ()
 

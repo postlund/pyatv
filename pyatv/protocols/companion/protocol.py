@@ -9,13 +9,13 @@ from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.interface import BaseService
-from pyatv.protocols.companion import opack
 from pyatv.protocols.companion.auth import CompanionPairVerifyProcedure
 from pyatv.protocols.companion.connection import (
     CompanionConnection,
     CompanionConnectionListener,
     FrameType,
 )
+from pyatv.support import opack
 from pyatv.support.collections import SharedData
 from pyatv.support.state_producer import StateProducer
 
@@ -82,7 +82,7 @@ class CompanionProtocol(
         """Initialize a new CompanionProtocol."""
         super().__init__()
         self.connection = connection
-        self.connection.listener = self
+        self.connection.set_listener(self)
         self.srp = srp
         self.service = service
         self._xid: int = randint(

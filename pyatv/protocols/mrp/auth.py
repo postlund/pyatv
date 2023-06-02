@@ -1,7 +1,7 @@
 """Device pairing and derivation of encryption keys."""
 
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import (
@@ -49,7 +49,9 @@ class MrpPairSetupProcedure(PairSetupProcedure):
         self._atv_salt = pairing_data[TlvValue.Salt]
         self._atv_pub_key = pairing_data[TlvValue.PublicKey]
 
-    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
+    async def finish_pairing(
+        self, username: str, pin_code: int, _: Optional[str]
+    ) -> HapCredentials:
         """Finish pairing process."""
         self.srp.step1(pin_code)
 

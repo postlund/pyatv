@@ -1,4 +1,5 @@
 """Abstraction for authentication based on HAP/SRP."""
+from abc import ABC, abstractmethod
 import binascii
 from enum import Enum, auto
 from typing import Optional, Tuple
@@ -84,28 +85,34 @@ class HapCredentials:
         )
 
 
-class PairSetupProcedure:
+class PairSetupProcedure(ABC):
     """Perform pair setup procedure to authenticate a new device."""
 
+    @abstractmethod
     async def start_pairing(self) -> None:
         """Start the pairing process.
 
         This method will show the expected PIN on screen.
         """
 
-    async def finish_pairing(self, username: str, pin_code: int) -> HapCredentials:
+    @abstractmethod
+    async def finish_pairing(
+        self, username: str, pin_code: int, display_name: Optional[str]
+    ) -> HapCredentials:
         """Finish pairing process.
 
         A username and the PIN code (usually shown on screen) must be provided.
         """
 
 
-class PairVerifyProcedure:
+class PairVerifyProcedure(ABC):
     """Verify if credentials are valid and derive encryption keys."""
 
+    @abstractmethod
     async def verify_credentials(self) -> bool:
         """Verify if credentials are valid and returns True if keys are generated."""
 
+    @abstractmethod
     def encryption_keys(
         self, salt: str, output_info: str, input_info: str
     ) -> Tuple[bytes, bytes]:
@@ -117,7 +124,7 @@ TRANSIENT_CREDENTIALS = HapCredentials(b"transient")
 
 
 def parse_credentials(detail_string: Optional[str]) -> HapCredentials:
-    """Parse a string represention of HapCredentials."""
+    """Parse a string representation of HapCredentials."""
     if detail_string is None:
         return NO_CREDENTIALS
 

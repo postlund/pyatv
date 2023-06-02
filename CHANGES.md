@@ -1,5 +1,143 @@
 # CHANGES
 
+## 0.12.0 Edna (2023-05-24)
+
+@michalmo has been working hard to bring you this release.
+It featuers the following:
+
+* Text/keyboard input API (get and alter current text)
+* Listener interface for volume updates (+ bug fix for MRP)
+* Updates to make atvproxy work with Companion (for devs)
+
+Thanks for your hard work @michalmo, it's really great to get
+some help since I don't have much time for pyatv right now. I
+know a lot of people are waiting for these features.
+
+**Changes:**
+
+*Other:*
+
+```
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+ccf8a8c Fix companion proxy (#1912)
+7c3707b added listener interface to Audio for volume updates
+```
+
+**All changes:**
+
+```
+931b808 build(deps): Bump types-requests in /requirements (#2004)
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+0028ce2 build(deps): Bump protobuf from 4.23.0 to 4.23.1 in /requirements (#2000)
+ccf8a8c Fix companion proxy (#1912)
+e7ac293 build(deps): Bump pytest-xdist from 3.2.1 to 3.3.1 in /requirements
+5749656 build(deps): Bump requests from 2.30.0 to 2.31.0 in /requirements
+7c3707b added listener interface to Audio for volume updates
+```
+
+## 0.11.0 Duffman (2023-05-15)
+
+Wow, it has been a long time since the last release. Unfortunately
+i don't have much time to work on pyatv right now, but i will try
+my best to make some bug fixes at least. In short, this release
+fixes a timeout bug when streaming to HomePods (introduced around
+16.4). It shall also fix missing artwork sometimes and account
+switching (using Companion protocol) is now also possible thanks
+to @michalmo.
+
+From this release I will use code names from Simpsons. There's more
+to choose from there...
+
+**Changes:**
+
+*Script: atvscript:*
+
+```
+1533a89 atvscript: Check app support before printing
+```
+
+*Other:*
+
+```
+8b16f5a protobuf: Bump to 4.22.3
+a7a5c54 protobuf: Bump and fix protobuf to 21.0
+7cf5d2f deps: Deprecate python 3.7
+3c13841 deps: Bump aiohttp to at least 3.8.3
+71b592e gha: Run tests with python 3.11
+7dee1e4 reuse client session from Core
+d8bc55b fix missing artwork
+9e73711 http: Increase timeout for http requests
+5634fc0 deps: Remove codecov as test dependency
+02b62ec test: Fix strict mode in pytest_asyncio
+aa23a11 readable paired device names for airplay and companion protocols
+bec4ed2 added support for companion protocol account switching
+```
+
+**All changes:**
+
+```
+e6d9299 build(deps): Bump pylint from 2.17.2 to 2.17.4 in /requirements
+436a8bc build(deps): Bump types-requests in /requirements
+10c5387 build(deps): Bump requests from 2.28.2 to 2.30.0 in /requirements
+a7aa051 build(deps): Bump mypy from 1.2.0 to 1.3.0 in /requirements
+3a2bc39 build(deps): Bump types-protobuf in /requirements
+5527d28 build(deps): Bump protobuf from 4.22.3 to 4.23.0 in /requirements
+0b4cd97 build(deps): Bump miniaudio from 1.56 to 1.57 in /requirements
+7faf30b build(deps): Bump zeroconf from 0.56.0 to 0.62.0 in /requirements
+f8fbbfe build(deps): Bump mediafile from 0.9.0 to 0.11.0 in /requirements
+f354a90 build(deps): Bump pytest-cov from 3.0.0 to 4.0.0 in /requirements
+788d643 build(deps): Bump pytest-xdist from 2.5.0 to 3.2.1 in /requirements
+ca5dc87 build(deps): Bump pytest from 7.1.2 to 7.3.1 in /requirements
+8f9d220 build(deps): Bump pydocstyle from 6.1.1 to 6.3.0 in /requirements
+7acaf6e deps: Fix new black issues
+17c8e13 build(deps): Bump black from 22.6.0 to 23.3.0 in /requirements
+3703173 build(deps): Bump mypy-protobuf from 3.2.0 to 3.4.0 in /requirements
+8b16f5a protobuf: Bump to 4.22.3
+a353870 protobuf: Hardcode protoc version again
+a7a5c54 protobuf: Bump and fix protobuf to 21.0
+8d1c5d4 build(deps): bump protobuf from 3.20.1 to 4.21.2 in /requirements
+14cf46c build(deps): Bump isort from 5.10.1 to 5.12.0 in /requirements
+c6feb23 deps: Fix flake8 issues
+8d4c1b9 build(deps): Bump flake8 from 5.0.3 to 6.0.0 in /requirements
+7cf5d2f deps: Deprecate python 3.7
+0edde61 build(deps): Bump cryptography from 40.0.1 to 40.0.2 in /requirements
+46c21e6 build(deps): Bump aiohttp from 3.8.1 to 3.8.4 in /requirements
+3c13841 deps: Bump aiohttp to at least 3.8.3
+71b592e gha: Run tests with python 3.11
+d9aa981 cq: Fix warnings and various issues
+5686462 build(deps): Bump zeroconf from 0.47.3 to 0.56.0 in /requirements
+acdebfc build(deps): Bump bitarray from 2.6.0 to 2.7.3 in /requirements
+2618e1d build(deps): Bump types-protobuf in /requirements
+1533a89 atvscript: Check app support before printing
+dfbb15b deps: Fix pylint issues in new release
+51c7316 build(deps): Bump pylint from 2.14.5 to 2.17.2 in /requirements
+7d3024e build(deps): Bump types-requests in /requirements
+15b6fda deps: Fix mypy issues from upgrade
+08f561e build(deps): Bump mypy from 0.961 to 1.2.0 in /requirements
+2f5f1ae add tests for hosted artwork
+7dee1e4 reuse client session from Core
+d8bc55b fix missing artwork
+8ede99e build(deps): Bump mutagen from 1.45.1 to 1.46.0 in /requirements
+9e73711 http: Increase timeout for http requests
+5634fc0 deps: Remove codecov as test dependency
+02b62ec test: Fix strict mode in pytest_asyncio
+34254b4 build(deps): Bump pytest-asyncio from 0.18.3 to 0.21.0 in /requirements
+b012b89 build(deps): Bump cryptography from 39.0.2 to 40.0.1 in /requirements
+93585e3 build(deps): Bump requests from 2.28.1 to 2.28.2 in /requirements
+fe4b654 move opack.py into pyatv/support
+aa23a11 readable paired device names for airplay and companion protocols
+88f1fbe build(deps): Bump codespell from 2.1.0 to 2.2.4 in /requirements
+bec4ed2 added support for companion protocol account switching
+8925745 build(deps): Bump deepdiff from 5.8.1 to 6.3.0 in /requirements
+f68e0b0 build(deps): Bump miniaudio from 1.51 to 1.56 in /requirements
+3787e7a build(deps): Bump zeroconf from 0.38.7 to 0.47.3 in /requirements
+5a7453d build(deps): Bump cryptography from 37.0.4 to 39.0.2 in /requirements
+fe704a3 Redirecting to correct page
+000c7ab build(deps): Bump flake8 from 4.0.1 to 5.0.3 in /requirements
+```
+
 ## 0.10.3 Chica (2022-08-02)
 
 This is another minor release:

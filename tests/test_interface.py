@@ -39,7 +39,6 @@ eq_test_cases = [
 
 
 class TestClass:
-
     variable = 1234
 
     def test_method(self):
@@ -299,6 +298,7 @@ def test_device_info_bad_types(properties):
         ({DeviceInfo.MODEL: DeviceModel.Gen4}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.Gen4K}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.AppleTV4KGen2}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.AppleTV4KGen3}, OperatingSystem.TvOS),
     ],
 )
 def test_device_info_guess_os(properties, expected_os):

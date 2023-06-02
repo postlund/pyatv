@@ -11,25 +11,60 @@ from typing import Any, Dict, Optional, cast
 from google.protobuf.message import Message as ProtobufMessage
 from zeroconf import Zeroconf
 
+from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.protocols.companion import opack
-from pyatv.protocols.companion.connection import CompanionConnection
-from pyatv.protocols.companion.protocol import CompanionProtocol, FrameType
+from pyatv.protocols.companion.connection import (
+    AUTH_TAG_LENGTH,
+    CompanionConnection,
+    CompanionConnectionListener,
+)
+from pyatv.protocols.companion.protocol import (
+    _AUTH_FRAMES,
+    _OPACK_FRAMES,
+    CompanionProtocol,
+    FrameType,
+    MessageType,
+)
+from pyatv.protocols.companion.server_auth import (
+    SERVER_IDENTIFIER as COMPANION_SERVER_IDENTIFIER,
+)
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
-from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER, MrpServerAuth
+from pyatv.protocols.mrp.server_auth import MrpServerAuth
+from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER as MRP_SERVER_IDENTIFIER
 from pyatv.scripts import log_current_version
-from pyatv.support import chacha20, log_binary, net, variant
+from pyatv.support import (
+    chacha20,
+    log_binary,
+    net,
+    opack,
+    shift_hex_identifier,
+    variant,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Proxy"
+BLUETOOTH_ADDRESS = "DA:97:7C:BA:A3:7A"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
+MEDIA_REMOTE_ROUTE_IDENTIFIER = "DA4A238E-EE6C-4F5B-9691-4D0A8FC03532"
 
+PROPERTY_CASE_MAP = {
+    "rpad": "rpAD",
+    "rpba": "rpBA",
+    "rpfl": "rpFl",
+    "rpha": "rpHA",
+    "rphi": "rpHI",
+    "rphn": "rpHN",
+    "rpmac": "rpMac",
+    "rpmd": "rpMd",
+    "rpmrtid": "rpMRtID",
+    "rpvr": "rpVr",
+}
 COMPANION_AUTH_FRAMES = [
     FrameType.PS_Start,
     FrameType.PS_Next,
@@ -146,7 +181,9 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
                 _LOGGER.exception("Error while dispatching message")
 
 
-class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
+class CompanionAppleTVProxy(
+    CompanionServerAuth, CompanionConnectionListener, asyncio.Protocol
+):
     """Implementation of a fake Companion device."""
 
     def __init__(
@@ -156,9 +193,10 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         super().__init__(DEVICE_NAME)
         self.loop = loop
         self.buffer: bytes = b""
+        self.credentials: str = credentials
         self.transport = None
         self.chacha: Optional[chacha20.Chacha20Cipher] = None
-        self.connection: Optional[CompanionConnection] = CompanionConnection(
+        self.connection: CompanionConnection = CompanionConnection(
             self.loop, address, port
         )
         self.protocol: CompanionProtocol = CompanionProtocol(
@@ -166,6 +204,9 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
             SRPAuthHandler(),
             MutableService(None, Protocol.Companion, port, {}, credentials=credentials),
         )
+        # CompanionProtocol sets listener, override it now
+        self.connection.set_listener(self)
+        self.system_info_xid = None
         self._receive_event: asyncio.Event = asyncio.Event()
         self._receive_task: Optional[asyncio.Future] = None
 
@@ -214,12 +255,9 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
                 _LOGGER.exception("failed to handle auth frame")
         else:
             try:
-                resp = await self.send_to_atv(frame_type, data)
-                self.send_to_client(frame_type, resp)
+                self.send_bytes_to_atv(frame_type, data)
             except Exception:
                 _LOGGER.exception("data exchange failed")
-
-        self._receive_event.clear()
 
     def connection_made(self, transport):
         """Client did connect to proxy."""
@@ -229,6 +267,8 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
     def connection_lost(self, exc):
         """Handle that connection was lost to client."""
         _LOGGER.debug("Connection lost to client device: %s", exc)
+        if self.connection.connected:
+            self.connection.close()
         if self._receive_task is not None:
             self._receive_task.cancel()
 
@@ -239,36 +279,127 @@ class CompanionAppleTVProxy(CompanionServerAuth, asyncio.Protocol):
         if self.connection.connected:
             self._receive_event.set()
 
-    async def send_to_atv(self, frame_type: FrameType, data: bytes):
-        """Send data to remote device (ATV)."""
+    def send_bytes_to_atv(self, frame_type: FrameType, data: bytes):
+        """Send encoded data to remote device (ATV)."""
         log_binary(_LOGGER, f">>(ENCRYPTED) FrameType={frame_type}", Message=data)
 
-        if self.chacha:
+        if self.chacha and len(data) > 0:
             header = bytes([frame_type.value]) + len(data).to_bytes(3, byteorder="big")
             data = self.chacha.decrypt(data, aad=header)
             log_binary(_LOGGER, "<<(DECRYPTED)", Message=data)
 
-        unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
-        if frame_type in COMPANION_AUTH_FRAMES:
-            return await self.protocol.exchange_auth(frame_type, unpacked)
-        return await self.protocol.exchange_opack(frame_type, unpacked)
+        if frame_type != FrameType.E_OPACK:
+            self.connection.send(frame_type, data)
+            return
 
-    def send_to_client(self, frame_type: FrameType, data: object) -> None:
-        """Send data to client device (iOS)."""
+        unpacked = cast(Dict[Any, Any], opack.unpack(data)[0])  # TODO: Bad cast
+        self.process_outgoing_data(frame_type, unpacked)
+        self.protocol.send_opack(frame_type, unpacked)
+
+    def frame_received(self, frame_type: FrameType, data: bytes) -> None:
+        """Frame was received from remote device."""
+        if frame_type in _AUTH_FRAMES:
+            # do not override authentication
+            self.protocol.frame_received(frame_type, data)
+            return
+
+        _LOGGER.debug("Received frame %s: %s", frame_type, data)
+        if frame_type in _OPACK_FRAMES:
+            opack_data, _ = opack.unpack(data)
+            _LOGGER.debug("Received OPACK: %s", opack_data)
+            self.send_to_client(frame_type, opack_data)
+        else:
+            self.send_bytes_to_client(frame_type, data)
+
+    def send_bytes_to_client(self, frame_type: FrameType, data: bytes) -> None:
+        """Send encoded data to client device (iOS)."""
         if not self.transport:
             _LOGGER.error("Tried to send to client, but not connected")
             return
 
-        payload = opack.pack(data)
-
-        payload_length = len(payload) + (16 if self.chacha else 0)
+        payload_length = len(data)
+        if self.chacha and payload_length > 0:
+            payload_length += AUTH_TAG_LENGTH
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
 
-        if self.chacha:
-            payload = self.chacha.encrypt(payload, aad=header)
-            log_binary(_LOGGER, ">> Send", Header=header, Encrypted=payload)
+        if self.chacha and len(data) > 0:
+            data = self.chacha.encrypt(data, aad=header)
+            log_binary(_LOGGER, ">> Send", Header=header, Encrypted=data)
 
-        self.transport.write(header + payload)
+        self.transport.write(header + data)
+
+    def send_to_client(self, frame_type: FrameType, data: object) -> None:
+        """Send data to client device (iOS)."""
+        self.process_incoming_data(frame_type, cast(Dict[str, Any], data))
+        self.send_bytes_to_client(frame_type, opack.pack(data))
+
+    def process_outgoing_data(self, frame_type: FrameType, data: Dict[str, Any]):
+        """Apply any required modifications to outgoing data."""
+        if frame_type != FrameType.E_OPACK:
+            return
+
+        data_type = data.get("_i")
+        if data_type == "_systemInfo":
+            self.system_info_xid = data.get("_x")
+            creds = parse_credentials(self.credentials)
+            payload = data["_c"]
+            payload.update(
+                {
+                    # The server will drop older connections with the same
+                    # identifier, so mangle them here to prevent disconnects if
+                    # the client device is also directly connected to the
+                    # server.
+                    "_i": shift_hex_identifier(payload["_i"]),
+                    "_idsID": creds.client_id.upper(),
+                    "_pubID": shift_hex_identifier(payload["_pubID"]),
+                }
+            )
+
+    def process_incoming_data(self, frame_type: FrameType, data: Dict[str, Any]):
+        """Apply any required modifications to incoming data."""
+        if frame_type != FrameType.E_OPACK:
+            return
+
+        message_type = data.get("_t")
+        xid = data.get("_x")
+        if message_type == MessageType.Response.value and xid == self.system_info_xid:
+            self.system_info_xid = None
+            payload = data["_c"]
+            payload.update(
+                {
+                    "name": DEVICE_NAME,
+                    "_i": "cafecafecafe",
+                    "_idsID": COMPANION_SERVER_IDENTIFIER,
+                    "_pubID": BLUETOOTH_ADDRESS,
+                }
+            )
+            if "_mrID" in payload:
+                payload["_mrID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            if "_mRtID" in payload:
+                payload["_mRtID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            if "_siriInfo" in payload:
+                siri_info = payload["_siriInfo"]
+                if "peerData" in siri_info:
+                    peer_data = siri_info["peerData"]
+                    peer_data.update(
+                        {
+                            "userAssignedDeviceName": DEVICE_NAME,
+                        }
+                    )
+                    if "homeAccessoryInfo" in peer_data:
+                        peer_data["homeAccessoryInfo"].update(
+                            {
+                                "name": DEVICE_NAME,
+                            }
+                        )
+                if "audio-session-coordination.system-info" in siri_info:
+                    audio_system_info = siri_info[
+                        "audio-session-coordination.system-info"
+                    ]
+                    if "mediaRemoteRouteIdentifier" in audio_system_info:
+                        audio_system_info[
+                            "mediaRemoteRouteIdentifier"
+                        ] = MEDIA_REMOTE_ROUTE_IDENTIFIER
 
 
 class RemoteConnection(asyncio.Protocol):
@@ -334,7 +465,7 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
         "macAddress": "40:cb:c0:12:34:56",
         "BluetoothAddress": "False",
         "Name": name,
-        "UniqueIdentifier": SERVER_IDENTIFIER,
+        "UniqueIdentifier": MRP_SERVER_IDENTIFIER,
         "SystemBuildVersion": "17K499",
         "LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER,
     }
@@ -348,18 +479,18 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
     )
 
 
-async def publish_companion_service(zconf: Zeroconf, address: str, port: int):
+async def publish_companion_service(
+    zconf: Zeroconf, address: str, port: int, target_properties: Dict[str, str]
+):
     """Publish zeroconf service for ATV Companion proxy instance."""
     properties = {
-        "rpMac": "1",
+        **target_properties,
         "rpHA": "9948cfb6da55",
-        "rpHN": "88f979f04023",
-        "rpVr": "230.1",
-        "rpMd": "AppleTV6,2",
-        "rpFl": "0x36782",
-        "rpAD": "657c1b9d3484",
+        "rpHN": "cef88e5db6fa",
+        "rpAD": "3b2210518c58",
         "rpHI": "91756a18d8e5",
-        "rpBA": "9D:19:F9:74:65:EA",
+        "rpBA": BLUETOOTH_ADDRESS,
+        "rpMRtID": MEDIA_REMOTE_ROUTE_IDENTIFIER,
     }
 
     return await mdns.publish(
@@ -388,8 +519,7 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
-        else:
-            return proxy
+        return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
@@ -433,25 +563,28 @@ async def _start_companion_proxy(loop, args, zconf):
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
-        else:
-            return proxy
+        return proxy
 
     if args.local_ip is None:
         args.local_ip = str(net.get_local_address_reaching(IPv4Address(args.remote_ip)))
 
     _LOGGER.debug("Binding to local address %s", args.local_ip)
 
-    if not args.remote_port:
-        resp = await mdns.unicast(loop, args.remote_ip, ["_companion-link._tcp.local"])
+    service_type = "_companion-link._tcp.local"
+    resp = await mdns.unicast(loop, args.remote_ip, [service_type])
+    service = next((s for s in resp.services if s.type == service_type), None)
 
-        if not args.remote_port:
-            args.remote_port = resp.services[0].port
+    if not args.remote_port:
+        args.remote_port = service.port
 
     server = await loop.create_server(proxy_factory, "0.0.0.0")
     port = server.sockets[0].getsockname()[1]
     _LOGGER.info("Started Companion server at port %d", port)
 
-    unpublisher = await publish_companion_service(zconf, args.local_ip, port)
+    properties = {PROPERTY_CASE_MAP.get(k, k): v for k, v in service.properties.items()}
+    unpublisher = await publish_companion_service(
+        zconf, args.local_ip, port, properties
+    )
 
     print("Press ENTER to quit")
     await loop.run_in_executor(None, sys.stdin.readline)

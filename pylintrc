@@ -16,6 +16,7 @@ max-line-length=88
 
 [TYPECHECK]
 ignore=protobuf
+ignored-modules=pyatv.protocols.mrp.protobuf
 ignored-classes=
   ProtocolMessage,
   SetConnectionStateMessage,
@@ -44,4 +45,4 @@ disable=
   too-many-lines
 
 [EXCEPTIONS]
-overgeneral-exceptions=Exception
+overgeneral-exceptions=builtins.Exception

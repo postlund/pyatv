@@ -86,6 +86,7 @@ class DaapRequester:
 
     async def login(self):
         """Login to Apple TV using specified login id."""
+
         # Do not use session.get_data(...) in login as that would end up in
         # an infinite loop.
         def _login_request():

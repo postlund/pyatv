@@ -4,8 +4,8 @@
 from enum import Enum
 
 MAJOR_VERSION = "0"
-MINOR_VERSION = "10"
-PATCH_VERSION = "3"
+MINOR_VERSION = "12"
+PATCH_VERSION = "0"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 
@@ -169,6 +169,9 @@ class DeviceModel(Enum):
 
     Music = 10
     """Music app (or iTunes) running on a desktop computer."""
+
+    AppleTV4KGen3 = 11
+    """Device model is seventh generation Apple TV (Apple TV 4K gen 3)."""
 
 
 class InputAction(Enum):
@@ -346,6 +349,12 @@ class FeatureName(Enum):
     LaunchApp = 39
     """Launch an app."""
 
+    AccountList = 55
+    """List of user accounts."""
+
+    SwitchAccount = 56
+    """Switch user account."""
+
     Artwork = 30
     """Playing media artwork."""
 
@@ -375,3 +384,15 @@ class FeatureName(Enum):
 
     SetVolume = 46
     """Set volume level."""
+
+    TextGet = 51
+    """Get current virtual keyboard text."""
+
+    TextClear = 52
+    """Clear virtual keyboard text."""
+
+    TextAppend = 53
+    """Input text into virtual keyboard."""
+
+    TextSet = 54
+    """Replace text in virtual keyboard."""

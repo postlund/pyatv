@@ -714,7 +714,7 @@ frame_type=<FrameType.PS_Next: 4>, length=303, data={'_pd': {5: b'\x8e\xfcV\xbf\
 
 ### Verification
 
-The verifcation sequence is initiated by the client by sending a frame with type `PV_Start`. The following messages always use `PV_Next` as frame type. A typical flow looks like this (details below):
+The verification sequence is initiated by the client by sending a frame with type `PV_Start`. The following messages always use `PV_Next` as frame type. A typical flow looks like this (details below):
 
 <code class="diagram">
 sequenceDiagram
@@ -1413,7 +1413,7 @@ CSeq: 0
 # AirPlay 2
 
 In reality, AirPlay 2 has a lot in common with its predecessor, but a lot also differs
-so it deserves its own capter.
+so it deserves its own chapter.
 
 For now, the main focus here is to describe how AirPlay can be set up for remote control
 only, i.e. how to get metadata for what is playing. Other parts will be added later.

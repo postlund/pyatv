@@ -34,7 +34,7 @@ FRAMES_PER_PACKET = 352
 def write_new_wave_file(filename: str, args) -> None:
     """Generate and write a new sample WAV file."""
     if path.exists(filename) and not args.overwrite:
-        raise Exception("file already exists")
+        raise RuntimeError("file already exists")
 
     with wave.open(filename, "wb") as handle:
         wfile: wave.Wave_write = cast(wave.Wave_write, handle)

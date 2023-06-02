@@ -6,6 +6,9 @@ import logging
 import math
 import re
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
+from urllib.parse import urlparse
+
+from aiohttp import ClientError, ClientSession
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -459,11 +462,12 @@ class MrpRemoteControl(RemoteControl):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, psm, identifier):
+    def __init__(self, protocol, psm, identifier, client_session: ClientSession):
         """Initialize a new MrpPlaying."""
         self.protocol = protocol
         self.psm = psm
         self.identifier = identifier
+        self.client_session = client_session
         self.artwork_cache = Cache(limit=4)
 
     @property
@@ -502,6 +506,57 @@ class MrpMetadata(Metadata):
         return artwork
 
     async def _fetch_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        return await self._fetch_remote_artwork(
+            width, height
+        ) or await self._fetch_local_artwork(width, height)
+
+    async def _fetch_remote_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch external artwork from a URL."""
+        metadata = self.psm.playing.metadata
+        if not metadata:
+            return None
+
+        urls = []
+
+        if metadata.HasField("artworkIdentifier"):
+            # appears to be a template to itunes artwork, but let's validate
+            url_template = metadata.artworkIdentifier
+            try:
+                url = url_template.format(
+                    # the itunes image server preserves aspect ratio
+                    w=999999 if width < 1 else width,
+                    h=999999 if height < 1 else height,
+                    c="bb",
+                    f="png",
+                )
+            except KeyError:
+                url = None
+            url_parts = urlparse(url)
+            if url_parts.scheme and url_parts.netloc:
+                urls.append(url)
+
+        if metadata.HasField("artworkURL"):
+            # artworkURL has fixed size and format, use it as a fallback
+            urls.append(metadata.artworkURL)
+
+        for url in urls:
+            try:
+                async with self.client_session.get(url) as response:
+                    if response.status == 200:
+                        return ArtworkInfo(
+                            bytes=await response.read(),
+                            mimetype=response.headers.get("content-type"),
+                            # TODO: get actual image size
+                            width=width,
+                            height=height,
+                        )
+            except ClientError:
+                pass
+
+        return None
+
+    async def _fetch_local_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch artwork over MRP."""
         playing = self.psm.playing
         resp = await self.psm.protocol.send_and_receive(
             messages.playback_queue_request(playing.location, width, height)
@@ -521,7 +576,7 @@ class MrpMetadata(Metadata):
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
         metadata = self.psm.playing.metadata
-        if metadata and metadata.artworkAvailable:
+        if metadata and (metadata.artworkAvailable or metadata.HasField("artworkURL")):
             if metadata.HasField("artworkIdentifier"):
                 return metadata.artworkIdentifier
             if metadata.HasField("contentIdentifier"):
@@ -671,16 +726,13 @@ class MrpAudio(Audio):
         self.protocol: MrpProtocol = protocol
         self.state_dispatcher = state_dispatcher
         self._volume_controls_available: bool = False
-        self._output_device_uid: Optional[str] = None
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
 
     @property
     def device_uid(self) -> Optional[str]:
-        """Return device UID for current active output device."""
-        if self._output_device_uid is not None:
-            return self._output_device_uid
+        """Return the UID of our device."""
         if self.protocol.device_info is not None:
             return self.protocol.device_info.inner().deviceUID  # type: ignore
         return None
@@ -709,8 +761,9 @@ class MrpAudio(Audio):
     async def _volume_control_changed(self, message) -> None:
         inner = message.inner()
 
-        self._output_device_uid = inner.outputDeviceUID
-        self._update_volume_controls(inner.capabilities)
+        # Make sure update is for our device (in case it changed for someone else)
+        if inner.outputDeviceUID == self.device_uid:
+            self._update_volume_controls(inner.capabilities)
 
     def _update_volume_controls(
         self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
@@ -724,7 +777,7 @@ class MrpAudio(Audio):
         inner = message.inner()
 
         # Make sure update is for our device (in case it changed for someone else)
-        if inner.outputDeviceUID == self._output_device_uid:
+        if inner.outputDeviceUID == self.device_uid:
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
@@ -923,7 +976,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
     psm = PlayerStateManager(protocol)
 
     remote_control = MrpRemoteControl(core.loop, psm, protocol)
-    metadata = MrpMetadata(protocol, psm, core.config.identifier)
+    metadata = MrpMetadata(
+        protocol, psm, core.config.identifier, core.session_manager.session
+    )
     power = MrpPower(core.loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
     audio = MrpAudio(protocol, core.state_dispatcher)

@@ -1,4 +1,4 @@
-"""Unit tests for pyatv.protocools.dmap.parser."""
+"""Unit tests for pyatv.protocols.dmap.parser."""
 
 import plistlib
 

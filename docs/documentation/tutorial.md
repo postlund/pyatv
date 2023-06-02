@@ -23,7 +23,7 @@ live push updates via websockets if you are lucky... Pairing is left out from th
 tutorial as an exercise to you. So you will need to obtain credentials (if
 needed) via some other method, e.g. [atvremote](../atvremote#pairing-with-a-device).
 
-Small steps is key, so the tutorial will be divded into the following sections:
+Small steps is key, so the tutorial will be divided into the following sections:
 
 1. Basic web server
 2. Add scan support
@@ -206,7 +206,7 @@ def main():
 ...
 ```
 
-The `on_shutdown` method will be called when the script is exitted, e.g. by
+The `on_shutdown` method will be called when the script is exited, e.g. by
 pressing Ctrl+C. There's one more guard we should add, making sure we don't try
 to connect if we are already connected. A simple check at the top will fix that:
 

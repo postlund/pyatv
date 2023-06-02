@@ -11,10 +11,9 @@ import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.interface import App, FeatureName, FeatureState
+from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 
-from tests.fake_device import FakeAppleTV
-from tests.fake_device.companion import INITIAL_VOLUME, VOLUME_STEP
+from tests.fake_device.companion import INITIAL_RTI_TEXT, INITIAL_VOLUME, VOLUME_STEP
 from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,6 +24,10 @@ TEST_APP_URL: str = "com.test.Test://test/url?param0=value0"
 TEST_APP2: str = "com.test.Test2"
 TEST_APP_NAME2: str = "Test2"
 TEST_APP_URL2: str = "com.test.Test2://test/url?param0=value0"
+TEST_ACCOUNT: str = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"
+TEST_ACCOUNT_NAME: str = "Alice"
+TEST_ACCOUNT2: str = "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB"
+TEST_ACCOUNT_NAME2: str = "Bob"
 
 MEDIA_CONTROL_FEATURES = [
     FeatureName.Play,
@@ -91,6 +94,28 @@ async def test_app_list(companion_client, companion_usecase):
 
     expected_apps = [App(TEST_APP_NAME, TEST_APP), App(TEST_APP_NAME2, TEST_APP2)]
     assert not DeepDiff(expected_apps, apps)
+
+
+async def test_switch_account(companion_client, companion_state):
+    await companion_client.user_accounts.switch_account(TEST_ACCOUNT)
+    await until(lambda: companion_state.active_account == TEST_ACCOUNT)
+
+
+async def test_account_list(companion_client, companion_usecase):
+    companion_usecase.set_available_accounts(
+        {
+            TEST_ACCOUNT: TEST_ACCOUNT_NAME,
+            TEST_ACCOUNT2: TEST_ACCOUNT_NAME2,
+        }
+    )
+
+    accounts = await companion_client.user_accounts.account_list()
+
+    expected_apps = [
+        UserAccount(TEST_ACCOUNT_NAME, TEST_ACCOUNT),
+        UserAccount(TEST_ACCOUNT_NAME2, TEST_ACCOUNT2),
+    ]
+    assert not DeepDiff(expected_apps, accounts)
 
 
 async def test_app_features(companion_client):
@@ -193,3 +218,35 @@ async def test_audio_volume_down(companion_client, companion_state):
     await companion_client.audio.volume_down()
     assert companion_client.audio.volume == INITIAL_VOLUME - VOLUME_STEP
     assert companion_state.latest_button == "volume_down"
+
+
+async def test_text_input_text_get(companion_client, companion_usecase):
+    text = await companion_client.keyboard.text_get()
+    assert text == INITIAL_RTI_TEXT
+
+    companion_usecase.set_rti_text("test")
+    text = await companion_client.keyboard.text_get()
+    assert text == "test"
+
+
+async def test_text_input_text_get_when_no_keyboard(
+    companion_client, companion_usecase
+):
+    companion_usecase.set_rti_text(None)
+    text = await companion_client.keyboard.text_get()
+    assert text is None
+
+
+async def test_text_input_text_clear(companion_client, companion_state):
+    await companion_client.keyboard.text_clear()
+    assert companion_state.rti_text == ""
+
+
+async def test_text_input_text_append(companion_client, companion_state):
+    await companion_client.keyboard.text_append("test")
+    assert companion_state.rti_text == INITIAL_RTI_TEXT + "test"
+
+
+async def test_text_input_text_set(companion_client, companion_state):
+    await companion_client.keyboard.text_set("test")
+    assert companion_state.rti_text == "test"

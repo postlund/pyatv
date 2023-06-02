@@ -8,8 +8,9 @@ variables:
     - pyatv
     - scripts
     - examples
-  cs_exclude_words: cann,cant,asai
+  cs_exclude_words: cann,cant,asai,cafs
   requirements_file: requirements/requirements.txt
+  miniaudio_package: $(grep miniaudio= requirements/requirements.txt)
 
 dependencies:
   files:
@@ -26,8 +27,8 @@ pipeline:
       run:
         - black .
         - isort {code_dirs}
-        - ./scripts/api.py generate
-        - ./scripts/protobuf.py --download generate
+        - python scripts/api.py generate
+        - python scripts/protobuf.py --download generate
   rebuild_miniaudio:
     # A lot of builds on GitHub Actions result in "Illegal Instruction"
     # when calling functions in miniaudio. Seemingly random and not
@@ -38,7 +39,7 @@ pipeline:
       tags: [all, miniaudio]
       run:
         - "pip uninstall -y miniaudio"
-        - "pip install --no-binary :all: miniaudio"
+        - "pip install --no-binary :all: {miniaudio_package}"
   validate:
     - name: pylint
       run: pylint -j 0 {pydirs}

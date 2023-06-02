@@ -29,7 +29,7 @@ from pyatv.protocols.raop.parsers import (
     get_metadata_types,
 )
 from pyatv.support import log_binary
-from pyatv.support.metadata import EMPTY_METADATA, AudioMetadata
+from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata
 from pyatv.support.rtsp import FRAMES_PER_PACKET, RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ KEEP_ALIVE_INTERVAL = 25  # Seconds
 SLOW_WARNING_THRESHOLD = 5
 
 # Metadata used when no metadata is present
-MISSING_METADATA = AudioMetadata(
+MISSING_METADATA = MediaMetadata(
     title="Streaming with pyatv", artist="pyatv", album="RAOP", duration=0.0
 )
 
@@ -111,7 +111,7 @@ class RaopContext:
 class PlaybackInfo(NamedTuple):
     """Information for what is currently playing."""
 
-    metadata: AudioMetadata
+    metadata: MediaMetadata
     position: float
 
 
@@ -353,7 +353,7 @@ class RaopClient:
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
         self._encryption_types: EncryptionType = EncryptionType.Unknown
         self._metadata_types: MetadataType = MetadataType.NotSupported
-        self._metadata: AudioMetadata = EMPTY_METADATA
+        self._metadata: MediaMetadata = EMPTY_METADATA
         self._keep_alive_task: Optional[asyncio.Future] = None
         self._listener: Optional[weakref.ReferenceType[Any]] = None
         self._info: Dict[str, object] = {}
@@ -528,11 +528,11 @@ class RaopClient:
         self.context.volume = volume
 
     async def send_audio(  # pylint: disable=too-many-branches
-        self, wave_file: AudioSource, metadata: AudioMetadata = EMPTY_METADATA
+        self, wave_file: AudioSource, metadata: MediaMetadata = EMPTY_METADATA
     ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
-            raise Exception("not initialized")  # TODO: better exception
+            raise RuntimeError("not initialized")
 
         self.context.reset()
 
