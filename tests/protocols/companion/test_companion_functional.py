@@ -10,7 +10,7 @@ import pytest
 import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
-from pyatv.const import Protocol
+from pyatv.const import KeyboardFocusState, Protocol
 from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 
 from tests.fake_device.companion import INITIAL_RTI_TEXT, INITIAL_VOLUME, VOLUME_STEP
@@ -207,6 +207,22 @@ async def test_audio_volume_down(companion_client, companion_state):
     assert companion_state.latest_button == "volume_down"
 
 
+async def test_text_input_text_focus_state(companion_client, companion_usecase):
+    state = companion_client.keyboard.text_focus_state
+    assert state == KeyboardFocusState.Focused
+
+    companion_usecase.set_rti_focus_state(KeyboardFocusState.Unfocused)
+    await until(
+        lambda: companion_client.keyboard.text_focus_state
+        == KeyboardFocusState.Unfocused
+    )
+
+    companion_usecase.set_rti_focus_state(KeyboardFocusState.Focused)
+    await until(
+        lambda: companion_client.keyboard.text_focus_state == KeyboardFocusState.Focused
+    )
+
+
 async def test_text_input_text_get(companion_client, companion_usecase):
     text = await companion_client.keyboard.text_get()
     assert text == INITIAL_RTI_TEXT
@@ -219,21 +235,21 @@ async def test_text_input_text_get(companion_client, companion_usecase):
 async def test_text_input_text_get_when_no_keyboard(
     companion_client, companion_usecase
 ):
-    companion_usecase.set_rti_text(None)
+    companion_usecase.set_rti_focus_state(KeyboardFocusState.Unfocused)
     text = await companion_client.keyboard.text_get()
     assert text is None
 
 
 async def test_text_input_text_clear(companion_client, companion_state):
     await companion_client.keyboard.text_clear()
-    assert companion_state.rti_text == ""
+    await until(lambda: companion_state.rti_text == "")
 
 
 async def test_text_input_text_append(companion_client, companion_state):
     await companion_client.keyboard.text_append("test")
-    assert companion_state.rti_text == INITIAL_RTI_TEXT + "test"
+    await until(lambda: companion_state.rti_text == INITIAL_RTI_TEXT + "test")
 
 
 async def test_text_input_text_set(companion_client, companion_state):
     await companion_client.keyboard.text_set("test")
-    assert companion_state.rti_text == "test"
+    await until(lambda: companion_state.rti_text == "test")

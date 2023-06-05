@@ -11,11 +11,12 @@ from unittest.mock import MagicMock
 import pytest
 import pytest_asyncio
 
-from pyatv import exceptions
+from pyatv import const, exceptions
 from pyatv.conf import AppleTV as AppleTVConf
 from pyatv.const import (
     DeviceState,
     FeatureName,
+    KeyboardFocusState,
     MediaType,
     OperatingSystem,
     PowerState,
@@ -33,6 +34,8 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     FeatureState,
+    Keyboard,
+    KeyboardListener,
     Metadata,
     Playing,
     Power,
@@ -133,6 +136,15 @@ class DummyAudio(Audio):
         self._volume = level
 
 
+class DummyKeyboard(Keyboard):
+    def __init__(self, focus_state: KeyboardFocusState) -> None:
+        self._focus_state = focus_state
+
+    @property
+    def focus_state(self) -> KeyboardFocusState:
+        return self._focus_state
+
+
 class DummyDeviceListener(DeviceListener):
     def __init__(self):
         self.lost_calls: int = 0
@@ -202,6 +214,18 @@ class SavingAudioListener(AudioListener):
         """Device volume was updated."""
         self.last_update = new_level
         self.all_updates.append(new_level)
+
+
+class SavingKeyboardListener(KeyboardListener):
+    def __init__(self):
+        self.last_update = None
+        self.all_updates = []
+
+    def focusstate_update(
+        self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
+    ):
+        self.last_update = new_state
+        self.all_updates.append(new_state)
 
 
 @pytest.fixture(name="register_interface")
@@ -537,6 +561,7 @@ def register_basic_interfaces(reg_interface, protocol: Protocol) -> None:
         FeatureName.PlayUrl, DummyFeatures(FeatureName.PlayUrl), protocol
     )
     sdg.interfaces[Audio] = DummyAudio(0.0)
+    sdg.interfaces[Keyboard] = DummyKeyboard(KeyboardFocusState.Unfocused)
     sdg.interfaces[Stream] = DummyStream()
     return sdg
 
@@ -852,6 +877,60 @@ async def test_audio_no_listener_duplicates(mrp_state_dispatcher, audio_setup):
     await dispatch_volume_update(mrp_state_dispatcher, 10.0)
     assert len(audio_setup.listener.all_updates) == 1
     assert audio_setup.listener.last_update == 10.0
+
+
+# KEYBOARD RELATED TESTS
+
+
+@pytest_asyncio.fixture(name="keyboard_setup")
+async def keyboard_setup_fixture(facade_dummy, register_interface):
+    listener = SavingKeyboardListener()
+
+    register_basic_interfaces(register_interface, Protocol.Companion)
+
+    await facade_dummy.connect()
+    facade_dummy.keyboard.listener = listener
+
+    yield facade_dummy.keyboard
+
+
+async def dispatch_focus_state_update(
+    companion_state_dispatcher, state, protocol=Protocol.Companion
+):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    companion_state_dispatcher.listen_to(
+        UpdatedState.KeyboardFocus, lambda message: event.set()
+    )
+    companion_state_dispatcher.dispatch(UpdatedState.KeyboardFocus, state)
+
+    await event.wait()
+
+
+async def test_keyboard_listener_updates(companion_state_dispatcher, keyboard_setup):
+    await dispatch_focus_state_update(
+        companion_state_dispatcher, KeyboardFocusState.Focused
+    )
+    assert keyboard_setup.listener.last_update == KeyboardFocusState.Focused
+    await dispatch_focus_state_update(
+        companion_state_dispatcher, KeyboardFocusState.Unfocused
+    )
+    assert keyboard_setup.listener.last_update == KeyboardFocusState.Unfocused
+
+
+async def test_keyboard_no_listener_duplicates(
+    companion_state_dispatcher, keyboard_setup
+):
+    await dispatch_focus_state_update(
+        companion_state_dispatcher, KeyboardFocusState.Focused
+    )
+    await dispatch_focus_state_update(
+        companion_state_dispatcher, KeyboardFocusState.Focused
+    )
+    assert len(keyboard_setup.listener.all_updates) == 1
+    assert keyboard_setup.listener.last_update == KeyboardFocusState.Focused
 
 
 # GUARD CALLS AFTER CLOSE

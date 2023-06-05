@@ -11,6 +11,7 @@ from pyatv.const import (
     FeatureName,
     FeatureState,
     InputAction,
+    KeyboardFocusState,
     PairingRequirement,
     Protocol,
 )
@@ -378,10 +379,31 @@ class CompanionAudio(Audio):
 class CompanionKeyboard(Keyboard):
     """Implementation of API for keyboard handling."""
 
-    def __init__(self, api: CompanionAPI):
+    def __init__(self, api: CompanionAPI, core: Core):
         """Initialize a new instance of CompanionKeyboard."""
         super().__init__()
         self.api = api
+        # _tiStarted will not be sent if session is started while already focused
+        self.api.listen_to("_tiStarted", self._handle_text_input)
+        self.api.listen_to("_tiStopped", self._handle_text_input)
+        # _tiStart is actually a command that we forward the response of,
+        self.api.listen_to("_tiStart", self._handle_text_input)
+        self.core = core
+        self._focus_state: KeyboardFocusState = KeyboardFocusState.Unknown
+
+    async def _handle_text_input(self, data: Mapping[str, Any]) -> None:
+        state = (
+            KeyboardFocusState.Focused
+            if "_tiD" in data
+            else KeyboardFocusState.Unfocused
+        )
+        self._focus_state = state
+        self.core.state_dispatcher.dispatch(UpdatedState.KeyboardFocus, state)
+
+    @property
+    def text_focus_state(self) -> KeyboardFocusState:
+        """Return keyboard focus state."""
+        return self._focus_state
 
     async def text_get(self) -> Optional[str]:
         """Get current virtual keyboard text."""
@@ -465,7 +487,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
         Power: CompanionPower(api),
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
-        Keyboard: CompanionKeyboard(api),
+        Keyboard: CompanionKeyboard(api, core),
     }
 
     async def _connect() -> bool:

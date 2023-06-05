@@ -167,3 +167,8 @@ def mrp_state_dispatcher_fixture(core_dispatcher):
 @pytest.fixture(name="dmap_state_dispatcher")
 def dmap_state_dispatcher_fixture(core_dispatcher):
     yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)
+
+
+@pytest.fixture(name="companion_state_dispatcher")
+def companion_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.Companion, core_dispatcher)

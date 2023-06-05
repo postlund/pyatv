@@ -1114,8 +1114,29 @@ class Audio(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
 
-class Keyboard:
-    """Base class for keyboard handling."""
+class KeyboardListener(ABC):  # pylint: disable=too-few-public-methods
+    """Listener interface for keyboard updates."""
+
+    @abstractmethod
+    def focusstate_update(
+        self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
+    ):
+        """Keyboard focus state was updated."""
+        raise NotImplementedError()
+
+
+class Keyboard(ABC, StateProducer):
+    """Base class for keyboard handling.
+
+    Listener
+    interface: `pyatv.interfaces.KeyboardListener`
+    """
+
+    @property
+    @feature(57, "TextFocusState", "Current virtual keyboard focus state.")
+    def text_focus_state(self) -> const.KeyboardFocusState:
+        """Return keyboard focus state."""
+        raise exceptions.NotSupportedError()
 
     @feature(51, "TextGet", "Get current virtual keyboard text.")
     async def text_get(self) -> Optional[str]:
