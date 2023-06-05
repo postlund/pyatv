@@ -116,3 +116,24 @@ atv.audio.listener = listener
 
 Live volume level updates are only sent over the `MRP` protocol. If an Apple TV is connected to
 speakers in a way that doesn't support volume levels, it will not send these updates.
+
+## Keyboard Updates
+
+It is possible to get callbacks whenever the virtual keyboard focus state of a device is changed.
+The API is defined by the
+{% include api i="interface.KeyboardListener" %} interface and works similarly to how push updates works.
+
+Here is a simple example:
+
+```python
+class MyKeyboardListener(interface.KeyboardListener):
+
+    def focusstate_update(self, old_state, new_state):
+        print('Focus state changed from {0:s} to {1:s}'.format(old_state, new_state))
+
+
+listener = MyKeyboardListener()
+atv.keyboard.listener = listener
+```
+
+Keyboard focus state updates are only sent over the `Companion` protocol.
