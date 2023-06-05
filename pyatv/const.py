@@ -110,6 +110,19 @@ class PowerState(Enum):
     """Device is turned on."""
 
 
+class KeyboardFocusState(Enum):
+    """All supported keyboard focus states."""
+
+    Unknown = 0
+    """Keyboard focus state is not determinable."""
+
+    Unfocused = 1
+    """Keyboard is not focused."""
+
+    Focused = 2
+    """Keyboard is focused."""
+
+
 class OperatingSystem(Enum):
     """Operating system on device."""
 
@@ -384,6 +397,9 @@ class FeatureName(Enum):
 
     SetVolume = 46
     """Set volume level."""
+
+    TextFocusState = 57
+    """Current virtual keyboard focus state."""
 
     TextGet = 51
     """Get current virtual keyboard text."""

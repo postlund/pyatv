@@ -18,6 +18,7 @@ from pyatv.interface import (
     AppleTV,
     AudioListener,
     DeviceListener,
+    KeyboardListener,
     Playing,
     PowerListener,
     PushListener,
@@ -89,6 +90,25 @@ class AudioPrinter(AudioListener):
         """Device volume level was updated."""
         print(
             self.formatter(output(True, values={"volume": new_level})),
+            flush=True,
+        )
+
+
+class KeyboardPrinter(KeyboardListener):
+    """Listen for keyboard updates and print changes."""
+
+    def __init__(self, formatter):
+        """Initialize a new KeyboardPrinter."""
+        self.formatter = formatter
+
+    def focusstate_update(
+        self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
+    ):
+        """Keyboard focus state was updated."""
+        print(
+            self.formatter(
+                output(True, values={"focus_state": new_state.name.lower()})
+            ),
             flush=True,
         )
 
@@ -236,11 +256,13 @@ async def _run_command(atv, args, abort_sem, loop):
     if args.command == "push_updates":
         power_listener = PowerPrinter(args.output)
         audio_listener = AudioPrinter(args.output)
+        keyboard_listener = KeyboardPrinter(args.output)
         device_listener = DevicePrinter(args.output, abort_sem)
         push_listener = PushPrinter(args.output, atv)
 
         atv.power.listener = power_listener
         atv.audio.listener = audio_listener
+        atv.keyboard.listener = keyboard_listener
         atv.listener = device_listener
         atv.push_updater.listener = push_listener
         atv.push_updater.start()

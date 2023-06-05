@@ -92,6 +92,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.SwitchAccount" href="#pyatv.const.FeatureName.SwitchAccount">SwitchAccount</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TextAppend" href="#pyatv.const.FeatureName.TextAppend">TextAppend</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TextClear" href="#pyatv.const.FeatureName.TextClear">TextClear</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextFocusState" href="#pyatv.const.FeatureName.TextFocusState">TextFocusState</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TextGet" href="#pyatv.const.FeatureName.TextGet">TextGet</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TextSet" href="#pyatv.const.FeatureName.TextSet">TextSet</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Title" href="#pyatv.const.FeatureName.Title">Title</a></code></li>
@@ -121,6 +122,14 @@ link_group: api
 <li><code><a title="pyatv.const.InputAction.DoubleTap" href="#pyatv.const.InputAction.DoubleTap">DoubleTap</a></code></li>
 <li><code><a title="pyatv.const.InputAction.Hold" href="#pyatv.const.InputAction.Hold">Hold</a></code></li>
 <li><code><a title="pyatv.const.InputAction.SingleTap" href="#pyatv.const.InputAction.SingleTap">SingleTap</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.const.KeyboardFocusState" href="#pyatv.const.KeyboardFocusState">KeyboardFocusState</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.KeyboardFocusState.Focused" href="#pyatv.const.KeyboardFocusState.Focused">Focused</a></code></li>
+<li><code><a title="pyatv.const.KeyboardFocusState.Unfocused" href="#pyatv.const.KeyboardFocusState.Unfocused">Unfocused</a></code></li>
+<li><code><a title="pyatv.const.KeyboardFocusState.Unknown" href="#pyatv.const.KeyboardFocusState.Unknown">Unknown</a></code></li>
 </ul>
 </li>
 <li>
@@ -195,7 +204,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L398" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L414" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -214,7 +223,7 @@ link_group: api
 <section class="desc"><p>Hardware device model.</p>
 <p>Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
 future.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L133-L174" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L146-L187" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -316,7 +325,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L229-L398" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L242-L414" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -499,6 +508,10 @@ future.</p></section>
 <dd>
 <section class="desc"><p>Clear virtual keyboard text.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.TextFocusState"><code class="name">var <span class="ident">TextFocusState</span></code></dt>
+<dd>
+<section class="desc"><p>Current virtual keyboard focus state.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.TextGet"><code class="name">var <span class="ident">TextGet</span></code></dt>
 <dd>
 <section class="desc"><p>Get current virtual keyboard text.</p></section>
@@ -555,7 +568,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>State of a particular feature.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L209-L225" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L222-L238" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -587,7 +600,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Type of input when pressing a button.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L177-L187" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L190-L200" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -605,6 +618,33 @@ future.</p></section>
 <dt id="pyatv.const.InputAction.SingleTap"><code class="name">var <span class="ident">SingleTap</span></code></dt>
 <dd>
 <section class="desc"><p>Press and release quickly.</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.KeyboardFocusState"><code class="flex name class">
+<span>class <span class="ident">KeyboardFocusState</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported keyboard focus states.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L113-L123" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.KeyboardFocusState.Focused"><code class="name">var <span class="ident">Focused</span></code></dt>
+<dd>
+<section class="desc"><p>Keyboard is focused.</p></section>
+</dd>
+<dt id="pyatv.const.KeyboardFocusState.Unfocused"><code class="name">var <span class="ident">Unfocused</span></code></dt>
+<dd>
+<section class="desc"><p>Keyboard is not focused.</p></section>
+</dd>
+<dt id="pyatv.const.KeyboardFocusState.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dd>
+<section class="desc"><p>Keyboard focus state is not determinable.</p></section>
 </dd>
 </dl>
 </dd>
@@ -647,7 +687,7 @@ not report a valid media type.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Operating system on device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L113-L130" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L126-L143" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -681,7 +721,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>Pairing requirement for a service.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L190-L206" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L203-L219" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
