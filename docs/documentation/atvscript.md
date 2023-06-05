@@ -203,17 +203,20 @@ $ atvscript -s 10.0.10.81 menu
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "command": "menu"}
 ```
 
-## Push, Power and Audio Updates
+## Push, Power, Audio and Keyboard Updates
 
-Push, power and audio updates are printed to the terminal as they happen:
+Push, power, audio and keyboard updates are printed to the terminal as they happen:
 
 ```shell
 $ atvscript -s 10.0.10.81 push_updates
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "off"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "focus_state": "unfocused"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "hash": "azyFEzFpSNOSGq9ZvcaX4A\u2206DcpumkUoRty+R098MQeIKA", "media_type": "music", "device_state": "paused", "title": "Ordinary World (Live)", "artist": "Duran Duran", "album": "From Mediterranea With Love - EP", "genre": "Rock", "total_time": 395, "position": 1, "shuffle": "off", "repeat": "off", "app": "Musik", "app_id": "com.apple.TVMusic"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "on"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "volume": 20.0}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "volume": 15.0}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "focus_state": "focused"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "focus_state": "unfocused"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "off"}
 
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "push_updates": "finished"}
