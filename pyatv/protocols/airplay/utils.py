@@ -1,5 +1,5 @@
 """Manage announced AirPlay features."""
-from enum import IntFlag
+from enum import Enum, IntFlag, auto
 import logging
 import plistlib
 import re
@@ -11,6 +11,7 @@ from pyatv.auth.hap_pairing import (
     HapCredentials,
 )
 from pyatv.const import PairingRequirement
+from pyatv.core import MutableService
 from pyatv.interface import BaseService
 from pyatv.support.http import HttpRequest, HttpResponse
 
@@ -20,6 +21,13 @@ from pyatv.support.http import HttpRequest, HttpResponse
 PIN_REQUIRED = 0x8
 PASSWORD_BIT = 0x80
 LEGACY_PAIRING_BIT = 0x200
+
+
+class AirPlayMajorVersion(Enum):
+    """Major AirPlay protocol version."""
+
+    AirPlayV1 = auto()
+    AirPlayV2 = auto()
 
 
 def _get_flags(properties: Mapping[str, str]) -> int:
@@ -201,3 +209,32 @@ def log_response(logger, response: HttpResponse, message_prefix="") -> None:
             response.protocol,
             payload,
         )
+
+
+# TODO: I don't know how to properly detect if a receiver support AirPlay 2 or not,
+# so I'm guessing until I know better. The basic idea here is simple: the service
+# should have the "features" flag (either "features" or "ft") and have all 64 bits
+# present. Not sure if that is good enough, but will do for now.
+def get_protocol_version(service: BaseService) -> AirPlayMajorVersion:
+    """Return major AirPlay version supported by a service."""
+    features = service.properties.get("ft")
+    if not features:
+        features = service.properties.get("features", "")
+
+    # Ensure feature flag is valid and all flags present (i.e.
+    # 0xAABBCCDD,0xAABBCCDD, thus looking for ",")
+    if features.count(",") == 1:
+        return AirPlayMajorVersion.AirPlayV2
+    return AirPlayMajorVersion.AirPlayV1
+
+
+def update_service_details(service: MutableService):
+    """Update AirPlay service according to that it supports."""
+    service.requires_password = is_password_required(service)
+
+    if service.properties.get("acl", "0") == "1":
+        # Access control might say that pairing is not possible, e.g. only devices
+        # belonging to the same home (not supported by pyatv)
+        service.pairing = PairingRequirement.Disabled
+    else:
+        service.pairing = get_pairing_requirement(service)

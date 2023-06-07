@@ -30,6 +30,13 @@ class TlvValue(IntEnum):
 
     # Apple internal(?)
     Name = 0x11
+    Flags = 0x13
+
+
+class Flags(IntEnum):
+    """Flags used with TlvValue.Flags."""
+
+    TransientPairing = 0x10
 
 
 class ErrorCode(IntEnum):

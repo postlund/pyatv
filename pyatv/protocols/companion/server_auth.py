@@ -118,7 +118,7 @@ class CompanionServerAuth(ABC):
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PV-Msg02".encode())
 
         tlv = write_tlv(
             {
@@ -182,7 +182,7 @@ class CompanionServerAuth(ABC):
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         decrypted_tlv_bytes = chacha.decrypt(
-            pairing_data[TlvValue.EncryptedData], nounce="PS-Msg05".encode()
+            pairing_data[TlvValue.EncryptedData], nonce="PS-Msg05".encode()
         )
 
         _LOGGER.debug("MSG5 EncryptedData=%s", read_tlv(decrypted_tlv_bytes))
@@ -209,7 +209,7 @@ class CompanionServerAuth(ABC):
         tlv = write_tlv(tlv)
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PS-Msg06".encode())
 
         tlv = write_tlv({TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted})
 

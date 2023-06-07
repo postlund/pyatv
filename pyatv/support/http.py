@@ -113,8 +113,8 @@ def _parse_http_message(
     """Parse HTTP response."""
     try:
         header_str, body = message.split(b"\r\n\r\n", maxsplit=1)
-    except ValueError as ex:
-        raise ValueError("missing end lines") from ex
+    except ValueError:
+        return None, CaseInsensitiveDict(), b"", message
     headers = header_str.decode("utf-8").split("\r\n")
 
     msg_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
@@ -170,7 +170,7 @@ def format_response(response: HttpResponse) -> bytes:
 def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     """Parse HTTP response."""
     first_line, msg_headers, msg_body, rest = _parse_http_message(response)
-    if not first_line:
+    if first_line is None:
         return None, rest
 
     # <method> <path> <protocol>/<version

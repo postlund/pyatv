@@ -47,7 +47,13 @@ class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
 
         await self.http.post("/pair-pin-start", headers=_AIRPLAY_HEADERS)
 
-        data = {hap_tlv8.TlvValue.Method: b"\x00", hap_tlv8.TlvValue.SeqNo: b"\x01"}
+        data = {
+            hap_tlv8.TlvValue.Method: b"\x00",
+            hap_tlv8.TlvValue.SeqNo: b"\x01",
+            hap_tlv8.TlvValue.Flags: int.to_bytes(
+                hap_tlv8.Flags.TransientPairing.value, 1, byteorder="big"
+            ),
+        }
         resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )

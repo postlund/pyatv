@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, PairingRequirement, Protocol
+from pyatv.const import DeviceModel, FeatureName, Protocol
 from pyatv.core import Core, MutableService, SetupData, mdns
 from pyatv.core.scan import (
     ScanHandlerDeviceInfoName,
@@ -36,11 +36,11 @@ from pyatv.protocols.airplay.pairing import (
 from pyatv.protocols.airplay.player import AirPlayPlayer
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
-    get_pairing_requirement,
-    is_password_required,
     is_remote_control_supported,
     parse_features,
+    update_service_details,
 )
+from pyatv.protocols.raop import setup as raop_setup
 from pyatv.support import net
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
@@ -56,10 +56,9 @@ _LOGGER = logging.getLogger(__name__)
 class AirPlayFeatures(Features):
     """Implementation of supported feature functionality."""
 
-    def __init__(self, service: BaseService) -> None:
+    def __init__(self, features: AirPlayFlags) -> None:
         """Initialize a new AirPlayFeatures instance."""
-        self.service = service
-        self._features = parse_features(self.service.properties.get("features", "0x0"))
+        self._features = features
 
     def get_feature(self, feature_name: FeatureName) -> FeatureInfo:
         """Return current state of a feature."""
@@ -170,14 +169,7 @@ async def service_info(
     services: Mapping[Protocol, BaseService],
 ) -> None:
     """Update service with additional information."""
-    service.requires_password = is_password_required(service)
-
-    if service.properties.get("acl", "0") == "1":
-        # Access control might say that pairing is not possible, e.g. only devices
-        # belonging to the same home (not supported by pyatv)
-        service.pairing = PairingRequirement.Disabled
-    else:
-        service.pairing = get_pairing_requirement(service)
+    update_service_details(service)
 
 
 def setup(  # pylint: disable=too-many-locals
@@ -187,8 +179,11 @@ def setup(  # pylint: disable=too-many-locals
     # TODO: Split up in connect/protocol and Stream implementation
     stream = AirPlayStream(core.config, core.service)
 
+    features = parse_features(core.service.properties.get("features", "0x0"))
+    credentials = extract_credentials(core.service)
+
     interfaces = {
-        Features: AirPlayFeatures(core.service),
+        Features: AirPlayFeatures(features),
         Stream: stream,
     }
 
@@ -211,7 +206,41 @@ def setup(  # pylint: disable=too-many-locals
         set([FeatureName.PlayUrl]),
     )
 
-    credentials = extract_credentials(core.service)
+    # AirPlay 2 does not mandate that a separate RAOP service exists for streaming
+    # audio, instead the same service user by AirPlay can be used if a particular flag
+    # is set (HasUnifiedAdvertiserInfo). If that flag is set and no RAOP service has
+    # been found, manually add a service pointing to the AirPlay service. This just
+    # simplifies the internal handling, but is not very efficient as no connections
+    # are re-used amongst the protocols.
+    if (
+        AirPlayFlags.HasUnifiedAdvertiserInfo in features
+        and core.config.get_service(Protocol.RAOP) is None
+    ):
+        _LOGGER.debug("RAOP supported but no service present, adding new service")
+        # Create a RAOP service to satisfy internal RAOP service
+        raop_service = MutableService(
+            None,
+            Protocol.RAOP,
+            core.service.port,
+            core.service.properties,
+            credentials=core.service.credentials,
+            password=core.service.password,
+        )
+        core.config.add_service(raop_service)
+
+        # Re-map service in Core to the newly created raop service
+        raop_core = Core(
+            core.loop,
+            core.config,
+            raop_service,
+            core.device_listener,
+            core.session_manager,
+            core.takeover,
+            core.state_dispatcher.create_copy(Protocol.RAOP),
+        )
+
+        for setup_data in raop_setup(raop_core):
+            yield setup_data
 
     # Set up remote control channel if it is supported
     if not is_remote_control_supported(core.service, credentials):

@@ -22,18 +22,18 @@ from pyatv.auth.server_auth import SERVER_IDENTIFIER
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.protocols.airplay import extract_credentials, verify_connection
-from pyatv.protocols.airplay.channels import (
-    BaseDataStreamChannel,
-    BaseEventChannel,
-    DataStreamMessage,
-)
-from pyatv.protocols.airplay.remote_control import (
+from pyatv.protocols.airplay.ap2_session import (
     DATASTREAM_INPUT_INFO,
     DATASTREAM_OUTPUT_INFO,
     DATASTREAM_SALT,
     EVENTS_READ_INFO,
     EVENTS_SALT,
     EVENTS_WRITE_INFO,
+)
+from pyatv.protocols.airplay.channels import (
+    BaseDataStreamChannel,
+    BaseEventChannel,
+    DataStreamMessage,
 )
 from pyatv.protocols.airplay.server_auth import BaseAirPlayServerAuth
 from pyatv.protocols.airplay.utils import (

@@ -183,6 +183,14 @@ class RtspSession:
         """Send RECORD message."""
         return await self.exchange("RECORD", headers=headers, body=body)
 
+    async def flush(
+        self,
+        headers: Optional[Dict[str, Any]] = None,
+        body: Optional[Union[str, bytes]] = None,
+    ) -> HttpResponse:
+        """Send RECORD message."""
+        return await self.exchange("FLUSH", headers=headers, body=body)
+
     async def set_parameter(self, parameter: str, value: str) -> HttpResponse:
         """Send SET_PARAMETER message."""
         return await self.exchange(

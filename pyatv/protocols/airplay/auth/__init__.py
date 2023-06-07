@@ -121,7 +121,9 @@ def extract_credentials(service: BaseService) -> HapCredentials:
     if service.credentials is not None:
         return parse_credentials(service.credentials)
 
-    flags = parse_features(service.properties.get("features", "0x0"))
+    flags = parse_features(
+        service.properties.get("features", service.properties.get("ft", "0x0"))
+    )
     if (
         AirPlayFlags.SupportsSystemPairing in flags
         or AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in flags

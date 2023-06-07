@@ -148,7 +148,7 @@ class MrpServerAuth(ABC):
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PV-Msg02".encode())
 
         msg = messages.crypto_pairing(
             {
@@ -228,7 +228,7 @@ class MrpServerAuth(ABC):
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PS-Msg06".encode())
 
         msg = messages.crypto_pairing(
             {TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted}
