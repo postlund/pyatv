@@ -93,13 +93,7 @@ work and behave as expected and all traffic should be logged to console.
 
 # Companion Proxy
 
-There is also support for the Companion protocol. Occasionally iOS devices will
-fail to complete the connection ("Connecting" visible in the remote app despite
-seeing initialization traffic in the proxy), possibly due to some kind of IP
-address & port or identifier caching. In such situations rebooting the iOS
-device, restarting the proxy, restarting the Apple TV Remote app (in newer iOS
-versions), or a combination of these has been known to bring it back to a
-working state.
+There is also support for the Companion protocol.
 
 ## Device Credentials
 
