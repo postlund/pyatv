@@ -158,6 +158,23 @@ still specify something. A simple call example looks like this:
 $ atvremote --manual --address 10.0.0.10 --port 49152 --protocol mrp --id test playing
 ```
 
+For testing purposes, it's possible to specify custom MDNS properties using
+`--service-properties`. This might be useful to tinker with certain flags that
+alter protocol behavior. The format looks like this:
+
+    Xvar1=value1Xvar2=value2
+
+Where `X` is any character not present in a variable name or value. A typical example
+might use `:` or `,` like this:
+
+    :name=test:flags=123
+
+An example call to `atvremote` might look like this:
+
+```shell
+$ atvremote --id "aa:bb:cc:dd:ee:ff" --address 10.0.10.253 --port 7000 --manual --protocol raop --service-properties :features=0x4A7FCA00,0xBC354BD0 --debug stream_file=never_gonna_give_you_up.mp3
+```
+
 # Pairing with a device
 
 In most cases you have to pair with a device and obtain *credentials* in order to communicate

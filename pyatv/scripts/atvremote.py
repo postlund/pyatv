@@ -444,6 +444,13 @@ async def cli_handler(loop):
     )
 
     parser.add_argument(
+        "--service-properties",
+        dest="service_properties",
+        default="",
+        help="manual MDNS properties",
+    )
+
+    parser.add_argument(
         "--raop-password",
         help="optional password for raop",
         dest="raop_password",
@@ -480,6 +487,8 @@ async def cli_handler(loop):
     args = parser.parse_args()
     if args.manual and isinstance(args.id, list):
         parser.error("--manual only supports one identifier to --id")
+    if not args.manual and args.service_properties:
+        parser.error("--service-properties only allowed with --manual")
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -556,8 +565,20 @@ async def _autodiscover_device(args, loop):
 
 
 def _manual_device(args):
+    properties = {}
+    if args.service_properties:
+        # Service properties are specified according to Xvar1=val1Xvar2=var2"
+        # where X is any character not in any variable or value. Examples would be
+        # "":name=test:type=something" or ",name=test,type=something" (both are
+        # equal). No proper error checking here!
+        split_char = args.service_properties[0]
+        properties = dict(
+            var.split("=", maxsplit=1)
+            for var in args.service_properties[1:].split(split_char)
+        )
+
     config = AppleTV(IPv4Address(args.address), args.name)
-    service = ManualService(args.id, args.protocol, args.port, {})
+    service = ManualService(args.id, args.protocol, args.port, properties)
     service.credentials = getattr(args, f"{args.protocol.name.lower()}_credentials")
     service.password = args.raop_password
     config.add_service(service)
