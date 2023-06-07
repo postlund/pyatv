@@ -10,7 +10,9 @@ from pyatv.const import PairingRequirement, Protocol
 from pyatv.core import MutableService
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
+    AirPlayMajorVersion,
     get_pairing_requirement,
+    get_protocol_version,
     is_password_required,
     is_remote_control_supported,
     parse_features,
@@ -110,3 +112,19 @@ async def test_get_pairing_requirement(props, expected_req):
 def test_is_remote_control_supported(props, credentials, expected_supported):
     service = MutableService("id", Protocol.AirPlay, 0, props)
     assert is_remote_control_supported(service, credentials) == expected_supported
+
+
+@pytest.mark.parametrize(
+    "props, expected_version",
+    [
+        # Used by RAOP
+        ({"ft": "0xAABBCCDD"}, AirPlayMajorVersion.AirPlayV1),
+        ({"ft": "0xAABBCCDD,0xAABBCCDD"}, AirPlayMajorVersion.AirPlayV2),
+        # User by AirPlay
+        ({"features": "0xAABBCCDD"}, AirPlayMajorVersion.AirPlayV1),
+        ({"features": "0xAABBCCDD,0xAABBCCDD"}, AirPlayMajorVersion.AirPlayV2),
+    ],
+)
+def test_get_protocol_version(props, expected_version):
+    service = MutableService("id", Protocol.AirPlay, 0, props)
+    assert get_protocol_version(service) == expected_version

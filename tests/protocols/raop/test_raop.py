@@ -7,7 +7,6 @@ import pytest
 from pyatv.const import DeviceModel, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.airplay.utils import AirPlayFlags
 from pyatv.protocols.raop import device_info, scan, service_info
 
 RAOP_SERVICE = "_raop._tcp.local"

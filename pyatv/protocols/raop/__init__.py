@@ -7,7 +7,7 @@ import math
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions
-from pyatv.auth.hap_pairing import AuthenticationType, parse_credentials
+from pyatv.auth.hap_pairing import AuthenticationType
 from pyatv.const import (
     DeviceModel,
     FeatureName,
@@ -45,16 +45,18 @@ from pyatv.interface import (
     RemoteControl,
     Stream,
 )
-from pyatv.protocols.airplay import service_info as airplay_service_info
+from pyatv.protocols.airplay.auth import extract_credentials
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
-from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
-from pyatv.protocols.raop.audio_source import AudioSource, open_source
-from pyatv.protocols.raop.raop import (
-    PlaybackInfo,
-    RaopClient,
-    RaopContext,
-    RaopListener,
+from pyatv.protocols.airplay.utils import (
+    AirPlayFlags,
+    AirPlayMajorVersion,
+    get_protocol_version,
+    parse_features,
+    update_service_details,
 )
+from pyatv.protocols.raop.audio_source import AudioSource, open_source
+from pyatv.protocols.raop.protocols import StreamContext, airplayv1, airplayv2
+from pyatv.protocols.raop.stream_client import PlaybackInfo, RaopListener, StreamClient
 from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model
@@ -119,18 +121,18 @@ class RaopPlaybackManager:
         self._is_acquired: bool = False
         self._address: str = address
         self._port: int = port
-        self._context: RaopContext = RaopContext()
+        self._context: StreamContext = StreamContext()
         self._connection: Optional[HttpConnection] = None
         self._rtsp: Optional[RtspSession] = None
-        self._raop: Optional[RaopClient] = None
+        self._raop: Optional[StreamClient] = None
 
     @property
-    def context(self) -> RaopContext:
+    def context(self) -> StreamContext:
         """Return RTSP context if a session is active."""
         return self._context
 
     @property
-    def raop(self) -> Optional[RaopClient]:
+    def raop(self) -> Optional[StreamClient]:
         """Return RAOP client if a session is active."""
         return self._raop
 
@@ -141,15 +143,27 @@ class RaopPlaybackManager:
 
         self._is_acquired = True
 
-    async def setup(self) -> Tuple[RaopClient, RtspSession, RaopContext]:
+    async def setup(self, service: BaseService) -> Tuple[StreamClient, StreamContext]:
         """Set up a session or return active if it exists."""
         if self._raop and self._rtsp and self._context:
-            return self._raop, self._rtsp, self._context
+            return self._raop, self._context
 
         self._connection = await http_connect(self._address, self._port)
         self._rtsp = RtspSession(self._connection)
-        self._raop = RaopClient(self._rtsp, self._context)
-        return self._raop, self._rtsp, self._context
+
+        protocol_version = get_protocol_version(service)
+        _LOGGER.debug("Using AirPlay version %s", protocol_version)
+
+        protocol_class = (
+            airplayv1.AirPlayV1
+            if protocol_version == AirPlayMajorVersion.AirPlayV1
+            else airplayv2.AirPlayV2
+        )
+
+        self._raop = StreamClient(
+            self._rtsp, self._context, protocol_class(self._context, self._rtsp)
+        )
+        return self._raop, self._context
 
     async def teardown(self) -> None:
         """Tear down and disconnect current session."""
@@ -349,9 +363,9 @@ class RaopStream(Stream):
             Audio, Metadata, PushUpdater, RemoteControl
         )
         try:
-            client, _, context = await self.playback_manager.setup()
-            client.credentials = parse_credentials(self.core.service.credentials)
-            client.password = self.core.service.password
+            client, context = await self.playback_manager.setup(self.core.service)
+            context.credentials = extract_credentials(self.core.service)
+            context.password = self.core.service.password
 
             client.listener = self.listener
             await client.initialize(self.core.service.properties)
@@ -489,7 +503,7 @@ async def service_info(
         service.pairing = PairingRequirement.Disabled
     else:
         # Same behavior as for AirPlay expected, so re-using that here
-        await airplay_service_info(service, devinfo, services)
+        update_service_details(service)
 
 
 def setup(  # pylint: disable=too-many-locals

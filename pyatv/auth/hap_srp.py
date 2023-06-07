@@ -92,7 +92,7 @@ class SRPAuthHandler:
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        decrypted_tlv = read_tlv(chacha.decrypt(encrypted, nounce="PV-Msg02".encode()))
+        decrypted_tlv = read_tlv(chacha.decrypt(encrypted, nonce="PV-Msg02".encode()))
 
         identifier = decrypted_tlv[TlvValue.Identifier]
         signature = decrypted_tlv[TlvValue.Signature]
@@ -121,7 +121,7 @@ class SRPAuthHandler:
             }
         )
 
-        return chacha.encrypt(tlv, nounce="PV-Msg03".encode())
+        return chacha.encrypt(tlv, nonce="PV-Msg03".encode())
 
     def verify2(
         self, salt: str, output_info: str, input_info: str
@@ -200,14 +200,14 @@ class SRPAuthHandler:
             tlv.update(additional_data)
 
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        encrypted_data = chacha.encrypt(write_tlv(tlv), nounce="PS-Msg05".encode())
+        encrypted_data = chacha.encrypt(write_tlv(tlv), nonce="PS-Msg05".encode())
         log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
     def step4(self, encrypted_data):
         """Last pairing step."""
         chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nounce="PS-Msg06".encode())
+        decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nonce="PS-Msg06".encode())
 
         if not decrypted_tlv_bytes:
             raise exceptions.AuthenticationError("data decrypt failed")

@@ -13,8 +13,9 @@ from bitarray import bitarray
 
 from pyatv.protocols.dmap import parser
 from pyatv.protocols.dmap.tag_definitions import lookup_tag
+from pyatv.protocols.raop import alac
 from pyatv.protocols.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
-from pyatv.protocols.raop.raop import parse_transport
+from pyatv.protocols.raop.protocols.airplayv1 import parse_transport
 from pyatv.support.http import (
     BasicHttpServer,
     HttpRequest,
@@ -91,16 +92,6 @@ def verify_password(method):
         )
 
     return _impl
-
-
-def alac_decode(data: bytes) -> bytes:
-    """Decode an ALAC frame and return raw audio data."""
-    buffer = bitarray()
-    buffer.frombytes(data)
-
-    # Audio starts 23 bits in and last bit must be removed to keep byte alignment,
-    # otherwise an additional \x00 will be present at the end
-    return buffer[23:-1].tobytes()
 
 
 class FakeRaopState:
@@ -198,10 +189,10 @@ class AudioReceiver(asyncio.Protocol):
                         data, (self.state.remote_address, self.state.control_port)
                     )
             else:
-                self.state.add_audio_packet(header.seqno, alac_decode(data[12:]))
+                self.state.add_audio_packet(header.seqno, alac.decode(data[12:]))
         elif packet_type == 0x56:  # Retransmission
             original_packet = data[4:]  # Remove retransmission header
-            self.state.add_audio_packet(header.seqno, alac_decode(original_packet[12:]))
+            self.state.add_audio_packet(header.seqno, alac.decode(original_packet[12:]))
         else:
             _LOGGER.debug("Unhandled packet type: %d", packet_type)
 
@@ -324,6 +315,7 @@ class FakeRaopService(HttpSimpleRouter):
         self.add_route("POST", "/auth-setup", self.handle_auth_setup)
         self.add_route("GET", "/info", self.handle_info)
         self.add_route("TEARDOWN", "rtsp://*", self.handle_teardown)
+        self.add_route("FLUSH", "rtsp://*", self.handle_flush)
 
     async def start(self, start_web_server: bool):
         """Start the fake RAOP service."""
@@ -452,6 +444,15 @@ class FakeRaopService(HttpSimpleRouter):
     def handle_record(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming RECORD request."""
         _LOGGER.debug("Received RECORD: %s", request)
+        return HttpResponse(
+            "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
+        )
+
+    @requires_auth
+    @verify_password
+    def handle_flush(self, request: HttpRequest) -> Optional[HttpResponse]:
+        """Handle incoming FLUSH request."""
+        _LOGGER.debug("Received FLUSH: %s", request)
         return HttpResponse(
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )

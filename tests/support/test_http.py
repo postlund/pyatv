@@ -37,10 +37,7 @@ def test_parse_response_ok_first_line():
 
 
 def test_parse_response_missing_ending():
-    with pytest.raises(ValueError) as exc:
-        parse_response(b"HTTP/1.0 200 OK\r\n")
-
-    assert "missing end lines" in str(exc)
+    assert parse_response(b"HTTP/1.0 200 OK\r\n") == (None, b"HTTP/1.0 200 OK\r\n")
 
 
 def test_parse_response_headers():

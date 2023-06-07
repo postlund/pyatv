@@ -227,6 +227,7 @@ AirTunes).
 
 Audio streaming has been verified to work with these devices:
 
+* [airplay2-receiver](https://github.com/openairplay/airplay2-receiver) ([224b9660c31ed8624f46fdae9fcb5f44e5ec6c12](https://github.com/openairplay/airplay2-receiver/tree/224b9660c31ed8624f46fdae9fcb5f44e5ec6c12))
 * Apple TV 3 (v8.4.4)
 * Apple TV 4K gen 1 (v14.5)
 * HomePod Mini (v14.5)
