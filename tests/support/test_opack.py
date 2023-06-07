@@ -8,7 +8,7 @@ from uuid import UUID
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.support.opack import pack, unpack
+from pyatv.support.opack import _sized_int, pack, unpack
 
 # pack
 
@@ -50,6 +50,13 @@ def test_pack_larger_integers():
     assert pack(0x1FF) == b"\x31\xFF\x01"
     assert pack(0x1FFFFFF) == b"\x32\xFF\xFF\xFF\x01"
     assert pack(0x1FFFFFFFFFFFFFF) == b"\x33\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"
+
+
+def test_pack_sized_integers():
+    assert pack(_sized_int(0x1, 1)) == b"\x30\x01"
+    assert pack(_sized_int(0x1, 2)) == b"\x31\x01\x00"
+    assert pack(_sized_int(0x1, 4)) == b"\x32\x01\x00\x00\x00"
+    assert pack(_sized_int(0x1, 8)) == b"\x33\x01\x00\x00\x00\x00\x00\x00\x00"
 
 
 def test_pack_float64():
@@ -227,9 +234,16 @@ def test_unpack_small_integers():
 
 def test_unpack_larger_integers():
     assert unpack(b"\x30\x28") == (0x28, b"")
-    assert unpack(b"\x31\xFf\x01") == (0x1FF, b"")
-    assert unpack(b"\x32\xFF\xFF\x01") == (0x1FFFF, b"")
-    assert unpack(b"\x33\xFF\xFF\xFF\x01") == (0x1FFFFFF, b"")
+    assert unpack(b"\x31\xFF\x01") == (0x1FF, b"")
+    assert unpack(b"\x32\xFF\xFF\xFF\x01") == (0x1FFFFFF, b"")
+    assert unpack(b"\x33\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01") == (0x1FFFFFFFFFFFFFF, b"")
+
+
+def test_unpack_sized_integers():
+    assert getattr(unpack(b"\x30\x01")[0], "size") == 1
+    assert getattr(unpack(b"\x31\x01\x00")[0], "size") == 2
+    assert getattr(unpack(b"\x32\x01\x00\x00\x00")[0], "size") == 4
+    assert getattr(unpack(b"\x33\x01\x00\x00\x00\x00\x00\x00\x00")[0], "size") == 8
 
 
 def test_pack_unfloat32():
