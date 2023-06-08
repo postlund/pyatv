@@ -5,25 +5,33 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
-import typing
-import typing_extensions
+import sys
+
+if sys.version_info >= (3, 8):
+    import typing as typing_extensions
+else:
+    import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+@typing_extensions.final
 class PlaybackQueueCapabilities(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     REQUESTBYRANGE_FIELD_NUMBER: builtins.int
     REQUESTBYIDENTIFIERS_FIELD_NUMBER: builtins.int
     REQUESTBYREQUEST_FIELD_NUMBER: builtins.int
     requestByRange: builtins.bool
     requestByIdentifiers: builtins.bool
     requestByRequest: builtins.bool
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        requestByRange: typing.Optional[builtins.bool] = ...,
-        requestByIdentifiers: typing.Optional[builtins.bool] = ...,
-        requestByRequest: typing.Optional[builtins.bool] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["requestByIdentifiers",b"requestByIdentifiers","requestByRange",b"requestByRange","requestByRequest",b"requestByRequest"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["requestByIdentifiers",b"requestByIdentifiers","requestByRange",b"requestByRange","requestByRequest",b"requestByRequest"]) -> None: ...
+        requestByRange: builtins.bool | None = ...,
+        requestByIdentifiers: builtins.bool | None = ...,
+        requestByRequest: builtins.bool | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]) -> None: ...
+
 global___PlaybackQueueCapabilities = PlaybackQueueCapabilities
