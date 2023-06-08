@@ -131,6 +131,24 @@ def _parse_http_message(
     )
 
 
+def format_response(response: HttpResponse) -> bytes:
+    """Encode HTTP response."""
+    output = (
+        f"{response.protocol}/{response.version} {response.code} {response.message}\r\n"
+    )
+    if "Server" not in response.headers:
+        output += f"Server: {SERVER_NAME}\r\n"
+    for key, value in response.headers.items():
+        output += f"{key}: {value}\r\n"
+
+    body = response.body or b""
+    if body:
+        body = body.encode("utf-8") if isinstance(body, str) else body
+        output += f"Content-Length: {len(body)}\r\n"
+
+    return output.encode("utf-8") + b"\r\n" + body
+
+
 def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     """Parse HTTP response."""
     first_line, msg_headers, msg_body, rest = _parse_http_message(response)
@@ -148,6 +166,17 @@ def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     return (
         HttpResponse(protocol, version, int(code), message, msg_headers, msg_body),
         rest,
+    )
+
+
+def format_request(request: HttpRequest) -> bytes:
+    """Encode HTTP request."""
+    return _format_message(
+        request.method,
+        request.path,
+        protocol=f"{request.protocol}/{request.version}",
+        headers=request.headers,
+        body=request.body,
     )
 
 
@@ -516,20 +545,8 @@ class BasicHttpServer(asyncio.Protocol):
         return rest
 
     def _send_response(self, resp: HttpResponse) -> None:
-        response = f"{resp.protocol}/{resp.version} {resp.code} {resp.message}\r\n"
-        response += f"Server: {SERVER_NAME}\r\n"
-        for key, value in resp.headers.items():
-            response += f"{key}: {value}\r\n"
-
-        body = resp.body or b""
-        if body:
-            body = body.encode("utf-8") if isinstance(body, str) else body
-            response += f"Content-Length: {len(body)}\r\n"
-
         if self.transport:
-            self.transport.write(
-                self.process_sent(response.encode("utf-8") + b"\r\n" + body)
-            )
+            self.transport.write(self.process_sent(format_response(resp)))
 
     def _send_task_response(self, task: asyncio.Task) -> None:
         if response := task.result():
