@@ -1122,7 +1122,7 @@ class KeyboardListener(ABC):  # pylint: disable=too-few-public-methods
         self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
     ):
         """Keyboard focus state was updated."""
-        raise NotImplementedError()
+        raise exceptions.NotSupportedError()
 
 
 class Keyboard(ABC, StateProducer):
