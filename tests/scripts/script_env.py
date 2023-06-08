@@ -52,8 +52,6 @@ class ScriptTest(AioHTTPTestCase):
         AioHTTPTestCase.tearDown(self)
 
     def setup_environment(self):
-        airplay_port = self.server.port
-
         self.fake_udns.add_service(
             fake_udns.homesharing_service(
                 DMAP_ID, "Apple TV 1", "aaaa", addresses=[IP_1]
@@ -74,7 +72,7 @@ class ScriptTest(AioHTTPTestCase):
                 "Apple TV 2",
                 AIRPLAY_ID,
                 addresses=[IP_2],
-                port=airplay_port,
+                port=self.fake_atv.get_port(Protocol.AirPlay),
                 model="pyatv",
             )
         )

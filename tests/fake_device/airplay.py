@@ -6,9 +6,8 @@ import logging
 import plistlib
 from typing import Optional
 
-from aiohttp import web
-
-from pyatv.support.net import unused_port
+from pyatv.protocols.airplay.server_auth import AirPlayServerAuth
+from pyatv.support.http import BasicHttpServer, HttpResponse, http_server
 
 from tests.utils import simple_get
 
@@ -17,6 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # --- START AUTHENTICATION DATA VALID SESSION (FROM DEVICE) ---
 
+DEVICE_NAME = "Fake AirPlay ATV"
 DEVICE_IDENTIFIER = "75FBEEC773CFC563"
 DEVICE_AUTH_KEY = "8F06696F2542D70DF59286C761695C485F815BE3D152849E1361282D46AB1493"
 DEVICE_PIN = 2271
@@ -56,40 +56,43 @@ class FakeAirPlayState:
         self.injected_play_fails = 0
 
 
-class FakeAirPlayService:
+class FakeAirPlayService(AirPlayServerAuth):
     def __init__(self, state, app, loop):
+        super().__init__(name=DEVICE_NAME)
         self.state = state
-        self.port = None
         self.app = app
-        self.runner = None
+        self.loop = loop
+        self.server = None
+        self.port = None
 
-        self.app.router.add_post("/play", self.handle_airplay_play)
-        self.app.router.add_get("/playback-info", self.handle_airplay_playback_info)
-        self.app.router.add_post("/pair-pin-start", self.handle_pair_pin_start)
-        self.app.router.add_post("/pair-setup-pin", self.handle_pair_setup_pin)
-        self.app.router.add_post("/pair-verify", self.handle_airplay_pair_verify)
+        self.add_route("POST", "^/play$", self.handle_airplay_play)
+        self.add_route("GET", "^/playback-info$", self.handle_airplay_playback_info)
+        self.add_route("POST", "^/pair-setup-pin$", self.handle_pair_setup_pin)
 
     async def start(self, start_web_server):
-        if start_web_server:
-            self.port = unused_port()
-            self.runner = web.AppRunner(self.app)
-            await self.runner.setup()
-            site = web.TCPSite(self.runner, "0.0.0.0", self.port)
-            await site.start()
+        _LOGGER.debug("start %s", repr(start_web_server))
+        self.server, self.port = await http_server(
+            lambda: BasicHttpServer(self), address="0.0.0.0"
+        )
+        _LOGGER.debug("start %s %s", self.server, self.port)
 
     async def cleanup(self):
-        if self.runner:
-            await self.runner.cleanup()
+        if self.server:
+            self.server.close()
 
-    async def handle_airplay_play(self, request):
+    def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""
         self.state.play_count += 1
 
         if self.state.always_auth_fail or not self.state.has_authenticated:
-            return web.Response(status=503)
+            return HttpResponse(
+                request.protocol, request.version, 503, "Service Unavailable", {}, b""
+            )
         if self.state.injected_play_fails > 0:
             self.state.injected_play_fails -= 1
-            return web.Response(status=500)
+            return HttpResponse(
+                request.protocol, request.version, 500, "Internal Server Error", {}, b""
+            )
 
         headers = request.headers
 
@@ -97,8 +100,7 @@ class FakeAirPlayService:
         assert headers["User-Agent"] == "MediaControl/1.0"
         assert headers["Content-Type"] == "application/x-apple-binary-plist"
 
-        body = await request.read()
-        parsed = plistlib.loads(body)
+        parsed = plistlib.loads(request.body)
 
         self.state.last_airplay_url = parsed["Content-Location"]
         self.state.last_airplay_start = parsed["Start-Position"]
@@ -107,13 +109,33 @@ class FakeAirPlayService:
         # Simulate that fake device streams if URL is localhost
         if self.state.last_airplay_url.startswith("http://127.0.0.1"):
             _LOGGER.debug("Retrieving file from %s", self.state.last_airplay_url)
-            self.state.last_airplay_content, _ = await simple_get(
-                self.state.last_airplay_url
-            )
 
-        return web.Response(status=200)
+            async def get_url():
+                self.state.last_airplay_content, _ = await simple_get(
+                    self.state.last_airplay_url
+                )
 
-    async def handle_airplay_playback_info(self, request):
+                return HttpResponse(
+                    request.protocol,
+                    request.version,
+                    200,
+                    "OK",
+                    {},
+                    b"",
+                )
+
+            return self.loop.create_task(get_url())
+
+        return HttpResponse(
+            request.protocol,
+            request.version,
+            200,
+            "OK",
+            {},
+            b"",
+        )
+
+    def handle_airplay_playback_info(self, request):
         """Handle AirPlay playback-info requests."""
         if self.state.airplay_responses:
             response = self.state.airplay_responses.pop()
@@ -122,54 +144,95 @@ class FakeAirPlayService:
             response = AirPlayPlaybackResponse(
                 200, plistlib.dumps(plist).encode("utf-8")
             )
-        return web.Response(
-            body=response.content,
-            status=response.code,
-            content_type="text/x-apple-plist+xml",
+        return HttpResponse(
+            request.protocol,
+            request.version,
+            response.code,
+            "...",
+            {"Content-Type": "text/x-apple-plist+xml"},
+            response.content,
         )
 
-    # TODO: Extract device auth code to separate module and make it more
-    # general. This is a dumb implementation that verifies hard coded values,
-    # which is fine for regression but an implementation with better validation
-    # would be better.
-    async def handle_pair_pin_start(self, request):
-        """Handle start of AirPlay device authentication."""
-        return web.Response(status=200)  # Normally never fails
-
-    async def handle_pair_setup_pin(self, request):
+    def handle_pair_setup_pin(self, request):
         """Handle AirPlay device authentication requests."""
-        content = await request.content.read()
+        content = request.body
         hexlified = binascii.hexlify(content)
+        _LOGGER.debug("handle_pair_setup_pin %s", hexlified)
 
         if hexlified == _DEVICE_AUTH_STEP1:
-            return web.Response(
-                body=binascii.unhexlify(_DEVICE_AUTH_STEP1_RESP), status=200
+            return HttpResponse(
+                request.protocol,
+                request.version,
+                200,
+                "OK",
+                {},
+                binascii.unhexlify(_DEVICE_AUTH_STEP1_RESP),
             )
         elif hexlified == _DEVICE_AUTH_STEP2:
-            return web.Response(
-                body=binascii.unhexlify(_DEVICE_AUTH_STEP2_RESP), status=200
+            return HttpResponse(
+                request.protocol,
+                request.version,
+                200,
+                "OK",
+                {},
+                binascii.unhexlify(_DEVICE_AUTH_STEP2_RESP),
             )
         elif hexlified == _DEVICE_AUTH_STEP3:
-            return web.Response(
-                body=binascii.unhexlify(_DEVICE_AUTH_STEP3_RESP), status=200
+            return HttpResponse(
+                request.protocol,
+                request.version,
+                200,
+                "OK",
+                {},
+                binascii.unhexlify(_DEVICE_AUTH_STEP3_RESP),
             )
 
-        return web.Response(status=403)
+        return HttpResponse(
+            request.protocol, request.version, 403, "Not Authenticated", {}, b""
+        )
 
-    async def handle_airplay_pair_verify(self, request):
+    def handle_pair_verify(self, request):
+        """Handle incoming /pair-verify request."""
+        response = super().handle_pair_verify(request)
+        if response.code == 501:
+            return self.handle_legacy_pair_verify(request)
+        return response
+
+    def handle_legacy_pair_verify(self, request):
         """Handle verification of AirPlay device authentication."""
-        content = await request.content.read()
-        hexlified = binascii.hexlify(content)
+        hexlified = binascii.hexlify(request.body)
 
         if hexlified == _DEVICE_VERIFY_STEP1:
-            return web.Response(
-                body=binascii.unhexlify(_DEVICE_VERIFY_STEP1_RESP), status=200
+            return HttpResponse(
+                request.protocol,
+                request.version,
+                200,
+                "OK",
+                {},
+                binascii.unhexlify(_DEVICE_VERIFY_STEP1_RESP),
             )
         elif hexlified == _DEVICE_VERIFY_STEP2:
             self.state.has_authenticated = True
-            return web.Response(body=_DEVICE_VERIFY_STEP2_RESP, status=200)
+            return HttpResponse(
+                request.protocol,
+                request.version,
+                200,
+                "OK",
+                {},
+                binascii.unhexlify(_DEVICE_VERIFY_STEP2_RESP),
+            )
 
-        return web.Response(body=b"", status=403)
+        return HttpResponse(
+            request.protocol,
+            request.version,
+            403,
+            "Forbidden",
+            {},
+            b"",
+        )
+
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        pass
 
 
 class FakeAirPlayUseCases:
