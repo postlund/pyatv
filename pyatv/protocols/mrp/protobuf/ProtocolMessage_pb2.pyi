@@ -255,6 +255,7 @@ class ProtocolMessage(google.protobuf.message.Message):
         ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage._Type.ValueType  # 105
         AUDIO_FADE_MESSAGE: ProtocolMessage._Type.ValueType  # 106
         AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 107
+        CONFIGURE_CONNECTION_MESSAGE: ProtocolMessage._Type.ValueType  # 120
 
     class Type(_Type, metaclass=_TypeEnumTypeWrapper): ...
     UNKNOWN_MESSAGE: ProtocolMessage.Type.ValueType  # 0
@@ -339,6 +340,7 @@ class ProtocolMessage(google.protobuf.message.Message):
     ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage.Type.ValueType  # 105
     AUDIO_FADE_MESSAGE: ProtocolMessage.Type.ValueType  # 106
     AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 107
+    CONFIGURE_CONNECTION_MESSAGE: ProtocolMessage.Type.ValueType  # 120
 
     TYPE_FIELD_NUMBER: builtins.int
     IDENTIFIER_FIELD_NUMBER: builtins.int
