@@ -102,9 +102,9 @@ def map_range(
 
 def shift_hex_identifier(identifier: str) -> str:
     """Repeatably modify a unique identifier to avoid collisions."""
-    assert len(identifier) > 0
+    assert len(identifier) >= 2
     first, rest = identifier[:2], identifier[2:]
     shifted = f"{(int(first, 16) + 1) % 256:02x}"
-    if first.isupper():
+    if identifier.isupper():
         shifted = shifted.upper()
     return shifted + rest

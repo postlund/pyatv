@@ -8,6 +8,8 @@ import struct
 import typing
 import unicodedata
 
+from zeroconf import ServiceInfo
+
 from pyatv.support.collections import CaseInsensitiveDict
 
 _LOGGER = logging.getLogger(__name__)
@@ -191,6 +193,15 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
     if compression_offset is not None:
         buffer.seek(compression_offset)
     return ".".join(labels)
+
+
+def format_txt_dict(
+    data: typing.Mapping[typing.Any, typing.Any],
+) -> bytes:
+    """Format a `dict` into a DNS-SD TXT record."""
+    return ServiceInfo(
+        "_x.local.", "_x.local.", addresses=[], port=12345, properties=data
+    ).text
 
 
 def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> CaseInsensitiveDict[bytes]:
