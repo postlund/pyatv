@@ -10,7 +10,7 @@ from typing import Optional
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
 from pyatv.protocols.mrp import protobuf
-from pyatv.support.http import parse_request
+from pyatv.support.http import HttpResponse, format_response, parse_request
 from pyatv.support.packet import defpacket
 from pyatv.support.variant import read_variant, write_variant
 
@@ -39,19 +39,26 @@ class EventChannel(AbstractHAPChannel):
                 _LOGGER.debug("Got message on event channel: %s", request)
 
                 # Send a positive response to satisfy the other end of the channel
-                # TODO: Add public method to pyatv.http to format a message
                 headers = {
-                    "Content-Length": 0,
-                    "Audio-Latency": 0,
-                    "Server": request.headers.get("Server"),
-                    "CSeq": request.headers.get("CSeq"),
+                    "Content-Length": "0",
+                    "Audio-Latency": "0",
                 }
-                response = (
-                    f"{request.protocol}/{request.version} 200 OK\r\n"
-                    + "\r\n".join(f"{key}: {value}" for key, value in headers.items())
-                    + "\r\n\r\n"
+                if "Server" in request.headers:
+                    headers["Server"] = request.headers["Server"]
+                if "CSeq" in request.headers:
+                    headers["CSeq"] = request.headers["CSeq"]
+                self.send(
+                    format_response(
+                        HttpResponse(
+                            request.protocol,
+                            request.version,
+                            200,
+                            "OK",
+                            headers,
+                            b"",
+                        )
+                    )
                 )
-                self.send(response.encode("utf-8"))
             except Exception:
                 _LOGGER.exception("Failed to handle message on event channel")
 

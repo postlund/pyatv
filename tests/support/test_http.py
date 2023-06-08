@@ -8,11 +8,15 @@ from deepdiff import DeepDiff
 import pytest
 
 from pyatv.support.http import (
+    SERVER_NAME,
+    USER_AGENT,
     BasicHttpServer,
     HttpRequest,
     HttpResponse,
     HttpSession,
     HttpSimpleRouter,
+    format_request,
+    format_response,
     http_connect,
     http_server,
     parse_request,
@@ -120,6 +124,35 @@ def test_parse_response_ignore_header_case():
     assert rest == b"extra"
 
 
+@pytest.mark.parametrize(
+    "response,expected",
+    [
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("FOO", "3.14", 200, "OK", {}, b""),
+            f"FOO/3.14 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 404, "Not Found", {}, b""),
+            f"HTTP/1.1 404 Not Found\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {"A": "B"}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b"test"),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_response(response, expected):
+    assert format_response(response) == expected
+
+
 def test_parse_request_ok_first_line():
     req, rest = parse_request(b"GET /test HTTP/1.0\r\n\r\n")
     assert req.method == "GET"
@@ -138,6 +171,39 @@ def test_parse_request_arbitrary_protocol_header():
 def test_parse_request_method_with_underscore():
     req, _ = parse_request(b"SOME_METHOD /test FOO/3.14\r\n\r\n")
     assert req.method == "SOME_METHOD"
+
+
+@pytest.mark.parametrize(
+    "request_,expected",
+    [
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("SOME METHOD", "/test", "HTTP", "1.1", {}, b""),
+            f"SOME METHOD /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/example", "HTTP", "1.1", {}, b""),
+            f"GET /example HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "FOO", "3.14", {}, b""),
+            f"GET /test FOO/3.14\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {"A": "B"}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b"test"),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_request(request_, expected):
+    assert format_request(request_) == expected
 
 
 # BASIC HTTP SERVER
