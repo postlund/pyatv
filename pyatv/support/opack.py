@@ -9,8 +9,24 @@ from datetime import datetime
 
 # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
 import struct
-from typing import Tuple
+from typing import Dict, Tuple, Type
 from uuid import UUID
+
+_SIZED_INT_TYPES: Dict[int, Type] = {}
+
+
+def _sized_int(value: int, size: int) -> int:
+    """Return an int subclass with a size attribute.
+
+    This preserves the original encoded size, and allows re-encoding to the same
+    size.
+    """
+    if size in _SIZED_INT_TYPES:
+        type_ = _SIZED_INT_TYPES[size]
+    else:
+        type_ = type(f"int_{size}b", (int,), {"size": size})
+        _SIZED_INT_TYPES[size] = type_
+    return type_(value)
 
 
 def pack(data: object) -> bytes:
@@ -29,13 +45,14 @@ def _pack(data, object_list):
     elif isinstance(data, datetime):
         raise NotImplementedError("absolute time")
     elif isinstance(data, int):
-        if data < 0x28:
+        size_hint = getattr(data, "size", None)  # if created with _sized_int()
+        if data < 0x28 and not size_hint:
             packed_bytes = bytes([data + 8])
-        elif data <= 0xFF:
+        elif (data <= 0xFF and not size_hint) or size_hint == 1:
             packed_bytes = bytes([0x30]) + data.to_bytes(1, byteorder="little")
-        elif data <= 0xFFFF:
+        elif (data <= 0xFFFF and not size_hint) or size_hint == 2:
             packed_bytes = bytes([0x31]) + data.to_bytes(2, byteorder="little")
-        elif data <= 0xFFFFFFFF:
+        elif (data <= 0xFFFFFFFF and not size_hint) or size_hint == 4:
             packed_bytes = bytes([0x32]) + data.to_bytes(4, byteorder="little")
         elif data <= 0xFFFFFFFFFFFFFFFF:
             packed_bytes = bytes([0x33]) + data.to_bytes(8, byteorder="little")
@@ -148,7 +165,9 @@ def _unpack(data, object_list):
     elif (data[0] & 0xF0) == 0x30:
         noof_bytes = 2 ** (data[0] & 0xF)
         value, remaining = (
-            int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little"),
+            _sized_int(
+                int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little"), noof_bytes
+            ),
             data[1 + noof_bytes :],
         )
     elif 0x40 <= data[0] <= 0x60:
