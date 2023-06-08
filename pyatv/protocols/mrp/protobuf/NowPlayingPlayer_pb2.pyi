@@ -5,25 +5,33 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
-import typing
-import typing_extensions
+import sys
+
+if sys.version_info >= (3, 8):
+    import typing as typing_extensions
+else:
+    import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+@typing_extensions.final
 class NowPlayingPlayer(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IDENTIFIER_FIELD_NUMBER: builtins.int
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     ISDEFAULTPLAYER_FIELD_NUMBER: builtins.int
-    identifier: typing.Text
-    displayName: typing.Text
+    identifier: builtins.str
+    displayName: builtins.str
     isDefaultPlayer: builtins.bool
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        identifier: typing.Optional[typing.Text] = ...,
-        displayName: typing.Optional[typing.Text] = ...,
-        isDefaultPlayer: typing.Optional[builtins.bool] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["displayName",b"displayName","identifier",b"identifier","isDefaultPlayer",b"isDefaultPlayer"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["displayName",b"displayName","identifier",b"identifier","isDefaultPlayer",b"isDefaultPlayer"]) -> None: ...
+        identifier: builtins.str | None = ...,
+        displayName: builtins.str | None = ...,
+        isDefaultPlayer: builtins.bool | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["displayName", b"displayName", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["displayName", b"displayName", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer"]) -> None: ...
+
 global___NowPlayingPlayer = NowPlayingPlayer

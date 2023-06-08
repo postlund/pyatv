@@ -6,17 +6,25 @@ import builtins
 import google.protobuf.descriptor
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
+import sys
 import typing
-import typing_extensions
+
+if sys.version_info >= (3, 10):
+    import typing as typing_extensions
+else:
+    import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+@typing_extensions.final
 class ErrorCode(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     class _Enum:
-        ValueType = typing.NewType('ValueType', builtins.int)
+        ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ErrorCode._Enum.ValueType], builtins.type):
+
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ErrorCode._Enum.ValueType], builtins.type):  # noqa: F821
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         NoError: ErrorCode._Enum.ValueType  # 0
         UnknownError: ErrorCode._Enum.ValueType  # 1
@@ -37,10 +45,8 @@ class ErrorCode(google.protobuf.message.Message):
         RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode._Enum.ValueType  # 16
         TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode._Enum.ValueType  # 17
         """The system will ignore the volume adjustment until overridden."""
-
         VolumeValueIsOutOfRange: ErrorCode._Enum.ValueType  # 18
         """between 0.0 and 1.0, where 1.0 is the loudest"""
-
         VolumeIsAlreadyAtTheMaximumValue: ErrorCode._Enum.ValueType  # 19
         VolumeIsAlreadyMuted: ErrorCode._Enum.ValueType  # 20
         VoiceInputEndpointDoesNotExist: ErrorCode._Enum.ValueType  # 21
@@ -84,9 +90,8 @@ class ErrorCode(google.protobuf.message.Message):
         OutputContextModificationCausedADeviceToBecomeAProxyGroupPlayer: ErrorCode._Enum.ValueType  # 201
         OutputContextModificationRequestedNoTopologyChange: ErrorCode._Enum.ValueType  # 202
         OtherUnknownError: ErrorCode._Enum.ValueType  # 299
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
-        pass
 
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
     NoError: ErrorCode.Enum.ValueType  # 0
     UnknownError: ErrorCode.Enum.ValueType  # 1
     InvalidOperation: ErrorCode.Enum.ValueType  # 2
@@ -106,10 +111,8 @@ class ErrorCode(google.protobuf.message.Message):
     RequestedDataIsOutOfDateAndShouldBeRequestedAgain: ErrorCode.Enum.ValueType  # 16
     TheDevicesEnforcedVolumeLimitHasBeenExceeded: ErrorCode.Enum.ValueType  # 17
     """The system will ignore the volume adjustment until overridden."""
-
     VolumeValueIsOutOfRange: ErrorCode.Enum.ValueType  # 18
     """between 0.0 and 1.0, where 1.0 is the loudest"""
-
     VolumeIsAlreadyAtTheMaximumValue: ErrorCode.Enum.ValueType  # 19
     VolumeIsAlreadyMuted: ErrorCode.Enum.ValueType  # 20
     VoiceInputEndpointDoesNotExist: ErrorCode.Enum.ValueType  # 21
@@ -154,16 +157,21 @@ class ErrorCode(google.protobuf.message.Message):
     OutputContextModificationRequestedNoTopologyChange: ErrorCode.Enum.ValueType  # 202
     OtherUnknownError: ErrorCode.Enum.ValueType  # 299
 
-    def __init__(self,
-        ) -> None: ...
+    def __init__(
+        self,
+    ) -> None: ...
+
 global___ErrorCode = ErrorCode
 
+@typing_extensions.final
 class ProtocolMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     class _Type:
-        ValueType = typing.NewType('ValueType', builtins.int)
+        ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ProtocolMessage._Type.ValueType], builtins.type):
+
+    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ProtocolMessage._Type.ValueType], builtins.type):  # noqa: F821
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UNKNOWN_MESSAGE: ProtocolMessage._Type.ValueType  # 0
         SEND_COMMAND_MESSAGE: ProtocolMessage._Type.ValueType  # 1
@@ -232,7 +240,6 @@ class ProtocolMessage(google.protobuf.message.Message):
         GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage._Type.ValueType  # 68
         REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage._Type.ValueType  # 69
         """Same as 66?"""
-
         PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage._Type.ValueType  # 70
         PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 71
         SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage._Type.ValueType  # 72
@@ -248,9 +255,8 @@ class ProtocolMessage(google.protobuf.message.Message):
         ORIGIN_CLIENT_PROPERTIES_MESSAGE: ProtocolMessage._Type.ValueType  # 105
         AUDIO_FADE_MESSAGE: ProtocolMessage._Type.ValueType  # 106
         AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage._Type.ValueType  # 107
-    class Type(_Type, metaclass=_TypeEnumTypeWrapper):
-        pass
 
+    class Type(_Type, metaclass=_TypeEnumTypeWrapper): ...
     UNKNOWN_MESSAGE: ProtocolMessage.Type.ValueType  # 0
     SEND_COMMAND_MESSAGE: ProtocolMessage.Type.ValueType  # 1
     SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 2
@@ -318,7 +324,6 @@ class ProtocolMessage(google.protobuf.message.Message):
     GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE: ProtocolMessage.Type.ValueType  # 68
     REMOVE_OUTPUT_DEVICES_MESSAGE2: ProtocolMessage.Type.ValueType  # 69
     """Same as 66?"""
-
     PLAYBACK_SESSION_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType  # 70
     PLAYBACK_SESSION_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 71
     SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE: ProtocolMessage.Type.ValueType  # 72
@@ -344,23 +349,24 @@ class ProtocolMessage(google.protobuf.message.Message):
     UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
     type: global___ProtocolMessage.Type.ValueType
     """Identifies which underlying message is filled in."""
-
-    identifier: typing.Text
-    authenticationToken: typing.Text
+    identifier: builtins.str
+    authenticationToken: builtins.str
     errorCode: global___ErrorCode.Enum.ValueType
     timestamp: builtins.int
-    errorDescription: typing.Text
-    uniqueIdentifier: typing.Text
-    def __init__(self,
+    errorDescription: builtins.str
+    uniqueIdentifier: builtins.str
+    def __init__(
+        self,
         *,
-        type: typing.Optional[global___ProtocolMessage.Type.ValueType] = ...,
-        identifier: typing.Optional[typing.Text] = ...,
-        authenticationToken: typing.Optional[typing.Text] = ...,
-        errorCode: typing.Optional[global___ErrorCode.Enum.ValueType] = ...,
-        timestamp: typing.Optional[builtins.int] = ...,
-        errorDescription: typing.Optional[typing.Text] = ...,
-        uniqueIdentifier: typing.Optional[typing.Text] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["authenticationToken",b"authenticationToken","errorCode",b"errorCode","errorDescription",b"errorDescription","identifier",b"identifier","timestamp",b"timestamp","type",b"type","uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
+        type: global___ProtocolMessage.Type.ValueType | None = ...,
+        identifier: builtins.str | None = ...,
+        authenticationToken: builtins.str | None = ...,
+        errorCode: global___ErrorCode.Enum.ValueType | None = ...,
+        timestamp: builtins.int | None = ...,
+        errorDescription: builtins.str | None = ...,
+        uniqueIdentifier: builtins.str | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]) -> None: ...
+
 global___ProtocolMessage = ProtocolMessage
