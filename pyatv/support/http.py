@@ -11,10 +11,10 @@ from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 import async_timeout
+from requests.structures import CaseInsensitiveDict
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
-from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,16 +47,18 @@ def _format_message(
 ) -> bytes:
     if isinstance(body, str):
         body = body.encode("utf-8")
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
 
     msg = f"{method} {uri} {protocol}"
-    if "User-Agent" not in (headers or {}):
+    if "User-Agent" not in headers:
         msg += f"\r\nUser-Agent: {user_agent}"
     if content_type:
         msg += f"\r\nContent-Type: {content_type}"
     if body:
         msg += f"\r\nContent-Length: {len(body) if body else 0}"
 
-    for key, value in (headers or {}).items():
+    for key, value in headers.items():
         msg += f"\r\n{key}: {value}"
     msg += 2 * "\r\n"
 
@@ -96,7 +98,7 @@ def _key_value(line: str) -> Tuple[str, str]:
 
 def _parse_http_message(
     message: bytes,
-) -> Tuple[Optional[str], CaseInsensitiveDict[str], Union[bytes, str], bytes]:
+) -> Tuple[Optional[str], CaseInsensitiveDict, Union[bytes, str], bytes]:
     """Parse HTTP response."""
     try:
         header_str, body = message.split(b"\r\n\r\n", maxsplit=1)
@@ -106,22 +108,18 @@ def _parse_http_message(
 
     msg_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
 
-    # TODO: pylint on python 3.6 does not seem to find CaseInsensitiveDict.get, but
-    # other versions seems to work fine. Remove this ignore when python 3.6 is dropped.
-    content_length = int(
-        msg_headers.get("Content-Length", 0)  # pylint: disable=no-member
-    )
+    content_length = int(msg_headers.get("Content-Length", 0))
     if len(body or []) < content_length:
         return None, CaseInsensitiveDict(), b"", message
 
     msg_body: Union[str, bytes] = body[0:content_length]
 
     # Assume body is text unless content type is application/octet-stream
-    # TODO: Remove pylint disable when python 3.6 is dropped
-    if not msg_headers.get("Content-Type", "").startswith(  # pylint: disable=no-member
-        "application"
-    ):
-        msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+    if not msg_headers.get("Content-Type", "").startswith("application"):
+        try:
+            msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+        except UnicodeDecodeError:
+            pass
 
     return (
         headers[0],
@@ -133,12 +131,16 @@ def _parse_http_message(
 
 def format_response(response: HttpResponse) -> bytes:
     """Encode HTTP response."""
+    headers = response.headers
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
+
     output = (
         f"{response.protocol}/{response.version} {response.code} {response.message}\r\n"
     )
-    if "Server" not in response.headers:
+    if "Server" not in headers:
         output += f"Server: {SERVER_NAME}\r\n"
-    for key, value in response.headers.items():
+    for key, value in headers.items():
         output += f"{key}: {value}\r\n"
 
     body = response.body or b""
