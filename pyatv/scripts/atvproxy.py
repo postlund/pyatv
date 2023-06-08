@@ -18,6 +18,7 @@ from pyatv.auth.hap_channel import AbstractHAPChannel, setup_channel
 from pyatv.auth.hap_pairing import PairVerifyProcedure, parse_credentials
 from pyatv.auth.hap_session import HAPSession
 from pyatv.auth.hap_srp import SRPAuthHandler, hkdf_expand
+from pyatv.auth.server_auth import SERVER_IDENTIFIER
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.protocols.airplay import extract_credentials, verify_connection
@@ -33,9 +34,6 @@ from pyatv.protocols.airplay.remote_control import (
     EVENTS_READ_INFO,
     EVENTS_SALT,
     EVENTS_WRITE_INFO,
-)
-from pyatv.protocols.airplay.server_auth import (
-    SERVER_IDENTIFIER as AIRPLAY_SERVER_IDENTIFIER,
 )
 from pyatv.protocols.airplay.server_auth import BaseAirPlayServerAuth
 from pyatv.protocols.airplay.utils import (
@@ -56,15 +54,11 @@ from pyatv.protocols.companion.protocol import (
     FrameType,
     MessageType,
 )
-from pyatv.protocols.companion.server_auth import (
-    SERVER_IDENTIFIER as COMPANION_SERVER_IDENTIFIER,
-)
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.protocols.mrp import protobuf
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.protocols.mrp.server_auth import MrpServerAuth
-from pyatv.protocols.mrp.server_auth import SERVER_IDENTIFIER as MRP_SERVER_IDENTIFIER
 from pyatv.scripts import log_current_version
 from pyatv.support import (
     chacha20,
@@ -89,7 +83,6 @@ _LOGGER = logging.getLogger(__name__)
 DEVICE_NAME = "Proxy"
 BLUETOOTH_ADDRESS = "DA:97:7C:BA:A3:7A"
 AIRPLAY_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A6A"
-MEDIA_REMOTE_ROUTE_IDENTIFIER = "DA4A238E-EE6C-4F5B-9691-4D0A8FC03532"
 
 PROPERTY_CASE_MAP = {
     "rpad": "rpAD",
@@ -392,6 +385,24 @@ class CompanionAppleTVProxy(
                     "_pubID": shift_hex_identifier(payload["_pubID"]),
                 }
             )
+            if "_siriInfo" in payload:
+                siri_info = payload["_siriInfo"]
+                if "peerData" in siri_info:
+                    peer_data = siri_info["peerData"]
+                    if "sharedUserIdentifier" in peer_data:
+                        peer_data["sharedUserIdentifier"] = shift_hex_identifier(
+                            peer_data["sharedUserIdentifier"]
+                        )
+                if "audio-session-coordination.system-info" in siri_info:
+                    audio_system_info = siri_info[
+                        "audio-session-coordination.system-info"
+                    ]
+                    if "mediaRemoteGroupIdentifier" in audio_system_info:
+                        audio_system_info[
+                            "mediaRemoteGroupIdentifier"
+                        ] = shift_hex_identifier(
+                            audio_system_info["mediaRemoteGroupIdentifier"]
+                        )
 
     def process_incoming_data(self, frame_type: FrameType, data: Dict[str, Any]):
         """Apply any required modifications to incoming data."""
@@ -406,15 +417,15 @@ class CompanionAppleTVProxy(
             payload.update(
                 {
                     "name": DEVICE_NAME,
-                    "_i": "cafecafecafe",
-                    "_idsID": COMPANION_SERVER_IDENTIFIER,
+                    "_i": shift_hex_identifier(payload["_i"]),
+                    "_idsID": shift_hex_identifier(payload["_idsID"]),
                     "_pubID": BLUETOOTH_ADDRESS,
                 }
             )
             if "_mrID" in payload:
-                payload["_mrID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                payload["_mrID"] = SERVER_IDENTIFIER
             if "_mRtID" in payload:
-                payload["_mRtID"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                payload["_mRtID"] = SERVER_IDENTIFIER
             if "_siriInfo" in payload:
                 siri_info = payload["_siriInfo"]
                 if "peerData" in siri_info:
@@ -434,10 +445,16 @@ class CompanionAppleTVProxy(
                     audio_system_info = siri_info[
                         "audio-session-coordination.system-info"
                     ]
+                    if "mediaRemoteGroupIdentifier" in audio_system_info:
+                        audio_system_info[
+                            "mediaRemoteGroupIdentifier"
+                        ] = shift_hex_identifier(
+                            audio_system_info["mediaRemoteGroupIdentifier"]
+                        )
                     if "mediaRemoteRouteIdentifier" in audio_system_info:
                         audio_system_info[
                             "mediaRemoteRouteIdentifier"
-                        ] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                        ] = SERVER_IDENTIFIER
 
 
 class AirPlayChannelAppleTVProxy(AbstractHAPChannel):
@@ -804,10 +821,10 @@ class AirPlayDataStreamChannelAppleTVProxy(
     ) -> Optional[protobuf.ProtocolMessage]:
         if message.type == protobuf.DEVICE_INFO_MESSAGE:
             inner = cast(protobuf.DeviceInfoMessage, message.inner())
-            inner.uniqueIdentifier = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            inner.uniqueIdentifier = SERVER_IDENTIFIER
             inner.name = DEVICE_NAME
             if inner.deviceUID:
-                inner.deviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                inner.deviceUID = SERVER_IDENTIFIER
             if inner.managedConfigDeviceID:
                 inner.managedConfigDeviceID = shift_hex_identifier(
                     inner.managedConfigDeviceID
@@ -837,7 +854,7 @@ class AirPlayDataStreamChannelAppleTVProxy(
             for device in list(inner.outputDevices) + list(
                 inner.clusterAwareOutputDevices
             ):
-                device.uniqueIdentifier = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                device.uniqueIdentifier = SERVER_IDENTIFIER
                 device.name = DEVICE_NAME
                 if device.bluetoothID and device.bluetoothID != "00:00:00:00:00:00":
                     device.bluetoothID = BLUETOOTH_ADDRESS
@@ -850,19 +867,19 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 if device.airPlayGroupID:
                     device.airPlayGroupID = shift_hex_identifier(device.airPlayGroupID)
                 if device.primaryUID:
-                    device.primaryUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                    device.primaryUID = SERVER_IDENTIFIER
             return message
 
         if message.type == protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE:
             inner = cast(
                 protobuf.VolumeControlCapabilitiesDidChangeMessage, message.inner()
             )
-            inner.outputDeviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            inner.outputDeviceUID = SERVER_IDENTIFIER
             return message
 
         if message.type == protobuf.VOLUME_DID_CHANGE_MESSAGE:
             inner = cast(protobuf.VolumeDidChangeMessage, message.inner())
-            inner.outputDeviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            inner.outputDeviceUID = SERVER_IDENTIFIER
             return message
 
         return None
@@ -1001,7 +1018,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
     def _rewrite_info(self, info: Mapping[str, Any]) -> Mapping[str, Any]:
         output = dict(info)
         if "psi" in info:
-            output["psi"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            output["psi"] = SERVER_IDENTIFIER
         if "name" in info:
             output["name"] = DEVICE_NAME
         if "senderAddress" in info:
@@ -1009,7 +1026,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         if "deviceID" in info:
             output["deviceID"] = shift_hex_identifier(info["deviceID"])
         if "pi" in info:
-            output["pi"] = AIRPLAY_SERVER_IDENTIFIER
+            output["pi"] = shift_hex_identifier(output["pi"])
         if "txtAirPlay" in info:
             dns_txt = info["txtAirPlay"]
             dns_data = {
@@ -1031,11 +1048,9 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         if "deviceid" in info:
             output["deviceid"] = shift_hex_identifier(info["deviceid"])
         if "pi" in info:
-            output["pi"] = AIRPLAY_SERVER_IDENTIFIER
-        # psi should be AIRPLAY_SERVER_IDENTIFIER and COMPANION_SERVER_IDENTIFIER
-        # but also different from MEDIA_REMOTE_ROUTE_IDENTIFIER ?
+            output["pi"] = shift_hex_identifier(output["pi"])
         if "psi" in info:
-            output["psi"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            output["psi"] = SERVER_IDENTIFIER
         if "pk" in info:
             output["pk"] = binascii.hexlify(
                 BaseAirPlayServerAuth.keys.auth_pub
@@ -1342,7 +1357,7 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
         "macAddress": "40:cb:c0:12:34:56",
         "BluetoothAddress": "False",
         "Name": name,
-        "UniqueIdentifier": MRP_SERVER_IDENTIFIER,
+        "UniqueIdentifier": SERVER_IDENTIFIER,
         "SystemBuildVersion": "17K499",
         "LocalAirPlayReceiverPairingIdentity": AIRPLAY_IDENTIFIER,
     }
@@ -1367,7 +1382,7 @@ async def publish_companion_service(
         "rpAD": "3b2210518c58",
         "rpHI": "91756a18d8e5",
         "rpBA": BLUETOOTH_ADDRESS,
-        "rpMRtID": MEDIA_REMOTE_ROUTE_IDENTIFIER,
+        "rpMRtID": SERVER_IDENTIFIER,
     }
 
     return await mdns.publish(
