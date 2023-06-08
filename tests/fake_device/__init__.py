@@ -74,7 +74,7 @@ class FakeAppleTV:
         self.services[protocol] = FakeService(service, state, usecase)
         return state, usecase
 
-    # Disclaimer: When running in "test mode", only MRP and Companion is supported here!
+    # Disclaimer: When running in "test mode", only MRP, Companion and AirPlay are supported here!
     def get_port(self, protocol: Protocol) -> int:
         return self.services[protocol].service.port
 

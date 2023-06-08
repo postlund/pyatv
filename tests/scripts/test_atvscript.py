@@ -63,7 +63,10 @@ class AtvscriptTest(ScriptTest):
                                 "protocol": "mrp",
                                 "port": self.fake_atv.get_port(Protocol.MRP),
                             },
-                            {"protocol": "airplay", "port": self.server.port},
+                            {
+                                "protocol": "airplay",
+                                "port": self.fake_atv.get_port(Protocol.AirPlay),
+                            },
                         ],
                     },
                 ],
