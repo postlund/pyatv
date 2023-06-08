@@ -264,6 +264,56 @@ async def test_server_with_router():
     server.close()
 
 
+@pytest.mark.asyncio
+async def test_server_process_received():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_received") as mock:
+        mock.side_effect = lambda data: data.replace(b"/foo", b"/bar")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 123
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_process_sent():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_sent") as mock:
+        mock.side_effect = lambda data: data.replace(b"200", b"456")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 456
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_async_handler():
+    class TestRouter(HttpSimpleRouter):
+        def __init__(self):
+            super().__init__()
+            self.add_route("GET", "/baz", self.baz)
+
+        def baz(self, request):
+            return asyncio.create_task(self.async_baz(request))
+
+        async def async_baz(self, request):
+            return HttpResponse("HTTP", "1.1", 200, "baz", {}, request.body)
+
+    client, server = await serve_and_connect(TestRouter())
+
+    resp = await client.get("/baz", allow_error=True)
+    assert resp.code == 200
+    assert resp.message == "baz"
+
+    server.close()
+
+
 # HTTP CONNECTION
 
 

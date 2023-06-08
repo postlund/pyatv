@@ -9,19 +9,25 @@ from collections import namedtuple
 import hashlib
 import logging
 import plistlib
+from typing import Optional, Tuple
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.x25519 import (
+    X25519PrivateKey,
+    X25519PublicKey,
+)
 from srptools import SRPContext, SRPServerSession, constants
 
 from pyatv.auth.hap_srp import hkdf_expand
 from pyatv.auth.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
-from pyatv.support import http
+from pyatv.protocols.airplay.auth.hap_transient import TRANSIENT_PIN
+from pyatv.support import chacha20, http, log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
-PIN_CODE = 3939
+PIN_CODE = 1111
+SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A6A"
 PRIVATE_KEY = 32 * b"\xAA"
 
 ServerKeys = namedtuple("ServerKeys", "sign auth auth_pub verify verify_pub")
@@ -46,7 +52,7 @@ def generate_keys(seed):
     )
 
 
-def new_server_session(keys, pin):
+def new_server_session(keys, pin) -> Tuple[SRPServerSession, bytes]:
     """Create SRP server session."""
     context = SRPContext(
         "Pair-Setup",
@@ -127,25 +133,302 @@ class PlayFair:
         return None
 
 
-class AirPlayServerAuth(http.HttpSimpleRouter, ABC):
-    """Server-side implementation of AirPlau authentication."""
+class BaseAirPlayServerAuth(http.HttpSimpleRouter, ABC):
+    """Shared part of server-side implementation of AirPlay authentication."""
 
-    def __init__(self, name: str, pin: int = PIN_CODE):
-        """Initialize a new instance if CompanionServerAuth."""
+    keys = generate_keys(PRIVATE_KEY)
+
+    def __init__(self, name: str, unique_id=SERVER_IDENTIFIER, pin: int = PIN_CODE):
+        """Initialize a new instance if BaseAirPlayServerAuth."""
         super().__init__()
-        self.keys = generate_keys(PRIVATE_KEY)
         self.name = name
-        self.session, self.salt = new_server_session(self.keys, str(pin))
-        self.add_route("GET", "/info", self.handle_info)
-        self.add_route("POST", "/pair-setup", self.handle_pair_setup)
+        self.unique_id = unique_id.encode()
+        self.pin = pin
+        self.session: Optional[SRPServerSession] = None
+        self.salt: Optional[bytes] = None
+        self.shared_key: Optional[bytes] = None
+        self.input_key: Optional[bytes] = None
+        self.output_key: Optional[bytes] = None
+        self.add_route("POST", "^/pair-pin-start$", self.handle_pair_pin_start)
+        self.add_route("POST", "^/pair-setup$", self.handle_pair_setup)
+        self.add_route("POST", "^/pair-verify$", self.handle_pair_verify)
+
+    def handle_pair_pin_start(self, request: http.HttpRequest):
+        """Handle incoming /pair-pin-start request."""
+        return http.HttpResponse(
+            request.protocol,
+            request.version,
+            200,
+            "OK",
+            {"CSeq": request.headers.get("CSeq", "1")},
+            b"",
+        )
+
+    def handle_pair_setup(self, request: http.HttpRequest):
+        """Handle incoming /pair-setup request."""
+        auth_version = request.headers.get("X-Apple-HKP")
+        if auth_version == "3":
+            return self.handle_pair_setup_hap(request)
+        if auth_version == "4":
+            return self.handle_pair_setup_hap_transient(request)
+        return http.HttpResponse(
+            request.protocol,
+            request.version,
+            501,
+            "Not implemented",
+            {"CSeq": request.headers.get("CSeq", "1")},
+            b"",
+        )
+
+    def handle_pair_setup_hap(self, request: http.HttpRequest):
+        """Handle incoming HAP /pair-setup request."""
+        body = (
+            request.body
+            if isinstance(request.body, bytes)
+            else request.body.encode("utf-8")
+        )
+        pairing_data = read_tlv(body)
+        _LOGGER.debug("Pair-setup message received: %s", pairing_data)
+
+        seqno = int.from_bytes(pairing_data[TlvValue.SeqNo], byteorder="little")
+        tlv = getattr(self, f"_m{seqno}_setup".format(seqno))(
+            pairing_data, transient=False
+        )
+        return http.HttpResponse(
+            request.protocol,
+            request.version,
+            200,
+            "OK",
+            {
+                "CSeq": request.headers.get("CSeq", "1"),
+                "Content-Type": "application/x-apple-binary-plist",
+            },
+            tlv,
+        )
+
+    def handle_pair_setup_hap_transient(self, request: http.HttpRequest):
+        """Handle incoming HAP transient /pair-setup request."""
+        body = (
+            request.body
+            if isinstance(request.body, bytes)
+            else request.body.encode("utf-8")
+        )
+        pairing_data = read_tlv(body)
+        _LOGGER.debug("Transient pair-setup message received: %s", pairing_data)
+
+        seqno = int.from_bytes(pairing_data[TlvValue.SeqNo], byteorder="little")
+        tlv = getattr(self, f"_m{seqno}_setup".format(seqno))(
+            pairing_data, transient=True
+        )
+        return http.HttpResponse(
+            request.protocol,
+            request.version,
+            200,
+            "OK",
+            {
+                "CSeq": request.headers.get("CSeq", "1"),
+                "Content-Type": "application/x-apple-binary-plist",
+            },
+            tlv,
+        )
+
+    def handle_pair_verify(self, request: http.HttpRequest):
+        """Handle incoming /pair-verify request."""
+        if request.headers.get("X-Apple-HKP") != "3":
+            return http.HttpResponse(
+                request.protocol,
+                request.version,
+                501,
+                "Not implemented",
+                {"CSeq": request.headers.get("CSeq", "1")},
+                b"",
+            )
+
+        body = (
+            request.body
+            if isinstance(request.body, bytes)
+            else request.body.encode("utf-8")
+        )
+        pairing_data = read_tlv(body)
+        _LOGGER.debug("Pair-verify message received: %s", pairing_data)
+
+        seqno = pairing_data[TlvValue.SeqNo][0]
+        tlv = getattr(self, f"_m{seqno}_verify")(pairing_data)
+        return http.HttpResponse(
+            request.protocol,
+            request.version,
+            200,
+            "OK",
+            {
+                "CSeq": request.headers.get("CSeq", "1"),
+                "Content-Type": "application/octet-stream",
+            },
+            tlv,
+        )
+
+    def _m1_verify(self, pairing_data):
+        server_pub_key = self.keys.verify_pub.public_bytes(
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
+        )
+        client_pub_key = pairing_data[TlvValue.PublicKey]
+
+        shared_key = self.keys.verify.exchange(
+            X25519PublicKey.from_public_bytes(client_pub_key)
+        )
+
+        session_key = hkdf_expand(
+            "Pair-Verify-Encrypt-Salt", "Pair-Verify-Encrypt-Info", shared_key
+        )
+
+        info = server_pub_key + self.unique_id + client_pub_key
+        signature = self.keys.sign.sign(info)
+
+        tlv = write_tlv(
+            {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
+        )
+
+        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
+
+        tlv = {
+            TlvValue.SeqNo: b"\x02",
+            TlvValue.PublicKey: server_pub_key,
+            TlvValue.EncryptedData: encrypted,
+        }
+
+        self.shared_key = shared_key
+        self.input_key = hkdf_expand(
+            "Control-Salt", "Control-Write-Encryption-Key", shared_key
+        )
+        self.output_key = hkdf_expand(
+            "Control-Salt", "Control-Read-Encryption-Key", shared_key
+        )
+
+        log_binary(_LOGGER, "Keys", Output=self.output_key, Input=self.input_key)
+        return write_tlv(tlv)
+
+    def _m3_verify(self, pairing_data):
+        self.enable_encryption(self.output_key, self.input_key)
+        return write_tlv({TlvValue.SeqNo: b"\x04"})
+
+    def _m1_setup(self, pairing_data, transient: bool):
+        self.session, self.salt = new_server_session(
+            self.keys, str(TRANSIENT_PIN if transient else self.pin)
+        )
+
+        return write_tlv(
+            {
+                TlvValue.SeqNo: b"\x02",
+                TlvValue.Salt: binascii.unhexlify(self.salt),
+                TlvValue.PublicKey: binascii.unhexlify(self.session.public),
+            }
+        )
+
+    def _m3_setup(self, pairing_data, transient: bool):
+        assert self.session is not None
+        pubkey = binascii.hexlify(pairing_data[TlvValue.PublicKey]).decode()
+        self.session.process(pubkey, self.salt)
+
+        if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
+            proof = binascii.unhexlify(self.session.key_proof_hash)
+            tlv = {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
+        else:
+            tlv = {
+                TlvValue.Error: bytes([ErrorCode.Authentication]),
+                TlvValue.SeqNo: b"\x04",
+            }
+
+        if transient:
+            self.shared_key = binascii.unhexlify(self.session.key)
+            self.input_key = hkdf_expand(
+                "Control-Salt",
+                "Control-Write-Encryption-Key",
+                self.shared_key,
+            )
+            self.output_key = hkdf_expand(
+                "Control-Salt",
+                "Control-Read-Encryption-Key",
+                self.shared_key,
+            )
+
+            self.enable_encryption(self.output_key, self.input_key)
+            self.has_paired()
+
+        return write_tlv(tlv)
+
+    def _m5_setup(self, pairing_data, transient: bool):
+        assert self.session is not None
+
+        session_key = hkdf_expand(
+            "Pair-Setup-Encrypt-Salt",
+            "Pair-Setup-Encrypt-Info",
+            binascii.unhexlify(self.session.key),
+        )
+
+        acc_device_x = hkdf_expand(
+            "Pair-Setup-Accessory-Sign-Salt",
+            "Pair-Setup-Accessory-Sign-Info",
+            binascii.unhexlify(self.session.key),
+        )
+
+        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        decrypted_tlv_bytes = chacha.decrypt(
+            pairing_data[TlvValue.EncryptedData], nounce="PS-Msg05".encode()
+        )
+
+        _LOGGER.debug("MSG5 EncryptedData=%s", read_tlv(decrypted_tlv_bytes))
+
+        # other = {
+        #     "altIRK": b"-\x54\xe0\x7a\x88*en\x11\xab\x82v-'%\xc5",
+        #     "accountID": "DC6A7CB6-CA1A-4BF4-880D-A61B717814DB",
+        #     "model": "AppleTV6,2",
+        #     "wifiMAC": b"@\xff\xa1\x8f\xa1\xb9",
+        #     "name": "Living Room",
+        #     "mac": b"@\xc4\xff\x8f\xb1\x99",
+        # }
+
+        device_info = acc_device_x + self.unique_id + self.keys.auth_pub
+        signature = self.keys.sign.sign(device_info)
+
+        tlv = write_tlv(
+            {
+                TlvValue.Identifier: self.unique_id,
+                TlvValue.PublicKey: self.keys.auth_pub,
+                TlvValue.Signature: signature,
+                # 17: opack.pack(other),
+            }
+        )
+
+        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
+
+        self.has_paired()
+        return write_tlv({TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted})
+
+    @abstractmethod
+    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
+        """Enable encryption with the specified keys."""
+
+    @staticmethod
+    def has_paired():
+        """Call when a client has paired."""
+
+
+class AirPlayServerAuth(BaseAirPlayServerAuth, ABC):
+    """Server-side implementation of AirPlay authentication."""
+
+    def __init__(self, name: str, unique_id=SERVER_IDENTIFIER, pin: int = PIN_CODE):
+        """Initialize a new instance if AirPlayServerAuth."""
+        super().__init__(name, unique_id, pin)
+        self.add_route("GET", "^/info$", self.handle_info)
         self.add_route("OPTIONS", ".*", self.handle_options)
-        self.add_route("POST", "/fp-setup", self.handle_fp_setup)
+        self.add_route("POST", "^/fp-setup$", self.handle_fp_setup)
 
     def handle_options(self, request: http.HttpRequest):
         """Handle incoming OPTIONS request."""
         return http.HttpResponse(
-            "RTSP",
-            "1.0",
+            request.protocol,
+            request.version,
             200,
             "OK",
             {"CSeq": request.headers["CSeq"], "Public": ", ".join(self._routes.keys())},
@@ -157,8 +440,8 @@ class AirPlayServerAuth(http.HttpSimpleRouter, ABC):
         """Handle request to set up FairPlay."""
         response = PlayFair().fairplay_setup(request.body)
         return http.HttpResponse(
-            "RTSP",
-            "1.0",
+            request.protocol,
+            request.version,
             200,
             "OK",
             {"CSeq": request.headers["CSeq"]},
@@ -210,80 +493,3 @@ class AirPlayServerAuth(http.HttpSimpleRouter, ABC):
             {"CSeq": request.headers["CSeq"]},
             plistlib.dumps(body),
         )
-
-    def handle_pair_setup(self, request: http.HttpRequest):
-        """Handle incoming /pair-setup request."""
-        if request.headers.get("X-Apple-HKP") != "4":
-            return http.HttpResponse(
-                "RTSP",
-                "1.0",
-                501,
-                "Not implemented",
-                {"CSeq": request.headers["CSeq"]},
-                b"",
-            )
-
-        body = (
-            request.body
-            if isinstance(request.body, bytes)
-            else request.body.encode("utf-8")
-        )
-        pairing_data = read_tlv(body)
-        _LOGGER.debug("Transient pair-setup message received: %s", pairing_data)
-
-        seqno = int.from_bytes(pairing_data[TlvValue.SeqNo], byteorder="little")
-        tlv = getattr(self, f"_m{seqno}_setup".format(seqno))(pairing_data)
-        return http.HttpResponse(
-            "RTSP",
-            "1.0",
-            200,
-            "OK",
-            {"CSeq": request.headers["CSeq"]},
-            tlv,
-        )
-
-    def _m1_setup(self, pairing_data):
-        return write_tlv(
-            {
-                TlvValue.SeqNo: b"\x02",
-                TlvValue.Salt: binascii.unhexlify(self.salt),
-                TlvValue.PublicKey: binascii.unhexlify(self.session.public),
-            }
-        )
-
-    def _m3_setup(self, pairing_data):
-        pubkey = binascii.hexlify(pairing_data[TlvValue.PublicKey])
-        self.session.process(pubkey, self.salt)
-
-        if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
-            proof = binascii.unhexlify(self.session.key_proof_hash)
-            tlv = {TlvValue.SeqNo: b"\x04", TlvValue.Proof: proof}
-        else:
-            tlv = {
-                TlvValue.SeqNo: b"\x04",
-                TlvValue.Error: bytes([ErrorCode.Authentication]),
-            }
-
-        write_shared_key = hkdf_expand(
-            "Control-Salt",
-            "Control-Write-Encryption-Key",
-            binascii.unhexlify(self.session.key),
-        )
-
-        read_shared_key = hkdf_expand(
-            "Control-Salt",
-            "Control-Read-Encryption-Key",
-            binascii.unhexlify(self.session.key),
-        )
-
-        self.enable_encryption(write_shared_key, read_shared_key)
-        self.has_paired()
-        return write_tlv(tlv)
-
-    @abstractmethod
-    def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
-        """Enable encryption with the specified keys."""
-
-    @staticmethod
-    def has_paired():
-        """Call when a client has paired."""

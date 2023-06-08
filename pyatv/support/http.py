@@ -423,7 +423,9 @@ class AbstractHttpServerHandler(ABC):
     """Abstract base class for handling HTTP requests."""
 
     @abstractmethod
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Handle incoming request and return response."""
 
 
@@ -442,7 +444,9 @@ class HttpSimpleRouter(AbstractHttpServerHandler):
         """Add new handler to route."""
         self._routes.setdefault(method, {})[path] = target
 
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Dispatch request to correct handler method."""
         for path, target in self._routes.get(request.method, {}).items():
             if re.match(path, request.path):
@@ -466,13 +470,22 @@ class BasicHttpServer(asyncio.Protocol):
     def data_received(self, data: bytes):
         """Handle incoming HTTP request."""
         _LOGGER.debug("Received: %s", data)
+        data = self.process_received(data)
 
         # Process all requests in packet
         while data:
             data = self._parse_and_send_next(data)
 
+    def process_received(self, data: bytes) -> bytes:
+        """Process incoming data."""
+        return data
+
+    def process_sent(self, data: bytes) -> bytes:
+        """Process outgoing data."""
+        return data
+
     def _parse_and_send_next(self, data: bytes):
-        resp: Optional[HttpResponse] = None
+        resp: Optional[Union[HttpResponse, asyncio.Task]] = None
         rest: bytes = b""
         try:
             request, rest = parse_request(data)
@@ -495,6 +508,14 @@ class BasicHttpServer(asyncio.Protocol):
         if not resp:
             resp = HttpResponse("HTTP", "1.1", 404, "File not found", {}, "Not found")
 
+        if isinstance(resp, asyncio.Task):
+            resp.add_done_callback(self._send_task_response)
+        else:
+            self._send_response(resp)
+
+        return rest
+
+    def _send_response(self, resp: HttpResponse) -> None:
         response = f"{resp.protocol}/{resp.version} {resp.code} {resp.message}\r\n"
         response += f"Server: {SERVER_NAME}\r\n"
         for key, value in resp.headers.items():
@@ -506,9 +527,13 @@ class BasicHttpServer(asyncio.Protocol):
             response += f"Content-Length: {len(body)}\r\n"
 
         if self.transport:
-            self.transport.write(response.encode("utf-8") + b"\r\n" + body)
+            self.transport.write(
+                self.process_sent(response.encode("utf-8") + b"\r\n" + body)
+            )
 
-        return rest
+    def _send_task_response(self, task: asyncio.Task) -> None:
+        if response := task.result():
+            self._send_response(response)
 
 
 class StaticFileWebServer:
