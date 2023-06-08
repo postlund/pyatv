@@ -5,10 +5,10 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from pyatv.auth.hap_pairing import TRANSIENT_CREDENTIALS, parse_credentials
+from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.const import Protocol
 from pyatv.exceptions import AuthenticationError
 from pyatv.protocols.airplay.auth import pair_verify
-from pyatv.protocols.airplay.server_auth import CLIENT_CREDENTIALS
 from pyatv.support import http
 
 from tests.fake_device.airplay import DEVICE_CREDENTIALS

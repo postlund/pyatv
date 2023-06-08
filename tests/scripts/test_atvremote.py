@@ -1,8 +1,8 @@
 """Smoke test for atvremote."""
 
 from pyatv.auth.hap_pairing import parse_credentials
+from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.const import Protocol
-from pyatv.protocols.mrp.server_auth import CLIENT_CREDENTIALS
 
 from tests.fake_device.airplay import DEVICE_CREDENTIALS, DEVICE_PIN
 from tests.scripts.script_env import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID, ScriptTest
