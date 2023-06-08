@@ -379,6 +379,41 @@ Or check the current power state:
 
     $ atvremote -i 00:11:22:33:44:54 power_state
 
+## Output devices
+
+Show current output devices:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 --airplay-credentials `cat airplay_credentials` output_devices
+Device: Living room (AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE), Device: Bedroom (FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ)
+```
+
+Only the AirPlay leader device returns the list of output devices, other
+connected AirPlay devices will return an empty list.
+
+Add output devices:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 --airplay-credentials `cat airplay_credentials` add_output_devices=FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ,KK:LL:MM:NN:OO:PP
+```
+
+Remove output devices:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 --airplay-credentials `cat airplay_credentials` remove_output_devices=AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE,FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ
+```
+
+Set output devices:
+
+```shell
+$ atvremote --id 00:11:22:33:44:54 --airplay-credentials `cat airplay_credentials` 
+set_output_devices=AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE,FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ,KK:LL:MM:NN:OO:PP
+```
+
+To discover device IDs to use with these commands, add the devices through the
+iOS UI, then use the `output_devices` command.
+
+
 # Logging and debugging
 
 You can enable additional debugging information by specifying

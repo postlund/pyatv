@@ -243,9 +243,9 @@ async def test_metadata_rest_not_supported():
 
 
 @pytest.mark.parametrize(
-    "properties,os,version,build_number,model,mac",
+    "properties,os,version,build_number,model,mac,output_device_id",
     [
-        ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None),
+        ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None, None),
         (
             {
                 DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
@@ -253,22 +253,27 @@ async def test_metadata_rest_not_supported():
                 DeviceInfo.BUILD_NUMBER: "ABC",
                 DeviceInfo.MODEL: DeviceModel.Gen3,
                 DeviceInfo.MAC: "AA:BB:CC:DD:EE:FF",
+                DeviceInfo.AIRPLAY_IDENTIFIER: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
             },
             OperatingSystem.TvOS,
             "1.0",
             "ABC",
             DeviceModel.Gen3,
             "AA:BB:CC:DD:EE:FF",
+            "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         ),
     ],
 )
-def test_device_info_empty_input(properties, os, version, build_number, model, mac):
+def test_device_info_empty_input(
+    properties, os, version, build_number, model, mac, output_device_id
+):
     dev_info = DeviceInfo(properties)
     assert dev_info.operating_system == os
     assert dev_info.version == version
     assert dev_info.build_number == build_number
     assert dev_info.model == model
     assert dev_info.mac == mac
+    assert dev_info.output_device_id == output_device_id
 
 
 @pytest.mark.parametrize(
@@ -279,6 +284,7 @@ def test_device_info_empty_input(properties, os, version, build_number, model, m
         {DeviceInfo.BUILD_NUMBER: 456},
         {DeviceInfo.MODEL: "bad"},
         {DeviceInfo.MAC: 789},
+        {DeviceInfo.AIRPLAY_IDENTIFIER: 0},
     ],
 )
 def test_device_info_bad_types(properties):

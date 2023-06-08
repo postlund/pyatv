@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+import "pyatv/protocols/mrp/protobuf/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional ModifyOutputContextRequestMessage modifyOutputContextRequestMessage = 52;
+}
+
+message ModifyOutputContextRequestType {
+  enum Enum {
+    SharedAudioPresentation = 1;
+  }
+}
+
+message ModifyOutputContextRequestMessage {
+  optional ModifyOutputContextRequestType.Enum type = 1;
+  repeated string addingDevices = 2;
+  repeated string removingDevices = 3;
+  repeated string settingDevices = 4;
+  repeated string clusterAwareAddingDevices = 5;
+  repeated string clusterAwareRemovingDevices = 6;
+  repeated string clusterAwareSettingDevices = 7;
+}

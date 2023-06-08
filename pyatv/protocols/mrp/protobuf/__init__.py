@@ -18,6 +18,7 @@ from . import GetRemoteTextInputSessionMessage_pb2
 from . import GetVolumeMessage_pb2
 from . import GetVolumeResultMessage_pb2
 from . import KeyboardMessage_pb2
+from . import ModifyOutputContextRequestMessage_pb2
 from . import NotificationMessage_pb2
 from . import OriginClientPropertiesMessage_pb2
 from . import PlaybackQueueRequestMessage_pb2
@@ -104,6 +105,8 @@ from .KeyboardMessage_pb2 import ReturnKeyType
 from .KeyboardMessage_pb2 import TextEditingAttributes
 from .KeyboardMessage_pb2 import TextInputTraits
 from .LanguageOption_pb2 import LanguageOption
+from .ModifyOutputContextRequestMessage_pb2 import ModifyOutputContextRequestMessage
+from .ModifyOutputContextRequestMessage_pb2 import ModifyOutputContextRequestType
 from .NotificationMessage_pb2 import NotificationMessage
 from .NowPlayingClient_pb2 import NowPlayingClient
 from .NowPlayingInfo_pb2 import NowPlayingInfo
@@ -190,6 +193,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.GET_VOLUME_MESSAGE: GetVolumeMessage_pb2.getVolumeMessage,
     ProtocolMessage.GET_VOLUME_RESULT_MESSAGE: GetVolumeResultMessage_pb2.getVolumeResultMessage,
     ProtocolMessage.KEYBOARD_MESSAGE: KeyboardMessage_pb2.keyboardMessage,
+    ProtocolMessage.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE: ModifyOutputContextRequestMessage_pb2.modifyOutputContextRequestMessage,
     ProtocolMessage.NOTIFICATION_MESSAGE: NotificationMessage_pb2.notificationMessage,
     ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE: OriginClientPropertiesMessage_pb2.originClientPropertiesMessage,
     ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE: PlaybackQueueRequestMessage_pb2.playbackQueueRequestMessage,
@@ -247,6 +251,7 @@ GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE = ProtocolMessage.GET_REMOTE_TEXT_INPUT_SE
 GET_VOLUME_MESSAGE = ProtocolMessage.GET_VOLUME_MESSAGE
 GET_VOLUME_RESULT_MESSAGE = ProtocolMessage.GET_VOLUME_RESULT_MESSAGE
 KEYBOARD_MESSAGE = ProtocolMessage.KEYBOARD_MESSAGE
+MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE = ProtocolMessage.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE
 NOTIFICATION_MESSAGE = ProtocolMessage.NOTIFICATION_MESSAGE
 ORIGIN_CLIENT_PROPERTIES_MESSAGE = ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE
 PLAYBACK_QUEUE_REQUEST_MESSAGE = ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE
