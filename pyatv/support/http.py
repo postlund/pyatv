@@ -492,6 +492,7 @@ class BasicHttpServer(asyncio.Protocol):
         """Initialize a new BasicHttpServer instance."""
         self.handler: AbstractHttpServerHandler = handler
         self.transport = None
+        self._request_buffer = b""
 
     def connection_made(self, transport):
         """Handle that a connection has been made."""
@@ -504,8 +505,13 @@ class BasicHttpServer(asyncio.Protocol):
         data = self.process_received(data)
 
         # Process all requests in packet
-        while data:
-            data = self._parse_and_send_next(data)
+        self._request_buffer += data
+        while self._request_buffer:
+            if (
+                rest := self._parse_and_send_next(self._request_buffer)
+            ) == self._request_buffer:
+                break
+            self._request_buffer = rest
 
     def process_received(self, data: bytes) -> bytes:
         """Process incoming data."""
@@ -521,13 +527,8 @@ class BasicHttpServer(asyncio.Protocol):
         try:
             request, rest = parse_request(data)
 
-            # TODO: If no request could be parsed, then there's not enough data.
-            # Segmented requests (over several IP packets) are currently not
-            # implemented. Implement this when needed.
             if not request:
-                raise exceptions.NotSupportedError(
-                    "segmented HTTP requests not supported"
-                )
+                return data
 
             resp = self.handler.handle_request(request)
         except Exception as ex:
