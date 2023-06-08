@@ -2,7 +2,7 @@
 import asyncio
 import inspect
 from typing import Optional, Tuple
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
 import pytest
@@ -376,6 +376,59 @@ async def test_server_async_handler():
     resp = await client.get("/baz", allow_error=True)
     assert resp.code == 200
     assert resp.message == "baz"
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_segmented_request():
+    class TestHttpRequestConnection(asyncio.Protocol):
+        def __init__(self) -> None:
+            super().__init__()
+            self.transport = None
+            self.response_received = asyncio.Event()
+            self.response_content = None
+
+        def connection_made(self, transport):
+            self.transport = transport
+
+        def data_received(self, data):
+            self.response_content = data
+            self.response_received.set()
+
+        async def send(self):
+            self.response_received.clear()
+            self.response_content = None
+
+            data_received = asyncio.Event()
+            original_data_received = BasicHttpServer.data_received
+
+            # make sure the first chunk was received before sending the next
+            def set_event_and_receive(self, data):
+                data_received.set()
+                return original_data_received(self, data)
+
+            with patch.object(BasicHttpServer, "data_received", set_event_and_receive):
+                self.transport.write(b"GET /foo HTTP/1.1\r\nContent-Length: 11\r\n\r\n")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"first")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"second")
+
+            await self.response_received.wait()
+            return self.response_content
+
+    server, port = await serve(DummyRouter())
+    loop = asyncio.get_event_loop()
+    _, client = await loop.create_connection(
+        TestHttpRequestConnection, "127.0.0.1", port
+    )
+
+    response = await client.send()
+    assert response.startswith(b"HTTP/1.1 200 foo\r\n")
+    assert response.endswith(b"\r\nfirstsecond")
 
     server.close()
 
