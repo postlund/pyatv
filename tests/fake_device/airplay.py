@@ -58,7 +58,7 @@ class FakeAirPlayState:
 
 class FakeAirPlayService(AirPlayServerAuth):
     def __init__(self, state, app, loop):
-        super().__init__(name=DEVICE_NAME)
+        super().__init__(name=DEVICE_NAME, pin=DEVICE_PIN)
         self.state = state
         self.app = app
         self.loop = loop
