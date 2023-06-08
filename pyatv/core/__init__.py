@@ -38,6 +38,9 @@ class UpdatedState(Enum):
     Volume = 2
     """Volume was updated."""
 
+    KeyboardFocus = 3
+    """Keyboard focus was updated."""
+
 
 # pylint: enable=invalid-name
 
@@ -51,6 +54,7 @@ class StateMessage(NamedTuple):
     # Type depending on value of state:
     # - UpdatedState.Playing -> interface.Playing
     # - UpdatedState.Volume -> float
+    # - UpdatedState.KeyboardFocus -> const.KeyboardFocusState
     value: Any
 
     def __str__(self):

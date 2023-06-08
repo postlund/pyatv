@@ -487,9 +487,32 @@ class FacadeAudio(Relayer, interface.Audio):
 class FacadeKeyboard(Relayer, interface.Keyboard):
     """Facade implementation for keyboard handling."""
 
-    def __init__(self):
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
         """Initialize a new FacadeKeyboard instance."""
-        super().__init__(interface.Keyboard, DEFAULT_PRIORITIES)
+        Relayer.__init__(self, interface.Keyboard, DEFAULT_PRIORITIES)
+        interface.Keyboard.__init__(self)
+        self._focus_state: const.KeyboardFocusState = const.KeyboardFocusState.Unknown
+        core_dispatcher.listen_to(
+            UpdatedState.KeyboardFocus,
+            self._focus_state_changed,
+            message_filter=lambda message: message.protocol == self.main_protocol,
+        )
+
+    def _focus_state_changed(self, message: StateMessage) -> None:
+        state = cast(const.KeyboardFocusState, message.value)
+
+        old_state = self._focus_state
+        new_state = self._focus_state = state
+
+        if new_state != old_state:
+            _LOGGER.debug("Focus state changed from %s to %s", old_state, new_state)
+            self.listener.focusstate_update(old_state, new_state)
+
+    @property
+    @shield.guard
+    def text_focus_state(self) -> const.KeyboardFocusState:
+        """Return keyboard focus state."""
+        return self.relay("text_focus_state")
 
     @shield.guard
     async def text_get(self) -> Optional[str]:
@@ -591,7 +614,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Apps: FacadeApps(),
             interface.UserAccounts: FacadeUserAccounts(),
             interface.Audio: FacadeAudio(core_dispatcher),
-            interface.Keyboard: FacadeKeyboard(),
+            interface.Keyboard: FacadeKeyboard(core_dispatcher),
         }
         self._shield_everything()
 

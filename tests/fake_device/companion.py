@@ -3,8 +3,9 @@
 import asyncio
 import logging
 import plistlib
-from typing import Dict, Optional, Set
+from typing import Any, Dict, List, Mapping, Optional, Set
 
+from pyatv.const import KeyboardFocusState
 from pyatv.protocols.companion import (
     HidCommand,
     MediaControlCommand,
@@ -69,8 +70,61 @@ class FakeCompanionState:
         self.media_control_flags: int = MediaControlFlags.Volume
         self.interests: Set[str] = set()
         self.volume: float = INITIAL_VOLUME
+        self.rti_clients: List[FakeCompanionService] = []
+        self._rti_focus_state: KeyboardFocusState = KeyboardFocusState.Focused
         self.rti_text: Optional[str] = INITIAL_RTI_TEXT
         self.rti_session_uuid: Optional[bytes] = None
+
+    def _send_rti(self, identifier, content):
+        for client in self.rti_clients:
+            client.send_event(identifier, 1234, content)
+
+    @property
+    def rti_focus_state(self) -> KeyboardFocusState:
+        return self._rti_focus_state
+
+    @rti_focus_state.setter
+    def rti_focus_state(self, value: KeyboardFocusState) -> None:
+        if value == self._rti_focus_state:
+            return
+        self._rti_focus_state = value
+        if value == KeyboardFocusState.Focused:
+            self._send_rti("_tiStarted", self.rti_encoded_data)
+        elif value == KeyboardFocusState.Unfocused:
+            self._send_rti("_tiStopped", self.rti_encoded_data)
+
+    @property
+    def rti_encoded_data(self) -> Mapping[str, Any]:
+        if self.rti_focus_state == KeyboardFocusState.Focused:
+            return {
+                "_tiD": plistlib.dumps(
+                    {
+                        "$top": {
+                            "sessionUUID": plistlib.UID(1),
+                            "documentState": plistlib.UID(2),
+                        },
+                        "$objects": [
+                            "$null",
+                            self.rti_session_uuid,
+                            {
+                                "docSt": plistlib.UID(3),
+                            },
+                        ]
+                        + [
+                            {
+                                "contextBeforeInput": plistlib.UID(4),
+                            },
+                            self.rti_text,
+                        ]
+                        if self.rti_text is not None
+                        else [{}],
+                    },
+                    fmt=plistlib.PlistFormat.FMT_BINARY,
+                    sort_keys=False,
+                )
+            }
+        else:
+            return {}
 
 
 class FakeCompanionServiceFactory:
@@ -331,36 +385,13 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             return
         elif self.state.rti_text is None:
             self.send_response(message, {})
+            self.state.rti_clients.append(self)
         elif self.state.rti_session_uuid is not None:
             _LOGGER.warning("RTI session already started")
         else:
             self.state.rti_session_uuid = b"0123456789abcdef"
-            self.send_response(
-                message,
-                {
-                    "_tiD": plistlib.dumps(
-                        {
-                            "$top": {
-                                "sessionUUID": plistlib.UID(1),
-                                "documentState": plistlib.UID(2),
-                            },
-                            "$objects": [
-                                "$null",
-                                self.state.rti_session_uuid,
-                                {
-                                    "docSt": plistlib.UID(3),
-                                },
-                                {
-                                    "contextBeforeInput": plistlib.UID(4),
-                                },
-                                self.state.rti_text,
-                            ],
-                        },
-                        fmt=plistlib.PlistFormat.FMT_BINARY,
-                        sort_keys=False,
-                    )
-                },
-            )
+            self.send_response(message, self.state.rti_encoded_data)
+            self.state.rti_clients.append(self)
 
     def handle__tistop(self, message):
         if message["_t"] != 2:
@@ -368,6 +399,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         elif self.state.rti_session_uuid is not None:
             self.state.rti_session_uuid = None
             self.send_response(message, {})
+            self.state.rti_clients.remove(self)
         else:
             _LOGGER.warning("No RTI session")
 
@@ -415,6 +447,9 @@ class FakeCompanionUseCases:
     def set_control_flags(self, flags: int) -> None:
         """Set media control flags."""
         self.state.media_control_flags = flags
+
+    def set_rti_focus_state(self, state: KeyboardFocusState) -> None:
+        self.state.rti_focus_state = state
 
     def set_rti_text(self, text: Optional[str]) -> None:
         self.state.rti_text = text

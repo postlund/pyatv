@@ -1,5 +1,5 @@
 """High level implementation of Companion API."""
-
+import asyncio
 from enum import Enum
 import logging
 from random import randint
@@ -96,6 +96,7 @@ class CompanionAPI(
             # Sometimes unsubscribe fails for an unknown reason, but we are no
             # going to bother with that and just swallow the error.
             await self.unsubscribe_event("_iMC")
+            await self._text_input_stop()
             await self._session_stop()
         except Exception as ex:
             _LOGGER.debug("Ignoring error during disconnect: %s", ex)
@@ -128,6 +129,7 @@ class CompanionAPI(
 
         await self.system_info()
         await self._session_start()
+        await self._text_input_start()
         await self.subscribe_event("_iMC")
 
     async def _send_command(
@@ -264,13 +266,23 @@ class CompanionAPI(
         """Send a HID command."""
         return await self._send_command("_mcc", {"_mcc": command.value, **(args or {})})
 
+    async def _text_input_start(self) -> Mapping[str, Any]:
+        response = await self._send_command("_tiStart", {})
+        await asyncio.gather(*self.dispatch("_tiStart", response.get("_c", {})))
+        return response
+
+    async def _text_input_stop(self) -> None:
+        await self._send_command("_tiStop", {})
+
     async def text_input_command(
         self,
         text: str,
         clear_previous_input: bool = False,
     ) -> Optional[str]:
         """Send a text input command."""
-        response = await self._send_command("_tiStart", {})
+        # restart the text input session so that we have up-to-date data
+        await self._text_input_stop()
+        response = await self._text_input_start()
         ti_data = response.get("_c", {}).get("_tiD")
 
         if ti_data is None:
@@ -305,5 +317,4 @@ class CompanionAPI(
             )
             current_text += text
 
-        await self._send_command("_tiStop", {})
         return current_text
