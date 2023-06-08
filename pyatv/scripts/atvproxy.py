@@ -6,9 +6,8 @@ import asyncio
 from functools import partial
 from ipaddress import IPv4Address
 import logging
-import plistlib
 import sys
-from typing import Any, Callable, Dict, Mapping, Optional, Union, cast
+from typing import Any, Callable, Dict, Mapping, Optional, Tuple, Union, cast
 
 from google.protobuf.message import Message as ProtobufMessage
 from zeroconf import Zeroconf
@@ -20,6 +19,11 @@ from pyatv.auth.hap_srp import SRPAuthHandler, hkdf_expand
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.protocols.airplay import extract_credentials, verify_connection
+from pyatv.protocols.airplay.channels import (
+    BaseDataStreamChannel,
+    BaseEventChannel,
+    DataStreamMessage,
+)
 from pyatv.protocols.airplay.remote_control import (
     DATASTREAM_INPUT_INFO,
     DATASTREAM_OUTPUT_INFO,
@@ -29,6 +33,12 @@ from pyatv.protocols.airplay.remote_control import (
     EVENTS_WRITE_INFO,
 )
 from pyatv.protocols.airplay.server_auth import BaseAirPlayServerAuth
+from pyatv.protocols.airplay.utils import (
+    decode_plist_body,
+    encode_plist_body,
+    log_request,
+    log_response,
+)
 from pyatv.protocols.companion.connection import (
     AUTH_TAG_LENGTH,
     CompanionConnection,
@@ -54,6 +64,7 @@ from pyatv.scripts import log_current_version
 from pyatv.support import (
     chacha20,
     log_binary,
+    log_protobuf,
     net,
     opack,
     shift_hex_identifier,
@@ -450,6 +461,8 @@ class AirPlayChannelAppleTVProxy(AbstractHAPChannel):
         self.remote_input_info = remote_input_info
         self.remote_transport: Optional[asyncio.BaseTransport] = None
         self.remote_protocol: Optional[AbstractHAPChannel] = None
+        self.local_buffer: bytes = b""
+        self.remote_buffer: bytes = b""
         self._connected_event: asyncio.Event = asyncio.Event()
         super().__init__(output_key, input_key)
 
@@ -482,18 +495,40 @@ class AirPlayChannelAppleTVProxy(AbstractHAPChannel):
 
         if self.buffer:
             _LOGGER.debug("%s received from Client: %s", self.name, self.buffer)
-            self.remote_send(self.buffer)
+            self.local_buffer += self.buffer
             self.buffer = b""
+
+        while self.local_buffer:
+            to_remote, self.local_buffer = self.process_buffer(self.local_buffer)
+            if not to_remote:
+                break
+            self.remote_send(to_remote)
 
     def remote_received(self, data: bytes) -> None:
         """Message was received from remote side of channel."""
         _LOGGER.debug("%s received from Apple TV: %s", self.name, data)
-        self.send(data)
+        self.remote_buffer += data
+
+        while self.remote_buffer:
+            to_client, self.remote_buffer = self.process_remote_buffer(
+                self.remote_buffer
+            )
+            if not to_client:
+                break
+            self.send(to_client)
 
     def remote_send(self, data: bytes) -> None:
         """Send message to remote side of channel."""
         assert self.remote_protocol is not None
         self.remote_protocol.send(data)
+
+    def process_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from client before proxying."""
+        return data, b""
+
+    def process_remote_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from remote before proxying."""
+        return data, b""
 
     async def _connect_to_remote(self):
         self.remote_transport, self.remote_protocol = await setup_channel(
@@ -535,7 +570,8 @@ class AirPlayChannelAppleTVForwarder(AbstractHAPChannel):
         self.buffer = b""
 
 
-class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy):
+# pylint: disable-next=too-many-ancestors
+class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy, BaseEventChannel):
     """AirPlay event channel connection proxy."""
 
     def __init__(
@@ -568,8 +604,25 @@ class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy):
             ),
         )
 
+    def process_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from client before proxying."""
+        response, consumed, rest = self.parse_response(data)
+        if response:
+            log_response(_LOGGER, response, message_prefix=f"{self.name} ")
+        return consumed, rest
 
-class AirPlayDataStreamChannelAppleTVProxy(AirPlayChannelAppleTVProxy):
+    def process_remote_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from remote before proxying."""
+        request, consumed, rest = self.parse_request(data)
+        if request:
+            log_request(_LOGGER, request, message_prefix=f"{self.name} ")
+        return consumed, rest
+
+
+# pylint: disable-next=too-many-ancestors
+class AirPlayDataStreamChannelAppleTVProxy(
+    AirPlayChannelAppleTVProxy, BaseDataStreamChannel
+):
     """AirPlay data stream channel connection proxy."""
 
     def __init__(
@@ -604,6 +657,50 @@ class AirPlayDataStreamChannelAppleTVProxy(AirPlayChannelAppleTVProxy):
                 shared_key,
             ),
         )
+
+    def process_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from client before proxying."""
+        message, consumed, rest = self.decode_message(data)
+        if message:
+            self._log_message(message, "client")
+        return consumed, rest
+
+    def process_remote_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
+        """Process data from remote before proxying."""
+        message, consumed, rest = self.decode_message(data)
+        if message:
+            self._log_message(message, "remote")
+        return consumed, rest
+
+    def _log_message(self, message: DataStreamMessage, source: str) -> None:
+        _LOGGER.debug(
+            "%s %s message: type=%s, command=%s, seqno=%i, padding=%i, payload=%s",
+            self.name,
+            source,
+            message.message_type,
+            message.command,
+            message.seqno,
+            message.padding,
+            message.payload,
+        )
+
+        if not message.payload:
+            return
+
+        data = self.decode_payload(message.payload)
+        _LOGGER.debug(
+            "%s %s message plist content: %s",
+            self.name,
+            source,
+            data,
+        )
+
+        protobufs = data.get("params", {}).get("data")
+        if not protobufs:
+            return
+
+        for protobuf_message in self.decode_protobufs(protobufs):
+            log_protobuf(_LOGGER, f"{self.name} {source} protobuf", protobuf_message)
 
 
 class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
@@ -685,7 +782,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         return self.loop.create_task(self._handle_setup(request))
 
     async def _handle_setup(self, request: HttpRequest):
-        request_data = self._decode_plist_body(request.body)
+        request_data = decode_plist_body(request.body) or {}
         if "streams" in request_data:
             return await self._handle_setup_data_stream_channel(request, request_data)
         return await self._handle_setup_event_channel(request, request_data)
@@ -694,7 +791,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         self, request: HttpRequest, request_data: dict
     ):
         response = await self.send_to_atv(request)
-        response_data = self._decode_plist_body(response.body)
+        response_data = decode_plist_body(response.body) or {}
         event_port = response_data["eventPort"]
 
         key = request.headers.get(
@@ -707,7 +804,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         _LOGGER.debug("Event port: remote=%d, local=%d", event_port, proxy_port)
 
         return response._replace(
-            body=self._encode_plist_body(
+            body=encode_plist_body(
                 {
                     **response_data,
                     "eventPort": proxy_port,
@@ -720,7 +817,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
     ):
         request_data_streams = request_data["streams"]
         response = await self.send_to_atv(request)
-        response_data = self._decode_plist_body(response.body)
+        response_data = decode_plist_body(response.body) or {}
         response_data_streams = response_data["streams"]
 
         response_data_streams_modified = []
@@ -755,7 +852,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             )
 
         return response._replace(
-            body=self._encode_plist_body(
+            body=encode_plist_body(
                 {
                     **response_data,
                     "streams": response_data_streams_modified,
@@ -768,7 +865,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         return self.loop.create_task(self._handle_teardown(request))
 
     async def _handle_teardown(self, request: HttpRequest):
-        request_data = self._decode_plist_body(request.body)
+        request_data = decode_plist_body(request.body) or {}
         if "streams" in request_data:
             return await self._handle_teardown_data_stream_channel(
                 request, request_data
@@ -804,7 +901,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         self, request: HttpRequest
     ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Dispatch request to correct handler method or proxy to remote device."""
-        self._log_request(request)
+        log_request(_LOGGER, request)
         response = super().handle_request(request)
         if response is not None:
             return response
@@ -823,7 +920,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             headers=request.headers,
             body=request.body,
         )
-        self._log_response(response)
+        log_response(_LOGGER, response)
         return response
 
     async def _create_channel_server(
@@ -866,35 +963,6 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             self.shared_key,
             seed,
         )
-
-    def _log_request(self, request: HttpRequest) -> None:
-        _LOGGER.debug("Request: %s", request)
-        if request.headers.get(
-            "content-type"
-        ) == "application/x-apple-binary-plist" and (
-            payload := self._decode_plist_body(request.body)
-        ):
-            _LOGGER.debug("%s request plist content: %s:", request.protocol, payload)
-
-    def _log_response(self, response: HttpResponse) -> None:
-        _LOGGER.debug("Response: %s", response)
-        if response.headers.get(
-            "content-type"
-        ) == "application/x-apple-binary-plist" and (
-            payload := self._decode_plist_body(response.body)
-        ):
-            _LOGGER.debug("%s response plist content: %s:", response.protocol, payload)
-
-    def _decode_plist_body(self, body: Union[str, bytes]) -> dict:
-        try:
-            return plistlib.loads(
-                body if isinstance(body, bytes) else body.encode("utf-8")
-            )
-        except plistlib.InvalidFileException:
-            return {}
-
-    def _encode_plist_body(self, data: dict):
-        return plistlib.dumps(data, fmt=plistlib.PlistFormat.FMT_BINARY)
 
 
 class RemoteConnection(asyncio.Protocol):
