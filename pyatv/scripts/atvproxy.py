@@ -3,7 +3,9 @@
 
 import argparse
 import asyncio
+import binascii
 from functools import partial
+from io import BytesIO
 from ipaddress import IPv4Address
 import logging
 import sys
@@ -31,6 +33,9 @@ from pyatv.protocols.airplay.remote_control import (
     EVENTS_READ_INFO,
     EVENTS_SALT,
     EVENTS_WRITE_INFO,
+)
+from pyatv.protocols.airplay.server_auth import (
+    SERVER_IDENTIFIER as AIRPLAY_SERVER_IDENTIFIER,
 )
 from pyatv.protocols.airplay.server_auth import BaseAirPlayServerAuth
 from pyatv.protocols.airplay.utils import (
@@ -70,6 +75,7 @@ from pyatv.support import (
     shift_hex_identifier,
     variant,
 )
+from pyatv.support.dns import format_txt_dict, parse_txt_dict
 from pyatv.support.http import (
     BasicHttpServer,
     HttpConnection,
@@ -581,6 +587,7 @@ class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy, BaseEventChann
         remote_address: str,
         remote_port: int,
         shared_key: bytes,
+        rewrite_info: Callable[[Mapping[str, Any]], Mapping[str, Any]],
     ) -> None:
         """Initialize a new AirPlayEventChannelAppleTVProxy instance."""
         super().__init__(
@@ -603,6 +610,7 @@ class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy, BaseEventChann
                 shared_key,
             ),
         )
+        self.rewrite_info = rewrite_info
 
     def process_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
         """Process data from client before proxying."""
@@ -616,6 +624,26 @@ class AirPlayEventChannelAppleTVProxy(AirPlayChannelAppleTVProxy, BaseEventChann
         request, consumed, rest = self.parse_request(data)
         if request:
             log_request(_LOGGER, request, message_prefix=f"{self.name} ")
+            decoded_data = decode_plist_body(request.body)
+            if request.path == "/command" and decoded_data.get("type") == "updateInfo":
+                return (
+                    self.format_request(
+                        request._replace(
+                            headers={
+                                k: v
+                                for k, v in request.headers.items()
+                                if k.lower() != "content-length"
+                            },
+                            body=encode_plist_body(
+                                {
+                                    **decoded_data,
+                                    "value": self.rewrite_info(decoded_data["value"]),
+                                }
+                            ),
+                        )
+                    ),
+                    rest,
+                )
         return consumed, rest
 
 
@@ -658,11 +686,30 @@ class AirPlayDataStreamChannelAppleTVProxy(
             ),
         )
 
+    class SendMessageVerbatim(Exception):
+        """Throw during processing to ignore (don't proxy) a message."""
+
+    class IgnoreMessage(Exception):
+        """Throw during processing to ignore (don't proxy) a message."""
+
     def process_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
         """Process data from client before proxying."""
         message, consumed, rest = self.decode_message(data)
         if message:
             self._log_message(message, "client")
+            try:
+                modified_message = self._rewrite_message(
+                    message, self._rewrite_client_protobuf
+                )
+                return self.encode_message(modified_message), rest
+            except self.IgnoreMessage:
+                # mechanism to ignore certain messages from the client
+                if message.message_type.startswith(b"sync"):
+                    self.send(self.encode_reply(message.seqno))
+                return b"", rest
+            except self.SendMessageVerbatim:
+                pass
+
         return consumed, rest
 
     def process_remote_buffer(self, data: bytes) -> Tuple[bytes, bytes]:
@@ -670,7 +717,155 @@ class AirPlayDataStreamChannelAppleTVProxy(
         message, consumed, rest = self.decode_message(data)
         if message:
             self._log_message(message, "remote")
+            try:
+                modified_message = self._rewrite_message(
+                    message, self._rewrite_remote_protobuf
+                )
+                return self.encode_message(modified_message), rest
+            except self.SendMessageVerbatim:
+                pass
+
         return consumed, rest
+
+    def _rewrite_message(
+        self,
+        message: DataStreamMessage,
+        protobuf_rewriter: Callable[
+            [protobuf.ProtocolMessage], Optional[protobuf.ProtocolMessage]
+        ],
+    ) -> DataStreamMessage:
+        if not message.message_type.startswith(b"sync") or not message.payload:
+            raise self.SendMessageVerbatim
+
+        payload = self.decode_payload(message.payload)
+        protobufs = payload.get("params", {}).get("data", [])
+
+        processed_messages = []
+        modified = False
+        for pb_message in self.decode_protobufs(protobufs):
+            if modified_message := protobuf_rewriter(pb_message):
+                modified = True
+            processed_messages.append(modified_message or pb_message)
+
+        if not modified:
+            raise self.SendMessageVerbatim
+
+        return DataStreamMessage(
+            message.message_type,
+            message.command,
+            message.seqno,
+            message.padding,
+            self.encode_payload(
+                {
+                    **payload,
+                    "params": {
+                        **payload["params"],
+                        "data": self.encode_protobufs(processed_messages),
+                    },
+                }
+            ),
+        )
+
+    def _rewrite_client_protobuf(
+        self, message: protobuf.ProtocolMessage
+    ) -> Optional[protobuf.ProtocolMessage]:
+        if message.type == protobuf.DEVICE_INFO_MESSAGE:
+            inner = cast(protobuf.DeviceInfoMessage, message.inner())
+            inner.uniqueIdentifier = shift_hex_identifier(inner.uniqueIdentifier)
+            if inner.deviceUID:
+                inner.deviceUID = shift_hex_identifier(inner.deviceUID)
+            if inner.managedConfigDeviceID:
+                inner.managedConfigDeviceID = shift_hex_identifier(
+                    inner.managedConfigDeviceID
+                )
+            if inner.groupUID:
+                inner.groupUID = shift_hex_identifier(inner.groupUID)
+            if inner.senderDefaultGroupUID:
+                inner.senderDefaultGroupUID = shift_hex_identifier(
+                    inner.senderDefaultGroupUID
+                )
+            if inner.routingContextID:
+                inner.routingContextID = shift_hex_identifier(inner.routingContextID)
+            if inner.airPlayGroupID:
+                inner.airPlayGroupID = shift_hex_identifier(inner.airPlayGroupID)
+            return message
+
+        if message.type == protobuf.CONFIGURE_CONNECTION_MESSAGE:
+            # iOS doesn't like the rewritten airplay group id and sends this
+            # message, but sending it on causes issues with the connection.
+            inner = cast(protobuf.ConfigureConnectionMessage, message.inner())
+            if inner.groupID:
+                raise self.IgnoreMessage
+
+        return None
+
+    def _rewrite_remote_protobuf(  # pylint: disable=too-many-branches
+        self, message: protobuf.ProtocolMessage
+    ) -> Optional[protobuf.ProtocolMessage]:
+        if message.type == protobuf.DEVICE_INFO_MESSAGE:
+            inner = cast(protobuf.DeviceInfoMessage, message.inner())
+            inner.uniqueIdentifier = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            inner.name = DEVICE_NAME
+            if inner.deviceUID:
+                inner.deviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            if inner.managedConfigDeviceID:
+                inner.managedConfigDeviceID = shift_hex_identifier(
+                    inner.managedConfigDeviceID
+                )
+            if (
+                inner.groupUID
+                and inner.senderDefaultGroupUID
+                and inner.groupUID.startswith(inner.senderDefaultGroupUID)
+            ):
+                inner.groupUID = shift_hex_identifier(inner.groupUID)
+            if inner.senderDefaultGroupUID:
+                inner.senderDefaultGroupUID = shift_hex_identifier(
+                    inner.senderDefaultGroupUID
+                )
+            if inner.routingContextID:
+                inner.routingContextID = shift_hex_identifier(inner.routingContextID)
+            if (
+                inner.airPlayGroupID
+                and inner.senderDefaultGroupUID
+                and inner.groupUID.startswith(inner.senderDefaultGroupUID)
+            ):
+                inner.airPlayGroupID = shift_hex_identifier(inner.airPlayGroupID)
+            return message
+
+        if message.type == protobuf.UPDATE_OUTPUT_DEVICE_MESSAGE:
+            inner = cast(protobuf.UpdateOutputDeviceMessage, message.inner())
+            for device in list(inner.outputDevices) + list(
+                inner.clusterAwareOutputDevices
+            ):
+                device.uniqueIdentifier = MEDIA_REMOTE_ROUTE_IDENTIFIER
+                device.name = DEVICE_NAME
+                if device.bluetoothID and device.bluetoothID != "00:00:00:00:00:00":
+                    device.bluetoothID = BLUETOOTH_ADDRESS
+                if device.groupID:
+                    device.groupID = shift_hex_identifier(device.groupID)
+                if device.sourceInfo and device.sourceInfo.routingContextUID:
+                    device.sourceInfo.routingContextUID = shift_hex_identifier(
+                        device.sourceInfo.routingContextUID
+                    )
+                if device.airPlayGroupID:
+                    device.airPlayGroupID = shift_hex_identifier(device.airPlayGroupID)
+                if device.primaryUID:
+                    device.primaryUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            return message
+
+        if message.type == protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE:
+            inner = cast(
+                protobuf.VolumeControlCapabilitiesDidChangeMessage, message.inner()
+            )
+            inner.outputDeviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            return message
+
+        if message.type == protobuf.VOLUME_DID_CHANGE_MESSAGE:
+            inner = cast(protobuf.VolumeDidChangeMessage, message.inner())
+            inner.outputDeviceUID = MEDIA_REMOTE_ROUTE_IDENTIFIER
+            return message
+
+        return None
 
     def _log_message(self, message: DataStreamMessage, source: str) -> None:
         _LOGGER.debug(
@@ -731,8 +926,23 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         self._channel_servers: Dict[str, asyncio.AbstractServer] = {}
         self._connected_event: asyncio.Event = asyncio.Event()
         # routes that need special handling when proxied
+        self.add_route("GET", "/info", self.handle_info)
         self.add_route("SETUP", ".*", self.handle_setup)
         self.add_route("TEARDOWN", ".*", self.handle_teardown)
+
+    @property
+    def client_ip(self) -> str:
+        """Return IP address of client."""
+        transport = cast(asyncio.Transport, self.transport)
+        sock = transport.get_extra_info("socket")
+        return sock.getpeername()[0]
+
+    @property
+    def client_port(self) -> int:
+        """Return port of client."""
+        transport = cast(asyncio.Transport, self.transport)
+        sock = transport.get_extra_info("socket")
+        return sock.getpeername()[1]
 
     async def start(self) -> None:
         """Start the proxy instance."""
@@ -777,6 +987,63 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             log_binary(_LOGGER, ">> Send", Encrypted=data)
         return data
 
+    def handle_info(self, request: HttpRequest):
+        """Handle incoming /info request."""
+        return self.loop.create_task(self._handle_info(request))
+
+    async def _handle_info(self, request: HttpRequest):
+        response = await self.send_to_atv(request)
+        response_data = decode_plist_body(response.body) or {}
+        return response._replace(
+            body=encode_plist_body(self._rewrite_info(response_data)),
+        )
+
+    def _rewrite_info(self, info: Mapping[str, Any]) -> Mapping[str, Any]:
+        output = dict(info)
+        if "psi" in info:
+            output["psi"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+        if "name" in info:
+            output["name"] = DEVICE_NAME
+        if "senderAddress" in info:
+            output["senderAddress"] = f"{self.client_ip}:{self.client_port}"
+        if "deviceID" in info:
+            output["deviceID"] = shift_hex_identifier(info["deviceID"])
+        if "pi" in info:
+            output["pi"] = AIRPLAY_SERVER_IDENTIFIER
+        if "txtAirPlay" in info:
+            dns_txt = info["txtAirPlay"]
+            dns_data = {
+                k: v if isinstance(v, str) else v.decode()
+                for k, v in parse_txt_dict(BytesIO(dns_txt), len(dns_txt)).items()
+            }
+            output["txtAirPlay"] = format_txt_dict(self._rewrite_dns_txt(dns_data))
+        if "pk" in info:
+            output["pk"] = BaseAirPlayServerAuth.keys.auth_pub
+        if "macAddress" in info:
+            output["macAddress"] = shift_hex_identifier(info["macAddress"])
+        return output
+
+    @staticmethod
+    def _rewrite_dns_txt(info: Mapping[str, str]) -> Mapping[str, str]:
+        output = dict(info)
+        if "btaddr" in info and info["btaddr"] != "00:00:00:00:00:00":
+            output["btaddr"] = BLUETOOTH_ADDRESS
+        if "deviceid" in info:
+            output["deviceid"] = shift_hex_identifier(info["deviceid"])
+        if "pi" in info:
+            output["pi"] = AIRPLAY_SERVER_IDENTIFIER
+        # psi should be AIRPLAY_SERVER_IDENTIFIER and COMPANION_SERVER_IDENTIFIER
+        # but also different from MEDIA_REMOTE_ROUTE_IDENTIFIER ?
+        if "psi" in info:
+            output["psi"] = MEDIA_REMOTE_ROUTE_IDENTIFIER
+        if "pk" in info:
+            output["pk"] = binascii.hexlify(
+                BaseAirPlayServerAuth.keys.auth_pub
+            ).decode()
+        if "gid" in info:
+            output["gid"] = shift_hex_identifier(info["gid"])
+        return output
+
     def handle_setup(self, request: HttpRequest):
         """Handle incoming SETUP request."""
         return self.loop.create_task(self._handle_setup(request))
@@ -790,6 +1057,28 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
     async def _handle_setup_event_channel(
         self, request: HttpRequest, request_data: dict
     ):
+        updated_request_data = dict(request_data)
+        if "sessionUUID" in request_data:
+            updated_request_data["sessionUUID"] = shift_hex_identifier(
+                request_data["sessionUUID"]
+            )
+        if "deviceID" in request_data:
+            updated_request_data["deviceID"] = shift_hex_identifier(
+                request_data["deviceID"]
+            )
+        if "macAddress" in request_data:
+            updated_request_data["macAddress"] = shift_hex_identifier(
+                request_data["macAddress"]
+            )
+        if "sessionCorrelationUUID" in request_data:
+            updated_request_data["sessionCorrelationUUID"] = shift_hex_identifier(
+                request_data["sessionCorrelationUUID"]
+            )
+        request = request._replace(
+            path=self._rewrite_uri(request.path),
+            body=encode_plist_body(updated_request_data),
+        )
+
         response = await self.send_to_atv(request)
         response_data = decode_plist_body(response.body) or {}
         event_port = response_data["eventPort"]
@@ -799,7 +1088,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         )
         proxy_port = await self._create_channel_server(
             f"Event {key}",
-            partial(self._create_event_channel, event_port),
+            partial(self._create_event_channel, event_port, self._rewrite_info),
         )
         _LOGGER.debug("Event port: remote=%d, local=%d", event_port, proxy_port)
 
@@ -809,12 +1098,14 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
                     **response_data,
                     "eventPort": proxy_port,
                 }
-            )
+            ),
         )
 
     async def _handle_setup_data_stream_channel(
         self, request: HttpRequest, request_data: dict
     ):
+        request = request._replace(path=self._rewrite_uri(request.path))
+
         request_data_streams = request_data["streams"]
         response = await self.send_to_atv(request)
         response_data = decode_plist_body(response.body) or {}
@@ -857,7 +1148,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
                     **response_data,
                     "streams": response_data_streams_modified,
                 }
-            )
+            ),
         )
 
     def handle_teardown(self, request: HttpRequest):
@@ -875,6 +1166,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
     async def _handle_teardown_event_channel(
         self, request: HttpRequest, request_data: dict
     ):
+        request = request._replace(path=self._rewrite_uri(request.path))
         try:
             return await self.send_to_atv(request)
         except TimeoutError:
@@ -888,6 +1180,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
     async def _handle_teardown_data_stream_channel(
         self, request: HttpRequest, request_data: dict
     ):
+        request = request._replace(path=self._rewrite_uri(request.path))
         try:
             return await self.send_to_atv(request)
         except TimeoutError:
@@ -897,6 +1190,13 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
                 stream_id = request_stream["streamID"]
                 self._destroy_channel_server(f"Data stream {stream_id}")
 
+    def _rewrite_uri(self, uri: str) -> str:
+        if "://" in uri:
+            assert self.connection is not None
+            parts = uri.split("/")
+            return "/".join([*parts[:2], self.connection.remote_ip, *parts[3:]])
+        return uri
+
     def handle_request(
         self, request: HttpRequest
     ) -> Optional[Union[HttpResponse, asyncio.Task]]:
@@ -905,7 +1205,8 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         response = super().handle_request(request)
         if response is not None:
             return response
-        # proxy verbatim if there was no specific handler
+        # generic handling if there was no specific handler
+        request = request._replace(path=self._rewrite_uri(request.path))
         task = self.loop.create_task(self.send_to_atv(request))
         return task
 
@@ -917,11 +1218,21 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             method=request.method,
             uri=request.path,
             protocol=f"{request.protocol}/{request.version}",
-            headers=request.headers,
+            headers={
+                k: v
+                for k, v in request.headers.items()
+                if k.lower() != "content-length"
+            },
             body=request.body,
         )
         log_response(_LOGGER, response)
-        return response
+        return response._replace(
+            headers={
+                k: v
+                for k, v in request.headers.items()
+                if k.lower() != "content-length"
+            },
+        )
 
     async def _create_channel_server(
         self, identifier: str, channel_factory: Callable[[], AirPlayChannelAppleTVProxy]
@@ -936,7 +1247,9 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         if server:
             server.close()
 
-    def _create_event_channel(self, port: int) -> AirPlayEventChannelAppleTVProxy:
+    def _create_event_channel(
+        self, port: int, rewrite_info: Callable[[Mapping[str, Any]], Mapping[str, Any]]
+    ) -> AirPlayEventChannelAppleTVProxy:
         assert self.connection is not None
         assert self.verifier is not None
         assert self.shared_key is not None
@@ -946,6 +1259,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             self.connection.remote_ip,
             port,
             self.shared_key,
+            rewrite_info,
         )
 
     def _create_data_stream_channel(
@@ -1073,9 +1387,11 @@ async def publish_airplay_service(
     zconf: Zeroconf, address: str, port: int, target_properties: Dict[str, str]
 ):
     """Publish zeroconf service for ATV AirPlay proxy instance."""
-    properties = {
-        **target_properties,
-    }
+    properties = (
+        AirPlayAppleTVProxy._rewrite_dns_txt(  # pylint: disable=protected-access
+            target_properties
+        )
+    )
 
     return await mdns.publish(
         asyncio.get_event_loop(),

@@ -241,6 +241,18 @@ def test_dns_sd_txt_parse_long():
 
 
 @pytest.mark.parametrize(
+    "data,expected",
+    [
+        ({"foo": b"bar"}, b"\x07foo=bar"),
+        ({b"foo": "bar"}, b"\x07foo=bar"),
+        ({"foo": "bar", "spam": "eggs"}, b"\x07foo=bar\x09spam=eggs"),
+    ],
+)
+def test_dns_sd_txt_format(data, expected):
+    assert dns.format_txt_dict(data) == expected
+
+
+@pytest.mark.parametrize(
     "record_type,data,expected",
     [
         (dns.QueryType.A, b"\x0A\x00\x00\x2A", "10.0.0.42"),

@@ -197,25 +197,32 @@ class BaseDataStreamChannel(AbstractHAPChannel, ABC):
     @staticmethod
     def decode_protobufs(data: bytes) -> List[protobuf.ProtocolMessage]:
         """Decode protobuf messages."""
+        pb_messages = []
         try:
-            pb_messages = []
             while data:
-                length, raw = read_variant(data)
-                if len(raw) < length:
-                    _LOGGER.warning("Expected %d bytes, got %d", length, len(raw))
-                    break
+                # Protobuf fields are encoded in ascending numerical order and
+                # every message must include type (field #1), which is encoded
+                # with the tag 0x08. This is not a valid length since the
+                # minimal message length is at least 40 (type and
+                # uniqueIdentifier). We can use this to detect cases where the
+                # message is not length prefixed, which is known to happen for
+                # ConfigureConnectionMessage.
+                if data[0] == 0x8:
+                    message, data = data, b""
+                else:
+                    length, raw = read_variant(data)
+                    if len(raw) < length:
+                        _LOGGER.warning("Expected %d bytes, got %d", length, len(raw))
+                        break
+                    message, data = raw[:length], raw[length:]
 
-                message = raw[:length]
-                data = raw[length:]
-
+                assert message[0] == 0x8
                 pb_msg = protobuf.ProtocolMessage()
                 pb_msg.ParseFromString(message)
                 pb_messages.append(pb_msg)
-
-            return pb_messages
         except Exception:
             _LOGGER.exception("failed to process data frame")
-            return []
+        return pb_messages
 
 
 class DataStreamChannel(BaseDataStreamChannel):
