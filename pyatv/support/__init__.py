@@ -4,11 +4,12 @@ import asyncio
 import binascii
 import functools
 import logging
-from os import environ
+from os import environ, path
 import warnings
 
 from google.protobuf.text_format import MessageToString
 
+import pyatv
 from pyatv import exceptions
 
 _PROTOBUF_LINE_LENGTH = 150
@@ -68,20 +69,36 @@ def log_protobuf(logger, text, message):
         logger.debug("%s: %s", text, msg_str)
 
 
+def _running_in_pyatv_repo() -> bool:
+    """Return pyatv is run via pytest inside its own repo."""
+    current_test = environ.get("PYTEST_CURRENT_TEST")
+    if current_test:
+        pyatv_path = path.dirname(path.dirname(pyatv.__file__))
+        test_file = current_test.split("::")[0]
+        abs_path = path.join(pyatv_path, test_file)
+        return path.exists(abs_path)
+    return False
+
+
 # https://stackoverflow.com/questions/2536307/
 #   decorators-in-the-python-standard-lib-deprecated-specifically
 def deprecated(func):
     """Decorate functions that are deprecated."""
+    if _running_in_pyatv_repo():
+        return func
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.simplefilter("always", DeprecationWarning)  # turn off filter
-        warnings.warn(
-            f"Call to deprecated function {func.__name__}.",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        warnings.simplefilter("default", DeprecationWarning)  # reset filter
+        # Tests typically call deprecated methods, yielding warnings. Suppress these
+        # warnings when running tests with pytest.
+        if not _running_in_pyatv_repo():
+            warnings.simplefilter("always", DeprecationWarning)  # turn off filter
+            warnings.warn(
+                f"Call to deprecated function {func.__name__}.",
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            warnings.simplefilter("default", DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
 
     return new_func
