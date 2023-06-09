@@ -112,7 +112,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Download pre-built packages
-        uses: actions/download-artifact@v23
+        uses: actions/download-artifact@v3
         with:
           name: packages
           path: dist
@@ -154,7 +154,7 @@ jobs:
           name: ${{ steps.info.outputs.name }}
 
       - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@v1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip_existing: true

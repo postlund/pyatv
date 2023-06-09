@@ -1,5 +1,67 @@
 # CHANGES
 
+## 0.12.1 Frankie (2023-06-08)
+
+Time for a new release. Here it goes:
+
+* Support for custom metadata when streaming audio
+* StreamReader (asyncio) can be used as streaming audio source
+* @a1ex4 fixed compatibility with shairport-sync
+* @michalmo added listener interface for keyboard focus
+* @Shraymonks added a few new tvOs versions and ATV 4K gen3
+* @michalmo addded deep linking support to launch_app
+
+A little of this and a little bit of that. It's so much fun
+to see new contributors to the project! I love it, keep up
+the good work!
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+e538496 raop: Support custom metadata when streaming (#2011)
+ec6a9fd raop: Support asyncio StreamReader when streaming (#2010)
+```
+
+*Other:*
+
+```
+8b3c15e added listener interface to Keyboard for focus updates
+ed7ac4b Fix shairport-sync player support
+9ef3ddc Add support for URL param to LaunchApp (#2024)
+8bf62de Add Apple TV 4k (gen3) and new tvOS versions
+```
+
+**All changes:**
+
+```
+0ce95c0 build(deps): Bump zeroconf from 0.64.0 to 0.64.1 in /requirements
+dcab463 change exception type based on code review
+53a4739 added Keyboard interface documentation
+8b3c15e added listener interface to Keyboard for focus updates
+990a82f preserve integer sizes when decoding/re-encoding with opack, fixes companion proxy stability
+d508f35 build(deps): Bump zeroconf from 0.63.0 to 0.64.0 in /requirements
+656ba7e build(deps): Bump miniaudio from 1.57 to 1.59 in /requirements
+ed7ac4b Fix shairport-sync player support
+062fc73 gha: Fix python version in logs workflow
+9966ce8 gha: Use python 3.10 for log parsing
+afe74a5 gha: Update log tests job
+95f2b5c build(deps): Bump cryptography from 41.0.0 to 41.0.1 in /requirements
+9ef3ddc Add support for URL param to LaunchApp (#2024)
+5633765 build(deps): Bump cryptography from 40.0.2 to 41.0.0 in /requirements
+20aa9a8 build(deps): Bump bitarray from 2.7.3 to 2.7.4 in /requirements
+50be0f8 build(deps): Bump types-requests in /requirements
+001ea0e build(deps): Bump protobuf from 4.23.1 to 4.23.2 in /requirements
+dcbf581 gha: Fix building docker images
+4f9b1c8 build(deps): Bump pytest-cov from 4.0.0 to 4.1.0 in /requirements
+6c05064 build(deps): Bump zeroconf from 0.62.0 to 0.63.0 in /requirements
+8bf62de Add Apple TV 4k (gen3) and new tvOS versions
+e538496 raop: Support custom metadata when streaming (#2011)
+ec6a9fd raop: Support asyncio StreamReader when streaming (#2010)
+747fd46 env: Install correct miniaudio on GHA (#2012)
+```
+
 ## 0.12.0 Edna (2023-05-24)
 
 @michalmo has been working hard to bring you this release.
