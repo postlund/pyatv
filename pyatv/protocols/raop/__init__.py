@@ -124,7 +124,7 @@ class RaopPlaybackManager:
         self._context: StreamContext = StreamContext()
         self._connection: Optional[HttpConnection] = None
         self._rtsp: Optional[RtspSession] = None
-        self._raop: Optional[StreamClient] = None
+        self._stream_client: Optional[StreamClient] = None
 
     @property
     def context(self) -> StreamContext:
@@ -132,9 +132,9 @@ class RaopPlaybackManager:
         return self._context
 
     @property
-    def raop(self) -> Optional[StreamClient]:
-        """Return RAOP client if a session is active."""
-        return self._raop
+    def stream_client(self) -> Optional[StreamClient]:
+        """Return stream client if a session is active."""
+        return self._stream_client
 
     def acquire(self) -> None:
         """Acquire playback manager for playback."""
@@ -145,8 +145,8 @@ class RaopPlaybackManager:
 
     async def setup(self, service: BaseService) -> Tuple[StreamClient, StreamContext]:
         """Set up a session or return active if it exists."""
-        if self._raop and self._rtsp and self._context:
-            return self._raop, self._context
+        if self._stream_client and self._rtsp and self._context:
+            return self._stream_client, self._context
 
         self._connection = await http_connect(self._address, self._port)
         self._rtsp = RtspSession(self._connection)
@@ -160,18 +160,19 @@ class RaopPlaybackManager:
             else airplayv2.AirPlayV2
         )
 
-        self._raop = StreamClient(
+        self._stream_client = StreamClient(
             self._rtsp, self._context, protocol_class(self._context, self._rtsp)
         )
-        return self._raop, self._context
+        return self._stream_client, self._context
 
     async def teardown(self) -> None:
         """Tear down and disconnect current session."""
-        if self._raop:
-            self._raop.close()
+        if self._stream_client:
+            self._stream_client.close()
         if self._connection:
+            self._connection.close()
             self._connection = None
-        self._raop = None
+        self._stream_client = None
         self._context.reset()
         self._rtsp = None
         self._connection = None
@@ -242,7 +243,7 @@ class RaopFeatures(Features):
             return FeatureInfo(FeatureState.Available)
 
         if feature_name in [FeatureName.Stop, FeatureName.Pause]:
-            is_streaming = self.playback_manager.raop is not None
+            is_streaming = self.playback_manager.stream_client is not None
             return FeatureInfo(
                 FeatureState.Available if is_streaming else FeatureState.Unavailable
             )
@@ -300,7 +301,7 @@ class RaopAudio(Audio):
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
-        raop = self.playback_manager.raop
+        raop = self.playback_manager.stream_client
         dbfs_volume = RaopAudio._pct_to_dbfs(level)
 
         if raop:
@@ -418,13 +419,13 @@ class RaopRemoteControl(RemoteControl):
     # gives a better experience in Home Assistant.
     async def pause(self) -> None:
         """Press key pause."""
-        if self.playback_manager.raop:
-            self.playback_manager.raop.stop()
+        if self.playback_manager.stream_client:
+            self.playback_manager.stream_client.stop()
 
     async def stop(self) -> None:
         """Press key stop."""
-        if self.playback_manager.raop:
-            self.playback_manager.raop.stop()
+        if self.playback_manager.stream_client:
+            self.playback_manager.stream_client.stop()
 
     async def volume_up(self) -> None:
         """Press key volume up."""
