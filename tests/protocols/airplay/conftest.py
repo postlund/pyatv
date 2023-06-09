@@ -33,10 +33,18 @@ def airplay_state_fixture(airplay_device):
     yield airplay_device.get_state(Protocol.AirPlay)
 
 
+@pytest.fixture(name="airplay_properties")
+def airplay_properties_fixture():
+    yield {}
+
+
 @pytest.fixture(name="airplay_conf")
-def airplay_conf_fixture(airplay_device):
+def airplay_conf_fixture(airplay_device, airplay_properties):
     service = ManualService(
-        "airplay_id", Protocol.AirPlay, airplay_device.get_port(Protocol.AirPlay), {}
+        "airplay_id",
+        Protocol.AirPlay,
+        airplay_device.get_port(Protocol.AirPlay),
+        airplay_properties,
     )
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)

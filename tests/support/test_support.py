@@ -10,7 +10,13 @@ import pytest
 
 from pyatv import exceptions
 from pyatv.protocols.mrp.protobuf import ProtocolMessage
-from pyatv.support import error_handler, log_binary, log_protobuf, map_range
+from pyatv.support import (
+    error_handler,
+    log_binary,
+    log_protobuf,
+    map_range,
+    shift_hex_identifier,
+)
 
 
 class DummyException(Exception):
@@ -175,3 +181,45 @@ def test_map_range_bad_ranges(in_min, in_max, out_min, out_max):
 def test_map_range_bad_input_values(value):
     with pytest.raises(ValueError):
         map_range(value, 0.0, 10.0, 20.0, 30.0)
+
+
+@pytest.mark.parametrize(
+    "input,output",
+    [
+        ("00:11:22:33:44:55", "01:11:22:33:44:55"),
+        ("01:11:22:33:44:55", "02:11:22:33:44:55"),
+        ("FF:11:22:33:44:55", "00:11:22:33:44:55"),
+        (
+            "00000000-1111-2222-3333-444444444444",
+            "01000000-1111-2222-3333-444444444444",
+        ),
+        (
+            "01000000-1111-2222-3333-444444444444",
+            "02000000-1111-2222-3333-444444444444",
+        ),
+        (
+            "FF000000-1111-2222-3333-444444444444",
+            "00000000-1111-2222-3333-444444444444",
+        ),
+        (
+            "00000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+            "01000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+        ),
+        (
+            "01000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+            "02000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+        ),
+        (
+            "FF000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+            "00000000-1111-2222-3333-444444444444+55555555-6666-7777-8888-999999999999",
+        ),
+    ],
+)
+def test_shift_hex_identifier(input, output):
+    assert shift_hex_identifier(input) == output
+
+
+@pytest.mark.parametrize("input", ["", "a"])
+def test_shift_hex_identifier_min_length(input):
+    with pytest.raises(AssertionError):
+        shift_hex_identifier(input)

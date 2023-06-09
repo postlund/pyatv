@@ -109,6 +109,7 @@ class FakeRaopState:
     def __init__(self):
         self.metadata = SimpleNamespace(title=None, artist=None, album=None)
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
+        self.initial_audio_packet: Optional[int] = None
         self.password: Optional[str] = None
         self.nonce: Optional[str] = None
         self.auth_required: bool = False
@@ -130,12 +131,22 @@ class FakeRaopState:
         if not self.audio_packets:
             return b""
 
-        # Sort received packets according to sequence number and join audio data
-        # together. If a sequence number is missing, the gap will not be filled with
-        # anything.
-        sorted_packets = sorted(self.audio_packets.items())
-        raw_audio = b"".join(audio for _, audio in sorted_packets)
-        return raw_audio
+        # We don't care about the order in which packets was received as that is
+        # supposed to be sorted out by the receiver. So we sort packet sequence
+        # numbers (and thus also audio data). Since sequence numbers are 16 bits,
+        # a wrap-around might happen. So look the first received packet and then
+        # re-arrange everything so that comes first (basically iterate from that
+        # index) and merge audio data after that.
+        sorted_packets = sorted(self.audio_packets.keys())
+        start_index = sorted_packets.index(self.initial_audio_packet)
+        indices = sorted_packets[start_index:] + sorted_packets[0:start_index]
+        return b"".join(self.audio_packets[index] for index in indices)
+
+    def add_audio_packet(self, seqno: int, audio_data: bytes) -> None:
+        # Save sequence number of first packet since it can wrap (16 bit)
+        if self.initial_audio_packet is None:
+            self.initial_audio_packet = seqno
+        self.audio_packets[seqno] = audio_data
 
 
 class AudioReceiver(asyncio.Protocol):
@@ -151,6 +162,11 @@ class AudioReceiver(asyncio.Protocol):
         if self.transport:
             self.transport.close()
             self.transport = None
+
+    def reset(self) -> None:
+        """Reset audio receiver."""
+        self.state.audio_packets = {}
+        self.state.initial_audio_packet = None
 
     @property
     def port(self):
@@ -182,10 +198,10 @@ class AudioReceiver(asyncio.Protocol):
                         data, (self.state.remote_address, self.state.control_port)
                     )
             else:
-                self.state.audio_packets[header.seqno] = alac_decode(data[12:])
+                self.state.add_audio_packet(header.seqno, alac_decode(data[12:]))
         elif packet_type == 0x56:  # Retransmission
             original_packet = data[4:]  # Remove retransmission header
-            self.state.audio_packets[header.seqno] = alac_decode(original_packet[12:])
+            self.state.add_audio_packet(header.seqno, alac_decode(original_packet[12:]))
         else:
             _LOGGER.debug("Unhandled packet type: %d", packet_type)
 
@@ -372,6 +388,7 @@ class FakeRaopService(HttpSimpleRouter):
         _LOGGER.debug("Received SETUP: %s", request)
         _, options = parse_transport(request.headers["Transport"])
         self.state.control_port = int(options["control_port"])
+        self._audio_receiver.reset()
         headers = {
             "Transport": (
                 "RTP/AVP/UDP;unicast;mode=record;"
