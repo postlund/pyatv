@@ -18,6 +18,8 @@ EVENTS_SALT = "Events-Salt"
 EVENTS_WRITE_INFO = "Events-Write-Encryption-Key"
 EVENTS_READ_INFO = "Events-Read-Encryption-Key"
 
+FEEDBACK_INTERVAL = 2.0  # Seconds
+
 
 class AirPlayV2(StreamProtocol):
     """Stream protocol used for AirPlay v1 support."""
@@ -29,6 +31,7 @@ class AirPlayV2(StreamProtocol):
         self.rtsp = rtsp
         self.event_channel: Optional[asyncio.BaseTransport] = None
         self._cipher: Optional[Chacha20Cipher] = None
+        self._feedback_task: Optional[asyncio.Task] = None
 
     async def setup(self, timing_client_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
@@ -94,13 +97,13 @@ class AirPlayV2(StreamProtocol):
                         "audioFormat": 0x40000,
                         "audioMode": "default",
                         "controlPort": control_client_port,
-                        "ct": 2,
+                        "ct": 2,  # Channels?
                         "isMedia": True,
                         "latencyMax": 88200,
                         "latencyMin": 11025,
                         "shk": shared_secret,
-                        "spf": 352,
-                        "sr": 44100,
+                        "spf": 352,  # Samples Per Frame
+                        "sr": 44100,  # Sample rate
                         "type": 0x60,
                         "supportsDynamicStreamID": False,
                         "streamConnectionID": self.rtsp.session_id,
@@ -120,12 +123,27 @@ class AirPlayV2(StreamProtocol):
 
     def teardown(self) -> None:
         """Teardown resources allocated by setup efter streaming finished."""
+        if self._feedback_task:
+            self._feedback_task.cancel()
+            self._feedback_task = None
         if self.event_channel:
             self.event_channel.close()
             self.event_channel = None
 
     async def start_feedback(self) -> None:
         """Start to send feedback (if supported and required)."""
+        if self._feedback_task is None:
+            self._feedback_task = asyncio.create_task(self._feedback_task_loop())
+
+    async def _feedback_task_loop(self) -> None:
+        _LOGGER.debug("Starting feedback task")
+        # TODO: Better end condition here to not risk infinite runs?
+        while True:
+            try:
+                await self.rtsp.feedback()
+            except Exception:
+                _LOGGER.exception("feedback failed")
+            await asyncio.sleep(FEEDBACK_INTERVAL)
 
     async def send_audio_packet(
         self, transport: asyncio.DatagramTransport, rtp_header: bytes, audio: bytes
