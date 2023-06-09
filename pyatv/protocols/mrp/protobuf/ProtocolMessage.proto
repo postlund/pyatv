@@ -157,6 +157,7 @@ message ProtocolMessage {
     ORIGIN_CLIENT_PROPERTIES_MESSAGE = 105;
     AUDIO_FADE_MESSAGE = 106;
     AUDIO_FADE_RESPONSE_MESSAGE = 107;
+    CONFIGURE_CONNECTION_MESSAGE = 120;
   }
 
   optional Type type = 1; // Identifies which underlying message is filled in.

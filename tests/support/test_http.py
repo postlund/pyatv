@@ -2,17 +2,21 @@
 import asyncio
 import inspect
 from typing import Optional, Tuple
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
 import pytest
 
 from pyatv.support.http import (
+    SERVER_NAME,
+    USER_AGENT,
     BasicHttpServer,
     HttpRequest,
     HttpResponse,
     HttpSession,
     HttpSimpleRouter,
+    format_request,
+    format_response,
     http_connect,
     http_server,
     parse_request,
@@ -120,6 +124,35 @@ def test_parse_response_ignore_header_case():
     assert rest == b"extra"
 
 
+@pytest.mark.parametrize(
+    "response,expected",
+    [
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("FOO", "3.14", 200, "OK", {}, b""),
+            f"FOO/3.14 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 404, "Not Found", {}, b""),
+            f"HTTP/1.1 404 Not Found\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {"A": "B"}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b"test"),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_response(response, expected):
+    assert format_response(response) == expected
+
+
 def test_parse_request_ok_first_line():
     req, rest = parse_request(b"GET /test HTTP/1.0\r\n\r\n")
     assert req.method == "GET"
@@ -138,6 +171,39 @@ def test_parse_request_arbitrary_protocol_header():
 def test_parse_request_method_with_underscore():
     req, _ = parse_request(b"SOME_METHOD /test FOO/3.14\r\n\r\n")
     assert req.method == "SOME_METHOD"
+
+
+@pytest.mark.parametrize(
+    "request_,expected",
+    [
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("SOME METHOD", "/test", "HTTP", "1.1", {}, b""),
+            f"SOME METHOD /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/example", "HTTP", "1.1", {}, b""),
+            f"GET /example HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "FOO", "3.14", {}, b""),
+            f"GET /test FOO/3.14\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {"A": "B"}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b"test"),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_request(request_, expected):
+    assert format_request(request_) == expected
 
 
 # BASIC HTTP SERVER
@@ -260,6 +326,109 @@ async def test_server_with_router():
 
     resp = await client.get("/foo", allow_error=True)
     assert resp.code == 200
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_process_received():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_received") as mock:
+        mock.side_effect = lambda data: data.replace(b"/foo", b"/bar")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 123
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_process_sent():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_sent") as mock:
+        mock.side_effect = lambda data: data.replace(b"200", b"456")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 456
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_async_handler():
+    class TestRouter(HttpSimpleRouter):
+        def __init__(self):
+            super().__init__()
+            self.add_route("GET", "/baz", self.baz)
+
+        def baz(self, request):
+            return asyncio.create_task(self.async_baz(request))
+
+        async def async_baz(self, request):
+            return HttpResponse("HTTP", "1.1", 200, "baz", {}, request.body)
+
+    client, server = await serve_and_connect(TestRouter())
+
+    resp = await client.get("/baz", allow_error=True)
+    assert resp.code == 200
+    assert resp.message == "baz"
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_segmented_request():
+    class TestHttpRequestConnection(asyncio.Protocol):
+        def __init__(self) -> None:
+            super().__init__()
+            self.transport = None
+            self.response_received = asyncio.Event()
+            self.response_content = None
+
+        def connection_made(self, transport):
+            self.transport = transport
+
+        def data_received(self, data):
+            self.response_content = data
+            self.response_received.set()
+
+        async def send(self):
+            self.response_received.clear()
+            self.response_content = None
+
+            data_received = asyncio.Event()
+            original_data_received = BasicHttpServer.data_received
+
+            # make sure the first chunk was received before sending the next
+            def set_event_and_receive(self, data):
+                data_received.set()
+                return original_data_received(self, data)
+
+            with patch.object(BasicHttpServer, "data_received", set_event_and_receive):
+                self.transport.write(b"GET /foo HTTP/1.1\r\nContent-Length: 11\r\n\r\n")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"first")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"second")
+
+            await self.response_received.wait()
+            return self.response_content
+
+    server, port = await serve(DummyRouter())
+    loop = asyncio.get_event_loop()
+    _, client = await loop.create_connection(
+        TestHttpRequestConnection, "127.0.0.1", port
+    )
+
+    response = await client.send()
+    assert response.startswith(b"HTTP/1.1 200 foo\r\n")
+    assert response.endswith(b"\r\nfirstsecond")
 
     server.close()
 

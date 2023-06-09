@@ -1,7 +1,9 @@
 """Manage announced AirPlay features."""
 from enum import IntFlag
+import logging
+import plistlib
 import re
-from typing import Mapping
+from typing import Any, Mapping, Union
 
 from pyatv.auth.hap_pairing import (
     TRANSIENT_CREDENTIALS,
@@ -10,6 +12,7 @@ from pyatv.auth.hap_pairing import (
 )
 from pyatv.const import PairingRequirement
 from pyatv.interface import BaseService
+from pyatv.support.http import HttpRequest, HttpResponse
 
 # pylint: disable=invalid-name
 
@@ -144,3 +147,55 @@ def is_remote_control_supported(
     # tvOS must be at least version 13 and HAP credentials are required by Apple TV
     version = service.properties.get("osvers", "0.0").split(".", maxsplit=1)[0]
     return float(version) >= 13.0 and credentials.type == AuthenticationType.HAP
+
+
+def encode_plist_body(data: Any):
+    """Encode a binary plist payload."""
+    return plistlib.dumps(
+        data,
+        fmt=plistlib.FMT_BINARY,  # pylint: disable=no-member
+    )
+
+
+def decode_plist_body(body: Union[str, bytes]) -> Any:
+    """Decode a binary plist payload."""
+    try:
+        return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
+    except plistlib.InvalidFileException:
+        return None
+
+
+def log_request(logger, request: HttpRequest, message_prefix="") -> None:
+    """Log an AirPlay request with optional binary plist body."""
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+
+    logger.debug("%sRequest: %s", message_prefix, request)
+    if request.headers.get("content-type") == "application/x-apple-binary-plist" and (
+        payload := decode_plist_body(request.body)
+    ):
+        logger.debug(
+            "%s%s request plist content: %s",
+            message_prefix,
+            request.protocol,
+            payload,
+        )
+
+
+def log_response(logger, response: HttpResponse, message_prefix="") -> None:
+    """Log an AirPlay response with optional binary plist body."""
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+
+    logger.debug("%sResponse: %s", message_prefix, response)
+    if (
+        response
+        and response.headers.get("content-type") == "application/x-apple-binary-plist"
+        and (payload := decode_plist_body(response.body))
+    ):
+        logger.debug(
+            "%s%s response plist content: %s",
+            message_prefix,
+            response.protocol,
+            payload,
+        )

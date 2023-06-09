@@ -9,6 +9,7 @@ from .ProtocolMessage_pb2 import ProtocolMessage
 from . import AudioFadeMessage_pb2
 from . import AudioFadeResponseMessage_pb2
 from . import ClientUpdatesConfigMessage_pb2
+from . import ConfigureConnectionMessage_pb2
 from . import CryptoPairingMessage_pb2
 from . import DeviceInfoMessage_pb2
 from . import GenericMessage_pb2
@@ -75,6 +76,7 @@ from .Common_pb2 import DeviceType
 from .Common_pb2 import PlaybackState
 from .Common_pb2 import RepeatMode
 from .Common_pb2 import ShuffleMode
+from .ConfigureConnectionMessage_pb2 import ConfigureConnectionMessage
 from .ContentItemMetadata_pb2 import ActiveFormatJustification
 from .ContentItemMetadata_pb2 import AlbumTraits
 from .ContentItemMetadata_pb2 import AudioFormat
@@ -178,6 +180,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.AUDIO_FADE_MESSAGE: AudioFadeMessage_pb2.audioFadeMessage,
     ProtocolMessage.AUDIO_FADE_RESPONSE_MESSAGE: AudioFadeResponseMessage_pb2.audioFadeResponseMessage,
     ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE: ClientUpdatesConfigMessage_pb2.clientUpdatesConfigMessage,
+    ProtocolMessage.CONFIGURE_CONNECTION_MESSAGE: ConfigureConnectionMessage_pb2.configureConnectionMessage,
     ProtocolMessage.CRYPTO_PAIRING_MESSAGE: CryptoPairingMessage_pb2.cryptoPairingMessage,
     ProtocolMessage.DEVICE_INFO_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
@@ -234,6 +237,7 @@ _EXTENSION_LOOKUP = {
 AUDIO_FADE_MESSAGE = ProtocolMessage.AUDIO_FADE_MESSAGE
 AUDIO_FADE_RESPONSE_MESSAGE = ProtocolMessage.AUDIO_FADE_RESPONSE_MESSAGE
 CLIENT_UPDATES_CONFIG_MESSAGE = ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE
+CONFIGURE_CONNECTION_MESSAGE = ProtocolMessage.CONFIGURE_CONNECTION_MESSAGE
 CRYPTO_PAIRING_MESSAGE = ProtocolMessage.CRYPTO_PAIRING_MESSAGE
 DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 DEVICE_INFO_UPDATE_MESSAGE = ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE

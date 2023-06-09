@@ -59,6 +59,7 @@ message AVOutputDeviceDescriptor {
   optional string primaryUID = 43;
   optional uint32 configuredClusterSize = 44;
   optional bool producesLowFidelityAudio = 49;
+  optional string airPlayGroupID = 51;
 }
 
 message UpdateOutputDeviceMessage {

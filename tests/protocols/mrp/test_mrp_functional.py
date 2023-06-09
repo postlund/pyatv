@@ -66,7 +66,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         airplay_service = ManualService(
             "airplay_id",
             Protocol.AirPlay,
-            self.server.port,
+            self.fake_atv.get_port(Protocol.AirPlay),
             properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
         airplay_service.credentials = DEVICE_CREDENTIALS

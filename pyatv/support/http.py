@@ -11,10 +11,10 @@ from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 import async_timeout
+from requests.structures import CaseInsensitiveDict
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
-from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,16 +47,18 @@ def _format_message(
 ) -> bytes:
     if isinstance(body, str):
         body = body.encode("utf-8")
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
 
     msg = f"{method} {uri} {protocol}"
-    if "User-Agent" not in (headers or {}):
+    if "User-Agent" not in headers:
         msg += f"\r\nUser-Agent: {user_agent}"
     if content_type:
         msg += f"\r\nContent-Type: {content_type}"
     if body:
         msg += f"\r\nContent-Length: {len(body) if body else 0}"
 
-    for key, value in (headers or {}).items():
+    for key, value in headers.items():
         msg += f"\r\n{key}: {value}"
     msg += 2 * "\r\n"
 
@@ -96,7 +98,7 @@ def _key_value(line: str) -> Tuple[str, str]:
 
 def _parse_http_message(
     message: bytes,
-) -> Tuple[Optional[str], CaseInsensitiveDict[str], Union[bytes, str], bytes]:
+) -> Tuple[Optional[str], CaseInsensitiveDict, Union[bytes, str], bytes]:
     """Parse HTTP response."""
     try:
         header_str, body = message.split(b"\r\n\r\n", maxsplit=1)
@@ -106,22 +108,18 @@ def _parse_http_message(
 
     msg_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
 
-    # TODO: pylint on python 3.6 does not seem to find CaseInsensitiveDict.get, but
-    # other versions seems to work fine. Remove this ignore when python 3.6 is dropped.
-    content_length = int(
-        msg_headers.get("Content-Length", 0)  # pylint: disable=no-member
-    )
+    content_length = int(msg_headers.get("Content-Length", 0))
     if len(body or []) < content_length:
         return None, CaseInsensitiveDict(), b"", message
 
     msg_body: Union[str, bytes] = body[0:content_length]
 
     # Assume body is text unless content type is application/octet-stream
-    # TODO: Remove pylint disable when python 3.6 is dropped
-    if not msg_headers.get("Content-Type", "").startswith(  # pylint: disable=no-member
-        "application"
-    ):
-        msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+    if not msg_headers.get("Content-Type", "").startswith("application"):
+        try:
+            msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+        except UnicodeDecodeError:
+            pass
 
     return (
         headers[0],
@@ -129,6 +127,28 @@ def _parse_http_message(
         msg_body,
         body[content_length:],
     )
+
+
+def format_response(response: HttpResponse) -> bytes:
+    """Encode HTTP response."""
+    headers = response.headers
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
+
+    output = (
+        f"{response.protocol}/{response.version} {response.code} {response.message}\r\n"
+    )
+    if "Server" not in headers:
+        output += f"Server: {SERVER_NAME}\r\n"
+    for key, value in headers.items():
+        output += f"{key}: {value}\r\n"
+
+    body = response.body or b""
+    if body:
+        body = body.encode("utf-8") if isinstance(body, str) else body
+        output += f"Content-Length: {len(body)}\r\n"
+
+    return output.encode("utf-8") + b"\r\n" + body
 
 
 def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
@@ -148,6 +168,17 @@ def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     return (
         HttpResponse(protocol, version, int(code), message, msg_headers, msg_body),
         rest,
+    )
+
+
+def format_request(request: HttpRequest) -> bytes:
+    """Encode HTTP request."""
+    return _format_message(
+        request.method,
+        request.path,
+        protocol=f"{request.protocol}/{request.version}",
+        headers=request.headers,
+        body=request.body,
     )
 
 
@@ -423,7 +454,9 @@ class AbstractHttpServerHandler(ABC):
     """Abstract base class for handling HTTP requests."""
 
     @abstractmethod
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Handle incoming request and return response."""
 
 
@@ -442,7 +475,9 @@ class HttpSimpleRouter(AbstractHttpServerHandler):
         """Add new handler to route."""
         self._routes.setdefault(method, {})[path] = target
 
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Dispatch request to correct handler method."""
         for path, target in self._routes.get(request.method, {}).items():
             if re.match(path, request.path):
@@ -457,6 +492,7 @@ class BasicHttpServer(asyncio.Protocol):
         """Initialize a new BasicHttpServer instance."""
         self.handler: AbstractHttpServerHandler = handler
         self.transport = None
+        self._request_buffer = b""
 
     def connection_made(self, transport):
         """Handle that a connection has been made."""
@@ -466,24 +502,33 @@ class BasicHttpServer(asyncio.Protocol):
     def data_received(self, data: bytes):
         """Handle incoming HTTP request."""
         _LOGGER.debug("Received: %s", data)
+        data = self.process_received(data)
 
         # Process all requests in packet
-        while data:
-            data = self._parse_and_send_next(data)
+        self._request_buffer += data
+        while self._request_buffer:
+            if (
+                rest := self._parse_and_send_next(self._request_buffer)
+            ) == self._request_buffer:
+                break
+            self._request_buffer = rest
+
+    def process_received(self, data: bytes) -> bytes:
+        """Process incoming data."""
+        return data
+
+    def process_sent(self, data: bytes) -> bytes:
+        """Process outgoing data."""
+        return data
 
     def _parse_and_send_next(self, data: bytes):
-        resp: Optional[HttpResponse] = None
+        resp: Optional[Union[HttpResponse, asyncio.Task]] = None
         rest: bytes = b""
         try:
             request, rest = parse_request(data)
 
-            # TODO: If no request could be parsed, then there's not enough data.
-            # Segmented requests (over several IP packets) are currently not
-            # implemented. Implement this when needed.
             if not request:
-                raise exceptions.NotSupportedError(
-                    "segmented HTTP requests not supported"
-                )
+                return data
 
             resp = self.handler.handle_request(request)
         except Exception as ex:
@@ -495,20 +540,20 @@ class BasicHttpServer(asyncio.Protocol):
         if not resp:
             resp = HttpResponse("HTTP", "1.1", 404, "File not found", {}, "Not found")
 
-        response = f"{resp.protocol}/{resp.version} {resp.code} {resp.message}\r\n"
-        response += f"Server: {SERVER_NAME}\r\n"
-        for key, value in resp.headers.items():
-            response += f"{key}: {value}\r\n"
-
-        body = resp.body or b""
-        if body:
-            body = body.encode("utf-8") if isinstance(body, str) else body
-            response += f"Content-Length: {len(body)}\r\n"
-
-        if self.transport:
-            self.transport.write(response.encode("utf-8") + b"\r\n" + body)
+        if isinstance(resp, asyncio.Task):
+            resp.add_done_callback(self._send_task_response)
+        else:
+            self._send_response(resp)
 
         return rest
+
+    def _send_response(self, resp: HttpResponse) -> None:
+        if self.transport:
+            self.transport.write(self.process_sent(format_response(resp)))
+
+    def _send_task_response(self, task: asyncio.Task) -> None:
+        if response := task.result():
+            self._send_response(response)
 
 
 class StaticFileWebServer:

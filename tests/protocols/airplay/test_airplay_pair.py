@@ -32,11 +32,12 @@ def require_auth(airplay_usecase):
     airplay_usecase.airplay_require_authentication()
 
 
-async def perform_pairing(conf, pin=DEVICE_PIN):
+async def perform_pairing(conf, pin=DEVICE_PIN, expected_credentials=None):
     pairing = await pair(conf, Protocol.AirPlay, asyncio.get_event_loop())
 
     assert pairing.device_provides_pin
 
+    assert conf.get_service(Protocol.AirPlay).credentials is None
     await pairing.begin()
     if pin:
         pairing.pin(pin)
@@ -45,26 +46,54 @@ async def perform_pairing(conf, pin=DEVICE_PIN):
 
     await pairing.finish()
     assert pairing.has_paired
-    assert parse_credentials(
-        conf.get_service(Protocol.AirPlay).credentials
-    ) == parse_credentials(DEVICE_CREDENTIALS)
+
+    assert conf.get_service(Protocol.AirPlay).credentials is not None
+    if expected_credentials:
+        assert parse_credentials(
+            conf.get_service(Protocol.AirPlay).credentials
+        ) == parse_credentials(expected_credentials)
 
 
-async def test_pairing_exception_invalid_pin(airplay_conf):
+@pytest.mark.parametrize(
+    "airplay_properties,expected_credentials",
+    [
+        ({}, DEVICE_CREDENTIALS),
+        ({"features": "0x00000000,0x00010000"}, None),
+    ],
+)
+async def test_pairing_exception_invalid_pin(airplay_conf, expected_credentials):
     with pytest.raises(exceptions.PairingError):
-        await perform_pairing(airplay_conf, 9999)
+        await perform_pairing(
+            airplay_conf, 9999, expected_credentials=expected_credentials
+        )
 
 
-async def test_pairing_exception_no_pin(airplay_conf):
+@pytest.mark.parametrize(
+    "airplay_properties,expected_credentials",
+    [
+        ({}, DEVICE_CREDENTIALS),
+        ({"features": "0x00000000,0x00010000"}, None),
+    ],
+)
+async def test_pairing_exception_invalid_pin(airplay_conf, expected_credentials):
     with pytest.raises(exceptions.PairingError):
-        await perform_pairing(airplay_conf, None)
+        await perform_pairing(
+            airplay_conf, 9999, expected_credentials=expected_credentials
+        )
 
 
-async def test_pairing_with_device_new_credentials(airplay_conf):
+@pytest.mark.parametrize(
+    "airplay_properties,expected_credentials",
+    [
+        ({}, DEVICE_CREDENTIALS),
+        ({"features": "0x00000000,0x00010000"}, None),
+    ],
+)
+async def test_pairing_with_device_new_credentials(airplay_conf, expected_credentials):
     # Using patch as decorator does not seem to work with python < 3.8, but can be
     # worked around using asynctest. This is however the only async test using patch
     # for now, so lets use a context manager and introduce asynctest when needed.
     # Source: https://github.com/pytest-dev/pytest-asyncio/issues/130
     with patch("pyatv.protocols.airplay.srp.urandom") as rand_func:
         rand_func.side_effect = predetermined_key
-        await perform_pairing(airplay_conf)
+        await perform_pairing(airplay_conf, expected_credentials=expected_credentials)

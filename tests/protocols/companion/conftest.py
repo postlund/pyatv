@@ -6,9 +6,9 @@ import pytest
 import pytest_asyncio
 
 from pyatv import connect
+from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
-from pyatv.protocols.companion.server_auth import CLIENT_CREDENTIALS
 
 from tests.fake_device import FakeAppleTV, companion
 from tests.fake_device.companion import FakeCompanionUseCases
