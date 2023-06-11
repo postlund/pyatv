@@ -43,6 +43,7 @@ HID_BUTTON_MAP = {
     HidCommand.PlayPause: "play_pause",
     HidCommand.ChannelIncrement: "channel_up",
     HidCommand.ChannelDecrement: "channel_down",
+    HidCommand.Screensaver: "screensaver",
 }
 
 MEDIA_CONTROL_MAP = {

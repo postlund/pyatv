@@ -128,6 +128,7 @@ SUPPORTED_FEATURES = set(
         FeatureName.PlayPause,
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
+        FeatureName.Screensaver,
         # Keyboard interface
         FeatureName.TextGet,
         FeatureName.TextClear,
@@ -306,6 +307,10 @@ class CompanionRemoteControl(RemoteControl):
     async def channel_down(self) -> None:
         """Select previous channel."""
         await self._press_button(HidCommand.ChannelDecrement)
+
+    async def screensaver(self) -> None:
+        """Activate screen saver."""
+        await self._press_button(HidCommand.Screensaver)
 
     async def _press_button(
         self, command: HidCommand, action: InputAction = InputAction.SingleTap

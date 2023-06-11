@@ -427,6 +427,11 @@ class RemoteControl:
         """Select previous channel."""
         raise exceptions.NotSupportedError()
 
+    @feature(58, "Screensaver", "Activate screen saver.")
+    async def screensaver(self) -> None:
+        """Activate screen saver.."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
