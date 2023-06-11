@@ -386,6 +386,9 @@ class FeatureName(Enum):
     PowerState = 32
     """Current device power state."""
 
+    Screensaver = 58
+    """Activate screen saver."""
+
     TurnOn = 33
     """Turn device on."""
 

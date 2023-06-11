@@ -190,6 +190,11 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Select previous channel."""
         return await self.relay("channel_down")()
 
+    @shield.guard
+    async def screensaver(self) -> None:
+        """Activate screen saver.."""
+        return await self.relay("screensaver")()
+
 
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""

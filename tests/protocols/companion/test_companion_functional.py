@@ -39,6 +39,10 @@ MEDIA_CONTROL_FEATURES = [
     FeatureName.SetVolume,
 ]
 
+ALWAYS_PRESENT_FEATURES = [
+    FeatureName.Screensaver,
+]
+
 pytestmark = pytest.mark.asyncio
 
 
@@ -136,6 +140,15 @@ async def test_media_control_features(
     await asyncio.gather(*atv.close())
 
 
+async def test_always_present_features(companion_conf, event_loop):
+    atv = await pyatv.connect(companion_conf, loop=event_loop)
+
+    for feature in ALWAYS_PRESENT_FEATURES:
+        assert atv.features.get_feature(feature).state == FeatureState.Available
+
+    await asyncio.gather(*atv.close())
+
+
 async def test_power_functions(companion_client, companion_state):
     assert companion_state.powered_on
 
@@ -176,6 +189,8 @@ async def test_session_start_and_stop(companion_client, companion_state):
         "pause",
         "next",
         "previous",
+        # Others
+        "screensaver",
     ],
 )
 async def test_remote_control_buttons(companion_client, companion_state, button):
