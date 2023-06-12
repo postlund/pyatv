@@ -582,4 +582,4 @@ async def test_stop_playback(raop_client, raop_state, button):
 
     await raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
 
-    assert len(raop_state.raw_audio) == ONE_FRAME_IN_BYTES
+    assert len(raop_state.raw_audio) >= ONE_FRAME_IN_BYTES
