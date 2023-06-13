@@ -583,3 +583,17 @@ async def test_stop_playback(raop_client, raop_state, button):
     await raop_client.stream.stream_file(data_path("audio_3_packets.wav"))
 
     assert len(raop_state.raw_audio) >= ONE_FRAME_IN_BYTES
+
+
+@pytest.mark.parametrize(
+    "files, raop_properties", [(["only_metadata.wav"], {"et": "0", "md": "0"})]
+)
+async def test_stream_metadata_from_http(
+    raop_client, raop_state, data_webserver, files
+):
+    file_url = data_webserver + files[0]
+    await raop_client.stream.stream_file(file_url)
+
+    assert raop_state.metadata.artist == "postlund"
+    assert raop_state.metadata.album == "raop"
+    assert raop_state.metadata.title == "pyatv"

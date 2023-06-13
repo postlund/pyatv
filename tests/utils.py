@@ -130,6 +130,11 @@ def faketime(module_name, *times):
     return FakeDatetime(list(times))
 
 
+def data_root() -> str:
+    """Return absolute path to data directory used by tests."""
+    return str(Path(__file__).parent.joinpath("data"))
+
+
 def data_path(filename: str) -> str:
     """Return absolute path to a test file in the data directory."""
     abs_path = str(Path(__file__).parent.joinpath("data", filename))

@@ -392,7 +392,7 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
     @shield.guard
     async def stream_file(
         self,
-        file: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+        file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
         /,
         metadata: Optional[interface.MediaMetadata] = None,
         **kwargs
