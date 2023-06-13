@@ -117,3 +117,7 @@ class BlockedStateError(Exception):
 
 class InvalidResponseError(Exception):
     """Thrown when a remote sends an invalid response."""
+
+
+class OperationTimeoutError(Exception):
+    """Raised when a timeout happens."""

@@ -1,4 +1,5 @@
 import logging
+from os import path
 from types import SimpleNamespace
 import typing
 from unittest.mock import Mock, patch
@@ -6,6 +7,7 @@ from unittest.mock import Mock, patch
 from ifaddr import IP, Adapter
 import pytest
 import pytest_asyncio
+from pytest_httpserver import HTTPServer
 
 import pyatv
 from pyatv.auth.hap_pairing import parse_credentials
@@ -18,7 +20,7 @@ from pyatv.support.net import unused_port
 from tests import fake_udns
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests.fake_knock import create_knock_server
-from tests.utils import stub_sleep, unstub_sleep
+from tests.utils import data_root, stub_sleep, unstub_sleep
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -172,3 +174,14 @@ def dmap_state_dispatcher_fixture(core_dispatcher):
 @pytest.fixture(name="companion_state_dispatcher")
 def companion_state_dispatcher_fixture(core_dispatcher):
     yield ProtocolStateDispatcher(Protocol.Companion, core_dispatcher)
+
+
+# "files" is a list of filenames from tests/data directory that will be served
+# as binary files from the HTTP server
+@pytest.fixture(name="data_webserver")
+def data_webserver_fixture(httpserver: HTTPServer, files: typing.Sequence[str]):
+    root_dir = data_root()
+    for file in files:
+        with open(path.join(root_dir, file), "rb") as _fh:
+            httpserver.expect_request("/" + file).respond_with_data(_fh.read())
+    yield httpserver.url_for("/")
