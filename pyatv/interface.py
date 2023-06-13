@@ -912,6 +912,7 @@ class DeviceInfo:
     MODEL = "model"
     RAW_MODEL = "raw_model"
     MAC = "mac"
+    OUTPUT_DEVICE_ID = "airplay_id"
 
     def __init__(self, device_info: Mapping[str, Any]) -> None:
         """Initialize a new DeviceInfo instance."""
@@ -923,6 +924,7 @@ class DeviceInfo:
         self._build_number = self._pop_with_type(self.BUILD_NUMBER, None, str)
         self._model = self._pop_with_type(self.MODEL, DeviceModel.Unknown, DeviceModel)
         self._mac = self._pop_with_type(self.MAC, None, str)
+        self._output_device_id = self._pop_with_type(self.OUTPUT_DEVICE_ID, None, str)
 
     def _pop_with_type(self, field, default, expected_type):
         value = self._devinfo.pop(field, default)
@@ -1003,6 +1005,11 @@ class DeviceInfo:
         """Device MAC address."""
         return self._mac
 
+    @property
+    def output_device_id(self) -> Optional[str]:
+        """Output device identifier."""
+        return self._output_device_id
+
     def __str__(self) -> str:
         """Convert device info to readable string."""
         output = (
@@ -1059,12 +1066,48 @@ class Features:
         return True
 
 
-class AudioListener(ABC):  # pylint: disable=too-few-public-methods
+class OutputDevice:
+    """Information about an output device."""
+
+    def __init__(self, name: Optional[str], identifier: str) -> None:
+        """Initialize a new OutputDevice instance."""
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -> Optional[str]:
+        """User friendly name of output device."""
+        return self._name
+
+    @property
+    def identifier(self) -> str:
+        """Return a unique id for the output device."""
+        return self._identifier
+
+    def __str__(self) -> str:
+        """Convert app info to readable string."""
+        return f"Device: {self.name} ({self.identifier})"
+
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, OutputDevice):
+            return self.name == other.name and self.identifier == other.identifier
+        return False
+
+
+class AudioListener(ABC):
     """Listener interface for audio updates."""
 
     @abstractmethod
     def volume_update(self, old_level: float, new_level: float):
         """Device volume was updated."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def outputdevices_update(
+        self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
+    ):
+        """Output devices were updated."""
         raise NotImplementedError()
 
 
@@ -1116,6 +1159,27 @@ class Audio(ABC, StateProducer):
         Call will block until volume change has been acknowledged by the device (when
         possible and supported).
         """
+        raise exceptions.NotSupportedError()
+
+    @property  # type: ignore
+    @feature(59, "OutputDevices", "Current output devices.")
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        raise exceptions.NotSupportedError()
+
+    @feature(60, "AddOutputDevices", "Add output devices.")
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        raise exceptions.NotSupportedError()
+
+    @feature(61, "RemoveOutputDevices", "Remove output devices.")
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        raise exceptions.NotSupportedError()
+
+    @feature(62, "SetOutputDevices", "Set output devices.")
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
         raise exceptions.NotSupportedError()
 
 

@@ -5,7 +5,7 @@ import inspect
 from ipaddress import IPv4Address
 import logging
 import math
-from typing import Any, Dict, Set
+from typing import Any, Dict, List, Set
 from unittest.mock import MagicMock
 
 import pytest
@@ -37,6 +37,7 @@ from pyatv.interface import (
     Keyboard,
     KeyboardListener,
     Metadata,
+    OutputDevice,
     Playing,
     Power,
     PowerListener,
@@ -214,6 +215,13 @@ class SavingAudioListener(AudioListener):
         """Device volume was updated."""
         self.last_update = new_level
         self.all_updates.append(new_level)
+
+    def outputdevices_update(
+        self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
+    ):
+        """Output devices were updated."""
+        self.last_update = new_devices
+        self.all_updates.append(new_devices)
 
 
 class SavingKeyboardListener(KeyboardListener):
@@ -865,18 +873,71 @@ async def dispatch_volume_update(mrp_state_dispatcher, level, protocol=Protocol.
     await event.wait()
 
 
-async def test_audio_listener_updates(mrp_state_dispatcher, audio_setup):
+async def dispatch_output_devices_update(
+    mrp_state_dispatcher, devices, protocol=Protocol.MRP
+):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    mrp_state_dispatcher.listen_to(
+        UpdatedState.OutputDevices, lambda message: event.set()
+    )
+    mrp_state_dispatcher.dispatch(UpdatedState.OutputDevices, devices)
+
+    await event.wait()
+
+
+async def test_audio_listener_volume_updates(mrp_state_dispatcher, audio_setup):
     await dispatch_volume_update(mrp_state_dispatcher, 10.0)
     assert audio_setup.listener.last_update == 10.0
     await dispatch_volume_update(mrp_state_dispatcher, 20.0)
     assert audio_setup.listener.last_update == 20.0
 
 
-async def test_audio_no_listener_duplicates(mrp_state_dispatcher, audio_setup):
+async def test_audio_no_listener_volume_duplicates(mrp_state_dispatcher, audio_setup):
     await dispatch_volume_update(mrp_state_dispatcher, 10.0)
     await dispatch_volume_update(mrp_state_dispatcher, 10.0)
     assert len(audio_setup.listener.all_updates) == 1
     assert audio_setup.listener.last_update == 10.0
+
+
+async def test_audio_listener_output_devices_updates(mrp_state_dispatcher, audio_setup):
+    await dispatch_output_devices_update(
+        mrp_state_dispatcher,
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+    )
+    assert audio_setup.listener.last_update == [
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+    ]
+    await dispatch_output_devices_update(
+        mrp_state_dispatcher,
+        [
+            OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+            OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+        ],
+    )
+    assert audio_setup.listener.last_update == [
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+        OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+    ]
+
+
+async def test_audio_no_listener_output_devices_duplicates(
+    mrp_state_dispatcher, audio_setup
+):
+    await dispatch_output_devices_update(
+        mrp_state_dispatcher,
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+    )
+    await dispatch_output_devices_update(
+        mrp_state_dispatcher,
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+    )
+    assert len(audio_setup.listener.all_updates) == 1
+    assert audio_setup.listener.last_update == [
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+    ]
 
 
 # KEYBOARD RELATED TESTS

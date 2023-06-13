@@ -90,6 +90,7 @@ class GlobalCommands:
         _print_commands("Power", interface.Power)
         _print_commands("Playing", interface.Playing)
         _print_commands("AirPlay", interface.Stream)
+        _print_commands("Audio", interface.Audio)
         _print_commands("Keyboard", interface.Keyboard)
         _print_commands("Device Info", interface.DeviceInfo)
         _print_commands("Device", DeviceCommands)
@@ -114,6 +115,7 @@ class GlobalCommands:
             interface.DeviceInfo,
             interface.Apps,
             interface.Audio,
+            interface.Keyboard,
             self.__class__,
             DeviceCommands,
         ]

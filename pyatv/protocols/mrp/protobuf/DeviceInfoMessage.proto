@@ -8,13 +8,13 @@ extend ProtocolMessage {
 }
 
 message DeviceInfoMessage {
-  required string uniqueIdentifier = 1; // Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063
+  optional string uniqueIdentifier = 1; // Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063
   required string name = 2; // Example: Jean's iPhone
   optional string localizedModelName = 3; // Example: iPhone
-  required string systemBuildVersion = 4; // Example: 13F69
-  required string applicationBundleIdentifier = 5; // Example: com.example.myremote
+  optional string systemBuildVersion = 4; // Example: 13F69
+  optional string applicationBundleIdentifier = 5; // Example: com.example.myremote
   optional string applicationBundleVersion = 6; // Example: 107
-  required int32 protocolVersion = 7; // Example: 1
+  optional int32 protocolVersion = 7; // Example: 1
   optional uint32 lastSupportedMessageType = 8;
   optional bool supportsSystemPairing = 9;
   optional bool allowsPairing = 10;
