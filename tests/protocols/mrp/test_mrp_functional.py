@@ -372,6 +372,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.TurnOn,
             FeatureName.TurnOff,
             FeatureName.PowerState,
+            FeatureName.OutputDevices,
+            FeatureName.AddOutputDevices,
+            FeatureName.RemoveOutputDevices,
+            FeatureName.SetOutputDevices,
         )
 
     async def test_features_artwork(self):

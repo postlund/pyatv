@@ -41,6 +41,13 @@ MEDIA_CONTROL_FEATURES = [
 
 ALWAYS_PRESENT_FEATURES = [
     FeatureName.Screensaver,
+    FeatureName.AccountList,
+    FeatureName.SwitchAccount,
+    FeatureName.TextFocusState,
+    FeatureName.TextGet,
+    FeatureName.TextClear,
+    FeatureName.TextAppend,
+    FeatureName.TextSet,
 ]
 
 pytestmark = pytest.mark.asyncio
