@@ -3,7 +3,6 @@
 import asyncio
 import io
 import logging
-import math
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions
@@ -50,14 +49,15 @@ from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     AirPlayMajorVersion,
+    dbfs_to_pct,
     get_protocol_version,
     parse_features,
+    pct_to_dbfs,
     update_service_details,
 )
 from pyatv.protocols.raop.audio_source import AudioSource, open_source
 from pyatv.protocols.raop.protocols import StreamContext, airplayv1, airplayv2
 from pyatv.protocols.raop.stream_client import PlaybackInfo, RaopListener, StreamClient
-from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
@@ -67,11 +67,6 @@ from pyatv.support.rtsp import RtspSession
 _LOGGER = logging.getLogger(__name__)
 
 INITIAL_VOLUME = 33.0  # Percent
-
-DBFS_MIN = -30.0
-DBFS_MAX = 0.0
-PERCENTAGE_MIN = 0.0
-PERCENTAGE_MAX = 100.0
 
 
 class RaopPushUpdater(AbstractPushUpdater):
@@ -277,7 +272,7 @@ class RaopAudio(Audio):
         volume = cast(float, message.value)
 
         _LOGGER.debug("Protocol %s changed volume to %f", message.protocol.name, volume)
-        self.playback_manager.context.volume = RaopAudio._pct_to_dbfs(volume)
+        self.playback_manager.context.volume = pct_to_dbfs(volume)
 
     @property
     def has_changed_volume(self) -> bool:
@@ -291,18 +286,12 @@ class RaopAudio(Audio):
         if vol is None:
             return INITIAL_VOLUME
 
-        # AirPlay uses -144.0 as "muted", but we treat everything below -30.0 as
-        # muted to be a bit defensive
-        if vol < DBFS_MIN:
-            return PERCENTAGE_MIN
-
-        # Map dBFS to percentage
-        return map_range(vol, DBFS_MIN, DBFS_MAX, PERCENTAGE_MIN, PERCENTAGE_MAX)
+        return dbfs_to_pct(vol)
 
     async def set_volume(self, level: float) -> None:
         """Change current volume level."""
         raop = self.playback_manager.stream_client
-        dbfs_volume = RaopAudio._pct_to_dbfs(level)
+        dbfs_volume = pct_to_dbfs(level)
 
         if raop:
             await raop.set_volume(dbfs_volume)
@@ -318,15 +307,6 @@ class RaopAudio(Audio):
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
         await self.set_volume(max(self.volume - 5.0, 0.0))
-
-    @staticmethod
-    def _pct_to_dbfs(level: float) -> float:
-        # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
-        if math.isclose(level, 0.0):
-            return -144.0
-
-        # Map percentage to dBFS
-        return map_range(level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX)
 
 
 class RaopStream(Stream):
@@ -388,6 +368,7 @@ class RaopStream(Stream):
             # If the user didn't change volume level prior to streaming, try to extract
             # volume level from device (if supported). Otherwise set the default level
             # in pyatv.
+            volume = None
             if not self.audio.has_changed_volume and "initialVolume" in client.info:
                 initial_volume = client.info["initialVolume"]
                 if not isinstance(initial_volume, float):
@@ -397,9 +378,15 @@ class RaopStream(Stream):
                     )
                 context.volume = initial_volume
             else:
-                await self.audio.set_volume(self.audio.volume)
+                # Try to set volume. If it fails, defer to setting it once
+                # streaming has started.
+                try:
+                    await self.audio.set_volume(self.audio.volume)
+                except Exception as ex:
+                    _LOGGER.debug("Failed to set volume (%s), delaying call", ex)
+                    volume = self.audio.volume
 
-            await client.send_audio(audio_file, file_metadata)
+            await client.send_audio(audio_file, file_metadata, volume=volume)
         finally:
             takeover_release()
             if audio_file:

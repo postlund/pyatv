@@ -19,6 +19,7 @@ from pyatv import connect, exceptions
 from pyatv.const import DeviceState, FeatureName, FeatureState, MediaType, Protocol
 from pyatv.exceptions import AuthenticationError
 from pyatv.interface import FeatureInfo, MediaMetadata, Playing, PushListener
+from pyatv.protocols.airplay.utils import dbfs_to_pct
 
 from tests.utils import data_path, stub_sleep, until
 
@@ -597,3 +598,18 @@ async def test_stream_metadata_from_http(
     assert raop_state.metadata.artist == "postlund"
     assert raop_state.metadata.album == "raop"
     assert raop_state.metadata.title == "pyatv"
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+async def test_stream_volume_set_after_stream_start(
+    raop_client, raop_state, raop_usecase
+):
+    raop_usecase.delayed_set_volume(True)
+
+    volume = 9
+
+    await raop_client.audio.set_volume(volume)
+    await raop_client.stream.stream_file(data_path("audio_1_packet_metadata.wav"))
+
+    assert math.isclose(raop_client.audio.volume, volume)
+    assert math.isclose(dbfs_to_pct(raop_state.volume), volume)
