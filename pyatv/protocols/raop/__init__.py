@@ -4,7 +4,6 @@ import asyncio
 import io
 import logging
 import math
-from os import path
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions
@@ -60,7 +59,7 @@ from pyatv.support import map_range
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
-from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata, get_metadata
+from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -333,7 +332,7 @@ class RaopStream(Stream):
 
     async def stream_file(
         self,
-        file: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+        file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
         /,
         metadata: Optional[MediaMetadata] = None,
         **kwargs
@@ -357,9 +356,6 @@ class RaopStream(Stream):
             client.listener = self.listener
             await client.initialize(self.core.service.properties)
 
-            # If metadata was provided, use that. Otherwise try to load from source.
-            file_metadata = metadata or await RaopStream.get_metadata(file)
-
             # After initialize has been called, all the audio properties will be
             # initialized and can be used in the miniaudio wrapper
             audio_file = await open_source(
@@ -367,6 +363,11 @@ class RaopStream(Stream):
                 context.sample_rate,
                 context.channels,
                 context.bytes_per_channel,
+            )
+
+            # If metadata was provided, use that. Otherwise try to load from source.
+            file_metadata = (
+                await audio_file.get_metadata() if metadata is None else metadata
             )
 
             # If the user didn't change volume level prior to streaming, try to extract
@@ -389,24 +390,6 @@ class RaopStream(Stream):
             if audio_file:
                 await audio_file.close()
             await self.playback_manager.teardown()
-
-    @staticmethod
-    async def get_metadata(
-        file: Union[str, io.BufferedReader, asyncio.streams.StreamReader]
-    ) -> MediaMetadata:
-        """Extract metadata from input file."""
-        try:
-            # Source must support seeking to read metadata (or point to file)
-            if (isinstance(file, io.BufferedReader) and file.seekable()) or (
-                isinstance(file, str) and path.exists(file)
-            ):
-                return await get_metadata(file)
-
-            _LOGGER.debug("Seeking not supported by source, not loading metadata")
-        except Exception as ex:
-            _LOGGER.exception("Failed to extract metadata from %s: %s", file, ex)
-
-        return EMPTY_METADATA
 
 
 class RaopRemoteControl(RemoteControl):

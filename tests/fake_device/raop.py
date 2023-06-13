@@ -388,6 +388,7 @@ class FakeRaopService(HttpSimpleRouter):
         _LOGGER.debug("Received SETUP: %s", request)
         _, options = parse_transport(request.headers["Transport"])
         self.state.control_port = int(options["control_port"])
+        self.state.metadata = SimpleNamespace(title=None, artist=None, album=None)
         self._audio_receiver.reset()
         headers = {
             "Transport": (

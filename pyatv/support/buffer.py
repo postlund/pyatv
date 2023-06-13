@@ -15,7 +15,7 @@ class SemiSeekableBuffer:
 
     A semi-seekable buffer in this context is a buffer that allows seeking, but with
     restrictions. The buffer shall be thought of more like a stream, where data is read
-    in a stream like fashion but added similarily to like a buffer. The buffer has a
+    in a stream like fashion but added similarly to like a buffer. The buffer has a
     fixed size internally, but an absolute "position" is maintained based on all data
     read from the buffer.
 
@@ -54,6 +54,7 @@ class SemiSeekableBuffer:
         buffer_size: int = BUFFER_SIZE,
         /,
         seekable_headroom: int = HEADROOM_SIZE,
+        protected_headroom: bool = False
     ) -> None:
         """Initialize a new SemiSeekableBuffer instance."""
         # Headroom cannot be smaller than actual buffer
@@ -65,7 +66,7 @@ class SemiSeekableBuffer:
         self._headroom: int = seekable_headroom
         self._position: int = 0
         self._has_headroom_data: bool = True
-        self._protected: bool = False
+        self._protected: bool = protected_headroom
 
     def empty(self) -> bool:
         """Return True if buffer is empty, otherwise False."""
@@ -144,6 +145,10 @@ class SemiSeekableBuffer:
         This method only works as long as there is headroom available. Returns True if
         seek was successful, otherwise False.
         """
+        # This is a special case where we allow seeking to the current position
+        if position == self.position:
+            return True
+
         # Absolute position (i.e. total amount of data read from buffer) has passed
         # headroom space, so we have no headroom data and thus seeking not possible.
         if not self._has_headroom_data:

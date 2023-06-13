@@ -6,6 +6,7 @@ from contextlib import suppress
 from functools import partial
 import io
 import logging
+import math
 import re
 import threading
 import time
@@ -15,12 +16,19 @@ import miniaudio
 from miniaudio import SampleFormat
 import requests
 
-from pyatv.exceptions import NotSupportedError, ProtocolError
+from pyatv.exceptions import NotSupportedError, OperationTimeoutError, ProtocolError
+from pyatv.interface import MediaMetadata
 from pyatv.support.buffer import SemiSeekableBuffer
+from pyatv.support.metadata import EMPTY_METADATA, get_metadata
 
 _LOGGER = logging.getLogger(__name__)
 
 FRAMES_PER_PACKET = 352
+
+DEFAULT_TIMEOUT = 10.0  # Seconds
+
+BUFFER_SIZE = 64 * 1024
+HEADROOM_SIZE = 32 * 1024
 
 
 def _int2sf(sample_size: int) -> SampleFormat:
@@ -47,6 +55,10 @@ class AudioSource(ABC):
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
 
+    @abstractmethod
+    async def get_metadata(self) -> MediaMetadata:
+        """Return media metadata if available and possible."""
+
     @property
     @abstractmethod
     def sample_rate(self) -> int:
@@ -68,12 +80,12 @@ class AudioSource(ABC):
         """Return duration in seconds."""
 
 
-class BufferedReaderWrapper(miniaudio.StreamableSource):
+class StreamableIOBaseWrapper(miniaudio.StreamableSource):
     """Wraps a reader into a StreamableSource that miniaudio can consume."""
 
-    def __init__(self, reader: io.BufferedReader) -> None:
+    def __init__(self, reader: io.BufferedIOBase) -> None:
         """Initialize a new ReaderWrapper instance."""
-        self.reader: io.BufferedReader = reader
+        self.reader: io.BufferedIOBase = reader
 
     def read(self, num_bytes: int) -> Union[bytes, memoryview]:
         """Read and return data from buffer."""
@@ -89,26 +101,155 @@ class BufferedReaderWrapper(miniaudio.StreamableSource):
         return True
 
 
+class BufferedIOBaseWrapper(io.BufferedIOBase):
+    """Wrap a BufferedIOBase, making it seekable."""
+
+    def __init__(self, reader: io.BufferedIOBase, buffer: SemiSeekableBuffer) -> None:
+        """Initialize a new BufferedIOBaseWrapper instance."""
+        self.reader: io.BufferedIOBase = reader
+        self.buffer: SemiSeekableBuffer = buffer
+        self.name = "stream"
+
+    def read(self, size=-1):
+        """Read bytes from stream."""
+        if size == 0:
+            return b""
+
+        self.buffer.add(self.reader.read(size))
+
+        # Read all data (if -1), otherwise as much as request OR space left in buffer
+        to_read = self.buffer.size if size == -1 else min(size, self.buffer.size)
+
+        return self.buffer.get(to_read)
+
+    def seek(self, pos, origin=io.SEEK_SET):
+        """Seek to position in stream."""
+        if origin == io.SEEK_SET:
+            self.buffer.seek(pos)
+        return self.buffer.tell()
+
+    def tell(self):
+        """Return current position in stream."""
+        return self.buffer.position
+
+    def seekable(self):
+        """Return a bool indicating whether object supports random access."""
+        return True
+
+    def readable(self):
+        """Return a bool indicating whether object was opened for reading."""
+        return True
+
+
 class StreamReaderWrapper(miniaudio.StreamableSource):
     """Wraps a reader into a StreamableSource that miniaudio can consume."""
 
-    def __init__(self, reader: asyncio.streams.StreamReader) -> None:
+    def __init__(
+        self, reader: asyncio.streams.StreamReader, buffer: SemiSeekableBuffer
+    ) -> None:
         """Initialize a new ReaderWrapper instance."""
         self.reader: asyncio.streams.StreamReader = reader
+        self.buffer: SemiSeekableBuffer = buffer
         self.loop = asyncio.get_event_loop()
 
-    def read(self, num_bytes: int) -> Union[bytes, memoryview]:
+    def read(self, num_bytes: int = -1) -> Union[bytes, memoryview]:
         """Read and return data from buffer."""
-        return asyncio.run_coroutine_threadsafe(
-            self.reader.read(num_bytes), self.loop
-        ).result()
+        if num_bytes == 0:
+            return b""
 
-    def seek(self, offset: int, origin: miniaudio.SeekOrigin) -> bool:
-        """Seek in stream."""
+        # Read all data (if -1), otherwise as much as request OR space left in buffer
+        if self.buffer.position > 0 and self.buffer.size == 0:
+            return asyncio.run_coroutine_threadsafe(
+                self.reader.read(num_bytes), self.loop
+            ).result()
+
+        to_read = self.buffer.size if num_bytes == -1 else num_bytes
+        to_read = min(to_read, BUFFER_SIZE - self.buffer.size)
+
+        self.buffer.add(
+            asyncio.run_coroutine_threadsafe(
+                self.reader.read(to_read), self.loop
+            ).result()
+        )
+
+        return self.buffer.get(to_read)
+
+    def seek(
+        self, offset: int, origin: miniaudio.SeekOrigin = miniaudio.SeekOrigin.START
+    ) -> bool:
+        """Seek to position in stream."""
+        if origin in (miniaudio.SeekOrigin.START, 0):
+            return self.buffer.seek(offset)
         return False
 
+    def tell(self):
+        """Return current position in stream."""
+        return self.buffer.position
 
-class BufferedReaderSource(AudioSource):
+
+class StreamableSourceWrapper(io.BufferedIOBase):
+    """Wraps a StreambleSource, making it seekable."""
+
+    def __init__(
+        self,
+        source: miniaudio.StreamableSource,
+        buffer: SemiSeekableBuffer,
+        /,
+        name: str = "stream"
+    ) -> None:
+        """Initialize a new StreamableSourceWrapper instance."""
+        super().__init__()
+        self.source = source
+        self.buffer = buffer
+        # Medafile uses this in error messages, so it helps for debugging
+        self.name = name
+
+    def read(self, size=-1):
+        """Read bytes from stream."""
+        return self.source.read(size)
+
+    def seek(self, pos, origin=io.SEEK_SET):
+        """Seek to position in stream."""
+        if origin == io.SEEK_SET:
+            self.source.seek(pos, miniaudio.SeekOrigin.START)
+        return self.buffer.position
+
+    def tell(self):
+        """Return current position in stream."""
+        return self.buffer.position
+
+    def seekable(self):
+        """Return a bool indicating whether object supports random access."""
+        return True
+
+    def readable(self):
+        """Return a bool indicating whether object was opened for reading."""
+        return True
+
+
+async def get_buffered_io_metadata(buffer: io.BufferedIOBase) -> MediaMetadata:
+    """Read metadata from a BufferedIOBase.
+
+    This method will restore position to previous position after reading.
+    """
+    # Save position in buffer before parsing metadata so we can restore it afterwards
+    before = buffer.tell()
+    if buffer.seek(0) != 0:
+        return EMPTY_METADATA
+
+    try:
+        return await get_metadata(buffer)
+    except Exception:
+        logging.exception("Failed to parse metadata")
+    finally:
+        buffer.seek(0)
+        if buffer.seek(before) != before:
+            logging.warning("Failed to restore position to %d", before)
+
+    return EMPTY_METADATA
+
+
+class BufferedIOBaseSource(AudioSource):
     """Audio source used to play a file from a buffer.
 
     This audio source adds a small internal buffer (corresponding to 0,5s) to deal with
@@ -121,6 +262,7 @@ class BufferedReaderSource(AudioSource):
         self,
         reader: miniaudio.WavFileReadStream,
         source: miniaudio.StreamableSource,
+        metadata: MediaMetadata,
         sample_rate: int,
         channels: int,
         sample_size: int,
@@ -128,7 +270,8 @@ class BufferedReaderSource(AudioSource):
         """Initialize a new MiniaudioWrapper instance."""
         self.loop = asyncio.get_event_loop()
         self.reader: miniaudio.WavFileReadStream = reader
-        self.source: miniaudio.StreamableSource = reader
+        self.source: miniaudio.StreamableSource = source
+        self.metadata = metadata
         self._buffer_task: Optional[asyncio.Task] = asyncio.ensure_future(
             self._buffering_task()
         )
@@ -143,18 +286,38 @@ class BufferedReaderSource(AudioSource):
     @classmethod
     async def open(
         cls,
-        source: miniaudio.StreamableSource,
+        source: Union[io.BufferedIOBase, asyncio.streams.StreamReader],
         sample_rate: int,
         channels: int,
         sample_size: int,
-    ) -> "BufferedReaderSource":
+    ) -> "BufferedIOBaseSource":
         """Return a new AudioSource instance playing from the provided buffer."""
         loop = asyncio.get_event_loop()
+
+        buffer = SemiSeekableBuffer(
+            BUFFER_SIZE, seekable_headroom=HEADROOM_SIZE, protected_headroom=True
+        )
+
+        # Use correct wrapper when streaming from buffer to ensure we have some kind
+        # of seek support
+        if isinstance(source, io.BufferedIOBase):
+            streamable_source = StreamableIOBaseWrapper(source)
+            if source.seekable():
+                metadata_source = source
+            else:
+                metadata_source = BufferedIOBaseWrapper(source, buffer)
+        else:
+            streamable_source = StreamReaderWrapper(source, buffer)
+            metadata_source = StreamableSourceWrapper(streamable_source, buffer)
+
+        metadata = await get_buffered_io_metadata(metadata_source)
+        buffer.protected_headroom = False
+
         src = await loop.run_in_executor(
             None,
             partial(
                 miniaudio.stream_any,
-                source,
+                streamable_source,
                 output_format=_int2sf(sample_size),
                 nchannels=channels,
                 sample_rate=sample_rate,
@@ -172,7 +335,9 @@ class BufferedReaderSource(AudioSource):
         await loop.run_in_executor(None, reader.read, 44)
 
         # The source stream is passed here and saved to not be garbage collected
-        instance = cls(reader, source, sample_rate, channels, sample_size)
+        instance = cls(
+            reader, streamable_source, metadata, sample_rate, channels, sample_size
+        )
         return instance
 
     async def close(self) -> None:
@@ -207,6 +372,10 @@ class BufferedReaderSource(AudioSource):
 
         return data
 
+    async def get_metadata(self) -> MediaMetadata:
+        """Return media metadata if available and possible."""
+        return self.metadata
+
     async def _buffering_task(self) -> None:
         _LOGGER.debug("Starting audio buffering task")
         while True:
@@ -214,7 +383,7 @@ class BufferedReaderSource(AudioSource):
                 # Read a chunk and add it to the internal buffer. If no data as read,
                 # just break out.
                 chunk = await self.loop.run_in_executor(
-                    None, self.source.read, self.CHUNK_SIZE
+                    None, self.reader.read, self.CHUNK_SIZE
                 )
                 if not chunk:
                     break
@@ -267,16 +436,13 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
     """Patched version of IceCastClient that breaks when all data has been read."""
 
     BLOCK_SIZE = 8 * 1024
-    BUFFER_SIZE = 64 * 1024
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, buffer: SemiSeekableBuffer, url: str) -> None:
         """Initialize a new PatchedIceCastClient instance."""
         self.url = url
         self.error_message: Optional[str] = None
         self._stop_stream: bool = False
-        self._buffer: SemiSeekableBuffer = SemiSeekableBuffer(
-            self.BUFFER_SIZE, seekable_headroom=2 * self.BLOCK_SIZE
-        )
+        self._buffer: SemiSeekableBuffer = buffer
         self._buffer_lock = threading.Lock()
         self._download_thread = threading.Thread(
             target=self._stream_wrapper, daemon=True
@@ -292,11 +458,18 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
 
     def read(self, num_bytes: int) -> bytes:
         """Read a chunk of data from the stream."""
+        start_time = time.monotonic()
+
         # TODO: Should not be based on polling
         while len(self._buffer) < num_bytes and not self._stop_stream:
+            if time.monotonic() - start_time > DEFAULT_TIMEOUT:
+                raise OperationTimeoutError("timed out reading from stream")
+
             time.sleep(0.1)
+
         with self._buffer_lock:
-            return self._buffer.get(num_bytes)
+            data = self._buffer.get(num_bytes)
+            return data
 
     def close(self) -> None:
         """Stop the stream, aborting the background downloading."""
@@ -360,6 +533,7 @@ class InternetSource(AudioSource):
         self,
         source: miniaudio.StreamableSource,
         stream_generator: Generator[array.array, int, None],
+        metadata: MediaMetadata,
         sample_rate: int,
         channels: int,
         sample_size: int,
@@ -367,6 +541,7 @@ class InternetSource(AudioSource):
         """Initialize a new InternetSource instance."""
         self.source = source
         self.stream_generator = stream_generator
+        self.metadata = metadata
         self.loop = asyncio.get_event_loop()
         self._sample_rate = sample_rate
         self._channels = channels
@@ -381,8 +556,21 @@ class InternetSource(AudioSource):
         sample_size: int,
     ) -> "InternetSource":
         """Return a new AudioSource instance playing from the provided URL."""
+        buffer = SemiSeekableBuffer(
+            BUFFER_SIZE,
+            seekable_headroom=HEADROOM_SIZE,
+            protected_headroom=True,
+        )
         loop = asyncio.get_event_loop()
-        source = await loop.run_in_executor(None, PatchedIceCastClient, url)
+        source = await loop.run_in_executor(None, PatchedIceCastClient, buffer, url)
+
+        # Read metadata prior to starting to stream to ensure we are at the
+        # beginning. Position will be restored to 0 afterwards.
+        metadata = await get_buffered_io_metadata(
+            StreamableSourceWrapper(source, buffer, name=url)
+        )
+        buffer.protected_headroom = False
+
         try:
             stream_generator = await loop.run_in_executor(
                 None,
@@ -399,7 +587,10 @@ class InternetSource(AudioSource):
             if source.error_message is not None:
                 raise ProtocolError(source.error_message) from ex
             raise
-        return cls(source, stream_generator, sample_rate, channels, sample_size)
+
+        return cls(
+            source, stream_generator, metadata, sample_rate, channels, sample_size
+        )
 
     async def close(self) -> None:
         """Close underlying resources."""
@@ -413,6 +604,10 @@ class InternetSource(AudioSource):
         if frames:
             return frames.tobytes()
         return AudioSource.NO_FRAMES
+
+    async def get_metadata(self) -> MediaMetadata:
+        """Return media metadata if available and possible."""
+        return self.metadata
 
     @property
     def sample_rate(self) -> int:
@@ -432,7 +627,7 @@ class InternetSource(AudioSource):
     @property
     def duration(self) -> int:
         """Return duration in seconds."""
-        return 0  # We don't know this
+        return math.ceil(self.metadata.duration or 0)
 
 
 class FileSource(AudioSource):
@@ -472,6 +667,14 @@ class FileSource(AudioSource):
         self.pos += bytes_to_read
         return data
 
+    async def get_metadata(self) -> MediaMetadata:
+        """Return media metadata if available and possible."""
+        try:
+            return await get_metadata(self.src.name)
+        except Exception as ex:
+            _LOGGER.warning("Failed to load metadata from %s: %s", self.src.name, ex)
+        return EMPTY_METADATA
+
     @property
     def sample_rate(self) -> int:
         """Return sample rate."""
@@ -494,7 +697,7 @@ class FileSource(AudioSource):
 
 
 async def open_source(
-    source: Union[str, io.BufferedReader, asyncio.streams.StreamReader],
+    source: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
     sample_rate: int,
     channels: int,
     sample_size: int,
@@ -505,12 +708,4 @@ async def open_source(
             return await InternetSource.open(source, sample_rate, channels, sample_size)
         return await FileSource.open(source, sample_rate, channels, sample_size)
 
-    # Use correct wrapper when streaming from buffer
-    if isinstance(source, io.BufferedReader):
-        wrapped_source = BufferedReaderWrapper(source)
-    elif isinstance(source, asyncio.streams.StreamReader):
-        wrapped_source = StreamReaderWrapper(source)
-
-    return await BufferedReaderSource.open(
-        wrapped_source, sample_rate, channels, sample_size
-    )
+    return await BufferedIOBaseSource.open(source, sample_rate, channels, sample_size)

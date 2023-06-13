@@ -72,6 +72,9 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.NotSupportedError" href="#pyatv.exceptions.NotSupportedError">NotSupportedError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.OperationTimeoutError" href="#pyatv.exceptions.OperationTimeoutError">OperationTimeoutError</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.PairingError" href="#pyatv.exceptions.PairingError">PairingError</a></code></h4>
 </li>
 <li>
@@ -99,7 +102,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L119" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L123" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -343,6 +346,19 @@ the connection was closed for some other reason.</p></section>
 <ul class="hlist">
 <li>builtins.NotImplementedError</li>
 <li>builtins.RuntimeError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.OperationTimeoutError"><code class="flex name class">
+<span>class <span class="ident">OperationTimeoutError</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Raised when a timeout happens.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L122-L123" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
