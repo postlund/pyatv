@@ -1,6 +1,7 @@
 """Manage announced AirPlay features."""
 from enum import Enum, IntFlag, auto
 import logging
+import math
 import plistlib
 import re
 from typing import Any, Dict, Mapping, Union
@@ -13,6 +14,7 @@ from pyatv.auth.hap_pairing import (
 from pyatv.const import PairingRequirement
 from pyatv.core import MutableService
 from pyatv.interface import BaseService
+from pyatv.support import map_range
 from pyatv.support.http import HttpRequest, HttpResponse
 
 # pylint: disable=invalid-name
@@ -21,6 +23,11 @@ from pyatv.support.http import HttpRequest, HttpResponse
 PIN_REQUIRED = 0x8
 PASSWORD_BIT = 0x80
 LEGACY_PAIRING_BIT = 0x200
+
+DBFS_MIN = -30.0
+DBFS_MAX = 0.0
+PERCENTAGE_MIN = 0.0
+PERCENTAGE_MAX = 100.0
 
 
 class AirPlayMajorVersion(Enum):
@@ -238,3 +245,27 @@ def update_service_details(service: MutableService):
         service.pairing = PairingRequirement.Disabled
     else:
         service.pairing = get_pairing_requirement(service)
+
+
+def pct_to_dbfs(level: float) -> float:
+    """Convert percentage level to dBFS.
+
+    Used for volume levels in AirPlay.
+    """
+    # AirPlay uses -144.0 as muted volume, so re-map 0.0 to that
+    if math.isclose(level, 0.0):
+        return -144.0
+
+    # Map percentage to dBFS
+    return map_range(level, PERCENTAGE_MIN, PERCENTAGE_MAX, DBFS_MIN, DBFS_MAX)
+
+
+def dbfs_to_pct(level: float) -> float:
+    """Convert dBFS to percentage."""
+    # AirPlay uses -144.0 as "muted", but we treat everything below -30.0 as
+    # muted to be a bit defensive
+    if level < DBFS_MIN:
+        return PERCENTAGE_MIN
+
+    # Map dBFS to percentage
+    return map_range(level, DBFS_MIN, DBFS_MAX, PERCENTAGE_MIN, PERCENTAGE_MAX)

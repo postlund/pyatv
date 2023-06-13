@@ -12,6 +12,7 @@ from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
 
 from pyatv import exceptions
+from pyatv.protocols.airplay.utils import pct_to_dbfs
 from pyatv.protocols.raop import alac, timing
 from pyatv.protocols.raop.audio_source import AudioSource
 from pyatv.protocols.raop.fifo import PacketFifo
@@ -104,7 +105,7 @@ class ControlClient(asyncio.Protocol):
 
         first_packet = True
         current_time = timing.ts2ntp(self.context.head_ts, self.context.sample_rate)
-        while True:
+        while self.transport is not None:
             current_sec, current_frac = timing.ntp2parts(current_time)
             packet = SyncPacket.encode(
                 0x90 if first_packet else 0x80,
@@ -409,7 +410,11 @@ class StreamClient:
         self.context.volume = volume
 
     async def send_audio(  # pylint: disable=too-many-branches
-        self, wave_file: AudioSource, metadata: MediaMetadata = EMPTY_METADATA
+        self,
+        wave_file: AudioSource,
+        metadata: MediaMetadata = EMPTY_METADATA,
+        /,
+        volume: Optional[float] = None
     ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_client is None:
@@ -465,6 +470,9 @@ class StreamClient:
                     ),
                 }
             )
+
+            if volume:
+                await self.set_volume(pct_to_dbfs(volume))
 
             await self._stream_data(wave_file, transport)
         except (  # pylint: disable=try-except-raise

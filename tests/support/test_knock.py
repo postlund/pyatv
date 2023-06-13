@@ -94,12 +94,12 @@ async def test_abort_knock_down_host(event_loop, caplog):
 
 @pytest.mark.asyncio
 @unittest.skipIf(sys.version_info < (3, 8), "Requires 3.8 or later to patch asyncio")
-async def atest_abort_knock_unhandled_exception(event_loop, caplog):
+async def test_abort_knock_unhandled_exception(event_loop, caplog):
     event_loop.set_debug(True)
     start = time.monotonic()
     with patch("pyatv.support.knock.asyncio.open_connection", side_effect=ValueError):
         task = await knocker("127.0.0.1", [1, 2, 3, 4], event_loop, timeout=3)
-        # For unknown exceptions we want to still raise them
+        # For unknown exceptions we want to s'till raise them
         with pytest.raises(ValueError):
             await task
     end = time.monotonic()
