@@ -210,6 +210,7 @@ Push, power, audio and keyboard updates are printed to the terminal as they happ
 ```shell
 $ atvscript -s 10.0.10.81 push_updates
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "off"}
+{"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "output_devices": [{"name": "Living room", "identifier": "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"}]}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "focus_state": "unfocused"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "hash": "azyFEzFpSNOSGq9ZvcaX4A\u2206DcpumkUoRty+R098MQeIKA", "media_type": "music", "device_state": "paused", "title": "Ordinary World (Live)", "artist": "Duran Duran", "album": "From Mediterranea With Love - EP", "genre": "Rock", "total_time": 395, "position": 1, "shuffle": "off", "repeat": "off", "app": "Musik", "app_id": "com.apple.TVMusic"}
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "power_state": "on"}

@@ -1,11 +1,12 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import asyncio
+from contextlib import suppress
 import datetime
 import logging
 import math
 import re
-from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple, cast
 
 from aiohttp import ClientError, ClientSession
 
@@ -49,6 +50,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Metadata,
+    OutputDevice,
     PairingHandler,
     Playing,
     Power,
@@ -105,6 +107,10 @@ _FEATURES_SUPPORTED: List[FeatureName] = [
     FeatureName.TurnOn,
     FeatureName.TurnOff,
     FeatureName.PowerState,
+    FeatureName.OutputDevices,
+    FeatureName.AddOutputDevices,
+    FeatureName.RemoveOutputDevices,
+    FeatureName.SetOutputDevices,
 ]
 
 _FEATURE_COMMAND_MAP = {
@@ -727,6 +733,8 @@ class MrpAudio(Audio):
         self._volume_controls_available: bool = False
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
+        self._output_devices: List[OutputDevice] = []
+        self._output_devices_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
 
     @property
@@ -752,6 +760,12 @@ class MrpAudio(Audio):
         )
         self.protocol.listen_to(
             protobuf.VOLUME_DID_CHANGE_MESSAGE, self._volume_did_change
+        )
+        self.protocol.listen_to(
+            protobuf.DEVICE_INFO_MESSAGE, self._update_output_devices
+        )
+        self.protocol.listen_to(
+            protobuf.DEVICE_INFO_UPDATE_MESSAGE, self._update_output_devices
         )
 
     async def _volume_control_availability(self, message) -> None:
@@ -822,6 +836,41 @@ class MrpAudio(Audio):
                 self.protocol, "volume_down", InputAction.SingleTap, flush=False
             )
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+
+    async def _update_output_devices(self, message: protobuf.ProtocolMessage) -> None:
+        inner = cast(protobuf.DeviceInfoMessage, message.inner())
+        devices = []
+        if inner.isGroupLeader and not inner.isProxyGroupPlayer:
+            devices.append(OutputDevice(inner.name, inner.uniqueIdentifier))
+        for device in list(inner.groupedDevices):
+            devices.append(OutputDevice(device.name, device.deviceUID))
+        self._output_devices = devices
+        self._output_devices_event.set()
+        self._output_devices_event.clear()
+        self.state_dispatcher.dispatch(UpdatedState.OutputDevices, devices)
+
+    @property
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        return self._output_devices
+
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        await self.protocol.send(messages.add_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
+
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        await self.protocol.send(messages.remove_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
+
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
+        await self.protocol.send(messages.set_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
 
 
 class MrpFeatures(Features):

@@ -20,6 +20,7 @@ from pyatv.const import (
     Protocol,
     ShuffleState,
 )
+from pyatv.interface import OutputDevice
 from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from pyatv.support.http import (
     BasicHttpServer,
@@ -633,3 +634,32 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         # Should not yield a timeout
         await self.atv.audio.volume_down()
+
+    async def test_output_devices(self):
+        assert self.atv.audio.output_devices == [
+            OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")
+        ]
+
+    async def test_output_devices_change(self):
+        await self.atv.audio.add_output_devices("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [
+                OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069"),
+                OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+            ]
+        )
+
+        await self.atv.audio.remove_output_devices(
+            "E510C430-B01D-45DF-B558-6EA6F8251069"
+        )
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")]
+        )
+
+        await self.atv.audio.set_output_devices("E510C430-B01D-45DF-B558-6EA6F8251069")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")]
+        )

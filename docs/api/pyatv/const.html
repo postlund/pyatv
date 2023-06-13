@@ -49,6 +49,7 @@ link_group: api
 <h4><code><a title="pyatv.const.FeatureName" href="#pyatv.const.FeatureName">FeatureName</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.const.FeatureName.AccountList" href="#pyatv.const.FeatureName.AccountList">AccountList</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.AddOutputDevices" href="#pyatv.const.FeatureName.AddOutputDevices">AddOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Album" href="#pyatv.const.FeatureName.Album">Album</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.App" href="#pyatv.const.FeatureName.App">App</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.AppList" href="#pyatv.const.FeatureName.AppList">AppList</a></code></li>
@@ -66,6 +67,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Left" href="#pyatv.const.FeatureName.Left">Left</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Menu" href="#pyatv.const.FeatureName.Menu">Menu</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Next" href="#pyatv.const.FeatureName.Next">Next</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.OutputDevices" href="#pyatv.const.FeatureName.OutputDevices">OutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Pause" href="#pyatv.const.FeatureName.Pause">Pause</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Play" href="#pyatv.const.FeatureName.Play">Play</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.PlayPause" href="#pyatv.const.FeatureName.PlayPause">PlayPause</a></code></li>
@@ -74,12 +76,14 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.PowerState" href="#pyatv.const.FeatureName.PowerState">PowerState</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Previous" href="#pyatv.const.FeatureName.Previous">Previous</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.PushUpdates" href="#pyatv.const.FeatureName.PushUpdates">PushUpdates</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.RemoveOutputDevices" href="#pyatv.const.FeatureName.RemoveOutputDevices">RemoveOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Repeat" href="#pyatv.const.FeatureName.Repeat">Repeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Right" href="#pyatv.const.FeatureName.Right">Right</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Screensaver" href="#pyatv.const.FeatureName.Screensaver">Screensaver</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SeasonNumber" href="#pyatv.const.FeatureName.SeasonNumber">SeasonNumber</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Select" href="#pyatv.const.FeatureName.Select">Select</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SeriesName" href="#pyatv.const.FeatureName.SeriesName">SeriesName</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SetOutputDevices" href="#pyatv.const.FeatureName.SetOutputDevices">SetOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetPosition" href="#pyatv.const.FeatureName.SetPosition">SetPosition</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetRepeat" href="#pyatv.const.FeatureName.SetRepeat">SetRepeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetShuffle" href="#pyatv.const.FeatureName.SetShuffle">SetShuffle</a></code></li>
@@ -205,7 +209,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L417" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L429" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -326,7 +330,7 @@ future.</p></section>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L242-L417" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L242-L429" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -336,6 +340,10 @@ future.</p></section>
 <dt id="pyatv.const.FeatureName.AccountList"><code class="name">var <span class="ident">AccountList</span></code></dt>
 <dd>
 <section class="desc"><p>List of user accounts.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.AddOutputDevices"><code class="name">var <span class="ident">AddOutputDevices</span></code></dt>
+<dd>
+<section class="desc"><p>Add output devices.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.Album"><code class="name">var <span class="ident">Album</span></code></dt>
 <dd>
@@ -405,6 +413,10 @@ future.</p></section>
 <dd>
 <section class="desc"><p>Change to next item.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.OutputDevices"><code class="name">var <span class="ident">OutputDevices</span></code></dt>
+<dd>
+<section class="desc"><p>Current output devices.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.Pause"><code class="name">var <span class="ident">Pause</span></code></dt>
 <dd>
 <section class="desc"><p>Pause playing media.</p></section>
@@ -437,6 +449,10 @@ future.</p></section>
 <dd>
 <section class="desc"><p>Push updates are supported.</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.RemoveOutputDevices"><code class="name">var <span class="ident">RemoveOutputDevices</span></code></dt>
+<dd>
+<section class="desc"><p>Remove output devices.</p></section>
+</dd>
 <dt id="pyatv.const.FeatureName.Repeat"><code class="name">var <span class="ident">Repeat</span></code></dt>
 <dd>
 <section class="desc"><p>Repeat state.</p></section>
@@ -460,6 +476,10 @@ future.</p></section>
 <dt id="pyatv.const.FeatureName.SeriesName"><code class="name">var <span class="ident">SeriesName</span></code></dt>
 <dd>
 <section class="desc"><p>Title of TV series.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SetOutputDevices"><code class="name">var <span class="ident">SetOutputDevices</span></code></dt>
+<dd>
+<section class="desc"><p>Set output devices.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName.SetPosition"><code class="name">var <span class="ident">SetPosition</span></code></dt>
 <dd>

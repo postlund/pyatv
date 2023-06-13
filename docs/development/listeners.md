@@ -97,7 +97,8 @@ only.
 
 ## Audio Updates
 
-It is possible to get callbacks whenever the volume level of a device is changed.
+It is possible to get callbacks whenever the volume level of a device is changed, or the AirPlay output
+devices are altered.
 The API is defined by the
 {% include api i="interface.AudioListener" %} interface and works similarly to how push updates works.
 
@@ -109,13 +110,17 @@ class MyAudioListener(interface.AudioListener):
     def volume_update(self, old_level, new_level):
         print('Volume level changed from {0:f} to {1:f}'.format(old_level, new_level))
 
+    def outputdevices_update(self, old_devices, new_devices):
+        print('Output devices changed from {0:s} to {1:s}'.format(old_devices, new_devices))
+
 
 listener = MyAudioListener()
 atv.audio.listener = listener
 ```
 
-Live volume level updates are only sent over the `MRP` protocol. If an Apple TV is connected to
-speakers in a way that doesn't support volume levels, it will not send these updates.
+Live volume level and output device updates are only sent over the `MRP` protocol.
+If an Apple TV is connected to speakers in a way that doesn't support volume levels,
+it will not send these updates.
 
 ## Keyboard Updates
 

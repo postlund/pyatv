@@ -9,7 +9,7 @@ import json
 import logging
 import sys
 import traceback
-from typing import Optional
+from typing import List, Optional
 
 from pyatv import connect, const, scan
 from pyatv.const import FeatureState, Protocol
@@ -19,6 +19,7 @@ from pyatv.interface import (
     AudioListener,
     DeviceListener,
     KeyboardListener,
+    OutputDevice,
     Playing,
     PowerListener,
     PushListener,
@@ -90,6 +91,25 @@ class AudioPrinter(AudioListener):
         """Device volume level was updated."""
         print(
             self.formatter(output(True, values={"volume": new_level})),
+            flush=True,
+        )
+
+    def outputdevices_update(
+        self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
+    ):
+        """Output devices were updated."""
+        print(
+            self.formatter(
+                output(
+                    True,
+                    values={
+                        "output_devices": [
+                            {"name": device.name, "identifier": device.identifier}
+                            for device in new_devices
+                        ]
+                    },
+                )
+            ),
             flush=True,
         )
 
@@ -272,6 +292,7 @@ async def _run_command(atv, args, abort_sem, loop):
             ),
             flush=True,
         )
+        audio_listener.outputdevices_update([], atv.audio.output_devices)
         await wait_for_input(loop, abort_sem)
         return output(True, values={"push_updates": "finished"})
 
