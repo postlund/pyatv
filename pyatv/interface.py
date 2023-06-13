@@ -912,7 +912,7 @@ class DeviceInfo:
     MODEL = "model"
     RAW_MODEL = "raw_model"
     MAC = "mac"
-    AIRPLAY_IDENTIFIER = "airplay_id"
+    OUTPUT_DEVICE_ID = "airplay_id"
 
     def __init__(self, device_info: Mapping[str, Any]) -> None:
         """Initialize a new DeviceInfo instance."""
@@ -924,9 +924,7 @@ class DeviceInfo:
         self._build_number = self._pop_with_type(self.BUILD_NUMBER, None, str)
         self._model = self._pop_with_type(self.MODEL, DeviceModel.Unknown, DeviceModel)
         self._mac = self._pop_with_type(self.MAC, None, str)
-        self._airplay_identifier = self._pop_with_type(
-            self.AIRPLAY_IDENTIFIER, None, str
-        )
+        self._output_device_id = self._pop_with_type(self.OUTPUT_DEVICE_ID, None, str)
 
     def _pop_with_type(self, field, default, expected_type):
         value = self._devinfo.pop(field, default)
@@ -1009,8 +1007,8 @@ class DeviceInfo:
 
     @property
     def output_device_id(self) -> Optional[str]:
-        """Device AirPlay identifier."""
-        return self._airplay_identifier
+        """Output device identifier."""
+        return self._output_device_id
 
     def __str__(self) -> str:
         """Convert device info to readable string."""
@@ -1097,7 +1095,7 @@ class OutputDevice:
         return False
 
 
-class AudioListener(ABC):  # pylint: disable=too-few-public-methods
+class AudioListener(ABC):
     """Listener interface for audio updates."""
 
     @abstractmethod

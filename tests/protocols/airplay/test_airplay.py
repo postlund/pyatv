@@ -57,12 +57,12 @@ def test_airplay_device_info_name():
         (
             "_dummy._tcp.local",
             {"pi": "AA:BB:CC:DD:EE:FF"},
-            {DeviceInfo.AIRPLAY_IDENTIFIER: "AA:BB:CC:DD:EE:FF"},
+            {DeviceInfo.OUTPUT_DEVICE_ID: "AA:BB:CC:DD:EE:FF"},
         ),
         (
             "_dummy._tcp.local",
             {"psi": "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", "pi": "AA:BB:CC:DD:EE:FF"},
-            {DeviceInfo.AIRPLAY_IDENTIFIER: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"},
+            {DeviceInfo.OUTPUT_DEVICE_ID: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"},
         ),
     ],
 )

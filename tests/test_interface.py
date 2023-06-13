@@ -253,7 +253,7 @@ async def test_metadata_rest_not_supported():
                 DeviceInfo.BUILD_NUMBER: "ABC",
                 DeviceInfo.MODEL: DeviceModel.Gen3,
                 DeviceInfo.MAC: "AA:BB:CC:DD:EE:FF",
-                DeviceInfo.AIRPLAY_IDENTIFIER: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
+                DeviceInfo.OUTPUT_DEVICE_ID: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
             },
             OperatingSystem.TvOS,
             "1.0",
@@ -284,7 +284,7 @@ def test_device_info_empty_input(
         {DeviceInfo.BUILD_NUMBER: 456},
         {DeviceInfo.MODEL: "bad"},
         {DeviceInfo.MAC: 789},
-        {DeviceInfo.AIRPLAY_IDENTIFIER: 0},
+        {DeviceInfo.OUTPUT_DEVICE_ID: 0},
     ],
 )
 def test_device_info_bad_types(properties):
