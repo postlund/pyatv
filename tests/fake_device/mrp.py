@@ -275,13 +275,24 @@ class FakeMrpState:
             client.displayName = display_name
         self._send(msg)
 
-    def volume_control(self, available):
+    def volume_control(self, available, support_absolute=True, support_relative=True):
+        if support_absolute and support_relative:
+            capabilities = protobuf.VolumeCapabilities.Both
+        elif support_absolute:
+            capabilities = protobuf.VolumeCapabilities.Absolute
+        elif support_relative:
+            capabilities = protobuf.VolumeCapabilities.Relative
+        else:
+            capabilities = None
+
         msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
         msg.inner().volumeControlAvailable = available
+        msg.inner().volumeCapabilities = capabilities
         self._send(msg)
 
         msg = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
         msg.inner().capabilities.volumeControlAvailable = available
+        msg.inner().capabilities.volumeCapabilities = capabilities
         msg.inner().outputDeviceUID = DEVICE_UID
         self._send(msg)
 
@@ -626,9 +637,15 @@ class FakeMrpUseCases:
         """Initialize a new FakeMrpUseCases."""
         self.state = state
 
-    def change_volume_control(self, available):
+    def change_volume_control(
+        self, available, support_absolute=True, support_relative=True
+    ):
         """Change volume control availability."""
-        self.state.volume_control(available)
+        self.state.volume_control(
+            available,
+            support_absolute=support_absolute,
+            support_relative=support_relative,
+        )
 
         # Device always sends current volume if controls are available
         if available:

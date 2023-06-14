@@ -811,6 +811,12 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 inner.airPlayGroupID = shift_hex_identifier(inner.airPlayGroupID)
             return message
 
+        if message.type == protobuf.SET_VOLUME_MESSAGE:
+            inner = cast(protobuf.SetVolumeMessage, message.inner())
+            if inner.outputDeviceUID == SERVER_IDENTIFIER:
+                inner.outputDeviceUID = self.target_identifier
+                return message
+
         if message.type == protobuf.CONFIGURE_CONNECTION_MESSAGE:
             # iOS doesn't like the rewritten airplay group id and sends this
             # message, but sending it on causes issues with the connection.

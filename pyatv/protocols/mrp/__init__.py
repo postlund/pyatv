@@ -731,6 +731,8 @@ class MrpAudio(Audio):
         self.protocol: MrpProtocol = protocol
         self.state_dispatcher = state_dispatcher
         self._volume_controls_available: bool = False
+        self._volume_controls_absolute: bool = False
+        self._volume_controls_relative: bool = False
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
         self._output_devices: List[OutputDevice] = []
@@ -748,6 +750,16 @@ class MrpAudio(Audio):
     def is_available(self):
         """Return if audio controls are available."""
         return self._volume_controls_available and self.device_uid is not None
+
+    @property
+    def is_volume_absolute(self):
+        """Return if absolute audio controls are available."""
+        return self._volume_controls_absolute
+
+    @property
+    def is_volume_relative(self):
+        """Return if absolute audio controls are available."""
+        return self._volume_controls_relative
 
     def _add_listeners(self):
         self.protocol.listen_to(
@@ -782,6 +794,14 @@ class MrpAudio(Audio):
         self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
     ) -> None:
         self._volume_controls_available = availabilty_message.volumeControlAvailable
+        self._volume_controls_absolute = availabilty_message.volumeCapabilities in {
+            protobuf.VolumeCapabilities.Absolute,
+            protobuf.VolumeCapabilities.Both,
+        }
+        self._volume_controls_relative = availabilty_message.volumeCapabilities in {
+            protobuf.VolumeCapabilities.Relative,
+            protobuf.VolumeCapabilities.Both,
+        }
         _LOGGER.debug(
             "Volume control availability changed to %s", self._volume_controls_available
         )
@@ -818,24 +838,34 @@ class MrpAudio(Audio):
 
         await self.protocol.send(messages.set_volume(self.device_uid, level / 100.0))
 
-        if self._volume != level:
+        if self.is_volume_absolute and self._volume != level:
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
-        if self._volume < 100.0:
+        if self.is_volume_absolute and self._volume == 100.0:
+            return
+        if self.is_volume_relative:
             await _send_hid_key(
                 self.protocol, "volume_up", InputAction.SingleTap, flush=False
             )
-            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+            if self.is_volume_absolute:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        elif self.is_volume_absolute:
+            await self.set_volume(min(self.volume + 5, 100.0))
 
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
-        if self._volume > 0.0:
+        if self.is_volume_absolute and self._volume == 0.0:
+            return
+        if self.is_volume_relative:
             await _send_hid_key(
                 self.protocol, "volume_down", InputAction.SingleTap, flush=False
             )
-            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+            if self.is_volume_absolute:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        elif self.is_volume_absolute:
+            await self.set_volume(max(self.volume - 5, 0.0))
 
     async def _update_output_devices(self, message: protobuf.ProtocolMessage) -> None:
         inner = cast(protobuf.DeviceInfoMessage, message.inner())
@@ -931,10 +961,16 @@ class MrpFeatures(Features):
         if feature_name in [
             FeatureName.VolumeDown,
             FeatureName.VolumeUp,
+        ]:
+            if self.audio.is_available:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
+
+        if feature_name in [
             FeatureName.Volume,
             FeatureName.SetVolume,
         ]:
-            if self.audio.is_available:
+            if self.audio.is_available and self.audio.is_volume_absolute:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
