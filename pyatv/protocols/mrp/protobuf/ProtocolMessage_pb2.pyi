@@ -218,6 +218,7 @@ class ProtocolMessage(google.protobuf.message.Message):
         SEND_LYRICS_EVENT: ProtocolMessage._Type.ValueType  # 44
         SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage._Type.ValueType  # 46
         SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage._Type.ValueType  # 47
+        MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE: ProtocolMessage._Type.ValueType  # 48
         GET_VOLUME_MESSAGE: ProtocolMessage._Type.ValueType  # 49
         GET_VOLUME_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 50
         SET_VOLUME_MESSAGE: ProtocolMessage._Type.ValueType  # 51
@@ -303,6 +304,7 @@ class ProtocolMessage(google.protobuf.message.Message):
     SEND_LYRICS_EVENT: ProtocolMessage.Type.ValueType  # 44
     SET_NOW_PLAYING_CLIENT_MESSAGE: ProtocolMessage.Type.ValueType  # 46
     SET_NOW_PLAYING_PLAYER_MESSAGE: ProtocolMessage.Type.ValueType  # 47
+    MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE: ProtocolMessage.Type.ValueType  # 48
     GET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType  # 49
     GET_VOLUME_RESULT_MESSAGE: ProtocolMessage.Type.ValueType  # 50
     SET_VOLUME_MESSAGE: ProtocolMessage.Type.ValueType  # 51

@@ -679,6 +679,8 @@ class AirPlayDataStreamChannelAppleTVProxy(
         remote_port: int,
         shared_key: bytes,
         seed: int,
+        target_identifier: str,
+        target_group: str,
     ) -> None:
         """Initialize a new AirPlayDataStreamChannelAppleTVProxy instance."""
         salt = DATASTREAM_SALT + str(seed & 0xFFFFFFFFFFFFFFFF)
@@ -702,6 +704,8 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 shared_key,
             ),
         )
+        self.target_identifier = target_identifier
+        self.target_group = target_group
 
     class SendMessageVerbatim(Exception):
         """Throw during processing to ignore (don't proxy) a message."""
@@ -807,6 +811,12 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 inner.airPlayGroupID = shift_hex_identifier(inner.airPlayGroupID)
             return message
 
+        if message.type == protobuf.SET_VOLUME_MESSAGE:
+            inner = cast(protobuf.SetVolumeMessage, message.inner())
+            if inner.outputDeviceUID == SERVER_IDENTIFIER:
+                inner.outputDeviceUID = self.target_identifier
+                return message
+
         if message.type == protobuf.CONFIGURE_CONNECTION_MESSAGE:
             # iOS doesn't like the rewritten airplay group id and sends this
             # message, but sending it on causes issues with the connection.
@@ -816,10 +826,14 @@ class AirPlayDataStreamChannelAppleTVProxy(
 
         return None
 
-    def _rewrite_remote_protobuf(  # pylint: disable=too-many-branches
+    # pylint: disable-next=too-many-branches,too-many-statements
+    def _rewrite_remote_protobuf(
         self, message: protobuf.ProtocolMessage
     ) -> Optional[protobuf.ProtocolMessage]:
-        if message.type == protobuf.DEVICE_INFO_MESSAGE:
+        if message.type in {
+            protobuf.DEVICE_INFO_MESSAGE,
+            protobuf.DEVICE_INFO_UPDATE_MESSAGE,
+        }:
             inner = cast(protobuf.DeviceInfoMessage, message.inner())
             inner.uniqueIdentifier = SERVER_IDENTIFIER
             inner.name = DEVICE_NAME
@@ -829,11 +843,7 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 inner.managedConfigDeviceID = shift_hex_identifier(
                     inner.managedConfigDeviceID
                 )
-            if (
-                inner.groupUID
-                and inner.senderDefaultGroupUID
-                and inner.groupUID.startswith(inner.senderDefaultGroupUID)
-            ):
+            if inner.groupUID and inner.groupUID == self.target_group:
                 inner.groupUID = shift_hex_identifier(inner.groupUID)
             if inner.senderDefaultGroupUID:
                 inner.senderDefaultGroupUID = shift_hex_identifier(
@@ -841,12 +851,16 @@ class AirPlayDataStreamChannelAppleTVProxy(
                 )
             if inner.routingContextID:
                 inner.routingContextID = shift_hex_identifier(inner.routingContextID)
-            if (
-                inner.airPlayGroupID
-                and inner.senderDefaultGroupUID
-                and inner.groupUID.startswith(inner.senderDefaultGroupUID)
-            ):
+            if inner.airPlayGroupID and inner.airPlayGroupID == self.target_group:
                 inner.airPlayGroupID = shift_hex_identifier(inner.airPlayGroupID)
+            for device in list(inner.groupedDevices):
+                if device.deviceUID == self.target_identifier:
+                    device.deviceUID = SERVER_IDENTIFIER
+                    device.name = DEVICE_NAME
+                if device.groupUID and device.groupUID == self.target_group:
+                    device.groupUID = shift_hex_identifier(device.groupUID)
+                if device.airPlayGroupID and device.airPlayGroupID == self.target_group:
+                    device.airPlayGroupID = shift_hex_identifier(device.airPlayGroupID)
             return message
 
         if message.type == protobuf.UPDATE_OUTPUT_DEVICE_MESSAGE:
@@ -854,32 +868,52 @@ class AirPlayDataStreamChannelAppleTVProxy(
             for device in list(inner.outputDevices) + list(
                 inner.clusterAwareOutputDevices
             ):
-                device.uniqueIdentifier = SERVER_IDENTIFIER
-                device.name = DEVICE_NAME
-                if device.bluetoothID and device.bluetoothID != "00:00:00:00:00:00":
-                    device.bluetoothID = BLUETOOTH_ADDRESS
-                if device.groupID:
+                if device.uniqueIdentifier == self.target_identifier:
+                    device.uniqueIdentifier = SERVER_IDENTIFIER
+                    device.name = DEVICE_NAME
+                    if device.bluetoothID and device.bluetoothID != "00:00:00:00:00:00":
+                        device.bluetoothID = BLUETOOTH_ADDRESS
+                    if device.primaryUID:
+                        device.primaryUID = SERVER_IDENTIFIER
+                    if device.sourceInfo and device.sourceInfo.routingContextUID:
+                        device.sourceInfo.routingContextUID = shift_hex_identifier(
+                            device.sourceInfo.routingContextUID
+                        )
+                if device.groupID and device.groupID == self.target_group:
                     device.groupID = shift_hex_identifier(device.groupID)
-                if device.sourceInfo and device.sourceInfo.routingContextUID:
-                    device.sourceInfo.routingContextUID = shift_hex_identifier(
-                        device.sourceInfo.routingContextUID
+                if (
+                    device.parentGroupIdentifier
+                    and device.parentGroupIdentifier == self.target_group
+                ):
+                    device.parentGroupIdentifier = shift_hex_identifier(
+                        device.parentGroupIdentifier
                     )
-                if device.airPlayGroupID:
+                if device.airPlayGroupID and device.airPlayGroupID == self.target_group:
                     device.airPlayGroupID = shift_hex_identifier(device.airPlayGroupID)
-                if device.primaryUID:
-                    device.primaryUID = SERVER_IDENTIFIER
             return message
 
         if message.type == protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE:
             inner = cast(
                 protobuf.VolumeControlCapabilitiesDidChangeMessage, message.inner()
             )
-            inner.outputDeviceUID = SERVER_IDENTIFIER
+            if (
+                inner.outputDeviceUID
+                and inner.outputDeviceUID == self.target_identifier
+            ):
+                inner.outputDeviceUID = SERVER_IDENTIFIER
+            if inner.endpointUID and inner.endpointUID == self.target_group:
+                inner.endpointUID = shift_hex_identifier(inner.endpointUID)
             return message
 
         if message.type == protobuf.VOLUME_DID_CHANGE_MESSAGE:
             inner = cast(protobuf.VolumeDidChangeMessage, message.inner())
-            inner.outputDeviceUID = SERVER_IDENTIFIER
+            if (
+                inner.outputDeviceUID
+                and inner.outputDeviceUID == self.target_identifier
+            ):
+                inner.outputDeviceUID = SERVER_IDENTIFIER
+            if inner.endpointUID and inner.endpointUID == self.target_group:
+                inner.endpointUID = shift_hex_identifier(inner.endpointUID)
             return message
 
         return None
@@ -923,7 +957,7 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         loop: asyncio.AbstractEventLoop,
         address: str,
         port: int,
-        properties: Optional[Mapping[str, str]],
+        properties: Mapping[str, str],
         credentials: Optional[str],
     ) -> None:
         """Initialize a new instance of CompanionAppleTVProxy."""
@@ -932,6 +966,8 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         self.loop = loop
         self.address = address
         self.port = port
+        self.target_identifier = properties["psi"]
+        self.target_group = properties["gid"]
         self.credentials: Optional[str] = credentials
         self.client_hap_session: Optional[HAPSession] = None
         self.client_encryption = False
@@ -1291,6 +1327,8 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
             port,
             self.shared_key,
             seed,
+            self.target_identifier,
+            self.target_group,
         )
 
 

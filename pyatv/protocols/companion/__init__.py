@@ -130,6 +130,7 @@ SUPPORTED_FEATURES = set(
         FeatureName.ChannelDown,
         FeatureName.Screensaver,
         # Keyboard interface
+        FeatureName.TextFocusState,
         FeatureName.TextGet,
         FeatureName.TextClear,
         FeatureName.TextAppend,

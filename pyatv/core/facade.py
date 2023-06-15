@@ -27,6 +27,7 @@ from pyatv.const import (
 )
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
+from pyatv.interface import OutputDevice
 from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
@@ -447,7 +448,11 @@ class FacadeAudio(Relayer, interface.Audio):
         Relayer.__init__(self, interface.Audio, DEFAULT_PRIORITIES)
         interface.Audio.__init__(self)
         self._volume = 0.0
+        self._output_devices: List[interface.OutputDevice] = []
         core_dispatcher.listen_to(UpdatedState.Volume, self._volume_changed)
+        core_dispatcher.listen_to(
+            UpdatedState.OutputDevices, self._output_devices_changed
+        )
 
     def _volume_changed(self, message: StateMessage) -> None:
         """State of something changed."""
@@ -460,6 +465,18 @@ class FacadeAudio(Relayer, interface.Audio):
         # Do not update state in case it didn't change
         if new_level != old_level:
             self.listener.volume_update(old_level, new_level)
+
+    def _output_devices_changed(self, message: StateMessage) -> None:
+        """State of output devices changed."""
+        output_devices = cast(List[interface.OutputDevice], message.value)
+
+        # Compute new state so we can know if we should update or not
+        old_devices = self._output_devices
+        new_devices = self._output_devices = output_devices
+
+        # Do not update state in case it didn't change
+        if new_devices != old_devices:
+            self.listener.outputdevices_update(old_devices, new_devices)
 
     @shield.guard
     async def volume_up(self) -> None:
@@ -487,6 +504,27 @@ class FacadeAudio(Relayer, interface.Audio):
             await self.relay("set_volume")(level)
         else:
             raise exceptions.ProtocolError(f"volume {level} is out of range")
+
+    @property
+    @shield.guard
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        return self.relay("output_devices")
+
+    @shield.guard
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        return await self.relay("add_output_devices")(*devices)
+
+    @shield.guard
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        return await self.relay("remove_output_devices")(*devices)
+
+    @shield.guard
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
+        return await self.relay("set_output_devices")(*devices)
 
 
 class FacadeKeyboard(Relayer, interface.Keyboard):

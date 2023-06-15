@@ -1,6 +1,7 @@
 """Helper code for dealing with protobuf messages."""
 
 import binascii
+from typing import List
 from uuid import uuid4
 
 from pyatv import const
@@ -207,4 +208,37 @@ def set_volume(device_uid: str, volume: float) -> protobuf.ProtocolMessage:
     inner = message.inner()
     inner.outputDeviceUID = device_uid
     inner.volume = volume
+    return message
+
+
+def add_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+    """Add AirPlay devices to the speaker group."""
+    message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
+    inner = message.inner()
+    inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
+    for device_uid in device_uids:
+        inner.addingDevices.append(device_uid)
+        inner.clusterAwareAddingDevices.append(device_uid)
+    return message
+
+
+def remove_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+    """Remove AirPlay devices from the speaker group."""
+    message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
+    inner = message.inner()
+    inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
+    for device_uid in device_uids:
+        inner.removingDevices.append(device_uid)
+        inner.clusterAwareRemovingDevices.append(device_uid)
+    return message
+
+
+def set_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+    """Set AirPlay devices as the speaker group."""
+    message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
+    inner = message.inner()
+    inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
+    for device_uid in device_uids:
+        inner.settingDevices.append(device_uid)
+        inner.clusterAwareSettingDevices.append(device_uid)
     return message

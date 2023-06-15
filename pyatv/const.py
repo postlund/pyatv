@@ -401,6 +401,18 @@ class FeatureName(Enum):
     SetVolume = 46
     """Set volume level."""
 
+    OutputDevices = 59
+    """Current output devices."""
+
+    AddOutputDevices = 60
+    """Add output devices."""
+
+    RemoveOutputDevices = 61
+    """Remove output devices."""
+
+    SetOutputDevices = 62
+    """Set output devices."""
+
     TextFocusState = 57
     """Current virtual keyboard focus state."""
 

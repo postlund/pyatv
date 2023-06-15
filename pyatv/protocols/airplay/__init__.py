@@ -160,6 +160,10 @@ def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, A
         devinfo[DeviceInfo.VERSION] = properties["osvers"]
     if "deviceid" in properties:
         devinfo[DeviceInfo.MAC] = properties["deviceid"]
+    if "psi" in properties:
+        devinfo[DeviceInfo.OUTPUT_DEVICE_ID] = properties["psi"]
+    elif "pi" in properties:
+        devinfo[DeviceInfo.OUTPUT_DEVICE_ID] = properties["pi"]
     return devinfo
 
 

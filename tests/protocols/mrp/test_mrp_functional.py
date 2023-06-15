@@ -20,6 +20,7 @@ from pyatv.const import (
     Protocol,
     ShuffleState,
 )
+from pyatv.interface import OutputDevice
 from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from pyatv.support.http import (
     BasicHttpServer,
@@ -371,6 +372,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.TurnOn,
             FeatureName.TurnOff,
             FeatureName.PowerState,
+            FeatureName.OutputDevices,
+            FeatureName.AddOutputDevices,
+            FeatureName.RemoveOutputDevices,
+            FeatureName.SetOutputDevices,
         )
 
     async def test_features_artwork(self):
@@ -553,6 +558,34 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.ContentIdentifier,
         )
 
+    async def test_absolute_volume_features(self):
+        features = [
+            FeatureName.Volume,
+            FeatureName.SetVolume,
+        ]
+        self.assertFeatures(FeatureState.Unavailable, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=False, support_relative=True
+        )
+        self.usecase.example_video(title="dummy2")
+        await self.playing(title="dummy2")
+        self.assertFeatures(FeatureState.Unavailable, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        self.usecase.example_video(title="dummy3")
+        await self.playing(title="dummy3")
+        self.assertFeatures(FeatureState.Available, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        self.usecase.example_video(title="dummy4")
+        await self.playing(title="dummy4")
+        self.assertFeatures(FeatureState.Available, *features)
+
     async def test_volume_change(self):
         self.usecase.change_volume_control(available=True)
 
@@ -572,9 +605,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.set_volume(0.3, DEVICE_UID)
         await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
 
-    async def test_audio_volume_up_increases_volume(self):
-        self.usecase.change_volume_control(available=True)
-
+    async def _test_audio_volume_up_increases_volume(self):
         await until(
             lambda: self.atv.features.in_state(
                 FeatureState.Available, FeatureName.SetVolume
@@ -589,7 +620,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.audio.volume_up()
         assert self.atv.audio.volume == round(20.0 + 2 * VOLUME_STEP * 100.0)
 
-    async def test_audio_volume_down_decreases_volume(self):
+    async def test_audio_volume_up_increases_volume_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_up_increases_volume()
+
+    async def test_audio_volume_up_increases_volume_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_up_increases_volume()
+
+    async def _test_audio_volume_down_decreases_volume(self):
         self.usecase.change_volume_control(available=True)
 
         await until(
@@ -606,9 +649,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.audio.volume_down()
         assert self.atv.audio.volume == round(20 - 2 * VOLUME_STEP * 100.0)
 
-    async def test_audio_volume_up_above_max(self):
-        self.usecase.change_volume_control(available=True)
+    async def test_audio_volume_down_decreases_volume_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_down_decreases_volume()
 
+    async def test_audio_volume_down_decreases_volume_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_down_decreases_volume()
+
+    async def _test_audio_volume_up_above_max(self):
         await until(
             lambda: self.atv.features.in_state(
                 FeatureState.Available, FeatureName.SetVolume
@@ -620,9 +673,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         # Should not yield a timeout
         await self.atv.audio.volume_up()
 
-    async def test_audio_volume_down_below_zero(self):
-        self.usecase.change_volume_control(available=True)
+    async def test_audio_volume_up_above_max_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_up_above_max()
 
+    async def test_audio_volume_up_above_max_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_up_above_max()
+
+    async def _test_audio_volume_down_below_zero(self):
         await until(
             lambda: self.atv.features.in_state(
                 FeatureState.Available, FeatureName.SetVolume
@@ -633,3 +696,67 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         # Should not yield a timeout
         await self.atv.audio.volume_down()
+
+    async def test_audio_volume_down_below_zero_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_down_below_zero()
+
+    async def test_audio_volume_down_below_zero_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_down_below_zero()
+
+    async def test_volume_clustered_devices(self):
+        cluster_id = "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"
+        self.usecase.set_cluster_id(cluster_id)
+        self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
+
+        # Manually set a new volume level
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device with wrong id
+        self.usecase.set_volume(0.3, DEVICE_UID)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device
+        self.usecase.set_volume(0.3, cluster_id)
+        await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
+
+    async def test_output_devices(self):
+        assert self.atv.audio.output_devices == [
+            OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")
+        ]
+
+    async def test_output_devices_change(self):
+        await self.atv.audio.add_output_devices("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [
+                OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069"),
+                OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+            ]
+        )
+
+        await self.atv.audio.remove_output_devices(
+            "E510C430-B01D-45DF-B558-6EA6F8251069"
+        )
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")]
+        )
+
+        await self.atv.audio.set_output_devices("E510C430-B01D-45DF-B558-6EA6F8251069")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")]
+        )

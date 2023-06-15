@@ -41,6 +41,9 @@ class UpdatedState(Enum):
     KeyboardFocus = 3
     """Keyboard focus was updated."""
 
+    OutputDevices = 4
+    """AirPlay output devices were updated."""
+
 
 # pylint: enable=invalid-name
 
@@ -55,6 +58,7 @@ class StateMessage(NamedTuple):
     # - UpdatedState.Playing -> interface.Playing
     # - UpdatedState.Volume -> float
     # - UpdatedState.KeyboardFocus -> const.KeyboardFocusState
+    # - UpdatedState.OutputDevices -> List[interface.OutputDevice]
     value: Any
 
     def __str__(self):

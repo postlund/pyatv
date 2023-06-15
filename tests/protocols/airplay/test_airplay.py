@@ -54,6 +54,16 @@ def test_airplay_device_info_name():
             {"deviceid": "aa:bb:cc:dd:ee:ff"},
             {DeviceInfo.MAC: "aa:bb:cc:dd:ee:ff"},
         ),
+        (
+            "_dummy._tcp.local",
+            {"pi": "AA:BB:CC:DD:EE:FF"},
+            {DeviceInfo.OUTPUT_DEVICE_ID: "AA:BB:CC:DD:EE:FF"},
+        ),
+        (
+            "_dummy._tcp.local",
+            {"psi": "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", "pi": "AA:BB:CC:DD:EE:FF"},
+            {DeviceInfo.OUTPUT_DEVICE_ID: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"},
+        ),
     ],
 )
 def test_device_info(service_type, properties, expected):

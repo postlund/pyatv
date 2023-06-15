@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 import math
 import struct
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from google.protobuf.message import Message as ProtobufMessage
 
@@ -209,10 +209,16 @@ class FakeMrpState:
         self.has_authenticated = False
         self.heartbeat_count = 0
         self.volume: float = 0.5
+        self.cluster_id: Optional[str] = None
+        self.output_devices: List[str] = [DEVICE_UID]
 
     def _send(self, msg):
         for client in self.clients:
             client.send_to_client(msg)
+
+    def _send_device_info(self):
+        for client in self.clients:
+            client._send_device_info(update=True)
 
     # This is a hack for now (if anyone has paired, OK...)
     @property
@@ -270,13 +276,28 @@ class FakeMrpState:
             client.displayName = display_name
         self._send(msg)
 
-    def volume_control(self, available):
+    def set_cluster_id(self, cluster_id):
+        self.cluster_id = cluster_id
+        self._send_device_info()
+
+    def volume_control(self, available, support_absolute=True, support_relative=True):
+        if support_absolute and support_relative:
+            capabilities = protobuf.VolumeCapabilities.Both
+        elif support_absolute:
+            capabilities = protobuf.VolumeCapabilities.Absolute
+        elif support_relative:
+            capabilities = protobuf.VolumeCapabilities.Relative
+        else:
+            capabilities = None
+
         msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
         msg.inner().volumeControlAvailable = available
+        msg.inner().volumeCapabilities = capabilities
         self._send(msg)
 
         msg = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
         msg.inner().capabilities.volumeControlAvailable = available
+        msg.inner().capabilities.volumeCapabilities = capabilities
         msg.inner().outputDeviceUID = DEVICE_UID
         self._send(msg)
 
@@ -300,6 +321,21 @@ class FakeMrpState:
             self._send(msg)
         else:
             _LOGGER.debug("Value %f out of range", volume)
+
+    def add_output_devices(self, devices):
+        for device in devices:
+            if device not in self.output_devices:
+                self.output_devices.append(device)
+        self._send_device_info()
+
+    def remove_output_devices(self, devices):
+        for device in devices:
+            self.output_devices.remove(device)
+        self._send_device_info()
+
+    def set_output_devices(self, devices):
+        self.output_devices[:] = devices
+        self._send_device_info()
 
 
 class FakeMrpServiceFactory:
@@ -371,13 +407,25 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         log_protobuf(_LOGGER, ">> Send: Protobuf", message)
 
     def _send_device_info(self, identifier=None, update=False):
-        resp = messages.device_information(DEVICE_NAME, "1234", update=update)
+        resp = messages.device_information(DEVICE_NAME, DEVICE_UID, update=update)
         if identifier:
             resp.identifier = identifier
         resp.inner().systemBuildVersion = BUILD_NUMBER
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
         resp.inner().deviceUID = DEVICE_UID
         resp.inner().modelID = DEVICE_MODEL
+        resp.inner().isGroupLeader = bool(len(self.state.output_devices) > 0)
+        resp.inner().isProxyGroupPlayer = bool(
+            len(self.state.output_devices) > 0
+            and DEVICE_UID not in self.state.output_devices
+        )
+        for device in self.state.output_devices:
+            if device == DEVICE_UID:
+                continue
+            device_info = protobuf.DeviceInfoMessage()
+            device_info.name = f"Device {device[:2]}"
+            device_info.deviceUID = device
+            resp.inner().groupedDevices.append(device_info)
         self.send_to_client(resp)
 
     def data_received(self, data):
@@ -575,6 +623,17 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             )
         )
 
+    def handle_modify_output_context_request(self, message, inner):
+        if inner.addingDevices:
+            _LOGGER.debug("Adding output devices: %s", inner.addingDevices)
+            self.state.add_output_devices(list(inner.addingDevices))
+        if inner.removingDevices:
+            _LOGGER.debug("Removing output devices: %s", inner.removingDevices)
+            self.state.remove_output_devices(list(inner.removingDevices))
+        if inner.settingDevices:
+            _LOGGER.debug("Setting output devices: %s", inner.settingDevices)
+            self.state.set_output_devices(list(inner.settingDevices))
+
 
 class FakeMrpUseCases:
     """Wrapper for altering behavior of a FakeMrpAppleTV instance."""
@@ -583,9 +642,18 @@ class FakeMrpUseCases:
         """Initialize a new FakeMrpUseCases."""
         self.state = state
 
-    def change_volume_control(self, available):
+    def set_cluster_id(self, cluster_id):
+        self.state.set_cluster_id(cluster_id)
+
+    def change_volume_control(
+        self, available, support_absolute=True, support_relative=True
+    ):
         """Change volume control availability."""
-        self.state.volume_control(available)
+        self.state.volume_control(
+            available,
+            support_absolute=support_absolute,
+            support_relative=support_relative,
+        )
 
         # Device always sends current volume if controls are available
         if available:
