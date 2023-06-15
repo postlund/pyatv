@@ -137,8 +137,8 @@ jobs:
               if name is not None:
                 notes += line
 
-          print(f"name={name} >> " + os.environ["GITHUB_OUTPUT"])
-          print(f"version={version} >> " + os.environ["GITHUB_OUTPUT"])
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.writelines([f"name={name}", f"version={version}"])
 
           with open("notes.md", "w", encoding="utf-8") as handle:
             handle.write(notes)
