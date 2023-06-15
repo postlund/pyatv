@@ -1,13 +1,17 @@
 """Unit tests for interface implementations in pyatv.protocols.mrp."""
+import datetime
 import math
-from unittest.mock import Mock
+from typing import Any, Dict
+from unittest.mock import Mock, PropertyMock
 
 import pytest
 
 from pyatv import exceptions
 from pyatv.core import UpdatedState
-from pyatv.interface import OutputDevice
-from pyatv.protocols.mrp import MrpAudio, messages, protobuf
+from pyatv.interface import ClientSessionManager, OutputDevice
+from pyatv.protocols.mrp import MrpAudio, MrpMetadata, messages, player_state, protobuf
+
+from tests.utils import faketime
 
 DEVICE_NAME = "Apple TV"
 DEVICE_UID = "F2204E63-BCAB-4941-80A0-06C46CB71391"
@@ -295,3 +299,73 @@ async def test_audio_set_output_devices(protocol_mock, audio):
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
+
+
+# MrpMetadata
+
+ELAPSED_TIME = 2
+ELAPSED_TIME_TIMESTAMP = 1
+NOW_TIME = 10
+
+
+@pytest.fixture(name="playing_metadata")
+def playing_metadata_fixture() -> Dict[str, Any]:
+    metadata = {}
+
+    # Ok, so this is tricky to get right... We assume time starts at zero. As Apple
+    # uses mach time (starts at 2001 instead of 1970), the elapsed time must be
+    # converted to mach time. Any time can be used here, but one second has been
+    # picked for simplicity. The elapsed time below is used to calculate position
+    # in case media is playing, since "elapsedTime" only reflects time since playback
+    # changed to "playing". So "elapsedTimeTimestamp" must be used as an additional
+    # offset in case media is playing. By hardcoding to one second, we know that the
+    # position essentially will be 1 + (time_now_mach - elapsedTimeTimestamp) IFF
+    # something is playing. Otherwise it's just "elapsedTime".
+    delta = datetime.datetime(1970, 1, 1) - datetime.datetime(2001, 1, 1)
+    metadata["elapsedTimeTimestamp"] = (
+        datetime.timedelta(seconds=ELAPSED_TIME_TIMESTAMP) + delta
+    ).total_seconds()
+
+    metadata["elapsedTime"] = ELAPSED_TIME
+
+    # Start of in paused state
+    metadata["playbackRate"] = 0.0
+    player_state.playback_state = protobuf.PlaybackState.Paused
+
+    yield metadata
+
+
+@pytest.fixture(name="player_state")
+def player_state_fixture(playing_metadata) -> Mock:
+    playing_mock = Mock(name="playing_mock")
+    playing_mock.metadata_field.side_effect = lambda field: playing_metadata.get(field)
+    yield playing_mock
+
+
+@pytest.fixture(name="metadata")
+def metadata_fixture(
+    protocol_mock, player_state, session_manager: ClientSessionManager
+) -> MrpMetadata:
+    psm_mock = Mock(name="metadata_mock")
+    type(psm_mock).playing = PropertyMock(return_value=player_state)
+
+    yield MrpMetadata(protocol_mock, psm_mock, "test", session_manager)
+
+
+async def test_metadata_position_calculation(metadata, playing_metadata, player_state):
+    # See playing_metadata fixture for timing details
+    with faketime("pyatv", NOW_TIME):
+        # Paused state => ELAPSED_TIME
+        assert (await metadata.playing()).position == ELAPSED_TIME
+
+        # Playing state => ELAPSED_TIME + time diff since "elapsedTimeTimestamp"
+        player_state.playback_state = protobuf.PlaybackState.Playing
+        playing_metadata["playbackRate"] = 1.0
+        assert (await metadata.playing()).position == ELAPSED_TIME + (
+            NOW_TIME - ELAPSED_TIME_TIMESTAMP
+        )
+
+        # Playing state but 0.0 playback rate => same as paused
+        player_state.playback_state = protobuf.PlaybackState.Playing
+        playing_metadata["playbackRate"] = 0.0
+        assert (await metadata.playing()).position == ELAPSED_TIME
