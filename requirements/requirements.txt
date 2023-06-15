@@ -7,7 +7,7 @@ ifaddr==0.2.0
 ifaddr==0.2.0
 mediafile==0.11.0
 miniaudio==1.59
-protobuf==4.23.2
+protobuf==4.23.3
 requests==2.31.0
 srptools==1.0.1
 zeroconf==0.66.0
