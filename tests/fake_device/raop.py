@@ -178,6 +178,7 @@ class FakeRaopState:
         # Save sequence number of first packet since it can wrap (16 bit)
         if self.initial_audio_packet is None:
             self.initial_audio_packet = seqno
+            _LOGGER.debug("Saving initial audio packet seqno %d", seqno)
         self.audio_packets[seqno] = audio_data
 
     def reset_streaming(self) -> None:

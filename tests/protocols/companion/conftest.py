@@ -10,7 +10,7 @@ from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
 
-from tests.fake_device import FakeAppleTV, companion
+from tests.fake_device import FakeAppleTV
 from tests.fake_device.companion import FakeCompanionUseCases
 
 
