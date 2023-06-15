@@ -215,7 +215,10 @@ def build_playing_instance(  # pylint: disable=too-many-locals
             datetime.datetime.now() - _cocoa_to_timestamp(elapsed_timestamp)
         ).total_seconds()
 
-        if device_state() == DeviceState.Playing:
+        playback_rate = state.metadata_field("playbackRate") or 0.0
+        if device_state() == DeviceState.Playing and not math.isclose(
+            playback_rate, 0.0
+        ):
             return int(elapsed_time + diff)
         return int(elapsed_time)
 
@@ -468,7 +471,13 @@ class MrpRemoteControl(RemoteControl):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, psm, identifier, client_session: ClientSession):
+    def __init__(
+        self,
+        protocol: MrpProtocol,
+        psm: PlayerStateManager,
+        identifier: Optional[str],
+        client_session: ClientSession,
+    ):
         """Initialize a new MrpPlaying."""
         self.protocol = protocol
         self.psm = psm

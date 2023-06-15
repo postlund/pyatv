@@ -6,7 +6,6 @@ import math
 from typing import Optional
 
 import pyatv
-from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceModel,
