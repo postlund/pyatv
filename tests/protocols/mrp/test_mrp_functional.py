@@ -709,6 +709,29 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         )
         await self._test_audio_volume_down_below_zero()
 
+    async def test_volume_clustered_devices(self):
+        cluster_id = "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"
+        self.usecase.set_cluster_id(cluster_id)
+        self.usecase.change_volume_control(available=True)
+
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
+
+        # Manually set a new volume level
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device with wrong id
+        self.usecase.set_volume(0.3, DEVICE_UID)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device
+        self.usecase.set_volume(0.3, cluster_id)
+        await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
+
     async def test_output_devices(self):
         assert self.atv.audio.output_devices == [
             OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")

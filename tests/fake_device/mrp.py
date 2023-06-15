@@ -209,6 +209,7 @@ class FakeMrpState:
         self.has_authenticated = False
         self.heartbeat_count = 0
         self.volume: float = 0.5
+        self.cluster_id: Optional[str] = None
         self.output_devices: List[str] = [DEVICE_UID]
 
     def _send(self, msg):
@@ -274,6 +275,10 @@ class FakeMrpState:
         if display_name is not None:
             client.displayName = display_name
         self._send(msg)
+
+    def set_cluster_id(self, cluster_id):
+        self.cluster_id = cluster_id
+        self._send_device_info()
 
     def volume_control(self, available, support_absolute=True, support_relative=True):
         if support_absolute and support_relative:
@@ -636,6 +641,9 @@ class FakeMrpUseCases:
     def __init__(self, state):
         """Initialize a new FakeMrpUseCases."""
         self.state = state
+
+    def set_cluster_id(self, cluster_id):
+        self.state.set_cluster_id(cluster_id)
 
     def change_volume_control(
         self, available, support_absolute=True, support_relative=True
