@@ -1,7 +1,6 @@
 """Functional tests using the API with a fake Apple TV."""
 
 import asyncio
-import logging
 import math
 
 from deepdiff import DeepDiff
@@ -10,13 +9,18 @@ import pytest
 import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
-from pyatv.const import KeyboardFocusState, Protocol
+from pyatv.const import KeyboardFocusState, PowerState, Protocol
 from pyatv.interface import App, FeatureName, FeatureState, UserAccount
+from pyatv.protocols.companion.api import SystemStatus
 
-from tests.fake_device.companion import INITIAL_RTI_TEXT, INITIAL_VOLUME, VOLUME_STEP
+from tests.fake_device.companion import (
+    INITIAL_RTI_TEXT,
+    INITIAL_VOLUME,
+    VOLUME_STEP,
+    CompanionServiceFlags,
+)
+from tests.shared_helpers import SavingPowerListener
 from tests.utils import until
-
-_LOGGER = logging.getLogger(__name__)
 
 TEST_APP: str = "com.test.Test"
 TEST_APP_NAME: str = "Test"
@@ -40,6 +44,8 @@ MEDIA_CONTROL_FEATURES = [
 ]
 
 ALWAYS_PRESENT_FEATURES = [
+    FeatureName.TurnOn,
+    FeatureName.TurnOff,
     FeatureName.Screensaver,
     FeatureName.AccountList,
     FeatureName.SwitchAccount,
@@ -209,15 +215,17 @@ async def test_audio_set_volume(companion_client, companion_state, companion_use
     await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
 
     await companion_client.audio.set_volume(INITIAL_VOLUME + 1.0)
-    assert math.isclose(companion_client.audio.volume, INITIAL_VOLUME + 1.0)
-    await until(lambda: math.isclose(companion_state.volume, INITIAL_VOLUME + 1.0))
+    await until(
+        lambda: math.isclose(companion_client.audio.volume, INITIAL_VOLUME + 1.0)
+    )
+    assert math.isclose(companion_state.volume, INITIAL_VOLUME + 1.0)
 
 
 async def test_audio_volume_up(companion_client, companion_state):
     await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
 
     await companion_client.audio.volume_up()
-    assert companion_client.audio.volume == INITIAL_VOLUME + VOLUME_STEP
+    await until(lambda: companion_client.audio.volume == INITIAL_VOLUME + VOLUME_STEP)
     assert companion_state.latest_button == "volume_up"
 
 
@@ -225,7 +233,7 @@ async def test_audio_volume_down(companion_client, companion_state):
     await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)
 
     await companion_client.audio.volume_down()
-    assert companion_client.audio.volume == INITIAL_VOLUME - VOLUME_STEP
+    await until(lambda: companion_client.audio.volume == INITIAL_VOLUME - VOLUME_STEP)
     assert companion_state.latest_button == "volume_down"
 
 
@@ -275,3 +283,55 @@ async def test_text_input_text_append(companion_client, companion_state):
 async def test_text_input_text_set(companion_client, companion_state):
     await companion_client.keyboard.text_set("test")
     await until(lambda: companion_state.rti_text == "test")
+
+
+async def test_power_state_changes(
+    companion_client, companion_state, companion_usecase
+):
+    listener = SavingPowerListener()
+    companion_client.power.listener = listener
+
+    # Fake device default state should be "on"
+    await until(lambda: companion_client.power.power_state == PowerState.On)
+
+    companion_usecase.set_system_status(SystemStatus.Asleep)
+    await until(lambda: listener.last_update == PowerState.Off)
+
+    companion_usecase.set_system_status(SystemStatus.Screensaver)
+    await until(lambda: listener.last_update == PowerState.On)
+
+    companion_usecase.set_system_status(SystemStatus.Asleep)
+    await until(lambda: listener.last_update == PowerState.Off)
+
+    companion_usecase.set_system_status(SystemStatus.Awake)
+    await until(lambda: listener.last_update == PowerState.On)
+
+
+@pytest.mark.parametrize(
+    "system_status_supported, expected_feature_state, expecter_power_state",
+    [
+        (True, FeatureState.Available, PowerState.On),
+        (False, FeatureState.Unsupported, PowerState.Unknown),
+    ],
+)
+async def test_power_state_availability(
+    event_loop,
+    companion_conf,
+    companion_state,
+    system_status_supported,
+    expected_feature_state,
+    expecter_power_state,
+):
+    companion_state.set_flag_state(
+        CompanionServiceFlags.SYSTEM_STATUS_SUPPORTED, system_status_supported
+    )
+
+    atv = await pyatv.connect(companion_conf, loop=event_loop)
+
+    await until(
+        lambda: atv.features.in_state(expected_feature_state, FeatureName.PowerState)
+    )
+
+    assert atv.power.power_state == expecter_power_state
+
+    await asyncio.gather(*atv.close())

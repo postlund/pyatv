@@ -328,6 +328,16 @@ class PushListener(interface.PushListener):
         print(f"An error occurred (restarting): {exception}")
 
 
+class PowerListener(interface.PowerListener):
+    """Listen for power updates and print changes."""
+
+    def powerstate_update(
+        self, old_state: const.PowerState, new_state: const.PowerState
+    ):
+        """Device power state was updated."""
+        print("New power state:", new_state.name)
+
+
 class DeviceListener(interface.DeviceListener):
     """Internal listener for generic device updates."""
 
@@ -625,8 +635,10 @@ def _extract_command_with_args(cmd):
 async def _handle_commands(args, config, loop):
     device_listener = DeviceListener()
     push_listener = PushListener()
+    power_listener = PowerListener()
     atv = await connect(config, loop, protocol=args.protocol)
     atv.listener = device_listener
+    atv.power.listener = power_listener
 
     if atv.features.in_state(FeatureState.Available, FeatureName.PushUpdates):
         atv.push_updater.listener = push_listener

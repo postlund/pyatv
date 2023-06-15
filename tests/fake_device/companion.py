@@ -1,6 +1,7 @@
 """Fake Companion Apple TV for tests."""
 
 import asyncio
+from enum import IntFlag, auto
 import logging
 import plistlib
 from typing import Any, Dict, List, Mapping, Optional, Set
@@ -12,6 +13,7 @@ from pyatv.protocols.companion import (
     MediaControlFlags,
     keyed_archiver,
 )
+from pyatv.protocols.companion.api import SystemStatus
 from pyatv.protocols.companion.connection import FrameType
 from pyatv.protocols.companion.server_auth import CompanionServerAuth
 from pyatv.support import chacha20, log_binary, opack
@@ -55,9 +57,24 @@ MEDIA_CONTROL_MAP = {
 }
 
 
+class CompanionServiceFlags(IntFlag):
+    """Flags used to alter fake service behavior."""
+
+    EMPTY = auto()
+    """Empty service flag."""
+
+    SYSTEM_STATUS_SUPPORTED = auto()
+    """If system status is supported."""
+
+
 class FakeCompanionState:
     def __init__(self):
         """State of a fake Companion device."""
+        self.flags: CompanionServiceFlags = (
+            CompanionServiceFlags.EMPTY | CompanionServiceFlags.SYSTEM_STATUS_SUPPORTED
+        )
+        self.clients: List[FakeCompanionService] = []
+        self._system_status: SystemStatus = SystemStatus.Awake
         self.active_app: Optional[str] = None
         self.open_url: Optional[str] = None
         self.installed_apps: Dict[str, str] = {}
@@ -75,6 +92,32 @@ class FakeCompanionState:
         self._rti_focus_state: KeyboardFocusState = KeyboardFocusState.Focused
         self.rti_text: Optional[str] = INITIAL_RTI_TEXT
         self.rti_session_uuid: Optional[bytes] = None
+
+    def is_supported(self, flag: CompanionServiceFlags) -> bool:
+        """Return if a feature is supported."""
+        return flag in self.flags
+
+    def set_flag_state(self, flag: CompanionServiceFlags, enabled: bool) -> None:
+        """Set if a feature is supported or not."""
+        if enabled:
+            self.flags |= flag
+        else:
+            self.flags &= ~flag
+
+    @property
+    def system_status(self) -> SystemStatus:
+        return self._system_status
+
+    @system_status.setter
+    def system_status(self, value) -> None:
+        self._system_status = value
+
+        # Only send event updates if feature is supported
+        if self.is_supported(CompanionServiceFlags.SYSTEM_STATUS_SUPPORTED):
+            for client in self.clients:
+                client.send_event(
+                    "SystemStatus", 1234, {"state": self.system_status.value}
+                )
 
     def _send_rti(self, identifier, content):
         for client in self.rti_clients:
@@ -171,10 +214,12 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def connection_made(self, transport):
         _LOGGER.debug("Client connected")
         self.transport = transport
+        self.state.clients.append(self)
 
     def connection_lost(self, exc):
         _LOGGER.debug("Client disconnected")
         self.transport = None
+        self.state.clients.remove(self)
 
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
@@ -231,7 +276,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
                     if hasattr(self, handler_method_name):
                         getattr(self, handler_method_name)(unpacked)
                     else:
-                        _LOGGER.warning("No handler for type %s", unpacked["_i"])
+                        self.send_handler_not_supported(unpacked)
 
             except Exception:
                 _LOGGER.exception("failed to handle incoming data")
@@ -258,18 +303,24 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             },
         )
 
-    def send_error(self, request, message):
+    def send_error(
+        self, request, message, /, code: int = 1337, domain: str = "RPErrorDomain"
+    ):
         self.send_to_client(
             FrameType.E_OPACK,
             {
                 "_i": request["_i"],
                 "_x": request["_x"],
                 "_t": 3,
-                "_ec": 1337,
-                "_ed": "RPErrorDomain",
+                "_ec": code,
+                "_ed": domain,
                 "_em": message,
             },
         )
+
+    def send_handler_not_supported(self, request):
+        _LOGGER.warning("No handler for type %s", request["_i"])
+        self.send_error(request, "No request handler", code=58822)
 
     def volume_changed(self, new_volume: float):
         self.state.volume = min(max(new_volume, 0.0), 100.0)
@@ -429,11 +480,18 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         if insertion_text is not None:
             self.state.rti_text += insertion_text
 
+    def handle_fetchattentionstate(self, message):
+        if self.state.is_supported(CompanionServiceFlags.SYSTEM_STATUS_SUPPORTED):
+            _LOGGER.debug("Returning system status: %s", self.state.system_status)
+            self.send_response(message, {"state": self.state.system_status.value})
+        else:
+            self.send_handler_not_supported(message)
+
 
 class FakeCompanionUseCases:
     """Wrapper for altering behavior of a FakeCompanionService instance."""
 
-    def __init__(self, state):
+    def __init__(self, state: FakeCompanionState):
         """Initialize a new FakeCompanionUseCases."""
         self.state = state
 
@@ -454,3 +512,7 @@ class FakeCompanionUseCases:
 
     def set_rti_text(self, text: Optional[str]) -> None:
         self.state.rti_text = text
+
+    def set_system_status(self, system_status: SystemStatus) -> None:
+        """Set a specific system state."""
+        self.state.system_status = system_status

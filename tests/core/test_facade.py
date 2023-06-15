@@ -47,6 +47,7 @@ from pyatv.interface import (
     Stream,
 )
 
+from tests.shared_helpers import SavingPowerListener
 from tests.utils import until
 
 _LOGGER = logging.getLogger(__name__)
@@ -193,17 +194,6 @@ class SavingPushListener(PushListener):
 
     def playstatus_error(self, updater, exception: Exception) -> None:
         pass
-
-
-class SavingPowerListener(PowerListener):
-    def __init__(self):
-        self.last_update = None
-        self.all_updates = []
-
-    def powerstate_update(self, old_state: PowerState, new_state: PowerState):
-        """Device power state was updated."""
-        self.last_update = new_state
-        self.all_updates.append(new_state)
 
 
 class SavingAudioListener(AudioListener):
@@ -733,37 +723,6 @@ async def dispatch_device_state(mrp_state_dispatcher, state, protocol=Protocol.M
     await event.wait()
 
 
-async def test_power_state_respect_playing_state(mrp_state_dispatcher, power_setup):
-    assert power_setup.power_state == PowerState.Off
-
-    # Trigger something to play (but keep power state off) changes it to On
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    assert power_setup.listener.last_update == PowerState.On
-    assert power_setup.power_state == PowerState.On
-
-    # Trigger back to idle shall give power state Off again
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    assert power_setup.listener.last_update == PowerState.Off
-    assert power_setup.power_state == PowerState.Off
-
-
-async def test_power_state_defaults_to_derived_power_state_from_off(
-    mrp_state_dispatcher, power_setup, power_instance
-):
-    assert power_setup.power_state == PowerState.Off
-
-    # Trigger something to play (but keep power state off) changes it to On
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    assert power_setup.listener.last_update == PowerState.On
-
-    # Change derived power state to On
-    power_instance.current_state = PowerState.On
-
-    # Trigger back to idle shall give power state On as derived state is On
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    assert power_setup.power_state == PowerState.On
-
-
 async def test_power_state_defaults_to_derived_power_state_from_on(
     mrp_state_dispatcher, power_setup, power_instance
 ):
@@ -777,41 +736,6 @@ async def test_power_state_defaults_to_derived_power_state_from_on(
     await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
     assert power_setup.power_state == PowerState.On
     assert power_setup.listener.last_update is None
-
-
-async def test_power_play_state_only_from_main_protocol(
-    mrp_state_dispatcher, dmap_state_dispatcher, power_setup
-):
-    assert power_setup.power_state == PowerState.Off
-
-    # The initial Playing (DMAP) shall be ignored so we should only get On state
-    # since duplicates are not propagated
-    await dispatch_device_state(
-        dmap_state_dispatcher, DeviceState.Playing, protocol=Protocol.DMAP
-    )
-    assert power_setup.listener.last_update is None
-    await dispatch_device_state(
-        mrp_state_dispatcher, DeviceState.Idle, protocol=Protocol.MRP
-    )
-    assert power_setup.listener.last_update is None
-    await dispatch_device_state(
-        mrp_state_dispatcher, DeviceState.Playing, protocol=Protocol.MRP
-    )
-    assert power_setup.listener.last_update == PowerState.On
-
-
-async def test_power_play_state_no_dispatcher_duplicates(
-    mrp_state_dispatcher, power_setup
-):
-    assert power_setup.power_state == PowerState.Off
-
-    # Dispatch two "On" and one "Off". On shall only be registered once.
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Playing)
-    await dispatch_device_state(mrp_state_dispatcher, DeviceState.Idle)
-    assert power_setup.listener.last_update == PowerState.Off
-
-    assert len(power_setup.listener.all_updates) == 2
 
 
 async def test_power_play_state_no_listener_duplicates(

@@ -1046,6 +1046,38 @@ Example: Put device to sleep:
 {'_c': {}, '_t': 3, '_x': 123}
 ```
 
+#### System Status
+
+A system can be in one of the following states:
+
+| **ID** | **State** | **Note** |
+| 0x01 | Asleep | Device is sleeping/in standby.
+| 0x02 | Screensaver | Screensaver is shown on screen.
+| 0x03 | Awake | Device is awake.
+| 0x04 | Idle | This state has not been seen, but is likely present. Not sure what difference is compare to `Awake`.
+
+Current system state can be fetch using `FetchAttentionState`:
+
+```javascript
+// Request
+{'_i': 'FetchAttentionState', '_t': 2, '_c': {}, '_x': 38571}
+
+// Response
+{'_c': {'state': 1}, '_t': 3, '_x': 38571}
+```
+
+`state` in the response maps to **ID** in the table above.
+
+Updates to the state is announced via the `SystemStatus` event:
+
+```javascript
+// Register to event
+{'_i': '_interest', '_t': 1, '_c': {'_regEvents': ['SystemStatus']}, '_x': 38573}
+
+// Example of an event
+{'_i': 'SystemStatus', '_x': 798413326, '_c': {'state': 3}, '_t': 1}
+```
+
 # AirPlay
 
 The AirPlay protocol suite is used to stream media from a sender to a receiver. Two protocols
