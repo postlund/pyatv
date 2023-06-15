@@ -743,7 +743,8 @@ class MrpAudio(Audio):
     def device_uid(self) -> Optional[str]:
         """Return the UID of our device."""
         if self.protocol.device_info is not None:
-            return self.protocol.device_info.inner().deviceUID  # type: ignore
+            inner = self.protocol.device_info.inner()
+            return inner.clusterID or inner.deviceUID  # type: ignore
         return None
 
     @property

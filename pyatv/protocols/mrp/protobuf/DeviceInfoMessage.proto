@@ -50,4 +50,8 @@ message DeviceInfoMessage {
   optional string routingContextID = 41; // Example: 577E1BCA-2D9B-41C2-A8F8-C515CE8072D4
   optional string airPlayGroupID = 42; // Example: 6E0ED14E-0BA4-4A84-AF30-9EB080E7AA73
   optional string systemBooksApplication = 43; // Example: com.apple.iBooks
+  repeated DeviceInfoMessage clusteredDevices = 44;
+  optional uint32 parentGroupContainsDiscoverableGroupLeader = 45;
+  optional uint32 groupContainsDiscoverableGroupLeader = 46;
+  optional uint32 lastKnownClusterType = 47;
 }
