@@ -115,18 +115,20 @@ class BufferedIOBaseWrapper(io.BufferedIOBase):
         if size == 0:
             return b""
 
-        self.buffer.add(self.reader.read(size))
+        # If space left in buffer, read from source and add it there. Don't do it if
+        # there's enough data in the buffer already though.
+        left_in_buffer = self.buffer.remaining
+        if left_in_buffer > 0 and size != -1 and size > self.buffer.size:
+            self.buffer.add(self.reader.read(min(size, left_in_buffer)))
 
-        # Read all data (if -1), otherwise as much as request OR space left in buffer
         to_read = self.buffer.size if size == -1 else min(size, self.buffer.size)
-
         return self.buffer.get(to_read)
 
     def seek(self, pos, origin=io.SEEK_SET):
         """Seek to position in stream."""
         if origin == io.SEEK_SET:
             self.buffer.seek(pos)
-        return self.buffer.tell()
+        return self.buffer.position
 
     def tell(self):
         """Return current position in stream."""
