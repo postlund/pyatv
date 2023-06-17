@@ -18,6 +18,7 @@ _MODEL_LIST: Dict[str, DeviceModel] = {
     "AudioAccessory1,1": DeviceModel.HomePod,
     "AudioAccessory1,2": DeviceModel.HomePod,
     "AudioAccessory5,1": DeviceModel.HomePodMini,
+    "AudioAccessory6,1": DeviceModel.HomePodGen2,
 }
 
 
