@@ -71,6 +71,16 @@ def test_buffer_emptyness(buffer):
     assert buffer.empty()
 
 
+def test_buffer_remaining(buffer):
+    assert buffer.remaining == BUFFER_SIZE
+
+    buffer.add(b"a")
+    assert buffer.remaining == BUFFER_SIZE - 1
+
+    buffer.add(b"a" * BUFFER_SIZE)
+    assert buffer.remaining == 0
+
+
 def test_position_no_seeking(buffer):
     assert buffer.position == 0
 

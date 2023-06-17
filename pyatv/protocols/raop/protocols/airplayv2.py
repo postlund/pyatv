@@ -45,7 +45,17 @@ class AirPlayV2(StreamProtocol):
                 "sessionUUID": str(uuid4()).upper(),
                 "timingPort": timing_client_port,
                 "timingProtocol": "NTP",
-                "sourceVersion": "409.16",
+                "isMultiSelectAirPlay": True,
+                "groupContainsGroupLeader": False,
+                "macAddress": "AA:BB:CC:DD:EE:FF",
+                "model": "iPhone14,3",
+                "name": "pyatv",
+                "osBuildVersion": "20F66",
+                "osName": "iPhone OS",
+                "osVersion": "16.5",
+                "senderSupportsRelay": False,
+                "sourceVersion": "690.7.1",
+                "statsCollectionEnabled": False,
             }
         )
         resp = decode_bplist_from_body(setup_resp)
@@ -94,10 +104,10 @@ class AirPlayV2(StreamProtocol):
             body={
                 "streams": [
                     {
-                        "audioFormat": 0x40000,
+                        "audioFormat": 0x800,
                         "audioMode": "default",
                         "controlPort": control_client_port,
-                        "ct": 2,  # Channels?
+                        "ct": 1,  # Raw PCM
                         "isMedia": True,
                         "latencyMax": 88200,
                         "latencyMin": 11025,

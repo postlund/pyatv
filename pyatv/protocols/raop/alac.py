@@ -10,6 +10,8 @@ Some assumptions here:
 * Samples are 16 bit/2 bytes
 * Number of samples in a frame is derived from frame size
 * End tag (111) is present at the end of a frame
+
+NB: This module is currently not used as raw samples are sent instead of ALAC.
 """
 from bitarray import bitarray
 

@@ -78,6 +78,11 @@ class SemiSeekableBuffer:
         return len(self._buffer) - (self._position if self._has_headroom_data else 0)
 
     @property
+    def remaining(self) -> int:
+        """Return remaining bytes in buffer."""
+        return self._buffer_size - self.size
+
+    @property
     def position(self) -> int:
         """Return absolute position of bytes read from buffer.
 

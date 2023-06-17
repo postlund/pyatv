@@ -12,7 +12,6 @@ from typing import Dict, Optional, cast
 
 from pyatv.protocols.dmap import parser
 from pyatv.protocols.dmap.tag_definitions import lookup_tag
-from pyatv.protocols.raop import alac
 from pyatv.protocols.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
 from pyatv.protocols.raop.protocols.airplayv1 import parse_transport
 from pyatv.support.http import (
@@ -235,10 +234,10 @@ class AudioReceiver(asyncio.Protocol):
                         data, (self.state.remote_address, self.state.control_port)
                     )
             else:
-                self.state.add_audio_packet(header.seqno, alac.decode(data[12:]))
+                self.state.add_audio_packet(header.seqno, data[12:])
         elif packet_type == 0x56:  # Retransmission
             original_packet = data[4:]  # Remove retransmission header
-            self.state.add_audio_packet(header.seqno, alac.decode(original_packet[12:]))
+            self.state.add_audio_packet(header.seqno, original_packet[12:])
         else:
             _LOGGER.debug("Unhandled packet type: %d", packet_type)
 
