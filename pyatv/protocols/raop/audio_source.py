@@ -8,6 +8,7 @@ import io
 import logging
 import math
 import re
+import sys
 import threading
 import time
 from typing import Generator, Optional, Union
@@ -29,6 +30,22 @@ DEFAULT_TIMEOUT = 10.0  # Seconds
 
 BUFFER_SIZE = 64 * 1024
 HEADROOM_SIZE = 32 * 1024
+
+
+def _to_audio_samples(data: Union[bytes, array.array]) -> bytes:
+    output: array.array
+    if isinstance(data, bytes):
+        # TODO: This assumes s16 samples!
+        output = array.array("h", data)
+    else:
+        output = data
+
+    # TODO: According to my investigation in #2057, this should happen if system
+    # byteorder is "big". So not sure why this works...
+    if sys.byteorder == "little":
+        output.byteswap()
+
+    return output.tobytes()
 
 
 def _int2sf(sample_size: int) -> SampleFormat:
@@ -53,7 +70,10 @@ class AudioSource(ABC):
 
     @abstractmethod
     async def readframes(self, nframes: int) -> bytes:
-        """Read number of frames and advance in stream."""
+        """Read number of frames and advance in stream.
+
+        Frames are returned in little endian to match what AirPlay expects.
+        """
 
     @abstractmethod
     async def get_metadata(self) -> MediaMetadata:
@@ -303,11 +323,11 @@ class BufferedIOBaseSource(AudioSource):
         # Use correct wrapper when streaming from buffer to ensure we have some kind
         # of seek support
         if isinstance(source, io.BufferedIOBase):
-            streamable_source = StreamableIOBaseWrapper(source)
             if source.seekable():
                 metadata_source = source
             else:
                 metadata_source = BufferedIOBaseWrapper(source, buffer)
+            streamable_source = StreamableIOBaseWrapper(metadata_source)
         else:
             streamable_source = StreamReaderWrapper(source, buffer)
             metadata_source = StreamableSourceWrapper(streamable_source, buffer)
@@ -372,7 +392,7 @@ class BufferedIOBaseSource(AudioSource):
         if len(self._audio_buffer) < 0.5 * self._buffer_size:
             self._buffer_needs_refilling.set()
 
-        return data
+        return _to_audio_samples(data)
 
     async def get_metadata(self) -> MediaMetadata:
         """Return media metadata if available and possible."""
@@ -600,11 +620,10 @@ class InternetSource(AudioSource):
 
     async def readframes(self, nframes: int) -> bytes:
         """Read number of frames and advance in stream."""
-        frames: Optional[array.array] = await self.loop.run_in_executor(
-            None, next, self.stream_generator, None
-        )
-        if frames:
-            return frames.tobytes()
+        with suppress(StopIteration):
+            frames: Optional[array.array] = next(self.stream_generator)
+            if frames:
+                return _to_audio_samples(frames)
         return AudioSource.NO_FRAMES
 
     async def get_metadata(self) -> MediaMetadata:
@@ -667,7 +686,7 @@ class FileSource(AudioSource):
         bytes_to_read = (self.sample_size * self.channels) * nframes
         data = self.samples[self.pos : min(len(self.samples), self.pos + bytes_to_read)]
         self.pos += bytes_to_read
-        return data
+        return _to_audio_samples(data)
 
     async def get_metadata(self) -> MediaMetadata:
         """Return media metadata if available and possible."""

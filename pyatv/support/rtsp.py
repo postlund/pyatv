@@ -29,7 +29,7 @@ ANNOUNCE_PAYLOAD = (
     + "c=IN IP4 {remote_ip}\r\n"
     + "t=0 0\r\n"
     + "m=audio 0 RTP/AVP 96\r\n"
-    + "a=rtpmap:96 AppleLossless\r\n"
+    + "a=rtpmap:96 L16/44100/2\r\n"
     + f"a=fmtp:96 {FRAMES_PER_PACKET} 0 "
     + "{bits_per_channel} 40 10 14 {channels} 255 0 0 {sample_rate}\r\n"
 )

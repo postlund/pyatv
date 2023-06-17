@@ -7,13 +7,13 @@ AirPlay v1 and/or v2. This is mainly for code re-use purposes.
 from abc import ABC, abstractmethod
 import asyncio
 import logging
-from time import perf_counter
+from time import monotonic, perf_counter
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
 
 from pyatv import exceptions
 from pyatv.protocols.airplay.utils import pct_to_dbfs
-from pyatv.protocols.raop import alac, timing
+from pyatv.protocols.raop import timing
 from pyatv.protocols.raop.audio_source import AudioSource
 from pyatv.protocols.raop.fifo import PacketFifo
 from pyatv.protocols.raop.packets import (
@@ -502,7 +502,7 @@ class StreamClient:
     ):
         stats = Statistics(self.context.sample_rate)
 
-        initial_time = perf_counter()
+        initial_time = monotonic()
         self._is_playing = True
         prev_slow_seqno = None
         number_slow_seqno = 0
@@ -551,7 +551,7 @@ class StreamClient:
             # are (from when we initially stared to stream). The diff is the time we
             # need to sleep until next lap.
             abs_time_stream = stats.total_frames / self.context.sample_rate
-            rel_to_start = perf_counter() - initial_time
+            rel_to_start = monotonic() - initial_time
             diff = abs_time_stream - rel_to_start
             if diff > 0:
                 number_slow_seqno = 0
@@ -610,7 +610,7 @@ class StreamClient:
             self.rtsp.session_id,
         )
 
-        audio = alac.encode(frames)
+        audio = frames
 
         if transport.is_closing():
             _LOGGER.warning("Connection closed while streaming audio")
