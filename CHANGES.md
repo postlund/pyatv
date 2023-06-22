@@ -1,5 +1,48 @@
 # CHANGES
 
+## 0.13.1 Homer (2023-06-22)
+
+Small patch release coming up! Second generation HomePod has
+been added as device type. A bug when streaming from a buffer
+(something inheriting BufferedIOBase) has been fixed. The bug
+would render metadata detection unusable and playback to cut
+off early.
+
+Previous releases would send raw PCM samples encapsulated in
+Apple Lossless Audio Codec (ALAC) frames. This is now changed
+to send pure raw audio frames instead (without ALAC). This
+has a big benefit in regards to performance as the ALAC
+header is not byte-aligned, so it required a lot of bit
+shifting and memory copying. This was extremly noticable on
+low-end systems like raspberry pi. Hopefully the performance
+is a lot better now. Issue #2057 contains more details
+regarding this for those interested.
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+51dffc9 raop: Send autio as raw PCM
+3d4c5ff raop: Fix bug when streaming from buffer
+```
+
+*Other:*
+
+```
+02a8cab device: Add second generation HomePod
+```
+
+**All changes:**
+
+```
+dd773cc build(deps): Bump mypy from 1.3.0 to 1.4.0 in /requirements
+fb18e3a build(deps): Bump zeroconf from 0.66.0 to 0.69.0 in /requirements
+02a8cab device: Add second generation HomePod
+51dffc9 raop: Send autio as raw PCM
+3d4c5ff raop: Fix bug when streaming from buffer
+```
+
 ## 0.13.0 Grandpa (2023-06-15)
 
 This release contains some big new stuff, really nice. In summary we have:
