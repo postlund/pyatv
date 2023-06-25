@@ -29,6 +29,8 @@ DBFS_MAX = 0.0
 PERCENTAGE_MIN = 0.0
 PERCENTAGE_MAX = 100.0
 
+UNSUPPORTED_MODELS = [r"^Mac\d+,\d+$"]
+
 
 class AirPlayMajorVersion(Enum):
     """Major AirPlay protocol version."""
@@ -243,6 +245,13 @@ def update_service_details(service: MutableService):
         # Access control might say that pairing is not possible, e.g. only devices
         # belonging to the same home (not supported by pyatv)
         service.pairing = PairingRequirement.Disabled
+    elif any(
+        re.match(model, service.properties.get("model", ""))
+        for model in UNSUPPORTED_MODELS
+    ):
+        # Set as "unsupported" for devices we know that pyatv does
+        # (yet) support.
+        service.pairing = PairingRequirement.Unsupported
     else:
         service.pairing = get_pairing_requirement(service)
 
