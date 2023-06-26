@@ -1,10 +1,11 @@
 """Functional tests for helper methods. Agnostic to protocol implementation."""
 
+from ipaddress import IPv4Address
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pyatv import conf, helpers
+from pyatv import conf, const, helpers
 
 from tests.utils import data_path
 
@@ -101,3 +102,36 @@ def test_get_unique_id_(service_type, service_name, properties, expected_id):
 )
 async def test_is_streamable_supported_file(test_file, streamable):
     assert await helpers.is_streamable(data_path(test_file)) == streamable
+
+
+@pytest.mark.parametrize(
+    "pairing_requirement, is_supported",
+    [
+        (const.PairingRequirement.Unsupported, False),
+        (const.PairingRequirement.Disabled, False),
+        (const.PairingRequirement.NotNeeded, True),
+        (const.PairingRequirement.Optional, True),
+        (const.PairingRequirement.Mandatory, True),
+    ],
+)
+def test_is_device_supported(pairing_requirement, is_supported):
+    dev = conf.AppleTV(IPv4Address("127.0.0.1"), "test")
+    dev.add_service(
+        conf.ManualService(
+            "unsupported",
+            const.Protocol.DMAP,
+            0,
+            {},
+            pairing_requirement=const.PairingRequirement.Unsupported,
+        )
+    )
+    dev.add_service(
+        conf.ManualService(
+            "test",
+            const.Protocol.AirPlay,
+            0,
+            {},
+            pairing_requirement=pairing_requirement,
+        )
+    )
+    assert helpers.is_device_supported(dev) == is_supported
