@@ -360,13 +360,19 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
         /,
         metadata: Optional[interface.MediaMetadata] = None,
+        override_missing_metadata: bool = False,
         **kwargs
     ) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        await self.relay("stream_file")(file, metadata=metadata, **kwargs)
+        await self.relay("stream_file")(
+            file,
+            metadata=metadata,
+            override_missing_metadata=override_missing_metadata,
+            **kwargs,
+        )
 
 
 class FacadeApps(Relayer, interface.Apps):

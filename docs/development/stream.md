@@ -121,16 +121,21 @@ MP3. For the same reason, metadata will not work if seeking is not supported as
 that is extracted prior to playing the file, so seeking is needed to return to
 the beginning of file again before playback.
 
-Note that there's (roughly) a two second delay until audio starts to play. This
+Note 1: Since  pyatv v0.13.0, buffer improvements have been made to support some
+seeking, even in non-seekable streams. This is however not fool-proof and not all
+audio formats (or files/streams) work, but compatibility is much better from that
+version and onwards.
+
+Note 2: that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
 
 #### Custom Metadata
 
 By default, pyatv will try to extract metadata from whatever content you are playing.
-This however requires the input to be seekable, usually not possible with streaming
-content. It is possible to provide custom metadata in these cases (or if you just
-want to replace whatever metadata is inside a file) by passing a
-{% include api i="interface.MediaMetadata" %} instance when starting to stream:
+Some file formats or streams either does not support nor provide any metadata,
+in which case you can manually provide the metadata that pyatv will report to the
+receiver by passing an instance of {% include api i="interface.MediaMetadata" %}
+when starting to stream:
 
 ```python
 from pyatv.interface import MediaMetadata
@@ -139,9 +144,21 @@ metadata = MediaMetadata(artist="pyatv", title="Look at me, I'm streaming")
 await stream.stream_file("myfile.mp3", metadata=metadata)
 ```
 
-Do note that custom metadata will override any metadata extraction from the file,
-i.e. it is not possible to load metadata from a file and override just certain
-fields. It's one way or the other.
+Custom metadata will override any metadata provided by the streamed content. You
+can however tell pyatv to only override metadata fields that are missing by setting
+`override_missing_metadata` to `True`:
+
+```python
+from pyatv.interface import MediaMetadata
+
+metadata = MediaMetadata(artist="pyatv")
+await stream.stream_file("myfile.mp3", metadata=metadata, override_missing_metadata=True)
+```
+
+This will use all the metadata from `myfile.mp3`, but use _pyatv_ as artist but **only**
+if that field is not present in the file.
+
+Note: It is not possible to override `duration` (it is ignored).
 
 #### Stream from HTTP(S)
 

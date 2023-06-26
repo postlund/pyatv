@@ -844,6 +844,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
         /,
         metadata: Optional[MediaMetadata] = None,
+        override_missing_metadata: bool = False,
         **kwargs
     ) -> None:
         """Stream local or remote file to device.
