@@ -32,3 +32,15 @@ async def get_metadata(file: Union[str, io.BufferedIOBase]) -> MediaMetadata:
         in_file.album,
         in_file.length,
     )
+
+
+def merge_into(base: MediaMetadata, new_metadata: MediaMetadata) -> MediaMetadata:
+    """Merge missing fields into base metadata.
+
+    Updates all fields with a None value in "new" with corresponding values from
+    "new_metadata". Returns "base" again.
+    """
+    for field in base.__dataclass_fields__.keys():
+        if getattr(base, field) is None:
+            setattr(base, field, getattr(new_metadata, field))
+    return base

@@ -552,6 +552,19 @@ async def test_custom_metadata(raop_client, raop_state):
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+async def test_custom_metadata_override_missing(raop_client, raop_state):
+    metadata = MediaMetadata(title="A", artist="B", album="C")
+
+    await raop_client.stream.stream_file(
+        data_path("only_title.wav"), metadata=metadata, override_missing_metadata=True
+    )
+
+    assert raop_state.metadata.title == "pyatv"
+    assert raop_state.metadata.artist == "B"
+    assert raop_state.metadata.album == "C"
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
 async def test_stream_from_buffer(raop_client, raop_state):
     with io.open(data_path("audio_1_packet_metadata.wav"), "rb") as source_file:
         await raop_client.stream.stream_file(source_file)

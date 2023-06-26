@@ -61,7 +61,7 @@ from pyatv.protocols.raop.stream_client import PlaybackInfo, RaopListener, Strea
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
-from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata
+from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata, merge_into
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -330,6 +330,7 @@ class RaopStream(Stream):
         file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
         /,
         metadata: Optional[MediaMetadata] = None,
+        override_missing_metadata: bool = False,
         **kwargs
     ) -> None:
         """Stream local or remote file to device.
@@ -360,10 +361,15 @@ class RaopStream(Stream):
                 context.bytes_per_channel,
             )
 
-            # If metadata was provided, use that. Otherwise try to load from source.
-            file_metadata = (
-                await audio_file.get_metadata() if metadata is None else metadata
-            )
+            # If no custom metadata is provided, try to load from source. If it is
+            # provided, check if metadata should be overridden or not.
+            if metadata is None:
+                file_metadata = await audio_file.get_metadata()
+            elif override_missing_metadata:
+                file_metadata = await audio_file.get_metadata()
+                file_metadata = merge_into(file_metadata, metadata)
+            else:
+                file_metadata = metadata
 
             # If the user didn't change volume level prior to streaming, try to extract
             # volume level from device (if supported). Otherwise set the default level
