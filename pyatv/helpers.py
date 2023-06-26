@@ -100,3 +100,23 @@ async def is_streamable(filename: str) -> bool:
     except Exception:
         return False
     return True
+
+
+def is_device_supported(conf: pyatv.interface.BaseConfig) -> bool:
+    """Return if pyatv supports this device.
+
+    This method will return False if all of its services are either
+    PairingRequirement.Unsupported or PairingRequirement.Disabled. In all other cases
+    it will return True. Do note that even if this method returns True, pairing (or
+    that existing credentials are provided) might still be needed.
+    """
+    # Gather a set of present pairing requirements, subtract unsupported requirements
+    # and check that we have something left.
+    dev_requirements = set(service.pairing for service in conf.services)
+    unsupported_requirements = set(
+        [
+            pyatv.const.PairingRequirement.Unsupported,
+            pyatv.const.PairingRequirement.Disabled,
+        ]
+    )
+    return len(dev_requirements.difference(unsupported_requirements)) > 0

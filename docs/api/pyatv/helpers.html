@@ -19,6 +19,7 @@ link_group: api
 <ul class="">
 <li><code><a title="pyatv.helpers.auto_connect" href="#pyatv.helpers.auto_connect">auto_connect</a></code></li>
 <li><code><a title="pyatv.helpers.get_unique_id" href="#pyatv.helpers.get_unique_id">get_unique_id</a></code></li>
+<li><code><a title="pyatv.helpers.is_device_supported" href="#pyatv.helpers.is_device_supported">is_device_supported</a></code></li>
 <li><code><a title="pyatv.helpers.is_streamable" href="#pyatv.helpers.is_streamable">is_streamable</a></code></li>
 </ul>
 </li>
@@ -30,7 +31,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Various helper methods.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L1-L102" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L1-L122" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -65,6 +66,19 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 <code>properties</code> all key-value properties belonging to the service.</p>
 <p>The unique identifier is returned if available, otherwise <code>None</code> is returned.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L54-L87" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.helpers.is_device_supported">
+<code class="name flex">
+<span>def <span class="ident">is_device_supported</span></span>(<span>conf: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>) -> bool</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Return if pyatv supports this device.</p>
+<p>This method will return False if all of its services are either
+PairingRequirement.Unsupported or PairingRequirement.Disabled. In all other cases
+it will return True. Do note that even if this method returns True, pairing (or
+that existing credentials are provided) might still be needed.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L105-L122" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.helpers.is_streamable">
 <code class="name flex">
