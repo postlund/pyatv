@@ -111,6 +111,7 @@ async def test_service_info_password(airplay_props, mrp_props, requires_password
         ({"flags": "0x200"}, {}, PairingRequirement.Mandatory),
         ({"acl": "1"}, {}, PairingRequirement.Disabled),
         ({"acl": "1", "sf": "0x200"}, {}, PairingRequirement.Disabled),
+        ({"model": "Mac10,1"}, {}, PairingRequirement.Unsupported),
     ],
 )
 async def test_service_info_pairing(airplay_props, devinfo, pairing_req):
