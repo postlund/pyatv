@@ -1,5 +1,71 @@
 # CHANGES
 
+## 0.13.2 Itchy (2023-06-27)
+
+Hitting it hard with new releases lately, here's another one:
+
+* Artwork can now be set when streaming
+* Metadata can be overridden only when missing
+* New helper method: helpers.is_device_supported
+* `bitarray` dependency has been dropped (no longer needed)
+* Bug: AirPlay in macOS is ignored until I can support it
+* Bug: Improved AirPlay 2 detection
+
+So, this release makes it possible to provide artwork as part of metadata when
+streaming files. It also adds a new flag, `override_missing_metadata`, that
+(when set) will use metadata provided by what is streamed but use custom
+metadata when some fields are missing. So if `title` is not in the stream, you
+can now provide that but still keep things like `album` and `artist` from
+the stream.
+
+A new helper method, `helpers.is_device_support`, has been added that returns
+boolean indicating if pyatv can interact with that device or not.
+
+And some bug fixes. Namely: computers running macOS with AirPlay receiver
+enabled (requires macOS 12 or later) are currently ignored as they aren't
+supported. I will try to fix that when I can. Also, detection of AirPlay 2
+devices has been improved. Some older devices (like Apple TV 3) was
+discovered as AirPlay 2 devices, breaking `stream_file` support.
+
+**Changes:**
+
+*Protocol: AirPlay:*
+
+```
+20a7524 airplay: Fix AirPlay major version detection
+703dc74 airplay: Disable AirPlay for macOS
+```
+
+*Protocol: RAOP:*
+
+```
+6beda0c raop: Allow setting artwork
+7b534d5 raop: Support override missing stream fields
+```
+
+*Other:*
+
+```
+70ce630 support: Add missing metadata tests
+3f054a0 deps: Remove bitarray code
+8ee9b61 helpers: Add is_device_supported
+```
+
+**All changes:**
+
+```
+20a7524 airplay: Fix AirPlay major version detection
+70ce630 support: Add missing metadata tests
+6beda0c raop: Allow setting artwork
+7b534d5 raop: Support override missing stream fields
+703dc74 airplay: Disable AirPlay for macOS
+3f054a0 deps: Remove bitarray code
+8ee9b61 helpers: Add is_device_supported
+9cbeeae build(deps): Bump bitarray from 2.7.5 to 2.7.6 in /requirements
+60b7052 build(deps): Bump pytest from 7.3.2 to 7.4.0 in /requirements
+1630694 build(deps): Bump mypy from 1.4.0 to 1.4.1 in /requirements
+```
+
 ## 0.13.1 Homer (2023-06-22)
 
 Small patch release coming up! Second generation HomePod has
