@@ -138,7 +138,7 @@ jobs:
                 notes += line
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.writelines([f"name={name}", f"version={version}"])
+              fh.writelines([f"name={name}\n", f"version={version}\n"])
 
           with open("notes.md", "w", encoding="utf-8") as handle:
             handle.write(notes)
