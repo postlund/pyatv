@@ -27,10 +27,10 @@ async def get_metadata(file: Union[str, io.BufferedIOBase]) -> MediaMetadata:
         in_file = await loop.run_in_executor(None, MediaFile, file)
 
     return MediaMetadata(
-        in_file.title,
-        in_file.artist,
-        in_file.album,
-        in_file.length,
+        title=in_file.title,
+        artist=in_file.artist,
+        album=in_file.album,
+        duration=in_file.length,
     )
 
 

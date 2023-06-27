@@ -37,6 +37,7 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
 )
+from pyatv.support import prettydataclass
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
@@ -67,6 +68,7 @@ class ArtworkInfo(NamedTuple):
     height: int
 
 
+@prettydataclass()
 @dataclass
 class MediaMetadata:
     """Container for media (e.g. audio or video) metadata."""
@@ -74,6 +76,7 @@ class MediaMetadata:
     title: Optional[str] = None
     artist: Optional[str] = None
     album: Optional[str] = None
+    artwork: Optional[bytes] = None  # Raw JPEG data
     duration: Optional[float] = None
 
 

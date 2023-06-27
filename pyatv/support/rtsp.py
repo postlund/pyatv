@@ -225,6 +225,24 @@ class RtspSession:
             body=tags.container_tag("mlit", payload),
         )
 
+    async def set_artwork(
+        self,
+        rtsp_session: int,
+        rtpseq: int,
+        rtptime: int,
+        artwork: bytes,
+    ) -> HttpResponse:
+        """Change artwork for what is playing."""
+        return await self.exchange(
+            "SET_PARAMETER",
+            content_type="image/jpeg",
+            headers={
+                "Session": rtsp_session,
+                "RTP-Info": f"seq={rtpseq};rtptime={rtptime}",
+            },
+            body=artwork,
+        )
+
     async def feedback(self, allow_error=False) -> HttpResponse:
         """Send SET_PARAMETER message."""
         return await self.exchange("POST", uri="/feedback", allow_error=allow_error)

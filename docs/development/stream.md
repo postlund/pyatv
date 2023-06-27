@@ -144,6 +144,10 @@ metadata = MediaMetadata(artist="pyatv", title="Look at me, I'm streaming")
 await stream.stream_file("myfile.mp3", metadata=metadata)
 ```
 
+All fields in {% include api i="interface.MediaMetadata" %} can be overridden (including
+artwork) except for {% include api i="interface.MediaMetadata.duration" %}, which is
+ignored. Please note that artwork must be in JPEG format.
+
 Custom metadata will override any metadata provided by the streamed content. You
 can however tell pyatv to only override metadata fields that are missing by setting
 `override_missing_metadata` to `True`:
@@ -157,8 +161,6 @@ await stream.stream_file("myfile.mp3", metadata=metadata, override_missing_metad
 
 This will use all the metadata from `myfile.mp3`, but use _pyatv_ as artist but **only**
 if that field is not present in the file.
-
-Note: It is not possible to override `duration` (it is ignored).
 
 #### Stream from HTTP(S)
 

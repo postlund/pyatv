@@ -411,7 +411,7 @@ class StreamClient:
 
     async def send_audio(  # pylint: disable=too-many-branches
         self,
-        wave_file: AudioSource,
+        source: AudioSource,
         metadata: MediaMetadata = EMPTY_METADATA,
         /,
         volume: Optional[float] = None
@@ -437,7 +437,7 @@ class StreamClient:
             if MetadataType.Progress in self._metadata_types:
                 start = self.context.rtptime
                 now = self.context.rtptime
-                end = start + wave_file.duration * self.context.sample_rate
+                end = start + source.duration * self.context.sample_rate
                 await self.rtsp.set_parameter("progress", f"{start}/{now}/{end}")
 
             # Apply text metadata if it is supported
@@ -449,6 +449,19 @@ class StreamClient:
                     self.context.rtpseq,
                     self.context.rtptime,
                     self.playback_info.metadata,
+                )
+
+            # Send artwork if that is supported
+            if (
+                MetadataType.Artwork in self._metadata_types
+                and metadata.artwork is not None
+            ):
+                _LOGGER.debug("Sending %s bytes artwork", len(metadata.artwork))
+                await self.rtsp.set_artwork(
+                    self.context.rtsp_session,
+                    self.context.rtpseq,
+                    self.context.rtptime,
+                    metadata.artwork,
                 )
 
             # Start keep-alive task to ensure connection is not closed by remote device
@@ -474,7 +487,7 @@ class StreamClient:
             if volume:
                 await self.set_volume(pct_to_dbfs(volume))
 
-            await self._stream_data(wave_file, transport)
+            await self._stream_data(source, transport)
         except (  # pylint: disable=try-except-raise
             exceptions.ProtocolError,
             exceptions.AuthenticationError,

@@ -5,6 +5,7 @@ import binascii
 import functools
 import logging
 from os import environ, path
+from typing import Any, Union
 import warnings
 
 from google.protobuf.text_format import MessageToString
@@ -16,8 +17,10 @@ _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512
 
 
-def _shorten(text, length):
-    return text if len(text) < length else text[: length - 3] + "..."
+def _shorten(text: Union[str, bytes], length: int) -> str:
+    if isinstance(text, str):
+        return text if len(text) < length else (text[: length - 3] + "...")
+    return str(text if len(text) < length else (text[: length - 3] + b"..."))
 
 
 def _log_value(value):
@@ -26,6 +29,39 @@ def _log_value(value):
     if isinstance(value, bytes):
         return binascii.hexlify(bytearray(value or b"")).decode()
     return str(value)
+
+
+def prettydataclass(max_length: int = 150):
+    """Prettify dataclasses.
+
+    Prettify an existing dataclass by replacing __repr__ with a method that
+    shortens variables to a max length, greatly reducing output for long strings
+    in debug logs.
+    """
+
+    def _repr(self) -> str:
+        def _format(value: Any) -> str:
+            if isinstance(value, (str, bytes)):
+                return _shorten(value, max_length)
+            return value
+
+        return (
+            self.__class__.__name__
+            + "("
+            + ", ".join(
+                [
+                    f"{f}={_format(getattr(self, f))}"
+                    for f in self.__dataclass_fields__.keys()
+                ]
+            )
+            + ")"
+        )
+
+    def _wrap(cls):
+        setattr(cls, "__repr__", _repr)
+        return cls
+
+    return _wrap
 
 
 async def error_handler(func, fallback, *args, **kwargs):

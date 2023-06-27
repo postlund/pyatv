@@ -10,6 +10,7 @@ import string
 from types import SimpleNamespace
 from typing import Dict, Optional, cast
 
+from pyatv.interface import MediaMetadata
 from pyatv.protocols.dmap import parser
 from pyatv.protocols.dmap.tag_definitions import lookup_tag
 from pyatv.protocols.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
@@ -131,7 +132,7 @@ class FakeRaopState:
         self.flags: RaopServiceFlags = (
             RaopServiceFlags.INFO_SUPPORTED | RaopServiceFlags.FEEDBACK_SUPPORTED
         )
-        self.metadata = SimpleNamespace(title=None, artist=None, album=None)
+        self.metadata = MediaMetadata()
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
         self.initial_audio_packet: Optional[int] = None
         self.password: Optional[str] = None
@@ -181,7 +182,7 @@ class FakeRaopState:
         self.audio_packets[seqno] = audio_data
 
     def reset_streaming(self) -> None:
-        self.metadata = SimpleNamespace(title=None, artist=None, album=None)
+        self.metadata = MediaMetadata()
         self.streaming_started = False
 
 
@@ -466,6 +467,9 @@ class FakeRaopService(HttpSimpleRouter):
             else:
                 self.state.volume = float(request.body.split(" ", maxsplit=1)[1])
                 _LOGGER.debug("Changing volume to %f", self.state.volume)
+        elif request.headers["Content-Type"] == "image/jpeg":
+            self.state.metadata.artwork = request.body
+            _LOGGER.debug("Got artwork (%d bytes)", len(self.state.metadata.artwork))
         else:
             return HttpResponse(
                 "RTSP",
