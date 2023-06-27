@@ -45,6 +45,11 @@ def _get_flags(properties: Mapping[str, str]) -> int:
     return int(flags, 16)
 
 
+# These flags have been imported from here:
+# https://emanuelecozzi.net/docs/airplay2/features/
+# Should be the same as the ones from here:
+# https://openairplay.github.io/airplay-spec/features.html
+# But seems to be some inconsistencies. Worth to keep in mind.
 class AirPlayFlags(IntFlag):
     """Features supported by AirPlay."""
 
@@ -222,17 +227,19 @@ def log_response(logger, response: HttpResponse, message_prefix="") -> None:
 
 # TODO: I don't know how to properly detect if a receiver support AirPlay 2 or not,
 # so I'm guessing until I know better. The basic idea here is simple: the service
-# should have the "features" flag (either "features" or "ft") and have all 64 bits
-# present. Not sure if that is good enough, but will do for now.
+# should have the "features" flag (either "features" or "ft") and either bit 38 or
+# bit 48 should be present.
 def get_protocol_version(service: BaseService) -> AirPlayMajorVersion:
     """Return major AirPlay version supported by a service."""
     features = service.properties.get("ft")
     if not features:
-        features = service.properties.get("features", "")
+        features = service.properties.get("features", "0x0")
 
-    # Ensure feature flag is valid and all flags present (i.e.
-    # 0xAABBCCDD,0xAABBCCDD, thus looking for ",")
-    if features.count(",") == 1:
+    parsed_features = parse_features(features)
+    if (
+        AirPlayFlags.SupportsUnifiedMediaControl in parsed_features
+        or AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in parsed_features
+    ):
         return AirPlayMajorVersion.AirPlayV2
     return AirPlayMajorVersion.AirPlayV1
 
