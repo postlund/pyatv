@@ -537,9 +537,9 @@ async def test_teardown_called_after_playback(raop_client, raop_state):
     assert raop_state.teardown_called
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0,1"})])
 async def test_custom_metadata(raop_client, raop_state):
-    metadata = MediaMetadata(title="A", artist="B", album="C")
+    metadata = MediaMetadata(title="A", artist="B", album="C", artwork=b"abcd")
 
     await raop_client.stream.stream_file(
         data_path("only_metadata.wav"), metadata=metadata
@@ -549,6 +549,18 @@ async def test_custom_metadata(raop_client, raop_state):
     assert raop_state.metadata.title == "A"
     assert raop_state.metadata.artist == "B"
     assert raop_state.metadata.album == "C"
+    assert raop_state.metadata.artwork == "abcd"
+
+
+@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+async def test_custom_metadata_no_artwork(raop_client, raop_state):
+    metadata = MediaMetadata(artwork=b"abcd")
+
+    await raop_client.stream.stream_file(
+        data_path("only_metadata.wav"), metadata=metadata
+    )
+
+    assert raop_state.metadata.artwork is None
 
 
 @pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])

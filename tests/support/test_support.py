@@ -1,6 +1,7 @@
 """Unit tests for pyatv.support."""
 
 import asyncio
+from dataclasses import dataclass
 import logging
 import math
 import os
@@ -15,6 +16,7 @@ from pyatv.support import (
     log_binary,
     log_protobuf,
     map_range,
+    prettydataclass,
     shift_hex_identifier,
 )
 
@@ -223,3 +225,24 @@ def test_shift_hex_identifier(input, output):
 def test_shift_hex_identifier_min_length(input):
     with pytest.raises(AssertionError):
         shift_hex_identifier(input)
+
+
+@pytest.mark.parametrize(
+    "max_length, data_count, expected",
+    [
+        (3, 10, "..."),
+        (4, 10, "a..."),
+        (10, 5, "aaaaa"),
+    ],
+)
+def test_prettydataclass(max_length: int, data_count: int, expected: str):
+    @prettydataclass(max_length=max_length)
+    @dataclass
+    class Dummy:
+        data: str
+        raw: bytes
+
+    assert (
+        str(Dummy(data=data_count * "a", raw=data_count * b"a"))
+        == f"Dummy(data={expected}, raw=b'{expected}')"
+    )
