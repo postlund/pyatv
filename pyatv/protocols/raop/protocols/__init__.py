@@ -1,12 +1,16 @@
 """Base classes used by streaming protocols."""
 from abc import ABC, abstractmethod
 import asyncio
+import logging
 from random import randrange
 from typing import Optional, Tuple
 
 from pyatv.auth.hap_pairing import NO_CREDENTIALS, HapCredentials
 from pyatv.protocols.raop import timing
+from pyatv.protocols.raop.packets import TimingPacket
 from pyatv.support.rtsp import FRAMES_PER_PACKET
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class StreamContext:
@@ -72,7 +76,7 @@ class StreamProtocol(ABC):
     """Base interface for a streaming protocol."""
 
     @abstractmethod
-    async def setup(self, timing_client_port: int, control_client_port: int) -> None:
+    async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
 
     @abstractmethod
@@ -88,3 +92,53 @@ class StreamProtocol(ABC):
         self, transport: asyncio.DatagramTransport, rtp_header: bytes, audio: bytes
     ) -> Tuple[int, bytes]:
         """Send audio packet to receiver."""
+
+    @abstractmethod
+    async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
+        """Play media from a URL."""
+
+
+class TimingServer(asyncio.Protocol):
+    """Basic timing server responding to timing requests."""
+
+    def __init__(self):
+        """Initialize a new TimingServer."""
+        self.transport = None
+
+    def close(self):
+        """Close timing server."""
+        if self.transport:
+            self.transport.close()
+            self.transport = None
+
+    @property
+    def port(self):
+        """Port this server listens to."""
+        return self.transport.get_extra_info("socket").getsockname()[1]
+
+    def connection_made(self, transport):
+        """Handle that connection succeeded."""
+        self.transport = transport
+
+    def datagram_received(self, data, addr):
+        """Handle incoming timing requests."""
+        req = TimingPacket.decode(data)
+        recvtime_sec, recvtime_frac = timing.ntp2parts(timing.ntp_now())
+        resp = TimingPacket.encode(
+            req.proto,
+            0x53 | 0x80,
+            7,
+            0,
+            req.sendtime_sec,
+            req.sendtime_frac,
+            recvtime_sec,
+            recvtime_frac,
+            recvtime_sec,
+            recvtime_frac,
+        )
+        self.transport.sendto(resp, addr)
+
+    @staticmethod
+    def error_received(exc) -> None:
+        """Handle a connection error."""
+        _LOGGER.error("Error received: %s", exc)

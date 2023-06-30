@@ -16,6 +16,10 @@ class ConnectionFailedError(Exception):
     """Thrown when connection fails, e.g. refused or timed out."""
 
 
+class ConnectionLostError(Exception):
+    """Thrown when a connection is lost."""
+
+
 class PairingError(Exception):
     """Thrown when pairing fails."""
 

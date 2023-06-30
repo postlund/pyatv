@@ -19,7 +19,7 @@ from pyatv.support.metadata import MediaMetadata
 _LOGGER = logging.getLogger(__name__)
 
 FRAMES_PER_PACKET = 352
-USER_AGENT = "AirPlay/540.31"
+USER_AGENT = "AirPlay/550.10"
 HTTP_PROTOCOL = "HTTP/1.1"
 
 ANNOUNCE_PAYLOAD = (

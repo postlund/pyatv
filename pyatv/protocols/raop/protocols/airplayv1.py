@@ -1,7 +1,9 @@
 """Implementation of AirPlay v1 protocol logic."""
 import asyncio
 import logging
+import plistlib
 from typing import List, Mapping, Optional, Tuple
+from uuid import uuid4
 
 from pyatv import exceptions
 from pyatv.protocols.airplay.auth import pair_verify
@@ -11,6 +13,11 @@ from pyatv.support.rtsp import RtspSession
 _LOGGER = logging.getLogger(__name__)
 
 KEEP_ALIVE_INTERVAL = 25  # Seconds
+
+HEADERS = {
+    "User-Agent": "MediaControl/1.0",
+    "Content-Type": "application/x-apple-binary-plist",
+}
 
 
 def parse_transport(transport: str) -> Tuple[List[str], Mapping[str, str]]:
@@ -36,7 +43,7 @@ class AirPlayV1(StreamProtocol):
         self.rtsp = rtsp
         self._keep_alive_task: Optional[asyncio.Future] = None
 
-    async def setup(self, timing_client_port: int, control_client_port: int) -> None:
+    async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
         verifier = pair_verify(self.context.credentials, self.rtsp.connection)
         await verifier.verify_credentials()
@@ -53,7 +60,7 @@ class AirPlayV1(StreamProtocol):
                 "Transport": (
                     "RTP/AVP/UDP;unicast;interleaved=0-1;mode=record;"
                     f"control_port={control_client_port};"
-                    f"timing_port={timing_client_port}"
+                    f"timing_port={timing_server_port}"
                 )
             }
         )
@@ -107,3 +114,23 @@ class AirPlayV1(StreamProtocol):
         packet = rtp_header + audio
         transport.sendto(packet)
         return self.context.rtpseq, packet
+
+    async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
+        """Play media from a URL."""
+        verifier = pair_verify(self.context.credentials, self.rtsp.connection)
+        await verifier.verify_credentials()
+
+        body = {
+            "Content-Location": url,
+            "Start-Position": position,
+            "X-Apple-Session-ID": str(uuid4()),
+        }
+
+        return await self.rtsp.connection.post(
+            "/play",
+            headers=HEADERS,
+            body=plistlib.dumps(
+                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+            ),
+            allow_error=True,
+        )
