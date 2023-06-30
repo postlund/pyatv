@@ -8,15 +8,14 @@ A client library for Apple TV and AirPlay devices
 [![codecov](https://codecov.io/gh/postlund/pyatv/branch/master/graph/badge.svg)](https://codecov.io/gh/postlund/pyatv)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/postlund/pyatv)
 [![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is an asyncio python library for interacting with Apple TV and AirPlay devices. It mainly
-targets Apple TVs (all generations, **including tvOS 15**), but also support audio streaming via AirPlay to
-receivers like the HomePod, AirPort Express and third-party speakers. It can act as remote control to the Music
+targets Apple TVs (all generations, **including tvOS 15 and later**), but also supports audio streaming via AirPlay
+to receivers like the HomePod, AirPort Express and third-party speakers. It can act as remote control to the Music
 app/iTunes in macOS.
 
 All the documentation you need is available at **[pyatv.dev](https://pyatv.dev)**.
@@ -29,6 +28,9 @@ Some examples include:
 * Metadata retrieval with push updates
 * Stream files via AirPlay
 * List and launch installed apps
+* List and switch user accounts
+* Add, remove or set audio output devices (e.g. HomePods)
+* Keyboard support
 
 ...and lots more! A complete list is available [here](https://pyatv.dev/documentation/supported_features/).
 

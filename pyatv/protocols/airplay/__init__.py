@@ -27,7 +27,7 @@ from pyatv.interface import (
 )
 from pyatv.protocols import mrp
 from pyatv.protocols.airplay.ap2_session import AP2Session
-from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
+from pyatv.protocols.airplay.auth import extract_credentials
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import (
     AirPlayPairingHandler,
@@ -36,11 +36,19 @@ from pyatv.protocols.airplay.pairing import (
 from pyatv.protocols.airplay.player import AirPlayPlayer
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
+    AirPlayMajorVersion,
+    get_protocol_version,
     is_remote_control_supported,
     parse_features,
     update_service_details,
 )
 from pyatv.protocols.raop import setup as raop_setup
+from pyatv.protocols.raop.protocols import (
+    StreamContext,
+    StreamProtocol,
+    airplayv1,
+    airplayv2,
+)
 from pyatv.support import net
 from pyatv.support.device_info import lookup_model
 from pyatv.support.http import (
@@ -49,6 +57,7 @@ from pyatv.support.http import (
     StaticFileWebServer,
     http_connect,
 )
+from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,11 +118,12 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
 
         connection: Optional[HttpConnection] = None
         try:
-            # Connect and verify connection to set up encryption
+            # Set up a new connection and wrap it with an AirPlay stream of
+            # correct protocol version
             connection = await http_connect(str(self.config.address), self.service.port)
-            await verify_connection(self._credentials, connection)
-
-            player = AirPlayPlayer(connection)
+            rtsp = RtspSession(connection)
+            stream_protocol = AirPlayStream.create_airplay_protocol(self.service, rtsp)
+            player = AirPlayPlayer(rtsp, stream_protocol)
             position = int(kwargs.get("position", 0))
             self._play_task = asyncio.ensure_future(player.play_url(url, position))
             return await self._play_task
@@ -123,6 +133,22 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
                 connection.close()
             if server:
                 await server.close()
+
+    # Should be included in a "common" module with shared AirPlay code
+    @staticmethod
+    def create_airplay_protocol(
+        service: BaseService, rtsp: RtspSession
+    ) -> StreamProtocol:
+        """Create AirPlay protocol implementation based on supported version."""
+        if service.protocol != Protocol.AirPlay:
+            raise exceptions.InvalidConfigError("invalid service")
+
+        context = StreamContext()
+        context.credentials = parse_credentials(service.credentials)
+
+        if get_protocol_version(service) == AirPlayMajorVersion.AirPlayV1:
+            return airplayv1.AirPlayV1(context, rtsp)
+        return airplayv2.AirPlayV2(context, rtsp)
 
 
 def airplay_service_handler(
