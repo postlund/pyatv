@@ -2,10 +2,10 @@
 from abc import ABC, abstractmethod
 import asyncio
 from collections import deque
+from dataclasses import dataclass
 import logging
 import pathlib
 import plistlib
-from queue import Queue
 import re
 from typing import (
     Any,
@@ -326,6 +326,14 @@ class HttpSession:
 class HttpConnection(asyncio.Protocol):
     """Representation of a HTTP connection."""
 
+    @dataclass
+    class PendingRequest:
+        """Container class for a pending request."""
+
+        event: asyncio.Event
+        response: Optional[HttpResponse] = None
+        connection_closed: bool = False
+
     def __init__(
         self,
         receive_processor: Optional[Callable[[bytes], bytes]] = None,
@@ -342,7 +350,6 @@ class HttpConnection(asyncio.Protocol):
         self._local_ip: Optional[str] = None
         self._remote_ip: Optional[str] = None
         self._requests: deque = deque()
-        self._responses: Queue = Queue()
         self._buffer = b""
 
     @property
@@ -365,6 +372,7 @@ class HttpConnection(asyncio.Protocol):
             transport = self.transport
             self.transport = None
             transport.close()
+        self._requests.clear()
 
     def connection_made(self, transport: asyncio.BaseTransport) -> None:
         """Handle that a connection has been made."""
@@ -388,9 +396,10 @@ class HttpConnection(asyncio.Protocol):
                 break
 
             # Dispatch message to first receiver
-            self._responses.put(parsed)
             if self._requests:
-                self._requests.pop().set()
+                pending_request = self._requests.pop()
+                pending_request.response = parsed
+                pending_request.event.set()
             else:
                 _LOGGER.warning("Got response without having a request: %s", parsed)
 
@@ -402,6 +411,11 @@ class HttpConnection(asyncio.Protocol):
     def connection_lost(self, exc) -> None:
         """Handle that connection was lost."""
         _LOGGER.debug("Connection closed")
+        for pending_request in self._requests:
+            pending_request.connection_closed = True
+            pending_request.event.set()
+        self._requests.clear()
+        self.transport = None
 
     async def get(self, path: str, allow_error: bool = False) -> HttpResponse:
         """Make a GET request and return response."""
@@ -437,23 +451,31 @@ class HttpConnection(asyncio.Protocol):
         )
 
         _LOGGER.debug("Sending %s message: %s", protocol, output)
-        if not self.transport:
+        if self.transport is None:
             raise RuntimeError("not connected to remote")
 
         self.transport.write(self.send_processor(output))
 
-        event = asyncio.Event()
-        self._requests.appendleft(event)
+        pending_request = HttpConnection.PendingRequest(event=asyncio.Event())
+        self._requests.appendleft(pending_request)
         try:
             async with async_timeout.timeout(timeout):
-                await event.wait()
-            response = cast(HttpResponse, self._responses.get())
+                await pending_request.event.wait()
+
+            if pending_request.connection_closed:
+                raise exceptions.ConnectionLostError("connection was lost")
+
+            response = pending_request.response
+
+            # This should never happen, but raise an exception for the sake of it
+            if response is None:
+                raise RuntimeError("did not get a response")
         except asyncio.TimeoutError as ex:
             raise TimeoutError(f"no response to {method} {uri} ({protocol})") from ex
         finally:
             # If request failed and event is still in request queue, remove it
-            if self._requests and self._requests[-1] == event:
-                self._requests.pop()
+            if pending_request in self._requests:
+                self._requests.remove(pending_request)
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
 
