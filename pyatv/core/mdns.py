@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import typing
 import weakref
 
-from zeroconf import ServiceInfo, Zeroconf, IPVersion
+from zeroconf import ServiceInfo, Zeroconf
 
 from pyatv import exceptions
 from pyatv.support import log_binary, net

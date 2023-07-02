@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import contextlib
-from ipaddress import IPv4Address, ip_address
+from ipaddress import IPv4Address
 import logging
 import os
 from typing import (
@@ -22,7 +22,7 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSPointer
+from zeroconf import DNSPointer, IPVersion
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _TYPE_PTR
 
@@ -404,7 +404,9 @@ class ZeroconfScanner(BaseScanner):
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = model.decode("utf-8")
             else:
-                address = _first_non_link_local_address(info.ip_addresses_by_version(IPVersion.V4Only))
+                address = _first_non_link_local_address(
+                    info.ip_addresses_by_version(IPVersion.V4Only)
+                )
                 if address:
                     services_by_address.setdefault(address, []).append(info)
         return services_by_address, name_to_model
