@@ -322,11 +322,10 @@ def _name_without_type(name: str, type_: str) -> str:
     return name[: -(len(type_) + 1)]
 
 
-def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[str]:
-    """Return the first non ipv6 or non-link local ipv4 address."""
-    for address in addresses:
-        ip_addr = ip_address(address)
-        if not (ip_addr.is_link_local or ip_addr.version == 6):
+def _first_non_link_local_address(addresses: List[IPv4Address]) -> Optional[str]:
+    """Return the first non-link local ipv4 address."""
+    for ip_addr in addresses:
+        if not ip_addr.is_link_local:
             return str(ip_addr)
     return None
 
@@ -405,7 +404,7 @@ class ZeroconfScanner(BaseScanner):
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = model.decode("utf-8")
             else:
-                address = _first_non_link_local_or_non_v6_address(info.addresses)
+                address = _first_non_link_local_address(info.ip_addresses_by_version(IPVersion.V4Only))
                 if address:
                     services_by_address.setdefault(address, []).append(info)
         return services_by_address, name_to_model
