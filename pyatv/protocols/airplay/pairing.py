@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def get_preferred_auth_type(service: BaseService) -> AuthenticationType:
     """Return the preferred authentication type depending on what is supported."""
-    features_string = service.properties.get("features")
+    features_string = service.properties.get("features", service.properties.get("ft"))
     if features_string:
         features = parse_features(features_string)
         if AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in features:

@@ -6,7 +6,6 @@ import logging
 from typing import Any, Dict, Generator, Mapping, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions
-from pyatv.auth.hap_pairing import AuthenticationType
 from pyatv.const import (
     DeviceModel,
     FeatureName,
@@ -45,13 +44,14 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.protocols.airplay.auth import extract_credentials
-from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
+from pyatv.protocols.airplay.pairing import (
+    AirPlayPairingHandler,
+    get_preferred_auth_type,
+)
 from pyatv.protocols.airplay.utils import (
-    AirPlayFlags,
     AirPlayMajorVersion,
     dbfs_to_pct,
     get_protocol_version,
-    parse_features,
     pct_to_dbfs,
     update_service_details,
 )
@@ -587,15 +587,6 @@ def pair(
     **kwargs
 ) -> PairingHandler:
     """Return pairing handler for protocol."""
-    features = service.properties.get("ft")
-    if not features:
-        # TODO: Better handle cases like these (provide API)
-        raise exceptions.NotSupportedError("pairing not required")
-
-    flags = parse_features(features)
-    if AirPlayFlags.SupportsLegacyPairing not in flags:
-        raise exceptions.NotSupportedError("legacy pairing not supported")
-
     return AirPlayPairingHandler(
-        config, service, session_manager, AuthenticationType.Legacy, **kwargs
+        config, service, session_manager, get_preferred_auth_type(service), **kwargs
     )
