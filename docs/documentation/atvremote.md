@@ -342,7 +342,7 @@ Unsupported: Not supported by this device (or by pyatv)
 
 ## Apps
 
-Show active app:
+Show app currently playing something:
 
 ```shell
 $ atvremote --id 00:11:22:33:44:54 app
