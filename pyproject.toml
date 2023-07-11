@@ -22,5 +22,6 @@ module = [
     "miniaudio",
     "audio_metadata",
     "srptools",
+    "bitarray",
 ]
 ignore_missing_imports = true
