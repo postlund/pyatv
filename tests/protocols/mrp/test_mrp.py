@@ -99,3 +99,16 @@ async def test_service_info_pairing(airplay_props, mrp_props, pairing_req):
 
     assert mrp_service.pairing == pairing_req
     assert airplay_service.pairing == PairingRequirement.Unsupported
+
+
+@pytest.mark.asyncio
+async def test_disabled_service_no_pairing():
+    mrp_service = MutableService("mrp", Protocol.MRP, 0, {}, enabled=False)
+    airplay_service = MutableService("id", Protocol.AirPlay, 0, {"allowpairing": "no"})
+
+    await service_info(
+        mrp_service,
+        DeviceInfo({}),
+        {Protocol.MRP: mrp_service, Protocol.AirPlay: airplay_service},
+    )
+    assert mrp_service.pairing == PairingRequirement.NotNeeded

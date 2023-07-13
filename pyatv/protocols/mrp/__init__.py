@@ -1053,11 +1053,12 @@ async def service_info(
     Pairing has never been enforced by MRP (maybe by design), but it is
     possible to pair if AllowPairing is YES.
     """
-    service.pairing = (
-        PairingRequirement.Optional
-        if service.properties.get("allowpairing", "no").lower() == "yes"
-        else PairingRequirement.Disabled
-    )
+    if not service.enabled:
+        service.pairing = PairingRequirement.NotNeeded
+    elif service.properties.get("allowpairing", "no").lower() == "yes":
+        service.pairing = PairingRequirement.Optional
+    else:
+        service.pairing = PairingRequirement.Disabled
 
 
 def create_with_connection(  # pylint: disable=too-many-locals
