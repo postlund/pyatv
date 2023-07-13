@@ -389,6 +389,8 @@ class StreamClient:
 
     @property
     def _requires_auth_setup(self):
+        return True
+        
         # Do auth-setup if MFiSAP encryption is supported by receiver. Also,
         # at least for now, only do this for AirPort Express as some receivers
         # won't play audio if setup process isn't finished:
