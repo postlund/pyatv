@@ -23,6 +23,7 @@ from pyatv.interface import (
     Features,
     FeatureState,
     PairingHandler,
+    RemoteControl,
     Stream,
 )
 from pyatv.protocols import mrp
@@ -77,25 +78,38 @@ class AirPlayFeatures(Features):
         ):
             return FeatureInfo(FeatureState.Available)
 
+        if feature_name == FeatureName.Stop:
+            return FeatureInfo(FeatureState.Available)
+
         return FeatureInfo(FeatureState.Unavailable)
 
 
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
 
-    def __init__(self, config: BaseConfig, service: BaseService) -> None:
+    def __init__(self, core: Core) -> None:
         """Initialize a new AirPlayStreamAPI instance."""
-        self.config = config
-        self.service = service
+        self.core = core
+        self.config = core.config
+        self.service = core.service
         self._credentials: HapCredentials = parse_credentials(self.service.credentials)
         self._play_task: Optional[asyncio.Future] = None
+        self._connection: Optional[HttpConnection] = None
 
     def close(self) -> None:
         """Close and free resources."""
+        if self._connection is not None:
+            self._connection.close()
+            self._connection = None
         if self._play_task is not None:
             _LOGGER.debug("Stopping AirPlay play task")
             self._play_task.cancel()
             self._play_task = None
+
+    def stop(self) -> None:
+        """Stop current playback."""
+        if self._connection is not None:
+            self._connection.close()
 
     async def play_url(self, url: str, **kwargs) -> None:
         """Play media from an URL on the device.
@@ -116,21 +130,25 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
             await server.start()
             url = server.file_address
 
-        connection: Optional[HttpConnection] = None
+        takeover_release = self.core.takeover(RemoteControl)
         try:
             # Set up a new connection and wrap it with an AirPlay stream of
             # correct protocol version
-            connection = await http_connect(str(self.config.address), self.service.port)
-            rtsp = RtspSession(connection)
+            self._connection = await http_connect(
+                str(self.config.address), self.service.port
+            )
+            rtsp = RtspSession(self._connection)
             stream_protocol = AirPlayStream.create_airplay_protocol(self.service, rtsp)
             player = AirPlayPlayer(rtsp, stream_protocol)
             position = int(kwargs.get("position", 0))
             self._play_task = asyncio.ensure_future(player.play_url(url, position))
             return await self._play_task
         finally:
+            takeover_release()
             self._play_task = None
-            if connection:
-                connection.close()
+            if self._connection:
+                self._connection.close()
+                self._connection = None
             if server:
                 await server.close()
 
@@ -149,6 +167,18 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
         if get_protocol_version(service) == AirPlayMajorVersion.AirPlayV1:
             return airplayv1.AirPlayV1(context, rtsp)
         return airplayv2.AirPlayV2(context, rtsp)
+
+
+class AirPlayRemoteControl(RemoteControl):
+    """Implementation of remote control functionality."""
+
+    def __init__(self, stream: AirPlayStream):
+        """Initialize a new AirPlayRemoteControl instance."""
+        self.stream = stream
+
+    async def stop(self) -> None:
+        """Press key stop."""
+        self.stream.stop()
 
 
 def airplay_service_handler(
@@ -207,13 +237,14 @@ def setup(  # pylint: disable=too-many-locals
 ) -> Generator[SetupData, None, None]:
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
-    stream = AirPlayStream(core.config, core.service)
+    stream = AirPlayStream(core)
 
     features = parse_features(core.service.properties.get("features", "0x0"))
     credentials = extract_credentials(core.service)
 
     interfaces = {
         Features: AirPlayFeatures(features),
+        RemoteControl: AirPlayRemoteControl(stream),
         Stream: stream,
     }
 
@@ -233,7 +264,7 @@ def setup(  # pylint: disable=too-many-locals
         _close,
         _device_info,
         interfaces,
-        set([FeatureName.PlayUrl]),
+        set([FeatureName.PlayUrl, FeatureName.Stop]),
     )
 
     # AirPlay 2 does not mandate that a separate RAOP service exists for streaming
