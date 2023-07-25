@@ -7,7 +7,7 @@ AirPlay v1 and/or v2. This is mainly for code re-use purposes.
 from abc import ABC, abstractmethod
 import asyncio
 import logging
-from time import monotonic, perf_counter
+from time import monotonic, monotonic_ns
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, cast
 import weakref
 
@@ -20,7 +20,6 @@ from pyatv.protocols.raop.packets import (
     AudioPacketHeader,
     RetransmitReqeust,
     SyncPacket,
-    TimingPacket,
 )
 from pyatv.protocols.raop.parsers import (
     EncryptionType,
@@ -29,7 +28,7 @@ from pyatv.protocols.raop.parsers import (
     get_encryption_types,
     get_metadata_types,
 )
-from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol
+from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol, TimingServer
 from pyatv.support import log_binary
 from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata
 from pyatv.support.rtsp import FRAMES_PER_PACKET, RtspSession
@@ -181,52 +180,6 @@ class ControlClient(asyncio.Protocol):
             self.task = None
 
 
-class TimingClient(asyncio.Protocol):
-    """Basic timing client responding to timing requests."""
-
-    def __init__(self):
-        """Initialize a new TimingClient."""
-        self.transport = None
-
-    def close(self):
-        """Close timing client."""
-        if self.transport:
-            self.transport.close()
-            self.transport = None
-
-    @property
-    def port(self):
-        """Port this client listens to."""
-        return self.transport.get_extra_info("socket").getsockname()[1]
-
-    def connection_made(self, transport):
-        """Handle that connection succeeded."""
-        self.transport = transport
-
-    def datagram_received(self, data, addr):
-        """Handle incoming timing requests."""
-        req = TimingPacket.decode(data)
-        recvtime_sec, recvtime_frac = timing.ntp2parts(timing.ntp_now())
-        resp = TimingPacket.encode(
-            req.proto,
-            0x53 | 0x80,
-            7,
-            0,
-            req.sendtime_sec,
-            req.sendtime_frac,
-            recvtime_sec,
-            recvtime_frac,
-            recvtime_sec,
-            recvtime_frac,
-        )
-        self.transport.sendto(resp, addr)
-
-    @staticmethod
-    def error_received(exc) -> None:
-        """Handle a connection error."""
-        _LOGGER.error("Error received: %s", exc)
-
-
 class AudioProtocol(asyncio.Protocol):
     """Minimal protocol to send audio packets."""
 
@@ -280,7 +233,7 @@ class StreamClient:
         self.rtsp: RtspSession = rtsp
         self.context: StreamContext = context
         self.control_client: Optional[ControlClient] = None
-        self.timing_client: Optional[TimingClient] = None
+        self.timing_server: Optional[TimingServer] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
         self._encryption_types: EncryptionType = EncryptionType.Unknown
         self._metadata_types: MetadataType = MetadataType.NotSupported
@@ -324,8 +277,8 @@ class StreamClient:
         self._protocol.teardown()
         if self.control_client:
             self.control_client.close()
-        if self.timing_client:
-            self.timing_client.close()
+        if self.timing_server:
+            self.timing_server.close()
 
     async def initialize(self, properties: Mapping[str, str]):
         """Initialize the session."""
@@ -351,17 +304,17 @@ class StreamClient:
             lambda: ControlClient(self.context, self._packet_backlog),
             local_addr=local_addr,
         )
-        (_, timing_client) = await self.loop.create_datagram_endpoint(
-            TimingClient, local_addr=local_addr
+        (_, timing_server) = await self.loop.create_datagram_endpoint(
+            TimingServer, local_addr=local_addr
         )
 
         self.control_client = cast(ControlClient, control_client)
-        self.timing_client = cast(TimingClient, timing_client)
+        self.timing_server = cast(TimingServer, timing_server)
 
         _LOGGER.debug(
             "Local ports: control=%d, timing=%d",
             self.control_client.port,
-            self.timing_client.port,
+            self.timing_server.port,
         )
 
         self._info.update(await self.rtsp.info())
@@ -372,7 +325,7 @@ class StreamClient:
             await self.rtsp.auth_setup()
 
         # Set up the streaming session
-        await self._protocol.setup(self.timing_client.port, self.control_client.port)
+        await self._protocol.setup(self.timing_server.port, self.control_client.port)
 
     def _update_output_properties(self, properties: Mapping[str, str]) -> None:
         (
@@ -417,7 +370,7 @@ class StreamClient:
         volume: Optional[float] = None
     ):
         """Send an audio stream to the device."""
-        if self.control_client is None or self.timing_client is None:
+        if self.control_client is None or self.timing_server is None:
             raise RuntimeError("not initialized")
 
         self.context.reset()
@@ -591,7 +544,7 @@ class StreamClient:
 
         _LOGGER.debug(
             "Audio finished sending in %fs",
-            (timing.perf_counter_ns() - stats.start_time_ns) / 10**9,
+            (monotonic_ns() - stats.start_time_ns) / 10**9,
         )
 
     async def _send_packet(
@@ -662,18 +615,15 @@ class Statistics:
     def __init__(self, sample_rate: int):
         """Initialize a new Statistics instance."""
         self.sample_rate: int = sample_rate
-        self.start_time_ns: int = timing.perf_counter_ns()
-        self.interval_time: float = perf_counter()
+        self.start_time_ns: int = monotonic_ns()
+        self.interval_time: float = monotonic()
         self.total_frames: int = 0
         self.interval_frames: int = 0
 
     @property
     def expected_frame_count(self) -> int:
         """Number of frames expected to be sent at current time."""
-        return int(
-            (timing.perf_counter_ns() - self.start_time_ns)
-            / (10**9 / self.sample_rate)
-        )
+        return int((monotonic_ns() - self.start_time_ns) / (10**9 / self.sample_rate))
 
     @property
     def frames_behind(self) -> int:
@@ -696,7 +646,7 @@ class Statistics:
 
     def new_interval(self) -> Tuple[float, int]:
         """Start measuring a new time interval."""
-        end_time = perf_counter()
+        end_time = monotonic()
         diff = end_time - self.interval_time
         self.interval_time = end_time
 

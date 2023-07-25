@@ -1,12 +1,14 @@
 """Unit tests for pyatv.support.http."""
 import asyncio
 import inspect
+import logging
 from typing import Optional, Tuple
 from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
 import pytest
 
+from pyatv import exceptions
 from pyatv.support.http import (
     SERVER_NAME,
     USER_AGENT,
@@ -22,6 +24,9 @@ from pyatv.support.http import (
     parse_request,
     parse_response,
 )
+from pyatv.support.net import unused_port
+
+_LOGGER = logging.getLogger(__name__)
 
 # HTTP MESSAGE PARSING
 #
@@ -461,3 +466,30 @@ async def test_connection_receive_processor():
     assert resp.message == "something else"
 
     server.close()
+
+
+@pytest.mark.asyncio
+async def test_connection_abort_timeout_if_connection_closed():
+    # Set up a TCP server that will just consume the request and disconnect
+    # so that the connection gets closed
+    async def _dummy_server(reader, writer):
+        _LOGGER.debug("Connection established")
+        await reader.read(1)
+
+        _LOGGER.debug("Data read, closing connection")
+        writer.close()
+
+    port = unused_port()
+    await asyncio.start_server(_dummy_server, "127.0.0.1", port)
+
+    connection = await http_connect("127.0.0.1", port)
+
+    # Spawn three requests. Connection will be closed when processing the first one
+    # but all three shall be aborted with an exception.
+    tasks = [
+        asyncio.create_task(connection.send_and_receive("GET", "/test"))
+        for _ in range(3)
+    ]
+    for task in tasks:
+        with pytest.raises(exceptions.ConnectionLostError):
+            await task

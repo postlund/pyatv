@@ -21,7 +21,6 @@ from pyatv.auth.hap_srp import SRPAuthHandler, hkdf_expand
 from pyatv.auth.server_auth import SERVER_IDENTIFIER
 from pyatv.const import Protocol
 from pyatv.core import MutableService, mdns
-from pyatv.protocols.airplay import extract_credentials, verify_connection
 from pyatv.protocols.airplay.ap2_session import (
     DATASTREAM_INPUT_INFO,
     DATASTREAM_OUTPUT_INFO,
@@ -30,6 +29,7 @@ from pyatv.protocols.airplay.ap2_session import (
     EVENTS_SALT,
     EVENTS_WRITE_INFO,
 )
+from pyatv.protocols.airplay.auth import extract_credentials, verify_connection
 from pyatv.protocols.airplay.channels import (
     BaseDataStreamChannel,
     BaseEventChannel,
@@ -966,8 +966,8 @@ class AirPlayAppleTVProxy(BasicHttpServer, BaseAirPlayServerAuth):
         self.loop = loop
         self.address = address
         self.port = port
-        self.target_identifier = properties["psi"]
-        self.target_group = properties["gid"]
+        self.target_identifier = properties.get("psi", "")
+        self.target_group = properties.get("gid", "")
         self.credentials: Optional[str] = credentials
         self.client_hap_session: Optional[HAPSession] = None
         self.client_encryption = False
