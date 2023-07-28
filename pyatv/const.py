@@ -142,6 +142,9 @@ class OperatingSystem(Enum):
     in pyatv as no official name has been found.
     """
 
+    MacOS = 4
+    """Operating system is macOS."""
+
 
 class DeviceModel(Enum):
     """Hardware device model.

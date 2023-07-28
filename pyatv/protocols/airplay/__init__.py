@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator, Mapping, Optional, Set
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, Protocol
+from pyatv.const import DeviceModel, FeatureName, OperatingSystem, Protocol
 from pyatv.core import Core, MutableService, SetupData, mdns
 from pyatv.core.scan import (
     ScanHandlerDeviceInfoName,
@@ -51,7 +51,7 @@ from pyatv.protocols.raop.protocols import (
     airplayv2,
 )
 from pyatv.support import net
-from pyatv.support.device_info import lookup_model
+from pyatv.support.device_info import lookup_model, lookup_os
 from pyatv.support.http import (
     ClientSessionManager,
     HttpConnection,
@@ -212,6 +212,9 @@ def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, A
         devinfo[DeviceInfo.RAW_MODEL] = properties["model"]
         if model != DeviceModel.Unknown:
             devinfo[DeviceInfo.MODEL] = model
+        operating_system = lookup_os(properties["model"])
+        if operating_system != OperatingSystem.Unknown:
+            devinfo[DeviceInfo.OPERATING_SYSTEM] = operating_system
     if "osvers" in properties:
         devinfo[DeviceInfo.VERSION] = properties["osvers"]
     if "deviceid" in properties:

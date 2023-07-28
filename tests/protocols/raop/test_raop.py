@@ -4,7 +4,7 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel, PairingRequirement, Protocol
+from pyatv.const import DeviceModel, OperatingSystem, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
 from pyatv.protocols.raop import device_info, scan, service_info
@@ -63,6 +63,14 @@ def test_airport_info_name():
             "_dummy._tcp.local",
             {"am": "AppleTV6,2"},
             {DeviceInfo.MODEL: DeviceModel.Gen4K, DeviceInfo.RAW_MODEL: "AppleTV6,2"},
+        ),
+        (
+            "_dummy._tcp.local",
+            {"am": "MacBookAir10,1"},
+            {
+                DeviceInfo.RAW_MODEL: "MacBookAir10,1",
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.MacOS,
+            },
         ),
         ("_dummy._tcp.local", {"ov": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
         # Special case for resolving MAC address and version on AirPort Express

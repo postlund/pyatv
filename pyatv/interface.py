@@ -1023,6 +1023,7 @@ class DeviceInfo:
                 OperatingSystem.Legacy: "ATV SW",
                 OperatingSystem.TvOS: "tvOS",
                 OperatingSystem.AirPortOS: "AirPortOS",
+                OperatingSystem.MacOS: "MacOS",
             }.get(self.operating_system, "Unknown OS")
         )
 
