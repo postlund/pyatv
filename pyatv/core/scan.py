@@ -390,17 +390,26 @@ class ZeroconfScanner(BaseScanner):
         self, zc_timeout: float
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
-        infos = self._build_service_info_queries()
         requests: List[Awaitable[bool]] = []
-        multicast_requests = [
-            info.async_request(self.zeroconf, zc_timeout) for info in infos
-        ]
-        for host in self.hosts:
-            requests.extend(
-                [info.async_request(self.zeroconf, zc_timeout, host) for info in infos]
-            )
-        requests.extend(multicast_requests)
-        await asyncio.gather(*requests)
+        infos = self._build_service_info_queries()
+        hosts = self.hosts
+        for info in infos:
+            if info.load_from_cache(self.zeroconf):
+                continue
+            if hosts:
+                for host in hosts:
+                    # Unicast requests
+                    requests.extend(
+                        [
+                            info.async_request(self.zeroconf, zc_timeout, host)
+                            for info in infos
+                        ]
+                    )
+                continue
+            # Multicast requests
+            requests.append(info.async_request(self.zeroconf, zc_timeout))
+        if requests:
+            await asyncio.gather(*requests)
         name_to_model: Dict[str, str] = {}
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
