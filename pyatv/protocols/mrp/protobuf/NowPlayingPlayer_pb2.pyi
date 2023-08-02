@@ -21,17 +21,29 @@ class NowPlayingPlayer(google.protobuf.message.Message):
     IDENTIFIER_FIELD_NUMBER: builtins.int
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     ISDEFAULTPLAYER_FIELD_NUMBER: builtins.int
+    AUDIOSESSIONTYPE_FIELD_NUMBER: builtins.int
+    MXSESSIONIDS_FIELD_NUMBER: builtins.int
+    AUDIOSESSIONID_FIELD_NUMBER: builtins.int
+    ICONURL_FIELD_NUMBER: builtins.int
     identifier: builtins.str
     displayName: builtins.str
     isDefaultPlayer: builtins.bool
+    audioSessionType: builtins.int
+    mxSessionIDs: builtins.int
+    audioSessionID: builtins.int
+    iconURL: builtins.str
     def __init__(
         self,
         *,
         identifier: builtins.str | None = ...,
         displayName: builtins.str | None = ...,
         isDefaultPlayer: builtins.bool | None = ...,
+        audioSessionType: builtins.int | None = ...,
+        mxSessionIDs: builtins.int | None = ...,
+        audioSessionID: builtins.int | None = ...,
+        iconURL: builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["displayName", b"displayName", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["displayName", b"displayName", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]) -> None: ...
 
 global___NowPlayingPlayer = NowPlayingPlayer
