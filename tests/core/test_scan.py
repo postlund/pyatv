@@ -365,17 +365,16 @@ async def test_scan_with_zeroconf_multicast_not_found():
     await aiozc.async_close()
 
 
-
 @pytest.mark.asyncio
 async def test_scan_with_zeroconf_unicast_not_found():
     aiozc, browser = await _create_zc_with_cache(PTR_RECORDS_ONLY)
     loop = asyncio.get_event_loop()
     with patch("pyatv.core.scan.AsyncServiceInfo.async_request") as mock_async_request:
-        results = await scan(loop, timeout=0, aiozc=aiozc, hosts=['127.0.0.1'])
+        results = await scan(loop, timeout=0, aiozc=aiozc, hosts=["127.0.0.1"])
     assert mock_async_request.mock_calls
     for call in mock_async_request.mock_calls:
         # Called with host argument
-        assert call[1][2] == '127.0.0.1'
+        assert call[1][2] == "127.0.0.1"
     assert not results
     await browser.async_cancel()
     await aiozc.async_close()
