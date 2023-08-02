@@ -40,11 +40,13 @@ class Origin(google.protobuf.message.Message):
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     IDENTIFIER_FIELD_NUMBER: builtins.int
     DEVICEINFO_FIELD_NUMBER: builtins.int
+    ISLOCALLYHOSTED_FIELD_NUMBER: builtins.int
     type: global___Origin.Type.ValueType
     displayName: builtins.str
     identifier: builtins.int
     @property
     def deviceInfo(self) -> pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage: ...
+    isLocallyHosted: builtins.bool
     def __init__(
         self,
         *,
@@ -52,8 +54,9 @@ class Origin(google.protobuf.message.Message):
         displayName: builtins.str | None = ...,
         identifier: builtins.int | None = ...,
         deviceInfo: pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage | None = ...,
+        isLocallyHosted: builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "type", b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]) -> None: ...
 
 global___Origin = Origin
