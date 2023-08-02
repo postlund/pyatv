@@ -264,7 +264,7 @@ async def test_metadata_rest_not_supported():
         ),
     ],
 )
-def test_device_info_empty_input(
+def test_device_info_various_input(
     properties, os, version, build_number, model, mac, output_device_id
 ):
     dev_info = DeviceInfo(properties)

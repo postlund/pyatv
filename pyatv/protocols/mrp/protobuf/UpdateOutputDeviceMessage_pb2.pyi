@@ -86,8 +86,27 @@ class AVOutputDeviceDescriptor(google.protobuf.message.Message):
     CLUSTERTYPE_FIELD_NUMBER: builtins.int
     PRIMARYUID_FIELD_NUMBER: builtins.int
     CONFIGUREDCLUSTERSIZE_FIELD_NUMBER: builtins.int
+    SUPPORTSRAPPORTREMOTECONTROLTRANSPORT_FIELD_NUMBER: builtins.int
+    CURRENTBLUETOOTHLISTENINGMODE_FIELD_NUMBER: builtins.int
+    AVAILABLEBLUETOOTHLISTENINGMODES_FIELD_NUMBER: builtins.int
+    SUPPORTSMULTIPLAYER_FIELD_NUMBER: builtins.int
     PRODUCESLOWFIDELITYAUDIO_FIELD_NUMBER: builtins.int
+    HOSTDEVICECLASS_FIELD_NUMBER: builtins.int
     AIRPLAYGROUPID_FIELD_NUMBER: builtins.int
+    SUPPORTSSHAREPLAYHANDOFF_FIELD_NUMBER: builtins.int
+    DISTANCE_FIELD_NUMBER: builtins.int
+    DISCOVEREDONSAMEINFRA_FIELD_NUMBER: builtins.int
+    ACTIVATEDCLUSTERMEMBERS_FIELD_NUMBER: builtins.int
+    PICKABLE_FIELD_NUMBER: builtins.int
+    TRANSPORTTYPE_FIELD_NUMBER: builtins.int
+    CLUSTERID_FIELD_NUMBER: builtins.int
+    ISCLUSTERLEADER_FIELD_NUMBER: builtins.int
+    ISAPPLEACCESSORY_FIELD_NUMBER: builtins.int
+    PARENTUNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
+    ROOMID_FIELD_NUMBER: builtins.int
+    ROOMNAME_FIELD_NUMBER: builtins.int
+    ALLCLUSTERMEMBERS_FIELD_NUMBER: builtins.int
+    ENGAGEONCLUSTERACTIVATE_FIELD_NUMBER: builtins.int
     name: builtins.str
     uniqueIdentifier: builtins.str
     groupID: builtins.str
@@ -134,8 +153,32 @@ class AVOutputDeviceDescriptor(google.protobuf.message.Message):
     clusterType: builtins.int
     primaryUID: builtins.str
     configuredClusterSize: builtins.int
+    supportsRapportRemoteControlTransport: builtins.bool
+    currentBluetoothListeningMode: builtins.str
+    @property
+    def availableBluetoothListeningModes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    @property
+    def supportsMultiplayer(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bool]: ...
     producesLowFidelityAudio: builtins.bool
+    hostDeviceClass: builtins.int
     airPlayGroupID: builtins.str
+    supportsSharePlayHandoff: builtins.bool
+    distance: builtins.float
+    discoveredOnSameInfra: builtins.bool
+    @property
+    def activatedClusterMembers(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AVOutputDeviceDescriptor]: ...
+    @property
+    def pickable(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bool]: ...
+    transportType: builtins.int
+    clusterID: builtins.str
+    isClusterLeader: builtins.bool
+    isAppleAccessory: builtins.bool
+    parentUniqueIdentifier: builtins.str
+    roomID: builtins.str
+    roomName: builtins.str
+    @property
+    def allClusterMembers(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AVOutputDeviceDescriptor]: ...
+    engageOnClusterActivate: builtins.bool
     def __init__(
         self,
         *,
@@ -183,11 +226,30 @@ class AVOutputDeviceDescriptor(google.protobuf.message.Message):
         clusterType: builtins.int | None = ...,
         primaryUID: builtins.str | None = ...,
         configuredClusterSize: builtins.int | None = ...,
+        supportsRapportRemoteControlTransport: builtins.bool | None = ...,
+        currentBluetoothListeningMode: builtins.str | None = ...,
+        availableBluetoothListeningModes: collections.abc.Iterable[builtins.str] | None = ...,
+        supportsMultiplayer: collections.abc.Iterable[builtins.bool] | None = ...,
         producesLowFidelityAudio: builtins.bool | None = ...,
+        hostDeviceClass: builtins.int | None = ...,
         airPlayGroupID: builtins.str | None = ...,
+        supportsSharePlayHandoff: builtins.bool | None = ...,
+        distance: builtins.float | None = ...,
+        discoveredOnSameInfra: builtins.bool | None = ...,
+        activatedClusterMembers: collections.abc.Iterable[global___AVOutputDeviceDescriptor] | None = ...,
+        pickable: collections.abc.Iterable[builtins.bool] | None = ...,
+        transportType: builtins.int | None = ...,
+        clusterID: builtins.str | None = ...,
+        isClusterLeader: builtins.bool | None = ...,
+        isAppleAccessory: builtins.bool | None = ...,
+        parentUniqueIdentifier: builtins.str | None = ...,
+        roomID: builtins.str | None = ...,
+        roomName: builtins.str | None = ...,
+        allClusterMembers: collections.abc.Iterable[global___AVOutputDeviceDescriptor] | None = ...,
+        engageOnClusterActivate: builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["airPlayGroupID", b"airPlayGroupID", "batteryLevel", b"batteryLevel", "bluetoothID", b"bluetoothID", "canAccessAppleMusic", b"canAccessAppleMusic", "canAccessRemoteAssets", b"canAccessRemoteAssets", "canAccessiCloudMusicLibrary", b"canAccessiCloudMusicLibrary", "canFetchMediaDataFromSender", b"canFetchMediaDataFromSender", "canPlayEncryptedProgressiveDownloadAssets", b"canPlayEncryptedProgressiveDownloadAssets", "canRelayCommunicationChannel", b"canRelayCommunicationChannel", "clusterType", b"clusterType", "configuredClusterSize", b"configuredClusterSize", "deviceSubType", b"deviceSubType", "deviceType", b"deviceType", "firmwareVersion", b"firmwareVersion", "groupContainsGroupLeader", b"groupContainsGroupLeader", "groupID", b"groupID", "isAddedToHomeKit", b"isAddedToHomeKit", "isAirPlayReceiverSessionActive", b"isAirPlayReceiverSessionActive", "isDeviceGroupable", b"isDeviceGroupable", "isGroupLeader", b"isGroupLeader", "isGroupable", b"isGroupable", "isLocalDevice", b"isLocalDevice", "isProxyGroupPlayer", b"isProxyGroupPlayer", "isRemoteControllable", b"isRemoteControllable", "isVolumeControlAvailable", b"isVolumeControlAvailable", "logicalDeviceID", b"logicalDeviceID", "macAddress", b"macAddress", "modelID", b"modelID", "modelSpecificInfoData", b"modelSpecificInfoData", "name", b"name", "parentGroupContainsDiscoverableLeader", b"parentGroupContainsDiscoverableLeader", "parentGroupIdentifier", b"parentGroupIdentifier", "primaryUID", b"primaryUID", "producesLowFidelityAudio", b"producesLowFidelityAudio", "requiresAuthorization", b"requiresAuthorization", "resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", b"resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", "shouldForceRemoteControlabillity", b"shouldForceRemoteControlabillity", "sourceInfo", b"sourceInfo", "supportsBufferedAirPlay", b"supportsBufferedAirPlay", "supportsExternalScreen", b"supportsExternalScreen", "supportsHAP", b"supportsHAP", "uniqueIdentifier", b"uniqueIdentifier", "usingJSONProtocol", b"usingJSONProtocol", "volume", b"volume", "volumeCapabilities", b"volumeCapabilities"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["airPlayGroupID", b"airPlayGroupID", "batteryLevel", b"batteryLevel", "bluetoothID", b"bluetoothID", "canAccessAppleMusic", b"canAccessAppleMusic", "canAccessRemoteAssets", b"canAccessRemoteAssets", "canAccessiCloudMusicLibrary", b"canAccessiCloudMusicLibrary", "canFetchMediaDataFromSender", b"canFetchMediaDataFromSender", "canPlayEncryptedProgressiveDownloadAssets", b"canPlayEncryptedProgressiveDownloadAssets", "canRelayCommunicationChannel", b"canRelayCommunicationChannel", "clusterCompositions", b"clusterCompositions", "clusterType", b"clusterType", "configuredClusterSize", b"configuredClusterSize", "deviceSubType", b"deviceSubType", "deviceType", b"deviceType", "firmwareVersion", b"firmwareVersion", "groupContainsGroupLeader", b"groupContainsGroupLeader", "groupID", b"groupID", "isAddedToHomeKit", b"isAddedToHomeKit", "isAirPlayReceiverSessionActive", b"isAirPlayReceiverSessionActive", "isDeviceGroupable", b"isDeviceGroupable", "isGroupLeader", b"isGroupLeader", "isGroupable", b"isGroupable", "isLocalDevice", b"isLocalDevice", "isProxyGroupPlayer", b"isProxyGroupPlayer", "isRemoteControllable", b"isRemoteControllable", "isVolumeControlAvailable", b"isVolumeControlAvailable", "logicalDeviceID", b"logicalDeviceID", "macAddress", b"macAddress", "modelID", b"modelID", "modelSpecificInfoData", b"modelSpecificInfoData", "name", b"name", "parentGroupContainsDiscoverableLeader", b"parentGroupContainsDiscoverableLeader", "parentGroupIdentifier", b"parentGroupIdentifier", "primaryUID", b"primaryUID", "producesLowFidelityAudio", b"producesLowFidelityAudio", "requiresAuthorization", b"requiresAuthorization", "resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", b"resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", "shouldForceRemoteControlabillity", b"shouldForceRemoteControlabillity", "sourceInfo", b"sourceInfo", "supportsBufferedAirPlay", b"supportsBufferedAirPlay", "supportsExternalScreen", b"supportsExternalScreen", "supportsHAP", b"supportsHAP", "uniqueIdentifier", b"uniqueIdentifier", "usingJSONProtocol", b"usingJSONProtocol", "volume", b"volume", "volumeCapabilities", b"volumeCapabilities"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["airPlayGroupID", b"airPlayGroupID", "batteryLevel", b"batteryLevel", "bluetoothID", b"bluetoothID", "canAccessAppleMusic", b"canAccessAppleMusic", "canAccessRemoteAssets", b"canAccessRemoteAssets", "canAccessiCloudMusicLibrary", b"canAccessiCloudMusicLibrary", "canFetchMediaDataFromSender", b"canFetchMediaDataFromSender", "canPlayEncryptedProgressiveDownloadAssets", b"canPlayEncryptedProgressiveDownloadAssets", "canRelayCommunicationChannel", b"canRelayCommunicationChannel", "clusterID", b"clusterID", "clusterType", b"clusterType", "configuredClusterSize", b"configuredClusterSize", "currentBluetoothListeningMode", b"currentBluetoothListeningMode", "deviceSubType", b"deviceSubType", "deviceType", b"deviceType", "discoveredOnSameInfra", b"discoveredOnSameInfra", "distance", b"distance", "engageOnClusterActivate", b"engageOnClusterActivate", "firmwareVersion", b"firmwareVersion", "groupContainsGroupLeader", b"groupContainsGroupLeader", "groupID", b"groupID", "hostDeviceClass", b"hostDeviceClass", "isAddedToHomeKit", b"isAddedToHomeKit", "isAirPlayReceiverSessionActive", b"isAirPlayReceiverSessionActive", "isAppleAccessory", b"isAppleAccessory", "isClusterLeader", b"isClusterLeader", "isDeviceGroupable", b"isDeviceGroupable", "isGroupLeader", b"isGroupLeader", "isGroupable", b"isGroupable", "isLocalDevice", b"isLocalDevice", "isProxyGroupPlayer", b"isProxyGroupPlayer", "isRemoteControllable", b"isRemoteControllable", "isVolumeControlAvailable", b"isVolumeControlAvailable", "logicalDeviceID", b"logicalDeviceID", "macAddress", b"macAddress", "modelID", b"modelID", "modelSpecificInfoData", b"modelSpecificInfoData", "name", b"name", "parentGroupContainsDiscoverableLeader", b"parentGroupContainsDiscoverableLeader", "parentGroupIdentifier", b"parentGroupIdentifier", "parentUniqueIdentifier", b"parentUniqueIdentifier", "primaryUID", b"primaryUID", "producesLowFidelityAudio", b"producesLowFidelityAudio", "requiresAuthorization", b"requiresAuthorization", "resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", b"resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", "roomID", b"roomID", "roomName", b"roomName", "shouldForceRemoteControlabillity", b"shouldForceRemoteControlabillity", "sourceInfo", b"sourceInfo", "supportsBufferedAirPlay", b"supportsBufferedAirPlay", "supportsExternalScreen", b"supportsExternalScreen", "supportsHAP", b"supportsHAP", "supportsRapportRemoteControlTransport", b"supportsRapportRemoteControlTransport", "supportsSharePlayHandoff", b"supportsSharePlayHandoff", "transportType", b"transportType", "uniqueIdentifier", b"uniqueIdentifier", "usingJSONProtocol", b"usingJSONProtocol", "volume", b"volume", "volumeCapabilities", b"volumeCapabilities"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["activatedClusterMembers", b"activatedClusterMembers", "airPlayGroupID", b"airPlayGroupID", "allClusterMembers", b"allClusterMembers", "availableBluetoothListeningModes", b"availableBluetoothListeningModes", "batteryLevel", b"batteryLevel", "bluetoothID", b"bluetoothID", "canAccessAppleMusic", b"canAccessAppleMusic", "canAccessRemoteAssets", b"canAccessRemoteAssets", "canAccessiCloudMusicLibrary", b"canAccessiCloudMusicLibrary", "canFetchMediaDataFromSender", b"canFetchMediaDataFromSender", "canPlayEncryptedProgressiveDownloadAssets", b"canPlayEncryptedProgressiveDownloadAssets", "canRelayCommunicationChannel", b"canRelayCommunicationChannel", "clusterCompositions", b"clusterCompositions", "clusterID", b"clusterID", "clusterType", b"clusterType", "configuredClusterSize", b"configuredClusterSize", "currentBluetoothListeningMode", b"currentBluetoothListeningMode", "deviceSubType", b"deviceSubType", "deviceType", b"deviceType", "discoveredOnSameInfra", b"discoveredOnSameInfra", "distance", b"distance", "engageOnClusterActivate", b"engageOnClusterActivate", "firmwareVersion", b"firmwareVersion", "groupContainsGroupLeader", b"groupContainsGroupLeader", "groupID", b"groupID", "hostDeviceClass", b"hostDeviceClass", "isAddedToHomeKit", b"isAddedToHomeKit", "isAirPlayReceiverSessionActive", b"isAirPlayReceiverSessionActive", "isAppleAccessory", b"isAppleAccessory", "isClusterLeader", b"isClusterLeader", "isDeviceGroupable", b"isDeviceGroupable", "isGroupLeader", b"isGroupLeader", "isGroupable", b"isGroupable", "isLocalDevice", b"isLocalDevice", "isProxyGroupPlayer", b"isProxyGroupPlayer", "isRemoteControllable", b"isRemoteControllable", "isVolumeControlAvailable", b"isVolumeControlAvailable", "logicalDeviceID", b"logicalDeviceID", "macAddress", b"macAddress", "modelID", b"modelID", "modelSpecificInfoData", b"modelSpecificInfoData", "name", b"name", "parentGroupContainsDiscoverableLeader", b"parentGroupContainsDiscoverableLeader", "parentGroupIdentifier", b"parentGroupIdentifier", "parentUniqueIdentifier", b"parentUniqueIdentifier", "pickable", b"pickable", "primaryUID", b"primaryUID", "producesLowFidelityAudio", b"producesLowFidelityAudio", "requiresAuthorization", b"requiresAuthorization", "resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", b"resentsOptimizedUserInterfaceWhenPlayingFetchedAudioOnlyAssets", "roomID", b"roomID", "roomName", b"roomName", "shouldForceRemoteControlabillity", b"shouldForceRemoteControlabillity", "sourceInfo", b"sourceInfo", "supportsBufferedAirPlay", b"supportsBufferedAirPlay", "supportsExternalScreen", b"supportsExternalScreen", "supportsHAP", b"supportsHAP", "supportsMultiplayer", b"supportsMultiplayer", "supportsRapportRemoteControlTransport", b"supportsRapportRemoteControlTransport", "supportsSharePlayHandoff", b"supportsSharePlayHandoff", "transportType", b"transportType", "uniqueIdentifier", b"uniqueIdentifier", "usingJSONProtocol", b"usingJSONProtocol", "volume", b"volume", "volumeCapabilities", b"volumeCapabilities"]) -> None: ...
 
 global___AVOutputDeviceDescriptor = AVOutputDeviceDescriptor
 

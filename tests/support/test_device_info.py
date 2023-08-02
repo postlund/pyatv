@@ -2,8 +2,13 @@
 
 import pytest
 
-from pyatv.const import DeviceModel
-from pyatv.support.device_info import lookup_internal_name, lookup_model, lookup_version
+from pyatv.const import DeviceModel, OperatingSystem
+from pyatv.support.device_info import (
+    lookup_internal_name,
+    lookup_model,
+    lookup_os,
+    lookup_version,
+)
 
 
 @pytest.mark.parametrize(
@@ -41,3 +46,19 @@ def test_lookup_internal_name(internal_name, expected_model):
 )
 def test_lookup_existing_version(version, expected_version):
     assert lookup_version(version) == expected_version
+
+
+@pytest.mark.parametrize(
+    "identifier,expected_os",
+    [
+        ("bad", OperatingSystem.Unknown),
+        ("MacBookAir10,1", OperatingSystem.MacOS),
+        ("iMac1,2", OperatingSystem.MacOS),
+        ("Macmini1,1", OperatingSystem.MacOS),
+        ("MacBookPro5,67", OperatingSystem.MacOS),
+        ("Mac1,4", OperatingSystem.MacOS),
+        ("MacPro19,4", OperatingSystem.MacOS),
+    ],
+)
+def test_lookup_os(identifier, expected_os):
+    assert lookup_os(identifier) == expected_os

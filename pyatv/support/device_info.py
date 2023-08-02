@@ -3,7 +3,7 @@
 import re
 from typing import Dict, Optional
 
-from pyatv.const import DeviceModel
+from pyatv.const import DeviceModel, OperatingSystem
 
 _MODEL_LIST: Dict[str, DeviceModel] = {
     "AirPort4,107": DeviceModel.AirPortExpress,
@@ -74,6 +74,15 @@ _VERSION_LIST: Dict[str, str] = {
     "20L563": "16.5",
 }
 
+_OS_IDENTIFIER_FORMATS = [
+    r"MacBookAir\d+,\d+",
+    r"iMac\d+,\d+",
+    r"Macmini\d+,\d+",
+    r"MacBookPro\d+,\d+",
+    r"Mac\d+,\d+",
+    r"MacPro\d+,\d+",
+]
+
 
 def lookup_model(identifier: Optional[str]) -> DeviceModel:
     """Lookup device model from identifier."""
@@ -102,3 +111,16 @@ def lookup_version(build: Optional[str]) -> Optional[str]:
         return str(base - 4) + ".x"
 
     return None
+
+
+def lookup_os(identifier: str) -> OperatingSystem:
+    """Lookup operating system based on identifier.
+
+    An identifier has the format similar to "MacbookAir10,1". Only
+    macOS is supported here.
+    """
+    return (
+        OperatingSystem.MacOS
+        if any(re.match(os_format, identifier) for os_format in _OS_IDENTIFIER_FORMATS)
+        else OperatingSystem.Unknown
+    )

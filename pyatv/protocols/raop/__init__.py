@@ -10,6 +10,7 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
+    OperatingSystem,
     PairingRequirement,
     Protocol,
 )
@@ -59,7 +60,7 @@ from pyatv.protocols.raop.audio_source import AudioSource, open_source
 from pyatv.protocols.raop.protocols import StreamContext, airplayv1, airplayv2
 from pyatv.protocols.raop.stream_client import PlaybackInfo, RaopListener, StreamClient
 from pyatv.support.collections import dict_merge
-from pyatv.support.device_info import lookup_model
+from pyatv.support.device_info import lookup_model, lookup_os
 from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata, merge_into
 from pyatv.support.rtsp import RtspSession
@@ -468,6 +469,9 @@ def device_info(service_type: str, properties: Mapping[str, Any]) -> Dict[str, A
         devinfo[DeviceInfo.RAW_MODEL] = properties["am"]
         if model != DeviceModel.Unknown:
             devinfo[DeviceInfo.MODEL] = model
+        operating_system = lookup_os(properties["am"])
+        if operating_system != OperatingSystem.Unknown:
+            devinfo[DeviceInfo.OPERATING_SYSTEM] = operating_system
     if "ov" in properties:
         devinfo[DeviceInfo.VERSION] = properties["ov"]
 
@@ -495,6 +499,10 @@ async def service_info(
         # Access control might say that pairing is not possible, e.g. only devices
         # belonging to the same home (not supported by pyatv)
         service.pairing = PairingRequirement.Disabled
+    elif airplay_service and airplay_service.properties.get("act", "0") == "2":
+        # Similarly to ACL, we can have an access control type we do not support,
+        # e.g. "2" which corresponds to "Current User". So we need to filter that.
+        service.pairing = PairingRequirement.Unsupported
     else:
         # Same behavior as for AirPlay expected, so re-using that here
         update_service_details(service)

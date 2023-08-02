@@ -87,6 +87,9 @@ def test_is_password_required(properties, requires_password):
         ({"sf": "0x8"}, PairingRequirement.Mandatory),
         ({"flags": "0x8"}, PairingRequirement.Mandatory),
         ({"flags": "0x0"}, PairingRequirement.NotNeeded),
+        # Corresponds to only allow "Current User", which is not
+        # supported by pyatv right now
+        ({"act": "2"}, PairingRequirement.Unsupported),
     ],
 )
 async def test_get_pairing_requirement(props, expected_req):
