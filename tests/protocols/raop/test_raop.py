@@ -153,9 +153,16 @@ async def test_service_info_pairing(raop_props, devinfo, pairing_req):
 
 
 @pytest.mark.asyncio
-async def test_service_info_pairing_acl():
+@pytest.mark.parametrize(
+    "props, pairing_req",
+    [
+        ({"acl": "1"}, PairingRequirement.Disabled),
+        ({"act": "2"}, PairingRequirement.Unsupported),
+    ],
+)
+async def test_service_info_pairing_acl(props, pairing_req):
     raop_service = MutableService("id", Protocol.RAOP, 0, {})
-    airplay_props = MutableService("id", Protocol.AirPlay, 0, {"acl": "1"})
+    airplay_props = MutableService("id", Protocol.AirPlay, 0, props)
 
     await service_info(
         raop_service,
@@ -163,4 +170,4 @@ async def test_service_info_pairing_acl():
         {Protocol.RAOP: raop_service, Protocol.AirPlay: airplay_props},
     )
 
-    assert raop_service.pairing == PairingRequirement.Disabled
+    assert raop_service.pairing == pairing_req

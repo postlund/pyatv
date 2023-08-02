@@ -499,6 +499,10 @@ async def service_info(
         # Access control might say that pairing is not possible, e.g. only devices
         # belonging to the same home (not supported by pyatv)
         service.pairing = PairingRequirement.Disabled
+    elif airplay_service and airplay_service.properties.get("act", "0") == "2":
+        # Similarly to ACL, we can have an access control type we do not support,
+        # e.g. "2" which corresponds to "Current User". So we need to filter that.
+        service.pairing = PairingRequirement.Unsupported
     else:
         # Same behavior as for AirPlay expected, so re-using that here
         update_service_details(service)

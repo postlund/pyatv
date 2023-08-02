@@ -141,10 +141,18 @@ def get_pairing_requirement(service: BaseService) -> PairingRequirement:
     - Bit 0x200 is set in sf (AirPlay v1)/flags (AirPlay v2)
     - But 0x8 set in sf/flags
 
+    There's an "act" (Access Control Type) field present in some cases. Values are yet
+    unknown, but "2" seems to correspond to "Current User".
+
     Other cases are optimistically treated as NotNeeded.
     """
     if _get_flags(service.properties) & (LEGACY_PAIRING_BIT | PIN_REQUIRED):
         return PairingRequirement.Mandatory
+
+    # "Current User" not supported by pyatv
+    if service.properties.get("act", "0") == "2":
+        return PairingRequirement.Unsupported
+
     return PairingRequirement.NotNeeded
 
 
