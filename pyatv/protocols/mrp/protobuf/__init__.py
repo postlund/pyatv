@@ -170,6 +170,7 @@ from .UpdateEndPointsMessage_pb2 import UpdateEndPointsMessage
 from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceDescriptor
 from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceSourceInfo
 from .UpdateOutputDeviceMessage_pb2 import UpdateOutputDeviceMessage
+from .UpdatePlayerPath_pb2 import UpdatePlayerMessage
 from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from .VolumeControlAvailabilityMessage_pb2 import VolumeCapabilities

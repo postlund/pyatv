@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n3pyatv/protocols/mrp/protobuf/NowPlayingPlayer.proto\"T\n\x10NowPlayingPlayer\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x17\n\x0fisDefaultPlayer\x18\x03 \x01(\x08')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n3pyatv/protocols/mrp/protobuf/NowPlayingPlayer.proto\"\xad\x01\n\x10NowPlayingPlayer\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x17\n\x0fisDefaultPlayer\x18\x03 \x01(\x08\x12\x18\n\x10\x61udioSessionType\x18\x04 \x01(\x05\x12\x14\n\x0cmxSessionIDs\x18\x05 \x01(\x03\x12\x16\n\x0e\x61udioSessionID\x18\x06 \x01(\r\x12\x0f\n\x07iconURL\x18\x07 \x01(\t')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -21,6 +21,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pyatv.protocols.mrp.protobu
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _globals['_NOWPLAYINGPLAYER']._serialized_start=55
-  _globals['_NOWPLAYINGPLAYER']._serialized_end=139
+  _globals['_NOWPLAYINGPLAYER']._serialized_start=56
+  _globals['_NOWPLAYINGPLAYER']._serialized_end=229
 # @@protoc_insertion_point(module_scope)

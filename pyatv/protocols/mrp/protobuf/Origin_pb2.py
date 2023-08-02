@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from pyatv.protocols.mrp.protobuf import DeviceInfoMessage_pb2 as pyatv_dot_protocols_dot_mrp_dot_protobuf_dot_DeviceInfoMessage__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n)pyatv/protocols/mrp/protobuf/Origin.proto\x1a\x34pyatv/protocols/mrp/protobuf/DeviceInfoMessage.proto\"\xa1\x01\n\x06Origin\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.Origin.Type\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x12\n\nidentifier\x18\x03 \x01(\x05\x12&\n\ndeviceInfo\x18\x04 \x01(\x0b\x32\x12.DeviceInfoMessage\"*\n\x04Type\x12\x0b\n\x07Unknown\x10\x00\x12\t\n\x05Local\x10\x01\x12\n\n\x06\x43ustom\x10\x02')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n)pyatv/protocols/mrp/protobuf/Origin.proto\x1a\x34pyatv/protocols/mrp/protobuf/DeviceInfoMessage.proto\"\xba\x01\n\x06Origin\x12\x1a\n\x04type\x18\x01 \x01(\x0e\x32\x0c.Origin.Type\x12\x13\n\x0b\x64isplayName\x18\x02 \x01(\t\x12\x12\n\nidentifier\x18\x03 \x01(\x05\x12&\n\ndeviceInfo\x18\x04 \x01(\x0b\x32\x12.DeviceInfoMessage\x12\x17\n\x0fisLocallyHosted\x18\x05 \x01(\x08\"*\n\x04Type\x12\x0b\n\x07Unknown\x10\x00\x12\t\n\x05Local\x10\x01\x12\n\n\x06\x43ustom\x10\x02')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,7 +23,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _globals['_ORIGIN']._serialized_start=100
-  _globals['_ORIGIN']._serialized_end=261
-  _globals['_ORIGIN_TYPE']._serialized_start=219
-  _globals['_ORIGIN_TYPE']._serialized_end=261
+  _globals['_ORIGIN']._serialized_end=286
+  _globals['_ORIGIN_TYPE']._serialized_start=244
+  _globals['_ORIGIN_TYPE']._serialized_end=286
 # @@protoc_insertion_point(module_scope)
