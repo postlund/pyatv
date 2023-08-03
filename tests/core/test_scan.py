@@ -6,10 +6,10 @@ from unittest.mock import patch
 import pytest
 from zeroconf import (
     DNSAddress,
+    DNSOutgoing,
     DNSPointer,
     DNSService,
     DNSText,
-    DNSOutgoing,
     ServiceListener,
     Zeroconf,
     const,
