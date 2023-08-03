@@ -526,12 +526,9 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         hosts: Optional[List[IPv4Address]] = None,
     ) -> None:
         """Initialize a new scanner."""
-        _LOGGER.error("ZeroconfUnicastScanner hosts: %s", hosts)
         super().__init__(aiozc, hosts)
         hosts = self.hosts
-        #
         # Once info_by_address_type is filled in, we are done.
-        #
         self.infos_by_address_type: Dict[
             IPv4Address, dict[str, Optional[AsyncServiceInfo]]
         ] = {host: {f"{type_}.": None for type_ in self._services} for host in hosts}
