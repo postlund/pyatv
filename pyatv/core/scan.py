@@ -514,7 +514,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self.hosts: Set[IPv4Address] = set(hosts) if hosts else set()
         # Once info_by_address_type is filled in, we are done.
         self.infos_by_address_type: Dict[
-            IPv4Address, dict[str, Optional[AsyncServiceInfo]]
+            IPv4Address, Dict[str, Optional[AsyncServiceInfo]]
         ] = {host: {f"{type_}.": None for type_ in self._services} for host in hosts}
 
     def _send_ptr_queries(self, address: IPv4Address, needed_types: List[str]) -> None:
@@ -577,8 +577,8 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
     ) -> bool:
         """Load from cache or send queries."""
         zeroconf = self.zeroconf
-        infos_to_send: list[AsyncServiceInfo] = []
-        infos_with_cache: list[AsyncServiceInfo] = []
+        infos_to_send: List[AsyncServiceInfo] = []
+        infos_with_cache: List[AsyncServiceInfo] = []
         for info in infos:
             if info.load_from_cache(zeroconf):
                 infos_with_cache.append(info)
