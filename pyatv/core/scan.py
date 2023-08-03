@@ -356,11 +356,9 @@ class ZeroconfScanner(BaseScanner):
 
     def _set_or_get_address_to_device_name(
         self, address: IPv4Address, info: AsyncServiceInfo
-    ) -> str | None:
+    ) -> Optional[str]:
         """Get and cache address to device name mapping."""
         address_to_device_name = self.address_to_device_name
-        device_name_to_address = self.device_name_to_address
-
         if cached_name := address_to_device_name.get(address):
             return cached_name
 
@@ -369,7 +367,7 @@ class ZeroconfScanner(BaseScanner):
 
         if device_name := self._device_info_name[service_type](name):
             address_to_device_name[address] = device_name
-            device_name_to_address[device_name] = address
+            self.device_name_to_address[device_name] = address
             return device_name
 
         return None
