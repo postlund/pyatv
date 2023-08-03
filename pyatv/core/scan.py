@@ -644,9 +644,8 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         if await self._load_from_cache_or_send_queries(infos, zc_timeout):
             return self._process_matching_service_infos()
 
-        # Multicast is likely broken or the network is dropping
-        # multicast responses. We will try to send unicast PTR queries
-        # for the missing types.
+        # Multicast is likely broken, the device is offline, or the network is dropping
+        # multicast responses. We will try to send unicast PTR queries for the missing types.
         return await self._lookup_services_and_models_with_ptr_fallback(zc_timeout)
 
     async def _lookup_services_and_models_with_ptr_fallback(
