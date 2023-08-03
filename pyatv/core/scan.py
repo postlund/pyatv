@@ -625,10 +625,9 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         if await self._load_from_cache_or_send_queries(infos, zc_timeout):
             return self._process_matching_service_infos()
 
-        # Multicast is likely broken, the device is offline, or the network is dropping
-        # multicast responses. We will try to send unicast PTR queries for the missing types.
-        # Send PTR queries for missing types. This is fallback
-        # in the event the network is dropping multicast responses
+        # Multicast is likely broken, the device is offline,
+        # or the network is dropping multicast responses.
+        # We will try to send unicast PTR queries for the missing types.
         infos_by_address_type = self.infos_by_address_type
         for host in self.hosts:
             # We do not send queries for sleep proxy because
@@ -640,7 +639,8 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                 if info is None and type_ != SLEEP_PROXY_TYPE
             ]:
                 _LOGGER.debug(
-                    "%s: Multicast is broken or device offline, trying unicast PTR queries for %s",
+                    "%s: Multicast is broken or device offline, "
+                    "trying unicast PTR queries for %s",
                     host,
                     needed_types,
                 )
