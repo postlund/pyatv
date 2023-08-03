@@ -527,7 +527,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
 
     def _send_ptr_queries(
         self, address: IPv4Address, needed_types: Set[str]
-    ) -> Generator[AsyncServiceInfo, None, None]:
+    ) -> None:
         """Send PTR queries."""
         out = DNSOutgoing(_FLAGS_QR_QUERY)
         # Note that the multicast flag here is True even though we are sending
