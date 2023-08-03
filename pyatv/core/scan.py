@@ -516,7 +516,11 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
     def _discard_completed_needed_types(
         self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
     ) -> List[AsyncServiceInfo]:
-        """Discard needed type that we have info for."""
+        """Discard needed type that we have info for.
+        
+        Returns a list of incomplete infos that we still need to
+        send queries for.
+        """
         zeroconf = self.zeroconf
         incomplete_infos: List[AsyncServiceInfo] = []
         needed_types_by_address = self.needed_types_by_address
