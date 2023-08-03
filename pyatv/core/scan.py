@@ -22,9 +22,9 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSPointer, IPVersion
+from zeroconf import DNSPointer, IPVersion, DNSOutgoing, const, current_time_millis
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
-from zeroconf.const import _CLASS_IN, _TYPE_PTR
+from zeroconf.const import _CLASS_IN, _TYPE_PTR, _FLAGS_QR_QUERY
 
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
@@ -322,14 +322,6 @@ def _name_without_type(name: str, type_: str) -> str:
     return name[: -(len(type_) + 1)]
 
 
-def _first_non_link_local_address(addresses: List[IPv4Address]) -> Optional[str]:
-    """Return the first non-link local ipv4 address."""
-    for ip_addr in addresses:
-        if not ip_addr.is_link_local:
-            return str(ip_addr)
-    return None
-
-
 class AsyncDeviceInfoServiceInfo(AsyncServiceInfo):
     """A version of AsyncServiceInfo that does not expect addresses."""
 
@@ -358,7 +350,7 @@ class ZeroconfScanner(BaseScanner):
         super().__init__()
         self.aiozc = aiozc
         self.zeroconf = aiozc.zeroconf
-        self.hosts: Set[str] = set(str(host) for host in hosts) if hosts else set()
+        self.hosts: Set[IPv4Address] = set(hosts) if hosts else set()
 
     def _build_service_info_queries(
         self,
@@ -366,13 +358,12 @@ class ZeroconfScanner(BaseScanner):
         """Build AsyncServiceInfo queries from the requested types."""
         infos: List[Union[AsyncServiceInfo, AsyncDeviceInfoServiceInfo]] = []
         device_names = set()
+        cache = self.zeroconf.cache
         for type_ in (SLEEP_PROXY, *self._services):
             if type_ == DEVICE_INFO:
                 continue
             zc_type = f"{type_}."
-            for record in self.zeroconf.cache.async_all_by_details(
-                zc_type, _TYPE_PTR, _CLASS_IN
-            ):
+            for record in cache.async_all_by_details(zc_type, _TYPE_PTR, _CLASS_IN):
                 ptr_name = cast(DNSPointer, record).alias
                 service_info = AsyncServiceInfo(zc_type, ptr_name)
                 infos.append(service_info)
@@ -386,51 +377,10 @@ class ZeroconfScanner(BaseScanner):
                     infos.append(device_service_info)
         return infos
 
-    async def _lookup_services_and_models(
-        self, zc_timeout: float
-    ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
-        """Lookup services and aggregate them by address."""
-        requests: List[Awaitable[bool]] = []
-        infos = self._build_service_info_queries()
-        hosts = self.hosts
-        for info in infos:
-            if info.load_from_cache(self.zeroconf):
-                continue
-            if hosts:
-                for host in hosts:
-                    # Unicast requests
-                    requests.extend(
-                        [
-                            info.async_request(self.zeroconf, zc_timeout, host)
-                            for info in infos
-                        ]
-                    )
-                continue
-            # Multicast requests
-            requests.append(info.async_request(self.zeroconf, zc_timeout))
-        if requests:
-            await asyncio.gather(*requests)
-        name_to_model: Dict[str, str] = {}
-        services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
-        for info in infos:
-            if info.type == DEVICE_INFO_TYPE:
-                model = info.properties.get(b"model")
-                if model:
-                    name = _name_without_type(info.name, info.type)
-                    with contextlib.suppress(UnicodeDecodeError):
-                        name_to_model[name] = model.decode("utf-8")
-            else:
-                address = _first_non_link_local_address(
-                    info.ip_addresses_by_version(IPVersion.V4Only)
-                )
-                if address:
-                    services_by_address.setdefault(address, []).append(info)
-        return services_by_address, name_to_model
-
     def _process_responses(
         self,
-        dev_services_by_address: Dict[str, List[mdns.Service]],
-        model_by_address: Dict[str, Optional[str]],
+        dev_services_by_address: Dict[IPv4Address, List[mdns.Service]],
+        model_by_address: Dict[IPv4Address, Optional[str]],
     ):
         """Process and callback each aggregated response to the base handler."""
         for address, dev_services in dev_services_by_address.items():
@@ -445,18 +395,25 @@ class ZeroconfScanner(BaseScanner):
                 )
             )
 
+    @abstractmethod
+    async def _lookup_services_and_models(
+        self, zc_timeout: float
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
+        """Lookup services and aggregate them by address."""
+
     async def process(self, timeout: int) -> None:
         """Start to process devices and services."""
         zc_timeout = timeout * 1000
         services_by_address, name_to_model = await self._lookup_services_and_models(
             zc_timeout
         )
-        dev_services_by_address: Dict[str, List[mdns.Service]] = {}
-        model_by_address: Dict[str, Optional[str]] = {}
+        hosts = self.hosts
+        dev_services_by_address: Dict[IPv4Address, List[mdns.Service]] = {}
+        model_by_address: Dict[IPv4Address, Optional[str]] = {}
         for address, service_infos in services_by_address.items():
-            if self.hosts and address not in self.hosts:
+            if hosts and address not in hosts:
                 continue
-            dev_services = []
+            dev_services: List[mdns.Service] = []
             for service_info in service_infos:
                 name = _extract_service_name(service_info)
                 service_type = service_info.type[:-1]
@@ -468,7 +425,7 @@ class ZeroconfScanner(BaseScanner):
                     mdns.Service(
                         service_type,
                         name,
-                        IPv4Address(address),
+                        address,
                         service_info.port,
                         CaseInsensitiveDict(
                             {
@@ -480,3 +437,161 @@ class ZeroconfScanner(BaseScanner):
                 )
             dev_services_by_address[address] = dev_services
         self._process_responses(dev_services_by_address, model_by_address)
+
+    def _process_service_info_responses(
+        self,
+        infos: List[AsyncServiceInfo],
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
+        name_to_model: Dict[str, str] = {}
+        services_by_address: Dict[IPv4Address, List[AsyncServiceInfo]] = {}
+        for info in infos:
+            if info.type == DEVICE_INFO_TYPE:
+                model = info.properties.get(b"model")
+                if model:
+                    name = _name_without_type(info.name, info.type)
+                    with contextlib.suppress(UnicodeDecodeError):
+                        name_to_model[name] = model.decode("utf-8")
+            else:
+                addresses = cast(
+                    List[IPv4Address], info.ip_addresses_by_version(IPVersion.V4Only)
+                )
+                for ip_address in addresses:
+                    services_by_address.setdefault(ip_address, []).append(info)
+        return services_by_address, name_to_model
+
+
+class ZeroconfMulticastScanner(ZeroconfScanner):
+    """Service discovery using zeroconf.
+
+    A ServiceBrowser must be running for all the types we are browsing.
+    """
+
+    async def _lookup_services_and_models(
+        self, zc_timeout: float
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
+        """Lookup services and aggregate them by address."""
+        infos = self._build_service_info_queries()
+        requests: List[Awaitable[bool]] = [
+            info.async_request(self.zeroconf, zc_timeout)
+            for info in infos
+            if not info.load_from_cache(self.zeroconf)
+        ]
+        if requests:
+            await asyncio.gather(*requests)
+        return self._process_service_info_responses(infos)
+
+
+class ZeroconfUnicastScanner(ZeroconfScanner):
+    """Service discovery using zeroconf.
+
+    A ServiceBrowser must be running for all the types we are browsing.
+    """
+
+    def __init__(
+        self,
+        aiozc: AsyncZeroconf,
+        hosts: Optional[List[IPv4Address]] = None,
+    ) -> None:
+        """Initialize a new scanner."""
+        super().__init__(aiozc, hosts)
+        hosts = self.hosts
+        zc_types = (f"{type_}." for type_ in (SLEEP_PROXY, *self._services))
+        self.needed_types_by_address = {host: set(zc_types) for host in hosts}
+
+    async def _send_ptr_queries(
+        self, now: float, address: IPv4Address, needed_types: set[str]
+    ) -> Generator[AsyncServiceInfo, None, None]:
+        """Send PTR queries."""
+        out = DNSOutgoing(_FLAGS_QR_QUERY)
+        cache = self.zeroconf.cache
+        for type_ in needed_types:
+            out.add_question_or_one_cache(cache, now, type_, _TYPE_PTR, _CLASS_IN)
+        for question in out.questions:
+            question.unicast = True
+        self.zeroconf.async_send(out, str(address))
+
+    def _discard_completed_infos_from_needed_types(
+        self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
+    ) -> List[AsyncServiceInfo]:
+        """Discard completed infos from needed types."""
+        zeroconf = self.zeroconf
+        incomplete_infos: List[AsyncServiceInfo] = []
+        needed_types_by_address = self.needed_types_by_address
+        for info in infos:
+            if loaded_from_cache and not info.load_from_cache(zeroconf):
+                incomplete_infos.append(info)
+                continue
+            for address in info.ip_addresses_by_version(IPVersion.V4Only):
+                if needed_types := needed_types_by_address.get(address):
+                    needed_types.discard(info.type)
+        return incomplete_infos
+
+    async def _load_from_cache_or_send_queries(
+        self, infos: List[AsyncServiceInfo], zc_timeout: float
+    ) -> bool:
+        """Load from cache or send queries."""
+        incomplete_infos = self._discard_completed_infos_from_needed_types(
+            infos, loaded_from_cache=True
+        )
+
+        # If all services are cached, we are done
+        if all(
+            not needed_types for needed_types in self.needed_types_by_address.values()
+        ):
+            return True
+
+        # If we have incomplete infos, send queries for them
+        if incomplete_infos:
+            requests: List[Awaitable[bool]] = []
+            zeroconf = self.zeroconf
+            for host in self.hosts:
+                host_str = str(host)
+                for info in infos:
+                    requests.append(info.async_request(zeroconf, zc_timeout, host_str))
+            await asyncio.gather(*requests)
+
+        # Check to see if we have all the info we need after
+        # sending queries for incomplete infos
+        self._discard_completed_infos_from_needed_types(
+            incomplete_infos, loaded_from_cache=False
+        )
+
+        # If all services are filled we are done
+        return not all(
+            not needed_types for needed_types in self.needed_types_by_address.values()
+        )
+
+    async def _lookup_services_and_models(
+        self, zc_timeout: float
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
+        """Lookup services and aggregate them by address."""
+        infos = self._build_service_info_queries()
+        if await self._load_from_cache_or_send_queries(infos, zc_timeout):
+            return self._process_service_info_responses(infos)
+
+        # Multicast is likely broken or the network is dropping
+        # multicast responses. We will try to send unicast PTR queries
+        # for the missing types.
+        return await self._lookup_services_and_models_with_ptr_fallback(zc_timeout)
+
+    async def _lookup_services_and_models_with_ptr_fallback(
+        self, zc_timeout: float
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
+        # Send PTR queries for missing types. This is fallback
+        # in the event the network is dropping multicast responses
+        now = current_time_millis()
+        needed_types_by_address = self.needed_types_by_address
+        for host in self.hosts:
+            if needed_types := needed_types_by_address[host]:
+                self._send_ptr_queries(now, host, needed_types)
+
+        # Wait for the PTR queries to complete. We have no way
+        # to know when they are done, so we just wait for the
+        # timeout to expire.
+        await asyncio.sleep(zc_timeout / 1000)
+        # Now that we have sent the PTR queries we check the
+        # cache again for any new info and refresh any incomplete
+        # info that we have.
+        infos = self._build_service_info_queries()
+        await self._load_from_cache_or_send_queries(infos, zc_timeout)
+        return self._process_service_info_responses(infos)
