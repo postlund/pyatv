@@ -557,7 +557,9 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             )
 
         # Check to see if we have all the info we need after
-        # sending queries for incomplete infos
+        # sending queries for incomplete infos. There is no point
+        # in sending queries for any types discard_completed_needed_types
+        # returns here because we just sent queries for them.
         self._discard_completed_needed_types(incomplete_infos, False)
 
         # If all services are filled we are done
