@@ -22,9 +22,9 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSPointer, IPVersion, DNSOutgoing, const, current_time_millis
+from zeroconf import DNSOutgoing, DNSPointer, IPVersion, const, current_time_millis
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
-from zeroconf.const import _CLASS_IN, _TYPE_PTR, _FLAGS_QR_QUERY
+from zeroconf.const import _CLASS_IN, _FLAGS_QR_QUERY, _TYPE_PTR
 
 from pyatv import conf
 from pyatv.const import DeviceModel, Protocol
@@ -517,7 +517,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
     ) -> List[AsyncServiceInfo]:
         """Discard needed type that we have info for.
-        
+
         Returns a list of incomplete infos that we still need to
         send queries for.
         """
