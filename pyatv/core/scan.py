@@ -536,11 +536,10 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         incomplete_infos = self._discard_completed_infos_from_needed_types(
             infos, loaded_from_cache=True
         )
+        needed_types_by_address = self.needed_types_by_address
 
         # If all services are cached, we are done
-        if all(
-            not needed_types for needed_types in self.needed_types_by_address.values()
-        ):
+        if all(not needed for needed in needed_types_by_address.values()):
             return True
 
         # If we have incomplete infos, send queries for them
@@ -560,9 +559,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         )
 
         # If all services are filled we are done
-        return not all(
-            not needed_types for needed_types in self.needed_types_by_address.values()
-        )
+        return all(not needed for needed in needed_types_by_address.values())
 
     async def _lookup_services_and_models(
         self, zc_timeout: float
