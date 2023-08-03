@@ -548,7 +548,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self.zeroconf.async_send(out, str(address))
 
     def _process_service_infos(
-        self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
+        self, infos: List[AsyncServiceInfo]
     ) -> None:
         """Process service infos and update self.infos_by_address_type."""
         device_infos: List[AsyncServiceInfo] = []
