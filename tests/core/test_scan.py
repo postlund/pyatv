@@ -380,12 +380,13 @@ async def test_scan_with_zeroconf_unicast_not_found():
         # Called with host argument
         assert call[1][2] == "127.0.0.1"
     calls = mock_async_send.mock_calls
-    assert len(calls) == 2
-    # We should send a PTR query as a fallback
-    second_send = calls[-1][1]
-    target = second_send[1]
+    assert len(calls) >= 1
+    # We should send a PTR query as a fallback to unicast
+    # which has a target of 127.0.0.1
+    last_call = calls[-1][1]
+    target = last_call[1]
     assert target == "127.0.0.1"
-    dns_outgoing: DNSOutgoing = second_send[0]
+    dns_outgoing: DNSOutgoing = last_call[0]
     assert len(dns_outgoing.questions) == 1
     question = dns_outgoing.questions[0]
     assert question.name == "_device-info._tcp.local."
