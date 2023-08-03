@@ -563,7 +563,6 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                 if infos_by_type := infos_by_address_type.get(address):
                     infos_by_type[info.type] = info
                     self._set_or_get_address_to_device_name(address, info)
-                    break
 
         # Device info is special because it does not have an address
         device_name_to_address = self.device_name_to_address
