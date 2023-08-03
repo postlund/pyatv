@@ -644,11 +644,6 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
 
         # Multicast is likely broken, the device is offline, or the network is dropping
         # multicast responses. We will try to send unicast PTR queries for the missing types.
-        return await self._lookup_services_and_models_with_ptr_fallback(zc_timeout)
-
-    async def _lookup_services_and_models_with_ptr_fallback(
-        self, zc_timeout: float
-    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
         # Send PTR queries for missing types. This is fallback
         # in the event the network is dropping multicast responses
         infos_by_address_type = self.infos_by_address_type
