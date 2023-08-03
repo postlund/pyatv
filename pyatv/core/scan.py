@@ -22,7 +22,13 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSOutgoing, DNSPointer, IPVersion, current_time_millis
+from zeroconf import (
+    DNSOutgoing,
+    DNSPointer,
+    DNSQuestion,
+    IPVersion,
+    current_time_millis,
+)
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _FLAGS_QR_QUERY, _TYPE_PTR
 
@@ -363,15 +369,15 @@ class ZeroconfScanner(BaseScanner):
 
         if cached_name := address_to_device_name.get(address):
             return cached_name
-        
+
         name = _extract_service_name(info)
         service_type = info.type[:-1]
-        
+
         if device_name := self._device_info_name[service_type](name):
             address_to_device_name[address] = device_name
             device_name_to_address[device_name] = address
             return device_name
-        
+
         return None
 
     def _build_service_info_queries(
@@ -523,21 +529,25 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         _LOGGER.error("ZeroconfUnicastScanner hosts: %s", hosts)
         super().__init__(aiozc, hosts)
         hosts = self.hosts
-        zc_types = (f"{type_}." for type_ in (SLEEP_PROXY, *self._services))
+        #
+        # Once info_by_address_type is filled in, we are done.
+        #
         self.infos_by_address_type: Dict[
             IPv4Address, dict[str, Optional[AsyncServiceInfo]]
-        ] = {host: {zc_type: None for zc_type in zc_types} for host in hosts}
+        ] = {host: {f"{type_}.": None for type_ in self._services} for host in hosts}
 
     def _send_ptr_queries(
-        self, now: float, address: IPv4Address, needed_types: Set[str]
+        self, address: IPv4Address, needed_types: Set[str]
     ) -> Generator[AsyncServiceInfo, None, None]:
         """Send PTR queries."""
         out = DNSOutgoing(_FLAGS_QR_QUERY)
-        cache = self.zeroconf.cache
+        # Note that the multicast flag here is True even though we are sending
+        # unicast queries. We still are speaking mdns and will be happy to get
+        # a multicast response back.
         for type_ in needed_types:
-            out.add_question_or_one_cache(cache, now, type_, _TYPE_PTR, _CLASS_IN)
-        for question in out.questions:
+            question = DNSQuestion(type_, _TYPE_PTR, _CLASS_IN)
             question.unicast = True
+            out.add_question(question)
         _LOGGER.error("Sending unicast PTR query: %s", out)
         self.zeroconf.async_send(out, str(address))
 
@@ -549,9 +559,9 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         """
         zeroconf = self.zeroconf
         incomplete_infos: List[AsyncServiceInfo] = []
+        device_infos: List[AsyncServiceInfo] = []
         infos_by_address_type = self.infos_by_address_type
 
-        device_infos: List[AsyncServiceInfo] = []
         for info in infos:
             if loaded_from_cache and not info.load_from_cache(zeroconf):
                 incomplete_infos.append(info)
@@ -565,6 +575,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                     self._set_or_get_address_to_device_name(address, info)
                     break
 
+        # Device info is special because it does not have an address
         device_name_to_address = self.device_name_to_address
         for info in device_infos:
             name = _extract_service_name(info)
@@ -581,13 +592,15 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                     return False
         return True
 
-    def _process_matching_service_infos(self) -> List[AsyncServiceInfo]:
+    def _process_matching_service_infos(
+        self,
+    ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
         """Return all matching service infos."""
-        self._process_service_info_responses(
+        return self._process_service_info_responses(
             [
                 info
                 for types in self.infos_by_address_type.values()
-                for info in types
+                for info in types.values()
                 if info is not None
             ]
         )
@@ -599,14 +612,12 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         incomplete_infos = self._process_service_infos(infos, True)
         # If all services are cached, we are done
         if self._all_services_discovered():
-            _LOGGER.error("All services cached for %s", self.hosts)
             return True
 
         # If we have incomplete infos, send queries for them
         if incomplete_infos:
             zeroconf = self.zeroconf
             host_strs = [str(host) for host in self.hosts]
-            _LOGGER.error("incomplete info %s", incomplete_infos)
             await asyncio.gather(
                 *(
                     info.async_request(zeroconf, zc_timeout, host_str)
@@ -636,10 +647,6 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         # Multicast is likely broken or the network is dropping
         # multicast responses. We will try to send unicast PTR queries
         # for the missing types.
-        _LOGGER.error(
-            "Multicast is broken or device offline, trying unicast PTR queries for %s",
-            self.infos_by_address_type,
-        )
         return await self._lookup_services_and_models_with_ptr_fallback(zc_timeout)
 
     async def _lookup_services_and_models_with_ptr_fallback(
@@ -647,15 +654,22 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
     ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
         # Send PTR queries for missing types. This is fallback
         # in the event the network is dropping multicast responses
-        now = current_time_millis()
         infos_by_address_type = self.infos_by_address_type
         for host in self.hosts:
+            # We do not send queries for sleep proxy because
+            # sleepy proxy is not useful if multicast is broken
+            # and its not required to complete service discovery.
             if needed_types := [
                 type_
                 for type_, info in infos_by_address_type[host].items()
-                if info is None
+                if info is None and type_ != SLEEP_PROXY_TYPE
             ]:
-                self._send_ptr_queries(now, host, needed_types)
+                _LOGGER.debug(
+                    "%s: Multicast is broken or device offline, trying unicast PTR queries for %s",
+                    host,
+                    needed_types,
+                )
+                self._send_ptr_queries(host, needed_types)
 
         # Wait for the PTR queries to complete. We have no way
         # to know when they are done, so we just wait for the
