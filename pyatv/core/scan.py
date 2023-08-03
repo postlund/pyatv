@@ -568,6 +568,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                 continue
             if info.type == DEVICE_INFO_TYPE:
                 device_infos.append(info)
+                # Device info is special because it does not have an address
                 continue
             for address in info.ip_addresses_by_version(IPVersion.V4Only):
                 if infos_by_type := infos_by_address_type.get(address):
@@ -595,7 +596,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
     def _process_matching_service_infos(
         self,
     ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
-        """Return all matching service infos."""
+        """Return all matching service infos for the requested hosts."""
         return self._process_service_info_responses(
             [
                 info
