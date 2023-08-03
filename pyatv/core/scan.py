@@ -22,13 +22,7 @@ from typing import (
     cast,
 )
 
-from zeroconf import (
-    DNSOutgoing,
-    DNSPointer,
-    DNSQuestion,
-    IPVersion,
-    current_time_millis,
-)
+from zeroconf import DNSOutgoing, DNSPointer, DNSQuestion, IPVersion
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _FLAGS_QR_QUERY, _TYPE_PTR
 
@@ -547,9 +541,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             out.add_question(question)
         self.zeroconf.async_send(out, str(address))
 
-    def _process_service_infos(
-        self, infos: List[AsyncServiceInfo]
-    ) -> None:
+    def _process_service_infos(self, infos: List[AsyncServiceInfo]) -> None:
         """Process service infos and update self.infos_by_address_type."""
         device_infos: List[AsyncServiceInfo] = []
         infos_by_address_type = self.infos_by_address_type
