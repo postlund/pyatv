@@ -545,7 +545,6 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             question = DNSQuestion(type_, _TYPE_PTR, _CLASS_IN)
             question.unicast = True
             out.add_question(question)
-        _LOGGER.error("Sending unicast PTR query: %s", out)
         self.zeroconf.async_send(out, str(address))
 
     def _process_service_infos(
