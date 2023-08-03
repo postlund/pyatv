@@ -544,13 +544,15 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
 
         # If we have incomplete infos, send queries for them
         if incomplete_infos:
-            requests: List[Awaitable[bool]] = []
             zeroconf = self.zeroconf
-            for host in self.hosts:
-                host_str = str(host)
-                for info in infos:
-                    requests.append(info.async_request(zeroconf, zc_timeout, host_str))
-            await asyncio.gather(*requests)
+            host_strs = [str(host) for host in self.hosts]
+            await asyncio.gather(
+                *(
+                    info.async_request(zeroconf, zc_timeout, host_str)
+                    for host_str in host_strs
+                    for info in infos
+                )
+            )
 
         # Check to see if we have all the info we need after
         # sending queries for incomplete infos
