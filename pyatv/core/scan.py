@@ -502,7 +502,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self.needed_types_by_address = {host: set(zc_types) for host in hosts}
 
     async def _send_ptr_queries(
-        self, now: float, address: IPv4Address, needed_types: set[str]
+        self, now: float, address: IPv4Address, needed_types: Set[str]
     ) -> Generator[AsyncServiceInfo, None, None]:
         """Send PTR queries."""
         out = DNSOutgoing(_FLAGS_QR_QUERY)
