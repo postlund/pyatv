@@ -344,13 +344,11 @@ class ZeroconfScanner(BaseScanner):
     def __init__(
         self,
         aiozc: AsyncZeroconf,
-        hosts: Optional[List[IPv4Address]] = None,
     ) -> None:
         """Initialize a new scanner."""
         super().__init__()
         self.aiozc = aiozc
         self.zeroconf = aiozc.zeroconf
-        self.hosts: Set[IPv4Address] = set(hosts) if hosts else set()
         self.address_to_device_name: Dict[IPv4Address, str] = {}
         self.device_name_to_address: Dict[str, IPv4Address] = {}
 
@@ -427,12 +425,9 @@ class ZeroconfScanner(BaseScanner):
         services_by_address, name_to_model = await self._lookup_services_and_models(
             zc_timeout
         )
-        hosts = self.hosts
         dev_services_by_address: Dict[IPv4Address, List[mdns.Service]] = {}
         model_by_address: Dict[IPv4Address, Optional[str]] = {}
         for address, service_infos in services_by_address.items():
-            if hosts and address not in hosts:
-                continue
             dev_services: List[mdns.Service] = []
             for service_info in service_infos:
                 if address not in model_by_address:
@@ -463,7 +458,6 @@ class ZeroconfScanner(BaseScanner):
     ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
         name_to_model: Dict[str, str] = {}
         services_by_address: Dict[IPv4Address, List[AsyncServiceInfo]] = {}
-        hosts = self.hosts
         for info in infos:
             if info.type == DEVICE_INFO_TYPE:
                 model = info.properties.get(b"model")
@@ -476,8 +470,6 @@ class ZeroconfScanner(BaseScanner):
                     List[IPv4Address], info.ip_addresses_by_version(IPVersion.V4Only)
                 )
                 for ip_address in addresses:
-                    if hosts and ip_address not in hosts:
-                        continue
                     services_by_address.setdefault(ip_address, []).append(info)
         return services_by_address, name_to_model
 
@@ -518,8 +510,8 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         hosts: List[IPv4Address],
     ) -> None:
         """Initialize a new scanner."""
-        super().__init__(aiozc, hosts)
-        hosts = self.hosts
+        super().__init__(aiozc)
+        self.hosts: Set[IPv4Address] = set(hosts) if hosts else set()
         # Once info_by_address_type is filled in, we are done.
         self.infos_by_address_type: Dict[
             IPv4Address, dict[str, Optional[AsyncServiceInfo]]
