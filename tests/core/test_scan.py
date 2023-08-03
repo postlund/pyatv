@@ -167,6 +167,12 @@ COMPANION_LINK_RECORDS = [
     COMPANION_LINK_TXT_RECORD,
 ]
 
+PTR_RECORDS_ONLY = [
+    SLEEP_PROXY_PTR_RECORD,
+    AIRPLAY_PTR_RECORD,
+    RAOP_PTR_RECORD,
+    COMPANION_LINK_PTR_RECORD,
+]
 
 COMPLETE_RECORD_SET_WITH_DEVICE_INFO = [
     DEVICE_A_RECORD,
@@ -340,5 +346,35 @@ async def test_scan_with_zeroconf_missing_companion_link_only():
     assert "_companion-link._tcp.local" not in atv.properties
     assert atv.deep_sleep is False
     assert atv.device_info.model == DeviceModel.AppleTV4KGen2
+    await browser.async_cancel()
+    await aiozc.async_close()
+
+
+@pytest.mark.asyncio
+async def test_scan_with_zeroconf_multicast_not_found():
+    aiozc, browser = await _create_zc_with_cache(PTR_RECORDS_ONLY)
+    loop = asyncio.get_event_loop()
+    with patch("pyatv.core.scan.AsyncServiceInfo.async_request") as mock_async_request:
+        results = await scan(loop, timeout=0, aiozc=aiozc)
+    assert mock_async_request.mock_calls
+    for call in mock_async_request.mock_calls:
+        # Not called with host argument
+        assert len(call[1]) == 2
+    assert not results
+    await browser.async_cancel()
+    await aiozc.async_close()
+
+
+@pytest.mark.asyncio
+async def test_scan_with_zeroconf_unicast_not_found():
+    aiozc, browser = await _create_zc_with_cache(PTR_RECORDS_ONLY)
+    loop = asyncio.get_event_loop()
+    with patch("pyatv.core.scan.AsyncServiceInfo.async_request") as mock_async_request:
+        results = await scan(loop, timeout=0, aiozc=aiozc, hosts=["127.0.0.1"])
+    assert mock_async_request.mock_calls
+    for call in mock_async_request.mock_calls:
+        # Called with host argument
+        assert call[1][2] == "127.0.0.1"
+    assert not results
     await browser.async_cancel()
     await aiozc.async_close()

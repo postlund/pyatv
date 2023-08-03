@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import contextlib
-from ipaddress import IPv4Address, ip_address
+from ipaddress import IPv4Address
 import logging
 import os
 from typing import (
@@ -22,7 +22,7 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSPointer
+from zeroconf import DNSPointer, IPVersion
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _TYPE_PTR
 
@@ -322,11 +322,10 @@ def _name_without_type(name: str, type_: str) -> str:
     return name[: -(len(type_) + 1)]
 
 
-def _first_non_link_local_or_non_v6_address(addresses: List[bytes]) -> Optional[str]:
-    """Return the first non ipv6 or non-link local ipv4 address."""
-    for address in addresses:
-        ip_addr = ip_address(address)
-        if not (ip_addr.is_link_local or ip_addr.version == 6):
+def _first_non_link_local_address(addresses: List[IPv4Address]) -> Optional[str]:
+    """Return the first non-link local ipv4 address."""
+    for ip_addr in addresses:
+        if not ip_addr.is_link_local:
             return str(ip_addr)
     return None
 
@@ -391,10 +390,26 @@ class ZeroconfScanner(BaseScanner):
         self, zc_timeout: float
     ) -> Tuple[Dict[str, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
+        requests: List[Awaitable[bool]] = []
         infos = self._build_service_info_queries()
-        await asyncio.gather(
-            *[info.async_request(self.zeroconf, zc_timeout) for info in infos]
-        )
+        hosts = self.hosts
+        for info in infos:
+            if info.load_from_cache(self.zeroconf):
+                continue
+            if hosts:
+                for host in hosts:
+                    # Unicast requests
+                    requests.extend(
+                        [
+                            info.async_request(self.zeroconf, zc_timeout, host)
+                            for info in infos
+                        ]
+                    )
+                continue
+            # Multicast requests
+            requests.append(info.async_request(self.zeroconf, zc_timeout))
+        if requests:
+            await asyncio.gather(*requests)
         name_to_model: Dict[str, str] = {}
         services_by_address: Dict[str, List[AsyncServiceInfo]] = {}
         for info in infos:
@@ -405,7 +420,9 @@ class ZeroconfScanner(BaseScanner):
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = model.decode("utf-8")
             else:
-                address = _first_non_link_local_or_non_v6_address(info.addresses)
+                address = _first_non_link_local_address(
+                    info.ip_addresses_by_version(IPVersion.V4Only)
+                )
                 if address:
                     services_by_address.setdefault(address, []).append(info)
         return services_by_address, name_to_model
