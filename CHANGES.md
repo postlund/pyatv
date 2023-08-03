@@ -1,5 +1,80 @@
 # CHANGES
 
+## 0.13.3 Joe (2023-08-03)
+
+Time for a somewhat minor fix release:
+
+* The play_url functionality has been restored on tvOS
+* Pairing requirement is correctly determined for macOS
+* macOS has been added as an operating system
+* @bdraco has made some performance improvements when
+  scanning for devices
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+dfcc82b mrp: Add some missing protobuf definitions
+5ad5103 mrp: Fix pairing requirement when disabled
+```
+
+*Protocol: AirPlay:*
+
+```
+54ff39e airplay: Handle Access Control Type
+c5772b3 airplay: Support stop with play_url
+c554ab7 airplay: Fix play_url with newer tvOS versions
+```
+
+*Protocol: RAOP:*
+
+```
+fef1667 raop: Use correct auth type for RAOP pairing
+```
+
+*Other:*
+
+```
+8022f68 Rework zeroconf for unicast scanning (#2083)
+42130e1 conf: Add macOS as operating system
+8b572fe http: Abort timeout if connection close
+7815a8f docs: Clarify atvremote app section
+```
+
+**All changes:**
+
+```
+8022f68 Rework zeroconf for unicast scanning (#2083)
+dfcc82b mrp: Add some missing protobuf definitions
+b91dfae build(deps): Bump cryptography from 41.0.2 to 41.0.3 in /requirements
+06cb03e build(deps): Bump zeroconf from 0.71.4 to 0.71.5 in /requirements
+54ff39e airplay: Handle Access Control Type
+42130e1 conf: Add macOS as operating system
+b8f793e build(deps): Bump flake8 from 6.0.0 to 6.1.0 in /requirements
+c3e0a52 build(deps): Bump pylint from 2.17.4 to 2.17.5 in /requirements
+6e89d8c build(deps): Bump types-protobuf in /requirements
+18edbf4 build(deps): Bump chacha20poly1305-reuseable in /requirements
+9cd5a4a build(deps): Bump zeroconf from 0.71.0 to 0.71.4 in /requirements
+c5772b3 airplay: Support stop with play_url
+c554ab7 airplay: Fix play_url with newer tvOS versions
+8b572fe http: Abort timeout if connection close
+0c61914 build(deps): Bump types-requests in /requirements
+3d3f9e8 build(deps): Bump aiohttp from 3.8.4 to 3.8.5 in /requirements
+353faa9 build(deps): Bump pytest-asyncio from 0.21.0 to 0.21.1 in /requirements
+5ad5103 mrp: Fix pairing requirement when disabled
+fef1667 raop: Use correct auth type for RAOP pairing
+a01117d build(deps): Bump cryptography from 41.0.1 to 41.0.2 in /requirements
+5ede5a9 build(deps): Bump black from 23.3.0 to 23.7.0 in /requirements
+e5bf455 build(deps): Bump zeroconf from 0.70.0 to 0.71.0 in /requirements
+cef7b74 build(deps): Bump deepdiff from 6.3.0 to 6.3.1 in /requirements
+67ad564 build(deps): Bump protobuf from 4.23.3 to 4.23.4 in /requirements
+7815a8f docs: Clarify atvremote app section
+11ab076 build(deps): Bump typed-ast from 1.5.4 to 1.5.5 in /requirements
+b6514e8 build(deps): Bump mediafile from 0.11.0 to 0.12.0 in /requirements
+2d70d8b build(deps): Bump zeroconf from 0.69.0 to 0.70.0 in /requirements
+```
+
 ## 0.13.2 Itchy (2023-06-27)
 
 Hitting it hard with new releases lately, here's another one:
