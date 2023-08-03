@@ -549,19 +549,12 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
 
     def _process_service_infos(
         self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
-    ) -> List[AsyncServiceInfo]:
-        """Process service infos and returns a list of incomplete infos that
-        we still need to send queries for.
-        """
-        zeroconf = self.zeroconf
-        incomplete_infos: List[AsyncServiceInfo] = []
+    ) -> None:
+        """Process service infos and update self.infos_by_address_type."""
         device_infos: List[AsyncServiceInfo] = []
         infos_by_address_type = self.infos_by_address_type
 
         for info in infos:
-            if loaded_from_cache and not info.load_from_cache(zeroconf):
-                incomplete_infos.append(info)
-                continue
             if info.type == DEVICE_INFO_TYPE:
                 device_infos.append(info)
                 # Device info is special because it does not have an address
@@ -578,8 +571,6 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             name = _extract_service_name(info)
             if address := device_name_to_address.get(name):
                 infos_by_address_type[address][DEVICE_INFO_TYPE] = info
-
-        return incomplete_infos
 
     def _all_services_discovered(self) -> bool:
         """Check if all services have been discovered."""
@@ -606,30 +597,34 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self, infos: List[AsyncServiceInfo], zc_timeout: float
     ) -> bool:
         """Load from cache or send queries."""
-        incomplete_infos = self._process_service_infos(infos, True)
+        zeroconf = self.zeroconf
+        infos_to_send: list[AsyncServiceInfo] = []
+        infos_with_cache: list[AsyncServiceInfo] = []
+        for info in infos:
+            if info.load_from_cache(zeroconf):
+                infos_with_cache.append(info)
+            else:
+                infos_to_send.append(info)
+
+        self._process_service_infos(infos_with_cache)
         # If all services are cached, we are done
         if self._all_services_discovered():
             return True
 
-        # If we have incomplete infos, send queries for them
-        if incomplete_infos:
-            zeroconf = self.zeroconf
-            host_strs = [str(host) for host in self.hosts]
-            await asyncio.gather(
-                *(
-                    info.async_request(zeroconf, zc_timeout, host_str)
-                    for host_str in host_strs
-                    for info in incomplete_infos
-                )
+        # If there are no infos that need to make requests, we are done
+        if not infos_to_send:
+            return False
+
+        zeroconf = self.zeroconf
+        host_strs = [str(host) for host in self.hosts]
+        await asyncio.gather(
+            *(
+                info.async_request(zeroconf, zc_timeout, host_str)
+                for host_str in host_strs
+                for info in infos_to_send
             )
-
-        # Check to see if we have all the info we need after
-        # sending queries for incomplete infos. There is no point
-        # in sending queries for any infos discard_completed_needed_types
-        # returns here because we just sent queries for them and they
-        # were not answered.
-        self._process_service_infos(incomplete_infos, False)
-
+        )
+        self._process_service_infos(infos_to_send)
         # If all services are filled we are done
         return self._all_services_discovered()
 
