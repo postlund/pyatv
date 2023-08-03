@@ -484,7 +484,10 @@ class ZeroconfMulticastScanner(ZeroconfScanner):
 class ZeroconfUnicastScanner(ZeroconfScanner):
     """Service discovery using zeroconf.
 
-    A ServiceBrowser must be running for all the types we are browsing.
+    A ServiceBrowser should be running for all the types we are browsing,
+    but we will fallback to sending unicast PTR queries for missing types
+    in the event the network is dropping multicast responses for some
+    reason.
     """
 
     def __init__(
