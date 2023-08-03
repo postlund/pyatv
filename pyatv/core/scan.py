@@ -513,10 +513,10 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             question.unicast = True
         self.zeroconf.async_send(out, str(address))
 
-    def _discard_completed_infos_from_needed_types(
+    def _discard_completed_needed_types(
         self, infos: List[AsyncServiceInfo], loaded_from_cache: bool
     ) -> List[AsyncServiceInfo]:
-        """Discard completed infos from needed types."""
+        """Discard needed type that we have info for."""
         zeroconf = self.zeroconf
         incomplete_infos: List[AsyncServiceInfo] = []
         needed_types_by_address = self.needed_types_by_address
@@ -533,9 +533,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         self, infos: List[AsyncServiceInfo], zc_timeout: float
     ) -> bool:
         """Load from cache or send queries."""
-        incomplete_infos = self._discard_completed_infos_from_needed_types(
-            infos, loaded_from_cache=True
-        )
+        incomplete_infos = self._discard_completed_needed_types(infos, True)
         needed_types_by_address = self.needed_types_by_address
 
         # If all services are cached, we are done
@@ -556,9 +554,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
 
         # Check to see if we have all the info we need after
         # sending queries for incomplete infos
-        self._discard_completed_infos_from_needed_types(
-            incomplete_infos, loaded_from_cache=False
-        )
+        self._discard_completed_needed_types(incomplete_infos, False)
 
         # If all services are filled we are done
         return all(not needed for needed in needed_types_by_address.values())
