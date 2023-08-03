@@ -22,7 +22,7 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSOutgoing, DNSPointer, IPVersion, const, current_time_millis
+from zeroconf import DNSOutgoing, DNSPointer, IPVersion, current_time_millis
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _FLAGS_QR_QUERY, _TYPE_PTR
 
