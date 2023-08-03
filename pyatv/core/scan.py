@@ -22,7 +22,13 @@ from typing import (
     cast,
 )
 
-from zeroconf import DNSOutgoing, DNSPointer, DNSQuestion, IPVersion
+from zeroconf import (
+    DNSOutgoing,
+    DNSPointer,
+    DNSQuestion,
+    IPVersion,
+    current_time_millis,
+)
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 from zeroconf.const import _CLASS_IN, _FLAGS_QR_QUERY, _TYPE_PTR
 
@@ -485,10 +491,11 @@ class ZeroconfMulticastScanner(ZeroconfScanner):
     ) -> Tuple[Dict[IPv4Address, List[AsyncServiceInfo]], Dict[str, str]]:
         """Lookup services and aggregate them by address."""
         infos = self._build_service_info_queries()
+        now = current_time_millis()
         requests: List[Awaitable[bool]] = [
             info.async_request(self.zeroconf, zc_timeout)
             for info in infos
-            if not info.load_from_cache(self.zeroconf)
+            if not info.load_from_cache(self.zeroconf, now)
         ]
         if requests:
             await asyncio.gather(*requests)
@@ -579,8 +586,9 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         zeroconf = self.zeroconf
         infos_to_send: List[AsyncServiceInfo] = []
         infos_with_cache: List[AsyncServiceInfo] = []
+        now = current_time_millis()
         for info in infos:
-            if info.load_from_cache(zeroconf):
+            if info.load_from_cache(zeroconf, now):
                 infos_with_cache.append(info)
             else:
                 infos_to_send.append(info)
