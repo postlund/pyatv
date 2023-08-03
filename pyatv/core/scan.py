@@ -515,7 +515,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
     def __init__(
         self,
         aiozc: AsyncZeroconf,
-        hosts: Optional[List[IPv4Address]] = None,
+        hosts: List[IPv4Address],
     ) -> None:
         """Initialize a new scanner."""
         super().__init__(aiozc, hosts)
