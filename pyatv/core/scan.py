@@ -492,10 +492,11 @@ class ZeroconfMulticastScanner(ZeroconfScanner):
         """Lookup services and aggregate them by address."""
         infos = self._build_service_info_queries()
         now = current_time_millis()
+        zeroconf = self.zeroconf
         requests: List[Awaitable[bool]] = [
-            info.async_request(self.zeroconf, zc_timeout)
+            info.async_request(zeroconf, zc_timeout)
             for info in infos
-            if not info.load_from_cache(self.zeroconf, now)
+            if not info.load_from_cache(zeroconf, now)
         ]
         if requests:
             await asyncio.gather(*requests)
