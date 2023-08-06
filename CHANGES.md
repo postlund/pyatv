@@ -1,5 +1,26 @@
 # CHANGES
 
+## 0.13.4 Krusty (2023-08-06)
+
+@bdraco cleaned up in aisle four and made scanning more
+robust in shaky networks, thanks!
+
+**Changes:**
+
+*Other:*
+
+```
+17d130a Fallback to sending unicast PTR queries when multicast is broken or packets are being dropped (#2122)
+b64bdf9 gha: Remove log workflow (#2120)
+```
+
+**All changes:**
+
+```
+17d130a Fallback to sending unicast PTR queries when multicast is broken or packets are being dropped (#2122)
+b64bdf9 gha: Remove log workflow (#2120)
+```
+
 ## 0.13.3 Joe (2023-08-03)
 
 Time for a somewhat minor fix release:
