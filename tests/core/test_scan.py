@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from zeroconf import (
     DNSAddress,
+    DNSOutgoing,
     DNSPointer,
     DNSService,
     DNSText,
@@ -28,6 +29,7 @@ ALL_MDNS_SERVICES = [
     "_mediaremotetv._tcp.local.",
     "_companion-link._tcp.local.",
     "_airport._tcp.local.",
+    "_device_info._tcp.local.",
     "_sleep-proxy._udp.local.",
     "_touch-able._tcp.local.",
     "_appletv-v2._tcp.local.",
@@ -369,12 +371,26 @@ async def test_scan_with_zeroconf_multicast_not_found():
 async def test_scan_with_zeroconf_unicast_not_found():
     aiozc, browser = await _create_zc_with_cache(PTR_RECORDS_ONLY)
     loop = asyncio.get_event_loop()
-    with patch("pyatv.core.scan.AsyncServiceInfo.async_request") as mock_async_request:
+    with patch(
+        "pyatv.core.scan.AsyncServiceInfo.async_request"
+    ) as mock_async_request, patch("zeroconf.Zeroconf.async_send") as mock_async_send:
         results = await scan(loop, timeout=0, aiozc=aiozc, hosts=["127.0.0.1"])
     assert mock_async_request.mock_calls
     for call in mock_async_request.mock_calls:
         # Called with host argument
         assert call[1][2] == "127.0.0.1"
+    calls = mock_async_send.mock_calls
+    assert len(calls) >= 1
+    # We should send a PTR query as a fallback to unicast
+    # which has a target of 127.0.0.1
+    last_call = calls[-1][1]
+    target = last_call[1]
+    assert target == "127.0.0.1"
+    dns_outgoing: DNSOutgoing = last_call[0]
+    assert len(dns_outgoing.questions) == 1
+    question = dns_outgoing.questions[0]
+    assert question.name == "_device-info._tcp.local."
+    assert question.unicast is True
     assert not results
     await browser.async_cancel()
     await aiozc.async_close()
