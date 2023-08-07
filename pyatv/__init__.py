@@ -19,7 +19,8 @@ from pyatv.core.scan import (
     BaseScanner,
     MulticastMdnsScanner,
     UnicastMdnsScanner,
-    ZeroconfScanner,
+    ZeroconfMulticastScanner,
+    ZeroconfUnicastScanner,
 )
 from pyatv.protocols import PROTOCOLS
 from pyatv.support import http
@@ -54,11 +55,11 @@ async def scan(
     scanner: BaseScanner
     if aiozc:
         if hosts:
-            scanner = ZeroconfScanner(
+            scanner = ZeroconfUnicastScanner(
                 aiozc, hosts=[IPv4Address(host) for host in hosts]
             )
         else:
-            scanner = ZeroconfScanner(aiozc)
+            scanner = ZeroconfMulticastScanner(aiozc)
     else:
         if hosts:
             scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
