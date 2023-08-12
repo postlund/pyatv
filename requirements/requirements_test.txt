@@ -15,5 +15,5 @@ pydocstyle==6.3.0
 mypy==1.4.1
 mypy-protobuf==3.4.0
 typed-ast==1.5.5
-types-protobuf==4.23.0.3
+types-protobuf==4.24.0.0
 types-requests==2.31.0.2
