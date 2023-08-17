@@ -12,3 +12,15 @@ updates:
   - postlund
   labels:
   - dependencies
+- package-ecosystem: docker
+  directory: /
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 3
+  reviewers:
+    - postlund
+  assignees:
+    - postlund
+  labels:
+    - dependencies
