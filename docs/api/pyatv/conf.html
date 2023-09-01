@@ -12,7 +12,7 @@ link_group: api
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pyatv" href="index">pyatv</a></code></li>
+<li><code><a title="pyatv" href=".">pyatv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -81,6 +81,7 @@ provide configurations for you.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -89,6 +90,7 @@ provide configurations for you.</p>
 <li><code><a title="pyatv.conf.ManualService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.conf.ManualService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>
@@ -116,6 +118,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.interface.BaseConfig.add_service" href="interface#pyatv.interface.BaseConfig.add_service">add_service</a></code></li>
 <li><code><a title="pyatv.interface.BaseConfig.address" href="interface#pyatv.interface.BaseConfig.address">address</a></code></li>
 <li><code><a title="pyatv.interface.BaseConfig.all_identifiers" href="interface#pyatv.interface.BaseConfig.all_identifiers">all_identifiers</a></code></li>
+<li><code><a title="pyatv.interface.BaseConfig.apply" href="interface#pyatv.interface.BaseConfig.apply">apply</a></code></li>
 <li><code><a title="pyatv.interface.BaseConfig.deep_sleep" href="interface#pyatv.interface.BaseConfig.deep_sleep">deep_sleep</a></code></li>
 <li><code><a title="pyatv.interface.BaseConfig.device_info" href="interface#pyatv.interface.BaseConfig.device_info">device_info</a></code></li>
 <li><code><a title="pyatv.interface.BaseConfig.get_service" href="interface#pyatv.interface.BaseConfig.get_service">get_service</a></code></li>
@@ -149,6 +152,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -157,6 +161,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.conf.ManualService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.conf.ManualService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>
@@ -180,6 +185,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -188,6 +194,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.conf.ManualService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.conf.ManualService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>
@@ -217,6 +224,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.interface.BaseService" href="interface#pyatv.interface.BaseService">BaseService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.interface.BaseService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -225,6 +233,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.interface.BaseService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.interface.BaseService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.interface.BaseService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>
@@ -248,6 +257,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -256,6 +266,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.conf.ManualService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.conf.ManualService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>
@@ -279,6 +290,7 @@ AirPlay.</p>
 <ul class="hlist">
 <li><code><b><a title="pyatv.conf.ManualService" href="#pyatv.conf.ManualService">ManualService</a></b></code>:
 <ul class="hlist">
+<li><code><a title="pyatv.conf.ManualService.apply" href="interface#pyatv.interface.BaseService.apply">apply</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.enabled" href="interface#pyatv.interface.BaseService.enabled">enabled</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.identifier" href="interface#pyatv.interface.BaseService.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.merge" href="interface#pyatv.interface.BaseService.merge">merge</a></code></li>
@@ -287,6 +299,7 @@ AirPlay.</p>
 <li><code><a title="pyatv.conf.ManualService.properties" href="interface#pyatv.interface.BaseService.properties">properties</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.protocol" href="interface#pyatv.interface.BaseService.protocol">protocol</a></code></li>
 <li><code><a title="pyatv.conf.ManualService.requires_password" href="interface#pyatv.interface.BaseService.requires_password">requires_password</a></code></li>
+<li><code><a title="pyatv.conf.ManualService.settings" href="interface#pyatv.interface.BaseService.settings">settings</a></code></li>
 </ul>
 </li>
 </ul>

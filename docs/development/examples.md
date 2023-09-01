@@ -8,7 +8,7 @@ files:
   - name: auto_connect.py
     description: Demonstrates the simple `auto_connect` helper.
   - name: connect_with_credentials.py
-    name: Restores credentials for a device before connecting.
+    description: Restores credentials for a device before connecting.
   - name: manual_connect.py
     description: Manual creation of a configuration used to connect to a device.
   - name: pairing.py
@@ -17,6 +17,8 @@ files:
     description: Play a video from URL using AirPlay.
   - name: scan_and_connect.py
     description: Scans for devices, picks the first one and connects to it.
+  - name: storage.py
+    description: Connect to a device using storage API.
   - name: stream.py
     description: Stream audio file to an AirPlay/RAOP receiver.
   - name: tutorial.py

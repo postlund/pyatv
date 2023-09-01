@@ -161,11 +161,16 @@ async def main():
 asyncio.run(main())  # asyncio.run requires python 3.7+
 ```
 
-## Storing credentials
+## Storing Credentials
 
-Credentials are not stored persistently by pyatv. It is up to the developer to implement
-a solution for that. After pairing, make sure to save at least one
-identifier and credentials for all services somewhere:
+Since pyatv 0.14.0, credentials and passwords are managed by a storage module. This means that
+credentials may be stored automatically to for instance a file or cloud service after pairing. It
+also allows for loading of said properties automatically. Please see
+[Storage and Settings](../storage) for details on using a storage module.
+
+### Legacy Storing Credentials
+
+Prior to storage support, credentials would be stored like this:
 
 ```python
 identifier = const.identifier
@@ -183,24 +188,38 @@ How to restore credentials is described in [here](#restoring-credentials).
 
 ## Protocol specific settings
 
-Some protocols support protocol specific setting, e.g. a special name or identifier.
-This section covers protocol specific settings, which at this time is only supported by `DMAP`.
+Some protocols support protocol specific setting, e.g. a special name or
+identifier. Prior to pyatv 0.14.0 these settings would be passed as
+additional arguments to {% include api i="pyatv.pair" %}. Settings are now
+stored in storage, so to change these settings you should update settings
+for the device in storage instead.
 
-### DMAP specifics
+### DMAP specifics (deprecated)
+
+*Note: Settings should be set via the settings API as of pyatv 0.14.0. Please refer to
+[Changing Settings](../storage/#changing-settings) for help with changing settings. The table below
+refers to the corresponding setting in storage (when applicable and supported).*
 
 The following extra settings are supported by `DMAP`:
 
-| Setting | Value |
-| ------- | ----- |
-| name | Name of the device that is exposed on the network (what you see on your Apple TV). |
-| pairing_guid | Custom value for `pairing_guid` (credentials) with format `0xXXXXXXXXXXXXXXXX`. |
-| zeroconf | If you want to use a custom `zeroconf.Zeroconf` instance, you can pass it here. |
-| addresses | List of local addresses to broadcast Zeroconf service on, e.g. `["10.0.0.1", "192.168.1.2"]`.
+| Setting | Value | Storage |
+| ------- | ----- | ------- |
+| name | Name of the device that is exposed on the network (what you see on your Apple TV). | {% include api i="settings.InfoSettings.name" %}
+| pairing_guid | Custom value for `pairing_guid` (credentials) with format `0xXXXXXXXXXXXXXXXX`. | Not supported (yet)
+| zeroconf | If you want to use a custom `zeroconf.Zeroconf` instance, you can pass it here. | Not supported (yet)
+| addresses | List of local addresses to broadcast Zeroconf service on, e.g. `["10.0.0.1", "192.168.1.2"]`. | Not supported (yet)
 
-You pass these via `kwargs` to {% include api i="pyatv.pair" %}:
+Apply setting according to:
 
 ```python
+# Using pyatv.pair directly
 pairing = await pyatv.pair(config, Protocol.DMAP, name="my remote")
+
+# Updating setting, then calling pyatv.pair
+settings = await storage.get_settings(conf)
+settings.info.name = "my remote"
+
+pairing = await pyatv.pair(config, Protocol.DMAP)
 ```
 
 # Connect
@@ -232,7 +251,10 @@ will be used automatically.*
 
 ## Restoring credentials
 
-Restoring credentials is performed with {% include api i="conf.AppleTV.set_credentials" %}:
+When using a storage module, credentials will be loaded automatically without any additional code.
+See [Storage and Settings](../storage) for details on settings that up.
+
+Legacy method of restoring credentials is performed with {% include api i="conf.AppleTV.set_credentials" %}:
 
 ```python
 # Restored from file

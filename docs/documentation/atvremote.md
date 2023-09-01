@@ -143,6 +143,8 @@ $ atvremote -n "Living Room" <some command>
 
 ## Manually specifying a device
 
+*Unless you know exactly what you are doing, just ignore this section.*
+
 It is possible to bypass the automatic scanning that `atvremote` performs
 by passing the `--manual` flag. This is convenient if you rely on an external
 scanning process or to shorten the turn-around time during development testing.
@@ -187,24 +189,26 @@ Pairing seems to have succeeded, yey!
 You may now use these credentials: xxxx
 ```
 
-Which protocols a device supports can be seen with `scan`. But in general you need to pair
-either `mrp` (devices running tvOS) or `dmap` (Apple TV 3 and earlier). If you also want to
-stream video, you can pair `airplay` as well. The procedure is the same for all of them, just
-change the argument provided to `--protocol`.
+What protocols a device supports can be seen with `scan`. Generally you should pair all protocols
+the device supports (beware of protocols marked with *Disabled*: ignore those). Just repeat the
+process multiple times, just changing the protocol (`airplay`, `companion`, `dmap`, `mrp` or
+`raop`).
 
+*Note: atvremote will automatically store credentials after paring, meaning you do not have to
+manually specify them as described in the sections below anymore. See
+[Storage and Settings](#storage-and-settings) for more details.*
 ## Credentials
 
-Once you have paired and received credentials, you must provide said credentials to `atvremote`
-via the `--xxx-credentials` flags. Replace `xxx` with either `mrp`, `dmap` or `airplay`.  You
+Once you have paired and received credentials, you may provide said credentials to `atvremote`
+via the `--xxx-credentials` flags. Replace `xxx` with a protocol, e.g. `mrp`, `dmap` or `airplay`.  You
 may specify multiple credentials:
 
 ```shell
 $ atvremote -n Kitchen --mrp-credentials abcd --airplay-credentials 1234 playing
 ```
 
-In the future, `atvremote` will likely store these automatically for you. But as of right now, you
-have to manage the credentials yourself. Follow progress at
-{% include issue no="243" %}.
+Manually specifying credentials is no longer needed as `atvrmote` stores credentials persistently
+in a file.
 
 ## Password
 
@@ -228,6 +232,129 @@ Device state: Paused
 ```
 
 Updates will be displayed when they happen. Just press ENTER to stop.
+
+# Storage and Settings
+
+By default, `atvremote` uses file based storage ({% include api i="storage/file_storage.FileStorage" %})
+and saves settings and credentials automatically to `$HOME/.pyatv.conf`. This means that you don't have
+to manually provide things like credentials and passwords once they have been saved to storage.
+
+Credentials are saved to the storage automatically after pairing a protocol, i.e. you only need to pair
+a protocol once and never care about credentials for that protocol again. Passwords are saved to storage
+as well when using one of the `--xxx-password` arguments, thus only needs to be issued once.
+
+Both credentials and passwords will be displayed when performing a scan:
+
+```raw
+$ atvremote scan
+       Name: Pierre's AirPort Express
+   Model/SW: AirPort Express (gen 2), AirPortOS 7.8.1
+    Address: 10.0.0.5
+        MAC: XX:XX:XX:XX:XX:XX
+ Deep Sleep: False
+Identifiers:
+ - XX:XX:XX:XX:XX:XX
+ - XXXXXXXXXXXX
+Services:
+ - Protocol: AirPlay, Port: 7000, Credentials: creds_airplay, Requires Password: False, Password: airplay_password, Pairing: NotNeeded
+ - Protocol: RAOP, Port: 7000, Credentials: creds_raop, Requires Password: False, Password: raop_password, Pairing: NotNeeded
+```
+
+You may also look at the settings for a specific device using `print_settings`:
+
+```
+$ atvremote -s 10.0.0.5 print_settings
+info.name = pyatv (str)
+info.mac = 02:70:79:61:74:76 (str)
+info.model = iPhone10,6 (str)
+info.device_id = FF:70:79:61:74:76 (str)
+info.os_name = iPhone OS (str)
+info.os_build = 18G82 (str)
+info.os_version = 14.7.1 (str)
+protocols.airplay.identifier = 58:D3:49:34:A4:B4 (str, NoneType)
+protocols.airplay.credentials = None (str, NoneType)
+protocols.airplay.password = None (str, NoneType)
+protocols.companion.identifier = None (str, NoneType)
+protocols.companion.credentials = None (str, NoneType)
+protocols.dmap.identifier = None (str, NoneType)
+protocols.dmap.credentials = None (str, NoneType)
+protocols.mrp.identifier = None (str, NoneType)
+protocols.mrp.credentials = None (str, NoneType)
+protocols.raop.identifier = 58D34934A4B4 (str, NoneType)
+protocols.raop.credentials = None (str, NoneType)
+protocols.raop.password = None (str, NoneType)
+```
+
+Please note that output may vary depending on the version of pyatv you are using.
+The output is agnostic to the underlying storage, i.e. the format will look the
+same no matter what storage is used. The following sections describes how to
+work with settings in more detail.
+
+## Configuring Storage Module
+
+If you want to change location of your storage, use `--storage-filename` and specify another file.
+It is also possible to disable file based storage altogether with `--storage none` (corresponding
+to how `atvremote` worked before storage support was added).
+
+At some point pyatv will likely support using custom storage modules as well,
+but that is currently not supported.
+
+## Importing Existing Settings
+
+In case you want to "import" credentials you already have, just run `atvremote` with those
+credentials and they will be saved to storage automatically. For example, running:
+
+```raw
+$ atvrmote -s <ip> --airplay-credentials xxx playing
+```
+
+Would save AirPlay credentials. The same thing can be done with passwords as well:
+
+```raw
+$ atvrmote -s <ip> --raop-password foobar playing
+```
+
+Would save RAOP password to storage. If you want to unset/remote credentials or password, just
+pass an empty string:
+
+```raw
+$ atvrmote -s <ip> --raop-password "" playing
+```
+
+## Changing Individual Settings
+
+To save individual settings, there is a command named `change_setting`. It
+accepts a "path" to the setting in the same format as printed by `print_setting`.
+Assume you want to change the OS build, look at the output for that setting:
+
+```raw
+info.os_build = 18G82 (str)
+```
+
+The "path" to this setting is *info.os_build* and it accepts a string (`str`)
+as value type. To change this setting, run:
+
+```raw
+$ atvremote -s 10.0.10.84 change_setting=info.os_build,19G82
+```
+
+If a setting lists `NoneType` as supported type, you can unset the value
+like this:
+
+```raw
+$ atvremote -s 10.0.10.84 unset_setting=protocols.raop.password
+```
+
+## Removing Settings
+
+To remove all settings for a device (reverting to defaults), run:
+
+```raw
+$ atvrmote -s <ip> remove_settings
+```
+
+Please beware that you lose everything saved for that device, including
+credentials and passwords!
 
 # Working with commands
 

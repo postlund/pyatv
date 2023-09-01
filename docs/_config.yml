@@ -74,6 +74,8 @@ page_links:
       title: Listeners
     - link: /development/stream/
       title: Stream
+    - link: /development/storage/
+      title: Storage
     - link: /development/apps/
       title: Apps
     - link: /development/audio/
