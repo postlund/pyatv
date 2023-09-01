@@ -16,7 +16,6 @@ from pyatv.core.scan import (
 )
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
-    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -52,12 +51,7 @@ from pyatv.protocols.raop.protocols import (
 )
 from pyatv.support import net
 from pyatv.support.device_info import lookup_model, lookup_os
-from pyatv.support.http import (
-    ClientSessionManager,
-    HttpConnection,
-    StaticFileWebServer,
-    http_connect,
-)
+from pyatv.support.http import HttpConnection, StaticFileWebServer, http_connect
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -297,6 +291,7 @@ def setup(  # pylint: disable=too-many-locals
             core.loop,
             core.config,
             raop_service,
+            core.settings,
             core.device_listener,
             core.session_manager,
             core.takeover,
@@ -314,7 +309,9 @@ def setup(  # pylint: disable=too-many-locals
     else:
         _LOGGER.debug("Remote control channel is supported")
 
-        session = AP2Session(str(core.config.address), core.service.port, credentials)
+        session = AP2Session(
+            str(core.config.address), core.service.port, credentials, core.settings.info
+        )
 
         # A protocol requires its corresponding service to function, so add a
         # dummy one if we don't have one yet
@@ -335,6 +332,7 @@ def setup(  # pylint: disable=too-many-locals
                 core.loop,
                 core.config,
                 mrp_service,
+                core.settings,
                 core.device_listener,
                 core.session_manager,
                 core.takeover,
@@ -379,14 +377,6 @@ def setup(  # pylint: disable=too-many-locals
         )
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return AirPlayPairingHandler(
-        config, service, session_manager, get_preferred_auth_type(service), **kwargs
-    )
+    return AirPlayPairingHandler(core, get_preferred_auth_type(core.service), **kwargs)

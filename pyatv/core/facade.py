@@ -21,6 +21,7 @@ from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
+from pyatv.settings import Settings
 from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
@@ -607,6 +608,7 @@ class FacadeAppleTV(interface.AppleTV):
         config: interface.BaseConfig,
         session_manager: ClientSessionManager,
         core_dispatcher: CoreStateDispatcher,
+        settings: Settings,
     ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
@@ -630,6 +632,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Audio: FacadeAudio(core_dispatcher),
             interface.Keyboard: FacadeKeyboard(core_dispatcher),
         }
+        self._settings = settings
         self._shield_everything()
 
     def _shield_everything(self):
@@ -745,6 +748,12 @@ class FacadeAppleTV(interface.AppleTV):
             taken_over.append(relayer)
 
         return _release
+
+    @property  # type: ignore
+    @shield.guard
+    def settings(self) -> Settings:
+        """Return device settings used by pyatv."""
+        return self._settings
 
     @property  # type: ignore
     @shield.guard

@@ -5,10 +5,11 @@ import binascii
 import functools
 import logging
 from os import environ, path
-from typing import Any, Union
+from typing import Any, List, Sequence, Union
 import warnings
 
 from google.protobuf.text_format import MessageToString
+from pydantic import BaseModel
 
 import pyatv
 from pyatv import exceptions
@@ -161,3 +162,54 @@ def shift_hex_identifier(identifier: str) -> str:
     if identifier.isupper():
         shifted = shifted.upper()
     return shifted + rest
+
+
+def stringify_model(model: BaseModel) -> Sequence[str]:
+    """Recursively traverse a pydantic model and print values.
+
+    This method will traverse a model and present each field with a "dotted" string
+    path, current value and data type. It is supposed to be used with pyatv.settings.
+    It is assumed optional field does not contain other models (only basic types).
+    """
+
+    def _recurse_into(
+        current_model: BaseModel, prefix: str, output: List[str]
+    ) -> Sequence[str]:
+        for name, field in current_model.model_fields.items():
+            if field.annotation.__dict__.get("__origin__") is Union:
+                field_types = ", ".join(
+                    arg.__name__ for arg in field.annotation.__args__
+                )
+                output.append(
+                    f"{prefix}{name} = {getattr(current_model, name)} ({field_types})"
+                )
+            elif BaseModel in field.annotation.__mro__:
+                _recurse_into(
+                    getattr(current_model, name), (prefix or "") + f"{name}.", output
+                )
+            elif field.default is not None:
+                output.append(
+                    f"{prefix}{name} = "
+                    f"{getattr(current_model, name)} "
+                    f"({field.annotation.__name__})"
+                )
+        return output
+
+    return _recurse_into(model, "", [])
+
+
+def update_model_field(
+    model: BaseModel, field: str, value: Union[str, int, float, None]
+) -> None:
+    """Update a field in a model using dotting string path."""
+    splitted_path = field.split(".", maxsplit=1)
+    next_field = splitted_path[0]
+
+    if not hasattr(model, next_field):
+        raise AttributeError(f"{model} has no field {next_field}")
+
+    if len(splitted_path) > 1:
+        update_model_field(getattr(model, next_field), splitted_path[1], value)
+    else:
+        model.model_validate({field: value})
+        setattr(model, field, value)

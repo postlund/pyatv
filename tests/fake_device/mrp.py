@@ -15,6 +15,7 @@ from pyatv.protocols.mrp.protobuf import CommandInfo_pb2 as cmd
 from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protobuf import SendCommandResultMessage as scr
 from pyatv.protocols.mrp.server_auth import MrpServerAuth
+from pyatv.settings import InfoSettings
 from pyatv.support import chacha20, log_protobuf, variant
 
 from tests.utils import stub_sleep
@@ -407,10 +408,12 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         log_protobuf(_LOGGER, ">> Send: Protobuf", message)
 
     def _send_device_info(self, identifier=None, update=False):
-        resp = messages.device_information(DEVICE_NAME, DEVICE_UID, update=update)
+        info = InfoSettings()
+        info.name = DEVICE_NAME
+        info.os_build = BUILD_NUMBER
+        resp = messages.device_information(info, DEVICE_UID, update=update)
         if identifier:
             resp.identifier = identifier
-        resp.inner().systemBuildVersion = BUILD_NUMBER
         resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
         resp.inner().deviceUID = DEVICE_UID
         resp.inner().modelID = DEVICE_MODEL

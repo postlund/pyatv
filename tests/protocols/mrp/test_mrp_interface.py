@@ -10,6 +10,7 @@ from pyatv import exceptions
 from pyatv.core import UpdatedState
 from pyatv.interface import ClientSessionManager, OutputDevice
 from pyatv.protocols.mrp import MrpAudio, MrpMetadata, messages, player_state, protobuf
+from pyatv.settings import InfoSettings
 
 from tests.utils import faketime
 
@@ -47,7 +48,10 @@ async def grouped_devices_changed(protocol, is_leader, is_proxy, grouped_devices
 
 @pytest.fixture(name="audio")
 def audio_fixture(protocol_mock, mrp_state_dispatcher):
-    device_info = messages.device_information("test", "id")
+    info = InfoSettings()
+    info.name = "test"
+
+    device_info = messages.device_information(info, "id")
     device_info.inner().deviceUID = DEVICE_UID
     protocol_mock.device_info = device_info
     yield MrpAudio(protocol_mock, mrp_state_dispatcher)

@@ -50,7 +50,7 @@ from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.collections import dict_merge
-from pyatv.support.http import ClientSessionManager, HttpSession
+from pyatv.support.http import HttpSession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -706,12 +706,6 @@ def setup(  # pylint: disable=too-many-locals
     yield SetupData(Protocol.DMAP, _connect, _close, _device_info, interfaces, features)
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return DmapPairingHandler(config, service, session_manager, loop, **kwargs)
+    return DmapPairingHandler(core, **kwargs)

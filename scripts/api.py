@@ -53,6 +53,8 @@ def generate():
     """Generate API reference."""
     for output_file, html in _api_modules():
         print("Generating", output_file)
+        if not os.path.exists(os.path.dirname(output_file)):
+            os.mkdir(os.path.dirname(output_file))
         with open(output_file, "wb") as f:
             f.write(html.encode("utf-8"))
 

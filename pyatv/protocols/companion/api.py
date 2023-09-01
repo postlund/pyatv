@@ -178,6 +178,7 @@ class CompanionAPI(
         """Send system information to device."""
         _LOGGER.debug("Sending system information")
         creds = parse_credentials(self.core.service.credentials)
+        info = self.core.settings.info
 
         # Bunch of semi-random values here...
         await self._send_command(
@@ -188,11 +189,12 @@ class CompanionAPI(
                 "_clFl": 128,
                 "_i": "cafecafecafe",  # TODO: Figure out what to put here
                 "_idsID": creds.client_id,
-                "_pubID": "aa:bb:cc:dd:ee:ff",
+                # Not really device id here, but better then anything...
+                "_pubID": info.device_id,
                 "_sf": 256,  # Status flags?
                 "_sv": "170.18",  # Software Version (I guess?)
-                "model": "iPhone14,3",
-                "name": "pyatv",
+                "model": info.model,
+                "name": info.name,
             },
         )
 

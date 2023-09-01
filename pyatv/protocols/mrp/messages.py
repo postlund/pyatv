@@ -7,6 +7,7 @@ from uuid import uuid4
 from pyatv import const
 from pyatv.auth import hap_tlv8
 from pyatv.protocols.mrp import protobuf
+from pyatv.settings import InfoSettings
 
 
 def create(message_type, error_code=0, identifier=None):
@@ -20,7 +21,7 @@ def create(message_type, error_code=0, identifier=None):
     return message
 
 
-def device_information(name, identifier, update=False):
+def device_information(info_settings: InfoSettings, identifier, update=False):
     """Create a new DEVICE_INFO_MESSAGE."""
     msg_type = (
         protobuf.DEVICE_INFO_UPDATE_MESSAGE if update else protobuf.DEVICE_INFO_MESSAGE
@@ -32,14 +33,14 @@ def device_information(name, identifier, update=False):
     info.applicationBundleVersion = "344.28"
     info.lastSupportedMessageType = 108
     info.localizedModelName = "iPhone"
-    info.name = name
+    info.name = info_settings.name
     info.protocolVersion = 1
     info.sharedQueueVersion = 2
     info.supportsACL = True
     info.supportsExtendedMotion = True
     info.supportsSharedQueue = True
     info.supportsSystemPairing = True
-    info.systemBuildVersion = "18A393"
+    info.systemBuildVersion = info_settings.os_build
     info.systemMediaApplication = "com.apple.TVMusic"
     info.uniqueIdentifier = identifier
     info.deviceClass = protobuf.DeviceClass.iPhone

@@ -4,9 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from pyatv import Core
 from pyatv.const import KeyboardFocusState
-from pyatv.core import MessageDispatcher, ProtocolStateDispatcher, UpdatedState
+from pyatv.core import Core, MessageDispatcher, ProtocolStateDispatcher, UpdatedState
 from pyatv.protocols.companion import CompanionKeyboard
 
 pytestmark = pytest.mark.asyncio

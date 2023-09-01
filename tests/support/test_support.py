@@ -5,8 +5,11 @@ from dataclasses import dataclass
 import logging
 import math
 import os
+from typing import Optional
 from unittest.mock import MagicMock, patch
 
+from deepdiff import DeepDiff
+from pydantic import BaseModel, Field, ValidationError
 import pytest
 
 from pyatv import exceptions
@@ -18,6 +21,8 @@ from pyatv.support import (
     map_range,
     prettydataclass,
     shift_hex_identifier,
+    stringify_model,
+    update_model_field,
 )
 
 
@@ -246,3 +251,90 @@ def test_prettydataclass(max_length: int, data_count: int, expected: str):
         str(Dummy(data=data_count * "a", raw=data_count * b"a"))
         == f"Dummy(data={expected}, raw=b'{expected}')"
     )
+
+
+# Related to pydantic
+
+
+class SubModel(BaseModel):
+    a: int = 1
+    b: str = "test"
+
+
+class TopModel(BaseModel):
+    test: int = 1234
+    sub_model: SubModel = Field(default_factory=SubModel)
+    foobar: str = "hej"
+
+
+class ModelWithOptionalField(BaseModel):
+    a: Optional[str] = "test"
+
+
+def test_dump_simple_model():
+    assert not DeepDiff(stringify_model(SubModel()), ["a = 1 (int)", "b = test (str)"])
+
+
+def test_dump_with_submodel():
+    assert not DeepDiff(
+        stringify_model(TopModel()),
+        [
+            "test = 1234 (int)",
+            "sub_model.a = 1 (int)",
+            "sub_model.b = test (str)",
+            "foobar = hej (str)",
+        ],
+    )
+
+
+def test_dump_with_optional_field():
+    assert not DeepDiff(
+        stringify_model(ModelWithOptionalField()), ["a = test (str, NoneType)"]
+    )
+
+
+def test_dump_with_changed_values():
+    model = TopModel()
+    model.test = 555
+    model.sub_model.a = 2
+    print(stringify_model(model))
+    assert not DeepDiff(
+        stringify_model(model),
+        [
+            "test = 555 (int)",
+            "sub_model.a = 2 (int)",
+            "sub_model.b = test (str)",
+            "foobar = hej (str)",
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("a", 10),
+        ("b", "test"),
+    ],
+)
+def test_update_field_in_simple_model(field, value):
+    model = SubModel()
+    update_model_field(model, field, value)
+    assert getattr(model, field) == value
+
+
+def test_update_missing_field_raises():
+    with pytest.raises(AttributeError):
+        update_model_field(SubModel(), "missing", 1)
+
+
+def test_update_field_in_submodel():
+    model = TopModel()
+    update_model_field(model, "sub_model.a", 1234)
+    assert model.sub_model.a == 1234
+
+
+def test_validate_input_before_assigning():
+    model = SubModel()
+    with pytest.raises(ValidationError):
+        update_model_field(model, "a", "test")
+    assert model.a == 1

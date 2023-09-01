@@ -32,7 +32,6 @@ from pyatv.core.scan import (
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
     Audio,
-    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -61,7 +60,7 @@ from pyatv.protocols.raop.protocols import StreamContext, airplayv1, airplayv2
 from pyatv.protocols.raop.stream_client import PlaybackInfo, RaopListener, StreamClient
 from pyatv.support.collections import dict_merge
 from pyatv.support.device_info import lookup_model, lookup_os
-from pyatv.support.http import ClientSessionManager, HttpConnection, http_connect
+from pyatv.support.http import HttpConnection, http_connect
 from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata, merge_into
 from pyatv.support.rtsp import RtspSession
 
@@ -587,14 +586,6 @@ def setup(  # pylint: disable=too-many-locals
     )
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return AirPlayPairingHandler(
-        config, service, session_manager, get_preferred_auth_type(service), **kwargs
-    )
+    return AirPlayPairingHandler(core, get_preferred_auth_type(core.service), **kwargs)

@@ -17,6 +17,7 @@ from pyatv.interface import BaseService
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.auth import MrpPairVerifyProcedure
 from pyatv.protocols.mrp.connection import AbstractMrpConnection
+from pyatv.settings import InfoSettings
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,6 +107,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         connection: AbstractMrpConnection,
         srp: SRPAuthHandler,
         service: BaseService,
+        info: InfoSettings,
     ) -> None:
         """Initialize a new MrpProtocol."""
         super().__init__()
@@ -113,6 +115,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         self.connection.listener = self
         self.srp = srp
         self.service = service
+        self.info = info
         self.device_info: Optional[protobuf.ProtocolMessage] = None
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._outstanding: Dict[str, OutstandingMessage] = {}
@@ -140,7 +143,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
             # The first message must always be DEVICE_INFORMATION, otherwise the
             # device will not respond with anything
             self.device_info = await self.send_and_receive(
-                messages.device_information("pyatv", self.srp.pairing_id.decode())
+                messages.device_information(self.info, self.srp.pairing_id.decode())
             )
 
             # Distribute the device information to all listeners (as the
