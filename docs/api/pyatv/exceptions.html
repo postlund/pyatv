@@ -12,7 +12,7 @@ link_group: api
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pyatv" href="index">pyatv</a></code></li>
+<li><code><a title="pyatv" href=".">pyatv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -87,6 +87,9 @@ link_group: api
 <h4><code><a title="pyatv.exceptions.ProtocolError" href="#pyatv.exceptions.ProtocolError">ProtocolError</a></code></h4>
 </li>
 <li>
+<h4><code><a title="pyatv.exceptions.SettingsError" href="#pyatv.exceptions.SettingsError">SettingsError</a></code></h4>
+</li>
+<li>
 <h4><code><a title="pyatv.exceptions.UnknownMediaKindError" href="#pyatv.exceptions.UnknownMediaKindError">UnknownMediaKindError</a></code></h4>
 </li>
 <li>
@@ -105,7 +108,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Local exceptions used by library.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L127" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L1-L131" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -149,7 +152,7 @@ link_group: api
 <dd>
 <section class="desc"><p>Thrown when calling a blocked method.</p>
 <p>Typically, public interface methods (e.g. any method available via the object
-returned by <code><a title="pyatv.connect" href="index#pyatv.connect">connect()</a></code>) becomes blocked after either calling close or because
+returned by <code><a title="pyatv.connect" href="#pyatv.connect">connect()</a></code>) becomes blocked after either calling close or because
 the connection was closed for some other reason.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L113-L119" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
@@ -423,6 +426,19 @@ that is not covered by another exception is covered by this exception.</p></sect
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="pyatv.exceptions.HttpError" href="#pyatv.exceptions.HttpError">HttpError</a></li>
+</ul>
+</dd>
+<dt id="pyatv.exceptions.SettingsError"><code class="flex name class">
+<span>class <span class="ident">SettingsError</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Raised when an error related to settings happens.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/exceptions.py#L130-L131" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
 </ul>
 </dd>
 <dt id="pyatv.exceptions.UnknownMediaKindError"><code class="flex name class">

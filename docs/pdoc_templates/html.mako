@@ -12,7 +12,14 @@
     if not isinstance(d, pdoc.Doc) or isinstance(d, pdoc.External) and not external_links:
         return name
     url = d.url(relative_to=module, link_prefix=link_prefix,
-                top_ancestor=not show_inherited_members).replace(".html", "")
+                top_ancestor=not show_inherited_members).replace(".html", "").replace("index", "")
+
+    # Ugly, ugly hack to make navigation working in submodules...
+    if url == "":
+      if len(d.qualname.split(".")) == 1:
+        url = "."
+      else:
+        url = os.path.relpath(d._url().replace("/index.html", ".html"), module.url())[3:].replace(".html", "")
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
   def const_link(refname):
@@ -252,7 +259,23 @@
           <h3>Class variables</h3>
           <dl>
           % for v in class_vars:
-              <dt id="${v.refname}"><code class="name">var ${ident(v.name)}</code></dt>
+              <%
+                  var_type = show_type_annotations and v.type_annotation(link=link) or ''
+                  if var_type:
+                      var_type = insert_union_types(var_type)
+
+                  # Try to extract value from enums and pydantic models
+                  var_value = ""
+                  if any(cls.name.startswith("enum.") for cls in mro):
+                    var_value = f" = {getattr(c.obj, v.name).value}"
+                  elif any(cls.name.startswith("pydantic.main.BaseModel") for cls in mro):
+                    field_info = c.obj.model_fields[v.name]
+
+                    # Ignore fields that are pydantic models as they produce unnecessary output
+                    if "__pydantic_serializer__" not in dir(field_info.annotation):
+                      var_value = f" = {field_info.default}"
+              %>
+              <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${var_type}${var_value}</code></dt>
               <dd>${show_desc(v)}</dd>
           % endfor
           </dl>
@@ -328,6 +351,12 @@
 
     <h1>Index</h1>
     ${extract_toc(module.docstring) if extract_module_toc_into_sidebar else ''}
+
+    % if "__pdoc_dev_page__" in dir(module.obj):
+    This module has additional documentation
+    <a title="test" href=${f"{module.obj.__pdoc_dev_page__}"}>here</a>.
+    % endif
+
     <ul id="index">
     % if supermodule:
     <li><h3>Super-module</h3>

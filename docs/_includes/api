@@ -1,9 +1,10 @@
 {%- assign module = include.i | split: "." | first -%}
 {%- if module == "pyatv" -%}
   {%- assign module = "" -%}
-  {%- assign path = "#" | append: include.i -%}
+  {%- assign path = "#" | append: include.i | replace: "/", "." -%}
 {%- else -%}
-  {%- assign path = "#pyatv." | append: include.i -%}
+  {%- assign path = "#pyatv." | append: include.i | replace: "/", "." -%}
 {%- endif -%}
 {%- assign url = '/api/' | append: module | append: path | relative_url -%}
-{{ '<a href="URL">PATH</a>' | replace: "URL", url | replace: "PATH", include.i }}
+{%- assign path = include.i | replace: "/", "." -%}
+{{ '<a href="URL">PATH</a>' | replace: "URL", url | replace: "PATH", path }}

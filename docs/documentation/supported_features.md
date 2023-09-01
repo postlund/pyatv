@@ -76,6 +76,8 @@ This is the general feature list provided by the external interface.
 | Launch application                                              | [Doc](../../development/apps), {% include api i="interface.Apps" %}
 | --------------------------------------------------------------- | --------- |
 | List installed apps                                             | [Doc](../../development/apps), {% include api i="interface.Apps" %}
+| --------------------------------------------------------------- | --------- |
+| Storage                                                         | [Doc](../../development/storage), {% include api i="interface.Storage" %}
 
 # Core Features
 
@@ -86,6 +88,7 @@ Some features are provided generally by pyatv and not bound to any particular pr
 * Device information via information from service discovery ([Device Information](../concepts#device-information))
 * Set up of protocols based on provided configuration
 * Callbacks when connection is lost ([Device Updates](../../development/listeners#device-updates))
+* Storage API for storing settings and credentials somewhere, e.g. file or a cloud service ([Storage and Settings](../../development/storage))
 
 # Protocols per Device
 

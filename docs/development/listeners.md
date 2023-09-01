@@ -11,7 +11,7 @@ link_group: development
 
 # Listeners
 
-In some cases it's not appropriate to contiuously poll the device for information.
+In some cases it's not appropriate to continuously poll the device for information.
 What is currently playing should be updated instantly for instance. This is supported
 via callbacks using a `listener`.
 

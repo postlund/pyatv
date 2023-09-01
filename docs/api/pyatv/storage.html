@@ -1,0 +1,187 @@
+---
+layout: template
+title: API - pyatv.storage
+permalink: /api//storage
+link_group: api
+---
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+This module has additional documentation
+<a title="test" href=/development/storage>here</a>.
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyatv" href="../">pyatv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="pyatv.storage.file_storage" href="file_storage">pyatv.storage.file_storage</a></code></li>
+<li><code><a title="pyatv.storage.memory_storage" href="memory_storage">pyatv.storage.memory_storage</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.storage.AbstractStorage" href="#pyatv.storage.AbstractStorage">AbstractStorage</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.storage.AbstractStorage.changed" href="#pyatv.storage.AbstractStorage.changed">changed</a></code></li>
+<li><code><a title="pyatv.storage.AbstractStorage.get_settings" href="#pyatv.storage.AbstractStorage.get_settings">get_settings</a></code></li>
+<li><code><a title="pyatv.storage.AbstractStorage.mark_as_saved" href="#pyatv.storage.AbstractStorage.mark_as_saved">mark_as_saved</a></code></li>
+<li><code><a title="pyatv.storage.AbstractStorage.storage_model" href="#pyatv.storage.AbstractStorage.storage_model">storage_model</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.storage.StorageModel" href="#pyatv.storage.StorageModel">StorageModel</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.storage.StorageModel.devices" href="#pyatv.storage.StorageModel.devices">devices</a></code></li>
+<li><code><a title="pyatv.storage.StorageModel.version" href="#pyatv.storage.StorageModel.version">version</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyatv.storage</code></h1>
+</header>
+<section id="section-intro">
+<p>Storage module.</p>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L1-L175" class="git-link">Browse git</a></div>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="pyatv.storage.file_storage" href="file_storage">pyatv.storage.file_storage</a></code></dt>
+<dd>
+<section class="desc"><p>File based storage module.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.storage.memory_storage" href="memory_storage">pyatv.storage.memory_storage</a></code></dt>
+<dd>
+<section class="desc"><p>Memory storage module.</p></section>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyatv.storage.AbstractStorage"><code class="flex name class">
+<span>class <span class="ident">AbstractStorage</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Abstract base class handling all logic except for saving and loading.</p>
+<p>New storage modules should generally inherit from this class and implement save and
+load according to the underlying storage mechanism.</p>
+<p>Initialize a new AbstractStorage instance.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L42-L175" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="pyatv.interface.Storage" href="../interface#pyatv.interface.Storage">Storage</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="pyatv.storage.file_storage.FileStorage" href="file_storage#pyatv.storage.file_storage.FileStorage">FileStorage</a></li>
+<li><a title="pyatv.storage.memory_storage.MemoryStorage" href="memory_storage#pyatv.storage.memory_storage.MemoryStorage">MemoryStorage</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.storage.AbstractStorage.changed"><code class="name">var <span class="ident">changed</span> -> bool</code></dt>
+<dd>
+<section class="desc"><p>Return if anything has changed in the model since loading.</p>
+<p>This property will return True if a any setting has been changed. It is reset
+when data is loaded into storage (by calling load) or manually by calling
+mark_as_solved (typically done by save).</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L54-L62" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.storage.AbstractStorage.storage_model"><code class="name">var <span class="ident">storage_model</span> -> <a title="pyatv.storage.StorageModel" href="#pyatv.storage.StorageModel">StorageModel</a></code></dt>
+<dd>
+<section class="desc"><p>Return storage model representation.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L69-L72" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyatv.storage.AbstractStorage.get_settings">
+<code class="name flex">
+<span>async def <span class="ident">get_settings</span></span>(<span>self, config: <a title="pyatv.interface.BaseConfig" href="../interface#pyatv.interface.BaseConfig">BaseConfig</a>) -> <a title="pyatv.settings.Settings" href="../settings#pyatv.settings.Settings">Settings</a></span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Return settings for a specific configuration (device).</p>
+<p>The returned Settings object is a reference to an object in the storage module.
+Changes made can/will be written back to the storage in case "save" is called.</p>
+<p>If no settings exists for the current configuration, new settings are created
+automatically and returned. If the configuration does not contain any valid
+identitiers, DeviceIdMissingError will be raised.</p>
+<p>If settings exists for a configuration but mismatch, they will be automatically
+updated in the storage. Set ignore_update to False to not update storage.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L89-L122" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.storage.AbstractStorage.mark_as_saved">
+<code class="name flex">
+<span>def <span class="ident">mark_as_saved</span></span>(<span>self) -> None</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Call after saving to indicate settings have been saved.</p>
+<p>The changed property reflects whether something has been changed in the model
+or not based on calling this method.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L81-L87" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="pyatv.interface.Storage" href="../interface#pyatv.interface.Storage">Storage</a></b></code>:
+<ul class="hlist">
+<li><code><a title="pyatv.interface.Storage.load" href="../interface#pyatv.interface.Storage.load">load</a></code></li>
+<li><code><a title="pyatv.interface.Storage.remove_settings" href="../interface#pyatv.interface.Storage.remove_settings">remove_settings</a></code></li>
+<li><code><a title="pyatv.interface.Storage.save" href="../interface#pyatv.interface.Storage.save">save</a></code></li>
+<li><code><a title="pyatv.interface.Storage.settings" href="../interface#pyatv.interface.Storage.settings">settings</a></code></li>
+<li><code><a title="pyatv.interface.Storage.update_settings" href="../interface#pyatv.interface.Storage.update_settings">update_settings</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="pyatv.storage.StorageModel"><code class="flex name class">
+<span>class <span class="ident">StorageModel</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Storage model of data that is saved or restored to underlying storage.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L35-L39" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.storage.StorageModel.devices"><code class="name">var <span class="ident">devices</span> -> List[<a title="pyatv.settings.Settings" href="../settings#pyatv.settings.Settings">Settings</a>] = PydanticUndefined</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.storage.StorageModel.version"><code class="name">var <span class="ident">version</span> -> int = PydanticUndefined</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite>.</p>
+</footer>

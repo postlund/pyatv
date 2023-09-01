@@ -30,6 +30,7 @@ Here is a short summary of supported features:
 * Listing installed apps, launching apps and currently playing app
 * Power management, e.g. turn on or off
 * Supports Apple TV (all of them), AirPort Express, HomePod, macOS music app and most AirPlay v1 receivers
+* Persistent storage of credentials and settings, e.g. to file or custom built storage
 
 A complete list of supported features and limitations is available
 [here](documentation/supported_features).

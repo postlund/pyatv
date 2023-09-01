@@ -1,0 +1,379 @@
+---
+layout: template
+title: API - pyatv.settings
+permalink: /api//settings
+link_group: api
+---
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+This module has additional documentation
+<a title="test" href=/development/storage>here</a>.
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyatv" href=".">pyatv</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyatv.settings.AirPlaySettings" href="#pyatv.settings.AirPlaySettings">AirPlaySettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.AirPlaySettings.credentials" href="#pyatv.settings.AirPlaySettings.credentials">credentials</a></code></li>
+<li><code><a title="pyatv.settings.AirPlaySettings.identifier" href="#pyatv.settings.AirPlaySettings.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.settings.AirPlaySettings.password" href="#pyatv.settings.AirPlaySettings.password">password</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.CompanionSettings" href="#pyatv.settings.CompanionSettings">CompanionSettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.CompanionSettings.credentials" href="#pyatv.settings.CompanionSettings.credentials">credentials</a></code></li>
+<li><code><a title="pyatv.settings.CompanionSettings.identifier" href="#pyatv.settings.CompanionSettings.identifier">identifier</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.DmapSettings" href="#pyatv.settings.DmapSettings">DmapSettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.DmapSettings.credentials" href="#pyatv.settings.DmapSettings.credentials">credentials</a></code></li>
+<li><code><a title="pyatv.settings.DmapSettings.identifier" href="#pyatv.settings.DmapSettings.identifier">identifier</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.settings.InfoSettings.device_id" href="#pyatv.settings.InfoSettings.device_id">device_id</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.mac" href="#pyatv.settings.InfoSettings.mac">mac</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.model" href="#pyatv.settings.InfoSettings.model">model</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.name" href="#pyatv.settings.InfoSettings.name">name</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.os_build" href="#pyatv.settings.InfoSettings.os_build">os_build</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.os_name" href="#pyatv.settings.InfoSettings.os_name">os_name</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.os_version" href="#pyatv.settings.InfoSettings.os_version">os_version</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.MrpSettings" href="#pyatv.settings.MrpSettings">MrpSettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.MrpSettings.credentials" href="#pyatv.settings.MrpSettings.credentials">credentials</a></code></li>
+<li><code><a title="pyatv.settings.MrpSettings.identifier" href="#pyatv.settings.MrpSettings.identifier">identifier</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.ProtocolSettings.airplay" href="#pyatv.settings.ProtocolSettings.airplay">airplay</a></code></li>
+<li><code><a title="pyatv.settings.ProtocolSettings.companion" href="#pyatv.settings.ProtocolSettings.companion">companion</a></code></li>
+<li><code><a title="pyatv.settings.ProtocolSettings.dmap" href="#pyatv.settings.ProtocolSettings.dmap">dmap</a></code></li>
+<li><code><a title="pyatv.settings.ProtocolSettings.mrp" href="#pyatv.settings.ProtocolSettings.mrp">mrp</a></code></li>
+<li><code><a title="pyatv.settings.ProtocolSettings.raop" href="#pyatv.settings.ProtocolSettings.raop">raop</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.RaopSettings.credentials" href="#pyatv.settings.RaopSettings.credentials">credentials</a></code></li>
+<li><code><a title="pyatv.settings.RaopSettings.identifier" href="#pyatv.settings.RaopSettings.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.settings.RaopSettings.password" href="#pyatv.settings.RaopSettings.password">password</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.Settings" href="#pyatv.settings.Settings">Settings</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.Settings.info" href="#pyatv.settings.Settings.info">info</a></code></li>
+<li><code><a title="pyatv.settings.Settings.protocols" href="#pyatv.settings.Settings.protocols">protocols</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyatv.settings</code></h1>
+</header>
+<section id="section-intro">
+<p>Settings for configuring pyatv.</p>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L118" class="git-link">Browse git</a></div>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyatv.settings.AirPlaySettings"><code class="flex name class">
+<span>class <span class="ident">AirPlaySettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings related to AirPlay.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L67-L72" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.AirPlaySettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.AirPlaySettings.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.CompanionSettings"><code class="flex name class">
+<span>class <span class="ident">CompanionSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings related to Companion.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L75-L79" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.CompanionSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.CompanionSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.DmapSettings"><code class="flex name class">
+<span>class <span class="ident">DmapSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings related to DMAP.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L82-L86" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.DmapSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.DmapSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.InfoSettings"><code class="flex name class">
+<span>class <span class="ident">InfoSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Information related settings.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L55-L64" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.InfoSettings.device_id"><code class="name">var <span class="ident">device_id</span> -> str = FF:70:79:61:74:76</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.mac"><code class="name">var <span class="ident">mac</span> -> typing_extensions.Annotated[str, AfterValidator(func=<function _mac_validator at 0x7f0b82a07af0>)] = 02:70:79:61:74:76</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.model"><code class="name">var <span class="ident">model</span> -> str = iPhone10,6</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.name"><code class="name">var <span class="ident">name</span> -> str = pyatv</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.os_build"><code class="name">var <span class="ident">os_build</span> -> str = 18G82</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.os_name"><code class="name">var <span class="ident">os_name</span> -> str = iPhone OS</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.os_version"><code class="name">var <span class="ident">os_version</span> -> str = 14.7.1</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.MrpSettings"><code class="flex name class">
+<span>class <span class="ident">MrpSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings related to MRP.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L89-L93" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.MrpSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.MrpSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.ProtocolSettings"><code class="flex name class">
+<span>class <span class="ident">ProtocolSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Container for protocol specific settings.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L104-L111" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.ProtocolSettings.airplay"><code class="name">var <span class="ident">airplay</span> -> <a title="pyatv.settings.AirPlaySettings" href="#pyatv.settings.AirPlaySettings">AirPlaySettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.ProtocolSettings.companion"><code class="name">var <span class="ident">companion</span> -> <a title="pyatv.settings.CompanionSettings" href="#pyatv.settings.CompanionSettings">CompanionSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.ProtocolSettings.dmap"><code class="name">var <span class="ident">dmap</span> -> <a title="pyatv.settings.DmapSettings" href="#pyatv.settings.DmapSettings">DmapSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.ProtocolSettings.mrp"><code class="name">var <span class="ident">mrp</span> -> <a title="pyatv.settings.MrpSettings" href="#pyatv.settings.MrpSettings">MrpSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.ProtocolSettings.raop"><code class="name">var <span class="ident">raop</span> -> <a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.RaopSettings"><code class="flex name class">
+<span>class <span class="ident">RaopSettings</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings related to RAOP.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L96-L101" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.RaopSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> Optional[str] = None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.Settings"><code class="flex name class">
+<span>class <span class="ident">Settings</span></span>
+<span>(</span><span>**values: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Settings container class.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L114-L118" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic_settings.main.BaseSettings</li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.Settings.info"><code class="name">var <span class="ident">info</span> -> <a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.Settings.protocols"><code class="name">var <span class="ident">protocols</span> -> <a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite>.</p>
+</footer>

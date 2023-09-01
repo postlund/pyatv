@@ -23,8 +23,9 @@ etc. You can read more about this in the following sections.
 
 The simplest way to create a configuration is to to scan for devices, as {% include api i="pyatv.scan" %} returns a list of {% include api i="conf.AppleTV" %} objects with almost all information already filled in. You can then just pick the configuration you want and either connect to or pair with the device. Scanning and pairing is explained below.
 
-It is also possible to manually create a configuration, although this is not the recommended way. One reason for this is that some information is not static. The `Media Remote Protocol` uses a randomized port that might change at any time. If the currently used port is stored in a static configuration, then the configuration will not work in case the port changes. When using {% include api i="pyatv.scan" %}, the correct port will be automatically identified and filled in for you.
-
+It is also possible to manually create a configuration, although this is not the recommended way. One reason
+for this is that some information is not static, e.g. port numbers and Zeroconf properties (which pyatv
+heavily relies on). When using {% include api i="pyatv.scan" %}, the correct port will be automatically identified and filled in for you.
 ## Services and protocols
 
 Each configuration keeps track of all the different protocols a device supports. The term *service* is also used in this context and it is exactly the same thing (this will likely be consolidated into a single term in the future, but for now they are used interchangeably).
@@ -90,12 +91,18 @@ The usual flow is:
 
 * Perform scan
 * Pick device of interest
-* For each protocol, get the service and insert credentials (stored externally)
 * Connect
 
-This means that pyatv does not store credentials for you. In the future, persistent storage will be added to pyatv (see issue {% include issue no="243" %}), but for now you have to deal with this yourself.
+As of pyatv.0.14.0, persistent storage is built in. So credentials are saved and loaded automatically from
+file (or somewhere else). See next section.
 
-One exception from this is `DMAP`, when Home Sharing is enabled. In this case, required credentials are automatically filled in and the service is ready to use. Fact is, in most cases you can talk to a device via `MRP` without using credentials at all. It is not known what the "rules" are for this though (when and what works).
+# Storage and Settings
+
+To simplify handling of things like credentials, passwords and various settings, pyatv will automatically
+put these into a storage module that allows for persistent storage. It is possible to implement custom
+storage modules that for instance store settings in a cloud service, but pyatv also ships with a file
+based storage module that will save settings in a file. This storage module is used by scripts shipped
+with pyatv, e.g. [atvremote](../atvremote) and [atvscript](../atvscript).
 
 # Scanning
 
