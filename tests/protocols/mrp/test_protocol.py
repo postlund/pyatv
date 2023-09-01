@@ -14,6 +14,7 @@ from pyatv.protocols.mrp.protocol import (
     MrpProtocol,
     heartbeat_loop,
 )
+from pyatv.settings import InfoSettings
 
 from tests.fake_device import FakeAppleTV
 from tests.utils import total_sleep_time, until
@@ -33,7 +34,7 @@ def mrp_protocol(event_loop, mrp_atv):
     port = mrp_atv.get_port(Protocol.MRP)
     service = ManualService("mrp_id", Protocol.MRP, port, {})
     connection = MrpConnection("127.0.0.1", port, event_loop)
-    protocol = MrpProtocol(connection, SRPAuthHandler(), service)
+    protocol = MrpProtocol(connection, SRPAuthHandler(), service, InfoSettings())
     yield protocol
     protocol.stop()
 

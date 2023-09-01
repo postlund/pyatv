@@ -22,7 +22,7 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import AbstractPushUpdater, SetupData, StateMessage, UpdatedState
+from pyatv.core import AbstractPushUpdater, SetupData, UpdatedState
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     AppleTV,
@@ -40,12 +40,12 @@ from pyatv.interface import (
     OutputDevice,
     Playing,
     Power,
-    PowerListener,
     PushListener,
     PushUpdater,
     RemoteControl,
     Stream,
 )
+from pyatv.settings import Settings
 
 from tests.shared_helpers import SavingPowerListener
 from tests.utils import until
@@ -60,7 +60,8 @@ pytestmark = pytest.mark.asyncio
 @pytest.fixture(name="facade_dummy")
 def facade_dummy_fixture(session_manager, core_dispatcher):
     conf = AppleTVConf(IPv4Address("127.0.0.1"), "Test")
-    facade = FacadeAppleTV(conf, session_manager, core_dispatcher)
+    settings = Settings()
+    facade = FacadeAppleTV(conf, session_manager, core_dispatcher, settings)
     yield facade
 
 

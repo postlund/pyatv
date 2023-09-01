@@ -9,6 +9,7 @@ import pytest
 from pyatv import exceptions, pair
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.const import Protocol
+from pyatv.storage.memory_storage import MemoryStorage
 
 from tests.fake_device.airplay import (
     DEVICE_AUTH_KEY,
@@ -33,7 +34,11 @@ def require_auth(airplay_usecase):
 
 
 async def perform_pairing(conf, pin=DEVICE_PIN, expected_credentials=None):
-    pairing = await pair(conf, Protocol.AirPlay, asyncio.get_event_loop())
+    storage = MemoryStorage()
+
+    pairing = await pair(
+        conf, Protocol.AirPlay, asyncio.get_event_loop(), storage=storage
+    )
 
     assert pairing.device_provides_pin
 
@@ -49,8 +54,15 @@ async def perform_pairing(conf, pin=DEVICE_PIN, expected_credentials=None):
 
     assert conf.get_service(Protocol.AirPlay).credentials is not None
     if expected_credentials:
+        # Verify credentials i config is correct
         assert parse_credentials(
             conf.get_service(Protocol.AirPlay).credentials
+        ) == parse_credentials(expected_credentials)
+
+        # Verify correct credentials were written to settings
+        assert len(storage.settings) == 1
+        assert parse_credentials(
+            storage.settings[0].protocols.airplay.credentials
         ) == parse_credentials(expected_credentials)
 
 

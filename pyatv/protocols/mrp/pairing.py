@@ -1,17 +1,16 @@
 """Device pairing and derivation of encryption keys."""
 
-import asyncio
 import logging
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.interface import BaseConfig, BaseService, PairingHandler
+from pyatv.core import Core
+from pyatv.interface import PairingHandler
 from pyatv.protocols.mrp.auth import MrpPairSetupProcedure, MrpPairVerifyProcedure
 from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support import error_handler
-from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,21 +18,19 @@ _LOGGER = logging.getLogger(__name__)
 class MrpPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(
-        self,
-        config: BaseConfig,
-        service: BaseService,
-        session_manager: ClientSessionManager,
-        loop: asyncio.AbstractEventLoop,
-        **kwargs
-    ):
+    def __init__(self, core: Core, **kwargs):
         """Initialize a new MrpPairingHandler."""
-        super().__init__(session_manager, service)
-        self.connection = MrpConnection(config.address, self.service.port, loop)
+        super().__init__(core.session_manager, core.service)
+        self.connection = MrpConnection(
+            core.config.address, self.service.port, core.loop
+        )
         self.srp = SRPAuthHandler()
-        self.protocol = MrpProtocol(self.connection, self.srp, self.service)
+        self.protocol = MrpProtocol(
+            self.connection, self.srp, self.service, core.settings.info
+        )
         self.pairing_procedure = MrpPairSetupProcedure(self.protocol, self.srp)
         self.pin_code = None
+        self._settings = core.settings
         self._has_paired = False
 
     async def close(self):
@@ -75,6 +72,7 @@ class MrpPairingHandler(PairingHandler):
         await error_handler(verifier.verify_credentials, exceptions.PairingError)
 
         self.service.credentials = credentials
+        self._settings.protocols.mrp.credentials = self.service.credentials
         self._has_paired = True
 
     @property

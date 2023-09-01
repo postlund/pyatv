@@ -152,7 +152,6 @@ def get_pairing_requirement(service: BaseService) -> PairingRequirement:
     # "Current User" not supported by pyatv
     if service.properties.get("act", "0") == "2":
         return PairingRequirement.Unsupported
-
     return PairingRequirement.NotNeeded
 
 

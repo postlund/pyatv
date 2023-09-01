@@ -67,7 +67,6 @@ from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
 from pyatv.support.device_info import lookup_model, lookup_version
-from pyatv.support.http import ClientSessionManager
 from pyatv.support.url import is_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -1067,7 +1066,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
     requires_heatbeat: bool = True,
 ) -> SetupData:
     """Set up a new MRP service from a connection."""
-    protocol = MrpProtocol(connection, SRPAuthHandler(), core.service)
+    protocol = MrpProtocol(
+        connection, SRPAuthHandler(), core.service, core.settings.info
+    )
     psm = PlayerStateManager(protocol)
 
     remote_control = MrpRemoteControl(core.loop, psm, protocol)
@@ -1139,12 +1140,6 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
     )
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return MrpPairingHandler(config, service, session_manager, loop, **kwargs)
+    return MrpPairingHandler(core, **kwargs)

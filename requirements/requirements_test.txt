@@ -2,6 +2,7 @@ black==23.7.0
 deepdiff==6.3.1
 flake8==6.1.0
 isort==5.12.0
+mockfs==1.1.2
 mutagen==1.46.0
 pylint==2.17.5
 pytest==7.4.0
@@ -17,3 +18,4 @@ mypy-protobuf==3.4.0
 typed-ast==1.5.5
 types-protobuf==4.24.0.1
 types-requests==2.31.0.2
+types-tabulate==0.9.0.3

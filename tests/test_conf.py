@@ -5,7 +5,8 @@ import pytest
 
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
-from pyatv.const import DeviceModel, OperatingSystem, Protocol
+from pyatv.const import Protocol
+from pyatv.settings import Settings
 
 ADDRESS_1 = "127.0.0.1"
 ADDRESS_2 = "192.168.0.1"
@@ -258,3 +259,59 @@ def test_service_merge_properties(props1, props2, expected):
     service1.merge(service2)
 
     assert not DeepDiff(service1.properties, expected)
+
+
+def test_service_get_settings():
+    service = ManualService("id", Protocol.DMAP, 0, {})
+    assert not DeepDiff(service.settings(), {"credentials": None, "password": None})
+
+    service.credentials = "abc"
+    assert not DeepDiff(
+        service.settings(),
+        {"credentials": "abc", "password": None},
+    )
+
+    service.password = "def"
+    assert not DeepDiff(
+        service.settings(),
+        {"credentials": "abc", "password": "def"},
+    )
+
+
+def test_service_apply_settings():
+    service = ManualService("id", Protocol.DMAP, 0, {})
+    service.apply({"credentials": "creds", "password": "password"})
+    assert service.credentials == "creds"
+    assert service.password == "password"
+
+
+def test_service_do_no_apply_empty_settings():
+    service = ManualService("id", Protocol.DMAP, 0, {})
+    service.credentials = "creds"
+    service.password = "password"
+    service.apply({"credentials": None, "password": None})
+    assert service.credentials == "creds"
+    assert service.password == "password"
+
+
+def test_config_apply_settings(config):
+    config.add_service(DMAP_SERVICE)
+    config.add_service(MRP_SERVICE)
+    config.add_service(AIRPLAY_SERVICE)
+    config.add_service(COMPANION_SERVICE)
+    config.add_service(RAOP_SERVICE)
+
+    settings = Settings()
+    settings.protocols.airplay.credentials = "airplay"
+    settings.protocols.companion.credentials = "companion"
+    settings.protocols.dmap.credentials = "dmap"
+    settings.protocols.mrp.credentials = "mrp"
+    settings.protocols.raop.credentials = "raop"
+
+    config.apply(settings)
+
+    assert config.get_service(Protocol.AirPlay).credentials == "airplay"
+    assert config.get_service(Protocol.Companion).credentials == "companion"
+    assert config.get_service(Protocol.DMAP).credentials == "dmap"
+    assert config.get_service(Protocol.MRP).credentials == "mrp"
+    assert config.get_service(Protocol.RAOP).credentials == "raop"

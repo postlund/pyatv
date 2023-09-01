@@ -125,3 +125,7 @@ class InvalidResponseError(Exception):
 
 class OperationTimeoutError(Exception):
     """Raised when a timeout happens."""
+
+
+class SettingsError(Exception):
+    """Raised when an error related to settings happens."""

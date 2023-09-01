@@ -17,6 +17,7 @@ from pyatv.core.protocol import heartbeater
 from pyatv.interface import DeviceListener
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
+from pyatv.settings import InfoSettings
 from pyatv.support.http import HttpConnection, decode_bplist_from_body, http_connect
 from pyatv.support.rtsp import RtspSession
 from pyatv.support.state_producer import StateProducer
@@ -39,12 +40,17 @@ class AP2Session:
     """High-level session for AirPlay 2."""
 
     def __init__(
-        self, address: str, control_port: int, credentials: HapCredentials
+        self,
+        address: str,
+        control_port: int,
+        credentials: HapCredentials,
+        info: InfoSettings,
     ) -> None:
         """Initialize a new AP2Session instance."""
         self._address = address
         self._control_port = control_port
         self._credentials = credentials
+        self._info = info
         self.connection: Optional[HttpConnection] = None
         self.verifier: Optional[PairVerifyProcedure] = None
         self.rtsp: Optional[RtspSession] = None
@@ -112,16 +118,16 @@ class AP2Session:
         resp = await self._setup(
             {
                 "isRemoteControlOnly": True,
-                "osName": "iPhone OS",
+                "osName": self._info.os_name,
                 "sourceVersion": "550.10",
                 "timingProtocol": "None",
-                "model": "iPhone10,6",
-                "deviceID": "FF:EE:DD:CC:BB:AA",
-                "osVersion": "14.7.1",
-                "osBuildVersion": "18G82",
-                "macAddress": "AA:BB:CC:DD:EE:FF",
+                "model": self._info.model,
+                "deviceID": self._info.device_id,
+                "osVersion": self._info.os_version,
+                "osBuildVersion": self._info.os_build,
+                "macAddress": self._info.mac,
                 "sessionUUID": str(uuid4()).upper(),
-                "name": "pyatv",
+                "name": self._info.name,
             }
         )
 

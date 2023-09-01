@@ -105,7 +105,8 @@ class ScriptTest(AioHTTPTestCase):
         self.assertEqual(self.retcode, code)
 
     async def run_script(self, script, *args):
-        argv = [script] + list(args)
+        # Always use no storage here to prevent settings to mix amongst tests
+        argv = [script, "--storage", "none"] + list(args)
         inputs = "\n".join(self.inputs) + "\n"
         with capture_output(argv, inputs) as (out, err):
             udns_port = str(self.fake_udns.port)

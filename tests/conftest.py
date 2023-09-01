@@ -1,3 +1,4 @@
+import builtins
 import logging
 from os import path
 from types import SimpleNamespace
@@ -5,6 +6,7 @@ import typing
 from unittest.mock import Mock, patch
 
 from ifaddr import IP, Adapter
+import mockfs
 import pytest
 import pytest_asyncio
 from pytest_httpserver import HTTPServer
@@ -130,7 +132,7 @@ async def multicast_scan_fixture(event_loop, udns_server):
 
 @pytest_asyncio.fixture(name="unicast_scan")
 async def unicast_scan_fixture(event_loop, udns_server):
-    async def _scan(timeout=1, identifier=None, protocol=None):
+    async def _scan(timeout=1, identifier=None, protocol=None, storage=None):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
             return await pyatv.scan(
@@ -139,6 +141,7 @@ async def unicast_scan_fixture(event_loop, udns_server):
                 timeout=timeout,
                 identifier=identifier,
                 protocol=protocol,
+                storage=storage,
             )
 
     yield _scan
@@ -185,3 +188,23 @@ def data_webserver_fixture(httpserver: HTTPServer, files: typing.Sequence[str]):
         with open(path.join(root_dir, file), "rb") as _fh:
             httpserver.expect_request("/" + file).respond_with_data(_fh.read())
     yield httpserver.url_for("/")
+
+
+# TODO: Current version of mockfs (1.1.2) does not match current signature of the open
+#       function, i.e. encoding and errors are missing. This is implemented on main
+#       in mockfs, but there's no release out yet. Once a release is available, the
+#       hack made here can be removed. Issue to follow is this one:
+#       https://github.com/mockfs/mockfs/issues/11
+@pytest.fixture(name="mockfs")
+def mockfs_fixture():
+    mocked = mockfs.replace_builtins()
+    replaced_open = open
+
+    # HACK: Add "encoding" and "errors" to open method
+    def _open_wrapper(name, mode="r", encoding=None, errors=None):
+        return replaced_open(name, mode)
+
+    builtins.open = _open_wrapper
+
+    yield mocked
+    mockfs.restore_builtins()

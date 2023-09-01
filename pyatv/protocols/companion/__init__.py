@@ -27,7 +27,6 @@ from pyatv.interface import (
     App,
     Apps,
     Audio,
-    BaseConfig,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -47,7 +46,6 @@ from pyatv.protocols.companion.api import (
 )
 from pyatv.protocols.companion.pairing import CompanionPairingHandler
 from pyatv.support.device_info import lookup_model
-from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -590,12 +588,6 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
     )
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return CompanionPairingHandler(config, service, session_manager, loop, **kwargs)
+    return CompanionPairingHandler(core, **kwargs)

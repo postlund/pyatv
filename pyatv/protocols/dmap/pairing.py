@@ -1,6 +1,5 @@
 """Module used for pairing pyatv with a device."""
 
-import asyncio
 import hashlib
 from io import StringIO
 from ipaddress import IPv4Address
@@ -11,10 +10,9 @@ from typing import List, Optional
 from aiohttp import web
 from zeroconf import Zeroconf
 
-from pyatv.core import mdns
-from pyatv.interface import BaseConfig, BaseService, PairingHandler
+from pyatv.core import Core, mdns
+from pyatv.interface import PairingHandler
 from pyatv.protocols.dmap import tags
-from pyatv.support.http import ClientSessionManager
 from pyatv.support.net import get_private_addresses, unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,19 +38,12 @@ class DmapPairingHandler(
     that responds to pairing requests.
     """
 
-    def __init__(
-        self,
-        config: BaseConfig,
-        service: BaseService,
-        session_manager: ClientSessionManager,
-        loop: asyncio.AbstractEventLoop,
-        **kwargs
-    ) -> None:
+    def __init__(self, core: Core, **kwargs) -> None:
         """Initialize a new instance."""
-        super().__init__(session_manager, service)
-        self._loop = loop
+        super().__init__(core.session_manager, core.service)
+        self._core = core
         self._zeroconf: Zeroconf = kwargs.get("zeroconf") or Zeroconf()
-        self._name: str = kwargs.get("name", "pyatv")
+        self._name: str = kwargs.get("name", core.settings.info.name)
         self.app = web.Application()
         self.app.router.add_routes([web.get("/pair", self.handle_request)])
         self.runner: web.AppRunner = web.AppRunner(self.app)
@@ -98,6 +89,7 @@ class DmapPairingHandler(
         if self._has_paired:
             _LOGGER.debug("Saving updated credentials")
             self.service.credentials = "0x" + self._pairing_guid
+            self._core.settings.protocols.dmap.credentials = self.service.credentials
 
     def pin(self, pin: int) -> None:
         """Pin code used for pairing."""
@@ -120,7 +112,7 @@ class DmapPairingHandler(
         }
 
         await mdns.publish(
-            self._loop,
+            self._core.loop,
             mdns.Service(
                 "_touch-remote._tcp.local",
                 f"{int(address):040d}",
