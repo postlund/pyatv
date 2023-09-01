@@ -1,11 +1,16 @@
 """Scripts bundled with pyatv."""
 
 import argparse
+import asyncio
 from ipaddress import ip_address
 import json
 import logging
+import os
 
 from pyatv import const
+from pyatv.interface import Storage
+from pyatv.storage.file_storage import FileStorage
+from pyatv.storage.memory_storage import MemoryStorage
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,6 +87,39 @@ class TransformIdentifiers(argparse.Action):
             setattr(namespace, self.dest, values)
         else:
             setattr(namespace, self.dest, set(identifiers_split))
+
+
+def create_common_parser() -> argparse.ArgumentParser:
+    """Return a parser with common arguments used by all scripts."""
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    settings_group = parser.add_argument_group("settings")
+
+    settings_group.add_argument(
+        "--storage",
+        choices=["file", "none"],
+        default="file",
+        help="storage backend for settings",
+    )
+
+    storage_file = os.path.join(os.environ["HOME"], ".pyatv.conf")
+    settings_group.add_argument(
+        "--storage-filename",
+        type=str,
+        default=storage_file,
+        help="file used by file storage",
+    )
+
+    return parser
+
+
+def get_storage(args, loop: asyncio.AbstractEventLoop) -> Storage:
+    """Get storage module based on user configuration."""
+    if args.storage == "file":
+        return FileStorage(args.storage_filename, loop)
+    return MemoryStorage()
 
 
 def log_current_version():
