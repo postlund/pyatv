@@ -60,6 +60,7 @@ from pyatv.protocols.mrp.connection import MrpConnection
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.protocols.mrp.server_auth import MrpServerAuth
 from pyatv.scripts import log_current_version
+from pyatv.settings import InfoSettings
 from pyatv.support import (
     chacha20,
     log_binary,
@@ -119,6 +120,7 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
             self.connection,
             SRPAuthHandler(),
             MutableService(None, Protocol.MRP, port, {}, credentials=credentials),
+            InfoSettings(),
         )
 
     async def start(self):

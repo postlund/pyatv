@@ -109,3 +109,17 @@ class AtvremoteTest(ScriptTest):
         )
         self.has_output("Media type: Unknown", "Device state: Idle")
         self.exit(0)
+
+    # TODO: Add per-test persistent storage so tests can be written properly
+    async def test_settings(self):
+        await self.atvremote("--id", MRP_ID, "print_settings")
+        self.has_output("protocols.raop.password = None")
+        self.exit(0)
+
+        await self.atvremote(
+            "--id", MRP_ID, "change_setting=protocols.raop.password,foo"
+        )
+        self.exit(0)
+
+        await self.atvremote("--id", MRP_ID, "unset_setting=protocols.raop.password")
+        self.exit(0)

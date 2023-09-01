@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tool modelled to be used for scripting."""
 
-import argparse
 import asyncio
 import datetime
 from enum import Enum
@@ -12,7 +11,7 @@ import traceback
 from typing import List, Optional
 
 from pyatv import connect, const, scan
-from pyatv.const import FeatureState, Protocol
+from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import (
     App,
     AppleTV,
@@ -24,12 +23,15 @@ from pyatv.interface import (
     PowerListener,
     PushListener,
     RemoteControl,
+    Storage,
     retrieve_commands,
 )
 from pyatv.scripts import (
     TransformOutput,
     TransformProtocol,
     VerifyScanHosts,
+    create_common_parser,
+    get_storage,
     log_current_version,
 )
 
@@ -204,9 +206,9 @@ def output_playing(playing: Playing, app: Optional[App]):
     return output(True, values=values)
 
 
-async def _scan_devices(loop, hosts):
+async def _scan_devices(loop, storage: Storage, hosts):
     atvs = []
-    for atv in await scan(loop, hosts=hosts):
+    for atv in await scan(loop, hosts=hosts, storage=storage):
         services = []
         for service in atv.services:
             services.append(
@@ -229,13 +231,13 @@ async def _scan_devices(loop, hosts):
     return output(True, values={"devices": atvs})
 
 
-async def _autodiscover_device(args, loop):
+async def _autodiscover_device(args, storage: Storage, loop: asyncio.AbstractEventLoop):
     options = {"identifier": args.id, "protocol": args.protocol}
 
     if args.scan_hosts:
         options["hosts"] = args.scan_hosts
 
-    atvs = await scan(loop, **options)
+    atvs = await scan(loop, storage=storage, **options)
 
     if not atvs:
         return None
@@ -254,15 +256,17 @@ async def _autodiscover_device(args, loop):
     return apple_tv
 
 
-async def _handle_command(args, abort_sem, loop):
+async def _handle_command(
+    args, abort_sem, storage: Storage, loop: asyncio.AbstractEventLoop
+):
     if args.command == "scan":
-        return await _scan_devices(loop, args.scan_hosts)
+        return await _scan_devices(loop, storage, args.scan_hosts)
 
-    config = await _autodiscover_device(args, loop)
+    config = await _autodiscover_device(args, storage, loop)
     if not config:
         return output(False, "device_not_found")
 
-    atv = await connect(config, loop, protocol=Protocol.MRP)
+    atv = await connect(config, loop, storage=storage)
     try:
         return await _run_command(atv, args, abort_sem, loop)
     finally:
@@ -271,7 +275,12 @@ async def _handle_command(args, abort_sem, loop):
 
 async def _run_command(atv, args, abort_sem, loop):
     if args.command == "playing":
-        return output_playing(await atv.metadata.playing(), atv.metadata.app)
+        return output_playing(
+            await atv.metadata.playing(),
+            atv.metadata.app
+            if atv.features.in_state(FeatureState.Available, FeatureName.App)
+            else None,
+        )
 
     if args.command == "push_updates":
         power_listener = PowerPrinter(args.output)
@@ -305,7 +314,7 @@ async def _run_command(atv, args, abort_sem, loop):
 
 async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
-    parser = argparse.ArgumentParser()
+    parser = create_common_parser()
     parser.add_argument("command", help="command to run")
     parser.add_argument("-i", "--id", help="device identifier", dest="id", default=None)
     parser.add_argument(
@@ -372,8 +381,14 @@ async def appstart(loop):
 
     _LOGGER.debug("Started atvscript")
 
+    storage = get_storage(args, loop)
+    await storage.load()
+
     try:
-        print(args.output(await _handle_command(args, abort_sem, loop)), flush=True)
+        print(
+            args.output(await _handle_command(args, abort_sem, storage, loop)),
+            flush=True,
+        )
     except Exception as ex:
         print(args.output(output(False, exception=ex)), flush=True)
 
