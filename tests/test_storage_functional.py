@@ -25,24 +25,21 @@ STORAGE_FILENAME = os.path.join(os.environ["HOME"], "pyatv.conf")
 
 
 @pytest.fixture(autouse=True)
-def setup_filesystem(mockfs) -> None:
-    mockfs.add_entries({os.environ["HOME"]: None})
-    yield
-
-
-@pytest.fixture(autouse=True)
 def setup_target_device(udns_server) -> None:
     udns_server.add_service(airplay_service("airplay", "aa:bb:cc:dd:ee:ff"))
 
 
-async def new_storage(filename: str, loop: asyncio.AbstractEventLoop) -> Storage:
+async def new_storage(
+    filename: str, loop: asyncio.AbstractEventLoop, mockfs
+) -> Storage:
     storage = FileStorage(filename, loop)
     await storage.load()
+    mockfs.add_entries({filename: ""})
     return storage
 
 
-async def test_scan_inserts_into_storage(event_loop, unicast_scan):
-    storage1 = await new_storage(STORAGE_FILENAME, event_loop)
+async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
+    storage1 = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
 
     # Scan for the device, get settings for it and save everything to storage
     conf = (await unicast_scan(storage=storage1))[0]
@@ -51,15 +48,15 @@ async def test_scan_inserts_into_storage(event_loop, unicast_scan):
 
     # Open a new storage (based on the same file as above) and extract same settings.
     # Compare content to ensure they are exactly the same.
-    storage2 = await new_storage(STORAGE_FILENAME, event_loop)
+    storage2 = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
     settings2 = await storage2.get_settings(conf)
     assert not DeepDiff(settings2.model_dump(), settings1.model_dump())
 
 
 async def test_provides_storage_to_pairing_handler(
-    event_loop, unicast_scan, session_manager
+    event_loop, unicast_scan, session_manager, mockfs
 ):
-    storage = await new_storage(STORAGE_FILENAME, event_loop)
+    storage = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
@@ -71,8 +68,10 @@ async def test_provides_storage_to_pairing_handler(
         assert airplay_mock.core.settings == settings
 
 
-async def test_provides_storage_to_connect(event_loop, unicast_scan, session_manager):
-    storage = await new_storage(STORAGE_FILENAME, event_loop)
+async def test_provides_storage_to_connect(
+    event_loop, unicast_scan, session_manager, mockfs
+):
+    storage = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
