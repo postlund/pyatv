@@ -6,7 +6,6 @@ import typing
 from unittest.mock import Mock, patch
 
 from ifaddr import IP, Adapter
-import mockfs
 import pytest
 import pytest_asyncio
 from pytest_httpserver import HTTPServer
@@ -191,7 +190,5 @@ def data_webserver_fixture(httpserver: HTTPServer, files: typing.Sequence[str]):
 
 
 @pytest.fixture(name="mockfs")
-def mockfs_fixture():
-    mocked = mockfs.replace_builtins()
-    yield mocked
-    mockfs.restore_builtins()
+def mockfs_fixture(fs):
+    yield fs
