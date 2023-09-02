@@ -190,21 +190,8 @@ def data_webserver_fixture(httpserver: HTTPServer, files: typing.Sequence[str]):
     yield httpserver.url_for("/")
 
 
-# TODO: Current version of mockfs (1.1.2) does not match current signature of the open
-#       function, i.e. encoding and errors are missing. This is implemented on main
-#       in mockfs, but there's no release out yet. Once a release is available, the
-#       hack made here can be removed. Issue to follow is this one:
-#       https://github.com/mockfs/mockfs/issues/11
 @pytest.fixture(name="mockfs")
 def mockfs_fixture():
     mocked = mockfs.replace_builtins()
-    replaced_open = open
-
-    # HACK: Add "encoding" and "errors" to open method
-    def _open_wrapper(name, mode="r", encoding=None, errors=None):
-        return replaced_open(name, mode)
-
-    builtins.open = _open_wrapper
-
     yield mocked
     mockfs.restore_builtins()
