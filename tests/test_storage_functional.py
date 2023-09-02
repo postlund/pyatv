@@ -4,7 +4,6 @@ Tests for top level methods such as scan, pair and connect.
 Uses MemoryStorage as storage for simplicity.
 """
 import asyncio
-import os
 from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
@@ -21,7 +20,7 @@ from tests.protocols.mock_protocol import mock_protocol
 
 pytestmark = pytest.mark.asyncio
 
-STORAGE_FILENAME = os.path.join(os.environ["HOME"], "pyatv.conf")
+STORAGE_FILENAME = "pyatv.conf"
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +33,6 @@ async def new_storage(
 ) -> Storage:
     storage = FileStorage(filename, loop)
     await storage.load()
-    mockfs.add_entries({filename: ""})
     return storage
 
 
