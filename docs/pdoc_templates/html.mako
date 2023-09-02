@@ -420,7 +420,7 @@
 ---
 layout: template
 title: API - ${module.name}
-permalink: /api/${module.name.replace("pyatv", "").replace(".", "/")}
+permalink: /api/${("/" + module.name).replace("pyatv", "").replace(".", "/").replace("//", "/")}
 link_group: api
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: template
 title: API - pyatv
-permalink: /api/
+permalink: /api//
 link_group: api
 ---
 <nav id="sidebar">
@@ -101,7 +101,7 @@ link_group: api
 </dd>
 <dt id="pyatv.scan">
 <code class="name flex">
-<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], ForwardRef(None)] = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], ForwardRef(None)] = None, hosts: Optional[List[str]] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage">Storage</a>] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
+<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], None] = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], None] = None, hosts: Optional[List[str]] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage">Storage</a>] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
 </code>
 </dt>
 <dd>
