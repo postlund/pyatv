@@ -12,21 +12,21 @@ link_group: api
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="pyatv.conf" href="conf">pyatv.conf</a></code></li>
-<li><code><a title="pyatv.const" href="const">pyatv.const</a></code></li>
-<li><code><a title="pyatv.convert" href="convert">pyatv.convert</a></code></li>
-<li><code><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></li>
-<li><code><a title="pyatv.helpers" href="helpers">pyatv.helpers</a></code></li>
-<li><code><a title="pyatv.interface" href="interface">pyatv.interface</a></code></li>
-<li><code><a title="pyatv.settings" href="settings">pyatv.settings</a></code></li>
+<li><code><a title="pyatv.conf" href="conf/">pyatv.conf</a></code></li>
+<li><code><a title="pyatv.const" href="const/">pyatv.const</a></code></li>
+<li><code><a title="pyatv.convert" href="convert/">pyatv.convert</a></code></li>
+<li><code><a title="pyatv.exceptions" href="exceptions/">pyatv.exceptions</a></code></li>
+<li><code><a title="pyatv.helpers" href="helpers/">pyatv.helpers</a></code></li>
+<li><code><a title="pyatv.interface" href="interface/">pyatv.interface</a></code></li>
+<li><code><a title="pyatv.settings" href="settings/">pyatv.settings</a></code></li>
 <li><code><a title="pyatv.storage" href="storage/">pyatv.storage</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pyatv.connect" href="#pyatv.connect">connect</a></code></li>
-<li><code><a title="pyatv.pair" href="#pyatv.pair">pair</a></code></li>
-<li><code><a title="pyatv.scan" href="#pyatv.scan">scan</a></code></li>
+<li><code><a title="pyatv.connect" href="#pyatv.connect/">connect</a></code></li>
+<li><code><a title="pyatv.pair" href="#pyatv.pair/">pair</a></code></li>
+<li><code><a title="pyatv.scan" href="#pyatv.scan/">scan</a></code></li>
 </ul>
 </li>
 </ul>
@@ -42,31 +42,31 @@ link_group: api
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="pyatv.conf" href="conf">pyatv.conf</a></code></dt>
+<dt><code class="name"><a title="pyatv.conf" href="conf/">pyatv.conf</a></code></dt>
 <dd>
 <section class="desc"><p>Configuration used when connecting to a device …</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.const" href="const">pyatv.const</a></code></dt>
+<dt><code class="name"><a title="pyatv.const" href="const/">pyatv.const</a></code></dt>
 <dd>
 <section class="desc"><p>Constants used in the public API.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.convert" href="convert">pyatv.convert</a></code></dt>
+<dt><code class="name"><a title="pyatv.convert" href="convert/">pyatv.convert</a></code></dt>
 <dd>
 <section class="desc"><p>Various types of extraction and conversion functions.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></dt>
+<dt><code class="name"><a title="pyatv.exceptions" href="exceptions/">pyatv.exceptions</a></code></dt>
 <dd>
 <section class="desc"><p>Local exceptions used by library.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.helpers" href="helpers">pyatv.helpers</a></code></dt>
+<dt><code class="name"><a title="pyatv.helpers" href="helpers/">pyatv.helpers</a></code></dt>
 <dd>
 <section class="desc"><p>Various helper methods.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.interface" href="interface">pyatv.interface</a></code></dt>
+<dt><code class="name"><a title="pyatv.interface" href="interface/">pyatv.interface</a></code></dt>
 <dd>
 <section class="desc"><p>Public interface exposed by library …</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.settings" href="settings">pyatv.settings</a></code></dt>
+<dt><code class="name"><a title="pyatv.settings" href="settings/">pyatv.settings</a></code></dt>
 <dd>
 <section class="desc"><p>Settings for configuring pyatv.</p></section>
 </dd>
@@ -83,7 +83,7 @@ link_group: api
 <dl>
 <dt id="pyatv.connect">
 <code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, loop: asyncio.events.AbstractEventLoop, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>] = None, session: Optional[aiohttp.client.ClientSession] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage">Storage</a>] = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a></span>
+<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig/">BaseConfig</a>, loop: asyncio.events.AbstractEventLoop, protocol: Optional[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol/">Protocol</a>] = None, session: Optional[aiohttp.client.ClientSession] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage/">Storage</a>] = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV/">AppleTV</a></span>
 </code>
 </dt>
 <dd>
@@ -92,7 +92,7 @@ link_group: api
 </dd>
 <dt id="pyatv.pair">
 <code class="name flex">
-<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage">Storage</a>] = None, **kwargs) -> <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler">PairingHandler</a></span>
+<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig/">BaseConfig</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol/">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage/">Storage</a>] = None, **kwargs) -> <a title="pyatv.interface.PairingHandler" href="interface#pyatv.interface.PairingHandler/">PairingHandler</a></span>
 </code>
 </dt>
 <dd>
@@ -101,7 +101,7 @@ link_group: api
 </dd>
 <dt id="pyatv.scan">
 <code class="name flex">
-<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], None] = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], None] = None, hosts: Optional[List[str]] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage">Storage</a>] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
+<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], None] = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol/">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol/">Protocol</a>], None] = None, hosts: Optional[List[str]] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None, storage: Optional[<a title="pyatv.interface.Storage" href="interface#pyatv.interface.Storage/">Storage</a>] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig/">BaseConfig</a>]</span>
 </code>
 </dt>
 <dd>
