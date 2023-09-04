@@ -12,14 +12,12 @@
     if not isinstance(d, pdoc.Doc) or isinstance(d, pdoc.External) and not external_links:
         return name
     url = d.url(relative_to=module, link_prefix=link_prefix,
-                top_ancestor=not show_inherited_members).replace(".html", "").replace("index", "")
-
+                top_ancestor=not show_inherited_members).replace("index.html", "").replace(".html", "")
     # Ugly, ugly hack to make navigation working in submodules...
     if url == "":
-      if len(d.qualname.split(".")) == 1:
-        url = "."
-      else:
-        url = os.path.relpath(d._url().replace("/index.html", ".html"), module.url())[3:].replace(".html", "")
+      url = ".."
+    if not url.endswith("/"):
+      url += "/"
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
   def const_link(refname):
@@ -417,10 +415,18 @@
   </nav>
 </%def>
 
+<%
+url = module.name.replace("pyatv", "").replace(".", "/")
+if url.startswith("/"):
+  url = url[1:]
+if not url.endswith("/"):
+  url += "/"
+%>
+
 ---
 layout: template
 title: API - ${module.name}
-permalink: /api/${("/" + module.name).replace("pyatv", "").replace(".", "/").replace("//", "/")}
+permalink: /api/${url}
 link_group: api
 ---
 
