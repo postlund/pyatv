@@ -1,5 +1,115 @@
 # CHANGES
 
+## 0.14.0 Lisa (2023-09-04)
+
+Finally time for a new release and this (despite the few number
+of commits) is a big one: this release introduces the storage API!
+in reality, the storage API comes with two distinct features:
+
+* Storing and loading of credentials and passwords
+* Support for generic settings
+
+The first one is pretty obvious and also the biggest one here.
+From now on, pyatv will automatically save credentials to a file
+when pairing and automatically load them again without the need
+of manually specifying them (the same applies to passwords as
+well). This is true for built in scripts like `atvremote` and
+`atvscript`. You need to add a few lines of code to support it
+within your applications.
+
+The API is generic in the sense that you can implement your own
+storage if you like. Perhaps you want to store your credentials in
+Dropbox or a Google Document? That is possible by writing a custom
+storage module. This release ships with a `FileStorage` module
+that stores settings in a local file using JSON as storage format.
+There's also a `MemoryStorage` module that just keeps settings in
+memory. The latter one is used by default if no storage is provided
+as a means of backwards compatibility.
+
+Moving on to generic settings then. Ways to alter the behavior of
+pyatv has been requested in several ways throughout the years. Be
+it specifying port nunbers or changing the way a protocol behaves.
+There has not been any way of implementing such settings until now.
+Biggest reason for it was because I wanted to implement storage
+first to see how things would fit together. I guess the benefit is
+that we now got both features at once.
+
+As a start, only a few metadata fields like MAC address and
+operating system version can be changed. I will add more settings
+over time and you can request additional settings by opening
+issues. As new settings adds extra maintenance burden (e.g. more
+tests), I will be a bit picky though.
+
+I have fixed a small detail in the documentation as well. The
+value of members in enums are now shown. Only the name was shown
+before. The same change also applies to the pydantic models used
+for settings, so you can see default values for all settings
+directly in the API reference.
+
+Oh, and one more thing... A wizard moved in to `atvremote`. If
+you run `atvremote wizard`, he will find all your devices, let you
+pick one and help out with setting it up (guiding you through
+pairing and passwords). Once you have completed the wizard, all
+credentials are saved to storage and you don't have to think about
+that anymore. Pretty neat, huh? This is still an early version,
+so expect bugs and please report them so they can be fixed.
+
+That is is. A pretty good release to be honest. Time for some
+rest!
+
+**Changes:**
+
+*Other:*
+
+```
+d13ede5 docs: Another attempt to fix docs
+7498250 docs: Try to fix API docs for some modules
+856fede storage: Switch to pyfakefs for testing
+7cc5a92 storage: Bump mockfs to 1.1.4
+3376835 storage: Fix tests on Windows
+dfcce1f docs: Add documentation for storage
+cd5ef88 storage: Adjust scripts to use storage
+e370ee1 storage: Initial support for storage
+557681c ci: Enable Dependabot for Dockerfile
+```
+
+**All changes:**
+
+```
+d13ede5 docs: Another attempt to fix docs
+f0978ff build(deps): Bump deepdiff from 6.3.1 to 6.4.1 in /requirements
+bb60615 build(deps): Bump pytest from 7.4.0 to 7.4.1 in /requirements
+11392ae build(deps): Bump mutagen from 1.46.0 to 1.47.0 in /requirements
+4928c42 build(deps): Bump zeroconf from 0.88.0 to 0.97.0 in /requirements
+48a25bb build(deps): Bump pydantic-settings from 2.0.2 to 2.0.3 in /requirements
+7498250 docs: Try to fix API docs for some modules
+856fede storage: Switch to pyfakefs for testing
+7cc5a92 storage: Bump mockfs to 1.1.4
+3376835 storage: Fix tests on Windows
+dfcce1f docs: Add documentation for storage
+cd5ef88 storage: Adjust scripts to use storage
+e370ee1 storage: Initial support for storage
+05ca46d build(deps): Bump zeroconf from 0.86.0 to 0.88.0 in /requirements
+573ac65 build(deps): Bump zeroconf from 0.82.1 to 0.86.0 in /requirements
+dbd0fbf build(deps): Bump chacha20poly1305-reuseable in /requirements
+894c9c4 build(deps): Bump python from 3.11.4-alpine to 3.11.5-alpine
+b892d20 build(deps): Bump protobuf from 4.24.1 to 4.24.2 in /requirements
+e5458f9 build(deps): Bump protobuf from 4.24.0 to 4.24.1 in /requirements
+aed3c2b build(deps): Bump zeroconf from 0.79.0 to 0.82.1 in /requirements
+2a03ff9 build(deps): Bump mypy from 1.5.0 to 1.5.1 in /requirements
+557681c ci: Enable Dependabot for Dockerfile
+a717479 build(deps): Bump python from 3.9.7 to 3.11.4 in Dockerfile
+84d8222 build(deps): Bump zeroconf from 0.76.0 to 0.79.0 in /requirements
+dffb71f build(deps): Bump zeroconf from 0.74.0 to 0.76.0 in /requirements
+e3d7a90 build(deps): Bump types-protobuf in /requirements
+671064e build(deps): Bump types-protobuf in /requirements
+d432705 build(deps): Bump mypy from 1.4.1 to 1.5.0 in /requirements
+6438d9f build(deps): Bump async-timeout from 4.0.2 to 4.0.3 in /requirements (#2136)
+be22c57 build(deps): Bump protobuf from 4.23.4 to 4.24.0 in /requirements (#2131)
+c3c5e33 build(deps): Bump types-protobuf in /requirements (#2130)
+285d4c0 build(deps): Bump zeroconf from 0.72.0 to 0.74.0 in /requirements (#2123)
+```
+
 ## 0.13.4 Krusty (2023-08-06)
 
 @bdraco cleaned up in aisle four and made scanning more
