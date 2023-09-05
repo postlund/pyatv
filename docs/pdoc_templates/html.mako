@@ -16,13 +16,18 @@
     # Ugly, ugly hack to make navigation working in submodules...
     if url == "":
       url = ".."
-    if not url.endswith("/"):
-      url += "/"
+    elif url.startswith("#"):
+      pass
+    elif "#" not in url:
+      if not url.endswith("/"):
+        url += "/"
+    else:
+        url = "../" + url
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
   def const_link(refname):
       desc = ".".join(refname.split(".")[-2:])
-      return f'<a title="{refname}" href="const#{refname}">{desc}</a>'
+      return f'<a title="{refname}" href="/api/const#{refname}">{desc}</a>'
 
   def to_html(text):
     return _to_html(text, module=module, link=link, latex_math=latex_math)
