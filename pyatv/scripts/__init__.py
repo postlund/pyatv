@@ -5,7 +5,6 @@ import asyncio
 from ipaddress import ip_address
 import json
 import logging
-import os
 
 from pyatv import const
 from pyatv.interface import Storage
@@ -104,11 +103,10 @@ def create_common_parser() -> argparse.ArgumentParser:
         help="storage backend for settings",
     )
 
-    storage_file = os.path.join(os.environ["HOME"], ".pyatv.conf")
     settings_group.add_argument(
         "--storage-filename",
         type=str,
-        default=storage_file,
+        default="default",  # Corresponds to FileStorage.default_storage()
         help="file used by file storage",
     )
 
@@ -118,6 +116,8 @@ def create_common_parser() -> argparse.ArgumentParser:
 def get_storage(args, loop: asyncio.AbstractEventLoop) -> Storage:
     """Get storage module based on user configuration."""
     if args.storage == "file":
+        if args.storage_filename == "default":
+            return FileStorage.default_storage(loop)
         return FileStorage(args.storage_filename, loop)
     return MemoryStorage()
 

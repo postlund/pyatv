@@ -159,6 +159,20 @@ await storage.save()
 Storages are supposed to keep track of changes and only save changes if something has actually
 changed.
 
+### Default File Storage
+
+When using tools bundled with pyatv, e.g. `atvremote` or `atvscript`,
+{% include api i="storage/file_storage.FileStorage" %} is used with the file `$HOME/.pyatv.conf`.
+You can tap into this storage with your own applications, thus sharing credentials with pyatv.
+There is a convenience method called
+{% include api i="storage/file_storage.FileStorage.default_storage" %} that is recommended to use
+as it is platform agnostic:
+
+```python
+loop = asyncio.get_event_loop()
+storage = FileStorage.default_storage(loop)
+await storage.load()
+```
 ## Changing Settings
 
 As stated in [Storage Guidelines](#storage-guidelines), some settings are only used when connecting

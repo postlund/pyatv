@@ -1,7 +1,6 @@
 """Simple example using file based storage."""
 
 import asyncio
-import os
 import sys
 
 from pyatv import connect, scan
@@ -13,7 +12,9 @@ LOOP = asyncio.get_event_loop()
 async def connect_with_storage(host):
     """Connect to a device using a storage."""
     loop = asyncio.get_event_loop()
-    storage = FileStorage(os.path.join(os.environ["HOME"], ".pyatv.conf"), loop)
+
+    # Load the same storage that pyatv uses internally (e.g. in atvremote)
+    storage = FileStorage.default_storage(loop)
     await storage.load()
 
     atvs = await scan(loop, timeout=5, hosts=[host], storage=storage)
