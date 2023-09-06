@@ -9,7 +9,7 @@ A client library for Apple TV and AirPlay devices
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/postlund/pyatv)
-[![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
+[![Downloads](https://static.pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -31,39 +31,68 @@ Some examples include:
 * List and switch user accounts
 * Add, remove or set audio output devices (e.g. HomePods)
 * Keyboard support
+* Persistent storage of credentials and settings
 
 ...and lots more! A complete list is available [here](https://pyatv.dev/documentation/supported_features/).
 
 # Great, but how do I use it?
 
 All documentation (especially for developers) are available at [pyatv.dev](https://pyatv.dev).
-It is however possible to install with `pip` and try things out with `atvremote`:
+It is however possible to install with `pip` and set up a new device `atvremote`:
 
 ```raw
 $ pip install pyatv
-$ atvremote scan
-       Name: Office
-   Model/SW: HomePodMini tvOS 14.7
-    Address: 10.0.10.84
-        MAC: AA:BB:CC:DD:EE:FF
- Deep Sleep: False
-Identifiers:
- - AA:BB:CC:DD:EE:FF
- - AABBCCDDEEFF
-Services:
- - Protocol: AirPlay, Port: 7000, Credentials: None
- - Protocol: Companion, Port: 49152, Credentials: None
- - Protocol: RAOP, Port: 7000, Credentials: None, Password: None
+$ atvremote wizard
+Looking for devices...
+Found the following devices:
+    Name                      Model                    Address
+--  ------------------------  -----------------------  -----------
+ 1  Receiver+                 airupnp                  10.0.10.200
+ 2  Receiver                  RX-V773                  10.0.10.82
+ 3  Pierre's AirPort Express  AirPort Express (gen 2)  10.0.10.168
+ 4  FakeATV                   Unknown                  10.0.10.254
+ 5  Vardagsrum                Apple TV 4K              10.0.10.81
+ 6  Apple TV                  Apple TV 3               10.0.10.83
+Enter index of device to set up (q to quit): 4
+Starting to set up FakeATV
+Starting to pair Protocol.MRP
+Enter PIN on screen: 1111
+Successfully paired Protocol.MRP, moving on...
+Pairing finished, trying to connect and get some metadata...
+Currently playing:
+  Media type: Music
+Device state: Playing
+       Title: Never Gonna Give You Up
+      Artist: Rick Astley
+    Position: 1/213s (0.0%)
+      Repeat: Off
+     Shuffle: Off
+Device is now set up!
 ```
 
-Or run in a container (x86_64, aarch64, armv7):
+After setting up a new device, other commands can be run directly:
 
 ```raw
-docker run -it --rm --network=host ghcr.io/postlund/pyatv:master atvremote scan
+$ atvremote -s 10.0.10.254 playing
+  Media type: Music
+Device state: Playing
+       Title: Never Gonna Give You Up
+      Artist: Rick Astley
+    Position: 1/213s (0.0%)
+      Repeat: Off
+     Shuffle: Off
+$ atvremote -s 10.0.10.254 pause
+$ atvremote -n FakeATV play
 ```
 
-The `master` tag points to latest commit on the `master` branch and can
-be changed to a specific version, e.g. `v0.9.0`.
+You can also run it inside a container (x86_64, aarch64, armv7):
+
+```raw
+docker run -it --rm --network=host ghcr.io/postlund/pyatv:0.14.0 atvremote scan
+```
+
+The `master` tag points to latest commit on the `master` branch and can `latest`
+points to the latest release.
 
 # I need to change something?
 
