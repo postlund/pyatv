@@ -14,7 +14,7 @@ AirPort Express and third-party speakers. It can act as remote control to the Mu
 [![PyPi Package](https://badge.fury.io/py/pyatv.svg)](https://badge.fury.io/py/pyatv)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/postlund/pyatv.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/postlund/pyatv/context:python)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/postlund/pyatv)
-[![Downloads](https://pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
+[![Downloads](https://static.pepy.tech/badge/pyatv)](https://pepy.tech/project/pyatv)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pyatv.svg)](https://pypi.python.org/pypi/pyatv/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -65,20 +65,13 @@ As pyatv depends solely on private and reverse engineered protocols, things some
 Apple changes something. Or because of other reasons. This section covers the major things that you
 need to be aware of.
 
-* Apple removed the "regular" MRP protocol in tvOS 15 and started tunneling it over AirPlay instead.
-  Version 0.9.0 of pyatv is the first version supporting tvOS 15. As long as credentials are provided
-  for AirPlay, everything should be seamless, i.e. nothing more needs to be done. Credentials obtained
-  from earlier versions will not work however, pairing must be re-performed with 0.9.0 (or later).
-* Playing anything with {% include api i="interface.Stream.play_url" %} tends to break devices running
-  tvOS, e.g. metadata stops working. Rebooting is the only recovery. Everything points at a bug in
-  tvOS.
-* It is possible to control the Music app running on a Mac, but macOS 11.4 seems to not work. Make
-  sure to upgrade.
-* There are some issues with {% include pypi package="miniaudio" %} when running on ARM
-  (e.g. Rasperry pi) which can be fixed by re-installing {% include pypi package="miniaudio" %} and
-  building it from source. See [here](support/faq#when-using-pyatv-on-a-raspberry-pi-eg-running-atvremote-i-get-illegal-instruction-how-do-i-fix-that)
+* As of tvOS 15, the Media Remote Protocol (MRP) is tunneled over AirPlay 2. Support for this was
+  introduced in version 0.9.0 of pyatv, so be sure to use a later version than that.
+* Support for {% include api i="interface.Stream.play_url" %} on tvOS was restored in version 0.13.3.
+* It is possible to control the Music app running on a Mac, but macOS 11.4 seems to not work.
+* If you have problems with {% include pypi package="miniaudio" %} on ARM (e.g. Rasperry Pi), try
+  re-installing {% include pypi package="miniaudio" %} and building it from source. See [here](support/faq#when-using-pyatv-on-a-raspberry-pi-eg-running-atvremote-i-get-illegal-instruction-how-do-i-fix-that)
   for details.
-* {% include pypi package="miniaudio" %} fails to compile on Apple Silicon {% include issue no="1162" %}
 * Other general issues can be found in the [FAQ](support/faq).
 
 # :trophy: Who uses pyatv?
@@ -93,6 +86,7 @@ Here are a few projects known to use pyatv:
 * [iSponsorBlockTV](https://github.com/dmunozv04/iSponsorBlockTV) - Skip sponsor segments in YouTube videos playing on an Apple TV
 * [homebridge-homepod-radio](https://github.com/petro-kushchak/homebridge-homepod-radio) - Homebridge accessory for streaming radio to Homepod mini
 * [node-red-contrib-apple-tv-x](https://github.com/twocolors/node-red-contrib-apple-tv-x) - Apple TV control from inside Node-RED
+* [c4-pyatv-remote](https://github.com/13mralex/c4-pyatv-remote>) - Control4 remote control integration
 
 If you are maintaining a project using pyatv, feel free to add it to the list (open a PR
 or [issue](https://github.com/postlund/pyatv/issues/new?assignees=&labels=question,documentation&template=question-or-idea.md&title=Add+my+pyatv+project+to+list&assignees=postlund)).
