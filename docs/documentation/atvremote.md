@@ -16,6 +16,50 @@ To more easily test pyatv, the atvremote application can be used. It is bundled 
 pyatv and supports all the functionality implemented by the library. So it is also a
 good place to go to for inspiration when implementing your own application.
 
+# Set up a device with wizard
+
+The atvremote command exposes more or less all functionality of pyatv, thus making it great
+for exploring what pyatv can do. Version 0.14.0 introduced a *wizard* to simplify setting up
+a new device (in case you don't care about the details). It will scan for devices and guide
+you through all the required steps and save credentials to a file, so you don't have to care
+about them ever again.
+
+To get going, just run `atvremote wizard`:
+
+```raw
+$ atvremote wizard
+Looking for devices...
+Found the following devices:
+    Name                      Model                    Address
+--  ------------------------  -----------------------  -----------
+ 1  Receiver+                 airupnp                  10.0.10.200
+ 2  Receiver                  RX-V773                  10.0.10.82
+ 3  Pierre's AirPort Express  AirPort Express (gen 2)  10.0.10.168
+ 4  FakeATV                   Unknown                  10.0.10.254
+ 5  Vardagsrum                Apple TV 4K              10.0.10.81
+ 6  Apple TV                  Apple TV 3               10.0.10.83
+Enter index of device to set up (q to quit): 4
+Starting to set up FakeATV
+Starting to pair Protocol.MRP
+Enter PIN on screen: 1111
+Successfully paired Protocol.MRP, moving on...
+Pairing finished, trying to connect and get some metadata...
+Currently playing:
+  Media type: Music
+Device state: Playing
+       Title: Never Gonna Give You Up
+      Artist: Rick Astley
+    Position: 1/213s (0.0%)
+      Repeat: Off
+     Shuffle: Off
+Device is now set up!
+```
+
+Here the device named `FakeATV` with IP address 10.0.10.254 is set up. From now on you
+can just run `atvremote -s 10.0.10.254 <command>` or `atvremote -n FakeATV <command>` to
+interact with it. Skip down to [Working with commands](#working-with-commands) to see
+what you can do.
+
 # Discovering devices
 
 To find devices, use the `scan` command:
@@ -357,6 +401,7 @@ Please beware that you lose everything saved for that device, including
 credentials and passwords!
 
 # Working with commands
+<a name="working-with-commands"></a>
 
 List supported commands:
 
