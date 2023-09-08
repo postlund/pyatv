@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 from os import path
+from pathlib import Path
 
 from pyatv.storage import AbstractStorage, StorageModel
 
@@ -19,6 +20,19 @@ class FileStorage(AbstractStorage):
         super().__init__()
         self._filename = filename
         self._loop = loop
+
+    @staticmethod
+    def default_storage(loop: asyncio.AbstractEventLoop) -> "FileStorage":
+        r"""Return file storage with default path.
+
+        This corresponds to the default file storage path that pyatv uses internally,
+        e.g. in atvremote. Use this if you want to hook into that storage in your own
+        applications.
+
+        The path used for this file is $HOME/.pyatv.conf (C:\Users\<user>\.pyatv.conf
+        on Windows).
+        """
+        return FileStorage(Path.home().joinpath(".pyatv.conf").as_posix(), loop)
 
     async def save(self) -> None:
         """Save settings to active storage."""
