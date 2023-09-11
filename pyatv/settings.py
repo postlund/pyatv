@@ -83,6 +83,18 @@ class RaopSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     credentials: Optional[str] = None
     password: Optional[str] = None
 
+    timing_port: int = 0
+    """Server side (UDP) port used by timing server.
+
+    Set to 0 to use random free port.
+    """
+
+    control_port: int = 0
+    """Server side (UDP) port used by control server.
+
+    Set to 0 to use random free port.
+    """
+
 
 class ProtocolSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Container for protocol specific settings."""
