@@ -110,12 +110,11 @@ class RaopPushUpdater(AbstractPushUpdater):
 class RaopPlaybackManager:
     """Manage current play state for RAOP."""
 
-    def __init__(self, address: str, port: int) -> None:
+    def __init__(self, core: Core) -> None:
         """Initialize a new RaopPlaybackManager instance."""
+        self.core = core
         self.playback_info: Optional[PlaybackInfo] = None
         self._is_acquired: bool = False
-        self._address: str = address
-        self._port: int = port
         self._context: StreamContext = StreamContext()
         self._connection: Optional[HttpConnection] = None
         self._rtsp: Optional[RtspSession] = None
@@ -143,7 +142,9 @@ class RaopPlaybackManager:
         if self._stream_client and self._rtsp and self._context:
             return self._stream_client, self._context
 
-        self._connection = await http_connect(self._address, self._port)
+        self._connection = await http_connect(
+            str(self.core.config.address), self.core.service.port
+        )
         self._rtsp = RtspSession(self._connection)
 
         protocol_version = get_protocol_version(service)
@@ -156,7 +157,10 @@ class RaopPlaybackManager:
         )
 
         self._stream_client = StreamClient(
-            self._rtsp, self._context, protocol_class(self._context, self._rtsp)
+            self._rtsp,
+            self._context,
+            protocol_class(self._context, self._rtsp),
+            self.core.settings,
         )
         return self._stream_client, self._context
 
@@ -511,7 +515,7 @@ def setup(  # pylint: disable=too-many-locals
     core: Core,
 ) -> Generator[SetupData, None, None]:
     """Set up a new RAOP service."""
-    playback_manager = RaopPlaybackManager(str(core.config.address), core.service.port)
+    playback_manager = RaopPlaybackManager(core)
     metadata = RaopMetadata(playback_manager)
     push_updater = RaopPushUpdater(metadata, core.state_dispatcher)
 

@@ -73,9 +73,11 @@ This module has additional documentation
 <li>
 <h4><code><a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></h4>
 <ul class="">
+<li><code><a title="pyatv.settings.RaopSettings.control_port" href="#pyatv.settings.RaopSettings.control_port">control_port</a></code></li>
 <li><code><a title="pyatv.settings.RaopSettings.credentials" href="#pyatv.settings.RaopSettings.credentials">credentials</a></code></li>
 <li><code><a title="pyatv.settings.RaopSettings.identifier" href="#pyatv.settings.RaopSettings.identifier">identifier</a></code></li>
 <li><code><a title="pyatv.settings.RaopSettings.password" href="#pyatv.settings.RaopSettings.password">password</a></code></li>
+<li><code><a title="pyatv.settings.RaopSettings.timing_port" href="#pyatv.settings.RaopSettings.timing_port">timing_port</a></code></li>
 </ul>
 </li>
 <li>
@@ -95,7 +97,7 @@ This module has additional documentation
 </header>
 <section id="section-intro">
 <p>Settings for configuring pyatv.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L101" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L113" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -281,7 +283,7 @@ allow <code>self</code> as a field name.</p></section>
 validated to form a valid model.</p>
 <p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
 allow <code>self</code> as a field name.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L87-L94" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L99-L106" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
@@ -321,13 +323,18 @@ allow <code>self</code> as a field name.</p></section>
 validated to form a valid model.</p>
 <p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
 allow <code>self</code> as a field name.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L79-L84" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L79-L96" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="pyatv.settings.RaopSettings.control_port"><code class="name">var <span class="ident">control_port</span> -> int = 0</code></dt>
+<dd>
+<section class="desc"><p>Server side (UDP) port used by control server.</p>
+<p>Set to 0 to use random free port.</p></section>
+</dd>
 <dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> Optional[str] = None</code></dt>
 <dd>
 <section class="desc"></section>
@@ -339,6 +346,11 @@ allow <code>self</code> as a field name.</p></section>
 <dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> Optional[str] = None</code></dt>
 <dd>
 <section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.RaopSettings.timing_port"><code class="name">var <span class="ident">timing_port</span> -> int = 0</code></dt>
+<dd>
+<section class="desc"><p>Server side (UDP) port used by timing server.</p>
+<p>Set to 0 to use random free port.</p></section>
 </dd>
 </dl>
 </dd>
@@ -353,7 +365,7 @@ allow <code>self</code> as a field name.</p></section>
 validated to form a valid model.</p>
 <p><code>__init__</code> uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
 allow <code>self</code> as a field name.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L97-L101" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L109-L113" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic_settings.main.BaseSettings</li>
