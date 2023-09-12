@@ -1,5 +1,5 @@
 name: Question or support
-description: If you are using `pyatv` and have questions regarding how to use it in any way (e.g. development), use this template.
+description: If you are using pyatv and have questions regarding how to use it in any way (e.g. development), use this template.
 labels: [question]
 body:
   - type: textarea
