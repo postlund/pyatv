@@ -29,6 +29,7 @@ from pyatv.protocols.raop.parsers import (
     get_metadata_types,
 )
 from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol, TimingServer
+from pyatv.settings import Settings
 from pyatv.support import log_binary
 from pyatv.support.metadata import EMPTY_METADATA, MediaMetadata
 from pyatv.support.rtsp import FRAMES_PER_PACKET, RtspSession
@@ -227,11 +228,13 @@ class StreamClient:
         rtsp: RtspSession,
         context: StreamContext,
         protocol: StreamProtocol,
+        settings: Settings,
     ):
         """Initialize a new StreamClient instance."""
         self.loop = asyncio.get_event_loop()
         self.rtsp: RtspSession = rtsp
         self.context: StreamContext = context
+        self.settings: Settings = settings
         self.control_client: Optional[ControlClient] = None
         self.timing_server: Optional[TimingServer] = None
         self._packet_backlog: PacketFifo = PacketFifo(PACKET_BACKLOG_SIZE)
@@ -299,13 +302,19 @@ class StreamClient:
 
         self._update_output_properties(properties)
 
-        local_addr = (self.rtsp.connection.local_ip, 0)
         (_, control_client) = await self.loop.create_datagram_endpoint(
             lambda: ControlClient(self.context, self._packet_backlog),
-            local_addr=local_addr,
+            local_addr=(
+                self.rtsp.connection.local_ip,
+                self.settings.protocols.raop.control_port,
+            ),
         )
         (_, timing_server) = await self.loop.create_datagram_endpoint(
-            TimingServer, local_addr=local_addr
+            TimingServer,
+            local_addr=(
+                self.rtsp.connection.local_ip,
+                self.settings.protocols.raop.timing_port,
+            ),
         )
 
         self.control_client = cast(ControlClient, control_client)
