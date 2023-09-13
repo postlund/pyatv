@@ -967,7 +967,7 @@ async def test_base_methods_guarded_after_close(facade_dummy, register_interface
         (RemoteControl, "remote_control", {}),
         (Metadata, "metadata", {}),
         (PushUpdater, "push_updater", {}),
-        (Stream, "stream", {}),
+        (Stream, "stream", {"play_service"}),
         (Power, "power", {}),
         # in_states is not abstract but uses get_features, will which will raise
         (Features, "features", {"in_state"}),
