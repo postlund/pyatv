@@ -189,7 +189,7 @@ class GlobalCommands:
             )
 
         pairing = await pair(
-            conf, self.args.protocol, self.loop, self.storage, **options
+            conf, self.args.protocol, self.loop, storage=self.storage, **options
         )
 
         try:
@@ -333,7 +333,7 @@ Press ENTER to continue
 
         print("Starting to pair", service.protocol)
 
-        pairing = await pair(conf, service.protocol, self.loop, self.storage)
+        pairing = await pair(conf, service.protocol, self.loop, storage=self.storage)
 
         await pairing.begin()
 
