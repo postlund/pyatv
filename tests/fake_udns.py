@@ -59,6 +59,7 @@ def airplay_service(
     properties = {"deviceid": deviceid.encode("utf-8"), "features": b"0x1"}
     if model:
         properties["model"] = model.encode("utf-8")
+        properties["flags"] = "0x8".encode("utf-8")  # Pin required
     service = FakeDnsService(
         name=atv_name,
         addresses=addresses,
