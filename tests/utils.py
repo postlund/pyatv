@@ -150,3 +150,8 @@ def assert_device(atv, name, address, identifier, protocol, port, creds=None):
     assert atv.get_service(protocol)
     assert atv.get_service(protocol).port == port
     assert atv.get_service(protocol).credentials == creds
+
+
+def all_in(text: str, *strings: str) -> bool:
+    """Return if all strings are in text."""
+    return all(string in text for string in strings)

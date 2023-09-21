@@ -141,9 +141,8 @@ class FakeAirPlayService(AirPlayServerAuth):
             response = self.state.airplay_responses.pop()
         else:
             plist = dict(readyToPlay=False, uuid=123)
-            response = AirPlayPlaybackResponse(
-                200, plistlib.dumps(plist).encode("utf-8")
-            )
+            response = AirPlayPlaybackResponse(200, plistlib.dumps(plist))
+
         return HttpResponse(
             request.protocol,
             request.version,
