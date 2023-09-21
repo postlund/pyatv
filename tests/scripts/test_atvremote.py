@@ -6,7 +6,7 @@ from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.const import Protocol
 
-from tests.fake_device.airplay import DEVICE_CREDENTIALS, DEVICE_PIN
+from tests.fake_device.airplay import DEVICE_AUTH_KEY, DEVICE_CREDENTIALS, DEVICE_PIN
 from tests.scripts.conftest import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID
 from tests.utils import all_in
 
@@ -172,4 +172,26 @@ async def test_settings(scriptenv):
         "atvremote", "--id", MRP_ID, "print_settings", persistent_storage=True
     )
     assert all_in(stdout, "protocols.raop.password = None")
+    assert exit_code == 0
+
+
+async def test_wizard(scriptenv):
+    # Run the wizard but limit scanning to a single device since scanning order might
+    # become unpredictable otherwise
+    stdout, _, exit_code = await scriptenv(
+        "atvremote",
+        "-s",
+        IP_2,
+        "wizard",
+        inputs=["1", str(DEVICE_PIN)],
+        persistent_storage=True,
+    )
+    assert all_in(stdout, "MRP is disabled", "Pairing finished", "Currently playing")
+    assert exit_code == 0
+
+    # Check that credentials was saved to storage
+    stdout, _, exit_code = await scriptenv(
+        "atvremote", "-s", IP_2, "print_settings", persistent_storage=True
+    )
+    assert all_in(stdout, DEVICE_AUTH_KEY.lower())
     assert exit_code == 0
