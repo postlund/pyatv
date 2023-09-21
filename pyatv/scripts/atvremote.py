@@ -814,6 +814,10 @@ def _extract_command_with_args(cmd):
     """
 
     def _typeparse(value):
+        # Special case where input is forced to be treated as a string by quoting
+        if isinstance(value, str) and value.startswith('"') and value.endswith('"'):
+            return value[1:-1]
+
         try:
             return int(value)
         except ValueError:
