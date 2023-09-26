@@ -6,33 +6,25 @@ from pyatv import exceptions
 from pyatv.auth.hap_pairing import PairSetupProcedure
 from pyatv.const import Protocol
 from pyatv.core import Core
-from pyatv.interface import BaseService, PairingHandler
+from pyatv.interface import PairingHandler
 from pyatv.protocols.airplay.auth import AuthenticationType, pair_setup
-from pyatv.protocols.airplay.utils import AirPlayFlags, parse_features
+from pyatv.protocols.airplay.utils import AirPlayMajorVersion
 from pyatv.support import error_handler
 from pyatv.support.http import HttpConnection, http_connect
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_preferred_auth_type(service: BaseService) -> AuthenticationType:
-    """Return the preferred authentication type depending on what is supported."""
-    features_string = service.properties.get("features", service.properties.get("ft"))
-    if features_string:
-        features = parse_features(features_string)
-        if AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in features:
-            return AuthenticationType.HAP
-    return AuthenticationType.Legacy
-
-
 class AirPlayPairingHandler(PairingHandler):
     """Base class for API used to pair with an Apple TV."""
 
-    def __init__(self, core: Core, auth_type: AuthenticationType, **kwargs) -> None:
+    def __init__(
+        self, core: Core, airplay_version: AirPlayMajorVersion, **kwargs
+    ) -> None:
         """Initialize a new MrpPairingHandler."""
         super().__init__(core.session_manager, core.service)
         self._name: str = kwargs.get("name", core.settings.info.name)
-        self.auth_type = auth_type
+        self.airplay_version = airplay_version
         self.http: Optional[HttpConnection] = None
         self.address: str = str(core.config.address)
         self.pairing_procedure: Optional[PairSetupProcedure] = None
@@ -54,7 +46,12 @@ class AirPlayPairingHandler(PairingHandler):
     async def begin(self) -> None:
         """Start pairing process."""
         self.http = await http_connect(self.address, self.service.port)
-        self.pairing_procedure = pair_setup(self.auth_type, self.http)
+        self.pairing_procedure = pair_setup(
+            AuthenticationType.HAP
+            if self.airplay_version == AirPlayMajorVersion.AirPlayV2
+            else AuthenticationType.Legacy,
+            self.http,
+        )
         self._has_paired = False
         return await error_handler(
             self.pairing_procedure.start_pairing, exceptions.PairingError

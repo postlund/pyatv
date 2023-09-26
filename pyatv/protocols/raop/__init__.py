@@ -44,10 +44,7 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.protocols.airplay.auth import extract_credentials
-from pyatv.protocols.airplay.pairing import (
-    AirPlayPairingHandler,
-    get_preferred_auth_type,
-)
+from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
 from pyatv.protocols.airplay.utils import (
     AirPlayMajorVersion,
     dbfs_to_pct,
@@ -147,7 +144,9 @@ class RaopPlaybackManager:
         )
         self._rtsp = RtspSession(self._connection)
 
-        protocol_version = get_protocol_version(service)
+        protocol_version = get_protocol_version(
+            service, self.core.settings.protocols.raop.protocol_version
+        )
         _LOGGER.debug("Using AirPlay version %s", protocol_version)
 
         protocol_class = (
@@ -592,4 +591,10 @@ def setup(  # pylint: disable=too-many-locals
 
 def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return AirPlayPairingHandler(core, get_preferred_auth_type(core.service), **kwargs)
+    return AirPlayPairingHandler(
+        core,
+        get_protocol_version(
+            core.service, core.settings.protocols.raop.protocol_version
+        ),
+        **kwargs,
+    )

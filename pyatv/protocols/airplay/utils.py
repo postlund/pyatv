@@ -14,6 +14,7 @@ from pyatv.auth.hap_pairing import (
 from pyatv.const import PairingRequirement
 from pyatv.core import MutableService
 from pyatv.interface import BaseService
+from pyatv.settings import AirPlayVersion
 from pyatv.support import map_range
 from pyatv.support.http import HttpRequest, HttpResponse
 
@@ -236,17 +237,23 @@ def log_response(logger, response: HttpResponse, message_prefix="") -> None:
 # so I'm guessing until I know better. The basic idea here is simple: the service
 # should have the "features" flag (either "features" or "ft") and either bit 38 or
 # bit 48 should be present.
-def get_protocol_version(service: BaseService) -> AirPlayMajorVersion:
+def get_protocol_version(
+    service: BaseService, preferred_version: AirPlayVersion
+) -> AirPlayMajorVersion:
     """Return major AirPlay version supported by a service."""
-    features = service.properties.get("ft")
-    if not features:
-        features = service.properties.get("features", "0x0")
+    if preferred_version == AirPlayVersion.Auto:
+        features = service.properties.get("ft")
+        if not features:
+            features = service.properties.get("features", "0x0")
 
-    parsed_features = parse_features(features)
-    if (
-        AirPlayFlags.SupportsUnifiedMediaControl in parsed_features
-        or AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in parsed_features
-    ):
+        parsed_features = parse_features(features)
+        if (
+            AirPlayFlags.SupportsUnifiedMediaControl in parsed_features
+            or AirPlayFlags.SupportsCoreUtilsPairingAndEncryption in parsed_features
+        ):
+            return AirPlayMajorVersion.AirPlayV2
+        return AirPlayMajorVersion.AirPlayV1
+    if preferred_version == AirPlayVersion.V2:
         return AirPlayMajorVersion.AirPlayV2
     return AirPlayMajorVersion.AirPlayV1
 

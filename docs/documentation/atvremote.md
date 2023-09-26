@@ -389,6 +389,35 @@ like this:
 $ atvremote -s 10.0.10.84 unset_setting=protocols.raop.password
 ```
 
+As `atvremote` tries to interpolate the correct data type of input (e.g. it
+will try to interpret "1" as an integer), you might end up with issues if a
+setting expects a number as a string. One example is this:
+
+```raw
+protocols.raop.protocol_version = auto (AirPlayVersion)
+```
+
+`AirPlayVersion` can be either auto, 1 or 2. Trying to change to 1 yields
+an error:
+
+```raw
+$ atvremote -s 10.0.10.84 change_setting=protocols.raop.protocol_version,1
+Traceback (most recent call last):
+...
+protocol_version
+  Input should be a valid string [type=string_type, input_value=1, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.1/v/string_type
+```
+
+It expects a string but `atvremote` automatically converts 1 to an integer. To
+circumvent this, you can force an argument to be treated as a string like this:
+
+```raw
+$ atvremote -s 10.0.10.81 'change_setting=protocols.raop.protocol_version,"1"'
+```
+
+
+
 ## Removing Settings
 
 To remove all settings for a device (reverting to defaults), run:

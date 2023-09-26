@@ -29,7 +29,8 @@ def setup_target_device(udns_server) -> None:
 
 
 async def new_storage(
-    filename: str, loop: asyncio.AbstractEventLoop, mockfs
+    filename: str,
+    loop: asyncio.AbstractEventLoop,
 ) -> Storage:
     storage = FileStorage(filename, loop)
     await storage.load()
@@ -37,7 +38,7 @@ async def new_storage(
 
 
 async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
-    storage1 = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
+    storage1 = await new_storage(STORAGE_FILENAME, event_loop)
 
     # Scan for the device, get settings for it and save everything to storage
     conf = (await unicast_scan(storage=storage1))[0]
@@ -46,7 +47,7 @@ async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
 
     # Open a new storage (based on the same file as above) and extract same settings.
     # Compare content to ensure they are exactly the same.
-    storage2 = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
+    storage2 = await new_storage(STORAGE_FILENAME, event_loop)
     settings2 = await storage2.get_settings(conf)
     assert not DeepDiff(settings2.model_dump(), settings1.model_dump())
 
@@ -54,7 +55,7 @@ async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
 async def test_provides_storage_to_pairing_handler(
     event_loop, unicast_scan, session_manager, mockfs
 ):
-    storage = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
+    storage = await new_storage(STORAGE_FILENAME, event_loop)
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
@@ -69,7 +70,7 @@ async def test_provides_storage_to_pairing_handler(
 async def test_provides_storage_to_connect(
     event_loop, unicast_scan, session_manager, mockfs
 ):
-    storage = await new_storage(STORAGE_FILENAME, event_loop, mockfs)
+    storage = await new_storage(STORAGE_FILENAME, event_loop)
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
