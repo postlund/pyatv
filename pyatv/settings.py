@@ -1,4 +1,5 @@
 """Settings for configuring pyatv."""
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -33,6 +34,19 @@ DEFAULT_MODEL = "iPhone10,6"
 DEFAULT_OS_NAME = "iPhone OS"
 DEFAULT_OS_BUILD = "18G82"
 DEFAULT_OS_VERSION = "14.7.1"
+
+# pylint: disable=invalid-name
+
+
+class AirPlayVersion(str, Enum):
+    """AirPlay version to use."""
+
+    Auto = "auto"
+    V1 = "1"
+    V2 = "2"
+
+
+# pylint: enable=invalid-name
 
 
 class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
@@ -82,6 +96,13 @@ class RaopSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     identifier: Optional[str] = None
     credentials: Optional[str] = None
     password: Optional[str] = None
+
+    protocol_version: AirPlayVersion = AirPlayVersion.Auto
+    """Protocol version used.
+
+    In reality this corresponds to the AirPlay version used. Set to 0 for automatic
+    mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.
+    """
 
     timing_port: int = 0
     """Server side (UDP) port used by timing server.

@@ -17,6 +17,7 @@ from pyatv.protocols.airplay.utils import (
     is_remote_control_supported,
     parse_features,
 )
+from pyatv.settings import AirPlayVersion
 
 # These are not really valid credentials but parse_credentials accepts them (for now)
 HAP_CREDS = parse_credentials("aa:bb:cc:dd")
@@ -118,24 +119,46 @@ def test_is_remote_control_supported(props, credentials, expected_supported):
 
 
 @pytest.mark.parametrize(
-    "props, expected_version",
+    "props, preferred_version, expected_version",
     [
         # Fallback
-        ({}, AirPlayMajorVersion.AirPlayV1),
+        ({}, AirPlayVersion.Auto, AirPlayMajorVersion.AirPlayV1),
         # Used by RAOP
-        ({"ft": "0x5A7FFFF7,0xE"}, AirPlayMajorVersion.AirPlayV1),  # Apple TV 3
+        (
+            {"ft": "0x5A7FFFF7,0xE"},
+            AirPlayVersion.Auto,
+            AirPlayMajorVersion.AirPlayV1,
+        ),  # Apple TV 3
         (
             {"ft": "0x4A7FCA00,0xBC354BD0"},
+            AirPlayVersion.Auto,
             AirPlayMajorVersion.AirPlayV2,
         ),  # HomePod Mini
         # Used by AirPlay
-        ({"features": "0x5A7FFFF7,0xE"}, AirPlayMajorVersion.AirPlayV1),  # Apple TV 3
+        (
+            {"features": "0x5A7FFFF7,0xE"},
+            AirPlayVersion.Auto,
+            AirPlayMajorVersion.AirPlayV1,
+        ),  # Apple TV 3
+        # Should yield v1 but overridden with v2
+        (
+            {"features": "0x5A7FFFF7,0xE"},
+            AirPlayVersion.V2,
+            AirPlayMajorVersion.AirPlayV2,
+        ),
         (
             {"features": "0x4A7FCA00,0xBC354BD0"},
+            AirPlayVersion.Auto,
             AirPlayMajorVersion.AirPlayV2,
         ),  # HomePod Mini
+        # Should yield v2 both overridden with v1
+        (
+            {"features": "0x4A7FCA00,0xBC354BD0"},
+            AirPlayVersion.V1,
+            AirPlayMajorVersion.AirPlayV1,
+        ),
     ],
 )
-def test_get_protocol_version(props, expected_version):
+def test_get_protocol_version(props, preferred_version, expected_version):
     service = MutableService("id", Protocol.AirPlay, 0, props)
-    assert get_protocol_version(service) == expected_version
+    assert get_protocol_version(service, preferred_version) == expected_version
