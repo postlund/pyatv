@@ -1,5 +1,74 @@
 # CHANGES
 
+## 0.14.1 Marge (2023-09-27)
+
+Minor release coming up today:
+
+* Fix Companion credentials not being saved when pairing
+* Actually use storage in the wizard (atvremote)
+* Add FileStorage.default_storage() to get the same storage
+  as used by scripts shipped with pyatv (i.e. you can share
+  credentials with your applications)
+* Add setting to force AirPlay version to use with RAOP
+* Add settings for RAOP control and timing ports
+
+**Changes:**
+
+*Protocol: Companion:*
+
+```
+e551954 companion: Fix credentials not saved
+```
+
+*Protocol: RAOP:*
+
+```
+c17f304 raop: Add protocol_version setting
+391be8b raop: Add settings for timing and control ports
+```
+
+*Script: atvremote:*
+
+```
+fa2f7b1 atvremote: Fix storage passing to pair
+```
+
+*Other:*
+
+```
+fd7135b tests: Add test for atvremote wizard
+e8a812d tests: Migrate scripts tests to pytest
+6704359 docs: Add minor change template
+74d2de5 storage: Add FileStorage.default_storage
+621adff docs: Some updates to README.md
+f13a353 docs: More link fixes
+d394708 storage: Use pydantic-extra-types for MAC
+```
+
+**All changes:**
+
+```
+e551954 companion: Fix credentials not saved
+1c4b4d3 build(deps): Bump types-protobuf in /requirements
+91fdc71 build(deps): Bump zeroconf from 0.108.0 to 0.112.0 in /requirements
+c17f304 raop: Add protocol_version setting
+fd7135b tests: Add test for atvremote wizard
+e8a812d tests: Migrate scripts tests to pytest
+fa2f7b1 atvremote: Fix storage passing to pair
+95d7d54 build(deps): Bump deepdiff from 6.4.1 to 6.5.0 in /requirements
+6704359 docs: Add minor change template
+712f105 build(deps): Bump zeroconf from 0.97.0 to 0.108.0 in /requirements
+46d50f0 build(deps): Bump black from 23.7.0 to 23.9.1 in /requirements
+391be8b raop: Add settings for timing and control ports
+2808c5d build(deps): Bump pytest from 7.4.1 to 7.4.2 in /requirements
+d426ae8 build(deps): Bump protobuf from 4.24.2 to 4.24.3 in /requirements
+01e4cc0 build(deps): Bump pytest-aiohttp from 1.0.4 to 1.0.5 in /requirements
+74d2de5 storage: Add FileStorage.default_storage
+621adff docs: Some updates to README.md
+f13a353 docs: More link fixes
+d394708 storage: Use pydantic-extra-types for MAC
+```
+
 ## 0.14.0 Lisa (2023-09-04)
 
 Finally time for a new release and this (despite the few number

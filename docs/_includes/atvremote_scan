@@ -1,0 +1,32 @@
+```raw
+$ atvremote acan
+Scan Results
+========================================
+       Name: Living Room
+   Model/SW: Apple TV 4K, tvOS 16.6 build 20M73
+    Address: 10.0.0.5
+        MAC: AA:BB:CC:DD:EE:FF
+ Deep Sleep: True
+Identifiers:
+ - 01234567-89AB-CDEF-0123-4567890ABCDE
+ - AA:BB:CC:DD:EE:FF
+ - 01234567-89AB-CDEF-0123-AAAAAAAAAAAA
+ - AABBCCDDEEFF
+Services:
+ - Protocol: Companion, Port: 49153, Credentials:None, Requires Password: False, Password: None, Pairing: Mandatory
+ - Protocol: AirPlay, Port: 7000, Credentials: None, Requires Password: False, Password: None, Pairing: Mandatory
+ - Protocol: MRP, Port: 49154, Credentials: None, Requires Password: False, Password: None, Pairing: NotNeeded (Disabled)
+ - Protocol: RAOP, Port: 7000, Credentials: None, Requires Password: False, Password: None, Pairing: Mandatory
+
+       Name: Pierre's AirPort Express
+   Model/SW: AirPort Express (gen 2), AirPortOS 7.8.1
+    Address: 10.0.0.6
+        MAC: BB:BB:BB:BB:BB:BB
+ Deep Sleep: False
+Identifiers:
+ - BB:BB:BB:BB:BB:BB
+ - BBBBBBBBBBBB
+Services:
+ - Protocol: AirPlay, Port: 7000, Credentials: None, Requires Password: False, Password: None, Pairing: NotNeeded
+ - Protocol: RAOP, Port: 7000, Credentials: None, Requires Password: False, Password: None, Pairing: NotNeeded
+```
