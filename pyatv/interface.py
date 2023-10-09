@@ -510,7 +510,7 @@ class Playing(ABC):
         self._content_identifier = content_identifier
         self._post_process()
 
-    def _post_process(self):
+    def _post_process(self) -> None:
         if self._position:
             # Make sure position never is negative
             self._position = max(self._position, 0)
@@ -569,7 +569,7 @@ class Playing(ABC):
 
         return "\n".join(output)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare if two objects are equal."""
         if isinstance(other, Playing):
             for prop in self._PROPERTIES:
@@ -895,7 +895,7 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def powerstate_update(
         self, old_state: const.PowerState, new_state: const.PowerState
-    ):
+    ) -> None:
         """Device power state was updated."""
         raise NotImplementedError()
 
@@ -1072,7 +1072,7 @@ class Features:
         self,
         states: Union[List[FeatureState], FeatureState],
         *feature_names: FeatureName
-    ):
+    ) -> bool:
         """Return if features are in a specific state.
 
         This method will return True if all given features are in the state specified
@@ -1120,14 +1120,14 @@ class AudioListener(ABC):
     """Listener interface for audio updates."""
 
     @abstractmethod
-    def volume_update(self, old_level: float, new_level: float):
+    def volume_update(self, old_level: float, new_level: float) -> None:
         """Device volume was updated."""
         raise NotImplementedError()
 
     @abstractmethod
     def outputdevices_update(
         self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
-    ):
+    ) -> None:
         """Output devices were updated."""
         raise NotImplementedError()
 
@@ -1210,7 +1210,7 @@ class KeyboardListener(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def focusstate_update(
         self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
-    ):
+    ) -> None:
         """Keyboard focus state was updated."""
         raise exceptions.NotSupportedError()
 
