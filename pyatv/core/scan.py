@@ -20,6 +20,7 @@ from typing import (
     Tuple,
     Union,
     cast,
+    TYPE_CHECKING,
 )
 
 from zeroconf import (
@@ -328,6 +329,29 @@ def _name_without_type(name: str, type_: str) -> str:
     return name[: -(len(type_) + 1)]
 
 
+def _get_valid_ipv4_address_from_service_info(
+    info: AsyncServiceInfo,
+) -> List[IPv4Address]:
+    """Return valid IPv4 addresses from service info.
+
+    Older airport devices (e.g. Airport Express) can return
+    link-local addresses in the service info after the valid
+    addresses. This function will filter out those addresses.
+    """
+    addresses = info.ip_addresses_by_version(IPVersion.V4Only)
+    if TYPE_CHECKING:
+        ipv4_addresses = cast(List[IPv4Address], addresses)
+    else:
+        ipv4_addresses = addresses
+    return [
+        ip_address
+        for ip_address in ipv4_addresses
+        if not ip_address.is_link_local
+        and not ip_address.is_loopback
+        and not ip_address.is_unspecified
+    ]
+
+
 class AsyncDeviceInfoServiceInfo(AsyncServiceInfo):
     """A version of AsyncServiceInfo that does not expect addresses."""
 
@@ -472,10 +496,7 @@ class ZeroconfScanner(BaseScanner):
                     with contextlib.suppress(UnicodeDecodeError):
                         name_to_model[name] = model.decode("utf-8")
             else:
-                addresses = cast(
-                    List[IPv4Address], info.ip_addresses_by_version(IPVersion.V4Only)
-                )
-                for ip_address in addresses:
+                for ip_address in _get_valid_ipv4_address_from_service_info(info):
                     services_by_address.setdefault(ip_address, []).append(info)
         return services_by_address, name_to_model
 
@@ -547,8 +568,8 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
                 device_infos.append(info)
                 # Device info is special because it does not have an address
                 continue
-            for address in info.ip_addresses_by_version(IPVersion.V4Only):
-                if infos_by_type := infos_by_address_type.get(address):
+            for ip_address in _get_valid_ipv4_address_from_service_info(info):
+                if infos_by_type := infos_by_address_type.get(ip_address):
                     infos_by_type[info.type] = info
                     self._set_or_get_address_to_device_name(address, info)
 
