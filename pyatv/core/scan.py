@@ -571,7 +571,7 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
             for ip_address in _get_valid_ipv4_address_from_service_info(info):
                 if infos_by_type := infos_by_address_type.get(ip_address):
                     infos_by_type[info.type] = info
-                    self._set_or_get_address_to_device_name(address, info)
+                    self._set_or_get_address_to_device_name(ip_address, info)
 
         # Device info is special because it does not have an address
         device_name_to_address = self.device_name_to_address
