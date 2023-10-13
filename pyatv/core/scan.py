@@ -7,6 +7,7 @@ from ipaddress import IPv4Address
 import logging
 import os
 from typing import (
+    TYPE_CHECKING,
     Any,
     Awaitable,
     Callable,
@@ -20,7 +21,6 @@ from typing import (
     Tuple,
     Union,
     cast,
-    TYPE_CHECKING,
 )
 
 from zeroconf import (
