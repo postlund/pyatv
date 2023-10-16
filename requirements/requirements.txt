@@ -6,7 +6,7 @@ ifaddr==0.2.0
 ifaddr==0.2.0
 mediafile==0.12.0
 miniaudio==1.59
-protobuf==4.24.3
+protobuf==4.24.4
 pydantic-extra-types==2.1.0
 pydantic-settings==2.0.3
 requests==2.31.0
