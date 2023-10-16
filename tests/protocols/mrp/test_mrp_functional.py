@@ -441,7 +441,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy2")
         self.assertEqual(self.atv.metadata.app.name, DEMO_APP_NAME)
 
-        # Do not include display name and re-use previous one
+        # Do not include display name and reuse previous one
         self.usecase.update_client(display_name=None)
         self.usecase.change_metadata(title="dummy3")
         await self.playing(title="dummy3")

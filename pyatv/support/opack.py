@@ -112,7 +112,7 @@ def _pack(data, object_list):
     else:
         raise TypeError(str(type(data)))
 
-    # Re-use if in object list, otherwise add it to list
+    # Reuse if in object list, otherwise add it to list
     if packed_bytes in object_list:
         object_index = object_list.index(packed_bytes)
         if object_index < 0x21:

@@ -2,7 +2,7 @@
 
 This is a "generic" client designed around how AirPlay works in regards to streaming.
 The client uses an underlying "protocol" for protocol specific bits, i.e. to support
-AirPlay v1 and/or v2. This is mainly for code re-use purposes.
+AirPlay v1 and/or v2. This is mainly for code reuse purposes.
 """
 from abc import ABC, abstractmethod
 import asyncio
@@ -461,7 +461,7 @@ class StreamClient:
             self._packet_backlog.clear()  # Don't keep old packets around (big!)
             if transport:
                 # TODO: Teardown should not be done here. In fact, nothing should be
-                # closed here since the connection should be re-usable for streaming
+                # closed here since the connection should be reusable for streaming
                 # more audio files. Refactor when support for that is added.
                 await self.rtsp.teardown(self.context.rtsp_session)
                 transport.close()

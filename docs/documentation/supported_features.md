@@ -174,7 +174,7 @@ Music app in macOS.
 
 ## MRP
 
-This protocol was introduced in tvOS and superseeds DMAP. It has the same features as well
+This protocol was introduced in tvOS and superseds DMAP. It has the same features as well
 as new ones, like notion of apps and game pad controls.
 
 ### Supported Features
