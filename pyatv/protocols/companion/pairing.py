@@ -28,6 +28,7 @@ class CompanionPairingHandler(PairingHandler):
         self.protocol = CompanionProtocol(self.connection, self.srp, core.service)
         self.pairing_procedure = CompanionPairSetupProcedure(self.protocol, self.srp)
         self.pin_code: Optional[str] = None
+        self._settings = core.settings
         self._has_paired: bool = False
 
     async def close(self) -> None:
@@ -62,6 +63,7 @@ class CompanionPairingHandler(PairingHandler):
                 self._name,
             )
         )
+        self._settings.protocols.companion.credentials = self.service.credentials
         self._has_paired = True
 
     @property
