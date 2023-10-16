@@ -150,7 +150,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
             # send_and_receive will stop that propagation).
             self.dispatch(protobuf.DEVICE_INFO_MESSAGE, self.device_info)
 
-            # This is a hack to support re-use of a protocol object in
+            # This is a hack to support reuse of a protocol object in
             # proxy (will be removed/refactored later)
             if skip_initial_messages:
                 return

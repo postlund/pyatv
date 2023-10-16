@@ -718,7 +718,7 @@ possible and supported).</p></section>
 <dl>
 <dt id="pyatv.interface.AudioListener.outputdevices_update">
 <code class="name flex">
-<span>def <span class="ident">outputdevices_update</span></span>(<span>self, old_devices: List[<a title="pyatv.interface.OutputDevice" href="#pyatv.interface.OutputDevice">OutputDevice</a>], new_devices: List[<a title="pyatv.interface.OutputDevice" href="#pyatv.interface.OutputDevice">OutputDevice</a>])</span>
+<span>def <span class="ident">outputdevices_update</span></span>(<span>self, old_devices: List[<a title="pyatv.interface.OutputDevice" href="#pyatv.interface.OutputDevice">OutputDevice</a>], new_devices: List[<a title="pyatv.interface.OutputDevice" href="#pyatv.interface.OutputDevice">OutputDevice</a>]) -> None</span>
 </code>
 </dt>
 <dd>
@@ -727,7 +727,7 @@ possible and supported).</p></section>
 </dd>
 <dt id="pyatv.interface.AudioListener.volume_update">
 <code class="name flex">
-<span>def <span class="ident">volume_update</span></span>(<span>self, old_level: float, new_level: float)</span>
+<span>def <span class="ident">volume_update</span></span>(<span>self, old_level: float, new_level: float) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1105,7 +1105,7 @@ then this property contains the raw model string (if any is available).</p></sec
 </dd>
 <dt id="pyatv.interface.Features.in_state">
 <code class="name flex">
-<span>def <span class="ident">in_state</span></span>(<span>self, states: Union[List[<a title="pyatv.const.FeatureState" href="../const#pyatv.const.FeatureState">FeatureState</a>], <a title="pyatv.const.FeatureState" href="../const#pyatv.const.FeatureState">FeatureState</a>], *feature_names: <a title="pyatv.const.FeatureName" href="../const#pyatv.const.FeatureName">FeatureName</a>)</span>
+<span>def <span class="ident">in_state</span></span>(<span>self, states: Union[List[<a title="pyatv.const.FeatureState" href="../const#pyatv.const.FeatureState">FeatureState</a>], <a title="pyatv.const.FeatureState" href="../const#pyatv.const.FeatureState">FeatureState</a>], *feature_names: <a title="pyatv.const.FeatureName" href="../const#pyatv.const.FeatureName">FeatureName</a>) -> bool</span>
 </code>
 </dt>
 <dd>
@@ -1224,7 +1224,7 @@ interface: <code>pyatv.interfaces.KeyboardListener</code></p>
 <dl>
 <dt id="pyatv.interface.KeyboardListener.focusstate_update">
 <code class="name flex">
-<span>def <span class="ident">focusstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.KeyboardFocusState" href="../const#pyatv.const.KeyboardFocusState">KeyboardFocusState</a>, new_state: <a title="pyatv.const.KeyboardFocusState" href="../const#pyatv.const.KeyboardFocusState">KeyboardFocusState</a>)</span>
+<span>def <span class="ident">focusstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.KeyboardFocusState" href="../const#pyatv.const.KeyboardFocusState">KeyboardFocusState</a>, new_state: <a title="pyatv.const.KeyboardFocusState" href="../const#pyatv.const.KeyboardFocusState">KeyboardFocusState</a>) -> None</span>
 </code>
 </dt>
 <dd>
@@ -1657,7 +1657,7 @@ always be the same for the same content, but it is not guaranteed.</p></section>
 <dl>
 <dt id="pyatv.interface.PowerListener.powerstate_update">
 <code class="name flex">
-<span>def <span class="ident">powerstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.PowerState" href="../const#pyatv.const.PowerState">PowerState</a>, new_state: <a title="pyatv.const.PowerState" href="../const#pyatv.const.PowerState">PowerState</a>)</span>
+<span>def <span class="ident">powerstate_update</span></span>(<span>self, old_state: <a title="pyatv.const.PowerState" href="../const#pyatv.const.PowerState">PowerState</a>, new_state: <a title="pyatv.const.PowerState" href="../const#pyatv.const.PowerState">PowerState</a>) -> None</span>
 </code>
 </dt>
 <dd>

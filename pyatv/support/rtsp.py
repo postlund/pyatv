@@ -123,7 +123,7 @@ class RtspSession:
         )
 
     # This method is only used by AirPlay 1 and is very specific (e.g. does not support
-    # annnouncing arbitrary audio formats) and should probably move to the AirPlay 1
+    # announcing arbitrary audio formats) and should probably move to the AirPlay 1
     # specific RAOP implementation. It will however live here for now until something
     # motivates that.
     async def announce(

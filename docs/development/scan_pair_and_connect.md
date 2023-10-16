@@ -224,7 +224,7 @@ pairing = await pyatv.pair(config, Protocol.DMAP)
 
 # Connect
 
-Connecting is simply done by passing a config to {% include api i="pyatv.conncet" %}:
+Connecting is simply done by passing a config to {% include api i="pyatv.connect" %}:
 
 ```python
 # Get a configuration with scan
@@ -296,7 +296,7 @@ It can however be convenient to have if you test things when developing pyatv
 as you can shorten the feedback loop, since scanning can be avoided. But be warned.
 
 A service is by default *enabled*, meaning that pyatv will try to connect to the
-service when {% include api i="pyatv.conncet" %} is called. It is possible to add
+service when {% include api i="pyatv.connect" %} is called. It is possible to add
 a service but not connect to it by setting `enabled` to `False`:
 
 ```python

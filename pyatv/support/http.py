@@ -670,5 +670,5 @@ async def http_server(
 async def create_session(
     session: Optional[ClientSession] = None,
 ) -> ClientSessionManager:
-    """Create aiohttp ClientSession manged by pyatv."""
+    """Create aiohttp ClientSession managed by pyatv."""
     return ClientSessionManager(session or ClientSession(), session is None)
