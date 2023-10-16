@@ -31,7 +31,7 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
-          - "3.12-rc.3"
+          - "3.12"
         chickn-args:
           - "--no-venv"
         regression:
