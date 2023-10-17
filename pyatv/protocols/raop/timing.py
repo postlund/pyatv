@@ -22,7 +22,7 @@ def ntp2parts(ntp: int) -> Tuple[int, int]:
 
 
 def ntp2ts(ntp: int, rate: int) -> int:
-    """Comvert NTP time into timestamp."""
+    """Convert NTP time into timestamp."""
     return int((ntp >> 16) * rate) >> 16
 
 

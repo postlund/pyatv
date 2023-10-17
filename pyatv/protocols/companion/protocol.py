@@ -15,7 +15,7 @@ from pyatv.protocols.companion.connection import (
     CompanionConnectionListener,
     FrameType,
 )
-from pyatv.support import opack
+from pyatv.support import error_handler, opack
 from pyatv.support.collections import SharedData
 from pyatv.support.state_producer import StateProducer
 
@@ -105,7 +105,7 @@ class CompanionProtocol(
 
         _LOGGER.debug("Companion credentials: %s", self.service.credentials)
 
-        await self._setup_encryption()
+        await error_handler(self._setup_encryption, exceptions.AuthenticationError)
 
     def stop(self):
         """Disconnect from device."""
@@ -117,14 +117,11 @@ class CompanionProtocol(
             credentials = parse_credentials(self.service.credentials)
             pair_verifier = CompanionPairVerifyProcedure(self, self.srp, credentials)
 
-            try:
-                await pair_verifier.verify_credentials()
-                output_key, input_key = pair_verifier.encryption_keys(
-                    SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
-                )
-                self.connection.enable_encryption(output_key, input_key)
-            except Exception as ex:
-                raise exceptions.AuthenticationError(str(ex)) from ex
+            await pair_verifier.verify_credentials()
+            output_key, input_key = pair_verifier.encryption_keys(
+                SRP_SALT, SRP_OUTPUT_INFO, SRP_INPUT_INFO
+            )
+            self.connection.enable_encryption(output_key, input_key)
 
     async def exchange_auth(
         self,

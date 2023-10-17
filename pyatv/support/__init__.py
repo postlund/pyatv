@@ -71,9 +71,7 @@ async def error_handler(func, fallback, *args, **kwargs):
         return await func(*args, **kwargs)
     except (OSError, asyncio.TimeoutError) as ex:
         raise exceptions.ConnectionFailedError(str(ex)) from ex
-    except exceptions.BackOffError:
-        raise
-    except exceptions.NoCredentialsError:
+    except (exceptions.BackOffError, exceptions.NoCredentialsError):
         raise
     except Exception as ex:
         raise fallback(str(ex)) from ex

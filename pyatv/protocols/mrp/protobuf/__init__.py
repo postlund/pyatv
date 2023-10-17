@@ -92,6 +92,7 @@ from .ContentItem_pb2 import ContentItem
 from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
+from .DeviceInfoMessage_pb2 import PreferredEncoding
 from .GenericMessage_pb2 import GenericMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
 from .GetRemoteTextInputSessionMessage_pb2 import GetRemoteTextInputSessionMessage
