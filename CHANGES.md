@@ -1,5 +1,54 @@
 # CHANGES
 
+## 0.14.2 Ned (2023-10-17)
+
+Hi-Diddily-Ho, time for some minor bug fixes:
+
+* Do not re-raise TimeoutError as AuthenticationError when
+  connecting (Companion and MRP were affected by this). This makes
+  more sense and also fixes issues with the Apple TV integration
+  in Home Assistant requiring reconfiguration way too often.
+* @bdraco made some zeroconf adjustments to deal with bad behavior
+  in some Zeroconf stacks (mainly seen with AirPort Express).
+
+**Changes:**
+
+*Other:*
+
+```
+bde4850 deps: Update protobuf version in base_versions
+d33a94e api: Use error_handler when connecting
+c11c2a9 Filter out invalid addreses from zeroconf
+3c1fc13 Filter out invalid addreses from zeroconf
+ef17195 add some missing return types on public interfaces
+bed2426 add py.typed to mark pyatv as PEP-561 compliant
+```
+
+**All changes:**
+
+```
+bde4850 deps: Update protobuf version in base_versions
+10835e1 build(deps): Bump mypy-protobuf from 3.4.0 to 3.5.0 in /requirements
+a29ceb5 build(deps): Bump pyfakefs from 5.2.4 to 5.3.0 in /requirements
+d33a94e api: Use error_handler when connecting
+e9896fa Fix spelling errors
+98348aa build(deps): Bump codespell from 2.2.5 to 2.2.6 in /requirements
+b90deec naming
+ec1191a naming
+c11c2a9 Filter out invalid addreses from zeroconf
+3c1fc13 Filter out invalid addreses from zeroconf
+2412932 build(deps): Bump zeroconf from 0.112.0 to 0.118.0 in /requirements
+ab54ef3 build(deps): Bump pytest-timeout from 2.1.0 to 2.2.0 in /requirements
+62fd75a build(deps): Bump pylint from 2.17.5 to 3.0.1 in /requirements
+486e110 build(deps): Bump aiohttp from 3.8.5 to 3.8.6 in /requirements
+835142e build(deps): Bump protobuf from 4.24.3 to 4.24.4 in /requirements
+344fac7 build(deps): Bump deepdiff from 6.5.0 to 6.6.0 in /requirements
+85b099a build(deps): Bump python from 3.11.5-alpine to 3.12.0-alpine
+57bfaf5 build(deps): Bump cryptography from 41.0.3 to 41.0.4 in /requirements
+ef17195 add some missing return types on public interfaces
+bed2426 add py.typed to mark pyatv as PEP-561 compliant
+```
+
 ## 0.14.1 Marge (2023-09-27)
 
 Minor release coming up today:
