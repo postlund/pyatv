@@ -1361,15 +1361,15 @@ class BaseConfig(ABC):
         """Apply settings to configuration."""
         for service in self.services:
             if service.protocol == Protocol.AirPlay:
-                service.apply(settings.protocols.airplay.model_dump())
+                service.apply(dict(settings.protocols.airplay))
             elif service.protocol == Protocol.Companion:
-                service.apply(settings.protocols.companion.model_dump())
+                service.apply(dict(settings.protocols.companion))
             elif service.protocol == Protocol.DMAP:
-                service.apply(settings.protocols.dmap.model_dump())
+                service.apply(dict(settings.protocols.dmap))
             elif service.protocol == Protocol.MRP:
-                service.apply(settings.protocols.mrp.model_dump())
+                service.apply(dict(settings.protocols.mrp))
             elif service.protocol == Protocol.RAOP:
-                service.apply(settings.protocols.raop.model_dump())
+                service.apply(dict(settings.protocols.raop))
 
     def __eq__(self, other) -> bool:
         """Compare instance with another instance."""
