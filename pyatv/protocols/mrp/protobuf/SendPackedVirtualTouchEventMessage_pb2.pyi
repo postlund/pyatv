@@ -26,7 +26,7 @@ class SendPackedVirtualTouchEventMessage(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _PhaseEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendPackedVirtualTouchEventMessage._Phase.ValueType], builtins.type):  # noqa: F821
+    class _PhaseEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendPackedVirtualTouchEventMessage._Phase.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Began: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 1
         Moved: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 2

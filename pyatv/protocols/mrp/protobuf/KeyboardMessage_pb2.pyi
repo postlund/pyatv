@@ -28,7 +28,7 @@ class KeyboardState(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardState._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardState._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: KeyboardState._Enum.ValueType  # 0
         NotEditing: KeyboardState._Enum.ValueType  # 1
@@ -61,7 +61,7 @@ class AutocapitalizationType(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AutocapitalizationType._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AutocapitalizationType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Words: AutocapitalizationType._Enum.ValueType  # 1
         Sentences: AutocapitalizationType._Enum.ValueType  # 2
@@ -86,7 +86,7 @@ class KeyboardType(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardType._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Default: KeyboardType._Enum.ValueType  # 0
         ASCII_Capable: KeyboardType._Enum.ValueType  # 1
@@ -131,7 +131,7 @@ class ReturnKeyType(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ReturnKeyType._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ReturnKeyType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Default: ReturnKeyType._Enum.ValueType  # 0
         Go: ReturnKeyType._Enum.ValueType  # 1

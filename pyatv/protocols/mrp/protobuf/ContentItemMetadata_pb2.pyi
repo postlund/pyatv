@@ -26,7 +26,7 @@ class AudioRouteType(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioRouteType._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioRouteType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: AudioRouteType._Enum.ValueType  # 0
         DevicesSpeaker: AudioRouteType._Enum.ValueType  # 1
@@ -88,7 +88,7 @@ class AudioTier(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioTier._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioTier._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         LowBandwidthStereo: AudioTier._Enum.ValueType  # 1
         HighQualityStereo: AudioTier._Enum.ValueType  # 2
@@ -117,7 +117,7 @@ class SongTraits(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SongTraits._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SongTraits._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         AppleDigitialMaster: SongTraits._Enum.ValueType  # 1
         Lossless: SongTraits._Enum.ValueType  # 2
@@ -148,7 +148,7 @@ class AlbumTraits(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AlbumTraits._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AlbumTraits._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         AppleDigitialMaster: AlbumTraits._Enum.ValueType  # 1
         Lossless: AlbumTraits._Enum.ValueType  # 2
@@ -179,7 +179,7 @@ class PlaylistTraits(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[PlaylistTraits._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[PlaylistTraits._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Spatial: PlaylistTraits._Enum.ValueType  # 8
         Atmos: PlaylistTraits._Enum.ValueType  # 16
@@ -204,7 +204,7 @@ class ActiveFormatJustification(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ActiveFormatJustification._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ActiveFormatJustification._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: ActiveFormatJustification._Enum.ValueType  # 0
         Unavailable: ActiveFormatJustification._Enum.ValueType  # 1
@@ -237,7 +237,7 @@ class FormatTier(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[FormatTier._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[FormatTier._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         LowBandwidthStereo: FormatTier._Enum.ValueType  # 1
         HighQualityStereo: FormatTier._Enum.ValueType  # 2
@@ -312,7 +312,7 @@ class ContentItemMetadata(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _MediaTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaType.ValueType], builtins.type):  # noqa: F821
+    class _MediaTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaType.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UnknownMediaType: ContentItemMetadata._MediaType.ValueType  # 0
         Audio: ContentItemMetadata._MediaType.ValueType  # 1
@@ -327,7 +327,7 @@ class ContentItemMetadata(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _MediaSubTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaSubType.ValueType], builtins.type):  # noqa: F821
+    class _MediaSubTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaSubType.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         UnknownMediaSubType: ContentItemMetadata._MediaSubType.ValueType  # 0
         Music: ContentItemMetadata._MediaSubType.ValueType  # 1

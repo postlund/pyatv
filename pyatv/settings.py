@@ -5,7 +5,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import AfterValidator
-from pydantic_settings import BaseSettings
 from typing_extensions import Annotated
 
 __pdoc__ = {
@@ -144,7 +143,7 @@ class ProtocolSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     raop: RaopSettings = Field(default_factory=RaopSettings)
 
 
-class Settings(BaseSettings, extra="ignore"):  # type: ignore[call-arg]
+class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Settings container class."""
 
     info: InfoSettings = Field(default_factory=InfoSettings)
