@@ -5,7 +5,10 @@ coverage:
   range: "80..100"
 
   status:
-    project: no
+    project:
+      default:
+        target: auto
+        threshold: 5%
 
 flags:
   library:
