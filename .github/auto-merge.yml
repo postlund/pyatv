@@ -1,1 +1,2 @@
-dependency_type: all
+- match:
+  update_type: all
