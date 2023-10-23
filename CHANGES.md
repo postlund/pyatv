@@ -1,5 +1,44 @@
 # CHANGES
 
+## 0.14.3 Otto (2023-10-23)
+
+Due to Home Assistant being stuck at pydantic v1 at the moment,
+I have now changed to use pydantic v1 with the compatibility
+version bundled in v2. This bascially means that pydantic v1 is
+used internally, even when v2 is installed. This is temporary
+until Home Assistant can bump up to pydantic v2. I have also
+removed dependency on pydantic-extra-types (only MacAddress was
+used) as it has no v1 compatible version. Same goes for
+pydantic-settings, which provides no functionality currently.
+
+**Changes:**
+
+*Other:*
+
+```
+86a4a91 storage: Use pydantic v1 compatibility
+1a8c05a storage: Remove usage of pydantic-settings
+d95ab81 storage: Remove need for pydantic-extra-types
+b671e21 cq: Another attempt to fix update_type
+e50fb7b cq: Specify depdency_type to auto-merge
+bde83fa cq: Update auto-merge token
+0c4a873 cq: Auto merge dependabot
+3e503dc cq: Automatic code coverage
+```
+
+**All changes:**
+
+```
+86a4a91 storage: Use pydantic v1 compatibility
+1a8c05a storage: Remove usage of pydantic-settings
+d95ab81 storage: Remove need for pydantic-extra-types
+b671e21 cq: Another attempt to fix update_type
+e50fb7b cq: Specify depdency_type to auto-merge
+bde83fa cq: Update auto-merge token
+0c4a873 cq: Auto merge dependabot
+3e503dc cq: Automatic code coverage
+```
+
 ## 0.14.2 Ned (2023-10-17)
 
 Hi-Diddily-Ho, time for some minor bug fixes:
