@@ -1,10 +1,12 @@
 """Settings for configuring pyatv."""
 from enum import Enum
+import re
 from typing import Optional
 
 from pydantic import BaseModel, Field
-from pydantic_extra_types.mac_address import MacAddress
+from pydantic.functional_validators import AfterValidator
 from pydantic_settings import BaseSettings
+from typing_extensions import Annotated
 
 __pdoc__ = {
     "InfoSettings.model_config": False,
@@ -26,6 +28,21 @@ __pdoc__ = {
 }
 
 __pdoc_dev_page__ = "/development/storage"
+
+
+# TODO: Replace with pydantic-extra-types when a release is out with MAC
+#       address validation included
+_MAC_REGEX = r"[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"
+
+
+def _mac_validator(mac_addr: str) -> str:
+    assert (
+        re.match(_MAC_REGEX, mac_addr) is not None
+    ), f"{mac_addr} is not a valid MAC address"
+    return mac_addr
+
+
+MacAddress = Annotated[str, AfterValidator(_mac_validator)]
 
 DEFAULT_NAME = "pyatv"
 DEFUALT_MAC = "02:70:79:61:74:76"  # Locally administrated (02) + "pyatv" in hex
