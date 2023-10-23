@@ -2,12 +2,11 @@
 from hashlib import sha256
 from typing import List, Sequence
 
-from pydantic import BaseModel
-
 from pyatv.const import Protocol
 from pyatv.exceptions import DeviceIdMissingError, SettingsError
 from pyatv.interface import BaseConfig, Storage
 from pyatv.settings import Settings
+from pyatv.support.pydantic_compat import BaseModel, model_copy
 
 __pdoc_dev_page__ = "/development/storage"
 
@@ -25,7 +24,7 @@ def _calculate_settings_hash(settings: List[Settings]) -> str:
     # (especially when making multiple calls) but should be reliable and good enough.
     hasher = sha256()
     for setting in settings:
-        setting_json = setting.model_dump_json(exclude_defaults=True)
+        setting_json = setting.json(exclude_defaults=True)
         hasher.update(setting_json.encode("utf-8"))
     return hasher.hexdigest()
 
@@ -145,28 +144,28 @@ class AbstractStorage(Storage):
         for service in config.services:
             # TODO: Clean this up/make more general
             if service.protocol == Protocol.AirPlay:
-                settings.protocols.airplay = settings.protocols.airplay.model_copy(
-                    update=service.settings()
+                settings.protocols.airplay = model_copy(
+                    settings.protocols.airplay, update=service.settings()
                 )
                 settings.protocols.airplay.identifier = service.identifier
             elif service.protocol == Protocol.DMAP:
-                settings.protocols.dmap = settings.protocols.dmap.model_copy(
-                    update=service.settings()
+                settings.protocols.dmap = model_copy(
+                    settings.protocols.dmap, update=service.settings()
                 )
                 settings.protocols.dmap.identifier = service.identifier
             elif service.protocol == Protocol.Companion:
-                settings.protocols.companion = settings.protocols.companion.model_copy(
-                    update=service.settings()
+                settings.protocols.companion = model_copy(
+                    settings.protocols.companion, update=service.settings()
                 )
                 settings.protocols.companion.identifier = service.identifier
             elif service.protocol == Protocol.MRP:
-                settings.protocols.mrp = settings.protocols.mrp.model_copy(
-                    update=service.settings()
+                settings.protocols.mrp = model_copy(
+                    settings.protocols.mrp, update=service.settings()
                 )
                 settings.protocols.mrp.identifier = service.identifier
             if service.protocol == Protocol.RAOP:
-                settings.protocols.raop = settings.protocols.raop.model_copy(
-                    update=service.settings()
+                settings.protocols.raop = model_copy(
+                    settings.protocols.raop, update=service.settings()
                 )
                 settings.protocols.raop.identifier = service.identifier
 

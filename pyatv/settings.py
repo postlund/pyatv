@@ -3,9 +3,7 @@ from enum import Enum
 import re
 from typing import Optional
 
-from pydantic import BaseModel, Field
-from pydantic.functional_validators import AfterValidator
-from typing_extensions import Annotated
+from pyatv.support.pydantic_compat import BaseModel, Field, field_validator
 
 __pdoc__ = {
     "InfoSettings.model_config": False,
@@ -34,15 +32,6 @@ __pdoc_dev_page__ = "/development/storage"
 _MAC_REGEX = r"[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"
 
 
-def _mac_validator(mac_addr: str) -> str:
-    assert (
-        re.match(_MAC_REGEX, mac_addr) is not None
-    ), f"{mac_addr} is not a valid MAC address"
-    return mac_addr
-
-
-MacAddress = Annotated[str, AfterValidator(_mac_validator)]
-
 DEFAULT_NAME = "pyatv"
 DEFUALT_MAC = "02:70:79:61:74:76"  # Locally administrated (02) + "pyatv" in hex
 DEFAULT_DEVICE_ID = "FF:70:79:61:74:76"  # 0xFF + "pyatv"
@@ -69,12 +58,20 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Information related settings."""
 
     name: str = DEFAULT_NAME
-    mac: MacAddress = DEFUALT_MAC
+    mac: str = DEFUALT_MAC
     model: str = DEFAULT_MODEL
     device_id: str = DEFAULT_DEVICE_ID
     os_name: str = DEFAULT_OS_NAME
     os_build: str = DEFAULT_OS_BUILD
     os_version: str = DEFAULT_OS_VERSION
+
+    @field_validator("mac")
+    @classmethod
+    def mac_validator(cls, mac: str) -> str:
+        """Validate MAC address to be correct."""
+        if re.match(_MAC_REGEX, mac) is None:
+            raise ValueError(f"{mac} is not a valid MAC address")
+        return mac
 
 
 class AirPlaySettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
