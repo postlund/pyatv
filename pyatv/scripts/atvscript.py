@@ -164,8 +164,10 @@ async def wait_for_input(loop, abort_sem):
     reader = asyncio.StreamReader(loop=loop)
     reader_protocol = asyncio.StreamReaderProtocol(reader)
     await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
+    reader_readline = asyncio.create_task(reader.readline())
+    abort_sem_acquire = asyncio.create_task(abort_sem.acquire())
     await asyncio.wait(
-        [reader.readline(), abort_sem.acquire()], return_when=asyncio.FIRST_COMPLETED
+        [reader_readline, abort_sem_acquire], return_when=asyncio.FIRST_COMPLETED
     )
 
 
