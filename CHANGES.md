@@ -1,5 +1,32 @@
 # CHANGES
 
+## 0.14.4 Patty (2023-10-27)
+
+This release contains a fix when running with python 3.11
+or later, mainly when calling atvscript. Thanks @maxileith!
+
+**Changes:**
+
+*Other:*
+
+```
+cc0e4a2 Wrap coroutines passed to asyncio.wait with create_tasks asyncio.wait does not support passing coroutines since python 3.11
+d8c6b4d cq: New attempt with token
+e611672 cq: New token for auto-merge
+b47ddbf cq: Update auto-merge token
+e7f880a cq: Try to fix auto-merge
+```
+
+**All changes:**
+
+```
+cc0e4a2 Wrap coroutines passed to asyncio.wait with create_tasks asyncio.wait does not support passing coroutines since python 3.11
+d8c6b4d cq: New attempt with token
+e611672 cq: New token for auto-merge
+b47ddbf cq: Update auto-merge token
+e7f880a cq: Try to fix auto-merge
+```
+
 ## 0.14.3 Otto (2023-10-23)
 
 Due to Home Assistant being stuck at pydantic v1 at the moment,
