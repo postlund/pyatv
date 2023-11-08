@@ -221,6 +221,7 @@ async def _scan_devices(loop, storage: Storage, hosts):
                 "name": atv.name,
                 "address": str(atv.address),
                 "identifier": atv.identifier,
+                "all_identifiers": atv.all_identifiers,
                 "device_info": {
                     "model": atv.device_info.model.name,
                     "model_str": atv.device_info.model_str,
