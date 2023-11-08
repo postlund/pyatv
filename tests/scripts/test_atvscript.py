@@ -8,7 +8,7 @@ import pytest
 
 from pyatv.const import Protocol
 
-from tests.scripts.conftest import DMAP_ID, IP_1, IP_2, MRP_ID
+from tests.scripts.conftest import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID
 
 _LOGGER = logging.getLogger(__name__)
 HASH = "ca496c14642c78af6dd4250191fe175f6dafd72b4c33bcbab43c454aae051da1"
@@ -41,6 +41,7 @@ async def test_scan_devices(scriptenv, fake_atv):
                     "name": "Apple TV 1",
                     "address": IP_1,
                     "identifier": DMAP_ID,
+                    "all_identifiers": [DMAP_ID],
                     "device_info": {
                         "model": "Unknown",
                         "model_str": "Unknown",
@@ -53,6 +54,7 @@ async def test_scan_devices(scriptenv, fake_atv):
                     "name": "Apple TV 2",
                     "address": IP_2,
                     "identifier": MRP_ID,
+                    "all_identifiers": [AIRPLAY_ID, MRP_ID],
                     "device_info": {
                         "model": "Unknown",
                         "model_str": "pyatv",
