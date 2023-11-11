@@ -43,6 +43,7 @@ async def test_scan_devices(scriptenv, fake_atv):
                     "identifier": DMAP_ID,
                     "all_identifiers": [DMAP_ID],
                     "device_info": {
+                        "mac": None,
                         "model": "Unknown",
                         "model_str": "Unknown",
                         "operating_system": "Legacy",
@@ -56,6 +57,7 @@ async def test_scan_devices(scriptenv, fake_atv):
                     "identifier": MRP_ID,
                     "all_identifiers": [AIRPLAY_ID, MRP_ID],
                     "device_info": {
+                        "mac": AIRPLAY_ID,
                         "model": "Unknown",
                         "model_str": "pyatv",
                         "operating_system": "TvOS",
