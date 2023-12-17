@@ -50,7 +50,7 @@ class PushPrinter(PushListener):
         """Inform about changes to what is currently playing."""
         app = (
             self.atv.metadata.app
-            if not self.atv.features.in_state(FeatureState.Unavailable)
+            if not self.atv.features.in_state(FeatureState.Unavailable, FeatureName.App)
             else None
         )
         print(
