@@ -46,24 +46,38 @@ the project: thank you!
 
 ```raw
 acheronfail <acheronfail at gmail.com>
+Alexandre Pulido <apulido at free.fr>
 Alexey <alexey.www at gmail.com>
 Andreas Billmeier <b at edevau.net>
 Colin <12702068+ckeehan at users.noreply.github.com>
 Colin <ckeehan at me.com>
+crxporter <38265886+crxporter at users.noreply.github.com>
 Dennis Frommknecht <dfrommi at users.noreply.github.com>
 Doug Hoffman <doug+github at hoff.mn>
 Erik Hendrix <hendrix_erik at hotmail.com>
+jakobjjw <73580309+jakobjjw at users.noreply.github.com>
 jdsnape <joel at sna.pe>
 J. Nick Koston <nick at koston.org>
 John Lian <jlian at users.noreply.github.com>
 KibosJ <29429479+KibosJ at users.noreply.github.com>
 Lucas Christian <lucas at lucasec.com>
+Maximilian Leith <maximilian at leith.de>
 Michael Carroll <mrc at apple.com>
+Michał Modzelewski <michal.modzelewski at gmail.com>
+Nebz <28622481+NebzHB at users.noreply.github.com>
+Paul <itsascambutmailmeanyway at gmail.com>
+Pierre Ståhl <pierre.sigma at renzgroup.com>
 Pierre Ståhl <pierre.staahl at gmail.com>
 Pierrick Rouxel <pierrick.rouxel at me.com>
+Raymond Ha <raymond at shraymonks.com>
 Robbie Trencheny <me at robbiet.us>
 Rob Nee <robnee at hotmail.com>
+sassukeuchiha <116432455+sassukeuchiha at users.noreply.github.com>
+SchlaubiSchlump <Schlaubischlump at users.noreply.github.com>
+Sebastian Pekarek <mail at sebbo.net>
+Stackie Jia <jsq2627 at gmail.com>
 stickpin <630000+stickpin at users.noreply.github.com>
+stimulated <56211318+xpnewmedia at users.noreply.github.com>
 Sylvain CECCHETTO <cecchetto.sylvain at me.com>
 Will Ross <paxswill at paxswill.com>
 ```
