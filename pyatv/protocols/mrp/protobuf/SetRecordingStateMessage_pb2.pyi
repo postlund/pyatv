@@ -26,7 +26,7 @@ class SetRecordingStateMessage(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _RecordingStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SetRecordingStateMessage._RecordingState.ValueType], builtins.type):  # noqa: F821
+    class _RecordingStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SetRecordingStateMessage._RecordingState.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: SetRecordingStateMessage._RecordingState.ValueType  # 0
         Recording: SetRecordingStateMessage._RecordingState.ValueType  # 1

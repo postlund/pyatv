@@ -272,7 +272,10 @@
                   if any(cls.name.startswith("enum.") for cls in mro):
                     var_value = f" = {getattr(c.obj, v.name).value}"
                   elif any(cls.name.startswith("pydantic.main.BaseModel") for cls in mro):
-                    field_info = c.obj.model_fields[v.name]
+                    if hasattr(c.obj, "__fields__"):
+                      field_info = c.obj.__fields__[v.name]
+                    else:
+                      field_info = c.obj.model_fields[v.name]
 
                     # Ignore fields that are pydantic models as they produce unnecessary output
                     if "__pydantic_serializer__" not in dir(field_info.annotation):

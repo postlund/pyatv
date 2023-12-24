@@ -73,7 +73,13 @@ $ atvscript scan
       "name": "Vardagsrum",
       "address": "10.0.10.81",
       "identifier": "xxx",
-      {
+      "all_identifiers": [
+        "xxx",
+        "xxx",
+        "xxx"
+      ],
+      "device_info": {
+        "mac": "AA:BB:CC:DD:EE:FF",
         "model": "Gen4K",
         "model_str": "Apple TV 4K",
         "operating_system": "TvOS",
@@ -94,7 +100,13 @@ $ atvscript scan
       "name": "Apple TV",
       "address": "10.0.10.123",
       "identifier": "xxx",
+      "all_identifiers": [
+        "xxx",
+        "xxx",
+        "xxx"
+      ],
       "device_info": {
+        "mac": "AA:BB:CC:DD:EE:FF",
         "model": "Gen3",
         "model_str": "Apple TV 3",
         "operating_system": "Legacy",
@@ -115,7 +127,13 @@ $ atvscript scan
       "name": "Proxy",
       "address": "10.0.10.254",
       "identifier": "xxx",
+      "all_identifiers": [
+        "xxx",
+        "xxx",
+        "xxx"
+      ],
       "device_info": {
+        "mac": null,
         "model": "Unknown",
         "model_str": "Unknown",
         "operating_system": "Unknown",
@@ -145,7 +163,13 @@ $ atvscript -s 10.0.10.81 scan
       "name": "Vardagsrum",
       "address": "10.0.10.81",
       "identifier": "xxx",
+      "all_identifiers": [
+        "xxx",
+        "xxx",
+        "xxx"
+      ],
       "device_info": {
+        "mac": "AA:BB:CC:DD:EE:FF",
         "model": "Gen4K",
         "model_str": "Apple TV 4K",
         "operating_system": "TvOS",

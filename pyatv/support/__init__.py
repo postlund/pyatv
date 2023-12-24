@@ -9,10 +9,10 @@ from typing import Any, List, Sequence, Union
 import warnings
 
 from google.protobuf.text_format import MessageToString
-from pydantic import BaseModel
 
 import pyatv
 from pyatv import exceptions
+from pyatv.support.pydantic_compat import BaseModel
 
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512
@@ -170,27 +170,26 @@ def stringify_model(model: BaseModel) -> Sequence[str]:
     It is assumed optional field does not contain other models (only basic types).
     """
 
+    def _lookup_type(current_model: BaseModel, type_path: str) -> str:
+        splitted_path = type_path.split(".", maxsplit=1)
+        value = current_model.__annotations__[splitted_path[0]]
+        if len(splitted_path) == 1:
+            if value.__dict__.get("__origin__") is Union:
+                return ", ".join(arg.__name__ for arg in value.__args__)
+            return value.__name__
+        return _lookup_type(value, splitted_path[1])
+
     def _recurse_into(
         current_model: BaseModel, prefix: str, output: List[str]
     ) -> Sequence[str]:
-        for name, field in current_model.model_fields.items():
-            if field.annotation.__dict__.get("__origin__") is Union:
-                field_types = ", ".join(
-                    arg.__name__ for arg in field.annotation.__args__
-                )
-                output.append(
-                    f"{prefix}{name} = {getattr(current_model, name)} ({field_types})"
-                )
-            elif BaseModel in field.annotation.__mro__:
+        for name, field in dict(current_model).items():
+            if hasattr(field, "__annotations__"):
                 _recurse_into(
                     getattr(current_model, name), (prefix or "") + f"{name}.", output
                 )
-            elif field.default is not None:
-                output.append(
-                    f"{prefix}{name} = "
-                    f"{getattr(current_model, name)} "
-                    f"({field.annotation.__name__})"
-                )
+            else:
+                field_type = _lookup_type(model, f"{prefix}{name}")
+                output.append(f"{prefix}{name} = {field} ({field_type})")
         return output
 
     return _recurse_into(model, "", [])
@@ -209,5 +208,5 @@ def update_model_field(
     if len(splitted_path) > 1:
         update_model_field(getattr(model, next_field), splitted_path[1], value)
     else:
-        model.model_validate({field: value})
+        model.parse_obj({field: value})
         setattr(model, field, value)

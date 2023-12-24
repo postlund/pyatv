@@ -26,7 +26,7 @@ class RegisterForGameControllerEventsMessage(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _InputModeFlagsEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[RegisterForGameControllerEventsMessage._InputModeFlags.ValueType], builtins.type):  # noqa: F821
+    class _InputModeFlagsEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[RegisterForGameControllerEventsMessage._InputModeFlags.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Motion: RegisterForGameControllerEventsMessage._InputModeFlags.ValueType  # 1
         Buttons: RegisterForGameControllerEventsMessage._InputModeFlags.ValueType  # 2
