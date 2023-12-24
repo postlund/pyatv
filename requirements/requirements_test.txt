@@ -1,4 +1,4 @@
-black==23.9.1
+black==23.12.1
 deepdiff==6.7.1
 flake8==6.1.0
 isort==5.12.0
