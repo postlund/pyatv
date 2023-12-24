@@ -96,7 +96,9 @@ async def test_zeroconf_service_published(mock_pairing):
     assert len(zeroconf.registered_services) == 1, "no zeroconf service registered"
 
     service = zeroconf.registered_services[0]
-    assert service.properties["DvNm"] == REMOTE_NAME, "remote name does not match"
+    assert service.properties[b"DvNm"] == REMOTE_NAME.encode(
+        "utf-8"
+    ), "remote name does not match"
     assert [ipaddress.ip_address("10.0.10.1").packed] == service.addresses
 
 
