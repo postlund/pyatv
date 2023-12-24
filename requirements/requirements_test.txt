@@ -1,10 +1,10 @@
 black==23.9.1
-deepdiff==6.6.0
+deepdiff==6.7.1
 flake8==6.1.0
 isort==5.12.0
 mutagen==1.47.0
 pyfakefs==5.3.0
-pylint==3.0.1
+pylint==3.0.3
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
@@ -16,6 +16,6 @@ pydocstyle==6.3.0
 mypy==1.6.0
 mypy-protobuf==3.5.0
 typed-ast==1.5.5
-types-protobuf==4.24.0.2
+types-protobuf==4.24.0.4
 types-requests==2.31.0.2
 types-tabulate==0.9.0.3
