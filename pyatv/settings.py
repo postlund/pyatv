@@ -1,10 +1,9 @@
 """Settings for configuring pyatv."""
 from enum import Enum
+import re
 from typing import Optional
 
-from pydantic import BaseModel, Field
-from pydantic_extra_types.mac_address import MacAddress
-from pydantic_settings import BaseSettings
+from pyatv.support.pydantic_compat import BaseModel, Field, field_validator
 
 __pdoc__ = {
     "InfoSettings.model_config": False,
@@ -26,6 +25,12 @@ __pdoc__ = {
 }
 
 __pdoc_dev_page__ = "/development/storage"
+
+
+# TODO: Replace with pydantic-extra-types when a release is out with MAC
+#       address validation included
+_MAC_REGEX = r"[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"
+
 
 DEFAULT_NAME = "pyatv"
 DEFUALT_MAC = "02:70:79:61:74:76"  # Locally administrated (02) + "pyatv" in hex
@@ -53,12 +58,20 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Information related settings."""
 
     name: str = DEFAULT_NAME
-    mac: MacAddress = DEFUALT_MAC
+    mac: str = DEFUALT_MAC
     model: str = DEFAULT_MODEL
     device_id: str = DEFAULT_DEVICE_ID
     os_name: str = DEFAULT_OS_NAME
     os_build: str = DEFAULT_OS_BUILD
     os_version: str = DEFAULT_OS_VERSION
+
+    @field_validator("mac")
+    @classmethod
+    def mac_validator(cls, mac: str) -> str:
+        """Validate MAC address to be correct."""
+        if re.match(_MAC_REGEX, mac) is None:
+            raise ValueError(f"{mac} is not a valid MAC address")
+        return mac
 
 
 class AirPlaySettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
@@ -127,7 +140,7 @@ class ProtocolSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     raop: RaopSettings = Field(default_factory=RaopSettings)
 
 
-class Settings(BaseSettings, extra="ignore"):  # type: ignore[call-arg]
+class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Settings container class."""
 
     info: InfoSettings = Field(default_factory=InfoSettings)

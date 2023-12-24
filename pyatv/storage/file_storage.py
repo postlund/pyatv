@@ -45,7 +45,7 @@ class FileStorage(AbstractStorage):
         # If settings are empty for a device (e.e. no settings overridden or credentials
         # saved), then the output will just be an empty dict. To not pollute the output
         # with those, we do some filtering here.
-        dumped = self.storage_model.model_dump(exclude_defaults=True)
+        dumped = self.storage_model.dict(exclude_defaults=True)
         dumped["devices"] = [device for device in dumped["devices"] if device != {}]
 
         with open(self._filename, "w", encoding="utf-8") as _fh:

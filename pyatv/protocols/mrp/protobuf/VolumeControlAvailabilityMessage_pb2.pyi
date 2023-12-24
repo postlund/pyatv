@@ -26,7 +26,7 @@ class VolumeCapabilities(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[VolumeCapabilities._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[VolumeCapabilities._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Relative: VolumeCapabilities._Enum.ValueType  # 1
         Absolute: VolumeCapabilities._Enum.ValueType  # 2

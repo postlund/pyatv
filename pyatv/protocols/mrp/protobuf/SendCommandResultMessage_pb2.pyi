@@ -29,7 +29,7 @@ class SendError(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendError._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendError._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         NoError: SendError._Enum.ValueType  # 0
         """This is None in original message definitions (no-go with python)"""
@@ -72,7 +72,7 @@ class HandlerReturnStatus(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[HandlerReturnStatus._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[HandlerReturnStatus._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Success: HandlerReturnStatus._Enum.ValueType  # 0
         NoSuchContent: HandlerReturnStatus._Enum.ValueType  # 1
@@ -125,7 +125,7 @@ class SendCommandStatusCode(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandStatusCode._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandStatusCode._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Success: SendCommandStatusCode._Enum.ValueType  # 0
         NoSuchContent: SendCommandStatusCode._Enum.ValueType  # 1
@@ -178,7 +178,7 @@ class SendCommandResultType(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandResultType._Enum.ValueType], builtins.type):  # noqa: F821
+    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandResultType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Dialog: SendCommandResultType._Enum.ValueType  # 1
         Error: SendCommandResultType._Enum.ValueType  # 2

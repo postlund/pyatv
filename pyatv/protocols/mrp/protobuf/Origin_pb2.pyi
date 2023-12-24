@@ -25,7 +25,7 @@ class Origin(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Origin._Type.ValueType], builtins.type):  # noqa: F821
+    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Origin._Type.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: Origin._Type.ValueType  # 0
         Local: Origin._Type.ValueType  # 1
