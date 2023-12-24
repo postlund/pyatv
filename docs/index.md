@@ -81,7 +81,7 @@ Here are a few projects known to use pyatv:
 * [Home Assistant](https://home-assistant.io) - The Apple TV integration is powered by pyatv
 * [node-pyatv](https://github.com/sebbo2002/node-pyatv) - Node.Js binding built using pyatv
 * [pyatv-mqtt-bridge](https://github.com/sebbo2002/pyatv-mqtt-bridge) - MQTT Bridge allows you to remote control your Apple TV using the MQTT protocol (built using node-pyatv)
-* [homebridge-appletv](https://github.com/cristian5th/homebridge-appletv) - Configuration of pyatv and homebridge-cmd4 for reading the Apple TV status in Homebridge
+* [homebridge-appletv-enhanced](https://github.com/maxileith/homebridge-appletv-enhanced#homebridge-appletv-enhanced) - Homebridge plugin that is providing functionality that should be native to HomeKit
 * [Indigo Domotics Plugin](https://github.com/kw123/appleTV) - Plugin to Indigo Domotics
 * [iSponsorBlockTV](https://github.com/dmunozv04/iSponsorBlockTV) - Skip sponsor segments in YouTube videos playing on an Apple TV
 * [homebridge-homepod-radio](https://github.com/petro-kushchak/homebridge-homepod-radio) - Homebridge accessory for streaming radio to Homepod mini
