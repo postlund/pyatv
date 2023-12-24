@@ -1,5 +1,50 @@
 # CHANGES
 
+## 0.14.5 Quimby (2023-12-24)
+
+Merry christmas everyone, here comes a small present! In this
+release @maxileith made some improvements to atvscript. App should be
+reported correctly now. All identifiers as well as MAC address is
+ouputted when scanning. Other than that it's merely house-keeping.
+
+Been rather slow work on pyatv for a while, let's see what the new
+year might bring!
+
+**Changes:**
+
+*Other:*
+
+```
+0da3258 scan: Fix python-zeroconf incompatibility
+454afc0 Fix a bug that causes atvscript push_updates to never report the app
+8d883fb update the list of contributors
+8be2b64 Changing the featured Homebridge plugin to a more recent and maintained one.
+2da50e9 add mac address to device info
+0937a7b Output all identifiers when scanning with atvscript
+```
+
+**All changes:**
+
+```
+ce61b49 build(deps): Bump black from 23.9.1 to 23.12.1 in /requirements
+10b0138 build(deps): Bump cryptography from 41.0.4 to 41.0.7 in /requirements
+04b75b7 build(deps): Bump mypy from 1.5.1 to 1.8.0 in /requirements
+1519ffc build(deps): Bump types-protobuf in /requirements
+f4f94d9 build(deps): Bump deepdiff from 6.6.0 to 6.7.1 in /requirements
+0732ee4 build(deps): Bump aiohttp from 3.8.6 to 3.9.1 in /requirements
+d7dfe9a build(deps): Bump protobuf from 4.24.2 to 4.25.1 in /requirements
+b4bd7ce build(deps): Bump chacha20poly1305-reuseable in /requirements
+0da3258 scan: Fix python-zeroconf incompatibility
+1bb0227 build(deps): Bump zeroconf from 0.118.0 to 0.131.0 in /requirements
+1392a00 build(deps): Bump pylint from 3.0.1 to 3.0.3 in /requirements
+454afc0 Fix a bug that causes atvscript push_updates to never report the app
+8d883fb update the list of contributors
+8be2b64 Changing the featured Homebridge plugin to a more recent and maintained one.
+2da50e9 add mac address to device info
+0937a7b Output all identifiers when scanning with atvscript
+427c362 build(deps): Bump pytest from 7.4.2 to 7.4.3 in /requirements
+```
+
 ## 0.14.4 Patty (2023-10-27)
 
 This release contains a fix when running with python 3.11
