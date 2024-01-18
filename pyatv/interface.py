@@ -43,6 +43,7 @@ from pyatv.support import prettydataclass
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
+from pyatv.support.yt_dlp import extract_video_url
 
 __pdoc__ = {
     "feature": False,
@@ -873,6 +874,24 @@ class Stream:  # pylint: disable=too-few-public-methods
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
         raise exceptions.NotSupportedError()
+
+    async def play_service(self, video_url: str) -> None:
+        """Play video from a video service, e.g. YouTube.
+
+        This method will try to extract the underlying video URL from various video
+        hosting services, e.g. YouTube, and play the video using play_url.
+
+        Note 1: For this method to work, yt-dlp must be installed. A NotSupportedError
+        is thrown otherwise.
+
+        Note 2: By default, pyatv will try to play the video with highest bitrate. It's
+        not possible to possible to change this at the moment, but will be in the
+        future.
+
+        INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
+        """
+        url = await extract_video_url(video_url)
+        await self.play_url(url)
 
 
 class DeviceListener(ABC):
