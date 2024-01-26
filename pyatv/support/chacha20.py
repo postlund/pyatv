@@ -48,7 +48,7 @@ class Chacha20Cipher:
         if nonce is None:
             nonce = self.out_nonce
             self._out_counter += 1
-        if len(nonce) < NONCE_LENGTH:
+        elif len(nonce) < NONCE_LENGTH:
             nonce = b"\x00" * (NONCE_LENGTH - len(nonce)) + nonce
         return self._enc_out.encrypt(nonce, data, aad)
 
@@ -59,6 +59,6 @@ class Chacha20Cipher:
         if nonce is None:
             nonce = self.in_nonce
             self._in_counter += 1
-        if len(nonce) < NONCE_LENGTH:
+        elif len(nonce) < NONCE_LENGTH:
             nonce = b"\x00" * (NONCE_LENGTH - len(nonce)) + nonce
         return self._enc_in.decrypt(nonce, data, aad)
