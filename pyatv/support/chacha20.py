@@ -1,9 +1,9 @@
 """Transparent encryption layer using Chacha20_Poly1305."""
+from functools import partial
+from struct import Struct
 from typing import Optional
 
 from chacha20poly1305_reuseable import ChaCha20Poly1305Reusable as ChaCha20Poly1305
-from functools import partial
-from struct import Struct
 
 NONCE_LENGTH = 12
 
