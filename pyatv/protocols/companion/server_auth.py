@@ -74,14 +74,14 @@ def new_server_session(keys, pin):
 class CompanionServerAuth(ABC):
     """Server-side implementation of Companion authentication."""
 
-    def __init__(self, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE):
+    def __init__(self, device_name, unique_id=SERVER_IDENTIFIER, pin=PIN_CODE, private_key=PRIVATE_KEY):
         """Initialize a new instance if CompanionServerAuth."""
         self.device_name = device_name
         self.unique_id = unique_id.encode()
         self.input_key = None
         self.output_key = None
-        self.keys = generate_keys(PRIVATE_KEY)
-        self.session, self.salt = new_server_session(self.keys, str(PIN_CODE))
+        self.keys = generate_keys(private_key)
+        self.session, self.salt = new_server_session(self.keys, str(pin))
 
     def handle_auth_frame(self, frame_type, data):
         """Handle incoming auth message."""
