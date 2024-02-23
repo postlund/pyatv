@@ -106,6 +106,8 @@ MEDIA_CONTROL_MAP = {
     FeatureName.SetVolume: MediaControlFlags.Volume,
     FeatureName.SkipForward: MediaControlFlags.SkipForward,
     FeatureName.SkipBackward: MediaControlFlags.SkipBackward,
+    FeatureName.FastForward: MediaControlFlags.FastForward,
+    FeatureName.Rewind: MediaControlFlags.Rewind
 }
 
 SUPPORTED_FEATURES = set(
@@ -140,6 +142,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextClear,
         FeatureName.TextAppend,
         FeatureName.TextSet,
+        FeatureName.FastForward,
+        FeatureName.Rewind
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -333,6 +337,14 @@ class CompanionRemoteControl(RemoteControl):
     async def previous(self) -> None:
         """Press key previous."""
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
+
+    async def fast_forward(self) -> None:
+        """Press key fast forward."""
+        await self.api.mediacontrol_command(MediaControlCommand.FastForwardBegin)
+
+    async def rewind(self) -> None:
+        """Press key rewind."""
+        await self.api.mediacontrol_command(MediaControlCommand.RewindBegin)
 
     async def channel_up(self) -> None:
         """Select next channel."""
