@@ -309,7 +309,7 @@ class FeatureName(Enum):
     """Fast Forward."""
 
     Rewind = 64
-    """Rewind a time interval."""
+    """Rewind."""
 
     SkipForward = 36
     """Skip forward a time interval."""
