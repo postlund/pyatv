@@ -128,6 +128,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.Left,
         FeatureName.Right,
         FeatureName.Select,
+        FeatureName.FastForward,
+        FeatureName.Rewind,
         FeatureName.Menu,
         FeatureName.Home,
         FeatureName.VolumeUp,
@@ -142,8 +144,6 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextClear,
         FeatureName.TextAppend,
         FeatureName.TextSet,
-        FeatureName.FastForward,
-        FeatureName.Rewind
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())

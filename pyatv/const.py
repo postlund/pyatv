@@ -5,7 +5,7 @@ from enum import Enum
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "14"
-PATCH_VERSION = "5"
+PATCH_VERSION = "4"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 
@@ -304,6 +304,10 @@ class FeatureName(Enum):
 
     WakeUp = 18
     """Wake up device (deprecated; use Power.turn_on)."""
+
+    FastForward = 63
+
+    Rewind = 64
 
     SkipForward = 36
     """Skip forward a time interval."""
