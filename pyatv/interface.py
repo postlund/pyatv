@@ -451,6 +451,16 @@ class RemoteControl:
         """Activate screen saver.."""
         raise exceptions.NotSupportedError()
 
+    @feature(63, "FastForward", "Fast Forward.")
+    async def fast_forward(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key fast forward."""
+        raise exceptions.NotSupportedError()
+
+    @feature(64, "Rewind", "Rewind.")
+    async def rewind(self, action: InputAction = InputAction.SingleTap) -> None:
+        """Press key rewind."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):

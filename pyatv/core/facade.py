@@ -190,6 +190,16 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Activate screen saver.."""
         return await self.relay("screensaver")()
 
+    @shield.guard
+    async def fast_forward(self) -> None:
+        """Fast Forward.."""
+        return await self.relay("fast_forward")()
+
+    @shield.guard
+    async def rewind(self) -> None:
+        """Rewind.."""
+        return await self.relay("rewind")()
+
 
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""
