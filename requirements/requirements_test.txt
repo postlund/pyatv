@@ -6,7 +6,7 @@ mutagen==1.47.0
 pyfakefs==5.3.2
 pylint==3.0.3
 pytest==7.4.3
-pytest-asyncio==0.23.2
+pytest-asyncio==0.23.5.post1
 pytest-cov==4.1.0
 pytest-timeout==2.2.0
 pytest-aiohttp==1.0.5
