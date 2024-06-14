@@ -91,7 +91,7 @@ You can also run it inside a container (x86_64, aarch64, armv7):
 docker run -it --rm --network=host ghcr.io/postlund/pyatv:0.14.0 atvremote scan
 ```
 
-The `master` tag points to latest commit on the `master` branch and can `latest`
+The `master` tag points to latest commit on the `master` branch and `latest`
 points to the latest release.
 
 # I need to change something?
