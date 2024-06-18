@@ -53,6 +53,13 @@ class HidCommand(Enum):
     PageUp = 18
     PageDown = 19
 
+
+class HidEventMode(Enum):
+    """HID event constants."""
+    Press = 1
+    Hold = 3
+    Release = 4
+
 class MediaControlCommand(Enum):
     """Media Control command constants."""
 
@@ -81,12 +88,6 @@ class SystemStatus(Enum):
     Awake = 0x03
     Idle = 0x04  # NB: Not verified
 
-class HidEventMode(Enum):
-    """HID event constants."""
-    Press = 1
-    Hold = 3
-    Release = 4
-
 
 TOUCHPAD_WIDTH  = 1000.0 # Touchpad width
 TOUCHPAD_HEIGHT = 1000.0 # Touchpad height
@@ -107,6 +108,7 @@ class CompanionAPI(
         self._protocol: Optional[CompanionProtocol] = None
         self._subscribed_events: List[str] = []
         self.sid: int = 0
+        self._base_timestamp = time.time_ns()
 
     async def disconnect(self):
         """Disconnect from companion device."""
@@ -295,9 +297,13 @@ class CompanionAPI(
 
     async def hid_event(self, x: int, y: int, mode: HidEventMode) -> None:
         """Send a HID command."""
+        x = max(x, 0)
+        y = max(y, 0)
+        x = min(x, int(TOUCHPAD_WIDTH))
+        y = min(y, int(TOUCHPAD_HEIGHT))
         await self._send_event(
             identifier="_hidT",
-            content={"_ns": time.time_ns(), "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
+            content={"_ns": (time.time_ns()-self._base_timestamp), "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
         )
 
     async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
@@ -318,10 +324,23 @@ class CompanionAPI(
         while current_time < end_time:
             x = x + float(end_x - x)*TOUCHPAD_DELAY_MS * 1000000 / (end_time - current_time)
             y = y + float(end_y - y)*TOUCHPAD_DELAY_MS * 1000000 / (end_time - current_time)
+            x = max(x, 0)
+            y = max(y, 0)
+            x = min(x, TOUCHPAD_WIDTH)
+            y = min(y, TOUCHPAD_HEIGHT)
             await self.hid_event(int(x), int(y), HidEventMode.Hold)
             await asyncio.sleep(sleep_time)
             current_time = time.time_ns()
         await self.hid_event(end_x, end_y, HidEventMode.Release)
+
+    async def touch_event(self, x: int, y: int, mode: int):
+        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+        in a given time (in milliseconds)
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        await self.hid_event(x, y, HidEventMode(mode))
 
     async def mediacontrol_command(
         self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None
@@ -394,6 +413,7 @@ class CompanionAPI(
 
     async def _touch_start(self) -> Mapping[str, Any]:
         """ Subscribe to touch gestures """
+        self._base_timestamp = time.time_ns()
         response = await self._send_command("_touchStart",
             {"_height": TOUCHPAD_HEIGHT, "_tFl": 0, "_width": TOUCHPAD_WIDTH})
         await asyncio.gather(*self.dispatch("_touchStart", response.get("_c", {})))

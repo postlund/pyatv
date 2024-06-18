@@ -1,7 +1,7 @@
 """PoC code for Companion protocol."""
 
 import asyncio
-from enum import IntFlag
+from enum import IntFlag, Enum
 import logging
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
@@ -36,7 +36,7 @@ from pyatv.interface import (
     Power,
     RemoteControl,
     UserAccount,
-    UserAccounts,
+    UserAccounts, TouchGestures,
 )
 from pyatv.protocols.companion.api import (
     CompanionAPI,
@@ -140,6 +140,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextClear,
         FeatureName.TextAppend,
         FeatureName.TextSet,
+        FeatureName.TouchGesture,
+        FeatureName.TouchEvent
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -461,6 +463,35 @@ class CompanionKeyboard(Keyboard):
         await self.api.text_input_command(text, clear_previous_input=True)
 
 
+class CompanionTouchGestures(TouchGestures):
+    """Implementation of touch gesture API."""
+
+    def __init__(self, api: CompanionAPI) -> None:
+        """Initialize a new CompanionRemoteControl."""
+        self.api = api
+
+    # pylint: disable=invalid-name
+    async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
+        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+        in a given time (in milliseconds)
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        await self.api.touch_gesture(start_x, start_y, end_x, end_y, duration_ms)
+
+    async def touch_event(self, x: int, y: int, mode: int):
+        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+        in a given time (in milliseconds)
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        await self.api.touch_event(x, y, mode)
+
+
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
@@ -565,6 +596,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
         Keyboard: CompanionKeyboard(api, core),
+        TouchGestures: CompanionTouchGestures(api)
     }
 
     async def _connect() -> bool:

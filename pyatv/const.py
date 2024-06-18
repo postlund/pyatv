@@ -433,3 +433,10 @@ class FeatureName(Enum):
 
     TextSet = 54
     """Replace text in virtual keyboard."""
+
+    TouchGesture = 63
+    """Touch gesture from given coordinates and duration."""
+
+    TouchEvent = 64
+    """Touch event to given coordinates."""
+

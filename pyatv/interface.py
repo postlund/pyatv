@@ -1249,6 +1249,29 @@ class Keyboard(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
 
+class TouchGestures(ABC):
+    @feature(63, "TouchGesture", "Touch gesture from given coordinates and duration.")
+    async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
+        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+        in a given time (in milliseconds)
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(64, "TouchEvent", "Touch event to given coordinates.")
+    async def touch_event(self, x: int, y: int, mode: int) -> None:
+        """ Generate a touch event to x,y coordinates (in range [0,1000])
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        raise exceptions.NotSupportedError()
+
+
 class BaseConfig(ABC):
     """Representation of a device configuration.
 
@@ -1524,3 +1547,8 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def keyboard(self) -> Keyboard:
         """Return keyboard interface."""
+
+    @property
+    @abstractmethod
+    def touchgestures(self) -> TouchGestures:
+        """Return touch gestures interface."""
