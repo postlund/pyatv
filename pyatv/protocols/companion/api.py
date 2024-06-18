@@ -91,7 +91,7 @@ class SystemStatus(Enum):
 
 TOUCHPAD_WIDTH  = 1000.0 # Touchpad width
 TOUCHPAD_HEIGHT = 1000.0 # Touchpad height
-TOUCHPAD_DELAY_MS = 90 # Delay between touch events in ms
+TOUCHPAD_DELAY_MS = 16 # Delay between touch events in ms
 # pylint: enable=invalid-name
 
 
