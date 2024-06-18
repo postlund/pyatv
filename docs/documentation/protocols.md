@@ -1046,6 +1046,62 @@ Example: Put device to sleep:
 {'_c': {}, '_t': 3, '_x': 123}
 ```
 
+#### Touch gestures
+
+Additional information about slide gestures :
+- Slide gestures are handled with a succession of events with 100ms between each requests
+- First event with _tPh=1 (press mode)
+- N requests with _tPh = 3 (where N*100 ms = duration of the gesture), with _cx and _cy coordinates changing at each request
+- _cx and _cy coordinates are in the range [0,1000] but should be set according to connection data
+```javascript
+// Received during initialization
+ {'_i': '_touchStart', '_x': 1865081428, '_btHP': False, '_c': {'_height': 1000.0, '_tFl': 0, '_width': 1000.0}, '_t': 2}
+ ```
+- with _ns = timestamp in nanoseconds (but starting from ?)
+- 1 request with _tPh=4 when released
+- increment _x for each requests
+
+## Single tap
+
+3 requests have to be sent to simulate tap gesture on the touch pad : 2 commands requests (_hidC) and 1 event request (_hidT)
+- 2 requests with _i = _hidC and in the additional arguments structure _C :
+  - the button pressed : _hidC = 6 for touch pad click
+  - the action mode : _hBtS = 1 for press, and the second request with _hBtS = 2 for release
+-  1 event with additional arguments as followed :
+  - _cx and _cy (x,y coordinates) set to max : 1000
+  - _tPh : action mode of the touchpad set to 5
+
+```javascript
+// Request
+{'_i': '_hidC', '_x': 1984212224, '_btHP': False, '_c': {'_hBtS': 1, '_hidC': 6}, '_t': 2}
+{'_i': '_hidC', '_x': 1984212225, '_btHP': False, '_c': {'_hBtS': 2, '_hidC': 6}, '_t': 2}
+{'_i': '_hidT', '_x': 1984212226, '_c': {'_ns': 713243707438041, '_tFg': 1, '_cx': 1000, '_tPh': 5, '_cy': 1000}, '_t': 1}
+
+// Response
+R: {'_c': {}, '_t': 3, '_x': 1984212224}
+R: {'_c': {}, '_t': 3, '_x': 1984212225}
+```
+
+
+## Gestures
+
+Touch gestures are a series of events (_i = "_hidT", _t = 1) sent every few milliseconds (~100ms) with updated x,y coordinates
+- 1 start event with _tPh = 1 (pressed event)
+- N events with _tPh = 3 (hold)
+- 1 end event with _tPh = 4 (released)
+
+```javascript
+// Request
+{'_i': '_hidT', '_x': 588648840, '_c': {'_ns': 713018028759791, '_tFg': 1, '_cx': 500, '_tPh': 1, '_cy': 800}, '_t': 1}
+{'_i': '_hidT', '_x': 588648841, '_c': {'_ns': 713018124653791, '_tFg': 1, '_cx': 506, '_tPh': 3, '_cy': 789}, '_t': 1}
+{'_i': '_hidT', '_x': 588648842, '_c': {'_ns': 713018141323791, '_tFg': 1, '_cx': 520, '_tPh': 3, '_cy': 767}, '_t': 1}
+{'_i': '_hidT', '_x': 588648843, '_c': {'_ns': 713018157994791, '_tFg': 1, '_cx': 520, '_tPh': 3, '_cy': 758}, '_t': 1}
+...
+{'_i': '_hidT', '_x': 588648930, '_c': {'_ns': 713019612448791, '_tFg': 1, '_cx': 587, '_tPh': 3, '_cy': 128}, '_t': 1}
+{'_i': '_hidT', '_x': 588648931, '_c': {'_ns': 713019616615791, '_tFg': 1, '_cx': 593, '_tPh': 4, '_cy': 134}, '_t': 1}
+```
+
+
 #### System Status
 
 A system can be in one of the following states:
