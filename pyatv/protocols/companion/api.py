@@ -59,6 +59,7 @@ class HidEventMode(Enum):
     Press = 1
     Hold = 3
     Release = 4
+    Click = 5
 
 class MediaControlCommand(Enum):
     """Media Control command constants."""
@@ -341,6 +342,12 @@ class CompanionAPI(
         :param mode: touch mode (1: press, 3: hold, 4: release)
         """
         await self.hid_event(x, y, HidEventMode(mode))
+
+    async def touch_click(self):
+        """Sends a touch click."""
+        await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
+        await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
+        await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
 
     async def mediacontrol_command(
         self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None

@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import sys
+import time
 import tkinter as tk
 from asyncio import Lock
 
@@ -19,7 +20,7 @@ class AtvUi(tk.Frame):
         self.canvas = tk.Canvas(self, width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
         self.canvas.pack(side="top", fill="both", expand=True)
         self.text_id = self.canvas.create_text(10, 10, anchor="nw", text="Virtual pad : drag the pointer")
-        root.bind('<ButtonPress-1>', self.click)
+        root.bind('<ButtonPress-1>', self.press)
         root.bind('<ButtonRelease-1>', self.release)
         self.atv: AppleTV | None = None
         self.loop = asyncio.get_event_loop()
@@ -27,6 +28,7 @@ class AtvUi(tk.Frame):
         self.x = -1
         self.y = -1
         self.touch_reset = False
+        self.press_timestamp = 0
 
     async def atvconnect(self, loop, ip_address: str, credentials: str) -> AppleTV | None:
         print("Discovering devices on network...")
@@ -63,7 +65,8 @@ class AtvUi(tk.Frame):
     def getY(self, y) -> int:
         return min(max(int(y * PAD_HEIGHT / CANVAS_HEIGHT), 0), PAD_HEIGHT)
 
-    def click(self, event):
+    def press(self, event):
+        self.press_timestamp = time.time_ns()
         self.canvas.itemconfig(self.text_id, text="Click")
         self.x = self.getX(event.x)
         self.y = self.getY(event.y)
@@ -77,6 +80,10 @@ class AtvUi(tk.Frame):
         self.loop.run_until_complete(self.atv.touchgestures.touch_event(self.getX(event.x), self.getY(event.y), 4))
         print("%r, %r : %r" % (self.getX(event.x), self.getY(event.y), 4))
         root.unbind('<B1-Motion>')
+        if time.time_ns() - self.press_timestamp < 100*1000000:
+            self.loop.run_until_complete(self.atv.touchgestures.touch_click())
+        self.press_timestamp = 0
+
 
     def motion(self, event):
         x, y = event.x, event.y

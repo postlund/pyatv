@@ -440,3 +440,5 @@ class FeatureName(Enum):
     TouchEvent = 64
     """Touch event to given coordinates."""
 
+    TouchClick = 65
+    """Touch click command."""
