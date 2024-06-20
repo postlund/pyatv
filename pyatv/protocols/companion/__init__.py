@@ -1,7 +1,7 @@
 """PoC code for Companion protocol."""
 
 import asyncio
-from enum import IntFlag, Enum
+from enum import Enum, IntFlag
 import logging
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
@@ -35,8 +35,9 @@ from pyatv.interface import (
     PairingHandler,
     Power,
     RemoteControl,
+    TouchGestures,
     UserAccount,
-    UserAccounts, TouchGestures,
+    UserAccounts,
 )
 from pyatv.protocols.companion.api import (
     CompanionAPI,

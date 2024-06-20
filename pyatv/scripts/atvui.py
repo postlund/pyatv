@@ -1,9 +1,9 @@
 import argparse
 import asyncio
+from asyncio import Lock
 import sys
 import time
 import tkinter as tk
-from asyncio import Lock
 
 import pyatv
 from pyatv import Protocol
