@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Mapping, Optional, cast
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.const import HidEventMode
 from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.companion import keyed_archiver
@@ -53,13 +54,6 @@ class HidCommand(Enum):
     PageUp = 18
     PageDown = 19
 
-
-class HidEventMode(Enum):
-    """HID event constants."""
-    Press = 1
-    Hold = 3
-    Release = 4
-    Click = 5
 
 class MediaControlCommand(Enum):
     """Media Control command constants."""
@@ -307,7 +301,7 @@ class CompanionAPI(
             content={"_ns": (time.time_ns()-self._base_timestamp), "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
         )
 
-    async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
+    async def touch(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param start_x: Start x coordinate
@@ -334,14 +328,14 @@ class CompanionAPI(
             current_time = time.time_ns()
         await self.hid_event(end_x, end_y, HidEventMode.Release)
 
-    async def touch_event(self, x: int, y: int, mode: int):
+    async def touch_event(self, x: int, y: int, mode: HidEventMode):
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
         """
-        await self.hid_event(x, y, HidEventMode(mode))
+        await self.hid_event(x, y, mode)
 
     async def touch_click(self):
         """Sends a touch click."""
@@ -423,7 +417,7 @@ class CompanionAPI(
         self._base_timestamp = time.time_ns()
         response = await self._send_command("_touchStart",
             {"_height": TOUCHPAD_HEIGHT, "_tFl": 0, "_width": TOUCHPAD_WIDTH})
-        await asyncio.gather(*self.dispatch("_touchStart", response.get("_c", {})))
+        self.dispatch("_touchStart", response.get("_c", {}))
         return response
 
     async def _touch_stop(self) -> None:

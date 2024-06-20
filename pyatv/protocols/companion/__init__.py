@@ -14,7 +14,7 @@ from pyatv.const import (
     KeyboardFocusState,
     PairingRequirement,
     PowerState,
-    Protocol,
+    Protocol, HidEventMode,
 )
 from pyatv.core import Core, MutableService, SetupData, UpdatedState, mdns
 from pyatv.core.scan import (
@@ -469,11 +469,11 @@ class CompanionTouchGestures(TouchGestures):
     """Implementation of touch gesture API."""
 
     def __init__(self, api: CompanionAPI) -> None:
-        """Initialize a new CompanionRemoteControl."""
+        """Initialize a new CompanionTouchGeatures."""
         self.api = api
 
     # pylint: disable=invalid-name
-    async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
+    async def touch(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param start_x: Start x coordinate
@@ -482,9 +482,9 @@ class CompanionTouchGestures(TouchGestures):
         :param end_y: Endi x coordinate
         :param duration_ms: Time in milliseconds to reach the end coordinates
         """
-        await self.api.touch_gesture(start_x, start_y, end_x, end_y, duration_ms)
+        await self.api.touch(start_x, start_y, end_x, end_y, duration_ms)
 
-    async def touch_event(self, x: int, y: int, mode: int):
+    async def touch_event(self, x: int, y: int, mode: HidEventMode):
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param x: x coordinate

@@ -442,3 +442,11 @@ class FeatureName(Enum):
 
     TouchClick = 65
     """Touch click command."""
+
+
+class HidEventMode(Enum):
+    """HID event constants."""
+    Press = 1
+    Hold = 3
+    Release = 4
+    Click = 5

@@ -36,7 +36,7 @@ from pyatv.const import (
     InputAction,
     OperatingSystem,
     PairingRequirement,
-    Protocol,
+    Protocol, HidEventMode,
 )
 from pyatv.settings import Settings
 from pyatv.support import prettydataclass
@@ -1251,7 +1251,7 @@ class Keyboard(ABC, StateProducer):
 
 class TouchGestures(ABC):
     @feature(63, "TouchGesture", "Touch gesture from given coordinates and duration.")
-    async def touch_gesture(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
+    async def touch(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param start_x: Start x coordinate
@@ -1263,7 +1263,7 @@ class TouchGestures(ABC):
         raise exceptions.NotSupportedError()
 
     @feature(64, "TouchEvent", "Touch event to given coordinates.")
-    async def touch_event(self, x: int, y: int, mode: int) -> None:
+    async def touch_event(self, x: int, y: int, mode: HidEventMode) -> None:
         """ Generate a touch event to x,y coordinates (in range [0,1000])
         :param x: x coordinate
         :param y: y coordinate
@@ -1555,5 +1555,5 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
 
     @property
     @abstractmethod
-    def touchgestures(self) -> TouchGestures:
+    def touch(self) -> TouchGestures:
         """Return touch gestures interface."""
