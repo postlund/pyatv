@@ -5,7 +5,7 @@ from enum import Enum
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "14"
-PATCH_VERSION = "4"
+PATCH_VERSION = "5"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 
