@@ -1,9 +1,15 @@
 """Transparent encryption layer using Chacha20_Poly1305."""
+from functools import partial
+from struct import Struct
 from typing import Optional
 
 from chacha20poly1305_reuseable import ChaCha20Poly1305Reusable as ChaCha20Poly1305
 
 NONCE_LENGTH = 12
+
+# The first 4 bytes are always 0, followed by 8 bytes of counter
+# for a total of 12 bytes.
+PACK_NONCE = partial(Struct("<LQ").pack, 0)
 
 
 class Chacha20Cipher:
@@ -24,7 +30,7 @@ class Chacha20Cipher:
         This is the nonce that will be used by encrypt in the _next_ call if no custom
         nonce is specified.
         """
-        return self._out_counter.to_bytes(length=self._nonce_length, byteorder="little")
+        return PACK_NONCE(self._out_counter)
 
     @property
     def in_nonce(self) -> bytes:
@@ -33,7 +39,7 @@ class Chacha20Cipher:
         This is the nonce that will be used by decrypt in the _next_ call if no custom
         nonce is specified.
         """
-        return self._in_counter.to_bytes(length=self._nonce_length, byteorder="little")
+        return PACK_NONCE(self._in_counter)
 
     def encrypt(
         self, data: bytes, nonce: Optional[bytes] = None, aad: Optional[bytes] = None
@@ -42,10 +48,8 @@ class Chacha20Cipher:
         if nonce is None:
             nonce = self.out_nonce
             self._out_counter += 1
-
-        if len(nonce) < NONCE_LENGTH:
+        elif len(nonce) < NONCE_LENGTH:
             nonce = b"\x00" * (NONCE_LENGTH - len(nonce)) + nonce
-
         return self._enc_out.encrypt(nonce, data, aad)
 
     def decrypt(
@@ -55,10 +59,6 @@ class Chacha20Cipher:
         if nonce is None:
             nonce = self.in_nonce
             self._in_counter += 1
-
-        if len(nonce) < NONCE_LENGTH:
+        elif len(nonce) < NONCE_LENGTH:
             nonce = b"\x00" * (NONCE_LENGTH - len(nonce)) + nonce
-
-        decrypted = self._enc_in.decrypt(nonce, data, aad)
-
-        return bytes(decrypted)
+        return self._enc_in.decrypt(nonce, data, aad)
