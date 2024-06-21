@@ -1048,20 +1048,23 @@ Example: Put device to sleep:
 
 #### Touch gestures
 
-Additional information about slide gestures :
-- Slide gestures are handled with a succession of events with 100ms between each requests
-- First event with _tPh=1 (press mode)
-- N requests with _tPh = 3 (where N*100 ms = duration of the gesture), with _cx and _cy coordinates changing at each request
-- _cx and _cy coordinates are in the range [0,1000] but should be set according to connection data
+Additional information about slide gestures : slide gestures are handled with a succession of events with about 20ms between each requests
+ 
+1. First event with _tPh=1 (press mode)
+2. N requests with _tPh = 3 (where N*100 ms = duration of the gesture), with _cx and _cy coordinates changing at each request
+3. One last request with _tPh=4 when released
+
+To be noted :
+- _cx and _cy coordinates must be in the range [0,1000] which is set in a startup event _touchStart :
 ```javascript
 // Received during initialization
  {'_i': '_touchStart', '_x': 1865081428, '_btHP': False, '_c': {'_height': 1000.0, '_tFl': 0, '_width': 1000.0}, '_t': 2}
  ```
-- with _ns = timestamp in nanoseconds (but starting from ?)
-- 1 request with _tPh=4 when released
-- increment _x for each requests
+- _ns = timestamp in nanoseconds (probably based on device boot time)
+- when reaching the edge of the touch area, a release event should be sent with a new press event otherwise the cursor will move in the opposite way 
 
-## Single tap
+
+#### Single tap
 
 3 requests have to be sent to simulate tap gesture on the touch pad : 2 commands requests (_hidC) and 1 event request (_hidT)
 - 2 requests with _i = _hidC and in the additional arguments structure _C :
@@ -1083,9 +1086,9 @@ R: {'_c': {}, '_t': 3, '_x': 1984212225}
 ```
 
 
-## Gestures
+#### Gestures
 
-Touch gestures are a series of events (_i = "_hidT", _t = 1) sent every few milliseconds (~100ms) with updated x,y coordinates
+Touch gestures are a series of events (_i = "_hidT", _t = 1) sent every few milliseconds (~20ms) with updated x,y coordinates
 - 1 start event with _tPh = 1 (pressed event)
 - N events with _tPh = 3 (hold)
 - 1 end event with _tPh = 4 (released)
