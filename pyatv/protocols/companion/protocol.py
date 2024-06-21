@@ -1,4 +1,5 @@
 """Implementation of the Companion protocol."""
+
 from abc import ABC
 from enum import Enum
 import logging
@@ -85,9 +86,7 @@ class CompanionProtocol(
         self.connection.set_listener(self)
         self.srp = srp
         self.service = service
-        self._xid: int = randint(
-            0, 2**16
-        )  # Don't know range here, just use something
+        self._xid: int = randint(0, 2**16)  # Don't know range here, just use something
         self._queues: Dict[FrameIdType, SharedData[Any]] = {}
         self._chacha = None
         self._is_started = False

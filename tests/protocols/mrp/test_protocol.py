@@ -1,4 +1,5 @@
 """Unittests for pyatv.protocols.mrp.protocol."""
+
 from unittest.mock import MagicMock
 
 import pytest

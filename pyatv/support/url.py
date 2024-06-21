@@ -1,4 +1,5 @@
 """Helpers for working with URLs."""
+
 from urllib.parse import urlparse
 
 

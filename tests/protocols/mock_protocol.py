@@ -4,6 +4,7 @@ This module allows for mocking protocols in pyatv.protocols and is meant for tes
 core featuers. It is not complete, just implemented enough to work. More fine grained
 functionality can be added over time as needed.
 """
+
 from contextlib import contextmanager
 from typing import Any, Dict, Generator, Mapping, Optional
 from unittest.mock import AsyncMock, MagicMock, patch

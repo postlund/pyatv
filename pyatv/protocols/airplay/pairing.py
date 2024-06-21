@@ -1,4 +1,5 @@
 """Device pairing and derivation of encryption keys."""
+
 import logging
 from typing import Optional
 
@@ -47,9 +48,11 @@ class AirPlayPairingHandler(PairingHandler):
         """Start pairing process."""
         self.http = await http_connect(self.address, self.service.port)
         self.pairing_procedure = pair_setup(
-            AuthenticationType.HAP
-            if self.airplay_version == AirPlayMajorVersion.AirPlayV2
-            else AuthenticationType.Legacy,
+            (
+                AuthenticationType.HAP
+                if self.airplay_version == AirPlayMajorVersion.AirPlayV2
+                else AuthenticationType.Legacy
+            ),
             self.http,
         )
         self._has_paired = False

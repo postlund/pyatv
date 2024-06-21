@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core.facade."""
+
 from abc import ABC
 import asyncio
 import inspect

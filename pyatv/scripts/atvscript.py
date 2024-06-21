@@ -281,9 +281,11 @@ async def _run_command(atv, args, abort_sem, loop):
     if args.command == "playing":
         return output_playing(
             await atv.metadata.playing(),
-            atv.metadata.app
-            if atv.features.in_state(FeatureState.Available, FeatureName.App)
-            else None,
+            (
+                atv.metadata.app
+                if atv.features.in_state(FeatureState.Available, FeatureName.App)
+                else None
+            ),
         )
 
     if args.command == "push_updates":

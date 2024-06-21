@@ -5,6 +5,7 @@ Technically, transient pairing only covers the first four states of regular pair
 makes it easier to implement as the verification procedure step instead, so that's
 how it works and why there's no setup procedure at all.
 """
+
 import binascii
 from copy import copy
 import logging

@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.metadata."""
+
 import pytest
 
 from pyatv.interface import MediaMetadata

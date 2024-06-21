@@ -1,4 +1,5 @@
 """Unit tests for interface implementations in pyatv.protocols.mrp."""
+
 import datetime
 import math
 from typing import Any, Dict

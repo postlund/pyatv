@@ -4,6 +4,7 @@ This code is pretty messy right now and needs some re-structuring. The intention
 however to set up a connection to an AirPlay 2 receiver and ensure encryption and
 most low-level stuff is taken care of.
 """
+
 import asyncio
 import logging
 from random import randint

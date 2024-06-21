@@ -1,4 +1,5 @@
 """Collections for pyatv."""
+
 import asyncio
 import collections.abc
 import typing
