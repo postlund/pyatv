@@ -9,7 +9,7 @@ import pytest
 import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
-from pyatv.const import KeyboardFocusState, PowerState, Protocol
+from pyatv.const import KeyboardFocusState, PowerState, Protocol, HidEventMode
 from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 from pyatv.protocols.companion.api import SystemStatus
 
@@ -335,3 +335,22 @@ async def test_power_state_availability(
     assert atv.power.power_state == expecter_power_state
 
     await asyncio.gather(*atv.close())
+
+
+async def test_touch(
+    companion_client, companion_state
+):
+    await companion_client.touch.touch(0, 0, 800, 800, 200)
+    await until(
+        lambda: companion_state.touch_event
+            and companion_state.touch_event.x == 800
+            and companion_state.touch_event.y == 800
+            and companion_state.touch_event.press_mode == HidEventMode.Release
+    )
+
+
+async def test_touch_click(
+    companion_client, companion_state
+):
+    await companion_client.touch.touch_click()
+    assert companion_state.latest_button == "select"
