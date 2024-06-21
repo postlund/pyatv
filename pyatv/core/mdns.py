@@ -1,4 +1,5 @@
 """Minimalistic DNS-SD implementation."""
+
 import asyncio
 from ipaddress import IPv4Address, ip_address
 import logging

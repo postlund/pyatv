@@ -1,4 +1,5 @@
 """Convenience methods for extracting metadata from an audio file."""
+
 import asyncio
 import io
 from typing import Union

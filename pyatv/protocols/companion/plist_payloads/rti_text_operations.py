@@ -3,6 +3,7 @@
 In the absence of a robust NSKeyedArchiver implementation, these are pre-
 encoded.
 """
+
 import plistlib
 
 __ALL__ = ["get_rti_clear_text_payload", "get_rti_input_text_payload"]

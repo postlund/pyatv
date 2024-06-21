@@ -3,6 +3,7 @@
 Note that this implementation only supports one level of value, i.e. no dicts
 in dicts.
 """
+
 # pylint: disable=invalid-name
 
 from enum import IntEnum

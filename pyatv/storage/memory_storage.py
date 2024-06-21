@@ -1,4 +1,5 @@
 """Memory storage module."""
+
 from pyatv.storage import AbstractStorage
 
 __pdoc_dev_page__ = "/development/storage"

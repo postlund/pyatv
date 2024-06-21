@@ -1,4 +1,5 @@
 """Pick authentication type based on device support."""
+
 import logging
 from typing import Tuple
 

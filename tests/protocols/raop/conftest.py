@@ -1,4 +1,5 @@
 """Shared test code for RAOP test cases."""
+
 import asyncio
 from typing import cast
 
