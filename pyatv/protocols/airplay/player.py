@@ -12,7 +12,8 @@ from pyatv.support.rtsp import RtspSession
 _LOGGER = logging.getLogger(__name__)
 
 PLAY_RETRIES = 3
-WAIT_RETRIES = 5
+WAIT_RETRIES = 10
+
 HEADERS = {
     "User-Agent": "AirPlay/550.10",
     "Content-Type": "application/x-apple-binary-plist",

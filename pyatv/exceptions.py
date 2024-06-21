@@ -129,3 +129,7 @@ class OperationTimeoutError(Exception):
 
 class SettingsError(Exception):
     """Raised when an error related to settings happens."""
+
+
+class InvalidFormatError(Exception):
+    """Raised when an unsupported (file) format is encountered."""
