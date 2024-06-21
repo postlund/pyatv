@@ -1,4 +1,5 @@
 """Processing functions for raw DNS messages."""
+
 import collections.abc
 import enum
 import io

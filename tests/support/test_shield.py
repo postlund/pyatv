@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.shield."""
+
 import pytest
 
 from pyatv.exceptions import BlockedStateError, InvalidStateError

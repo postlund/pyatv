@@ -1,4 +1,5 @@
 """Transparent encryption layer using Chacha20_Poly1305."""
+
 from functools import partial
 from struct import Struct
 from typing import Optional

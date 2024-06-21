@@ -1,4 +1,5 @@
 """Shared test code for AirPlay test cases."""
+
 import pytest
 import pytest_asyncio
 

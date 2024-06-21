@@ -3,6 +3,7 @@
 As zeroconf does not provide a stub or mock, this implementation will serve as
 stub here. It can fake immediate answers for any service.
 """
+
 from zeroconf import ServiceInfo
 
 

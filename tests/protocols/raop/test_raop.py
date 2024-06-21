@@ -1,4 +1,5 @@
 """Unit tests for pyatv.protocols.raop."""
+
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff

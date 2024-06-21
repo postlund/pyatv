@@ -400,10 +400,10 @@ class CompanionAppleTVProxy(
                         "audio-session-coordination.system-info"
                     ]
                     if "mediaRemoteGroupIdentifier" in audio_system_info:
-                        audio_system_info[
-                            "mediaRemoteGroupIdentifier"
-                        ] = shift_hex_identifier(
-                            audio_system_info["mediaRemoteGroupIdentifier"]
+                        audio_system_info["mediaRemoteGroupIdentifier"] = (
+                            shift_hex_identifier(
+                                audio_system_info["mediaRemoteGroupIdentifier"]
+                            )
                         )
 
     def process_incoming_data(self, frame_type: FrameType, data: Dict[str, Any]):
@@ -448,15 +448,15 @@ class CompanionAppleTVProxy(
                         "audio-session-coordination.system-info"
                     ]
                     if "mediaRemoteGroupIdentifier" in audio_system_info:
-                        audio_system_info[
-                            "mediaRemoteGroupIdentifier"
-                        ] = shift_hex_identifier(
-                            audio_system_info["mediaRemoteGroupIdentifier"]
+                        audio_system_info["mediaRemoteGroupIdentifier"] = (
+                            shift_hex_identifier(
+                                audio_system_info["mediaRemoteGroupIdentifier"]
+                            )
                         )
                     if "mediaRemoteRouteIdentifier" in audio_system_info:
-                        audio_system_info[
-                            "mediaRemoteRouteIdentifier"
-                        ] = SERVER_IDENTIFIER
+                        audio_system_info["mediaRemoteRouteIdentifier"] = (
+                            SERVER_IDENTIFIER
+                        )
 
 
 class AirPlayChannelAppleTVProxy(AbstractHAPChannel):

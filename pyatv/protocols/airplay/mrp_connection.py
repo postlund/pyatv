@@ -1,4 +1,5 @@
 """MRP connection implemented as a channel/stream over AirPlay."""
+
 import logging
 from typing import Optional
 

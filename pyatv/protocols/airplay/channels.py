@@ -2,6 +2,7 @@
 
 This module only deals with AirPlay 2 related channels right now.
 """
+
 from abc import ABC
 import logging
 from random import randrange

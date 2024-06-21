@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core."""
+
 from unittest.mock import ANY, MagicMock
 
 import pytest

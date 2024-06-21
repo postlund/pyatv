@@ -1,4 +1,5 @@
 """Connection abstraction for Companion protocol."""
+
 from abc import ABC
 import asyncio
 from collections import deque

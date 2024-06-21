@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core.protocol."""
+
 import asyncio
 import math
 from typing import Any, Optional

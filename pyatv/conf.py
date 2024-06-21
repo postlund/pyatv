@@ -4,6 +4,7 @@ A configuration describes a device, e.g. it's name, IP address and credentials. 
 possible to manually create a configuration, but generally scanning for devices will
 provide configurations for you.
 """
+
 from copy import deepcopy
 from ipaddress import IPv4Address
 from typing import Dict, List, Mapping, Optional

@@ -1,4 +1,5 @@
 """Fake RAOP device for tests."""
+
 import asyncio
 from enum import IntFlag, auto
 from functools import wraps

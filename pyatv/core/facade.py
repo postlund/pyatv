@@ -10,6 +10,7 @@ picked. See `DEFAULT_PRIORITIES` for priority list.
 NB: Typing in this file suffers much from:
 https://github.com/python/mypy/issues/5374
 """
+
 import asyncio
 import io
 import logging
