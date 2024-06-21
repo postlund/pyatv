@@ -1,4 +1,5 @@
 """Fixtures and code shared between MRP tests."""
+
 import asyncio
 
 import pytest

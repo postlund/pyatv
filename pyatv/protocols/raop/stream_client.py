@@ -4,6 +4,7 @@ This is a "generic" client designed around how AirPlay works in regards to strea
 The client uses an underlying "protocol" for protocol specific bits, i.e. to support
 AirPlay v1 and/or v2. This is mainly for code reuse purposes.
 """
+
 from abc import ABC, abstractmethod
 import asyncio
 import logging

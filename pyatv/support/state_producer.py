@@ -1,4 +1,5 @@
 """State producer module."""
+
 from typing import Generic, Optional, TypeVar, cast
 import weakref
 

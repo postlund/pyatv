@@ -1,4 +1,5 @@
 """Functional tests for DMAP scan."""
+
 from ipaddress import ip_address
 
 import pytest

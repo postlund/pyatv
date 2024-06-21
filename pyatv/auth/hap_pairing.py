@@ -1,4 +1,5 @@
 """Abstraction for authentication based on HAP/SRP."""
+
 from abc import ABC, abstractmethod
 import binascii
 from enum import Enum, auto

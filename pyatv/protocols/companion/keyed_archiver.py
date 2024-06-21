@@ -1,4 +1,5 @@
 """Support for working with NSKeyedArchiver serialized data."""
+
 import plistlib
 from typing import Any, List, Optional, Tuple
 

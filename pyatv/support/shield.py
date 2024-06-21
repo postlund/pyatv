@@ -29,6 +29,7 @@ pyatv.exceptions.BlockedStateError: guarded is blocked
 ```
 
 """
+
 from functools import wraps
 from typing import TypeVar
 

@@ -1,4 +1,5 @@
 """Module for working with HTTP requests."""
+
 from abc import ABC, abstractmethod
 import asyncio
 from collections import deque

@@ -3,6 +3,7 @@
 Tests for top level methods such as scan, pair and connect.
 Uses MemoryStorage as storage for simplicity.
 """
+
 import asyncio
 from unittest.mock import MagicMock, patch
 
