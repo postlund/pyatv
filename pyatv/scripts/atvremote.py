@@ -104,6 +104,7 @@ class GlobalCommands:
         _print_commands("Apps", interface.Apps)
         _print_commands("User Accounts", interface.UserAccounts)
         _print_commands("Global", self.__class__)
+        _print_commands("Touch", interface.TouchGestures)
 
         return 0
 
@@ -123,6 +124,7 @@ class GlobalCommands:
             interface.Apps,
             interface.Audio,
             interface.Keyboard,
+            interface.TouchGestures,
             self.__class__,
             DeviceCommands,
         ]
@@ -833,6 +835,10 @@ def _extract_command_with_args(cmd):
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
+        if cmd == "touch":
+            for x in args:
+                print(x)
+            return [int(args[0]), int(args[1]), int(args[2]), int(args[3]), int(args[4])]
         return args
 
     equal_sign = cmd.find("=")
@@ -883,6 +889,7 @@ async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
     user_accounts = retrieve_commands(interface.UserAccounts)
     audio = retrieve_commands(interface.Audio)
     keyboard = retrieve_commands(interface.Keyboard)
+    touch = retrieve_commands(interface.TouchGestures)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -926,6 +933,9 @@ async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
 
     if cmd in user_accounts:
         return await _exec_command(atv.user_accounts, cmd, True, *cmd_args)
+
+    if cmd in touch:
+        return await _exec_command(atv.touch, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1
