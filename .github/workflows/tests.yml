@@ -66,7 +66,7 @@ jobs:
         fetch-depth: 2
     - name: Set up Python ${{ matrix.python-version }}
       if: steps.run_result.outputs.run_result != 'success'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - uses: syphar/restore-virtualenv@v1
