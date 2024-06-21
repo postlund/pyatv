@@ -1,4 +1,5 @@
 """Shared test helper code."""
+
 from pyatv.const import PowerState
 from pyatv.interface import PowerListener
 

@@ -1,4 +1,5 @@
 """Unit tests for client and player management."""
+
 from unittest.mock import MagicMock
 
 import pytest

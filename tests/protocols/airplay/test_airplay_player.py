@@ -1,4 +1,5 @@
 """Unit tests for pyatv.protocols.airplay.player."""
+
 import math
 
 import pytest

@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.dns"""
+
 import io
 import typing
 

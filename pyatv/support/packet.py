@@ -1,4 +1,5 @@
 """Generic utility for encoding and decoding binary packets."""
+
 from collections import namedtuple
 import struct
 

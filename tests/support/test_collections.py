@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.collections"""
+
 import asyncio
 from unittest.mock import sentinel
 

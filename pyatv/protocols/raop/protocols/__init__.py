@@ -1,4 +1,5 @@
 """Base classes used by streaming protocols."""
+
 from abc import ABC, abstractmethod
 import asyncio
 import logging

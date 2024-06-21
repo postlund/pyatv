@@ -1,4 +1,5 @@
 """Implementation of AirPlay v2 protocol logic."""
+
 import asyncio
 import logging
 import plistlib

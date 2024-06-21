@@ -1,4 +1,5 @@
 """Storage module."""
+
 from hashlib import sha256
 from typing import List, Sequence
 

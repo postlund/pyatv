@@ -1,4 +1,5 @@
 """Core module of pyatv."""
+
 import asyncio
 from enum import Enum
 from typing import (

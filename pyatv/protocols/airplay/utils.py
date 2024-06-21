@@ -1,4 +1,5 @@
 """Manage announced AirPlay features."""
+
 from enum import Enum, IntFlag, auto
 import logging
 import math
