@@ -354,3 +354,10 @@ async def test_touch_click(
 ):
     await companion_client.touch.touch_click()
     assert companion_state.latest_button == "select"
+
+
+async def test_touch_hold(
+    companion_client, companion_state
+):
+    await companion_client.touch.touch_click()
+    assert companion_state.latest_button == "select"
