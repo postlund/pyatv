@@ -306,6 +306,12 @@ class FeatureName(Enum):
     WakeUp = 18
     """Wake up device (deprecated; use Power.turn_on)."""
 
+    FastForward = 63
+    """Fast Forward."""
+
+    Rewind = 64
+    """Rewind."""
+
     SkipForward = 36
     """Skip forward a time interval."""
 
