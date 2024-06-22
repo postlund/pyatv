@@ -56,8 +56,8 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await super().setUpAsync()
         self.atv = await self.get_connected_device(HSGID)
 
-    def tearDown(self):
-        self.atv.close()
+    async def tearDownAsync(self):
+        await asyncio.gather(*self.atv.close())
         super().tearDown()
 
     async def get_application(self, loop=None):

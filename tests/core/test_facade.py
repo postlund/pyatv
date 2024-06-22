@@ -459,7 +459,7 @@ async def test_close_returns_pending_tasks_from_previous_close(
 
     facade_dummy.close()
     pending_tasks = facade_dummy.close()
-    assert len(pending_tasks) == 1
+    assert len(pending_tasks) == 2
     assert task in pending_tasks
 
 
