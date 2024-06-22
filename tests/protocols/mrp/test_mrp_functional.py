@@ -1,5 +1,6 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import asyncio
 from ipaddress import IPv4Address
 import logging
 import math
@@ -74,8 +75,8 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.atv = await self.get_connected_device()
         self.artwork_server = None
 
-    def tearDown(self):
-        self.atv.close()
+    async def tearDownAsync(self):
+        await asyncio.gather(*self.atv.close())
         if self.artwork_server is not None:
             self.artwork_server.close()
         super().tearDown()
