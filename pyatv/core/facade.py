@@ -744,7 +744,7 @@ class FacadeAppleTV(interface.AppleTV):
         self.push_updater.stop()
 
         self._pending_tasks = set()
-        asyncio.ensure_future(self._session_manager.close())
+        self._pending_tasks.add(asyncio.create_task(self._session_manager.close()))
         for setup_data in self._protocol_handlers.values():
             self._pending_tasks.update(setup_data.close())
 
