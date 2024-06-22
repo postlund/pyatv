@@ -1,4 +1,5 @@
 """Unit tests for pyatv.core.relayer."""
+
 import pytest
 
 from pyatv import exceptions

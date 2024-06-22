@@ -27,6 +27,7 @@ relayer.register(CompanionMetadata())
 relayer.register(AirPlayMetadata())
 artwork = await relayer.relay("artwork")(width=640)
 """
+
 from itertools import chain
 from typing import Dict, Generic, List, Optional, Sequence, Type, TypeVar
 

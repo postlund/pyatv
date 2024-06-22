@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.http."""
+
 import asyncio
 import inspect
 import logging

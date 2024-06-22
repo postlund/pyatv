@@ -1,4 +1,5 @@
 """Classes and functions for data buffering."""
+
 from typing import Union
 
 from pyatv.exceptions import InvalidStateError

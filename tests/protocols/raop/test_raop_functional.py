@@ -6,6 +6,7 @@ TODO: Things to improve:
 * Improve sync tests
 * Volume changed by other protocol (multi-protocol test)
 """
+
 import asyncio
 import io
 import logging

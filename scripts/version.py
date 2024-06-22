@@ -1,4 +1,5 @@
 """Work with versions in pyatv."""
+
 import argparse
 import re
 import subprocess

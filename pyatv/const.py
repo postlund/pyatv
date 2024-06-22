@@ -1,4 +1,5 @@
 """Constants used in the public API."""
+
 # pylint: disable=invalid-name
 
 from enum import Enum

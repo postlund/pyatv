@@ -1,4 +1,5 @@
 """Shared test code for Companiom test cases."""
+
 import asyncio
 from typing import cast
 

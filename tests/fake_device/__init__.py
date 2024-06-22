@@ -1,4 +1,5 @@
 """Representation of a fake device supporting multiple protocol."""
+
 from collections import namedtuple
 from typing import Dict
 

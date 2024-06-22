@@ -1,4 +1,5 @@
 """Settings for configuring pyatv."""
+
 from enum import Enum
 import re
 from typing import Optional
