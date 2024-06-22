@@ -624,6 +624,11 @@ class FacadeTouchGestures(Relayer, interface.TouchGestures):
         """Sends a touch click."""
         return await self.relay("touch_click")()
 
+    @shield.guard
+    async def touch_hold(self):
+        """Sends a hold touch command."""
+        return await self.relay("touch_hold")()
+
 
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""

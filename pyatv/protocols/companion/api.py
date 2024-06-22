@@ -340,6 +340,14 @@ class CompanionAPI(
     async def touch_click(self):
         """Sends a touch click."""
         await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
+        await asyncio.sleep(0.02)
+        await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
+        await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
+
+    async def touch_hold(self):
+        """Sends a hold touch command."""
+        await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
+        await asyncio.sleep(1)
         await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
         await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
 

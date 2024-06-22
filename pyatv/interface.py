@@ -1276,6 +1276,11 @@ class TouchGestures(ABC):
         """Sends a touch click."""
         raise exceptions.NotSupportedError()
 
+    @feature(66, "TouchHold", "Hold touch command.")
+    async def touch_hold(self):
+        """Sends a hold touch command."""
+        raise exceptions.NotSupportedError()
+
 
 class BaseConfig(ABC):
     """Representation of a device configuration.

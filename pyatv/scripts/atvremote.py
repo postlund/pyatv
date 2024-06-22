@@ -836,8 +836,6 @@ def _extract_command_with_args(cmd):
         if cmd == "set_volume":
             return [float(args[0])]
         if cmd == "touch":
-            for x in args:
-                print(x)
             return [int(args[0]), int(args[1]), int(args[2]), int(args[3]), int(args[4])]
         return args
 

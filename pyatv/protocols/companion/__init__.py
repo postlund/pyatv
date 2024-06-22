@@ -143,7 +143,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextSet,
         FeatureName.TouchGesture,
         FeatureName.TouchEvent,
-        FeatureName.TouchClick
+        FeatureName.TouchClick,
+        FeatureName.TouchHold
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -496,6 +497,10 @@ class CompanionTouchGestures(TouchGestures):
     async def touch_click(self):
         """Sends a touch click."""
         await self.api.touch_click()
+
+    async def touch_hold(self):
+        """Sends a hold touch command."""
+        await self.api.touch_hold()
 
 
 class CompanionFeatures(Features):
