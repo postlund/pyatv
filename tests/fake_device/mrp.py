@@ -392,7 +392,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with specified keys."""
-        self.chacha = chacha20.Chacha20Cipher(output_key, input_key)
+        self.chacha = chacha20.Chacha20Cipher8byteNonce(output_key, input_key)
         self.state.has_authenticated = True
 
     def send_to_client(self, message: ProtobufMessage) -> None:
