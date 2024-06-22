@@ -1,4 +1,5 @@
 """Simple example that shows how to manually connect to an Apple TV."""
+
 import asyncio
 
 from pyatv import conf, connect

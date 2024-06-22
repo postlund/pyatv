@@ -1,4 +1,5 @@
 """Base class for HAP based channels (connections)."""
+
 from abc import ABC, abstractmethod
 import asyncio
 import logging

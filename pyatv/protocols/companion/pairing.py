@@ -1,4 +1,5 @@
 """Device pairing and derivation of encryption keys."""
+
 import logging
 from typing import Optional
 

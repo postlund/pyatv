@@ -1,4 +1,5 @@
 """Unit tests for pyatc.core."""
+
 import pytest
 
 from pyatv.support.state_producer import StateProducer

@@ -1,4 +1,5 @@
 """Audio sources that can provide raw PCM frames that pyatv can stream."""
+
 from abc import ABC, abstractmethod
 import array
 import asyncio

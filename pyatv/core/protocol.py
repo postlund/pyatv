@@ -1,4 +1,5 @@
 """Generic functions for protocol logic."""
+
 import asyncio
 import inspect
 import logging

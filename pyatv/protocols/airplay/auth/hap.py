@@ -1,4 +1,5 @@
 """API for performing and verifying device authentication."""
+
 from copy import copy
 import logging
 from typing import Any, Dict, Optional, Tuple

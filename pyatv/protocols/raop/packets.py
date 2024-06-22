@@ -1,4 +1,5 @@
 """Packet formats used by RAOP."""
+
 from pyatv.support.packet import defpacket
 
 RtpHeader = defpacket("RtpHeader", proto="B", type="B", seqno="H")

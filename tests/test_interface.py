@@ -1,4 +1,5 @@
 """Unit tests for pyatv.interface."""
+
 from typing import Dict, Optional
 from unittest.mock import ANY, MagicMock
 

@@ -147,21 +147,23 @@ class FakeCompanionState:
                             "sessionUUID": plistlib.UID(1),
                             "documentState": plistlib.UID(2),
                         },
-                        "$objects": [
-                            "$null",
-                            self.rti_session_uuid,
-                            {
-                                "docSt": plistlib.UID(3),
-                            },
-                        ]
-                        + [
-                            {
-                                "contextBeforeInput": plistlib.UID(4),
-                            },
-                            self.rti_text,
-                        ]
-                        if self.rti_text is not None
-                        else [{}],
+                        "$objects": (
+                            [
+                                "$null",
+                                self.rti_session_uuid,
+                                {
+                                    "docSt": plistlib.UID(3),
+                                },
+                            ]
+                            + [
+                                {
+                                    "contextBeforeInput": plistlib.UID(4),
+                                },
+                                self.rti_text,
+                            ]
+                            if self.rti_text is not None
+                            else [{}]
+                        ),
                     },
                     fmt=plistlib.PlistFormat.FMT_BINARY,
                     sort_keys=False,

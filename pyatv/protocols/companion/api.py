@@ -1,4 +1,5 @@
 """High level implementation of Companion API."""
+
 import asyncio
 from enum import Enum
 import logging
