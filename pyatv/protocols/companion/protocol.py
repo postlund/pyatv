@@ -183,7 +183,6 @@ class CompanionProtocol(
             self._xid += 1
 
         _LOGGER.debug("Send OPACK: %s", data)
-        print(data)
         self.connection.send(frame_type, opack.pack(data))
 
     def frame_received(self, frame_type: FrameType, data: bytes) -> None:
