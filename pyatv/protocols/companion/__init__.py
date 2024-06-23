@@ -141,10 +141,9 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextClear,
         FeatureName.TextAppend,
         FeatureName.TextSet,
-        FeatureName.TouchGesture,
-        FeatureName.TouchEvent,
-        FeatureName.TouchClick,
-        FeatureName.TouchHold
+        FeatureName.TouchSwipe,
+        FeatureName.TouchAction,
+        FeatureName.TouchClick
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -474,8 +473,8 @@ class CompanionTouchGestures(TouchGestures):
         self.api = api
 
     # pylint: disable=invalid-name
-    async def touch(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
-        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+    async def touch_swipe(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
+        """ Generate a touch swipe from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param start_x: Start x coordinate
         :param start_y: Start y coordinate
@@ -483,24 +482,21 @@ class CompanionTouchGestures(TouchGestures):
         :param end_y: Endi x coordinate
         :param duration_ms: Time in milliseconds to reach the end coordinates
         """
-        await self.api.touch(start_x, start_y, end_x, end_y, duration_ms)
+        await self.api.touch_swipe(start_x, start_y, end_x, end_y, duration_ms)
 
-    async def touch_event(self, x: int, y: int, mode: HidEventMode):
+    async def touch_action(self, x: int, y: int, mode: HidEventMode):
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
         """
-        await self.api.touch_event(x, y, mode)
+        await self.api.touch_action(x, y, mode)
 
-    async def touch_click(self):
-        """Sends a touch click."""
-        await self.api.touch_click()
-
-    async def touch_hold(self):
-        """Sends a hold touch command."""
-        await self.api.touch_hold()
+    async def touch_click(self, action: InputAction):
+        """Sends a touch click.
+        :param action: action mode : single tap (0), double tap (1), or hold (2)"""
+        await self.api.touch_click(action)
 
 
 class CompanionFeatures(Features):

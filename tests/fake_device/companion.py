@@ -1,6 +1,7 @@
 """Fake Companion Apple TV for tests."""
 
 import asyncio
+from dataclasses import dataclass
 from enum import IntFlag, auto
 import logging
 import plistlib
@@ -57,12 +58,12 @@ MEDIA_CONTROL_MAP = {
 }
 
 
+@dataclass
 class HidEvent:
-    def __init__(self, press_mode: HidEventMode, x: int, y: int, ns: int):
-        self.press_mode = press_mode
-        self.x = x
-        self.y = y
-        self.ns = ns
+    press_mode: HidEventMode
+    x: int
+    y: int
+    ns: int
 
 
 class CompanionServiceFlags(IntFlag):
@@ -434,7 +435,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         else:
             _LOGGER.warning("Touch event mode not supported %s", press_mode)
 
-        self.state.touch_event = HidEvent(HidEventMode(press_mode), cx, cy, ns)
+        self.state.touch_action = HidEvent(HidEventMode(press_mode), cx, cy, ns)
 
     def handle__mcc(self, message):
         args = {}

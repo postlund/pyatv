@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Mapping, Optional, cast
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.const import HidEventMode
+from pyatv.const import HidEventMode, InputAction
 from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.companion import keyed_archiver
@@ -302,8 +302,8 @@ class CompanionAPI(
             content={"_ns": (time.time_ns()-self._base_timestamp), "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
         )
 
-    async def touch(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
-        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
+    async def touch_swipe(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
+        """ Generate a touch swipe from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param start_x: Start x coordinate
         :param start_y: Start y coordinate
@@ -329,7 +329,7 @@ class CompanionAPI(
             current_time = time.time_ns()
         await self.hid_event(end_x, end_y, HidEventMode.Release)
 
-    async def touch_event(self, x: int, y: int, mode: HidEventMode):
+    async def touch_action(self, x: int, y: int, mode: HidEventMode):
         """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
         in a given time (in milliseconds)
         :param x: x coordinate
@@ -338,19 +338,21 @@ class CompanionAPI(
         """
         await self.hid_event(x, y, mode)
 
-    async def touch_click(self):
-        """Sends a touch click."""
-        await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
-        await asyncio.sleep(0.02)
-        await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
-        await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
-
-    async def touch_hold(self):
-        """Sends a hold touch command."""
-        await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
-        await asyncio.sleep(1)
-        await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
-        await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
+    async def touch_click(self, action: InputAction):
+        """Sends a touch click.
+        :param action: action mode : single tap (0), double tap (1), or hold (2)"""
+        if action in [InputAction.SingleTap, InputAction.DoubleTap]:
+            count = 1 if action == InputAction.SingleTap else 2
+            for i in range(count):
+                await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
+                await asyncio.sleep(0.02)
+                await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
+                await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
+        else: # Hold
+            await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
+            await asyncio.sleep(1)
+            await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
+            await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
 
     async def mediacontrol_command(
         self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None
