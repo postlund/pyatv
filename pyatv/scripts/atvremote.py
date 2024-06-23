@@ -20,7 +20,7 @@ from pyatv.const import (
     PairingRequirement,
     Protocol,
     RepeatState,
-    ShuffleState,
+    ShuffleState, HidEventMode,
 )
 from pyatv.interface import BaseConfig, BaseService, Storage, retrieve_commands
 from pyatv.scripts import (
@@ -831,12 +831,12 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
-        if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
+        if cmd in ["up", "down", "left", "right", "select", "menu", "home", "touch_click"]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
-        if cmd == "touch":
-            return [int(args[0]), int(args[1]), int(args[2]), int(args[3]), int(args[4])]
+        if cmd == "touch_action":
+            return [args[0], args[1], HidEventMode(args[2])]
         return args
 
     equal_sign = cmd.find("=")
