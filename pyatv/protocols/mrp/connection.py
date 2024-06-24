@@ -92,7 +92,7 @@ class MrpConnection(
 
     def enable_encryption(self, output_key: bytes, input_key: bytes) -> None:
         """Enable encryption with the specified keys."""
-        self._chacha = chacha20.Chacha20Cipher(output_key, input_key)
+        self._chacha = chacha20.Chacha20Cipher8byteNonce(output_key, input_key)
 
     @property
     def connected(self) -> bool:
