@@ -284,7 +284,7 @@ class BaseAirPlayServerAuth(http.HttpSimpleRouter, ABC):
             {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nonce="PV-Msg02".encode())
 
         tlv = {
@@ -368,7 +368,7 @@ class BaseAirPlayServerAuth(http.HttpSimpleRouter, ABC):
             binascii.unhexlify(self.session.key),
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
         decrypted_tlv_bytes = chacha.decrypt(
             pairing_data[TlvValue.EncryptedData], nonce="PS-Msg05".encode()
         )
@@ -396,7 +396,7 @@ class BaseAirPlayServerAuth(http.HttpSimpleRouter, ABC):
             }
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
         encrypted = chacha.encrypt(tlv, nonce="PS-Msg06".encode())
 
         self.has_paired()
