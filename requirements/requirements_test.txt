@@ -1,6 +1,6 @@
-black==24.4.0
-deepdiff==6.7.1
-flake8==7.0.0
+black==24.4.2
+deepdiff==7.0.1
+flake8==7.1.0
 isort==5.13.2
 mutagen==1.47.0
 pyfakefs==5.4.1
@@ -8,10 +8,10 @@ pylint==3.0.3
 pytest==8.2.2
 pytest-asyncio==0.23.6
 pytest-cov==4.1.0
-pytest-timeout==2.2.0
+pytest-timeout==2.3.1
 pytest-aiohttp==1.0.5
 pytest-httpserver==1.0.8
-pytest-xdist==3.5.0
+pytest-xdist==3.6.1
 pydocstyle==6.3.0
 mypy==1.8.0
 mypy-protobuf==3.5.0
