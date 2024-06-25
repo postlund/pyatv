@@ -1251,10 +1251,16 @@ class Keyboard(ABC, StateProducer):
 
 
 class TouchGestures(ABC):
+    """Base class for touch gestures."""
+
     @feature(63, "TouchSwipe", "Touch swipe from given coordinates and duration.")
-    async def touch_swipe(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
-        """ Generate a touch swipe from start to end x,y coordinates (in range [0,1000])
-        in a given time (in milliseconds)
+    async def touch_swipe(self, start_x: int, start_y: int,
+                          end_x: int, end_y: int, duration_ms: int) -> None:
+        """Generate a touch swipe.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
         :param start_x: Start x coordinate
         :param start_y: Start y coordinate
         :param end_x: End x coordinate
@@ -1265,7 +1271,8 @@ class TouchGestures(ABC):
 
     @feature(64, "TouchAction", "Touch event to given coordinates.")
     async def touch_action(self, x: int, y: int, mode: HidEventMode) -> None:
-        """ Generate a touch event to x,y coordinates (in range [0,1000])
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
@@ -1274,8 +1281,10 @@ class TouchGestures(ABC):
 
     @feature(65, "TouchClick", "Touch click command.")
     async def touch_click(self, action: InputAction):
-        """Sends a touch click.
-        :param action: action mode : single tap (0), double tap (1), or hold (2)"""
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
         raise exceptions.NotSupportedError()
 
 

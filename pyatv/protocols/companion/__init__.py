@@ -1,7 +1,7 @@
 """PoC code for Companion protocol."""
 
 import asyncio
-from enum import Enum, IntFlag
+from enum import IntFlag
 import logging
 from typing import Any, Dict, Generator, List, Mapping, Optional, Set, cast
 
@@ -474,9 +474,13 @@ class CompanionTouchGestures(TouchGestures):
         self.api = api
 
     # pylint: disable=invalid-name
-    async def touch_swipe(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int) -> None:
-        """ Generate a touch swipe from start to end x,y coordinates (in range [0,1000])
-        in a given time (in milliseconds)
+    async def touch_swipe(self, start_x: int, start_y: int,
+                          end_x: int, end_y: int, duration_ms: int) -> None:
+        """Generate a touch swipe.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
         :param start_x: Start x coordinate
         :param start_y: Start y coordinate
         :param end_x: End x coordinate
@@ -486,8 +490,8 @@ class CompanionTouchGestures(TouchGestures):
         await self.api.touch_swipe(start_x, start_y, end_x, end_y, duration_ms)
 
     async def touch_action(self, x: int, y: int, mode: HidEventMode):
-        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
-        in a given time (in milliseconds)
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
@@ -495,8 +499,10 @@ class CompanionTouchGestures(TouchGestures):
         await self.api.touch_action(x, y, mode)
 
     async def touch_click(self, action: InputAction):
-        """Sends a touch click.
-        :param action: action mode : single tap (0), double tap (1), or hold (2)"""
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
         await self.api.touch_click(action)
 
 

@@ -447,6 +447,7 @@ class FeatureName(Enum):
 
 class HidEventMode(Enum):
     """HID event constants."""
+
     Press = 1
     Hold = 3
     Release = 4

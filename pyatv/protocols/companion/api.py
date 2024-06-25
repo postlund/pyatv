@@ -85,9 +85,9 @@ class SystemStatus(Enum):
     Idle = 0x04  # NB: Not verified
 
 
-TOUCHPAD_WIDTH  = 1000.0 # Touchpad width
-TOUCHPAD_HEIGHT = 1000.0 # Touchpad height
-TOUCHPAD_DELAY_MS = 16 # Delay between touch events in ms
+TOUCHPAD_WIDTH = 1000.0  # Touchpad width
+TOUCHPAD_HEIGHT = 1000.0  # Touchpad height
+TOUCHPAD_DELAY_MS = 16  # Delay between touch events in ms
 # pylint: enable=invalid-name
 
 
@@ -299,12 +299,17 @@ class CompanionAPI(
         y = min(y, int(TOUCHPAD_HEIGHT))
         await self._send_event(
             identifier="_hidT",
-            content={"_ns": (time.time_ns()-self._base_timestamp), "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
+            content={"_ns": (time.time_ns() - self._base_timestamp),
+                     "_tFg": 1, "_cx": x, "_tPh": mode.value, "_cy": y}
         )
 
-    async def touch_swipe(self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int):
-        """ Generate a touch swipe from start to end x,y coordinates (in range [0,1000])
-        in a given time (in milliseconds)
+    async def touch_swipe(self, start_x: int, start_y: int,
+                          end_x: int, end_y: int, duration_ms: int):
+        """Generate a touch swipe.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
         :param start_x: Start x coordinate
         :param start_y: Start y coordinate
         :param end_x: End x coordinate
@@ -318,8 +323,10 @@ class CompanionAPI(
         sleep_time = float(TOUCHPAD_DELAY_MS / 1000)
         current_time = time.time_ns()
         while current_time < end_time:
-            x = x + float(end_x - x)*TOUCHPAD_DELAY_MS * 1000000 / (end_time - current_time)
-            y = y + float(end_y - y)*TOUCHPAD_DELAY_MS * 1000000 / (end_time - current_time)
+            x = (x + float(end_x - x) * TOUCHPAD_DELAY_MS * 1000000
+                 / (end_time - current_time))
+            y = (y + float(end_y - y) * TOUCHPAD_DELAY_MS * 1000000
+                 / (end_time - current_time))
             x = max(x, 0)
             y = max(y, 0)
             x = min(x, TOUCHPAD_WIDTH)
@@ -330,8 +337,8 @@ class CompanionAPI(
         await self.hid_event(end_x, end_y, HidEventMode.Release)
 
     async def touch_action(self, x: int, y: int, mode: HidEventMode):
-        """ Generate a touch gesture from start to end x,y coordinates (in range [0,1000])
-        in a given time (in milliseconds)
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
@@ -339,20 +346,26 @@ class CompanionAPI(
         await self.hid_event(x, y, mode)
 
     async def touch_click(self, action: InputAction):
-        """Sends a touch click.
-        :param action: action mode : single tap (0), double tap (1), or hold (2)"""
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
         if action in [InputAction.SingleTap, InputAction.DoubleTap]:
             count = 1 if action == InputAction.SingleTap else 2
             for i in range(count):
                 await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
                 await asyncio.sleep(0.02)
                 await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
-                await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
-        else: # Hold
+                await self.hid_event(int(TOUCHPAD_WIDTH),
+                                     int(TOUCHPAD_HEIGHT),
+                                     HidEventMode.Click)
+        else:  # Hold
             await self._send_command("_hidC", {'_hBtS': 1, '_hidC': 6})
             await asyncio.sleep(1)
             await self._send_command("_hidC", {'_hBtS': 2, '_hidC': 6})
-            await self.hid_event(int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), HidEventMode.Click)
+            await self.hid_event(int(TOUCHPAD_WIDTH),
+                                 int(TOUCHPAD_HEIGHT),
+                                 HidEventMode.Click)
 
     async def mediacontrol_command(
         self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None
@@ -424,16 +437,17 @@ class CompanionAPI(
         return SystemStatus(content["state"])
 
     async def _touch_start(self) -> Mapping[str, Any]:
-        """ Subscribe to touch gestures """
+        """Subscribe to touch gestures."""
         self._base_timestamp = time.time_ns()
         response = await self._send_command("_touchStart",
-            {"_height": TOUCHPAD_HEIGHT, "_tFl": 0, "_width": TOUCHPAD_WIDTH})
+                                            {"_height": TOUCHPAD_HEIGHT,
+                                             "_tFl": 0, "_width": TOUCHPAD_WIDTH})
         self.dispatch("_touchStart", response.get("_c", {}))
         return response
 
     async def _touch_stop(self) -> None:
-        """ Unsubscribe touch gestures """
-        await self._send_command("_touchStop",{"_i": 1})
+        """Unsubscribe touch gestures."""
+        await self._send_command("_touchStop", {"_i": 1})
 
     async def _siri_start(self) -> Mapping[str, Any]:
         response = await self._send_command("_siriStart", {})

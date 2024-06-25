@@ -832,7 +832,8 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
-        if cmd in ["up", "down", "left", "right", "select", "menu", "home", "touch_click"]:
+        if cmd in ["up", "down", "left", "right", "select",
+                   "menu", "home", "touch_click"]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
