@@ -311,8 +311,6 @@ class CompanionAPI(
         :param end_y: Endi x coordinate
         :param duration_ms: Time in milliseconds to reach the end coordinates
         """
-        await self._test_siri("heure")
-        return
         end_time = time.time_ns() + duration_ms * 1000000
         x: float = float(start_x)
         y: float = float(start_y)
@@ -436,25 +434,6 @@ class CompanionAPI(
     async def _touch_stop(self) -> None:
         """ Unsubscribe touch gestures """
         await self._send_command("_touchStop",{"_i": 1})
-
-    async def _test_siri(self, command):
-        await self._siri_start()
-        await asyncio.sleep(1)
-        await self._siri_stop()
-        await self.text_input_command("", clear_previous_input=True)
-        await asyncio.sleep(0.1)
-        await self.text_input_command(command, clear_previous_input=True)
-        await self.hid_command(True, HidCommand.Down)
-        await self.hid_command(False, HidCommand.Down)
-        await asyncio.sleep(0.1)
-        await self.hid_command(True, HidCommand.Down)
-        await self.hid_command(False, HidCommand.Down)
-        await asyncio.sleep(0.1)
-        await self.hid_command(True, HidCommand.Down)
-        await self.hid_command(False, HidCommand.Down)
-        await asyncio.sleep(0.1)
-        await self.touch_click(InputAction.SingleTap)
-        await asyncio.sleep(0.1)
 
     async def _siri_start(self) -> Mapping[str, Any]:
         response = await self._send_command("_siriStart", {})
