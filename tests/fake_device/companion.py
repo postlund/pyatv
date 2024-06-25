@@ -7,7 +7,7 @@ import logging
 import plistlib
 from typing import Any, Dict, List, Mapping, Optional, Set
 
-from pyatv.const import KeyboardFocusState, HidEventMode
+from pyatv.const import HidEventMode, KeyboardFocusState
 from pyatv.protocols.companion import (
     HidCommand,
     MediaControlCommand,

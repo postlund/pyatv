@@ -16,11 +16,12 @@ from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
+    HidEventMode,
     InputAction,
     PairingRequirement,
     Protocol,
     RepeatState,
-    ShuffleState, HidEventMode,
+    ShuffleState,
 )
 from pyatv.interface import BaseConfig, BaseService, Storage, retrieve_commands
 from pyatv.scripts import (

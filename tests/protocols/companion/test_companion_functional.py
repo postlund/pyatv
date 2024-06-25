@@ -9,7 +9,13 @@ import pytest
 import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
-from pyatv.const import KeyboardFocusState, PowerState, Protocol, HidEventMode, InputAction
+from pyatv.const import (
+    HidEventMode,
+    InputAction,
+    KeyboardFocusState,
+    PowerState,
+    Protocol,
+)
 from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 from pyatv.protocols.companion.api import SystemStatus
 

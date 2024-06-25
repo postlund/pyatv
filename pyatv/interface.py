@@ -33,10 +33,11 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
+    HidEventMode,
     InputAction,
     OperatingSystem,
     PairingRequirement,
-    Protocol, HidEventMode,
+    Protocol,
 )
 from pyatv.settings import Settings
 from pyatv.support import prettydataclass

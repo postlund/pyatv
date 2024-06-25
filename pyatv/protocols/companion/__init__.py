@@ -10,11 +10,12 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
+    HidEventMode,
     InputAction,
     KeyboardFocusState,
     PairingRequirement,
     PowerState,
-    Protocol, HidEventMode,
+    Protocol,
 )
 from pyatv.core import Core, MutableService, SetupData, UpdatedState, mdns
 from pyatv.core.scan import (
