@@ -1254,8 +1254,9 @@ class TouchGestures(ABC):
     """Base class for touch gestures."""
 
     @feature(63, "TouchSwipe", "Touch swipe from given coordinates and duration.")
-    async def touch_swipe(self, start_x: int, start_y: int,
-                          end_x: int, end_y: int, duration_ms: int) -> None:
+    async def touch_swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
         """Generate a touch swipe.
 
          From start to end x,y coordinates (in range [0,1000])

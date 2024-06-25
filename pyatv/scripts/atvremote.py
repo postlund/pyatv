@@ -705,9 +705,9 @@ async def cli_handler(loop):  # pylint: disable=too-many-statements,too-many-bra
 
     if args.mdns_debug:
         # logging.TRAFFIC is set in runtime by support.mdns
-        logging.getLogger("pyatv.core.mdns").level = (
-            logging.TRAFFIC  # pylint: disable=no-member
-        )
+        logging.getLogger(
+            "pyatv.core.mdns"
+        ).level = logging.TRAFFIC  # pylint: disable=no-member
 
     cmds = retrieve_commands(GlobalCommands)
 
@@ -832,8 +832,16 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
-        if cmd in ["up", "down", "left", "right", "select",
-                   "menu", "home", "touch_click"]:
+        if cmd in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "select",
+            "menu",
+            "home",
+            "touch_click",
+        ]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]

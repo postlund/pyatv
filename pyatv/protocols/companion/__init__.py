@@ -144,7 +144,7 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextSet,
         FeatureName.TouchSwipe,
         FeatureName.TouchAction,
-        FeatureName.TouchClick
+        FeatureName.TouchClick,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -474,8 +474,9 @@ class CompanionTouchGestures(TouchGestures):
         self.api = api
 
     # pylint: disable=invalid-name
-    async def touch_swipe(self, start_x: int, start_y: int,
-                          end_x: int, end_y: int, duration_ms: int) -> None:
+    async def touch_swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
         """Generate a touch swipe.
 
          From start to end x,y coordinates (in range [0,1000])
@@ -610,7 +611,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
         Keyboard: CompanionKeyboard(api, core),
-        TouchGestures: CompanionTouchGestures(api)
+        TouchGestures: CompanionTouchGestures(api),
     }
 
     async def _connect() -> bool:

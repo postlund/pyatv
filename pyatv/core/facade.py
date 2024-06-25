@@ -610,14 +610,17 @@ class FacadeTouchGestures(Relayer, interface.TouchGestures):
         interface.TouchGestures.__init__(self)
 
     @shield.guard
-    async def touch_swipe(self, start_x: int, start_y: int,
-                          end_x: int, end_y: int, duration_ms: int) -> None:
+    async def touch_swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
         """Generate a touch gesture from start to end x,y coordinates."""
-        return await self.relay("touch_swipe")(start_x=start_x,
-                                               start_y=start_y,
-                                               end_x=end_x,
-                                               end_y=end_y,
-                                               duration_ms=duration_ms)
+        return await self.relay("touch_swipe")(
+            start_x=start_x,
+            start_y=start_y,
+            end_x=end_x,
+            end_y=end_y,
+            duration_ms=duration_ms,
+        )
 
     @shield.guard
     async def touch_action(self, x: int, y: int, mode: HidEventMode) -> None:
@@ -664,7 +667,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.UserAccounts: FacadeUserAccounts(),
             interface.Audio: FacadeAudio(core_dispatcher),
             interface.Keyboard: FacadeKeyboard(core_dispatcher),
-            interface.TouchGestures: FacadeTouchGestures(core_dispatcher)
+            interface.TouchGestures: FacadeTouchGestures(core_dispatcher),
         }
         self._settings = settings
         self._shield_everything()

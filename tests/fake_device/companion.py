@@ -407,10 +407,21 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def handle__touchstart(self, message):
         width = message["_c"]["_width"]
         height = message["_c"]["_height"]
-        _LOGGER.debug("Touch start command received with touchpad width %s and height %s", width, height)
+        _LOGGER.debug(
+            "Touch start command received with touchpad width %s and height %s",
+            width,
+            height,
+        )
         self.state.touch_width = width
         self.state.touch_height = height
-        if not width or width < 0 or width > 1000 or not height or height < 0 or height > 1000:
+        if (
+            not width
+            or width < 0
+            or width > 1000
+            or not height
+            or height < 0
+            or height > 1000
+        ):
             self.send_error(message, "Invalid touchpad width or height")
         else:
             self.send_response(message, {})
