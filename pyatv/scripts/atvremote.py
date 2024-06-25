@@ -16,6 +16,7 @@ from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
+    HidEventMode,
     InputAction,
     PairingRequirement,
     Protocol,
@@ -104,6 +105,7 @@ class GlobalCommands:
         _print_commands("Apps", interface.Apps)
         _print_commands("User Accounts", interface.UserAccounts)
         _print_commands("Global", self.__class__)
+        _print_commands("Touch", interface.TouchGestures)
 
         return 0
 
@@ -123,6 +125,7 @@ class GlobalCommands:
             interface.Apps,
             interface.Audio,
             interface.Keyboard,
+            interface.TouchGestures,
             self.__class__,
             DeviceCommands,
         ]
@@ -703,8 +706,8 @@ async def cli_handler(loop):  # pylint: disable=too-many-statements,too-many-bra
     if args.mdns_debug:
         # logging.TRAFFIC is set in runtime by support.mdns
         logging.getLogger("pyatv.core.mdns").level = (
-            logging.TRAFFIC  # pylint: disable=no-member
-        )
+            logging.TRAFFIC
+        )  # pylint: disable=no-member
 
     cmds = retrieve_commands(GlobalCommands)
 
@@ -829,10 +832,21 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
-        if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
+        if cmd in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "select",
+            "menu",
+            "home",
+            "touch_click",
+        ]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
+        if cmd == "touch_action":
+            return [args[0], args[1], HidEventMode(args[2])]
         return args
 
     equal_sign = cmd.find("=")
@@ -883,6 +897,7 @@ async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
     user_accounts = retrieve_commands(interface.UserAccounts)
     audio = retrieve_commands(interface.Audio)
     keyboard = retrieve_commands(interface.Keyboard)
+    touch = retrieve_commands(interface.TouchGestures)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
@@ -926,6 +941,9 @@ async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
 
     if cmd in user_accounts:
         return await _exec_command(atv.user_accounts, cmd, True, *cmd_args)
+
+    if cmd in touch:
+        return await _exec_command(atv.touch, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1

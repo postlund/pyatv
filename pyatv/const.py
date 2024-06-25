@@ -434,3 +434,21 @@ class FeatureName(Enum):
 
     TextSet = 54
     """Replace text in virtual keyboard."""
+
+    TouchSwipe = 63
+    """Touch swipe from given coordinates and duration."""
+
+    TouchAction = 64
+    """Touch event to given coordinates."""
+
+    TouchClick = 65
+    """Touch click command."""
+
+
+class HidEventMode(Enum):
+    """HID event constants."""
+
+    Press = 1
+    Hold = 3
+    Release = 4
+    Click = 5

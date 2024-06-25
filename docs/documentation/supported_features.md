@@ -139,6 +139,7 @@ app and power related functions.
 * Turn on/off device ({% include api i="interface.Power.turn_on" %},
   {% include api i="interface.Power.turn_off" %})
 * Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
+* Touch gestures and click
 
 ### Limitations and notes
 
