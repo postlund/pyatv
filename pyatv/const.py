@@ -363,6 +363,9 @@ class FeatureName(Enum):
     ContentIdentifier = 47
     """Identifier for Content"""
 
+    iTunesStoreIdentifier = 50
+    """iTunes Store Identifier for Content"""
+
     AppList = 38
     """List of launchable apps."""
 
