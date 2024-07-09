@@ -16,7 +16,7 @@ from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
-    HidEventMode,
+    TouchAction,
     InputAction,
     PairingRequirement,
     Protocol,
@@ -846,7 +846,7 @@ def _extract_command_with_args(cmd):
         if cmd == "set_volume":
             return [float(args[0])]
         if cmd == "touch_action":
-            return [args[0], args[1], HidEventMode(args[2])]
+            return [args[0], args[1], TouchAction(args[2])]
         return args
 
     equal_sign = cmd.find("=")

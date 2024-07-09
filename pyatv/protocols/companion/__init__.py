@@ -10,7 +10,7 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
-    HidEventMode,
+    TouchAction,
     InputAction,
     KeyboardFocusState,
     PairingRequirement,
@@ -490,7 +490,7 @@ class CompanionTouchGestures(TouchGestures):
         """
         await self.api.touch_swipe(start_x, start_y, end_x, end_y, duration_ms)
 
-    async def touch_action(self, x: int, y: int, mode: HidEventMode):
+    async def touch_action(self, x: int, y: int, mode: TouchAction):
         """Generate a touch event to x,y coordinates (in range [0,1000]).
 
         :param x: x coordinate

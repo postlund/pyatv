@@ -18,7 +18,7 @@ from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
-from pyatv.const import FeatureName, FeatureState, HidEventMode, InputAction, Protocol
+from pyatv.const import FeatureName, FeatureState, TouchAction, InputAction, Protocol
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
@@ -623,7 +623,7 @@ class FacadeTouchGestures(Relayer, interface.TouchGestures):
         )
 
     @shield.guard
-    async def touch_action(self, x: int, y: int, mode: HidEventMode) -> None:
+    async def touch_action(self, x: int, y: int, mode: TouchAction) -> None:
         """Generate a touch event to end x,y coordinates."""
         return await self.relay("touch_action")(x=x, y=y, mode=mode)
 
