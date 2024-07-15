@@ -3,7 +3,7 @@ deepdiff==7.0.1
 flake8==7.1.0
 isort==5.13.2
 mutagen==1.47.0
-pyfakefs==5.4.1
+pyfakefs==5.6.0
 pylint==3.0.3
 pytest==8.2.2
 pytest-asyncio==0.23.6
