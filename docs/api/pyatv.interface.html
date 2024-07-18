@@ -220,6 +220,7 @@ link_group: api
 <li><code><a title="pyatv.interface.Playing.episode_number" href="#pyatv.interface.Playing.episode_number">episode_number</a></code></li>
 <li><code><a title="pyatv.interface.Playing.genre" href="#pyatv.interface.Playing.genre">genre</a></code></li>
 <li><code><a title="pyatv.interface.Playing.hash" href="#pyatv.interface.Playing.hash">hash</a></code></li>
+<li><code><a title="pyatv.interface.Playing.itunes_store_identifier" href="#pyatv.interface.Playing.itunes_store_identifier">itunes_store_identifier</a></code></li>
 <li><code><a title="pyatv.interface.Playing.media_type" href="#pyatv.interface.Playing.media_type">media_type</a></code></li>
 <li><code><a title="pyatv.interface.Playing.position" href="#pyatv.interface.Playing.position">position</a></code></li>
 <li><code><a title="pyatv.interface.Playing.repeat" href="#pyatv.interface.Playing.repeat">repeat</a></code></li>
@@ -1502,7 +1503,11 @@ aspect ratio.</p></section>
 <section class="desc"><p>Create a unique hash for what is currently playing.</p>
 <p>The hash is based on title, artist, album and total time. It should
 always be the same for the same content, but it is not guaranteed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L581-L592" class="git-link">Browse git</a></div>
+<dt id="pyatv.interface.Playing.itunes_store_identifier"><code class="name">var <span class="ident">itunes_store_identifier</span> -> Optional[str]</code></dt>
+<dd>
+<section class="desc"><p>The Itunes Store Identifier</p>
+<p>This Identifier can be used with Itunes Api/Url to represent the content</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L683-L687" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.interface.Playing.media_type"><code class="name">var <span class="ident">media_type</span> -> <a title="pyatv.const.MediaType" href="../const#pyatv.const.MediaType">MediaType</a></code></dt>
 <dd>
