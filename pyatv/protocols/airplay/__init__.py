@@ -299,8 +299,7 @@ def setup(  # pylint: disable=too-many-locals
             core.state_dispatcher.create_copy(Protocol.RAOP),
         )
 
-        for setup_data in raop_setup(raop_core):
-            yield setup_data
+        yield from raop_setup(raop_core)
 
     # Set up remote control channel if it is supported
     if not is_remote_control_supported(core.service, credentials):

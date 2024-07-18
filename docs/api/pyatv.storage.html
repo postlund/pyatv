@@ -100,12 +100,10 @@ load according to the underlying storage mechanism.</p>
 <p>This property will return True if a any setting has been changed. It is reset
 when data is loaded into storage (by calling load) or manually by calling
 mark_as_solved (typically done by save).</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L54-L62" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.storage.AbstractStorage.storage_model"><code class="name">var <span class="ident">storage_model</span> -> <a title="pyatv.storage.StorageModel" href="#pyatv.storage.StorageModel">StorageModel</a></code></dt>
 <dd>
 <section class="desc"><p>Return storage model representation.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L69-L72" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -124,7 +122,6 @@ automatically and returned. If the configuration does not contain any valid
 identitiers, DeviceIdMissingError will be raised.</p>
 <p>If settings exists for a configuration but mismatch, they will be automatically
 updated in the storage. Set ignore_update to False to not update storage.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L89-L122" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.storage.AbstractStorage.mark_as_saved">
 <code class="name flex">
@@ -135,7 +132,6 @@ updated in the storage. Set ignore_update to False to not update storage.</p></s
 <section class="desc"><p>Call after saving to indicate settings have been saved.</p>
 <p>The changed property reflects whether something has been changed in the model
 or not based on calling this method.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L81-L87" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
