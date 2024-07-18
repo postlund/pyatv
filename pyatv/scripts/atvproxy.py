@@ -1674,7 +1674,11 @@ async def appstart(loop):
         unpublisher = await _start_airplay_proxy(loop, args, zconf)
     elif args.command == "relay":
         unpublisher = await _start_relay(loop, args, zconf)
-    await unpublisher()
+    else:
+        unpublisher = None
+
+    if unpublisher:
+        await unpublisher()
 
     return 0
 
