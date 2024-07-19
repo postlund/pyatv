@@ -33,7 +33,7 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
-    HidEventMode,
+    TouchAction,
     InputAction,
     OperatingSystem,
     PairingRequirement,
@@ -1253,11 +1253,11 @@ class Keyboard(ABC, StateProducer):
 class TouchGestures(ABC):
     """Base class for touch gestures."""
 
-    @feature(63, "TouchSwipe", "Touch swipe from given coordinates and duration.")
-    async def touch_swipe(
+    @feature(63, "Swipe", "Swipe gesture from given coordinates and duration.")
+    async def swipe(
         self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
     ) -> None:
-        """Generate a touch swipe.
+        """Generate a swipe gesture.
 
          From start to end x,y coordinates (in range [0,1000])
          in a given time (in milliseconds).
@@ -1271,7 +1271,7 @@ class TouchGestures(ABC):
         raise exceptions.NotSupportedError()
 
     @feature(64, "TouchAction", "Touch event to given coordinates.")
-    async def touch_action(self, x: int, y: int, mode: HidEventMode) -> None:
+    async def touch_action(self, x: int, y: int, mode: TouchAction) -> None:
         """Generate a touch event to x,y coordinates (in range [0,1000]).
 
         :param x: x coordinate

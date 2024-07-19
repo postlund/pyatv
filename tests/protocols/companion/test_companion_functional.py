@@ -10,7 +10,7 @@ import pyatv
 from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
-    HidEventMode,
+    TouchAction,
     InputAction,
     KeyboardFocusState,
     PowerState,
@@ -344,12 +344,12 @@ async def test_power_state_availability(
 
 
 async def test_touch(companion_client, companion_state):
-    await companion_client.touch.touch_swipe(0, 0, 800, 800, 200)
+    await companion_client.touch.swipe(0, 0, 800, 800, 200)
     await until(
         lambda: companion_state.touch_action
-        and companion_state.touch_action.x == 800
-        and companion_state.touch_action.y == 800
-        and companion_state.touch_action.press_mode == HidEventMode.Release
+                and companion_state.touch_action.x == 800
+                and companion_state.touch_action.y == 800
+                and companion_state.touch_action.press_mode == TouchAction.Release
     )
 
 
