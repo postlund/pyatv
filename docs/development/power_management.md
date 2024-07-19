@@ -44,7 +44,7 @@ has powered off:
 await pwrc.turn_off(await_new_state=True)
 ```
 
-If the device is already off, it will return immedietly.
+If the device is already off, it will return immediately.
 
 To not block indefinitely, use `wait_for` with a timeout:
 

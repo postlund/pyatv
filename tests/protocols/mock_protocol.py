@@ -1,7 +1,7 @@
 """Implementation of a protocol in mocked version for testing.
 
 This module allows for mocking protocols in pyatv.protocols and is meant for testing
-core featuers. It is not complete, just implemented enough to work. More fine grained
+core features. It is not complete, just implemented enough to work. More fine grained
 functionality can be added over time as needed.
 """
 
