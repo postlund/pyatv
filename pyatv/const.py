@@ -438,10 +438,10 @@ class FeatureName(Enum):
     Swipe = 63
     """Touch swipe from given coordinates and duration."""
 
-    TouchAction = 64
+    Action = 64
     """Touch event to given coordinates."""
 
-    TouchClick = 65
+    Click = 65
     """Touch click command."""
 
 

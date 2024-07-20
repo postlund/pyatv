@@ -344,7 +344,7 @@ class CompanionAPI(
             current_time = time.time_ns()
         await self.hid_event(end_x, end_y, TouchAction.Release)
 
-    async def touch_action(self, x: int, y: int, mode: TouchAction):
+    async def action(self, x: int, y: int, mode: TouchAction):
         """Generate a touch event to x,y coordinates (in range [0,1000]).
 
         :param x: x coordinate
@@ -353,7 +353,7 @@ class CompanionAPI(
         """
         await self.hid_event(x, y, mode)
 
-    async def touch_click(self, action: InputAction):
+    async def click(self, action: InputAction):
         """Send a touch click.
 
         :param action: action mode single tap (0), double tap (1), or hold (2)

@@ -623,17 +623,17 @@ class FacadeTouchGestures(Relayer, interface.TouchGestures):
         )
 
     @shield.guard
-    async def touch_action(self, x: int, y: int, mode: TouchAction) -> None:
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
         """Generate a touch event to end x,y coordinates."""
-        return await self.relay("touch_action")(x=x, y=y, mode=mode)
+        return await self.relay("action")(x=x, y=y, mode=mode)
 
     @shield.guard
-    async def touch_click(self, action: InputAction):
+    async def click(self, action: InputAction):
         """Send a touch click.
 
         :param action: action mode, single tap (0), double tap (1), or hold (2).
         """
-        return await self.relay("touch_click")(action=action)
+        return await self.relay("click")(action=action)
 
 
 class FacadeAppleTV(interface.AppleTV):

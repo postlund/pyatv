@@ -1271,7 +1271,7 @@ class TouchGestures(ABC):
         raise exceptions.NotSupportedError()
 
     @feature(64, "TouchAction", "Touch event to given coordinates.")
-    async def touch_action(self, x: int, y: int, mode: TouchAction) -> None:
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
         """Generate a touch event to x,y coordinates (in range [0,1000]).
 
         :param x: x coordinate
@@ -1281,7 +1281,7 @@ class TouchGestures(ABC):
         raise exceptions.NotSupportedError()
 
     @feature(65, "TouchClick", "Touch click command.")
-    async def touch_click(self, action: InputAction):
+    async def click(self, action: InputAction):
         """Send a touch click.
 
         :param action: action mode single tap (0), double tap (1), or hold (2)

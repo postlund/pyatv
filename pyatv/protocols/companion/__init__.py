@@ -143,8 +143,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextAppend,
         FeatureName.TextSet,
         FeatureName.Swipe,
-        FeatureName.TouchAction,
-        FeatureName.TouchClick,
+        FeatureName.Action,
+        FeatureName.Click,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -490,21 +490,21 @@ class CompanionTouchGestures(TouchGestures):
         """
         await self.api.swipe(start_x, start_y, end_x, end_y, duration_ms)
 
-    async def touch_action(self, x: int, y: int, mode: TouchAction):
+    async def action(self, x: int, y: int, mode: TouchAction):
         """Generate a touch event to x,y coordinates (in range [0,1000]).
 
         :param x: x coordinate
         :param y: y coordinate
         :param mode: touch mode (1: press, 3: hold, 4: release)
         """
-        await self.api.touch_action(x, y, mode)
+        await self.api.action(x, y, mode)
 
-    async def touch_click(self, action: InputAction):
+    async def click(self, action: InputAction):
         """Send a touch click.
 
         :param action: action mode single tap (0), double tap (1), or hold (2)
         """
-        await self.api.touch_click(action)
+        await self.api.click(action)
 
 
 class CompanionFeatures(Features):
