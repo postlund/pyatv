@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Mapping, Optional, cast
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.const import TouchAction, InputAction
+from pyatv.const import InputAction, TouchAction
 from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.companion import keyed_archiver

@@ -33,11 +33,11 @@ from pyatv.const import (
     DeviceModel,
     FeatureName,
     FeatureState,
-    TouchAction,
     InputAction,
     OperatingSystem,
     PairingRequirement,
     Protocol,
+    TouchAction,
 )
 from pyatv.settings import Settings
 from pyatv.support import prettydataclass

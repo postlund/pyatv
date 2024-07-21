@@ -7,7 +7,7 @@ import logging
 import plistlib
 from typing import Any, Dict, List, Mapping, Optional, Set
 
-from pyatv.const import TouchAction, KeyboardFocusState
+from pyatv.const import KeyboardFocusState, TouchAction
 from pyatv.protocols.companion import (
     HidCommand,
     MediaControlCommand,
@@ -446,7 +446,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
                 _LOGGER.debug("Touch event click to (%s, %s) at time %s", cx, cy, ns)
             case _:
                 _LOGGER.warning("Touch event mode not supported %s", press_mode)
-        self.state.touch_action = HidEvent(TouchAction(press_mode), cx, cy, ns)
+        self.state.action = HidEvent(TouchAction(press_mode), cx, cy, ns)
 
     def handle__mcc(self, message):
         args = {}

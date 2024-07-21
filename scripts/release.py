@@ -12,9 +12,9 @@ import re
 import subprocess
 import sys
 
-import api
 from packaging.version import InvalidVersion, Version
 
+import api
 from pyatv import const, scripts
 
 _LOGGER = logging.getLogger(__name__)

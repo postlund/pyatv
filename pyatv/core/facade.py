@@ -18,7 +18,7 @@ from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
-from pyatv.const import FeatureName, FeatureState, TouchAction, InputAction, Protocol
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol, TouchAction
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
