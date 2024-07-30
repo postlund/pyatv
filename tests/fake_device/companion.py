@@ -23,6 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEVICE_NAME = "Fake Companion ATV"
 INITIAL_VOLUME = 10.0
+INITIAL_DURATION = 10.0
 VOLUME_STEP = 5.0
 INITIAL_RTI_TEXT = "Fake Companion Keyboard Text"
 
@@ -55,6 +56,7 @@ MEDIA_CONTROL_MAP = {
     MediaControlCommand.NextTrack: "next",
     MediaControlCommand.PreviousTrack: "previous",
     MediaControlCommand.SetVolume: "set_volume",
+    MediaControlCommand.SkipBy: "skip",
 }
 
 
@@ -97,6 +99,7 @@ class FakeCompanionState:
         self.media_control_flags: int = MediaControlFlags.Volume
         self.interests: Set[str] = set()
         self.volume: float = INITIAL_VOLUME
+        self.duration: float = INITIAL_DURATION
         self.rti_clients: List[FakeCompanionService] = []
         self._rti_focus_state: KeyboardFocusState = KeyboardFocusState.Focused
         self.rti_text: Optional[str] = INITIAL_RTI_TEXT
@@ -454,8 +457,10 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         if mcc == MediaControlCommand.SetVolume:
             # Make sure we send response before triggering event with volume update
             self.loop.call_soon(self.volume_changed(message["_c"]["_vol"] * 100.0))
-        if mcc == MediaControlCommand.GetVolume:
+        elif mcc == MediaControlCommand.GetVolume:
             args["_vol"] = self.state.volume / 100.0
+        elif mcc == MediaControlCommand.SkipBy:
+            self.state.duration += message["_c"]["_skpS"]
         elif mcc in MEDIA_CONTROL_MAP:
             _LOGGER.debug("Activated Media Control Command %s", mcc)
             self.state.latest_button = MEDIA_CONTROL_MAP[mcc]

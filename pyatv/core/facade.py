@@ -162,6 +162,15 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         return await self.relay("skip_backward")()
 
     @shield.guard
+    async def skip(self, time_delta: float) -> None:
+        """Skip backwards or forwards a time_delta, measured in seconds.
+
+        If the delta is positive, skip forwards.
+        If the delta is negative, skip backwards.
+        """
+        return await self.relay("skip")(time_delta)
+
+    @shield.guard
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
         return await self.relay("set_position")(pos=pos)

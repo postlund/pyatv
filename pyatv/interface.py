@@ -422,6 +422,15 @@ class RemoteControl:
         """
         raise exceptions.NotSupportedError()
 
+    @feature(63, "Skip", "Skip forwards of backwards a time interval.")
+    async def skip(self, time_delta: float) -> None:
+        """Skip backwards or forwards a time_delta, measured in seconds.
+
+        If the delta is positive, skip forwards.
+        If the delta is negative, skip backwards.
+        """
+        raise exceptions.NotSupportedError()
+
     @feature(19, "SetPosition", "Seek to position.")
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
