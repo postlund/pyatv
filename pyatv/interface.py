@@ -37,6 +37,7 @@ from pyatv.const import (
     OperatingSystem,
     PairingRequirement,
     Protocol,
+    TouchAction,
 )
 from pyatv.settings import Settings
 from pyatv.support import prettydataclass
@@ -1249,6 +1250,45 @@ class Keyboard(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
 
+class TouchGestures(ABC):
+    """Base class for touch gestures."""
+
+    @feature(63, "Swipe", "Swipe gesture from given coordinates and duration.")
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
+        """Generate a swipe gesture.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(64, "TouchAction", "Touch event to given coordinates.")
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(65, "TouchClick", "Touch click command.")
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
+        raise exceptions.NotSupportedError()
+
+
 class BaseConfig(ABC):
     """Representation of a device configuration.
 
@@ -1524,3 +1564,8 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def keyboard(self) -> Keyboard:
         """Return keyboard interface."""
+
+    @property
+    @abstractmethod
+    def touch(self) -> TouchGestures:
+        """Return touch gestures interface."""
