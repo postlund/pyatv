@@ -354,10 +354,10 @@ async def test_touch(companion_client, companion_state):
 
 
 async def test_touch_click(companion_client, companion_state):
-    await companion_client.click(InputAction.SingleTap)
+    await companion_client.touch.click(InputAction.SingleTap)
     assert companion_state.latest_button == "select"
 
 
 async def test_touch_hold(companion_client, companion_state):
-    await companion_client.click(InputAction.Hold)
+    await companion_client.touch.click(InputAction.Hold)
     assert companion_state.latest_button == "select"
