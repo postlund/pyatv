@@ -347,9 +347,9 @@ async def test_touch(companion_client, companion_state):
     await companion_client.touch.swipe(0, 0, 800, 800, 200)
     await until(
         lambda: companion_state.action
-                and companion_state.action.x == 800
-                and companion_state.action.y == 800
-                and companion_state.action.press_mode == TouchAction.Release
+        and companion_state.action.x == 800
+        and companion_state.action.y == 800
+        and companion_state.action.press_mode == TouchAction.Release
     )
 
 
