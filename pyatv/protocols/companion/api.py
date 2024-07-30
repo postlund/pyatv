@@ -360,7 +360,7 @@ class CompanionAPI(
         """
         if action in [InputAction.SingleTap, InputAction.DoubleTap]:
             count = 1 if action == InputAction.SingleTap else 2
-            for i in range(count):
+            for _i in range(count):
                 await self._send_command("_hidC", {"_hBtS": 1, "_hidC": 6})
                 await asyncio.sleep(0.02)
                 await self._send_command("_hidC", {"_hBtS": 2, "_hidC": 6})
