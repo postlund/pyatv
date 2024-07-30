@@ -437,3 +437,21 @@ class FeatureName(Enum):
 
     TextSet = 54
     """Replace text in virtual keyboard."""
+
+    Swipe = 63
+    """Touch swipe from given coordinates and duration."""
+
+    Action = 64
+    """Touch event to given coordinates."""
+
+    Click = 65
+    """Touch click command."""
+
+
+class TouchAction(Enum):
+    """Touch action constants."""
+
+    Press = 1
+    Hold = 3
+    Release = 4
+    Click = 5

@@ -15,6 +15,7 @@ from pyatv.const import (
     PairingRequirement,
     PowerState,
     Protocol,
+    TouchAction,
 )
 from pyatv.core import Core, MutableService, SetupData, UpdatedState, mdns
 from pyatv.core.scan import (
@@ -35,6 +36,7 @@ from pyatv.interface import (
     PairingHandler,
     Power,
     RemoteControl,
+    TouchGestures,
     UserAccount,
     UserAccounts,
 )
@@ -142,6 +144,9 @@ SUPPORTED_FEATURES = set(
         FeatureName.TextClear,
         FeatureName.TextAppend,
         FeatureName.TextSet,
+        FeatureName.Swipe,
+        FeatureName.Action,
+        FeatureName.Click,
     ]
     # Remote control (playback, i.e. Media Control)
     + list(MEDIA_CONTROL_MAP.keys())
@@ -468,6 +473,47 @@ class CompanionKeyboard(Keyboard):
         await self.api.text_input_command(text, clear_previous_input=True)
 
 
+class CompanionTouchGestures(TouchGestures):
+    """Implementation of touch gesture API."""
+
+    def __init__(self, api: CompanionAPI) -> None:
+        """Initialize a new CompanionTouchGeatures."""
+        self.api = api
+
+    # pylint: disable=invalid-name
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
+        """Generate a touch swipe.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        await self.api.swipe(start_x, start_y, end_x, end_y, duration_ms)
+
+    async def action(self, x: int, y: int, mode: TouchAction):
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        await self.api.action(x, y, mode)
+
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
+        await self.api.click(action)
+
+
 class CompanionFeatures(Features):
     """Implementation of supported feature functionality."""
 
@@ -572,6 +618,7 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
         RemoteControl: CompanionRemoteControl(api),
         Audio: CompanionAudio(api, core),
         Keyboard: CompanionKeyboard(api, core),
+        TouchGestures: CompanionTouchGestures(api),
     }
 
     async def _connect() -> bool:
