@@ -883,7 +883,8 @@ async def _handle_commands(args, config, storage: Storage, loop):
     return 0
 
 
-# pylint: disable=too-many-return-statements disable=too-many-locals disable=too-many-branches
+# pylint: disable=too-many-return-statements disable=too-many-locals
+# pylint: disable=too-many-branches
 async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
     device = retrieve_commands(DeviceCommands)
     settings = retrieve_commands(SettingsCommands)
