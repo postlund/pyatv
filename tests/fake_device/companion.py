@@ -435,17 +435,16 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         ns = message["_c"]["_ns"]
         cx = message["_c"]["_cx"]
         cy = message["_c"]["_cy"]
-        match press_mode:
-            case TouchAction.Press:
-                _LOGGER.debug("Touch event press to (%s, %s) at time %s", cx, cy, ns)
-            case TouchAction.Hold:
-                _LOGGER.debug("Touch event move to (%s, %s) at time %s", cx, cy, ns)
-            case TouchAction.Release:
-                _LOGGER.debug("Touch event release to (%s, %s) at time %s", cx, cy, ns)
-            case TouchAction.Click:
-                _LOGGER.debug("Touch event click to (%s, %s) at time %s", cx, cy, ns)
-            case _:
-                _LOGGER.warning("Touch event mode not supported %s", press_mode)
+        if press_mode == TouchAction.Press:
+            _LOGGER.debug("Touch event press to (%s, %s) at time %s", cx, cy, ns)
+        elif TouchAction.Hold:
+            _LOGGER.debug("Touch event move to (%s, %s) at time %s", cx, cy, ns)
+        elif press_mode == TouchAction.Release:
+            _LOGGER.debug("Touch event release to (%s, %s) at time %s", cx, cy, ns)
+        elif press_mode == TouchAction.Click:
+            _LOGGER.debug("Touch event click to (%s, %s) at time %s", cx, cy, ns)
+        else:
+            _LOGGER.warning("Touch event mode not supported %s", press_mode)
         self.state.action = HidEvent(TouchAction(press_mode), cx, cy, ns)
 
     def handle__mcc(self, message):
