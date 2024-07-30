@@ -18,7 +18,7 @@ from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
-from pyatv.const import FeatureName, FeatureState, InputAction, Protocol
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol, TouchAction
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
@@ -601,6 +601,41 @@ class FacadePushUpdater(
             self.listener.playstatus_error(updater, exception)
 
 
+class FacadeTouchGestures(Relayer, interface.TouchGestures):
+    """Facade implementation for touch gestures handling."""
+
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
+        """Initialize a new FacadeTouchGestures instance."""
+        Relayer.__init__(self, interface.TouchGestures, DEFAULT_PRIORITIES)
+        interface.TouchGestures.__init__(self)
+
+    @shield.guard
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
+        """Generate a touch gesture from start to end x,y coordinates."""
+        return await self.relay("swipe")(
+            start_x=start_x,
+            start_y=start_y,
+            end_x=end_x,
+            end_y=end_y,
+            duration_ms=duration_ms,
+        )
+
+    @shield.guard
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
+        """Generate a touch event to end x,y coordinates."""
+        return await self.relay("action")(x=x, y=y, mode=mode)
+
+    @shield.guard
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode, single tap (0), double tap (1), or hold (2).
+        """
+        return await self.relay("click")(action=action)
+
+
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
@@ -632,6 +667,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.UserAccounts: FacadeUserAccounts(),
             interface.Audio: FacadeAudio(core_dispatcher),
             interface.Keyboard: FacadeKeyboard(core_dispatcher),
+            interface.TouchGestures: FacadeTouchGestures(core_dispatcher),
         }
         self._settings = settings
         self._shield_everything()
@@ -832,6 +868,12 @@ class FacadeAppleTV(interface.AppleTV):
     def keyboard(self) -> interface.Keyboard:
         """Return keyboard interface."""
         return cast(interface.Keyboard, self._interfaces[interface.Keyboard])
+
+    @property  # type: ignore
+    @shield.guard
+    def touch(self) -> interface.TouchGestures:
+        """Return touch gestures interface."""
+        return cast(interface.TouchGestures, self._interfaces[interface.TouchGestures])
 
     def state_was_updated(self) -> None:
         """Call when state was updated.

@@ -4,11 +4,13 @@ import asyncio
 from enum import Enum
 import logging
 from random import randint
+import time
 from typing import Any, Dict, List, Mapping, Optional, cast
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.hap_srp import SRPAuthHandler
+from pyatv.const import InputAction, TouchAction
 from pyatv.core import Core
 from pyatv.core.protocol import MessageDispatcher
 from pyatv.protocols.companion import keyed_archiver
@@ -83,6 +85,9 @@ class SystemStatus(Enum):
     Idle = 0x04  # NB: Not verified
 
 
+TOUCHPAD_WIDTH = 1000.0  # Touchpad width
+TOUCHPAD_HEIGHT = 1000.0  # Touchpad height
+TOUCHPAD_DELAY_MS = 16  # Delay between touch events in ms
 # pylint: enable=invalid-name
 
 
@@ -99,6 +104,7 @@ class CompanionAPI(
         self._protocol: Optional[CompanionProtocol] = None
         self._subscribed_events: List[str] = []
         self.sid: int = 0
+        self._base_timestamp = time.time_ns()
 
     async def disconnect(self):
         """Disconnect from companion device."""
@@ -113,6 +119,7 @@ class CompanionAPI(
             # going to bother with that and just swallow the error.
             await self._session_stop()
 
+            await self._touch_stop()
             await self._text_input_stop()
         except Exception as ex:
             _LOGGER.debug("Ignoring error during disconnect: %s", ex)
@@ -144,6 +151,7 @@ class CompanionAPI(
         await self._protocol.start()
 
         await self.system_info()
+        await self._touch_start()
         await self._session_start()
         await self._text_input_start()
 
@@ -283,6 +291,90 @@ class CompanionAPI(
             "_hidC", {"_hBtS": 1 if down else 2, "_hidC": command.value}
         )
 
+    async def hid_event(self, x: int, y: int, mode: TouchAction) -> None:
+        """Send a HID command."""
+        x = max(x, 0)
+        y = max(y, 0)
+        x = min(x, int(TOUCHPAD_WIDTH))
+        y = min(y, int(TOUCHPAD_HEIGHT))
+        await self._send_event(
+            identifier="_hidT",
+            content={
+                "_ns": (time.time_ns() - self._base_timestamp),
+                "_tFg": 1,
+                "_cx": x,
+                "_tPh": mode.value,
+                "_cy": y,
+            },
+        )
+
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ):
+        """Generate a swipe gesture.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        end_time = time.time_ns() + duration_ms * 1000000
+        x: float = float(start_x)
+        y: float = float(start_y)
+        await self.hid_event(int(x), int(y), TouchAction.Press)
+        sleep_time = float(TOUCHPAD_DELAY_MS / 1000)
+        current_time = time.time_ns()
+        while current_time < end_time:
+            x = x + float(end_x - x) * TOUCHPAD_DELAY_MS * 1000000 / (
+                end_time - current_time
+            )
+            y = y + float(end_y - y) * TOUCHPAD_DELAY_MS * 1000000 / (
+                end_time - current_time
+            )
+            x = max(x, 0)
+            y = max(y, 0)
+            x = min(x, TOUCHPAD_WIDTH)
+            y = min(y, TOUCHPAD_HEIGHT)
+            await self.hid_event(int(x), int(y), TouchAction.Hold)
+            await asyncio.sleep(sleep_time)
+            current_time = time.time_ns()
+        await self.hid_event(end_x, end_y, TouchAction.Release)
+
+    async def action(self, x: int, y: int, mode: TouchAction):
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        await self.hid_event(x, y, mode)
+
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
+        """
+        if action in [InputAction.SingleTap, InputAction.DoubleTap]:
+            count = 1 if action == InputAction.SingleTap else 2
+            for _i in range(count):
+                await self._send_command("_hidC", {"_hBtS": 1, "_hidC": 6})
+                await asyncio.sleep(0.02)
+                await self._send_command("_hidC", {"_hBtS": 2, "_hidC": 6})
+                await self.hid_event(
+                    int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), TouchAction.Click
+                )
+        else:  # Hold
+            await self._send_command("_hidC", {"_hBtS": 1, "_hidC": 6})
+            await asyncio.sleep(1)
+            await self._send_command("_hidC", {"_hBtS": 2, "_hidC": 6})
+            await self.hid_event(
+                int(TOUCHPAD_WIDTH), int(TOUCHPAD_HEIGHT), TouchAction.Click
+            )
+
     async def mediacontrol_command(
         self, command: MediaControlCommand, args: Optional[Mapping[str, Any]] = None
     ) -> Mapping[str, Any]:
@@ -351,3 +443,16 @@ class CompanionAPI(
             raise exceptions.ProtocolError("missing content")
 
         return SystemStatus(content["state"])
+
+    async def _touch_start(self) -> Mapping[str, Any]:
+        """Subscribe to touch gestures."""
+        self._base_timestamp = time.time_ns()
+        response = await self._send_command(
+            "_touchStart",
+            {"_height": TOUCHPAD_HEIGHT, "_tFl": 0, "_width": TOUCHPAD_WIDTH},
+        )
+        return response
+
+    async def _touch_stop(self) -> None:
+        """Unsubscribe touch gestures."""
+        await self._send_command("_touchStop", {"_i": 1})

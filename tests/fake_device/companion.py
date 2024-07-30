@@ -1,12 +1,13 @@
 """Fake Companion Apple TV for tests."""
 
 import asyncio
+from dataclasses import dataclass
 from enum import IntFlag, auto
 import logging
 import plistlib
 from typing import Any, Dict, List, Mapping, Optional, Set
 
-from pyatv.const import KeyboardFocusState
+from pyatv.const import KeyboardFocusState, TouchAction
 from pyatv.protocols.companion import (
     HidCommand,
     MediaControlCommand,
@@ -57,6 +58,14 @@ MEDIA_CONTROL_MAP = {
 }
 
 
+@dataclass
+class HidEvent:
+    press_mode: TouchAction
+    x: int
+    y: int
+    ns: int
+
+
 class CompanionServiceFlags(IntFlag):
     """Flags used to alter fake service behavior."""
 
@@ -92,6 +101,9 @@ class FakeCompanionState:
         self._rti_focus_state: KeyboardFocusState = KeyboardFocusState.Focused
         self.rti_text: Optional[str] = INITIAL_RTI_TEXT
         self.rti_session_uuid: Optional[bytes] = None
+        self.touch_event: HidEvent | None = None
+        self.touch_width = 0
+        self.touch_height = 0
 
     def is_supported(self, flag: CompanionServiceFlags) -> bool:
         """Return if a feature is supported."""
@@ -171,6 +183,10 @@ class FakeCompanionState:
             }
         else:
             return {}
+
+    @property
+    def touch_event_state(self) -> HidEvent:
+        return self.touch_event
 
 
 class FakeCompanionServiceFactory:
@@ -387,6 +403,49 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             return  # Would be good to send error message here
 
         self.send_response(message, {})
+
+    def handle__touchstart(self, message):
+        width = message["_c"]["_width"]
+        height = message["_c"]["_height"]
+        _LOGGER.debug(
+            "Touch start command received with touchpad width %s and height %s",
+            width,
+            height,
+        )
+        self.state.touch_width = width
+        self.state.touch_height = height
+        if (
+            not width
+            or width < 0
+            or width > 1000
+            or not height
+            or height < 0
+            or height > 1000
+        ):
+            self.send_error(message, "Invalid touchpad width or height")
+        else:
+            self.send_response(message, {})
+
+    def handle__touchstop(self, message):
+        _LOGGER.debug("Touch stop command received")
+        self.send_response(message, {})
+
+    def handle__hidt(self, message):
+        press_mode: int = message["_c"]["_tPh"]
+        ns = message["_c"]["_ns"]
+        cx = message["_c"]["_cx"]
+        cy = message["_c"]["_cy"]
+        if press_mode == TouchAction.Press:
+            _LOGGER.debug("Touch event press to (%s, %s) at time %s", cx, cy, ns)
+        elif TouchAction.Hold:
+            _LOGGER.debug("Touch event move to (%s, %s) at time %s", cx, cy, ns)
+        elif press_mode == TouchAction.Release:
+            _LOGGER.debug("Touch event release to (%s, %s) at time %s", cx, cy, ns)
+        elif press_mode == TouchAction.Click:
+            _LOGGER.debug("Touch event click to (%s, %s) at time %s", cx, cy, ns)
+        else:
+            _LOGGER.warning("Touch event mode not supported %s", press_mode)
+        self.state.action = HidEvent(TouchAction(press_mode), cx, cy, ns)
 
     def handle__mcc(self, message):
         args = {}
