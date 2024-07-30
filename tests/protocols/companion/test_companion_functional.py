@@ -16,6 +16,7 @@ from pyatv.protocols.companion.api import SystemStatus
 from tests.fake_device.companion import (
     INITIAL_RTI_TEXT,
     INITIAL_VOLUME,
+    INITIAL_DURATION,
     VOLUME_STEP,
     CompanionServiceFlags,
 )
@@ -210,6 +211,11 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     await getattr(companion_client.remote_control, button)()
     assert companion_state.latest_button == button
 
+async def test_remote_control_skip(companion_client, companion_state):
+    await companion_client.remote_control.skip(10.0)
+    await until(
+        lambda: math.isclose(companion_state.duration, INITIAL_DURATION + 10.0)
+    )
 
 async def test_audio_set_volume(companion_client, companion_state, companion_usecase):
     await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)

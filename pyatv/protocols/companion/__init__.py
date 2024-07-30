@@ -106,6 +106,8 @@ MEDIA_CONTROL_MAP = {
     FeatureName.SetVolume: MediaControlFlags.Volume,
     FeatureName.SkipForward: MediaControlFlags.SkipForward,
     FeatureName.SkipBackward: MediaControlFlags.SkipBackward,
+    # skip is present if either is active, though typically both or none are present
+    FeatureName.Skip: MediaControlFlags.SkipBackward | MediaControlFlags.SkipForward
 }
 
 SUPPORTED_FEATURES = set(
@@ -333,6 +335,11 @@ class CompanionRemoteControl(RemoteControl):
     async def previous(self) -> None:
         """Press key previous."""
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
+
+    async def skip(self, time_delta: float) -> None:
+        await self.api.mediacontrol_command(
+            MediaControlCommand.SkipBy, {"_skpS": time_delta}
+        )
 
     async def channel_up(self) -> None:
         """Select next channel."""
