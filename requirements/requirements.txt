@@ -1,6 +1,6 @@
 aiohttp==3.10.0
 async-timeout==4.0.3
-cryptography==42.0.8
+cryptography==43.0.0
 chacha20poly1305-reuseable==0.12.2
 ifaddr==0.2.0
 ifaddr==0.2.0
