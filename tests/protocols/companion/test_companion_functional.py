@@ -45,6 +45,8 @@ MEDIA_CONTROL_FEATURES = [
     FeatureName.Previous,
     FeatureName.SkipForward,
     FeatureName.SkipBackward,
+    FeatureName.FastForward,
+    FeatureName.Rewind,
     FeatureName.Volume,
     FeatureName.SetVolume,
 ]
