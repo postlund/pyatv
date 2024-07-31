@@ -353,23 +353,25 @@ class DmapRemoteControl(RemoteControl):
         """Press key volume down."""
         await self.apple_tv.ctrl_int_cmd("volumedown")
 
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position + _DEFAULT_SKIP_TIME)
+            await self.set_position(current_position +
+                (int(time_interval) if time_interval > 0 else  _DEFAULT_SKIP_TIME))
 
-    async def skip_backward(self) -> None:
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position - _DEFAULT_SKIP_TIME)
+            await self.set_position(current_position -
+                (int(time_interval) if time_interval > 0 else  _DEFAULT_SKIP_TIME))
 
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""

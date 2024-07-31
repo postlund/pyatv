@@ -217,10 +217,36 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     await getattr(companion_client.remote_control, button)()
     assert companion_state.latest_button == button
 
-async def test_remote_control_skip(companion_client, companion_state):
-    await companion_client.remote_control.skip(10.0)
+async def test_remote_control_skip_forward_backward(companion_client, companion_state):
+    duration = companion_state.duration
+    await companion_client.remote_control.skip_forward()
     await until(
-        lambda: math.isclose(companion_state.duration, INITIAL_DURATION + 10.0)
+        lambda: math.isclose(companion_state.duration, duration + 10)
+    )
+
+    duration = companion_state.duration
+    await companion_client.remote_control.skip_backward()
+    await until(
+        lambda: math.isclose(companion_state.duration, duration - 10)
+    )
+
+    duration = companion_state.duration
+    await companion_client.remote_control.skip_forward(10.5)
+    await until(
+        lambda: math.isclose(companion_state.duration, duration + 10.5)
+    )
+
+    duration = companion_state.duration
+    await companion_client.remote_control.skip_backward(7.3)
+    await until(
+        lambda: math.isclose(companion_state.duration, duration - 7.3)
+    )
+
+    # "From beginning"
+    duration = companion_state.duration
+    await companion_client.remote_control.skip_backward(9999999.0)
+    await until(
+        lambda: math.isclose(companion_state.duration, 0)
     )
 
 async def test_audio_set_volume(companion_client, companion_state, companion_usecase):

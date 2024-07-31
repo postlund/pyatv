@@ -474,6 +474,13 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title="dummy4")
         metadata = await self.playing(title="dummy4")
         self.assertEqual(metadata.position, prev_position - 8)
+        prev_position = metadata.position
+
+        # Test specified skip time
+        await self.atv.remote_control.skip_forward(17)
+        self.usecase.change_metadata(title="dummy5")
+        metadata = await self.playing(title="dummy5")
+        self.assertEqual(metadata.position, prev_position + 17)
 
     async def test_button_play_pause(self):
         self.usecase.example_video(supported_commands=[CommandInfo_pb2.TogglePlayPause])

@@ -407,27 +407,20 @@ class RemoteControl:
         "SkipForward",
         "Skip forward a time interval.",
     )
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
         raise exceptions.NotSupportedError()
 
     @feature(37, "SkipBackward", "Skip backwards a time interval.")
-    async def skip_backward(self) -> None:
-        """Skip backwards a time interval.
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
+        """Skip backward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
-        """
-        raise exceptions.NotSupportedError()
-
-    @feature(63, "Skip", "Skip forwards of backwards a time interval.")
-    async def skip(self, time_delta: float) -> None:
-        """Skip backwards or forwards a time_delta, measured in seconds.
-
-        If the delta is positive, skip forwards.
-        If the delta is negative, skip backwards.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
         raise exceptions.NotSupportedError()
 
