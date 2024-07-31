@@ -360,8 +360,10 @@ class DmapRemoteControl(RemoteControl):
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position +
-                (int(time_interval) if time_interval > 0 else  _DEFAULT_SKIP_TIME))
+            await self.set_position(
+                current_position
+                + (int(time_interval) if time_interval > 0 else _DEFAULT_SKIP_TIME)
+            )
 
     async def skip_backward(self, time_interval: float = 0.0) -> None:
         """Skip backwards a time interval.
@@ -370,8 +372,10 @@ class DmapRemoteControl(RemoteControl):
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position -
-                (int(time_interval) if time_interval > 0 else  _DEFAULT_SKIP_TIME))
+            await self.set_position(
+                current_position
+                - (int(time_interval) if time_interval > 0 else _DEFAULT_SKIP_TIME)
+            )
 
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
