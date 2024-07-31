@@ -20,9 +20,9 @@ from pyatv.interface import App, FeatureName, FeatureState, UserAccount
 from pyatv.protocols.companion.api import SystemStatus
 
 from tests.fake_device.companion import (
+    INITIAL_DURATION,
     INITIAL_RTI_TEXT,
     INITIAL_VOLUME,
-    INITIAL_DURATION,
     VOLUME_STEP,
     CompanionServiceFlags,
 )
@@ -217,37 +217,29 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     await getattr(companion_client.remote_control, button)()
     assert companion_state.latest_button == button
 
+
 async def test_remote_control_skip_forward_backward(companion_client, companion_state):
     duration = companion_state.duration
     await companion_client.remote_control.skip_forward()
-    await until(
-        lambda: math.isclose(companion_state.duration, duration + 10)
-    )
+    await until(lambda: math.isclose(companion_state.duration, duration + 10))
 
     duration = companion_state.duration
     await companion_client.remote_control.skip_backward()
-    await until(
-        lambda: math.isclose(companion_state.duration, duration - 10)
-    )
+    await until(lambda: math.isclose(companion_state.duration, duration - 10))
 
     duration = companion_state.duration
     await companion_client.remote_control.skip_forward(10.5)
-    await until(
-        lambda: math.isclose(companion_state.duration, duration + 10.5)
-    )
+    await until(lambda: math.isclose(companion_state.duration, duration + 10.5))
 
     duration = companion_state.duration
     await companion_client.remote_control.skip_backward(7.3)
-    await until(
-        lambda: math.isclose(companion_state.duration, duration - 7.3)
-    )
+    await until(lambda: math.isclose(companion_state.duration, duration - 7.3))
 
     # "From beginning"
     duration = companion_state.duration
     await companion_client.remote_control.skip_backward(9999999.0)
-    await until(
-        lambda: math.isclose(companion_state.duration, 0)
-    )
+    await until(lambda: math.isclose(companion_state.duration, 0))
+
 
 async def test_audio_set_volume(companion_client, companion_state, companion_usecase):
     await until(lambda: companion_client.audio.volume, INITIAL_VOLUME)

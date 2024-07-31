@@ -77,6 +77,7 @@ PAIRING_DISABLED_MASK = 0x04
 # that pyatv supports).
 PAIRING_WITH_PIN_SUPPORTED_MASK = 0x4000
 
+# As seen in the TV Remote App
 _DEFAULT_SKIP_TIME = 10
 
 # pylint: disable=invalid-name
@@ -342,18 +343,26 @@ class CompanionRemoteControl(RemoteControl):
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
 
     async def skip_forward(self, time_interval: float = 0.0) -> None:
+        """Skip forward a time interval."""
         await self.api.mediacontrol_command(
             MediaControlCommand.SkipBy,
-            {"_skpS": float(time_interval if time_interval > 0 else _DEFAULT_SKIP_TIME)}
+            {
+                "_skpS": float(
+                    time_interval if time_interval > 0 else _DEFAULT_SKIP_TIME
+                )
+            },
         )
 
     async def skip_backward(self, time_interval: float = 0.0) -> None:
+        """Skip forward a time interval."""
         # float cast: opack fails with negative integers
         await self.api.mediacontrol_command(
             MediaControlCommand.SkipBy,
-            { "_skpS":
-                float(-time_interval if time_interval > 0 else -_DEFAULT_SKIP_TIME)
-            }
+            {
+                "_skpS": float(
+                    -time_interval if time_interval > 0 else -_DEFAULT_SKIP_TIME
+                )
+            },
         )
 
     async def channel_up(self) -> None:
