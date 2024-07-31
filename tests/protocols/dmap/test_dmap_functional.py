@@ -270,6 +270,16 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.skip_backward()
         metadata = await self.playing()
         self.assertEqual(metadata.position, prev_position - SKIP_TIME)
+        prev_position = metadata.position
+
+        await self.atv.remote_control.skip_forward(13.0)
+        metadata = await self.playing()
+        self.assertEqual(metadata.position, prev_position + 13)
+        prev_position = metadata.position
+
+        await self.atv.remote_control.skip_backward(11.0)
+        metadata = await self.playing()
+        self.assertEqual(metadata.position, prev_position - 11)
 
     async def test_reset_revision_if_push_updates_fail(self):
         """Test that revision is reset when an error occurs during push update.

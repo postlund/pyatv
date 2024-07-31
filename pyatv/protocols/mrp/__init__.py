@@ -71,6 +71,8 @@ from pyatv.support.url import is_url
 
 _LOGGER = logging.getLogger(__name__)
 
+_DEFAULT_SKIP_TIME = 15
+
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
     # name: [usage_page, usage]
@@ -429,28 +431,31 @@ class MrpRemoteControl(RemoteControl):
         """Wake up the device."""
         await _send_hid_key(self.protocol, "wakeup", InputAction.SingleTap)
 
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        await self._skip_command(CommandInfo_pb2.SkipForward)
+        await self._skip_command(CommandInfo_pb2.SkipForward, time_interval)
 
-    async def skip_backward(self) -> None:
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        await self._skip_command(CommandInfo_pb2.SkipBackward)
+        await self._skip_command(CommandInfo_pb2.SkipBackward, time_interval)
 
-    async def _skip_command(self, command) -> None:
+    async def _skip_command(self, command, time_interval: float) -> None:
         info = self.psm.playing.command_info(command)
 
+        skip_interval: int
+        if time_interval > 0:
+            skip_interval = int(time_interval)
         # Pick the first preferred interval for simplicity
-        if info and info.preferredIntervals:
+        elif info and info.preferredIntervals:
             skip_interval = info.preferredIntervals[0]
         else:
-            skip_interval = 15  # Default value
+            skip_interval = _DEFAULT_SKIP_TIME  # Default value
 
         await self._send_command(command, skipInterval=skip_interval)
 

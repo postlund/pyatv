@@ -146,29 +146,22 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         return await self.relay("wakeup")()
 
     @shield.guard
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
-        return await self.relay("skip_forward")()
+        return await self.relay("skip_forward")(time_interval)
 
     @shield.guard
-    async def skip_backward(self) -> None:
-        """Skip backwards a time interval.
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
+        """Skip backward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
-        return await self.relay("skip_backward")()
-
-    @shield.guard
-    async def skip(self, time_delta: float) -> None:
-        """Skip backwards or forwards a time_delta, measured in seconds.
-
-        If the delta is positive, skip forwards.
-        If the delta is negative, skip backwards.
-        """
-        return await self.relay("skip")(time_delta)
+        return await self.relay("skip_backward")(time_interval)
 
     @shield.guard
     async def set_position(self, pos: int) -> None:

@@ -460,7 +460,7 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         elif mcc == MediaControlCommand.GetVolume:
             args["_vol"] = self.state.volume / 100.0
         elif mcc == MediaControlCommand.SkipBy:
-            self.state.duration += message["_c"]["_skpS"]
+            self.state.duration = max(0, self.state.duration + message["_c"]["_skpS"])
         elif mcc in MEDIA_CONTROL_MAP:
             _LOGGER.debug("Activated Media Control Command %s", mcc)
             self.state.latest_button = MEDIA_CONTROL_MAP[mcc]

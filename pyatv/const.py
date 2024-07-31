@@ -312,9 +312,6 @@ class FeatureName(Enum):
     SkipBackward = 37
     """Skip backwards a time interval."""
 
-    Skip = 63
-    """Skip backwards or forwards a specified time interval."""
-
     SetPosition = 19
     """Seek to position."""
 

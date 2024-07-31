@@ -77,6 +77,8 @@ PAIRING_DISABLED_MASK = 0x04
 # that pyatv supports).
 PAIRING_WITH_PIN_SUPPORTED_MASK = 0x4000
 
+_DEFAULT_SKIP_TIME = 10
+
 # pylint: disable=invalid-name
 
 
@@ -108,8 +110,6 @@ MEDIA_CONTROL_MAP = {
     FeatureName.SetVolume: MediaControlFlags.Volume,
     FeatureName.SkipForward: MediaControlFlags.SkipForward,
     FeatureName.SkipBackward: MediaControlFlags.SkipBackward,
-    # skip is present if either is active, though typically both or none are present
-    FeatureName.Skip: MediaControlFlags.SkipBackward | MediaControlFlags.SkipForward
 }
 
 SUPPORTED_FEATURES = set(
@@ -341,9 +341,19 @@ class CompanionRemoteControl(RemoteControl):
         """Press key previous."""
         await self.api.mediacontrol_command(MediaControlCommand.PreviousTrack)
 
-    async def skip(self, time_delta: float) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         await self.api.mediacontrol_command(
-            MediaControlCommand.SkipBy, {"_skpS": time_delta}
+            MediaControlCommand.SkipBy,
+            {"_skpS": float(time_interval if time_interval > 0 else _DEFAULT_SKIP_TIME)}
+        )
+
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
+        # float cast: opack fails with negative integers
+        await self.api.mediacontrol_command(
+            MediaControlCommand.SkipBy,
+            { "_skpS":
+                float(-time_interval if time_interval > 0 else -_DEFAULT_SKIP_TIME)
+            }
         )
 
     async def channel_up(self) -> None:
