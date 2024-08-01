@@ -14,7 +14,7 @@ pytest_httpserver==1.0.12
 pytest-xdist==3.6.1
 pydocstyle==6.3.0
 mypy==1.11.1
-mypy-protobuf==3.5.0
+mypy-protobuf==3.6.0
 typed-ast==1.5.5
 types-protobuf==5.27.0.20240626
 types-requests==2.31.0.2
