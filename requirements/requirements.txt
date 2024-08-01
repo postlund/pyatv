@@ -6,7 +6,7 @@ ifaddr==0.2.0
 ifaddr==0.2.0
 mediafile==0.12.0
 miniaudio==1.61
-protobuf==5.27.2
+protobuf==5.27.3
 pydantic==2.8.2
 requests==2.32.3
 srptools==1.0.1
