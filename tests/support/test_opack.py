@@ -84,6 +84,7 @@ def test_pack_short_raw_bytes():
 def test_pack_longer_raw_bytes():
     assert pack(33 * b"\x61") == b"\x91\x21" + (33 * b"\x61")
     assert pack(256 * b"\x61") == b"\x92\x00\x01" + (256 * b"\x61")
+    assert pack(65536 * b"\x61") == b"\x93\x00\x00\x01\x00" + (65536 * b"\x61")
 
 
 def test_pack_array():
@@ -275,6 +276,7 @@ def test_unpack_short_raw_bytes():
 def test_unpack_longer_raw_bytes():
     assert unpack(b"\x91\x21" + (33 * b"\x61")) == (33 * b"\x61", b"")
     assert unpack(b"\x92\x00\x01" + (256 * b"\x61")) == (256 * b"\x61", b"")
+    assert unpack(b"\x93\x00\x00\x01\x00" + (65536 * b"\x61")) == (65536 * b"\x61", b"")
 
 
 def test_unpack_array():

@@ -86,17 +86,17 @@ def _pack(data, object_list):
             packed_bytes = (
                 bytes([0x91]) + len(data).to_bytes(1, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFF:
+        elif len(data) <= 0xFFFF:  # 2^16-1
             packed_bytes = (
                 bytes([0x92]) + len(data).to_bytes(2, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFFFF:
+        elif len(data) <= 0xFFFF_FFFF:  # 2^32-1
             packed_bytes = (
-                bytes([0x93]) + len(data).to_bytes(3, byteorder="little") + data
+                bytes([0x93]) + len(data).to_bytes(4, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFFFFFF:
+        elif len(data) <= 0xFFFF_FFFF_FFFF_FFFF:  # 2^64-1
             packed_bytes = (
-                bytes([0x94]) + len(data).to_bytes(4, byteorder="little") + data
+                bytes([0x94]) + len(data).to_bytes(8, byteorder="little") + data
             )
     elif isinstance(data, list):
         packed_bytes = bytes([0xD0 + min(len(data), 0xF)]) + b"".join(
@@ -184,8 +184,8 @@ def _unpack(data, object_list):
     elif 0x70 <= data[0] <= 0x90:
         length = data[0] - 0x70
         value, remaining = data[1 : 1 + length], data[1 + length :]
-    elif 0x90 < data[0] <= 0x94:
-        noof_bytes = data[0] & 0xF
+    elif 0x91 <= data[0] <= 0x94:
+        noof_bytes = 1 << ((data[0] & 0xF) - 1)
         length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little")
         value, remaining = (
             data[1 + noof_bytes : 1 + noof_bytes + length],
