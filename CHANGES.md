@@ -1,5 +1,143 @@
 # CHANGES
 
+## 0.15.0 Ralph (2024-08-10)
+
+It has been a long time since the last release (christmas!), so a it's really
+due for a new one. I have mostly been busy with other (personal) stuff, so I
+have not done much more than maintenance. There are a few changes from the
+community though.
+
+Some hightlights:
+
+* Uplift of various dependencies, e.g, fix breaking change in cryptography
+* It is possible to skip forward/backwards (Companion) with custom intervals,
+  thanks @thiccaxe!
+* @bdraco fixed a bug related to changes in chacha20poly1305-reuseable
+* Python 3.12 is now (finally) offically supported
+
+This is a minor update indeed. I hope to see some updates in the near future,
+especially related to tvOS 18 compatibility as well as new features. I am very
+grateful for any help from the community. So if you want to help out
+implementing anything, please send a PR and I'll try my best to find time to
+review it!
+
+**Changes:**
+
+*Other:*
+
+```
+7716858a fix styling for 2462
+41b039f9 precise skip in companion, mrp, dmap
+618e93a4 companion skip implementation
+8331c783 deps: Bump protobuf base version to 4.25.3
+2a8afa68 deps: Sync some versions with base versions
+9f2f7cd3 Added touch gesture to companion protocol (#2402)
+55f3455e deps: Bump some lowest deps versions
+31b57b27 cq: Fix pylint issues
+42ff35ab docs: Fix codespell issues
+ea9d3339 Fix Chacha20Cipher with companion
+a84774c1 test: Improve MRP volume tests
+8080aaae test: Improve dispatch test
+aad6bcd7 test: Improve aiothttp session closing
+ed20bf72 Bump setup-python to v5
+1b780d46 gha: Bump setup-python tp v4
+541ba00d Update tests.yml
+ec402a68 gha: Run tests with python 3.12
+1037d5ef dep: Bump chacha20poly1305-reuseable and cryptography
+1fc1cb0f cq: Run black to fix errors
+5c721409 gha: Remove automerge workflow
+90b23cc4 Update index.md
+7fdfa28a still need to pad for hap
+29ad6fc0 still need to pad for hap
+e817af09 still need to pad for hap
+0c1f6674 lint
+d5a29d7e Simplify ChaCha20 Poly1305 implementation
+8d78f516 Fix typo in README.
+```
+
+**All changes:**
+
+```
+e7487a8b build(deps): Bump python from 3.11.0-alpine to 3.12.5-alpine
+81cd5819 build(deps): Bump aiohttp from 3.10.1 to 3.10.2 in /requirements
+7716858a fix styling for 2462
+41b039f9 precise skip in companion, mrp, dmap
+618e93a4 companion skip implementation
+0d2d3fc9 build(deps): Bump flake8 from 7.1.0 to 7.1.1 in /requirements
+1e0d7991 build(deps): Bump black from 24.4.2 to 24.8.0 in /requirements
+5f801d4c build(deps): Bump aiohttp from 3.10.0 to 3.10.1 in /requirements
+95c43b1c build(deps): Bump mypy-protobuf from 3.5.0 to 3.6.0 in /requirements
+8331c783 deps: Bump protobuf base version to 4.25.3
+80fd95e6 build(deps): Bump pylint from 3.2.5 to 3.2.6 in /requirements
+0abc130b build(deps): Bump protobuf from 5.27.2 to 5.27.3 in /requirements
+1bda482d build(deps): Bump mypy from 1.10.1 to 1.11.1 in /requirements
+2a8afa68 deps: Sync some versions with base versions
+1b38c96f build(deps): Bump pytest-httpserver in /requirements
+961340f8 build(deps): Bump pytest from 8.2.2 to 8.3.2 in /requirements
+64cc5847 build(deps): Bump aiohttp from 3.9.5 to 3.10.0 in /requirements (#2463)
+18ceacd4 build(deps): Bump miniaudio from 1.60 to 1.61 in /requirements (#2459)
+9f2f7cd3 Added touch gesture to companion protocol (#2402)
+55f3455e deps: Bump some lowest deps versions
+c263ff54 build(deps): Bump pydantic from 2.7.4 to 2.8.2 in /requirements
+cba3eb9a build(deps): Bump chacha20poly1305-reuseable in /requirements
+6e9cc70d build(deps): Bump miniaudio from 1.59 to 1.60 in /requirements
+21becc1e build(deps): Bump pytest-asyncio from 0.23.6 to 0.23.8 in /requirements
+98dd3f2d build(deps): Bump protobuf from 5.27.1 to 5.27.2 in /requirements
+0e024712 build(deps): Bump requests from 2.32.2 to 2.32.3 in /requirements
+31b57b27 cq: Fix pylint issues
+8d942aa2 build(deps): Bump pylint from 3.0.3 to 3.2.5 in /requirements
+42ff35ab docs: Fix codespell issues
+1e256440 build(deps): Bump codespell from 2.2.6 to 2.3.0 in /requirements
+bbfb6ec2 build(deps): Bump pytest-httpserver in /requirements
+d70a9a47 build(deps): Bump zeroconf from 0.131.0 to 0.132.2 in /requirements
+9dbdcae1 build(deps): Bump mypy from 1.8.0 to 1.10.1 in /requirements
+e84219bb build(deps): Bump pytest-cov from 4.1.0 to 5.0.0 in /requirements
+0eec178c build(deps): Bump types-protobuf in /requirements
+b1bd82b5 build(deps): Bump pyfakefs from 5.4.1 to 5.6.0 in /requirements
+d789cd08 build(deps): Bump pytest-timeout from 2.2.0 to 2.3.1 in /requirements
+80b9c91d build(deps): Bump pydantic from 2.5.3 to 2.7.4 in /requirements
+ee725bd7 build(deps): Bump pytest-xdist from 3.5.0 to 3.6.1 in /requirements
+1c7f3719 build(deps): Bump black from 24.4.0 to 24.4.2 in /requirements
+f2152da3 build(deps): Bump protobuf from 4.25.2 to 5.27.1 in /requirements
+30bcb66e build(deps): Bump cryptography from 42.0.5 to 42.0.8 in /requirements
+ea9d3339 Fix Chacha20Cipher with companion
+fb78faf6 build(deps): Bump flake8 from 7.0.0 to 7.1.0 in /requirements
+5e6f1b17 build(deps): Bump deepdiff from 6.7.1 to 7.0.1 in /requirements
+c5f182af build(deps): Bump pdoc3 from 0.10.0 to 0.11.0 in /requirements
+a84774c1 test: Improve MRP volume tests
+8080aaae test: Improve dispatch test
+aad6bcd7 test: Improve aiothttp session closing
+ed20bf72 Bump setup-python to v5
+1b780d46 gha: Bump setup-python tp v4
+541ba00d Update tests.yml
+ec402a68 gha: Run tests with python 3.12
+39a868f9 build(deps): Bump pytest from 7.4.3 to 8.2.2 in /requirements
+a0aa0d6e build(deps): Bump flake8 from 6.1.0 to 7.0.0 in /requirements
+1037d5ef dep: Bump chacha20poly1305-reuseable and cryptography
+1fc1cb0f cq: Run black to fix errors
+2b0cc6a0 build(deps): Bump black from 23.12.1 to 24.4.0 in /requirements
+62020c36 build(deps): Bump types-protobuf in /requirements
+5c721409 gha: Remove automerge workflow
+90b23cc4 Update index.md
+7589ec8b build(deps): Bump types-tabulate in /requirements
+7fdfa28a still need to pad for hap
+29ad6fc0 still need to pad for hap
+e817af09 still need to pad for hap
+0c1f6674 lint
+d5a29d7e Simplify ChaCha20 Poly1305 implementation
+601e553a build(deps): Bump requests from 2.31.0 to 2.32.2 in /requirements
+7bff8b32 build(deps): Bump pytest-asyncio from 0.23.2 to 0.23.6 in /requirements
+a2da7611 build(deps): Bump pyfakefs from 5.3.2 to 5.4.1 in /requirements
+eaf73bf9 build(deps): Bump aiohttp from 3.9.1 to 3.9.5 in /requirements
+8d78f516 Fix typo in README.
+4b00261b build(deps): Bump protobuf from 4.25.1 to 4.25.2 in /requirements
+2f7e2fd1 build(deps): Bump pytest-asyncio from 0.21.1 to 0.23.2 in /requirements
+4cd32600 build(deps): Bump isort from 5.12.0 to 5.13.2 in /requirements
+51458f95 build(deps): Bump pyfakefs from 5.3.0 to 5.3.2 in /requirements
+9d0e7f4c build(deps): Bump pydantic from 2.4.2 to 2.5.3 in /requirements
+6d2762df build(deps): Bump pytest-xdist from 3.3.1 to 3.5.0 in /requirements
+```
+
 ## 0.14.5 Quimby (2023-12-24)
 
 Merry christmas everyone, here comes a small present! In this
