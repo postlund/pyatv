@@ -12,7 +12,7 @@ from pyatv.auth.hap_pairing import PairVerifyProcedure
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import EventChannel
 from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol
-from pyatv.support.chacha20 import Chacha20Cipher
+from pyatv.support.chacha20 import Chacha20Cipher, Chacha20Cipher8byteNonce
 from pyatv.support.http import decode_bplist_from_body
 from pyatv.support.rtsp import RtspSession
 
@@ -153,7 +153,7 @@ class AirPlayV2(StreamProtocol):
         self.context.control_port = stream["controlPort"]
         self.context.server_port = stream["dataPort"]
 
-        self._cipher = Chacha20Cipher(shared_secret, shared_secret)
+        self._cipher = Chacha20Cipher8byteNonce(shared_secret, shared_secret)
 
     def teardown(self) -> None:
         """Teardown resources allocated by setup efter streaming finished."""
@@ -186,12 +186,22 @@ class AirPlayV2(StreamProtocol):
         """Send audio packet to receiver."""
         # TODO: This part is extremely sub-optimized. Should at least use a memoryview
         # and do in-place operations to avoid copying memory left and right.
+        nonce = b""
         if self._cipher:
+            # Save the nonce that will be used by the next encrypt call as it is
+            # included in the audio packet.
             nonce = self._cipher.out_nonce
             aad = rtp_header[4:12]
-            audio = self._cipher.encrypt(audio, nonce=nonce, aad=aad)
 
-        packet = rtp_header + audio + nonce
+            # Do _not_ pass nonce=nonce here as that not increase the internal counter
+            # of outgoing messages. We would just send zero as nonce. We did that in
+            # the past and Apple doesn't seem to care, but other vendors might do.
+            audio = self._cipher.encrypt(audio, aad=aad)
+
+        # Build the audio packet. Make sure to drop the "upper four" bytes of the nonce
+        # as only eight byte nonces are used for encryption (the Chacha20
+        # implementation however returns twelve bytes according to specification).
+        packet = rtp_header + audio + nonce[-8:]
 
         transport.sendto(packet)
 
