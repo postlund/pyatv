@@ -8,30 +8,22 @@ import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class RegisterVoiceInputDeviceMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     DEVICEDESCRIPTOR_FIELD_NUMBER: builtins.int
     @property
     def deviceDescriptor(self) -> pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        deviceDescriptor: pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["deviceDescriptor", b"deviceDescriptor"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["deviceDescriptor", b"deviceDescriptor"]) -> None: ...
-
+        deviceDescriptor: typing.Optional[pyatv.protocols.mrp.protobuf.VoiceInputDeviceDescriptorMessage_pb2.VoiceInputDeviceDescriptor] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["deviceDescriptor",b"deviceDescriptor"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["deviceDescriptor",b"deviceDescriptor"]) -> None: ...
 global___RegisterVoiceInputDeviceMessage = RegisterVoiceInputDeviceMessage
 
 REGISTERVOICEINPUTDEVICEMESSAGE_FIELD_NUMBER: builtins.int

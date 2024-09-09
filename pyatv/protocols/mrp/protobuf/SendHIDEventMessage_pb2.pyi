@@ -7,19 +7,13 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SendHIDEventMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     HIDEVENTDATA_FIELD_NUMBER: builtins.int
     hidEventData: builtins.bytes
     """This data corresponds to a "keyboardEvent" in IOHIDEvent.h encoded as raw
@@ -53,14 +47,13 @@ class SendHIDEventMessage(google.protobuf.message.Message):
     tvOS seems to accept old timestamps here. So it's probably fine to send
     anything.
     """
-    def __init__(
-        self,
-        *,
-        hidEventData: builtins.bytes | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["hidEventData", b"hidEventData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["hidEventData", b"hidEventData"]) -> None: ...
 
+    def __init__(self,
+        *,
+        hidEventData: typing.Optional[builtins.bytes] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["hidEventData",b"hidEventData"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["hidEventData",b"hidEventData"]) -> None: ...
 global___SendHIDEventMessage = SendHIDEventMessage
 
 SENDHIDEVENTMESSAGE_FIELD_NUMBER: builtins.int

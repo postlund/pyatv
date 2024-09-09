@@ -3,39 +3,30 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class NotificationMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     NOTIFICATION_FIELD_NUMBER: builtins.int
     USERINFO_FIELD_NUMBER: builtins.int
     @property
-    def notification(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def notification(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     @property
     def userInfo(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        notification: collections.abc.Iterable[builtins.str] | None = ...,
-        userInfo: collections.abc.Iterable[builtins.bytes] | None = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["notification", b"notification", "userInfo", b"userInfo"]) -> None: ...
-
+        notification: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        userInfo: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["notification",b"notification","userInfo",b"userInfo"]) -> None: ...
 global___NotificationMessage = NotificationMessage
 
 NOTIFICATIONMESSAGE_FIELD_NUMBER: builtins.int

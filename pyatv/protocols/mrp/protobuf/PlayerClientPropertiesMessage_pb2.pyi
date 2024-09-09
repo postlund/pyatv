@@ -8,33 +8,25 @@ import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class PlayerClientPropertiesMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     PLAYERPATH_FIELD_NUMBER: builtins.int
     LASTPLAYINGTIMESTAMP_FIELD_NUMBER: builtins.int
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     lastPlayingTimestamp: builtins.float
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        lastPlayingTimestamp: builtins.float | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp", b"lastPlayingTimestamp", "playerPath", b"playerPath"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp", b"lastPlayingTimestamp", "playerPath", b"playerPath"]) -> None: ...
-
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        lastPlayingTimestamp: typing.Optional[builtins.float] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp","playerPath",b"playerPath"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp","playerPath",b"playerPath"]) -> None: ...
 global___PlayerClientPropertiesMessage = PlayerClientPropertiesMessage
 
 PLAYERCLIENTPROPERTIESMESSAGE_FIELD_NUMBER: builtins.int

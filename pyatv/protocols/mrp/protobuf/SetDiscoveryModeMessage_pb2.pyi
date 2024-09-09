@@ -7,32 +7,24 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SetDiscoveryModeMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     MODE_FIELD_NUMBER: builtins.int
     FEATURES_FIELD_NUMBER: builtins.int
     mode: builtins.int
     features: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        mode: builtins.int | None = ...,
-        features: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["features", b"features", "mode", b"mode"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["features", b"features", "mode", b"mode"]) -> None: ...
-
+        mode: typing.Optional[builtins.int] = ...,
+        features: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["features",b"features","mode",b"mode"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["features",b"features","mode",b"mode"]) -> None: ...
 global___SetDiscoveryModeMessage = SetDiscoveryModeMessage
 
 SETDISCOVERYMODEMESSAGE_FIELD_NUMBER: builtins.int

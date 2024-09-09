@@ -3,39 +3,30 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class RemoveOutputDevicesMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     OUTPUTDEVICEUIDS_FIELD_NUMBER: builtins.int
     ENDPOINTUID_FIELD_NUMBER: builtins.int
     @property
-    def outputDeviceUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    endpointUID: builtins.str
-    def __init__(
-        self,
+    def outputDeviceUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    endpointUID: typing.Text
+    def __init__(self,
         *,
-        outputDeviceUIDs: collections.abc.Iterable[builtins.str] | None = ...,
-        endpointUID: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["endpointUID", b"endpointUID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["endpointUID", b"endpointUID", "outputDeviceUIDs", b"outputDeviceUIDs"]) -> None: ...
-
+        outputDeviceUIDs: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        endpointUID: typing.Optional[typing.Text] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["endpointUID",b"endpointUID"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["endpointUID",b"endpointUID","outputDeviceUIDs",b"outputDeviceUIDs"]) -> None: ...
 global___RemoveOutputDevicesMessage = RemoveOutputDevicesMessage
 
 REMOVEOUTPUTDEVICESMESSAGE_FIELD_NUMBER: builtins.int
