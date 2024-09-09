@@ -3,35 +3,26 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class RemoveEndpointsMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ENDPOINTUIDS_FIELD_NUMBER: builtins.int
     @property
-    def endpointUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    def __init__(
-        self,
+    def endpointUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def __init__(self,
         *,
-        endpointUIDs: collections.abc.Iterable[builtins.str] | None = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["endpointUIDs", b"endpointUIDs"]) -> None: ...
-
+        endpointUIDs: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["endpointUIDs",b"endpointUIDs"]) -> None: ...
 global___RemoveEndpointsMessage = RemoveEndpointsMessage
 
 REMOVEENDPOINTSMESSAGE_FIELD_NUMBER: builtins.int

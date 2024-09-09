@@ -8,45 +8,36 @@ import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
 import typing
-
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SetRecordingStateMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _RecordingState:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _RecordingStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SetRecordingStateMessage._RecordingState.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Unknown: SetRecordingStateMessage._RecordingState.ValueType  # 0
         Recording: SetRecordingStateMessage._RecordingState.ValueType  # 1
         NotRecording: SetRecordingStateMessage._RecordingState.ValueType  # 2
+    class RecordingState(_RecordingState, metaclass=_RecordingStateEnumTypeWrapper):
+        pass
 
-    class RecordingState(_RecordingState, metaclass=_RecordingStateEnumTypeWrapper): ...
     Unknown: SetRecordingStateMessage.RecordingState.ValueType  # 0
     Recording: SetRecordingStateMessage.RecordingState.ValueType  # 1
     NotRecording: SetRecordingStateMessage.RecordingState.ValueType  # 2
 
     STATE_FIELD_NUMBER: builtins.int
     state: global___SetRecordingStateMessage.RecordingState.ValueType
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        state: global___SetRecordingStateMessage.RecordingState.ValueType | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["state", b"state"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["state", b"state"]) -> None: ...
-
+        state: typing.Optional[global___SetRecordingStateMessage.RecordingState.ValueType] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["state",b"state"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["state",b"state"]) -> None: ...
 global___SetRecordingStateMessage = SetRecordingStateMessage
 
 SETRECORDINGSTATEMESSAGE_FIELD_NUMBER: builtins.int

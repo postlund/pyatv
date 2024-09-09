@@ -7,29 +7,21 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class OriginClientPropertiesMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     LASTPLAYINGTIMESTAMP_FIELD_NUMBER: builtins.int
     lastPlayingTimestamp: builtins.float
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        lastPlayingTimestamp: builtins.float | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp", b"lastPlayingTimestamp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp", b"lastPlayingTimestamp"]) -> None: ...
-
+        lastPlayingTimestamp: typing.Optional[builtins.float] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["lastPlayingTimestamp",b"lastPlayingTimestamp"]) -> None: ...
 global___OriginClientPropertiesMessage = OriginClientPropertiesMessage
 
 ORIGINCLIENTPROPERTIESMESSAGE_FIELD_NUMBER: builtins.int

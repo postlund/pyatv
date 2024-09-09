@@ -5,27 +5,19 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class AudioFormatSettings(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     FORMATSETTINGSPLISTDATA_FIELD_NUMBER: builtins.int
     formatSettingsPlistData: builtins.bytes
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        formatSettingsPlistData: builtins.bytes | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]) -> None: ...
-
+        formatSettingsPlistData: typing.Optional[builtins.bytes] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["formatSettingsPlistData",b"formatSettingsPlistData"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["formatSettingsPlistData",b"formatSettingsPlistData"]) -> None: ...
 global___AudioFormatSettings = AudioFormatSettings

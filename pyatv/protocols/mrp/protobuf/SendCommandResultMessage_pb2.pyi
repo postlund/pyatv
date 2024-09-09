@@ -3,7 +3,6 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
@@ -11,28 +10,21 @@ import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
 import typing
-
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SendError(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendError._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         NoError: SendError._Enum.ValueType  # 0
         """This is None in original message definitions (no-go with python)"""
+
         ApplicationNotFound: SendError._Enum.ValueType  # 1
         ConnectionFailed: SendError._Enum.ValueType  # 2
         Ignored: SendError._Enum.ValueType  # 3
@@ -43,10 +35,12 @@ class SendError(google.protobuf.message.Message):
         NoCommandHandlers: SendError._Enum.ValueType  # 8
         ApplicationNotInstalled: SendError._Enum.ValueType  # 9
         NotSupported: SendError._Enum.ValueType  # 10
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
 
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
     NoError: SendError.Enum.ValueType  # 0
     """This is None in original message definitions (no-go with python)"""
+
     ApplicationNotFound: SendError.Enum.ValueType  # 1
     ConnectionFailed: SendError.Enum.ValueType  # 2
     Ignored: SendError.Enum.ValueType  # 3
@@ -58,20 +52,15 @@ class SendError(google.protobuf.message.Message):
     ApplicationNotInstalled: SendError.Enum.ValueType  # 9
     NotSupported: SendError.Enum.ValueType  # 10
 
-    def __init__(
-        self,
-    ) -> None: ...
-
+    def __init__(self,
+        ) -> None: ...
 global___SendError = SendError
 
-@typing_extensions.final
 class HandlerReturnStatus(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[HandlerReturnStatus._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Success: HandlerReturnStatus._Enum.ValueType  # 0
@@ -91,8 +80,9 @@ class HandlerReturnStatus(google.protobuf.message.Message):
         SkipLimitReached: HandlerReturnStatus._Enum.ValueType  # 108
         AuthenticationFailure: HandlerReturnStatus._Enum.ValueType  # 401
         MediaServiceUnavailable: HandlerReturnStatus._Enum.ValueType  # 501
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
 
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
     Success: HandlerReturnStatus.Enum.ValueType  # 0
     NoSuchContent: HandlerReturnStatus.Enum.ValueType  # 1
     CommandFailed: HandlerReturnStatus.Enum.ValueType  # 2
@@ -111,20 +101,15 @@ class HandlerReturnStatus(google.protobuf.message.Message):
     AuthenticationFailure: HandlerReturnStatus.Enum.ValueType  # 401
     MediaServiceUnavailable: HandlerReturnStatus.Enum.ValueType  # 501
 
-    def __init__(
-        self,
-    ) -> None: ...
-
+    def __init__(self,
+        ) -> None: ...
 global___HandlerReturnStatus = HandlerReturnStatus
 
-@typing_extensions.final
 class SendCommandStatusCode(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandStatusCode._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Success: SendCommandStatusCode._Enum.ValueType  # 0
@@ -144,8 +129,9 @@ class SendCommandStatusCode(google.protobuf.message.Message):
         SkipLimitReached: SendCommandStatusCode._Enum.ValueType  # 108
         AuthenticationFailure: SendCommandStatusCode._Enum.ValueType  # 401
         MediaServiceUnavailable: SendCommandStatusCode._Enum.ValueType  # 501
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
 
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
     Success: SendCommandStatusCode.Enum.ValueType  # 0
     NoSuchContent: SendCommandStatusCode.Enum.ValueType  # 1
     CommandFailed: SendCommandStatusCode.Enum.ValueType  # 2
@@ -164,41 +150,33 @@ class SendCommandStatusCode(google.protobuf.message.Message):
     AuthenticationFailure: SendCommandStatusCode.Enum.ValueType  # 401
     MediaServiceUnavailable: SendCommandStatusCode.Enum.ValueType  # 501
 
-    def __init__(
-        self,
-    ) -> None: ...
-
+    def __init__(self,
+        ) -> None: ...
 global___SendCommandStatusCode = SendCommandStatusCode
 
-@typing_extensions.final
 class SendCommandResultType(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendCommandResultType._Enum.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Dialog: SendCommandResultType._Enum.ValueType  # 1
         Error: SendCommandResultType._Enum.ValueType  # 2
         Custom: SendCommandResultType._Enum.ValueType  # 999
+    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper):
+        pass
 
-    class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
     Dialog: SendCommandResultType.Enum.ValueType  # 1
     Error: SendCommandResultType.Enum.ValueType  # 2
     Custom: SendCommandResultType.Enum.ValueType  # 999
 
-    def __init__(
-        self,
-    ) -> None: ...
-
+    def __init__(self,
+        ) -> None: ...
 global___SendCommandResultType = SendCommandResultType
 
-@typing_extensions.final
 class SendCommandResultStatus(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     STATUSCODE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     CUSTOMDATA_FIELD_NUMBER: builtins.int
@@ -209,24 +187,21 @@ class SendCommandResultStatus(google.protobuf.message.Message):
     """optional ... dialog = 3;
     optional ... error = 4;
     """
-    customDataType: builtins.str
-    def __init__(
-        self,
-        *,
-        statusCode: global___SendCommandStatusCode.Enum.ValueType | None = ...,
-        type: global___SendCommandResultType.Enum.ValueType | None = ...,
-        customData: builtins.bytes | None = ...,
-        customDataType: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["customData", b"customData", "customDataType", b"customDataType", "statusCode", b"statusCode", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["customData", b"customData", "customDataType", b"customDataType", "statusCode", b"statusCode", "type", b"type"]) -> None: ...
 
+    customDataType: typing.Text
+    def __init__(self,
+        *,
+        statusCode: typing.Optional[global___SendCommandStatusCode.Enum.ValueType] = ...,
+        type: typing.Optional[global___SendCommandResultType.Enum.ValueType] = ...,
+        customData: typing.Optional[builtins.bytes] = ...,
+        customDataType: typing.Optional[typing.Text] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["customData",b"customData","customDataType",b"customDataType","statusCode",b"statusCode","type",b"type"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["customData",b"customData","customDataType",b"customDataType","statusCode",b"statusCode","type",b"type"]) -> None: ...
 global___SendCommandResultStatus = SendCommandResultStatus
 
-@typing_extensions.final
 class SendCommandResult(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     PLAYERPATH_FIELD_NUMBER: builtins.int
     SENDERROR_FIELD_NUMBER: builtins.int
     STATUSES_FIELD_NUMBER: builtins.int
@@ -235,22 +210,18 @@ class SendCommandResult(google.protobuf.message.Message):
     sendError: global___SendError.Enum.ValueType
     @property
     def statuses(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SendCommandResultStatus]: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        sendError: global___SendError.Enum.ValueType | None = ...,
-        statuses: collections.abc.Iterable[global___SendCommandResultStatus] | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["playerPath", b"playerPath", "sendError", b"sendError"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["playerPath", b"playerPath", "sendError", b"sendError", "statuses", b"statuses"]) -> None: ...
-
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        sendError: typing.Optional[global___SendError.Enum.ValueType] = ...,
+        statuses: typing.Optional[typing.Iterable[global___SendCommandResultStatus]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath","sendError",b"sendError"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["playerPath",b"playerPath","sendError",b"sendError","statuses",b"statuses"]) -> None: ...
 global___SendCommandResult = SendCommandResult
 
-@typing_extensions.final
 class SendCommandResultMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     SENDERROR_FIELD_NUMBER: builtins.int
     HANDLERRETURNSTATUS_FIELD_NUMBER: builtins.int
     HANDLERRETURNSTATUSDATAS_FIELD_NUMBER: builtins.int
@@ -261,24 +232,22 @@ class SendCommandResultMessage(google.protobuf.message.Message):
     handlerReturnStatus: global___HandlerReturnStatus.Enum.ValueType
     @property
     def handlerReturnStatusDatas(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-    commandID: builtins.str
+    commandID: typing.Text
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
     @property
     def commandResult(self) -> global___SendCommandResult: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        sendError: global___SendError.Enum.ValueType | None = ...,
-        handlerReturnStatus: global___HandlerReturnStatus.Enum.ValueType | None = ...,
-        handlerReturnStatusDatas: collections.abc.Iterable[builtins.bytes] | None = ...,
-        commandID: builtins.str | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        commandResult: global___SendCommandResult | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["commandID", b"commandID", "commandResult", b"commandResult", "handlerReturnStatus", b"handlerReturnStatus", "playerPath", b"playerPath", "sendError", b"sendError"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["commandID", b"commandID", "commandResult", b"commandResult", "handlerReturnStatus", b"handlerReturnStatus", "handlerReturnStatusDatas", b"handlerReturnStatusDatas", "playerPath", b"playerPath", "sendError", b"sendError"]) -> None: ...
-
+        sendError: typing.Optional[global___SendError.Enum.ValueType] = ...,
+        handlerReturnStatus: typing.Optional[global___HandlerReturnStatus.Enum.ValueType] = ...,
+        handlerReturnStatusDatas: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
+        commandID: typing.Optional[typing.Text] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        commandResult: typing.Optional[global___SendCommandResult] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["commandID",b"commandID","commandResult",b"commandResult","handlerReturnStatus",b"handlerReturnStatus","playerPath",b"playerPath","sendError",b"sendError"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["commandID",b"commandID","commandResult",b"commandResult","handlerReturnStatus",b"handlerReturnStatus","handlerReturnStatusDatas",b"handlerReturnStatusDatas","playerPath",b"playerPath","sendError",b"sendError"]) -> None: ...
 global___SendCommandResultMessage = SendCommandResultMessage
 
 SENDCOMMANDRESULTMESSAGE_FIELD_NUMBER: builtins.int

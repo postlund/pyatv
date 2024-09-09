@@ -6,19 +6,13 @@ import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.Common_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class CommandOptions(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     SOURCEID_FIELD_NUMBER: builtins.int
     MEDIATYPE_FIELD_NUMBER: builtins.int
     EXTERNALPLAYERCOMMAND_FIELD_NUMBER: builtins.int
@@ -49,8 +43,8 @@ class CommandOptions(google.protobuf.message.Message):
     INSERTAFTERCONTENTITEMID_FIELD_NUMBER: builtins.int
     NOWPLAYINGCONTENTITEMID_FIELD_NUMBER: builtins.int
     REPLACEINTENT_FIELD_NUMBER: builtins.int
-    sourceId: builtins.str
-    mediaType: builtins.str
+    sourceId: typing.Text
+    mediaType: typing.Text
     externalPlayerCommand: builtins.bool
     skipInterval: builtins.float
     playbackRate: builtins.float
@@ -61,59 +55,57 @@ class CommandOptions(google.protobuf.message.Message):
     shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType
     trackID: builtins.int
     radioStationID: builtins.int
-    radioStationHash: builtins.str
+    radioStationHash: typing.Text
     systemAppPlaybackQueueData: builtins.bytes
-    destinationAppDisplayID: builtins.str
+    destinationAppDisplayID: typing.Text
     sendOptions: builtins.int
     requestDefermentToPlaybackQueuePosition: builtins.bool
-    contextID: builtins.str
+    contextID: typing.Text
     shouldOverrideManuallyCuratedQueue: builtins.bool
-    stationURL: builtins.str
+    stationURL: typing.Text
     shouldBeginRadioPlayback: builtins.bool
     playbackQueueInsertionPosition: builtins.int
-    contentItemID: builtins.str
+    contentItemID: typing.Text
     playbackQueueOffset: builtins.int
     playbackQueueDestinationOffset: builtins.int
     languageOption: builtins.bytes
     playbackQueueContext: builtins.bytes
-    insertAfterContentItemID: builtins.str
-    nowPlayingContentItemID: builtins.str
+    insertAfterContentItemID: typing.Text
+    nowPlayingContentItemID: typing.Text
     replaceIntent: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        sourceId: builtins.str | None = ...,
-        mediaType: builtins.str | None = ...,
-        externalPlayerCommand: builtins.bool | None = ...,
-        skipInterval: builtins.float | None = ...,
-        playbackRate: builtins.float | None = ...,
-        rating: builtins.float | None = ...,
-        negative: builtins.bool | None = ...,
-        playbackPosition: builtins.float | None = ...,
-        repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType | None = ...,
-        shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
-        trackID: builtins.int | None = ...,
-        radioStationID: builtins.int | None = ...,
-        radioStationHash: builtins.str | None = ...,
-        systemAppPlaybackQueueData: builtins.bytes | None = ...,
-        destinationAppDisplayID: builtins.str | None = ...,
-        sendOptions: builtins.int | None = ...,
-        requestDefermentToPlaybackQueuePosition: builtins.bool | None = ...,
-        contextID: builtins.str | None = ...,
-        shouldOverrideManuallyCuratedQueue: builtins.bool | None = ...,
-        stationURL: builtins.str | None = ...,
-        shouldBeginRadioPlayback: builtins.bool | None = ...,
-        playbackQueueInsertionPosition: builtins.int | None = ...,
-        contentItemID: builtins.str | None = ...,
-        playbackQueueOffset: builtins.int | None = ...,
-        playbackQueueDestinationOffset: builtins.int | None = ...,
-        languageOption: builtins.bytes | None = ...,
-        playbackQueueContext: builtins.bytes | None = ...,
-        insertAfterContentItemID: builtins.str | None = ...,
-        nowPlayingContentItemID: builtins.str | None = ...,
-        replaceIntent: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]) -> None: ...
-
+        sourceId: typing.Optional[typing.Text] = ...,
+        mediaType: typing.Optional[typing.Text] = ...,
+        externalPlayerCommand: typing.Optional[builtins.bool] = ...,
+        skipInterval: typing.Optional[builtins.float] = ...,
+        playbackRate: typing.Optional[builtins.float] = ...,
+        rating: typing.Optional[builtins.float] = ...,
+        negative: typing.Optional[builtins.bool] = ...,
+        playbackPosition: typing.Optional[builtins.float] = ...,
+        repeatMode: typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType] = ...,
+        shuffleMode: typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType] = ...,
+        trackID: typing.Optional[builtins.int] = ...,
+        radioStationID: typing.Optional[builtins.int] = ...,
+        radioStationHash: typing.Optional[typing.Text] = ...,
+        systemAppPlaybackQueueData: typing.Optional[builtins.bytes] = ...,
+        destinationAppDisplayID: typing.Optional[typing.Text] = ...,
+        sendOptions: typing.Optional[builtins.int] = ...,
+        requestDefermentToPlaybackQueuePosition: typing.Optional[builtins.bool] = ...,
+        contextID: typing.Optional[typing.Text] = ...,
+        shouldOverrideManuallyCuratedQueue: typing.Optional[builtins.bool] = ...,
+        stationURL: typing.Optional[typing.Text] = ...,
+        shouldBeginRadioPlayback: typing.Optional[builtins.bool] = ...,
+        playbackQueueInsertionPosition: typing.Optional[builtins.int] = ...,
+        contentItemID: typing.Optional[typing.Text] = ...,
+        playbackQueueOffset: typing.Optional[builtins.int] = ...,
+        playbackQueueDestinationOffset: typing.Optional[builtins.int] = ...,
+        languageOption: typing.Optional[builtins.bytes] = ...,
+        playbackQueueContext: typing.Optional[builtins.bytes] = ...,
+        insertAfterContentItemID: typing.Optional[typing.Text] = ...,
+        nowPlayingContentItemID: typing.Optional[typing.Text] = ...,
+        replaceIntent: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["contentItemID",b"contentItemID","contextID",b"contextID","destinationAppDisplayID",b"destinationAppDisplayID","externalPlayerCommand",b"externalPlayerCommand","insertAfterContentItemID",b"insertAfterContentItemID","languageOption",b"languageOption","mediaType",b"mediaType","negative",b"negative","nowPlayingContentItemID",b"nowPlayingContentItemID","playbackPosition",b"playbackPosition","playbackQueueContext",b"playbackQueueContext","playbackQueueDestinationOffset",b"playbackQueueDestinationOffset","playbackQueueInsertionPosition",b"playbackQueueInsertionPosition","playbackQueueOffset",b"playbackQueueOffset","playbackRate",b"playbackRate","radioStationHash",b"radioStationHash","radioStationID",b"radioStationID","rating",b"rating","repeatMode",b"repeatMode","replaceIntent",b"replaceIntent","requestDefermentToPlaybackQueuePosition",b"requestDefermentToPlaybackQueuePosition","sendOptions",b"sendOptions","shouldBeginRadioPlayback",b"shouldBeginRadioPlayback","shouldOverrideManuallyCuratedQueue",b"shouldOverrideManuallyCuratedQueue","shuffleMode",b"shuffleMode","skipInterval",b"skipInterval","sourceId",b"sourceId","stationURL",b"stationURL","systemAppPlaybackQueueData",b"systemAppPlaybackQueueData","trackID",b"trackID"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["contentItemID",b"contentItemID","contextID",b"contextID","destinationAppDisplayID",b"destinationAppDisplayID","externalPlayerCommand",b"externalPlayerCommand","insertAfterContentItemID",b"insertAfterContentItemID","languageOption",b"languageOption","mediaType",b"mediaType","negative",b"negative","nowPlayingContentItemID",b"nowPlayingContentItemID","playbackPosition",b"playbackPosition","playbackQueueContext",b"playbackQueueContext","playbackQueueDestinationOffset",b"playbackQueueDestinationOffset","playbackQueueInsertionPosition",b"playbackQueueInsertionPosition","playbackQueueOffset",b"playbackQueueOffset","playbackRate",b"playbackRate","radioStationHash",b"radioStationHash","radioStationID",b"radioStationID","rating",b"rating","repeatMode",b"repeatMode","replaceIntent",b"replaceIntent","requestDefermentToPlaybackQueuePosition",b"requestDefermentToPlaybackQueuePosition","sendOptions",b"sendOptions","shouldBeginRadioPlayback",b"shouldBeginRadioPlayback","shouldOverrideManuallyCuratedQueue",b"shouldOverrideManuallyCuratedQueue","shuffleMode",b"shuffleMode","skipInterval",b"skipInterval","sourceId",b"sourceId","stationURL",b"stationURL","systemAppPlaybackQueueData",b"systemAppPlaybackQueueData","trackID",b"trackID"]) -> None: ...
 global___CommandOptions = CommandOptions

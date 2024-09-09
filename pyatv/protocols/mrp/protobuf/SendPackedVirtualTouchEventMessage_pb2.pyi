@@ -8,24 +8,16 @@ import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
 import typing
-
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SendPackedVirtualTouchEventMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     class _Phase:
-        ValueType = typing.NewType("ValueType", builtins.int)
+        ValueType = typing.NewType('ValueType', builtins.int)
         V: typing_extensions.TypeAlias = ValueType
-
     class _PhaseEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SendPackedVirtualTouchEventMessage._Phase.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         Began: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 1
@@ -33,9 +25,9 @@ class SendPackedVirtualTouchEventMessage(google.protobuf.message.Message):
         Stationary: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 3
         Ended: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 4
         Cancelled: SendPackedVirtualTouchEventMessage._Phase.ValueType  # 5
-
     class Phase(_Phase, metaclass=_PhaseEnumTypeWrapper):
         """Corresponds to "phase" in data"""
+        pass
 
     Began: SendPackedVirtualTouchEventMessage.Phase.ValueType  # 1
     Moved: SendPackedVirtualTouchEventMessage.Phase.ValueType  # 2
@@ -49,14 +41,13 @@ class SendPackedVirtualTouchEventMessage(google.protobuf.message.Message):
     and finger stored as a byte array. Each value is written as 16bit little
     endian integers.
     """
-    def __init__(
-        self,
-        *,
-        data: builtins.bytes | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["data", b"data"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["data", b"data"]) -> None: ...
 
+    def __init__(self,
+        *,
+        data: typing.Optional[builtins.bytes] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["data",b"data"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___SendPackedVirtualTouchEventMessage = SendPackedVirtualTouchEventMessage
 
 SENDPACKEDVIRTUALTOUCHEVENTMESSAGE_FIELD_NUMBER: builtins.int
