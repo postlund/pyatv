@@ -475,6 +475,7 @@ class Playing(ABC):
         "season_number",
         "episode_number",
         "content_identifier",
+        "itunes_store_identifier",
     ]
 
     def __init__(  # pylint: disable=too-many-locals
@@ -494,8 +495,10 @@ class Playing(ABC):
         season_number: Optional[int] = None,
         episode_number: Optional[int] = None,
         content_identifier: Optional[str] = None,
+        itunes_store_identifier: Optional[int] = None,
     ) -> None:
         """Initialize a new Playing instance."""
+        self._itunes_store_identifier = None
         self._media_type = media_type
         self._device_state = device_state
         self._title = title
@@ -511,6 +514,8 @@ class Playing(ABC):
         self._season_number = season_number
         self._episode_number = episode_number
         self._content_identifier = content_identifier
+        self._itunes_store_identifier = itunes_store_identifier
+
         self._post_process()
 
     def _post_process(self) -> None:
@@ -570,6 +575,8 @@ class Playing(ABC):
         if self.shuffle is not None:
             output.append(f"     Shuffle: {convert.shuffle_str(self.shuffle)}")
 
+        if self._itunes_store_identifier is not None:
+            output.append(f"iTunes Store Identifier: {self._itunes_store_identifier}")
         return "\n".join(output)
 
     def __eq__(self, other) -> bool:
@@ -675,6 +682,12 @@ class Playing(ABC):
     def content_identifier(self) -> Optional[str]:
         """Content identifier (app specific)."""
         return self._content_identifier
+
+    @property  # type: ignore
+    @feature(50, "iTunesStoreIdentifier", "iTunes Store identifier for Content")
+    def itunes_store_identifier(self) -> Optional[int]:
+        """Itunes Store identifier."""
+        return self._itunes_store_identifier
 
 
 class App:

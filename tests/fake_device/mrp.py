@@ -118,6 +118,8 @@ def _fill_item(item, metadata):
         md.episodeNumber = metadata.episode_number
     if metadata.content_identifier:
         md.contentIdentifier = metadata.content_identifier
+    if metadata.itunes_store_identifier:
+        md.iTunesStoreIdentifier = metadata.itunes_store_identifier
 
 
 def _set_state_message(metadata, identifier):
@@ -194,6 +196,7 @@ class PlayingState:
         self.skip_time = kwargs.get("skip_time")
         self.app_name = kwargs.get("app_name")
         self.content_identifier = kwargs.get("content_identifier")
+        self.itunes_store_identifier = kwargs.get("itunes_store_identifier")
 
 
 class FakeMrpState:

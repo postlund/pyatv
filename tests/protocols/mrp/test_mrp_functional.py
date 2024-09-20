@@ -542,6 +542,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             season_number=12,
             episode_number=4,
             content_identifier="identifier",
+            itunes_store_identifier=123456789,
         )
 
         with faketime("pyatv", 0):
@@ -554,6 +555,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.season_number, 12)
             self.assertEqual(playing.episode_number, 4)
             self.assertEqual(playing.content_identifier, "identifier")
+            self.assertEqual(playing.itunes_store_identifier, 123456789)
 
         self.assertFeatures(
             FeatureState.Available,
