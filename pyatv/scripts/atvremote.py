@@ -840,12 +840,12 @@ def _extract_command_with_args(cmd):
             "select",
             "menu",
             "home",
-            "touch_click",
+            "click",
         ]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
-        if cmd == "touch_action":
+        if cmd == "action":
             return [args[0], args[1], TouchAction(args[2])]
         return args
 
