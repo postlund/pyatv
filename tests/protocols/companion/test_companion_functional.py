@@ -218,6 +218,75 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     assert companion_state.latest_button == button
 
 
+async def test_button_up_actions(self):
+    await self.atv.remote_control.up(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("up", InputAction.DoubleTap)
+
+    await self.atv.remote_control.up(action=InputAction.Hold)
+    await self.wait_for_button_press("up", InputAction.Hold)
+
+
+async def test_button_down_actions(self):
+    await self.atv.remote_control.down(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("down", InputAction.DoubleTap)
+
+    await self.atv.remote_control.down(action=InputAction.Hold)
+    await self.wait_for_button_press("down", InputAction.Hold)
+
+
+async def test_button_left_actions(self):
+    await self.atv.remote_control.left(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("left", InputAction.DoubleTap)
+
+    await self.atv.remote_control.left(action=InputAction.Hold)
+    await self.wait_for_button_press("left", InputAction.Hold)
+
+
+async def test_button_right_actions(self):
+    await self.atv.remote_control.right(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("right", InputAction.DoubleTap)
+
+    await self.atv.remote_control.right(action=InputAction.Hold)
+    await self.wait_for_button_press("right", InputAction.Hold)
+
+
+async def test_button_top_menu(self):
+    await self.atv.remote_control.top_menu()
+    await self.wait_for_button_press("top_menu", InputAction.SingleTap)
+
+
+async def test_button_home(self):
+    await self.atv.remote_control.home()
+    await self.wait_for_button_press("home", InputAction.SingleTap)
+
+    await self.atv.remote_control.home(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("home", InputAction.DoubleTap)
+
+    await self.atv.remote_control.home(action=InputAction.Hold)
+    await self.wait_for_button_press("home", InputAction.Hold)
+
+
+async def test_button_home_hold(self):
+    await self.atv.remote_control.home_hold()
+    await self.wait_for_button_press("home", InputAction.Hold)
+
+
+async def test_button_select_actions(self):
+    await self.atv.remote_control.select(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("select", InputAction.DoubleTap)
+
+    await self.atv.remote_control.select(action=InputAction.Hold)
+    await self.wait_for_button_press("select", InputAction.Hold)
+
+
+async def test_button_menu_actions(self):
+    await self.atv.remote_control.menu(action=InputAction.DoubleTap)
+    await self.wait_for_button_press("menu", InputAction.DoubleTap)
+
+    await self.atv.remote_control.menu(action=InputAction.Hold)
+    await self.wait_for_button_press("menu", InputAction.Hold)
+
+
 async def test_remote_control_skip_forward_backward(companion_client, companion_state):
     duration = companion_state.duration
     await companion_client.remote_control.skip_forward()
