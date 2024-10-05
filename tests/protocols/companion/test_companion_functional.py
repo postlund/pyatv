@@ -218,6 +218,30 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     assert companion_state.latest_button == button
 
 
+@pytest.mark.parametrize(
+    "button,action",
+    [
+        ("up", InputAction.DoubleTap),
+        ("up", InputAction.Hold),
+        ("down", InputAction.DoubleTap),
+        ("down", InputAction.Hold),
+        ("left", InputAction.DoubleTap),
+        ("left", InputAction.Hold),
+        ("right", InputAction.DoubleTap),
+        ("right", InputAction.Hold),
+        ("select", InputAction.DoubleTap),
+        ("select", InputAction.Hold),
+        ("menu", InputAction.DoubleTap),
+        ("menu", InputAction.Hold),
+        ("home", InputAction.DoubleTap),
+        ("home", InputAction.Hold),
+    ],
+)
+async def test_button_actions(companion_client, companion_state, button, action):
+    await getattr(companion_client.remote_control, button)(action=action)
+    assert companion_state.latest_button == button
+
+
 async def test_remote_control_skip_forward_backward(companion_client, companion_state):
     duration = companion_state.duration
     await companion_client.remote_control.skip_forward()

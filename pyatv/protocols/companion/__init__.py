@@ -378,12 +378,29 @@ class CompanionRemoteControl(RemoteControl):
         await self._press_button(HidCommand.Screensaver)
 
     async def _press_button(
-        self, command: HidCommand, action: InputAction = InputAction.SingleTap
+        self,
+        command: HidCommand,
+        action: InputAction = InputAction.SingleTap,
+        delay: float = 1,
     ) -> None:
-        if action != InputAction.SingleTap:
-            raise NotImplementedError(f"{action} not supported for {command} (yet)")
-        await self.api.hid_command(True, command)
-        await self.api.hid_command(False, command)
+        if action == InputAction.SingleTap:
+            await self.api.hid_command(True, command)
+            await self.api.hid_command(False, command)
+
+        elif action == InputAction.Hold:
+            await self.api.hid_command(True, command)
+            await asyncio.sleep(delay)
+            await self.api.hid_command(False, command)
+
+        elif action == InputAction.DoubleTap:
+            # First press
+            await self.api.hid_command(True, command)
+            await self.api.hid_command(False, command)
+            # Second press
+            await self.api.hid_command(True, command)
+            await self.api.hid_command(False, command)
+        else:
+            raise exceptions.NotSupportedError(f"unsupported input action: {action}")
 
 
 class CompanionAudio(Audio):
