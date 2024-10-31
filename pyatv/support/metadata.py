@@ -5,6 +5,7 @@ import io
 from typing import Union
 
 from mediafile import MediaFile
+from tinytag import TinyTag
 
 from pyatv.interface import MediaMetadata
 
@@ -13,7 +14,7 @@ EMPTY_METADATA = MediaMetadata(None, None, None, None)
 
 def _open_file(file: io.BufferedIOBase) -> MediaFile:
     start_position = file.tell()
-    in_file = MediaFile(file)
+    in_file = TinyTag.get(file_obj=file)
     file.seek(start_position)
     return in_file
 
@@ -23,15 +24,15 @@ async def get_metadata(file: Union[str, io.BufferedIOBase]) -> MediaMetadata:
     loop = asyncio.get_event_loop()
 
     if isinstance(file, io.BufferedIOBase):
-        in_file = await loop.run_in_executor(None, _open_file, file)
+        tag = await loop.run_in_executor(None, _open_file, file)
     else:
-        in_file = await loop.run_in_executor(None, MediaFile, file)
+        tag = await loop.run_in_executor(None, TinyTag.get, file)
 
     return MediaMetadata(
-        title=in_file.title,
-        artist=in_file.artist,
-        album=in_file.album,
-        duration=in_file.length,
+        title=tag.title,
+        artist=tag.artist,
+        album=tag.album,
+        duration=tag.duration,
     )
 
 
