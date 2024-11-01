@@ -8,30 +8,22 @@ import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class UpdateClientMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     CLIENT_FIELD_NUMBER: builtins.int
     @property
     def client(self) -> pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2.NowPlayingClient: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        client: pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2.NowPlayingClient | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["client", b"client"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["client", b"client"]) -> None: ...
-
+        client: typing.Optional[pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2.NowPlayingClient] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["client",b"client"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["client",b"client"]) -> None: ...
 global___UpdateClientMessage = UpdateClientMessage
 
 UPDATECLIENTMESSAGE_FIELD_NUMBER: builtins.int

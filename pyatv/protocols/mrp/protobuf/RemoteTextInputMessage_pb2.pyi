@@ -7,35 +7,27 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class RemoteTextInputMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     TIMESTAMP_FIELD_NUMBER: builtins.int
     VERSION_FIELD_NUMBER: builtins.int
     DATA_FIELD_NUMBER: builtins.int
     timestamp: builtins.float
     version: builtins.int
     data: builtins.bytes
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        timestamp: builtins.float | None = ...,
-        version: builtins.int | None = ...,
-        data: builtins.bytes | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]) -> None: ...
-
+        timestamp: typing.Optional[builtins.float] = ...,
+        version: typing.Optional[builtins.int] = ...,
+        data: typing.Optional[builtins.bytes] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["data",b"data","timestamp",b"timestamp","version",b"version"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["data",b"data","timestamp",b"timestamp","version",b"version"]) -> None: ...
 global___RemoteTextInputMessage = RemoteTextInputMessage
 
 REMOTETEXTINPUTMESSAGE_FIELD_NUMBER: builtins.int

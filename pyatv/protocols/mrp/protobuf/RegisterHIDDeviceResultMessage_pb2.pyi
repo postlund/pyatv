@@ -7,32 +7,24 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class RegisterHIDDeviceResultMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ERRORCODE_FIELD_NUMBER: builtins.int
     DEVICEIDENTIFIER_FIELD_NUMBER: builtins.int
     errorCode: builtins.int
     deviceIdentifier: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        errorCode: builtins.int | None = ...,
-        deviceIdentifier: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["deviceIdentifier", b"deviceIdentifier", "errorCode", b"errorCode"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["deviceIdentifier", b"deviceIdentifier", "errorCode", b"errorCode"]) -> None: ...
-
+        errorCode: typing.Optional[builtins.int] = ...,
+        deviceIdentifier: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["deviceIdentifier",b"deviceIdentifier","errorCode",b"errorCode"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["deviceIdentifier",b"deviceIdentifier","errorCode",b"errorCode"]) -> None: ...
 global___RegisterHIDDeviceResultMessage = RegisterHIDDeviceResultMessage
 
 REGISTERHIDDEVICERESULTMESSAGE_FIELD_NUMBER: builtins.int

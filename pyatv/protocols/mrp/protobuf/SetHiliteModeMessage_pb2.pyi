@@ -7,29 +7,21 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SetHiliteModeMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     HILITEMODE_FIELD_NUMBER: builtins.int
     hiliteMode: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        hiliteMode: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["hiliteMode", b"hiliteMode"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["hiliteMode", b"hiliteMode"]) -> None: ...
-
+        hiliteMode: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["hiliteMode",b"hiliteMode"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["hiliteMode",b"hiliteMode"]) -> None: ...
 global___SetHiliteModeMessage = SetHiliteModeMessage
 
 SETHILITEMODEMESSAGE_FIELD_NUMBER: builtins.int

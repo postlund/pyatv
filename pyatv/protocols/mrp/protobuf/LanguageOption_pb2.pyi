@@ -3,44 +3,35 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class LanguageOption(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     TYPE_FIELD_NUMBER: builtins.int
     LANGUAGETAG_FIELD_NUMBER: builtins.int
     CHARACTERISTICS_FIELD_NUMBER: builtins.int
     DISPLAYNAME_FIELD_NUMBER: builtins.int
     IDENTIFIER_FIELD_NUMBER: builtins.int
     type: builtins.int
-    languageTag: builtins.str
+    languageTag: typing.Text
     @property
-    def characteristics(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    displayName: builtins.str
-    identifier: builtins.str
-    def __init__(
-        self,
+    def characteristics(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    displayName: typing.Text
+    identifier: typing.Text
+    def __init__(self,
         *,
-        type: builtins.int | None = ...,
-        languageTag: builtins.str | None = ...,
-        characteristics: collections.abc.Iterable[builtins.str] | None = ...,
-        displayName: builtins.str | None = ...,
-        identifier: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["characteristics", b"characteristics", "displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]) -> None: ...
-
+        type: typing.Optional[builtins.int] = ...,
+        languageTag: typing.Optional[typing.Text] = ...,
+        characteristics: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        displayName: typing.Optional[typing.Text] = ...,
+        identifier: typing.Optional[typing.Text] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["displayName",b"displayName","identifier",b"identifier","languageTag",b"languageTag","type",b"type"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["characteristics",b"characteristics","displayName",b"displayName","identifier",b"identifier","languageTag",b"languageTag","type",b"type"]) -> None: ...
 global___LanguageOption = LanguageOption

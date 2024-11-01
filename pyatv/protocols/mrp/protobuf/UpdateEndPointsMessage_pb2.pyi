@@ -7,19 +7,13 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class AVEndpointDescriptor(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     NAME_FIELD_NUMBER: builtins.int
     UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
     ISLOCALENDPOINT_FIELD_NUMBER: builtins.int
@@ -27,51 +21,47 @@ class AVEndpointDescriptor(google.protobuf.message.Message):
     ISPROXYGROUPPLAYER_FIELD_NUMBER: builtins.int
     CONNECTIONTYPE_FIELD_NUMBER: builtins.int
     CANMODIFYGROUPMEMBERSHIP_FIELD_NUMBER: builtins.int
-    name: builtins.str
-    uniqueIdentifier: builtins.str
+    name: typing.Text
+    uniqueIdentifier: typing.Text
     isLocalEndpoint: builtins.bool
     """repeated ... outputDevices = 3;
     optional ... designatedGroupLeader = 4;
     """
-    instanceIdentifier: builtins.str
+
+    instanceIdentifier: typing.Text
     isProxyGroupPlayer: builtins.bool
     connectionType: builtins.int
     canModifyGroupMembership: builtins.bool
     """repeated ... _personalOutputDevices = 10;"""
-    def __init__(
-        self,
-        *,
-        name: builtins.str | None = ...,
-        uniqueIdentifier: builtins.str | None = ...,
-        isLocalEndpoint: builtins.bool | None = ...,
-        instanceIdentifier: builtins.str | None = ...,
-        isProxyGroupPlayer: builtins.bool | None = ...,
-        connectionType: builtins.int | None = ...,
-        canModifyGroupMembership: builtins.bool | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["canModifyGroupMembership", b"canModifyGroupMembership", "connectionType", b"connectionType", "instanceIdentifier", b"instanceIdentifier", "isLocalEndpoint", b"isLocalEndpoint", "isProxyGroupPlayer", b"isProxyGroupPlayer", "name", b"name", "uniqueIdentifier", b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["canModifyGroupMembership", b"canModifyGroupMembership", "connectionType", b"connectionType", "instanceIdentifier", b"instanceIdentifier", "isLocalEndpoint", b"isLocalEndpoint", "isProxyGroupPlayer", b"isProxyGroupPlayer", "name", b"name", "uniqueIdentifier", b"uniqueIdentifier"]) -> None: ...
 
+    def __init__(self,
+        *,
+        name: typing.Optional[typing.Text] = ...,
+        uniqueIdentifier: typing.Optional[typing.Text] = ...,
+        isLocalEndpoint: typing.Optional[builtins.bool] = ...,
+        instanceIdentifier: typing.Optional[typing.Text] = ...,
+        isProxyGroupPlayer: typing.Optional[builtins.bool] = ...,
+        connectionType: typing.Optional[builtins.int] = ...,
+        canModifyGroupMembership: typing.Optional[builtins.bool] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["canModifyGroupMembership",b"canModifyGroupMembership","connectionType",b"connectionType","instanceIdentifier",b"instanceIdentifier","isLocalEndpoint",b"isLocalEndpoint","isProxyGroupPlayer",b"isProxyGroupPlayer","name",b"name","uniqueIdentifier",b"uniqueIdentifier"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["canModifyGroupMembership",b"canModifyGroupMembership","connectionType",b"connectionType","instanceIdentifier",b"instanceIdentifier","isLocalEndpoint",b"isLocalEndpoint","isProxyGroupPlayer",b"isProxyGroupPlayer","name",b"name","uniqueIdentifier",b"uniqueIdentifier"]) -> None: ...
 global___AVEndpointDescriptor = AVEndpointDescriptor
 
-@typing_extensions.final
 class UpdateEndPointsMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ENDPOINTS_FIELD_NUMBER: builtins.int
     ENDPOINTFEATURES_FIELD_NUMBER: builtins.int
     @property
     def endpoints(self) -> global___AVEndpointDescriptor: ...
     endpointFeatures: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        endpoints: global___AVEndpointDescriptor | None = ...,
-        endpointFeatures: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["endpointFeatures", b"endpointFeatures", "endpoints", b"endpoints"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["endpointFeatures", b"endpointFeatures", "endpoints", b"endpoints"]) -> None: ...
-
+        endpoints: typing.Optional[global___AVEndpointDescriptor] = ...,
+        endpointFeatures: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["endpointFeatures",b"endpointFeatures","endpoints",b"endpoints"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["endpointFeatures",b"endpointFeatures","endpoints",b"endpoints"]) -> None: ...
 global___UpdateEndPointsMessage = UpdateEndPointsMessage
 
 UPDATEENDPOINTSMESSAGE_FIELD_NUMBER: builtins.int

@@ -3,37 +3,28 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class VoiceInputDeviceDescriptor(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     DEFAULTFORMAT_FIELD_NUMBER: builtins.int
     SUPPORTEDFORMATS_FIELD_NUMBER: builtins.int
     @property
     def defaultFormat(self) -> pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings: ...
     @property
     def supportedFormats(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        defaultFormat: pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings | None = ...,
-        supportedFormats: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings] | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["defaultFormat", b"defaultFormat"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["defaultFormat", b"defaultFormat", "supportedFormats", b"supportedFormats"]) -> None: ...
-
+        defaultFormat: typing.Optional[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings] = ...,
+        supportedFormats: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["defaultFormat",b"defaultFormat"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["defaultFormat",b"defaultFormat","supportedFormats",b"supportedFormats"]) -> None: ...
 global___VoiceInputDeviceDescriptor = VoiceInputDeviceDescriptor

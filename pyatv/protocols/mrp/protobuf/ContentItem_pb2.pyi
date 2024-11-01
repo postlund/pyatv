@@ -3,25 +3,18 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2
 import pyatv.protocols.mrp.protobuf.LanguageOption_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class LanguageOptionGroup(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ALLOWEMPTYSELECTION_FIELD_NUMBER: builtins.int
     DEFAULTLANGUAGEOPTION_FIELD_NUMBER: builtins.int
     LANGUAGEOPTIONS_FIELD_NUMBER: builtins.int
@@ -30,22 +23,18 @@ class LanguageOptionGroup(google.protobuf.message.Message):
     def defaultLanguageOption(self) -> pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption: ...
     @property
     def languageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        allowEmptySelection: builtins.bool | None = ...,
-        defaultLanguageOption: pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption | None = ...,
-        languageOptions: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption] | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption", "languageOptions", b"languageOptions"]) -> None: ...
-
+        allowEmptySelection: typing.Optional[builtins.bool] = ...,
+        defaultLanguageOption: typing.Optional[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption] = ...,
+        languageOptions: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["allowEmptySelection",b"allowEmptySelection","defaultLanguageOption",b"defaultLanguageOption"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["allowEmptySelection",b"allowEmptySelection","defaultLanguageOption",b"defaultLanguageOption","languageOptions",b"languageOptions"]) -> None: ...
 global___LanguageOptionGroup = LanguageOptionGroup
 
-@typing_extensions.final
 class ContentItem(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     IDENTIFIER_FIELD_NUMBER: builtins.int
     METADATA_FIELD_NUMBER: builtins.int
     ARTWORKDATA_FIELD_NUMBER: builtins.int
@@ -58,41 +47,40 @@ class ContentItem(google.protobuf.message.Message):
     REQUESTIDENTIFIER_FIELD_NUMBER: builtins.int
     ARTWORKDATAWIDTH_FIELD_NUMBER: builtins.int
     ARTWORKDATAHEIGHT_FIELD_NUMBER: builtins.int
-    identifier: builtins.str
+    identifier: typing.Text
     @property
     def metadata(self) -> pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2.ContentItemMetadata: ...
     artworkData: builtins.bytes
-    info: builtins.str
+    info: typing.Text
     @property
     def availableLanguageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LanguageOptionGroup]: ...
     @property
     def currentLanguageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]: ...
-    parentIdentifier: builtins.str
+    parentIdentifier: typing.Text
     """ optional Lyrics lyrics = 7;
      repeated Sections sections = 8;
     """
-    ancestorIdentifier: builtins.str
-    queueIdentifier: builtins.str
-    requestIdentifier: builtins.str
+
+    ancestorIdentifier: typing.Text
+    queueIdentifier: typing.Text
+    requestIdentifier: typing.Text
     artworkDataWidth: builtins.int
     artworkDataHeight: builtins.int
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        identifier: builtins.str | None = ...,
-        metadata: pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2.ContentItemMetadata | None = ...,
-        artworkData: builtins.bytes | None = ...,
-        info: builtins.str | None = ...,
-        availableLanguageOptions: collections.abc.Iterable[global___LanguageOptionGroup] | None = ...,
-        currentLanguageOptions: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption] | None = ...,
-        parentIdentifier: builtins.str | None = ...,
-        ancestorIdentifier: builtins.str | None = ...,
-        queueIdentifier: builtins.str | None = ...,
-        requestIdentifier: builtins.str | None = ...,
-        artworkDataWidth: builtins.int | None = ...,
-        artworkDataHeight: builtins.int | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "availableLanguageOptions", b"availableLanguageOptions", "currentLanguageOptions", b"currentLanguageOptions", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]) -> None: ...
-
+        identifier: typing.Optional[typing.Text] = ...,
+        metadata: typing.Optional[pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2.ContentItemMetadata] = ...,
+        artworkData: typing.Optional[builtins.bytes] = ...,
+        info: typing.Optional[typing.Text] = ...,
+        availableLanguageOptions: typing.Optional[typing.Iterable[global___LanguageOptionGroup]] = ...,
+        currentLanguageOptions: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]] = ...,
+        parentIdentifier: typing.Optional[typing.Text] = ...,
+        ancestorIdentifier: typing.Optional[typing.Text] = ...,
+        queueIdentifier: typing.Optional[typing.Text] = ...,
+        requestIdentifier: typing.Optional[typing.Text] = ...,
+        artworkDataWidth: typing.Optional[builtins.int] = ...,
+        artworkDataHeight: typing.Optional[builtins.int] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["ancestorIdentifier",b"ancestorIdentifier","artworkData",b"artworkData","artworkDataHeight",b"artworkDataHeight","artworkDataWidth",b"artworkDataWidth","identifier",b"identifier","info",b"info","metadata",b"metadata","parentIdentifier",b"parentIdentifier","queueIdentifier",b"queueIdentifier","requestIdentifier",b"requestIdentifier"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestorIdentifier",b"ancestorIdentifier","artworkData",b"artworkData","artworkDataHeight",b"artworkDataHeight","artworkDataWidth",b"artworkDataWidth","availableLanguageOptions",b"availableLanguageOptions","currentLanguageOptions",b"currentLanguageOptions","identifier",b"identifier","info",b"info","metadata",b"metadata","parentIdentifier",b"parentIdentifier","queueIdentifier",b"queueIdentifier","requestIdentifier",b"requestIdentifier"]) -> None: ...
 global___ContentItem = ContentItem

@@ -9,19 +9,13 @@ import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import pyatv.protocols.mrp.protobuf.TransactionPackets_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class TransactionMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     NAME_FIELD_NUMBER: builtins.int
     PACKETS_FIELD_NUMBER: builtins.int
     PLAYERPATH_FIELD_NUMBER: builtins.int
@@ -30,16 +24,14 @@ class TransactionMessage(google.protobuf.message.Message):
     def packets(self) -> pyatv.protocols.mrp.protobuf.TransactionPackets_pb2.TransactionPackets: ...
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        name: builtins.int | None = ...,
-        packets: pyatv.protocols.mrp.protobuf.TransactionPackets_pb2.TransactionPackets | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["name", b"name", "packets", b"packets", "playerPath", b"playerPath"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["name", b"name", "packets", b"packets", "playerPath", b"playerPath"]) -> None: ...
-
+        name: typing.Optional[builtins.int] = ...,
+        packets: typing.Optional[pyatv.protocols.mrp.protobuf.TransactionPackets_pb2.TransactionPackets] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["name",b"name","packets",b"packets","playerPath",b"playerPath"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name",b"name","packets",b"packets","playerPath",b"playerPath"]) -> None: ...
 global___TransactionMessage = TransactionMessage
 
 TRANSACTIONMESSAGE_FIELD_NUMBER: builtins.int
