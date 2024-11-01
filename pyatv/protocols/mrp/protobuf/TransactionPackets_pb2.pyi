@@ -3,32 +3,23 @@
 isort:skip_file
 """
 import builtins
-import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.TransactionPacket_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class TransactionPackets(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     PACKETS_FIELD_NUMBER: builtins.int
     @property
     def packets(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        packets: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket] | None = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["packets", b"packets"]) -> None: ...
-
+        packets: typing.Optional[typing.Iterable[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["packets",b"packets"]) -> None: ...
 global___TransactionPackets = TransactionPackets

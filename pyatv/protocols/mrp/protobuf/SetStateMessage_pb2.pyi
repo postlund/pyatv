@@ -14,19 +14,13 @@ import pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2
 import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
 import pyatv.protocols.mrp.protobuf.SupportedCommands_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SetStateMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     NOWPLAYINGINFO_FIELD_NUMBER: builtins.int
     SUPPORTEDCOMMANDS_FIELD_NUMBER: builtins.int
     PLAYBACKQUEUE_FIELD_NUMBER: builtins.int
@@ -43,8 +37,8 @@ class SetStateMessage(google.protobuf.message.Message):
     def supportedCommands(self) -> pyatv.protocols.mrp.protobuf.SupportedCommands_pb2.SupportedCommands: ...
     @property
     def playbackQueue(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2.PlaybackQueue: ...
-    displayID: builtins.str
-    displayName: builtins.str
+    displayID: typing.Text
+    displayName: typing.Text
     playbackState: pyatv.protocols.mrp.protobuf.Common_pb2.PlaybackState.Enum.ValueType
     @property
     def playbackQueueCapabilities(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueCapabilities_pb2.PlaybackQueueCapabilities: ...
@@ -53,23 +47,21 @@ class SetStateMessage(google.protobuf.message.Message):
     @property
     def request(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueRequestMessage_pb2.PlaybackQueueRequestMessage: ...
     playbackStateTimestamp: builtins.float
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        nowPlayingInfo: pyatv.protocols.mrp.protobuf.NowPlayingInfo_pb2.NowPlayingInfo | None = ...,
-        supportedCommands: pyatv.protocols.mrp.protobuf.SupportedCommands_pb2.SupportedCommands | None = ...,
-        playbackQueue: pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2.PlaybackQueue | None = ...,
-        displayID: builtins.str | None = ...,
-        displayName: builtins.str | None = ...,
-        playbackState: pyatv.protocols.mrp.protobuf.Common_pb2.PlaybackState.Enum.ValueType | None = ...,
-        playbackQueueCapabilities: pyatv.protocols.mrp.protobuf.PlaybackQueueCapabilities_pb2.PlaybackQueueCapabilities | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        request: pyatv.protocols.mrp.protobuf.PlaybackQueueRequestMessage_pb2.PlaybackQueueRequestMessage | None = ...,
-        playbackStateTimestamp: builtins.float | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["displayID", b"displayID", "displayName", b"displayName", "nowPlayingInfo", b"nowPlayingInfo", "playbackQueue", b"playbackQueue", "playbackQueueCapabilities", b"playbackQueueCapabilities", "playbackState", b"playbackState", "playbackStateTimestamp", b"playbackStateTimestamp", "playerPath", b"playerPath", "request", b"request", "supportedCommands", b"supportedCommands"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["displayID", b"displayID", "displayName", b"displayName", "nowPlayingInfo", b"nowPlayingInfo", "playbackQueue", b"playbackQueue", "playbackQueueCapabilities", b"playbackQueueCapabilities", "playbackState", b"playbackState", "playbackStateTimestamp", b"playbackStateTimestamp", "playerPath", b"playerPath", "request", b"request", "supportedCommands", b"supportedCommands"]) -> None: ...
-
+        nowPlayingInfo: typing.Optional[pyatv.protocols.mrp.protobuf.NowPlayingInfo_pb2.NowPlayingInfo] = ...,
+        supportedCommands: typing.Optional[pyatv.protocols.mrp.protobuf.SupportedCommands_pb2.SupportedCommands] = ...,
+        playbackQueue: typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueue_pb2.PlaybackQueue] = ...,
+        displayID: typing.Optional[typing.Text] = ...,
+        displayName: typing.Optional[typing.Text] = ...,
+        playbackState: typing.Optional[pyatv.protocols.mrp.protobuf.Common_pb2.PlaybackState.Enum.ValueType] = ...,
+        playbackQueueCapabilities: typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueCapabilities_pb2.PlaybackQueueCapabilities] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        request: typing.Optional[pyatv.protocols.mrp.protobuf.PlaybackQueueRequestMessage_pb2.PlaybackQueueRequestMessage] = ...,
+        playbackStateTimestamp: typing.Optional[builtins.float] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["displayID",b"displayID","displayName",b"displayName","nowPlayingInfo",b"nowPlayingInfo","playbackQueue",b"playbackQueue","playbackQueueCapabilities",b"playbackQueueCapabilities","playbackState",b"playbackState","playbackStateTimestamp",b"playbackStateTimestamp","playerPath",b"playerPath","request",b"request","supportedCommands",b"supportedCommands"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["displayID",b"displayID","displayName",b"displayName","nowPlayingInfo",b"nowPlayingInfo","playbackQueue",b"playbackQueue","playbackQueueCapabilities",b"playbackQueueCapabilities","playbackState",b"playbackState","playbackStateTimestamp",b"playbackStateTimestamp","playerPath",b"playerPath","request",b"request","supportedCommands",b"supportedCommands"]) -> None: ...
 global___SetStateMessage = SetStateMessage
 
 SETSTATEMESSAGE_FIELD_NUMBER: builtins.int

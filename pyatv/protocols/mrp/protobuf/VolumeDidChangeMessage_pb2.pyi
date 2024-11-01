@@ -7,35 +7,27 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class VolumeDidChangeMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     VOLUME_FIELD_NUMBER: builtins.int
     ENDPOINTUID_FIELD_NUMBER: builtins.int
     OUTPUTDEVICEUID_FIELD_NUMBER: builtins.int
     volume: builtins.float
-    endpointUID: builtins.str
-    outputDeviceUID: builtins.str
-    def __init__(
-        self,
+    endpointUID: typing.Text
+    outputDeviceUID: typing.Text
+    def __init__(self,
         *,
-        volume: builtins.float | None = ...,
-        endpointUID: builtins.str | None = ...,
-        outputDeviceUID: builtins.str | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]) -> None: ...
-
+        volume: typing.Optional[builtins.float] = ...,
+        endpointUID: typing.Optional[typing.Text] = ...,
+        outputDeviceUID: typing.Optional[typing.Text] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["endpointUID",b"endpointUID","outputDeviceUID",b"outputDeviceUID","volume",b"volume"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["endpointUID",b"endpointUID","outputDeviceUID",b"outputDeviceUID","volume",b"volume"]) -> None: ...
 global___VolumeDidChangeMessage = VolumeDidChangeMessage
 
 VOLUMEDIDCHANGEMESSAGE_FIELD_NUMBER: builtins.int

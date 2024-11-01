@@ -7,19 +7,13 @@ import google.protobuf.descriptor
 import google.protobuf.internal.extension_dict
 import google.protobuf.message
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class ClientUpdatesConfigMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ARTWORKUPDATES_FIELD_NUMBER: builtins.int
     NOWPLAYINGUPDATES_FIELD_NUMBER: builtins.int
     VOLUMEUPDATES_FIELD_NUMBER: builtins.int
@@ -30,18 +24,16 @@ class ClientUpdatesConfigMessage(google.protobuf.message.Message):
     volumeUpdates: builtins.bool
     keyboardUpdates: builtins.bool
     outputDeviceUpdates: builtins.bool
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        artworkUpdates: builtins.bool | None = ...,
-        nowPlayingUpdates: builtins.bool | None = ...,
-        volumeUpdates: builtins.bool | None = ...,
-        keyboardUpdates: builtins.bool | None = ...,
-        outputDeviceUpdates: builtins.bool | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]) -> None: ...
-
+        artworkUpdates: typing.Optional[builtins.bool] = ...,
+        nowPlayingUpdates: typing.Optional[builtins.bool] = ...,
+        volumeUpdates: typing.Optional[builtins.bool] = ...,
+        keyboardUpdates: typing.Optional[builtins.bool] = ...,
+        outputDeviceUpdates: typing.Optional[builtins.bool] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["artworkUpdates",b"artworkUpdates","keyboardUpdates",b"keyboardUpdates","nowPlayingUpdates",b"nowPlayingUpdates","outputDeviceUpdates",b"outputDeviceUpdates","volumeUpdates",b"volumeUpdates"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["artworkUpdates",b"artworkUpdates","keyboardUpdates",b"keyboardUpdates","nowPlayingUpdates",b"nowPlayingUpdates","outputDeviceUpdates",b"outputDeviceUpdates","volumeUpdates",b"volumeUpdates"]) -> None: ...
 global___ClientUpdatesConfigMessage = ClientUpdatesConfigMessage
 
 CLIENTUPDATESCONFIGMESSAGE_FIELD_NUMBER: builtins.int

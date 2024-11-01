@@ -1,5 +1,27 @@
 # CHANGES
 
+## 0.15.1 Seymour (2024-09-06)
+
+Audio streaming stopped working in the previous version and is fixed in this
+version. It also includes a fix to sequence number handling for outgoing
+messages, potentially improving audio streaming to AirPlay receivers from
+third party vendors (not tested however).
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+8a8d176f raop: Fix broken audio streaming
+```
+
+**All changes:**
+
+```
+8a8d176f raop: Fix broken audio streaming
+2cbaf5f5 build(deps): Bump pytest-httpserver in /requirements
+```
+
 ## 0.15.0 Ralph (2024-08-10)
 
 It has been a long time since the last release (christmas!), so a it's really

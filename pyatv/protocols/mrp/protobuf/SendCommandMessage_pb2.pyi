@@ -10,19 +10,13 @@ import pyatv.protocols.mrp.protobuf.CommandInfo_pb2
 import pyatv.protocols.mrp.protobuf.CommandOptions_pb2
 import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
 import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class SendCommandMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     COMMAND_FIELD_NUMBER: builtins.int
     OPTIONS_FIELD_NUMBER: builtins.int
     PLAYERPATH_FIELD_NUMBER: builtins.int
@@ -31,16 +25,14 @@ class SendCommandMessage(google.protobuf.message.Message):
     def options(self) -> pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions: ...
     @property
     def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        command: pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType | None = ...,
-        options: pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]) -> None: ...
-
+        command: typing.Optional[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType] = ...,
+        options: typing.Optional[pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions] = ...,
+        playerPath: typing.Optional[pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["command",b"command","options",b"options","playerPath",b"playerPath"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["command",b"command","options",b"options","playerPath",b"playerPath"]) -> None: ...
 global___SendCommandMessage = SendCommandMessage
 
 SENDCOMMANDMESSAGE_FIELD_NUMBER: builtins.int

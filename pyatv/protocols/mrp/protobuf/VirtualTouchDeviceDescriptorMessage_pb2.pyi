@@ -5,19 +5,13 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
-import sys
-
-if sys.version_info >= (3, 8):
-    import typing as typing_extensions
-else:
-    import typing_extensions
+import typing
+import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-@typing_extensions.final
 class VirtualTouchDeviceDescriptor(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
     ABSOLUTE_FIELD_NUMBER: builtins.int
     INTEGRATEDDISPLAY_FIELD_NUMBER: builtins.int
     SCREENSIZEWIDTH_FIELD_NUMBER: builtins.int
@@ -26,15 +20,13 @@ class VirtualTouchDeviceDescriptor(google.protobuf.message.Message):
     integratedDisplay: builtins.bool
     screenSizeWidth: builtins.float
     screenSizeHeight: builtins.float
-    def __init__(
-        self,
+    def __init__(self,
         *,
-        absolute: builtins.bool | None = ...,
-        integratedDisplay: builtins.bool | None = ...,
-        screenSizeWidth: builtins.float | None = ...,
-        screenSizeHeight: builtins.float | None = ...,
-    ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]) -> None: ...
-
+        absolute: typing.Optional[builtins.bool] = ...,
+        integratedDisplay: typing.Optional[builtins.bool] = ...,
+        screenSizeWidth: typing.Optional[builtins.float] = ...,
+        screenSizeHeight: typing.Optional[builtins.float] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["absolute",b"absolute","integratedDisplay",b"integratedDisplay","screenSizeHeight",b"screenSizeHeight","screenSizeWidth",b"screenSizeWidth"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["absolute",b"absolute","integratedDisplay",b"integratedDisplay","screenSizeHeight",b"screenSizeHeight","screenSizeWidth",b"screenSizeWidth"]) -> None: ...
 global___VirtualTouchDeviceDescriptor = VirtualTouchDeviceDescriptor

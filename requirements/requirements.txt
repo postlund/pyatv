@@ -1,4 +1,4 @@
-aiohttp==3.10.2
+aiohttp==3.10.10
 async-timeout==4.0.3
 cryptography==43.0.0
 chacha20poly1305-reuseable==0.13.2
@@ -6,9 +6,9 @@ ifaddr==0.2.0
 ifaddr==0.2.0
 mediafile==0.12.0
 miniaudio==1.61
-protobuf==5.27.3
+protobuf==5.28.1
 pydantic==2.8.2
 requests==2.32.3
 srptools==1.0.1
 tabulate==0.9.0
-zeroconf==0.132.2
+zeroconf==0.136.0
