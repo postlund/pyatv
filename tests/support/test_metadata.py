@@ -1,9 +1,36 @@
 """Unit tests for pyatv.support.metadata."""
 
+import math
+from pathlib import Path
+
 import pytest
 
 from pyatv.interface import MediaMetadata
-from pyatv.support.metadata import merge_into
+from pyatv.support.metadata import get_metadata, merge_into
+
+from tests.utils import data_path
+
+
+def assert_metadata(metadata: MediaMetadata) -> None:
+    assert metadata.artist == "postlund"
+    assert metadata.album == "raop"
+    assert metadata.title == "pyatv"
+    assert metadata.artwork is None
+    assert math.isclose(metadata.duration, 0.0)
+
+
+@pytest.mark.asyncio
+async def test_get_metadata_from_file():
+    with open(data_path("only_metadata.wav"), "rb") as fh:
+        metadata = await get_metadata(fh)
+    assert_metadata(metadata)
+
+
+@pytest.mark.asyncio
+async def test_get_metadata_from_buffer():
+    metadata = await get_metadata(data_path("only_metadata.wav"))
+    assert_metadata(metadata)
+
 
 METADATA_FIELDS = list(MediaMetadata.__dataclass_fields__.keys())
 

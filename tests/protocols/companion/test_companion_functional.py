@@ -66,13 +66,13 @@ ALWAYS_PRESENT_FEATURES = [
 pytestmark = pytest.mark.asyncio
 
 
-async def test_connect_only_companion(event_loop):
+async def test_connect_only_companion():
     service = ManualService(None, Protocol.Companion, 0, {})  # connect never happens
     conf = AppleTV("127.0.0.1", "Apple TV")
     conf.add_service(service)
 
     with pytest.raises(exceptions.DeviceIdMissingError):
-        await pyatv.connect(conf, loop=event_loop)
+        await pyatv.connect(conf, loop=asyncio.get_running_loop())
 
 
 async def test_subscribe_unsubscribe_media_control(companion_client, companion_state):
@@ -148,11 +148,11 @@ async def test_app_features(companion_client):
     ],
 )
 async def test_media_control_features(
-    companion_conf, event_loop, companion_usecase, features, expected_state
+    companion_conf, companion_usecase, features, expected_state
 ):
     companion_usecase.set_control_flags(features)
 
-    atv = await pyatv.connect(companion_conf, loop=event_loop)
+    atv = await pyatv.connect(companion_conf, loop=asyncio.get_running_loop())
 
     for feature in MEDIA_CONTROL_FEATURES:
         await until(lambda: atv.features.get_feature(feature).state == expected_state)
@@ -160,8 +160,8 @@ async def test_media_control_features(
     await asyncio.gather(*atv.close())
 
 
-async def test_always_present_features(companion_conf, event_loop):
-    atv = await pyatv.connect(companion_conf, loop=event_loop)
+async def test_always_present_features(companion_conf):
+    atv = await pyatv.connect(companion_conf, loop=asyncio.get_running_loop())
 
     for feature in ALWAYS_PRESENT_FEATURES:
         assert atv.features.get_feature(feature).state == FeatureState.Available
@@ -345,7 +345,6 @@ async def test_power_state_changes(
     ],
 )
 async def test_power_state_availability(
-    event_loop,
     companion_conf,
     companion_state,
     system_status_supported,
@@ -356,7 +355,7 @@ async def test_power_state_availability(
         CompanionServiceFlags.SYSTEM_STATUS_SUPPORTED, system_status_supported
     )
 
-    atv = await pyatv.connect(companion_conf, loop=event_loop)
+    atv = await pyatv.connect(companion_conf, loop=asyncio.get_running_loop())
 
     await until(
         lambda: atv.features.in_state(expected_feature_state, FeatureName.PowerState)

@@ -15,8 +15,8 @@ from tests.fake_device.raop import FakeRaopUseCases
 
 
 @pytest_asyncio.fixture(name="raop_device")
-async def raop_device_fixture(event_loop):
-    fake_atv = FakeAppleTV(event_loop, test_mode=False)
+async def raop_device_fixture():
+    fake_atv = FakeAppleTV(asyncio.get_running_loop(), test_mode=False)
     fake_atv.add_service(Protocol.RAOP)
     await fake_atv.start()
     yield fake_atv
@@ -44,7 +44,7 @@ def raop_conf_fixture(raop_device, raop_properties):
 
 
 @pytest_asyncio.fixture(name="raop_client")
-async def raop_client_fixture(raop_conf, event_loop):
-    client = await connect(raop_conf, loop=event_loop)
+async def raop_client_fixture(raop_conf):
+    client = await connect(raop_conf, loop=asyncio.get_running_loop())
     yield client
     await asyncio.gather(*client.close())
