@@ -42,7 +42,8 @@ disable=
   too-many-public-methods,
   too-many-arguments,
   too-many-instance-attributes,
-  too-many-lines
+  too-many-lines,
+  too-many-positional-arguments
 
 [EXCEPTIONS]
 overgeneral-exceptions=builtins.Exception
