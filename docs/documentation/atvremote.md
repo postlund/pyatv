@@ -480,10 +480,10 @@ Device state: Playing
         Shuffle: False
 ```
 
-Artwork with a specific size (width,height):
+Artwork with a specific size (width, height) and filename:
 
 ```shell
-$ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1
+$ atvremote --id 00:11:22:33:44:54 artwork_save=300,-1,foobar.jpg
 ```
 
 Using -1 will let the device decide that parameter in order to keep aspect ratio.
