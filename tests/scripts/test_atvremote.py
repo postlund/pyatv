@@ -1,5 +1,7 @@
 """Smoke test for atvremote."""
 
+import asyncio
+
 import pytest
 
 from pyatv.auth.hap_pairing import parse_credentials

@@ -150,7 +150,7 @@ def test_dict_substract_remove_if_same_value():
 
 
 @pytest.mark.asyncio
-async def test_shared_data(event_loop):
+async def test_shared_data():
     async def _waiter(shared_data: SharedData[int], future: asyncio.Future):
         result = await shared_data.wait()
         future.set_result(result)
