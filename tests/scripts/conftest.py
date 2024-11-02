@@ -1,5 +1,6 @@
 """Simulated environment for functional script testing."""
 
+import asyncio
 from contextlib import contextmanager
 from importlib import import_module
 from io import StringIO
@@ -38,8 +39,8 @@ def capture_output(argv, inputs):
 
 
 @pytest_asyncio.fixture(name="udns")
-async def udns_fixture(event_loop, fake_atv):
-    udns = fake_udns.FakeUdns(event_loop)
+async def udns_fixture(fake_atv):
+    udns = fake_udns.FakeUdns(asyncio.get_running_loop())
     udns.ip_filter = IP_2
     await udns.start()
 
@@ -73,8 +74,8 @@ async def udns_fixture(event_loop, fake_atv):
 
 
 @pytest_asyncio.fixture(name="fake_atv")
-async def fake_atv_fixture(event_loop):
-    fake_atv = FakeAppleTV(event_loop)
+async def fake_atv_fixture():
+    fake_atv = FakeAppleTV(asyncio.get_running_loop())
     fake_atv.add_service(Protocol.MRP)
     fake_atv.add_service(Protocol.AirPlay)
     await fake_atv.start()
@@ -82,10 +83,12 @@ async def fake_atv_fixture(event_loop):
 
 
 @pytest.fixture
-def scriptenv(event_loop, fake_atv, udns, mockfs):
+def scriptenv(fake_atv, udns, mockfs):
     async def _run_script(
         script, *args, inputs: Sequence[str] = None, persistent_storage: bool = False
     ):
+        loop = asyncio.get_running_loop()
+
         argv = [script]
         if persistent_storage:
             argv += ["--storage", "file", "--storage-file", "/pyatv.conf"]
@@ -97,7 +100,7 @@ def scriptenv(event_loop, fake_atv, udns, mockfs):
         with capture_output(argv, inputs) as (out, err):
             udns_port = str(udns.port)
             with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port}):
-                with fake_udns.stub_multicast(udns, event_loop):
+                with fake_udns.stub_multicast(udns, loop):
                     with faketime("pyatv", 0):
                         # Stub away port knocking and ignore result (not tested here)
                         with patch("pyatv.support.knock.knock") as mock_knock:
@@ -108,7 +111,7 @@ def scriptenv(event_loop, fake_atv, udns, mockfs):
                             mock_knock.side_effect = _no_action
 
                             module = import_module(f"pyatv.scripts.{script}")
-                            exit_code = await module.appstart(event_loop)
+                            exit_code = await module.appstart(loop)
                             stdout = out.getvalue()
                             stderr = err.getvalue()
                             return stdout, stderr, exit_code

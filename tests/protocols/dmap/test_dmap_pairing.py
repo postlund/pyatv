@@ -1,5 +1,6 @@
 """Test suit for pairing process with Apple TV."""
 
+import asyncio
 import ipaddress
 from unittest.mock import MagicMock
 
@@ -58,7 +59,7 @@ def storage_fixture() -> MemoryStorage:
 
 
 @pytest_asyncio.fixture
-async def mock_pairing(event_loop, storage):
+async def mock_pairing(storage):
     obj = MagicMock()
 
     service = ManualService("id", Protocol.DMAP, 0, {})
@@ -78,7 +79,9 @@ async def mock_pairing(event_loop, storage):
             options["addresses"] = addresses
 
         settings = await storage.get_settings(config)
-        core = await create_core(config, service, settings=settings, loop=event_loop)
+        core = await create_core(
+            config, service, settings=settings, loop=asyncio.get_running_loop()
+        )
 
         obj.pairing = pairing.DmapPairingHandler(core, **options)
         await obj.pairing.begin()
