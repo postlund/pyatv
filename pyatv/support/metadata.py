@@ -4,7 +4,6 @@ import asyncio
 import io
 from typing import Union
 
-from mediafile import MediaFile
 from tinytag import TinyTag
 
 from pyatv.interface import MediaMetadata
@@ -12,7 +11,7 @@ from pyatv.interface import MediaMetadata
 EMPTY_METADATA = MediaMetadata(None, None, None, None)
 
 
-def _open_file(file: io.BufferedIOBase) -> MediaFile:
+def _open_file(file: io.BufferedIOBase) -> TinyTag:
     start_position = file.tell()
     in_file = TinyTag.get(file_obj=file)
     file.seek(start_position)
@@ -23,10 +22,15 @@ async def get_metadata(file: Union[str, io.BufferedIOBase]) -> MediaMetadata:
     """Extract metadata from a file and return it."""
     loop = asyncio.get_event_loop()
 
-    if isinstance(file, io.BufferedIOBase):
-        tag = await loop.run_in_executor(None, _open_file, file)
-    else:
+    # TODO: TinyTag will always start by seeking to the end of a
+    # file, which isn't possible for streaming buffers. So this
+    # works as long as the entire file is in the buffer, otherwise
+    # it will fail. Hopefully this can be fixed by using mutagen
+    # directly, but will require some manual handling.
+    if isinstance(file, str):
         tag = await loop.run_in_executor(None, TinyTag.get, file)
+    else:
+        tag = await loop.run_in_executor(None, _open_file, file)
 
     return MediaMetadata(
         title=tag.title,
