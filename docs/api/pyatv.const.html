@@ -48,7 +48,7 @@ link_group: api
 </li>
 <li>
 <h4><code><a title="pyatv.const.FeatureName" href="#pyatv.const.FeatureName">FeatureName</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="pyatv.const.FeatureName.AccountList" href="#pyatv.const.FeatureName.AccountList">AccountList</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Action" href="#pyatv.const.FeatureName.Action">Action</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.AddOutputDevices" href="#pyatv.const.FeatureName.AddOutputDevices">AddOutputDevices</a></code></li>
@@ -114,6 +114,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.VolumeDown" href="#pyatv.const.FeatureName.VolumeDown">VolumeDown</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.VolumeUp" href="#pyatv.const.FeatureName.VolumeUp">VolumeUp</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.WakeUp" href="#pyatv.const.FeatureName.WakeUp">WakeUp</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.iTunesStoreIdentifier" href="#pyatv.const.FeatureName.iTunesStoreIdentifier">iTunesStoreIdentifier</a></code></li>
 </ul>
 </li>
 <li>
@@ -223,7 +224,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L454" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L457" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -236,7 +237,7 @@ link_group: api
 <dl>
 <dt id="pyatv.const.DeviceModel"><code class="flex name class">
 <span>class <span class="ident">DeviceModel</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Hardware device model.</p>
@@ -305,7 +306,7 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.DeviceState"><code class="flex name class">
 <span>class <span class="ident">DeviceState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported device states.</p></section>
@@ -344,11 +345,11 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName"><code class="flex name class">
 <span>class <span class="ident">FeatureName</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L249-L445" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L249-L448" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
@@ -615,11 +616,15 @@ future.</p></section>
 <dd>
 <section class="desc"><p>Wake up device (deprecated; use Power.turn_on).</p></section>
 </dd>
+<dt id="pyatv.const.FeatureName.iTunesStoreIdentifier"><code class="name">var <span class="ident">iTunesStoreIdentifier</span> = 50</code></dt>
+<dd>
+<section class="desc"><p>iTunes Store Identifier for Content</p></section>
+</dd>
 </dl>
 </dd>
 <dt id="pyatv.const.FeatureState"><code class="flex name class">
 <span>class <span class="ident">FeatureState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>State of a particular feature.</p></section>
@@ -651,7 +656,7 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.InputAction"><code class="flex name class">
 <span>class <span class="ident">InputAction</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type of input when pressing a button.</p></section>
@@ -678,7 +683,7 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.KeyboardFocusState"><code class="flex name class">
 <span>class <span class="ident">KeyboardFocusState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported keyboard focus states.</p></section>
@@ -705,7 +710,7 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.MediaType"><code class="flex name class">
 <span>class <span class="ident">MediaType</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported media types.</p></section>
@@ -738,7 +743,7 @@ not report a valid media type.</p></section>
 </dd>
 <dt id="pyatv.const.OperatingSystem"><code class="flex name class">
 <span>class <span class="ident">OperatingSystem</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Operating system on device.</p></section>
@@ -776,7 +781,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.PairingRequirement"><code class="flex name class">
 <span>class <span class="ident">PairingRequirement</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Pairing requirement for a service.</p></section>
@@ -811,7 +816,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.PowerState"><code class="flex name class">
 <span>class <span class="ident">PowerState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported power states.</p></section>
@@ -838,7 +843,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.Protocol"><code class="flex name class">
 <span>class <span class="ident">Protocol</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported protocols.</p></section>
@@ -873,7 +878,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.RepeatState"><code class="flex name class">
 <span>class <span class="ident">RepeatState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported repeat states.</p></section>
@@ -900,7 +905,7 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.ShuffleState"><code class="flex name class">
 <span>class <span class="ident">ShuffleState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported shuffle states.</p></section>
@@ -927,11 +932,11 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.TouchAction"><code class="flex name class">
 <span>class <span class="ident">TouchAction</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Touch action constants.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L448-L454" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L451-L457" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>

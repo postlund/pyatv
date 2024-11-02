@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.12
 
 jobs:
   build_containers:
@@ -112,7 +112,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Download pre-built packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: packages
           path: dist

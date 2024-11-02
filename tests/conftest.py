@@ -1,3 +1,4 @@
+import asyncio
 import builtins
 import logging
 from os import path
@@ -81,11 +82,13 @@ async def session_manager():
 
 
 @pytest_asyncio.fixture
-async def knock_server(event_loop):
+async def knock_server():
     servers = []
 
     async def _add_server():
-        server, knock_server = await create_knock_server(unused_port(), event_loop)
+        server, knock_server = await create_knock_server(
+            unused_port(), asyncio.get_running_loop()
+        )
         servers.append(server)
         return knock_server
 
@@ -111,31 +114,34 @@ def stub_knock_server():
 # stub_knock_server is added here to make sure all UDNS tests uses a stubbed
 # knock server
 @pytest_asyncio.fixture
-async def udns_server(event_loop, stub_knock_server):
-    server = fake_udns.FakeUdns(event_loop)
+async def udns_server(stub_knock_server):
+    server = fake_udns.FakeUdns(asyncio.get_running_loop())
     await server.start()
     yield server
     server.close()
 
 
 @pytest_asyncio.fixture(name="multicast_scan")
-async def multicast_scan_fixture(event_loop, udns_server):
+async def multicast_scan_fixture(udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None):
-        with fake_udns.stub_multicast(udns_server, event_loop):
+        with fake_udns.stub_multicast(udns_server, asyncio.get_running_loop()):
             return await pyatv.scan(
-                event_loop, identifier=identifier, protocol=protocol, timeout=timeout
+                asyncio.get_running_loop(),
+                identifier=identifier,
+                protocol=protocol,
+                timeout=timeout,
             )
 
     yield _scan
 
 
 @pytest_asyncio.fixture(name="unicast_scan")
-async def unicast_scan_fixture(event_loop, udns_server):
+async def unicast_scan_fixture(udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None, storage=None):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
             return await pyatv.scan(
-                event_loop,
+                asyncio.get_running_loop(),
                 hosts=["127.0.0.1"],
                 timeout=timeout,
                 identifier=identifier,

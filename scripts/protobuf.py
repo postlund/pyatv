@@ -78,7 +78,7 @@ def _protobuf_url(version):
 
 
 def _get_protobuf_version():
-    return "22.3"
+    return "28.1"
 
 
 def _download_protoc(force=False):

@@ -1,5 +1,7 @@
 """Shared test code for AirPlay test cases."""
 
+import asyncio
+
 import pytest
 import pytest_asyncio
 
@@ -11,8 +13,8 @@ from tests.fake_device import FakeAppleTV
 
 
 @pytest_asyncio.fixture(name="airplay_device")
-async def airplay_device_fixture(event_loop):
-    fake_atv = FakeAppleTV(event_loop, test_mode=False)
+async def airplay_device_fixture():
+    fake_atv = FakeAppleTV(asyncio.get_running_loop(), test_mode=False)
     fake_atv.add_service(Protocol.AirPlay)
     await fake_atv.start()
     yield fake_atv
@@ -20,7 +22,7 @@ async def airplay_device_fixture(event_loop):
 
 
 @pytest_asyncio.fixture(name="client_connection")
-async def client_connection_fixture(airplay_device, event_loop):
+async def client_connection_fixture(airplay_device):
     yield await http_connect("127.0.0.1", airplay_device.get_port(Protocol.AirPlay))
 
 

@@ -406,11 +406,11 @@ class DeviceCommands:
                 self.args, command, self.atv, self.storage, self.loop
             )
 
-    async def artwork_save(self, width=None, height=None):
+    async def artwork_save(self, width=None, height=None, file_name="artwork"):
         """Download artwork and save it to artwork.png."""
         artwork = await self.atv.metadata.artwork(width=width, height=height)
         if artwork is not None:
-            with open("artwork.png", "wb") as file:
+            with open(f"{file_name}.png", "wb") as file:
                 file.write(artwork.bytes)
         else:
             print("No artwork is currently available.")
@@ -840,12 +840,12 @@ def _extract_command_with_args(cmd):
             "select",
             "menu",
             "home",
-            "touch_click",
+            "click",
         ]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
-        if cmd == "touch_action":
+        if cmd == "action":
             return [args[0], args[1], TouchAction(args[2])]
         return args
 
