@@ -128,6 +128,7 @@ def test_playing_basic_fields():
             season_number=1245,
             episode_number=2468,
             content_identifier="content_id",
+            itunes_store_identifier=123456789,
         )
     )
     assert "mytitle" in out
@@ -138,6 +139,7 @@ def test_playing_basic_fields():
     assert "1245" in out
     assert "2468" in out
     assert "content_id" in out
+    assert "123456789" in out
 
 
 @pytest.mark.parametrize(
@@ -197,7 +199,7 @@ def test_playing_custom_hash():
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(Playing().__dict__) == 15
+    assert len(Playing().__dict__) == 16
 
 
 @pytest.mark.parametrize(

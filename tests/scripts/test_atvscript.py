@@ -103,6 +103,7 @@ async def test_mrp_idle(scriptenv):
             "season_number": None,
             "episode_number": None,
             "content_identifier": None,
+            "itunes_store_identifier": None,
         },
     )
     assert exit_code == 0

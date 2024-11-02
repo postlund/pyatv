@@ -142,6 +142,7 @@ _FIELD_FEATURES: Dict[FeatureName, str] = {
     FeatureName.SeasonNumber: "seasonNumber",
     FeatureName.EpisodeNumber: "episodeNumber",
     FeatureName.ContentIdentifier: "contentIdentifier",
+    FeatureName.iTunesStoreIdentifier: "iTunesStoreIdentifier",
 }
 
 DELAY_BETWEEN_COMMANDS = 0.1
@@ -267,6 +268,10 @@ def build_playing_instance(  # pylint: disable=too-many-locals
         """Content identifier."""
         return state.metadata_field("contentIdentifier")
 
+    def itunes_store_identifier() -> int:
+        """Itunes Store identifier."""
+        return state.metadata_field("iTunesStoreIdentifier")
+
     return Playing(
         media_type=media_type(),
         device_state=device_state(),
@@ -283,6 +288,7 @@ def build_playing_instance(  # pylint: disable=too-many-locals
         season_number=season_number(),
         episode_number=episode_number(),
         content_identifier=content_identifier(),
+        itunes_store_identifier=itunes_store_identifier(),
     )
 
 
