@@ -27,7 +27,6 @@ jobs:
           - macos-latest
           - windows-latest
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -38,7 +37,7 @@ jobs:
           - false
         include:
           - platform: ubuntu-latest
-            python-version: 3.8
+            python-version: 3.9
             chickn-args: "--no-venv -v requirements_file=base_versions.txt"
             regression: true
     steps:
