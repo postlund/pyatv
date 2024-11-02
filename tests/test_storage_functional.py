@@ -38,8 +38,10 @@ async def new_storage(
     return storage
 
 
-async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
-    storage1 = await new_storage(STORAGE_FILENAME, event_loop)
+async def test_scan_inserts_into_storage(unicast_scan, mockfs):
+    loop = asyncio.get_running_loop()
+
+    storage1 = await new_storage(STORAGE_FILENAME, loop)
 
     # Scan for the device, get settings for it and save everything to storage
     conf = (await unicast_scan(storage=storage1))[0]
@@ -48,30 +50,30 @@ async def test_scan_inserts_into_storage(event_loop, unicast_scan, mockfs):
 
     # Open a new storage (based on the same file as above) and extract same settings.
     # Compare content to ensure they are exactly the same.
-    storage2 = await new_storage(STORAGE_FILENAME, event_loop)
+    storage2 = await new_storage(STORAGE_FILENAME, loop)
     settings2 = await storage2.get_settings(conf)
     assert not DeepDiff(settings2.dict(), settings1.dict())
 
 
 async def test_provides_storage_to_pairing_handler(
-    event_loop, unicast_scan, session_manager, mockfs
+    unicast_scan, session_manager, mockfs
 ):
-    storage = await new_storage(STORAGE_FILENAME, event_loop)
+    loop = asyncio.get_running_loop()
+
+    storage = await new_storage(STORAGE_FILENAME, loop)
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
 
     with mock_protocol(Protocol.AirPlay) as airplay_mock:
         # Calling pair will save Core instance in protocol mock
-        await pair(conf, Protocol.AirPlay, event_loop, session=session_manager.session)
+        await pair(conf, Protocol.AirPlay, loop, session=session_manager.session)
 
         assert airplay_mock.core.settings == settings
 
 
-async def test_provides_storage_to_connect(
-    event_loop, unicast_scan, session_manager, mockfs
-):
-    storage = await new_storage(STORAGE_FILENAME, event_loop)
+async def test_provides_storage_to_connect(unicast_scan, session_manager, mockfs):
+    storage = await new_storage(STORAGE_FILENAME, asyncio.get_running_loop())
 
     conf = (await unicast_scan(storage=storage))[0]
     settings = await storage.get_settings(conf)
@@ -79,7 +81,10 @@ async def test_provides_storage_to_connect(
 
     with mock_protocol(Protocol.AirPlay) as airplay_mock:
         await connect(
-            conf, event_loop, session=session_manager.session, storage=storage
+            conf,
+            asyncio.get_running_loop(),
+            session=session_manager.session,
+            storage=storage,
         )
 
         # connect will create a copy of the config and load settings in there. Extract
