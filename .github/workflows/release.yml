@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.12
 
 jobs:
   build_containers:
