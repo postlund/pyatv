@@ -79,7 +79,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await asyncio.gather(*self.atv.close())
         if self.artwork_server is not None:
             self.artwork_server.close()
-        super().tearDown()
+        await super().tearDownAsync()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)

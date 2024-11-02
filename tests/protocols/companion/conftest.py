@@ -16,8 +16,8 @@ from tests.fake_device.companion import FakeCompanionUseCases
 
 
 @pytest_asyncio.fixture(name="companion_device")
-async def companion_device_fixture(event_loop):
-    fake_atv = FakeAppleTV(event_loop, test_mode=False)
+async def companion_device_fixture():
+    fake_atv = FakeAppleTV(asyncio.get_running_loop(), test_mode=False)
     fake_atv.add_service(Protocol.Companion)
     await fake_atv.start()
     yield fake_atv
@@ -51,7 +51,7 @@ def companion_conf_fixture(companion_device):
 
 
 @pytest_asyncio.fixture(name="companion_client")
-async def companion_client_fixture(companion_conf, event_loop):
-    atv = await connect(companion_conf, loop=event_loop)
+async def companion_client_fixture(companion_conf):
+    atv = await connect(companion_conf, loop=asyncio.get_running_loop())
     yield atv
     await asyncio.gather(*atv.close())

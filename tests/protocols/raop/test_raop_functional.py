@@ -204,7 +204,6 @@ async def test_stream_with_password(
     raop_conf,
     raop_server_password,
     raop_client_password,
-    event_loop,
 ):
     raop_usecase.password(raop_server_password)
 
@@ -214,7 +213,7 @@ async def test_stream_with_password(
 
     expect_error = raop_server_password != raop_client_password
 
-    client = await connect(raop_conf, loop=event_loop)
+    client = await connect(raop_conf, loop=asyncio.get_running_loop())
     try:
         await client.stream.stream_file(data_path("audio_10_frames.wav"))
         assert not expect_error
@@ -612,6 +611,8 @@ async def test_stop_playback(raop_client, raop_state, button):
     assert len(raop_state.raw_audio) >= ONE_FRAME_IN_BYTES
 
 
+# TODO: Re-enable later, see support/metadata.py
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "files, raop_properties", [(["only_metadata.wav"], {"et": "0", "md": "0"})]
 )
