@@ -1,7 +1,7 @@
 ---
 layout: template
 title: API - pyatv
-permalink: /api/
+permalink: /api//
 link_group: api
 ---
 <nav id="sidebar">
@@ -12,12 +12,14 @@ link_group: api
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="pyatv.conf" href="conf">pyatv.conf</a></code></li>
-<li><code><a title="pyatv.const" href="const">pyatv.const</a></code></li>
-<li><code><a title="pyatv.convert" href="convert">pyatv.convert</a></code></li>
-<li><code><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></li>
-<li><code><a title="pyatv.helpers" href="helpers">pyatv.helpers</a></code></li>
-<li><code><a title="pyatv.interface" href="interface">pyatv.interface</a></code></li>
+<li><code><a title="pyatv.conf" href="conf/">pyatv.conf</a></code></li>
+<li><code><a title="pyatv.const" href="const/">pyatv.const</a></code></li>
+<li><code><a title="pyatv.convert" href="convert/">pyatv.convert</a></code></li>
+<li><code><a title="pyatv.exceptions" href="exceptions/">pyatv.exceptions</a></code></li>
+<li><code><a title="pyatv.helpers" href="helpers/">pyatv.helpers</a></code></li>
+<li><code><a title="pyatv.interface" href="interface/">pyatv.interface</a></code></li>
+<li><code><a title="pyatv.settings" href="settings/">pyatv.settings</a></code></li>
+<li><code><a title="pyatv.storage" href="storage/">pyatv.storage</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
@@ -35,34 +37,42 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Main routines for interacting with an Apple TV.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L1-L164" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L1-L196" class="git-link">Browse git</a></div>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="pyatv.conf" href="conf">pyatv.conf</a></code></dt>
+<dt><code class="name"><a title="pyatv.conf" href="conf/">pyatv.conf</a></code></dt>
 <dd>
 <section class="desc"><p>Configuration used when connecting to a device …</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.const" href="const">pyatv.const</a></code></dt>
+<dt><code class="name"><a title="pyatv.const" href="const/">pyatv.const</a></code></dt>
 <dd>
 <section class="desc"><p>Constants used in the public API.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.convert" href="convert">pyatv.convert</a></code></dt>
+<dt><code class="name"><a title="pyatv.convert" href="convert/">pyatv.convert</a></code></dt>
 <dd>
 <section class="desc"><p>Various types of extraction and conversion functions.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.exceptions" href="exceptions">pyatv.exceptions</a></code></dt>
+<dt><code class="name"><a title="pyatv.exceptions" href="exceptions/">pyatv.exceptions</a></code></dt>
 <dd>
 <section class="desc"><p>Local exceptions used by library.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.helpers" href="helpers">pyatv.helpers</a></code></dt>
+<dt><code class="name"><a title="pyatv.helpers" href="helpers/">pyatv.helpers</a></code></dt>
 <dd>
 <section class="desc"><p>Various helper methods.</p></section>
 </dd>
-<dt><code class="name"><a title="pyatv.interface" href="interface">pyatv.interface</a></code></dt>
+<dt><code class="name"><a title="pyatv.interface" href="interface/">pyatv.interface</a></code></dt>
 <dd>
 <section class="desc"><p>Public interface exposed by library …</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.settings" href="settings/">pyatv.settings</a></code></dt>
+<dd>
+<section class="desc"><p>Settings for configuring pyatv.</p></section>
+</dd>
+<dt><code class="name"><a title="pyatv.storage" href="storage/">pyatv.storage</a></code></dt>
+<dd>
+<section class="desc"><p>Storage module.</p></section>
 </dd>
 </dl>
 </section>
@@ -73,32 +83,29 @@ link_group: api
 <dl>
 <dt id="pyatv.connect">
 <code class="name flex">
-<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, loop: asyncio.events.AbstractEventLoop, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a> = None, session: aiohttp.client.ClientSession = None) -> <a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a></span>
+<span>async def <span class="ident">connect</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="../interface#pyatv.interface.BaseConfig">BaseConfig</a>, loop: asyncio.events.AbstractEventLoop, protocol: Optional[<a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>] = None, session: Optional[aiohttp.client.ClientSession] = None, storage: Optional[<a title="pyatv.interface.Storage" href="../interface#pyatv.interface.Storage">Storage</a>] = None) -> <a title="pyatv.interface.AppleTV" href="../interface#pyatv.interface.AppleTV">AppleTV</a></span>
 </code>
 </dt>
 <dd>
 <section class="desc"><p>Connect to a device based on a configuration.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L90-L140" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.pair">
 <code class="name flex">
-<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>, protocol: <a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, **kwargs)</span>
+<span>async def <span class="ident">pair</span></span>(<span>config: <a title="pyatv.interface.BaseConfig" href="../interface#pyatv.interface.BaseConfig">BaseConfig</a>, protocol: <a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>, loop: asyncio.events.AbstractEventLoop, session: aiohttp.client.ClientSession = None, storage: Optional[<a title="pyatv.interface.Storage" href="../interface#pyatv.interface.Storage">Storage</a>] = None, **kwargs) -> <a title="pyatv.interface.PairingHandler" href="../interface#pyatv.interface.PairingHandler">PairingHandler</a></span>
 </code>
 </dt>
 <dd>
 <section class="desc"><p>Pair a protocol for an Apple TV.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L143-L164" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.scan">
 <code class="name flex">
-<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], None] = None, protocol: Union[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="const#pyatv.const.Protocol">Protocol</a>], None] = None, hosts: List[str] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None) -> List[<a title="pyatv.interface.BaseConfig" href="interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
+<span>async def <span class="ident">scan</span></span>(<span>loop: asyncio.events.AbstractEventLoop, timeout: int = 5, identifier: Union[str, Set[str], ForwardRef(None)] = None, protocol: Union[<a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>, Set[<a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>], ForwardRef(None)] = None, hosts: Optional[List[str]] = None, aiozc: Optional[zeroconf.asyncio.AsyncZeroconf] = None, storage: Optional[<a title="pyatv.interface.Storage" href="../interface#pyatv.interface.Storage">Storage</a>] = None) -> List[<a title="pyatv.interface.BaseConfig" href="../interface#pyatv.interface.BaseConfig">BaseConfig</a>]</span>
 </code>
 </dt>
 <dd>
 <section class="desc"><p>Scan for Apple TVs on network and return their configurations.</p>
 <p>When passing in an aiozc instance, a ServiceBrowser must
 be running for all the types in the protocols that being scanned for.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/__init__.py#L30-L87" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>

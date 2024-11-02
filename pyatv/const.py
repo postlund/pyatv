@@ -1,11 +1,12 @@
 """Constants used in the public API."""
+
 # pylint: disable=invalid-name
 
 from enum import Enum
 
 MAJOR_VERSION = "0"
-MINOR_VERSION = "10"
-PATCH_VERSION = "3"
+MINOR_VERSION = "15"
+PATCH_VERSION = "1"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
 
@@ -110,6 +111,19 @@ class PowerState(Enum):
     """Device is turned on."""
 
 
+class KeyboardFocusState(Enum):
+    """All supported keyboard focus states."""
+
+    Unknown = 0
+    """Keyboard focus state is not determinable."""
+
+    Unfocused = 1
+    """Keyboard is not focused."""
+
+    Focused = 2
+    """Keyboard is focused."""
+
+
 class OperatingSystem(Enum):
     """Operating system on device."""
 
@@ -128,6 +142,9 @@ class OperatingSystem(Enum):
     This OS is used by AirPort Express devices. It is not an official name but made up
     in pyatv as no official name has been found.
     """
+
+    MacOS = 4
+    """Operating system is macOS."""
 
 
 class DeviceModel(Enum):
@@ -169,6 +186,12 @@ class DeviceModel(Enum):
 
     Music = 10
     """Music app (or iTunes) running on a desktop computer."""
+
+    AppleTV4KGen3 = 11
+    """Device model is seventh generation Apple TV (Apple TV 4K gen 3)."""
+
+    HomePodGen2 = 12
+    """Device model is HomePod (second generation)."""
 
 
 class InputAction(Enum):
@@ -340,11 +363,20 @@ class FeatureName(Enum):
     ContentIdentifier = 47
     """Identifier for Content"""
 
+    iTunesStoreIdentifier = 50
+    """iTunes Store Identifier for Content"""
+
     AppList = 38
     """List of launchable apps."""
 
     LaunchApp = 39
     """Launch an app."""
+
+    AccountList = 55
+    """List of user accounts."""
+
+    SwitchAccount = 56
+    """Switch user account."""
 
     Artwork = 30
     """Playing media artwork."""
@@ -364,6 +396,9 @@ class FeatureName(Enum):
     PowerState = 32
     """Current device power state."""
 
+    Screensaver = 58
+    """Activate screen saver."""
+
     TurnOn = 33
     """Turn device on."""
 
@@ -375,3 +410,48 @@ class FeatureName(Enum):
 
     SetVolume = 46
     """Set volume level."""
+
+    OutputDevices = 59
+    """Current output devices."""
+
+    AddOutputDevices = 60
+    """Add output devices."""
+
+    RemoveOutputDevices = 61
+    """Remove output devices."""
+
+    SetOutputDevices = 62
+    """Set output devices."""
+
+    TextFocusState = 57
+    """Current virtual keyboard focus state."""
+
+    TextGet = 51
+    """Get current virtual keyboard text."""
+
+    TextClear = 52
+    """Clear virtual keyboard text."""
+
+    TextAppend = 53
+    """Input text into virtual keyboard."""
+
+    TextSet = 54
+    """Replace text in virtual keyboard."""
+
+    Swipe = 63
+    """Touch swipe from given coordinates and duration."""
+
+    Action = 64
+    """Touch event to given coordinates."""
+
+    Click = 65
+    """Touch click command."""
+
+
+class TouchAction(Enum):
+    """Touch action constants."""
+
+    Press = 1
+    Hold = 3
+    Release = 4
+    Click = 5

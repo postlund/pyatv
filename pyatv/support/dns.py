@@ -1,4 +1,5 @@
 """Processing functions for raw DNS messages."""
+
 import collections.abc
 import enum
 import io
@@ -7,6 +8,8 @@ import logging
 import struct
 import typing
 import unicodedata
+
+from zeroconf import ServiceInfo
 
 from pyatv.support.collections import CaseInsensitiveDict
 
@@ -193,6 +196,15 @@ def parse_domain_name(buffer: typing.BinaryIO) -> str:
     return ".".join(labels)
 
 
+def format_txt_dict(
+    data: typing.Mapping[typing.Any, typing.Any],
+) -> bytes:
+    """Format a `dict` into a DNS-SD TXT record."""
+    return ServiceInfo(
+        "_x.local.", "_x.local.", addresses=[], port=12345, properties=data
+    ).text
+
+
 def parse_txt_dict(buffer: typing.BinaryIO, length: int) -> CaseInsensitiveDict[bytes]:
     """Parse DNS-SD TXT records into a `dict`."""
     output: CaseInsensitiveDict[bytes] = CaseInsensitiveDict()
@@ -349,7 +361,7 @@ class DnsResource(typing.NamedTuple):
 class DnsMessage:
     """Represent a DNS message."""
 
-    def __init__(self, msg_id=0, flags=0x0120):
+    def __init__(self, msg_id=0, flags=0x0120) -> None:
         """Initialize a new DnsMessage."""
         self.msg_id = msg_id
         self.flags = flags

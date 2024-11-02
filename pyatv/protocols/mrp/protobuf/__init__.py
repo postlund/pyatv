@@ -9,6 +9,7 @@ from .ProtocolMessage_pb2 import ProtocolMessage
 from . import AudioFadeMessage_pb2
 from . import AudioFadeResponseMessage_pb2
 from . import ClientUpdatesConfigMessage_pb2
+from . import ConfigureConnectionMessage_pb2
 from . import CryptoPairingMessage_pb2
 from . import DeviceInfoMessage_pb2
 from . import GenericMessage_pb2
@@ -17,6 +18,7 @@ from . import GetRemoteTextInputSessionMessage_pb2
 from . import GetVolumeMessage_pb2
 from . import GetVolumeResultMessage_pb2
 from . import KeyboardMessage_pb2
+from . import ModifyOutputContextRequestMessage_pb2
 from . import NotificationMessage_pb2
 from . import OriginClientPropertiesMessage_pb2
 from . import PlaybackQueueRequestMessage_pb2
@@ -75,6 +77,7 @@ from .Common_pb2 import DeviceType
 from .Common_pb2 import PlaybackState
 from .Common_pb2 import RepeatMode
 from .Common_pb2 import ShuffleMode
+from .ConfigureConnectionMessage_pb2 import ConfigureConnectionMessage
 from .ContentItemMetadata_pb2 import ActiveFormatJustification
 from .ContentItemMetadata_pb2 import AlbumTraits
 from .ContentItemMetadata_pb2 import AudioFormat
@@ -89,6 +92,7 @@ from .ContentItem_pb2 import ContentItem
 from .ContentItem_pb2 import LanguageOptionGroup
 from .CryptoPairingMessage_pb2 import CryptoPairingMessage
 from .DeviceInfoMessage_pb2 import DeviceInfoMessage
+from .DeviceInfoMessage_pb2 import PreferredEncoding
 from .GenericMessage_pb2 import GenericMessage
 from .GetKeyboardSessionMessage_pb2 import GetKeyboardSessionMessage
 from .GetRemoteTextInputSessionMessage_pb2 import GetRemoteTextInputSessionMessage
@@ -102,6 +106,8 @@ from .KeyboardMessage_pb2 import ReturnKeyType
 from .KeyboardMessage_pb2 import TextEditingAttributes
 from .KeyboardMessage_pb2 import TextInputTraits
 from .LanguageOption_pb2 import LanguageOption
+from .ModifyOutputContextRequestMessage_pb2 import ModifyOutputContextRequestMessage
+from .ModifyOutputContextRequestMessage_pb2 import ModifyOutputContextRequestType
 from .NotificationMessage_pb2 import NotificationMessage
 from .NowPlayingClient_pb2 import NowPlayingClient
 from .NowPlayingInfo_pb2 import NowPlayingInfo
@@ -165,6 +171,7 @@ from .UpdateEndPointsMessage_pb2 import UpdateEndPointsMessage
 from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceDescriptor
 from .UpdateOutputDeviceMessage_pb2 import AVOutputDeviceSourceInfo
 from .UpdateOutputDeviceMessage_pb2 import UpdateOutputDeviceMessage
+from .UpdatePlayerPath_pb2 import UpdatePlayerMessage
 from .VirtualTouchDeviceDescriptorMessage_pb2 import VirtualTouchDeviceDescriptor
 from .VoiceInputDeviceDescriptorMessage_pb2 import VoiceInputDeviceDescriptor
 from .VolumeControlAvailabilityMessage_pb2 import VolumeCapabilities
@@ -178,6 +185,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.AUDIO_FADE_MESSAGE: AudioFadeMessage_pb2.audioFadeMessage,
     ProtocolMessage.AUDIO_FADE_RESPONSE_MESSAGE: AudioFadeResponseMessage_pb2.audioFadeResponseMessage,
     ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE: ClientUpdatesConfigMessage_pb2.clientUpdatesConfigMessage,
+    ProtocolMessage.CONFIGURE_CONNECTION_MESSAGE: ConfigureConnectionMessage_pb2.configureConnectionMessage,
     ProtocolMessage.CRYPTO_PAIRING_MESSAGE: CryptoPairingMessage_pb2.cryptoPairingMessage,
     ProtocolMessage.DEVICE_INFO_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
     ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE: DeviceInfoMessage_pb2.deviceInfoMessage,
@@ -187,6 +195,7 @@ _EXTENSION_LOOKUP = {
     ProtocolMessage.GET_VOLUME_MESSAGE: GetVolumeMessage_pb2.getVolumeMessage,
     ProtocolMessage.GET_VOLUME_RESULT_MESSAGE: GetVolumeResultMessage_pb2.getVolumeResultMessage,
     ProtocolMessage.KEYBOARD_MESSAGE: KeyboardMessage_pb2.keyboardMessage,
+    ProtocolMessage.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE: ModifyOutputContextRequestMessage_pb2.modifyOutputContextRequestMessage,
     ProtocolMessage.NOTIFICATION_MESSAGE: NotificationMessage_pb2.notificationMessage,
     ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE: OriginClientPropertiesMessage_pb2.originClientPropertiesMessage,
     ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE: PlaybackQueueRequestMessage_pb2.playbackQueueRequestMessage,
@@ -234,6 +243,7 @@ _EXTENSION_LOOKUP = {
 AUDIO_FADE_MESSAGE = ProtocolMessage.AUDIO_FADE_MESSAGE
 AUDIO_FADE_RESPONSE_MESSAGE = ProtocolMessage.AUDIO_FADE_RESPONSE_MESSAGE
 CLIENT_UPDATES_CONFIG_MESSAGE = ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE
+CONFIGURE_CONNECTION_MESSAGE = ProtocolMessage.CONFIGURE_CONNECTION_MESSAGE
 CRYPTO_PAIRING_MESSAGE = ProtocolMessage.CRYPTO_PAIRING_MESSAGE
 DEVICE_INFO_MESSAGE = ProtocolMessage.DEVICE_INFO_MESSAGE
 DEVICE_INFO_UPDATE_MESSAGE = ProtocolMessage.DEVICE_INFO_UPDATE_MESSAGE
@@ -243,6 +253,7 @@ GET_REMOTE_TEXT_INPUT_SESSION_MESSAGE = ProtocolMessage.GET_REMOTE_TEXT_INPUT_SE
 GET_VOLUME_MESSAGE = ProtocolMessage.GET_VOLUME_MESSAGE
 GET_VOLUME_RESULT_MESSAGE = ProtocolMessage.GET_VOLUME_RESULT_MESSAGE
 KEYBOARD_MESSAGE = ProtocolMessage.KEYBOARD_MESSAGE
+MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE = ProtocolMessage.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE
 NOTIFICATION_MESSAGE = ProtocolMessage.NOTIFICATION_MESSAGE
 ORIGIN_CLIENT_PROPERTIES_MESSAGE = ProtocolMessage.ORIGIN_CLIENT_PROPERTIES_MESSAGE
 PLAYBACK_QUEUE_REQUEST_MESSAGE = ProtocolMessage.PLAYBACK_QUEUE_REQUEST_MESSAGE

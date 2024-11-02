@@ -1,16 +1,16 @@
 """Device pairing and derivation of encryption keys."""
-import asyncio
+
 import logging
 from typing import Optional
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
-from pyatv.interface import BaseConfig, BaseService, PairingHandler
+from pyatv.core import Core
+from pyatv.interface import PairingHandler
 from pyatv.protocols.companion.auth import CompanionPairSetupProcedure
 from pyatv.protocols.companion.connection import CompanionConnection
 from pyatv.protocols.companion.protocol import CompanionProtocol
 from pyatv.support import error_handler
-from pyatv.support.http import ClientSessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,23 +18,18 @@ _LOGGER = logging.getLogger(__name__)
 class CompanionPairingHandler(PairingHandler):
     """Pairing handler used to pair the Companion link protocol."""
 
-    def __init__(
-        self,
-        config: BaseConfig,
-        service: BaseService,
-        session: ClientSessionManager,
-        loop: asyncio.AbstractEventLoop,
-        **kwargs
-    ):
+    def __init__(self, core: Core, **kwargs):
         """Initialize a new CompanionPairingHandler."""
-        super().__init__(session, service)
+        super().__init__(core.session_manager, core.service)
+        self._name: str = kwargs.get("name", "pyatv")
         self.connection = CompanionConnection(
-            loop, str(config.address), self.service.port, None
+            core.loop, str(core.config.address), core.service.port, None
         )
         self.srp = SRPAuthHandler()
-        self.protocol = CompanionProtocol(self.connection, self.srp, self.service)
+        self.protocol = CompanionProtocol(self.connection, self.srp, core.service)
         self.pairing_procedure = CompanionPairSetupProcedure(self.protocol, self.srp)
         self.pin_code: Optional[str] = None
+        self._settings = core.settings
         self._has_paired: bool = False
 
     async def close(self) -> None:
@@ -66,8 +61,10 @@ class CompanionPairingHandler(PairingHandler):
                 exceptions.PairingError,
                 "",  # username required but not used
                 self.pin_code,
+                self._name,
             )
         )
+        self._settings.protocols.companion.credentials = self.service.credentials
         self._has_paired = True
 
     @property

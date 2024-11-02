@@ -13,4 +13,5 @@ message Origin {
   optional string displayName = 2;
   optional int32 identifier = 3;
   optional DeviceInfoMessage deviceInfo = 4;
+  optional bool isLocallyHosted = 5;
 }

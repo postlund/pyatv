@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Any, Dict, Generator, List, Mapping, Optional, Set
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
 import weakref
 
 from aiohttp.client_exceptions import ClientError
@@ -50,7 +50,7 @@ from pyatv.protocols.dmap.daap import DaapRequester
 from pyatv.protocols.dmap.pairing import DmapPairingHandler
 from pyatv.support.cache import Cache
 from pyatv.support.collections import dict_merge
-from pyatv.support.http import ClientSessionManager, HttpSession
+from pyatv.support.http import HttpSession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ _ARTWORK_CMD = "ctrl-int/1/nowplayingartwork?mw={width}&mh={height}&[AUTH]"
 _CTRL_PROMPT_CMD = "ctrl-int/1/controlpromptentry?[AUTH]&prompt-id=0"
 
 # Features that are always considered to be available
-_AVAILABLE_FEATURES = [
+_AVAILABLE_FEATURES: List[FeatureName] = [
     FeatureName.Down,
     FeatureName.Left,
     FeatureName.Menu,
@@ -71,10 +71,10 @@ _AVAILABLE_FEATURES = [
     FeatureName.Select,
     FeatureName.TopMenu,
     FeatureName.Up,
-]  # type: List[FeatureName]
+]
 
 # Features that are supported by the device but we don't now if available
-_UNKNOWN_FEATURES = [
+_UNKNOWN_FEATURES: List[FeatureName] = [
     FeatureName.Artwork,
     FeatureName.Next,
     FeatureName.Pause,
@@ -87,10 +87,10 @@ _UNKNOWN_FEATURES = [
     FeatureName.Stop,
     FeatureName.SkipForward,
     FeatureName.SkipBackward,
-]  # type: List[FeatureName]
+]
 
 # Features that are considered available if corresponding field is present
-_FIELD_FEATURES = {
+_FIELD_FEATURES: Dict[FeatureName, Tuple[str, str]] = {
     FeatureName.Title: ("cmst", "caps"),
     FeatureName.Artist: ("cmst", "cann"),
     FeatureName.Album: ("cmst", "canl"),
@@ -99,7 +99,7 @@ _FIELD_FEATURES = {
     FeatureName.Position: ("cmst", "cant"),
     FeatureName.Shuffle: ("cmst", "cash"),
     FeatureName.Repeat: ("cmst", "carp"),
-}  # type: Dict[FeatureName, tuple]
+}
 
 
 def build_playing_instance(playstatus) -> Playing:
@@ -353,23 +353,29 @@ class DmapRemoteControl(RemoteControl):
         """Press key volume down."""
         await self.apple_tv.ctrl_int_cmd("volumedown")
 
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position + _DEFAULT_SKIP_TIME)
+            await self.set_position(
+                current_position
+                + (int(time_interval) if time_interval > 0 else _DEFAULT_SKIP_TIME)
+            )
 
-    async def skip_backward(self) -> None:
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
         current_position = (await self.apple_tv.playstatus()).position
         if current_position:
-            await self.set_position(current_position - _DEFAULT_SKIP_TIME)
+            await self.set_position(
+                current_position
+                - (int(time_interval) if time_interval > 0 else _DEFAULT_SKIP_TIME)
+            )
 
     async def set_position(self, pos: int) -> None:
         """Seek in the current playing media."""
@@ -706,12 +712,6 @@ def setup(  # pylint: disable=too-many-locals
     yield SetupData(Protocol.DMAP, _connect, _close, _device_info, interfaces, features)
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return DmapPairingHandler(config, service, session_manager, loop, **kwargs)
+    return DmapPairingHandler(core, **kwargs)

@@ -27,6 +27,7 @@ relayer.register(CompanionMetadata())
 relayer.register(AirPlayMetadata())
 artwork = await relayer.relay("artwork")(width=640)
 """
+
 from itertools import chain
 from typing import Dict, Generic, List, Optional, Sequence, Type, TypeVar
 
@@ -85,7 +86,7 @@ class Relayer(Generic[T]):
         """Return instance for protocol if available."""
         return self._interfaces.get(protocol)
 
-    def relay(self, target: str, priority: List[Protocol] = None):
+    def relay(self, target: str, priority: Optional[List[Protocol]] = None):
         """Return method (or property value) of target instance based on priority."""
         instance = self._find_instance(
             target, chain(self._takeover_protocol, priority or self._priorities)

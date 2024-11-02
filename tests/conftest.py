@@ -1,10 +1,15 @@
+import asyncio
+import builtins
 import logging
+from os import path
 from types import SimpleNamespace
 import typing
 from unittest.mock import Mock, patch
 
 from ifaddr import IP, Adapter
 import pytest
+import pytest_asyncio
+from pytest_httpserver import HTTPServer
 
 import pyatv
 from pyatv.auth.hap_pairing import parse_credentials
@@ -17,7 +22,7 @@ from pyatv.support.net import unused_port
 from tests import fake_udns
 from tests.fake_device.airplay import DEVICE_CREDENTIALS
 from tests.fake_knock import create_knock_server
-from tests.utils import stub_sleep, unstub_sleep
+from tests.utils import data_root, stub_sleep, unstub_sleep
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,19 +74,21 @@ def stub_heartbeat_loop(request):
         yield
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session_manager():
     session_manager = await create_session()
     yield session_manager
     await session_manager.close()
 
 
-@pytest.fixture
-async def knock_server(event_loop):
+@pytest_asyncio.fixture
+async def knock_server():
     servers = []
 
     async def _add_server():
-        server, knock_server = await create_knock_server(unused_port(), event_loop)
+        server, knock_server = await create_knock_server(
+            unused_port(), asyncio.get_running_loop()
+        )
         servers.append(server)
         return knock_server
 
@@ -91,7 +98,7 @@ async def knock_server(event_loop):
         server.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def stub_knock_server():
     with patch("pyatv.support.knock.knock") as knock:
         info = SimpleNamespace(ports=set(), knock_count=0)
@@ -106,36 +113,40 @@ def stub_knock_server():
 
 # stub_knock_server is added here to make sure all UDNS tests uses a stubbed
 # knock server
-@pytest.fixture
-async def udns_server(event_loop, stub_knock_server):
-    server = fake_udns.FakeUdns(event_loop)
+@pytest_asyncio.fixture
+async def udns_server(stub_knock_server):
+    server = fake_udns.FakeUdns(asyncio.get_running_loop())
     await server.start()
     yield server
     server.close()
 
 
-@pytest.fixture(name="multicast_scan")
-async def multicast_scan_fixture(event_loop, udns_server):
+@pytest_asyncio.fixture(name="multicast_scan")
+async def multicast_scan_fixture(udns_server):
     async def _scan(timeout=1, identifier=None, protocol=None):
-        with fake_udns.stub_multicast(udns_server, event_loop):
+        with fake_udns.stub_multicast(udns_server, asyncio.get_running_loop()):
             return await pyatv.scan(
-                event_loop, identifier=identifier, protocol=protocol, timeout=timeout
+                asyncio.get_running_loop(),
+                identifier=identifier,
+                protocol=protocol,
+                timeout=timeout,
             )
 
     yield _scan
 
 
-@pytest.fixture(name="unicast_scan")
-async def unicast_scan_fixture(event_loop, udns_server):
-    async def _scan(timeout=1, identifier=None, protocol=None):
+@pytest_asyncio.fixture(name="unicast_scan")
+async def unicast_scan_fixture(udns_server):
+    async def _scan(timeout=1, identifier=None, protocol=None, storage=None):
         port = str(udns_server.port)
         with patch.dict("os.environ", {"PYATV_UDNS_PORT": port}):
             return await pyatv.scan(
-                event_loop,
+                asyncio.get_running_loop(),
                 hosts=["127.0.0.1"],
                 timeout=timeout,
                 identifier=identifier,
                 protocol=protocol,
+                storage=storage,
             )
 
     yield _scan
@@ -166,3 +177,24 @@ def mrp_state_dispatcher_fixture(core_dispatcher):
 @pytest.fixture(name="dmap_state_dispatcher")
 def dmap_state_dispatcher_fixture(core_dispatcher):
     yield ProtocolStateDispatcher(Protocol.DMAP, core_dispatcher)
+
+
+@pytest.fixture(name="companion_state_dispatcher")
+def companion_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.Companion, core_dispatcher)
+
+
+# "files" is a list of filenames from tests/data directory that will be served
+# as binary files from the HTTP server
+@pytest.fixture(name="data_webserver")
+def data_webserver_fixture(httpserver: HTTPServer, files: typing.Sequence[str]):
+    root_dir = data_root()
+    for file in files:
+        with open(path.join(root_dir, file), "rb") as _fh:
+            httpserver.expect_request("/" + file).respond_with_data(_fh.read())
+    yield httpserver.url_for("/")
+
+
+@pytest.fixture(name="mockfs")
+def mockfs_fixture(fs):
+    yield fs

@@ -1,25 +1,33 @@
 """Unit tests for pyatv.support.http."""
+
 import asyncio
 import inspect
+import logging
 from typing import Optional, Tuple
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv import const
+from pyatv import exceptions
 from pyatv.support.http import (
-    AbstractHttpServerHandler,
+    SERVER_NAME,
+    USER_AGENT,
     BasicHttpServer,
     HttpRequest,
     HttpResponse,
     HttpSession,
     HttpSimpleRouter,
+    format_request,
+    format_response,
     http_connect,
     http_server,
     parse_request,
     parse_response,
 )
+from pyatv.support.net import unused_port
+
+_LOGGER = logging.getLogger(__name__)
 
 # HTTP MESSAGE PARSING
 #
@@ -35,10 +43,7 @@ def test_parse_response_ok_first_line():
 
 
 def test_parse_response_missing_ending():
-    with pytest.raises(ValueError) as exc:
-        parse_response(b"HTTP/1.0 200 OK\r\n")
-
-    assert "missing end lines" in str(exc)
+    assert parse_response(b"HTTP/1.0 200 OK\r\n") == (None, b"HTTP/1.0 200 OK\r\n")
 
 
 def test_parse_response_headers():
@@ -122,6 +127,35 @@ def test_parse_response_ignore_header_case():
     assert rest == b"extra"
 
 
+@pytest.mark.parametrize(
+    "response,expected",
+    [
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("FOO", "3.14", 200, "OK", {}, b""),
+            f"FOO/3.14 200 OK\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 404, "Not Found", {}, b""),
+            f"HTTP/1.1 404 Not Found\r\nServer: {SERVER_NAME}\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {"A": "B"}, b""),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpResponse("HTTP", "1.1", 200, "OK", {}, b"test"),
+            f"HTTP/1.1 200 OK\r\nServer: {SERVER_NAME}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_response(response, expected):
+    assert format_response(response) == expected
+
+
 def test_parse_request_ok_first_line():
     req, rest = parse_request(b"GET /test HTTP/1.0\r\n\r\n")
     assert req.method == "GET"
@@ -140,6 +174,39 @@ def test_parse_request_arbitrary_protocol_header():
 def test_parse_request_method_with_underscore():
     req, _ = parse_request(b"SOME_METHOD /test FOO/3.14\r\n\r\n")
     assert req.method == "SOME_METHOD"
+
+
+@pytest.mark.parametrize(
+    "request_,expected",
+    [
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("SOME METHOD", "/test", "HTTP", "1.1", {}, b""),
+            f"SOME METHOD /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/example", "HTTP", "1.1", {}, b""),
+            f"GET /example HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "FOO", "3.14", {}, b""),
+            f"GET /test FOO/3.14\r\nUser-Agent: {USER_AGENT}\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {"A": "B"}, b""),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nA: B\r\n\r\n".encode(),
+        ),
+        (
+            HttpRequest("GET", "/test", "HTTP", "1.1", {}, b"test"),
+            f"GET /test HTTP/1.1\r\nUser-Agent: {USER_AGENT}\r\nContent-Length: 4\r\n\r\ntest".encode(),
+        ),
+    ],
+)
+def test_format_request(request_, expected):
+    assert format_request(request_) == expected
 
 
 # BASIC HTTP SERVER
@@ -162,6 +229,7 @@ async def serve_and_connect(
     return client, server
 
 
+@pytest.mark.asyncio
 async def test_server_request_unhandled_resource():
     client, server = await serve_and_connect(lambda req: False)
 
@@ -176,6 +244,7 @@ async def test_server_request_unhandled_resource():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_server_request_single_file():
     def _handle_page(request: HttpRequest):
         assert request.protocol == "HTTP"
@@ -204,6 +273,7 @@ async def test_server_request_single_file():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_server_bad_handler_gives_error():
     def _handle_page(request: HttpRequest):
         raise Exception("fail")
@@ -232,6 +302,7 @@ class DummyRouter(HttpSimpleRouter):
         return HttpResponse("HTTP", "1.1", 123, "dummy", {}, request.body)
 
 
+@pytest.mark.asyncio
 async def test_simple_router():
     router = DummyRouter()
     resp = router.handle_request(
@@ -243,6 +314,7 @@ async def test_simple_router():
     assert resp.body == "foobar"
 
 
+@pytest.mark.asyncio
 async def test_simple_router_method():
     router = DummyRouter()
     resp = router.handle_request(
@@ -251,6 +323,7 @@ async def test_simple_router_method():
     assert resp is None
 
 
+@pytest.mark.asyncio
 async def test_server_with_router():
     client, server = await serve_and_connect(DummyRouter())
 
@@ -260,9 +333,113 @@ async def test_server_with_router():
     server.close()
 
 
+@pytest.mark.asyncio
+async def test_server_process_received():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_received") as mock:
+        mock.side_effect = lambda data: data.replace(b"/foo", b"/bar")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 123
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_process_sent():
+    client, server = await serve_and_connect(DummyRouter())
+
+    with patch.object(BasicHttpServer, "process_sent") as mock:
+        mock.side_effect = lambda data: data.replace(b"200", b"456")
+        resp = await client.get("/foo", allow_error=True)
+
+    mock.assert_called_once()
+    assert resp.code == 456
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_async_handler():
+    class TestRouter(HttpSimpleRouter):
+        def __init__(self):
+            super().__init__()
+            self.add_route("GET", "/baz", self.baz)
+
+        def baz(self, request):
+            return asyncio.create_task(self.async_baz(request))
+
+        async def async_baz(self, request):
+            return HttpResponse("HTTP", "1.1", 200, "baz", {}, request.body)
+
+    client, server = await serve_and_connect(TestRouter())
+
+    resp = await client.get("/baz", allow_error=True)
+    assert resp.code == 200
+    assert resp.message == "baz"
+
+    server.close()
+
+
+@pytest.mark.asyncio
+async def test_server_segmented_request():
+    class TestHttpRequestConnection(asyncio.Protocol):
+        def __init__(self) -> None:
+            super().__init__()
+            self.transport = None
+            self.response_received = asyncio.Event()
+            self.response_content = None
+
+        def connection_made(self, transport):
+            self.transport = transport
+
+        def data_received(self, data):
+            self.response_content = data
+            self.response_received.set()
+
+        async def send(self):
+            self.response_received.clear()
+            self.response_content = None
+
+            data_received = asyncio.Event()
+            original_data_received = BasicHttpServer.data_received
+
+            # make sure the first chunk was received before sending the next
+            def set_event_and_receive(self, data):
+                data_received.set()
+                return original_data_received(self, data)
+
+            with patch.object(BasicHttpServer, "data_received", set_event_and_receive):
+                self.transport.write(b"GET /foo HTTP/1.1\r\nContent-Length: 11\r\n\r\n")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"first")
+                await data_received.wait()
+                data_received.clear()
+                self.transport.write(b"second")
+
+            await self.response_received.wait()
+            return self.response_content
+
+    server, port = await serve(DummyRouter())
+    loop = asyncio.get_event_loop()
+    _, client = await loop.create_connection(
+        TestHttpRequestConnection, "127.0.0.1", port
+    )
+
+    response = await client.send()
+    assert response.startswith(b"HTTP/1.1 200 foo\r\n")
+    assert response.endswith(b"\r\nfirstsecond")
+
+    server.close()
+
+
 # HTTP CONNECTION
 
 
+@pytest.mark.asyncio
 async def test_connection_send_processor():
     def send_processor(data: bytes) -> bytes:
         return data.replace(b"/foo", b"/bar")
@@ -277,6 +454,7 @@ async def test_connection_send_processor():
     server.close()
 
 
+@pytest.mark.asyncio
 async def test_connection_receive_processor():
     def receive_processor(data: bytes) -> bytes:
         return data.replace(b"foo", b"something else")
@@ -289,3 +467,30 @@ async def test_connection_receive_processor():
     assert resp.message == "something else"
 
     server.close()
+
+
+@pytest.mark.asyncio
+async def test_connection_abort_timeout_if_connection_closed():
+    # Set up a TCP server that will just consume the request and disconnect
+    # so that the connection gets closed
+    async def _dummy_server(reader, writer):
+        _LOGGER.debug("Connection established")
+        await reader.read(1)
+
+        _LOGGER.debug("Data read, closing connection")
+        writer.close()
+
+    port = unused_port()
+    await asyncio.start_server(_dummy_server, "127.0.0.1", port)
+
+    connection = await http_connect("127.0.0.1", port)
+
+    # Spawn three requests. Connection will be closed when processing the first one
+    # but all three shall be aborted with an exception.
+    tasks = [
+        asyncio.create_task(connection.send_and_receive("GET", "/test"))
+        for _ in range(3)
+    ]
+    for task in tasks:
+        with pytest.raises(exceptions.ConnectionLostError):
+            await task

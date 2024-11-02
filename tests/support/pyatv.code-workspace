@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../airplay2-receiver"
+		},
+		{
+			"path": "../../../pyminiaudio"
+		}
+	],
+	"settings": {}
+}

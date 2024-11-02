@@ -13,27 +13,31 @@ from zeroconf.asyncio import AsyncZeroconf
 
 from pyatv import exceptions, interface
 from pyatv.const import Protocol
-from pyatv.core import Core, CoreStateDispatcher, ProtocolStateDispatcher
+from pyatv.core import CoreStateDispatcher, create_core
 from pyatv.core.facade import FacadeAppleTV
 from pyatv.core.scan import (
     BaseScanner,
     MulticastMdnsScanner,
     UnicastMdnsScanner,
-    ZeroconfScanner,
+    ZeroconfMulticastScanner,
+    ZeroconfUnicastScanner,
 )
+from pyatv.interface import Storage
 from pyatv.protocols import PROTOCOLS
+from pyatv.storage.memory_storage import MemoryStorage
 from pyatv.support import http
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def scan(
+async def scan(  # pylint: disable=too-many-locals
     loop: asyncio.AbstractEventLoop,
     timeout: int = 5,
     identifier: Optional[Union[str, Set[str]]] = None,
     protocol: Optional[Union[Protocol, Set[Protocol]]] = None,
-    hosts: List[str] = None,
+    hosts: Optional[List[str]] = None,
     aiozc: Optional[AsyncZeroconf] = None,
+    storage: Optional[Storage] = None,
 ) -> List[interface.BaseConfig]:
     """Scan for Apple TVs on network and return their configurations.
 
@@ -54,11 +58,11 @@ async def scan(
     scanner: BaseScanner
     if aiozc:
         if hosts:
-            scanner = ZeroconfScanner(
+            scanner = ZeroconfUnicastScanner(
                 aiozc, hosts=[IPv4Address(host) for host in hosts]
             )
         else:
-            scanner = ZeroconfScanner(aiozc)
+            scanner = ZeroconfMulticastScanner(aiozc)
     else:
         if hosts:
             scanner = UnicastMdnsScanner([IPv4Address(host) for host in hosts], loop)
@@ -83,15 +87,23 @@ async def scan(
                 proto_methods.device_info,
             )
 
+    storage = storage or MemoryStorage()
+
     devices = (await scanner.discover(timeout)).values()
-    return [device for device in devices if _should_include(device)]
+    filtered_devices = [device for device in devices if _should_include(device)]
+
+    for device in filtered_devices:
+        settings = await storage.get_settings(device)
+        device.apply(settings)
+    return filtered_devices
 
 
-async def connect(
+async def connect(  # pylint: disable=too-many-locals
     config: interface.BaseConfig,
     loop: asyncio.AbstractEventLoop,
-    protocol: Protocol = None,
-    session: aiohttp.ClientSession = None,
+    protocol: Optional[Protocol] = None,
+    session: Optional[aiohttp.ClientSession] = None,
+    storage: Optional[Storage] = None,
 ) -> interface.AppleTV:
     """Connect to a device based on a configuration."""
     if not config.services:
@@ -100,10 +112,17 @@ async def connect(
     if config.identifier is None:
         raise exceptions.DeviceIdMissingError("no device identifier")
 
+    storage = storage or MemoryStorage()
+
     config_copy = deepcopy(config)
+
+    _LOGGER.debug("Loading settings from %s", storage)
+    settings = await storage.get_settings(config)
+    config_copy.apply(settings)
+
     session_manager = await http.create_session(session)
     core_dispatcher = CoreStateDispatcher()
-    atv = FacadeAppleTV(config_copy, session_manager, core_dispatcher)
+    atv = FacadeAppleTV(config_copy, session_manager, core_dispatcher, settings)
 
     try:
         for proto, proto_methods in PROTOCOLS.items():
@@ -119,14 +138,15 @@ async def connect(
             takeover_method = partial(atv.takeover, proto)
 
             # Core provides core access with a protocol specific twist
-            core = Core(
-                loop,
+            core = await create_core(
                 config_copy,
                 service,
-                atv,
-                session_manager,
-                takeover_method,
-                ProtocolStateDispatcher(proto, core_dispatcher),
+                settings=settings,
+                device_listener=atv,
+                session_manager=session_manager,
+                core_dispatcher=core_dispatcher,
+                takeover_method=takeover_method,
+                loop=loop,
             )
 
             for setup_data in proto_methods.setup(core):
@@ -136,8 +156,7 @@ async def connect(
     except Exception:
         await session_manager.close()
         raise
-    else:
-        return atv
+    return atv
 
 
 async def pair(
@@ -145,8 +164,9 @@ async def pair(
     protocol: Protocol,
     loop: asyncio.AbstractEventLoop,
     session: aiohttp.ClientSession = None,
+    storage: Optional[Storage] = None,
     **kwargs
-):
+) -> interface.PairingHandler:
     """Pair a protocol for an Apple TV."""
     service = config.get_service(protocol)
     if not service:
@@ -156,9 +176,21 @@ async def pair(
     if not proto_methods:
         raise RuntimeError(f"missing implementation for {protocol}")
 
-    session = await http.create_session(session)
+    storage = storage or MemoryStorage()
+
+    settings = await storage.get_settings(config)
+    session_manager = await http.create_session(session)
+
+    core = await create_core(
+        deepcopy(config),
+        service,
+        settings=settings,
+        session_manager=session_manager,
+        loop=loop,
+    )
+
     try:
-        return proto_methods.pair(config, service, session, loop, **kwargs)
+        return proto_methods.pair(core, **kwargs)
     except Exception:
-        await session.close()
+        await session_manager.close()
         raise

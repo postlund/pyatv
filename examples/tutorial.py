@@ -6,6 +6,7 @@ https://pyatv.dev/documentation/tutorial/
 
 Comments has been added here to make linters happy.
 """
+
 import asyncio
 
 from aiohttp import WSMsgType, web

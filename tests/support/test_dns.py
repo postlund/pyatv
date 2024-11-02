@@ -1,4 +1,5 @@
 """Unit tests for pyatv.support.dns"""
+
 import io
 import typing
 
@@ -238,6 +239,18 @@ def test_dns_sd_txt_parse_long():
         txt_dict = dns.parse_txt_dict(buffer, len(data))
         assert buffer.tell() == len(data)
         assert txt_dict == {"foo": b"\xCA\xFE" * 100}
+
+
+@pytest.mark.parametrize(
+    "data,expected",
+    [
+        ({"foo": b"bar"}, b"\x07foo=bar"),
+        ({b"foo": "bar"}, b"\x07foo=bar"),
+        ({"foo": "bar", "spam": "eggs"}, b"\x07foo=bar\x09spam=eggs"),
+    ],
+)
+def test_dns_sd_txt_format(data, expected):
+    assert dns.format_txt_dict(data) == expected
 
 
 @pytest.mark.parametrize(

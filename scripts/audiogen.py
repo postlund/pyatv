@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Simple script to generate audio files for testing.
 
 This script can generate example audio files used for testing. Some metadata fields,
@@ -34,7 +35,7 @@ FRAMES_PER_PACKET = 352
 def write_new_wave_file(filename: str, args) -> None:
     """Generate and write a new sample WAV file."""
     if path.exists(filename) and not args.overwrite:
-        raise Exception("file already exists")
+        raise RuntimeError("file already exists")
 
     with wave.open(filename, "wb") as handle:
         wfile: wave.Wave_write = cast(wave.Wave_write, handle)
@@ -58,7 +59,9 @@ def add_metadata(filename: str, args):
     f = File(filename)
     f.add_tags()
     for title, tag in METADATA_FIELDS.items():
-        f.tags.add(tag(encoding=Encoding.UTF8, text=[getattr(args, title)]))
+        text = getattr(args, title)
+        if text is not None:
+            f.tags.add(tag(encoding=Encoding.UTF8, text=[text]))
     f.save()
 
 

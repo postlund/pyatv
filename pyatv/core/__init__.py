@@ -1,4 +1,5 @@
 """Core module of pyatv."""
+
 import asyncio
 from enum import Enum
 from typing import (
@@ -17,7 +18,8 @@ from typing import (
 from pyatv.const import FeatureName, PairingRequirement, Protocol
 from pyatv.core.protocol import MessageDispatcher
 from pyatv.interface import BaseConfig, BaseService, Playing, PushUpdater
-from pyatv.support.http import ClientSessionManager
+from pyatv.settings import Settings
+from pyatv.support.http import ClientSessionManager, create_session
 from pyatv.support.state_producer import StateProducer
 
 TakeoverMethod = Callable[
@@ -38,6 +40,12 @@ class UpdatedState(Enum):
     Volume = 2
     """Volume was updated."""
 
+    KeyboardFocus = 3
+    """Keyboard focus was updated."""
+
+    OutputDevices = 4
+    """AirPlay output devices were updated."""
+
 
 # pylint: enable=invalid-name
 
@@ -51,6 +59,8 @@ class StateMessage(NamedTuple):
     # Type depending on value of state:
     # - UpdatedState.Playing -> interface.Playing
     # - UpdatedState.Volume -> float
+    # - UpdatedState.KeyboardFocus -> const.KeyboardFocusState
+    # - UpdatedState.OutputDevices -> List[interface.OutputDevice]
     value: Any
 
     def __str__(self):
@@ -203,6 +213,7 @@ class Core:
         loop: asyncio.AbstractEventLoop,
         config: BaseConfig,
         service: BaseService,
+        settings: Settings,
         device_listener: StateProducer,
         session_manager: ClientSessionManager,
         takeover: TakeoverMethod,
@@ -212,7 +223,41 @@ class Core:
         self.loop = loop
         self.config = config
         self.service = service
+        self.settings = settings
         self.device_listener = device_listener
         self.session_manager = session_manager
         self.takeover = takeover
         self.state_dispatcher = state_dispatcher
+
+
+async def create_core(
+    config: BaseConfig,
+    service: BaseService,
+    /,
+    settings: Optional[Settings] = None,
+    device_listener: Optional[StateProducer] = None,
+    session_manager: Optional[ClientSessionManager] = None,
+    core_dispatcher: Optional[CoreStateDispatcher] = None,
+    takeover_method: Optional[TakeoverMethod] = None,
+    loop: Optional[asyncio.AbstractEventLoop] = None,
+) -> Core:
+    """Create a new core instance.
+
+    Mostly a convenience method that provides defaults for some arguments.
+    """
+
+    def _takeover():
+        pass
+
+    return Core(
+        loop or asyncio.get_running_loop(),
+        config,
+        service,
+        settings or Settings(),
+        device_listener or StateProducer(),
+        session_manager or await create_session(),
+        takeover_method or _takeover,
+        ProtocolStateDispatcher(
+            service.protocol, core_dispatcher or CoreStateDispatcher()
+        ),
+    )

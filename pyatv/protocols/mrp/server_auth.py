@@ -17,22 +17,11 @@ from srptools import SRPContext, SRPServerSession, constants
 
 from pyatv.auth.hap_srp import hkdf_expand
 from pyatv.auth.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
+from pyatv.auth.server_auth import PIN_CODE, PRIVATE_KEY, SERVER_IDENTIFIER
 from pyatv.protocols.mrp import messages, protobuf
 from pyatv.support import chacha20, log_binary
 
 _LOGGER = logging.getLogger(__name__)
-
-PIN_CODE = 1111
-CLIENT_IDENTIFIER = "4D797FD3-3538-427E-A47B-A32FC6CF3A69"
-CLIENT_CREDENTIALS = (
-    "e734ea6c2b6257de72355e472aa05a4c487e6b463c029ed306d"
-    + "f2f01b5636b58:3c99faa5484bb424bcb5da34cbf5dec6e755139c3674e39abc4ae8"
-    + "9032c87900:35443739374644332d333533382d343237452d413437422d413332464"
-    + "336434633413639:31393966303461372d613536642d343932312d616139392d6165"
-    + "64653932323964393833"
-)
-SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A69"
-PRIVATE_KEY = 32 * b"\xAA"
 
 ServerKeys = namedtuple("ServerKeys", "sign auth auth_pub verify verify_pub")
 
@@ -158,8 +147,8 @@ class MrpServerAuth(ABC):
             {TlvValue.Identifier: self.unique_id, TlvValue.Signature: signature}
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
+        encrypted = chacha.encrypt(tlv, nonce="PV-Msg02".encode())
 
         msg = messages.crypto_pairing(
             {
@@ -201,7 +190,6 @@ class MrpServerAuth(ABC):
 
         proof = binascii.unhexlify(self.session.key_proof_hash)
         if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
-
             msg = messages.crypto_pairing(
                 {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
             )
@@ -239,8 +227,8 @@ class MrpServerAuth(ABC):
             }
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
+        encrypted = chacha.encrypt(tlv, nonce="PS-Msg06".encode())
 
         msg = messages.crypto_pairing(
             {TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted}

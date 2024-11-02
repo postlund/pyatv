@@ -76,6 +76,8 @@ This is the general feature list provided by the external interface.
 | Launch application                                              | [Doc](../../development/apps), {% include api i="interface.Apps" %}
 | --------------------------------------------------------------- | --------- |
 | List installed apps                                             | [Doc](../../development/apps), {% include api i="interface.Apps" %}
+| --------------------------------------------------------------- | --------- |
+| Storage                                                         | [Doc](../../development/storage), {% include api i="interface.Storage" %}
 
 # Core Features
 
@@ -86,6 +88,7 @@ Some features are provided generally by pyatv and not bound to any particular pr
 * Device information via information from service discovery ([Device Information](../concepts#device-information))
 * Set up of protocols based on provided configuration
 * Callbacks when connection is lost ([Device Updates](../../development/listeners#device-updates))
+* Storage API for storing settings and credentials somewhere, e.g. file or a cloud service ([Storage and Settings](../../development/storage))
 
 # Protocols per Device
 
@@ -136,6 +139,7 @@ app and power related functions.
 * Turn on/off device ({% include api i="interface.Power.turn_on" %},
   {% include api i="interface.Power.turn_off" %})
 * Remote control (see {% include api i="interface.RemoteControl" %} for supported buttons)
+* Touch gestures and click
 
 ### Limitations and notes
 
@@ -171,7 +175,7 @@ Music app in macOS.
 
 ## MRP
 
-This protocol was introduced in tvOS and superseeds DMAP. It has the same features as well
+This protocol was introduced in tvOS and superseds DMAP. It has the same features as well
 as new ones, like notion of apps and game pad controls.
 
 ### Supported Features
@@ -229,13 +233,14 @@ Audio streaming has been verified to work with these devices:
 
 * Apple TV 3 (v8.4.4)
 * Apple TV 4K gen 1 (v14.5)
+* [airplay2-receiver](https://github.com/openairplay/airplay2-receiver) ([224b9660c31ed8624f46fdae9fcb5f44e5ec6c12](https://github.com/openairplay/airplay2-receiver/tree/224b9660c31ed8624f46fdae9fcb5f44e5ec6c12))
 * HomePod Mini (v14.5)
 * AirPort Express (v7.8.1)
 * Yamaha RX-V773 (v1.98)
 
 The following 3rd party software receivers have also been verified to work:
 
-* [shairport-sync](https://github.com/mikebrady/shairport-sync) (v3.3.8)
+* [shairport-sync](https://github.com/mikebrady/shairport-sync) (v4.2)
 
 If you have verified another device or receiver, please update the list by pressing
 *Edit this page* below and opening a pull request.

@@ -1,11 +1,14 @@
 """Implementation of the MediaRemoteTV Protocol used by ATV4 and later."""
 
 import asyncio
+from contextlib import suppress
 import datetime
 import logging
 import math
 import re
-from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple, cast
+
+from aiohttp import ClientError, ClientSession
 
 from pyatv import exceptions
 from pyatv.auth.hap_srp import SRPAuthHandler
@@ -47,6 +50,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Metadata,
+    OutputDevice,
     PairingHandler,
     Playing,
     Power,
@@ -63,9 +67,11 @@ from pyatv.protocols.mrp.protobuf import PlaybackState
 from pyatv.protocols.mrp.protocol import MrpProtocol
 from pyatv.support.cache import Cache
 from pyatv.support.device_info import lookup_model, lookup_version
-from pyatv.support.http import ClientSessionManager
+from pyatv.support.url import is_url
 
 _LOGGER = logging.getLogger(__name__)
+
+_DEFAULT_SKIP_TIME = 15
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
@@ -102,6 +108,10 @@ _FEATURES_SUPPORTED: List[FeatureName] = [
     FeatureName.TurnOn,
     FeatureName.TurnOff,
     FeatureName.PowerState,
+    FeatureName.OutputDevices,
+    FeatureName.AddOutputDevices,
+    FeatureName.RemoveOutputDevices,
+    FeatureName.SetOutputDevices,
 ]
 
 _FEATURE_COMMAND_MAP = {
@@ -132,6 +142,7 @@ _FIELD_FEATURES: Dict[FeatureName, str] = {
     FeatureName.SeasonNumber: "seasonNumber",
     FeatureName.EpisodeNumber: "episodeNumber",
     FeatureName.ContentIdentifier: "contentIdentifier",
+    FeatureName.iTunesStoreIdentifier: "iTunesStoreIdentifier",
 }
 
 DELAY_BETWEEN_COMMANDS = 0.1
@@ -206,7 +217,10 @@ def build_playing_instance(  # pylint: disable=too-many-locals
             datetime.datetime.now() - _cocoa_to_timestamp(elapsed_timestamp)
         ).total_seconds()
 
-        if device_state() == DeviceState.Playing:
+        playback_rate = state.metadata_field("playbackRate") or 0.0
+        if device_state() == DeviceState.Playing and not math.isclose(
+            playback_rate, 0.0
+        ):
             return int(elapsed_time + diff)
         return int(elapsed_time)
 
@@ -254,6 +268,10 @@ def build_playing_instance(  # pylint: disable=too-many-locals
         """Content identifier."""
         return state.metadata_field("contentIdentifier")
 
+    def itunes_store_identifier() -> int:
+        """Itunes Store identifier."""
+        return state.metadata_field("iTunesStoreIdentifier")
+
     return Playing(
         media_type=media_type(),
         device_state=device_state(),
@@ -270,6 +288,7 @@ def build_playing_instance(  # pylint: disable=too-many-locals
         season_number=season_number(),
         episode_number=episode_number(),
         content_identifier=content_identifier(),
+        itunes_store_identifier=itunes_store_identifier(),
     )
 
 
@@ -418,28 +437,31 @@ class MrpRemoteControl(RemoteControl):
         """Wake up the device."""
         await _send_hid_key(self.protocol, "wakeup", InputAction.SingleTap)
 
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        await self._skip_command(CommandInfo_pb2.SkipForward)
+        await self._skip_command(CommandInfo_pb2.SkipForward, time_interval)
 
-    async def skip_backward(self) -> None:
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
         """Skip backwards a time interval.
 
         Skip interval is typically 15-30s, but is decided by the app.
         """
-        await self._skip_command(CommandInfo_pb2.SkipBackward)
+        await self._skip_command(CommandInfo_pb2.SkipBackward, time_interval)
 
-    async def _skip_command(self, command) -> None:
+    async def _skip_command(self, command, time_interval: float) -> None:
         info = self.psm.playing.command_info(command)
 
+        skip_interval: int
+        if time_interval > 0:
+            skip_interval = int(time_interval)
         # Pick the first preferred interval for simplicity
-        if info and info.preferredIntervals:
+        elif info and info.preferredIntervals:
             skip_interval = info.preferredIntervals[0]
         else:
-            skip_interval = 15  # Default value
+            skip_interval = _DEFAULT_SKIP_TIME  # Default value
 
         await self._send_command(command, skipInterval=skip_interval)
 
@@ -459,11 +481,18 @@ class MrpRemoteControl(RemoteControl):
 class MrpMetadata(Metadata):
     """Implementation of API for retrieving metadata."""
 
-    def __init__(self, protocol, psm, identifier):
+    def __init__(
+        self,
+        protocol: MrpProtocol,
+        psm: PlayerStateManager,
+        identifier: Optional[str],
+        client_session: ClientSession,
+    ):
         """Initialize a new MrpPlaying."""
         self.protocol = protocol
         self.psm = psm
         self.identifier = identifier
+        self.client_session = client_session
         self.artwork_cache = Cache(limit=4)
 
     @property
@@ -502,6 +531,56 @@ class MrpMetadata(Metadata):
         return artwork
 
     async def _fetch_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        return await self._fetch_remote_artwork(
+            width, height
+        ) or await self._fetch_local_artwork(width, height)
+
+    async def _fetch_remote_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch external artwork from a URL."""
+        metadata = self.psm.playing.metadata
+        if not metadata:
+            return None
+
+        urls = []
+
+        if metadata.HasField("artworkIdentifier"):
+            # appears to be a template to itunes artwork, but let's validate
+            url_template = metadata.artworkIdentifier
+            try:
+                url = url_template.format(
+                    # the itunes image server preserves aspect ratio
+                    w=999999 if width < 1 else width,
+                    h=999999 if height < 1 else height,
+                    c="bb",
+                    f="png",
+                )
+            except KeyError:
+                url = None
+            if is_url(url):
+                urls.append(url)
+
+        if metadata.HasField("artworkURL"):
+            # artworkURL has fixed size and format, use it as a fallback
+            urls.append(metadata.artworkURL)
+
+        for url in urls:
+            try:
+                async with self.client_session.get(url) as response:
+                    if response.status == 200:
+                        return ArtworkInfo(
+                            bytes=await response.read(),
+                            mimetype=response.headers.get("content-type"),
+                            # TODO: get actual image size
+                            width=width,
+                            height=height,
+                        )
+            except ClientError:
+                pass
+
+        return None
+
+    async def _fetch_local_artwork(self, width, height) -> Optional[ArtworkInfo]:
+        """Fetch artwork over MRP."""
         playing = self.psm.playing
         resp = await self.psm.protocol.send_and_receive(
             messages.playback_queue_request(playing.location, width, height)
@@ -521,7 +600,7 @@ class MrpMetadata(Metadata):
     def artwork_id(self):
         """Return a unique identifier for current artwork."""
         metadata = self.psm.playing.metadata
-        if metadata and metadata.artworkAvailable:
+        if metadata and (metadata.artworkAvailable or metadata.HasField("artworkURL")):
             if metadata.HasField("artworkIdentifier"):
                 return metadata.artworkIdentifier
             if metadata.HasField("contentIdentifier"):
@@ -671,24 +750,36 @@ class MrpAudio(Audio):
         self.protocol: MrpProtocol = protocol
         self.state_dispatcher = state_dispatcher
         self._volume_controls_available: bool = False
-        self._output_device_uid: Optional[str] = None
+        self._volume_controls_absolute: bool = False
+        self._volume_controls_relative: bool = False
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
+        self._output_devices: List[OutputDevice] = []
+        self._output_devices_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
 
     @property
     def device_uid(self) -> Optional[str]:
-        """Return device UID for current active output device."""
-        if self._output_device_uid is not None:
-            return self._output_device_uid
+        """Return the UID of our device."""
         if self.protocol.device_info is not None:
-            return self.protocol.device_info.inner().deviceUID  # type: ignore
+            inner = self.protocol.device_info.inner()
+            return inner.clusterID or inner.deviceUID  # type: ignore
         return None
 
     @property
     def is_available(self):
         """Return if audio controls are available."""
         return self._volume_controls_available and self.device_uid is not None
+
+    @property
+    def is_volume_absolute(self):
+        """Return if absolute audio controls are available."""
+        return self._volume_controls_absolute
+
+    @property
+    def is_volume_relative(self):
+        """Return if absolute audio controls are available."""
+        return self._volume_controls_relative
 
     def _add_listeners(self):
         self.protocol.listen_to(
@@ -702,6 +793,12 @@ class MrpAudio(Audio):
         self.protocol.listen_to(
             protobuf.VOLUME_DID_CHANGE_MESSAGE, self._volume_did_change
         )
+        self.protocol.listen_to(
+            protobuf.DEVICE_INFO_MESSAGE, self._update_output_devices
+        )
+        self.protocol.listen_to(
+            protobuf.DEVICE_INFO_UPDATE_MESSAGE, self._update_output_devices
+        )
 
     async def _volume_control_availability(self, message) -> None:
         self._update_volume_controls(message.inner())
@@ -709,13 +806,22 @@ class MrpAudio(Audio):
     async def _volume_control_changed(self, message) -> None:
         inner = message.inner()
 
-        self._output_device_uid = inner.outputDeviceUID
-        self._update_volume_controls(inner.capabilities)
+        # Make sure update is for our device (in case it changed for someone else)
+        if inner.outputDeviceUID == self.device_uid:
+            self._update_volume_controls(inner.capabilities)
 
     def _update_volume_controls(
         self, availabilty_message: protobuf.VolumeControlAvailabilityMessage
     ) -> None:
         self._volume_controls_available = availabilty_message.volumeControlAvailable
+        self._volume_controls_absolute = availabilty_message.volumeCapabilities in {
+            protobuf.VolumeCapabilities.Absolute,
+            protobuf.VolumeCapabilities.Both,
+        }
+        self._volume_controls_relative = availabilty_message.volumeCapabilities in {
+            protobuf.VolumeCapabilities.Relative,
+            protobuf.VolumeCapabilities.Both,
+        }
         _LOGGER.debug(
             "Volume control availability changed to %s", self._volume_controls_available
         )
@@ -724,7 +830,7 @@ class MrpAudio(Audio):
         inner = message.inner()
 
         # Make sure update is for our device (in case it changed for someone else)
-        if inner.outputDeviceUID == self._output_device_uid:
+        if inner.outputDeviceUID == self.device_uid:
             self._volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
@@ -752,24 +858,69 @@ class MrpAudio(Audio):
 
         await self.protocol.send(messages.set_volume(self.device_uid, level / 100.0))
 
-        if self._volume != level:
+        if self.is_volume_absolute and self._volume != level:
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
-        if self._volume < 100.0:
+        if self.is_volume_absolute and self._volume == 100.0:
+            return
+        if self.is_volume_relative:
             await _send_hid_key(
                 self.protocol, "volume_up", InputAction.SingleTap, flush=False
             )
-            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+            if self.is_volume_absolute:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        elif self.is_volume_absolute:
+            await self.set_volume(min(self.volume + 5, 100.0))
 
     async def volume_down(self) -> None:
         """Decrease volume by one step."""
-        if self._volume > 0.0:
+        if self.is_volume_absolute and self._volume == 0.0:
+            return
+        if self.is_volume_relative:
             await _send_hid_key(
                 self.protocol, "volume_down", InputAction.SingleTap, flush=False
             )
-            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+            if self.is_volume_absolute:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        elif self.is_volume_absolute:
+            await self.set_volume(max(self.volume - 5, 0.0))
+
+    async def _update_output_devices(self, message: protobuf.ProtocolMessage) -> None:
+        inner = cast(protobuf.DeviceInfoMessage, message.inner())
+        devices = []
+        if inner.isGroupLeader and not inner.isProxyGroupPlayer:
+            devices.append(OutputDevice(inner.name, inner.uniqueIdentifier))
+        for device in list(inner.groupedDevices):
+            devices.append(OutputDevice(device.name, device.deviceUID))
+        self._output_devices = devices
+        self._output_devices_event.set()
+        self._output_devices_event.clear()
+        self.state_dispatcher.dispatch(UpdatedState.OutputDevices, devices)
+
+    @property
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        return self._output_devices
+
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        await self.protocol.send(messages.add_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
+
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        await self.protocol.send(messages.remove_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
+
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
+        await self.protocol.send(messages.set_output_devices(*devices))
+        with suppress(asyncio.TimeoutError):
+            await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
 
 
 class MrpFeatures(Features):
@@ -830,10 +981,16 @@ class MrpFeatures(Features):
         if feature_name in [
             FeatureName.VolumeDown,
             FeatureName.VolumeUp,
+        ]:
+            if self.audio.is_available:
+                return FeatureInfo(state=FeatureState.Available)
+            return FeatureInfo(state=FeatureState.Unavailable)
+
+        if feature_name in [
             FeatureName.Volume,
             FeatureName.SetVolume,
         ]:
-            if self.audio.is_available:
+            if self.audio.is_available and self.audio.is_volume_absolute:
                 return FeatureInfo(state=FeatureState.Available)
             return FeatureInfo(state=FeatureState.Unavailable)
 
@@ -906,11 +1063,12 @@ async def service_info(
     Pairing has never been enforced by MRP (maybe by design), but it is
     possible to pair if AllowPairing is YES.
     """
-    service.pairing = (
-        PairingRequirement.Optional
-        if service.properties.get("allowpairing", "no").lower() == "yes"
-        else PairingRequirement.Disabled
-    )
+    if not service.enabled:
+        service.pairing = PairingRequirement.NotNeeded
+    elif service.properties.get("allowpairing", "no").lower() == "yes":
+        service.pairing = PairingRequirement.Optional
+    else:
+        service.pairing = PairingRequirement.Disabled
 
 
 def create_with_connection(  # pylint: disable=too-many-locals
@@ -919,11 +1077,15 @@ def create_with_connection(  # pylint: disable=too-many-locals
     requires_heatbeat: bool = True,
 ) -> SetupData:
     """Set up a new MRP service from a connection."""
-    protocol = MrpProtocol(connection, SRPAuthHandler(), core.service)
+    protocol = MrpProtocol(
+        connection, SRPAuthHandler(), core.service, core.settings.info
+    )
     psm = PlayerStateManager(protocol)
 
     remote_control = MrpRemoteControl(core.loop, psm, protocol)
-    metadata = MrpMetadata(protocol, psm, core.config.identifier)
+    metadata = MrpMetadata(
+        protocol, psm, core.config.identifier, core.session_manager.session
+    )
     power = MrpPower(core.loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
     audio = MrpAudio(protocol, core.state_dispatcher)
@@ -989,12 +1151,6 @@ def setup(core: Core) -> Generator[SetupData, None, None]:
     )
 
 
-def pair(
-    config: BaseConfig,
-    service: BaseService,
-    session_manager: ClientSessionManager,
-    loop: asyncio.AbstractEventLoop,
-    **kwargs
-) -> PairingHandler:
+def pair(core: Core, **kwargs) -> PairingHandler:
     """Return pairing handler for protocol."""
-    return MrpPairingHandler(config, service, session_manager, loop, **kwargs)
+    return MrpPairingHandler(core, **kwargs)

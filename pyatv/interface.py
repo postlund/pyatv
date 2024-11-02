@@ -6,6 +6,7 @@ all its features.
 
 from abc import ABC, abstractmethod
 import asyncio
+from dataclasses import dataclass
 import hashlib
 import inspect
 import io
@@ -20,6 +21,7 @@ from typing import (
     MutableMapping,
     NamedTuple,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -35,7 +37,10 @@ from pyatv.const import (
     OperatingSystem,
     PairingRequirement,
     Protocol,
+    TouchAction,
 )
+from pyatv.settings import Settings
+from pyatv.support import prettydataclass
 from pyatv.support.device_info import lookup_version
 from pyatv.support.http import ClientSessionManager
 from pyatv.support.state_producer import StateProducer
@@ -50,7 +55,7 @@ __pdoc__ = {
     "DeviceInfo.RAW_MODEL": False,
 }
 
-_ALL_FEATURES = {}  # type: Dict[int, Tuple[str, str]]
+_ALL_FEATURES: Dict[int, Tuple[str, str]] = {}
 
 ReturnType = TypeVar(  # pylint: disable=invalid-name
     "ReturnType", bound=Callable[..., Any]
@@ -64,6 +69,18 @@ class ArtworkInfo(NamedTuple):
     mimetype: str
     width: int
     height: int
+
+
+@prettydataclass()
+@dataclass
+class MediaMetadata:
+    """Container for media (e.g. audio or video) metadata."""
+
+    title: Optional[str] = None
+    artist: Optional[str] = None
+    album: Optional[str] = None
+    artwork: Optional[bytes] = None  # Raw JPEG data
+    duration: Optional[float] = None
 
 
 class FeatureInfo(NamedTuple):
@@ -85,7 +102,7 @@ def feature(index: int, name: str, doc: str) -> Callable[[ReturnType], ReturnTyp
             setattr(func, "_feature_name", name)
             return func
 
-        raise Exception(
+        raise RuntimeError(
             f"Index {index} collides between {name} and {_ALL_FEATURES[index]}"
         )
 
@@ -109,7 +126,7 @@ def _get_first_sentence_in_pydoc(obj):
 
 def retrieve_commands(obj: object):
     """Retrieve all commands and help texts from an API object."""
-    commands = {}  # type: Dict[str, str]
+    commands: Dict[str, str] = {}
     for func in obj.__dict__:
         if not inspect.isfunction(obj.__dict__[func]) and not isinstance(
             obj.__dict__[func], property
@@ -192,6 +209,23 @@ class BaseService(ABC):
         self.password = other.password or self.password
         self._properties.update(other.properties)
 
+    def settings(self) -> Mapping[str, Any]:
+        """Return settings and their values."""
+        return {
+            "credentials": self.credentials,
+            "password": self.password,
+        }
+
+    def apply(self, settings: Mapping[str, Any]) -> None:
+        """Apply settings to service.
+
+        Expects the same format as returned by settings() method. Unknown properties
+        are silently ignored. Settings with a None value are also ignore (keeps
+        original value).
+        """
+        self.credentials = settings.get("credentials") or self.credentials
+        self.password = settings.get("password") or self.password
+
     def __str__(self) -> str:
         """Return a string representation of this object."""
         return (
@@ -212,7 +246,9 @@ class PairingHandler(ABC):
     """Base class for API used to pair with an Apple TV."""
 
     def __init__(
-        self, session_manager: ClientSessionManager, service: BaseService
+        self,
+        session_manager: ClientSessionManager,
+        service: BaseService,
     ) -> None:
         """Initialize a new instance of PairingHandler."""
         self.session_manager = session_manager
@@ -230,13 +266,11 @@ class PairingHandler(ABC):
     @abstractmethod
     def pin(self, pin) -> None:
         """Pin code used for pairing."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
     def device_provides_pin(self) -> bool:
         """Return True if remote device presents PIN code, else False."""
-        raise exceptions.NotSupportedError()
 
     @property
     @abstractmethod
@@ -245,17 +279,14 @@ class PairingHandler(ABC):
 
         The value will be reset when stop() is called.
         """
-        raise exceptions.NotSupportedError()
 
     @abstractmethod
     async def begin(self) -> None:
         """Start pairing process."""
-        raise exceptions.NotSupportedError()
 
     @abstractmethod
     async def finish(self) -> None:
         """Stop pairing process."""
-        raise exceptions.NotSupportedError()
 
 
 class RemoteControl:
@@ -294,7 +325,7 @@ class RemoteControl:
 
     @feature(6, "Pause", "Pause playing media.")
     async def pause(self) -> None:
-        """Press key play."""
+        """Press key pause."""
         raise exceptions.NotSupportedError()
 
     @feature(7, "Stop", "Stop playing media.")
@@ -376,18 +407,20 @@ class RemoteControl:
         "SkipForward",
         "Skip forward a time interval.",
     )
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
         raise exceptions.NotSupportedError()
 
     @feature(37, "SkipBackward", "Skip backwards a time interval.")
-    async def skip_backward(self) -> None:
-        """Skip backwards a time interval.
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
+        """Skip backward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
         raise exceptions.NotSupportedError()
 
@@ -416,6 +449,11 @@ class RemoteControl:
         """Select previous channel."""
         raise exceptions.NotSupportedError()
 
+    @feature(58, "Screensaver", "Activate screen saver.")
+    async def screensaver(self) -> None:
+        """Activate screen saver.."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
@@ -437,6 +475,7 @@ class Playing(ABC):
         "season_number",
         "episode_number",
         "content_identifier",
+        "itunes_store_identifier",
     ]
 
     def __init__(  # pylint: disable=too-many-locals
@@ -456,8 +495,10 @@ class Playing(ABC):
         season_number: Optional[int] = None,
         episode_number: Optional[int] = None,
         content_identifier: Optional[str] = None,
+        itunes_store_identifier: Optional[int] = None,
     ) -> None:
         """Initialize a new Playing instance."""
+        self._itunes_store_identifier = None
         self._media_type = media_type
         self._device_state = device_state
         self._title = title
@@ -473,9 +514,11 @@ class Playing(ABC):
         self._season_number = season_number
         self._episode_number = episode_number
         self._content_identifier = content_identifier
+        self._itunes_store_identifier = itunes_store_identifier
+
         self._post_process()
 
-    def _post_process(self):
+    def _post_process(self) -> None:
         if self._position:
             # Make sure position never is negative
             self._position = max(self._position, 0)
@@ -532,9 +575,11 @@ class Playing(ABC):
         if self.shuffle is not None:
             output.append(f"     Shuffle: {convert.shuffle_str(self.shuffle)}")
 
+        if self._itunes_store_identifier is not None:
+            output.append(f"iTunes Store Identifier: {self._itunes_store_identifier}")
         return "\n".join(output)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare if two objects are equal."""
         if isinstance(other, Playing):
             for prop in self._PROPERTIES:
@@ -638,6 +683,12 @@ class Playing(ABC):
         """Content identifier (app specific)."""
         return self._content_identifier
 
+    @property  # type: ignore
+    @feature(50, "iTunesStoreIdentifier", "iTunes Store identifier for Content")
+    def itunes_store_identifier(self) -> Optional[int]:
+        """Itunes Store identifier."""
+        return self._itunes_store_identifier
+
 
 class App:
     """Information about an app."""
@@ -677,8 +728,51 @@ class Apps:
         raise exceptions.NotSupportedError()
 
     @feature(39, "LaunchApp", "Launch an app.")
-    async def launch_app(self, bundle_id: str) -> None:
-        """Launch an app based on bundle ID."""
+    async def launch_app(self, bundle_id_or_url: str) -> None:
+        """Launch an app based on bundle ID or URL."""
+        raise exceptions.NotSupportedError()
+
+
+class UserAccount:
+    """Information about a user account."""
+
+    def __init__(self, name: str, identifier: str) -> None:
+        """Initialize a new UserAccount instance."""
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -> Optional[str]:
+        """User name."""
+        return self._name
+
+    @property
+    def identifier(self) -> str:
+        """Return a unique id for the account."""
+        return self._identifier
+
+    def __str__(self) -> str:
+        """Convert account info to readable string."""
+        return f"Account: {self.name} ({self.identifier})"
+
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, UserAccount):
+            return self.name == other.name and self.identifier == other.identifier
+        return False
+
+
+class UserAccounts:
+    """Base class for account handling."""
+
+    @feature(55, "AccountList", "List of user accounts.")
+    async def account_list(self) -> List[UserAccount]:
+        """Fetch a list of user accounts that can be switched."""
+        raise exceptions.NotSupportedError()
+
+    @feature(56, "SwitchAccount", "Switch user account.")
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account by account ID."""
         raise exceptions.NotSupportedError()
 
 
@@ -780,7 +874,14 @@ class Stream:  # pylint: disable=too-few-public-methods
         raise exceptions.NotSupportedError()
 
     @feature(44, "StreamFile", "Stream local file to device.")
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(
+        self,
+        file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
+        /,
+        metadata: Optional[MediaMetadata] = None,
+        override_missing_metadata: bool = False,
+        **kwargs
+    ) -> None:
         """Stream local or remote file to device.
 
         Supports either local file paths or a HTTP(s) address.
@@ -810,7 +911,7 @@ class PowerListener(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def powerstate_update(
         self, old_state: const.PowerState, new_state: const.PowerState
-    ):
+    ) -> None:
         """Device power state was updated."""
         raise NotImplementedError()
 
@@ -847,6 +948,7 @@ class DeviceInfo:
     MODEL = "model"
     RAW_MODEL = "raw_model"
     MAC = "mac"
+    OUTPUT_DEVICE_ID = "airplay_id"
 
     def __init__(self, device_info: Mapping[str, Any]) -> None:
         """Initialize a new DeviceInfo instance."""
@@ -858,6 +960,7 @@ class DeviceInfo:
         self._build_number = self._pop_with_type(self.BUILD_NUMBER, None, str)
         self._model = self._pop_with_type(self.MODEL, DeviceModel.Unknown, DeviceModel)
         self._mac = self._pop_with_type(self.MAC, None, str)
+        self._output_device_id = self._pop_with_type(self.OUTPUT_DEVICE_ID, None, str)
 
     def _pop_with_type(self, field, default, expected_type):
         value = self._devinfo.pop(field, default)
@@ -883,6 +986,7 @@ class DeviceInfo:
             DeviceModel.Gen4,
             DeviceModel.Gen4K,
             DeviceModel.AppleTV4KGen2,
+            DeviceModel.AppleTV4KGen3,
         ]:
             return OperatingSystem.TvOS
 
@@ -937,6 +1041,11 @@ class DeviceInfo:
         """Device MAC address."""
         return self._mac
 
+    @property
+    def output_device_id(self) -> Optional[str]:
+        """Output device identifier."""
+        return self._output_device_id
+
     def __str__(self) -> str:
         """Convert device info to readable string."""
         output = (
@@ -946,6 +1055,7 @@ class DeviceInfo:
                 OperatingSystem.Legacy: "ATV SW",
                 OperatingSystem.TvOS: "tvOS",
                 OperatingSystem.AirPortOS: "AirPortOS",
+                OperatingSystem.MacOS: "MacOS",
             }.get(self.operating_system, "Unknown OS")
         )
 
@@ -978,7 +1088,7 @@ class Features:
         self,
         states: Union[List[FeatureState], FeatureState],
         *feature_names: FeatureName
-    ):
+    ) -> bool:
         """Return if features are in a specific state.
 
         This method will return True if all given features are in the state specified
@@ -993,10 +1103,58 @@ class Features:
         return True
 
 
-class Audio:
+class OutputDevice:
+    """Information about an output device."""
+
+    def __init__(self, name: Optional[str], identifier: str) -> None:
+        """Initialize a new OutputDevice instance."""
+        self._name = name
+        self._identifier = identifier
+
+    @property
+    def name(self) -> Optional[str]:
+        """User friendly name of output device."""
+        return self._name
+
+    @property
+    def identifier(self) -> str:
+        """Return a unique id for the output device."""
+        return self._identifier
+
+    def __str__(self) -> str:
+        """Convert app info to readable string."""
+        return f"Device: {self.name} ({self.identifier})"
+
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, OutputDevice):
+            return self.name == other.name and self.identifier == other.identifier
+        return False
+
+
+class AudioListener(ABC):
+    """Listener interface for audio updates."""
+
+    @abstractmethod
+    def volume_update(self, old_level: float, new_level: float) -> None:
+        """Device volume was updated."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def outputdevices_update(
+        self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
+    ) -> None:
+        """Output devices were updated."""
+        raise NotImplementedError()
+
+
+class Audio(ABC, StateProducer):
     """Base class for audio functionality.
 
     Volume level is managed in percent where 0 is muted and 100 is max volume.
+
+
+    Listener interface: `pyatv.interfaces.AudioListener`
     """
 
     @property  # type: ignore
@@ -1037,6 +1195,111 @@ class Audio:
 
         Call will block until volume change has been acknowledged by the device (when
         possible and supported).
+        """
+        raise exceptions.NotSupportedError()
+
+    @property  # type: ignore
+    @feature(59, "OutputDevices", "Current output devices.")
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        raise exceptions.NotSupportedError()
+
+    @feature(60, "AddOutputDevices", "Add output devices.")
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        raise exceptions.NotSupportedError()
+
+    @feature(61, "RemoveOutputDevices", "Remove output devices.")
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        raise exceptions.NotSupportedError()
+
+    @feature(62, "SetOutputDevices", "Set output devices.")
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
+        raise exceptions.NotSupportedError()
+
+
+class KeyboardListener(ABC):  # pylint: disable=too-few-public-methods
+    """Listener interface for keyboard updates."""
+
+    @abstractmethod
+    def focusstate_update(
+        self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
+    ) -> None:
+        """Keyboard focus state was updated."""
+        raise exceptions.NotSupportedError()
+
+
+class Keyboard(ABC, StateProducer):
+    """Base class for keyboard handling.
+
+    Listener
+    interface: `pyatv.interfaces.KeyboardListener`
+    """
+
+    @property
+    @feature(57, "TextFocusState", "Current virtual keyboard focus state.")
+    def text_focus_state(self) -> const.KeyboardFocusState:
+        """Return keyboard focus state."""
+        raise exceptions.NotSupportedError()
+
+    @feature(51, "TextGet", "Get current virtual keyboard text.")
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        raise exceptions.NotSupportedError()
+
+    @feature(52, "TextClear", "Clear virtual keyboard text.")
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        raise exceptions.NotSupportedError()
+
+    @feature(53, "TextAppend", "Input text into virtual keyboard.")
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        raise exceptions.NotSupportedError()
+
+    @feature(54, "TextSet", "Replace text in virtual keyboard.")
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        raise exceptions.NotSupportedError()
+
+
+class TouchGestures(ABC):
+    """Base class for touch gestures."""
+
+    @feature(63, "Swipe", "Swipe gesture from given coordinates and duration.")
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
+        """Generate a swipe gesture.
+
+         From start to end x,y coordinates (in range [0,1000])
+         in a given time (in milliseconds).
+
+        :param start_x: Start x coordinate
+        :param start_y: Start y coordinate
+        :param end_x: End x coordinate
+        :param end_y: Endi x coordinate
+        :param duration_ms: Time in milliseconds to reach the end coordinates
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(64, "TouchAction", "Touch event to given coordinates.")
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
+        """Generate a touch event to x,y coordinates (in range [0,1000]).
+
+        :param x: x coordinate
+        :param y: y coordinate
+        :param mode: touch mode (1: press, 3: hold, 4: release)
+        """
+        raise exceptions.NotSupportedError()
+
+    @feature(65, "TouchClick", "Touch click command.")
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode single tap (0), double tap (1), or hold (2)
         """
         raise exceptions.NotSupportedError()
 
@@ -1109,7 +1372,13 @@ class BaseConfig(ABC):
     @property
     def identifier(self) -> Optional[str]:
         """Return the main identifier associated with this device."""
-        for prot in [Protocol.MRP, Protocol.DMAP, Protocol.AirPlay, Protocol.RAOP]:
+        for prot in [
+            Protocol.MRP,
+            Protocol.DMAP,
+            Protocol.AirPlay,
+            Protocol.RAOP,
+            Protocol.Companion,
+        ]:
             service = self.get_service(prot)
             if service and service.identifier is not None:
                 return service.identifier
@@ -1143,6 +1412,20 @@ class BaseConfig(ABC):
             return True
         return False
 
+    def apply(self, settings: Settings) -> None:
+        """Apply settings to configuration."""
+        for service in self.services:
+            if service.protocol == Protocol.AirPlay:
+                service.apply(dict(settings.protocols.airplay))
+            elif service.protocol == Protocol.Companion:
+                service.apply(dict(settings.protocols.companion))
+            elif service.protocol == Protocol.DMAP:
+                service.apply(dict(settings.protocols.dmap))
+            elif service.protocol == Protocol.MRP:
+                service.apply(dict(settings.protocols.mrp))
+            elif service.protocol == Protocol.RAOP:
+                service.apply(dict(settings.protocols.raop))
+
     def __eq__(self, other) -> bool:
         """Compare instance with another instance."""
         if isinstance(other, self.__class__):
@@ -1171,6 +1454,50 @@ class BaseConfig(ABC):
         """Return deep-copy of instance."""
 
 
+class Storage(ABC):
+    """Base class for storage modules."""
+
+    @property
+    @abstractmethod
+    def settings(self) -> Sequence[Settings]:
+        """Return settings for all devices."""
+
+    @abstractmethod
+    async def save(self) -> None:
+        """Save settings to active storage."""
+
+    @abstractmethod
+    async def load(self) -> None:
+        """Load settings from active storage."""
+
+    @abstractmethod
+    async def get_settings(self, config: BaseConfig) -> Settings:
+        """Return settings for a specific configuration (device).
+
+        The returned Settings object is a reference to an object in the storage module.
+        Changes made can/will be written back to the storage in case "save" is called.
+
+        If no settings exists for the current configuration, new settings are created
+        automatically and returned. If the configuration does not contain any valid
+        identitiers, DeviceIdMissingError will be raised.
+        """
+
+    @abstractmethod
+    async def remove_settings(self, settings: Settings) -> bool:
+        """Remove settings from storage.
+
+        Returns True if settings were removed, otherwise False.
+        """
+
+    @abstractmethod
+    async def update_settings(self, config: BaseConfig) -> None:
+        """Update settings based on config.
+
+        This method extracts settings from a configuration and writes them back to
+        the storage.
+        """
+
+
 class AppleTV(ABC, StateProducer[DeviceListener]):
     """Base class representing an Apple TV.
 
@@ -1187,6 +1514,11 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
+
+    @property
+    @abstractmethod
+    def settings(self) -> Settings:
+        """Return device settings used by pyatv."""
 
     @property
     @abstractmethod
@@ -1235,5 +1567,20 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
 
     @property
     @abstractmethod
+    def user_accounts(self) -> UserAccounts:
+        """Return user accounts interface."""
+
+    @property
+    @abstractmethod
     def audio(self) -> Audio:
         """Return audio interface."""
+
+    @property
+    @abstractmethod
+    def keyboard(self) -> Keyboard:
+        """Return keyboard interface."""
+
+    @property
+    @abstractmethod
+    def touch(self) -> TouchGestures:
+        """Return touch gestures interface."""

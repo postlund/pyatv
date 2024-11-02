@@ -16,23 +16,11 @@ from srptools import SRPContext, SRPServerSession, constants
 
 from pyatv.auth.hap_srp import hkdf_expand
 from pyatv.auth.hap_tlv8 import ErrorCode, TlvValue, read_tlv, write_tlv
-from pyatv.protocols.companion import opack
+from pyatv.auth.server_auth import PIN_CODE, PRIVATE_KEY, SERVER_IDENTIFIER
 from pyatv.protocols.companion.connection import FrameType
-from pyatv.support import chacha20, log_binary
+from pyatv.support import chacha20, log_binary, opack
 
 _LOGGER = logging.getLogger(__name__)
-
-PIN_CODE = 1111
-CLIENT_CREDENTIALS = (
-    "E734EA6C2B6257DE72355E472AA05A4C487E6B463C029ED306DF2F01B5636B58:"
-    + "80FD8265B0748DA90BC5C5294DABE394D3D47199994AE96AC73EE45C783537B1:"
-    + "35443739374644332D333533382D343237452D413437422D41333246433643463"
-    + "3413641:61343333373865362D613438612D343766382D613931632D666465366"
-    + "165316532643233"
-)
-
-SERVER_IDENTIFIER = "5D797FD3-3538-427E-A47B-A32FC6CF3A6A"
-PRIVATE_KEY = 32 * b"\xAA"
 
 ServerKeys = namedtuple("ServerKeys", "sign auth auth_pub verify verify_pub")
 
@@ -130,7 +118,7 @@ class CompanionServerAuth(ABC):
         )
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PV-Msg02".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PV-Msg02".encode())
 
         tlv = write_tlv(
             {
@@ -194,7 +182,7 @@ class CompanionServerAuth(ABC):
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
         decrypted_tlv_bytes = chacha.decrypt(
-            pairing_data[TlvValue.EncryptedData], nounce="PS-Msg05".encode()
+            pairing_data[TlvValue.EncryptedData], nonce="PS-Msg05".encode()
         )
 
         _LOGGER.debug("MSG5 EncryptedData=%s", read_tlv(decrypted_tlv_bytes))
@@ -221,7 +209,7 @@ class CompanionServerAuth(ABC):
         tlv = write_tlv(tlv)
 
         chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        encrypted = chacha.encrypt(tlv, nounce="PS-Msg06".encode())
+        encrypted = chacha.encrypt(tlv, nonce="PS-Msg06".encode())
 
         tlv = write_tlv({TlvValue.SeqNo: b"\x06", TlvValue.EncryptedData: encrypted})
 

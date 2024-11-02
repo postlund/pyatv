@@ -1,5 +1,7 @@
 """Fake RAOP device for tests."""
+
 import asyncio
+from enum import IntFlag, auto
 from functools import wraps
 from hashlib import md5
 import logging
@@ -9,12 +11,11 @@ import string
 from types import SimpleNamespace
 from typing import Dict, Optional, cast
 
-from bitarray import bitarray
-
+from pyatv.interface import MediaMetadata
 from pyatv.protocols.dmap import parser
 from pyatv.protocols.dmap.tag_definitions import lookup_tag
 from pyatv.protocols.raop.packets import RetransmitReqeust, RtpHeader, SyncPacket
-from pyatv.protocols.raop.raop import parse_transport
+from pyatv.protocols.raop.protocols.airplayv1 import parse_transport
 from pyatv.support.http import (
     BasicHttpServer,
     HttpRequest,
@@ -34,10 +35,42 @@ DIGEST_PAYLOAD = (
 REALM = "raop"
 
 
+class RaopServiceFlags(IntFlag):
+    """Flags used to alter fake service behavior."""
+
+    EMPTY = auto()
+    """Empty service flag."""
+
+    INFO_SUPPORTED = auto()
+    """If /info endpoint is supported."""
+
+    AUTH_REQUIRED = auto()
+    """If authentication is required or not."""
+
+    SUPPORTS_RETRANSMISSION = auto()
+    """If audio packet retransmission is supported."""
+
+    INITIAL_AUDIO_LEVEL = auto()
+    """If initial audio level is supported."""
+
+    FEEDBACK_SUPPORTED = auto()
+    """If feedback is supported."""
+
+    DELAYED_SET_VOLUME = auto()
+    """Fail to set volume prior to start start.
+
+    Some devices (at least Sonos) seems to fail when setting volume prior to starting
+    a stream. This flag mimcs that behavior.
+    """
+
+
 def requires_auth(method):
     @wraps(method)
     def _impl(self, request: HttpRequest, *args, **kwargs):
-        if self.state.auth_required and not self.state.auth_setup_performed:
+        if (
+            self.state.is_supported(RaopServiceFlags.AUTH_REQUIRED)
+            and not self.state.auth_setup_performed
+        ):
             return HttpResponse(
                 "RTSP", "1.0", 403, "Forbidden", {"CSeq": request.headers["CSeq"]}, b""
             )
@@ -93,49 +126,65 @@ def verify_password(method):
     return _impl
 
 
-def alac_decode(data: bytes) -> bytes:
-    """Decode an ALAC frame and return raw audio data."""
-    buffer = bitarray()
-    buffer.frombytes(data)
-
-    # Audio starts 23 bits in and last bit must be removed to keep byte alignment,
-    # otherwise an additional \x00 will be present at the end
-    return buffer[23:-1].tobytes()
-
-
 class FakeRaopState:
     """Internal state for RAOP service."""
 
     def __init__(self):
-        self.metadata = SimpleNamespace(title=None, artist=None, album=None)
+        self.flags: RaopServiceFlags = (
+            RaopServiceFlags.INFO_SUPPORTED | RaopServiceFlags.FEEDBACK_SUPPORTED
+        )
+        self.metadata = MediaMetadata()
         self.audio_packets: Dict[int, bytes] = {}  # seqo -> raw audio
+        self.initial_audio_packet: Optional[int] = None
         self.password: Optional[str] = None
         self.nonce: Optional[str] = None
-        self.auth_required: bool = False
         self.auth_setup_performed: bool = False
-        self.supports_retransmissions: bool = True
-        self.supports_feedback: bool = True
         self.feedback_packets_received: int = 0
         self.sync_packets_received: int = 0
         self.drop_packets: int = 0
         self.control_port: int = 0
         self.remote_address: Optional[str] = None
         self.volume: float = INITIAL_VOLUME
-        self.initial_audio_level_supported: bool = False
-        self.info_supported: bool = True
         self.teardown_called: bool = False
+        self.streaming_started: bool = False
+
+    def is_supported(self, flag: RaopServiceFlags) -> bool:
+        """Return if a feature is supported."""
+        return flag in self.flags
+
+    def set_flag_state(self, flag: RaopServiceFlags, enabled: bool) -> None:
+        """Set if a feature is supported or not."""
+        if enabled:
+            self.flags |= flag
+        else:
+            self.flags &= ~flag
 
     @property
     def raw_audio(self) -> bytes:
         if not self.audio_packets:
             return b""
 
-        # Sort received packets according to sequence number and join audio data
-        # together. If a sequence number is missing, the gap will not be filled with
-        # anything.
-        sorted_packets = sorted(self.audio_packets.items())
-        raw_audio = b"".join(audio for _, audio in sorted_packets)
-        return raw_audio
+        # We don't care about the order in which packets was received as that is
+        # supposed to be sorted out by the receiver. So we sort packet sequence
+        # numbers (and thus also audio data). Since sequence numbers are 16 bits,
+        # a wrap-around might happen. So look the first received packet and then
+        # re-arrange everything so that comes first (basically iterate from that
+        # index) and merge audio data after that.
+        sorted_packets = sorted(self.audio_packets.keys())
+        start_index = sorted_packets.index(self.initial_audio_packet)
+        indices = sorted_packets[start_index:] + sorted_packets[0:start_index]
+        return b"".join(self.audio_packets[index] for index in indices)
+
+    def add_audio_packet(self, seqno: int, audio_data: bytes) -> None:
+        # Save sequence number of first packet since it can wrap (16 bit)
+        if self.initial_audio_packet is None:
+            self.initial_audio_packet = seqno
+            _LOGGER.debug("Saving initial audio packet seqno %d", seqno)
+        self.audio_packets[seqno] = audio_data
+
+    def reset_streaming(self) -> None:
+        self.metadata = MediaMetadata()
+        self.streaming_started = False
 
 
 class AudioReceiver(asyncio.Protocol):
@@ -151,6 +200,11 @@ class AudioReceiver(asyncio.Protocol):
         if self.transport:
             self.transport.close()
             self.transport = None
+
+    def reset(self) -> None:
+        """Reset audio receiver."""
+        self.state.audio_packets = {}
+        self.state.initial_audio_packet = None
 
     @property
     def port(self):
@@ -176,16 +230,16 @@ class AudioReceiver(asyncio.Protocol):
                 )
                 self.state.drop_packets -= 1
 
-                if self.state.supports_retransmissions:
+                if self.state.is_supported(RaopServiceFlags.SUPPORTS_RETRANSMISSION):
                     _LOGGER.debug("Requesting to retransmit seqno %d", header.seqno)
                     self._request_retransmit(
                         data, (self.state.remote_address, self.state.control_port)
                     )
             else:
-                self.state.audio_packets[header.seqno] = alac_decode(data[12:])
+                self.state.add_audio_packet(header.seqno, data[12:])
         elif packet_type == 0x56:  # Retransmission
             original_packet = data[4:]  # Remove retransmission header
-            self.state.audio_packets[header.seqno] = alac_decode(original_packet[12:])
+            self.state.add_audio_packet(header.seqno, original_packet[12:])
         else:
             _LOGGER.debug("Unhandled packet type: %d", packet_type)
 
@@ -308,6 +362,7 @@ class FakeRaopService(HttpSimpleRouter):
         self.add_route("POST", "/auth-setup", self.handle_auth_setup)
         self.add_route("GET", "/info", self.handle_info)
         self.add_route("TEARDOWN", "rtsp://*", self.handle_teardown)
+        self.add_route("FLUSH", "rtsp://*", self.handle_flush)
 
     async def start(self, start_web_server: bool):
         """Start the fake RAOP service."""
@@ -372,6 +427,8 @@ class FakeRaopService(HttpSimpleRouter):
         _LOGGER.debug("Received SETUP: %s", request)
         _, options = parse_transport(request.headers["Transport"])
         self.state.control_port = int(options["control_port"])
+        self.state.reset_streaming()
+        self._audio_receiver.reset()
         headers = {
             "Transport": (
                 "RTP/AVP/UDP;unicast;mode=record;"
@@ -395,8 +452,25 @@ class FakeRaopService(HttpSimpleRouter):
             self.state.metadata.artist = parser.first(tags, "mlit", "asar")
             self.state.metadata.album = parser.first(tags, "mlit", "asal")
         elif request.body.startswith("volume:"):
-            self.state.volume = float(request.body.split(" ", maxsplit=1)[1])
-            _LOGGER.debug("Changing volume to %f", self.state.volume)
+            # If delayed set volume is active, then streaming must have started
+            if (
+                self.state.is_supported(RaopServiceFlags.DELAYED_SET_VOLUME)
+                and not self.state.streaming_started
+            ):
+                return HttpResponse(
+                    "RTSP",
+                    "1.0",
+                    500,
+                    "Not supported here",
+                    {"CSeq": request.headers["CSeq"]},
+                    b"",
+                )
+            else:
+                self.state.volume = float(request.body.split(" ", maxsplit=1)[1])
+                _LOGGER.debug("Changing volume to %f", self.state.volume)
+        elif request.headers["Content-Type"] == "image/jpeg":
+            self.state.metadata.artwork = request.body
+            _LOGGER.debug("Got artwork (%d bytes)", len(self.state.metadata.artwork))
         else:
             return HttpResponse(
                 "RTSP",
@@ -416,7 +490,7 @@ class FakeRaopService(HttpSimpleRouter):
         """Handle incoming feedback request."""
         _LOGGER.debug("Received feedback: %s", request)
         self.state.feedback_packets_received += 1
-        if not self.state.supports_feedback:
+        if not self.state.is_supported(RaopServiceFlags.FEEDBACK_SUPPORTED):
             return HttpResponse(
                 "RTSP",
                 "1.0",
@@ -438,6 +512,16 @@ class FakeRaopService(HttpSimpleRouter):
             "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
         )
 
+    @requires_auth
+    @verify_password
+    def handle_flush(self, request: HttpRequest) -> Optional[HttpResponse]:
+        """Handle incoming FLUSH request."""
+        _LOGGER.debug("Received FLUSH: %s", request)
+        self.state.streaming_started = True
+        return HttpResponse(
+            "RTSP", "1.0", 200, "OK", {"CSeq": request.headers["CSeq"]}, b""
+        )
+
     @verify_password
     def handle_auth_setup(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming auth-setup request."""
@@ -454,7 +538,7 @@ class FakeRaopService(HttpSimpleRouter):
 
     def handle_info(self, request: HttpRequest) -> Optional[HttpResponse]:
         """Handle incoming info request."""
-        if not self.state.info_supported:
+        if not self.state.is_supported(RaopServiceFlags.INFO_SUPPORTED):
             return HttpResponse(
                 "RTSP",
                 "1.0",
@@ -466,7 +550,7 @@ class FakeRaopService(HttpSimpleRouter):
                 b"",
             )
         info = {}
-        if self.state.initial_audio_level_supported:
+        if self.state.is_supported(RaopServiceFlags.INITIAL_AUDIO_LEVEL):
             info["initialVolume"] = self.state.volume
         return HttpResponse(
             "RTSP",
@@ -497,7 +581,7 @@ class FakeRaopUseCases:
 
     def retransmissions_enabled(self, enabled: bool) -> None:
         """Enable or disable retransmissions."""
-        self.state.supports_retransmissions = enabled
+        self.state.set_flag_state(RaopServiceFlags.SUPPORTS_RETRANSMISSION, enabled)
 
     def drop_n_packets(self, packets: int) -> None:
         """Make fake device drop packets and trigger retransmission (if supported)."""
@@ -505,15 +589,15 @@ class FakeRaopUseCases:
 
     def feedback_enabled(self, enabled: bool) -> None:
         """Enable or disable support for /feedback endpoint."""
-        self.state.supports_feedback = enabled
+        self.state.set_flag_state(RaopServiceFlags.FEEDBACK_SUPPORTED, enabled)
 
     def initial_audio_level_supported(self, supported: bool) -> None:
         """Initial audio level reported in info from device."""
-        self.state.initial_audio_level_supported = supported
+        self.state.set_flag_state(RaopServiceFlags.INITIAL_AUDIO_LEVEL, supported)
 
     def require_auth(self, is_required: bool) -> None:
         """Enable or disable requirement to perform authentication."""
-        self.state.auth_required = is_required
+        self.state.set_flag_state(RaopServiceFlags.AUTH_REQUIRED, is_required)
 
     def password(self, new_password: Optional[str]) -> None:
         """Set a new password. Pass in None to remove the password."""
@@ -522,4 +606,10 @@ class FakeRaopUseCases:
 
     def supports_info(self, is_supported: bool) -> None:
         """State if /info is supported or not."""
-        self.state.info_supported = is_supported
+        self.state.set_flag_state(RaopServiceFlags.INFO_SUPPORTED, is_supported)
+
+    def delayed_set_volume(self, delayed_set_volume) -> None:
+        """Enable or disable delayed set volume."""
+        self.state.set_flag_state(
+            RaopServiceFlags.DELAYED_SET_VOLUME, delayed_set_volume
+        )

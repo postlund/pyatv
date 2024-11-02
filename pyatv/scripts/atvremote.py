@@ -9,24 +9,31 @@ import logging
 import sys
 import traceback
 
+from tabulate import tabulate
+
 from pyatv import connect, const, exceptions, interface, pair, scan
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     FeatureName,
     FeatureState,
     InputAction,
+    PairingRequirement,
     Protocol,
     RepeatState,
     ShuffleState,
+    TouchAction,
 )
-from pyatv.interface import retrieve_commands
+from pyatv.interface import BaseConfig, BaseService, Storage, retrieve_commands
 from pyatv.scripts import (
     TransformIdentifiers,
     TransformProtocol,
     VerifyScanHosts,
     VerifyScanProtocols,
+    create_common_parser,
+    get_storage,
     log_current_version,
 )
+from pyatv.support import stringify_model, update_model_field
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +55,7 @@ async def _read_input(loop: asyncio.AbstractEventLoop, prompt: str):
     return user_input.strip()
 
 
-async def _scan_for_device(args, timeout, loop, protocol=None):
+async def _scan_for_device(args, timeout, storage: Storage, loop, protocol=None):
     options = {"timeout": timeout, "protocol": protocol}
 
     if not args.name:
@@ -56,7 +63,7 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
     if args.scan_hosts:
         options["hosts"] = args.scan_hosts
 
-    atvs = await scan(loop, **options)
+    atvs = await scan(loop, storage=storage, **options)
 
     if args.name:
         devices = [atv for atv in atvs if atv.name == args.name]
@@ -78,9 +85,10 @@ async def _scan_for_device(args, timeout, loop, protocol=None):
 class GlobalCommands:
     """Commands not bound to a specific device."""
 
-    def __init__(self, args, loop):
+    def __init__(self, args, storage: Storage, loop):
         """Initialize a new instance of GlobalCommands."""
         self.args = args
+        self.storage = storage
         self.loop = loop
 
     async def commands(self):
@@ -90,10 +98,14 @@ class GlobalCommands:
         _print_commands("Power", interface.Power)
         _print_commands("Playing", interface.Playing)
         _print_commands("AirPlay", interface.Stream)
+        _print_commands("Audio", interface.Audio)
+        _print_commands("Keyboard", interface.Keyboard)
         _print_commands("Device Info", interface.DeviceInfo)
         _print_commands("Device", DeviceCommands)
         _print_commands("Apps", interface.Apps)
+        _print_commands("User Accounts", interface.UserAccounts)
         _print_commands("Global", self.__class__)
+        _print_commands("Touch", interface.TouchGestures)
 
         return 0
 
@@ -112,6 +124,8 @@ class GlobalCommands:
             interface.DeviceInfo,
             interface.Apps,
             interface.Audio,
+            interface.Keyboard,
+            interface.TouchGestures,
             self.__class__,
             DeviceCommands,
         ]
@@ -138,6 +152,7 @@ class GlobalCommands:
             timeout=self.args.scan_timeout,
             protocol=self.args.scan_protocols,
             identifier=self.args.id,
+            storage=self.storage,
         )
         _print_found_apple_tvs(atvs, sys.stdout)
 
@@ -152,11 +167,15 @@ class GlobalCommands:
         if self.args.manual:
             conf = _manual_device(self.args)
         else:
-            conf = await _scan_for_device(self.args, self.args.scan_timeout, self.loop)
+            conf = await _scan_for_device(
+                self.args, self.args.scan_timeout, self.storage, self.loop
+            )
         if not conf:
             return 2
 
-        options = {}
+        options = {
+            "name": self.args.remote_name,
+        }
 
         # Inject user provided credentials
         for proto in Protocol:
@@ -169,11 +188,12 @@ class GlobalCommands:
             options.update(
                 {
                     "pairing_guid": self.args.pairing_guid,
-                    "remote_name": self.args.remote_name,
                 }
             )
 
-        pairing = await pair(conf, self.args.protocol, self.loop, **options)
+        pairing = await pair(
+            conf, self.args.protocol, self.loop, storage=self.storage, **options
+        )
 
         try:
             await self._perform_pairing(pairing)
@@ -218,6 +238,142 @@ class GlobalCommands:
         else:
             print("Pairing failed!")
 
+    async def wizard(self) -> int:
+        """Wizard to set up a device."""
+        print("Looking for devices...")
+        atvs = await scan(
+            self.loop,
+            hosts=self.args.scan_hosts,
+            timeout=self.args.scan_timeout,
+            storage=self.storage,
+        )
+        if not atvs:
+            print("No devices found!")
+            return 1
+
+        # Create a list of devices showing index, device name, model and IP address
+        devices = [
+            [index + 1, config.name, config.device_info.model_str, config.address]
+            for index, config in enumerate(atvs)
+        ]
+
+        print("Found the following devices:")
+
+        print(tabulate(devices, headers=["", "Name", "Model", "Address"]))
+
+        index = 0
+        while True:
+            user_input = await _read_input(
+                self.loop, "Enter index of device to set up (q to quit): "
+            )
+            if user_input == "q":
+                return 0
+
+            try:
+                index = int(user_input) - 1
+                if 0 <= index < len(atvs):
+                    break
+            except ValueError:
+                pass
+
+            print("Not a valid device:", user_input, file=sys.stderr)
+
+        conf = atvs[index]
+        print(f"Starting to set up {conf.name}")
+
+        for service in conf.services:
+            await self._wizard_password(service)
+            await self._wizard_pair(conf, service)
+
+        print("Pairing finished, trying to connect and get some metadata...")
+
+        try:
+            atv = await connect(conf, self.loop, storage=self.storage)
+        except Exception:
+            _LOGGER.exception("Connect failed")
+            print("Something failed when connecting, error is printed above.")
+            return 1
+
+        print("Currently playing:")
+        print(await atv.metadata.playing())
+        atv.close()
+
+        print("Device is now set up!")
+        return 0
+
+    async def _wizard_pair(self, conf: BaseConfig, service: BaseService) -> None:
+        if service.pairing == PairingRequirement.Unsupported:
+            print(f"Ignoring {service.protocol.name} as it is not supported")
+            return
+        if service.pairing == PairingRequirement.Disabled:
+            message = f"""
+"Protocol {service.protocol.name} is disabled, please see this page for help:
+
+https://pyatv.dev/support/troubleshooting/#pairing-disabled
+
+This protocol will be ignored for now, but you can just re-run the wizard again
+later to pair it.
+
+Press ENTER to continue
+"""
+            print(message)
+            service.credentials = None
+            await self.loop.run_in_executor(None, sys.stdin.readline)
+            return
+        if service.pairing == PairingRequirement.NotNeeded:
+            print(f"Ignoring {service.protocol.name} since pairing is not needed")
+            service.credentials = None
+            return
+
+        # Do not pair if we already have credentials
+        if service.credentials:
+            print(
+                "Credentials already exists for",
+                service.protocol.name,
+                "=> pairing not needed",
+            )
+            return
+
+        print("Starting to pair", service.protocol)
+
+        pairing = await pair(conf, service.protocol, self.loop, storage=self.storage)
+
+        await pairing.begin()
+
+        # Ask for PIN if present or just wait for pairing to end
+        if pairing.device_provides_pin:
+            pin = await _read_input(self.loop, "Enter PIN on screen: ")
+            pairing.pin(pin)
+        else:
+            pairing.pin(1234)
+
+            print(
+                f"Use pin 1234 to pair "
+                f'with "{self.args.remote_name}"'
+                " (press ENTER when you are done)"
+            )
+
+            await self.loop.run_in_executor(None, sys.stdin.readline)
+
+        await pairing.finish()
+
+        # Give some feedback to the user
+        if pairing.has_paired:
+            print(f"Successfully paired {service.protocol}, moving on...")
+        else:
+            print("Pairing did not succeed. Press ENTER to continue.")
+            await self.loop.run_in_executor(None, sys.stdin.readline)
+
+    async def _wizard_password(self, service: BaseService) -> None:
+        # Nothing to do if password is not required
+        if not service.requires_password:
+            service.password = None
+            return
+
+        service.password = await _read_input(
+            self.loop, f"Please enter password for {service.protocol}: "
+        )
+
 
 class DeviceCommands:
     """Additional commands available for a device.
@@ -225,10 +381,11 @@ class DeviceCommands:
     These commands are not part of the API but are provided by atvremote.
     """
 
-    def __init__(self, atv, loop, args):
+    def __init__(self, atv, loop, storage: Storage, args):
         """Initialize a new instance of DeviceCommands."""
         self.atv = atv
         self.loop = loop
+        self.storage = storage
         self.args = args
 
     async def cli(self):
@@ -245,7 +402,9 @@ class DeviceCommands:
                 print("Command not available here")
                 continue
 
-            await _handle_device_command(self.args, command, self.atv, self.loop)
+            await _handle_device_command(
+                self.args, command, self.atv, self.storage, self.loop
+            )
 
     async def artwork_save(self, width=None, height=None, file_name="artwork"):
         """Download artwork and save it to artwork.png."""
@@ -310,6 +469,37 @@ class DeviceCommands:
         return 0
 
 
+class SettingsCommands:
+    """Commands to work with settings."""
+
+    def __init__(self, atv, loop, storage: Storage, args):
+        """Initialize a new instance of SettingsCommand."""
+        self.atv = atv
+        self.loop = loop
+        self.storage = storage
+        self.args = args
+
+    async def print_settings(self) -> int:
+        """Print current settings."""
+        print("\n".join(stringify_model(self.atv.settings)))
+        return 0
+
+    async def remove_settings(self) -> int:
+        """Remove current settings."""
+        await self.storage.remove_settings(self.atv.settings)
+        return 0
+
+    async def change_setting(self, setting: str, value: str) -> int:
+        """Change value of a setting."""
+        update_model_field(self.atv.settings, setting, value)
+        return 0
+
+    async def unset_setting(self, setting: str) -> int:
+        """Unset a setting (make it None).."""
+        update_model_field(self.atv.settings, setting, None)
+        return 0
+
+
 class PushListener(interface.PushListener):
     """Internal listener for push updates."""
 
@@ -321,6 +511,16 @@ class PushListener(interface.PushListener):
     def playstatus_error(self, _, exception):
         """Inform about an error and restart push updates."""
         print(f"An error occurred (restarting): {exception}")
+
+
+class PowerListener(interface.PowerListener):
+    """Listen for power updates and print changes."""
+
+    def powerstate_update(
+        self, old_state: const.PowerState, new_state: const.PowerState
+    ):
+        """Device power state was updated."""
+        print("New power state:", new_state.name)
 
 
 class DeviceListener(interface.DeviceListener):
@@ -347,9 +547,9 @@ def _in_range(lower, upper, allow_none=False):
     return _checker
 
 
-async def cli_handler(loop):
+async def cli_handler(loop):  # pylint: disable=too-many-statements,too-many-branches
     """Application starts here."""
-    parser = argparse.ArgumentParser()
+    parser = create_common_parser()
 
     parser.add_argument("command", nargs="+", help="commands, help, ...")
     parser.add_argument(
@@ -439,10 +639,10 @@ async def cli_handler(loop):
     )
 
     parser.add_argument(
-        "--raop-password",
-        help="optional password for raop",
-        dest="raop_password",
-        default=None,
+        "--service-properties",
+        dest="service_properties",
+        default="",
+        help="manual MDNS properties",
     )
 
     creds = parser.add_argument_group("credentials")
@@ -451,6 +651,15 @@ async def cli_handler(loop):
             f"--{prot.name.lower()}-credentials",
             help=f"credentials for {prot.name}",
             dest=f"{prot.name.lower()}_credentials",
+            default=None,
+        )
+
+    passwords = parser.add_argument_group("passwords")
+    for prot in [Protocol.AirPlay, Protocol.RAOP]:
+        passwords.add_argument(
+            f"--{prot.name.lower()}-password",
+            help=f"password for {prot.name}",
+            dest=f"{prot.name.lower()}_password",
             default=None,
         )
 
@@ -475,6 +684,8 @@ async def cli_handler(loop):
     args = parser.parse_args()
     if args.manual and isinstance(args.id, list):
         parser.error("--manual only supports one identifier to --id")
+    if not args.manual and args.service_properties:
+        parser.error("--service-properties only allowed with --manual")
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -494,28 +705,34 @@ async def cli_handler(loop):
 
     if args.mdns_debug:
         # logging.TRAFFIC is set in runtime by support.mdns
-        logging.getLogger(
-            "pyatv.core.mdns"
-        ).level = logging.TRAFFIC  # pylint: disable=no-member
+        logging.getLogger("pyatv.core.mdns").level = (
+            logging.TRAFFIC  # pylint: disable=no-member
+        )
 
     cmds = retrieve_commands(GlobalCommands)
 
-    if args.command[0] in cmds:
-        glob_cmds = GlobalCommands(args, loop)
-        return await _exec_command(glob_cmds, args.command[0], print_result=False)
-    if not args.manual:
-        config = await _autodiscover_device(args, loop)
-        if not config:
+    storage = get_storage(args, loop)
+    await storage.load()
+
+    try:
+        if args.command[0] in cmds:
+            glob_cmds = GlobalCommands(args, storage, loop)
+            return await _exec_command(glob_cmds, args.command[0], print_result=False)
+        if not args.manual:
+            config = await _autodiscover_device(args, storage, loop)
+            if not config:
+                return 1
+
+            return await _handle_commands(args, config, storage, loop)
+
+        if args.port == 0 or args.address is None or args.protocol is None:
+            _LOGGER.error("You must specify address, port and protocol in manual mode")
             return 1
 
-        return await _handle_commands(args, config, loop)
-
-    if args.port == 0 or args.address is None or args.protocol is None:
-        _LOGGER.error("You must specify address, port and protocol in manual mode")
-        return 1
-
-    config = _manual_device(args)
-    return await _handle_commands(args, config, loop)
+        config = _manual_device(args)
+        return await _handle_commands(args, config, storage, loop)
+    finally:
+        await storage.save()
 
 
 def _print_found_apple_tvs(atvs, outstream):
@@ -525,9 +742,9 @@ def _print_found_apple_tvs(atvs, outstream):
         print(f"{apple_tv}\n", file=outstream)
 
 
-async def _autodiscover_device(args, loop):
+async def _autodiscover_device(args, storage: Storage, loop):
     apple_tv = await _scan_for_device(
-        args, args.scan_timeout, loop, protocol=args.scan_protocols
+        args, args.scan_timeout, storage, loop, protocol=args.scan_protocols
     )
     if not apple_tv:
         return None
@@ -535,15 +752,30 @@ async def _autodiscover_device(args, loop):
     def _set_credentials(protocol, field):
         service = apple_tv.get_service(protocol)
         if service:
-            value = service.credentials or getattr(args, field)
+            # If "" is specified as credentials, unset the field (None)
+            arg_value = getattr(args, field)
+            if arg_value == "":
+                value = None
+            else:
+                value = arg_value or service.credentials
             service.credentials = value
+
+    def _set_password(protocol, field):
+        service = apple_tv.get_service(protocol)
+        if service:
+            # If "" is specified as password, unset the field (None)
+            arg_value = getattr(args, field)
+            if arg_value == "":
+                value = None
+            else:
+                value = arg_value or service.password
+            service.password = value
 
     for proto in Protocol:
         _set_credentials(proto, f"{proto.name.lower()}_credentials")
 
-    raop_service = apple_tv.get_service(Protocol.RAOP)
-    if raop_service:
-        raop_service.password = args.raop_password
+    for proto in [Protocol.RAOP, Protocol.AirPlay]:
+        _set_password(proto, f"{proto.name.lower()}_password")
 
     _LOGGER.info("Auto-discovered %s at %s", apple_tv.name, apple_tv.address)
 
@@ -551,10 +783,25 @@ async def _autodiscover_device(args, loop):
 
 
 def _manual_device(args):
+    properties = {}
+    if args.service_properties:
+        # Service properties are specified according to Xvar1=val1Xvar2=var2"
+        # where X is any character not in any variable or value. Examples would be
+        # "":name=test:type=something" or ",name=test,type=something" (both are
+        # equal). No proper error checking here!
+        split_char = args.service_properties[0]
+        properties = dict(
+            var.split("=", maxsplit=1)
+            for var in args.service_properties[1:].split(split_char)
+        )
+
     config = AppleTV(IPv4Address(args.address), args.name)
-    service = ManualService(args.id, args.protocol, args.port, {})
+    service = ManualService(args.id, args.protocol, args.port, properties)
     service.credentials = getattr(args, f"{args.protocol.name.lower()}_credentials")
-    service.password = args.raop_password
+    if args.protocol == Protocol.AirPlay:
+        service.password = args.airplay_password
+    elif args.protocol == Protocol.RAOP:
+        service.password = args.raop_password
     config.add_service(service)
     return config
 
@@ -570,6 +817,10 @@ def _extract_command_with_args(cmd):
     """
 
     def _typeparse(value):
+        # Special case where input is forced to be treated as a string by quoting
+        if isinstance(value, str) and value.startswith('"') and value.endswith('"'):
+            return value[1:-1]
+
         try:
             return int(value)
         except ValueError:
@@ -581,10 +832,21 @@ def _extract_command_with_args(cmd):
             return [ShuffleState(args[0])]
         if cmd == "set_repeat":
             return [RepeatState(args[0])]
-        if cmd in ["up", "down", "left", "right", "select", "menu", "home"]:
+        if cmd in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "select",
+            "menu",
+            "home",
+            "click",
+        ]:
             return [InputAction(args[0])]
         if cmd == "set_volume":
             return [float(args[0])]
+        if cmd == "action":
+            return [args[0], args[1], TouchAction(args[2])]
         return args
 
     equal_sign = cmd.find("=")
@@ -596,11 +858,13 @@ def _extract_command_with_args(cmd):
     return command, _parse_args(command, args)
 
 
-async def _handle_commands(args, config, loop):
+async def _handle_commands(args, config, storage: Storage, loop):
     device_listener = DeviceListener()
     push_listener = PushListener()
-    atv = await connect(config, loop, protocol=args.protocol)
+    power_listener = PowerListener()
+    atv = await connect(config, loop, protocol=args.protocol, storage=storage)
     atv.listener = device_listener
+    atv.power.listener = power_listener
 
     if atv.features.in_state(FeatureState.Available, FeatureName.PushUpdates):
         atv.push_updater.listener = push_listener
@@ -609,7 +873,7 @@ async def _handle_commands(args, config, loop):
 
     try:
         for cmd in args.command:
-            ret = await _handle_device_command(args, cmd, atv, loop)
+            ret = await _handle_device_command(args, cmd, atv, storage, loop)
             if ret != 0:
                 return ret
     finally:
@@ -619,9 +883,11 @@ async def _handle_commands(args, config, loop):
     return 0
 
 
-# pylint: disable=too-many-return-statements
-async def _handle_device_command(args, cmd, atv, loop):
+# pylint: disable=too-many-return-statements disable=too-many-locals
+# pylint: disable=too-many-branches
+async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
     device = retrieve_commands(DeviceCommands)
+    settings = retrieve_commands(SettingsCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
     metadata = retrieve_commands(interface.Metadata)
     power = retrieve_commands(interface.Power)
@@ -629,15 +895,21 @@ async def _handle_device_command(args, cmd, atv, loop):
     stream = retrieve_commands(interface.Stream)
     device_info = retrieve_commands(interface.DeviceInfo)
     apps = retrieve_commands(interface.Apps)
+    user_accounts = retrieve_commands(interface.UserAccounts)
     audio = retrieve_commands(interface.Audio)
+    keyboard = retrieve_commands(interface.Keyboard)
+    touch = retrieve_commands(interface.TouchGestures)
 
     # Parse input command and argument from user
     cmd, cmd_args = _extract_command_with_args(cmd)
     if cmd in device:
         return await _exec_command(
-            DeviceCommands(atv, loop, args), cmd, False, *cmd_args
+            DeviceCommands(atv, loop, storage, args), cmd, False, *cmd_args
         )
-
+    if cmd in settings:
+        return await _exec_command(
+            SettingsCommands(atv, loop, storage, args), cmd, False, *cmd_args
+        )
     # NB: Needs to be above RemoteControl for now as volume_up/down exists in both
     # but implementations in Audio shall be called
     if cmd in audio:
@@ -659,11 +931,20 @@ async def _handle_device_command(args, cmd, atv, loop):
     if cmd in stream:
         return await _exec_command(atv.stream, cmd, True, *cmd_args)
 
+    if cmd in keyboard:
+        return await _exec_command(atv.keyboard, cmd, True, *cmd_args)
+
     if cmd in device_info:
         return await _exec_command(atv.device_info, cmd, True, *cmd_args)
 
     if cmd in apps:
         return await _exec_command(atv.apps, cmd, True, *cmd_args)
+
+    if cmd in user_accounts:
+        return await _exec_command(atv.user_accounts, cmd, True, *cmd_args)
+
+    if cmd in touch:
+        return await _exec_command(atv.touch, cmd, True, *cmd_args)
 
     _LOGGER.error("Unknown command: %s", cmd)
     return 1
@@ -710,8 +991,7 @@ def _pretty_print(data):
 
 async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
-    # Helper method so that the coroutine exits cleanly if an exception
-    # happens (which would leave resources dangling)
+
     async def _run_application(loop):
         try:
             return await cli_handler(loop)

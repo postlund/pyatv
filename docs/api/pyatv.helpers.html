@@ -1,7 +1,7 @@
 ---
 layout: template
 title: API - pyatv.helpers
-permalink: /api//helpers
+permalink: /api/helpers/
 link_group: api
 ---
 <nav id="sidebar">
@@ -12,13 +12,14 @@ link_group: api
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pyatv" href="index">pyatv</a></code></li>
+<li><code><a title="pyatv" href="..">pyatv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pyatv.helpers.auto_connect" href="#pyatv.helpers.auto_connect">auto_connect</a></code></li>
 <li><code><a title="pyatv.helpers.get_unique_id" href="#pyatv.helpers.get_unique_id">get_unique_id</a></code></li>
+<li><code><a title="pyatv.helpers.is_device_supported" href="#pyatv.helpers.is_device_supported">is_device_supported</a></code></li>
 <li><code><a title="pyatv.helpers.is_streamable" href="#pyatv.helpers.is_streamable">is_streamable</a></code></li>
 </ul>
 </li>
@@ -30,7 +31,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Various helper methods.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L1-L98" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L1-L122" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -41,7 +42,7 @@ link_group: api
 <dl>
 <dt id="pyatv.helpers.auto_connect">
 <code class="name flex">
-<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Callable[[], None] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None</span>
+<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="../interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Optional[Callable[[], None]] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None</span>
 </code>
 </dt>
 <dd>
@@ -51,7 +52,6 @@ device found, connects to it and passes it to a user provided handler. An
 optional error handler can be provided that is called when no device was found.
 Very inflexible in many cases, but can be handys sometimes when trying things.</p>
 <p>Note: both handler and not_found must be coroutines</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L18-L50" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.helpers.get_unique_id">
 <code class="name flex">
@@ -64,7 +64,18 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 <code>service_name</code> name of the service (e.g. <em>Office</em> or <em>Living Room</em>) and
 <code>properties</code> all key-value properties belonging to the service.</p>
 <p>The unique identifier is returned if available, otherwise <code>None</code> is returned.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L53-L82" class="git-link">Browse git</a></div>
+</dd>
+<dt id="pyatv.helpers.is_device_supported">
+<code class="name flex">
+<span>def <span class="ident">is_device_supported</span></span>(<span>conf: <a title="pyatv.interface.BaseConfig" href="../interface#pyatv.interface.BaseConfig">BaseConfig</a>) -> bool</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Return if pyatv supports this device.</p>
+<p>This method will return False if all of its services are either
+PairingRequirement.Unsupported or PairingRequirement.Disabled. In all other cases
+it will return True. Do note that even if this method returns True, pairing (or
+that existing credentials are provided) might still be needed.</p></section>
 </dd>
 <dt id="pyatv.helpers.is_streamable">
 <code class="name flex">
@@ -76,7 +87,6 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 <p>This method will return if the file format of the given file is supported
 and streamable by pyatv. It will never raise an exception, e.g. because the
 file is missing or lack of permissions.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L85-L98" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>

@@ -65,3 +65,19 @@ self.atv.push_updater.start()
 
 Here a local reference is kept to the listener. Beware that the same issue will arise when `listener`
 goes out of scope, so make sure all your listeners live at least as long as they are used in pyatv.
+
+# Pairing requirement is listed as "disabled", what does that mean?
+<a name="pairing-disabled"></a>
+
+This either means that the service is turned off or an access restriction is in place
+that does not allow pyatv to pair (pyatv probably does not support this method of pairing). To solve this,
+you need to go to your device and change access settings to "Allow everyone on the same network".
+How this is done depends on device, here a few links to check out depending on device:
+
+* [Apple TV](https://support.apple.com/guide/tv/stream-audio-and-video-with-airplay-atvbf2be9ef7/tvos) -
+  Expand *Set who can use AirPlay to stream content to Apple TV* and pick *Anyone on the Same Network*
+* [HomePod](https://support.apple.com/guide/ipad/share-controls-with-others-ipad76474c82/ipados) -
+  Follow instructions under *Allow others to access your AirPlay 2-enabled speakers and TVs*, pick
+  *Anyone on the same network*
+* [macOS](https://support.apple.com/guide/mac-help/set-up-your-mac-to-be-an-airplay-receiver-mchleee00ec8/mac) -
+  Follow instructions and pick *Anyone on the Same Network*

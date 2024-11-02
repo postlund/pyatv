@@ -2,15 +2,23 @@
 
 This module only deals with AirPlay 2 related channels right now.
 """
+
 from abc import ABC
 import logging
-import plistlib
 from random import randrange
-from typing import Optional
+from typing import Any, List, NamedTuple, Optional, Tuple
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
+from pyatv.protocols.airplay.utils import decode_plist_body, encode_plist_body
 from pyatv.protocols.mrp import protobuf
-from pyatv.support.http import parse_request
+from pyatv.support.http import (
+    HttpRequest,
+    HttpResponse,
+    format_request,
+    format_response,
+    parse_request,
+    parse_response,
+)
 from pyatv.support.packet import defpacket
 from pyatv.support.variant import read_variant, write_variant
 
@@ -23,7 +31,33 @@ DataHeader = defpacket(
 )
 
 
-class EventChannel(AbstractHAPChannel):
+class BaseEventChannel(AbstractHAPChannel, ABC):
+    """Base class for connection used to handle the event channel."""
+
+    @staticmethod
+    def format_request(request: HttpRequest) -> bytes:
+        """Encode event channel request."""
+        return format_request(request)
+
+    @staticmethod
+    def parse_request(data: bytes) -> Tuple[Optional[HttpRequest], bytes, bytes]:
+        """Parse event channel request."""
+        request, rest = parse_request(data)
+        return request, data[: len(data) - len(rest)], rest
+
+    @staticmethod
+    def format_response(response: HttpResponse) -> bytes:
+        """Encode event channel response."""
+        return format_response(response)
+
+    @staticmethod
+    def parse_response(data: bytes) -> Tuple[Optional[HttpResponse], bytes, bytes]:
+        """Parse event channel response."""
+        response, rest = parse_response(data)
+        return response, data[: len(data) - len(rest)], rest
+
+
+class EventChannel(BaseEventChannel):
     """Connection used to handle the event channel."""
 
     def handle_received(self) -> None:
@@ -31,7 +65,7 @@ class EventChannel(AbstractHAPChannel):
         self.buffer: bytes
         while self.buffer:
             try:
-                request, self.buffer = parse_request(self.buffer)
+                request, _, self.buffer = self.parse_request(self.buffer)
                 if request is None:
                     _LOGGER.debug("Not enough data to parse request on event channel")
                     break
@@ -39,19 +73,26 @@ class EventChannel(AbstractHAPChannel):
                 _LOGGER.debug("Got message on event channel: %s", request)
 
                 # Send a positive response to satisfy the other end of the channel
-                # TODO: Add public method to pyatv.http to format a message
                 headers = {
-                    "Content-Length": 0,
-                    "Audio-Latency": 0,
-                    "Server": request.headers.get("Server"),
-                    "CSeq": request.headers.get("CSeq"),
+                    "Content-Length": "0",
+                    "Audio-Latency": "0",
                 }
-                response = (
-                    f"{request.protocol}/{request.version} 200 OK\r\n"
-                    + "\r\n".join(f"{key}: {value}" for key, value in headers.items())
-                    + "\r\n\r\n"
+                if "Server" in request.headers:
+                    headers["Server"] = request.headers["Server"]
+                if "CSeq" in request.headers:
+                    headers["CSeq"] = request.headers["CSeq"]
+                self.send(
+                    self.format_response(
+                        HttpResponse(
+                            request.protocol,
+                            request.version,
+                            200,
+                            "OK",
+                            headers,
+                            b"",
+                        )
+                    )
                 )
-                self.send(response.encode("utf-8"))
             except Exception:
                 _LOGGER.exception("Failed to handle message on event channel")
 
@@ -66,7 +107,126 @@ class DataStreamListener(ABC):
         """Device connection was dropped."""
 
 
-class DataStreamChannel(AbstractHAPChannel):
+class DataStreamMessage(NamedTuple):
+    """Data stream channel message."""
+
+    message_type: bytes
+    command: bytes
+    seqno: int
+    padding: int
+    payload: bytes
+
+
+class BaseDataStreamChannel(AbstractHAPChannel, ABC):
+    """Base class for connection used to handle the data stream channel."""
+
+    @staticmethod
+    def encode_message(message: DataStreamMessage) -> bytes:
+        """Encode data stream channel message."""
+        return (
+            DataHeader.encode(
+                DataHeader.length + len(message.payload),
+                message.message_type,
+                message.command,
+                message.seqno,
+                message.padding,
+            )
+            + message.payload
+        )
+
+    @staticmethod
+    def encode_payload(payload: Any) -> bytes:
+        """Encode message payload."""
+        return encode_plist_body(payload)
+
+    @staticmethod
+    def encode_protobufs(protobuf_messages: List[protobuf.ProtocolMessage]) -> bytes:
+        """Encode protobuf messages."""
+        serialized_messages = []
+        for protobuf_message in protobuf_messages:
+            serialized_message = protobuf_message.SerializeToString()
+            serialized_length = write_variant(len(serialized_message))
+            serialized_messages.append(serialized_length)
+            serialized_messages.append(serialized_message)
+        return b"".join(serialized_messages)
+
+    def encode_reply(self, seqno: int) -> bytes:
+        """Encode data stream channel reply."""
+        return self.encode_message(
+            DataStreamMessage(
+                b"rply" + 8 * b"\x00",
+                4 * b"\x00",
+                seqno,
+                DATA_HEADER_PADDING,
+                b"",
+            )
+        )
+
+    @staticmethod
+    def decode_message(data: bytes) -> Tuple[Optional[DataStreamMessage], bytes, bytes]:
+        """Decode data stream channel message."""
+        if len(data) < DataHeader.length:
+            return None, b"", data
+        header = DataHeader.decode(data, allow_excessive=True)
+        if len(data) < header.size:
+            _LOGGER.debug(
+                "Not enough data on data channel (has %d, expects %d)",
+                len(data),
+                header.size,
+            )
+            return None, b"", data
+        return (
+            DataStreamMessage(
+                header.message_type,
+                header.command,
+                header.seqno,
+                header.padding,
+                data[DataHeader.length : header.size],
+            ),
+            data[: header.size],
+            data[header.size :],
+        )
+
+    @staticmethod
+    def decode_payload(payload: bytes) -> Any:
+        """Decode message payload."""
+        data = decode_plist_body(payload)
+        if data is None:
+            _LOGGER.warning("failed to process data frame")
+        return data
+
+    @staticmethod
+    def decode_protobufs(data: bytes) -> List[protobuf.ProtocolMessage]:
+        """Decode protobuf messages."""
+        pb_messages = []
+        try:
+            while data:
+                # Protobuf fields are encoded in ascending numerical order and
+                # every message must include type (field #1), which is encoded
+                # with the tag 0x08. This is not a valid length since the
+                # minimal message length is at least 40 (type and
+                # uniqueIdentifier). We can use this to detect cases where the
+                # message is not length prefixed, which is known to happen for
+                # ConfigureConnectionMessage.
+                if data[0] == 0x8:
+                    message, data = data, b""
+                else:
+                    length, raw = read_variant(data)
+                    if len(raw) < length:
+                        _LOGGER.warning("Expected %d bytes, got %d", length, len(raw))
+                        break
+                    message, data = raw[:length], raw[length:]
+
+                assert message[0] == 0x8
+                pb_msg = protobuf.ProtocolMessage()
+                pb_msg.ParseFromString(message)
+                pb_messages.append(pb_msg)
+        except Exception:
+            _LOGGER.exception("failed to process data frame")
+        return pb_messages
+
+
+class DataStreamChannel(BaseDataStreamChannel):
     """Connection used to handle the data stream channel."""
 
     def __init__(self, output_key: bytes, input_key: bytes) -> None:
@@ -82,39 +242,17 @@ class DataStreamChannel(AbstractHAPChannel):
         """Handle received data that was put in buffer."""
         self.buffer: bytes
         while len(self.buffer) >= DataHeader.length:
-            header = DataHeader.decode(self.buffer, allow_excessive=True)
-            if len(self.buffer) < header.size:
-                _LOGGER.debug(
-                    "Not enough data on data channel (has %d, expects %d)",
-                    len(self.buffer),
-                    header.size,
-                )
+            message, _, self.buffer = self.decode_message(self.buffer)
+            if not message:
                 break
 
-            try:
-                self._process_message_from_buffer(header)
-            except Exception:
-                _LOGGER.exception("failed to process data frame")
+            payload = self.decode_payload(message.payload)
+            if payload:
+                self._process_payload(payload)
 
-            self.buffer = self.buffer[header.size :]
-
-    def _process_message_from_buffer(self, header) -> None:
-        # Decode payload and process it
-        payload = plistlib.loads(self.buffer[DataHeader.length : header.size])
-        if payload:
-            self._process_payload(payload)
-
-        # If this was a request, send a reply to satisfy other end
-        if header.message_type.startswith(b"sync"):
-            self.send(
-                DataHeader.encode(
-                    DataHeader.length,
-                    b"rply" + 8 * b"\x00",
-                    4 * b"\x00",
-                    header.seqno,
-                    DATA_HEADER_PADDING,
-                )
-            )
+            # If this was a request, send a reply to satisfy other end
+            if message.message_type.startswith(b"sync"):
+                self.send(self.encode_reply(message.seqno))
 
     def _process_payload(self, message) -> None:
         data = message.get("params", {}).get("data")
@@ -122,36 +260,21 @@ class DataStreamChannel(AbstractHAPChannel):
             _LOGGER.debug("Got message with unsupported format: %s", message)
             return
 
-        while data:
-            length, raw = read_variant(data)
-            if len(raw) < length:
-                _LOGGER.warning("Expected %d bytes, got %d", length, len(raw))
-                return
-
-            message = raw[:length]
-            data = raw[length:]
-
-            pb_msg = protobuf.ProtocolMessage()
-            pb_msg.ParseFromString(message)
+        for pb_msg in self.decode_protobufs(data):
             self.listener.handle_protobuf(pb_msg)
 
     def send_protobuf(self, message: protobuf.ProtocolMessage) -> None:
         """Serialize a protobuf message and send it to receiver."""
-        serialized_message = message.SerializeToString()
-        serialized_length = write_variant(len(serialized_message))
-
-        payload = plistlib.dumps(
-            {"params": {"data": serialized_length + serialized_message}},
-            fmt=plistlib.FMT_BINARY,  # pylint: disable=no-member
-        )
-
         self.send(
-            DataHeader.encode(
-                DataHeader.length + len(payload),
-                b"sync" + 8 * b"\x00",
-                b"comm",
-                self.send_seqno,
-                DATA_HEADER_PADDING,
+            self.encode_message(
+                DataStreamMessage(
+                    b"sync" + 8 * b"\x00",
+                    b"comm",
+                    self.send_seqno,
+                    DATA_HEADER_PADDING,
+                    self.encode_payload(
+                        {"params": {"data": self.encode_protobufs([message])}}
+                    ),
+                )
             )
-            + payload
         )

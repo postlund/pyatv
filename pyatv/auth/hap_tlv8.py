@@ -3,6 +3,7 @@
 Note that this implementation only supports one level of value, i.e. no dicts
 in dicts.
 """
+
 # pylint: disable=invalid-name
 
 from enum import IntEnum
@@ -12,6 +13,7 @@ from typing import List
 class TlvValue(IntEnum):
     """Correspond to TLV values in HAP specification."""
 
+    # Standardized keys
     Method = 0x00
     Identifier = 0x01
     Salt = 0x02
@@ -26,6 +28,16 @@ class TlvValue(IntEnum):
     Permissions = 0x0B
     FragmentData = 0x0C
     FragmentLast = 0x0D
+
+    # Apple internal(?)
+    Name = 0x11
+    Flags = 0x13
+
+
+class Flags(IntEnum):
+    """Flags used with TlvValue.Flags."""
+
+    TransientPairing = 0x10
 
 
 class ErrorCode(IntEnum):

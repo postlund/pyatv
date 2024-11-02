@@ -58,7 +58,27 @@ message AVOutputDeviceDescriptor {
   optional uint32 clusterType = 42;
   optional string primaryUID = 43;
   optional uint32 configuredClusterSize = 44;
+  optional bool supportsRapportRemoteControlTransport = 45;
+  optional string currentBluetoothListeningMode = 46;
+  repeated string availableBluetoothListeningModes = 47;
+  repeated bool supportsMultiplayer = 48;
   optional bool producesLowFidelityAudio = 49;
+  optional int32 hostDeviceClass = 50;
+  optional string airPlayGroupID = 51;
+  optional bool supportsSharePlayHandoff = 52;
+  optional float distance = 53;
+  optional bool discoveredOnSameInfra = 54;
+  repeated AVOutputDeviceDescriptor activatedClusterMembers = 55;
+  repeated bool pickable = 56;
+  optional int32 transportType = 57;
+  optional string clusterID = 58;
+  optional bool isClusterLeader = 59;
+  optional bool isAppleAccessory = 60;
+  optional string parentUniqueIdentifier = 61;
+  optional string roomID = 62;
+  optional string roomName = 63;
+  repeated AVOutputDeviceDescriptor allClusterMembers = 64;
+  optional bool engageOnClusterActivate = 67;
 }
 
 message UpdateOutputDeviceMessage {

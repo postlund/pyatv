@@ -714,7 +714,7 @@ frame_type=<FrameType.PS_Next: 4>, length=303, data={'_pd': {5: b'\x8e\xfcV\xbf\
 
 ### Verification
 
-The verifcation sequence is initiated by the client by sending a frame with type `PV_Start`. The following messages always use `PV_Next` as frame type. A typical flow looks like this (details below):
+The verification sequence is initiated by the client by sending a frame with type `PV_Start`. The following messages always use `PV_Next` as frame type. A typical flow looks like this (details below):
 
 <code class="diagram">
 sequenceDiagram
@@ -1044,6 +1044,97 @@ Example: Put device to sleep:
 
 // Response
 {'_c': {}, '_t': 3, '_x': 123}
+```
+
+#### Touch gestures
+
+Additional information about slide gestures : slide gestures are handled with a succession of events with about 20ms between each requests
+ 
+1. First event with _tPh=1 (press mode)
+2. N requests with _tPh = 3 (where N*100 ms = duration of the gesture), with _cx and _cy coordinates changing at each request
+3. One last request with _tPh=4 when released
+
+To be noted :
+- _cx and _cy coordinates must be in the range [0,1000] which is set in a startup event _touchStart :
+```javascript
+// Received during initialization
+ {'_i': '_touchStart', '_x': 1865081428, '_btHP': False, '_c': {'_height': 1000.0, '_tFl': 0, '_width': 1000.0}, '_t': 2}
+ ```
+- _ns = timestamp in nanoseconds (probably based on device boot time)
+- when reaching the edge of the touch area, a release event should be sent with a new press event otherwise the cursor will move in the opposite way 
+
+
+#### Single tap
+
+3 requests have to be sent to simulate tap gesture on the touch pad : 2 commands requests (_hidC) and 1 event request (_hidT)
+- 2 requests with _i = _hidC and in the additional arguments structure _C :
+  - the button pressed : _hidC = 6 for touch pad click
+  - the action mode : _hBtS = 1 for press, and the second request with _hBtS = 2 for release
+-  1 event with additional arguments as followed :
+  - _cx and _cy (x,y coordinates) set to max : 1000
+  - _tPh : action mode of the touchpad set to 5
+
+```javascript
+// Request
+{'_i': '_hidC', '_x': 1984212224, '_btHP': False, '_c': {'_hBtS': 1, '_hidC': 6}, '_t': 2}
+{'_i': '_hidC', '_x': 1984212225, '_btHP': False, '_c': {'_hBtS': 2, '_hidC': 6}, '_t': 2}
+{'_i': '_hidT', '_x': 1984212226, '_c': {'_ns': 713243707438041, '_tFg': 1, '_cx': 1000, '_tPh': 5, '_cy': 1000}, '_t': 1}
+
+// Response
+R: {'_c': {}, '_t': 3, '_x': 1984212224}
+R: {'_c': {}, '_t': 3, '_x': 1984212225}
+```
+
+
+#### Gestures
+
+Touch gestures are a series of events (_i = "_hidT", _t = 1) sent every few milliseconds (~20ms) with updated x,y coordinates
+- 1 start event with _tPh = 1 (pressed event)
+- N events with _tPh = 3 (hold)
+- 1 end event with _tPh = 4 (released)
+
+```javascript
+// Request
+{'_i': '_hidT', '_x': 588648840, '_c': {'_ns': 713018028759791, '_tFg': 1, '_cx': 500, '_tPh': 1, '_cy': 800}, '_t': 1}
+{'_i': '_hidT', '_x': 588648841, '_c': {'_ns': 713018124653791, '_tFg': 1, '_cx': 506, '_tPh': 3, '_cy': 789}, '_t': 1}
+{'_i': '_hidT', '_x': 588648842, '_c': {'_ns': 713018141323791, '_tFg': 1, '_cx': 520, '_tPh': 3, '_cy': 767}, '_t': 1}
+{'_i': '_hidT', '_x': 588648843, '_c': {'_ns': 713018157994791, '_tFg': 1, '_cx': 520, '_tPh': 3, '_cy': 758}, '_t': 1}
+...
+{'_i': '_hidT', '_x': 588648930, '_c': {'_ns': 713019612448791, '_tFg': 1, '_cx': 587, '_tPh': 3, '_cy': 128}, '_t': 1}
+{'_i': '_hidT', '_x': 588648931, '_c': {'_ns': 713019616615791, '_tFg': 1, '_cx': 593, '_tPh': 4, '_cy': 134}, '_t': 1}
+```
+
+
+#### System Status
+
+A system can be in one of the following states:
+
+| **ID** | **State** | **Note** |
+| 0x01 | Asleep | Device is sleeping/in standby.
+| 0x02 | Screensaver | Screensaver is shown on screen.
+| 0x03 | Awake | Device is awake.
+| 0x04 | Idle | This state has not been seen, but is likely present. Not sure what difference is compare to `Awake`.
+
+Current system state can be fetch using `FetchAttentionState`:
+
+```javascript
+// Request
+{'_i': 'FetchAttentionState', '_t': 2, '_c': {}, '_x': 38571}
+
+// Response
+{'_c': {'state': 1}, '_t': 3, '_x': 38571}
+```
+
+`state` in the response maps to **ID** in the table above.
+
+Updates to the state is announced via the `SystemStatus` event:
+
+```javascript
+// Register to event
+{'_i': '_interest', '_t': 1, '_c': {'_regEvents': ['SystemStatus']}, '_x': 38573}
+
+// Example of an event
+{'_i': 'SystemStatus', '_x': 798413326, '_c': {'state': 3}, '_t': 1}
 ```
 
 # AirPlay
@@ -1413,7 +1504,7 @@ CSeq: 0
 # AirPlay 2
 
 In reality, AirPlay 2 has a lot in common with its predecessor, but a lot also differs
-so it deserves its own capter.
+so it deserves its own chapter.
 
 For now, the main focus here is to describe how AirPlay can be set up for remote control
 only, i.e. how to get metadata for what is playing. Other parts will be added later.

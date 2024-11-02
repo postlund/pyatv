@@ -1,4 +1,5 @@
 """Unit tests for pyatv.interface."""
+
 from typing import Dict, Optional
 from unittest.mock import ANY, MagicMock
 
@@ -39,7 +40,6 @@ eq_test_cases = [
 
 
 class TestClass:
-
     variable = 1234
 
     def test_method(self):
@@ -128,6 +128,7 @@ def test_playing_basic_fields():
             season_number=1245,
             episode_number=2468,
             content_identifier="content_id",
+            itunes_store_identifier=123456789,
         )
     )
     assert "mytitle" in out
@@ -138,6 +139,7 @@ def test_playing_basic_fields():
     assert "1245" in out
     assert "2468" in out
     assert "content_id" in out
+    assert "123456789" in out
 
 
 @pytest.mark.parametrize(
@@ -197,7 +199,7 @@ def test_playing_custom_hash():
 def test_playing_eq_ensure_member_count():
     # Fail if a property is added or removed to interface, just as a reminder to
     # update equality comparison
-    assert len(Playing().__dict__) == 15
+    assert len(Playing().__dict__) == 16
 
 
 @pytest.mark.parametrize(
@@ -244,9 +246,9 @@ async def test_metadata_rest_not_supported():
 
 
 @pytest.mark.parametrize(
-    "properties,os,version,build_number,model,mac",
+    "properties,os,version,build_number,model,mac,output_device_id",
     [
-        ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None),
+        ({}, OperatingSystem.Unknown, None, None, DeviceModel.Unknown, None, None),
         (
             {
                 DeviceInfo.OPERATING_SYSTEM: OperatingSystem.TvOS,
@@ -254,22 +256,27 @@ async def test_metadata_rest_not_supported():
                 DeviceInfo.BUILD_NUMBER: "ABC",
                 DeviceInfo.MODEL: DeviceModel.Gen3,
                 DeviceInfo.MAC: "AA:BB:CC:DD:EE:FF",
+                DeviceInfo.OUTPUT_DEVICE_ID: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
             },
             OperatingSystem.TvOS,
             "1.0",
             "ABC",
             DeviceModel.Gen3,
             "AA:BB:CC:DD:EE:FF",
+            "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         ),
     ],
 )
-def test_device_info_empty_input(properties, os, version, build_number, model, mac):
+def test_device_info_various_input(
+    properties, os, version, build_number, model, mac, output_device_id
+):
     dev_info = DeviceInfo(properties)
     assert dev_info.operating_system == os
     assert dev_info.version == version
     assert dev_info.build_number == build_number
     assert dev_info.model == model
     assert dev_info.mac == mac
+    assert dev_info.output_device_id == output_device_id
 
 
 @pytest.mark.parametrize(
@@ -280,6 +287,7 @@ def test_device_info_empty_input(properties, os, version, build_number, model, m
         {DeviceInfo.BUILD_NUMBER: 456},
         {DeviceInfo.MODEL: "bad"},
         {DeviceInfo.MAC: 789},
+        {DeviceInfo.OUTPUT_DEVICE_ID: 0},
     ],
 )
 def test_device_info_bad_types(properties):
@@ -299,6 +307,7 @@ def test_device_info_bad_types(properties):
         ({DeviceInfo.MODEL: DeviceModel.Gen4}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.Gen4K}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.AppleTV4KGen2}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.AppleTV4KGen3}, OperatingSystem.TvOS),
     ],
 )
 def test_device_info_guess_os(properties, expected_os):

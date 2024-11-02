@@ -10,6 +10,7 @@ picked. See `DEFAULT_PRIORITIES` for priority list.
 NB: Typing in this file suffers much from:
 https://github.com/python/mypy/issues/5374
 """
+
 import asyncio
 import io
 import logging
@@ -17,16 +18,11 @@ from queue import Queue
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
-from pyatv.const import (
-    DeviceState,
-    FeatureName,
-    FeatureState,
-    InputAction,
-    PowerState,
-    Protocol,
-)
+from pyatv.const import FeatureName, FeatureState, InputAction, Protocol, TouchAction
 from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
 from pyatv.core.relayer import Relayer
+from pyatv.interface import OutputDevice
+from pyatv.settings import Settings
 from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
 from pyatv.support.http import ClientSessionManager
@@ -150,20 +146,22 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         return await self.relay("wakeup")()
 
     @shield.guard
-    async def skip_forward(self) -> None:
+    async def skip_forward(self, time_interval: float = 0.0) -> None:
         """Skip forward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
-        return await self.relay("skip_forward")()
+        return await self.relay("skip_forward")(time_interval)
 
     @shield.guard
-    async def skip_backward(self) -> None:
-        """Skip backwards a time interval.
+    async def skip_backward(self, time_interval: float = 0.0) -> None:
+        """Skip backward a time interval.
 
-        Skip interval is typically 15-30s, but is decided by the app.
+        If time_interval is not positive or not present, a default or app-chosen
+        time interval is used, which is typically 10, 15, 30, etc. seconds.
         """
-        return await self.relay("skip_backward")()
+        return await self.relay("skip_backward")(time_interval)
 
     @shield.guard
     async def set_position(self, pos: int) -> None:
@@ -189,6 +187,11 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
     async def channel_down(self) -> None:
         """Select previous channel."""
         return await self.relay("channel_down")()
+
+    @shield.guard
+    async def screensaver(self) -> None:
+        """Activate screen saver.."""
+        return await self.relay("screensaver")()
 
 
 class FacadeMetadata(Relayer, interface.Metadata):
@@ -303,30 +306,6 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
         # This is border line, maybe need another structure to support this
         Relayer.__init__(self, interface.Power, DEFAULT_PRIORITIES)
         interface.Power.__init__(self)
-        self._is_playing: Optional[bool] = None
-        core_dispatcher.listen_to(
-            UpdatedState.Playing,
-            self._playing_changed,
-            message_filter=lambda message: message.protocol == self.main_protocol,
-        )
-
-    def _playing_changed(self, message: StateMessage) -> None:
-        """State of something changed."""
-        playing = cast(interface.Playing, message.value)
-
-        # Initially we must ask the protocol about power state so we don't send
-        # duplicate updates
-        if self._is_playing is None:
-            self._is_playing = self.relay("power_state") == PowerState.On
-
-        # Computer new state so we can know if we should update or not
-        old_state = self.power_state
-        self._is_playing = playing.device_state != DeviceState.Idle
-        new_state = self.power_state
-
-        # Do not update state in case it didn't change
-        if new_state != old_state:
-            self.listener.powerstate_update(old_state, new_state)
 
     def powerstate_update(
         self, old_state: const.PowerState, new_state: const.PowerState
@@ -335,16 +314,12 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
 
         Forward power state updates from protocol implementations to actual listener.
         """
-        if not self._is_playing:
-            self.listener.powerstate_update(old_state, new_state)
+        self.listener.powerstate_update(old_state, new_state)
 
     @property  # type: ignore
     @shield.guard
     def power_state(self) -> const.PowerState:
         """Return device power state."""
-        # Override power state in case something is playing
-        if self._is_playing:
-            return const.PowerState.On
         return self.relay("power_state")
 
     @shield.guard
@@ -384,12 +359,24 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         await self.relay("play_url")(url, **kwargs)
 
     @shield.guard
-    async def stream_file(self, file: Union[str, io.BufferedReader], **kwargs) -> None:
+    async def stream_file(
+        self,
+        file: Union[str, io.BufferedIOBase, asyncio.streams.StreamReader],
+        /,
+        metadata: Optional[interface.MediaMetadata] = None,
+        override_missing_metadata: bool = False,
+        **kwargs
+    ) -> None:
         """Stream local file to device.
 
         INCUBATING METHOD - MIGHT CHANGE IN THE FUTURE!
         """
-        await self.relay("stream_file")(file, **kwargs)
+        await self.relay("stream_file")(
+            file,
+            metadata=metadata,
+            override_missing_metadata=override_missing_metadata,
+            **kwargs,
+        )
 
 
 class FacadeApps(Relayer, interface.Apps):
@@ -405,17 +392,66 @@ class FacadeApps(Relayer, interface.Apps):
         return await self.relay("app_list")()
 
     @shield.guard
-    async def launch_app(self, bundle_id: str) -> None:
-        """Launch an app based on bundle ID."""
-        await self.relay("launch_app")(bundle_id)
+    async def launch_app(self, bundle_id_or_url: str) -> None:
+        """Launch an app based on bundle ID or URL."""
+        await self.relay("launch_app")(bundle_id_or_url)
+
+
+class FacadeUserAccounts(Relayer, interface.UserAccounts):
+    """Facade implementation for account handling."""
+
+    def __init__(self):
+        """Initialize a new FacadeUserAccounts instance."""
+        super().__init__(interface.UserAccounts, DEFAULT_PRIORITIES)
+
+    @shield.guard
+    async def account_list(self) -> List[interface.UserAccount]:
+        """Fetch a list of user accounts that can be switched."""
+        return await self.relay("account_list")()
+
+    @shield.guard
+    async def switch_account(self, account_id: str) -> None:
+        """Switch user account by account ID."""
+        await self.relay("switch_account")(account_id)
 
 
 class FacadeAudio(Relayer, interface.Audio):
     """Facade implementation for audio functionality."""
 
-    def __init__(self):
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
         """Initialize a new FacadeAudio instance."""
-        super().__init__(interface.Audio, DEFAULT_PRIORITIES)
+        Relayer.__init__(self, interface.Audio, DEFAULT_PRIORITIES)
+        interface.Audio.__init__(self)
+        self._volume = 0.0
+        self._output_devices: List[interface.OutputDevice] = []
+        core_dispatcher.listen_to(UpdatedState.Volume, self._volume_changed)
+        core_dispatcher.listen_to(
+            UpdatedState.OutputDevices, self._output_devices_changed
+        )
+
+    def _volume_changed(self, message: StateMessage) -> None:
+        """State of something changed."""
+        volume = cast(float, message.value)
+
+        # Compute new state so we can know if we should update or not
+        old_level = self._volume
+        new_level = self._volume = volume
+
+        # Do not update state in case it didn't change
+        if new_level != old_level:
+            self.listener.volume_update(old_level, new_level)
+
+    def _output_devices_changed(self, message: StateMessage) -> None:
+        """State of output devices changed."""
+        output_devices = cast(List[interface.OutputDevice], message.value)
+
+        # Compute new state so we can know if we should update or not
+        old_devices = self._output_devices
+        new_devices = self._output_devices = output_devices
+
+        # Do not update state in case it didn't change
+        if new_devices != old_devices:
+            self.listener.outputdevices_update(old_devices, new_devices)
 
     @shield.guard
     async def volume_up(self) -> None:
@@ -443,6 +479,78 @@ class FacadeAudio(Relayer, interface.Audio):
             await self.relay("set_volume")(level)
         else:
             raise exceptions.ProtocolError(f"volume {level} is out of range")
+
+    @property
+    @shield.guard
+    def output_devices(self) -> List[OutputDevice]:
+        """Return current list of output device IDs."""
+        return self.relay("output_devices")
+
+    @shield.guard
+    async def add_output_devices(self, *devices: List[str]) -> None:
+        """Add output devices."""
+        return await self.relay("add_output_devices")(*devices)
+
+    @shield.guard
+    async def remove_output_devices(self, *devices: List[str]) -> None:
+        """Remove output devices."""
+        return await self.relay("remove_output_devices")(*devices)
+
+    @shield.guard
+    async def set_output_devices(self, *devices: List[str]) -> None:
+        """Set output devices."""
+        return await self.relay("set_output_devices")(*devices)
+
+
+class FacadeKeyboard(Relayer, interface.Keyboard):
+    """Facade implementation for keyboard handling."""
+
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
+        """Initialize a new FacadeKeyboard instance."""
+        Relayer.__init__(self, interface.Keyboard, DEFAULT_PRIORITIES)
+        interface.Keyboard.__init__(self)
+        self._focus_state: const.KeyboardFocusState = const.KeyboardFocusState.Unknown
+        core_dispatcher.listen_to(
+            UpdatedState.KeyboardFocus,
+            self._focus_state_changed,
+            message_filter=lambda message: message.protocol == self.main_protocol,
+        )
+
+    def _focus_state_changed(self, message: StateMessage) -> None:
+        state = cast(const.KeyboardFocusState, message.value)
+
+        old_state = self._focus_state
+        new_state = self._focus_state = state
+
+        if new_state != old_state:
+            _LOGGER.debug("Focus state changed from %s to %s", old_state, new_state)
+            self.listener.focusstate_update(old_state, new_state)
+
+    @property
+    @shield.guard
+    def text_focus_state(self) -> const.KeyboardFocusState:
+        """Return keyboard focus state."""
+        return self.relay("text_focus_state")
+
+    @shield.guard
+    async def text_get(self) -> Optional[str]:
+        """Get current virtual keyboard text."""
+        return await self.relay("text_get")()
+
+    @shield.guard
+    async def text_clear(self) -> None:
+        """Clear virtual keyboard text."""
+        return await self.relay("text_clear")()
+
+    @shield.guard
+    async def text_append(self, text: str) -> None:
+        """Input text into virtual keyboard."""
+        return await self.relay("text_append")(text=text)
+
+    @shield.guard
+    async def text_set(self, text: str) -> None:
+        """Replace text in virtual keyboard."""
+        return await self.relay("text_set")(text=text)
 
 
 class FacadePushUpdater(
@@ -495,6 +603,41 @@ class FacadePushUpdater(
             self.listener.playstatus_error(updater, exception)
 
 
+class FacadeTouchGestures(Relayer, interface.TouchGestures):
+    """Facade implementation for touch gestures handling."""
+
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
+        """Initialize a new FacadeTouchGestures instance."""
+        Relayer.__init__(self, interface.TouchGestures, DEFAULT_PRIORITIES)
+        interface.TouchGestures.__init__(self)
+
+    @shield.guard
+    async def swipe(
+        self, start_x: int, start_y: int, end_x: int, end_y: int, duration_ms: int
+    ) -> None:
+        """Generate a touch gesture from start to end x,y coordinates."""
+        return await self.relay("swipe")(
+            start_x=start_x,
+            start_y=start_y,
+            end_x=end_x,
+            end_y=end_y,
+            duration_ms=duration_ms,
+        )
+
+    @shield.guard
+    async def action(self, x: int, y: int, mode: TouchAction) -> None:
+        """Generate a touch event to end x,y coordinates."""
+        return await self.relay("action")(x=x, y=y, mode=mode)
+
+    @shield.guard
+    async def click(self, action: InputAction):
+        """Send a touch click.
+
+        :param action: action mode, single tap (0), double tap (1), or hold (2).
+        """
+        return await self.relay("click")(action=action)
+
+
 class FacadeAppleTV(interface.AppleTV):
     """Facade implementation of the external interface."""
 
@@ -503,6 +646,7 @@ class FacadeAppleTV(interface.AppleTV):
         config: interface.BaseConfig,
         session_manager: ClientSessionManager,
         core_dispatcher: CoreStateDispatcher,
+        settings: Settings,
     ):
         """Initialize a new FacadeAppleTV instance."""
         super().__init__(max_calls=1)  # To StateProducer via interface.AppleTV
@@ -522,8 +666,12 @@ class FacadeAppleTV(interface.AppleTV):
             interface.PushUpdater: self._push_updates,
             interface.Stream: FacadeStream(self._features),
             interface.Apps: FacadeApps(),
-            interface.Audio: FacadeAudio(),
+            interface.UserAccounts: FacadeUserAccounts(),
+            interface.Audio: FacadeAudio(core_dispatcher),
+            interface.Keyboard: FacadeKeyboard(core_dispatcher),
+            interface.TouchGestures: FacadeTouchGestures(core_dispatcher),
         }
+        self._settings = settings
         self._shield_everything()
 
     def _shield_everything(self):
@@ -603,7 +751,7 @@ class FacadeAppleTV(interface.AppleTV):
         self.push_updater.stop()
 
         self._pending_tasks = set()
-        asyncio.ensure_future(self._session_manager.close())
+        self._pending_tasks.add(asyncio.create_task(self._session_manager.close()))
         for setup_data in self._protocol_handlers.values():
             self._pending_tasks.update(setup_data.close())
 
@@ -636,10 +784,15 @@ class FacadeAppleTV(interface.AppleTV):
             except exceptions.InvalidStateError:
                 _release()
                 raise
-            else:
-                taken_over.append(relayer)
+            taken_over.append(relayer)
 
         return _release
+
+    @property  # type: ignore
+    @shield.guard
+    def settings(self) -> Settings:
+        """Return device settings used by pyatv."""
+        return self._settings
 
     @property  # type: ignore
     @shield.guard
@@ -702,9 +855,27 @@ class FacadeAppleTV(interface.AppleTV):
 
     @property  # type: ignore
     @shield.guard
+    def user_accounts(self) -> interface.UserAccounts:
+        """Return user accounts interface."""
+        return cast(interface.UserAccounts, self._interfaces[interface.UserAccounts])
+
+    @property  # type: ignore
+    @shield.guard
     def audio(self) -> interface.Audio:
         """Return audio interface."""
         return cast(interface.Audio, self._interfaces[interface.Audio])
+
+    @property  # type: ignore
+    @shield.guard
+    def keyboard(self) -> interface.Keyboard:
+        """Return keyboard interface."""
+        return cast(interface.Keyboard, self._interfaces[interface.Keyboard])
+
+    @property  # type: ignore
+    @shield.guard
+    def touch(self) -> interface.TouchGestures:
+        """Return touch gestures interface."""
+        return cast(interface.TouchGestures, self._interfaces[interface.TouchGestures])
 
     def state_was_updated(self) -> None:
         """Call when state was updated.

@@ -1,14 +1,17 @@
 """Test suit for pairing process with Apple TV."""
 
+import asyncio
 import ipaddress
 from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import Protocol
+from pyatv.core import create_core
 from pyatv.protocols.dmap import pairing, parser, tag_definitions
-from pyatv.support import http
+from pyatv.storage.memory_storage import MemoryStorage
 
 from tests import utils, zeroconf_stub
 
@@ -50,11 +53,16 @@ def mock_random():
     pairing.random.getrandbits = lambda x: RANDOM_128_BITS
 
 
-@pytest.fixture
-async def mock_pairing(event_loop):
+@pytest.fixture(name="storage")
+def storage_fixture() -> MemoryStorage:
+    yield MemoryStorage()
+
+
+@pytest_asyncio.fixture
+async def mock_pairing(storage):
     obj = MagicMock()
 
-    service = ManualService(None, Protocol.DMAP, 0, {})
+    service = ManualService("id", Protocol.DMAP, 0, {})
     config = AppleTV("Apple TV", "127.0.0.1")
     config.add_service(service)
     zeroconf = zeroconf_stub.stub(pairing)
@@ -70,9 +78,12 @@ async def mock_pairing(event_loop):
         if addresses:
             options["addresses"] = addresses
 
-        obj.pairing = pairing.DmapPairingHandler(
-            config, service, await http.create_session(), event_loop, **options
+        settings = await storage.get_settings(config)
+        core = await create_core(
+            config, service, settings=settings, loop=asyncio.get_running_loop()
         )
+
+        obj.pairing = pairing.DmapPairingHandler(core, **options)
         await obj.pairing.begin()
         obj.pairing.pin(pin_code)
         return obj.pairing, zeroconf, service
@@ -88,7 +99,9 @@ async def test_zeroconf_service_published(mock_pairing):
     assert len(zeroconf.registered_services) == 1, "no zeroconf service registered"
 
     service = zeroconf.registered_services[0]
-    assert service.properties["DvNm"] == REMOTE_NAME, "remote name does not match"
+    assert service.properties[b"DvNm"] == REMOTE_NAME.encode(
+        "utf-8"
+    ), "remote name does not match"
     assert [ipaddress.ip_address("10.0.10.1").packed] == service.addresses
 
 
@@ -103,7 +116,7 @@ async def test_zeroconf_custom_addresses(mock_pairing, addresses):
         assert ipaddress.ip_address(address).packed in service.addresses
 
 
-async def test_succesful_pairing(mock_pairing):
+async def test_succesful_pairing(mock_pairing, storage):
     pairing, zeroconf, service = await mock_pairing()
 
     url = pairing_url(zeroconf, PAIRING_CODE)
@@ -118,10 +131,11 @@ async def test_succesful_pairing(mock_pairing):
     assert parser.first(parsed, "cmpa", "cmty") == "iPhone"
 
     assert service.credentials == PAIRING_GUID
+    assert storage.settings[0].protocols.dmap.credentials == PAIRING_GUID
 
 
 async def test_successful_pairing_random_pairing_guid_generated(
-    mock_random, mock_pairing
+    mock_random, mock_pairing, storage
 ):
     pairing, zeroconf, service = await mock_pairing(pairing_guid=None)
 
@@ -131,6 +145,7 @@ async def test_successful_pairing_random_pairing_guid_generated(
     await pairing.finish()
 
     assert service.credentials == RANDOM_PAIRING_GUID
+    assert storage.settings[0].protocols.dmap.credentials == RANDOM_PAIRING_GUID
 
 
 async def test_succesful_pairing_with_any_pin(mock_pairing):
@@ -151,7 +166,7 @@ async def test_succesful_pairing_with_pin_leadering_zeros(mock_pairing):
     assert status == 200
 
 
-async def test_pair_custom_pairing_guid(mock_pairing):
+async def test_pair_custom_pairing_guid(mock_pairing, storage):
     pairing, zeroconf, service = await mock_pairing(
         pin_code=PIN_CODE2, pairing_guid=PAIRING_GUID2
     )
@@ -166,6 +181,7 @@ async def test_pair_custom_pairing_guid(mock_pairing):
     assert parser.first(parsed, "cmpa", "cmpg") == int(PAIRING_GUID2, 16)
 
     assert service.credentials == PAIRING_GUID2
+    assert storage.settings[0].protocols.dmap.credentials == PAIRING_GUID2
 
 
 async def test_failed_pairing(mock_pairing):

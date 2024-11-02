@@ -1,0 +1,10 @@
+name: Minor Change
+description: Use this to suggest minor changes to code or documentation.
+body:
+  - type: textarea
+    id: minor-change
+    attributes:
+      label: What to change?
+      description: Please describe in as much detail as possible what to change.
+    validations:
+      required: true

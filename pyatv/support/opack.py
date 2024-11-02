@@ -5,12 +5,29 @@ Notes:
  * Pack implementation does not implement UID referencing
  * Likely other cases missing
 """
+
 from datetime import datetime
 
 # pylint: disable=too-many-branches,too-many-return-statements,too-many-statements
 import struct
-from typing import Tuple
+from typing import Dict, Tuple, Type
 from uuid import UUID
+
+_SIZED_INT_TYPES: Dict[int, Type] = {}
+
+
+def _sized_int(value: int, size: int) -> int:
+    """Return an int subclass with a size attribute.
+
+    This preserves the original encoded size, and allows re-encoding to the same
+    size.
+    """
+    if size in _SIZED_INT_TYPES:
+        type_ = _SIZED_INT_TYPES[size]
+    else:
+        type_ = type(f"int_{size}b", (int,), {"size": size})
+        _SIZED_INT_TYPES[size] = type_
+    return type_(value)
 
 
 def pack(data: object) -> bytes:
@@ -29,13 +46,14 @@ def _pack(data, object_list):
     elif isinstance(data, datetime):
         raise NotImplementedError("absolute time")
     elif isinstance(data, int):
-        if data < 0x28:
+        size_hint = getattr(data, "size", None)  # if created with _sized_int()
+        if data < 0x28 and not size_hint:
             packed_bytes = bytes([data + 8])
-        elif data <= 0xFF:
+        elif (data <= 0xFF and not size_hint) or size_hint == 1:
             packed_bytes = bytes([0x30]) + data.to_bytes(1, byteorder="little")
-        elif data <= 0xFFFF:
+        elif (data <= 0xFFFF and not size_hint) or size_hint == 2:
             packed_bytes = bytes([0x31]) + data.to_bytes(2, byteorder="little")
-        elif data <= 0xFFFFFFFF:
+        elif (data <= 0xFFFFFFFF and not size_hint) or size_hint == 4:
             packed_bytes = bytes([0x32]) + data.to_bytes(4, byteorder="little")
         elif data <= 0xFFFFFFFFFFFFFFFF:
             packed_bytes = bytes([0x33]) + data.to_bytes(8, byteorder="little")
@@ -68,17 +86,17 @@ def _pack(data, object_list):
             packed_bytes = (
                 bytes([0x91]) + len(data).to_bytes(1, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFF:
+        elif len(data) <= 0xFFFF:  # 2^16-1
             packed_bytes = (
                 bytes([0x92]) + len(data).to_bytes(2, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFFFF:
+        elif len(data) <= 0xFFFF_FFFF:  # 2^32-1
             packed_bytes = (
-                bytes([0x93]) + len(data).to_bytes(3, byteorder="little") + data
+                bytes([0x93]) + len(data).to_bytes(4, byteorder="little") + data
             )
-        elif len(data) <= 0xFFFFFFFF:
+        elif len(data) <= 0xFFFF_FFFF_FFFF_FFFF:  # 2^64-1
             packed_bytes = (
-                bytes([0x94]) + len(data).to_bytes(4, byteorder="little") + data
+                bytes([0x94]) + len(data).to_bytes(8, byteorder="little") + data
             )
     elif isinstance(data, list):
         packed_bytes = bytes([0xD0 + min(len(data), 0xF)]) + b"".join(
@@ -95,9 +113,19 @@ def _pack(data, object_list):
     else:
         raise TypeError(str(type(data)))
 
-    # Re-use if in object list, otherwise add it to list
+    # Reuse if in object list, otherwise add it to list
     if packed_bytes in object_list:
-        packed_bytes = bytes([0xA0 + object_list.index(packed_bytes)])
+        object_index = object_list.index(packed_bytes)
+        if object_index < 0x21:
+            packed_bytes = bytes([0xA0 + object_index])
+        elif object_index <= 0xFF:
+            packed_bytes = bytes([0xC1]) + object_index.to_bytes(1, byteorder="little")
+        elif object_index <= 0xFFFF:
+            packed_bytes = bytes([0xC2]) + object_index.to_bytes(2, byteorder="little")
+        elif object_index <= 0xFFFFFFFF:
+            packed_bytes = bytes([0xC3]) + object_index.to_bytes(4, byteorder="little")
+        elif object_index <= 0xFFFFFFFFFFFFFFFF:
+            packed_bytes = bytes([0xC4]) + object_index.to_bytes(8, byteorder="little")
     elif len(packed_bytes) > 1:
         object_list.append(packed_bytes)
 
@@ -138,7 +166,9 @@ def _unpack(data, object_list):
     elif (data[0] & 0xF0) == 0x30:
         noof_bytes = 2 ** (data[0] & 0xF)
         value, remaining = (
-            int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little"),
+            _sized_int(
+                int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little"), noof_bytes
+            ),
             data[1 + noof_bytes :],
         )
     elif 0x40 <= data[0] <= 0x60:
@@ -154,8 +184,8 @@ def _unpack(data, object_list):
     elif 0x70 <= data[0] <= 0x90:
         length = data[0] - 0x70
         value, remaining = data[1 : 1 + length], data[1 + length :]
-    elif 0x90 < data[0] <= 0x94:
-        noof_bytes = data[0] & 0xF
+    elif 0x91 <= data[0] <= 0x94:
+        noof_bytes = 1 << ((data[0] & 0xF) - 1)
         length = int.from_bytes(data[1 : 1 + noof_bytes], byteorder="little")
         value, remaining = (
             data[1 + noof_bytes : 1 + noof_bytes + length],

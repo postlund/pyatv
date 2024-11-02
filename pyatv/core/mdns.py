@@ -1,4 +1,5 @@
 """Minimalistic DNS-SD implementation."""
+
 import asyncio
 from ipaddress import IPv4Address, ip_address
 import logging
@@ -435,9 +436,9 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
         except UnicodeDecodeError:
             log_binary(_LOGGER, "Failed to decode message", Msg=data)
             return
-        else:
-            if not services:
-                return
+
+        if not services:
+            return
 
         # Ignore responses from other services
         for service in services:

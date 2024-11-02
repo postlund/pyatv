@@ -95,8 +95,10 @@ def test_protocol_str(protocol, output):
         (DeviceModel.HomePodMini, "HomePod Mini"),
         (DeviceModel.AirPortExpress, "AirPort Express (gen 1)"),
         (DeviceModel.AirPortExpressGen2, "AirPort Express (gen 2)"),
-        (DeviceModel.AppleTV4KGen2, "Apple TV 4K (gen2)"),
+        (DeviceModel.AppleTV4KGen2, "Apple TV 4K (gen 2)"),
         (DeviceModel.Music, "Music/iTunes"),
+        (DeviceModel.AppleTV4KGen3, "Apple TV 4K (gen 3)"),
+        (DeviceModel.HomePodGen2, "HomePod (gen 2)"),
         (1234, "Unknown"),
     ],
 )

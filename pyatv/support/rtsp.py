@@ -3,6 +3,7 @@
 This is a simple implementation of the RTSP protocol used by Apple (with its quirks
 and all). It is somewhat generalized to support both AirPlay 1 and 2.
 """
+
 import asyncio
 from hashlib import md5
 import logging
@@ -13,13 +14,13 @@ from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 import async_timeout
 
 from pyatv.protocols.dmap import tags
-from pyatv.support.http import HttpConnection, HttpResponse
-from pyatv.support.metadata import AudioMetadata
+from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
+from pyatv.support.metadata import MediaMetadata
 
 _LOGGER = logging.getLogger(__name__)
 
 FRAMES_PER_PACKET = 352
-USER_AGENT = "AirPlay/540.31"
+USER_AGENT = "AirPlay/550.10"
 HTTP_PROTOCOL = "HTTP/1.1"
 
 ANNOUNCE_PAYLOAD = (
@@ -29,7 +30,7 @@ ANNOUNCE_PAYLOAD = (
     + "c=IN IP4 {remote_ip}\r\n"
     + "t=0 0\r\n"
     + "m=audio 0 RTP/AVP 96\r\n"
-    + "a=rtpmap:96 AppleLossless\r\n"
+    + "a=rtpmap:96 L16/44100/2\r\n"
     + f"a=fmtp:96 {FRAMES_PER_PACKET} 0 "
     + "{bits_per_channel} 40 10 14 {channels} 255 0 0 {sample_rate}\r\n"
 )
@@ -47,6 +48,8 @@ CURVE25519_PUB_KEY = (
     b"\xa9\x4d\xbd\x50\xd8\xaa\x46\x5b"
     b"\x5d\x8c\x01\x2a\x0c\x7e\x1d\x4e"
 )
+
+BPLIST_CONTENT_TYPE = "application/x-apple-binary-plist"
 
 
 class DigestInfo(NamedTuple):
@@ -98,21 +101,14 @@ class RtspSession:
 
     async def info(self) -> Dict[str, object]:
         """Return device information."""
-        device_info = await self.exchange(
-            "GET", "/info", allow_error=True, protocol=HTTP_PROTOCOL
-        )
+        device_info = await self.exchange("GET", "/info", allow_error=True)
 
         # If not supported, just return an empty dict
         if device_info.code != 200:
             _LOGGER.debug("Device does not support /info")
             return {}
 
-        body = (
-            device_info.body
-            if isinstance(device_info.body, bytes)
-            else device_info.body.encode("utf-8")
-        )
-        return plistlib.loads(body)
+        return decode_bplist_from_body(device_info)
 
     async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
@@ -128,7 +124,7 @@ class RtspSession:
         )
 
     # This method is only used by AirPlay 1 and is very specific (e.g. does not support
-    # annnouncing arbitrary audio formats) and should probably move to the AirPlay 1
+    # announcing arbitrary audio formats) and should probably move to the AirPlay 1
     # specific RAOP implementation. It will however live here for now until something
     # motivates that.
     async def announce(
@@ -175,7 +171,7 @@ class RtspSession:
     async def setup(
         self,
         headers: Optional[Dict[str, Any]] = None,
-        body: Optional[Union[str, bytes]] = None,
+        body: Optional[Union[str, bytes, dict]] = None,
     ) -> HttpResponse:
         """Send SETUP message."""
         return await self.exchange("SETUP", headers=headers, body=body)
@@ -187,6 +183,14 @@ class RtspSession:
     ) -> HttpResponse:
         """Send RECORD message."""
         return await self.exchange("RECORD", headers=headers, body=body)
+
+    async def flush(
+        self,
+        headers: Optional[Dict[str, Any]] = None,
+        body: Optional[Union[str, bytes]] = None,
+    ) -> HttpResponse:
+        """Send RECORD message."""
+        return await self.exchange("FLUSH", headers=headers, body=body)
 
     async def set_parameter(self, parameter: str, value: str) -> HttpResponse:
         """Send SET_PARAMETER message."""
@@ -201,7 +205,7 @@ class RtspSession:
         rtsp_session: int,
         rtpseq: int,
         rtptime: int,
-        metadata: AudioMetadata,
+        metadata: MediaMetadata,
     ) -> HttpResponse:
         """Change metadata for what is playing."""
         payload = b""
@@ -222,6 +226,24 @@ class RtspSession:
             body=tags.container_tag("mlit", payload),
         )
 
+    async def set_artwork(
+        self,
+        rtsp_session: int,
+        rtpseq: int,
+        rtptime: int,
+        artwork: bytes,
+    ) -> HttpResponse:
+        """Change artwork for what is playing."""
+        return await self.exchange(
+            "SET_PARAMETER",
+            content_type="image/jpeg",
+            headers={
+                "Session": rtsp_session,
+                "RTP-Info": f"seq={rtpseq};rtptime={rtptime}",
+            },
+            body=artwork,
+        )
+
     async def feedback(self, allow_error=False) -> HttpResponse:
         """Send SET_PARAMETER message."""
         return await self.exchange("POST", uri="/feedback", allow_error=allow_error)
@@ -235,8 +257,8 @@ class RtspSession:
         method: str,
         uri: Optional[str] = None,
         content_type: Optional[str] = None,
-        headers: Mapping[str, object] = None,
-        body: Union[str, bytes] = None,
+        headers: Optional[Mapping[str, object]] = None,
+        body: Optional[Union[str, bytes, dict]] = None,
         allow_error: bool = False,
         protocol: str = "RTSP/1.0",
     ) -> HttpResponse:
@@ -259,6 +281,13 @@ class RtspSession:
 
         if headers:
             hdrs.update(headers)
+
+        # If body is a dict, assume that payload should be sent as a binary plist
+        if isinstance(body, dict):
+            hdrs["Content-Type"] = BPLIST_CONTENT_TYPE
+            body = plistlib.dumps(
+                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+            )
 
         # Map an asyncio Event to current CSeq and make the request
         self.requests[cseq] = (asyncio.Event(), None)

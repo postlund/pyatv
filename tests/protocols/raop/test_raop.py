@@ -1,13 +1,13 @@
 """Unit tests for pyatv.protocols.raop."""
+
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import DeviceModel, PairingRequirement, Protocol
+from pyatv.const import DeviceModel, OperatingSystem, PairingRequirement, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.airplay.utils import AirPlayFlags
 from pyatv.protocols.raop import device_info, scan, service_info
 
 RAOP_SERVICE = "_raop._tcp.local"
@@ -65,6 +65,14 @@ def test_airport_info_name():
             {"am": "AppleTV6,2"},
             {DeviceInfo.MODEL: DeviceModel.Gen4K, DeviceInfo.RAW_MODEL: "AppleTV6,2"},
         ),
+        (
+            "_dummy._tcp.local",
+            {"am": "MacBookAir10,1"},
+            {
+                DeviceInfo.RAW_MODEL: "MacBookAir10,1",
+                DeviceInfo.OPERATING_SYSTEM: OperatingSystem.MacOS,
+            },
+        ),
         ("_dummy._tcp.local", {"ov": "14.7"}, {DeviceInfo.VERSION: "14.7"}),
         # Special case for resolving MAC address and version on AirPort Express
         (
@@ -90,6 +98,7 @@ def test_device_info(service_type, properties, expected):
     assert not DeepDiff(device_info(service_type, properties), expected)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "raop_props,mrp_props,requires_password",
     [
@@ -120,6 +129,7 @@ async def test_service_info_password(raop_props, mrp_props, requires_password):
     assert not mrp_service.requires_password
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "raop_props,devinfo,pairing_req",
     [
@@ -143,9 +153,17 @@ async def test_service_info_pairing(raop_props, devinfo, pairing_req):
     assert raop_service.pairing == pairing_req
 
 
-async def test_service_info_pairing_acl():
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "props, pairing_req",
+    [
+        ({"acl": "1"}, PairingRequirement.Disabled),
+        ({"act": "2"}, PairingRequirement.Unsupported),
+    ],
+)
+async def test_service_info_pairing_acl(props, pairing_req):
     raop_service = MutableService("id", Protocol.RAOP, 0, {})
-    airplay_props = MutableService("id", Protocol.AirPlay, 0, {"acl": "1"})
+    airplay_props = MutableService("id", Protocol.AirPlay, 0, props)
 
     await service_info(
         raop_service,
@@ -153,4 +171,4 @@ async def test_service_info_pairing_acl():
         {Protocol.RAOP: raop_service, Protocol.AirPlay: airplay_props},
     )
 
-    assert raop_service.pairing == PairingRequirement.Disabled
+    assert raop_service.pairing == pairing_req

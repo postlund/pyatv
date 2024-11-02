@@ -1,13 +1,12 @@
 """Functional tests using the API with a fake Apple TV."""
 
+import asyncio
 from ipaddress import IPv4Address
 import logging
 import math
-
-from aiohttp.test_utils import unittest_run_loop
+from typing import Optional
 
 import pyatv
-from pyatv import exceptions
 from pyatv.conf import AppleTV, ManualService
 from pyatv.const import (
     DeviceModel,
@@ -21,7 +20,15 @@ from pyatv.const import (
     Protocol,
     ShuffleState,
 )
+from pyatv.interface import OutputDevice
 from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
+from pyatv.support.http import (
+    BasicHttpServer,
+    HttpRequest,
+    HttpResponse,
+    HttpSimpleRouter,
+    http_server,
+)
 
 from tests import common_functional_tests
 from tests.fake_device import FakeAppleTV
@@ -60,16 +67,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         airplay_service = ManualService(
             "airplay_id",
             Protocol.AirPlay,
-            self.server.port,
+            self.fake_atv.get_port(Protocol.AirPlay),
             properties={"features": "0x1"},  # AirPlayVideoV1 supported
         )
         airplay_service.credentials = DEVICE_CREDENTIALS
         self.conf.add_service(airplay_service)
         self.atv = await self.get_connected_device()
+        self.artwork_server = None
 
-    def tearDown(self):
-        self.atv.close()
-        super().tearDown()
+    async def tearDownAsync(self):
+        await asyncio.gather(*self.atv.close())
+        if self.artwork_server is not None:
+            self.artwork_server.close()
+        await super().tearDownAsync()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)
@@ -90,7 +100,27 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.SetVolume,
         ]
 
-    @unittest_run_loop
+    async def serve_artwork(self, path: str) -> int:
+        class ArtworkHandler(HttpSimpleRouter):
+            def __init__(self, path: str):
+                super().__init__()
+                self.add_route("GET", path, self.handle_artwork)
+
+            def handle_artwork(self, request: HttpRequest) -> Optional[HttpResponse]:
+                return HttpResponse(
+                    "HTTP",
+                    "1.0",
+                    200,
+                    "OK",
+                    {"Content-Type": ARTWORK_MIMETYPE},
+                    ARTWORK_BYTES,
+                )
+
+        self.artwork_server, port = await http_server(
+            lambda: BasicHttpServer(ArtworkHandler(path))
+        )
+        return port
+
     async def test_button_up_actions(self):
         await self.atv.remote_control.up(action=InputAction.DoubleTap)
         await self.wait_for_button_press("up", InputAction.DoubleTap)
@@ -98,7 +128,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.up(action=InputAction.Hold)
         await self.wait_for_button_press("up", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_down_actions(self):
         await self.atv.remote_control.down(action=InputAction.DoubleTap)
         await self.wait_for_button_press("down", InputAction.DoubleTap)
@@ -106,7 +135,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.down(action=InputAction.Hold)
         await self.wait_for_button_press("down", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_left_actions(self):
         await self.atv.remote_control.left(action=InputAction.DoubleTap)
         await self.wait_for_button_press("left", InputAction.DoubleTap)
@@ -114,7 +142,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.left(action=InputAction.Hold)
         await self.wait_for_button_press("left", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_right_actions(self):
         await self.atv.remote_control.right(action=InputAction.DoubleTap)
         await self.wait_for_button_press("right", InputAction.DoubleTap)
@@ -122,12 +149,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.right(action=InputAction.Hold)
         await self.wait_for_button_press("right", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_top_menu(self):
         await self.atv.remote_control.top_menu()
         await self.wait_for_button_press("top_menu", InputAction.SingleTap)
 
-    @unittest_run_loop
     async def test_button_home(self):
         await self.atv.remote_control.home()
         await self.wait_for_button_press("home", InputAction.SingleTap)
@@ -138,12 +163,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.home(action=InputAction.Hold)
         await self.wait_for_button_press("home", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_home_hold(self):
         await self.atv.remote_control.home_hold()
         await self.wait_for_button_press("home", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_select_actions(self):
         await self.atv.remote_control.select(action=InputAction.DoubleTap)
         await self.wait_for_button_press("select", InputAction.DoubleTap)
@@ -151,7 +174,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.select(action=InputAction.Hold)
         await self.wait_for_button_press("select", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_menu_actions(self):
         await self.atv.remote_control.menu(action=InputAction.DoubleTap)
         await self.wait_for_button_press("menu", InputAction.DoubleTap)
@@ -159,23 +181,19 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.menu(action=InputAction.Hold)
         await self.wait_for_button_press("menu", InputAction.Hold)
 
-    @unittest_run_loop
     async def test_button_suspend(self):
         await self.atv.remote_control.suspend()
         await until(lambda: self.state.last_button_pressed == "suspend")
 
-    @unittest_run_loop
     async def test_button_wakeup(self):
         await self.atv.remote_control.wakeup()
         await until(lambda: self.state.last_button_pressed == "wakeup")
 
-    @unittest_run_loop
     async def test_shuffle_state_albums(self):
         self.usecase.example_video(shuffle=ShuffleState.Albums)
         playing = await self.playing(shuffle=ShuffleState.Albums)
         self.assertEqual(playing.shuffle, ShuffleState.Albums)
 
-    @unittest_run_loop
     async def test_set_shuffle_albums(self):
         self.usecase.example_video()
 
@@ -183,7 +201,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         playing = await self.playing(shuffle=ShuffleState.Albums)
         self.assertEqual(playing.shuffle, ShuffleState.Albums)
 
-    @unittest_run_loop
     async def test_metadata_artwork_id(self):
         self.usecase.example_video()
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE, ARTWORK_ID)
@@ -191,7 +208,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy")
         self.assertEqual(self.atv.metadata.artwork_id, ARTWORK_ID)
 
-    @unittest_run_loop
     async def test_metadata_artwork_id_no_identifier(self):
         self.usecase.example_video(identifier="some_id")
         self.usecase.change_artwork(ARTWORK_BYTES, ARTWORK_MIMETYPE, None)
@@ -199,7 +215,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy")
         self.assertEqual(self.atv.metadata.artwork_id, "some_id")
 
-    @unittest_run_loop
     async def test_metadata_artwork_erroneously_available(self):
         self.usecase.example_video()
 
@@ -212,7 +227,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         artwork = await self.atv.metadata.artwork(width=123, height=456)
         self.assertIsNone(artwork)
 
-    @unittest_run_loop
     async def test_metadata_artwork_width_and_height(self):
         self.usecase.example_video()
         self.usecase.change_artwork(
@@ -226,7 +240,35 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(artwork.width, 111)
         self.assertEqual(artwork.height, 222)
 
-    @unittest_run_loop
+    async def test_metadata_artwork_url(self):
+        port = await self.serve_artwork("/test")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(b"", "", url=f"http://localhost:{port}/test")
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
+    async def test_metadata_artwork_url_in_identifier(self):
+        port = await self.serve_artwork("/test/123x456bb.png")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            b"",
+            "",
+            identifier=f"http://localhost:{port}/test/{{w}}x{{h}}{{c}}.{{f}}",
+            url=f"http://localhost:{port}/test/1200x1200bb.heic",
+        )
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=123, height=456)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
     async def test_item_updates(self):
         self.usecase.video_playing(
             False, "dummy", 100, 1, identifier="id", artist="some artist"
@@ -245,11 +287,10 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.total_time, 100)
             self.assertEqual(playing.position, 1)
 
-    @unittest_run_loop
     async def test_item_id_hash(self):
         initial_hash = (await self.atv.metadata.playing()).hash
 
-        # Verify thar content identifier is used as hash
+        # Verify that content identifier is used as hash
         self.usecase.example_video(identifier="some_id")
         playing = await self.playing(title="dummy")
         self.assertEqual(playing.hash, "some_id")
@@ -259,7 +300,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         nothing_playing = await self.playing(device_state=DeviceState.Idle)
         self.assertEqual(nothing_playing.hash, initial_hash)
 
-    @unittest_run_loop
     async def test_metadata_playback_rate_device_state(self):
         self.usecase.example_video(paused=False, playback_rate=0.0)
 
@@ -274,7 +314,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         playing = await self.playing(title="dummy3")
         self.assertEqual(playing.device_state, DeviceState.Paused)
 
-    @unittest_run_loop
     async def test_power_state(self):
         class PowerListener:
             def __init__(self):
@@ -304,7 +343,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await until(lambda: listener.old_state == PowerState.Off)
         await until(lambda: listener.new_state == PowerState.On)
 
-    @unittest_run_loop
     async def test_power_state_acknowledgement(self):
         self.assertEqual(self.atv.power.power_state, PowerState.On)
         await self.atv.power.turn_off(await_new_state=True)
@@ -312,7 +350,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.power.turn_on(await_new_state=True)
         self.assertEqual(self.atv.power.power_state, PowerState.On)
 
-    @unittest_run_loop
     async def test_basic_device_info(self):
         self.assertEqual(self.atv.device_info.operating_system, OperatingSystem.TvOS)
         self.assertEqual(self.atv.device_info.build_number, BUILD_NUMBER)
@@ -320,7 +357,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.device_info.raw_model, DEVICE_MODEL)
         self.assertEqual(self.atv.device_info.model, DeviceModel.Gen4K)
 
-    @unittest_run_loop
     async def test_always_available_features(self):
         self.assertFeatures(
             FeatureState.Available,
@@ -336,9 +372,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.TurnOn,
             FeatureName.TurnOff,
             FeatureName.PowerState,
+            FeatureName.OutputDevices,
+            FeatureName.AddOutputDevices,
+            FeatureName.RemoveOutputDevices,
+            FeatureName.SetOutputDevices,
         )
 
-    @unittest_run_loop
     async def test_features_artwork(self):
         self.assertFeatures(FeatureState.Unavailable, FeatureName.Artwork)
 
@@ -348,7 +387,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         self.assertFeatures(FeatureState.Available, FeatureName.Artwork)
 
-    @unittest_run_loop
     async def test_features_with_supported_commands(self):
         feature_map = {
             FeatureName.Next: CommandInfo_pb2.NextTrack,
@@ -378,7 +416,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy2")
         self.assertFeatures(FeatureState.Available, *feature_map.keys())
 
-    @unittest_run_loop
     async def test_playing_app(self):
         self.usecase.nothing_playing()
 
@@ -405,13 +442,12 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy2")
         self.assertEqual(self.atv.metadata.app.name, DEMO_APP_NAME)
 
-        # Do not include display name and re-use previous one
+        # Do not include display name and reuse previous one
         self.usecase.update_client(display_name=None)
         self.usecase.change_metadata(title="dummy3")
         await self.playing(title="dummy3")
         self.assertEqual(self.atv.metadata.app.name, DEMO_APP_NAME)
 
-    @unittest_run_loop
     async def test_skip_forward_backward(self):
         self.usecase.example_video(
             supported_commands=[
@@ -438,8 +474,14 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.change_metadata(title="dummy4")
         metadata = await self.playing(title="dummy4")
         self.assertEqual(metadata.position, prev_position - 8)
+        prev_position = metadata.position
 
-    @unittest_run_loop
+        # Test specified skip time
+        await self.atv.remote_control.skip_forward(17)
+        self.usecase.change_metadata(title="dummy5")
+        metadata = await self.playing(title="dummy5")
+        self.assertEqual(metadata.position, prev_position + 17)
+
     async def test_button_play_pause(self):
         self.usecase.example_video(supported_commands=[CommandInfo_pb2.TogglePlayPause])
 
@@ -447,7 +489,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.play_pause()
         await until(lambda: self.state.last_button_pressed == "playpause")
 
-    @unittest_run_loop
     async def test_play_pause_emulation(self):
         self.usecase.example_video(paused=False)
         await self.playing(device_state=DeviceState.Playing)
@@ -466,7 +507,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.remote_control.play_pause()
         await until(lambda: self.state.last_button_pressed == "play")
 
-    @unittest_run_loop
     async def test_update_client_before_setstate(self):
         self.usecase.update_client(APP_NAME, TEST_PLAYER)
         self.usecase.example_video(title="test", player=TEST_PLAYER, app_name=None)
@@ -475,7 +515,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(self.atv.metadata.app.name, APP_NAME)
         self.assertEqual(self.atv.metadata.app.identifier, TEST_PLAYER)
 
-    @unittest_run_loop
     async def test_set_default_commands(self):
         self.usecase.default_supported_commands(
             [CommandInfo_pb2.Play, CommandInfo_pb2.Pause]
@@ -485,7 +524,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.playing(title="dummy")
         self.assertFeatures(FeatureState.Available, FeatureName.Play, FeatureName.Pause)
 
-    @unittest_run_loop
     async def test_playing_immutable_update_content_item(self):
         self.usecase.example_video(position=1)
         playing = await self.playing(title="dummy")
@@ -495,7 +533,6 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
         self.assertEqual(playing.position, 1)
 
-    @unittest_run_loop
     async def test_metadata_tv_playing(self):
         self.usecase.tv_playing(
             paused=False,
@@ -505,6 +542,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             season_number=12,
             episode_number=4,
             content_identifier="identifier",
+            itunes_store_identifier=123456789,
         )
 
         with faketime("pyatv", 0):
@@ -517,6 +555,7 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             self.assertEqual(playing.season_number, 12)
             self.assertEqual(playing.episode_number, 4)
             self.assertEqual(playing.content_identifier, "identifier")
+            self.assertEqual(playing.itunes_store_identifier, 123456789)
 
         self.assertFeatures(
             FeatureState.Available,
@@ -528,11 +567,38 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             FeatureName.ContentIdentifier,
         )
 
-    @unittest_run_loop
+    async def test_absolute_volume_features(self):
+        features = [
+            FeatureName.Volume,
+            FeatureName.SetVolume,
+        ]
+        self.assertFeatures(FeatureState.Unavailable, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=False, support_relative=True
+        )
+        self.usecase.example_video(title="dummy2")
+        await self.playing(title="dummy2")
+        self.assertFeatures(FeatureState.Unavailable, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        self.usecase.example_video(title="dummy3")
+        await self.playing(title="dummy3")
+        self.assertFeatures(FeatureState.Available, *features)
+
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        self.usecase.example_video(title="dummy4")
+        await self.playing(title="dummy4")
+        self.assertFeatures(FeatureState.Available, *features)
+
     async def test_volume_change(self):
         self.usecase.change_volume_control(available=True)
 
-        assert math.isclose(self.atv.audio.volume, 0.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 0.0))
 
         await until(
             lambda: self.atv.features.in_state(
@@ -548,8 +614,36 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.usecase.set_volume(0.3, DEVICE_UID)
         await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
 
-    @unittest_run_loop
-    async def test_audio_volume_up_increases_volume(self):
+    async def _test_audio_volume_up_increases_volume(self):
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        await self.atv.audio.volume_up()
+        await until(lambda: self.atv.audio.volume == round(20.0 + VOLUME_STEP * 100.0))
+
+        await self.atv.audio.volume_up()
+        await until(
+            lambda: self.atv.audio.volume == round(20.0 + 2 * VOLUME_STEP * 100.0)
+        )
+
+    async def test_audio_volume_up_increases_volume_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_up_increases_volume()
+
+    async def test_audio_volume_up_increases_volume_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_up_increases_volume()
+
+    async def _test_audio_volume_down_decreases_volume(self):
         self.usecase.change_volume_control(available=True)
 
         await until(
@@ -558,49 +652,79 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
             )
         )
         await self.atv.audio.set_volume(20.0)
-        assert math.isclose(self.atv.audio.volume, 20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
 
-        await self.atv.audio.volume_up()
-        assert self.atv.audio.volume == round(20.0 + VOLUME_STEP * 100.0)
+        await self.atv.audio.volume_down()
+        await until(lambda: self.atv.audio.volume == round(20 - VOLUME_STEP * 100.0))
 
-        await self.atv.audio.volume_up()
-        assert self.atv.audio.volume == round(20.0 + 2 * VOLUME_STEP * 100.0)
-
-    @unittest_run_loop
-    async def test_audio_volume_down_decreases_volume(self):
-        self.usecase.change_volume_control(available=True)
-
+        await self.atv.audio.volume_down()
         await until(
-            lambda: self.atv.features.in_state(
-                FeatureState.Available, FeatureName.SetVolume
-            )
+            lambda: self.atv.audio.volume == round(20 - 2 * VOLUME_STEP * 100.0)
         )
-        await self.atv.audio.set_volume(20.0)
-        assert math.isclose(self.atv.audio.volume, 20.0)
 
-        await self.atv.audio.volume_down()
-        assert self.atv.audio.volume == round(20 - VOLUME_STEP * 100.0)
+    async def test_audio_volume_down_decreases_volume_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_down_decreases_volume()
 
-        await self.atv.audio.volume_down()
-        assert self.atv.audio.volume == round(20 - 2 * VOLUME_STEP * 100.0)
+    async def test_audio_volume_down_decreases_volume_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_down_decreases_volume()
 
-    @unittest_run_loop
-    async def test_audio_volume_up_above_max(self):
-        self.usecase.change_volume_control(available=True)
-
+    async def _test_audio_volume_up_above_max(self):
         await until(
             lambda: self.atv.features.in_state(
                 FeatureState.Available, FeatureName.SetVolume
             )
         )
         await self.atv.audio.set_volume(100.0)
-        assert math.isclose(self.atv.audio.volume, 100.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 100.0))
 
         # Should not yield a timeout
         await self.atv.audio.volume_up()
 
-    @unittest_run_loop
-    async def test_audio_volume_down_below_zero(self):
+    async def test_audio_volume_up_above_max_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_up_above_max()
+
+    async def test_audio_volume_up_above_max_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_up_above_max()
+
+    async def _test_audio_volume_down_below_zero(self):
+        await until(
+            lambda: self.atv.features.in_state(
+                FeatureState.Available, FeatureName.SetVolume
+            )
+        )
+        await self.atv.audio.set_volume(0.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 0.0))
+
+        # Should not yield a timeout
+        await self.atv.audio.volume_down()
+
+    async def test_audio_volume_down_below_zero_relative(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=True
+        )
+        await self._test_audio_volume_down_below_zero()
+
+    async def test_audio_volume_down_below_zero_absolute(self):
+        self.usecase.change_volume_control(
+            available=True, support_absolute=True, support_relative=False
+        )
+        await self._test_audio_volume_down_below_zero()
+
+    async def test_volume_clustered_devices(self):
+        cluster_id = "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"
+        self.usecase.set_cluster_id(cluster_id)
         self.usecase.change_volume_control(available=True)
 
         await until(
@@ -608,8 +732,44 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
                 FeatureState.Available, FeatureName.SetVolume
             )
         )
-        await self.atv.audio.set_volume(0.0)
-        assert math.isclose(self.atv.audio.volume, 0.0)
 
-        # Should not yield a timeout
-        await self.atv.audio.volume_down()
+        # Manually set a new volume level
+        await self.atv.audio.set_volume(20.0)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device with wrong id
+        self.usecase.set_volume(0.3, DEVICE_UID)
+        await until(lambda: math.isclose(self.atv.audio.volume, 20.0))
+
+        # Trigger volume change from device
+        self.usecase.set_volume(0.3, cluster_id)
+        await until(lambda: math.isclose(self.atv.audio.volume, 30.0))
+
+    async def test_output_devices(self):
+        assert self.atv.audio.output_devices == [
+            OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")
+        ]
+
+    async def test_output_devices_change(self):
+        await self.atv.audio.add_output_devices("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [
+                OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069"),
+                OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+            ]
+        )
+
+        await self.atv.audio.remove_output_devices(
+            "E510C430-B01D-45DF-B558-6EA6F8251069"
+        )
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")]
+        )
+
+        await self.atv.audio.set_output_devices("E510C430-B01D-45DF-B558-6EA6F8251069")
+        await until(
+            lambda: self.atv.audio.output_devices
+            == [OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069")]
+        )

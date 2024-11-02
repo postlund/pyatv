@@ -1,4 +1,5 @@
 """Unit tests for pyatv.protocols.dmap."""
+
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
@@ -80,6 +81,7 @@ def test_device_info(service_type, properties, expected):
     assert not DeepDiff(device_info(service_type, properties), expected)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "dmap_props,mrp_props,pairing_req",
     [

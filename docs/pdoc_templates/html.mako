@@ -12,12 +12,22 @@
     if not isinstance(d, pdoc.Doc) or isinstance(d, pdoc.External) and not external_links:
         return name
     url = d.url(relative_to=module, link_prefix=link_prefix,
-                top_ancestor=not show_inherited_members).replace(".html", "")
+                top_ancestor=not show_inherited_members).replace("index.html", "").replace(".html", "")
+    # Ugly, ugly hack to make navigation working in submodules...
+    if url == "":
+      url = ".."
+    elif url.startswith("#"):
+      pass
+    elif "#" not in url:
+      if not url.endswith("/"):
+        url += "/"
+    else:
+        url = "../" + url
     return '<a title="{}" href="{}">{}</a>'.format(d.refname, url, name)
 
   def const_link(refname):
       desc = ".".join(refname.split(".")[-2:])
-      return f'<a title="{refname}" href="const#{refname}">{desc}</a>'
+      return f'<a title="{refname}" href="/api/const#{refname}">{desc}</a>'
 
   def to_html(text):
     return _to_html(text, module=module, link=link, latex_math=latex_math)
@@ -252,7 +262,26 @@
           <h3>Class variables</h3>
           <dl>
           % for v in class_vars:
-              <dt id="${v.refname}"><code class="name">var ${ident(v.name)}</code></dt>
+              <%
+                  var_type = show_type_annotations and v.type_annotation(link=link) or ''
+                  if var_type:
+                      var_type = insert_union_types(var_type)
+
+                  # Try to extract value from enums and pydantic models
+                  var_value = ""
+                  if any(cls.name.startswith("enum.") for cls in mro):
+                    var_value = f" = {getattr(c.obj, v.name).value}"
+                  elif any(cls.name.startswith("pydantic.main.BaseModel") for cls in mro):
+                    if hasattr(c.obj, "__fields__"):
+                      field_info = c.obj.__fields__[v.name]
+                    else:
+                      field_info = c.obj.model_fields[v.name]
+
+                    # Ignore fields that are pydantic models as they produce unnecessary output
+                    if "__pydantic_serializer__" not in dir(field_info.annotation):
+                      var_value = f" = {field_info.default}"
+              %>
+              <dt id="${v.refname}"><code class="name">var ${ident(v.name)}${var_type}${var_value}</code></dt>
               <dd>${show_desc(v)}</dd>
           % endfor
           </dl>
@@ -328,6 +357,12 @@
 
     <h1>Index</h1>
     ${extract_toc(module.docstring) if extract_module_toc_into_sidebar else ''}
+
+    % if "__pdoc_dev_page__" in dir(module.obj):
+    This module has additional documentation
+    <a title="test" href=${f"{module.obj.__pdoc_dev_page__}"}>here</a>.
+    % endif
+
     <ul id="index">
     % if supermodule:
     <li><h3>Super-module</h3>
@@ -388,10 +423,18 @@
   </nav>
 </%def>
 
+<%
+url = module.name.replace("pyatv", "").replace(".", "/")
+if url.startswith("/"):
+  url = url[1:]
+if not url.endswith("/"):
+  url += "/"
+%>
+
 ---
 layout: template
 title: API - ${module.name}
-permalink: /api/${module.name.replace("pyatv", "").replace(".", "/")}
+permalink: /api/${url}
 link_group: api
 ---
 

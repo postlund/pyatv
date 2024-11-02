@@ -59,7 +59,7 @@ async def test_pairing_failed(airplay_device, client_connection):
     pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
     await pairing_procedure.start_pairing()
     with pytest.raises(AuthenticationError):
-        await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN)
+        await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN, None)
 
 
 async def test_pairing_successful(airplay_device, client_connection):
@@ -68,4 +68,4 @@ async def test_pairing_successful(airplay_device, client_connection):
 
     pairing_procedure = AirPlayLegacyPairSetupProcedure(client_connection, srp)
     await pairing_procedure.start_pairing()
-    assert await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN)
+    assert await pairing_procedure.finish_pairing(DEVICE_IDENTIFIER, DEVICE_PIN, None)

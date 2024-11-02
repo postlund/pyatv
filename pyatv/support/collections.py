@@ -1,4 +1,5 @@
 """Collections for pyatv."""
+
 import asyncio
 import collections.abc
 import typing
@@ -10,13 +11,43 @@ SharedType = typing.TypeVar("SharedType")  # pylint: disable=invalid-name
 def dict_merge(
     dict_a: typing.Dict[typing.Any, typing.Any],
     dict_b: typing.Mapping[typing.Any, typing.Any],
+    /,
+    allow_overwrite: bool = False,
 ) -> typing.Dict[typing.Any, typing.Any]:
     """Merge items from dict_b into dict_a, not overriding existing keys.
 
     This is effectively the same as the merge operator in python 3.9: dict_a | dict_b
     """
-    dict_a.update({key: value for key, value in dict_b.items() if key not in dict_a})
+    dict_a.update(
+        {
+            key: value
+            for key, value in dict_b.items()
+            if allow_overwrite or key not in dict_a
+        }
+    )
     return dict_a
+
+
+def dict_subtract(
+    dict_a: typing.Dict[typing.Any, typing.Any],
+    dict_b: typing.Mapping[typing.Any, typing.Any],
+    /,
+    remove_if_same_value: bool = False
+) -> typing.Dict[typing.Any, typing.Any]:
+    """Subtract items from a dict (based on key) recursively.
+
+    This corresponds to dict_a - dict_b more or less.
+
+    If remove_if_same_value is set to True, keys will only be removed if they have the
+    same value, e.g. if a=1 in dict_a and a=1 also in dict_b.
+    """
+    diff = {}
+    for key, val in dict_a.items():
+        if isinstance(val, dict):
+            diff[key] = dict_subtract(val, dict_b[key])
+        elif key not in dict_b or (remove_if_same_value and dict_a[key] != dict_b[key]):
+            diff[key] = val
+    return diff
 
 
 class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
@@ -120,7 +151,7 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
 class SharedData(typing.Generic[SharedType]):
     """Synchronization barrier used to synchronization data transfer between tasks."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new SharedData instance."""
         self._event: asyncio.Event = asyncio.Event()
         self._data: typing.Optional[SharedType] = None

@@ -1,9 +1,13 @@
 """Unit tests for pyatv.core.protocol."""
+
 import asyncio
+from functools import partial
 import math
 from typing import Any, Optional
+from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 
 from pyatv.core.protocol import MessageDispatcher, heartbeater
 
@@ -61,7 +65,7 @@ class HeartbeatMonitor:
         self.failure_called = True
 
 
-@pytest.fixture(name="monitor")
+@pytest_asyncio.fixture(name="monitor")
 async def monitor_fixture():
     monitor = HeartbeatMonitor()
     yield monitor
@@ -136,30 +140,23 @@ async def test_message_is_passed_to_send(monitor):
 
 
 async def test_simple_dispatch():
-    dispatched_msg1 = None
-    dispatched_msg2 = None
+    test_mock = MagicMock()
 
-    async def dispatch_func1(message: bytes) -> None:
-        nonlocal dispatched_msg1
-        dispatched_msg1 = message
+    async def dispatch_func1(mock, message: bytes) -> None:
+        mock.func1(message)
 
     def dispatch_func2(message: bytes) -> None:
-        nonlocal dispatched_msg2
-        dispatched_msg2 = message
+        mock.func2(message)
 
     dispatcher = MessageDispatcher[int, bytes]()
-    dispatcher.listen_to(1, dispatch_func1)
-    dispatcher.listen_to(2, dispatch_func2)
+    dispatcher.listen_to(1, partial(dispatch_func1, test_mock))
+    dispatcher.listen_to(2, partial(dispatch_func2, test_mock))
 
     await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(1, b"123")), 5.0)
-    assert dispatched_msg1 == b"123"
-    assert dispatched_msg2 is None
-
-    dispatched_msg1 = None
+    test_mock.func1.assert_called_once_with(b"123")
 
     await asyncio.wait_for(asyncio.gather(*dispatcher.dispatch(2, b"456")), 5.0)
-    assert dispatched_msg1 is None
-    assert dispatched_msg2 == b"456"
+    test_mock.func1.assert_called_once_with(b"123")
 
 
 async def test_dispatch_with_filter():

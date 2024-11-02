@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tool modelled to be used for scripting."""
 
-import argparse
 import asyncio
 import datetime
 from enum import Enum
@@ -9,22 +8,30 @@ import json
 import logging
 import sys
 import traceback
+from typing import List, Optional
 
 from pyatv import connect, const, scan
-from pyatv.const import Protocol
+from pyatv.const import FeatureName, FeatureState, Protocol
 from pyatv.interface import (
     App,
+    AppleTV,
+    AudioListener,
     DeviceListener,
+    KeyboardListener,
+    OutputDevice,
     Playing,
     PowerListener,
     PushListener,
     RemoteControl,
+    Storage,
     retrieve_commands,
 )
 from pyatv.scripts import (
     TransformOutput,
     TransformProtocol,
     VerifyScanHosts,
+    create_common_parser,
+    get_storage,
     log_current_version,
 )
 
@@ -34,15 +41,20 @@ _LOGGER = logging.getLogger(__name__)
 class PushPrinter(PushListener):
     """Listen for push updates and print changes."""
 
-    def __init__(self, formatter, atv):
+    def __init__(self, formatter, atv: AppleTV):
         """Initialize a new PushPrinter."""
         self.formatter = formatter
         self.atv = atv
 
     def playstatus_update(self, updater, playstatus: Playing) -> None:
         """Inform about changes to what is currently playing."""
+        app = (
+            self.atv.metadata.app
+            if not self.atv.features.in_state(FeatureState.Unavailable, FeatureName.App)
+            else None
+        )
         print(
-            self.formatter(output_playing(playstatus, self.atv.metadata.app)),
+            self.formatter(output_playing(playstatus, app)),
             flush=True,
         )
 
@@ -65,6 +77,59 @@ class PowerPrinter(PowerListener):
         print(
             self.formatter(
                 output(True, values={"power_state": new_state.name.lower()})
+            ),
+            flush=True,
+        )
+
+
+class AudioPrinter(AudioListener):
+    """Listen for audio updates and print changes."""
+
+    def __init__(self, formatter):
+        """Initialize a new AudioPrinter."""
+        self.formatter = formatter
+
+    def volume_update(self, old_level: float, new_level: float):
+        """Device volume level was updated."""
+        print(
+            self.formatter(output(True, values={"volume": new_level})),
+            flush=True,
+        )
+
+    def outputdevices_update(
+        self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
+    ):
+        """Output devices were updated."""
+        print(
+            self.formatter(
+                output(
+                    True,
+                    values={
+                        "output_devices": [
+                            {"name": device.name, "identifier": device.identifier}
+                            for device in new_devices
+                        ]
+                    },
+                )
+            ),
+            flush=True,
+        )
+
+
+class KeyboardPrinter(KeyboardListener):
+    """Listen for keyboard updates and print changes."""
+
+    def __init__(self, formatter):
+        """Initialize a new KeyboardPrinter."""
+        self.formatter = formatter
+
+    def focusstate_update(
+        self, old_state: const.KeyboardFocusState, new_state: const.KeyboardFocusState
+    ):
+        """Keyboard focus state was updated."""
+        print(
+            self.formatter(
+                output(True, values={"focus_state": new_state.name.lower()})
             ),
             flush=True,
         )
@@ -99,8 +164,10 @@ async def wait_for_input(loop, abort_sem):
     reader = asyncio.StreamReader(loop=loop)
     reader_protocol = asyncio.StreamReaderProtocol(reader)
     await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
+    reader_readline = asyncio.create_task(reader.readline())
+    abort_sem_acquire = asyncio.create_task(abort_sem.acquire())
     await asyncio.wait(
-        [reader.readline(), abort_sem.acquire()], return_when=asyncio.FIRST_COMPLETED
+        [reader_readline, abort_sem_acquire], return_when=asyncio.FIRST_COMPLETED
     )
 
 
@@ -122,7 +189,7 @@ def output(success: bool, error=None, exception=None, values=None):
     return result
 
 
-def output_playing(playing: Playing, app: App):
+def output_playing(playing: Playing, app: Optional[App]):
     """Produce output for what is currently playing."""
 
     def _convert(field):
@@ -141,9 +208,9 @@ def output_playing(playing: Playing, app: App):
     return output(True, values=values)
 
 
-async def _scan_devices(loop, hosts):
+async def _scan_devices(loop, storage: Storage, hosts):
     atvs = []
-    for atv in await scan(loop, hosts=hosts):
+    for atv in await scan(loop, hosts=hosts, storage=storage):
         services = []
         for service in atv.services:
             services.append(
@@ -154,7 +221,9 @@ async def _scan_devices(loop, hosts):
                 "name": atv.name,
                 "address": str(atv.address),
                 "identifier": atv.identifier,
+                "all_identifiers": atv.all_identifiers,
                 "device_info": {
+                    "mac": atv.device_info.mac,
                     "model": atv.device_info.model.name,
                     "model_str": atv.device_info.model_str,
                     "operating_system": atv.device_info.operating_system.name,
@@ -166,13 +235,13 @@ async def _scan_devices(loop, hosts):
     return output(True, values={"devices": atvs})
 
 
-async def _autodiscover_device(args, loop):
+async def _autodiscover_device(args, storage: Storage, loop: asyncio.AbstractEventLoop):
     options = {"identifier": args.id, "protocol": args.protocol}
 
     if args.scan_hosts:
         options["hosts"] = args.scan_hosts
 
-    atvs = await scan(loop, **options)
+    atvs = await scan(loop, storage=storage, **options)
 
     if not atvs:
         return None
@@ -191,15 +260,17 @@ async def _autodiscover_device(args, loop):
     return apple_tv
 
 
-async def _handle_command(args, abort_sem, loop):
+async def _handle_command(
+    args, abort_sem, storage: Storage, loop: asyncio.AbstractEventLoop
+):
     if args.command == "scan":
-        return await _scan_devices(loop, args.scan_hosts)
+        return await _scan_devices(loop, storage, args.scan_hosts)
 
-    config = await _autodiscover_device(args, loop)
+    config = await _autodiscover_device(args, storage, loop)
     if not config:
         return output(False, "device_not_found")
 
-    atv = await connect(config, loop, protocol=Protocol.MRP)
+    atv = await connect(config, loop, storage=storage)
     try:
         return await _run_command(atv, args, abort_sem, loop)
     finally:
@@ -208,14 +279,25 @@ async def _handle_command(args, abort_sem, loop):
 
 async def _run_command(atv, args, abort_sem, loop):
     if args.command == "playing":
-        return output_playing(await atv.metadata.playing(), atv.metadata.app)
+        return output_playing(
+            await atv.metadata.playing(),
+            (
+                atv.metadata.app
+                if atv.features.in_state(FeatureState.Available, FeatureName.App)
+                else None
+            ),
+        )
 
     if args.command == "push_updates":
         power_listener = PowerPrinter(args.output)
+        audio_listener = AudioPrinter(args.output)
+        keyboard_listener = KeyboardPrinter(args.output)
         device_listener = DevicePrinter(args.output, abort_sem)
         push_listener = PushPrinter(args.output, atv)
 
         atv.power.listener = power_listener
+        atv.audio.listener = audio_listener
+        atv.keyboard.listener = keyboard_listener
         atv.listener = device_listener
         atv.push_updater.listener = push_listener
         atv.push_updater.start()
@@ -225,6 +307,7 @@ async def _run_command(atv, args, abort_sem, loop):
             ),
             flush=True,
         )
+        audio_listener.outputdevices_update([], atv.audio.output_devices)
         await wait_for_input(loop, abort_sem)
         return output(True, values={"push_updates": "finished"})
 
@@ -237,7 +320,7 @@ async def _run_command(atv, args, abort_sem, loop):
 
 async def appstart(loop):
     """Start the asyncio event loop and runs the application."""
-    parser = argparse.ArgumentParser()
+    parser = create_common_parser()
     parser.add_argument("command", help="command to run")
     parser.add_argument("-i", "--id", help="device identifier", dest="id", default=None)
     parser.add_argument(
@@ -304,8 +387,14 @@ async def appstart(loop):
 
     _LOGGER.debug("Started atvscript")
 
+    storage = get_storage(args, loop)
+    await storage.load()
+
     try:
-        print(args.output(await _handle_command(args, abort_sem, loop)), flush=True)
+        print(
+            args.output(await _handle_command(args, abort_sem, storage, loop)),
+            flush=True,
+        )
     except Exception as ex:
         print(args.output(output(False, exception=ex)), flush=True)
 

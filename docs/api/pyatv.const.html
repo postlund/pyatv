@@ -1,7 +1,7 @@
 ---
 layout: template
 title: API - pyatv.const
-permalink: /api//const
+permalink: /api/const/
 link_group: api
 ---
 <nav id="sidebar">
@@ -12,7 +12,7 @@ link_group: api
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pyatv" href="index">pyatv</a></code></li>
+<li><code><a title="pyatv" href="..">pyatv</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -23,11 +23,13 @@ link_group: api
 <li><code><a title="pyatv.const.DeviceModel.AirPortExpress" href="#pyatv.const.DeviceModel.AirPortExpress">AirPortExpress</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.AirPortExpressGen2" href="#pyatv.const.DeviceModel.AirPortExpressGen2">AirPortExpressGen2</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.AppleTV4KGen2" href="#pyatv.const.DeviceModel.AppleTV4KGen2">AppleTV4KGen2</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.AppleTV4KGen3" href="#pyatv.const.DeviceModel.AppleTV4KGen3">AppleTV4KGen3</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen2" href="#pyatv.const.DeviceModel.Gen2">Gen2</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen3" href="#pyatv.const.DeviceModel.Gen3">Gen3</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen4" href="#pyatv.const.DeviceModel.Gen4">Gen4</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Gen4K" href="#pyatv.const.DeviceModel.Gen4K">Gen4K</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.HomePod" href="#pyatv.const.DeviceModel.HomePod">HomePod</a></code></li>
+<li><code><a title="pyatv.const.DeviceModel.HomePodGen2" href="#pyatv.const.DeviceModel.HomePodGen2">HomePodGen2</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.HomePodMini" href="#pyatv.const.DeviceModel.HomePodMini">HomePodMini</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Music" href="#pyatv.const.DeviceModel.Music">Music</a></code></li>
 <li><code><a title="pyatv.const.DeviceModel.Unknown" href="#pyatv.const.DeviceModel.Unknown">Unknown</a></code></li>
@@ -46,7 +48,10 @@ link_group: api
 </li>
 <li>
 <h4><code><a title="pyatv.const.FeatureName" href="#pyatv.const.FeatureName">FeatureName</a></code></h4>
-<ul class="two-column">
+<ul class="">
+<li><code><a title="pyatv.const.FeatureName.AccountList" href="#pyatv.const.FeatureName.AccountList">AccountList</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.Action" href="#pyatv.const.FeatureName.Action">Action</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.AddOutputDevices" href="#pyatv.const.FeatureName.AddOutputDevices">AddOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Album" href="#pyatv.const.FeatureName.Album">Album</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.App" href="#pyatv.const.FeatureName.App">App</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.AppList" href="#pyatv.const.FeatureName.AppList">AppList</a></code></li>
@@ -54,6 +59,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Artwork" href="#pyatv.const.FeatureName.Artwork">Artwork</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.ChannelDown" href="#pyatv.const.FeatureName.ChannelDown">ChannelDown</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.ChannelUp" href="#pyatv.const.FeatureName.ChannelUp">ChannelUp</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.Click" href="#pyatv.const.FeatureName.Click">Click</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.ContentIdentifier" href="#pyatv.const.FeatureName.ContentIdentifier">ContentIdentifier</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Down" href="#pyatv.const.FeatureName.Down">Down</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.EpisodeNumber" href="#pyatv.const.FeatureName.EpisodeNumber">EpisodeNumber</a></code></li>
@@ -64,6 +70,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Left" href="#pyatv.const.FeatureName.Left">Left</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Menu" href="#pyatv.const.FeatureName.Menu">Menu</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Next" href="#pyatv.const.FeatureName.Next">Next</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.OutputDevices" href="#pyatv.const.FeatureName.OutputDevices">OutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Pause" href="#pyatv.const.FeatureName.Pause">Pause</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Play" href="#pyatv.const.FeatureName.Play">Play</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.PlayPause" href="#pyatv.const.FeatureName.PlayPause">PlayPause</a></code></li>
@@ -72,11 +79,14 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.PowerState" href="#pyatv.const.FeatureName.PowerState">PowerState</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Previous" href="#pyatv.const.FeatureName.Previous">Previous</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.PushUpdates" href="#pyatv.const.FeatureName.PushUpdates">PushUpdates</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.RemoveOutputDevices" href="#pyatv.const.FeatureName.RemoveOutputDevices">RemoveOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Repeat" href="#pyatv.const.FeatureName.Repeat">Repeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Right" href="#pyatv.const.FeatureName.Right">Right</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.Screensaver" href="#pyatv.const.FeatureName.Screensaver">Screensaver</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SeasonNumber" href="#pyatv.const.FeatureName.SeasonNumber">SeasonNumber</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Select" href="#pyatv.const.FeatureName.Select">Select</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SeriesName" href="#pyatv.const.FeatureName.SeriesName">SeriesName</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SetOutputDevices" href="#pyatv.const.FeatureName.SetOutputDevices">SetOutputDevices</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetPosition" href="#pyatv.const.FeatureName.SetPosition">SetPosition</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetRepeat" href="#pyatv.const.FeatureName.SetRepeat">SetRepeat</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.SetShuffle" href="#pyatv.const.FeatureName.SetShuffle">SetShuffle</a></code></li>
@@ -87,6 +97,13 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.Stop" href="#pyatv.const.FeatureName.Stop">Stop</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.StreamFile" href="#pyatv.const.FeatureName.StreamFile">StreamFile</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Suspend" href="#pyatv.const.FeatureName.Suspend">Suspend</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.Swipe" href="#pyatv.const.FeatureName.Swipe">Swipe</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.SwitchAccount" href="#pyatv.const.FeatureName.SwitchAccount">SwitchAccount</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextAppend" href="#pyatv.const.FeatureName.TextAppend">TextAppend</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextClear" href="#pyatv.const.FeatureName.TextClear">TextClear</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextFocusState" href="#pyatv.const.FeatureName.TextFocusState">TextFocusState</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextGet" href="#pyatv.const.FeatureName.TextGet">TextGet</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.TextSet" href="#pyatv.const.FeatureName.TextSet">TextSet</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.Title" href="#pyatv.const.FeatureName.Title">Title</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TopMenu" href="#pyatv.const.FeatureName.TopMenu">TopMenu</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.TotalTime" href="#pyatv.const.FeatureName.TotalTime">TotalTime</a></code></li>
@@ -97,6 +114,7 @@ link_group: api
 <li><code><a title="pyatv.const.FeatureName.VolumeDown" href="#pyatv.const.FeatureName.VolumeDown">VolumeDown</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.VolumeUp" href="#pyatv.const.FeatureName.VolumeUp">VolumeUp</a></code></li>
 <li><code><a title="pyatv.const.FeatureName.WakeUp" href="#pyatv.const.FeatureName.WakeUp">WakeUp</a></code></li>
+<li><code><a title="pyatv.const.FeatureName.iTunesStoreIdentifier" href="#pyatv.const.FeatureName.iTunesStoreIdentifier">iTunesStoreIdentifier</a></code></li>
 </ul>
 </li>
 <li>
@@ -117,6 +135,14 @@ link_group: api
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.const.KeyboardFocusState" href="#pyatv.const.KeyboardFocusState">KeyboardFocusState</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.KeyboardFocusState.Focused" href="#pyatv.const.KeyboardFocusState.Focused">Focused</a></code></li>
+<li><code><a title="pyatv.const.KeyboardFocusState.Unfocused" href="#pyatv.const.KeyboardFocusState.Unfocused">Unfocused</a></code></li>
+<li><code><a title="pyatv.const.KeyboardFocusState.Unknown" href="#pyatv.const.KeyboardFocusState.Unknown">Unknown</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.const.MediaType" href="#pyatv.const.MediaType">MediaType</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.const.MediaType.Music" href="#pyatv.const.MediaType.Music">Music</a></code></li>
@@ -130,6 +156,7 @@ link_group: api
 <ul class="">
 <li><code><a title="pyatv.const.OperatingSystem.AirPortOS" href="#pyatv.const.OperatingSystem.AirPortOS">AirPortOS</a></code></li>
 <li><code><a title="pyatv.const.OperatingSystem.Legacy" href="#pyatv.const.OperatingSystem.Legacy">Legacy</a></code></li>
+<li><code><a title="pyatv.const.OperatingSystem.MacOS" href="#pyatv.const.OperatingSystem.MacOS">MacOS</a></code></li>
 <li><code><a title="pyatv.const.OperatingSystem.TvOS" href="#pyatv.const.OperatingSystem.TvOS">TvOS</a></code></li>
 <li><code><a title="pyatv.const.OperatingSystem.Unknown" href="#pyatv.const.OperatingSystem.Unknown">Unknown</a></code></li>
 </ul>
@@ -178,6 +205,15 @@ link_group: api
 <li><code><a title="pyatv.const.ShuffleState.Songs" href="#pyatv.const.ShuffleState.Songs">Songs</a></code></li>
 </ul>
 </li>
+<li>
+<h4><code><a title="pyatv.const.TouchAction" href="#pyatv.const.TouchAction">TouchAction</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.const.TouchAction.Click" href="#pyatv.const.TouchAction.Click">Click</a></code></li>
+<li><code><a title="pyatv.const.TouchAction.Hold" href="#pyatv.const.TouchAction.Hold">Hold</a></code></li>
+<li><code><a title="pyatv.const.TouchAction.Press" href="#pyatv.const.TouchAction.Press">Press</a></code></li>
+<li><code><a title="pyatv.const.TouchAction.Release" href="#pyatv.const.TouchAction.Release">Release</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -188,7 +224,7 @@ link_group: api
 </header>
 <section id="section-intro">
 <p>Constants used in the public API.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L377" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L1-L457" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -201,60 +237,68 @@ link_group: api
 <dl>
 <dt id="pyatv.const.DeviceModel"><code class="flex name class">
 <span>class <span class="ident">DeviceModel</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Hardware device model.</p>
 <p>Gen2-Gen4K are Apple TV model names and will be renamed to AppleTVGenX in the
 future.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L133-L171" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L150-L194" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.DeviceModel.AirPortExpress"><code class="name">var <span class="ident">AirPortExpress</span></code></dt>
+<dt id="pyatv.const.DeviceModel.AirPortExpress"><code class="name">var <span class="ident">AirPortExpress</span> = 7</code></dt>
 <dd>
 <section class="desc"><p>Device model is AirPort Express (first generation).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.AirPortExpressGen2"><code class="name">var <span class="ident">AirPortExpressGen2</span></code></dt>
+<dt id="pyatv.const.DeviceModel.AirPortExpressGen2"><code class="name">var <span class="ident">AirPortExpressGen2</span> = 8</code></dt>
 <dd>
 <section class="desc"><p>Device model is AirPort Express (second generation).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.AppleTV4KGen2"><code class="name">var <span class="ident">AppleTV4KGen2</span></code></dt>
+<dt id="pyatv.const.DeviceModel.AppleTV4KGen2"><code class="name">var <span class="ident">AppleTV4KGen2</span> = 9</code></dt>
 <dd>
 <section class="desc"><p>Device model is sixth generation Apple TV (Apple TV 4K gen 2).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Gen2"><code class="name">var <span class="ident">Gen2</span></code></dt>
+<dt id="pyatv.const.DeviceModel.AppleTV4KGen3"><code class="name">var <span class="ident">AppleTV4KGen3</span> = 11</code></dt>
+<dd>
+<section class="desc"><p>Device model is seventh generation Apple TV (Apple TV 4K gen 3).</p></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.Gen2"><code class="name">var <span class="ident">Gen2</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Device model is second generation Apple TV (Apple TV 2).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Gen3"><code class="name">var <span class="ident">Gen3</span></code></dt>
+<dt id="pyatv.const.DeviceModel.Gen3"><code class="name">var <span class="ident">Gen3</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Device model is third generation Apple TV (Apple TV 3).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Gen4"><code class="name">var <span class="ident">Gen4</span></code></dt>
+<dt id="pyatv.const.DeviceModel.Gen4"><code class="name">var <span class="ident">Gen4</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Device model is fourth generation Apple TV (Apple TV 4).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Gen4K"><code class="name">var <span class="ident">Gen4K</span></code></dt>
+<dt id="pyatv.const.DeviceModel.Gen4K"><code class="name">var <span class="ident">Gen4K</span> = 4</code></dt>
 <dd>
 <section class="desc"><p>Device model is fifth generation Apple TV (Apple TV 4K).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.HomePod"><code class="name">var <span class="ident">HomePod</span></code></dt>
+<dt id="pyatv.const.DeviceModel.HomePod"><code class="name">var <span class="ident">HomePod</span> = 5</code></dt>
 <dd>
 <section class="desc"><p>Device model is HomePod (first generation).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.HomePodMini"><code class="name">var <span class="ident">HomePodMini</span></code></dt>
+<dt id="pyatv.const.DeviceModel.HomePodGen2"><code class="name">var <span class="ident">HomePodGen2</span> = 12</code></dt>
+<dd>
+<section class="desc"><p>Device model is HomePod (second generation).</p></section>
+</dd>
+<dt id="pyatv.const.DeviceModel.HomePodMini"><code class="name">var <span class="ident">HomePodMini</span> = 6</code></dt>
 <dd>
 <section class="desc"><p>Device model is HomePod Mini (first generation).</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Music"><code class="name">var <span class="ident">Music</span></code></dt>
+<dt id="pyatv.const.DeviceModel.Music"><code class="name">var <span class="ident">Music</span> = 10</code></dt>
 <dd>
 <section class="desc"><p>Music app (or iTunes) running on a desktop computer.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceModel.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dt id="pyatv.const.DeviceModel.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Device model is unknown.</p></section>
 </dd>
@@ -262,38 +306,38 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.DeviceState"><code class="flex name class">
 <span>class <span class="ident">DeviceState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported device states.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L52-L71" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L53-L72" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.DeviceState.Idle"><code class="name">var <span class="ident">Idle</span></code></dt>
+<dt id="pyatv.const.DeviceState.Idle"><code class="name">var <span class="ident">Idle</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Device is idling, i.e. nothing is playing or about to play.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceState.Loading"><code class="name">var <span class="ident">Loading</span></code></dt>
+<dt id="pyatv.const.DeviceState.Loading"><code class="name">var <span class="ident">Loading</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Media is being loaded but not yet playing.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceState.Paused"><code class="name">var <span class="ident">Paused</span></code></dt>
+<dt id="pyatv.const.DeviceState.Paused"><code class="name">var <span class="ident">Paused</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Media is in paused state.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceState.Playing"><code class="name">var <span class="ident">Playing</span></code></dt>
+<dt id="pyatv.const.DeviceState.Playing"><code class="name">var <span class="ident">Playing</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Media is playing.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceState.Seeking"><code class="name">var <span class="ident">Seeking</span></code></dt>
+<dt id="pyatv.const.DeviceState.Seeking"><code class="name">var <span class="ident">Seeking</span> = 5</code></dt>
 <dd>
 <section class="desc"><p>Media is seeking, e.g fast forward.</p></section>
 </dd>
-<dt id="pyatv.const.DeviceState.Stopped"><code class="name">var <span class="ident">Stopped</span></code></dt>
+<dt id="pyatv.const.DeviceState.Stopped"><code class="name">var <span class="ident">Stopped</span> = 4</code></dt>
 <dd>
 <section class="desc"><p>Media is stopped.</p></section>
 </dd>
@@ -301,246 +345,310 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.FeatureName"><code class="flex name class">
 <span>class <span class="ident">FeatureName</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported features.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L226-L377" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L249-L448" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.FeatureName.Album"><code class="name">var <span class="ident">Album</span></code></dt>
+<dt id="pyatv.const.FeatureName.AccountList"><code class="name">var <span class="ident">AccountList</span> = 55</code></dt>
+<dd>
+<section class="desc"><p>List of user accounts.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Action"><code class="name">var <span class="ident">Action</span> = 64</code></dt>
+<dd>
+<section class="desc"><p>Touch event to given coordinates.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.AddOutputDevices"><code class="name">var <span class="ident">AddOutputDevices</span> = 60</code></dt>
+<dd>
+<section class="desc"><p>Add output devices.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Album"><code class="name">var <span class="ident">Album</span> = 24</code></dt>
 <dd>
 <section class="desc"><p>Album from playing artist.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.App"><code class="name">var <span class="ident">App</span></code></dt>
+<dt id="pyatv.const.FeatureName.App"><code class="name">var <span class="ident">App</span> = 35</code></dt>
 <dd>
 <section class="desc"><p>App playing media.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.AppList"><code class="name">var <span class="ident">AppList</span></code></dt>
+<dt id="pyatv.const.FeatureName.AppList"><code class="name">var <span class="ident">AppList</span> = 38</code></dt>
 <dd>
 <section class="desc"><p>List of launchable apps.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Artist"><code class="name">var <span class="ident">Artist</span></code></dt>
+<dt id="pyatv.const.FeatureName.Artist"><code class="name">var <span class="ident">Artist</span> = 23</code></dt>
 <dd>
 <section class="desc"><p>Artist of playing song.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Artwork"><code class="name">var <span class="ident">Artwork</span></code></dt>
+<dt id="pyatv.const.FeatureName.Artwork"><code class="name">var <span class="ident">Artwork</span> = 30</code></dt>
 <dd>
 <section class="desc"><p>Playing media artwork.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.ChannelDown"><code class="name">var <span class="ident">ChannelDown</span></code></dt>
+<dt id="pyatv.const.FeatureName.ChannelDown"><code class="name">var <span class="ident">ChannelDown</span> = 49</code></dt>
 <dd>
 <section class="desc"><p>Select previous channel.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.ChannelUp"><code class="name">var <span class="ident">ChannelUp</span></code></dt>
+<dt id="pyatv.const.FeatureName.ChannelUp"><code class="name">var <span class="ident">ChannelUp</span> = 48</code></dt>
 <dd>
 <section class="desc"><p>Select next channel.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.ContentIdentifier"><code class="name">var <span class="ident">ContentIdentifier</span></code></dt>
+<dt id="pyatv.const.FeatureName.Click"><code class="name">var <span class="ident">Click</span> = 65</code></dt>
+<dd>
+<section class="desc"><p>Touch click command.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.ContentIdentifier"><code class="name">var <span class="ident">ContentIdentifier</span> = 47</code></dt>
 <dd>
 <section class="desc"><p>Identifier for Content</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Down"><code class="name">var <span class="ident">Down</span></code></dt>
+<dt id="pyatv.const.FeatureName.Down"><code class="name">var <span class="ident">Down</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Down button on remote.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.EpisodeNumber"><code class="name">var <span class="ident">EpisodeNumber</span></code></dt>
+<dt id="pyatv.const.FeatureName.EpisodeNumber"><code class="name">var <span class="ident">EpisodeNumber</span> = 42</code></dt>
 <dd>
 <section class="desc"><p>Episode number of TV series.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Genre"><code class="name">var <span class="ident">Genre</span></code></dt>
+<dt id="pyatv.const.FeatureName.Genre"><code class="name">var <span class="ident">Genre</span> = 25</code></dt>
 <dd>
 <section class="desc"><p>Genre of playing song.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Home"><code class="name">var <span class="ident">Home</span></code></dt>
+<dt id="pyatv.const.FeatureName.Home"><code class="name">var <span class="ident">Home</span> = 14</code></dt>
 <dd>
 <section class="desc"><p>Home/TV button.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.HomeHold"><code class="name">var <span class="ident">HomeHold</span></code></dt>
+<dt id="pyatv.const.FeatureName.HomeHold"><code class="name">var <span class="ident">HomeHold</span> = 15</code></dt>
 <dd>
 <section class="desc"><p>Long-press home button (deprecated: use RemoteControl.home).</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.LaunchApp"><code class="name">var <span class="ident">LaunchApp</span></code></dt>
+<dt id="pyatv.const.FeatureName.LaunchApp"><code class="name">var <span class="ident">LaunchApp</span> = 39</code></dt>
 <dd>
 <section class="desc"><p>Launch an app.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Left"><code class="name">var <span class="ident">Left</span></code></dt>
+<dt id="pyatv.const.FeatureName.Left"><code class="name">var <span class="ident">Left</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Left button on remote.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Menu"><code class="name">var <span class="ident">Menu</span></code></dt>
+<dt id="pyatv.const.FeatureName.Menu"><code class="name">var <span class="ident">Menu</span> = 11</code></dt>
 <dd>
 <section class="desc"><p>Go back to previous menu.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Next"><code class="name">var <span class="ident">Next</span></code></dt>
+<dt id="pyatv.const.FeatureName.Next"><code class="name">var <span class="ident">Next</span> = 8</code></dt>
 <dd>
 <section class="desc"><p>Change to next item.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Pause"><code class="name">var <span class="ident">Pause</span></code></dt>
+<dt id="pyatv.const.FeatureName.OutputDevices"><code class="name">var <span class="ident">OutputDevices</span> = 59</code></dt>
+<dd>
+<section class="desc"><p>Current output devices.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Pause"><code class="name">var <span class="ident">Pause</span> = 6</code></dt>
 <dd>
 <section class="desc"><p>Pause playing media.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Play"><code class="name">var <span class="ident">Play</span></code></dt>
+<dt id="pyatv.const.FeatureName.Play"><code class="name">var <span class="ident">Play</span> = 4</code></dt>
 <dd>
 <section class="desc"><p>Start playing media.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.PlayPause"><code class="name">var <span class="ident">PlayPause</span></code></dt>
+<dt id="pyatv.const.FeatureName.PlayPause"><code class="name">var <span class="ident">PlayPause</span> = 5</code></dt>
 <dd>
 <section class="desc"><p>Toggle between play/pause.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.PlayUrl"><code class="name">var <span class="ident">PlayUrl</span></code></dt>
+<dt id="pyatv.const.FeatureName.PlayUrl"><code class="name">var <span class="ident">PlayUrl</span> = 31</code></dt>
 <dd>
 <section class="desc"><p>Stream a URL on device.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Position"><code class="name">var <span class="ident">Position</span></code></dt>
+<dt id="pyatv.const.FeatureName.Position"><code class="name">var <span class="ident">Position</span> = 27</code></dt>
 <dd>
 <section class="desc"><p>Current play time position.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.PowerState"><code class="name">var <span class="ident">PowerState</span></code></dt>
+<dt id="pyatv.const.FeatureName.PowerState"><code class="name">var <span class="ident">PowerState</span> = 32</code></dt>
 <dd>
 <section class="desc"><p>Current device power state.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Previous"><code class="name">var <span class="ident">Previous</span></code></dt>
+<dt id="pyatv.const.FeatureName.Previous"><code class="name">var <span class="ident">Previous</span> = 9</code></dt>
 <dd>
 <section class="desc"><p>Change to previous item.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.PushUpdates"><code class="name">var <span class="ident">PushUpdates</span></code></dt>
+<dt id="pyatv.const.FeatureName.PushUpdates"><code class="name">var <span class="ident">PushUpdates</span> = 43</code></dt>
 <dd>
 <section class="desc"><p>Push updates are supported.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Repeat"><code class="name">var <span class="ident">Repeat</span></code></dt>
+<dt id="pyatv.const.FeatureName.RemoveOutputDevices"><code class="name">var <span class="ident">RemoveOutputDevices</span> = 61</code></dt>
+<dd>
+<section class="desc"><p>Remove output devices.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Repeat"><code class="name">var <span class="ident">Repeat</span> = 29</code></dt>
 <dd>
 <section class="desc"><p>Repeat state.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Right"><code class="name">var <span class="ident">Right</span></code></dt>
+<dt id="pyatv.const.FeatureName.Right"><code class="name">var <span class="ident">Right</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Right button on remote.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SeasonNumber"><code class="name">var <span class="ident">SeasonNumber</span></code></dt>
+<dt id="pyatv.const.FeatureName.Screensaver"><code class="name">var <span class="ident">Screensaver</span> = 58</code></dt>
+<dd>
+<section class="desc"><p>Activate screen saver.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SeasonNumber"><code class="name">var <span class="ident">SeasonNumber</span> = 41</code></dt>
 <dd>
 <section class="desc"><p>Season number of TV series.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Select"><code class="name">var <span class="ident">Select</span></code></dt>
+<dt id="pyatv.const.FeatureName.Select"><code class="name">var <span class="ident">Select</span> = 10</code></dt>
 <dd>
 <section class="desc"><p>Select current option.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SeriesName"><code class="name">var <span class="ident">SeriesName</span></code></dt>
+<dt id="pyatv.const.FeatureName.SeriesName"><code class="name">var <span class="ident">SeriesName</span> = 40</code></dt>
 <dd>
 <section class="desc"><p>Title of TV series.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SetPosition"><code class="name">var <span class="ident">SetPosition</span></code></dt>
+<dt id="pyatv.const.FeatureName.SetOutputDevices"><code class="name">var <span class="ident">SetOutputDevices</span> = 62</code></dt>
+<dd>
+<section class="desc"><p>Set output devices.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SetPosition"><code class="name">var <span class="ident">SetPosition</span> = 19</code></dt>
 <dd>
 <section class="desc"><p>Seek to position.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SetRepeat"><code class="name">var <span class="ident">SetRepeat</span></code></dt>
+<dt id="pyatv.const.FeatureName.SetRepeat"><code class="name">var <span class="ident">SetRepeat</span> = 21</code></dt>
 <dd>
 <section class="desc"><p>Change repeat state.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SetShuffle"><code class="name">var <span class="ident">SetShuffle</span></code></dt>
+<dt id="pyatv.const.FeatureName.SetShuffle"><code class="name">var <span class="ident">SetShuffle</span> = 20</code></dt>
 <dd>
 <section class="desc"><p>Change shuffle state.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SetVolume"><code class="name">var <span class="ident">SetVolume</span></code></dt>
+<dt id="pyatv.const.FeatureName.SetVolume"><code class="name">var <span class="ident">SetVolume</span> = 46</code></dt>
 <dd>
 <section class="desc"><p>Set volume level.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Shuffle"><code class="name">var <span class="ident">Shuffle</span></code></dt>
+<dt id="pyatv.const.FeatureName.Shuffle"><code class="name">var <span class="ident">Shuffle</span> = 28</code></dt>
 <dd>
 <section class="desc"><p>Shuffle state.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SkipBackward"><code class="name">var <span class="ident">SkipBackward</span></code></dt>
+<dt id="pyatv.const.FeatureName.SkipBackward"><code class="name">var <span class="ident">SkipBackward</span> = 37</code></dt>
 <dd>
 <section class="desc"><p>Skip backwards a time interval.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.SkipForward"><code class="name">var <span class="ident">SkipForward</span></code></dt>
+<dt id="pyatv.const.FeatureName.SkipForward"><code class="name">var <span class="ident">SkipForward</span> = 36</code></dt>
 <dd>
 <section class="desc"><p>Skip forward a time interval.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Stop"><code class="name">var <span class="ident">Stop</span></code></dt>
+<dt id="pyatv.const.FeatureName.Stop"><code class="name">var <span class="ident">Stop</span> = 7</code></dt>
 <dd>
 <section class="desc"><p>Stop playing media.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.StreamFile"><code class="name">var <span class="ident">StreamFile</span></code></dt>
+<dt id="pyatv.const.FeatureName.StreamFile"><code class="name">var <span class="ident">StreamFile</span> = 44</code></dt>
 <dd>
 <section class="desc"><p>Stream local file to device.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Suspend"><code class="name">var <span class="ident">Suspend</span></code></dt>
+<dt id="pyatv.const.FeatureName.Suspend"><code class="name">var <span class="ident">Suspend</span> = 17</code></dt>
 <dd>
 <section class="desc"><p>Suspend device (deprecated; use Power.turn_off).</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Title"><code class="name">var <span class="ident">Title</span></code></dt>
+<dt id="pyatv.const.FeatureName.Swipe"><code class="name">var <span class="ident">Swipe</span> = 63</code></dt>
+<dd>
+<section class="desc"><p>Touch swipe from given coordinates and duration.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.SwitchAccount"><code class="name">var <span class="ident">SwitchAccount</span> = 56</code></dt>
+<dd>
+<section class="desc"><p>Switch user account.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.TextAppend"><code class="name">var <span class="ident">TextAppend</span> = 53</code></dt>
+<dd>
+<section class="desc"><p>Input text into virtual keyboard.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.TextClear"><code class="name">var <span class="ident">TextClear</span> = 52</code></dt>
+<dd>
+<section class="desc"><p>Clear virtual keyboard text.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.TextFocusState"><code class="name">var <span class="ident">TextFocusState</span> = 57</code></dt>
+<dd>
+<section class="desc"><p>Current virtual keyboard focus state.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.TextGet"><code class="name">var <span class="ident">TextGet</span> = 51</code></dt>
+<dd>
+<section class="desc"><p>Get current virtual keyboard text.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.TextSet"><code class="name">var <span class="ident">TextSet</span> = 54</code></dt>
+<dd>
+<section class="desc"><p>Replace text in virtual keyboard.</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.Title"><code class="name">var <span class="ident">Title</span> = 22</code></dt>
 <dd>
 <section class="desc"><p>Title of playing media.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.TopMenu"><code class="name">var <span class="ident">TopMenu</span></code></dt>
+<dt id="pyatv.const.FeatureName.TopMenu"><code class="name">var <span class="ident">TopMenu</span> = 16</code></dt>
 <dd>
 <section class="desc"><p>Go to main menu.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.TotalTime"><code class="name">var <span class="ident">TotalTime</span></code></dt>
+<dt id="pyatv.const.FeatureName.TotalTime"><code class="name">var <span class="ident">TotalTime</span> = 26</code></dt>
 <dd>
 <section class="desc"><p>Total length of playing media (seconds).</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.TurnOff"><code class="name">var <span class="ident">TurnOff</span></code></dt>
+<dt id="pyatv.const.FeatureName.TurnOff"><code class="name">var <span class="ident">TurnOff</span> = 34</code></dt>
 <dd>
 <section class="desc"><p>Turn off device.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.TurnOn"><code class="name">var <span class="ident">TurnOn</span></code></dt>
+<dt id="pyatv.const.FeatureName.TurnOn"><code class="name">var <span class="ident">TurnOn</span> = 33</code></dt>
 <dd>
 <section class="desc"><p>Turn device on.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Up"><code class="name">var <span class="ident">Up</span></code></dt>
+<dt id="pyatv.const.FeatureName.Up"><code class="name">var <span class="ident">Up</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Up button on remote.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.Volume"><code class="name">var <span class="ident">Volume</span></code></dt>
+<dt id="pyatv.const.FeatureName.Volume"><code class="name">var <span class="ident">Volume</span> = 45</code></dt>
 <dd>
 <section class="desc"><p>Current volume level.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.VolumeDown"><code class="name">var <span class="ident">VolumeDown</span></code></dt>
+<dt id="pyatv.const.FeatureName.VolumeDown"><code class="name">var <span class="ident">VolumeDown</span> = 13</code></dt>
 <dd>
 <section class="desc"><p>Decrease volume.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.VolumeUp"><code class="name">var <span class="ident">VolumeUp</span></code></dt>
+<dt id="pyatv.const.FeatureName.VolumeUp"><code class="name">var <span class="ident">VolumeUp</span> = 12</code></dt>
 <dd>
 <section class="desc"><p>Increase volume.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureName.WakeUp"><code class="name">var <span class="ident">WakeUp</span></code></dt>
+<dt id="pyatv.const.FeatureName.WakeUp"><code class="name">var <span class="ident">WakeUp</span> = 18</code></dt>
 <dd>
 <section class="desc"><p>Wake up device (deprecated; use Power.turn_on).</p></section>
+</dd>
+<dt id="pyatv.const.FeatureName.iTunesStoreIdentifier"><code class="name">var <span class="ident">iTunesStoreIdentifier</span> = 50</code></dt>
+<dd>
+<section class="desc"><p>iTunes Store Identifier for Content</p></section>
 </dd>
 </dl>
 </dd>
 <dt id="pyatv.const.FeatureState"><code class="flex name class">
 <span>class <span class="ident">FeatureState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>State of a particular feature.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L206-L222" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L229-L245" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.FeatureState.Available"><code class="name">var <span class="ident">Available</span></code></dt>
+<dt id="pyatv.const.FeatureState.Available"><code class="name">var <span class="ident">Available</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Feature is supported and available.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureState.Unavailable"><code class="name">var <span class="ident">Unavailable</span></code></dt>
+<dt id="pyatv.const.FeatureState.Unavailable"><code class="name">var <span class="ident">Unavailable</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Feature is supported by device but not available now.</p>
 <p>Pause is for instance unavailable if nothing is playing.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureState.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dt id="pyatv.const.FeatureState.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Feature is supported by device but it is not known if it is available or not.</p></section>
 </dd>
-<dt id="pyatv.const.FeatureState.Unsupported"><code class="name">var <span class="ident">Unsupported</span></code></dt>
+<dt id="pyatv.const.FeatureState.Unsupported"><code class="name">var <span class="ident">Unsupported</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Device does not support this feature.</p></section>
 </dd>
@@ -548,59 +656,86 @@ future.</p></section>
 </dd>
 <dt id="pyatv.const.InputAction"><code class="flex name class">
 <span>class <span class="ident">InputAction</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Type of input when pressing a button.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L174-L184" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L197-L207" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.InputAction.DoubleTap"><code class="name">var <span class="ident">DoubleTap</span></code></dt>
+<dt id="pyatv.const.InputAction.DoubleTap"><code class="name">var <span class="ident">DoubleTap</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Press and release twice quickly.</p></section>
 </dd>
-<dt id="pyatv.const.InputAction.Hold"><code class="name">var <span class="ident">Hold</span></code></dt>
+<dt id="pyatv.const.InputAction.Hold"><code class="name">var <span class="ident">Hold</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Press and hold for one second before releasing.</p></section>
 </dd>
-<dt id="pyatv.const.InputAction.SingleTap"><code class="name">var <span class="ident">SingleTap</span></code></dt>
+<dt id="pyatv.const.InputAction.SingleTap"><code class="name">var <span class="ident">SingleTap</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Press and release quickly.</p></section>
 </dd>
 </dl>
 </dd>
-<dt id="pyatv.const.MediaType"><code class="flex name class">
-<span>class <span class="ident">MediaType</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<dt id="pyatv.const.KeyboardFocusState"><code class="flex name class">
+<span>class <span class="ident">KeyboardFocusState</span></span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>All supported media types.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L32-L49" class="git-link">Browse git</a></div>
+<section class="desc"><p>All supported keyboard focus states.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L114-L124" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.MediaType.Music"><code class="name">var <span class="ident">Music</span></code></dt>
+<dt id="pyatv.const.KeyboardFocusState.Focused"><code class="name">var <span class="ident">Focused</span> = 2</code></dt>
+<dd>
+<section class="desc"><p>Keyboard is focused.</p></section>
+</dd>
+<dt id="pyatv.const.KeyboardFocusState.Unfocused"><code class="name">var <span class="ident">Unfocused</span> = 1</code></dt>
+<dd>
+<section class="desc"><p>Keyboard is not focused.</p></section>
+</dd>
+<dt id="pyatv.const.KeyboardFocusState.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
+<dd>
+<section class="desc"><p>Keyboard focus state is not determinable.</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.MediaType"><code class="flex name class">
+<span>class <span class="ident">MediaType</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>All supported media types.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L33-L50" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.MediaType.Music"><code class="name">var <span class="ident">Music</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Media type is music.</p></section>
 </dd>
-<dt id="pyatv.const.MediaType.TV"><code class="name">var <span class="ident">TV</span></code></dt>
+<dt id="pyatv.const.MediaType.TV"><code class="name">var <span class="ident">TV</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Media type is a TV show.</p></section>
 </dd>
-<dt id="pyatv.const.MediaType.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dt id="pyatv.const.MediaType.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Media type is not known.</p>
 <p>This can be either the case that nothing is playing or the app does
 not report a valid media type.</p></section>
 </dd>
-<dt id="pyatv.const.MediaType.Video"><code class="name">var <span class="ident">Video</span></code></dt>
+<dt id="pyatv.const.MediaType.Video"><code class="name">var <span class="ident">Video</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Media type is video.</p></section>
 </dd>
@@ -608,33 +743,37 @@ not report a valid media type.</p></section>
 </dd>
 <dt id="pyatv.const.OperatingSystem"><code class="flex name class">
 <span>class <span class="ident">OperatingSystem</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Operating system on device.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L113-L130" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L127-L147" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.OperatingSystem.AirPortOS"><code class="name">var <span class="ident">AirPortOS</span></code></dt>
+<dt id="pyatv.const.OperatingSystem.AirPortOS"><code class="name">var <span class="ident">AirPortOS</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Operating system is AirPortOS.</p>
 <p>This OS is used by AirPort Express devices. It is not an official name but made up
 in pyatv as no official name has been found.</p></section>
 </dd>
-<dt id="pyatv.const.OperatingSystem.Legacy"><code class="name">var <span class="ident">Legacy</span></code></dt>
+<dt id="pyatv.const.OperatingSystem.Legacy"><code class="name">var <span class="ident">Legacy</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Operating system
 is Apple TV Software (pre-tvOS).</p></section>
 </dd>
-<dt id="pyatv.const.OperatingSystem.TvOS"><code class="name">var <span class="ident">TvOS</span></code></dt>
+<dt id="pyatv.const.OperatingSystem.MacOS"><code class="name">var <span class="ident">MacOS</span> = 4</code></dt>
+<dd>
+<section class="desc"><p>Operating system is macOS.</p></section>
+</dd>
+<dt id="pyatv.const.OperatingSystem.TvOS"><code class="name">var <span class="ident">TvOS</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Operating system is tvOS.</p></section>
 </dd>
-<dt id="pyatv.const.OperatingSystem.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dt id="pyatv.const.OperatingSystem.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Operating system is not known.</p></section>
 </dd>
@@ -642,34 +781,34 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.PairingRequirement"><code class="flex name class">
 <span>class <span class="ident">PairingRequirement</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Pairing requirement for a service.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L187-L203" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L210-L226" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.PairingRequirement.Disabled"><code class="name">var <span class="ident">Disabled</span></code></dt>
+<dt id="pyatv.const.PairingRequirement.Disabled"><code class="name">var <span class="ident">Disabled</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Pairing is disabled by protocol.</p></section>
 </dd>
-<dt id="pyatv.const.PairingRequirement.Mandatory"><code class="name">var <span class="ident">Mandatory</span></code></dt>
+<dt id="pyatv.const.PairingRequirement.Mandatory"><code class="name">var <span class="ident">Mandatory</span> = 5</code></dt>
 <dd>
 <section class="desc"><p>Pairing must be performed.</p></section>
 </dd>
-<dt id="pyatv.const.PairingRequirement.NotNeeded"><code class="name">var <span class="ident">NotNeeded</span></code></dt>
+<dt id="pyatv.const.PairingRequirement.NotNeeded"><code class="name">var <span class="ident">NotNeeded</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Pairing is not needed.</p></section>
 </dd>
-<dt id="pyatv.const.PairingRequirement.Optional"><code class="name">var <span class="ident">Optional</span></code></dt>
+<dt id="pyatv.const.PairingRequirement.Optional"><code class="name">var <span class="ident">Optional</span> = 4</code></dt>
 <dd>
 <section class="desc"><p>Pairing is supported but not required.</p></section>
 </dd>
-<dt id="pyatv.const.PairingRequirement.Unsupported"><code class="name">var <span class="ident">Unsupported</span></code></dt>
+<dt id="pyatv.const.PairingRequirement.Unsupported"><code class="name">var <span class="ident">Unsupported</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Not supported by protocol or not implemented.</p></section>
 </dd>
@@ -677,26 +816,26 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.PowerState"><code class="flex name class">
 <span>class <span class="ident">PowerState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported power states.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L100-L110" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L101-L111" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.PowerState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dt id="pyatv.const.PowerState.Off"><code class="name">var <span class="ident">Off</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Device is turned off (standby).</p></section>
 </dd>
-<dt id="pyatv.const.PowerState.On"><code class="name">var <span class="ident">On</span></code></dt>
+<dt id="pyatv.const.PowerState.On"><code class="name">var <span class="ident">On</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Device is turned on.</p></section>
 </dd>
-<dt id="pyatv.const.PowerState.Unknown"><code class="name">var <span class="ident">Unknown</span></code></dt>
+<dt id="pyatv.const.PowerState.Unknown"><code class="name">var <span class="ident">Unknown</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Power state is not determinable.</p></section>
 </dd>
@@ -704,34 +843,34 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.Protocol"><code class="flex name class">
 <span>class <span class="ident">Protocol</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported protocols.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L13-L29" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L14-L30" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.Protocol.AirPlay"><code class="name">var <span class="ident">AirPlay</span></code></dt>
+<dt id="pyatv.const.Protocol.AirPlay"><code class="name">var <span class="ident">AirPlay</span> = 3</code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing AirPlay.</p></section>
 </dd>
-<dt id="pyatv.const.Protocol.Companion"><code class="name">var <span class="ident">Companion</span></code></dt>
+<dt id="pyatv.const.Protocol.Companion"><code class="name">var <span class="ident">Companion</span> = 4</code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing Companion link.</p></section>
 </dd>
-<dt id="pyatv.const.Protocol.DMAP"><code class="name">var <span class="ident">DMAP</span></code></dt>
+<dt id="pyatv.const.Protocol.DMAP"><code class="name">var <span class="ident">DMAP</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing DMAP.</p></section>
 </dd>
-<dt id="pyatv.const.Protocol.MRP"><code class="name">var <span class="ident">MRP</span></code></dt>
+<dt id="pyatv.const.Protocol.MRP"><code class="name">var <span class="ident">MRP</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing MRP.</p></section>
 </dd>
-<dt id="pyatv.const.Protocol.RAOP"><code class="name">var <span class="ident">RAOP</span></code></dt>
+<dt id="pyatv.const.Protocol.RAOP"><code class="name">var <span class="ident">RAOP</span> = 5</code></dt>
 <dd>
 <section class="desc"><p>Protocol constant representing RAOP.</p></section>
 </dd>
@@ -739,26 +878,26 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.RepeatState"><code class="flex name class">
 <span>class <span class="ident">RepeatState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported repeat states.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L74-L84" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L75-L85" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.RepeatState.All"><code class="name">var <span class="ident">All</span></code></dt>
+<dt id="pyatv.const.RepeatState.All"><code class="name">var <span class="ident">All</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Repeat all tracks or items.</p></section>
 </dd>
-<dt id="pyatv.const.RepeatState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dt id="pyatv.const.RepeatState.Off"><code class="name">var <span class="ident">Off</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Repeat is off.</p></section>
 </dd>
-<dt id="pyatv.const.RepeatState.Track"><code class="name">var <span class="ident">Track</span></code></dt>
+<dt id="pyatv.const.RepeatState.Track"><code class="name">var <span class="ident">Track</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Repeat current track or item.</p></section>
 </dd>
@@ -766,28 +905,59 @@ is Apple TV Software (pre-tvOS).</p></section>
 </dd>
 <dt id="pyatv.const.ShuffleState"><code class="flex name class">
 <span>class <span class="ident">ShuffleState</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+<span>(</span><span>*args, **kwds)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>All supported shuffle states.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L87-L97" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L88-L98" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>enum.Enum</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.const.ShuffleState.Albums"><code class="name">var <span class="ident">Albums</span></code></dt>
+<dt id="pyatv.const.ShuffleState.Albums"><code class="name">var <span class="ident">Albums</span> = 1</code></dt>
 <dd>
 <section class="desc"><p>Shuffle on album level.</p></section>
 </dd>
-<dt id="pyatv.const.ShuffleState.Off"><code class="name">var <span class="ident">Off</span></code></dt>
+<dt id="pyatv.const.ShuffleState.Off"><code class="name">var <span class="ident">Off</span> = 0</code></dt>
 <dd>
 <section class="desc"><p>Shuffle is off.</p></section>
 </dd>
-<dt id="pyatv.const.ShuffleState.Songs"><code class="name">var <span class="ident">Songs</span></code></dt>
+<dt id="pyatv.const.ShuffleState.Songs"><code class="name">var <span class="ident">Songs</span> = 2</code></dt>
 <dd>
 <section class="desc"><p>Shuffle on song level.</p></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.const.TouchAction"><code class="flex name class">
+<span>class <span class="ident">TouchAction</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Touch action constants.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/const.py#L451-L457" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.const.TouchAction.Click"><code class="name">var <span class="ident">Click</span> = 5</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.TouchAction.Hold"><code class="name">var <span class="ident">Hold</span> = 3</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.TouchAction.Press"><code class="name">var <span class="ident">Press</span> = 1</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.const.TouchAction.Release"><code class="name">var <span class="ident">Release</span> = 4</code></dt>
+<dd>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>

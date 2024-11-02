@@ -7,14 +7,21 @@ extend ProtocolMessage {
   optional DeviceInfoMessage deviceInfoMessage = 20;
 }
 
+message PreferredEncoding {
+  enum Enum {
+    Default = 0;
+    JSON = 1;
+  }
+}
+
 message DeviceInfoMessage {
-  required string uniqueIdentifier = 1; // Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063
+  optional string uniqueIdentifier = 1; // Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063
   required string name = 2; // Example: Jean's iPhone
   optional string localizedModelName = 3; // Example: iPhone
-  required string systemBuildVersion = 4; // Example: 13F69
-  required string applicationBundleIdentifier = 5; // Example: com.example.myremote
+  optional string systemBuildVersion = 4; // Example: 13F69
+  optional string applicationBundleIdentifier = 5; // Example: com.example.myremote
   optional string applicationBundleVersion = 6; // Example: 107
-  required int32 protocolVersion = 7; // Example: 1
+  optional int32 protocolVersion = 7; // Example: 1
   optional uint32 lastSupportedMessageType = 8;
   optional bool supportsSystemPairing = 9;
   optional bool allowsPairing = 10;
@@ -50,4 +57,13 @@ message DeviceInfoMessage {
   optional string routingContextID = 41; // Example: 577E1BCA-2D9B-41C2-A8F8-C515CE8072D4
   optional string airPlayGroupID = 42; // Example: 6E0ED14E-0BA4-4A84-AF30-9EB080E7AA73
   optional string systemBooksApplication = 43; // Example: com.apple.iBooks
+  repeated DeviceInfoMessage clusteredDevices = 44;
+  optional uint32 parentGroupContainsDiscoverableGroupLeader = 45;
+  optional uint32 groupContainsDiscoverableGroupLeader = 46;
+  optional uint32 lastKnownClusterType = 47;
+  // repeated ... allClusteredDevices = 48;
+  optional bool supportsOutputContextSync = 49;
+  optional string computerName = 50;
+  optional uint32 configuredClusterSize = 51;
+  optional PreferredEncoding.Enum preferredEncoding = 52;
 }

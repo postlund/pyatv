@@ -1,4 +1,5 @@
 """Generic functions for protocol logic."""
+
 import asyncio
 import inspect
 import logging
@@ -78,7 +79,7 @@ async def heartbeater(
 class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
     """Dispatch message to listeners based on a type."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new MessageDispatcher instance."""
         self.__listeners: Dict[
             DispatchType, List[Tuple[DispatchFilterFunc, DispatchFunc]]

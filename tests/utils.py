@@ -58,7 +58,6 @@ async def simple_get(url: str) -> Tuple[bytes, int]:
     """Perform a GET-request to a specified URL."""
     async with ClientSession() as session:
         async with session.get(url) as response:
-
             if response.status < 200 or response.status >= 300:
                 return None, response.status
 
@@ -131,6 +130,11 @@ def faketime(module_name, *times):
     return FakeDatetime(list(times))
 
 
+def data_root() -> str:
+    """Return absolute path to data directory used by tests."""
+    return str(Path(__file__).parent.joinpath("data"))
+
+
 def data_path(filename: str) -> str:
     """Return absolute path to a test file in the data directory."""
     abs_path = str(Path(__file__).parent.joinpath("data", filename))
@@ -146,3 +150,8 @@ def assert_device(atv, name, address, identifier, protocol, port, creds=None):
     assert atv.get_service(protocol)
     assert atv.get_service(protocol).port == port
     assert atv.get_service(protocol).credentials == creds
+
+
+def all_in(text: str, *strings: str) -> bool:
+    """Return if all strings are in text."""
+    return all(string in text for string in strings)

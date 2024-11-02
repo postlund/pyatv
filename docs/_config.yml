@@ -74,10 +74,14 @@ page_links:
       title: Listeners
     - link: /development/stream/
       title: Stream
+    - link: /development/storage/
+      title: Storage
     - link: /development/apps/
       title: Apps
     - link: /development/audio/
       title: Audio
+    - link: /development/keyboard/
+      title: Keyboard
     - link: /development/logging/
       title: Logging
     - link: /development/examples/

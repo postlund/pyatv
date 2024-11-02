@@ -1,4 +1,5 @@
 """Unit tests for pyatv.protocols.companion."""
+
 from ipaddress import ip_address
 
 from deepdiff import DeepDiff
@@ -53,6 +54,7 @@ def test_device_info(service_type, properties, expected):
     assert not DeepDiff(device_info(service_type, properties), expected)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "properties,expected",
     [

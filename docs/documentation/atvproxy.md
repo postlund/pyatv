@@ -15,10 +15,11 @@ link_group: documentation
 The `atvproxy` is a helper script used to intercept traffic by doing versions
 of MITM "attacks" (it's not *really* attacks). It can help when reverse engineering
 a new protocol or exploring new features in an already well-known protocol,
-like MRP.
+like AirPlay, Companion or MRP.
 
-Currently this script support MRP, for which it can fully output decrypted
-messages, Companion (only basic support) and a "relay" mode, which just sits
+Currently this script support AirPlay (for which it can fully output decrypted
+control channel messages, but not play media), Companion (fully output decrypted
+messages), MRP (fully output decrypted messages) and a "relay" mode, which just sits
 between two devices and prints the traffic. The latter is meant for simplifying
 reverse engineering of new protocols.
 
@@ -26,13 +27,13 @@ reverse engineering of new protocols.
 It also depends on the internal API, meaning you should not use it as a
 reference for your own projects.*
 
-# MRP Proxy
+# AirPlay Proxy
 
-Due to MRP using encryption, it's not possible to capture the traffic using
+Due to AirPlay using encryption, it's not possible to capture the traffic using
 for instance Wireshark and analyze it. Since it's very hard to extract the
-used keys, decryption is more or less not possible. To cicrumvent this, you
-can use the MRP Proxy. It will publish a proxy device on the network,
-that it is possible to pair with using the Remote app. The proxy itself will
+used keys, decryption is more or less not possible. To circumvent this, you
+can use the AirPlay Proxy. It will publish a proxy device on the network,
+that it is possible to pair with using an iOS device. The proxy itself will
 establish a connection to the device of interest and relay messages between
 your iOS device and the Apple TV. One set of encryption keys are used between
 the proxy and Apple TV and another set between the proxy and your iOS device.
@@ -40,6 +41,107 @@ the proxy and Apple TV and another set between the proxy and your iOS device.
 A private key is hardcoded into the proxy, so you can re-connect to it again
 multiple times without having to re-pair. Even when restarting the proxy. This
 of course means that **there is no security when using the proxy**.
+
+## Device Credentials
+
+For an Apple TV the proxy needs credentials to your device, so pair with it
+using `atvremote` if you have not done so already:
+
+```shell
+$ atvremote --id <device id> --protocol airplay pair
+```
+
+Save the generated credentials to a file, for instance `creds_airplay`.
+
+HomePods use transient pairing and do not need credentials.
+
+## Running the Proxy
+
+In order to run the proxy you need to provide credentials (created above) and
+IP address of the device. You can find the address by scanning:
+
+```raw
+$ atvremote scan
+========================================
+       Name: Living Room
+   Model/SW: 4K tvOS 13.3.1 build 17K795
+    Address: 10.0.0.10
+        MAC: AA:BB:CC:DD:EE:FF
+Identifiers:
+ - 01234567-89AB-CDEF-0123-4567890ABCDE
+ - 00:11:22:33:44:55
+Services:
+ - Protocol: MRP, Port: 49152, Credentials: None
+ - Protocol: AirPlay, Port: 7000, Credentials: None
+```
+
+To run the proxy to an Apple TV, run:
+
+```shell
+$ atvproxy airplay 10.0.0.10 --credentials=`cat creds_airplay`
+```
+
+To proxy to a HomePod without credentials, run (insert IP address to HomePod):
+
+```shell
+$ atvproxy airplay <ip>
+```
+
+### Manual Settings
+
+The script will automatically try to figure out which AirPlay port to use with
+unicast scanning and IP address of a local interface on the same network as the
+device. You can however provide these parameters manually with `--remote-port`
+and `--local-ip`.
+
+## Pairing and Looking at Traffic
+
+Open the AirPlay speaker selector from the Now Playing widget in action center,
+select the device called `Proxy` and if asked use pin code `1111` to pair (only
+needed once). AirPlay controls should work and behave as expected and all
+control traffic should be logged to console. Playing media is not supported.
+
+# Companion Proxy
+
+There is also support for the Companion protocol.
+
+## Device Credentials
+
+The proxy needs credentials to your device, so pair with it using `atvremote`
+unless you have not done so already:
+
+```raw
+$ atvremote --id <device id> --protocol companion pair
+```
+
+Save the generated credentials to a file, for instance `creds_comp`.
+
+## Running the proxy
+
+To run the proxy, run (insert IP address to Apple TV):
+
+```shell
+$ atvproxy companion `cat creds_mrp` <ip>
+```
+
+It will appear as a device called `Proxy` on the network.
+
+### Manual Settings
+
+The script will automatically try to figure out which port Companion uses with
+unicast scanning. You can however provide this parameter with `--remote-port`
+if you want.
+
+## Pairing and Looking at Traffic
+
+Open up the remote widget in action center, select the device called `Proxy` and
+use pin code `1111` to pair (only needed once). Everything of interest is logged to the
+console by default.
+
+# MRP Proxy
+
+There is also support for the legacy un-encapsulated MRP protocol, which was
+available prior to tvOS 15.
 
 ## Device Credentials
 
@@ -90,47 +192,6 @@ manually with `--remote-port`, `--local-ip` and `--name`.
 Open the Remote app and select the device called `XXX Proxy`, where `XXX`
 is the name of your Apple TV. Use pin code `1111` when pairing. The app should
 work and behave as expected and all traffic should be logged to console.
-
-# Companion Proxy
-
-There is basic support for the Companion protocol. However, there's a big limitation, making
-the proxy less useful at the moment. During connection (after encryption has been set up),
-a `_systemInfo` message is sent which includes a signture that the Apple TV fails to verify
-and because of that closes the connection. Until this has been resolved, the proxy is fairly
-unusable and any help to fix this is appreciated.
-
-## Device Credentials
-
-The proxy needs credentials to your device, so pair with it using `atvremote`
-unless you have not done so already:
-
-```raw
-$ atvremote --id <device id> --protocol companion pair
-```
-
-Save the generated credentials to a file, for instance `creds_comp`.
-
-## Running the proxy
-
-To run the proxy, run (insert IP address to Apple TV):
-
-```shell
-$ atvproxy mrp `cat creds_mrp` <ip>
-```
-
-It will appear as a device called `Proxy` on the network.
-
-### Manual Settings
-
-The script will automatically try to figure out which port Companion uses with
-unicast scanning. You can however provide this parameter with `--remote-port`
-if you want.
-
-## Pairing and Looking at Traffic
-
-Open up the remote widget in action center, select the device called `Proxy` and
-use pin code `1111` to pair (only needed once). Everything of interest is logged to the
-console by default.
 
 # Relay Proxy
 

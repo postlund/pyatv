@@ -98,6 +98,21 @@ await stream.stream_file(sys.stdin.buffer)
 
 As `stdin` is a text stream, the underlying binary buffer must be retrieved and used.
 
+It is also possible to use an asyncio
+[StreamReader](https://docs.python.org/3/library/asyncio-stream.html#streamreader) as
+input. Here is an example piping output from ffmpeg:
+
+```python
+import asyncio.subprocess as asp
+
+process = await asp.create_subprocess_exec(
+    "ffmpeg", "-i", "file.mp3", "-f", "mp3", "-",
+    stdin=None, stdout=asp.PIPE, stderr=None,
+)
+
+await self.atv.stream.stream_file(process.stdout)
+```
+
 When streaming from a buffer, it's important to know that some audio formats are
 not suitable for that. MP3 works fine, WAV and OGG does not. The reason is that
 seeking is done in the stream and `stdin` does for instance not support that. If
@@ -106,10 +121,48 @@ MP3. For the same reason, metadata will not work if seeking is not supported as
 that is extracted prior to playing the file, so seeking is needed to return to
 the beginning of file again before playback.
 
-Note that there's (roughly) a two second delay until audio starts to play. This
+Note 1: Since  pyatv v0.13.0, buffer improvements have been made to support some
+seeking, even in non-seekable streams. This is however not fool-proof and not all
+audio formats (or files/streams) work, but compatibility is much better from that
+version and onwards.
+
+Note 2: that there's (roughly) a two second delay until audio starts to play. This
 is part of the buffering mechanism and not much pyatv can do anything about.
 
-### Stream from HTTP(S)
+#### Custom Metadata
+
+By default, pyatv will try to extract metadata from whatever content you are playing.
+Some file formats or streams either does not support nor provide any metadata,
+in which case you can manually provide the metadata that pyatv will report to the
+receiver by passing an instance of {% include api i="interface.MediaMetadata" %}
+when starting to stream:
+
+```python
+from pyatv.interface import MediaMetadata
+
+metadata = MediaMetadata(artist="pyatv", title="Look at me, I'm streaming")
+await stream.stream_file("myfile.mp3", metadata=metadata)
+```
+
+All fields in {% include api i="interface.MediaMetadata" %} can be overridden (including
+artwork) except for {% include api i="interface.MediaMetadata.duration" %}, which is
+ignored. Please note that artwork must be in JPEG format.
+
+Custom metadata will override any metadata provided by the streamed content. You
+can however tell pyatv to only override metadata fields that are missing by setting
+`override_missing_metadata` to `True`:
+
+```python
+from pyatv.interface import MediaMetadata
+
+metadata = MediaMetadata(artist="pyatv")
+await stream.stream_file("myfile.mp3", metadata=metadata, override_missing_metadata=True)
+```
+
+This will use all the metadata from `myfile.mp3`, but use _pyatv_ as artist but **only**
+if that field is not present in the file.
+
+#### Stream from HTTP(S)
 
 There is experimental support for streaming directly from HTTP or HTTPS. A URL can
 be passed instead of a file path:

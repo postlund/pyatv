@@ -1,5 +1,1039 @@
 # CHANGES
 
+## 0.15.1 Seymour (2024-09-06)
+
+Audio streaming stopped working in the previous version and is fixed in this
+version. It also includes a fix to sequence number handling for outgoing
+messages, potentially improving audio streaming to AirPlay receivers from
+third party vendors (not tested however).
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+8a8d176f raop: Fix broken audio streaming
+```
+
+**All changes:**
+
+```
+8a8d176f raop: Fix broken audio streaming
+2cbaf5f5 build(deps): Bump pytest-httpserver in /requirements
+```
+
+## 0.15.0 Ralph (2024-08-10)
+
+It has been a long time since the last release (christmas!), so a it's really
+due for a new one. I have mostly been busy with other (personal) stuff, so I
+have not done much more than maintenance. There are a few changes from the
+community though.
+
+Some hightlights:
+
+* Uplift of various dependencies, e.g, fix breaking change in cryptography
+* It is possible to skip forward/backwards (Companion) with custom intervals,
+  thanks @thiccaxe!
+* @bdraco fixed a bug related to changes in chacha20poly1305-reuseable
+* Python 3.12 is now (finally) offically supported
+
+This is a minor update indeed. I hope to see some updates in the near future,
+especially related to tvOS 18 compatibility as well as new features. I am very
+grateful for any help from the community. So if you want to help out
+implementing anything, please send a PR and I'll try my best to find time to
+review it!
+
+**Changes:**
+
+*Other:*
+
+```
+7716858a fix styling for 2462
+41b039f9 precise skip in companion, mrp, dmap
+618e93a4 companion skip implementation
+8331c783 deps: Bump protobuf base version to 4.25.3
+2a8afa68 deps: Sync some versions with base versions
+9f2f7cd3 Added touch gesture to companion protocol (#2402)
+55f3455e deps: Bump some lowest deps versions
+31b57b27 cq: Fix pylint issues
+42ff35ab docs: Fix codespell issues
+ea9d3339 Fix Chacha20Cipher with companion
+a84774c1 test: Improve MRP volume tests
+8080aaae test: Improve dispatch test
+aad6bcd7 test: Improve aiothttp session closing
+ed20bf72 Bump setup-python to v5
+1b780d46 gha: Bump setup-python tp v4
+541ba00d Update tests.yml
+ec402a68 gha: Run tests with python 3.12
+1037d5ef dep: Bump chacha20poly1305-reuseable and cryptography
+1fc1cb0f cq: Run black to fix errors
+5c721409 gha: Remove automerge workflow
+90b23cc4 Update index.md
+7fdfa28a still need to pad for hap
+29ad6fc0 still need to pad for hap
+e817af09 still need to pad for hap
+0c1f6674 lint
+d5a29d7e Simplify ChaCha20 Poly1305 implementation
+8d78f516 Fix typo in README.
+```
+
+**All changes:**
+
+```
+e7487a8b build(deps): Bump python from 3.11.0-alpine to 3.12.5-alpine
+81cd5819 build(deps): Bump aiohttp from 3.10.1 to 3.10.2 in /requirements
+7716858a fix styling for 2462
+41b039f9 precise skip in companion, mrp, dmap
+618e93a4 companion skip implementation
+0d2d3fc9 build(deps): Bump flake8 from 7.1.0 to 7.1.1 in /requirements
+1e0d7991 build(deps): Bump black from 24.4.2 to 24.8.0 in /requirements
+5f801d4c build(deps): Bump aiohttp from 3.10.0 to 3.10.1 in /requirements
+95c43b1c build(deps): Bump mypy-protobuf from 3.5.0 to 3.6.0 in /requirements
+8331c783 deps: Bump protobuf base version to 4.25.3
+80fd95e6 build(deps): Bump pylint from 3.2.5 to 3.2.6 in /requirements
+0abc130b build(deps): Bump protobuf from 5.27.2 to 5.27.3 in /requirements
+1bda482d build(deps): Bump mypy from 1.10.1 to 1.11.1 in /requirements
+2a8afa68 deps: Sync some versions with base versions
+1b38c96f build(deps): Bump pytest-httpserver in /requirements
+961340f8 build(deps): Bump pytest from 8.2.2 to 8.3.2 in /requirements
+64cc5847 build(deps): Bump aiohttp from 3.9.5 to 3.10.0 in /requirements (#2463)
+18ceacd4 build(deps): Bump miniaudio from 1.60 to 1.61 in /requirements (#2459)
+9f2f7cd3 Added touch gesture to companion protocol (#2402)
+55f3455e deps: Bump some lowest deps versions
+c263ff54 build(deps): Bump pydantic from 2.7.4 to 2.8.2 in /requirements
+cba3eb9a build(deps): Bump chacha20poly1305-reuseable in /requirements
+6e9cc70d build(deps): Bump miniaudio from 1.59 to 1.60 in /requirements
+21becc1e build(deps): Bump pytest-asyncio from 0.23.6 to 0.23.8 in /requirements
+98dd3f2d build(deps): Bump protobuf from 5.27.1 to 5.27.2 in /requirements
+0e024712 build(deps): Bump requests from 2.32.2 to 2.32.3 in /requirements
+31b57b27 cq: Fix pylint issues
+8d942aa2 build(deps): Bump pylint from 3.0.3 to 3.2.5 in /requirements
+42ff35ab docs: Fix codespell issues
+1e256440 build(deps): Bump codespell from 2.2.6 to 2.3.0 in /requirements
+bbfb6ec2 build(deps): Bump pytest-httpserver in /requirements
+d70a9a47 build(deps): Bump zeroconf from 0.131.0 to 0.132.2 in /requirements
+9dbdcae1 build(deps): Bump mypy from 1.8.0 to 1.10.1 in /requirements
+e84219bb build(deps): Bump pytest-cov from 4.1.0 to 5.0.0 in /requirements
+0eec178c build(deps): Bump types-protobuf in /requirements
+b1bd82b5 build(deps): Bump pyfakefs from 5.4.1 to 5.6.0 in /requirements
+d789cd08 build(deps): Bump pytest-timeout from 2.2.0 to 2.3.1 in /requirements
+80b9c91d build(deps): Bump pydantic from 2.5.3 to 2.7.4 in /requirements
+ee725bd7 build(deps): Bump pytest-xdist from 3.5.0 to 3.6.1 in /requirements
+1c7f3719 build(deps): Bump black from 24.4.0 to 24.4.2 in /requirements
+f2152da3 build(deps): Bump protobuf from 4.25.2 to 5.27.1 in /requirements
+30bcb66e build(deps): Bump cryptography from 42.0.5 to 42.0.8 in /requirements
+ea9d3339 Fix Chacha20Cipher with companion
+fb78faf6 build(deps): Bump flake8 from 7.0.0 to 7.1.0 in /requirements
+5e6f1b17 build(deps): Bump deepdiff from 6.7.1 to 7.0.1 in /requirements
+c5f182af build(deps): Bump pdoc3 from 0.10.0 to 0.11.0 in /requirements
+a84774c1 test: Improve MRP volume tests
+8080aaae test: Improve dispatch test
+aad6bcd7 test: Improve aiothttp session closing
+ed20bf72 Bump setup-python to v5
+1b780d46 gha: Bump setup-python tp v4
+541ba00d Update tests.yml
+ec402a68 gha: Run tests with python 3.12
+39a868f9 build(deps): Bump pytest from 7.4.3 to 8.2.2 in /requirements
+a0aa0d6e build(deps): Bump flake8 from 6.1.0 to 7.0.0 in /requirements
+1037d5ef dep: Bump chacha20poly1305-reuseable and cryptography
+1fc1cb0f cq: Run black to fix errors
+2b0cc6a0 build(deps): Bump black from 23.12.1 to 24.4.0 in /requirements
+62020c36 build(deps): Bump types-protobuf in /requirements
+5c721409 gha: Remove automerge workflow
+90b23cc4 Update index.md
+7589ec8b build(deps): Bump types-tabulate in /requirements
+7fdfa28a still need to pad for hap
+29ad6fc0 still need to pad for hap
+e817af09 still need to pad for hap
+0c1f6674 lint
+d5a29d7e Simplify ChaCha20 Poly1305 implementation
+601e553a build(deps): Bump requests from 2.31.0 to 2.32.2 in /requirements
+7bff8b32 build(deps): Bump pytest-asyncio from 0.23.2 to 0.23.6 in /requirements
+a2da7611 build(deps): Bump pyfakefs from 5.3.2 to 5.4.1 in /requirements
+eaf73bf9 build(deps): Bump aiohttp from 3.9.1 to 3.9.5 in /requirements
+8d78f516 Fix typo in README.
+4b00261b build(deps): Bump protobuf from 4.25.1 to 4.25.2 in /requirements
+2f7e2fd1 build(deps): Bump pytest-asyncio from 0.21.1 to 0.23.2 in /requirements
+4cd32600 build(deps): Bump isort from 5.12.0 to 5.13.2 in /requirements
+51458f95 build(deps): Bump pyfakefs from 5.3.0 to 5.3.2 in /requirements
+9d0e7f4c build(deps): Bump pydantic from 2.4.2 to 2.5.3 in /requirements
+6d2762df build(deps): Bump pytest-xdist from 3.3.1 to 3.5.0 in /requirements
+```
+
+## 0.14.5 Quimby (2023-12-24)
+
+Merry christmas everyone, here comes a small present! In this
+release @maxileith made some improvements to atvscript. App should be
+reported correctly now. All identifiers as well as MAC address is
+ouputted when scanning. Other than that it's merely house-keeping.
+
+Been rather slow work on pyatv for a while, let's see what the new
+year might bring!
+
+**Changes:**
+
+*Other:*
+
+```
+0da3258 scan: Fix python-zeroconf incompatibility
+454afc0 Fix a bug that causes atvscript push_updates to never report the app
+8d883fb update the list of contributors
+8be2b64 Changing the featured Homebridge plugin to a more recent and maintained one.
+2da50e9 add mac address to device info
+0937a7b Output all identifiers when scanning with atvscript
+```
+
+**All changes:**
+
+```
+ce61b49 build(deps): Bump black from 23.9.1 to 23.12.1 in /requirements
+10b0138 build(deps): Bump cryptography from 41.0.4 to 41.0.7 in /requirements
+04b75b7 build(deps): Bump mypy from 1.5.1 to 1.8.0 in /requirements
+1519ffc build(deps): Bump types-protobuf in /requirements
+f4f94d9 build(deps): Bump deepdiff from 6.6.0 to 6.7.1 in /requirements
+0732ee4 build(deps): Bump aiohttp from 3.8.6 to 3.9.1 in /requirements
+d7dfe9a build(deps): Bump protobuf from 4.24.2 to 4.25.1 in /requirements
+b4bd7ce build(deps): Bump chacha20poly1305-reuseable in /requirements
+0da3258 scan: Fix python-zeroconf incompatibility
+1bb0227 build(deps): Bump zeroconf from 0.118.0 to 0.131.0 in /requirements
+1392a00 build(deps): Bump pylint from 3.0.1 to 3.0.3 in /requirements
+454afc0 Fix a bug that causes atvscript push_updates to never report the app
+8d883fb update the list of contributors
+8be2b64 Changing the featured Homebridge plugin to a more recent and maintained one.
+2da50e9 add mac address to device info
+0937a7b Output all identifiers when scanning with atvscript
+427c362 build(deps): Bump pytest from 7.4.2 to 7.4.3 in /requirements
+```
+
+## 0.14.4 Patty (2023-10-27)
+
+This release contains a fix when running with python 3.11
+or later, mainly when calling atvscript. Thanks @maxileith!
+
+**Changes:**
+
+*Other:*
+
+```
+cc0e4a2 Wrap coroutines passed to asyncio.wait with create_tasks asyncio.wait does not support passing coroutines since python 3.11
+d8c6b4d cq: New attempt with token
+e611672 cq: New token for auto-merge
+b47ddbf cq: Update auto-merge token
+e7f880a cq: Try to fix auto-merge
+```
+
+**All changes:**
+
+```
+cc0e4a2 Wrap coroutines passed to asyncio.wait with create_tasks asyncio.wait does not support passing coroutines since python 3.11
+d8c6b4d cq: New attempt with token
+e611672 cq: New token for auto-merge
+b47ddbf cq: Update auto-merge token
+e7f880a cq: Try to fix auto-merge
+```
+
+## 0.14.3 Otto (2023-10-23)
+
+Due to Home Assistant being stuck at pydantic v1 at the moment,
+I have now changed to use pydantic v1 with the compatibility
+version bundled in v2. This bascially means that pydantic v1 is
+used internally, even when v2 is installed. This is temporary
+until Home Assistant can bump up to pydantic v2. I have also
+removed dependency on pydantic-extra-types (only MacAddress was
+used) as it has no v1 compatible version. Same goes for
+pydantic-settings, which provides no functionality currently.
+
+**Changes:**
+
+*Other:*
+
+```
+86a4a91 storage: Use pydantic v1 compatibility
+1a8c05a storage: Remove usage of pydantic-settings
+d95ab81 storage: Remove need for pydantic-extra-types
+b671e21 cq: Another attempt to fix update_type
+e50fb7b cq: Specify depdency_type to auto-merge
+bde83fa cq: Update auto-merge token
+0c4a873 cq: Auto merge dependabot
+3e503dc cq: Automatic code coverage
+```
+
+**All changes:**
+
+```
+86a4a91 storage: Use pydantic v1 compatibility
+1a8c05a storage: Remove usage of pydantic-settings
+d95ab81 storage: Remove need for pydantic-extra-types
+b671e21 cq: Another attempt to fix update_type
+e50fb7b cq: Specify depdency_type to auto-merge
+bde83fa cq: Update auto-merge token
+0c4a873 cq: Auto merge dependabot
+3e503dc cq: Automatic code coverage
+```
+
+## 0.14.2 Ned (2023-10-17)
+
+Hi-Diddily-Ho, time for some minor bug fixes:
+
+* Do not re-raise TimeoutError as AuthenticationError when
+  connecting (Companion and MRP were affected by this). This makes
+  more sense and also fixes issues with the Apple TV integration
+  in Home Assistant requiring reconfiguration way too often.
+* @bdraco made some zeroconf adjustments to deal with bad behavior
+  in some Zeroconf stacks (mainly seen with AirPort Express).
+
+**Changes:**
+
+*Other:*
+
+```
+bde4850 deps: Update protobuf version in base_versions
+d33a94e api: Use error_handler when connecting
+c11c2a9 Filter out invalid addreses from zeroconf
+3c1fc13 Filter out invalid addreses from zeroconf
+ef17195 add some missing return types on public interfaces
+bed2426 add py.typed to mark pyatv as PEP-561 compliant
+```
+
+**All changes:**
+
+```
+bde4850 deps: Update protobuf version in base_versions
+10835e1 build(deps): Bump mypy-protobuf from 3.4.0 to 3.5.0 in /requirements
+a29ceb5 build(deps): Bump pyfakefs from 5.2.4 to 5.3.0 in /requirements
+d33a94e api: Use error_handler when connecting
+e9896fa Fix spelling errors
+98348aa build(deps): Bump codespell from 2.2.5 to 2.2.6 in /requirements
+b90deec naming
+ec1191a naming
+c11c2a9 Filter out invalid addreses from zeroconf
+3c1fc13 Filter out invalid addreses from zeroconf
+2412932 build(deps): Bump zeroconf from 0.112.0 to 0.118.0 in /requirements
+ab54ef3 build(deps): Bump pytest-timeout from 2.1.0 to 2.2.0 in /requirements
+62fd75a build(deps): Bump pylint from 2.17.5 to 3.0.1 in /requirements
+486e110 build(deps): Bump aiohttp from 3.8.5 to 3.8.6 in /requirements
+835142e build(deps): Bump protobuf from 4.24.3 to 4.24.4 in /requirements
+344fac7 build(deps): Bump deepdiff from 6.5.0 to 6.6.0 in /requirements
+85b099a build(deps): Bump python from 3.11.5-alpine to 3.12.0-alpine
+57bfaf5 build(deps): Bump cryptography from 41.0.3 to 41.0.4 in /requirements
+ef17195 add some missing return types on public interfaces
+bed2426 add py.typed to mark pyatv as PEP-561 compliant
+```
+
+## 0.14.1 Marge (2023-09-27)
+
+Minor release coming up today:
+
+* Fix Companion credentials not being saved when pairing
+* Actually use storage in the wizard (atvremote)
+* Add FileStorage.default_storage() to get the same storage
+  as used by scripts shipped with pyatv (i.e. you can share
+  credentials with your applications)
+* Add setting to force AirPlay version to use with RAOP
+* Add settings for RAOP control and timing ports
+
+**Changes:**
+
+*Protocol: Companion:*
+
+```
+e551954 companion: Fix credentials not saved
+```
+
+*Protocol: RAOP:*
+
+```
+c17f304 raop: Add protocol_version setting
+391be8b raop: Add settings for timing and control ports
+```
+
+*Script: atvremote:*
+
+```
+fa2f7b1 atvremote: Fix storage passing to pair
+```
+
+*Other:*
+
+```
+fd7135b tests: Add test for atvremote wizard
+e8a812d tests: Migrate scripts tests to pytest
+6704359 docs: Add minor change template
+74d2de5 storage: Add FileStorage.default_storage
+621adff docs: Some updates to README.md
+f13a353 docs: More link fixes
+d394708 storage: Use pydantic-extra-types for MAC
+```
+
+**All changes:**
+
+```
+e551954 companion: Fix credentials not saved
+1c4b4d3 build(deps): Bump types-protobuf in /requirements
+91fdc71 build(deps): Bump zeroconf from 0.108.0 to 0.112.0 in /requirements
+c17f304 raop: Add protocol_version setting
+fd7135b tests: Add test for atvremote wizard
+e8a812d tests: Migrate scripts tests to pytest
+fa2f7b1 atvremote: Fix storage passing to pair
+95d7d54 build(deps): Bump deepdiff from 6.4.1 to 6.5.0 in /requirements
+6704359 docs: Add minor change template
+712f105 build(deps): Bump zeroconf from 0.97.0 to 0.108.0 in /requirements
+46d50f0 build(deps): Bump black from 23.7.0 to 23.9.1 in /requirements
+391be8b raop: Add settings for timing and control ports
+2808c5d build(deps): Bump pytest from 7.4.1 to 7.4.2 in /requirements
+d426ae8 build(deps): Bump protobuf from 4.24.2 to 4.24.3 in /requirements
+01e4cc0 build(deps): Bump pytest-aiohttp from 1.0.4 to 1.0.5 in /requirements
+74d2de5 storage: Add FileStorage.default_storage
+621adff docs: Some updates to README.md
+f13a353 docs: More link fixes
+d394708 storage: Use pydantic-extra-types for MAC
+```
+
+## 0.14.0 Lisa (2023-09-04)
+
+Finally time for a new release and this (despite the few number
+of commits) is a big one: this release introduces the storage API!
+in reality, the storage API comes with two distinct features:
+
+* Storing and loading of credentials and passwords
+* Support for generic settings
+
+The first one is pretty obvious and also the biggest one here.
+From now on, pyatv will automatically save credentials to a file
+when pairing and automatically load them again without the need
+of manually specifying them (the same applies to passwords as
+well). This is true for built in scripts like `atvremote` and
+`atvscript`. You need to add a few lines of code to support it
+within your applications.
+
+The API is generic in the sense that you can implement your own
+storage if you like. Perhaps you want to store your credentials in
+Dropbox or a Google Document? That is possible by writing a custom
+storage module. This release ships with a `FileStorage` module
+that stores settings in a local file using JSON as storage format.
+There's also a `MemoryStorage` module that just keeps settings in
+memory. The latter one is used by default if no storage is provided
+as a means of backwards compatibility.
+
+Moving on to generic settings then. Ways to alter the behavior of
+pyatv has been requested in several ways throughout the years. Be
+it specifying port nunbers or changing the way a protocol behaves.
+There has not been any way of implementing such settings until now.
+Biggest reason for it was because I wanted to implement storage
+first to see how things would fit together. I guess the benefit is
+that we now got both features at once.
+
+As a start, only a few metadata fields like MAC address and
+operating system version can be changed. I will add more settings
+over time and you can request additional settings by opening
+issues. As new settings adds extra maintenance burden (e.g. more
+tests), I will be a bit picky though.
+
+I have fixed a small detail in the documentation as well. The
+value of members in enums are now shown. Only the name was shown
+before. The same change also applies to the pydantic models used
+for settings, so you can see default values for all settings
+directly in the API reference.
+
+Oh, and one more thing... A wizard moved in to `atvremote`. If
+you run `atvremote wizard`, he will find all your devices, let you
+pick one and help out with setting it up (guiding you through
+pairing and passwords). Once you have completed the wizard, all
+credentials are saved to storage and you don't have to think about
+that anymore. Pretty neat, huh? This is still an early version,
+so expect bugs and please report them so they can be fixed.
+
+That is is. A pretty good release to be honest. Time for some
+rest!
+
+**Changes:**
+
+*Other:*
+
+```
+d13ede5 docs: Another attempt to fix docs
+7498250 docs: Try to fix API docs for some modules
+856fede storage: Switch to pyfakefs for testing
+7cc5a92 storage: Bump mockfs to 1.1.4
+3376835 storage: Fix tests on Windows
+dfcce1f docs: Add documentation for storage
+cd5ef88 storage: Adjust scripts to use storage
+e370ee1 storage: Initial support for storage
+557681c ci: Enable Dependabot for Dockerfile
+```
+
+**All changes:**
+
+```
+d13ede5 docs: Another attempt to fix docs
+f0978ff build(deps): Bump deepdiff from 6.3.1 to 6.4.1 in /requirements
+bb60615 build(deps): Bump pytest from 7.4.0 to 7.4.1 in /requirements
+11392ae build(deps): Bump mutagen from 1.46.0 to 1.47.0 in /requirements
+4928c42 build(deps): Bump zeroconf from 0.88.0 to 0.97.0 in /requirements
+48a25bb build(deps): Bump pydantic-settings from 2.0.2 to 2.0.3 in /requirements
+7498250 docs: Try to fix API docs for some modules
+856fede storage: Switch to pyfakefs for testing
+7cc5a92 storage: Bump mockfs to 1.1.4
+3376835 storage: Fix tests on Windows
+dfcce1f docs: Add documentation for storage
+cd5ef88 storage: Adjust scripts to use storage
+e370ee1 storage: Initial support for storage
+05ca46d build(deps): Bump zeroconf from 0.86.0 to 0.88.0 in /requirements
+573ac65 build(deps): Bump zeroconf from 0.82.1 to 0.86.0 in /requirements
+dbd0fbf build(deps): Bump chacha20poly1305-reuseable in /requirements
+894c9c4 build(deps): Bump python from 3.11.4-alpine to 3.11.5-alpine
+b892d20 build(deps): Bump protobuf from 4.24.1 to 4.24.2 in /requirements
+e5458f9 build(deps): Bump protobuf from 4.24.0 to 4.24.1 in /requirements
+aed3c2b build(deps): Bump zeroconf from 0.79.0 to 0.82.1 in /requirements
+2a03ff9 build(deps): Bump mypy from 1.5.0 to 1.5.1 in /requirements
+557681c ci: Enable Dependabot for Dockerfile
+a717479 build(deps): Bump python from 3.9.7 to 3.11.4 in Dockerfile
+84d8222 build(deps): Bump zeroconf from 0.76.0 to 0.79.0 in /requirements
+dffb71f build(deps): Bump zeroconf from 0.74.0 to 0.76.0 in /requirements
+e3d7a90 build(deps): Bump types-protobuf in /requirements
+671064e build(deps): Bump types-protobuf in /requirements
+d432705 build(deps): Bump mypy from 1.4.1 to 1.5.0 in /requirements
+6438d9f build(deps): Bump async-timeout from 4.0.2 to 4.0.3 in /requirements (#2136)
+be22c57 build(deps): Bump protobuf from 4.23.4 to 4.24.0 in /requirements (#2131)
+c3c5e33 build(deps): Bump types-protobuf in /requirements (#2130)
+285d4c0 build(deps): Bump zeroconf from 0.72.0 to 0.74.0 in /requirements (#2123)
+```
+
+## 0.13.4 Krusty (2023-08-06)
+
+@bdraco cleaned up in aisle four and made scanning more
+robust in shaky networks, thanks!
+
+**Changes:**
+
+*Other:*
+
+```
+17d130a Fallback to sending unicast PTR queries when multicast is broken or packets are being dropped (#2122)
+b64bdf9 gha: Remove log workflow (#2120)
+```
+
+**All changes:**
+
+```
+17d130a Fallback to sending unicast PTR queries when multicast is broken or packets are being dropped (#2122)
+b64bdf9 gha: Remove log workflow (#2120)
+```
+
+## 0.13.3 Joe (2023-08-03)
+
+Time for a somewhat minor fix release:
+
+* The play_url functionality has been restored on tvOS
+* Pairing requirement is correctly determined for macOS
+* macOS has been added as an operating system
+* @bdraco has made some performance improvements when
+  scanning for devices
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+dfcc82b mrp: Add some missing protobuf definitions
+5ad5103 mrp: Fix pairing requirement when disabled
+```
+
+*Protocol: AirPlay:*
+
+```
+54ff39e airplay: Handle Access Control Type
+c5772b3 airplay: Support stop with play_url
+c554ab7 airplay: Fix play_url with newer tvOS versions
+```
+
+*Protocol: RAOP:*
+
+```
+fef1667 raop: Use correct auth type for RAOP pairing
+```
+
+*Other:*
+
+```
+8022f68 Rework zeroconf for unicast scanning (#2083)
+42130e1 conf: Add macOS as operating system
+8b572fe http: Abort timeout if connection close
+7815a8f docs: Clarify atvremote app section
+```
+
+**All changes:**
+
+```
+8022f68 Rework zeroconf for unicast scanning (#2083)
+dfcc82b mrp: Add some missing protobuf definitions
+b91dfae build(deps): Bump cryptography from 41.0.2 to 41.0.3 in /requirements
+06cb03e build(deps): Bump zeroconf from 0.71.4 to 0.71.5 in /requirements
+54ff39e airplay: Handle Access Control Type
+42130e1 conf: Add macOS as operating system
+b8f793e build(deps): Bump flake8 from 6.0.0 to 6.1.0 in /requirements
+c3e0a52 build(deps): Bump pylint from 2.17.4 to 2.17.5 in /requirements
+6e89d8c build(deps): Bump types-protobuf in /requirements
+18edbf4 build(deps): Bump chacha20poly1305-reuseable in /requirements
+9cd5a4a build(deps): Bump zeroconf from 0.71.0 to 0.71.4 in /requirements
+c5772b3 airplay: Support stop with play_url
+c554ab7 airplay: Fix play_url with newer tvOS versions
+8b572fe http: Abort timeout if connection close
+0c61914 build(deps): Bump types-requests in /requirements
+3d3f9e8 build(deps): Bump aiohttp from 3.8.4 to 3.8.5 in /requirements
+353faa9 build(deps): Bump pytest-asyncio from 0.21.0 to 0.21.1 in /requirements
+5ad5103 mrp: Fix pairing requirement when disabled
+fef1667 raop: Use correct auth type for RAOP pairing
+a01117d build(deps): Bump cryptography from 41.0.1 to 41.0.2 in /requirements
+5ede5a9 build(deps): Bump black from 23.3.0 to 23.7.0 in /requirements
+e5bf455 build(deps): Bump zeroconf from 0.70.0 to 0.71.0 in /requirements
+cef7b74 build(deps): Bump deepdiff from 6.3.0 to 6.3.1 in /requirements
+67ad564 build(deps): Bump protobuf from 4.23.3 to 4.23.4 in /requirements
+7815a8f docs: Clarify atvremote app section
+11ab076 build(deps): Bump typed-ast from 1.5.4 to 1.5.5 in /requirements
+b6514e8 build(deps): Bump mediafile from 0.11.0 to 0.12.0 in /requirements
+2d70d8b build(deps): Bump zeroconf from 0.69.0 to 0.70.0 in /requirements
+```
+
+## 0.13.2 Itchy (2023-06-27)
+
+Hitting it hard with new releases lately, here's another one:
+
+* Artwork can now be set when streaming
+* Metadata can be overridden only when missing
+* New helper method: helpers.is_device_supported
+* `bitarray` dependency has been dropped (no longer needed)
+* Bug: AirPlay in macOS is ignored until I can support it
+* Bug: Improved AirPlay 2 detection
+
+So, this release makes it possible to provide artwork as part of metadata when
+streaming files. It also adds a new flag, `override_missing_metadata`, that
+(when set) will use metadata provided by what is streamed but use custom
+metadata when some fields are missing. So if `title` is not in the stream, you
+can now provide that but still keep things like `album` and `artist` from
+the stream.
+
+A new helper method, `helpers.is_device_support`, has been added that returns
+boolean indicating if pyatv can interact with that device or not.
+
+And some bug fixes. Namely: computers running macOS with AirPlay receiver
+enabled (requires macOS 12 or later) are currently ignored as they aren't
+supported. I will try to fix that when I can. Also, detection of AirPlay 2
+devices has been improved. Some older devices (like Apple TV 3) was
+discovered as AirPlay 2 devices, breaking `stream_file` support.
+
+**Changes:**
+
+*Protocol: AirPlay:*
+
+```
+20a7524 airplay: Fix AirPlay major version detection
+703dc74 airplay: Disable AirPlay for macOS
+```
+
+*Protocol: RAOP:*
+
+```
+6beda0c raop: Allow setting artwork
+7b534d5 raop: Support override missing stream fields
+```
+
+*Other:*
+
+```
+70ce630 support: Add missing metadata tests
+3f054a0 deps: Remove bitarray code
+8ee9b61 helpers: Add is_device_supported
+```
+
+**All changes:**
+
+```
+20a7524 airplay: Fix AirPlay major version detection
+70ce630 support: Add missing metadata tests
+6beda0c raop: Allow setting artwork
+7b534d5 raop: Support override missing stream fields
+703dc74 airplay: Disable AirPlay for macOS
+3f054a0 deps: Remove bitarray code
+8ee9b61 helpers: Add is_device_supported
+9cbeeae build(deps): Bump bitarray from 2.7.5 to 2.7.6 in /requirements
+60b7052 build(deps): Bump pytest from 7.3.2 to 7.4.0 in /requirements
+1630694 build(deps): Bump mypy from 1.4.0 to 1.4.1 in /requirements
+```
+
+## 0.13.1 Homer (2023-06-22)
+
+Small patch release coming up! Second generation HomePod has
+been added as device type. A bug when streaming from a buffer
+(something inheriting BufferedIOBase) has been fixed. The bug
+would render metadata detection unusable and playback to cut
+off early.
+
+Previous releases would send raw PCM samples encapsulated in
+Apple Lossless Audio Codec (ALAC) frames. This is now changed
+to send pure raw audio frames instead (without ALAC). This
+has a big benefit in regards to performance as the ALAC
+header is not byte-aligned, so it required a lot of bit
+shifting and memory copying. This was extremly noticable on
+low-end systems like raspberry pi. Hopefully the performance
+is a lot better now. Issue #2057 contains more details
+regarding this for those interested.
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+51dffc9 raop: Send autio as raw PCM
+3d4c5ff raop: Fix bug when streaming from buffer
+```
+
+*Other:*
+
+```
+02a8cab device: Add second generation HomePod
+```
+
+**All changes:**
+
+```
+dd773cc build(deps): Bump mypy from 1.3.0 to 1.4.0 in /requirements
+fb18e3a build(deps): Bump zeroconf from 0.66.0 to 0.69.0 in /requirements
+02a8cab device: Add second generation HomePod
+51dffc9 raop: Send autio as raw PCM
+3d4c5ff raop: Fix bug when streaming from buffer
+```
+
+## 0.13.0 Grandpa (2023-06-15)
+
+This release contains some big new stuff, really nice. In summary we have:
+
+* Basic support for audio streaming using AirPlay 2
+* Proper power state support in Companion
+* Support for activating screensaver
+* Improved buffering of audio when streaming
+* Added support for changing output devices in tvOS (@michalmo)
+* atvproxy now supports MRP-over-AirPlay (@michalmo)
+* Bug: Absolute/relative volume management is greatly improved (@michalmo)
+* Bug: Position calculation improved in MRP
+
+One of the big new things in this release is support for streaming audio via
+AirPlay 2. Streaming via AirPlay 1 has been possible for quite some time now
+and that is "good enough" (based on what pyatv supports) with Apple devices,
+but not most 3rd party receivers as lots of them only support AirPlay 2. From
+now on however, pyatv can be used to stream audio to previously unsupported
+receivers, like Sonos for instance. It is still not possible to use controls
+like pause and skip next, but metadata should work fine. More features will
+be added over time. Main driver for this feature is using any AirPlay 2
+receiver for Text-To-Speech (TTS) in Home Assistant.
+
+Another feature lots of people have been asking for is an API to change output
+device(s) on their Apple TV. This allows for changing audio device to for
+instance a HomePod instead of the built-in TV speakers. @michalmo took a
+crack at and implemented that (fixing AirPlay support in atvproxy whilst doing
+so). Active devices can be listed or removed and new devices added, nice!
+
+Yet another feature/bug fix is buffering support for non-seekable streams when
+streaming audio via RAOP. When streaming from an Internet source for instance,
+pyatv would "consume" data in a linear fashion (get X bytes, stream that, throw
+it away, get next X bytes, etc.). For some formats this works fine, but a few
+requires seeking, i.e. looking into the future of the stream and then going
+back to the start again. This is not possible if the buffer is not seekable,
+which is the case for an Internet source. I have now added general buffering
+support for the beginning of a anything being streamed, improving streaming
+support a lot. It also allows for extracting metadata from more formats, even
+Internet sources, so that's a big improvements as well. It's not bulletproof,
+so milage may vary. Again, main driver for this is Home Assistant. Some
+TTS integrations, like picoTTS, would not work because the generated file
+required seeking (due to file format being wav I think). This release should
+fix that.
+
+One more thing... proper standby detection via Companion! Recently (not exactly
+sure which version) Apple added "SystemStatus" support over Companion. The
+system status reflects whether a device is in standby or awake mode (or even
+has the screensaver active). Changes are pushed as an event, so pyatv will
+get notified as soon as the state changes. I hope this will help a lot of
+people having problem with device state, like we see a lot of in Home
+Assistant.
+
+**Changes:**
+
+*Protocol: MRP:*
+
+```
+850547e mrp: Fix position if playbackRate is 0.0
+```
+
+*Protocol: AirPlay:*
+
+```
+8badbf7 Support volume control for an Apple TV connected to HomePod(s) instead of TV speakers
+254694c Control AirPlay output devices (#2044)
+```
+
+*Protocol: Companion:*
+
+```
+74b3fc4 companion: Implement SystemStatus support
+62f6654 companion: Add screensaver support
+```
+
+*Protocol: RAOP:*
+
+```
+6d46726 raop: Basic AirPlay 2 streaming
+bb20742 raop: Migrate remaining buffers to SemiSeekableBuffer
+4807f0f raop: Migrate PatchedIceCastClient to SemiSeekableBuffer
+```
+
+*Script: atvremote:*
+
+```
+139bc4b atvremote: Allow custom service properties
+```
+
+**All changes:**
+
+```
+74b3fc4 companion: Implement SystemStatus support
+850547e mrp: Fix position if playbackRate is 0.0
+10e207f raop: Handle setting volume later
+ab8ee57 raop: Add feedback to AirPlay 2 streaming
+6d46726 raop: Basic AirPlay 2 streaming
+139bc4b atvremote: Allow custom service properties
+12d9b5a airplay: Change RemoteControl to AP2Session
+290a1e0 rtsp: Make handling of bplists more general
+8badbf7 Support volume control for an Apple TV connected to HomePod(s) instead of TV speakers
+b99b4f8 Volume control improvements
+8815d02 build(deps): Bump codespell from 2.2.4 to 2.2.5 in /requirements
+979e61e build(deps): Bump protobuf from 4.23.2 to 4.23.3 in /requirements (#2051)
+a3e3d51 add FeatureName.TextFocusState to supported features for Companion (#2047)
+254694c Control AirPlay output devices (#2044)
+bb20742 raop: Migrate remaining buffers to SemiSeekableBuffer
+4807f0f raop: Migrate PatchedIceCastClient to SemiSeekableBuffer
+44a4c7a support: Add a SemiSeekableBuffer
+ca8c928 build(deps): Bump zeroconf from 0.64.1 to 0.66.0 in /requirements
+eeba576 build(deps): Bump bitarray from 2.7.4 to 2.7.5 in /requirements
+72f2f92 build(deps): Bump pytest from 7.3.1 to 7.3.2 in /requirements
+62f6654 companion: Add screensaver support
+e66aa2e if: Update doc string for pause
+4a66c5d tests: Fix some streaming instability in RAOP
+fbf02c3 cq: Disable deprecated warnings in pyatv tests
+ff89c26 update documentation
+d500480 unify identifiers and credentials
+83be27e add tests for HAP and transient auth
+0b75957 update tests to use airplay.server_auth
+a311b8b support segmented requests in BasicHttpServer
+054b9e5 rewrite identifiers to improve connection
+7a307c2 add protobuf ConfigureConnectionMessage
+fa006ff add field to UpdateOutputDeviceMessage
+6ca50c1 regenerate protobuf code
+d192759 log decoded channel messages
+5ebc663 replace CaseInsensitiveDict in pyatv.support.http with version from requests that preserves input case, which is better for proxying
+443f7d1 add public methods to pyatv.http to format requests and reponses
+ee9523b initial airplay proxy working with pyatv client
+```
+
+## 0.12.1 Frankie (2023-06-08)
+
+Time for a new release. Here it goes:
+
+* Support for custom metadata when streaming audio
+* StreamReader (asyncio) can be used as streaming audio source
+* @a1ex4 fixed compatibility with shairport-sync
+* @michalmo added listener interface for keyboard focus
+* @Shraymonks added a few new tvOs versions and ATV 4K gen3
+* @michalmo addded deep linking support to launch_app
+
+A little of this and a little bit of that. It's so much fun
+to see new contributors to the project! I love it, keep up
+the good work!
+
+**Changes:**
+
+*Protocol: RAOP:*
+
+```
+e538496 raop: Support custom metadata when streaming (#2011)
+ec6a9fd raop: Support asyncio StreamReader when streaming (#2010)
+```
+
+*Other:*
+
+```
+8b3c15e added listener interface to Keyboard for focus updates
+ed7ac4b Fix shairport-sync player support
+9ef3ddc Add support for URL param to LaunchApp (#2024)
+8bf62de Add Apple TV 4k (gen3) and new tvOS versions
+```
+
+**All changes:**
+
+```
+0ce95c0 build(deps): Bump zeroconf from 0.64.0 to 0.64.1 in /requirements
+dcab463 change exception type based on code review
+53a4739 added Keyboard interface documentation
+8b3c15e added listener interface to Keyboard for focus updates
+990a82f preserve integer sizes when decoding/re-encoding with opack, fixes companion proxy stability
+d508f35 build(deps): Bump zeroconf from 0.63.0 to 0.64.0 in /requirements
+656ba7e build(deps): Bump miniaudio from 1.57 to 1.59 in /requirements
+ed7ac4b Fix shairport-sync player support
+062fc73 gha: Fix python version in logs workflow
+9966ce8 gha: Use python 3.10 for log parsing
+afe74a5 gha: Update log tests job
+95f2b5c build(deps): Bump cryptography from 41.0.0 to 41.0.1 in /requirements
+9ef3ddc Add support for URL param to LaunchApp (#2024)
+5633765 build(deps): Bump cryptography from 40.0.2 to 41.0.0 in /requirements
+20aa9a8 build(deps): Bump bitarray from 2.7.3 to 2.7.4 in /requirements
+50be0f8 build(deps): Bump types-requests in /requirements
+001ea0e build(deps): Bump protobuf from 4.23.1 to 4.23.2 in /requirements
+dcbf581 gha: Fix building docker images
+4f9b1c8 build(deps): Bump pytest-cov from 4.0.0 to 4.1.0 in /requirements
+6c05064 build(deps): Bump zeroconf from 0.62.0 to 0.63.0 in /requirements
+8bf62de Add Apple TV 4k (gen3) and new tvOS versions
+e538496 raop: Support custom metadata when streaming (#2011)
+ec6a9fd raop: Support asyncio StreamReader when streaming (#2010)
+747fd46 env: Install correct miniaudio on GHA (#2012)
+```
+
+## 0.12.0 Edna (2023-05-24)
+
+@michalmo has been working hard to bring you this release.
+It featuers the following:
+
+* Text/keyboard input API (get and alter current text)
+* Listener interface for volume updates (+ bug fix for MRP)
+* Updates to make atvproxy work with Companion (for devs)
+
+Thanks for your hard work @michalmo, it's really great to get
+some help since I don't have much time for pyatv right now. I
+know a lot of people are waiting for these features.
+
+**Changes:**
+
+*Other:*
+
+```
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+ccf8a8c Fix companion proxy (#1912)
+7c3707b added listener interface to Audio for volume updates
+```
+
+**All changes:**
+
+```
+931b808 build(deps): Bump types-requests in /requirements (#2004)
+34c719c Add support for companion protocol text input (#1905)
+39e4d08 Make sure were sending and receiving volume messages for our device, even if playing to other AirPlay devices in a group (#2006)
+0028ce2 build(deps): Bump protobuf from 4.23.0 to 4.23.1 in /requirements (#2000)
+ccf8a8c Fix companion proxy (#1912)
+e7ac293 build(deps): Bump pytest-xdist from 3.2.1 to 3.3.1 in /requirements
+5749656 build(deps): Bump requests from 2.30.0 to 2.31.0 in /requirements
+7c3707b added listener interface to Audio for volume updates
+```
+
+## 0.11.0 Duffman (2023-05-15)
+
+Wow, it has been a long time since the last release. Unfortunately
+i don't have much time to work on pyatv right now, but i will try
+my best to make some bug fixes at least. In short, this release
+fixes a timeout bug when streaming to HomePods (introduced around
+16.4). It shall also fix missing artwork sometimes and account
+switching (using Companion protocol) is now also possible thanks
+to @michalmo.
+
+From this release I will use code names from Simpsons. There's more
+to choose from there...
+
+**Changes:**
+
+*Script: atvscript:*
+
+```
+1533a89 atvscript: Check app support before printing
+```
+
+*Other:*
+
+```
+8b16f5a protobuf: Bump to 4.22.3
+a7a5c54 protobuf: Bump and fix protobuf to 21.0
+7cf5d2f deps: Deprecate python 3.7
+3c13841 deps: Bump aiohttp to at least 3.8.3
+71b592e gha: Run tests with python 3.11
+7dee1e4 reuse client session from Core
+d8bc55b fix missing artwork
+9e73711 http: Increase timeout for http requests
+5634fc0 deps: Remove codecov as test dependency
+02b62ec test: Fix strict mode in pytest_asyncio
+aa23a11 readable paired device names for airplay and companion protocols
+bec4ed2 added support for companion protocol account switching
+```
+
+**All changes:**
+
+```
+e6d9299 build(deps): Bump pylint from 2.17.2 to 2.17.4 in /requirements
+436a8bc build(deps): Bump types-requests in /requirements
+10c5387 build(deps): Bump requests from 2.28.2 to 2.30.0 in /requirements
+a7aa051 build(deps): Bump mypy from 1.2.0 to 1.3.0 in /requirements
+3a2bc39 build(deps): Bump types-protobuf in /requirements
+5527d28 build(deps): Bump protobuf from 4.22.3 to 4.23.0 in /requirements
+0b4cd97 build(deps): Bump miniaudio from 1.56 to 1.57 in /requirements
+7faf30b build(deps): Bump zeroconf from 0.56.0 to 0.62.0 in /requirements
+f8fbbfe build(deps): Bump mediafile from 0.9.0 to 0.11.0 in /requirements
+f354a90 build(deps): Bump pytest-cov from 3.0.0 to 4.0.0 in /requirements
+788d643 build(deps): Bump pytest-xdist from 2.5.0 to 3.2.1 in /requirements
+ca5dc87 build(deps): Bump pytest from 7.1.2 to 7.3.1 in /requirements
+8f9d220 build(deps): Bump pydocstyle from 6.1.1 to 6.3.0 in /requirements
+7acaf6e deps: Fix new black issues
+17c8e13 build(deps): Bump black from 22.6.0 to 23.3.0 in /requirements
+3703173 build(deps): Bump mypy-protobuf from 3.2.0 to 3.4.0 in /requirements
+8b16f5a protobuf: Bump to 4.22.3
+a353870 protobuf: Hardcode protoc version again
+a7a5c54 protobuf: Bump and fix protobuf to 21.0
+8d1c5d4 build(deps): bump protobuf from 3.20.1 to 4.21.2 in /requirements
+14cf46c build(deps): Bump isort from 5.10.1 to 5.12.0 in /requirements
+c6feb23 deps: Fix flake8 issues
+8d4c1b9 build(deps): Bump flake8 from 5.0.3 to 6.0.0 in /requirements
+7cf5d2f deps: Deprecate python 3.7
+0edde61 build(deps): Bump cryptography from 40.0.1 to 40.0.2 in /requirements
+46c21e6 build(deps): Bump aiohttp from 3.8.1 to 3.8.4 in /requirements
+3c13841 deps: Bump aiohttp to at least 3.8.3
+71b592e gha: Run tests with python 3.11
+d9aa981 cq: Fix warnings and various issues
+5686462 build(deps): Bump zeroconf from 0.47.3 to 0.56.0 in /requirements
+acdebfc build(deps): Bump bitarray from 2.6.0 to 2.7.3 in /requirements
+2618e1d build(deps): Bump types-protobuf in /requirements
+1533a89 atvscript: Check app support before printing
+dfbb15b deps: Fix pylint issues in new release
+51c7316 build(deps): Bump pylint from 2.14.5 to 2.17.2 in /requirements
+7d3024e build(deps): Bump types-requests in /requirements
+15b6fda deps: Fix mypy issues from upgrade
+08f561e build(deps): Bump mypy from 0.961 to 1.2.0 in /requirements
+2f5f1ae add tests for hosted artwork
+7dee1e4 reuse client session from Core
+d8bc55b fix missing artwork
+8ede99e build(deps): Bump mutagen from 1.45.1 to 1.46.0 in /requirements
+9e73711 http: Increase timeout for http requests
+5634fc0 deps: Remove codecov as test dependency
+02b62ec test: Fix strict mode in pytest_asyncio
+34254b4 build(deps): Bump pytest-asyncio from 0.18.3 to 0.21.0 in /requirements
+b012b89 build(deps): Bump cryptography from 39.0.2 to 40.0.1 in /requirements
+93585e3 build(deps): Bump requests from 2.28.1 to 2.28.2 in /requirements
+fe4b654 move opack.py into pyatv/support
+aa23a11 readable paired device names for airplay and companion protocols
+88f1fbe build(deps): Bump codespell from 2.1.0 to 2.2.4 in /requirements
+bec4ed2 added support for companion protocol account switching
+8925745 build(deps): Bump deepdiff from 5.8.1 to 6.3.0 in /requirements
+f68e0b0 build(deps): Bump miniaudio from 1.51 to 1.56 in /requirements
+3787e7a build(deps): Bump zeroconf from 0.38.7 to 0.47.3 in /requirements
+5a7453d build(deps): Bump cryptography from 37.0.4 to 39.0.2 in /requirements
+fe704a3 Redirecting to correct page
+000c7ab build(deps): Bump flake8 from 4.0.1 to 5.0.3 in /requirements
+```
+
 ## 0.10.3 Chica (2022-08-02)
 
 This is another minor release:

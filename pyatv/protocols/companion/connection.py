@@ -1,4 +1,5 @@
 """Connection abstraction for Companion protocol."""
+
 from abc import ABC
 import asyncio
 from collections import deque
@@ -63,7 +64,7 @@ class CompanionConnection(asyncio.Protocol):
         self.loop = loop
         self.host = host
         self.port = port
-        self.listener: Optional[CompanionConnectionListener] = None
+        self._listener: Optional[CompanionConnectionListener] = None
         self._device_listener = device_listener
         self.transport = None
         self._buffer: bytes = b""
@@ -90,12 +91,18 @@ class CompanionConnection(asyncio.Protocol):
         """Enable encryption with the specified keys."""
         self._chacha = chacha20.Chacha20Cipher(output_key, input_key, nonce_length=12)
 
+    def set_listener(self, listener: CompanionConnectionListener) -> None:
+        """Set the CompanionConnectionListener in a way that doesn't break pylint."""
+        self._listener = listener
+
     def send(self, frame_type: FrameType, data: bytes) -> None:
         """Send message without waiting for a response."""
         if self.transport is None:
             raise exceptions.InvalidStateError("not connected")
 
-        payload_length = len(data) + (AUTH_TAG_LENGTH if self._chacha else 0)
+        payload_length = len(data)
+        if self._chacha and payload_length > 0:
+            payload_length += AUTH_TAG_LENGTH
         header = bytes([frame_type.value]) + payload_length.to_bytes(3, byteorder="big")
 
         log_binary(
@@ -105,7 +112,7 @@ class CompanionConnection(asyncio.Protocol):
             Data=data,
         )
 
-        if self._chacha:
+        if self._chacha and len(data) > 0:
             data = self._chacha.encrypt(data, aad=header)
             log_binary(_LOGGER, ">> Send", Header=header, Encrypted=data)
 
@@ -138,10 +145,10 @@ class CompanionConnection(asyncio.Protocol):
             self._buffer = self._buffer[payload_length:]
 
             try:
-                if self._chacha:
+                if self._chacha and len(payload) > 0:
                     payload = self._chacha.decrypt(payload, aad=header)
 
-                self.listener.frame_received(FrameType(header[0]), payload)
+                self._listener.frame_received(FrameType(header[0]), payload)
             except Exception:
                 _LOGGER.exception("failed to handle frame")
 

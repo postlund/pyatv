@@ -1,20 +1,32 @@
 """Module for working with HTTP requests."""
+
 from abc import ABC, abstractmethod
 import asyncio
 from collections import deque
+from dataclasses import dataclass
 import logging
 import pathlib
-from queue import Queue
+import plistlib
 import re
-from typing import Callable, Dict, Mapping, NamedTuple, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 import async_timeout
+from requests.structures import CaseInsensitiveDict
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
-from pyatv.support.collections import CaseInsensitiveDict
 from pyatv.support.net import unused_port
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,16 +59,18 @@ def _format_message(
 ) -> bytes:
     if isinstance(body, str):
         body = body.encode("utf-8")
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
 
     msg = f"{method} {uri} {protocol}"
-    if "User-Agent" not in (headers or {}):
+    if "User-Agent" not in headers:
         msg += f"\r\nUser-Agent: {user_agent}"
     if content_type:
         msg += f"\r\nContent-Type: {content_type}"
     if body:
         msg += f"\r\nContent-Length: {len(body) if body else 0}"
 
-    for key, value in (headers or {}).items():
+    for key, value in headers.items():
         msg += f"\r\n{key}: {value}"
     msg += 2 * "\r\n"
 
@@ -75,7 +89,7 @@ class HttpResponse(NamedTuple):
     code: int
     message: str
     headers: Mapping[str, str]
-    body: Union[str, bytes]
+    body: Union[str, bytes, dict]
 
 
 class HttpRequest(NamedTuple):
@@ -96,32 +110,28 @@ def _key_value(line: str) -> Tuple[str, str]:
 
 def _parse_http_message(
     message: bytes,
-) -> Tuple[Optional[str], CaseInsensitiveDict[str], Union[bytes, str], bytes]:
+) -> Tuple[Optional[str], CaseInsensitiveDict, Union[bytes, str], bytes]:
     """Parse HTTP response."""
     try:
         header_str, body = message.split(b"\r\n\r\n", maxsplit=1)
-    except ValueError as ex:
-        raise ValueError("missing end lines") from ex
+    except ValueError:
+        return None, CaseInsensitiveDict(), b"", message
     headers = header_str.decode("utf-8").split("\r\n")
 
     msg_headers = CaseInsensitiveDict(_key_value(line) for line in headers[1:] if line)
 
-    # TODO: pylint on python 3.6 does not seem to find CaseInsensitiveDict.get, but
-    # other versions seems to work fine. Remove this ignore when python 3.6 is dropped.
-    content_length = int(
-        msg_headers.get("Content-Length", 0)  # pylint: disable=no-member
-    )
+    content_length = int(msg_headers.get("Content-Length", 0))
     if len(body or []) < content_length:
         return None, CaseInsensitiveDict(), b"", message
 
     msg_body: Union[str, bytes] = body[0:content_length]
 
     # Assume body is text unless content type is application/octet-stream
-    # TODO: Remove pylint disable when python 3.6 is dropped
-    if not msg_headers.get("Content-Type", "").startswith(  # pylint: disable=no-member
-        "application"
-    ):
-        msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+    if not msg_headers.get("Content-Type", "").startswith("application"):
+        try:
+            msg_body = cast(bytes, msg_body).decode("utf-8")  # We know it's bytes here
+        except UnicodeDecodeError:
+            pass
 
     return (
         headers[0],
@@ -131,10 +141,37 @@ def _parse_http_message(
     )
 
 
+def format_response(response: HttpResponse) -> bytes:
+    """Encode HTTP response."""
+    headers = response.headers
+    if not isinstance(headers, CaseInsensitiveDict):
+        headers = CaseInsensitiveDict(headers)
+
+    output = (
+        f"{response.protocol}/{response.version} {response.code} {response.message}\r\n"
+    )
+    if "Server" not in headers:
+        output += f"Server: {SERVER_NAME}\r\n"
+    for key, value in headers.items():
+        output += f"{key}: {value}\r\n"
+
+    body = response.body or b""
+    if body:
+        if isinstance(body, str):
+            body = body.encode("utf-8")
+        elif isinstance(body, dict):
+            body = plistlib.dumps(
+                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+            )
+        output += f"Content-Length: {len(body)}\r\n"
+
+    return output.encode("utf-8") + b"\r\n" + body
+
+
 def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     """Parse HTTP response."""
     first_line, msg_headers, msg_body, rest = _parse_http_message(response)
-    if not first_line:
+    if first_line is None:
         return None, rest
 
     # <method> <path> <protocol>/<version
@@ -148,6 +185,17 @@ def parse_response(response: bytes) -> Tuple[Optional[HttpResponse], bytes]:
     return (
         HttpResponse(protocol, version, int(code), message, msg_headers, msg_body),
         rest,
+    )
+
+
+def format_request(request: HttpRequest) -> bytes:
+    """Encode HTTP request."""
+    return _format_message(
+        request.method,
+        request.path,
+        protocol=f"{request.protocol}/{request.version}",
+        headers=request.headers,
+        body=request.body,
     )
 
 
@@ -169,6 +217,17 @@ def parse_request(request: bytes) -> Tuple[Optional[HttpRequest], bytes]:
         HttpRequest(method, path, protocol, version, msg_headers, msg_body),
         rest,
     )
+
+
+def decode_bplist_from_body(response: HttpResponse) -> Dict[str, Any]:
+    """Decode a binary property list in a response."""
+    if not isinstance(response.body, (bytes, str)):
+        raise exceptions.ProtocolError(
+            f"expected bytes or str but got {type(response.body).__name__}"
+        )
+
+    body = response.body
+    return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
 
 
 class ClientSessionManager:
@@ -201,7 +260,7 @@ class HttpSession:
     async def get_data(
         self,
         path: str,
-        headers: Mapping[str, object] = None,
+        headers: Optional[Mapping[str, object]] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> Tuple[bytes, int]:
         """Perform a GET request."""
@@ -230,8 +289,8 @@ class HttpSession:
     async def post_data(
         self,
         path: str,
-        data: bytes = None,
-        headers: Mapping[str, object] = None,
+        data: Optional[bytes] = None,
+        headers: Optional[Mapping[str, object]] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> Tuple[bytes, int]:
         """Perform a POST request."""
@@ -268,6 +327,14 @@ class HttpSession:
 class HttpConnection(asyncio.Protocol):
     """Representation of a HTTP connection."""
 
+    @dataclass
+    class PendingRequest:
+        """Container class for a pending request."""
+
+        event: asyncio.Event
+        response: Optional[HttpResponse] = None
+        connection_closed: bool = False
+
     def __init__(
         self,
         receive_processor: Optional[Callable[[bytes], bytes]] = None,
@@ -284,7 +351,6 @@ class HttpConnection(asyncio.Protocol):
         self._local_ip: Optional[str] = None
         self._remote_ip: Optional[str] = None
         self._requests: deque = deque()
-        self._responses: Queue = Queue()
         self._buffer = b""
 
     @property
@@ -307,6 +373,7 @@ class HttpConnection(asyncio.Protocol):
             transport = self.transport
             self.transport = None
             transport.close()
+        self._requests.clear()
 
     def connection_made(self, transport: asyncio.BaseTransport) -> None:
         """Handle that a connection has been made."""
@@ -330,9 +397,10 @@ class HttpConnection(asyncio.Protocol):
                 break
 
             # Dispatch message to first receiver
-            self._responses.put(parsed)
             if self._requests:
-                self._requests.pop().set()
+                pending_request = self._requests.pop()
+                pending_request.response = parsed
+                pending_request.event.set()
             else:
                 _LOGGER.warning("Got response without having a request: %s", parsed)
 
@@ -344,6 +412,11 @@ class HttpConnection(asyncio.Protocol):
     def connection_lost(self, exc) -> None:
         """Handle that connection was lost."""
         _LOGGER.debug("Connection closed")
+        for pending_request in self._requests:
+            pending_request.connection_closed = True
+            pending_request.event.set()
+        self._requests.clear()
+        self.transport = None
 
     async def get(self, path: str, allow_error: bool = False) -> HttpResponse:
         """Make a GET request and return response."""
@@ -371,6 +444,7 @@ class HttpConnection(asyncio.Protocol):
         headers: Optional[Mapping[str, object]] = None,
         body: Optional[Union[str, bytes]] = None,
         allow_error: bool = False,
+        timeout: int = 10,
     ) -> HttpResponse:
         """Send a HTTP message and return response."""
         output = _format_message(
@@ -378,23 +452,31 @@ class HttpConnection(asyncio.Protocol):
         )
 
         _LOGGER.debug("Sending %s message: %s", protocol, output)
-        if not self.transport:
+        if self.transport is None:
             raise RuntimeError("not connected to remote")
 
         self.transport.write(self.send_processor(output))
 
-        event = asyncio.Event()
-        self._requests.appendleft(event)
+        pending_request = HttpConnection.PendingRequest(event=asyncio.Event())
+        self._requests.appendleft(pending_request)
         try:
-            async with async_timeout.timeout(4):
-                await event.wait()
-            response = cast(HttpResponse, self._responses.get())
+            async with async_timeout.timeout(timeout):
+                await pending_request.event.wait()
+
+            if pending_request.connection_closed:
+                raise exceptions.ConnectionLostError("connection was lost")
+
+            response = pending_request.response
+
+            # This should never happen, but raise an exception for the sake of it
+            if response is None:
+                raise RuntimeError("did not get a response")
         except asyncio.TimeoutError as ex:
             raise TimeoutError(f"no response to {method} {uri} ({protocol})") from ex
         finally:
             # If request failed and event is still in request queue, remove it
-            if self._requests and self._requests[-1] == event:
-                self._requests.pop()
+            if pending_request in self._requests:
+                self._requests.remove(pending_request)
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
 
@@ -422,14 +504,16 @@ class AbstractHttpServerHandler(ABC):
     """Abstract base class for handling HTTP requests."""
 
     @abstractmethod
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Handle incoming request and return response."""
 
 
 class HttpSimpleRouter(AbstractHttpServerHandler):
     """Simple router that routes method and path to handler function."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new HttpSimpleRouter instance."""
         super().__init__()
         # method -> path -> handler
@@ -441,7 +525,9 @@ class HttpSimpleRouter(AbstractHttpServerHandler):
         """Add new handler to route."""
         self._routes.setdefault(method, {})[path] = target
 
-    def handle_request(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def handle_request(
+        self, request: HttpRequest
+    ) -> Optional[Union[HttpResponse, asyncio.Task]]:
         """Dispatch request to correct handler method."""
         for path, target in self._routes.get(request.method, {}).items():
             if re.match(path, request.path):
@@ -456,6 +542,7 @@ class BasicHttpServer(asyncio.Protocol):
         """Initialize a new BasicHttpServer instance."""
         self.handler: AbstractHttpServerHandler = handler
         self.transport = None
+        self._request_buffer = b""
 
     def connection_made(self, transport):
         """Handle that a connection has been made."""
@@ -465,24 +552,33 @@ class BasicHttpServer(asyncio.Protocol):
     def data_received(self, data: bytes):
         """Handle incoming HTTP request."""
         _LOGGER.debug("Received: %s", data)
+        data = self.process_received(data)
 
         # Process all requests in packet
-        while data:
-            data = self._parse_and_send_next(data)
+        self._request_buffer += data
+        while self._request_buffer:
+            if (
+                rest := self._parse_and_send_next(self._request_buffer)
+            ) == self._request_buffer:
+                break
+            self._request_buffer = rest
+
+    def process_received(self, data: bytes) -> bytes:
+        """Process incoming data."""
+        return data
+
+    def process_sent(self, data: bytes) -> bytes:
+        """Process outgoing data."""
+        return data
 
     def _parse_and_send_next(self, data: bytes):
-        resp: Optional[HttpResponse] = None
+        resp: Optional[Union[HttpResponse, asyncio.Task]] = None
         rest: bytes = b""
         try:
             request, rest = parse_request(data)
 
-            # TODO: If no request could be parsed, then there's not enough data.
-            # Segmented requests (over several IP packets) are currently not
-            # implemented. Implement this when needed.
             if not request:
-                raise exceptions.NotSupportedError(
-                    "segmented HTTP requests not supported"
-                )
+                return data
 
             resp = self.handler.handle_request(request)
         except Exception as ex:
@@ -494,20 +590,20 @@ class BasicHttpServer(asyncio.Protocol):
         if not resp:
             resp = HttpResponse("HTTP", "1.1", 404, "File not found", {}, "Not found")
 
-        response = f"{resp.protocol}/{resp.version} {resp.code} {resp.message}\r\n"
-        response += f"Server: {SERVER_NAME}\r\n"
-        for key, value in resp.headers.items():
-            response += f"{key}: {value}\r\n"
-
-        body = resp.body or b""
-        if body:
-            body = body.encode("utf-8") if isinstance(body, str) else body
-            response += f"Content-Length: {len(body)}\r\n"
-
-        if self.transport:
-            self.transport.write(response.encode("utf-8") + b"\r\n" + body)
+        if isinstance(resp, asyncio.Task):
+            resp.add_done_callback(self._send_task_response)
+        else:
+            self._send_response(resp)
 
         return rest
+
+    def _send_response(self, resp: HttpResponse) -> None:
+        if self.transport:
+            self.transport.write(self.process_sent(format_response(resp)))
+
+    def _send_task_response(self, task: asyncio.Task) -> None:
+        if response := task.result():
+            self._send_response(response)
 
 
 class StaticFileWebServer:
@@ -575,5 +671,5 @@ async def http_server(
 async def create_session(
     session: Optional[ClientSession] = None,
 ) -> ClientSessionManager:
-    """Create aiohttp ClientSession manged by pyatv."""
+    """Create aiohttp ClientSession managed by pyatv."""
     return ClientSessionManager(session or ClientSession(), session is None)

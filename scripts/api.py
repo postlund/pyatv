@@ -43,15 +43,15 @@ def _api_modules():
 
     for mod in modules:
         for module_name, html in _recursive_htmls(mod):
-            split = module_name.split(".")
-            split[-1] = split[-1] + ".html"
-            output_file = os.path.join("docs", "api", *split)
+            output_file = os.path.join("docs", "api", module_name + ".html")
             yield output_file, html
 
 
 def generate():
     """Generate API reference."""
     for output_file, html in _api_modules():
+        if not os.path.exists(os.path.dirname(output_file)):
+            os.mkdir(os.path.dirname(output_file))
         print("Generating", output_file)
         with open(output_file, "wb") as f:
             f.write(html.encode("utf-8"))

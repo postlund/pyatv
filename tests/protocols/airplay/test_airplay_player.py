@@ -1,10 +1,14 @@
 """Unit tests for pyatv.protocols.airplay.player."""
+
 import math
 
 import pytest
 
 from pyatv import exceptions
+from pyatv.auth.hap_pairing import NO_CREDENTIALS
 from pyatv.protocols.airplay import player
+from pyatv.protocols.raop.protocols import StreamContext, airplayv1
+from pyatv.support.rtsp import RtspSession
 
 from tests.utils import total_sleep_time
 
@@ -16,7 +20,11 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture(name="airplay_player")
 def airplay_player_fixture(client_connection):
-    yield player.AirPlayPlayer(client_connection)
+    rtsp = RtspSession(client_connection)
+    context = StreamContext()
+    context.credentials = NO_CREDENTIALS
+    stream_protocol = airplayv1.AirPlayV1(context, rtsp)
+    yield player.AirPlayPlayer(rtsp, stream_protocol)
 
 
 async def test_play_video(airplay_usecase, airplay_player, airplay_state):

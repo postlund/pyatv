@@ -59,6 +59,7 @@ def airplay_service(
     properties = {"deviceid": deviceid.encode("utf-8"), "features": b"0x1"}
     if model:
         properties["model"] = model.encode("utf-8")
+        properties["flags"] = "0x8".encode("utf-8")  # Pin required
     service = FakeDnsService(
         name=atv_name,
         addresses=addresses,
@@ -241,7 +242,7 @@ class FakeUdns(asyncio.Protocol):
         self.loop = loop
         self.server = None
         self.services: Dict[str, FakeDnsService] = services or {}
-        self.skip_count: int = 0  # Ignore sending respone to this many requests
+        self.skip_count: int = 0  # Ignore sending response to this many requests
         self.ip_filter = None
         self.sleep_proxy: bool = False
         self.request_count: int = 0

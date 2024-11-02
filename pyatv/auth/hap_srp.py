@@ -4,7 +4,7 @@ import binascii
 import hashlib
 import logging
 import os
-from typing import Tuple
+from typing import Any, Dict, Optional, Tuple
 import uuid
 
 from cryptography.exceptions import InvalidSignature
@@ -24,7 +24,7 @@ from srptools import SRPClientSession, SRPContext, constants
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import HapCredentials
 from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, write_tlv
-from pyatv.support import chacha20, log_binary
+from pyatv.support import chacha20, log_binary, opack
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,8 +91,8 @@ class SRPAuthHandler:
             "Pair-Verify-Encrypt-Salt", "Pair-Verify-Encrypt-Info", self._shared
         )
 
-        chacha = chacha20.Chacha20Cipher(session_key, session_key)
-        decrypted_tlv = read_tlv(chacha.decrypt(encrypted, nounce="PV-Msg02".encode()))
+        chacha = chacha20.Chacha20Cipher8byteNonce(session_key, session_key)
+        decrypted_tlv = read_tlv(chacha.decrypt(encrypted, nonce="PV-Msg02".encode()))
 
         identifier = decrypted_tlv[TlvValue.Identifier]
         signature = decrypted_tlv[TlvValue.Signature]
@@ -121,7 +121,7 @@ class SRPAuthHandler:
             }
         )
 
-        return chacha.encrypt(tlv, nounce="PV-Msg03".encode())
+        return chacha.encrypt(tlv, nonce="PV-Msg03".encode())
 
     def verify2(
         self, salt: str, output_info: str, input_info: str
@@ -162,7 +162,11 @@ class SRPAuthHandler:
         log_binary(_LOGGER, "Client", Public=pub_key, Proof=proof)
         return pub_key, proof
 
-    def step3(self, additional_data=None):
+    def step3(
+        self,
+        name: Optional[str] = None,
+        additional_data: Optional[Dict[TlvValue, Any]] = None,
+    ):
         """Third pairing step."""
         ios_device_x = hkdf_expand(
             "Pair-Setup-Controller-Sign-Salt",
@@ -179,24 +183,31 @@ class SRPAuthHandler:
         device_info = ios_device_x + self.pairing_id + self._auth_public
         device_signature = self._signing_key.sign(device_info)
 
-        tlv = {
+        tlv: Dict[TlvValue, Any] = {
             TlvValue.Identifier: self.pairing_id,
             TlvValue.PublicKey: self._auth_public,
             TlvValue.Signature: device_signature,
         }
 
+        if name:
+            tlv[TlvValue.Name] = opack.pack(
+                {
+                    "name": name,
+                }
+            )
+
         if additional_data:
             tlv.update(additional_data)
 
-        chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        encrypted_data = chacha.encrypt(write_tlv(tlv), nounce="PS-Msg05".encode())
+        chacha = chacha20.Chacha20Cipher8byteNonce(self._session_key, self._session_key)
+        encrypted_data = chacha.encrypt(write_tlv(tlv), nonce="PS-Msg05".encode())
         log_binary(_LOGGER, "Data", Encrypted=encrypted_data)
         return encrypted_data
 
     def step4(self, encrypted_data):
         """Last pairing step."""
-        chacha = chacha20.Chacha20Cipher(self._session_key, self._session_key)
-        decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nounce="PS-Msg06".encode())
+        chacha = chacha20.Chacha20Cipher8byteNonce(self._session_key, self._session_key)
+        decrypted_tlv_bytes = chacha.decrypt(encrypted_data, nonce="PS-Msg06".encode())
 
         if not decrypted_tlv_bytes:
             raise exceptions.AuthenticationError("data decrypt failed")
