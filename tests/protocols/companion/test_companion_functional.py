@@ -218,6 +218,8 @@ async def test_remote_control_buttons(companion_client, companion_state, button)
     assert companion_state.latest_button == button
 
 
+# TODO: This test does not verify that actual input action (e.g. hold).
+#       Fake service must be extended to support this.
 @pytest.mark.parametrize(
     "button,action",
     [
