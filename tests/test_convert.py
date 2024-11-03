@@ -87,6 +87,7 @@ def test_protocol_str(protocol, output):
 @pytest.mark.parametrize(
     "model,output",
     [
+        (DeviceModel.AppleTVGen1, "Apple TV 1"),
         (DeviceModel.Gen2, "Apple TV 2"),
         (DeviceModel.Gen3, "Apple TV 3"),
         (DeviceModel.Gen4, "Apple TV 4"),

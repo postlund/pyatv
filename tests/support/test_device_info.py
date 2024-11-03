@@ -49,7 +49,7 @@ def test_lookup_existing_version(version, expected_version):
 
 
 @pytest.mark.parametrize(
-    "identifier,expected_os",
+    "id_or_model,expected_os",
     [
         ("bad", OperatingSystem.Unknown),
         ("MacBookAir10,1", OperatingSystem.MacOS),
@@ -58,7 +58,19 @@ def test_lookup_existing_version(version, expected_version):
         ("MacBookPro5,67", OperatingSystem.MacOS),
         ("Mac1,4", OperatingSystem.MacOS),
         ("MacPro19,4", OperatingSystem.MacOS),
+        (DeviceModel.AirPortExpress, OperatingSystem.AirPortOS),
+        (DeviceModel.AirPortExpressGen2, OperatingSystem.AirPortOS),
+        (DeviceModel.HomePod, OperatingSystem.TvOS),
+        (DeviceModel.HomePodGen2, OperatingSystem.TvOS),
+        (DeviceModel.HomePodMini, OperatingSystem.TvOS),
+        (DeviceModel.AppleTVGen1, OperatingSystem.Legacy),
+        (DeviceModel.Gen2, OperatingSystem.Legacy),
+        (DeviceModel.Gen3, OperatingSystem.Legacy),
+        (DeviceModel.Gen4, OperatingSystem.TvOS),
+        (DeviceModel.Gen4K, OperatingSystem.TvOS),
+        (DeviceModel.AppleTV4KGen2, OperatingSystem.TvOS),
+        (DeviceModel.AppleTV4KGen3, OperatingSystem.TvOS),
     ],
 )
-def test_lookup_os(identifier, expected_os):
-    assert lookup_os(identifier) == expected_os
+def test_lookup_os(id_or_model, expected_os):
+    assert lookup_os(id_or_model) == expected_os

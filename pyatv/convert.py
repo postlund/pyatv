@@ -65,6 +65,7 @@ def protocol_str(protocol: Protocol) -> str:
 def model_str(device_model: DeviceModel) -> str:
     """Convert device model to string."""
     return {
+        DeviceModel.AppleTVGen1: "Apple TV 1",
         DeviceModel.Gen2: "Apple TV 2",
         DeviceModel.Gen3: "Apple TV 3",
         DeviceModel.Gen4: "Apple TV 4",

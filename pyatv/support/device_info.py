@@ -1,13 +1,14 @@
 """Lookup methods for device data."""
 
 import re
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from pyatv.const import DeviceModel, OperatingSystem
 
 _MODEL_LIST: Dict[str, DeviceModel] = {
     "AirPort4,107": DeviceModel.AirPortExpress,
     "AirPort10,115": DeviceModel.AirPortExpressGen2,
+    "AppleTV1,1": DeviceModel.AppleTVGen1,
     "AppleTV2,1": DeviceModel.Gen2,
     "AppleTV3,1": DeviceModel.Gen3,
     "AppleTV3,2": DeviceModel.Gen3,
@@ -18,6 +19,7 @@ _MODEL_LIST: Dict[str, DeviceModel] = {
     "AudioAccessory1,1": DeviceModel.HomePod,
     "AudioAccessory1,2": DeviceModel.HomePod,
     "AudioAccessory5,1": DeviceModel.HomePodMini,
+    "AudioAccessorySingle5,1": DeviceModel.HomePodMini,
     "AudioAccessory6,1": DeviceModel.HomePodGen2,
 }
 
@@ -72,6 +74,18 @@ _VERSION_LIST: Dict[str, str] = {
     "20L497": "16.4",
     "20L498": "16.4.1",
     "20L563": "16.5",
+    "20M73": "16.6",
+    "22J354": "17.0",
+    "21K69": "17.1",
+    "21K365": "17.2",
+    "21K646": "17.3",
+    "21L227": "17.4",
+    "21L569": "17.5",
+    "21L580": "17.5.1",
+    "21M71": "17.6",
+    "21M80": "17.6.1",
+    "22J357": "18.0",
+    "22J580": "18.1",
 }
 
 _OS_IDENTIFIER_FORMATS = [
@@ -113,14 +127,37 @@ def lookup_version(build: Optional[str]) -> Optional[str]:
     return None
 
 
-def lookup_os(identifier: str) -> OperatingSystem:
+def lookup_os(id_or_model: Union[str, DeviceModel]) -> OperatingSystem:
     """Lookup operating system based on identifier.
 
-    An identifier has the format similar to "MacbookAir10,1". Only
-    macOS is supported here.
+    An identifier has the format similar to "MacbookAir10,1" or
+    a DeviceModel.
     """
-    return (
-        OperatingSystem.MacOS
-        if any(re.match(os_format, identifier) for os_format in _OS_IDENTIFIER_FORMATS)
-        else OperatingSystem.Unknown
-    )
+    if isinstance(id_or_model, str):
+        return (
+            OperatingSystem.MacOS
+            if any(
+                re.match(os_format, id_or_model) for os_format in _OS_IDENTIFIER_FORMATS
+            )
+            else OperatingSystem.Unknown
+        )
+
+    if id_or_model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
+        return OperatingSystem.AirPortOS
+    if id_or_model in [
+        DeviceModel.HomePod,
+        DeviceModel.HomePodMini,
+        DeviceModel.HomePodGen2,
+    ]:
+        return OperatingSystem.TvOS
+    if id_or_model in [DeviceModel.AppleTVGen1, DeviceModel.Gen2, DeviceModel.Gen3]:
+        return OperatingSystem.Legacy
+    if id_or_model in [
+        DeviceModel.Gen4,
+        DeviceModel.Gen4K,
+        DeviceModel.AppleTV4KGen2,
+        DeviceModel.AppleTV4KGen3,
+    ]:
+        return OperatingSystem.TvOS
+
+    return OperatingSystem.Unknown
