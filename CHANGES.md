@@ -1,5 +1,102 @@
 # CHANGES
 
+## 0.16.0 Troy (2024-11-03)
+
+Okie-dokie, let's do this. Due to Python 3.13 removing some deprecated
+modules, you might have encountered an import error related to
+`imghdr`. This module is not used directly by pyatv, but rather
+indirectly via the `mediafile` library. As `mediafile` is not
+maintained much these days, I decided to replace it with `tinytag`
+instead. I have also added python 3.13 as an offically supported
+version.
+
+Another somewhat related change is that Python 3.8 is no longer
+supported. It is end-of-life and some of my dependencies are
+dropping support for it, so it's hard to maintain. Good bye,
+old friend!
+
+There are some new stuff as well:
+
+* It is possible specify filename with `artwork_save` in `atvremote` (@AVITPL)
+* Input actions are now fully supported in Companion (@dmrgn1991)
+* iTunes Store Identifier is now exposed when available (@JarekToro)
+
+There are a few minor bug fixes and clean up of warnings as well.
+Everything is stated below.
+
+**Changes:**
+
+*Other:*
+
+```
+b310213b deps: Remove mediafile as dependency
+f6bc9d9f gha: Update upload-artifact to v4
+4a193b67 core: Update device info
+658fd062 cq: Minor updates
+1be71809 deps: Support python 3.13
+41e58d53 deps: Bump base requests to 2.30.0
+e73da542 deps: Deprecate python 3.8
+cb2b050a Artwork_save file naming.
+8a79abaf Update test_companion_functional.py
+1569eae0 Update setup_dev_env.sh
+19be4cc4 Add Input.Action to Companion
+b859a99d opack: fix byte encoding length
+5f0515ec feat: Add iTunes Store Identifier to metadata - Added `iTunesStoreIdentifier` to `FeatureName` in `pyatv/const.py`. - Updated `Playing` class in `pyatv/interface.py` to include `itunes_store_identifier`. - Enhanced the `metadata_field` function in `pyatv/protocols/mrp/__init__.py` to support `itunes_store_identifier`. - Adjusted fake device implementation in `tests/fake_device/mrp.py` to handle `itunes_store_identifier`. - Updated functional tests in `tests/protocols/mrp/test_mrp_functional.py` to verify `itunes_store_identifier`. - Modified documentation to include `itunes_store_identifier`.
+41cab90f Fix atvremote action enum
+e0772353 support: Remove use of mediafile
+225ef6d7 cq: Fix lots of warnings in tests
+e330162a cq: Re-generate protobuf messages
+ce104f16 support: Migrate from mediafile to tinytag
+27aaabb9 support: Add tests for metadata decoding
+a613c292 bump protobuf to 5.28.0 in base_versions.txt
+505a7820 regenerate protobuf bindings
+```
+
+**All changes:**
+
+```
+db2c5d3d build(deps): Bump pyfakefs from 5.6.0 to 5.7.1 in /requirements
+ae648e86 build(deps): Bump protobuf from 5.28.1 to 5.28.3 in /requirements
+b310213b deps: Remove mediafile as dependency
+e7e3989a build(deps): Bump pytest-cov from 5.0.0 to 6.0.0 in /requirements
+f6bc9d9f gha: Update upload-artifact to v4
+70617a01 build(deps): Bump tinytag from 1.10.1 to 2.0.0 in /requirements
+44fc3055 build(deps): Bump pydantic from 2.8.2 to 2.9.2 in /requirements
+6e62ceae build(deps): Bump black from 24.8.0 to 24.10.0 in /requirements
+4a193b67 core: Update device info
+658fd062 cq: Minor updates
+1be71809 deps: Support python 3.13
+41e58d53 deps: Bump base requests to 2.30.0
+d9ff8524 build(deps): Bump types-requests in /requirements
+d25ef2b7 build(deps): Bump pdoc3 from 0.11.0 to 0.11.1 in /requirements
+e73da542 deps: Deprecate python 3.8
+cb2b050a Artwork_save file naming.
+8a79abaf Update test_companion_functional.py
+1569eae0 Update setup_dev_env.sh
+19be4cc4 Add Input.Action to Companion
+b859a99d opack: fix byte encoding length
+d34718fc build(deps): Bump pytest from 8.3.2 to 8.3.3 in /requirements
+5f0515ec feat: Add iTunes Store Identifier to metadata - Added `iTunesStoreIdentifier` to `FeatureName` in `pyatv/const.py`. - Updated `Playing` class in `pyatv/interface.py` to include `itunes_store_identifier`. - Enhanced the `metadata_field` function in `pyatv/protocols/mrp/__init__.py` to support `itunes_store_identifier`. - Adjusted fake device implementation in `tests/fake_device/mrp.py` to handle `itunes_store_identifier`. - Updated functional tests in `tests/protocols/mrp/test_mrp_functional.py` to verify `itunes_store_identifier`. - Modified documentation to include `itunes_store_identifier`.
+0f354031 build(deps): Bump actions/download-artifact in /.github/workflows
+41cab90f Fix atvremote action enum
+e0772353 support: Remove use of mediafile
+225ef6d7 cq: Fix lots of warnings in tests
+e330162a cq: Re-generate protobuf messages
+ce104f16 support: Migrate from mediafile to tinytag
+27aaabb9 support: Add tests for metadata decoding
+d3ad45d5 build(deps): Bump cryptography from 43.0.0 to 43.0.3 in /requirements
+c7b9750b build(deps): Bump python from 3.12.5-alpine to 3.13.0-alpine
+e3c73f60 build(deps): Bump pytest-asyncio from 0.23.8 to 0.24.0 in /requirements
+e3dd9dc6 build(deps): Bump deepdiff from 7.0.1 to 8.0.1 in /requirements
+2d41eb10 build(deps): Bump aiohttp from 3.10.3 to 3.10.10 in /requirements
+cfca954a build(deps): Bump mypy from 1.11.1 to 1.13.0 in /requirements
+26d77125 build(deps): Bump zeroconf from 0.132.2 to 0.136.0 in /requirements
+a613c292 bump protobuf to 5.28.0 in base_versions.txt
+505a7820 regenerate protobuf bindings
+7d7f26d0 build(deps): Bump aiohttp from 3.10.2 to 3.10.3 in /requirements
+5980d02a build(deps): Bump protobuf from 5.27.3 to 5.28.1 in /requirements
+```
+
 ## 0.15.1 Seymour (2024-09-06)
 
 Audio streaming stopped working in the previous version and is fixed in this
