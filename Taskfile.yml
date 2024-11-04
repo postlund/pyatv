@@ -1,0 +1,197 @@
+version: "3"
+
+vars:
+  UV_VERSION: 0.4.29
+
+  # TODO: Merge these once everything is run on tests as well
+  PY_DIRS: "examples pyatv scripts"
+  CODE_DIRS: "examples pyatv scripts tests"
+
+  CS_EXCLUDE_WORDS: infoms,cann,cant,asai,cafs,assertIn
+
+output: prefixed
+
+tasks:
+
+  # ENVIRONMENT TASKS
+
+  env:install_uv:
+    desc: Setup a venv and install uv
+    run: once
+    cmds:
+      - python -m venv uv_venv
+      - ./uv_venv/bin/pip install --force-reinstall -U uv=={{ .UV_VERSION }}
+    status:
+      - ./uv_venv/bin/uv --version | grep -q {{ .UV_VERSION }}
+
+  env:create_venv:
+    desc: Create venv using uv where pyatv and dependencies will be installed
+    run: once
+    deps: [env:install_uv]
+    cmds:
+      - ./uv_venv/bin/uv venv
+
+  env:install_deps:
+    desc: Install all external dependencies
+    run: once
+    deps: [env:create_venv]
+    silent: true
+    env:
+      VIRTUAL_ENV: ".venv"
+    cmds:
+      - ./uv_venv/bin/uv pip install pyyaml -r requirements/requirements.txt -r requirements/requirements_docs.txt -r requirements/requirements_test.txt
+
+  env:run_in_venv:
+    desc: Run a command inside venv
+    deps: [env:install_deps]
+    silent: true
+    cmds:
+      - |
+        bash <<EOF
+        source ".venv/bin/activate"
+        trap deactivate EXIT
+        {{ .COMMAND }}
+        EOF
+    prefix: "{{ .NAME }}"
+    requires:
+      vars: [COMMAND, NAME]
+
+  # TOOL TASKS
+
+  tool:pylint:
+    desc: Run pylint
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: pylint -j0 {{ .PY_DIRS }}
+
+  cli:pylint:
+    desc: Run pylint CLI
+    interactive: true
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: pylint {{ .CLI_ARGS }}
+
+  tool:api:
+    desc: Verify API documentation
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: python scripts/api.py verify
+
+  tool:protobuf:
+    desc: Verify protobuf generated files
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: python scripts/protobuf.py --download verify
+
+  tool:flake8:
+    desc: Run flake8 on code
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: flake8 --exclude=pyatv/protocols/mrp/protobuf {{ .PY_DIRS }}
+
+  tool:black:
+    desc: Verify code with black
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: black --fast --check .
+
+  tool:pydocstyle:
+    desc: Verify python documentation with pydocstyle
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: pydocstyle -v --match='(?!test_).*[^pb2]\.py' {{ .PY_DIRS }}
+
+  tool:isort:
+    desc: Verify import sorting with isort
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: isort -c --diff {{ .CODE_DIRS }}
+
+  tool:codespell_docs:
+    desc: Run codespell on documentation
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: codespell -q 6 -L {{ .CS_EXCLUDE_WORDS }} -S "lib,vendor,_site,api,assets,*~,.sass-cache,*.lock" docs
+
+  tool:codespell_code:
+    desc: Run codespell on code
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: codespell -q 4 -L {{ .CS_EXCLUDE_WORDS }} --skip="*.pyc,*.pyi,*~,tests/data" {{ .CODE_DIRS }}
+
+  tool:mypy:
+    desc: Verify typing with mypy
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: mypy --python-executable ".venv/bin/python" --ignore-missing-imports --follow-imports=skip pyatv
+
+  tool:pytest:
+    desc: Run tests with pytest
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: pytest -n auto --log-level=debug -q -d --timeout=30 --durations=10 --cov --cov-report=term-missing --cov-report=xml tests
+
+  # META TASKS
+  clean:
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: coverage erase
+
+  fix:
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "fix:black"
+          COMMAND: black .
+      - task: env:run_in_venv
+        vars:
+          NAME: "fix:isort"
+          COMMAND: isort {{ .CODE_DIRS }}
+      - task: env:run_in_venv
+        vars:
+          NAME: "fix:api"
+          COMMAND: python scripts/api.py generate
+      - task: env:run_in_venv
+        vars:
+          NAME: "fix:protobuf"
+          COMMAND: python scripts/protobuf.py --download generate
+
+  verify:
+    deps:
+      - tool:api
+      - tool:black
+      - tool:codespell_code
+      - tool:codespell_docs
+      - tool:flake8
+      - tool:isort
+      - tool:mypy
+      - tool:protobuf
+      - tool:pydocstyle
+      - tool:pylint
+      - tool:pytest
