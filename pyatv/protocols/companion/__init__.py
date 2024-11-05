@@ -286,33 +286,33 @@ class CompanionRemoteControl(RemoteControl):
         self.api = api
 
     # pylint: disable=invalid-name
-    async def up(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def up(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key up."""
-        await self._press_button(HidCommand.Up, action)
+        await self._press_button(HidCommand.Up, action, delay)
 
-    async def down(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def down(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key down."""
-        await self._press_button(HidCommand.Down, action)
+        await self._press_button(HidCommand.Down, action, delay)
 
-    async def left(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def left(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key left."""
-        await self._press_button(HidCommand.Left, action)
+        await self._press_button(HidCommand.Left, action, delay)
 
-    async def right(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def right(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key right."""
-        await self._press_button(HidCommand.Right, action)
+        await self._press_button(HidCommand.Right, action, delay)
 
-    async def select(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def select(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key select."""
-        await self._press_button(HidCommand.Select, action)
+        await self._press_button(HidCommand.Select, action, delay)
 
-    async def menu(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def menu(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key menu."""
-        await self._press_button(HidCommand.Menu, action)
+        await self._press_button(HidCommand.Menu, action, delay)
 
-    async def home(self, action: InputAction = InputAction.SingleTap) -> None:
+    async def home(self, action: InputAction = InputAction.SingleTap, delay: float = 1) -> None:
         """Press key home."""
-        await self._press_button(HidCommand.Home, action)
+        await self._press_button(HidCommand.Home, action, delay)
 
     async def volume_up(self) -> None:
         """Press key volume up."""
