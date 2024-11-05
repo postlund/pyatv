@@ -39,7 +39,7 @@ tasks:
     env:
       VIRTUAL_ENV: ".venv"
     cmds:
-      - ./uv_venv/bin/uv pip install pyyaml -r requirements/requirements.txt -r requirements/requirements_docs.txt -r requirements/requirements_test.txt
+      - ./uv_venv/bin/uv pip install pyyaml setuptools -r requirements/requirements.txt -r requirements/requirements_docs.txt -r requirements/requirements_test.txt
 
   env:run_in_venv:
     desc: Run a command inside venv
@@ -155,7 +155,25 @@ tasks:
           NAME: "{{ .TASK }}"
           COMMAND: pytest -n auto --log-level=debug -q -d --timeout=30 --durations=10 --cov --cov-report=term-missing --cov-report=xml tests
 
+  # SPECIAL TASKS
+
+  # A lot of builds on GitHub Actions result in "Illegal Instruction"
+  # when calling functions in miniaudio. Seemingly random and not
+  # always. Likely has to do with some instruction set mismatch, but
+  # not sure. Rebuilding miniaudio seems to improve the situation,
+  # so this optional step is used by the tests workflow to do that.
+  special:rebuild_miniaudio:
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: |
+            echo {{ .PACKAGE }}
+            ./uv_venv/bin/uv pip uninstall miniaudio
+            ./uv_venv/bin/uv pip install --no-binary :all: $(grep miniaudio= requirements/requirements.txt)
+
   # META TASKS
+
   clean:
     cmds:
       - task: env:run_in_venv
@@ -183,6 +201,7 @@ tasks:
           COMMAND: python scripts/protobuf.py --download generate
 
   verify:
+    desc: Verify everything
     deps:
       - tool:api
       - tool:black
@@ -195,3 +214,44 @@ tasks:
       - tool:pydocstyle
       - tool:pylint
       - tool:pytest
+
+  post:
+    desc: Post-verify actions
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: |
+            coverage report
+            coverage html
+
+  package:
+    desc: Package pyatv by building wheels
+    cmds:
+      - task: env:run_in_venv
+        vars:
+          NAME: "{{ .TASK }}"
+          COMMAND: python setup.py sdist bdist_wheel
+
+  ci:
+    desc: Run tasks for CI
+    cmds:
+      - task: clean
+      - task: fix
+      - task: special:rebuild_miniaudio
+      - task: verify
+      - task: post
+
+  release:
+    desc: Build a release (CI)
+    cmds:
+      - task: ci
+      - task: package
+
+  default:
+    desc: Fix and verify everything
+    cmds:
+      - task: clean
+      - task: fix
+      - task: verify
+      - task: post
