@@ -33,7 +33,8 @@ the requests.
 
 ## DMAP Binary Format
 
-The binary format is basically TLV data where the tag is a 4 byte ASCII-string,
+The binary format is basically [type-length-value](https://en.wikipedia.org/wiki/Type–length–value)
+(TLV) data where the tag (or key) is a 4 byte ASCII-string,
 the length is a four byte unsigned integer and the data is, well, data. Type
 and meaning of a specific TLV are derived from the tag. So one must know which
 tags are used, how large they are and what they mean. Please note that Length
@@ -594,7 +595,7 @@ This excellent example comes straight from [fabianfreyer/opack-tools](https://gi
 
 Devices are paired and data encrypted according to HAP (HomeKit). You can refer to that specification
 for further details (available [here](https://developer.apple.com/homekit/specification/),
-but it requires an Apple ID, except for the Non-Commercial vevsion, free to download).
+but it requires an Apple ID, except for the Non-Commercial version, free to download).
 
 Messages are presented in hex and a decoded format, based on the implementation in
 pyatv. So beware that it will be somewhat python-oriented.
