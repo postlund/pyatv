@@ -304,7 +304,7 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
     def __init__(self, core_dispatcher: CoreStateDispatcher):
         """Initialize a new FacadePower instance."""
         # This is border line, maybe need another structure to support this
-        Relayer.__init__(self, interface.Power, DEFAULT_PRIORITIES)
+        Relayer.__init__(self, interface.Power, self.OVERRIDE_PRIORITIES)
         interface.Power.__init__(self)
 
     def powerstate_update(
@@ -320,7 +320,7 @@ class FacadePower(Relayer, interface.Power, interface.PowerListener):
     @shield.guard
     def power_state(self) -> const.PowerState:
         """Return device power state."""
-        return self.relay("power_state")
+        return self.relay("power_state", priority=self.OVERRIDE_PRIORITIES)
 
     @shield.guard
     async def turn_on(self, await_new_state: bool = False) -> None:
