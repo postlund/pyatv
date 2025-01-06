@@ -225,6 +225,9 @@ class CompanionPower(Power):
             self.api.listen_to("SystemStatus", self._handle_system_status_update)
             await self.api.subscribe_event("SystemStatus")
 
+            self.api.listen_to("TVSystemStatus", self._handle_system_status_update)
+            await self.api.subscribe_event("TVSystemStatus")
+
             _LOGGER.debug("Initial power state is %s", self.power_state)
         except Exception as ex:
             _LOGGER.exception(
