@@ -506,7 +506,7 @@ async def service_info(
         # e.g. "2" which corresponds to "Current User". So we need to filter that.
         service.pairing = PairingRequirement.Unsupported
     else:
-        # Same behavior as for AirPlay expected, so re-using that here
+        # Same behavior as for AirPlay expected, so reusing that here
         update_service_details(service)
 
 

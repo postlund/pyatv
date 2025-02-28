@@ -46,7 +46,7 @@ the device and use the obtained credentials with playing media. See
 
 ## When I scan, other devices like AirPlay speakers and iTunes libraries show up. Why is that?
 
-~~Apple has re-used several protocols across different products. AirPlay is AirPlay and
+~~Apple has reused several protocols across different products. AirPlay is AirPlay and
 there's no practical difference if it's on a speaker or an Apple TV: it's the same
 thing. Because of this, they might show up in the scan results. In the future some
 devices might be filtered (like pure AirPlay devices, since you can't connect to them
@@ -96,7 +96,7 @@ must be done from the beginning again for the next command. This behavior is by 
 slow.
 
 To get instantaneous feedback, the connection must remain active and commands sent by
-re-using the connection. This can be done in many ways, e.g. by implementing a daemon
+reusing the connection. This can be done in many ways, e.g. by implementing a daemon
 that maintains the connection in the background and receives commands via some interface
 (maybe REST). Currently, pyatv does not ship with such a tool since it's first and foremost
 a library. You will have to implement a solution that fits your needs.

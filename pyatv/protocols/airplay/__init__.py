@@ -270,7 +270,7 @@ def setup(  # pylint: disable=too-many-locals
     # is set (HasUnifiedAdvertiserInfo). If that flag is set and no RAOP service has
     # been found, manually add a service pointing to the AirPlay service. This just
     # simplifies the internal handling, but is not very efficient as no connections
-    # are re-used amongst the protocols.
+    # are reused amongst the protocols.
     if (
         AirPlayFlags.HasUnifiedAdvertiserInfo in features
         and core.config.get_service(Protocol.RAOP) is None

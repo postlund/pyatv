@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from google.protobuf.text_format import MessageToString
 import requests
 
-# New messages re-using inner message of another type
+# New messages reusing inner message of another type
 REUSED_MESSAGES = {"DEVICE_INFO_MESSAGE": "DEVICE_INFO_UPDATE_MESSAGE"}
 
 BASE_PATH = os.path.join("pyatv", "protocols", "mrp", "protobuf")
