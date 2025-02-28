@@ -106,6 +106,7 @@ class GlobalCommands:
         _print_commands("User Accounts", interface.UserAccounts)
         _print_commands("Global", self.__class__)
         _print_commands("Touch", interface.TouchGestures)
+        _print_commands("Settings", SettingsCommands)
 
         return 0
 

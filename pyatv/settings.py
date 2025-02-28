@@ -48,8 +48,26 @@ class AirPlayVersion(str, Enum):
     """AirPlay version to use."""
 
     Auto = "auto"
+    """Automatically determine what version to use."""
+
     V1 = "1"
+    """Use version 1 of AirPlay."""
+
     V2 = "2"
+    """Use version 2 of AirPlay."""
+
+
+class MrpTunnel(str, Enum):
+    """How MRP tunneling over AirPlay is handled."""
+
+    Auto = "auto"
+    """Automatically set up MRP tunnel if supported by remote device."""
+
+    Force = "force"
+    """Force set up of MRP tunnel even if remote device does not supports it."""
+
+    Disable = "disable"
+    """Fully disable set up of MRP tunnel."""
 
 
 # pylint: enable=invalid-name
@@ -81,6 +99,8 @@ class AirPlaySettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     identifier: Optional[str] = None
     credentials: Optional[str] = None
     password: Optional[str] = None
+
+    mrp_tunnel: MrpTunnel = MrpTunnel.Auto
 
 
 class CompanionSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
