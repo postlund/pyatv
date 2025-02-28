@@ -109,9 +109,9 @@ def test_stringify_unknown_values():
     assert (
         stringify(
             {
-                TlvValue.Method: b"\xAA",
-                TlvValue.SeqNo: b"\xAB",
-                TlvValue.Error: b"\xAC",
+                TlvValue.Method: b"\xaa",
+                TlvValue.SeqNo: b"\xab",
+                TlvValue.Error: b"\xac",
                 0xAD: b"\x01\x02\x03",
             }
         )

@@ -25,11 +25,11 @@ def test_decode_with_excessive_data():
 
 
 def test_extend_encode():
-    assert Bar.encode(b"\x77", 0x67, 0xAABBCCDD) == b"\x77\x00\x67\xAA\xBB\xCC\xDD"
+    assert Bar.encode(b"\x77", 0x67, 0xAABBCCDD) == b"\x77\x00\x67\xaa\xbb\xcc\xdd"
 
 
 def test_extend_decode():
-    decoded = Bar.decode(b"\x77\x00\x67\xAA\xBB\xCC\xDD")
+    decoded = Bar.decode(b"\x77\x00\x67\xaa\xbb\xcc\xdd")
     assert decoded.a == b"\x77"
     assert decoded.b == 0x0067
     assert decoded.c == 0xAABBCCDD

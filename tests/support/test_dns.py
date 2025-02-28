@@ -100,16 +100,16 @@ def test_qname_encode(name, expected_raw):
 decode_domain_names = {
     "simple": (b"\x03foo\x07example\x03com\x00", 0, "foo.example.com", None),
     "null": (b"\00", 0, "", None),
-    "compressed": (b"aaaa\x04test\x00\x05label\xC0\x04\xAB\xCD", 10, "label.test", -2),
+    "compressed": (b"aaaa\x04test\x00\x05label\xc0\x04\xab\xcd", 10, "label.test", -2),
     # This case has two levels of compression
     "multi_compressed": (
-        b"aaaa\x04test\x00\x05label\xC0\x04\x03foo\xC0\x0A\xAB\xCD",
+        b"aaaa\x04test\x00\x05label\xc0\x04\x03foo\xc0\x0a\xab\xcd",
         18,
         "foo.label.test",
         -2,
     ),
     # Taken straight from the Internationalized Domain name Wikipedia page
-    "idna": (b"\x0Dxn--bcher-kva\x07example\x00", 0, "bücher.example", None),
+    "idna": (b"\x0dxn--bcher-kva\x07example\x00", 0, "bücher.example", None),
     # Taken from issue #919. Apple puts a non-breaking space between "Apple" and "TV".
     "nbsp": (
         b"\x10Apple\xc2\xa0TV (4167)\x05local\x00",
@@ -162,17 +162,17 @@ decode_strings = {
     "null": (b"\x00", b"", None),
     # 63 is significant because that's the max length for a domain label, but not a
     # character-string (they have similar encodings).
-    "len_63": (b"\x3F" + (63 * b"0"), (63 * b"0"), None),
+    "len_63": (b"\x3f" + (63 * b"0"), (63 * b"0"), None),
     # For similar reasons as 63, 64 is significant because it would set only one of the
     # flag bits for name compression if domain-name encoding is assumed.
     "len_64": (b"\x40" + (64 * b"0"), (64 * b"0"), None),
     # Ditto for 128, but the other flag
     "len_128": (b"\x80" + (128 * b"0"), (128 * b"0"), None),
     # ...and 192 is both flags
-    "len_192": (b"\xC0" + (192 * b"0"), (192 * b"0"), None),
+    "len_192": (b"\xc0" + (192 * b"0"), (192 * b"0"), None),
     # 255 is the max length a character-string can be
-    "len_255": (b"\xFF" + (255 * b"0"), (255 * b"0"), None),
-    "trailing": (b"\x0A" + (10 * b"2") + (17 * b"9"), (10 * b"2"), -17),
+    "len_255": (b"\xff" + (255 * b"0"), (255 * b"0"), None),
+    "trailing": (b"\x0a" + (10 * b"2") + (17 * b"9"), (10 * b"2"), -17),
 }
 
 
@@ -200,7 +200,7 @@ def test_string_parsing(
 def test_dns_sd_txt_parse_single():
     """Test that a TXT RDATA section with one key can be parsed properly."""
     data = b"\x07foo=bar"
-    extra_data = data + b"\xDE\xAD\xBE\xEF" * 3
+    extra_data = data + b"\xde\xad\xbe\xef" * 3
     with io.BytesIO(extra_data) as buffer:
         txt_dict = dns.parse_txt_dict(buffer, len(data))
         assert buffer.tell() == len(data)
@@ -210,7 +210,7 @@ def test_dns_sd_txt_parse_single():
 def test_dns_sd_txt_parse_multiple():
     """Test that a TXT RDATA section with multiple keys can be parsed properly."""
     data = b"\x07foo=bar\x09spam=eggs"
-    extra_data = data + b"\xDE\xAD\xBE\xEF" * 2
+    extra_data = data + b"\xde\xad\xbe\xef" * 2
     with io.BytesIO(extra_data) as buffer:
         txt_dict = dns.parse_txt_dict(buffer, len(data))
         assert buffer.tell() == len(data)
@@ -221,24 +221,24 @@ def test_dns_sd_txt_parse_binary():
     """Test that a TXT RDATA section with a binary value can be parsed properly."""
     # 0xfeed can't be decoded as UTF-8 or ASCII, so it'll thrown an error if it's not
     # being treated as binary data.
-    data = b"\x06foo=\xFE\xED"
-    extra_data = data + b"\xDE\xAD\xBE\xEF" * 3
+    data = b"\x06foo=\xfe\xed"
+    extra_data = data + b"\xde\xad\xbe\xef" * 3
     with io.BytesIO(extra_data) as buffer:
         txt_dict = dns.parse_txt_dict(buffer, len(data))
         assert buffer.tell() == len(data)
-        assert txt_dict == {"foo": b"\xFE\xED"}
+        assert txt_dict == {"foo": b"\xfe\xed"}
 
 
 def test_dns_sd_txt_parse_long():
     """Test that a TXT RDATA section with a long value can be parsed properly."""
     # If TXT records are being parsed the same way domain names are, this won't work as
     # the data is too long to fit in a label.
-    data = b"\xCCfoo=" + b"\xCA\xFE" * 100
-    extra_data = data + b"\xDE\xAD\xBE\xEF" * 3
+    data = b"\xccfoo=" + b"\xca\xfe" * 100
+    extra_data = data + b"\xde\xad\xbe\xef" * 3
     with io.BytesIO(extra_data) as buffer:
         txt_dict = dns.parse_txt_dict(buffer, len(data))
         assert buffer.tell() == len(data)
-        assert txt_dict == {"foo": b"\xCA\xFE" * 100}
+        assert txt_dict == {"foo": b"\xca\xfe" * 100}
 
 
 @pytest.mark.parametrize(
@@ -256,12 +256,12 @@ def test_dns_sd_txt_format(data, expected):
 @pytest.mark.parametrize(
     "record_type,data,expected",
     [
-        (dns.QueryType.A, b"\x0A\x00\x00\x2A", "10.0.0.42"),
+        (dns.QueryType.A, b"\x0a\x00\x00\x2a", "10.0.0.42"),
         (dns.QueryType.PTR, b"\x03foo\x07example\x03com\x00", "foo.example.com"),
         (dns.QueryType.TXT, b"\x07foo=bar", {"foo": b"bar"}),
         (
             dns.QueryType.SRV,
-            b"\x00\x0A\x00\x00\x00\x50\x03foo\x07example\x03com\x00",
+            b"\x00\x0a\x00\x00\x00\x50\x03foo\x07example\x03com\x00",
             {
                 "priority": 10,
                 "weight": 0,

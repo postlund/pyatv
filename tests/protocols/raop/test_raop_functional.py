@@ -129,7 +129,7 @@ async def test_stream_file_verify_metadata(raop_client, raop_state, metadata):
     assert raop_state.metadata.title == metadata["title"]
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_stream_complete_file(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
 
@@ -137,7 +137,7 @@ async def test_stream_complete_file(raop_client, raop_state):
 
 
 @pytest.mark.skip(reason="unstable, must investigate")
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_stream_complete_file_verify_padding(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("audio_10_frames.wav"))
 
@@ -254,7 +254,7 @@ async def test_stream_retransmission(
     )
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_push_updates(raop_client, playing_listener):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
@@ -277,7 +277,7 @@ async def test_push_updates(raop_client, playing_listener):
     assert idle.media_type == MediaType.Unknown
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_push_updates_progress(raop_client, playing_listener):
     assert_features_in_state(
         raop_client.features.all_features(),
@@ -302,7 +302,7 @@ async def test_push_updates_progress(raop_client, playing_listener):
     )
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_metadata_features(raop_client, playing_listener):
     # All features should be unavailable when nothing is playing
     assert_features_in_state(
@@ -330,7 +330,7 @@ async def test_metadata_features(raop_client, playing_listener):
     )
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_remote_control_features(raop_client, playing_listener):
     assert_features_in_state(
         raop_client.features.all_features(),
@@ -361,7 +361,7 @@ async def test_remote_control_features(raop_client, playing_listener):
     )
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_sync_packets(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
@@ -386,7 +386,7 @@ async def test_send_feedback(raop_client, raop_usecase, raop_state, feedback_sup
         assert raop_state.feedback_packets_received == 1
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_set_volume_prior_to_streaming(raop_client, raop_state):
     # Initial client sound level
     assert math.isclose(raop_client.audio.volume, 33.0)
@@ -430,7 +430,7 @@ async def test_use_default_volume_from_device(
     assert math.isclose(raop_client.audio.volume, sender_expected)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_set_volume_during_playback(raop_client, raop_state, playing_listener):
     # Set maximum volume as initial volume
     await raop_client.audio.set_volume(100.0)
@@ -451,7 +451,7 @@ async def test_set_volume_during_playback(raop_client, raop_state, playing_liste
     await future
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_volume_features(raop_client):
     assert_features_in_state(
         raop_client.features.all_features(), VOLUME_FIELDS, FeatureState.Available
@@ -487,7 +487,7 @@ async def test_volume_up_volume_down(raop_client, iface):
     assert math.isclose(raop_client.audio.volume, 0.0)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_only_allow_one_stream_at_the_time(raop_client):
     # This is not pretty, but the idea is to start two concurrent streaming tasks, wait
     # for them to finish and verify that one of them raised an exception. This is to
@@ -504,7 +504,7 @@ async def test_only_allow_one_stream_at_the_time(raop_client):
     assert isinstance(result[0], exceptions.InvalidStateError)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_muted_volume_from_receiver(raop_client, raop_state, raop_usecase):
     raop_usecase.initial_audio_level_supported(True)
     raop_state.volume = -144.0
@@ -514,7 +514,7 @@ async def test_muted_volume_from_receiver(raop_client, raop_state, raop_usecase)
     assert math.isclose(raop_client.audio.volume, 0.0)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_mute_volume_from_client(raop_client, raop_state):
     await raop_client.audio.set_volume(0.0)
 
@@ -523,7 +523,7 @@ async def test_mute_volume_from_client(raop_client, raop_state):
     assert math.isclose(raop_state.volume, -144.0)
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
     raop_usecase.supports_info(False)
 
@@ -531,13 +531,13 @@ async def test_device_not_supporting_info_requests(raop_client, raop_usecase):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0"}])
 async def test_teardown_called_after_playback(raop_client, raop_state):
     await raop_client.stream.stream_file(data_path("only_metadata.wav"))
     assert raop_state.teardown_called
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0,1"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0", "md": "0,1"}])
 async def test_custom_metadata(raop_client, raop_state):
     metadata = MediaMetadata(title="A", artist="B", album="C", artwork=b"abcd")
 
@@ -552,7 +552,7 @@ async def test_custom_metadata(raop_client, raop_state):
     assert raop_state.metadata.artwork == "abcd"
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0", "md": "0"}])
 async def test_custom_metadata_no_artwork(raop_client, raop_state):
     metadata = MediaMetadata(artwork=b"abcd")
 
@@ -563,7 +563,7 @@ async def test_custom_metadata_no_artwork(raop_client, raop_state):
     assert raop_state.metadata.artwork is None
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0", "md": "0"}])
 async def test_custom_metadata_override_missing(raop_client, raop_state):
     metadata = MediaMetadata(title="A", artist="B", album="C")
 
@@ -576,7 +576,7 @@ async def test_custom_metadata_override_missing(raop_client, raop_state):
     assert raop_state.metadata.album == "C"
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0", "md": "0"}])
 async def test_stream_from_buffer(raop_client, raop_state):
     with io.open(data_path("audio_1_packet_metadata.wav"), "rb") as source_file:
         await raop_client.stream.stream_file(source_file)
@@ -627,7 +627,7 @@ async def test_stream_metadata_from_http(
     assert raop_state.metadata.title == "pyatv"
 
 
-@pytest.mark.parametrize("raop_properties", [({"et": "0", "md": "0"})])
+@pytest.mark.parametrize("raop_properties", [{"et": "0", "md": "0"}])
 async def test_stream_volume_set_after_stream_start(
     raop_client, raop_state, raop_usecase
 ):

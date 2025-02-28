@@ -146,7 +146,7 @@ DEVICE_INFO_TEXT_RECORD = DNSText(
     const._TYPE_TXT,
     const._CLASS_IN,
     const._DNS_OTHER_TTL,
-    b"\x0Cmodel=J305AP",
+    b"\x0cmodel=J305AP",
 )
 SLEEP_PROXY_RECORDS = [
     SLEEP_PROXY_PTR_RECORD,
