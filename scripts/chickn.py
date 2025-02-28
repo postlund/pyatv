@@ -23,7 +23,7 @@ class InternalError(Exception):
     """Raised internally on error."""
 
 
-async def _exec(cmd) -> Tuple[str, str]:
+async def _exec2(cmd) -> Tuple[str, str]:
     _LOGGER.debug("Run command: %s", cmd)
     proc = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -33,6 +33,25 @@ async def _exec(cmd) -> Tuple[str, str]:
 
     stdout = stdout.decode() if stdout else None
     stderr = stderr.decode() if stderr else None
+
+    if proc.returncode != 0:
+        raise InternalError(
+            f"Command failed: {cmd}\n[STDOUT]\n{stdout}\n\n[STDERR]\n{stderr}"
+        )
+
+    return stdout, stderr
+
+
+async def _exec(cmd) -> Tuple[str, str]:
+    _LOGGER.debug("Run command: %s", cmd)
+    proc = await asyncio.create_subprocess_shell(
+        cmd  # , stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    )
+
+    await proc.wait()
+
+    stdout = ""
+    stderr = ""
 
     if proc.returncode != 0:
         raise InternalError(
@@ -67,7 +86,7 @@ async def run_step(step, variables) -> None:
 async def run_pip(dependency_files, variables, force_reinstall=False) -> None:
     """Run pip and try to figure out if dependencies needs to be installed."""
     # Figure out which packages are installed
-    stdout, _ = await _exec("pip list --format json")
+    stdout, _ = await _exec2("pip list --format json")
     installed_packages = {
         package["name"]: package["version"] for package in json.loads(stdout)
     }
@@ -108,7 +127,7 @@ async def run_pip(dependency_files, variables, force_reinstall=False) -> None:
             ),
         )
 
-        await _exec(
+        await _exec2(
             "pip install --upgrade "
             + ("--force-reinstall " if force_reinstall else "")
             + " ".join(
@@ -140,7 +159,7 @@ async def parse_variable_value(value: Union[str, Sequence[str]]) -> str:
 
     # Execute command and use stdout as value if format is $(command)
     if value.startswith("$(") and value.endswith(")"):
-        return (await _exec(value[2:-1]))[0].rstrip()  # Only stdout
+        return (await _exec2(value[2:-1]))[0].rstrip()  # Only stdout
 
     return value
 

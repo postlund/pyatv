@@ -58,7 +58,7 @@ class DMAPFunctionalTest(common_functional_tests.CommonFunctionalTests):
 
     async def tearDownAsync(self):
         await asyncio.gather(*self.atv.close())
-        super().tearDown()
+        await super().tearDownAsync()
 
     async def get_application(self, loop=None):
         self.fake_atv = FakeAppleTV(self.loop)
