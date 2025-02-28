@@ -171,7 +171,7 @@ class DaapRequester:
 
     async def _assure_logged_in(self):
         if self._session_id != 0:
-            _LOGGER.debug("Already logged in, re-using seasion id %d", self._session_id)
+            _LOGGER.debug("Already logged in, reusing seasion id %d", self._session_id)
         else:
             await self.login()
 

@@ -224,7 +224,7 @@ for reference implementation.
 
 When performing device authentication, a device identifier and a private key is
 required. Once authenticated, they can be used to authenticate without using a
-PIN code. So they must be saved and re-used whenever something is to be played.
+PIN code. So they must be saved and reused whenever something is to be played.
 
 In this library, the device identifier and private key is called
 *AirPlay credentials* and are concatenated into a string, using : as separator.
