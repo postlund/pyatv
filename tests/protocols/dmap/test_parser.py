@@ -72,7 +72,7 @@ def test_parse_binary_plist():
 
 
 def test_parse_bytes():
-    in_data = tags.raw_tag("byte", b"\x01\xAA\xFF\x45")
+    in_data = tags.raw_tag("byte", b"\x01\xaa\xff\x45")
     parsed = parser.parse(in_data, lookup_tag)
     assert 1 == len(parsed)
     assert "0x01aaff45" == parser.first(parsed, "byte")

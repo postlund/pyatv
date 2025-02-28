@@ -105,7 +105,7 @@ async def test_zeroconf_service_published(mock_pairing):
     assert [ipaddress.ip_address("10.0.10.1").packed] == service.addresses
 
 
-@pytest.mark.parametrize("addresses", [(["1.2.3.4"])])
+@pytest.mark.parametrize("addresses", [["1.2.3.4"]])
 async def test_zeroconf_custom_addresses(mock_pairing, addresses):
     _, zeroconf, _ = await mock_pairing(addresses=addresses)
 

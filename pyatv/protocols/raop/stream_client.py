@@ -162,7 +162,7 @@ class ControlClient(asyncio.Protocol):
                 # Very "low level" here just because it's simple and avoids
                 # unnecessary conversions
                 original_seqno = packet[2:4]
-                resp = b"\x80\xD6" + original_seqno + packet
+                resp = b"\x80\xd6" + original_seqno + packet
 
                 if self.transport:
                     self.transport.sendto(resp, addr)

@@ -42,7 +42,7 @@ link_group: api
 <dl>
 <dt id="pyatv.helpers.auto_connect">
 <code class="name flex">
-<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="../interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Optional[Callable[[], None]] = None, loop: Optional[asyncio.events.AbstractEventLoop] = None) -> None</span>
+<span>async def <span class="ident">auto_connect</span></span>(<span>handler: Callable[[<a title="pyatv.interface.AppleTV" href="../interface#pyatv.interface.AppleTV">AppleTV</a>], None], timeout: int = 5, not_found: Callable[[], None] | None = None, loop: asyncio.events.AbstractEventLoop | None = None) -> None</span>
 </code>
 </dt>
 <dd>
@@ -52,10 +52,11 @@ device found, connects to it and passes it to a user provided handler. An
 optional error handler can be provided that is called when no device was found.
 Very inflexible in many cases, but can be handys sometimes when trying things.</p>
 <p>Note: both handler and not_found must be coroutines</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L19-L51" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.helpers.get_unique_id">
 <code class="name flex">
-<span>def <span class="ident">get_unique_id</span></span>(<span>service_type: str, service_name: str, properties: Mapping[str, str]) -> Optional[str]</span>
+<span>def <span class="ident">get_unique_id</span></span>(<span>service_type: str, service_name: str, properties: Mapping[str, str]) -> str | None</span>
 </code>
 </dt>
 <dd>
@@ -64,6 +65,7 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 <code>service_name</code> name of the service (e.g. <em>Office</em> or <em>Living Room</em>) and
 <code>properties</code> all key-value properties belonging to the service.</p>
 <p>The unique identifier is returned if available, otherwise <code>None</code> is returned.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L54-L87" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.helpers.is_device_supported">
 <code class="name flex">
@@ -76,6 +78,7 @@ Very inflexible in many cases, but can be handys sometimes when trying things.</
 PairingRequirement.Unsupported or PairingRequirement.Disabled. In all other cases
 it will return True. Do note that even if this method returns True, pairing (or
 that existing credentials are provided) might still be needed.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L105-L122" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.helpers.is_streamable">
 <code class="name flex">
@@ -87,6 +90,7 @@ that existing credentials are provided) might still be needed.</p></section>
 <p>This method will return if the file format of the given file is supported
 and streamable by pyatv. It will never raise an exception, e.g. because the
 file is missing or lack of permissions.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/helpers.py#L90-L102" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 </section>

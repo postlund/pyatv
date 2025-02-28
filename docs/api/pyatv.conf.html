@@ -64,7 +64,7 @@ provide configurations for you.</p>
 <dl>
 <dt id="pyatv.conf.AirPlayService"><code class="flex name class">
 <span>class <span class="ident">AirPlayService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>identifier: str | None, port: int = 7000, credentials: str | None = None, properties: Mapping[str, str] | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an AirPlay service.</p>
@@ -97,7 +97,7 @@ provide configurations for you.</p>
 </dd>
 <dt id="pyatv.conf.AppleTV"><code class="flex name class">
 <span>class <span class="ident">AppleTV</span></span>
-<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, properties: Optional[Mapping[str, Mapping[str, str]]] = None, device_info: Optional[<a title="pyatv.interface.DeviceInfo" href="../interface#pyatv.interface.DeviceInfo">DeviceInfo</a>] = None)</span>
+<span>(</span><span>address: ipaddress.IPv4Address, name: str, deep_sleep: bool = False, properties: Mapping[str, Mapping[str, str]] | None = None, device_info: <a title="pyatv.interface.DeviceInfo" href="../interface#pyatv.interface.DeviceInfo">DeviceInfo</a> | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a device configuration.</p>
@@ -135,7 +135,7 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.CompanionService"><code class="flex name class">
 <span>class <span class="ident">CompanionService</span></span>
-<span>(</span><span>port: int, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>port: int, credentials: str | None = None, properties: Mapping[str, str] | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a Companion link service.</p>
@@ -168,7 +168,7 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.DmapService"><code class="flex name class">
 <span>class <span class="ident">DmapService</span></span>
-<span>(</span><span>identifier: Optional[str], credentials: Optional[str], port: int = 3689, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>identifier: str | None, credentials: str | None, port: int = 3689, properties: Mapping[str, str] | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a DMAP service.</p>
@@ -201,7 +201,7 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.ManualService"><code class="flex name class">
 <span>class <span class="ident">ManualService</span></span>
-<span>(</span><span>identifier: Optional[str], protocol: <a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Optional[Mapping[str, str]], credentials: Optional[str] = None, password: Optional[str] = None, requires_password: bool = False, pairing_requirement: <a title="pyatv.const.PairingRequirement" href="../const#pyatv.const.PairingRequirement">PairingRequirement</a> = PairingRequirement.Unsupported, enabled: bool = True)</span>
+<span>(</span><span>identifier: str | None, protocol: <a title="pyatv.const.Protocol" href="../const#pyatv.const.Protocol">Protocol</a>, port: int, properties: Mapping[str, str] | None, credentials: str | None = None, password: str | None = None, requires_password: bool = False, pairing_requirement: <a title="pyatv.const.PairingRequirement" href="../const#pyatv.const.PairingRequirement">PairingRequirement</a> = PairingRequirement.Unsupported, enabled: bool = True)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Service used when manually creating and adding a service.</p>
@@ -240,7 +240,7 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.MrpService"><code class="flex name class">
 <span>class <span class="ident">MrpService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int, credentials: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>identifier: str | None, port: int, credentials: str | None = None, properties: Mapping[str, str] | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of a MediaRemote Protocol (MRP) service.</p>
@@ -273,7 +273,7 @@ AirPlay.</p>
 </dd>
 <dt id="pyatv.conf.RaopService"><code class="flex name class">
 <span>class <span class="ident">RaopService</span></span>
-<span>(</span><span>identifier: Optional[str], port: int = 7000, credentials: Optional[str] = None, password: Optional[str] = None, properties: Optional[Mapping[str, str]] = None)</span>
+<span>(</span><span>identifier: str | None, port: int = 7000, credentials: str | None = None, password: str | None = None, properties: Mapping[str, str] | None = None)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Representation of an RAOP service.</p>

@@ -294,7 +294,7 @@ def main() -> None:
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
     else:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
     return loop.run_until_complete(appstart(loop))
 
 

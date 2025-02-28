@@ -64,7 +64,7 @@ def decode_value(value: bytes):
     """
     try:
         return (
-            value.replace(b"\xC2\xA0", b" ").replace(b"\x00\xA0", b" ").decode("utf-8")
+            value.replace(b"\xc2\xa0", b" ").replace(b"\x00\xa0", b" ").decode("utf-8")
         )
     except Exception:  # pylint: disable=broad-except
         return str(value)
