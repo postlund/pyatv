@@ -24,6 +24,7 @@ This module has additional documentation
 <ul class="">
 <li><code><a title="pyatv.settings.AirPlaySettings.credentials" href="#pyatv.settings.AirPlaySettings.credentials">credentials</a></code></li>
 <li><code><a title="pyatv.settings.AirPlaySettings.identifier" href="#pyatv.settings.AirPlaySettings.identifier">identifier</a></code></li>
+<li><code><a title="pyatv.settings.AirPlaySettings.mrp_tunnel" href="#pyatv.settings.AirPlaySettings.mrp_tunnel">mrp_tunnel</a></code></li>
 <li><code><a title="pyatv.settings.AirPlaySettings.password" href="#pyatv.settings.AirPlaySettings.password">password</a></code></li>
 </ul>
 </li>
@@ -70,6 +71,14 @@ This module has additional documentation
 </ul>
 </li>
 <li>
+<h4><code><a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.settings.MrpTunnel.Auto" href="#pyatv.settings.MrpTunnel.Auto">Auto</a></code></li>
+<li><code><a title="pyatv.settings.MrpTunnel.Disable" href="#pyatv.settings.MrpTunnel.Disable">Disable</a></code></li>
+<li><code><a title="pyatv.settings.MrpTunnel.Force" href="#pyatv.settings.MrpTunnel.Force">Force</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.settings.ProtocolSettings.airplay" href="#pyatv.settings.ProtocolSettings.airplay">airplay</a></code></li>
@@ -107,7 +116,7 @@ This module has additional documentation
 </header>
 <section id="section-intro">
 <p>Settings for configuring pyatv.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L148" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L168" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -126,7 +135,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to AirPlay.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L78-L83" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L96-L103" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -142,6 +151,10 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
+<dt id="pyatv.settings.AirPlaySettings.mrp_tunnel"><code class="name">var <span class="ident">mrp_tunnel</span> -> <a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a></code></dt>
+<dd>
+<section class="desc"><p>The type of the None singleton.</p></section>
+</dd>
 <dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
 <dd>
 <section class="desc"><p>The type of the None singleton.</p></section>
@@ -154,7 +167,7 @@ This module has additional documentation
 </code></dt>
 <dd>
 <section class="desc"><p>AirPlay version to use.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L47-L52" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L47-L57" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.str</li>
@@ -164,15 +177,15 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.AirPlayVersion.Auto"><code class="name">var <span class="ident">Auto</span> = auto</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"><p>Automatically determine what version to use.</p></section>
 </dd>
 <dt id="pyatv.settings.AirPlayVersion.V1"><code class="name">var <span class="ident">V1</span> = 1</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"><p>Use version 1 of AirPlay.</p></section>
 </dd>
 <dt id="pyatv.settings.AirPlayVersion.V2"><code class="name">var <span class="ident">V2</span> = 2</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"><p>Use version 2 of AirPlay.</p></section>
 </dd>
 </dl>
 </dd>
@@ -184,7 +197,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to Companion.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L86-L90" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L106-L110" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -210,7 +223,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to DMAP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L93-L97" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L113-L117" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -236,7 +249,7 @@ This module has additional documentation
 <section class="desc"><p>Information related settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L58-L75" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L76-L93" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -293,7 +306,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to MRP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L100-L104" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L120-L124" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -311,6 +324,34 @@ This module has additional documentation
 </dd>
 </dl>
 </dd>
+<dt id="pyatv.settings.MrpTunnel"><code class="flex name class">
+<span>class <span class="ident">MrpTunnel</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>How MRP tunneling over AirPlay is handled.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L60-L70" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.MrpTunnel.Auto"><code class="name">var <span class="ident">Auto</span> = auto</code></dt>
+<dd>
+<section class="desc"><p>Automatically set up MRP tunnel if supported by remote device.</p></section>
+</dd>
+<dt id="pyatv.settings.MrpTunnel.Disable"><code class="name">var <span class="ident">Disable</span> = disable</code></dt>
+<dd>
+<section class="desc"><p>Fully disable set up of MRP tunnel.</p></section>
+</dd>
+<dt id="pyatv.settings.MrpTunnel.Force"><code class="name">var <span class="ident">Force</span> = force</code></dt>
+<dd>
+<section class="desc"><p>Force set up of MRP tunnel even if remote device does not supports it.</p></section>
+</dd>
+</dl>
+</dd>
 <dt id="pyatv.settings.ProtocolSettings"><code class="flex name class">
 <span>class <span class="ident">ProtocolSettings</span></span>
 <span>(</span><span>**data: Any)</span>
@@ -319,7 +360,7 @@ This module has additional documentation
 <section class="desc"><p>Container for protocol specific settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L134-L141" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L154-L161" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -357,7 +398,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to RAOP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L107-L131" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L127-L151" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -403,7 +444,7 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <section class="desc"><p>Settings container class.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L144-L148" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L164-L168" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
