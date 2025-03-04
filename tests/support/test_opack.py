@@ -36,8 +36,7 @@ def test_pack_uuid():
 
 
 def test_pack_absolute_time():
-    with pytest.raises(NotImplementedError):
-        pack(datetime.now())
+    assert pack(datetime.fromtimestamp(978307200.0)) == b"\x06" + (b"\x00" * 8)
 
 
 def test_pack_small_integers():
@@ -224,8 +223,10 @@ def test_unpack_uuid():
 
 
 def test_unpack_absolute_time():
-    # TODO: This is not implemented, it only parses the time stamp as an integer
-    assert unpack(b"\x06\x01\x00\x00\x00\x00\x00\x00\x00") == (1, b"")
+    assert unpack(b"\x06\x00\x00\x00\x00\x00\x00\x00\x00") == (
+        datetime.fromtimestamp(978307200.0),
+        b"",
+    )
 
 
 def test_unpack_small_integers():
