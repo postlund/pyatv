@@ -1,5 +1,5 @@
 black==25.1.0
-deepdiff==8.2.0
+deepdiff==8.3.0
 flake8==7.1.2
 isort==6.0.1
 mutagen==1.47.0
