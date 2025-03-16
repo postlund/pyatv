@@ -142,6 +142,15 @@ class AbstractStorage(Storage):
 
     @staticmethod
     def _update_settings_from_config(config: BaseConfig, settings: Settings) -> None:
+        
+        settings.info.name  = config.name
+        settings.info.mac = config.device_info.mac
+        settings.info.model = config.device_info.model.name
+        settings.info.device_id = config.identifier
+        settings.info.os_name = config.device_info.operating_system.name
+        settings.info.os_build = config.device_info.build_number
+        settings.info.os_version = config.device_info.version
+
         for service in config.services:
             # TODO: Clean this up/make more general
             if service.protocol == Protocol.AirPlay:
