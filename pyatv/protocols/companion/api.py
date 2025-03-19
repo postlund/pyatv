@@ -1,6 +1,7 @@
 """High level implementation of Companion API."""
 
 import asyncio
+import os
 from enum import Enum
 import logging
 from random import randint
@@ -196,7 +197,7 @@ class CompanionAPI(
                 "_bf": 0,
                 "_cf": 512,
                 "_clFl": 128,
-                "_i": "cafecafecafe",  # TODO: Figure out what to put here
+                "_i": os.urandom(6).hex(), # TODO: Figure out what to put here => "cafecafecafe" don't work anymore
                 "_idsID": creds.client_id,
                 # Not really device id here, but better then anything...
                 "_pubID": info.device_id,
