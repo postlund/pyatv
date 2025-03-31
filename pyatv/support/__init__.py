@@ -162,60 +162,73 @@ def shift_hex_identifier(identifier: str) -> str:
     return shifted + rest
 
 
+def stringify_model(model: BaseModel) -> List[str]:
+    """
+    Recursively traverse a pydantic BaseModel to produce a list of strings
+    describing field values and their annotated types.
 
-
-
-def stringify_model(model: BaseModel) -> Sequence[str]:
-    """Recursively traverse a pydantic model and print values.
-
-    This version no longer assumes that optional fields contain only basic types.
-    If an optional field’s type annotation includes a BaseModel, then if a non-None
-    value is present it will be recursed into. Otherwise, the field’s value and its
-    annotated type (including that it is optional) are printed.
+    - For nested BaseModels, the function recurses.
+    - For dictionary fields, it recursively iterates over keys and nested values.
+    - If a field’s annotation is a Union (e.g. Optional[...]), all constituent type names are shown.
     """
 
-    def _lookup_type(current_model: BaseModel, type_path: str) -> str:
-        splitted_path = type_path.split(".", maxsplit=1)
-        value = current_model.__annotations__[splitted_path[0]]
-        if len(splitted_path) == 1:
-            if value.__dict__.get("__origin__") is Union:
-                return ", ".join(arg.__name__ for arg in value.__args__)
-            return value.__name__
-        return _lookup_type(value, splitted_path[1])
+    def lookup_type(annotation: Any, value: Any) -> str:
+        """Return a string representation for a type annotation."""
+        origin = get_origin(annotation)
 
-    def _recurse_into(current_model: BaseModel, prefix: str, output: List[str]) -> Sequence[str]:
-        for name, field in dict(current_model).items():
-            # If the field is itself a pydantic model, recurse into it.
-            if hasattr(field, "__annotations__"):
-                _recurse_into(getattr(current_model, name), f"{prefix or ''}{name}.", output)
-            # Special handling for dictionaries: iterate over its items.
-            elif isinstance(field, dict):
-                for key, subvalue in field.items():
-                    # If the value is a dict, iterate one level deeper.
-                    if isinstance(subvalue, dict):
-                        for inner_key, inner_value in subvalue.items():
-                            output.append(
-                                f"{prefix}{name}[\"{key}\"].{inner_key} = {repr(inner_value)}"
-                            )
-                    else:
-                        output.append(
-                            f"{prefix}{name}[\"{key}\"] = {repr(subvalue)}"
-                        )
-            # Handle Optional[BaseModel] fields.
-            elif get_origin(field) is Union and get_args(field)[1] is not type(None):
-                if getattr(current_model, name) is not None:
-                    if (isinstance(current_model, BaseModel)):
-                        _recurse_into(getattr(current_model, name), f"{prefix}{name}.", output)
-                    output.append(f"{prefix}{name} = {repr(field)}")
+        if origin is Union:
+            args = get_args(annotation)
+            types = []
+            for arg in args:
+                if arg != type(None):
+                    types.append(getattr(arg, "__name__", str(arg)))
+                elif value is None:
+                    types.append("None")
+            if types.count == 1:
+                return types[0]
+            return ", ".join(getattr(arg, "__name__", str(arg)) for arg in args)
+        return getattr(annotation, "__name__", str(annotation))
+
+    def recurse(instance: Any, prefix: str = "") -> List[str]:
+        """Recursively traverse a BaseModel (or dict) and collect string representations."""
+        lines: List[str] = []
+        if isinstance(instance, BaseModel):
+            # Retrieve annotations from the model.
+            annotations = instance.__annotations__
+            for field_name, field_value in instance.__dict__.items():
+                # Build the full field name with current prefix.
+                full_field_name = f"{prefix}{field_name}"
+                # If the field is another BaseModel, recurse into it.
+                if isinstance(field_value, BaseModel):
+                    lines.extend(recurse(field_value, full_field_name + "."))
+                # If the field is a dictionary, delegate to process_dict.
+                elif isinstance(field_value, dict):
+                    lines.extend(process_dict(field_value, full_field_name))
                 else:
-                    field_type = _lookup_type(current_model, f"{prefix}{name}")
-                    output.append(f"{prefix}{name} = {field} ({field_type})")
+                    # Look up the annotated type; if missing, fall back on the runtime type.
+                    annotation = annotations.get(field_name, type(field_value))
+                    type_str = lookup_type(annotation, field_value)
+                    lines.append(f"{full_field_name} = {field_value} ({type_str})")
+        else:
+            # If the instance is not a BaseModel, output its repr and type.
+            lines.append(f"{prefix} = {repr(instance)} ({type(instance).__name__})")
+        return lines
+
+    def process_dict(d: dict, prefix: str) -> List[str]:
+        """Recursively process a dictionary field."""
+        lines: List[str] = []
+        for key, value in d.items():
+            # Use repr(key) to account for keys that are strings, numbers, etc.
+            full_field_name = f'{prefix}[{repr(key)}]'
+            if isinstance(value, dict):
+                lines.extend(process_dict(value, full_field_name))
+            elif isinstance(value, BaseModel):
+                lines.extend(recurse(value, full_field_name + "."))
             else:
-                output.append(f"{prefix}{name} = {repr(field)}")
-        return output
+                lines.append(f"{full_field_name} = {repr(value)} ({type(value).__name__})")
+        return lines
 
-    return _recurse_into(model, "", [])
-
+    return recurse(model, "")
 
 def update_model_field(
     model: BaseModel, field: str, value: Union[str, int, float, None]
