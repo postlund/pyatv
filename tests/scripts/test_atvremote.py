@@ -143,7 +143,6 @@ async def test_settings(scriptenv):
         "atvremote", "--id", MRP_ID, "print_settings", persistent_storage=True
     )
 
-
     assert all_in(stdout, "protocols.raop.password = None")
     assert exit_code == 0
 
