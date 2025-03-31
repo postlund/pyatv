@@ -104,6 +104,30 @@ This module has additional documentation
 <ul class="">
 <li><code><a title="pyatv.settings.Settings.info" href="#pyatv.settings.Settings.info">info</a></code></li>
 <li><code><a title="pyatv.settings.Settings.protocols" href="#pyatv.settings.Settings.protocols">protocols</a></code></li>
+<li><code><a title="pyatv.settings.Settings.target_device" href="#pyatv.settings.Settings.target_device">target_device</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.TargetDeviceConfig" href="#pyatv.settings.TargetDeviceConfig">TargetDeviceConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.settings.TargetDeviceConfig.CLASS_TYPE" href="#pyatv.settings.TargetDeviceConfig.CLASS_TYPE">CLASS_TYPE</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceConfig.address" href="#pyatv.settings.TargetDeviceConfig.address">address</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceConfig.deep_sleep" href="#pyatv.settings.TargetDeviceConfig.deep_sleep">deep_sleep</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceConfig.device_info" href="#pyatv.settings.TargetDeviceConfig.device_info">device_info</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceConfig.name" href="#pyatv.settings.TargetDeviceConfig.name">name</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceConfig.properties" href="#pyatv.settings.TargetDeviceConfig.properties">properties</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.settings.TargetDeviceInfo" href="#pyatv.settings.TargetDeviceInfo">TargetDeviceInfo</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyatv.settings.TargetDeviceInfo.mac" href="#pyatv.settings.TargetDeviceInfo.mac">mac</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.model" href="#pyatv.settings.TargetDeviceInfo.model">model</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.os_build" href="#pyatv.settings.TargetDeviceInfo.os_build">os_build</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.os_name" href="#pyatv.settings.TargetDeviceInfo.os_name">os_name</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.os_version" href="#pyatv.settings.TargetDeviceInfo.os_version">os_version</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.output_device_id" href="#pyatv.settings.TargetDeviceInfo.output_device_id">output_device_id</a></code></li>
+<li><code><a title="pyatv.settings.TargetDeviceInfo.raw_model" href="#pyatv.settings.TargetDeviceInfo.raw_model">raw_model</a></code></li>
 </ul>
 </li>
 </ul>
@@ -116,7 +140,7 @@ This module has additional documentation
 </header>
 <section id="section-intro">
 <p>Settings for configuring pyatv.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L168" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L192" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -145,25 +169,25 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.AirPlaySettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.mrp_tunnel"><code class="name">var <span class="ident">mrp_tunnel</span> -> <a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
 <dt id="pyatv.settings.AirPlayVersion"><code class="flex name class">
 <span>class <span class="ident">AirPlayVersion</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>AirPlay version to use.</p></section>
@@ -207,11 +231,11 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.CompanionSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.CompanionSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -233,11 +257,11 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.DmapSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.DmapSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -259,31 +283,31 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.InfoSettings.device_id"><code class="name">var <span class="ident">device_id</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.mac"><code class="name">var <span class="ident">mac</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.model"><code class="name">var <span class="ident">model</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_build"><code class="name">var <span class="ident">os_build</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_name"><code class="name">var <span class="ident">os_name</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_version"><code class="name">var <span class="ident">os_version</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -316,17 +340,17 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.MrpSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.MrpSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
 <dt id="pyatv.settings.MrpTunnel"><code class="flex name class">
 <span>class <span class="ident">MrpTunnel</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>How MRP tunneling over AirPlay is handled.</p></section>
@@ -370,23 +394,23 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.ProtocolSettings.airplay"><code class="name">var <span class="ident">airplay</span> -> <a title="pyatv.settings.AirPlaySettings" href="#pyatv.settings.AirPlaySettings">AirPlaySettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.companion"><code class="name">var <span class="ident">companion</span> -> <a title="pyatv.settings.CompanionSettings" href="#pyatv.settings.CompanionSettings">CompanionSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.dmap"><code class="name">var <span class="ident">dmap</span> -> <a title="pyatv.settings.DmapSettings" href="#pyatv.settings.DmapSettings">DmapSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.mrp"><code class="name">var <span class="ident">mrp</span> -> <a title="pyatv.settings.MrpSettings" href="#pyatv.settings.MrpSettings">MrpSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.raop"><code class="name">var <span class="ident">raop</span> -> <a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -413,15 +437,15 @@ This module has additional documentation
 </dd>
 <dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.protocol_version"><code class="name">var <span class="ident">protocol_version</span> -> <a title="pyatv.settings.AirPlayVersion" href="#pyatv.settings.AirPlayVersion">AirPlayVersion</a></code></dt>
 <dd>
@@ -444,7 +468,7 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <section class="desc"><p>Settings container class.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L164-L168" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L187-L192" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -454,11 +478,103 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <dl>
 <dt id="pyatv.settings.Settings.info"><code class="name">var <span class="ident">info</span> -> <a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.Settings.protocols"><code class="name">var <span class="ident">protocols</span> -> <a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.Settings.target_device"><code class="name">var <span class="ident">target_device</span> -> <a title="pyatv.settings.TargetDeviceConfig" href="#pyatv.settings.TargetDeviceConfig">TargetDeviceConfig</a></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig"><code class="flex name class">
+<span>class <span class="ident">TargetDeviceConfig</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Configuration for a target device.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L176-L184" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.v1.main.BaseModel</li>
+<li>pydantic.v1.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.TargetDeviceConfig.CLASS_TYPE"><code class="name">var <span class="ident">CLASS_TYPE</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig.address"><code class="name">var <span class="ident">address</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig.deep_sleep"><code class="name">var <span class="ident">deep_sleep</span> -> bool</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig.device_info"><code class="name">var <span class="ident">device_info</span> -> <a title="pyatv.settings.TargetDeviceInfo" href="#pyatv.settings.TargetDeviceInfo">TargetDeviceInfo</a> | None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceConfig.properties"><code class="name">var <span class="ident">properties</span> -> dict</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo"><code class="flex name class">
+<span>class <span class="ident">TargetDeviceInfo</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Information about the target device.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L164-L173" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.v1.main.BaseModel</li>
+<li>pydantic.v1.utils.Representation</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyatv.settings.TargetDeviceInfo.mac"><code class="name">var <span class="ident">mac</span> -> str | None</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.model"><code class="name">var <span class="ident">model</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.os_build"><code class="name">var <span class="ident">os_build</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.os_name"><code class="name">var <span class="ident">os_name</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.os_version"><code class="name">var <span class="ident">os_version</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.output_device_id"><code class="name">var <span class="ident">output_device_id</span> -> str</code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.TargetDeviceInfo.raw_model"><code class="name">var <span class="ident">raw_model</span> -> str | None</code></dt>
+<dd>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
